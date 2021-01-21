@@ -12,7 +12,7 @@
                 </button>
             </div>
             <div class="modal-body col row">
-                <div class="col h-100 border-right">
+                <div class="col h-100 border-end">
                     <div class="mb-0 h-100 d-flex flex-column" v-if="type == 'text'">
                         <div class="text-center">
                             <button type="button" class="btn btn-outline-primary" @click="toggleEditMode">
@@ -20,7 +20,7 @@
                             </button>
                         </div>
                         <div class="col px-0 mt-2 overflow-hidden">
-                            <pre class="text-left w-100 h-100 mb-0" v-if="!editMode" v-highlightjs="content"><code class="h-100 text-prewrap word-break-all"></code></pre>
+                            <pre class="text-start w-100 h-100 mb-0" v-if="!editMode" v-highlightjs="content"><code class="h-100 text-prewrap word-break-all"></code></pre>
                             <textarea class="w-100 h-100 p-2" v-else v-model="content" @input="fileEdited = true"></textarea>
                         </div>
                     </div>

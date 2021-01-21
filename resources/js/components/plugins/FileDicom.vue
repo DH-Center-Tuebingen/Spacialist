@@ -21,8 +21,8 @@
                     </button>
                 </div>
             </div>
-            <!-- <div class="text-left col d-flex flex-column"> -->
-            <div class="text-left col-6 d-flex flex-column h-100">
+            <!-- <div class="text-start col d-flex flex-column"> -->
+            <div class="text-start col-6 d-flex flex-column h-100">
                 <div id="dicom-controls">
                     <h4>
                         {{ $t('plugins.files.modal.detail.dicom.controls.title') }}

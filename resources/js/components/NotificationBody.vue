@@ -1,6 +1,6 @@
 <template>
     <div class="d-flex flex-row px-3" :class="{'bg-light-dark': odd, 'bg-light': !odd, 'py-3': !smallText, 'py-2': smallText}">
-            <div class="mr-3" :class="{'opacity-50': read}" v-if="showAvatar">
+            <div class="me-3" :class="{'opacity-50': read}" v-if="showAvatar">
                 <a href="#" @click.prevent="$showUserInfo(sender)">
                     <user-avatar :user="sender" :size="avatar"></user-avatar>
                 </a>
@@ -12,14 +12,14 @@
                     </span>
                     <div class="d-flex flex-row">
                         <div v-if="isSystem">
-                            <span class="badge badge-warning mr-2">
+                            <span class="badge badge-warning me-2">
                                 {{ $t('global.notifications.body.type.system') }}
                             </span>
                         </div>
                         <a href="#" class="text-muted" @click.prevent.stop="markNotificationAsRead(notf.id)" v-if="!read">
                             <i class="fas fa-xs fa-check"></i>
                         </a>
-                        <a v-if="!isSystem" href="#" class="text-muted ml-2" @click.prevent.stop="deleteNotification(notf.id)">
+                        <a v-if="!isSystem" href="#" class="text-muted ms-2" @click.prevent.stop="deleteNotification(notf.id)">
                             <i class="fas fa-xs fa-times"></i>
                         </a>
                     </div>
@@ -65,12 +65,12 @@
                         <div class="form-group mb-0">
                             <textarea class="form-control resize-none" :style="smallStyle" id="reply-message" name="reply-message" rows="1" :placeholder="$t('global.notifications.body.mention_info')" v-model="replyMessage"></textarea>
                         </div>
-                        <div class="text-right" :class="smallClass">
+                        <div class="text-end" :class="smallClass">
                             <button type="submit" class="btn btn-sm btn-outline-success" :disabled="!replyMessage" @click.prevent="postReply()">
                                 <i class="fas fa-fw fa-reply"></i>
                                 <span v-html="$t('global.notifications.body.reply_to_user', {name: sender.nickname})"></span>
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-success ml-2" :disabled="!replyMessage" @click.prevent="postReply('to_chat')">
+                            <button type="button" class="btn btn-sm btn-outline-success ms-2" :disabled="!replyMessage" @click.prevent="postReply('to_chat')">
                                 <i class="fas fa-fw fa-comment"></i>
                                 {{ $t('global.notifications.body.reply_to_chat') }}
                             </button>

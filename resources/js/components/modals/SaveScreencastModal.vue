@@ -15,19 +15,19 @@
                 <p class="alert alert-info">
                     {{ $t('main.entity.modals.screencast.info') }}
                     <dl class="row">
-                        <dt class="col-md-6 text-right">
+                        <dt class="col-md-6 text-end">
                             {{ $t('global.duration') }}
                         </dt>
                         <dd class="col-md-6">
                             {{ duration | time }}
                         </dd>
-                        <dt class="col-md-6 text-right">
+                        <dt class="col-md-6 text-end">
                             {{ $t('global.size') }}
                         </dt>
                         <dd class="col-md-6">
                             {{ content.size | bytes }}
                         </dd>
-                        <dt class="col-md-6 text-right">
+                        <dt class="col-md-6 text-end">
                             {{ $t('global.type') }}
                         </dt>
                         <dd class="col-md-6">

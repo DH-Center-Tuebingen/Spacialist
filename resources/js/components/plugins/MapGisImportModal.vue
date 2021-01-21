@@ -43,7 +43,7 @@
                             <i class="fas fa-fw fa-file-import"></i> {{ $t('plugins.map.gis.import.files.button') }}
                         </span>
                     </file-upload>
-                    <div v-if="files.length" class="text-left w-25">
+                    <div v-if="files.length" class="text-start w-25">
                         <h5>
                             {{ $t('plugins.map.gis.import.files.selected') }}
                             <small class="clickable" @click="showFileList = !showFileList">
@@ -76,7 +76,7 @@
                     <div v-if="mapLayers && parsed">
                         <hr />
                         <form class="form-inline mb-3">
-                            <div class="form-group mr-2 overlay-all">
+                            <div class="form-group me-2 overlay-all">
                                 <label for="root_element" class="sr-only">
                                     {{ $t('plugins.map.gis.import.metadata.root_element') }}
                                 </label>
@@ -89,7 +89,7 @@
                                     :value="metadata.root_element.name">
                                 </entity-search>
                             </div>
-                            <div class="form-group mr-2 overlay-all">
+                            <div class="form-group me-2 overlay-all">
                                 <label for="type" class="sr-only">
                                     {{ $t('plugins.map.gis.import.metadata.entity_type') }}
                                 </label>
@@ -102,7 +102,7 @@
                                     :value="$translateConcept(metadata.type.thesaurus_url)">
                                 </entity-type-search>
                             </div>
-                            <div class="form-group mr-2 overlay-all">
+                            <div class="form-group me-2 overlay-all">
                                 <label for="name_column" class="sr-only">
                                     {{ $t('plugins.map.gis.import.metadata.name_column') }}
                                 </label>
@@ -134,13 +134,13 @@
                         </div>
                         <div class="col-md-4 d-flex flex-column justify-content-center">
                             <dl class="row my-2">
-                                <dt class="col-md-6 text-right">
+                                <dt class="col-md-6 text-end">
                                     {{ $t('plugins.map.gis.import.feature_count') }}
                                 </dt>
                                 <dd class="col-md-6">
                                     {{ featureCollection.features.length }}
                                 </dd>
-                                <dt class="col-md-6 text-right">
+                                <dt class="col-md-6 text-end">
                                     {{ $t('plugins.map.gis.import.epsg') }}
                                 </dt>
                                 <dd class="col-md-6">

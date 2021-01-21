@@ -6,7 +6,7 @@
                     <user-avatar :user="comment.author" :size="avatar"></user-avatar>
                 </a>
             </slot>
-            <div class="ml-3 flex-grow-1">
+            <div class="ms-3 flex-grow-1">
                 <div class="card">
                     <div class="card-header d-flex flex-row justify-content-between py-2 px-3" :class="{'border-0': !comment.content}">
                         <div>
@@ -23,7 +23,7 @@
                             </slot>
                         </div>
                         <div class="small">
-                            <slot name="metadata" class="mr-2" :comment="comment"></slot>
+                            <slot name="metadata" class="me-2" :comment="comment"></slot>
                             <template v-if="comment.updated_at != comment.created_at">
                                 <span class="badge badge-light border">
                                     {{ $t('global.edited') }}
@@ -34,7 +34,7 @@
                                 {{ comment.updated_at | ago }}
                             </span>
                             <span class="dropdown" v-if="!comment.deleted_at">
-                                <span :id="`edit-comment-dropdown-${comment.id}`" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span :id="`edit-comment-dropdown-${comment.id}`" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <i class="fas fa-fw fa-ellipsis-h"></i>
                                 </span>
                                 <div class="dropdown-menu" :aria-labelledby="`edit-comment-dropdown-${comment.id}`">
@@ -56,7 +56,7 @@
                             <div class="card-body px-3 py-2">
                                 <textarea class="form-control" v-model="editing.content"></textarea>
                                 <div class="mt-1 d-flex flex-row justify-content-end">
-                                    <button type="button" class="btn btn-success btn-sm mr-2" :disabled="editing.content == comment.content" @click="emitEdited(comment, editing.content)">
+                                    <button type="button" class="btn btn-success btn-sm me-2" :disabled="editing.content == comment.content" @click="emitEdited(comment, editing.content)">
                                         <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
                                     </button>
                                     <button type="button" class="btn btn-danger btn-sm" @click="disableEditing()">

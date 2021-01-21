@@ -5,7 +5,7 @@
 @import "~bootstrap/scss/bootstrap";
 
 // tree-component
-@import "~tree-component/dist/tree.min.css";
+// @import "~tree-component/dist/tree.min.css";
 @import "tree";
 
 // vue-upload-component
@@ -15,7 +15,7 @@
 @import "multiselect";
 
 // entity menu
-@import '~vue-context/src/sass/vue-context';
+// @import '~vue-context/src/sass/vue-context';
 @import 'contextmenu';
 
 // map
@@ -34,8 +34,8 @@
 @import "search";
 
 // Datepicker
-@import "~vue2-datepicker/scss/index";
-@import "datepicker";
+// @import "~vue2-datepicker/scss/index";
+// @import "datepicker";
 
 // Spacialist utility classes
 @import "utilities";

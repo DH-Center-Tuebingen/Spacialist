@@ -22,11 +22,11 @@
                 <textarea v-validate="" name="editTextarea" class="w-100 h-100 p-2" v-model="content"></textarea>
             </div>
             <div class="col px-1">
-                <pre class="mb-0 h-100 text-left" v-show="!csv.render && !markdown.render" v-highlightjs="content"><code class="h-100 text-prewrap word-break-all" :class="{nohighlight: disableHighlighting}"></code></pre>
+                <pre class="mb-0 h-100 text-start" v-show="!csv.render && !markdown.render" v-highlightjs="content"><code class="h-100 text-prewrap word-break-all" :class="{nohighlight: disableHighlighting}"></code></pre>
                 <div class="h-100 d-flex flex-column" v-if="isCsv && csv.render">
                     <form class="form-inline">
                         <div class="form-group mx-2">
-                            <label for="delimiter" class="col-form-label mr-1">
+                            <label for="delimiter" class="col-form-label me-1">
                                 {{ $t('plugins.files.modal.detail.csv.delimiter') }}
                             </label>
                             <input type="text" class="form-control" id="delimiter" v-model="csv.delimiter" placeholder="Delimiter (',', ';', '|', ...)" />
@@ -38,7 +38,7 @@
                             </label>
                         </div>
                         <div class="form-group mx-2">
-                            <label for="row-count" class="col-form-label mr-1">
+                            <label for="row-count" class="col-form-label me-1">
                                 {{ $t('plugins.files.modal.detail.csv.rows') }}
                             </label>
                             <input type="text" class="form-control" id="row-count" v-model.number="csv.rows" placeholder="Row Count" />

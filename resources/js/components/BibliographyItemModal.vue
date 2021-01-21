@@ -10,7 +10,7 @@
             </div>
             <div class="modal-body col d-flex flex-column">
                 <p class="alert alert-info">
-                    <i class="fas fa-lightbulb mr-1"></i> <span class="font-weight-medium">Note</span>
+                    <i class="fas fa-lightbulb me-1"></i> <span class="font-weight-medium">Note</span>
                     <br />
                     You can use <kbd><kbd>ctrl</kbd> + <kbd>v</kbd></kbd> to fill out the fields with a BibTeX entry from your clipboard.
                 </p>

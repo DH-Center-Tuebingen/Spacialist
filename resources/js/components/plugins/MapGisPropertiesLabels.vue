@@ -3,7 +3,7 @@
         <div class="col scroll-y-auto">
             <form role="form" name="layerLabelingForm" id="layerLabelingForm" @submit.prevent="apply">
                 <div class="form-group row">
-                    <label class="col-form-label col-md-3 text-right my-auto" for="label-text">
+                    <label class="col-form-label col-md-3 text-end my-auto" for="label-text">
                         {{ $t('global.text') }}:
                     </label>
                     <div class="col-md-9">
@@ -57,7 +57,7 @@
                 </h6>
                 <div v-show="displays.font">
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3 text-right" for="font-size">
+                        <label class="col-form-label col-md-3 text-end" for="font-size">
                             {{ $t('global.size') }}:
                         </label>
                         <div class="col-md-9">
@@ -65,7 +65,7 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3 text-right" for="font-color">
+                        <label class="col-form-label col-md-3 text-end" for="font-color">
                             {{ $t('global.color') }}:
                         </label>
                         <div class="col-md-9">
@@ -73,7 +73,7 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3 text-right" for="font-style">
+                        <label class="col-form-label col-md-3 text-end" for="font-style">
                             {{ $t('plugins.map.gis.props.labels.style') }}:
                         </label>
                         <div class="col-md-9">
@@ -94,7 +94,7 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3 text-right" for="font-transform">
+                        <label class="col-form-label col-md-3 text-end" for="font-transform">
                             {{ $t('plugins.map.gis.props.labels.transform') }}:
                         </label>
                         <div class="col-md-9">
@@ -115,12 +115,12 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3 text-right" for="font-transparency">
+                        <label class="col-form-label col-md-3 text-end" for="font-transparency">
                             {{ $t('global.transparency') }}:
                         </label>
                         <div class="col-md-9 d-flex">
                             <input class="form-control" type="range" id="font-transparency" name="font-transparency" min="0" max="1" step="0.01" v-model="font.transparency" />
-                            <span class="ml-3">{{ font.transparency }}</span>
+                            <span class="ms-3">{{ font.transparency }}</span>
                         </div>
                     </div>
                 </div>
@@ -145,7 +145,7 @@
                 </h6>
                 <div v-show="displays.buffer">
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3 text-right" for="buffer-size">
+                        <label class="col-form-label col-md-3 text-end" for="buffer-size">
                             {{ $t('global.size') }}:
                         </label>
                         <div class="col-md-9">
@@ -153,7 +153,7 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3 text-right" for="buffer-color">
+                        <label class="col-form-label col-md-3 text-end" for="buffer-color">
                             {{ $t('global.color') }}:
                         </label>
                         <div class="col-md-9">
@@ -161,12 +161,12 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3 text-right" for="buffer-transparency">
+                        <label class="col-form-label col-md-3 text-end" for="buffer-transparency">
                             {{ $t('global.transparency') }}:
                         </label>
                         <div class="col-md-9 d-flex">
                             <input class="form-control" type="range" id="buffer-transparency" name="buffer-transparency" min="0" max="1" step="0.01" v-model="buffer.transparency" />
-                            <span class="ml-3">{{ buffer.transparency }}</span>
+                            <span class="ms-3">{{ buffer.transparency }}</span>
                         </div>
                     </div>
                 </div>
@@ -191,7 +191,7 @@
                 </h6>
                 <div v-show="displays.background">
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3 text-right" for="background-size-x">
+                        <label class="col-form-label col-md-3 text-end" for="background-size-x">
                             {{ $t('plugins.map.gis.props.labels.background.padding-x') }}:
                         </label>
                         <div class="col-md-9">
@@ -199,7 +199,7 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3 text-right" for="background-size-y">
+                        <label class="col-form-label col-md-3 text-end" for="background-size-y">
                             {{ $t('plugins.map.gis.props.labels.background.padding-y') }}:
                         </label>
                         <div class="col-md-9">
@@ -207,7 +207,7 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3 text-right" for="background-color-fill">
+                        <label class="col-form-label col-md-3 text-end" for="background-color-fill">
                             {{ $t('plugins.map.gis.props.labels.fill-color') }}:
                         </label>
                         <div class="col-md-9">
@@ -215,7 +215,7 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3 text-right" for="background-color-border">
+                        <label class="col-form-label col-md-3 text-end" for="background-color-border">
                             {{ $t('plugins.map.gis.props.labels.border-color') }}:
                         </label>
                         <div class="col-md-9">
@@ -223,7 +223,7 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3 text-right" for="background-size-border">
+                        <label class="col-form-label col-md-3 text-end" for="background-size-border">
                             {{ $t('plugins.map.gis.props.labels.border-size') }}:
                         </label>
                         <div class="col-md-9">
@@ -231,12 +231,12 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3 text-right" for="background-transparency">
+                        <label class="col-form-label col-md-3 text-end" for="background-transparency">
                             {{ $t('global.transparency') }}:
                         </label>
                         <div class="col-md-9 d-flex">
                             <input class="form-control" type="range" id="background-transparency" name="background-transparency" min="0" max="1" step="0.01" v-model="background.transparency" />
-                            <span class="ml-3">{{ background.transparency }}</span>
+                            <span class="ms-3">{{ background.transparency }}</span>
                         </div>
                     </div>
                 </div>
@@ -261,7 +261,7 @@
                 </h6>
                 <div v-show="displays.position">
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3 text-right" for="position-offset-x">
+                        <label class="col-form-label col-md-3 text-end" for="position-offset-x">
                             {{ $t('plugins.map.gis.props.labels.position.offset-x') }}:
                         </label>
                         <div class="col-md-9">
@@ -269,7 +269,7 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3 text-right" for="position-offset-y">
+                        <label class="col-form-label col-md-3 text-end" for="position-offset-y">
                             {{ $t('plugins.map.gis.props.labels.position.offset-y') }}:
                         </label>
                         <div class="col-md-9">
@@ -277,7 +277,7 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3 text-right" for="position-placement">
+                        <label class="col-form-label col-md-3 text-end" for="position-placement">
                             {{ $t('plugins.map.gis.props.labels.position.placement') }}:
                         </label>
                         <div class="col-md-9">

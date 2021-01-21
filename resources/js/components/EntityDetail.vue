@@ -15,8 +15,8 @@
                     </a>
                 </span>
                 <form class="form-inline" v-else>
-                    <input type="text" class="form-control mr-2" v-model="newEntityName" />
-                    <button type="submit" class="btn btn-outline-success mr-2" @click="updateEntityName(selectedEntity, newEntityName)">
+                    <input type="text" class="form-control me-2" v-model="newEntityName" />
+                    <button type="submit" class="btn btn-outline-success me-2" @click="updateEntityName(selectedEntity, newEntityName)">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                     <button type="reset" class="btn btn-outline-danger" @click="cancelUpdateEntityName()">
@@ -67,7 +67,7 @@
                 </a>
             </li>
         </ul>
-        <div class="tab-content col pl-0 pr-0 overflow-hidden" id="myTabContent">
+        <div class="tab-content col ps-0 pe-0 overflow-hidden" id="myTabContent">
             <div class="tab-pane fade h-100 show active" id="active-entity-attributes-panel" role="tabpanel">
                 <form id="entity-attribute-form" name="entity-attribute-form" class="h-100" @submit.prevent="saveEntity(selectedEntity)">
                     <attributes class="pt-2 h-100 scroll-y-auto scroll-x-hidden" v-if="hasData" v-can="'view_concept_props'"
@@ -119,7 +119,7 @@
                 <form role="form" class="mt-2" @submit.prevent="postComment">
                     <div class="form-group d-flex">
                         <textarea class="form-control" v-model="comment" id="comment-content" ref="comCnt" :placeholder="$t('global.comments.text_placeholder')"></textarea>
-                        <div class="ml-2 mt-auto">
+                        <div class="ms-2 mt-auto">
                             <emoji-picker @selected="addEmoji"></emoji-picker>
                         </div>
                     </div>

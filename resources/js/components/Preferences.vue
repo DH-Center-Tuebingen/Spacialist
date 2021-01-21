@@ -75,13 +75,13 @@
                         <div class="form-group row">
                             <label for="center-column" class="col-md-2 col-form-label">{{ $t('main.preference.key.columns.center') }}:</label>
                             <div class="col-md-10">
-                                <input class="form-control" id="left-column" type="number" min="0" :max="getMax('center')" v-model="preferences['prefs.columns'].value.center" />
+                                <input class="form-control" id="center-column" type="number" min="0" :max="getMax('center')" v-model="preferences['prefs.columns'].value.center" />
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="right-column" class="col-md-2 col-form-label">{{ $t('main.preference.key.columns.right') }}:</label>
                             <div class="col-md-10">
-                                <input class="form-control" id="left-column" type="number" min="0" :max="getMax('right')" v-model="preferences['prefs.columns'].value.right" />
+                                <input class="form-control" id="right-column" type="number" min="0" :max="getMax('right')" v-model="preferences['prefs.columns'].value.right" />
                             </div>
                         </div>
                     </form>

@@ -53,7 +53,7 @@
                     </td>
                     <td>
                         <div class="dropdown">
-                            <span id="dropdownMenuButton" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span id="dropdownMenuButton" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-fw fa-ellipsis-h"></i>
                                 <sup class="notification-info" v-if="userDirty(user.id)">
                                     <i class="fas fa-fw fa-xs fa-circle text-warning"></i>
@@ -129,7 +129,7 @@
                     </td>
                     <td>
                         <div class="dropdown">
-                            <span :id="`deactive-user-dropdown-${dUser.id}`" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span :id="`deactive-user-dropdown-${dUser.id}`" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-fw fa-ellipsis-h"></i>
                             </span>
                             <div class="dropdown-menu" :aria-labelledby="`deactive-user-dropdown-${dUser.id}`">

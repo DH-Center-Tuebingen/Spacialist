@@ -46,7 +46,7 @@
                             </a>
                         </td>
                         <td :class="actionIcons == 'only' ? 'text-center' : ''">
-                            <span v-if="actionIcons == 'only'" v-html="getIcon(act.description)" data-toggle="popover" :data-content="act.description" data-trigger="hover" data-placement="right">
+                            <span v-if="actionIcons == 'only'" v-html="getIcon(act.description)" data-bs-toggle="popover" :data-content="act.description" data-trigger="hover" data-placement="right">
                             </span>
                             <span v-else-if="actionIcons == 'both'" v-html="getIcon(act.description, true)">
                             </span>
@@ -62,7 +62,7 @@
                                 <i class="fas fa-fw fa-database"></i>
                                 {{ $t('main.activity.toggle_raw_data') }}
                             </button>
-                            <button type="button" class="btn btn-primary btn-sm ml-2" v-show="dataShown[i]" @click="togglePrettyPrint(i, act.properties)">
+                            <button type="button" class="btn btn-primary btn-sm ms-2" v-show="dataShown[i]" @click="togglePrettyPrint(i, act.properties)">
                                 <i class="fas fa-fw fa-indent"></i>
                                 {{ $t('main.activity.toggle_pretty_print') }}
                             </button>
@@ -135,7 +135,7 @@
                 if(this.disableFetching) return;
                 this.$emit('fetch-data');
                 this.$nextTick(_ => {
-                    $('[data-toggle="popover"]').popover()
+                    $('[data-bs-toggle="popover"]').popover()
                 });
             },
             toggleDataShown(i) {

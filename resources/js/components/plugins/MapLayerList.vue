@@ -1,12 +1,12 @@
 <template>
     <div>
-        <ul class="ml-3 list-unstyled">
+        <ul class="ms-3 list-unstyled">
             <li v-for="(l, i) in layer" class="pb-1 d-flex align-items-center justify-content-between" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)">
                 <i class="fas fa-fw fa-map-marked-alt"></i>
                 <a class="p-1" href="#" @click.prevent="onSelect(l)">
                     {{ getTitle(l) }}
                 </a>
-                <span class="ml-auto">
+                <span class="ms-auto">
                     <button class="btn btn-danger btn-fab rounded-circle" v-show="hoverStates[i] && deleteAllowed(l)" @click="onDelete(l)">
                         <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
                     </button>

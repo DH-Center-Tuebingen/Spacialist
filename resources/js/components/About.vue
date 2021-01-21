@@ -9,7 +9,7 @@
             </div>
             <div class="modal-body">
                 <div class="media">
-                    <img class="mr-3" src="/img/logo.png" alt="spacialist logo" width="64px" />
+                    <img class="me-3" src="/img/logo.png" alt="spacialist logo" width="64px" />
                     <div class="media-body">
                         <h4>Spacialist</h4>
                         {{ $t('main.about.desc') }}
@@ -17,17 +17,17 @@
                 </div>
                 <hr />
                 <dl class="row">
-                    <dt class="col-md-6 text-right">{{ $t('main.about.release.name') }}</dt>
+                    <dt class="col-md-6 text-end">{{ $t('main.about.release.name') }}</dt>
                     <dd class="col-md-6">
                         {{ version.name }}
                     </dd>
-                    <dt class="col-md-6 text-right">{{ $t('main.about.release.time') }}</dt>
+                    <dt class="col-md-6 text-end">{{ $t('main.about.release.time') }}</dt>
                     <dd class="col-md-6">
-                        <span id="version-time" data-toggle="popover" :data-content="version.time | datestring" data-trigger="hover" data-placement="bottom">
+                        <span id="version-time" data-bs-toggle="popover" :data-content="version.time | datestring" data-trigger="hover" data-placement="bottom">
                             {{ version.time | date }}
                         </span>
                     </dd>
-                    <dt class="col-md-6 text-right">{{ $t('main.about.release.full-name') }}</dt>
+                    <dt class="col-md-6 text-end">{{ $t('main.about.release.full-name') }}</dt>
                     <dd class="col-md-6">
                         {{ version.full }}
                     </dd>

@@ -3,7 +3,7 @@
         <div class="col scroll-y-auto">
             <form role="form" name="layerLabelingForm" id="layerLabelingForm" @submit.prevent="apply">
                 <div class="form-group row">
-                    <label class="col-form-label col-md-3 text-right my-auto" for="label-text">
+                    <label class="col-form-label col-md-3 text-end my-auto" for="label-text">
                         {{ $t('global.text') }}:
                     </label>
                     <div class="col-md-9">
@@ -27,7 +27,7 @@
                 </div>
                 <h6>{{ $t('plugins.map.gis.props.diagrams.data.title') }}</h6>
                 <div class="form-group row">
-                    <label class="col-form-label col-md-3 text-right" for="row-or-columns">
+                    <label class="col-form-label col-md-3 text-end" for="row-or-columns">
                         {{ $t('plugins.map.gis.props.diagrams.data.order') }}:
                     </label>
                     <div class="col-md-9">
@@ -47,7 +47,7 @@
                     </div>
                 </div>
                 <div class="form-group row" v-if="!dataInitNeeded">
-                    <label class="col-form-label col-md-3 text-right" for="selected-columns">
+                    <label class="col-form-label col-md-3 text-end" for="selected-columns">
                         {{ $t('plugins.map.gis.props.diagrams.data.columns') }}:
                     </label>
                     <div class="col-md-9">
@@ -77,7 +77,7 @@
                     </p>
                 </div>
                 <div class="form-group row">
-                    <label class="col-form-label col-md-3 text-right" for="min-values">
+                    <label class="col-form-label col-md-3 text-end" for="min-values">
                         {{ $t('plugins.map.gis.props.diagrams.data.min_n_values') }}:
                     </label>
                     <div class="col-md-9">
@@ -85,7 +85,7 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label class="col-form-label col-md-3 text-right" for="last-n-elements">
+                    <label class="col-form-label col-md-3 text-end" for="last-n-elements">
                         {{ $t('plugins.map.gis.props.diagrams.data.last_n_elements') }}:
                     </label>
                     <div class="col-md-9">
@@ -95,7 +95,7 @@
                 <hr />
                 <h6>{{ $t('plugins.map.gis.props.diagrams.properties.title') }}</h6>
                 <div class="form-group row">
-                    <label class="col-form-label col-md-3 text-right" for="radius">
+                    <label class="col-form-label col-md-3 text-end" for="radius">
                         {{ $t('plugins.map.gis.props.diagrams.properties.radius') }}:
                     </label>
                     <div class="col-md-9">
@@ -103,7 +103,7 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label class="col-form-label col-md-3 text-right" for="radius">
+                    <label class="col-form-label col-md-3 text-end" for="radius">
                         {{ $t('plugins.map.gis.props.diagrams.properties.type') }}:
                     </label>
                     <div class="col-md-9">
@@ -123,7 +123,7 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label class="col-form-label col-md-3 text-right" for="stroke-color">
+                    <label class="col-form-label col-md-3 text-end" for="stroke-color">
                         {{ $t('plugins.map.gis.props.diagrams.properties.stroke_color') }}:
                     </label>
                     <div class="col-md-9">
@@ -131,7 +131,7 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label class="col-form-label col-md-3 text-right" for="stroke-width">
+                    <label class="col-form-label col-md-3 text-end" for="stroke-width">
                         {{ $t('plugins.map.gis.props.diagrams.properties.stroke_width') }}:
                     </label>
                     <div class="col-md-9">

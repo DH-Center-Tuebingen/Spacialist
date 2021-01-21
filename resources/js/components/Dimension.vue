@@ -10,7 +10,7 @@
         </div>
         <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="onInput('T', $event.target.value)" v-model="T"/>
         <div class="input-group-append">
-            <button class="btn btn-outline-secondary dropdown-toggle" :disabled="disabled" type="button" data-toggle="dropdown" aria-haspopup="true"     aria-expanded="false">{{unit}}</button>
+            <button class="btn btn-outline-secondary dropdown-toggle" :disabled="disabled" type="button" data-bs-toggle="dropdown" aria-haspopup="true"     aria-expanded="false">{{unit}}</button>
             <div class="dropdown-menu">
                 <a class="dropdown-item" href="#" v-for="unit in dimensionUnits" @click="setUnit(unit)">
                     {{ unit }}

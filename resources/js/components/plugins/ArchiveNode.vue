@@ -7,14 +7,14 @@
             <span v-else>
                 <i class="fas fa-fw fa-file"></i>
             </span>
-            <span class="ml-1 font-weight-medium">
+            <span class="ms-1 font-weight-medium">
                 {{ data.cleanFilename }}
             </span>
         </div>
-        <div v-if="!data.isDirectory" class="text-secondary ml-auto">
+        <div v-if="!data.isDirectory" class="text-secondary ms-auto">
             {{ data.compressedSize | bytes }}/{{ data.uncompressedSize | bytes }}
         </div>
-        <div v-else class="text-secondary ml-auto" v-html="$tc('plugins.files.modal.detail.archive.files_in_folder', data.children.length, {cnt: data.children.length})">
+        <div v-else class="text-secondary ms-auto" v-html="$tc('plugins.files.modal.detail.archive.files_in_folder', data.children.length, {cnt: data.children.length})">
         </div>
     </div>
 </template>

@@ -13,7 +13,7 @@
                 </button>
             </div>
         </div>
-        <form role="form" id="layer-form" class="col pl-0 scroll-y-auto scroll-x-hidden" @submit.prevent="updateLayer(layer)">
+        <form role="form" id="layer-form" class="col ps-0 scroll-y-auto scroll-x-hidden" @submit.prevent="updateLayer(layer)">
             <div v-if="isEntityLayer">
                 <div class="form-group row">
                     <label for="color" class="col-md-4 col-form-label">
@@ -144,7 +144,7 @@
                 </label>
                 <div class="col-md-8 d-flex">
                     <input type="range" id="opacity" class="form-control" step="0.01" min="0" max="1" value="0" v-model="layer.opacity"/>
-                    <span class="ml-3">{{ layer.opacity }}</span>
+                    <span class="ms-3">{{ layer.opacity }}</span>
                 </div>
             </div>
         </form>

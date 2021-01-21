@@ -30,7 +30,7 @@
                 </h6>
                 <dl class="row" v-show="showHeaders">
                     <template v-for="(header, name) in headers">
-                        <dt class="col-md-3 text-right">
+                        <dt class="col-md-3 text-end">
                             {{ name }}
                         </dt>
                         <dd class="col-md-9">

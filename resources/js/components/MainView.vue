@@ -1,21 +1,22 @@
 <template>
     <div class="row h-100 overflow-hidden" v-if="initFinished">
-        <div :class="`h-100 d-flex flex-column col-md-${$getPreference('prefs.columns').left}`" id="tree-container" v-can="'view_concepts'" v-if="$getPreference('prefs.columns').left > 0">
+        <div :class="`h-100 d-flex flex-column col-md-${columnPref.left}`" id="tree-container" v-can="'view_concepts'" v-if="columnPref.left > 0">
             <entity-tree
-                class="col px-0"
-                :selected-entity="selectedEntity">
+                class="col px-0">
             </entity-tree>
+            ENTITY-TREE
         </div>
-        <div :class="`h-100 border-left border-right col-md-${$getPreference('prefs.columns').center}`" id="attribute-container" v-can="'view_concepts|view_concept_props'" v-if="$getPreference('prefs.columns').center > 0">
-            <router-view
+        <div :class="`h-100 border-start border-end col-md-${columnPref.center}`" id="attribute-container" v-can="'view_concepts|view_concept_props'" v-if="columnPref.center > 0">
+            <!-- <router-view
                 :selected-entity="selectedEntity"
                 :bibliography="bibliography"
                 @detail-updated="setDetailDirty"
             >
-            </router-view>
+            </router-view> -->
+            ENTITY-DETAIL
         </div>
-        <div :class="`h-100 d-flex flex-column col-md-${$getPreference('prefs.columns').right}`" id="addon-container" v-if="$getPreference('prefs.columns').right > 0">
-            <ul class="nav nav-tabs">
+        <div :class="`h-100 d-flex flex-column col-md-${columnPref.right}`" id="addon-container" v-if="columnPref.right > 0">
+            <!-- <ul class="nav nav-tabs">
                 <li class="nav-item" v-for="plugin in $getTabPlugins()">
                     <router-link class="nav-link" :class="{active: tab == plugin.key}" :to="{ query: { tab: plugin.key }}" append>
                         <i class="fas fa-fw" :class="plugin.icon"></i> {{ $t(plugin.label) }}
@@ -61,229 +62,241 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
+            FILES/MAP COLUMN
         </div>
-        <discard-changes-modal :name="discardModal"/>
+        <!-- <discard-changes-modal :name="discardModal"/> -->
     </div>
 </template>
 
 <script>
-    import { EventBus } from '../event-bus.js';
-    import { mapFields } from 'vee-validate';
+    import {
+        computed,
+    } from 'vue';
+    import store from '../bootstrap/store.js';
 
     export default {
-        beforeRouteEnter(to, from, next) {
-            let bibliography, entityData;
-            $httpQueue.add(() => $http.get('bibliography').then(response => {
-                bibliography = response.data;
-                if(to.params.id) {
-                    return $http.get(`/entity/${to.params.id}`);
-                } else {
-                    return new Promise(resolve => resolve(null));
-                }
-            }).then(response => {
-                entityData = response ? response.data : null;
-                if(to.params.id) {
-                    return $http.get(`/entity/${to.params.id}/reference`);
-                } else {
-                    return new Promise(resolve => resolve(null));
-                }
-            }).then(response => {
-                next(vm => vm.init(bibliography, to.query.tab, entityData, response ? response.data : null));
-            }));
-        },
-        beforeRouteUpdate(to, from, next) {
-            if(to.query.tab) {
-                this.setTabOrPlugin(to.query.tab);
-            }
-            let loadNext = () => {
-                if(to.params.id) {
-                    if(to.params.id != from.params.id) {
-                        this.getNewEntity(to.params.id).then(r => {
-                            next();
-                        });
-                    } else {
-                        next();
-                    }
-                } else {
-                    this.resetEntity();
-                    next();
-                }
-            }
-            if(this.discardState.dirty) {
-                let discardAndContinue = () => {
-                    loadNext();
-                };
-                let saveAndContinue = () => {
-                    this.discardState.callback(this.selectedEntity).then(loadNext);
-                };
-                this.$modal.show(this.discardModal, {reference: this.selectedEntity.name, onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
-            } else {
-                loadNext();
-            }
-        },
-        mounted() {},
-        methods: {
-            getNewEntity(id) {
-                return $httpQueue.add(() => $http.get(`/entity/${id}`).then(response => {
-                    this.selectedEntity = response.data;
-                    return $http.get(`/entity/${id}/reference`);
-                }).then(response => {
-                    Vue.set(this.selectedEntity, 'references', response.data);
-                }));
-            },
-            resetEntity() {
-                this.selectedEntity = {};
-            },
-            init(bibliography, openTab, entityData, entityReferences) {
-                this.initFinished = false;
-                this.bibliography = bibliography;
-                if(entityData) {
-                    this.selectedEntity = entityData;
-                }
-                if(entityReferences) {
-                    if(Array.isArray(entityReferences) && !entityReferences.length) {
-                        entityReferences = {};
-                    }
-                    Vue.set(this.selectedEntity, 'references', entityReferences);
-                } else {
-                    Vue.set(this.selectedEntity, 'references', {});
-                }
-                if(openTab) {
-                    this.setTabOrPlugin(openTab);
-                }
-                EventBus.$on('entity-update', this.handleEntityUpdate);
-                EventBus.$on('references-updated', this.handleReferenceUpdate);
-                this.initFinished = true;
-                return new Promise(r => r(null));
-            },
-            setDetailDirty(event) {
-                this.discardState.dirty = event.isDirty;
-                this.discardState.callback = event.onDiscard;
-            },
-            setReferencesTab() {
-                if(!this.selectedEntity.id) return;
-                this.$router.push({
-                    append: true,
-                    query: {
-                        tab: 'references'
-                    }
-                });
-            },
-            setTabOrPlugin(key) {
-                if(key == 'references') {
-                    this.setActiveTab('references');
-                } else {
-                    const plugins = this.$getTabPlugins();
-                    const plugin = plugins.find(p => p.key == key);
-                    if(plugin) {
-                        this.setActivePlugin(plugin);
-                    }
-                }
-            },
-            setActiveTab: function(tab) {
-                if(tab == 'references') {
-                    if(!this.selectedEntity.id) return;
-                    this.activePlugin = '';
-                }
-                this.tab = tab;
-            },
-            setActivePlugin: function(plugin) {
-                this.setActiveTab(plugin.key);
-                this.activePlugin = plugin.tag;
-            },
-            showMetadataForReferenceGroup(referenceGroup) {
-                if(!referenceGroup) return;
-                if(!this.selectedEntity) return;
-                const aid = referenceGroup[0].attribute_id;
-                this.$router.push({
-                    name: 'entityrefs',
-                    params: {
-                        aid: aid
-                    },
-                    query: this.$route.query,
-                    append: true
-                });
-            },
-            updateLink(geoId, entityId) {
-                if(entityId != this.selectedEntity.id) {
-                    return;
-                }
-                this.selectedEntity.geodata_id = geoId;
-            },
-            handleEntityUpdate(e) {
-                if(this.selectedEntity && this.selectedEntity.id == e.entity_id) {
-                    switch(e.type) {
-                        case 'name':
-                            this.selectedEntity.name = e.value;
-                        break;
-                        default:
-                            vm.$throwError({message: `Unknown event type ${e.type} received.`});
-                    }
-                }
-            },
-            handleReferenceUpdate(e) {
-                const r = e.reference;
-                const grp = this.selectedEntity.references[e.group];
-                switch(e.action) {
-                    case 'add':
-                        if(!grp) {
-                            Vue.set(this.selectedEntity.references, e.group, []);
-                        }
-                        this.selectedEntity.references[e.group].push(r);
-                        break;
-                    case 'delete':
-                        const idx = grp.findIndex(ref => ref.id == r.id);
-                        if(idx > -1) {
-                            this.selectedEntity.references[e.group].splice(idx, 1);
-                        }
-                        if(!grp.length) {
-                            Vue.delete(this.selectedEntity.references, e.group);
-                        }
-                        break;
-                    case 'edit':
-                        let ref = grp.find(ref => ref.id == r.id);
-                        ref.description = r.description;
-                        ref.updated_at = r.updated_at;
-                        break;
-                }
-            }
-        },
-        data() {
+        setup(props) {
             return {
-                bibliography: {},
-                initFinished: false,
-                selectedEntity: {},
-                referenceModal: {},
-                dataLoaded: false,
-                defaultKey: undefined,
-                plugins: this.$getTabPlugins(),
-                activePlugin: '',
-                discardModal: 'discard-changes-modal',
-                discardState: {
-                    dirty: false,
-                    callback: () => {}
-                }
-            }
-        },
-        computed: {
-            hasReferences: function() {
-                return this.selectedEntity && this.selectedEntity.references && Object.keys(this.selectedEntity.references).length;
-            },
-            tab: {
-                get() {
-                    if(this.defaultKey) return this.defaultKey;
-                    else if(this.plugins && this.plugins[0]) {
-                        this.activePlugin = this.plugins[0].tag;
-                        return this.plugins[0].key;
-                    } else {
-                        return '';
-                    }
-                },
-                set(newValue) {
-                    this.defaultKey = newValue;
-                }
-            }
+                concepts: computed(_ => store.state.concepts),
+                entityTypes: computed(_ => store.state.entityTypes),
+                columnPref: computed(_ => store.getters.preferenceByKey('prefs.columns')),
+                users: computed(_ => store.state.users),
+                initFinished: true
+            };
         }
+        // beforeRouteEnter(to, from, next) {
+        //     let bibliography, entityData;
+        //     $httpQueue.add(() => $http.get('bibliography').then(response => {
+        //         bibliography = response.data;
+        //         if(to.params.id) {
+        //             return $http.get(`/entity/${to.params.id}`);
+        //         } else {
+        //             return new Promise(resolve => resolve(null));
+        //         }
+        //     }).then(response => {
+        //         entityData = response ? response.data : null;
+        //         if(to.params.id) {
+        //             return $http.get(`/entity/${to.params.id}/reference`);
+        //         } else {
+        //             return new Promise(resolve => resolve(null));
+        //         }
+        //     }).then(response => {
+        //         next(vm => vm.init(bibliography, to.query.tab, entityData, response ? response.data : null));
+        //     }));
+        // },
+        // beforeRouteUpdate(to, from, next) {
+        //     if(to.query.tab) {
+        //         this.setTabOrPlugin(to.query.tab);
+        //     }
+        //     let loadNext = () => {
+        //         if(to.params.id) {
+        //             if(to.params.id != from.params.id) {
+        //                 this.getNewEntity(to.params.id).then(r => {
+        //                     next();
+        //                 });
+        //             } else {
+        //                 next();
+        //             }
+        //         } else {
+        //             this.resetEntity();
+        //             next();
+        //         }
+        //     }
+        //     if(this.discardState.dirty) {
+        //         let discardAndContinue = () => {
+        //             loadNext();
+        //         };
+        //         let saveAndContinue = () => {
+        //             this.discardState.callback(this.selectedEntity).then(loadNext);
+        //         };
+        //         this.$modal.show(this.discardModal, {reference: this.selectedEntity.name, onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
+        //     } else {
+        //         loadNext();
+        //     }
+        // },
+        // mounted() {},
+        // methods: {
+        //     getNewEntity(id) {
+        //         return $httpQueue.add(() => $http.get(`/entity/${id}`).then(response => {
+        //             this.selectedEntity = response.data;
+        //             return $http.get(`/entity/${id}/reference`);
+        //         }).then(response => {
+        //             Vue.set(this.selectedEntity, 'references', response.data);
+        //         }));
+        //     },
+        //     resetEntity() {
+        //         this.selectedEntity = {};
+        //     },
+        //     init(bibliography, openTab, entityData, entityReferences) {
+        //         this.initFinished = false;
+        //         this.bibliography = bibliography;
+        //         if(entityData) {
+        //             this.selectedEntity = entityData;
+        //         }
+        //         if(entityReferences) {
+        //             if(Array.isArray(entityReferences) && !entityReferences.length) {
+        //                 entityReferences = {};
+        //             }
+        //             Vue.set(this.selectedEntity, 'references', entityReferences);
+        //         } else {
+        //             Vue.set(this.selectedEntity, 'references', {});
+        //         }
+        //         if(openTab) {
+        //             this.setTabOrPlugin(openTab);
+        //         }
+        //         EventBus.$on('entity-update', this.handleEntityUpdate);
+        //         EventBus.$on('references-updated', this.handleReferenceUpdate);
+        //         this.initFinished = true;
+        //         return new Promise(r => r(null));
+        //     },
+        //     setDetailDirty(event) {
+        //         this.discardState.dirty = event.isDirty;
+        //         this.discardState.callback = event.onDiscard;
+        //     },
+        //     setReferencesTab() {
+        //         if(!this.selectedEntity.id) return;
+        //         this.$router.push({
+        //             append: true,
+        //             query: {
+        //                 tab: 'references'
+        //             }
+        //         });
+        //     },
+        //     setTabOrPlugin(key) {
+        //         if(key == 'references') {
+        //             this.setActiveTab('references');
+        //         } else {
+        //             const plugins = this.$getTabPlugins();
+        //             const plugin = plugins.find(p => p.key == key);
+        //             if(plugin) {
+        //                 this.setActivePlugin(plugin);
+        //             }
+        //         }
+        //     },
+        //     setActiveTab: function(tab) {
+        //         if(tab == 'references') {
+        //             if(!this.selectedEntity.id) return;
+        //             this.activePlugin = '';
+        //         }
+        //         this.tab = tab;
+        //     },
+        //     setActivePlugin: function(plugin) {
+        //         this.setActiveTab(plugin.key);
+        //         this.activePlugin = plugin.tag;
+        //     },
+        //     showMetadataForReferenceGroup(referenceGroup) {
+        //         if(!referenceGroup) return;
+        //         if(!this.selectedEntity) return;
+        //         const aid = referenceGroup[0].attribute_id;
+        //         this.$router.push({
+        //             name: 'entityrefs',
+        //             params: {
+        //                 aid: aid
+        //             },
+        //             query: this.$route.query,
+        //             append: true
+        //         });
+        //     },
+        //     updateLink(geoId, entityId) {
+        //         if(entityId != this.selectedEntity.id) {
+        //             return;
+        //         }
+        //         this.selectedEntity.geodata_id = geoId;
+        //     },
+        //     handleEntityUpdate(e) {
+        //         if(this.selectedEntity && this.selectedEntity.id == e.entity_id) {
+        //             switch(e.type) {
+        //                 case 'name':
+        //                     this.selectedEntity.name = e.value;
+        //                 break;
+        //                 default:
+        //                     vm.$throwError({message: `Unknown event type ${e.type} received.`});
+        //             }
+        //         }
+        //     },
+        //     handleReferenceUpdate(e) {
+        //         const r = e.reference;
+        //         const grp = this.selectedEntity.references[e.group];
+        //         switch(e.action) {
+        //             case 'add':
+        //                 if(!grp) {
+        //                     Vue.set(this.selectedEntity.references, e.group, []);
+        //                 }
+        //                 this.selectedEntity.references[e.group].push(r);
+        //                 break;
+        //             case 'delete':
+        //                 const idx = grp.findIndex(ref => ref.id == r.id);
+        //                 if(idx > -1) {
+        //                     this.selectedEntity.references[e.group].splice(idx, 1);
+        //                 }
+        //                 if(!grp.length) {
+        //                     Vue.delete(this.selectedEntity.references, e.group);
+        //                 }
+        //                 break;
+        //             case 'edit':
+        //                 let ref = grp.find(ref => ref.id == r.id);
+        //                 ref.description = r.description;
+        //                 ref.updated_at = r.updated_at;
+        //                 break;
+        //         }
+        //     }
+        // },
+        // data() {
+        //     return {
+        //         bibliography: {},
+        //         initFinished: false,
+        //         selectedEntity: {},
+        //         referenceModal: {},
+        //         dataLoaded: false,
+        //         defaultKey: undefined,
+        //         plugins: this.$getTabPlugins(),
+        //         activePlugin: '',
+        //         discardModal: 'discard-changes-modal',
+        //         discardState: {
+        //             dirty: false,
+        //             callback: () => {}
+        //         }
+        //     }
+        // },
+        // computed: {
+        //     hasReferences: function() {
+        //         return this.selectedEntity && this.selectedEntity.references && Object.keys(this.selectedEntity.references).length;
+        //     },
+        //     tab: {
+        //         get() {
+        //             if(this.defaultKey) return this.defaultKey;
+        //             else if(this.plugins && this.plugins[0]) {
+        //                 this.activePlugin = this.plugins[0].tag;
+        //                 return this.plugins[0].key;
+        //             } else {
+        //                 return '';
+        //             }
+        //         },
+        //         set(newValue) {
+        //             this.defaultKey = newValue;
+        //         }
+        //     }
+        // }
     }
 </script>

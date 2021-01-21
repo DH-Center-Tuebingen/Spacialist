@@ -3,7 +3,7 @@
         <div class="col scroll-y-auto">
             <form role="form" name="layerStylingForm" id="layerStylingForm" @submit.prevent="apply">
                 <div class="form-group row">
-                    <label class="col-form-label col-md-3 text-right" for="style-style">
+                    <label class="col-form-label col-md-3 text-end" for="style-style">
                         {{ $t('plugins.map.gis.props.style.title') }}:
                     </label>
                     <div class="col-md-9">
@@ -25,7 +25,7 @@
                 </div>
                 <div v-if="styleActive">
                     <div class="form-group row" v-if="isAttributeBased">
-                        <label class="col-form-label col-md-3 text-right" for="style-attribute">
+                        <label class="col-form-label col-md-3 text-end" for="style-attribute">
                             {{ $t('global.attribute') }}:
                         </label>
                         <div class="col-md-9">
@@ -47,7 +47,7 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3 text-right" for="style-colors">
+                        <label class="col-form-label col-md-3 text-end" for="style-colors">
                             {{ $t('plugins.map.gis.props.style.color-ramp') }}:
                         </label>
                         <div class="col-md-9" v-if="isAttributeBased">
@@ -85,7 +85,7 @@
                         </div>
                     </div>
                     <div class="form-group row" v-if="isGraduated">
-                        <label class="col-form-label col-md-3 text-right" for="style-classes">
+                        <label class="col-form-label col-md-3 text-end" for="style-classes">
                             {{ $t('plugins.map.gis.props.style.classes') }}:
                         </label>
                         <div class="col-md-9">
@@ -93,7 +93,7 @@
                         </div>
                     </div>
                     <div class="form-group row" v-if="isGraduated">
-                        <label class="col-form-label col-md-3 text-right" for="style-graduated-mode">
+                        <label class="col-form-label col-md-3 text-end" for="style-graduated-mode">
                             {{ $t('global.mode') }}:
                         </label>
                         <div class="col-md-9">
@@ -114,7 +114,7 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3 text-right" for="style-size">
+                        <label class="col-form-label col-md-3 text-end" for="style-size">
                             {{ $t('global.size') }}:
                         </label>
                         <div class="col-md-9">
@@ -122,12 +122,12 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3 text-right" for="style-transparency">
+                        <label class="col-form-label col-md-3 text-end" for="style-transparency">
                             {{ $t('global.transparency') }}:
                         </label>
                         <div class="col-md-9 d-flex">
                             <input class="form-control" type="range" id="style-transparency" name="style-transparency" min="0" max="1" step="0.01" v-model="transparency" />
-                            <span class="ml-3">{{ transparency }}</span>
+                            <span class="ms-3">{{ transparency }}</span>
                         </div>
                     </div>
                 </div>

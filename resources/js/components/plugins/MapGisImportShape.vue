@@ -1,7 +1,7 @@
 <template>
     <div>
         <form class="form-inline mb-3" @submit.prevent="parse">
-            <div class="form-group mr-2">
+            <div class="form-group me-2">
                 <label for="epsg-code" class="sr-only">
                     {{ $t('plugins.map.gis.import.epsg') }}
                 </label>

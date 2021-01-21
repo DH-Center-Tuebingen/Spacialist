@@ -2,7 +2,7 @@
     <div>
         <div class="input-group">
             <div class="input-group-prepend" uib-dropdown>
-                <button type="button" class="btn btn-outline-secondary dropdown-toggle" :disabled="disabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle" :disabled="disabled" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <span v-if="startLabel">
                         {{ $t(`main.entity.attributes.${startLabel}`) }}
                     </span>
@@ -21,7 +21,7 @@
             </div>
             <input type="number" step="1" min="0" pattern="[0-9]+" class="form-control text-center" :disabled="disabled" aria-label="" @input="onInput('end', end)" v-model.number="end">
             <div class="input-group-append">
-                <button type="button" class="btn btn-outline-secondary dropdown-toggle" :disabled="disabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle" :disabled="disabled" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <span v-if="endLabel">
                         {{ $t(`main.entity.attributes.${endLabel}`) }}
                     </span>

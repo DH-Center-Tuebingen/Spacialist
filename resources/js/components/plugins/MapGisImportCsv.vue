@@ -1,7 +1,7 @@
 <template>
     <div>
         <form class="form-inline mb-3" @submit.prevent="parse">
-            <div class="form-group mr-2 overlay-all">
+            <div class="form-group me-2 overlay-all">
                 <label for="delimiter" class="sr-only">
                     {{ $t('plugins.map.gis.import.csv.delimiter') }}
                 </label>
@@ -38,7 +38,7 @@
                     {{ $t('plugins.map.gis.import.csv.wkt') }}
                 </label>
             </div>
-            <div class="form-group mr-2 overlay-all" v-if="pointType == 'point'" style="min-width: 120px;">
+            <div class="form-group me-2 overlay-all" v-if="pointType == 'point'" style="min-width: 120px;">
                 <label for="x" class="sr-only">
                     {{ $t('plugins.map.gis.import.csv.lon') }}
                 </label>
@@ -56,7 +56,7 @@
                     :deselect-label="$t('global.select.deselect')">
                 </multiselect>
             </div>
-            <div class="form-group mr-2 overlay-all" v-if="pointType == 'point'" style="min-width: 120px;">
+            <div class="form-group me-2 overlay-all" v-if="pointType == 'point'" style="min-width: 120px;">
                 <label for="y" class="sr-only">
                     {{ $t('plugins.map.gis.import.csv.lat') }}
                 </label>
@@ -74,7 +74,7 @@
                     :deselect-label="$t('global.select.deselect')">
                 </multiselect>
             </div>
-            <div class="form-group mr-2 overlay-all" v-if="pointType == 'wkt'">
+            <div class="form-group me-2 overlay-all" v-if="pointType == 'wkt'">
                 <label for="y" class="sr-only">
                     {{ $t('plugins.map.gis.import.csv.wkt') }}
                 </label>
@@ -92,7 +92,7 @@
                     :deselect-label="$t('global.select.deselect')">
                 </multiselect>
             </div>
-            <div class="form-group mr-2">
+            <div class="form-group me-2">
                 <label for="epsg-code" class="sr-only">
                     {{ $t('plugins.map.gis.import.epsg') }}
                 </label>

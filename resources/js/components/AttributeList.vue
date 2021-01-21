@@ -1,5 +1,5 @@
 <template>
-    <div class="pr-1">
+    <div class="pe-1">
         <draggable
             class="h-100"
             v-bind="dragOpts"
@@ -13,20 +13,20 @@
             <div class="form-group row" :class="{'disabled not-allowed-handle': attribute.isDisabled}" v-for="(attribute, i) in localAttributes" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)" v-show="!hiddenByDependency[attribute.id]">
                 <label class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break" :for="'attribute-'+attribute.id" :class="{'copy-handle': isSource&&!attribute.isDisabled, 'not-allowed-handle text-muted': attribute.isDisabled}">
                     <div v-show="hoverState[i]">
-                        <a v-show="onReorder" href="" @click.prevent="" class="reorder-handle" data-toggle="popover" :data-content="$t('global.resort')" data-trigger="hover" data-placement="bottom">
+                        <a v-show="onReorder" href="" @click.prevent="" class="reorder-handle" data-bs-toggle="popover" :data-content="$t('global.resort')" data-trigger="hover" data-placement="bottom">
                             <i class="fas fa-fw fa-sort text-secondary"></i>
                         </a>
-                        <button v-show="onEdit" class="btn btn-info btn-fab rounded-circle" @click="onEdit(attribute)" data-toggle="popover" :data-content="$t('global.edit')" data-trigger="hover" data-placement="bottom">
+                        <button v-show="onEdit" class="btn btn-info btn-fab rounded-circle" @click="onEdit(attribute)" data-bs-toggle="popover" :data-content="$t('global.edit')" data-trigger="hover" data-placement="bottom">
                             <i class="fas fa-fw fa-xs fa-edit" style="vertical-align: 0;"></i>
                         </button>
-                        <button v-show="onRemove" class="btn btn-danger btn-fab rounded-circle" @click="onRemove(attribute)" data-toggle="popover" :data-content="$t('global.remove')" data-trigger="hover" data-placement="bottom">
+                        <button v-show="onRemove" class="btn btn-danger btn-fab rounded-circle" @click="onRemove(attribute)" data-bs-toggle="popover" :data-content="$t('global.remove')" data-trigger="hover" data-placement="bottom">
                             <i class="fas fa-fw fa-xs fa-times" style="vertical-align: 0;"></i>
                         </button>
-                        <button v-show="onDelete" class="btn btn-danger btn-fab rounded-circle" @click="onDelete(attribute)" data-toggle="popover" :data-content="$t('global.delete')" data-trigger="hover" data-placement="bottom">
+                        <button v-show="onDelete" class="btn btn-danger btn-fab rounded-circle" @click="onDelete(attribute)" data-bs-toggle="popover" :data-content="$t('global.delete')" data-trigger="hover" data-placement="bottom">
                             <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
                         </button>
                     </div>
-                    <span class="text-right col">
+                    <span class="text-end col">
                         {{ $translateConcept(attribute.thesaurus_url) }}:
                     </span>
                     <sup class="clickable" v-if="onMetadata" @click="onMetadata(attribute)">
@@ -50,7 +50,7 @@
                     <textarea class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'stringf'" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value" @blur="checkDependency(attribute.id)"></textarea>
                     <div v-else-if="attribute.datatype == 'percentage'" class="d-flex">
                         <input class="custom-range" :disabled="attribute.isDisabled" type="range" step="1" min="0" max="100" value="0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value" @mouseup="checkDependency(attribute.id)"/>
-                        <span class="ml-3">{{ localValues[attribute.id].value }}%</span>
+                        <span class="ms-3">{{ localValues[attribute.id].value }}%</span>
                     </div>
                     <div v-else-if="attribute.datatype == 'geography'">
                         <input class="form-control" :disabled="attribute.isDisabled" type="text" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" :placeholder="$t('main.entity.attributes.add-wkt')" v-model="localValues[attribute.id].value" @blur="checkDependency(attribute.id)" />
@@ -295,7 +295,7 @@
         beforeMount() {
             // Enable popovers
             $(function () {
-                $('[data-toggle="popover"]').popover()
+                $('[data-bs-toggle="popover"]').popover()
             });
         },
         mounted() {

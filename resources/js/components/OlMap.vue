@@ -4,34 +4,34 @@
             <div :id="id" class="map w-100 h-100">
                 <div class="d-flex flex-column ol-bar ol-right ol-bottom">
                     <div v-if="!drawDisabled" class="d-flex flex-column align-items-end">
-                        <button type="button" class="btn btn-sm p-1" :class="{'btn-primary': drawType == 'Point', 'btn-outline-primary': drawType != 'Point'}" data-toggle="popover" :data-content="$t('main.map.draw.point.desc')" data-trigger="hover" data-placement="bottom" @click="toggleDrawType('Point')">
+                        <button type="button" class="btn btn-sm p-1" :class="{'btn-primary': drawType == 'Point', 'btn-outline-primary': drawType != 'Point'}" data-bs-toggle="popover" :data-content="$t('main.map.draw.point.desc')" data-trigger="hover" data-placement="bottom" @click="toggleDrawType('Point')">
                             <i class="fas fa-fw fa-map-marker-alt"></i>
                         </button>
-                        <button type="button" class="btn btn-sm p-1" :class="{'btn-primary': drawType == 'LineString', 'btn-outline-primary': drawType != 'LineString'}" data-toggle="popover" :data-content="$t('main.map.draw.linestring.desc')" data-trigger="hover" data-placement="bottom" @click="toggleDrawType('LineString')">
+                        <button type="button" class="btn btn-sm p-1" :class="{'btn-primary': drawType == 'LineString', 'btn-outline-primary': drawType != 'LineString'}" data-bs-toggle="popover" :data-content="$t('main.map.draw.linestring.desc')" data-trigger="hover" data-placement="bottom" @click="toggleDrawType('LineString')">
                             <i class="fas fa-fw fa-road"></i>
                         </button>
-                        <button type="button" class="btn btn-sm p-1" :class="{'btn-primary': drawType == 'Polygon', 'btn-outline-primary': drawType != 'Polygon'}" data-toggle="popover" :data-content="$t('main.map.draw.polygon.desc')" data-trigger="hover" data-placement="bottom" @click="toggleDrawType('Polygon')">
+                        <button type="button" class="btn btn-sm p-1" :class="{'btn-primary': drawType == 'Polygon', 'btn-outline-primary': drawType != 'Polygon'}" data-bs-toggle="popover" :data-content="$t('main.map.draw.polygon.desc')" data-trigger="hover" data-placement="bottom" @click="toggleDrawType('Polygon')">
                             <i class="fas fa-fw fa-draw-polygon"></i>
                         </button>
-                        <button type="button" class="btn btn-sm p-1 btn-outline-info" v-show="interactionMode != 'modify'" data-toggle="popover" :data-content="$t('main.map.draw.modify.desc')" data-trigger="hover" data-placement="bottom" @click="setInteractionMode('modify')">
+                        <button type="button" class="btn btn-sm p-1 btn-outline-info" v-show="interactionMode != 'modify'" data-bs-toggle="popover" :data-content="$t('main.map.draw.modify.desc')" data-trigger="hover" data-placement="bottom" @click="setInteractionMode('modify')">
                             <i class="fas fa-fw fa-edit"></i>
                         </button>
-                        <button type="button" class="btn btn-sm p-1 btn-outline-success" v-show="interactionMode == 'modify'" data-toggle="popover" :data-content="$t('main.map.draw.modify.pos-desc')" data-trigger="hover" data-placement="bottom" @click="updateFeatures">
+                        <button type="button" class="btn btn-sm p-1 btn-outline-success" v-show="interactionMode == 'modify'" data-bs-toggle="popover" :data-content="$t('main.map.draw.modify.pos-desc')" data-trigger="hover" data-placement="bottom" @click="updateFeatures">
                             <i class="fas fa-fw fa-check"></i>
                         </button>
-                        <button type="button" class="btn btn-sm p-1 btn-outline-danger" v-show="interactionMode == 'modify'" data-toggle="popover" :data-content="$t('main.map.draw.modify.neg-desc')" data-trigger="hover" data-placement="bottom" @click="cancelUpdateFeatures">
+                        <button type="button" class="btn btn-sm p-1 btn-outline-danger" v-show="interactionMode == 'modify'" data-bs-toggle="popover" :data-content="$t('main.map.draw.modify.neg-desc')" data-trigger="hover" data-placement="bottom" @click="cancelUpdateFeatures">
                             <i class="fas fa-fw fa-times"></i>
                         </button>
-                        <button type="button" class="btn btn-sm p-1 btn-outline-danger" v-show="interactionMode != 'delete'" data-toggle="popover" :data-content="$t('main.map.draw.delete.desc')" data-trigger="hover" data-placement="bottom" @click="setInteractionMode('delete')">
+                        <button type="button" class="btn btn-sm p-1 btn-outline-danger" v-show="interactionMode != 'delete'" data-bs-toggle="popover" :data-content="$t('main.map.draw.delete.desc')" data-trigger="hover" data-placement="bottom" @click="setInteractionMode('delete')">
                             <i class="fas fa-fw fa-trash"></i>
                         </button>
-                        <button type="button" class="btn btn-sm p-1 btn-outline-success" v-show="interactionMode == 'delete'" data-toggle="popover" :data-content="$t('main.map.draw.delete.pos-desc')" data-trigger="hover" data-placement="bottom" @click="deleteFeatures">
+                        <button type="button" class="btn btn-sm p-1 btn-outline-success" v-show="interactionMode == 'delete'" data-bs-toggle="popover" :data-content="$t('main.map.draw.delete.pos-desc')" data-trigger="hover" data-placement="bottom" @click="deleteFeatures">
                             <i class="fas fa-fw fa-check"></i>
                         </button>
-                        <button type="button" class="btn btn-sm p-1 btn-outline-danger" v-show="interactionMode == 'delete'" data-toggle="popover" :data-content="$t('main.map.draw.delete.neg-desc')" data-trigger="hover" data-placement="bottom" @click="cancelDeleteFeatures">
+                        <button type="button" class="btn btn-sm p-1 btn-outline-danger" v-show="interactionMode == 'delete'" data-bs-toggle="popover" :data-content="$t('main.map.draw.delete.neg-desc')" data-trigger="hover" data-placement="bottom" @click="cancelDeleteFeatures">
                             <i class="fas fa-fw fa-times"></i>
                         </button>
-                        <button type="button" class="btn btn-sm p-1 btn-outline-primary" data-toggle="popover" :data-content="$t('main.map.draw.measure.desc')" data-trigger="hover" data-placement="bottom" @click="toggleMeasurements">
+                        <button type="button" class="btn btn-sm p-1 btn-outline-primary" data-bs-toggle="popover" :data-content="$t('main.map.draw.measure.desc')" data-trigger="hover" data-placement="bottom" @click="toggleMeasurements">
                             <i class="fas fa-fw fa-ruler-combined"></i>
                         </button>
                     </div>
@@ -74,7 +74,7 @@
                                 </span>
                             </dt>
                             <dd>
-                                <span data-toggle="tooltip" :title="`${overlayInfo.size_in_m}${overlayInfo.size_unit}`">
+                                <span data-bs-toggle="tooltip" :title="`${overlayInfo.size_in_m}${overlayInfo.size_unit}`">
                                     {{ overlayInfo.size }}
                                 </span>
                             </dd>
@@ -100,19 +100,19 @@
                                 <table class="table table-striped table-borderless table-sm mb-0">
                                     <tbody>
                                         <tr v-for="c in coordinateList">
-                                            <td class="text-left">
+                                            <td class="text-start">
                                                 <input type="number" class="form-control form-control-sm" step="0.000001" v-model.number="overlayInfo.editCoordinates[0]" v-if="overlayInfo.pointEditEnabled" />
                                                 <span v-else>
                                                     {{ c.x | toFixed(4) }}
                                                 </span>
                                             </td>
-                                            <td class="text-right">
+                                            <td class="text-end">
                                                 <input type="number" class="form-control form-control-sm" step="0.000001" v-model.number="overlayInfo.editCoordinates[1]" v-if="overlayInfo.pointEditEnabled" />
                                                 <span v-else>
                                                     {{ c.y | toFixed(4) }}
                                                 </span>
                                             </td>
-                                            <td class="text-right clickable" v-if="isPointOverlay">
+                                            <td class="text-end clickable" v-if="isPointOverlay">
                                                 <div v-show="overlayInfo.pointEditEnabled">
                                                     <a href="" @click.prevent="confirmPointCoordEdit">
                                                         <i class="fas fa-fw fa-check" ></i>
@@ -283,8 +283,8 @@
             this.setDraw();
             // Enable popovers
             $(function () {
-                $('[data-toggle="popover"]').popover();
-                $('[data-toggle="tooltip"]').tooltip();
+                $('[data-bs-toggle="popover"]').popover();
+                $('[data-bs-toggle="tooltip"]').tooltip();
             });
         },
         methods: {

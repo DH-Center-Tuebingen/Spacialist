@@ -4,13 +4,13 @@
         <div v-if="entityType.id" class="col d-flex flex-column">
             <form role="form" v-on:submit.prevent="updateEntityType">
                 <div class="form-group row">
-                    <label class="col-form-label col-md-3 text-right">{{ $t('main.datamodel.detail.properties.top-level') }}</label>
+                    <label class="col-form-label col-md-3 text-end">{{ $t('main.datamodel.detail.properties.top-level') }}</label>
                     <div class="col-md-9">
                         <input type="checkbox" v-model="entityType.is_root" />
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label class="col-form-label col-md-3 text-right">{{ $t('main.datamodel.detail.properties.sub-types') }}</label>
+                    <label class="col-form-label col-md-3 text-end">{{ $t('main.datamodel.detail.properties.sub-types') }}</label>
                     <div class="col-md-9">
                         <multiselect
                             label="thesaurus_url"
@@ -27,7 +27,7 @@
                             :deselect-label="$t('global.select.deselect')">
                         </multiselect>
                         <div class="pt-2">
-                            <button type="button" class="btn btn-outline-success mr-2" @click="addAllEntityTypes">
+                            <button type="button" class="btn btn-outline-success me-2" @click="addAllEntityTypes">
                                 <i class="fas fa-fw fa-tasks"></i> {{ $t('global.select-all') }}
                             </button>
                             <button type="button" class="btn btn-outline-danger" @click="removeAllEntityTypes">

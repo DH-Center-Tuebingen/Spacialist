@@ -3,7 +3,7 @@
         <p class="alert alert-info">
             {{ $t('plugins.files.modal.detail.archive.info') }}
         </p>
-        <tree class="text-left col px-0 scroll-y-auto node-w-100"
+        <tree class="text-start col px-0 scroll-y-auto node-w-100"
             :data="fileList"
             :draggable="false"
             @change="onSelect"

@@ -5,25 +5,25 @@
         </h2>
         <ul class="nav nav-tabs nav-fill" id="message-tab-list" role="tablist">
             <li class="nav-item" role="presentation">
-                <a class="nav-link active" id="all-tab" data-toggle="tab" href="#all" role="tab" aria-controls="all" aria-selected="true">
+                <a class="nav-link active" id="all-tab" data-bs-toggle="tab" href="#all" role="tab" aria-controls="all" aria-selected="true">
                     {{ $t('global.notifications.tab_all') }}
                     <span class="badge badge-secondary">{{ notifications.length }}</span>
                 </a>
             </li>
             <li class="nav-item" role="presentation">
-                <a class="nav-link" id="unread-tab" data-toggle="tab" href="#unread" role="tab" aria-controls="unread" aria-selected="false">
+                <a class="nav-link" id="unread-tab" data-bs-toggle="tab" href="#unread" role="tab" aria-controls="unread" aria-selected="false">
                     {{ $t('global.notifications.tab_unread') }}
                     <span class="badge badge-secondary">{{ unreadNotifications.length }}</span>
                 </a>
             </li>
             <li class="nav-item" role="presentation">
-                <a class="nav-link" id="read-tab" data-toggle="tab" href="#read" role="tab" aria-controls="read" aria-selected="false">
+                <a class="nav-link" id="read-tab" data-bs-toggle="tab" href="#read" role="tab" aria-controls="read" aria-selected="false">
                     {{ $t('global.notifications.tab_read') }}
                     <span class="badge badge-secondary">{{ readNotifications.length }}</span>
                 </a>
             </li>
             <li class="nav-item" role="presentation">
-                <a class="nav-link" id="system-tab" data-toggle="tab" href="#system" role="tab" aria-controls="system" aria-selected="false">
+                <a class="nav-link" id="system-tab" data-bs-toggle="tab" href="#system" role="tab" aria-controls="system" aria-selected="false">
                     {{ $t('global.notifications.tab_system') }}
                     <span class="badge badge-secondary">{{ systemNotifications.length }}</span>
                 </a>
@@ -32,7 +32,7 @@
         <div class="tab-content mt-3 col overflow-hidden" id="message-tab-panel">
             <div class="tab-pane fade show active h-100" id="all" role="tabpanel" aria-labelledby="all-tab">
                 <div class="d-flex flex-column h-100">
-                    <div class="text-right">
+                    <div class="text-end">
                         <button type="button" class="btn btn-sm btn-success" :disabled="!notifications.length" @click="markListAsRead(notifications)">
                             <i class="fas fa-fw fa-check"></i>
                             {{ $t('global.notifications.mark_all_as_read') }}
@@ -62,7 +62,7 @@
             </div>
             <div class="tab-pane fade h-100" id="unread" role="tabpanel" aria-labelledby="unread-tab">
                 <div class="d-flex flex-column h-100">
-                    <div class="text-right">
+                    <div class="text-end">
                         <button type="button" class="btn btn-sm btn-success" :disabled="!unreadNotifications.length" @click="markListAsRead(unreadNotifications)">
                             <i class="fas fa-fw fa-check"></i>
                             {{ $t('global.notifications.mark_all_as_read') }}
@@ -91,7 +91,7 @@
             </div>
             <div class="tab-pane fade h-100" id="read" role="tabpanel" aria-labelledby="read-tab">
                 <div class="d-flex flex-column h-100">
-                    <div class="text-right">
+                    <div class="text-end">
                         <button type="button" class="btn btn-sm btn-danger" :disabled="!readNotifications.length" @click="deleteAll(readNotifications)">
                             <i class="fas fa-fw fa-times"></i>
                             {{ $t('global.notifications.delete_all') }}
@@ -116,7 +116,7 @@
             </div>
             <div class="tab-pane fade h-100" id="system" role="tabpanel" aria-labelledby="system-tab">
                 <div class="d-flex flex-column h-100">
-                    <div class="text-right">
+                    <div class="text-end">
                         <button type="button" class="btn btn-sm btn-success" :disabled="!systemNotifications.length" @click="markListAsRead(systemNotifications)">
                             <i class="fas fa-fw fa-check"></i>
                             {{ $t('global.notifications.mark_all_as_read') }}

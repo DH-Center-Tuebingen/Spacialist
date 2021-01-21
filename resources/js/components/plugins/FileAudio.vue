@@ -29,7 +29,7 @@
             </div>
             <div class="col-md-4 px-0 d-flex justify-content-center align-items-center">
                 <input type="range" min="0" max="1" step="0.01" v-model="currentVolume" @input="setVolume" />
-                <div @click="toggleMute" class="ml-1">
+                <div @click="toggleMute" class="ms-1">
                     <span v-show="isMute || currentVolume == 0">
                         <i class="fas fa-fw fa-volume-mute"></i>
                     </span>

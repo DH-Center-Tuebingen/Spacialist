@@ -1,6 +1,6 @@
 <template>
     <div class="row h-100" v-if="initFinished">
-        <div class="col-md-2 h-100 d-flex flex-column border-right">
+        <div class="col-md-2 h-100 d-flex flex-column border-end">
             <h5>{{ $tc('main.map.baselayer', 2) }}</h5>
             <layer-list
                 class="flex-grow-1 scroll-y-auto"

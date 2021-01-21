@@ -1,6 +1,6 @@
 <template>
     <div class="row">
-        <div class="col-3 mt-2 border-right">
+        <div class="col-3 mt-2 border-end">
             <file-upload
                 accept="image/*"
                 class="w-100"
@@ -14,7 +14,7 @@
                     <user-avatar :user="avatarUser" class="d-flex justify-content-center"></user-avatar>
             </file-upload>
             <div class="text-center mt-3">
-                <button type="button" class="btn btn-outline-danger ml-2" :disabled="!avatarUser.avatar" @click="deleteAvatar()">
+                <button type="button" class="btn btn-outline-danger ms-2" :disabled="!avatarUser.avatar" @click="deleteAvatar()">
                     {{ $t('global.delete') }}
                 </button>
             </div>

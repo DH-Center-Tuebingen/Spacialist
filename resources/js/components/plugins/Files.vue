@@ -291,8 +291,8 @@
                             </a>
                         </span>
                         <form class="form-inline" v-else>
-                            <input type="text" class="form-control mr-2" v-model="newFilename" />
-                            <button type="submit" class="btn btn-outline-success mr-2" @click="updateFilename(newFilename)">
+                            <input type="text" class="form-control me-2" v-model="newFilename" />
+                            <button type="submit" class="btn btn-outline-success me-2" @click="updateFilename(newFilename)">
                                 <i class="fas fa-fw fa-check"></i>
                             </button>
                             <button type="reset" class="btn btn-outline-danger" @click="cancelUpdateFilename()">
@@ -359,16 +359,16 @@
                             <table class="table table-striped table-hover table-sm mb-0">
                                 <tbody>
                                     <tr v-for="p in fileProperties" class="d-flex justify-content-between">
-                                        <td class="text-left font-weight-medium">
+                                        <td class="text-start font-weight-medium">
                                             {{ $t(`plugins.files.modal.detail.props.${p}`) }}
                                         </td>
-                                        <td class="col text-left">
+                                        <td class="col text-start">
                                             <div class="text-muted text-line" v-if="editingProperty.key != p">
                                                 {{selectedFile[p]}}
                                             </div>
                                             <form role="form" class="form-inline" v-else @submit.prevent="updateProperty()">
-                                                <textarea class="form-control mr-1 col" :id="`edit-property-${p}`" v-model="selectedFile[p]"></textarea>
-                                                <button type="submit" class="btn btn-sm btn-outline-success mr-1">
+                                                <textarea class="form-control me-1 col" :id="`edit-property-${p}`" v-model="selectedFile[p]"></textarea>
+                                                <button type="submit" class="btn btn-sm btn-outline-success me-1">
                                                     <i class="fas fa-fw fa-check"></i>
                                                 </button>
                                                 <button type="button" class="btn btn-sm btn-outline-danger" @click="cancelPropertyEditing()">
@@ -378,7 +378,7 @@
                                         </td>
                                         <td>
                                             <div class="dropdown">
-                                                <span id="dropdownMenuButton" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <span id="dropdownMenuButton" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     <i class="fas fa-fw fa-ellipsis-h"></i>
                                                 </span>
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
@@ -395,31 +395,31 @@
                             <table class="table table-striped table-hover table-sm mb-0">
                                 <tbody>
                                     <tr>
-                                        <td class="text-left font-weight-medium">
+                                        <td class="text-start font-weight-medium">
                                             {{ $t('plugins.files.modal.detail.metadata.created') }}
                                         </td>
-                                        <td class="text-right text-muted">
+                                        <td class="text-end text-muted">
                                             {{selectedFile.created_unix|date}}
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-left font-weight-medium">
+                                        <td class="text-start font-weight-medium">
                                             {{ $t('plugins.files.modal.detail.metadata.lastmodified') }}
                                         </td>
-                                        <td class="text-right text-muted">
+                                        <td class="text-end text-muted">
                                             {{selectedFile.modified_unix|date}}
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-left font-weight-medium">
+                                        <td class="text-start font-weight-medium">
                                             {{ $t('plugins.files.modal.detail.metadata.filesize') }}
                                         </td>
-                                        <td class="text-right text-muted">
+                                        <td class="text-end text-muted">
                                             {{selectedFile.size|bytes}}
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-left font-weight-medium">
+                                        <td class="text-start font-weight-medium">
                                             <file-upload
                                                 class="mb-0"
                                                 v-show="!replaceFiles.length"
@@ -451,14 +451,14 @@
                                                         <i class="fas fa-fw fa-check"></i>
                                                         {{ $t('global.replace') }}
                                                     </button>
-                                                    <button type="button" class="btn btn-outline-danger ml-2" @click="cancelReplaceFile">
+                                                    <button type="button" class="btn btn-outline-danger ms-2" @click="cancelReplaceFile">
                                                         <i class="fas fa-fw fa-ban"></i>
                                                         {{ $t('global.cancel') }}
                                                     </button>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="text-right font-weight-medium">
+                                        <td class="text-end font-weight-medium">
                                             <a :href="selectedFile.url" :download="selectedFile.name" target="_blank">
                                                 {{ $t('global.download') }}
                                                 <i class="fas fa-fw fa-file-download text-muted"></i>
@@ -504,7 +504,7 @@
                                 <div class="my-3 col p-0 scroll-y-auto">
                                     <ul class="list-group mx-0" v-if="selectedFile.entities && selectedFile.entities.length">
                                         <li class="list-group-item d-flex justify-content-between" v-for="link in selectedFile.entities" :key="link.id">
-                                            <a href="#" @click.prevent="routeToEntity(link)" class="text-left">
+                                            <a href="#" @click.prevent="routeToEntity(link)" class="text-start">
                                                 <i class="fas fa-fw fa-monument"></i>
                                                 <span>{{ link.name }}</span>
                                             </a>

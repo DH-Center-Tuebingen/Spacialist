@@ -46,7 +46,7 @@
                 <form role="form" @submit.prevent="onUpdateCertainty">
                     <div class="form-group d-flex">
                         <textarea class="form-control" v-model="certainty_description" id="comment-content" ref="comCnt" :placeholder="$t('main.entity.references.certaintyc')"></textarea>
-                        <div class="ml-2 mt-auto">
+                        <div class="ms-2 mt-auto">
                             <emoji-picker @selected="addEmoji"></emoji-picker>
                         </div>
                     </div>
@@ -60,7 +60,7 @@
                 <table class="table table-hover">
                     <tbody>
                         <tr class="d-flex flex-row" v-for="reference in refs.refs" :key="reference.id">
-                            <td class="text-left py-2 col px-0 pl-1">
+                            <td class="text-start py-2 col px-0 ps-1">
                                 <div class="d-flex flex-column">
                                     <h6>{{ reference.bibliography.title }}</h6>
                                     <span class="mb-0">
@@ -68,15 +68,15 @@
                                     </span>
                                 </div>
                             </td>
-                            <td class="text-right p-2 col">
+                            <td class="text-end p-2 col">
                                 <div class="d-flex flex-column">
                                     <div>
                                         <p class="font-weight-light font-italic mb-0" v-if="editReference.id != reference.id">
                                             {{ reference.description }}
                                         </p>
                                         <div class="d-flex" v-else>
-                                            <input type="text" class="form-control mr-1" v-model="editReference.description" />
-                                            <button type="button" class="btn btn-outline-success mr-1" @click="onUpdateReference(editReference)">
+                                            <input type="text" class="form-control me-1" v-model="editReference.description" />
+                                            <button type="button" class="btn btn-outline-success me-1" @click="onUpdateReference(editReference)">
                                                 <i class="fas fa-fw fa-check"></i>
                                             </button>
                                             <button type="button" class="btn btn-outline-danger" @click="cancelEditReference">
@@ -89,9 +89,9 @@
                                     </span>
                                 </div>
                             </td>
-                            <td class="px-0 pr-1">
+                            <td class="px-0 pe-1">
                                 <div class="dropdown">
-                                    <span id="dropdownMenuButton" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span id="dropdownMenuButton" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         <i class="fas fa-fw fa-ellipsis-h"></i>
                                     </span>
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">

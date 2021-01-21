@@ -19,7 +19,7 @@
                     })
                 }}
             </span>
-            <a href="" class="mr-auto ml-2" @click.prevent="grid = !grid">
+            <a href="" class="me-auto ms-2" @click.prevent="grid = !grid">
                 <span v-show="grid">
                     <i class="fas fa-fw fa-list"></i>
                 </span>
@@ -28,7 +28,7 @@
                 </span>
             </a>
             <div class="dropdown" v-if="fileCount">
-                <span id="selected-files-actions" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span id="selected-files-actions" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <i class="fas fa-fw fa-ellipsis-h"></i>
                 </span>
                 <div class="dropdown-menu" aria-labelledby="selected-files-actions">
@@ -121,7 +121,7 @@
                                     <i class="fas fa-fw fa-tags text-info"></i>
                                 </span>
                             </div>
-                            <div class="position-absolute top-0 left-0 m-2" v-if="$can('export_files')">
+                            <div class="position-absolute top-0 start-0 m-2" v-if="$can('export_files')">
                                 <input type="checkbox" @click.stop="" :id="file.id" :value="file.id" v-model="selectedFiles" />
                             </div>
                         </div>
@@ -141,8 +141,8 @@
             <ul class="list-group mb-2 w-100" v-else>
                 <li class="list-group-item px-3 py-2 w-100 d-flex flex-row justify-content-between clickable" v-for="file in files" :title="file.name" @click="onClick(file)" @contextmenu.prevent="$refs.fileMenu.open($event, {file: file})">
                     <div class="d-flex justify-content-start align-items-center">
-                        <input type="checkbox" class="mr-2" @click.stop="" :id="file.id" :value="file.id" v-model="selectedFiles" v-if="$can('export_files')" />
-                        <div class="mr-2">
+                        <input type="checkbox" class="me-2" @click.stop="" :id="file.id" :value="file.id" v-model="selectedFiles" v-if="$can('export_files')" />
+                        <div class="me-2">
                             <div v-if="file.category == 'xml'">
                                 <i class="fas fa-fw fa-file-code w-32p h-32p"></i>
                             </div>
@@ -201,10 +201,10 @@
                         <span v-if="showLinks && getFileLinks(file).length" :title="$tc('global.has-links', getFileLinks(file).length, {cnt: getFileLinks(file).length})">
                             <i class="fas fa-fw fa-link text-info"></i>
                         </span>
-                        <span v-if="isFromSubEntity(file)" class="ml-2" :title="$tc('global.from-subentity')">
+                        <span v-if="isFromSubEntity(file)" class="ms-2" :title="$tc('global.from-subentity')">
                             <i class="fas fa-fw fa-sitemap text-info"></i>
                         </span>
-                        <span v-if="getFileTags(file).length" class="ml-2" :title="$tc('global.has-tags', getFileTags(file).length, {cnt: getFileTags(file).length})">
+                        <span v-if="getFileTags(file).length" class="ms-2" :title="$tc('global.has-tags', getFileTags(file).length, {cnt: getFileTags(file).length})">
                             <i class="fas fa-fw fa-tags text-info"></i>
                         </span>
                     </div>
@@ -219,7 +219,7 @@
                         <i class="fas fa-fw fa-sync fa-3x fa-spin"></i>
                     </div>
                     <span v-else>
-                        <i class="fas fa-fw fa-sync mr-2 ml-4 w-32p h-32p fa-spin"></i>
+                        <i class="fas fa-fw fa-sync me-2 ms-4 w-32p h-32p fa-spin"></i>
                     </span>
                 </span>
                 <span slot="no-more"></span>
