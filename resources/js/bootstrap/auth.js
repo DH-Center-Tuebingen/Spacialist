@@ -30,6 +30,4 @@ export function useAuth() {
     return vueAuth;
 }
 
-export default {
-    vueAuth
-};
+export default vueAuth;

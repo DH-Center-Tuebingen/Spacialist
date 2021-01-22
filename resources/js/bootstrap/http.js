@@ -1,4 +1,6 @@
 import axios from 'axios';
+import router from './router.js';
+
 
 axios.defaults.baseURL = 'api/v1';
 axios.defaults.withCredentials = true;

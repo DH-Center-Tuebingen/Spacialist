@@ -192,6 +192,7 @@
     import { useAuth } from './bootstrap/auth.js';
     import { useI18n } from 'vue-i18n';
 
+    import { fetchPreData } from './api.js';
     import {
         getPreference,
         getToolPlugins,
@@ -206,24 +207,7 @@
             const { t, locale } = useI18n();
 
             // FETCH
-            $httpQueue.add(() => $http.get('pre').then(response => {
-                store.commit('setConcepts', response.data.concepts);
-                store.commit('setEntityTypes', response.data.entityTypes);
-                store.commit('setPreferences', response.data.preferences);
-                store.commit('setUsers', response.data.users);
-
-                store.commit('setUser', auth.user());
-                
-                if(auth.ready()) {
-                    auth.load().then(_ => {
-                        locale.value = store.getters.preferenceByKey('prefs.gui-language');
-                    });
-                } else {
-                    locale.value = store.getters.preferenceByKey('prefs.gui-language');
-                }
-
-                // TODO init spacialist "plugins"
-            }));
+            fetchPreData(locale);
 
             // DATA
             const state = reactive({

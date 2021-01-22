@@ -89,9 +89,10 @@
     } from 'vue';
 
     import { useRoute } from 'vue-router';
-    import { useAuth } from '@websanova/vue-auth';
+    import { useAuth } from '../bootstrap/auth.js';
     import { useI18n } from 'vue-i18n';
 
+    import { fetchPreData } from '../api.js';
     import {
         getErrorMessages,
         getValidClass
@@ -100,7 +101,7 @@
     export default {
         setup() {
             const auth = useAuth();
-            const { t } = useI18n();
+            const { t, locale } = useI18n();
             // DATA
             const state = reactive({
                 user: {},
@@ -129,9 +130,9 @@
                     fetchUser: true
                 }).then(_ => {
                     state.error = {};
+                    fetchPreData(locale);
                 }, e => {
                     state.error = getErrorMessages(e);
-                    console.log(state.error, "check error object to set v-key");
                 });
             }
 
