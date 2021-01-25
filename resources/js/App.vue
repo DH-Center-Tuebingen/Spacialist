@@ -188,8 +188,8 @@
         watch,
     } from 'vue';
 
-    import { useStore } from './bootstrap/store.js';
-    import { useAuth } from './bootstrap/auth.js';
+    import store from './bootstrap/store.js';
+    import auth from './bootstrap/auth.js';
     import { useI18n } from 'vue-i18n';
 
     import { fetchPreData } from './api.js';
@@ -202,8 +202,6 @@
 
     export default {
         setup(props) {
-            const store = useStore();
-            const auth = useAuth();
             const { t, locale } = useI18n();
 
             // FETCH

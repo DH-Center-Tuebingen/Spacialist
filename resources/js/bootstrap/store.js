@@ -1,6 +1,8 @@
 import { createStore } from 'vuex';
 
 import { sortTree, Node } from '../helpers/tree.js';
+import { can } from '../helpers/helpers.js';
+import { getEntityData } from '../api.js';
 
 export const store = createStore({
     state() {
@@ -55,6 +57,84 @@ export const store = createStore({
             state.file = data;
         }
     },
+    actions: {
+        sortTree({commit}, sort) {
+            commit('sortTree', sort)
+        },
+        async getEntity({commit}, entityId) {
+            if(!can('view_concept_props')) {
+                const hiddenEntity = {
+                    id: entity.id,
+                    // TODO: parents?
+                    data: {},
+                    attributes: [],
+                    selections: {},
+                    dependencies: [],
+                    references: [],
+                    comments: [],
+                };
+                commit('setEntity', hiddenEntity);
+            } else {
+                let entity = {};
+                entity.data = await getEntityData(entityId);
+                
+                return;
+
+                return $httpQueue.add(() => $http.get(`/entity/${cid}/data`).then(response => {
+                    // if result is empty, php returns [] instead of {}
+                    if(response.data instanceof Array) {
+                        response.data = {};
+                    }
+                    Vue.set(this.selectedEntity, 'data', response.data);
+                    return $http.get(`/editor/entity_type/${ctid}/attribute`);
+                }).then(response => {
+                    this.selectedEntity.attributes = [];
+                    let data = response.data;
+                    for(let i=0; i<data.attributes.length; i++) {
+                        let aid = data.attributes[i].id;
+                        if(!this.selectedEntity.data[aid]) {
+                            let val = {};
+                            switch(data.attributes[i].datatype) {
+                                case 'dimension':
+                                case 'epoch':
+                                case 'timeperiod':
+                                    val.value = {};
+                                    break;
+                                case 'table':
+                                case 'list':
+                                    val.value = [];
+                                    break;
+                            }
+                            Vue.set(this.selectedEntity.data, aid, val);
+                        } else {
+                            const val = this.selectedEntity.data[aid].value;
+                            switch(data.attributes[i].datatype) {
+                                case 'date':
+                                    const dtVal = new Date(val);
+                                    this.selectedEntity.data[aid].value = dtVal;
+                                    break;
+                            }
+                        }
+                        this.selectedEntity.attributes.push(data.attributes[i]);
+                    }
+                    // if result is empty, php returns [] instead of {}
+                    if(data.selections instanceof Array) {
+                        data.selections = {};
+                    }
+                    if(data.dependencies instanceof Array) {
+                        data.dependencies = {};
+                    }
+                    Vue.set(this.selectedEntity, 'selections', data.selections);
+                    Vue.set(this.selectedEntity, 'dependencies', data.dependencies);
+
+                    const aid = this.$route.params.aid;
+                    this.setReferenceAttribute(aid);
+                    Vue.set(this, 'dataLoaded', true);
+                    this.setEntityView();
+                }));
+            }
+        }
+    },
     getters: {
         concepts: state => {
             return state.concepts;
@@ -66,43 +146,7 @@ export const store = createStore({
             return state.topEntities;
         },
         tree: state => {
-            // return state.tree;
-            return [
-                  {
-                    text: 'node 1',
-                    value: { id: 1 },
-                    state: {
-                    opened: true
-                    },
-                    children: [
-                    {
-                        text: 'node 11',
-                        value: { id: 11 }
-                    },
-                    {
-                        text: 'node 12',
-                        value: { id: 12 },
-                        state: {
-                        opened: true
-                        },
-                        children: [
-                        {
-                            text: 'node 121',
-                            value: { id: 121 }
-                        },
-                        {
-                            text: 'node 122',
-                            value: { id: 122 }
-                        },
-                        {
-                            text: 'node 123',
-                            value: { id: 123 }
-                        }
-                        ]
-                    }
-                    ]
-                },
-            ]
+            return state.tree;
         },
         preferenceByKey: state => key => {
             return state.preferences[key];

@@ -89,7 +89,7 @@
     } from 'vue';
 
     import { useRoute } from 'vue-router';
-    import { useAuth } from '../bootstrap/auth.js';
+    import auth from '../bootstrap/auth.js';
     import { useI18n } from 'vue-i18n';
 
     import { fetchPreData } from '../api.js';
@@ -100,7 +100,6 @@
 
     export default {
         setup() {
-            const auth = useAuth();
             const { t, locale } = useI18n();
             // DATA
             const state = reactive({
@@ -128,11 +127,10 @@
                     staySignedIn: state.user.remember,
                     redirect: state.redirect,
                     fetchUser: true
+                }).then(_ => fetchPreData(locale), e => {
+                    state.error = getErrorMessages(e);
                 }).then(_ => {
                     state.error = {};
-                    fetchPreData(locale);
-                }, e => {
-                    state.error = getErrorMessages(e);
                 });
             }
 

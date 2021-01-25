@@ -16,50 +16,44 @@
                 <i class="fas fa-fw fa-plus"></i> {{ t('main.entity.tree.add') }}
             </button>
             <div class="mb-2 d-flex flex-row flex-wrap justify-content-between">
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('rank', 'asc')" data-bs-toggle="popover" :data-content="t('main.entity.tree.sorts.asc.rank')" data-trigger="hover" data-placement="bottom">
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('rank', 'asc')" data-bs-toggle="popover" :data-bs-content="t('main.entity.tree.sorts.asc.rank')" data-bs-trigger="hover" data-bs-placement="bottom">
                     <i class="fas fa-fw fa-sort-numeric-down"></i>
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('rank', 'desc')" data-bs-toggle="popover" :data-content="t('main.entity.tree.sorts.desc.rank')" data-trigger="hover" data-placement="bottom">
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('rank', 'desc')" data-bs-toggle="popover" :data-bs-content="t('main.entity.tree.sorts.desc.rank')" data-bs-trigger="hover" data-bs-placement="bottom">
                     <i class="fas fa-fw fa-sort-numeric-up"></i>
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('alpha', 'asc')" data-bs-toggle="popover" :data-content="t('main.entity.tree.sorts.asc.name')" data-trigger="hover" data-placement="bottom">
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('alpha', 'asc')" data-bs-toggle="popover" :data-bs-content="t('main.entity.tree.sorts.asc.name')" data-bs-trigger="hover" data-bs-placement="bottom">
                     <i class="fas fa-fw fa-sort-alpha-down"></i>
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('alpha', 'desc')" data-bs-toggle="popover" :data-content="t('main.entity.tree.sorts.desc.name')" data-trigger="hover" data-placement="bottom">
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('alpha', 'desc')" data-bs-toggle="popover" :data-bs-content="t('main.entity.tree.sorts.desc.name')" data-bs-trigger="hover" data-bs-placement="bottom">
                     <i class="fas fa-fw fa-sort-alpha-up"></i>
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('children', 'asc')" data-bs-toggle="popover" :data-content="t('main.entity.tree.sorts.asc.children')" data-trigger="hover" data-placement="bottom">
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('children', 'asc')" data-bs-toggle="popover" :data-bs-content="t('main.entity.tree.sorts.asc.children')" data-bs-trigger="hover" data-bs-placement="bottom">
                     <i class="fas fa-fw fa-sort-amount-down"></i>
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('children', 'desc')" data-bs-toggle="popover" :data-content="t('main.entity.tree.sorts.desc.children')" data-trigger="hover" data-placement="bottom">
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('children', 'desc')" data-bs-toggle="popover" :data-bs-content="t('main.entity.tree.sorts.desc.children')" data-bs-trigger="hover" data-bs-placement="bottom">
                     <i class="fas fa-fw fa-sort-amount-up"></i>
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('type', 'asc')" data-bs-toggle="popover" :data-content="t('main.entity.tree.sorts.asc.type')" data-trigger="hover" data-placement="bottom">
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('type', 'asc')" data-bs-toggle="popover" :data-bs-content="t('main.entity.tree.sorts.asc.type')" data-bs-trigger="hover" data-bs-placement="bottom">
                     <span class="fa-stack d-inline">
                         <i class="fas fa-long-arrow-alt-down"></i>
                         <i class="fas fa-monument" data-fa-transform="start-4" style="margin-right: -0.2rem;"></i>
                     </span>
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('type', 'desc')" data-bs-toggle="popover" :data-content="t('main.entity.tree.sorts.desc.type')" data-trigger="hover" data-placement="bottom">
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('type', 'desc')" data-bs-toggle="popover" :data-bs-content="t('main.entity.tree.sorts.desc.type')" data-bs-trigger="hover" data-bs-placement="bottom">
                     <span class="fa-stack d-inline">
                         <i class="fas fa-long-arrow-alt-up"></i>
                         <i class="fas fa-monument" data-fa-transform="start-4" style="margin-right: -0.2rem;"></i>
                     </span>
                 </button>
             </div>
-            <tree :data="tree">
-                <node
-                v-for="(child, i) in tree"
-                :key="i"
-                :data="child"
-                :last="i === tree.length - 1"
-                :path="[i]"
-                :root="tree"
-                >
-                </node>
-            </tree>
-            <!-- <tree :data="tree">
-            </tree> -->
+            <ul class="mb-0 col px-0 px-3 scroll-y-auto">
+                <li v-for="(entry, i) in state.tree" :key="i">
+                    <a href="#" class="font-weight-bold" @click.prevent="itemClick(entry)">
+                        {{ entry.name }}
+                    </a>
+                </li>
+            </ul>
             <!-- <tree
                 id="entity-tree"
                 class="col px-0 scroll-y-auto"
@@ -71,21 +65,28 @@
                 @drop="itemDrop"
                 @toggle="itemToggle">
             </tree> -->
-            <!-- <button type="button" class="btn btn-sm btn-outline-success mt-2" @click="requestAddNewEntity()">
+            <button type="button" class="btn btn-sm btn-outline-success mt-2" @click="requestAddNewEntity()">
                 <i class="fas fa-fw fa-plus"></i> {{ t('main.entity.tree.add') }}
-            </button> -->
+            </button>
         </div>
         <!-- <modals-container class="visible-overflow" /> -->
     </div>
 </template>
 
 <script>
-    import { computed } from 'vue';
+    import {
+        computed,
+        onMounted,
+        reactive
+    } from 'vue';
+
+    import { useRoute } from 'vue-router';
     import { useI18n } from 'vue-i18n';
 
     import { Node, Tree } from "tree-vue-component";
 
     import store from '../bootstrap/store.js';
+    import router from '../bootstrap/router.js';
     import { fetchTopEntities } from '../api.js';
 
     export default {
@@ -95,16 +96,56 @@
         },
         setup(props) {
             const { t } = useI18n();
+            const currentRoute = useRoute();
             const entities = fetchTopEntities();
 
-            return {
-                t,
+            // FETCH
+
+            // DATA
+            const state = reactive({
                 tree: computed(_ => store.getters.tree),
                 entity: computed(_ => store.getters.entity),
                 topEntities: computed(_ => store.getters.topEntities),
                 entities: entities,
                 requestAddNewEntity: () => {},
-                setSort: (attr, dir) => {},
+            });
+
+            // FUNCTIONS
+            const itemClick = (item) => {
+                if(state.entity.id == item.id) {
+                    router.push({
+                        append: true,
+                        name: 'home',
+                        query: currentRoute.query
+                    });
+                } else {
+                    router.push({
+                        name: 'entitydetail',
+                        params: {
+                            id: item.id
+                        },
+                        query: currentRoute.query
+                    });
+                }
+            };
+            const setSort = (attr, dir) => {
+                store.dispatch('sortTree', {
+                    by: attr,
+                    dir: dir
+                });
+            };
+
+            // ON MOUNTED
+            onMounted(_ => {
+                console.log("entity tree component mounted");
+            });
+
+            // RETURN
+            return {
+                t,
+                state,
+                itemClick,
+                setSort,
             };
         }
     }
@@ -141,10 +182,6 @@
     //         'tree-search': TreeSearch,
     //     },
     //     props: {
-    //         selectedEntity: {
-    //             required: false,
-    //             type: Object
-    //         },
     //         dragDelay: {
     //             required: false,
     //             type: Number,
@@ -163,12 +200,6 @@
     //         EventBus.$on('entity-delete', this.handleEntityDelete);
     //     },
     //     methods: {
-    //         setSort(by, dir) {
-    //             this.sort.by = by;
-    //             this.sort.dir = dir;
-    //             store.commit('sortTree', {by: by, dir: dir});
-    //             this.sortTree(by, dir, this.tree);
-    //         },
     //         itemClick(eventData) {
     //             const item = eventData.data;
     //             if(this.selectedEntity.id == item.id) {
@@ -408,18 +439,6 @@
     //                 parent.state.openable = parent.children_count > 0;
     //             }
     //             delete vm.entities[entity.id];
-    //         },
-    //         init() {
-    //             const vm = this
-    //             $httpQueue.add(() => $http.get('/entity/top').then(response => {
-    //                 response.data.forEach(e => {
-    //                     const n = new Node(e, vm);
-    //                     vm.entities[n.id] = n;
-    //                     vm.tree.push(n);
-    //                 });
-    //                 vm.sortTree(vm.sort.by, vm.sort.dir, vm.tree);
-    //                 vm.selectEntity();
-    //             }));
     //         },
     //         isDropAllowed(dropData) {
     //             //TODO check if it works with tree-vue-component

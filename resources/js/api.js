@@ -27,3 +27,15 @@ export async function fetchPreData(locale) {
         // TODO init spacialist "plugins"
     }));
 };
+
+export async function getEntityData(id)  {
+    return await $httpQueue.add(
+        () => $http.get(`/entity/${id}/data`)
+        .then(response => {
+            if(response.data instanceof Array) {
+                response.data = {};
+            }
+            return response.data;
+        })
+    );
+}

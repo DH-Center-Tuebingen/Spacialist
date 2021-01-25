@@ -4,16 +4,16 @@
             <entity-tree
                 class="col px-0">
             </entity-tree>
-            ENTITY-TREE
         </div>
         <div :class="`h-100 border-start border-end col-md-${columnPref.center}`" id="attribute-container" v-can="'view_concepts|view_concept_props'" v-if="columnPref.center > 0">
+            <router-view>
+            </router-view>
             <!-- <router-view
                 :selected-entity="selectedEntity"
                 :bibliography="bibliography"
                 @detail-updated="setDetailDirty"
             >
             </router-view> -->
-            ENTITY-DETAIL
         </div>
         <div :class="`h-100 d-flex flex-column col-md-${columnPref.right}`" id="addon-container" v-if="columnPref.right > 0">
             <!-- <ul class="nav nav-tabs">

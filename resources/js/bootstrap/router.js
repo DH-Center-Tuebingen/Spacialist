@@ -3,6 +3,7 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 // Pages
 import Login from '../components/Login.vue';
 import MainView from '../components/MainView.vue';
+import EntityDetail from '../components/EntityDetail.vue';
 import DummyComponent from '../components/DummyComponent.vue';
 import NotFound from '../components/NotFound.vue';
 
@@ -100,8 +101,8 @@ export const router = createRouter({
                 {
                     path: 'e/:id',
                     name: 'entitydetail',
-                    component: DummyComponent,
-                    // component: EntityDetail,
+                    // component: DummyComponent,
+                    component: EntityDetail,
                     children: [
                         {
                             path: 'refs/:aid',
