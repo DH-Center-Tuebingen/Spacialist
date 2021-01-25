@@ -1,5 +1,5 @@
 <template>
-    <table class="table table-striped table-hover" v-if="initFinished" v-can="'edit_preferences'">
+    <table class="table table-striped table-hover" v-if="initFinished" v-dcan="'edit_preferences'">
         <thead class="thead-light">
             <tr>
                 <th>{{ $t('global.preference') }}</th>

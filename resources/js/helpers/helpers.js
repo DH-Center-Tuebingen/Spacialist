@@ -19,6 +19,88 @@ export function can(permissionString, oneOf) {
     }
 }
 
+export function getErrorMessages(error, suffix = '') {
+    let msgObject = {};
+    const r = error.response;
+    if(r.status == 422) {
+        if(r.data.errors) {
+            for(let k in r.data.errors) {
+                msgObject[`${k}${suffix}`] = r.data.errors[k];
+            }
+        }
+    } else if(r.status == 400) {
+        msgObject.global = r.data.error;
+    }
+    return msgObject;
+}
+
+export function rgb2hex(rgb) {
+    let colors = rgb.substring(1);
+    let r = parseInt(colors.substring(0, 2), 16);
+    let g = parseInt(colors.substring(2, 4), 16);
+    let b = parseInt(colors.substring(4, 6), 16);
+    return [r, g, b];
+}
+
+export function getTs() {
+    const d = new Date();
+    return d.getTime();
+}
+
+export function hasConcept(url) {
+    if(!url) return false;
+    return !!store.getters.concepts[url];
+}
+
+export function translateLabel(element, prop) {
+    const value = element[prop];
+    if(!value) return element;
+    return translateConcept(value);
+}
+
+export function translateConcept(url) {
+    const concepts = store.getters.concepts;
+    if(!url || !concepts) return url;
+    if(!concepts[url]) return url;
+    return concepts[url].label;
+}
+
+export function translateEntityType(id) {
+    return translateConcept(getEntityType(id).thesaurus_url);
+}
+
+export function getEntityType(id) {
+    return getEntityTypes()[id];
+}
+
+export function getEntityTypes() {
+    return store.getters.entityTypes;
+}
+
+// Formula based on https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color/3943023#3943023
+export function getEntityColors(id, alpha = 0.5) {
+    const et = getEntityType(id);
+    if(!et || !et.layer) return {};
+    let r, g, b, a;
+    [r, g, b] = rgb2hex(et.layer.color);
+    const cs = [r, g, b].map(c => {
+        c /= 255.0;
+        if(c <= 0.03928) c /= 12.92;
+        else c = Math.pow(((c+0.055)/1.055), 2.4);
+        return c;
+    });
+    // let cont = r*0.299 + g*0.587 + b*0.114;
+    const l = cs[0]*0.2126 + cs[1]*0.7152 + cs[2]*0.0722;
+
+    // const textColor = cont > 150 ? '#000000' : '#ffffff';
+    const textColor = l > 0.179 ? '#000000' : '#ffffff';
+    const color = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    return {
+        color: textColor,
+        backgroundColor: color
+    };
+}
+
 // UNVERIFIED
 
 export function simpleResourceType(resource) {
@@ -196,24 +278,6 @@ export function throwError(error) {
     }
 };
 
-export function getErrorMessages(error, suffix = '') {
-    let msgObject = {};
-    // for(let k in msgObject) {
-    //     delete msgObject[k];
-    // }
-    const r = error.response;
-    if(r.status == 422) {
-        if(r.data.errors) {
-            for(let k in r.data.errors) {
-                msgObject[`${k}${suffix}`] = r.data.errors[k];
-            }
-        }
-    } else if(r.status == 400) {
-        msgObject.global = r.data.error;
-    }
-    return msgObject;
-}
-
 export function getValidClass(msgObject, field) {
     let isInvalid = false;
     field.split('|').forEach(f => {
@@ -247,86 +311,23 @@ export function createDownloadLink(content, filename, base64 = false, contentTyp
     link.click();
 }
 
-export function rgb2hex(rgb) {
-    let colors = rgb.substring(1);
-    let r = parseInt(colors.substring(0, 2), 16);
-    let g = parseInt(colors.substring(2, 4), 16);
-    let b = parseInt(colors.substring(4, 6), 16);
-    return [r, g, b];
-}
-
-export function getTs() {
-    const d = new Date();
-    return d.getTime();
-}
-
-export function hasConcept(url) {
-    if(!url) return false;
-    return !!this.state.concepts[url];
-}
-
-export function translateLabel(element, prop) {
-    const value = element[prop];
-    if(!value) return element;
-    return translateConcept(value);
-}
-
-export function translateConcept(url) {
-    const concepts = this.state.concepts;
-    if(!url || !concepts) return url;
-    if(!concepts[url]) return url;
-    return concepts[url].label;
-}
-
-export function translateEntityType(id) {
-    return translateConcept(this.state.entityTypes[id].thesaurus_url);
-}
-
-export function getEntityType(id) {
-    return this.state.entityTypes[id];
-}
-
-export function getEntityTypes() {
-    return this.state.entityTypes;
-}
-
-// Formula based on https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color/3943023#3943023
-export function getEntityColors(id, alpha = 0.5) {
-    const et = getEntityType(id);
-    if(!et || !et.layer) return {};
-    let r, g, b, a;
-    [r, g, b] = rgb2hex(et.layer.color);
-    const cs = [r, g, b].map(c => {
-        c /= 255.0;
-        if(c <= 0.03928) c /= 12.92;
-        else c = Math.pow(((c+0.055)/1.055), 2.4);
-        return c;
-    });
-    // let cont = r*0.299 + g*0.587 + b*0.114;
-    const l = cs[0]*0.2126 + cs[1]*0.7152 + cs[2]*0.0722;
-
-    // const textColor = cont > 150 ? '#000000' : '#ffffff';
-    const textColor = l > 0.179 ? '#000000' : '#ffffff';
-    const color = `rgba(${r}, ${g}, ${b}, ${alpha})`;
-    return {
-        color: textColor,
-        backgroundColor: color
-    };
-}
-
 export function showUserInfo(user) {
-    this.$modal.show('user-info-modal', {
-        user: user,
-    });
+    console.log("Implement showUserInfo method");
+    // TODO
+    // this.$modal.show('user-info-modal', {
+    //     user: user,
+    // });
 }
 
 export function hasPreference(prefKey, prop) {
-    const ps = this.state.preferences;
-    return prop ? ps[prefKey] && ps[prefKey][prop] : ps[prefKey];
+    const ps = store.getters.preferenceByKey(prefKey);
+    if(ps) {
+        return ps[prop] || ps;
+    }
 }
 
 export function getPreference(prefKey) {
-    return this.state.preferences[prefKey];
+    return store.getters.preferenceByKey(prefKey);
 }
 
 export function setPreference(prefKey, value) {

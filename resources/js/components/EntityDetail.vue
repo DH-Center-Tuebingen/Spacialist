@@ -1,11 +1,10 @@
 <template>
     <div class="h-100 d-flex flex-column">
-        Text
-        <!-- <entity-breadcrumbs class="mb-2 small" :entity="selectedEntity" v-if="selectedEntity.parentIds.length > 1"></entity-breadcrumbs>
+        <entity-breadcrumbs class="mb-2 small" :entity="state.entity" v-if="showBreadcrumb"></entity-breadcrumbs>
         <div class="d-flex align-items-center justify-content-between">
             <h3 class="mb-0" @mouseenter="onEntityHeaderHover(true)" @mouseleave="onEntityHeaderHover(false)">
-                <span v-if="!selectedEntity.editing">
-                    {{ selectedEntity.name }}
+                <span v-if="!state.entity.editing">
+                    {{ state.entity.name }}
                     <small>
                         <span v-show="hiddenAttributes > 0" @mouseenter="dependencyInfoHoverOver" @mouseleave="dependencyInfoHoverOut">
                             <i id="dependency-info" class="fas fa-fw fa-xs fa-eye-slash"></i>
@@ -17,7 +16,7 @@
                 </span>
                 <form class="form-inline" v-else>
                     <input type="text" class="form-control me-2" v-model="newEntityName" />
-                    <button type="submit" class="btn btn-outline-success me-2" @click="updateEntityName(selectedEntity, newEntityName)">
+                    <button type="submit" class="btn btn-outline-success me-2" @click="updateEntityName(state.entity, newEntityName)">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                     <button type="reset" class="btn btn-outline-danger" @click="cancelUpdateEntityName()">
@@ -26,66 +25,66 @@
                 </form>
             </h3>
             <span>
-                <button type="submit" form="entity-attribute-form" class="btn btn-success" :disabled="!isFormDirty || !$can('duplicate_edit_concepts')">
-                    <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
+                <button type="submit" form="entity-attribute-form" class="btn btn-success me-2" :disabled="!isFormDirty || !can('duplicate_edit_concepts')">
+                    <i class="fas fa-fw fa-save"></i> {{ t('global.save') }}
                 </button>
-                <button type="button" class="btn btn-danger" :disabled="!$can('delete_move_concepts')" @click="deleteEntity(selectedEntity)">
-                    <i class="fas fa-fw fa-trash"></i> {{ $t('global.delete') }}
+                <button type="button" class="btn btn-danger" :disabled="!can('delete_move_concepts')" @click="deleteEntity(state.entity)">
+                    <i class="fas fa-fw fa-trash"></i> {{ t('global.delete') }}
                 </button>
             </span>
         </div>
         <div class="d-flex justify-content-between my-2">
             <div>
-                <span :style="colorStyles">
+                <span :style="state.colorStyles">
                     <i class="fas fa-fw fa-circle"></i>
                 </span>
-                {{
-                    $translateConcept($getEntityType(selectedEntity.entity_type_id).thesaurus_url)
-                }}
+                <span>
+                    {{ state.entityTypeLabel }}
+                </span>
             </div>
             <div>
                 <i class="fas fa-fw fa-user-edit"></i>
                 <span>
-                    {{ (selectedEntity.updated_at || selectedEntity.created_at) | date(undefined, true, true) }}
+                    {{ date(state.lastModified, undefined, true, true) }}
                 </span>
                 -
-                <a href="#" @click.prevent="$showUserInfo(selectedEntity.user)" class="font-weight-medium">
-                    {{ selectedEntity.user.name }}
-                    <user-avatar :user="selectedEntity.user" :size="20" class="align-middle"></user-avatar>
+                <a href="#" @click.prevent="showUserInfo(state.entity.user)" class="font-weight-medium" v-if="state.entity.user">
+                    {{ state.entity.user.name }}
+                    <user-avatar :user="state.entity.user" :size="20" class="align-middle"></user-avatar>
                 </a>
             </div>
         </div>
         <ul class="nav nav-tabs" id="myTab" role="tablist">
             <li class="nav-item" role="presentation">
                 <a class="nav-link active" id="active-entity-attributes-tab" href="#" @click.prevent="setEntityView('attributes')">
-                    {{ $t('main.entity.tabs.attributes') }}
+                    {{ t('main.entity.tabs.attributes') }}
                 </a>
             </li>
             <li class="nav-item" role="presentation">
                 <a class="nav-link" id="active-entity-comments-tab" href="#" @click.prevent="setEntityView('comments')">
-                    {{ $t('main.entity.tabs.comments') }}
-                    <span class="badge badge-primary">{{ selectedEntity.comments_count }}</span>
+                    {{ t('main.entity.tabs.comments') }}
+                    <span class="badge badge-primary">{{ state.entity.comments_count }}</span>
                 </a>
             </li>
         </ul>
         <div class="tab-content col ps-0 pe-0 overflow-hidden" id="myTabContent">
             <div class="tab-pane fade h-100 show active" id="active-entity-attributes-panel" role="tabpanel">
-                <form id="entity-attribute-form" name="entity-attribute-form" class="h-100" @submit.prevent="saveEntity(selectedEntity)">
-                    <attributes class="pt-2 h-100 scroll-y-auto scroll-x-hidden" v-if="hasData" v-can="'view_concept_props'"
-                        :attributes="selectedEntity.attributes"
-                        :dependencies="selectedEntity.dependencies"
+                <form id="entity-attribute-form" name="entity-attribute-form" class="h-100" @submit.prevent="saveEntity(state.entity)">
+                    <!-- <attribute-list class="pt-2 h-100 scroll-y-auto scroll-x-hidden" v-if="hasData" v-dcan="'view_concept_props'"
+                        :attributes="state.entity.attributes"
+                        :dependencies="state.entity.dependencies"
                         :disable-drag="true"
                         :on-metadata="showMetadata"
                         :metadata-addon="hasReferenceGroup"
-                        :selections="selectedEntity.selections"
-                        :values="selectedEntity.data"
+                        :selections="state.entity.selections"
+                        :values="state.entity.data"
                         @attr-dep-change="updateDependencyCounter">
-                    </attributes>
+                    </attribute-list> -->
                 </form>
             </div>
             <div class="tab-pane fade h-100 d-flex flex-column" id="active-entity-comments-panel" role="tabpanel">
-                <div class="mb-auto scroll-y-auto" v-if="selectedEntity.comments">
-                    <div v-if="commentsFetching" class="mt-2">
+                <div class="mb-auto scroll-y-auto" v-if="state.entity.comments">
+                    <!-- <div v-if="commentsFetching" class="mt-2">
                         <p class="alert alert-info mb-0" v-html="$t('global.comments.fetching')">
                         </p>
                     </div>
@@ -101,40 +100,40 @@
                     <comment-list
                         v-else
                         :avatar="48"
-                        :comments="selectedEntity.comments"
+                        :comments="state.entity.comments"
                         @edited="editComment"
                         @on-delete="deleteComment"
                         @reply-to="addReplyTo"
                         @load-replies="loadReplies">
-                    </comment-list>
+                    </comment-list> -->
                 </div>
                 <hr />
-                <div v-if="replyTo.comment_id > 0" class="mb-1">
+                <!-- <div v-if="replyTo.comment_id > 0" class="mb-1">
                     <span class="badge badge-info">
                         {{ $t('global.replying_to', {name: replyTo.author.name}) }}
                         <a href="#" @click.prevent="cancelReplyTo" class="text-white">
                             <i class="fas fa-fw fa-times"></i>
                         </a>
                     </span>
-                </div>
+                </div> -->
                 <form role="form" class="mt-2" @submit.prevent="postComment">
                     <div class="form-group d-flex">
-                        <textarea class="form-control" v-model="comment" id="comment-content" ref="comCnt" :placeholder="$t('global.comments.text_placeholder')"></textarea>
+                        <textarea class="form-control" v-model="comment" id="comment-content" ref="comCnt" :placeholder="t('global.comments.text_placeholder')"></textarea>
                         <div class="ms-2 mt-auto">
                             <emoji-picker @selected="addEmoji"></emoji-picker>
                         </div>
                     </div>
-                    <div class="text-center">
+                    <div class="text-center mt-2">
                         <button type="submit" class="btn btn-outline-success">
-                            <i class="fas fa-fw fa-save"></i> {{ $t('global.comments.submit') }}
+                            <i class="fas fa-fw fa-save"></i> {{ t('global.comments.submit') }}
                         </button>
                     </div>
                 </form>
             </div>
-        </div> -->
+        </div>
 
         <!-- <router-view
-            v-can="'view_concept_props'"
+            v-dcan="'view_concept_props'"
             :bibliography="bibliography"
             :refs="attributeReferences">
         </router-view> -->
@@ -145,7 +144,8 @@
     // import { EventBus } from '../event-bus.js';
     import {
         computed,
-        reactive
+        reactive,
+        onMounted,
     } from 'vue';
     import {
         useRoute,
@@ -155,15 +155,34 @@
     import { useI18n } from 'vue-i18n';
 
     import store from '../bootstrap/store.js';
-    import { getEntityData } from '../api.js';
+
+    import { date } from '../helpers/filters.js';
+    import {
+        can,
+        getEntityColors,
+        getEntityType,
+        showUserInfo,
+        translateConcept
+    } from '../helpers/helpers.js';
 
     export default {
+        props: {
+            bibliography: {
+                required: false,
+                type: Array,
+                default: () => []
+            },
+            onDelete: {
+                required: false,
+                type: Function,
+                default: () => {}
+            }
+        },
         setup(props) {
             const { t } = useI18n();
             const currentRoute = useRoute();
 
             // FETCH
-
             store.dispatch('getEntity', currentRoute.params.id);
             // onBeforeRouteUpdate((to, from) => {
             //     console.log(to);
@@ -237,165 +256,70 @@
 
             // DATA
             const state = reactive({
+                colorStyles: computed(_ => {
+                    const colors = getEntityColors(state.entity.entity_type_id, 0.75);
+                    return {
+                        color: colors.backgroundColor
+                    };
+                }),
                 entity: computed(_ => store.getters.entity),
+                entityTypeLabel: computed(_ => {
+                    // if(!state.entity) return;
+                    const entityType = getEntityType(state.entity.entity_type_id);
+                    if(!entityType) return;
+                    return translateConcept(entityType.thesaurus_url);
+                }),
+                showBreadcrumb: computed(_ => {
+                    return state.entity.parentIds && state.entity.parentIds.length > 1;
+                }),
+                lastModified: computed(_ => {
+                    return state.entity.updated_at || state.entity.created_at;
+                }),
             });
+
+            // FUNCTIONS
+            const setEntityView = tab => {
+                let newTab, oldTab, newPanel, oldPanel;
+                if(tab === 'comments') {
+                    newTab = document.getElementById('active-entity-comments-tab');
+                    newPanel = document.getElementById('active-entity-comments-panel');
+                    oldTab = document.getElementById('active-entity-attributes-tab');
+                    oldPanel = document.getElementById('active-entity-attributes-panel');
+                    // TODO
+                    // if(!this.commentsFetched) {
+                    //     this.fetchComments();
+                    // }
+                } else {
+                    newTab = document.getElementById('active-entity-attributes-tab');
+                    newPanel = document.getElementById('active-entity-attributes-panel');
+                    oldTab = document.getElementById('active-entity-comments-tab');
+                    oldPanel = document.getElementById('active-entity-comments-panel');
+                }
+
+                oldTab.classList.remove('active');
+                newTab.classList.add('active');
+                oldPanel.classList.remove('show', 'active');
+                newPanel.classList.add('show', 'active');
+            };
 
 
             // FUNCTIONS
 
+            // ON MOUNTED
+            onMounted(_ => {
+                console.log("entity detail component mounted");
+            });
+
             // RETURN
             return {
                 t,
+                can,
+                date,
                 state,
+                setEntityView,
+                showUserInfo,
             };
         }
-    //     beforeRouteEnter(to, from, next) {
-    //         next(vm => vm.getEntityData(vm.selectedEntity));
-    //     },
-    //     beforeRouteUpdate(to, from, next) {
-    //         if(to.params.id != from.params.id) {
-    //             this.reset();
-    //             this.getEntityData(this.selectedEntity).then(r => {
-    //                 next();
-    //             });
-    //         } else {
-    //             if(to.params.aid) {
-    //                 this.setReferenceAttribute(to.params.aid);
-    //             }
-    //             next();
-    //         }
-    //     },
-    //     props: {
-    //         selectedEntity: {
-    //             required: true,
-    //             type: Object
-    //         },
-    //         bibliography: {
-    //             required: false,
-    //             type: Array,
-    //             default: () => []
-    //         },
-    //         onDelete: {
-    //             required: false,
-    //             type: Function,
-    //             default: () => {}
-    //         }
-    //     },
-    //     mounted() {},
-    //     methods: {
-    //         init(entity) {},
-    //         reset() {
-    //             this.commentLoadingState = 'not';
-    //             this.comment = '';
-    //             this.replyTo = {
-    //                 comment_id: null,
-    //                 author: {
-    //                     name: null,
-    //                     nickname: null
-    //                 }
-    //             };
-    //         },
-    //         getEntityData(entity) {
-    //             this.dataLoaded = false;
-    //             if(!this.$can('view_concept_props')) {
-    //                 Vue.set(this.selectedEntity, 'data', {});
-    //                 Vue.set(this.selectedEntity, 'attributes', []);
-    //                 Vue.set(this.selectedEntity, 'selections', {});
-    //                 Vue.set(this.selectedEntity, 'dependencies', []);
-    //                 Vue.set(this.selectedEntity, 'references', []);
-    //                 Vue.set(this.selectedEntity, 'comments', []);
-    //                 Vue.set(this, 'dataLoaded', true);
-    //                 return new Promise(r => r(null));
-    //             }
-    //             if(!this.selectedEntity.comments || this.selectedEntity.comments_count === 0) {
-    //                 Vue.set(this.selectedEntity, 'comments', []);
-    //             }
-    //             const cid = entity.id;
-    //             const ctid = entity.entity_type_id;
-    //             return $httpQueue.add(() => $http.get(`/entity/${cid}/data`).then(response => {
-    //                 // if result is empty, php returns [] instead of {}
-    //                 if(response.data instanceof Array) {
-    //                     response.data = {};
-    //                 }
-    //                 Vue.set(this.selectedEntity, 'data', response.data);
-    //                 return $http.get(`/editor/entity_type/${ctid}/attribute`);
-    //             }).then(response => {
-    //                 this.selectedEntity.attributes = [];
-    //                 let data = response.data;
-    //                 for(let i=0; i<data.attributes.length; i++) {
-    //                     let aid = data.attributes[i].id;
-    //                     if(!this.selectedEntity.data[aid]) {
-    //                         let val = {};
-    //                         switch(data.attributes[i].datatype) {
-    //                             case 'dimension':
-    //                             case 'epoch':
-    //                             case 'timeperiod':
-    //                                 val.value = {};
-    //                                 break;
-    //                             case 'table':
-    //                             case 'list':
-    //                                 val.value = [];
-    //                                 break;
-    //                         }
-    //                         Vue.set(this.selectedEntity.data, aid, val);
-    //                     } else {
-    //                         const val = this.selectedEntity.data[aid].value;
-    //                         switch(data.attributes[i].datatype) {
-    //                             case 'date':
-    //                                 const dtVal = new Date(val);
-    //                                 this.selectedEntity.data[aid].value = dtVal;
-    //                                 break;
-    //                         }
-    //                     }
-    //                     this.selectedEntity.attributes.push(data.attributes[i]);
-    //                 }
-    //                 // if result is empty, php returns [] instead of {}
-    //                 if(data.selections instanceof Array) {
-    //                     data.selections = {};
-    //                 }
-    //                 if(data.dependencies instanceof Array) {
-    //                     data.dependencies = {};
-    //                 }
-    //                 Vue.set(this.selectedEntity, 'selections', data.selections);
-    //                 Vue.set(this.selectedEntity, 'dependencies', data.dependencies);
-
-    //                 const aid = this.$route.params.aid;
-    //                 this.setReferenceAttribute(aid);
-    //                 Vue.set(this, 'dataLoaded', true);
-    //                 this.setEntityView();
-    //             }));
-    //         },
-    //         saveEntity(entity) {
-    //             if(!this.$can('duplicate_edit_concepts')) return;
-    //             let cid = entity.id;
-    //             var patches = [];
-    //             for(let f in this.fields) {
-    //                 if(this.fields.hasOwnProperty(f) && f.startsWith('attribute-')) {
-    //                     if(this.fields[f].dirty) {
-    //                         let aid = Number(f.replace(/^attribute-/, ''));
-    //                         let data = entity.data[aid];
-    //                         var patch = {};
-    //                         patch.params = {};
-    //                         patch.params.aid = aid;
-    //                         patch.params.cid = cid;
-    //                         if(data.id) {
-    //                             // if data.id exists, there has been an entry in the database, therefore it is a replace/remove operation
-    //                             patch.params.id = data.id;
-    //                             if(data.value && data.value != '') {
-    //                                 // value is set, therefore it is a replace
-    //                                 patch.op = "replace";
-    //                                 patch.value = data.value;
-    //                                 patch.value = this.getCleanValue(data, entity.attributes);
-    //                             } else {
-    //                                 // value is empty, therefore it is a remove
-    //                                 patch.op = "remove";
-    //                             }
-    //                         } else {
-    //                             // there has been no entry in the database before, therefore it is an add operation
-    //                             if(data.value && data.value != '') {
-    //                                 patch.op = "add";
-    //                                 data.attribute = entity.attributes.find(a => a.id == aid);
-    //                                 patch.value = thiimport { EventBus } from '../event-bus.js';
 
     // export default {
     //     beforeRouteEnter(to, from, next) {
@@ -414,25 +338,7 @@
     //             next();
     //         }
     //     },
-    //     props: {
-    //         selectedEntity: {
-    //             required: true,
-    //             type: Object
-    //         },
-    //         bibliography: {
-    //             required: false,
-    //             type: Array,
-    //             default: () => []
-    //         },
-    //         onDelete: {
-    //             required: false,
-    //             type: Function,
-    //             default: () => {}
-    //         }
-    //     },
-    //     mounted() {},
     //     methods: {
-    //         init(entity) {},
     //         reset() {
     //             this.commentLoadingState = 'not';
     //             this.comment = '';
@@ -579,28 +485,6 @@
     //             EventBus.$emit('entity-delete', {
     //                 entity: entity
     //             });
-    //         },
-    //         setEntityView(tab) {
-    //             let newTab, oldTab, newPanel, oldPanel;
-    //             if(tab === 'comments') {
-    //                 newTab = document.getElementById('active-entity-comments-tab');
-    //                 newPanel = document.getElementById('active-entity-comments-panel');
-    //                 oldTab = document.getElementById('active-entity-attributes-tab');
-    //                 oldPanel = document.getElementById('active-entity-attributes-panel');
-    //                 if(!this.commentsFetched) {
-    //                     this.fetchComments();
-    //                 }
-    //             } else {
-    //                 newTab = document.getElementById('active-entity-attributes-tab');
-    //                 newPanel = document.getElementById('active-entity-attributes-panel');
-    //                 oldTab = document.getElementById('active-entity-comments-tab');
-    //                 oldPanel = document.getElementById('active-entity-comments-panel');
-    //             }
-
-    //             oldTab.classList.remove('active');
-    //             newTab.classList.add('active');
-    //             oldPanel.classList.remove('show', 'active');
-    //             newPanel.classList.add('show', 'active');
     //         },
     //         onEntityHeaderHover(hoverState) {
     //             this.entityHeaderHovered = hoverState;
@@ -872,12 +756,6 @@
     //                 !!this.selectedEntity &&
     //                 !!this.selectedEntity.attributes &&
     //                 !!this.selectedEntity.selections
-    //         },
-    //         colorStyles() {
-    //             const colors = this.$getEntityColors(this.selectedEntity.entity_type_id, 0.75);
-    //             return {
-    //                 color: colors.backgroundColor
-    //             };
     //         },
     //         attributeReferences() {
     //             let data = {

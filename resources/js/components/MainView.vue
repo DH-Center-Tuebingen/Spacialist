@@ -1,11 +1,11 @@
 <template>
     <div class="row h-100 overflow-hidden" v-if="initFinished">
-        <div :class="`h-100 d-flex flex-column col-md-${columnPref.left}`" id="tree-container" v-can="'view_concepts'" v-if="columnPref.left > 0">
+        <div :class="`h-100 d-flex flex-column col-md-${columnPref.left}`" id="tree-container" v-dcan="'view_concepts'" v-if="columnPref.left > 0">
             <entity-tree
                 class="col px-0">
             </entity-tree>
         </div>
-        <div :class="`h-100 border-start border-end col-md-${columnPref.center}`" id="attribute-container" v-can="'view_concepts|view_concept_props'" v-if="columnPref.center > 0">
+        <div :class="`h-100 border-start border-end col-md-${columnPref.center}`" id="attribute-container" v-dcan="'view_concepts|view_concept_props'" v-if="columnPref.center > 0">
             <router-view>
             </router-view>
             <!-- <router-view
@@ -72,11 +72,18 @@
 <script>
     import {
         computed,
+        onMounted,
     } from 'vue';
     import store from '../bootstrap/store.js';
 
     export default {
         setup(props) {
+            // ON MOUNTED
+            onMounted(_ => {
+                console.log("mainview component mounted");
+            });
+
+            // RETURN
             return {
                 concepts: computed(_ => store.state.concepts),
                 entityTypes: computed(_ => store.state.entityTypes),
@@ -85,6 +92,7 @@
                 initFinished: true
             };
         }
+
         // beforeRouteEnter(to, from, next) {
         //     let bibliography, entityData;
         //     $httpQueue.add(() => $http.get('bibliography').then(response => {

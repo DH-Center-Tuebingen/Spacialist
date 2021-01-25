@@ -4,6 +4,8 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import Login from '../components/Login.vue';
 import MainView from '../components/MainView.vue';
 import EntityDetail from '../components/EntityDetail.vue';
+import Users from '../components/Users.vue';
+
 import DummyComponent from '../components/DummyComponent.vue';
 import NotFound from '../components/NotFound.vue';
 
@@ -153,8 +155,7 @@ export const router = createRouter({
         {
             path: '/mg/users',
             name: 'users',
-            component: DummyComponent,
-            // component: Users,
+            component: Users,
             meta: {
                 auth: true
             }

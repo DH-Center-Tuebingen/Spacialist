@@ -72,7 +72,7 @@
             <i class="fas fa-fw fa-plus"></i> {{ $t('main.role.add-button') }}
         </button>
 
-        <modal name="new-role-modal" height="auto" :scrollable="true" v-can="'add_edit_role'">
+        <modal name="new-role-modal" height="auto" :scrollable="true" v-dcan="'add_edit_role'">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="newRoleModalLabel">{{ $t('main.role.modal.new.title') }}</h5>
@@ -126,7 +126,7 @@
             </div>
         </modal>
 
-        <modal name="confirm-delete-role-modal" height="auto" :scrollable="true" v-can="'delete_role'">
+        <modal name="confirm-delete-role-modal" height="auto" :scrollable="true" v-dcan="'delete_role'">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">{{ $t('global.delete-name.title', {name: selectedRole.display_name}) }}</h5>

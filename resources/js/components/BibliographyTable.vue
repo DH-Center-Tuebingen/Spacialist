@@ -365,7 +365,7 @@
             :on-close="onModalClose">
         </router-view>
 
-        <modal name="delete-bibliography-item-modal" height="auto" :scrollable="true" v-can="'add_remove_bibliography'">
+        <modal name="delete-bibliography-item-modal" height="auto" :scrollable="true" v-dcan="'add_remove_bibliography'">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">{{ $t('main.bibliography.modal.delete.title') }}</h5>

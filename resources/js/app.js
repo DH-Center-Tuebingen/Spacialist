@@ -7,6 +7,10 @@ import bootstrap from 'bootstrap';
 // Helpers/Filter
 
 // Reusable Components
+// import AttributeList from './components/AttributeList.vue';
+import EntityTree from './components/EntityTree.vue';
+import EntityBreadcrumbs from './components/EntityBreadcrumbs.vue';
+import UserAvatar from './components/UserAvatar.vue';
 
 // Init Libs
 // PQueue, httpQueue
@@ -17,7 +21,6 @@ window.$httpQueue = queue;
 
 // Components
 import App from './App.vue';
-import EntityTree from './components/EntityTree.vue';
 
 // Init required libs
 // Vuex
@@ -41,7 +44,7 @@ app.use(store);
 app.use(vueAuth);
 
 // Directives
-app.directive('can', {
+app.directive('dcan', {
     terminal: true,
     beforeMount(el, bindings) {
         const canI = can(bindings.value, bindings.modifiers.one);
@@ -74,7 +77,10 @@ app.directive('can', {
 });
 
 // Components
+// app.component('attribute-list', AttributeList);
 app.component('entity-tree', EntityTree);
+app.component('entity-breadcrumbs', EntityBreadcrumbs);
+app.component('user-avatar', UserAvatar);
 
 // Mount Vue
 app.mount('#app');

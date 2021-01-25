@@ -87,7 +87,6 @@
 
     import store from '../bootstrap/store.js';
     import router from '../bootstrap/router.js';
-    import { fetchTopEntities } from '../api.js';
 
     export default {
         components: {
@@ -97,7 +96,6 @@
         setup(props) {
             const { t } = useI18n();
             const currentRoute = useRoute();
-            const entities = fetchTopEntities();
 
             // FETCH
 
@@ -105,8 +103,6 @@
             const state = reactive({
                 tree: computed(_ => store.getters.tree),
                 entity: computed(_ => store.getters.entity),
-                topEntities: computed(_ => store.getters.topEntities),
-                entities: entities,
                 requestAddNewEntity: () => {},
             });
 

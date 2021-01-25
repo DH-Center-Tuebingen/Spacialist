@@ -1,9 +1,19 @@
 import store from './bootstrap/store.js';
 import auth from './bootstrap/auth.js';
 
+export async function fetchUsers() {
+    await $httpQueue.add(() => $http.get('user').then(response => {
+        store.dispatch('setUsers', {
+            active: response.data.users,
+            deleted: response.data.deleted_users || []
+        });
+        store.dispatch('setRoles', response.data.roles);
+    }));
+}
+
 export async function fetchTopEntities() {
     await $httpQueue.add(() => $http.get('/entity/top').then(response => {
-        store.commit('setTopEntities', response.data);
+        store.dispatch('setInitialEntities', response.data);
     }));
 };
 

@@ -1,15 +1,20 @@
 <template>
     <span style="display: inline-flex;">
-        <img v-if="user.avatar" :src="user.avatar_url" alt="user avatar" :width="`${size}px`" :height="`${size}px`" :class="styles" class="object-fit-cover" />
-        <div v-else :style="initialsStyles.container" :class="styles" class="d-flex justify-content-center align-items-center">
-            <span :style="initialsStyles.text">
-                {{ initials }}
+        <img v-if="user.avatar" :src="user.avatar_url" alt="user avatar" :width="`${size}px`" :height="`${size}px`" :class="state.styles" class="object-fit-cover" />
+        <div v-else :style="state.initialsStyles.container" :class="state.styles" class="d-flex justify-content-center align-items-center">
+            <span :style="state.initialsStyles.text">
+                {{ state.initials }}
             </span>
         </div>
     </span>
 </template>
 
 <script>
+    import {
+        computed,
+        reactive,
+    } from 'vue';
+
     export default {
         props: {
             user: {
@@ -27,52 +32,53 @@
                 default: true
             }
         },
-        mounted() {
-        },
-        methods: {
-        },
-        data() {
-            return {
-            }
-        },
-        computed: {
-            styles() {
-                return {
-                    'rounded-circle': this.round
-                }
-            },
-            color() {
-                let hue = 0;
-                for(let i=0; i < this.user.name.length; i++) {
-                    hue = this.user.name.charCodeAt(i) + ((hue << 5) - hue);
-                }
-
-                hue = hue % 360;
-                return `hsl(${hue}, 32%, 75%)`;
-            },
-            initialsStyles() {
-                return {
-                    container: {
-                        height: `${this.size}px`,
-                        width: `${this.size}px`,
-                        'background-color': this.color
-                    },
-                    text: {
-                        'font-weight': 'bold',
-                        'font-size': `${this.size/2}px`,
-                        'line-height': `${this.size/2}px`,
-                        color: '#ffffff'
+        setup(props) {
+            const state = reactive({
+                styles: computed(_ => {
+                    return {
+                        'rounded-circle': props.round
                     }
-                }
-            },
-            initials() {
-                let initials = '';
-                let names = this.user.name.split(' ');
-                initials += names[0].charAt(0).toUpperCase();
-                if(names.length > 1) {
-                    initials += names[names.length-1].charAt(0).toUpperCase();
-                }
-                return initials;
+                }),
+                color: computed(_ => {
+                    if(!props.user.name) return;
+                    let hue = 0;
+                    for(let i=0; i < props.user.name.length; i++) {
+                        hue = props.user.name.charCodeAt(i) + ((hue << 5) - hue);
+                    }
+
+                    hue = hue % 360;
+                    return `hsl(${hue}, 32%, 75%)`;
+                }),
+                initialsStyles: computed(_ => {
+                    return {
+                        container: {
+                            height: `${props.size}px`,
+                            width: `${props.size}px`,
+                            'background-color': state.color
+                        },
+                        text: {
+                            'font-weight': 'bold',
+                            'font-size': `${props.size/2}px`,
+                            'line-height': `${props.size/2}px`,
+                            color: '#ffffff'
+                        }
+                    }
+                }),
+                initials: computed(_ => {
+                    if(!props.user.name) return;
+                    let initials = '';
+                    let names = props.user.name.split(' ');
+                    initials += names[0].charAt(0).toUpperCase();
+                    if(names.length > 1) {
+                        initials += names[names.length-1].charAt(0).toUpperCase();
+                    }
+                    return initials;
+                })
+            });
+
+            // RETURN
+            return {
+                state
             }
         }
     }

@@ -9,34 +9,27 @@ export const store = createStore({
         return {
             concepts: {},
             entityTypes: {},
-            topEntities: [],
             entities: {},
             tree: [],
             preferences: {},
+            roles: [],
             users: [],
+            deletedUsers: [],
             user: {},
             entity: {},
             file: {}
         }
     },
     mutations: {
+        addEntity(state, n) {
+            state.entities[n.id] = n;
+            state.tree.push(n);
+        },
         setConcepts(state, data) {
             state.concepts = data;
         },
         setEntityTypes(state, data) {
             state.entityTypes = data;
-        },
-        setTopEntities(state, data) {
-            state.tree = [];
-            state.entities = {};
-
-            state.topEntities = data;
-            data.forEach(e => {
-                const n = new Node(e);
-                state.entities[n.id] = n;
-                state.tree.push(n);
-            });
-            sortTree('rank', 'asc', state.tree);
         },
         sortTree(state, sort) {
             sortTree(sort.by, sort.dir, state.tree);
@@ -44,8 +37,12 @@ export const store = createStore({
         setPreferences(state, data) {
             state.preferences = data;
         },
+        setRoles(state, data) {
+            state.roles = data;
+        },
         setUsers(state, data) {
-            state.users = data;
+            state.users = data.active;
+            state.deletedUsers = data.deleted;
         },
         setUser(state, data) {
             state.user = data;
@@ -58,14 +55,21 @@ export const store = createStore({
         }
     },
     actions: {
+        setRoles({commit}, data) {
+            commit('setRoles', data);
+        },
+        setUsers({commit}, data) {
+            commit('setUsers', data);
+        },
         sortTree({commit}, sort) {
             commit('sortTree', sort)
         },
-        async getEntity({commit}, entityId) {
+        async getEntity({commit, state}, entityId) {
+            let entity = state.entities[entityId];
+            console.log(entity);
             if(!can('view_concept_props')) {
                 const hiddenEntity = {
-                    id: entity.id,
-                    // TODO: parents?
+                    ...entity,
                     data: {},
                     attributes: [],
                     selections: {},
@@ -75,8 +79,8 @@ export const store = createStore({
                 };
                 commit('setEntity', hiddenEntity);
             } else {
-                let entity = {};
                 entity.data = await getEntityData(entityId);
+                commit('setEntity', entity)
                 
                 return;
 
@@ -133,7 +137,17 @@ export const store = createStore({
                     this.setEntityView();
                 }));
             }
-        }
+        },
+        setInitialEntities({commit, state}, data) {
+            state.tree = [];
+            state.entities = {};
+
+            data.forEach(e => {
+                const n = new Node(e);
+                commit('addEntity', n);
+            });
+            sortTree('rank', 'asc', state.tree);
+        },
     },
     getters: {
         concepts: state => {
@@ -141,9 +155,6 @@ export const store = createStore({
         },
         entityTypes: state => {
             return state.entityTypes;
-        },
-        topEntities: state => {
-            return state.topEntities;
         },
         tree: state => {
             return state.tree;
@@ -154,8 +165,20 @@ export const store = createStore({
         preferences: state => {
             return state.preferences;
         },
+        roles: state => {
+            return state.roles;
+        },
+        allUsers: state => {
+            return [
+                ...state.users,
+                ...state.deletedUsers
+            ];
+        },
         users: state => {
             return state.users;
+        },
+        deletedUsers: state => {
+            return state.deletedUsers;
         },
         user: state => {
             return state.user;

@@ -1,3 +1,5 @@
+import dayjs from '../bootstrap/time.js';
+
 export function date(value, format = 'DD.MM.YYYY HH:mm') {
     if(value) {
         let d;

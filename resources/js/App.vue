@@ -192,7 +192,11 @@
     import auth from './bootstrap/auth.js';
     import { useI18n } from 'vue-i18n';
 
-    import { fetchPreData } from './api.js';
+    import {
+        fetchTopEntities,
+        fetchPreData,
+        fetchUsers,
+    } from './api.js';
     import {
         getPreference,
         getToolPlugins,
@@ -206,6 +210,8 @@
 
             // FETCH
             fetchPreData(locale);
+            fetchUsers();
+            fetchTopEntities();
 
             // DATA
             const state = reactive({

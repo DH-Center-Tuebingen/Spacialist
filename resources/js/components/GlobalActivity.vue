@@ -1,5 +1,5 @@
 <template>
-    <div class="row d-flex flex-row overflow-hidden h-100" v-can="'view_users'">
+    <div class="row d-flex flex-row overflow-hidden h-100" v-dcan="'view_users'">
         <div class="col-md-12 h-100 d-flex flex-column">
             <h3>
                 {{ $tc('main.activity.title_project', 2) }}
