@@ -12,11 +12,11 @@
                         <div>
                             <slot name="author" :comment="comment.author">
                                 <a href="#" @click.prevent="$showUserInfo(comment.author)" class="text-body">
-                                    <span class="font-weight-medium">
+                                    <span class="fw-medium">
                                         {{ comment.author.name }}
                                     </span>
                                     &bull;
-                                    <span class="text-muted font-weight-light">
+                                    <span class="text-muted fw-light">
                                         {{ comment.author.nickname }}
                                     </span>
                                 </a>
@@ -30,7 +30,7 @@
                                 </span>
                                 &bull;
                             </template>
-                            <span class="text-muted font-weight-light" :title="comment.updated_at | datestring">
+                            <span class="text-muted fw-light" :title="comment.updated_at | datestring">
                                 {{ comment.updated_at | ago }}
                             </span>
                             <span class="dropdown" v-if="!comment.deleted_at">

@@ -1,6 +1,6 @@
 <template>
     <span style="display: inline-flex;">
-        <img v-if="user.avatar" :src="user.avatar_url" alt="user avatar" :width="`${size}px`" :height="`${size}px`" :class="state.styles" class="object-fit-cover" />
+        <img v-if="user.avatar" :src="user.avatar_url" alt="user avatar" :width="size" :height="size" :class="state.styles" class="object-fit-cover" />
         <div v-else :style="state.initialsStyles.container" :class="state.styles" class="d-flex justify-content-center align-items-center">
             <span :style="state.initialsStyles.text">
                 {{ state.initials }}
@@ -13,6 +13,7 @@
     import {
         computed,
         reactive,
+        toRefs,
     } from 'vue';
 
     export default {
@@ -33,17 +34,19 @@
             }
         },
         setup(props) {
+            const { user, size, round } = toRefs(props);
             const state = reactive({
                 styles: computed(_ => {
                     return {
-                        'rounded-circle': props.round
+                        'rounded-circle': round.value
                     }
                 }),
+                halfSize: computed(_ => size.value / 2),
                 color: computed(_ => {
-                    if(!props.user.name) return;
+                    if(!user.value.name) return;
                     let hue = 0;
-                    for(let i=0; i < props.user.name.length; i++) {
-                        hue = props.user.name.charCodeAt(i) + ((hue << 5) - hue);
+                    for(let i=0; i < user.value.name.length; i++) {
+                        hue = user.value.name.charCodeAt(i) + ((hue << 5) - hue);
                     }
 
                     hue = hue % 360;
@@ -52,22 +55,22 @@
                 initialsStyles: computed(_ => {
                     return {
                         container: {
-                            height: `${props.size}px`,
-                            width: `${props.size}px`,
+                            height: `${size.value}px`,
+                            width: `${size.value}px`,
                             'background-color': state.color
                         },
                         text: {
                             'font-weight': 'bold',
-                            'font-size': `${props.size/2}px`,
-                            'line-height': `${props.size/2}px`,
+                            'font-size': `${state.halfSize}px`,
+                            'line-height': `${state.halfSize}px`,
                             color: '#ffffff'
                         }
                     }
                 }),
                 initials: computed(_ => {
-                    if(!props.user.name) return;
+                    if(!user.value.name) return;
                     let initials = '';
-                    let names = props.user.name.split(' ');
+                    let names = user.value.name.split(' ');
                     initials += names[0].charAt(0).toUpperCase();
                     if(names.length > 1) {
                         initials += names[names.length-1].charAt(0).toUpperCase();
@@ -78,7 +81,8 @@
 
             // RETURN
             return {
-                state
+                state,
+                user,
             }
         }
     }

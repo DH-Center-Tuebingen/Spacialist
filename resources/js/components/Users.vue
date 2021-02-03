@@ -1,9 +1,14 @@
 <template>
-    <div>
+    <div class="d-flex flex-column h-100">
         <h4>
             {{ t('main.user.active_users') }}
         </h4>
-        <table class="table table-striped table-hover" v-dcan="'view_users'">
+        <div>
+            <button type="button" class="btn btn-outline-success" @click="showNewUserModal" :disabled="!can('create_users')">
+                <i class="fas fa-fw fa-plus"></i> {{ t('main.user.add-button') }}
+            </button>
+        </div>
+        <table class="table table-striped table-hover flex-grow-1" v-dcan="'view_users'" v-if="state.dataInitialized">
             <thead class="thead-light">
                 <tr>
                     <th>{{ t('global.name') }}</th>
@@ -36,6 +41,17 @@
                         </div> -->
                     </td>
                     <td>
+                        <multiselect
+                            v-model="user.roles"
+                            :object="true"
+                            :label="'display_name'"
+                            :track-by="'display_name'"
+                            :valueProp="'id'"
+                            :mode="'tags'"
+                            :disabled="!can('add_remove_role')"
+                            :options="state.roles"
+                            :placeholder="t('main.user.add-role-placeholder')">
+                        </multiselect>
                         <!-- <multiselect
                             label="display_name"
                             track-by="id"
@@ -83,16 +99,12 @@
             </tbody>
         </table>
 
-        <button type="button" class="btn btn-success" @click="showNewUserModal" :disabled="!can('create_users')">
-            <i class="fas fa-fw fa-plus"></i> {{ t('main.user.add-button') }}
-        </button>
-
         <hr>
 
         <h4>
             {{ t('main.user.deactivated_users') }}
         </h4>
-        <table class="table table-striped table-hover" v-dcan="'view_users'" v-if="state.deletedUserList.length > 0">
+        <table class="table table-striped table-hover flex-grow-1" v-dcan="'view_users'" v-if="state.deletedUserList.length > 0">
             <thead class="thead-light">
                 <tr>
                     <th>{{ t('global.name') }}</th>
@@ -149,16 +161,15 @@
                 </tr>
             </tbody>
         </table>
-        <p class="alert alert-info" v-else>
+        <div class="alert alert-info" role="alert" v-else>
             {{ t('main.user.empty_list') }}
-        </p>
+        </div>
 
         <!-- <modal name="new-user-modal" height="auto" :scrollable="true">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">{{ t('main.user.modal.new.title') }}</h5>
-                    <button type="button" class="close" aria-label="Close" @click="hideNewUserModal">
-                        <span aria-hidden="true">&times;</span>
+                    <button type="button" class="btn-close" aria-label="Close" @click="hideNewUserModal">
                     </button>
                 </div>
                 <div class="modal-body">
@@ -242,8 +253,7 @@
                     <h5 class="modal-title">
                         {{ t('global.deactivate-name.title', {name: state.selectedUser.name}) }}
                     </h5>
-                    <button type="button" class="close" aria-label="Close" @click="hideDeleteUserModal">
-                        <span aria-hidden="true">&times;</span>
+                    <button type="button" class="btn-close" aria-label="Close" @click="hideDeleteUserModal">
                     </button>
                 </div>
                 <div class="modal-body">
@@ -264,7 +274,6 @@
 </template>
 
 <script>
-    // import { mapFields } from 'vee-validate';
     import {
         computed,
         reactive,
@@ -287,16 +296,19 @@
         setup(props) {
             const { t } = useI18n();
 
+            // DATA
             const state = reactive({
                 userList: computed(_ => store.getters.users),
                 deletedUserList: computed(_ => store.getters.deletedUsers),
-                roles: computed(_ => store.getters.roles),
+                roles: computed(_ => store.getters.roles(true)),
+                dataInitialized: computed(_ => state.userList.length > 0 && state.roles.length > 0),
                 newUser: {},
                 error: {},
                 selectedUser: {},
                 discardModal: 'discard-changes-modal'
             });
 
+            // RETURN
             return {
                 t,
                 can,

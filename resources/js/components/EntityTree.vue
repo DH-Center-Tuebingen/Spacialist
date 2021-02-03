@@ -2,8 +2,8 @@
     <div class="d-flex flex-column">
         <h3>
             {{ t('main.entity.title', 2) }}
-            <small class="badge badge-secondary font-weight-light align-middle font-size-50">
-                {{ t('main.entity.count', topLevelCount, {cnt: topLevelCount}) }}
+            <small class="badge bg-secondary fw-light align-middle font-size-50">
+                {{ t('main.entity.count', {cnt: topLevelCount}, topLevelCount) }}
             </small>
         </h3>
         <tree-search
@@ -49,11 +49,19 @@
             </div>
             <ul class="mb-0 col px-0 px-3 scroll-y-auto">
                 <li v-for="(entry, i) in state.tree" :key="i">
-                    <a href="#" class="font-weight-bold" @click.prevent="itemClick(entry)">
+                    <a href="#" class="fw-bold" @click.prevent="itemClick(entry)">
                         {{ entry.name }}
                     </a>
                 </li>
             </ul>
+            <tree
+                id="entity-tree"
+                class="col px-0 scroll-y-auto"
+                :data="state.tree"
+                size="small"
+                @change="itemClick">
+                <node v-for="(child, i) in state.tree" :key="i" :data="child"></node>
+            </tree>
             <!-- <tree
                 id="entity-tree"
                 class="col px-0 scroll-y-auto"
@@ -83,14 +91,16 @@
     import { useRoute } from 'vue-router';
     import { useI18n } from 'vue-i18n';
 
-    import { Node, Tree } from "tree-vue-component";
+    import { Tree } from "tree-vue-component";
+    import TreeNode from '../components/TreeNode.vue';
 
     import store from '../bootstrap/store.js';
     import router from '../bootstrap/router.js';
 
     export default {
         components: {
-            node: Node,
+            // node: Node,
+            node: TreeNode,
             tree: Tree,
         },
         setup(props) {
@@ -98,13 +108,6 @@
             const currentRoute = useRoute();
 
             // FETCH
-
-            // DATA
-            const state = reactive({
-                tree: computed(_ => store.getters.tree),
-                entity: computed(_ => store.getters.entity),
-                requestAddNewEntity: () => {},
-            });
 
             // FUNCTIONS
             const itemClick = (item) => {
@@ -130,6 +133,15 @@
                     dir: dir
                 });
             };
+
+            // DATA
+            const state = reactive({
+                tree: computed(_ => store.getters.tree),
+                entity: computed(_ => store.getters.entity),
+                requestAddNewEntity: () => {},
+            });
+
+            console.log(state.tree);
 
             // ON MOUNTED
             onMounted(_ => {

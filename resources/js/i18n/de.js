@@ -5,6 +5,7 @@ const de = {
         deactivate: 'Deaktivieren',
         reactivate: 'Reaktivieren',
         remove: 'Entfernen',
+        reset: 'Zurücksetzen',
         cancel: 'Abbrechen',
         close: 'Schließen',
         add: 'Hinzufügen',
@@ -49,7 +50,7 @@ const de = {
         'has-links': 'Hat keine Verknüpfungen | Hat eine Verknüpfung | Hat {cnt} Verknüpfungen',
         discard: {
             title: 'Ungespeicherte Änderungen',
-            msg: 'Ungespeicherte Änderungen in <span class="font-weight-medium">{name}</span>. Willst du wirklich fortfahren und die Änderungen verwerfen?',
+            msg: 'Ungespeicherte Änderungen in <span class="fw-medium">{name}</span>. Willst du wirklich fortfahren und die Änderungen verwerfen?',
             confirm: 'Ja, Änderungen verwerfen',
             confirmpos: 'Nein, Speichern und fortfahren'
         },
@@ -85,8 +86,9 @@ const de = {
             profile: 'Profil',
             logout: 'Ausloggen',
             info_title: 'Benutzerinformationen',
+            personal_info_title: 'Persönliche Informationen',
             member_since: 'Mitglied seit',
-            deactivated_since: '<span class="font-weight-bold">Deaktiviert</span> seit {dt}',
+            deactivated_since: '<span class="fw-bold">Deaktiviert</span> seit {dt}',
             contact: 'Kontakt',
             avatar: 'Avatar',
             invalid_orcid: 'Die eigegebene ORCID ist ungültig',
@@ -118,7 +120,7 @@ const de = {
             serial: 'Fortlaufende ID',
             'serial-info': `Alle Instanzen teilen diesen Identifier als Attribut. Benutze <code class="normal">%d</code> als Zähler.
             <br />
-            <span class="font-weight-medium">Beispiel:</span>
+            <span class="fw-medium">Beispiel:</span>
             <br />
             <code class="normal">Fund_%d_Stein</code> würde zu Fund_1_Stein, Fund_2_Stein, &hellip; führen.
             <br />
@@ -187,8 +189,8 @@ const de = {
             show: 'Kommentare anzeigen',
             submit: 'Kommtentar abschicken',
             text_placeholder: 'Kommentar eingeben',
-            hide_reply: '<span class="font-weight-bold">Eine</span> Antwort ausblenden | <span class="font-weight-bold">{cnt}</span> Antworten ausblenden',
-            show_reply: '<span class="font-weight-bold">Eine</span> Antwort anzeigen | <span class="font-weight-bold">{cnt}</span> Antworten anzeigen',
+            hide_reply: '<span class="fw-bold">Eine</span> Antwort ausblenden | <span class="fw-bold">{cnt}</span> Antworten ausblenden',
+            show_reply: '<span class="fw-bold">Eine</span> Antwort anzeigen | <span class="fw-bold">{cnt}</span> Antworten anzeigen',
             fetching: 'Lade Kommentare&hellip;',
             fetching_failed: 'Laden der Kommentare fehlgeschlagen!',
             retry_failed: 'Wiederholen',
@@ -212,11 +214,11 @@ const de = {
                 type: {
                     system: 'System-Nachricht'
                 },
-                user_left_comment_on: 'hat bei <span class="font-weight-bold">{name}</span> einen Kommentar hinterlassen.',
+                user_left_comment_on: 'hat bei <span class="fw-bold">{name}</span> einen Kommentar hinterlassen.',
                 reply: 'Antworten',
                 mention_info: 'Schreibe deine Antwort. Verwende @nickname um andere Nutzer zu erwähnen.',
                 reply_sent: 'Antwort abgeschickt',
-                reply_to_user: '<span class="font-weight-bold">{name}</span> antworten',
+                reply_to_user: '<span class="fw-bold">{name}</span> antworten',
                 reply_to_chat: 'Als Kommentar antworten',
             }
         }

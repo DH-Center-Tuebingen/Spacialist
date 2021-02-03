@@ -1,73 +1,83 @@
 <template>
     <div class="row">
-        <div class="col-3 mt-2 border-end">
+        <div class="col-3 pt-2 border-end">
             <file-upload
                 accept="image/*"
                 class="w-100"
                 ref="upload"
-                v-model="fileQueue"
+                v-model="state.fileQueue"
                 :custom-action="uploadFile"
                 :directory="false"
                 :drop="true"
                 :multiple="false"
                 @input-file="inputFile">
-                    <user-avatar :user="avatarUser" class="d-flex justify-content-center"></user-avatar>
+                    <user-avatar :user="state.avatarUser" class="d-flex justify-content-center"></user-avatar>
             </file-upload>
             <div class="text-center mt-3">
-                <button type="button" class="btn btn-outline-danger ms-2" :disabled="!avatarUser.avatar" @click="deleteAvatar()">
-                    {{ $t('global.delete') }}
+                <button type="button" class="btn btn-outline-danger ms-2" :disabled="!state.avatarUser.avatar" @click="deleteAvatar()">
+                    {{ t('global.delete') }}
                 </button>
             </div>
         </div>
-        <div class="col-6">
-            <form id="profile-user-info-form" name="profile-user-info-form" class="row" role="form" @submit.prevent="updateUserInformation()">
+        <div class="col-6 pt-2">
+            <div class="d-flex justify-content-between">
+                <h3>
+                    {{ t('global.user.info_title') }}
+                </h3>
+                <div>
+                    <button type="submit" class="btn btn-outline-success" form="profile-user-info-form">
+                        <i class="fas fa-fw fa-save"></i>
+                        {{ t('global.save') }}
+                    </button>
+                    <button type="button" class="btn btn-outline-warning ms-3" @click="resetUserInfo()">
+                        <i class="fas fa-fw fa-undo"></i>
+                        {{ t('global.reset') }}
+                    </button>
+                </div>
+            </div>
+            <form id="profile-user-info-form" name="profile-user-info-form" class="row mt-3" role="form" @submit.prevent="updateUserInformation()">
                 <div class="col-6">
                     <h4>
-                        {{ $t('global.user.info_title') }}
+                        {{ t('global.user.personal_info_title') }}
                     </h4>
                     <div class="form-group">
-                        <label class="font-weight-bold" for="profile-user-info-name">
-                            {{ $t('global.name') }}:
+                        <label class="fw-bold" for="profile-user-info-name">
+                            {{ t('global.name') }}:
                         </label>
-                        <input type="text" class="form-control" id="profile-user-info-name" v-model="localUser.name" />
+                        <input type="text" class="form-control" id="profile-user-info-name" v-model="state.localUser.name" />
                     </div>
-                    <div class="form-group">
-                        <label class="font-weight-bold" for="profile-user-info-nickname">
-                            {{ $t('global.nickname') }}:
+                    <div class="form-group mt-2">
+                        <label class="fw-bold" for="profile-user-info-nickname">
+                            {{ t('global.nickname') }}:
                         </label>
-                        <input type="text" class="form-control" id="profile-user-info-nickname" v-model="localUser.nickname" />
+                        <input type="text" class="form-control" id="profile-user-info-nickname" v-model="state.localUser.nickname" />
                     </div>
                 </div>
                 <div class="col-6">
                     <h4>
-                        {{ $t('global.user.contact') }}
+                        {{ t('global.user.contact') }}
                     </h4>
                     <div class="form-group">
-                        <label class="font-weight-bold" for="profile-user-contact-email">
-                            <i class="fas fa-fw fa-envelope"></i> {{ $t('global.email') }}:
+                        <label class="fw-bold" for="profile-user-contact-email">
+                            <i class="fas fa-fw fa-envelope"></i> {{ t('global.email') }}:
                         </label>
-                        <input type="email" class="form-control" id="profile-user-contact-email" v-model="localUser.email" />
+                        <input type="email" class="form-control" id="profile-user-contact-email" v-model="state.localUser.email" />
                     </div>
-                    <div class="form-group">
-                        <label class="font-weight-bold" for="profile-user-contact-phonenumber">
-                            <i class="fas fa-fw fa-mobile-alt"></i> {{ $t('global.phonenumber') }}:
+                    <div class="form-group mt-2">
+                        <label class="fw-bold" for="profile-user-contact-phonenumber">
+                            <i class="fas fa-fw fa-mobile-alt"></i> {{ t('global.phonenumber') }}:
                         </label>
-                        <input type="tel" class="form-control" id="profile-user-contact-phonenumber" v-model="localUser.metadata.phonenumber" />
+                        <input type="tel" class="form-control" id="profile-user-contact-phonenumber" v-model="state.localUser.metadata.phonenumber" />
                     </div>
-                    <div class="form-group">
-                        <label class="font-weight-bold" for="profile-user-contact-orcid">
-                            <i class="fab fa-fw fa-orcid"></i> {{ $t('global.orcid') }}:
+                    <div class="form-group mt-2">
+                        <label class="fw-bold" for="profile-user-contact-orcid">
+                            <i class="fab fa-fw fa-orcid"></i> {{ t('global.orcid') }}:
                         </label>
-                        <input type="text" class="form-control" :class="{'is-invalid': invalidOrcid}" id="profile-user-contact-orcid" v-model="localUser.metadata.orcid" />
-                        <div v-if="invalidOrcid" class="invalid-feedback">
-                            {{ $t('global.user.invalid_orcid') }}
+                        <input type="text" class="form-control" :class="{'is-invalid': state.invalidOrcid}" id="profile-user-contact-orcid" v-model="state.localUser.metadata.orcid" />
+                        <div v-if="state.invalidOrcid" class="invalid-feedback">
+                            {{ t('global.user.invalid_orcid') }}
                         </div>
                     </div>
-                </div>
-                <div class="col-12">
-                    <button type="submit" class="btn btn-outline-success w-100">
-                        {{ $t('global.save') }}
-                    </button>
                 </div>
             </form>
         </div>
@@ -75,39 +85,66 @@
 </template>
 
 <script>
+    import {
+        computed,
+        reactive,
+        ref,
+    } from 'vue';
+
+    import { useI18n } from 'vue-i18n';
+
+    import auth from '../bootstrap/auth.js';
+    import store from '../bootstrap/store.js';
+
+    import {
+        getUser,
+        _cloneDeep,
+    } from '../helpers/helpers.js';
+    import {
+        setUserAvatar,
+        deleteUserAvatar,
+    } from '../api.js';
+
     export default {
-        mounted() {},
-        methods: {
-            updateUserInformation() {
+        setup(props) {
+            const { t } = useI18n();
+
+            // FETCH
+
+            // FUNCTIONS
+            const updateUserInformation = _ => {
                 let data = {};
-                if(this.localUser.name !== '' && this.localUser.name != this.user.name) {
-                    data.name = this.localUser.name;
+                if(state.localUser.name !== '' && state.localUser.name != state.user.name) {
+                    data.name = state.localUser.name;
                 }
-                if(this.localUser.nickname !== '' && this.localUser.nickname != this.user.nickname) {
-                    data.nickname = this.localUser.nickname;
+                if(state.localUser.nickname !== '' && state.localUser.nickname != state.user.nickname) {
+                    data.nickname = state.localUser.nickname;
                 }
-                if(this.localUser.email !== '' && this.localUser.email != this.user.email) {
-                    data.email = this.localUser.email;
+                if(state.localUser.email !== '' && state.localUser.email != state.user.email) {
+                    data.email = state.localUser.email;
                 }
-                if(this.localUser.metadata.phonenumber != this.user.metadata.phonenumber) {
-                    data.phonenumber = this.localUser.metadata.phonenumber;
+                if(state.localUser.metadata.phonenumber != state.user.metadata.phonenumber) {
+                    data.phonenumber = state.localUser.metadata.phonenumber;
                 }
-                if(this.localUser.metadata.orcid != this.user.metadata.orcid && (!this.localUser.metadata.orcid || this.validateOrcid(this.localUser.metadata.orcid))) {
-                    data.orcid = this.localUser.metadata.orcid;
-                    this.invalidOrcid = false;
-                } else if(this.localUser.metadata.orcid && !this.validateOrcid(this.localUser.metadata.orcid)) {
-                    this.invalidOrcid = true;
+                if(state.localUser.metadata.orcid != state.user.metadata.orcid && (!state.localUser.metadata.orcid || validateOrcid(state.localUser.metadata.orcid))) {
+                    data.orcid = state.localUser.metadata.orcid;
+                    state.invalidOrcid = false;
+                } else if(state.localUser.metadata.orcid && !validateOrcid(state.localUser.metadata.orcid)) {
+                    state.invalidOrcid = true;
                     return;
                 }
 
                 // No changes, no update
                 if(Object.keys(data).length === 0) return;
 
-                this.$http.patch(`user/${this.user.id}`, data).then(response => {
-                    this.updateUserObjects(response.data);
+                $http.patch(`user/${state.user.id}`, data).then(response => {
+                    updateUserObjects(response.data);
                 });
-            },
-            validateOrcid(oid) {
+            };
+            const resetUserInfo = _ => {
+                state.localUser = appliedMetadata(state.user);
+            };
+            const validateOrcid = oid => {
                 if(oid === '') {
                     return false;
                 }
@@ -126,62 +163,67 @@
                 let chk = (12 - (tot % 11)) % 11;
                 if(chk == 10) chk = 'X';
                 return oid[oid.length-1].toUpperCase() == chk;
-            },
-            deleteAvatar() {
-                this.$http.delete(`user/${this.user.id}/avatar`).then(response => {
-                    this.updateUserObjects({
+            };
+            const deleteAvatar = _ => {
+                deleteUserAvatar(state.user.id).then(data => {
+                    updateUserObjects({
                         avatar: false,
                         avatar_url: '',
                     });
                 });
-            },
-            updateUserObjects(data) {
-                this.$auth.user({
-                    ...this.$auth.user(),
+            };
+            const updateUserObjects = data => {
+                auth.user({
+                    ...getUser(),
                     ...data
                 });
-                this.$auth.user(
-                    this.appliedMetadata(this.$auth.user())
+                auth.user(
+                    appliedMetadata(getUser())
                 );
-                this.localUser = this.appliedMetadata(this.$auth.user());
-                this.avatarUser = this.appliedMetadata(this.$auth.user());
-            },
-            uploadFile(file, component) {
-                let formData = new FormData();
-                formData.append('file', file.file);
-                return $http.post(`user/${this.user.id}/avatar`, formData).then(response => {
-                    this.updateUserObjects(response.data);
+                state.localUser = appliedMetadata(getUser());
+                state.avatarUser = appliedMetadata(getUser());
+            };
+            const uploadFile = (file, component) => {
+                return setUserAvatar(state.user.id, file.file).then(data => {
+                    updateUserObjects(data)
                 });
-            },
-            inputFile(newFile, oldFile) {
+            };
+            const inputFile = (newFile, oldFile) => {
                 // Wait for response
                 if(newFile && oldFile && newFile.success && !oldFile.success) {
                 }
 
                 // Enable automatic upload
                 if(Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error) {
-                    if(!this.$refs.upload.active) {
-                        this.$refs.upload.active = true
+                    if(!newFile.active) {
+                        newFile.active = true
                     }
                 }
-            },
-            appliedMetadata(u) {
+            };
+            const appliedMetadata = u => {
                 const nu = _cloneDeep(u)
                 return u.metadata ? nu : {...nu, ...{metadata: {}}};
-            }
-        },
-        data() {
-            return {
-                localUser: this.appliedMetadata(this.$auth.user()),
-                avatarUser: this.appliedMetadata(this.$auth.user()),
+            };
+
+            // DATA
+            const state = reactive({
+                localUser: appliedMetadata(getUser()),
+                avatarUser: appliedMetadata(getUser()),
                 fileQueue: [],
-                invalidOrcid: false,
-            }
+                invalidOrcid: ref(false),
+                user: computed(_ => appliedMetadata(getUser())),
+            });
+
+            // RETURN
+            return {
+                t,
+                inputFile,
+                uploadFile,
+                deleteAvatar,
+                updateUserInformation,
+                resetUserInfo,
+                state,
+            };
         },
-        computed: {
-            user() {
-                return this.appliedMetadata(this.$auth.user());
-            },
-        }
     }
 </script>

@@ -7,8 +7,7 @@
                         $t('global.user.info_title')
                     }}
                 </h5>
-                <button type="button" class="close" aria-label="Close" @click="hideModal">
-                    <span aria-hidden="true">&times;</span>
+                <button type="button" class="btn-close" aria-label="Close" @click="hideModal">
                 </button>
             </div>
             <div class="modal-body">
@@ -17,7 +16,7 @@
                     <h3 class="mb-0 mt-2">
                         {{ user.name }}
                     </h3>
-                    <h6 class="font-weight-normal text-muted">
+                    <h6 class="fw-normal text-muted">
                         {{ user.nickname }}
                     </h6>
                     <dl class="row">

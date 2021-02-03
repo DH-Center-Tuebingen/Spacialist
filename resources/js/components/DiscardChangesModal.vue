@@ -3,8 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">{{ $t('global.discard.title') }}</h5>
-                <button type="button" class="close" aria-label="Close" @click="cancel">
-                    <span aria-hidden="true">&times;</span>
+                <button type="button" class="btn-close" aria-label="Close" @click="cancel">
                 </button>
             </div>
             <div class="modal-body">

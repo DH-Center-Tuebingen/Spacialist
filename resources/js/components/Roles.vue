@@ -1,50 +1,70 @@
 <template>
     <div>
-        <table class="table table-striped table-hover">
+        <h4>
+            {{ t('global.roles') }}
+        </h4>
+        <button type="button" class="btn btn-success" @click="showNewRoleModal" :disabled="!can('add_edit_role')">
+            <i class="fas fa-fw fa-plus"></i> {{ t('main.role.add-button') }}
+        </button>
+
+        <table class="table table-striped table-hover" v-if="state.dataInitialized">
             <thead class="thead-light">
                 <tr>
-                    <th>{{ $t('global.name') }}</th>
-                    <th>{{ $t('global.display-name') }}</th>
-                    <th>{{ $t('global.description') }}</th>
-                    <th>{{ $t('global.permissions') }}</th>
-                    <th>{{ $t('global.created_at') }}</th>
-                    <th>{{ $t('global.updated_at') }}</th>
-                    <th>{{ $t('global.options') }}</th>
+                    <th>{{ t('global.name') }}</th>
+                    <th>{{ t('global.display-name') }}</th>
+                    <th>{{ t('global.description') }}</th>
+                    <th>{{ t('global.permissions') }}</th>
+                    <th>{{ t('global.created_at') }}</th>
+                    <th>{{ t('global.updated_at') }}</th>
+                    <th>{{ t('global.options') }}</th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="role in roleList">
+                <tr v-for="role in state.roleList" :key="role.id">
                     <td>
                         {{ role.name }}
                     </td>
                     <td>
-                        <input type="text" class="form-control" v-model="role.display_name" v-validate="" required :name="`disp_${role.id}`" />
+                        <input type="text" class="form-control" v-model="role.display_name" required :name="`disp_${role.id}`" />
+                        <!-- <input type="text" class="form-control" v-model="role.display_name" v-validate="" required :name="`disp_${role.id}`" /> -->
                     </td>
                     <td>
-                        <input type="text" class="form-control" v-model="role.description" v-validate="" required :name="`desc_${role.id}`" />
+                        <input type="text" class="form-control" v-model="role.description" required :name="`desc_${role.id}`" />
+                        <!-- <input type="text" class="form-control" v-model="role.description" v-validate="" required :name="`desc_${role.id}`" /> -->
                     </td>
                     <td>
                         <multiselect
+                            v-model="role.permissions"
+                            :object="true"
+                            :label="'display_name'"
+                            :track-by="'display_name'"
+                            :valueProp="'id'"
+                            :mode="'tags'"
+                            :disabled="!can('add_remove_role')"
+                            :options="state.permissions"
+                            :placeholder="t('main.role.add-permission-placeholder')">
+                        </multiselect>
+                        <!-- <multiselect
                             label="display_name"
                             track-by="id"
                             v-model="role.permissions"
                             v-validate=""
                             :closeOnSelect="false"
-                            :disabled="!$can('add_remove_permission')"
+                            :disabled="!can('add_remove_permission')"
                             :hideSelected="true"
                             :multiple="true"
                             :name="`perms_${role.id}`"
-                            :options="permissions"
-                            :placeholder="$t('main.role.add-permission-placeholder')"
-                            :select-label="$t('global.select.select')"
-                            :deselect-label="$t('global.select.deselect')">
-                        </multiselect>
+                            :options="state.permissions"
+                            :placeholder="t('main.role.add-permission-placeholder')"
+                            :select-label="t('global.select.select')"
+                            :deselect-label="t('global.select.deselect')">
+                        </multiselect> -->
                     </td>
                     <td>
-                        {{ role.created_at }}
+                        {{ date(role.created_at) }}
                     </td>
                     <td>
-                        {{ role.updated_at }}
+                        {{ date(role.updated_at) }}
                     </td>
                     <td>
                         <div class="dropdown">
@@ -55,11 +75,11 @@
                                 </sup>
                             </span>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" href="#" v-if="roleDirty(role.id)" :disabled="!$can('add_remove_permission')" @click.prevent="onPatchRole(role.id)">
-                                    <i class="fas fa-fw fa-check text-success"></i> {{ $t('global.save') }}
+                                <a class="dropdown-item" href="#" v-if="roleDirty(role.id)" :disabled="!can('add_remove_permission')" @click.prevent="onPatchRole(role.id)">
+                                    <i class="fas fa-fw fa-check text-success"></i> {{ t('global.save') }}
                                 </a>
-                                <a class="dropdown-item" href="#" @click.prevent="requestDeleteRole(role.id)" :disabled="!$can('delete_role')">
-                                    <i class="fas fa-fw fa-trash text-danger"></i> {{ $t('global.delete') }}
+                                <a class="dropdown-item" href="#" @click.prevent="requestDeleteRole(role.id)" :disabled="!can('delete_role')">
+                                    <i class="fas fa-fw fa-trash text-danger"></i> {{ t('global.delete') }}
                                 </a>
                             </div>
                         </div>
@@ -68,27 +88,22 @@
             </tbody>
         </table>
 
-        <button type="button" class="btn btn-success" @click="showNewRoleModal" :disabled="!$can('add_edit_role')">
-            <i class="fas fa-fw fa-plus"></i> {{ $t('main.role.add-button') }}
-        </button>
-
-        <modal name="new-role-modal" height="auto" :scrollable="true" v-dcan="'add_edit_role'">
+        <!-- <modal name="new-role-modal" height="auto" :scrollable="true" v-dcan="'add_edit_role'">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="newRoleModalLabel">{{ $t('main.role.modal.new.title') }}</h5>
-                    <button type="button" class="close" aria-label="Close" @click="hideNewRoleModal">
-                        <span aria-hidden="true">&times;</span>
+                    <h5 class="modal-title" id="newRoleModalLabel">{{ t('main.role.modal.new.title') }}</h5>
+                    <button type="button" class="btn-close" aria-label="Close" @click="hideNewRoleModal">
                     </button>
                 </div>
                 <div class="modal-body">
                     <form id="newRoleForm" name="newRoleForm" role="form" v-on:submit.prevent="onAddRole(newRole)">
                         <div class="form-group">
                             <label class="col-form-label col-md-3" for="name">
-                                {{ $t('global.name') }}
+                                {{ t('global.name') }}
                                 <span class="text-danger">*</span>:
                             </label>
                             <div class="col-md-9">
-                                <input class="form-control" :class="$getValidClass(error, 'name')" type="text" id="name" v-model="newRole.name" required autofocus />
+                                <input class="form-control" :class="getValidClass(error, 'name')" type="text" id="name" v-model="newRole.name" required autofocus />
 
                                 <div class="invalid-feedback">
                                     <span v-for="msg in error.name">
@@ -99,7 +114,7 @@
                         </div>
                         <div class="form-group">
                             <label class="col-form-label col-md-3" for="display_name">
-                                {{ $t('global.display-name') }}:
+                                {{ t('global.display-name') }}:
                             </label>
                             <div class="col-md-9">
                                 <input class="form-control" type="text" id="display_name" v-model="newRole.display_name" />
@@ -107,7 +122,7 @@
                         </div>
                         <div class="form-group">
                             <label class="col-form-label col-md-3" for="description">
-                                {{ $t('global.description') }}:
+                                {{ t('global.description') }}:
                             </label>
                             <div class="col-md-9">
                                 <input class="form-control" type="text" id="description" v-model="newRole.description" />
@@ -117,10 +132,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success" form="newRoleForm">
-                        <i class="fas fa-fw fa-plus"></i> {{ $t('global.add') }}
+                        <i class="fas fa-fw fa-plus"></i> {{ t('global.add') }}
                     </button>
                     <button type="button" class="btn btn-danger" @click="hideNewRoleModal">
-                        <i class="fas fa-fw fa-ban"></i> {{ $t('global.cancel') }}
+                        <i class="fas fa-fw fa-ban"></i> {{ t('global.cancel') }}
                     </button>
                 </div>
             </div>
@@ -129,87 +144,108 @@
         <modal name="confirm-delete-role-modal" height="auto" :scrollable="true" v-dcan="'delete_role'">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">{{ $t('global.delete-name.title', {name: selectedRole.display_name}) }}</h5>
-                    <button type="button" class="close" aria-label="Close" @click="hideDeleteRoleModal">
-                        <span aria-hidden="true">&times;</span>
+                    <h5 class="modal-title">{{ t('global.delete-name.title', {name: selectedRole.display_name}) }}</h5>
+                    <button type="button" class="btn-close" aria-label="Close" @click="hideDeleteRoleModal">
                     </button>
                 </div>
                 <div class="modal-body">
-                    {{ $t('global.delete-name.desc', {name: selectedRole.display_name}) }}
+                    {{ t('global.delete-name.desc', {name: selectedRole.display_name}) }}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" @click="deleteRole(selectedRole.id)">
-                        <i class="fas fa-fw fa-check"></i> {{ $t('global.delete') }}
+                        <i class="fas fa-fw fa-check"></i> {{ t('global.delete') }}
                     </button>
                     <button type="button" class="btn btn-danger" @click="hideDeleteRoleModal">
-                        <i class="fas fa-fw fa-ban"></i> {{ $t('global.cancel') }}
+                        <i class="fas fa-fw fa-ban"></i> {{ t('global.cancel') }}
                     </button>
                 </div>
             </div>
         </modal>
-        <discard-changes-modal :name="discardModal"/>
+        <discard-changes-modal :name="discardModal"/> -->
     </div>
 </template>
 
 <script>
-    import { mapFields } from 'vee-validate';
+    import {
+        computed,
+        reactive,
+    } from 'vue';
+
+    import { useI18n } from 'vue-i18n';
+
+    import store from '../bootstrap/store.js';
+
+    import {
+        can,
+        getValidClass,
+    } from '../helpers/helpers.js';
+    import {
+        date,
+    } from '../helpers/filters.js';
 
     export default {
-        beforeRouteEnter(to, from, next) {
-            $httpQueue.add(() => $http.get('role').then(response => {
-                const roles = response.data.roles;
-                const permissions = response.data.permissions;
-                next(vm => vm.init(roles, permissions));
-            }));
-        },
-        beforeRouteLeave: function(to, from, next) {
-            let loadNext = () => {
-                next();
-            }
-            if(this.isOneDirty) {
-                let discardAndContinue = () => {
-                    loadNext();
-                };
-                let saveAndContinue = () => {
-                    let patching = async _ => {
-                        await this.$asyncFor(this.roleList, async r => {
-                            await this.onPatchRole(r.id);
-                        });
-                        loadNext();
-                    };
-                    patching();
-                };
-                this.$modal.show(this.discardModal, {reference: this.$t('global.settings.roles'), onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
-            } else {
-                loadNext();
-            }
-        },
-        mounted() {},
-        methods: {
-            init(roles, permissions) {
+        // beforeRouteLeave: function(to, from, next) {
+        //     let loadNext = () => {
+        //         next();
+        //     }
+        //     if(this.isOneDirty) {
+        //         let discardAndContinue = () => {
+        //             loadNext();
+        //         };
+        //         let saveAndContinue = () => {
+        //             let patching = async _ => {
+        //                 await this.$asyncFor(this.roleList, async r => {
+        //                     await this.onPatchRole(r.id);
+        //                 });
+        //                 loadNext();
+        //             };
+        //             patching();
+        //         };
+        //         this.$modal.show(this.discardModal, {reference: this.$t('global.settings.roles'), onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
+        //     } else {
+        //         loadNext();
+        //     }
+        // },
+        setup(props) {
+            const { t } = useI18n();
+
+            // DATA
+            const state = reactive({
+                roleList: computed(_ => store.getters.roles()),
+                permissions: computed(_ => store.getters.permissions),
+                dataInitialized: computed(_ => state.roleList.length > 0 && state.permissions.length > 0),
+                newRole: {},
+                error: {},
+                selectedRole: {},
+                discardModal: 'discard-changes-modal',
+                isOneDirty: false, //computed(_ => Object.keys(this.fields).some(key => this.fields[key].dirty))
+            });
+
+            // FUNCTIONS
+            const init = (roles, permissions) => {
                 this.roleList = roles;
                 this.permissions = permissions;
-            },
-            showNewRoleModal() {
-                if(!this.$can('add_edit_role')) return;
+            };
+            const showNewRoleModal = _ => {
+                if(!this.can('add_edit_role')) return;
                 this.$modal.show('new-role-modal');
-            },
-            hideNewRoleModal() {
+            };
+            const hideNewRoleModal = _ => {
                 this.$modal.hide('new-role-modal');
                 this.newRole = {};
-            },
-            onAddRole(newRole) {
+            };
+            const onAddRole = newRole => {
                 const vm = this;
-                if(!vm.$can('add_edit_role')) return;
+                if(!vm.can('add_edit_role')) return;
                 vm.$http.post('role', newRole).then(function(response) {
                     vm.roleList.push(response.data);
                     vm.hideNewRoleModal();
                 }).catch(e => {
                     this.$getErrorMessages(e, this.error);
                 });
-            },
-            onPatchRole(id) {
-                if(!this.$can('add_edit_role')) return new Promise(r => r());
+            };
+            const onPatchRole = id => {
+                if(!this.can('add_edit_role')) return new Promise(r => r());
                 if(!this.roleDirty(id)) return new Promise(r => r());
                 let role = this.roleList.find(r => r.id == id);
                 if(!role.display_name || !role.description) {
@@ -241,69 +277,63 @@
                         'success'
                     );
                 }));
-            },
-            showDeleteRoleModal() {
-                if(!this.$can('delete_role')) return;
+            };
+            const showDeleteRoleModal = _ => {
+                if(!this.can('delete_role')) return;
                 this.$modal.show('confirm-delete-role-modal');
-            },
-            hideDeleteRoleModal() {
+            };
+            const hideDeleteRoleModal = _ => {
                 this.$modal.hide('confirm-delete-role-modal');
                 this.selectedRole = {};
-            },
-            requestDeleteRole(id) {
-                if(!this.$can('delete_role')) return;
+            };
+            const requestDeleteRole = id => {
+                if(!this.can('delete_role')) return;
                 this.selectedRole = this.roleList.find(r => r.id == id);
                 this.showDeleteRoleModal();
-            },
-            deleteRole(id) {
+            };
+            const deleteRole = id => {
                 const vm = this;
-                if(!vm.$can('delete_role')) return;
+                if(!vm.can('delete_role')) return;
                 if(!id) return;
                 vm.$http.delete(`role/${id}`).then(function(response) {
                     const index = vm.roleList.findIndex(r => r.id == id);
                     if(index > -1) vm.roleList.splice(index, 1);
                     vm.hideDeleteRoleModal();
                 });
-            },
-            isDirty(fieldname) {
-                if(this.fields[fieldname]) {
-                    return this.fields[fieldname].dirty;
-                }
+            };
+            const isDirty = fieldname => {
+                // if(this.fields[fieldname]) {
+                //     return this.fields[fieldname].dirty;
+                // }
                 return false;
-            },
-            roleDirty(rid) {
-                const r = this.roleList.find(r => r.id == rid);
-                return this.isDirty(`perms_${rid}`) ||
-                    (this.isDirty(`disp_${rid}`) && !!r.display_name) ||
-                    (this.isDirty(`desc_${rid}`) && !!r.description);
-            },
-            setPristine(fieldname) {
+            };
+            const roleDirty = rid => {
+                const r = state.roleList.find(r => r.id == rid);
+                return isDirty(`perms_${rid}`) ||
+                    (isDirty(`disp_${rid}`) && !!r.display_name) ||
+                    (isDirty(`desc_${rid}`) && !!r.description);
+            };
+            const setPristine = fieldname => {
                 this.$validator.flag(fieldname, {
                     dirty: false,
                     pristine: true
                 });
-            },
-            setRolePristine(rid) {
+            };
+            const setRolePristine = rid => {
                 this.setPristine(`perms_${rid}`);
                 this.setPristine(`disp_${rid}`);
                 this.setPristine(`desc_${rid}`);
-            }
-        },
-        data() {
+            };
+
+            // RETURN
             return {
-                roleList: [],
-                permissions: [],
-                userRoles: {},
-                newRole: {},
-                error: {},
-                selectedRole: {},
-                discardModal: 'discard-changes-modal'
-            }
+                can,
+                date,
+                getValidClass,
+                t,
+                state,
+                roleDirty,
+            };
         },
-        computed: {
-            isOneDirty() {
-                return Object.keys(this.fields).some(key => this.fields[key].dirty);
-            },
-        }
     }
 </script>

@@ -205,8 +205,7 @@
                     {{
                         $tc('plugins.files.upload.finish.msg', successfulFileUpload.errors, {files: successfulFileUpload.errors})
                     }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                    <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close">
                     </button>
                 </div>
                 <form role="form">
@@ -256,7 +255,7 @@
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div>
                                 <span>{{file.name}}</span>
-                                <span class="text-muted font-weight-light" v-if="!file.error">
+                                <span class="text-muted fw-light" v-if="!file.error">
                                     {{file.size|bytes}} - {{file.speed|bytes}}/s
                                 </span>
                             </div>
@@ -300,8 +299,7 @@
                             </button>
                         </form>
                     </h5>
-                    <button type="button" class="close" aria-label="Close" @click="closeFileModal">
-                        <span aria-hidden="true">&times;</span>
+                    <button type="button" class="btn-close" aria-label="Close" @click="closeFileModal">
                     </button>
                 </div>
                 <div class="modal-body row flex-grow-1 text-center overflow-hidden">
@@ -359,7 +357,7 @@
                             <table class="table table-striped table-hover table-sm mb-0">
                                 <tbody>
                                     <tr v-for="p in fileProperties" class="d-flex justify-content-between">
-                                        <td class="text-start font-weight-medium">
+                                        <td class="text-start fw-medium">
                                             {{ $t(`plugins.files.modal.detail.props.${p}`) }}
                                         </td>
                                         <td class="col text-start">
@@ -395,7 +393,7 @@
                             <table class="table table-striped table-hover table-sm mb-0">
                                 <tbody>
                                     <tr>
-                                        <td class="text-start font-weight-medium">
+                                        <td class="text-start fw-medium">
                                             {{ $t('plugins.files.modal.detail.metadata.created') }}
                                         </td>
                                         <td class="text-end text-muted">
@@ -403,7 +401,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-start font-weight-medium">
+                                        <td class="text-start fw-medium">
                                             {{ $t('plugins.files.modal.detail.metadata.lastmodified') }}
                                         </td>
                                         <td class="text-end text-muted">
@@ -411,7 +409,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-start font-weight-medium">
+                                        <td class="text-start fw-medium">
                                             {{ $t('plugins.files.modal.detail.metadata.filesize') }}
                                         </td>
                                         <td class="text-end text-muted">
@@ -419,7 +417,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-start font-weight-medium">
+                                        <td class="text-start fw-medium">
                                             <file-upload
                                                 class="mb-0"
                                                 v-show="!replaceFiles.length"
@@ -434,7 +432,7 @@
                                                         <i class="fas fa-fw fa-file-import text-muted"></i> {{ $t('plugins.files.modal.detail.replace.button') }}
                                                     </span>
                                             </file-upload>
-                                            <div class="d-flex flex-column align-items-start font-weight-normal" v-if="replaceFiles.length">
+                                            <div class="d-flex flex-column align-items-start fw-normal" v-if="replaceFiles.length">
                                                 <span>
                                                     {{
                                                         $t('plugins.files.modal.detail.replace.confirm', {
@@ -458,7 +456,7 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="text-end font-weight-medium">
+                                        <td class="text-end fw-medium">
                                             <a :href="selectedFile.url" :download="selectedFile.name" target="_blank">
                                                 {{ $t('global.download') }}
                                                 <i class="fas fa-fw fa-file-download text-muted"></i>
@@ -644,8 +642,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">{{ $t('global.delete-name.title', {name: contextMenuFile.name}) }}</h5>
-                    <button type="button" class="close" aria-label="Close" @click="hideDeleteFileModal">
-                        <span aria-hidden="true">&times;</span>
+                    <button type="button" class="btn-close" aria-label="Close" @click="hideDeleteFileModal">
                     </button>
                 </div>
                 <div class="modal-body">
@@ -678,8 +675,7 @@
                     <h5 class="modal-title">
                         {{ $t('global.unlink-name.title', {name: contextMenuFile.name}) }}
                     </h5>
-                    <button type="button" class="close" aria-label="Close" @click="hideUnlinkFileModal">
-                        <span aria-hidden="true">&times;</span>
+                    <button type="button" class="btn-close" aria-label="Close" @click="hideUnlinkFileModal">
                     </button>
                 </div>
                 <div class="modal-body">

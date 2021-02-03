@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.9 - Isfahan
+### Added
+- Global State for shared information (Vuex)
+### Fixed
+### Changed
+- Update Laravel to Version 8
+- Update VueJS to Version 3
+- Update Dependencies
+  - Bootstrap 5
+  - Dropdown Plugin
+
 ## 0.8 - Helgö
 ### Added
 - Support to extend all data with a comment section. Currently:

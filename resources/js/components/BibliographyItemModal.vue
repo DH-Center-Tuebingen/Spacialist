@@ -4,13 +4,12 @@
             <div class="modal-header">
                 <h5 class="modal-title" v-if="data.id">{{ $t('main.bibliography.modal.edit.title') }}</h5>
                 <h5 class="modal-title" v-else>{{ $t('main.bibliography.modal.new.title') }}</h5>
-                <button type="button" class="close" aria-label="Close" @click="hide">
-                    <span aria-hidden="true">&times;</span>
+                <button type="button" class="btn-close" aria-label="Close" @click="hide">
                 </button>
             </div>
             <div class="modal-body col d-flex flex-column">
                 <p class="alert alert-info">
-                    <i class="fas fa-lightbulb me-1"></i> <span class="font-weight-medium">Note</span>
+                    <i class="fas fa-lightbulb me-1"></i> <span class="fw-medium">Note</span>
                     <br />
                     You can use <kbd><kbd>ctrl</kbd> + <kbd>v</kbd></kbd> to fill out the fields with a BibTeX entry from your clipboard.
                 </p>

@@ -45,14 +45,12 @@ class UserController extends Controller
                 'error' => __('You do not have the permission to view users')
             ], 403);
         }
-        $users = User::withoutTrashed()->with('roles')->orderBy('id')->get();
-        $delUsers = User::onlyTrashed()->with('roles')->orderBy('id')->get();
-        $roles = Role::orderBy('id')->get();
+        $users = User::with('roles')->withoutTrashed()->orderBy('id')->get();
+        $delUsers = User::with('roles')->onlyTrashed()->orderBy('id')->get();
 
         return response()->json([
             'users' => $users,
             'deleted_users' => $delUsers,
-            'roles' => $roles
         ]);
     }
 

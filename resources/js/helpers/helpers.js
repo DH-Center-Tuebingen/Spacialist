@@ -1,7 +1,5 @@
-import { useAuth } from '../bootstrap/auth.js';
+import auth from '../bootstrap/auth.js';
 import store from '../bootstrap/store.js';
-
-const auth = useAuth();
 
 export function can(permissionString, oneOf) {
     oneOf = oneOf || false;
@@ -42,6 +40,22 @@ export function rgb2hex(rgb) {
     return [r, g, b];
 }
 
+export function getCertaintyClass(certainty, prefix = 'bg') {
+    let classes = {};
+
+    if(certainty <= 25) {
+        classes[`${prefix}-danger`] = true;
+    } else if(certainty <= 50) {
+        classes[`${prefix}-warning`] = true;
+    } else if(certainty <= 75) {
+        classes[`${prefix}-info`] = true;
+    } else {
+        classes[`${prefix}-success`] = true;
+    }
+
+    return classes;
+}
+
 export function getTs() {
     const d = new Date();
     return d.getTime();
@@ -77,6 +91,10 @@ export function getEntityTypes() {
     return store.getters.entityTypes;
 }
 
+export function getEntityTypeAttributes(id) {
+    return store.getters.entityTypeAttributes(id);
+}
+
 // Formula based on https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color/3943023#3943023
 export function getEntityColors(id, alpha = 0.5) {
     const et = getEntityType(id);
@@ -100,6 +118,36 @@ export function getEntityColors(id, alpha = 0.5) {
         backgroundColor: color
     };
 }
+
+export function isLoggedIn() {
+    return auth.check();
+}
+
+export function getUser() {
+    return isLoggedIn() ? auth.user() : {};
+}
+
+export function userId() {
+    return getUser().id || -1;
+};
+
+export function getUserBy(value, attr = 'id') {
+    if(isLoggedIn()) {
+        const isNum = !isNaN(value);
+        const lValue = isNum ? value : value.toLowerCase();
+        return store.users.find(u => isNum ? (u[attr] == lValue) : (u[attr].toLowerCase() == lValue));
+    } else {
+        return null;
+    }
+};
+
+export function getUsers() {
+    return isLoggedIn() ? store.getters.users : [];
+};
+
+export const _cloneDeep = require('lodash/cloneDeep');
+export const _debounce = require('lodash/debounce');
+export const _orderBy = require('lodash/orderBy');
 
 // UNVERIFIED
 
@@ -222,28 +270,6 @@ export function deleteAllNotifications(ids = null, from = userNotifications()) {
     }));
 }
 
-export function getUser() {
-    return isLoggedIn() ? auth.user() : {};
-}
-
-export function userId() {
-    return getUser().id || -1;
-};
-
-export function getUserBy(value, attr = 'id') {
-    if(isLoggedIn()) {
-        const isNum = !isNaN(value);
-        const lValue = isNum ? value : value.toLowerCase();
-        return this.state.users.find(u => isNum ? (u[attr] == lValue) : (u[attr].toLowerCase() == lValue));
-    } else {
-        return null;
-    }
-};
-
-export function getUsers() {
-    return isLoggedIn() ? this.state.users : [];
-};
-
 export async function asyncFor(arr, callback) {
     for(let i=0; i<arr.length; i++) {
         await callback(arr[i]);
@@ -309,6 +335,11 @@ export function createDownloadLink(content, filename, base64 = false, contentTyp
     link.setAttribute("download", filename);
     document.body.appendChild(link);
     link.click();
+}
+
+export function createAnchorFromUrl(url) {
+    const urlRegex =/(\b(https?):\/\/[-A-Z0-9+#&=?@%_.]*[-A-Z0-9+#&=?@%_\/])/ig;
+    return url.replace(urlRegex, match => `<a href="${match}" target="_blank">${match}</a>`);
 }
 
 export function showUserInfo(user) {

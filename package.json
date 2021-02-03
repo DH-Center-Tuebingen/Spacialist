@@ -43,12 +43,21 @@
     },
     "dependencies": {
         "@popperjs/core": "^2.6.0",
+        "@vueform/multiselect": "^1.2.5",
         "bootstrap": "^5.0.0-beta1",
         "buffer": "^6.0.3",
+        "chart.js": "^3.0.0-beta.10",
         "dayjs": "^1.10.4",
+        "highlight.js": "^10.5.0",
+        "lodash": "^4.17.20",
         "p-queue": "^6.6.2",
         "process": "^0.11.10",
         "tree-vue-component": "^6.0.1",
-        "vue-i18n": "^9.0.0-rc.3"
+        "vee-validate": "^4.1.12",
+        "vue-i18n": "^9.0.0-rc.3",
+        "vue-infinite-loading": "^2.4.5",
+        "vue-upload-component": "^3.0.50",
+        "vue2-datepicker": "^4.0.0-beta.2",
+        "vuedraggable": "^4.0.1"
     }
 }

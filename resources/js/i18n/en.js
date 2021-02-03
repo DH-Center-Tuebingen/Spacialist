@@ -5,6 +5,7 @@ const en = {
         deactivate: 'Deactivate',
         reactivate: 'Reactivate',
         remove: 'Remove',
+        reset: 'Reset',
         cancel: 'Cancel',
         close: 'Close',
         add: 'Add',
@@ -49,7 +50,7 @@ const en = {
         'has-links': 'Has no links | Has one link | Has {cnt} links',
         discard: {
             title: 'Unsaved Changes',
-            msg: 'Unsaved changes in <span class="font-weight-medium">{name}</span>. Do you really want to continue and discard changes?',
+            msg: 'Unsaved changes in <span class="fw-medium">{name}</span>. Do you really want to continue and discard changes?',
             confirm: 'Yes, discard changes',
             confirmpos: 'No, save and continue'
         },
@@ -85,8 +86,9 @@ const en = {
             profile: 'Profile',
             logout: 'Logout',
             info_title: 'User Information',
+            personal_info_title: 'Personal Informationen',
             member_since: 'Member since',
-            deactivated_since: '<span class="font-weight-bold">deactivated</span> since {dt}',
+            deactivated_since: '<span class="fw-bold">deactivated</span> since {dt}',
             contact: 'Contact',
             avatar: 'Avatar',
             invalid_orcid: 'This ORCID is invalid',
@@ -118,7 +120,7 @@ const en = {
             serial: 'Serial (Auto-incrementing ID)',
             'serial-info': `All instances share this identifier as attribute. Add <code class="normal">%d</code> as counter.
             <br />
-            <span class="font-weight-medium">Example:</span>
+            <span class="fw-medium">Example:</span>
             <br />
             <code class="normal">Find_%d_Stone</code> would create Find_1_Stone, Find_2_Stone, &hellip;
             <br />
@@ -187,8 +189,8 @@ const en = {
             show: 'Show comments',
             submit: 'Submit Comment',
             text_placeholder: 'Enter a comment',
-            hide_reply: 'Hide <span class="font-weight-bold">one</span> reply | Hide <span class="font-weight-bold">{cnt}</span> replies',
-            show_reply: 'Show <span class="font-weight-bold">one</span> reply | Show <span class="font-weight-bold">{cnt}</span> replies',
+            hide_reply: 'Hide <span class="fw-bold">one</span> reply | Hide <span class="fw-bold">{cnt}</span> replies',
+            show_reply: 'Show <span class="fw-bold">one</span> reply | Show <span class="fw-bold">{cnt}</span> replies',
             fetching: 'Fetching comments&hellip;',
             fetching_failed: 'Fetching comments failed!',
             retry_failed: 'Retry',
@@ -212,14 +214,17 @@ const en = {
                 type: {
                     system: 'system-message'
                 },
-                user_left_comment_on: 'left a comment on <span class="font-weight-bold">{name}</span>.',
+                user_left_comment_on: 'left a comment on <span class="fw-bold">{name}</span>.',
                 reply: 'Reply',
                 mention_info: 'Write your reply. Use @nickname to mention other users.',
                 reply_sent: 'Reply sent',
-                reply_to_user: 'Reply to <span class="font-weight-bold">{name}</span>',
+                reply_to_user: 'Reply to <span class="fw-bold">{name}</span>',
                 reply_to_chat: 'Reply to comment section',
             }
-        }
+        },
+        validations: {
+            required: '',
+        },
     },
     main: {
         entity: {

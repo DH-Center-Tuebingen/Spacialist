@@ -3,28 +3,28 @@
         <div class="input-group">
             <div class="input-group-prepend">
                 <button type="button" class="btn btn-outline-secondary" :disabled="disabled" @click="toggleList()">
-                    <div v-show="!expanded">
+                    <div v-show="!state.expanded">
                         <i class="fas fa-fw fa-caret-up"></i>
-                        <span v-if="entries.length">
-                            ({{entries.length}})
+                        <span v-if="state.entries.length">
+                            ({{ state.entries.length }})
                         </span>
                     </div>
-                    <div v-show="expanded">
+                    <div v-show="state.expanded">
                         <i class="fas fa-fw fa-caret-down"></i>
                     </div>
                 </button>
             </div>
-            <input type="text" class="form-control" :disabled="disabled" v-model="input" />
+            <input type="text" class="form-control" :disabled="disabled" v-model="state.input" />
             <div class="input-group-append">
-                <button type="button" class="btn btn-success" @click="addListEntry()">
+                <button type="button" class="btn btn-outline-success" @click="addListEntry()">
                     <i class="fas fa-fw fa-plus"></i>
                 </button>
             </div>
         </div>
-        <ol class="mt-2" v-if="expanded && entries.length">
-            <li v-for="(l, i) in entries" :key="i">
-                <span v-html="urlify(l)"></span>
-                <a href="#" class="text-danger" @click="removeListEntry(i)">
+        <ol class="mt-2" v-if="state.expanded && state.entries.length">
+            <li v-for="(l, i) in state.entries" :key="i">
+                <span v-html="createAnchorFromUrl(l)"></span>
+                <a href="#" class="text-danger" @click.prevent="removeListEntry(i)">
                     <i class="fas fa-fw fa-trash"></i>
                 </a>
             </li>
@@ -33,17 +33,19 @@
 </template>
 
 <script>
+    import {
+        computed,
+        reactive,
+        toRefs,
+    } from 'vue';
+
+    import { useI18n } from 'vue-i18n';
+
+    import {
+        createAnchorFromUrl,
+    } from '../helpers/helpers.js';
+
     export default {
-        $_veeValidate: {
-            // value getter
-            value () {
-                return this.$el.value;
-            },
-            // name getter
-            name () {
-                return this.name;
-            }
-        },
         props: {
             name: String,
             entries: {
@@ -58,41 +60,61 @@
                 required: true,
             }
         },
-        mounted () {
-            this.$el.value = this.entries;
-        },
-        methods: {
-            onInput(value) {
-                this.$emit('input', value);
-                this.onChange(value);
-            },
-            addListEntry() {
-                if(!this.entries) {
-                    this.entries = [];
+        setup(props, context) {
+            const { t } = useI18n();
+            const {
+                name,
+                entries,
+                disabled,
+                onChange,
+            } = toRefs(props);
+            // FETCH
+
+            // FUNCTIONS
+            const onInput = value => {
+                // this.$emit('input', value);
+                // this.onChange(value);
+            };
+            const addListEntry = _ => {
+                if(!state.entries.value) {
+                    state.entries.value = [];
                 }
-                this.entries.push(this.input);
-                this.input="";
-                this.onInput(this.entries);
-            },
-            removeListEntry(index) {
-                this.entries.splice(index, 1);
-                this.onInput(this.entries);
-            },
-            toggleList() {
-                this.expanded = !this.expanded;
-            },
-            urlify(text) {
-                var urlRegex =/(\b(https?):\/\/[-A-Z0-9+#&=?@%_.]*[-A-Z0-9+#&=?@%_\/])/ig;
-                return text.replace(urlRegex, url => {
-                    return `<a href="${url}" target="_blank">${url}</a>`;
-                });
+                state.entries.push(state.input);
+                state.input = "";
+                onInput(state.entries);
+            };
+            const removeListEntry = index => {
+                state.entries.splice(index, 1);
+                onInput(state.entries);
+            };
+            const toggleList = _ => {
+                state.expanded = !state.expanded;
+            };
+
+            // DATA
+            const state = reactive({
+                input: "",
+                expanded: false,
+                entries: entries.value.slice(),
+            });
+
+            // RETURN
+            return {
+                t,
+                // HELPERS
+                createAnchorFromUrl,
+                // LOCAL
+                onInput,
+                addListEntry,
+                removeListEntry,
+                toggleList,
+                // PROPS
+                name,
+                disabled,
+                onChange,
+                // STATE
+                state,
             }
         },
-        data () {
-            return {
-                input: "",
-                expanded: false
-            }
-        }
     }
 </script>

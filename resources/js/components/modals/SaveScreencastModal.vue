@@ -6,8 +6,7 @@
                     $t('main.entity.modals.screencast.title')
                 }}
             </h5>
-            <button type="button" class="close" aria-label="Close" @click="$emit('close')">
-                <span aria-hidden="true">&times;</span>
+            <button type="button" class="btn-close" aria-label="Close" @click="$emit('close')">
             </button>
         </div>
         <div class="modal-body">

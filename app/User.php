@@ -85,7 +85,6 @@ class User extends Authenticatable implements JWTSubject
     }
 
     public function getAvatarUrlAttribute() {
-
         return isset($this->avatar) ? sp_get_public_url($this->avatar) : null;
     }
 

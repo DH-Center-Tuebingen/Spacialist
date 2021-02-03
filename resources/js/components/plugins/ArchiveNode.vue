@@ -7,7 +7,7 @@
             <span v-else>
                 <i class="fas fa-fw fa-file"></i>
             </span>
-            <span class="ms-1 font-weight-medium">
+            <span class="ms-1 fw-medium">
                 {{ data.cleanFilename }}
             </span>
         </div>

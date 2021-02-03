@@ -4,7 +4,17 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import Login from '../components/Login.vue';
 import MainView from '../components/MainView.vue';
 import EntityDetail from '../components/EntityDetail.vue';
+// Tools
+import Bibliography from '../components/BibliographyTable.vue';
+import GlobalActivity from '../components/GlobalActivity.vue';
+// Settings
 import Users from '../components/Users.vue';
+import Roles from '../components/Roles.vue';
+import DataModel from '../components/DataModel.vue';
+import DataModelDetailView from '../components/DataModelDetailView.vue';
+// User
+import UserProfile from '../components/UserProfile.vue';
+import UserActivity from '../components/UserActivity.vue';
 
 import DummyComponent from '../components/DummyComponent.vue';
 import NotFound from '../components/NotFound.vue';
@@ -103,7 +113,6 @@ export const router = createRouter({
                 {
                     path: 'e/:id',
                     name: 'entitydetail',
-                    // component: DummyComponent,
                     component: EntityDetail,
                     children: [
                         {
@@ -123,8 +132,7 @@ export const router = createRouter({
         {
             path: '/bibliography',
             name: 'bibliography',
-            component: DummyComponent,
-            // component: Bibliography,
+            component: Bibliography,
             children: [
                 {
                     path: 'edit/:id',
@@ -163,8 +171,7 @@ export const router = createRouter({
         {
             path: '/mg/roles',
             name: 'roles',
-            component: DummyComponent,
-            // component: Roles,
+            component: Roles,
             meta: {
                 auth: true
             }
@@ -172,8 +179,7 @@ export const router = createRouter({
         {
             path: '/activity/g',
             name: 'globalactivity',
-            component: DummyComponent,
-            // component: GlobalActivity,
+            component: GlobalActivity,
             meta: {
                 auth: true
             }
@@ -181,14 +187,12 @@ export const router = createRouter({
         {
             path: '/editor/dm',
             name: 'dme',
-            component: DummyComponent,
-            // component: DataModel,
+            component: DataModel,
             children: [
                 {
                     path: 'et/:id',
                     name: 'dmdetail',
-                    component: DummyComponent
-                    // component: DataModelDetailView
+                    component: DataModelDetailView
                 }
             ],
             meta: {
@@ -225,8 +229,7 @@ export const router = createRouter({
         {
             path: '/activity/u',
             name: 'useractivity',
-            component: DummyComponent,
-            // component: UserActivity,
+            component: UserActivity,
             meta: {
                 auth: true
             }
@@ -234,14 +237,14 @@ export const router = createRouter({
         {
             path: '/profile',
             name: 'userprofile',
-            component: DummyComponent,
-            // component: UserProfile,
+            component: UserProfile,
             meta: {
                 auth: true
             }
         },
         {
-            path: '/:catchAll(.*)',
+            path: '/:pathMatch(.*)',
+            name: 'not-found',
             component: NotFound,
         }
     ]

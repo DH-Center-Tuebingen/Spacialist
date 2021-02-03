@@ -111,7 +111,7 @@ const de = {
                     },
                     archive: {
                         info: 'Klicke auf Dateien um sie direkt herunterzuladen. Das Herunterladen ganzer Ordner wird noch nicht unterstützt.',
-                        files_in_folder: 'Enthält <span class="font-weight-medium">keine</span> Dateien | Enthält <span class="font-weight-medium">eine</span> Datei | Enthält <span class="font-weight-medium">{cnt}</span> Dateien'
+                        files_in_folder: 'Enthält <span class="fw-medium">keine</span> Dateien | Enthält <span class="fw-medium">eine</span> Datei | Enthält <span class="fw-medium">{cnt}</span> Dateien'
                     },
                     undef: {
                         info: `Der Dateityp <code>{mime}</code> von <span class="font-italic">{name}</span> wird im Moment nicht von Spacialist unterstützt.
@@ -135,7 +135,7 @@ const de = {
                     replace: {
                         button: 'Datei ersetzen',
                         confirm: 'Willst du die Datei ({size}) durch {name} ({size2}) ersetzen?',
-                        different_mime: 'Die Dateien haben einen unterschiedlichen Mime-Type. Wenn du fortfährst, wird der Typ von <span class="font-weight-medium">{mime_old}</span> zu <span class="font-weight-medium">{mime_new}</span> geändert. Du solltest daher den Dateinamen anpassen.'
+                        different_mime: 'Die Dateien haben einen unterschiedlichen Mime-Type. Wenn du fortfährst, wird der Typ von <span class="fw-medium">{mime_old}</span> zu <span class="fw-medium">{mime_new}</span> geändert. Du solltest daher den Dateinamen anpassen.'
                     }
                 },
                 delete: {

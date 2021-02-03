@@ -3,8 +3,7 @@
         <div class="modal-content h-100">
             <div class="modal-header">
                 <h5 class="modal-title">{{ $t('main.entity.references.title') }}</h5>
-                <button type="button" class="close" aria-label="Close" @click="hideModal">
-                    <span aria-hidden="true">&times;</span>
+                <button type="button" class="btn-close" aria-label="Close" @click="hideModal">
                 </button>
             </div>
             <div class="modal-body col col-md-8 offset-md-2 scroll-y-auto">
@@ -64,14 +63,14 @@
                                 <div class="d-flex flex-column">
                                     <h6>{{ reference.bibliography.title }}</h6>
                                     <span class="mb-0">
-                                        {{ reference.bibliography.author }}, <span class="text-muted font-weight-light">{{ reference.bibliography.year}}</span>
+                                        {{ reference.bibliography.author }}, <span class="text-muted fw-light">{{ reference.bibliography.year}}</span>
                                     </span>
                                 </div>
                             </td>
                             <td class="text-end p-2 col">
                                 <div class="d-flex flex-column">
                                     <div>
-                                        <p class="font-weight-light font-italic mb-0" v-if="editReference.id != reference.id">
+                                        <p class="fw-light font-italic mb-0" v-if="editReference.id != reference.id">
                                             {{ reference.description }}
                                         </p>
                                         <div class="d-flex" v-else>
@@ -84,7 +83,7 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <span class="text-muted font-weight-light">
+                                    <span class="text-muted fw-light">
                                         {{ reference.updated_at | date(undefined, true, true) }}
                                     </span>
                                 </div>
@@ -138,7 +137,7 @@
                                             {{ props.option.title }}
                                         </span>
                                         <span class="option__small">
-                                            {{ props.option.author }}, <span class="text-muted font-weight-light">{{ props.option.year}}</span>
+                                            {{ props.option.author }}, <span class="text-muted fw-light">{{ props.option.year}}</span>
                                         </span>
                                     </div>
                                 </template>

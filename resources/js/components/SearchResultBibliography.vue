@@ -5,7 +5,7 @@
             <div class="media-body small">
                 <h6 class="my-0" style="white-space: pre;">{{ data.title }}</h6>
                 <p class="mb-0">
-                    {{ data.author }}, <span class="text-muted font-weight-light">{{ data.year}}</span>
+                    {{ data.author }}, <span class="text-muted fw-light">{{ data.year}}</span>
                 </p>
             </div>
             <div class="ms-3 media-image-placeholder">

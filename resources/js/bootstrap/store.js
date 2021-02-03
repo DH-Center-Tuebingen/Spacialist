@@ -7,20 +7,30 @@ import { getEntityData } from '../api.js';
 export const store = createStore({
     state() {
         return {
+            attributes: [],
+            entityTypeAttributes: {},
+            bibliography: [],
             concepts: {},
+            deletedUsers: [],
+            entity: {},
             entityTypes: {},
             entities: {},
-            tree: [],
+            file: {},
+            permissions: [],
             preferences: {},
             roles: [],
-            users: [],
-            deletedUsers: [],
+            tree: [],
             user: {},
-            entity: {},
-            file: {}
+            users: [],
         }
     },
     mutations: {
+        setAttributes(state, data) {
+            state.attributes = data;
+        },
+        setBibliography(state, data) {
+            state.bibliography = data;
+        },
         addEntity(state, n) {
             state.entities[n.id] = n;
             state.tree.push(n);
@@ -29,6 +39,11 @@ export const store = createStore({
             state.concepts = data;
         },
         setEntityTypes(state, data) {
+            for(let k in data) {
+                const et = data[k];
+                state.entityTypeAttributes[et.id] = et.attributes.slice();
+                delete et.attributes;
+            }
             state.entityTypes = data;
         },
         sortTree(state, sort) {
@@ -39,6 +54,9 @@ export const store = createStore({
         },
         setRoles(state, data) {
             state.roles = data;
+        },
+        setPermissions(state, data) {
+            state.permissions = data;
         },
         setUsers(state, data) {
             state.users = data.active;
@@ -55,8 +73,12 @@ export const store = createStore({
         }
     },
     actions: {
+        setBibliography({commit}, data) {
+            commit('setBibliography', data);
+        },
         setRoles({commit}, data) {
-            commit('setRoles', data);
+            commit('setRoles', data.roles);
+            commit('setPermissions', data.permissions);
         },
         setUsers({commit}, data) {
             commit('setUsers', data);
@@ -148,13 +170,31 @@ export const store = createStore({
             });
             sortTree('rank', 'asc', state.tree);
         },
+        setEntityTypes({commit, state}, data) {
+            state.entityTypes = {};
+            state.entityTypeAttributes = {};
+            commit('setEntityTypes', data);
+        },
+        setAttributes({commit, state}, data) {
+            state.attributes = [];
+            commit('setAttributes', data);
+        },
     },
     getters: {
+        attributes: state => {
+            return state.attributes;
+        },
+        bibliography: state => {
+            return state.bibliography;
+        },
         concepts: state => {
             return state.concepts;
         },
         entityTypes: state => {
             return state.entityTypes;
+        },
+        entityTypeAttributes: state => id => {
+            return state.entityTypeAttributes[id];
         },
         tree: state => {
             return state.tree;
@@ -165,8 +205,15 @@ export const store = createStore({
         preferences: state => {
             return state.preferences;
         },
-        roles: state => {
-            return state.roles;
+        roles: state => noPerms => {
+            return noPerms ? state.roles.map(r => {
+                // Remove permissions from role
+                let {permissions, ...role} = r;
+                return role;
+            }) : state.roles;
+        },
+        permissions: state => {
+            return state.permissions;
         },
         allUsers: state => {
             return [

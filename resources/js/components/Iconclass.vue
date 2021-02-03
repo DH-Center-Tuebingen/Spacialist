@@ -9,7 +9,7 @@
             </div>
         </div>
         <div class="bg-light mt-2 p-2 border rounded" v-if="infoLoaded">
-            <span class="font-weight-bold">{{ text }}</span>
+            <span class="fw-bold">{{ text }}</span>
             <hr class="my-2" />
             <div>
                 <span>{{ keywords.join(' &bull; ') }}</span>

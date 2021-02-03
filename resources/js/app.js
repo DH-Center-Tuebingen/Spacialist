@@ -3,14 +3,17 @@ import { createApp } from 'vue';
 // Third-Party Libs
 const {default: PQueue} = require('p-queue');
 import bootstrap from 'bootstrap';
+import hljs from 'highlight.js';
 
 // Helpers/Filter
 
 // Reusable Components
-// import AttributeList from './components/AttributeList.vue';
+import AttributeList from './components/AttributeList.vue';
+import EntityTypeList from './components/EntityTypeList.vue';
 import EntityTree from './components/EntityTree.vue';
 import EntityBreadcrumbs from './components/EntityBreadcrumbs.vue';
 import UserAvatar from './components/UserAvatar.vue';
+import ActivityLog from './components/ActivityLog.vue';
 
 // Init Libs
 // PQueue, httpQueue
@@ -18,7 +21,11 @@ const queue = new PQueue({concurrency: 1});
 window.$httpQueue = queue;
 
 // Third-Party Components
-
+import Multiselect from '@vueform/multiselect';
+import VueUploadComponent from 'vue-upload-component';
+import DatePicker from 'vue2-datepicker';
+import InfiniteLoading from 'vue-infinite-loading';
+import draggable from 'vuedraggable';
 // Components
 import App from './App.vue';
 
@@ -75,12 +82,45 @@ app.directive('dcan', {
         }
     }
 });
+app.directive('highlightjs', {
+  deep: true,
+  beforeMount(el, binding) {
+    // on first bind, highlight all targets
+    let targets = el.querySelectorAll('code')
+    targets.forEach((target) => {
+      // if a value is directly assigned to the directive, use this
+      // instead of the element content.
+      if (binding.value) {
+        target.innerHTML = binding.value
+      }
+      hljs.highlightBlock(target)
+    })
+  },
+  updated(el, binding) {
+    // after an update, re-fill the content and then highlight
+    let targets = el.querySelectorAll('code')
+    targets.forEach((target) => {
+      if (binding.value) {
+        target.innerHTML = binding.value
+        hljs.highlightBlock(target)
+      }
+    })
+  }
+})
 
 // Components
-// app.component('attribute-list', AttributeList);
+app.component('attribute-list', AttributeList);
+app.component('entity-type-list', EntityTypeList);
 app.component('entity-tree', EntityTree);
 app.component('entity-breadcrumbs', EntityBreadcrumbs);
 app.component('user-avatar', UserAvatar);
+app.component('activity-log', ActivityLog);
+// Third-Party components
+app.component('multiselect', Multiselect);
+app.component('file-upload', VueUploadComponent);
+app.component('date-picker', DatePicker);
+app.component('infinite-loading', InfiniteLoading);
+app.component('draggable', draggable);
 
 // Mount Vue
 app.mount('#app');

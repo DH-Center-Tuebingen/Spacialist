@@ -48,7 +48,7 @@
                     {{ date(state.lastModified, undefined, true, true) }}
                 </span>
                 -
-                <a href="#" @click.prevent="showUserInfo(state.entity.user)" class="font-weight-medium" v-if="state.entity.user">
+                <a href="#" @click.prevent="showUserInfo(state.entity.user)" class="fw-medium" v-if="state.entity.user">
                     {{ state.entity.user.name }}
                     <user-avatar :user="state.entity.user" :size="20" class="align-middle"></user-avatar>
                 </a>

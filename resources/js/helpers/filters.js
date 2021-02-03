@@ -162,7 +162,7 @@ export function bibtexify(value, type) {
 };
 export function mentionify(value) {
     const template = `<span class="badge badge-primary">@{name}</span>`;
-    const unknownTemplate = `<span class="font-weight-bold">@{name}</span>`;
+    const unknownTemplate = `<span class="fw-bold">@{name}</span>`;
     const mentionRegex = /@(\w|\d)+/gi;
     let mentions = value.match(mentionRegex);
     if(!mentions) return value;

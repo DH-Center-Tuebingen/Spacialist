@@ -111,7 +111,7 @@ const en = {
                     },
                     archive: {
                         info: 'Click on files to download them. Downloading folders is currently not supported.',
-                        files_in_folder: 'Contains <span class="font-weight-medium">no</span> files | Contains <span class="font-weight-medium">one</span> file | Contains <span class="font-weight-medium">{cnt}</span> files'
+                        files_in_folder: 'Contains <span class="fw-medium">no</span> files | Contains <span class="fw-medium">one</span> file | Contains <span class="fw-medium">{cnt}</span> files'
                     },
                     undef: {
                         info: `The mime-type <code>{mime}</code> of <span class="font-italic">{name}</span> is currently not supported in Spacialist.
@@ -135,7 +135,7 @@ const en = {
                     replace: {
                         button: 'Replace file',
                         confirm: 'Do you want to replace the file ({size}) with {name} ({size2})?',
-                        different_mime: 'These files have a different mime-type. If you proceed, type is changed from <span class="font-weight-medium">{mime_old}</span> to <span class="font-weight-medium">{mime_new}</span>. You should adjust the filename.'
+                        different_mime: 'These files have a different mime-type. If you proceed, type is changed from <span class="fw-medium">{mime_old}</span> to <span class="fw-medium">{mime_new}</span>. You should adjust the filename.'
                     }
                 },
                 delete: {

@@ -7,7 +7,7 @@
             </div>
             <div class="d-flex flex-column flex-grow-1" :class="{'small': smallText}">
                 <div class="d-flex flex-row justify-content-between">
-                    <span class="font-weight-bold text-primary">
+                    <span class="fw-bold text-primary">
                         {{ $t('global.notifications.body.title') }}
                     </span>
                     <div class="d-flex flex-row">
@@ -27,7 +27,7 @@
                 <div class="text-muted" :class="{'opacity-50': read}">
                     <div v-if="notf.type == 'App\\Notifications\\CommentPosted'">
                         <a href="#" @click.prevent="$showUserInfo(sender)" class="text-body">
-                            <span class="font-weight-bold">{{ sender.nickname }}</span>
+                            <span class="fw-bold">{{ sender.nickname }}</span>
                         </a>
                         <span v-html="$t('global.notifications.body.user_left_comment_on', {
                             name: `${notf.data.resource.id} (${notf.data.resource.type})`

@@ -8,3 +8,9 @@
   border-color: $input-border-color !important;
   border-radius: $input-border-radius !important;
 }
+
+.#{$namespace}-datepicker-col-5 {
+  position: initial;
+  display: initial;
+  width: 41.6666666667%;
+}

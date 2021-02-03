@@ -7,8 +7,7 @@
                         name: file.name
                     }) }}
                 </h5>
-                <button type="button" class="close" aria-label="Close" @click.prevent="hide">
-                    <span aria-hidden="true">&times;</span>
+                <button type="button" class="btn-close" aria-label="Close" @click.prevent="hide">
                 </button>
             </div>
             <div class="modal-body col row">

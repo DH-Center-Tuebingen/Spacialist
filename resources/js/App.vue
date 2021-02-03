@@ -169,7 +169,7 @@
                 </div>
             </div>
         </nav>
-        <div class="container-fluid mt-3 mb-3 col">
+        <div class="container-fluid my-3 col overflow-hidden">
             <router-view></router-view>
             <video id="rtc-sharing-container" class="video-js d-none"></video>
             <about-dialog></about-dialog>
@@ -193,6 +193,8 @@
     import { useI18n } from 'vue-i18n';
 
     import {
+        fetchAttributes,
+        fetchBibliography,
         fetchTopEntities,
         fetchPreData,
         fetchUsers,
@@ -210,8 +212,10 @@
 
             // FETCH
             fetchPreData(locale);
+            fetchAttributes();
             fetchUsers();
             fetchTopEntities();
+            fetchBibliography();
 
             // DATA
             const state = reactive({

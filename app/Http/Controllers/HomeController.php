@@ -49,7 +49,7 @@ class HomeController extends Controller
 
         $concepts = ThConcept::getMap($locale);
 
-        $entityTypes = EntityType::with(['sub_entity_types', 'layer'])
+        $entityTypes = EntityType::with(['sub_entity_types', 'layer', 'attributes'])
             ->orderBy('id')
             ->get();
         $entityTypeMap = $entityTypes->getDictionary();

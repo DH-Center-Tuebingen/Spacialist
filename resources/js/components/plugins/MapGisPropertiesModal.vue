@@ -3,8 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">{{ $t('plugins.map.gis.props.title') }}</h5>
-                <button type="button" class="close" aria-label="Close" @click.prevent="hide">
-                    <span aria-hidden="true">&times;</span>
+                <button type="button" class="btn-close" aria-label="Close" @click.prevent="hide">
                 </button>
             </div>
             <div class="modal-body row col">

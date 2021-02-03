@@ -5,8 +5,7 @@
                 <h5 class="modal-title">
                     {{ $t('plugins.map.gis.import.title') }}
                 </h5>
-                <button type="button" class="close" aria-label="Close" @click.prevent="hide">
-                    <span aria-hidden="true">&times;</span>
+                <button type="button" class="btn-close" aria-label="Close" @click.prevent="hide">
                 </button>
             </div>
             <div class="modal-body row col">
@@ -56,10 +55,9 @@
                             </small>
                         </h5>
                         <ul class="list-group" v-show="showFileList">
-                            <li class="list-group-item px-2 py-1" v-for="file in files">
+                            <li class="list-group-item px-2 py-1" v-for="file in files" :key="file.id">
                                 <span>{{ file.name }}</span>
-                                <button type="button" class="close" aria-label="Remove File" @click="onFileRemove(file)">
-                                    <span aria-hidden="true" style="vertical-align: text-top;">&times;</span>
+                                <button type="button" class="btn-close" aria-label="Remove File" @click="onFileRemove(file)">
                                 </button>
                             </li>
                         </ul>

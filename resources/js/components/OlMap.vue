@@ -49,7 +49,7 @@
             </div>
             <div :id="id+'-popup'" class="popup popover ol-popover bs-popover-top">
                 <h4 class="popover-header">
-                    <span class="font-weight-medium">
+                    <span class="fw-medium">
                         {{ overlayInfo.name }}
                     </span>
                     <span v-if="overlayInfo.subname">
@@ -85,7 +85,7 @@
                                     epsg: epsg.epsg
                                 })
                             }}
-                            <span class="font-weight-normal">
+                            <span class="fw-normal">
                                 ({{ coordinateList.length }})
                             </span>
                             <span v-show="overlayInfo.showCoordinates">

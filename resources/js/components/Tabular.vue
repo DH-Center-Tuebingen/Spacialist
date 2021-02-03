@@ -3,8 +3,8 @@
         <table class="table table-striped table-hovered table-sm">
             <thead class="thead-light">
                 <tr>
-                    <th v-for="column in attribute.columns">
-                        {{ $translateConcept(column.thesaurus_url) }}
+                    <th v-for="(column, i) in attribute.columns" :key="i">
+                        {{ translateConcept(column.thesaurus_url) }}
                     </th>
                     <th>
                         <button type="button" class="btn btn-outline-secondary btn-sm" @click="emitExpandToggle()">
@@ -14,8 +14,8 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(row, $index) in value">
-                    <td v-for="column in attribute.columns">
+                <tr v-for="(row, $index) in value" :key="$index">
+                    <td v-for="(column, i) in attribute.columns" :key="i">
                         <input class="form-control form-control-sm" v-if="column.datatype == 'string'" type="text" :disabled="disabled" v-model="row[column.id]" @input="onInput($index, $event.target.value)"/>
                         <input class="form-control form-control-sm" v-else-if="column.datatype == 'double'" type="number" :disabled="disabled" step="any" min="0" placeholder="0.0" v-model.number="row[column.id]" @input="onInput($index, $event.target.value)"/>
                         <input class="form-control form-control-sm" v-else-if="column.datatype == 'integer'" type="number" :disabled="disabled" step="1" placeholder="0" v-model.number="row[column.id]" @input="onInput($index, $event.target.value)"/>
@@ -23,26 +23,21 @@
                         <div v-else-if="column.datatype == 'string-sc'">
                             <multiselect
                                 class="multiselect-sm"
-                                label="concept_url"
-                                track-by="id"
                                 v-model="row[column.id]"
-                                :allowEmpty="true"
-                                :closeOnSelect="true"
-                                :customLabel="translateLabel"
+                                :mode="'tags'"
+                                :label="'concept_url'"
+                                :track-by="'concept_url'"
+                                :valueProp="'id'"
                                 :disabled="disabled"
-                                :hideSelected="true"
-                                :multiple="false"
                                 :options="selections[column.id] || []"
-                                :placeholder="$t('global.select.placehoder')"
-                                :select-label="$t('global.select.select')"
-                                :deselect-label="$t('global.select.deselect')"
+                                :placeholder="t('global.select.placehoder')"
                                 @input="onInput($index, $event.target)">
                             </multiselect>
                         </div>
                         <div v-else-if="column.datatype == 'entity'">
                             <entity-search
-                                :id="`attribute-${column.id}`"
-                                :name="`attribute-${column.id}`"
+                                :id="`attr-${column.id}`"
+                                :name="`attr-${column.id}`"
                                 :on-select="selection => setEntitySearchResult(selection, row, column.id, $index)"
                                 :value="row[column.id] ? row[column.id].name : ''">
                             </entity-search>
@@ -55,35 +50,29 @@
                     </td>
                 </tr>
                 <tr>
-                    <td v-for="column in attribute.columns">
-                        <input class="form-control form-control-sm" v-if="column.datatype == 'string'" type="text" :disabled="disabled" v-model="newTableCols[column.id]"/>
-                        <input class="form-control form-control-sm" v-else-if="column.datatype == 'double'" type="number" :disabled="disabled" step="any" min="0" placeholder="0.0" v-model.number="newTableCols[column.id]"/>
-                        <input class="form-control form-control-sm" v-else-if="column.datatype == 'integer'" type="number" :disabled="disabled" step="1" placeholder="0" v-model.number="newTableCols[column.id]"/>
-                        <input class="form-control form-control-sm" v-else-if="column.datatype == 'boolean'" type="checkbox" :disabled="disabled" v-model="newTableCols[column.id]"/>
+                    <td v-for="(column, i) in attribute.columns" :key="i">
+                        <input class="form-control form-control-sm" v-if="column.datatype == 'string'" type="text" :disabled="disabled" v-model="state.newTableCols[column.id]"/>
+                        <input class="form-control form-control-sm" v-else-if="column.datatype == 'double'" type="number" :disabled="disabled" step="any" min="0" placeholder="0.0" v-model.number="state.newTableCols[column.id]"/>
+                        <input class="form-control form-control-sm" v-else-if="column.datatype == 'integer'" type="number" :disabled="disabled" step="1" placeholder="0" v-model.number="state.newTableCols[column.id]"/>
+                        <input class="form-control form-control-sm" v-else-if="column.datatype == 'boolean'" type="checkbox" :disabled="disabled" v-model="state.newTableCols[column.id]"/>
                         <div v-else-if="column.datatype == 'string-sc'">
                             <multiselect
                                 class="multiselect-sm"
-                                label="concept_url"
-                                track-by="id"
-                                v-model="newTableCols[column.id]"
-                                :allowEmpty="true"
-                                :closeOnSelect="true"
-                                :customLabel="translateLabel"
+                                v-model="state.newTableCols[column.id]"
+                                :label="'concept_url'"
+                                :track-by="'concept_url'"
+                                :mode="'tags'"
                                 :disabled="disabled"
-                                :hideSelected="true"
-                                :multiple="false"
                                 :options="selections[column.id] || []"
-                                :placeholder="$t('global.select.placehoder')"
-                                :select-label="$t('global.select.select')"
-                                :deselect-label="$t('global.select.deselect')">
+                                :placeholder="t('global.select.placehoder')">
                             </multiselect>
                         </div>
                         <div v-else-if="column.datatype == 'entity'">
                             <entity-search
-                                :id="`attribute-${column.id}`"
-                                :name="`attribute-${column.id}`"
-                                :on-select="selection => setEntitySearchResult(selection, newTableCols, column.id)"
-                                :value="newTableCols[column.id] ? newTableCols[column.id].name : ''">
+                                :id="`attr-${column.id}`"
+                                :name="`attr-${column.id}`"
+                                :on-select="selection => setEntitySearchResult(selection, state.newTableCols, column.id)"
+                                :value="state.newTableCols[column.id] ? state.newTableCols[column.id].name : ''">
                             </entity-search>
                         </div>
                     </td>
@@ -94,62 +83,68 @@
                     </td>
                 </tr>
                 <tr>
-                    <td v-for="column in attribute.columns">
-                        <form class="d-flex flex-column" v-if="chartShown">
+                    <td v-for="(column, i) in attribute.columns" :key="i">
+                        <form class="d-flex flex-column" v-if="state.chartShown">
                             <div class="form-check" v-show="column.datatype == 'integer'">
-                                <input class="form-check-input" type="checkbox" :id="`include-cb-${column.id}`" v-model="chartSet[column.id]" @change="updateChart()" />
+                                <input class="form-check-input" type="checkbox" :id="`include-cb-${column.id}`" v-model="state.chartSet[column.id]" @change="updateChart()" />
                                 <label class="form-check-label" :for="`include-cb-${column.id}`">
-                                    {{ $t('main.entity.attributes.table.chart.include_in') }}
+                                    {{ t('main.entity.attributes.table.chart.include_in') }}
                                 </label>
                             </div>
                             <div class="form-check" v-show="column.datatype == 'integer'">
-                                <input class="form-check-input" type="checkbox" :id="`difference-cb-${column.id}`" v-model="chartAcc[column.id]" @change="updateChart()" />
+                                <input class="form-check-input" type="checkbox" :id="`difference-cb-${column.id}`" v-model="state.chartAcc[column.id]" @change="updateChart()" />
                                 <label class="form-check-label" :for="`difference-cb-${column.id}`">
-                                    {{ $t('main.entity.attributes.table.chart.use_difference') }}
+                                    {{ t('main.entity.attributes.table.chart.use_difference') }}
                                 </label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" :id="`label-radio-${column.id}`" :value="column.id" v-model="chartLabel" @change="updateChart()" />
+                                <input class="form-check-input" type="radio" :id="`label-radio-${column.id}`" :value="column.id" v-model="state.chartLabel" @change="updateChart()" />
                                 <label class="form-check-label" :for="`label-radio-${column.id}`">
-                                    {{ $t('main.entity.attributes.table.chart.use_as_label') }}
+                                    {{ t('main.entity.attributes.table.chart.use_as_label') }}
                                 </label>
                             </div>
                         </form>
                     </td>
                     <td>
-                        <button type="button" class="btn btn-primary btn-sm" @click="toggleChart">
+                        <button type="button" class="btn btn-primary btn-sm" @click="toggleChart()">
                             <i class="fas fa-fw fa-chart-bar"></i>
                         </button>
                     </td>
                 </tr>
             </tbody>
         </table>
-        <div v-show="chartShown">
+        <div v-show="state.chartShown">
             <div class="d-flex flex-row">
-                <input type="range" class="form-control-range" min="1" :max="value.length" step="1" v-model.number="chartSetLength" @change="updateChart()" />
+                <input type="range" class="form-range" min="1" :max="value.length" step="1" v-model.number="state.chartSetLength" @change="updateChart()" />
                 <span>
-                    {{ $t('main.entity.attributes.table.chart.number_sets', {cnt: chartSetLength}) }}
+                    {{ t('main.entity.attributes.table.chart.number_sets', {cnt: state.chartSetLength}) }}
                 </span>
             </div>
-            <canvas :id="chartId"></canvas>
+            <canvas :id="state.chartId"></canvas>
         </div>
     </div>
 </template>
 
 <script>
-    import Chart from 'chart.js';
+    import {
+        computed,
+        onMounted,
+        reactive,
+        toRefs,
+    } from 'vue';
+
+    import {
+        Chart,
+        LinearScale,
+    } from 'chart.js';
+
+    import { useI18n } from 'vue-i18n';
+
+    import {
+        translateConcept,
+    } from '../helpers/helpers.js';
 
     export default {
-        $_veeValidate: {
-            // value getter
-            value () {
-                return this.$el.value;
-            },
-            // name getter
-            name () {
-                return this.name;
-            }
-        },
         props: {
             name: String,
             value: {
@@ -170,47 +165,57 @@
                 required: true,
             }
         },
-        mounted () {
-            this.$el.value = this.value;
-            for(let k in this.attribute.columns) {
-                const c = this.attribute.columns[k];
-                Vue.set(this.newTableCols, c.id, null);
-            }
-        },
-        methods: {
-            emitExpandToggle() {
-                this.expanded = !this.expanded;
-                this.$emit('expanded', {
-                    id: this.attribute.id,
-                    state: this.expanded
+        emits: ['expanded'],
+        setup(props, context) {
+            const { t } = useI18n();
+
+            Chart.register(LinearScale);
+
+            const {
+                name,
+                value,
+                selections,
+                attribute,
+                disabled,
+                onChange,
+            } = toRefs(props);
+
+            // FETCH
+
+            // FUNCTIONS
+            const emitExpandToggle = _ => {
+                state.expanded = !state.expanded;
+                context.emit('expanded', {
+                    id: attribute.value.id,
+                    state: state.expanded,
                 });
-            },
-            toggleChart() {
-                if(this.chartShown) {
-                    this.chartShown = false;
-                    if(this.chartCtx) this.chartCtx.destroy();
-                    this.chartCtx = null;
+            };
+            const toggleChart = _ => {
+                if(state.chartShown) {
+                    state.chartShown = false;
+                    if(thstateis.chartCtx) state.chartCtx.destroy();
+                    state.chartCtx = null;
                 } else {
-                    this.chartShown = true;
+                    state.chartShown = true;
                 }
-            },
-            updateChart() {
-                if(this.chartCtx) this.chartCtx.destroy();
-                this.chartCtx = new Chart(this.chartId, {
+            };
+            const updateChart = _ => {
+                if(state.chartCtx) state.chartCtx.destroy();
+                state.chartCtx = new Chart(state.chartId, {
                     type: 'bar',
-                    data: this.chartData,
+                    data: state.chartData,
                     options: {
                         scales: {
-                            yAxes: [{
+                            y: {
                                 ticks: {
                                     beginAtZero: true
                                 }
-                            }]
+                            },
                         }
                     }
                 });
-            },
-            onInput(field, value) {
+            };
+            const onInput = (field, value) => {
                 this.$emit('input', value);
                 if(field != null) {
                     // an entry in an existing row has been changed
@@ -219,34 +224,32 @@
                     value = this.value[field];
                 }
                 this.onChange(field, value);
-            },
-            setEntitySearchResult(result, row, column, field) {
+            };
+            const setEntitySearchResult = (result, row, column, field) => {
                 if(result) {
-                    Vue.set(row, column, result);
+                    row[column] = result;
                 } else {
-                    Vue.delete(row, column);
+                    delete row[column];
                 }
                 if(field) {
-                    this.onInput(field, result);
+                    onInput(field, result);
                 }
-            },
-            addTableRow(row) {
+            };
+            const addTableRow = row => {
                 this.value.push(_clone(row));
                 for(let k in row) {
-                    Vue.delete(row, k);
+                    delete row[k];
                 }
-                this.onInput(null, this.value);
-            },
-            deleteTableRow(index) {
+                onInput(null, this.value);
+            };
+            const deleteTableRow = index => {
                 this.value.splice(index, 1);
-                this.onInput(null, this.value);
-            },
-            translateLabel(element, prop) {
-                return this.$translateLabel(element, prop);
-            },
-        },
-        data() {
-            return {
+                onInput(null, this.value);
+            };
+
+            // DATA
+            const state = reactive({
+                locValue: value,
                 newTableCols: {},
                 expanded: false,
                 chartShown: false,
@@ -255,43 +258,69 @@
                 chartLabel: -1,
                 chartSet: {},
                 chartAcc: {},
-                chartSetLength: Math.min(7, this.value.length),
+                chartSetLength: Math.min(7, value.value.length),
+                chartData: computed(_ => {
+                    if(!state.chartShown) return;
+                    if(state.chartLabel === -1) return;
+                    let lastValues = value.value.slice(-(state.chartSetLength+1));
+                    let datasets = [];
+                    for(let i=1; i<lastValues.length; i++) {
+                        let j = 0;
+                        for(let k in state.chartSet) {
+                            if(!state.chartSet[k]) continue;
+                            const label = attribute.value.columns[k];
+                            if(!datasets[j]) {
+                                datasets[j] = {
+                                    data: [],
+                                    backgroundColor: `rgba(${Math.floor(Math.random()*256)}, ${Math.floor(Math.random()*256)}, ${Math.floor(Math.random()*256)}, 0.25)`,
+                                    label: `${translateConcept(label.thesaurus_url)}`
+                                }
+                            }
+                            let value;
+                            if(state.chartAcc[k]) {
+                                value = lastValues[i][k] - lastValues[i-1][k];
+                            } else {
+                                value = lastValues[i][k];
+                            }
+                            datasets[j].data.push(value);
+                            j++;
+                        }
+                    }
+                    const labels = lastValues.slice(1).map(v => v[state.chartLabel]);
+                    return {
+                        labels: labels,
+                        datasets: datasets
+                    };
+                }),
+            });
+
+            // ON MOUNTED
+            onMounted(_ => {
+
+            });
+
+            // RETURN
+            return {
+                t,
+                // HELPERS
+                translateConcept,
+                // LOCAL
+                emitExpandToggle,
+                toggleChart,
+                updateChart,
+                setEntitySearchResult,
+                // PROPS
+                disabled,
+                // STATE
+                state,
             }
         },
-        computed: {
-            chartData() {
-                if(!this.chartShown) return;
-                if(this.chartLabel === -1) return;
-                let lastValues = this.value.slice(-(this.chartSetLength+1));
-                let datasets = [];
-                for(let i=1; i<lastValues.length; i++) {
-                    let j = 0;
-                    for(let k in this.chartSet) {
-                        if(!this.chartSet[k]) continue;
-                        const label = this.attribute.columns[k];
-                        if(!datasets[j]) {
-                            datasets[j] = {
-                                data: [],
-                                backgroundColor: `rgba(${Math.floor(Math.random()*256)}, ${Math.floor(Math.random()*256)}, ${Math.floor(Math.random()*256)}, 0.25)`,
-                                label: `${this.$translateConcept(label.thesaurus_url)}`
-                            }
-                        }
-                        let value;
-                        if(this.chartAcc[k]) {
-                            value = lastValues[i][k] - lastValues[i-1][k];
-                        } else {
-                            value = lastValues[i][k];
-                        }
-                        datasets[j].data.push(value);
-                        j++;
-                    }
-                }
-                const labels = lastValues.slice(1).map(v => v[this.chartLabel]);
-                return {
-                    labels: labels,
-                    datasets: datasets
-                };
-            }
-        }
+        // mounted () {
+        //     this.$el.value = this.value;
+        //     for(let k in this.attribute.columns) {
+        //         const c = this.attribute.columns[k];
+        //         Vue.set(this.newTableCols, c.id, null);
+        //     }
+        // },
     }
 </script>
