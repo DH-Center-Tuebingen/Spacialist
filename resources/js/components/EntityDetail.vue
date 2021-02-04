@@ -70,8 +70,11 @@
         <div class="tab-content col ps-0 pe-0 overflow-hidden" id="myTabContent">
             <div class="tab-pane fade h-100 show active" id="active-entity-attributes-panel" role="tabpanel">
                 <form id="entity-attribute-form" name="entity-attribute-form" class="h-100" @submit.prevent="saveEntity(state.entity)">
-                    <!-- <attribute-list class="pt-2 h-100 scroll-y-auto scroll-x-hidden" v-if="hasData" v-dcan="'view_concept_props'"
-                        :attributes="state.entity.attributes"
+                    {{ state.entityAttributes}}
+                    <hr>
+                    {{ state.entityTypeSelections }}
+                    <attribute-list class="pt-2 h-100 scroll-y-auto scroll-x-hidden" v-if="state.attributesFetched" v-dcan="'view_concept_props'"
+                        :attributes="state.entityAttributes"
                         :dependencies="state.entity.dependencies"
                         :disable-drag="true"
                         :on-metadata="showMetadata"
@@ -79,7 +82,7 @@
                         :selections="state.entity.selections"
                         :values="state.entity.data"
                         @attr-dep-change="updateDependencyCounter">
-                    </attribute-list> -->
+                    </attribute-list>
                 </form>
             </div>
             <div class="tab-pane fade h-100 d-flex flex-column" id="active-entity-comments-panel" role="tabpanel">
@@ -161,6 +164,7 @@
         can,
         getEntityColors,
         getEntityType,
+        getEntityTypeAttributeSelections,
         showUserInfo,
         translateConcept
     } from '../helpers/helpers.js';
@@ -181,6 +185,10 @@
         setup(props) {
             const { t } = useI18n();
             const currentRoute = useRoute();
+
+            onBeforeRouteUpdate(_ => {
+                store.dispatch('getEntity', currentRoute.params.id);
+            })
 
             // FETCH
             store.dispatch('getEntity', currentRoute.params.id);
@@ -255,6 +263,7 @@
             // });
 
             // DATA
+            getEntityTypeAttributeSelections()
             const state = reactive({
                 colorStyles: computed(_ => {
                     const colors = getEntityColors(state.entity.entity_type_id, 0.75);
@@ -263,6 +272,9 @@
                     };
                 }),
                 entity: computed(_ => store.getters.entity),
+                entityAttributes: computed(_ => store.getters.entityTypeAttributes(state.entity.entity_type_id)),
+                entityTypeSelections: computed(_ => getEntityTypeAttributeSelections(state.entity.entity_type_id)),
+                attributesFetched: computed(_ => !!state.entityAttributes && state.entityAttributes.length > 0),
                 entityTypeLabel: computed(_ => {
                     // if(!state.entity) return;
                     const entityType = getEntityType(state.entity.entity_type_id);

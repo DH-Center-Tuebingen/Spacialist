@@ -8,6 +8,8 @@ export const store = createStore({
     state() {
         return {
             attributes: [],
+            attributeSelections: {},
+            attributeDependencies: {},
             entityTypeAttributes: {},
             bibliography: [],
             concepts: {},
@@ -27,6 +29,12 @@ export const store = createStore({
     mutations: {
         setAttributes(state, data) {
             state.attributes = data;
+        },
+        setAttributeSelections(state, data) {
+            state.attributeSelections = data;
+        },
+        setAttributeDependencies(state, data) {
+            state.attributeDependencies = data;
         },
         setBibliography(state, data) {
             state.bibliography = data;
@@ -88,7 +96,9 @@ export const store = createStore({
         },
         async getEntity({commit, state}, entityId) {
             let entity = state.entities[entityId];
-            console.log(entity);
+            if(!entity) {
+                entity = {};
+            }
             if(!can('view_concept_props')) {
                 const hiddenEntity = {
                     ...entity,
@@ -177,12 +187,23 @@ export const store = createStore({
         },
         setAttributes({commit, state}, data) {
             state.attributes = [];
-            commit('setAttributes', data);
+            state.attributeSelections = {};
+            state.attributeDependencies = {};
+            console.log(data);
+            commit('setAttributes', data.attributes);
+            commit('setAttributeSelections', data.selections);
+            commit('setAttributeDependencies', data.dependencies);
         },
     },
     getters: {
         attributes: state => {
             return state.attributes;
+        },
+        attributeSelections: state => {
+            return state.attributeSelections;
+        },
+        attributeDependencies: state => {
+            return state.attributeDependencies;
         },
         bibliography: state => {
             return state.bibliography;

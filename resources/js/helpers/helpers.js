@@ -95,6 +95,23 @@ export function getEntityTypeAttributes(id) {
     return store.getters.entityTypeAttributes(id);
 }
 
+export function getEntityTypeAttributeSelections(id) {
+    const attrs = getEntityTypeAttributes(id);
+    if(!attrs) return {};
+    const attrIds = attrs.map(a => a.id);
+    const sel = store.getters.attributeSelections;
+    console.log(attrIds, "attrIds");
+    console.log(sel, "sel");
+    let filteredSel = {};
+    for(let k in sel) {
+        if(attrIds.findIndex(aid => aid == k) > -1) {
+            filteredSel[k] = sel[k];
+        }
+    }
+    console.log(filteredSel, "filteredSel");
+    return filteredSel;
+}
+
 // Formula based on https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color/3943023#3943023
 export function getEntityColors(id, alpha = 0.5) {
     const et = getEntityType(id);

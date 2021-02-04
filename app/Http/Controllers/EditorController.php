@@ -163,10 +163,47 @@ class EditorController extends Controller {
             ], 403);
         }
         $attributes = Attribute::whereNull('parent_id')->orderBy('id')->get();
-        foreach($attributes as $a) {
-            $a->columns = Attribute::where('parent_id', $a->id)->get();
+        // foreach($attributes as $a) {
+        //     $a->columns = Attribute::where('parent_id', $a->id)->get();
+        // }
+        $selections = [];
+        $dependencies = [];
+        foreach ($attributes as $a) {
+            if (isset($a->depends_on)) {
+                $dependsOn = json_decode($a->depends_on);
+                foreach ($dependsOn as $depAttr => $dep) {
+                    if (!isset($dependencies[$depAttr])) {
+                        $dependencies[$depAttr] = [];
+                    }
+                    $dependencies[$depAttr][] = $dep;
+                }
+            }
+            unset($a->depends_on);
+            switch ($a->datatype) {
+                case 'string-sc':
+                case 'string-mc':
+                case 'epoch':
+                    $selections[$a->id] = ThConcept::getChildren($a->thesaurus_root_url, $a->recursive);
+                    break;
+                case 'table':
+                    $a->columns = Attribute::where('parent_id', $a->id)->get()->keyBy('id');
+                    // Only string-sc is allowed in tables
+                    $columns = Attribute::where('parent_id', $a->id)
+                        ->where('datatype', 'string-sc')
+                        ->get();
+                    foreach ($columns as $c) {
+                        $selections[$c->id] = ThConcept::getChildren($c->thesaurus_root_url, $c->recursive);
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
-        return response()->json($attributes);
+        return response()->json([
+            'attributes' => $attributes,
+            'selections' => $selections,
+            'dependencies' => $dependencies
+        ]);
     }
 
     public function getAttributeTypes() {

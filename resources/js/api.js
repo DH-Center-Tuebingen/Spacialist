@@ -67,6 +67,12 @@ export async function getEntityData(id) {
     );
 }
 
+export async function getEntityTypeAttributes(id) {
+    return await $httpQueue.add(
+        () => $http.get(`/editor/entity_type/${id}/attribute`)
+    )
+}
+
 export async function updateEntityTypeRelation(entityType) {
     const id = entityType.id;
     const data = {
