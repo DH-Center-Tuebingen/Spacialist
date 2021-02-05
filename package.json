@@ -42,6 +42,7 @@
         "vuex": "^4.0.0-rc.2"
     },
     "dependencies": {
+        "@joeattardi/emoji-button": "^4.6.0",
         "@popperjs/core": "^2.6.0",
         "@vueform/multiselect": "^1.2.5",
         "bootstrap": "^5.0.0-beta1",

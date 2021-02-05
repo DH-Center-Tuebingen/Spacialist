@@ -1,40 +1,48 @@
 <template>
-    <button type="button" class="btn btn-outline-secondary" :id="pickId">
+    <button type="button" class="btn btn-outline-secondary" :id="state.pickId">
         😀
     </button>
 </template>
 
 <script>
+    import {
+        reactive,
+        onMounted,
+    } from 'vue';
+
     import { EmojiButton } from '@joeattardi/emoji-button';
 
     export default {
-        mounted() {
-            const emojiButton = document.getElementById(this.pickId);
-
-            this.picker.on('emoji', emoji => {
-                this.$emit('selected', {
-                    emoji: emoji.emoji
-                });
-            });
-
-            emojiButton.addEventListener('click', _ => {
-                this.picker.togglePicker(emojiButton);
-            });
-        },
-        data() {
-            return {
-                uid: Date.now(),
+        emits: ['selected'],
+        setup(props, context) {
+            // DATA
+            const state = reactive({
+                pickId: `emoji-picker-${Date.now()}`,
                 picker: new EmojiButton({
                     autoHide: false,
                     position: 'bottom-end',
                     zIndex: 1021
                 }),
+            });
+
+            // ON MOUNTED
+            onMounted(_ => {
+                const emojiButton = document.getElementById(state.pickId);
+    
+                state.picker.on('emoji', emoji => {
+                    context.emit('selected', {
+                        emoji: emoji.emoji
+                    });
+                });
+    
+                emojiButton.addEventListener('click', _ => {
+                    state.picker.togglePicker(emojiButton);
+                });
+            });
+
+            return {
+                state,
             }
         },
-        computed: {
-            pickId() {
-                return `emoji-picker-${this.uid}`;
-            }
-        }
     }
 </script>

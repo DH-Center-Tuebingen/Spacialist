@@ -84,6 +84,7 @@ export function translateEntityType(id) {
 }
 
 export function getEntityType(id) {
+    if(!id) return {};
     return getEntityTypes()[id];
 }
 
@@ -92,6 +93,7 @@ export function getEntityTypes() {
 }
 
 export function getEntityTypeAttributes(id) {
+    if(!id) return [];
     return store.getters.entityTypeAttributes(id);
 }
 
@@ -110,6 +112,11 @@ export function getEntityTypeAttributeSelections(id) {
     }
     console.log(filteredSel, "filteredSel");
     return filteredSel;
+}
+
+export function getEntityTypeDependencies(id) {
+    console.log(store.getters.attributeDependencies, "deps");
+    return {};
 }
 
 // Formula based on https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color/3943023#3943023

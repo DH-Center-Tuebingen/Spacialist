@@ -1,4 +1,15 @@
 import TreeNode from '../components/TreeNode.vue';
+import store from '../bootstrap/store.js';
+
+export async function fetchChildren(id, sort = {by: 'rank', dir: 'asc'}) {
+    return $httpQueue.add(() => $http.get(`/entity/byParent/${id}`)
+        .then(response => {
+            return store.dispatch('addEntities', {
+                entities: response.data,
+                sort: sort,
+            });
+        }));
+};
 
 export function sortTree(by, dir, tree) {
     dir = dir == 'desc' ? dir : 'asc';

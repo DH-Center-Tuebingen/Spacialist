@@ -1,16 +1,16 @@
 <template>
     <div class="h-100 d-flex flex-column">
-        <entity-breadcrumbs class="mb-2 small" :entity="state.entity" v-if="showBreadcrumb"></entity-breadcrumbs>
+        <entity-breadcrumbs class="mb-2 small" :entity="state.entity" v-if="state.showBreadcrumb"></entity-breadcrumbs>
         <div class="d-flex align-items-center justify-content-between">
             <h3 class="mb-0" @mouseenter="onEntityHeaderHover(true)" @mouseleave="onEntityHeaderHover(false)">
                 <span v-if="!state.entity.editing">
                     {{ state.entity.name }}
                     <small>
-                        <span v-show="hiddenAttributes > 0" @mouseenter="dependencyInfoHoverOver" @mouseleave="dependencyInfoHoverOut">
+                        <span v-show="state.hiddenAttributes > 0" @mouseenter="dependencyInfoHoverOver" @mouseleave="dependencyInfoHoverOut">
                             <i id="dependency-info" class="fas fa-fw fa-xs fa-eye-slash"></i>
                         </span>
                     </small>
-                    <a href="#" v-if="entityHeaderHovered" class="text-dark" @click.prevent="enableEntityNameEditing()">
+                    <a href="#" v-if="state.entityHeaderHovered" class="text-dark" @click.prevent="enableEntityNameEditing()">
                         <i class="fas fa-fw fa-edit fa-xs"></i>
                     </a>
                 </span>
@@ -25,7 +25,7 @@
                 </form>
             </h3>
             <span>
-                <button type="submit" form="entity-attribute-form" class="btn btn-success me-2" :disabled="!isFormDirty || !can('duplicate_edit_concepts')">
+                <button type="submit" form="entity-attribute-form" class="btn btn-success me-2" :disabled="!state.formDirty || !can('duplicate_edit_concepts')">
                     <i class="fas fa-fw fa-save"></i> {{ t('global.save') }}
                 </button>
                 <button type="button" class="btn btn-danger" :disabled="!can('delete_move_concepts')" @click="deleteEntity(state.entity)">
@@ -70,17 +70,19 @@
         <div class="tab-content col ps-0 pe-0 overflow-hidden" id="myTabContent">
             <div class="tab-pane fade h-100 show active" id="active-entity-attributes-panel" role="tabpanel">
                 <form id="entity-attribute-form" name="entity-attribute-form" class="h-100" @submit.prevent="saveEntity(state.entity)">
-                    {{ state.entityAttributes}}
+                    <!-- {{ state.entityAttributes}}
                     <hr>
-                    {{ state.entityTypeSelections }}
+                    {{ state.entityTypeSelections }} -->
+                    {{ state.entity.data }}
                     <attribute-list class="pt-2 h-100 scroll-y-auto scroll-x-hidden" v-if="state.attributesFetched" v-dcan="'view_concept_props'"
                         :attributes="state.entityAttributes"
                         :dependencies="state.entity.dependencies"
                         :disable-drag="true"
-                        :on-metadata="showMetadata"
                         :metadata-addon="hasReferenceGroup"
-                        :selections="state.entity.selections"
+                        :selections="state.entityTypeSelections"
                         :values="state.entity.data"
+                        @dirty="setFormState"
+                        @metadata="showMetadata"
                         @attr-dep-change="updateDependencyCounter">
                     </attribute-list>
                 </form>
@@ -121,7 +123,7 @@
                 </div> -->
                 <form role="form" class="mt-2" @submit.prevent="postComment">
                     <div class="form-group d-flex">
-                        <textarea class="form-control" v-model="comment" id="comment-content" ref="comCnt" :placeholder="t('global.comments.text_placeholder')"></textarea>
+                        <textarea class="form-control" v-model="state.comment" id="comment-content" ref="comCnt" :placeholder="t('global.comments.text_placeholder')"></textarea>
                         <div class="ms-2 mt-auto">
                             <emoji-picker @selected="addEmoji"></emoji-picker>
                         </div>
@@ -149,15 +151,16 @@
         computed,
         reactive,
         onMounted,
+        watch,
     } from 'vue';
     import {
         useRoute,
-        onBeforeRouteUpdate
     } from 'vue-router';
 
     import { useI18n } from 'vue-i18n';
 
     import store from '../bootstrap/store.js';
+    import router from '../bootstrap/router.js';
 
     import { date } from '../helpers/filters.js';
     import {
@@ -165,6 +168,7 @@
         getEntityColors,
         getEntityType,
         getEntityTypeAttributeSelections,
+        getEntityTypeDependencies,
         showUserInfo,
         translateConcept
     } from '../helpers/helpers.js';
@@ -184,14 +188,17 @@
         },
         setup(props) {
             const { t } = useI18n();
-            const currentRoute = useRoute();
+            const route = useRoute();
 
-            onBeforeRouteUpdate(_ => {
-                store.dispatch('getEntity', currentRoute.params.id);
-            })
+            // onBeforeRouteUpdate(_ => {
+            //     console.log("getting entity ", route.params.id);
+            // })
 
             // FETCH
-            store.dispatch('getEntity', currentRoute.params.id);
+            store.dispatch('getEntity', route.params.id).then(_ => {
+                getEntityTypeAttributeSelections();
+                state.initFinished = true;
+            });
             // onBeforeRouteUpdate((to, from) => {
             //     console.log(to);
             //     if(!this.$can('view_concept_props')) {
@@ -263,7 +270,6 @@
             // });
 
             // DATA
-            getEntityTypeAttributeSelections()
             const state = reactive({
                 colorStyles: computed(_ => {
                     const colors = getEntityColors(state.entity.entity_type_id, 0.75);
@@ -271,10 +277,15 @@
                         color: colors.backgroundColor
                     };
                 }),
+                formDirty: false,
+                hiddenAttributes: 0,
+                entityHeaderHovered: false,
+                initFinished: false,
                 entity: computed(_ => store.getters.entity),
                 entityAttributes: computed(_ => store.getters.entityTypeAttributes(state.entity.entity_type_id)),
                 entityTypeSelections: computed(_ => getEntityTypeAttributeSelections(state.entity.entity_type_id)),
-                attributesFetched: computed(_ => !!state.entityAttributes && state.entityAttributes.length > 0),
+                entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
+                attributesFetched: computed(_ => state.initFinished && state.entity.data && !!state.entityAttributes && state.entityAttributes.length > 0),
                 entityTypeLabel: computed(_ => {
                     // if(!state.entity) return;
                     const entityType = getEntityType(state.entity.entity_type_id);
@@ -287,9 +298,29 @@
                 lastModified: computed(_ => {
                     return state.entity.updated_at || state.entity.created_at;
                 }),
+                comment: '',
             });
 
             // FUNCTIONS
+            const hasReferenceGroup = group => {
+                if(!state.entity.references) return false;
+                if(!Object.keys(state.entity.references).length) return false;
+                if(!state.entity.references[group]) return false;
+                return Object.keys(state.entity.references[group]).length > 0;
+            };
+            const showMetadata = attribute => {
+                router.push({
+                    append: true,
+                    name: 'entityrefs',
+                    params: {
+                        aid: attribute.id
+                    },
+                    query: route.query
+                });
+            };
+            const updateDependencyCounter = event => {
+                state.hiddenAttributes = event.counter;
+            };
             const setEntityView = tab => {
                 let newTab, oldTab, newPanel, oldPanel;
                 if(tab === 'comments') {
@@ -313,23 +344,53 @@
                 oldPanel.classList.remove('show', 'active');
                 newPanel.classList.add('show', 'active');
             };
-
-
-            // FUNCTIONS
+            const onEntityHeaderHover = hoverState => {
+                state.entityHeaderHovered = hoverState;
+            };
+            const setFormState = e => {
+                // TODO implement
+            };
+            const postComment = e => {
+                // TODO implement
+            };
+            const addEmoji = event => {
+                state.comment += event.emoji;
+            };
 
             // ON MOUNTED
             onMounted(_ => {
                 console.log("entity detail component mounted");
             });
 
+            watch(_ => route.params,
+                async newParams => {
+                    state.initFinished = false;
+                    store.dispatch('getEntity', newParams.id).then(_ => {
+                        getEntityTypeAttributeSelections();
+                        state.initFinished = true;
+                        console.log(state.entity.data, "state entity data");
+                    });
+                }
+            );
+
             // RETURN
             return {
                 t,
+                // HELPERS
                 can,
                 date,
-                state,
-                setEntityView,
                 showUserInfo,
+                // LOCAL
+                hasReferenceGroup,
+                showMetadata,
+                updateDependencyCounter,
+                setEntityView,
+                onEntityHeaderHover,
+                setFormState,
+                postComment,
+                addEmoji,
+                // STATE
+                state,
             };
         }
 
@@ -635,9 +696,6 @@
     //                 this.comment = '';
     //             });
     //         },
-    //         addEmoji(event) {
-    //             this.comment += event.emoji;
-    //         },
     //         getCleanValue(entry, attributes) {
     //             if(!entry) return;
     //             const v = entry.value;
@@ -692,9 +750,6 @@
     //             this.selectedEntity.user = entity.user;
     //             this.selectedEntity.updated_at = entity.updated_at;
     //         },
-    //         updateDependencyCounter(event) {
-    //             this.hiddenAttributes = event.counter;
-    //         },
     //         dependencyInfoHoverOver(event) {
     //             if(this.dependencyInfoHovered) {
     //                 return;
@@ -716,23 +771,6 @@
     //         },
     //         setReferenceAttribute(aid) {
     //             this.referenceAttribute = aid;
-    //         },
-    //         showMetadata(attribute) {
-    //             this.$router.push({
-    //                 append: true,
-    //                 name: 'entityrefs',
-    //                 params: {
-    //                     aid: attribute.id
-    //                 },
-    //                 query: this.$route.query
-    //             });
-    //         },
-    //         hasReferenceGroup: function(group) {
-    //             if(!this.selectedEntity.references) return false;
-    //             if(!Object.keys(this.selectedEntity.references).length) return false;
-    //             if(!this.selectedEntity.references[group]) return false;
-    //             let count = Object.keys(this.selectedEntity.references[group]).length > 0;
-    //             return count > 0;
     //         },
     //         resetFlags() {
     //             this.$validator.fields.items.forEach(field => {

@@ -47,20 +47,14 @@
                     </span>
                 </button>
             </div>
-            <ul class="mb-0 col px-0 px-3 scroll-y-auto">
-                <li v-for="(entry, i) in state.tree" :key="i">
-                    <a href="#" class="fw-bold" @click.prevent="itemClick(entry)">
-                        {{ entry.name }}
-                    </a>
-                </li>
-            </ul>
             <tree
                 id="entity-tree"
                 class="col px-0 scroll-y-auto"
                 :data="state.tree"
                 size="small"
-                @change="itemClick">
-                <node v-for="(child, i) in state.tree" :key="i" :data="child"></node>
+                @change="itemClick"
+                @toggle="itemToggle">
+                <!-- <treenode v-for="(child, i) in state.tree" :key="i" :data="child"></treenode> -->
             </tree>
             <!-- <tree
                 id="entity-tree"
@@ -91,17 +85,22 @@
     import { useRoute } from 'vue-router';
     import { useI18n } from 'vue-i18n';
 
-    import { Tree } from "tree-vue-component";
-    import TreeNode from '../components/TreeNode.vue';
+    // import { Tree, Node } from "tree-vue-component";
+    // import TreeNode from '../components/TreeNode.vue';
 
     import store from '../bootstrap/store.js';
     import router from '../bootstrap/router.js';
 
+    import {
+        fetchChildren,
+        sortTree,
+    } from '../helpers/tree.js';
+
     export default {
         components: {
             // node: Node,
-            node: TreeNode,
-            tree: Tree,
+            // treenode: TreeNode,
+            // tree: Tree,
         },
         setup(props) {
             const { t } = useI18n();
@@ -111,7 +110,7 @@
 
             // FUNCTIONS
             const itemClick = (item) => {
-                if(state.entity.id == item.id) {
+                if(state.entity.id == item.data.id) {
                     router.push({
                         append: true,
                         name: 'home',
@@ -121,13 +120,27 @@
                     router.push({
                         name: 'entitydetail',
                         params: {
-                            id: item.id
+                            id: item.data.id
                         },
                         query: currentRoute.query
                     });
                 }
             };
+            const itemToggle = eventData => {
+                const item = eventData.data;
+                if(item.children.length < item.children_count) {
+                    item.state.loading = true;
+                    fetchChildren(item.id, state.sort).then(response => {
+                        item.children =  response;
+                        item.state.loading = false;
+                        item.childrenLoaded = true;
+                    });
+                }
+                item.state.opened = !item.state.opened;
+            };
             const setSort = (attr, dir) => {
+                state.sort.by = attr;
+                state.sort.dir = dir;
                 store.dispatch('sortTree', {
                     by: attr,
                     dir: dir
@@ -139,6 +152,10 @@
                 tree: computed(_ => store.getters.tree),
                 entity: computed(_ => store.getters.entity),
                 requestAddNewEntity: () => {},
+                sort: {
+                    by: 'rank',
+                    dir: 'asc'
+                },
             });
 
             console.log(state.tree);
@@ -151,9 +168,13 @@
             // RETURN
             return {
                 t,
-                state,
+                // HELPERS
+                // LOCAL
                 itemClick,
+                itemToggle,
                 setSort,
+                // STATE
+                state,
             };
         }
     }

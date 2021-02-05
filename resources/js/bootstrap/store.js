@@ -41,6 +41,9 @@ export const store = createStore({
         },
         addEntity(state, n) {
             state.entities[n.id] = n;
+        },
+        addRootEntity(state, n) {
+            state.entities[n.id] = n;
             state.tree.push(n);
         },
         setConcepts(state, data) {
@@ -176,9 +179,23 @@ export const store = createStore({
 
             data.forEach(e => {
                 const n = new Node(e);
-                commit('addEntity', n);
+                commit('addRootEntity', n);
             });
             sortTree('rank', 'asc', state.tree);
+        },
+        addEntities({commit}, data) {
+            let nodes = [];
+            data.entities.forEach(e => {
+                const n = new Node(e);
+                commit('addEntity', n);
+                nodes.push(n);
+            });
+            sortTree(data.sort.by, data.sort.dir, nodes);
+            return nodes;
+        },
+        addEntity({commit}, data) {
+            const n = new Node(data);
+            commit('addEntity', n);
         },
         setEntityTypes({commit, state}, data) {
             state.entityTypes = {};

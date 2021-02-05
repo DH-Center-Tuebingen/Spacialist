@@ -1,5 +1,5 @@
 <template>
-        <draggable v-if="state.attributeList.length > 0"
+        <draggable v-if="state.componentLoaded"
             class="h-100 pe-1"
             v-model="state.attributeList"
             item-key="id">
@@ -54,6 +54,7 @@
                             <div v-else-if="element.datatype == 'percentage'" class="d-flex">
                                 <input class="form-range" :disabled="element.isDisabled" type="range" step="1" min="0" max="100" :id="`attr-${element.id}`" :name="`attr-${element.id}`" v-model="state.attributeValues[element.id].value" @mouseup="checkDependency(element.id)"/>
                                 <span class="ms-3">{{ state.attributeValues[element.id].value }}%</span>
+                                PERCENTAGE!
                             </div>
                             <div v-else-if="element.datatype == 'geography'">
                                 <input class="form-control" :disabled="element.isDisabled" type="text" :id="`attr-${element.id}`" :name="`attr-${element.id}`" :placeholder="t('main.entity.attributes.add-wkt')" v-model="state.attributeValues[element.id].value" @blur="checkDependency(element.id)" />
@@ -234,7 +235,7 @@
             'tabular': Tabular,
             'iconclass': Iconclass,
         },
-        emits: ['edit', 'remove', 'delete', 'reorder', 'metadata'],
+        emits: ['edit', 'remove', 'delete', 'reorder', 'metadata', 'dirty'],
         setup(props, context) {
             const { t } = useI18n();
             const {
@@ -315,14 +316,16 @@
                 selectionLists: selections,
                 hoverStates: new Array(attributes.value.length).fill(false),
                 expansionStates: new Array(attributes.value.length).fill(false),
+                componentLoaded: computed(_ => state.attributeList.length > 0 && state.attributeValues),
                 isHoveringPossible: computed(_ => {
                     return !!attrs.reorder || !!attrs.edit || !!attrs.remove || !!attrs.delete;
                 }),
             });
 
-            // ON MOUNTEDnew Array(newValue.length).fill(false)
+            // ON MOUNTED
             onMounted(_ => {
-
+                console.log(values, "values raw");
+                console.log(state.attributeValues.value, "state values");
             });
 
             // RETURN

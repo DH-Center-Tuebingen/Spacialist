@@ -14,6 +14,7 @@ import EntityTree from './components/EntityTree.vue';
 import EntityBreadcrumbs from './components/EntityBreadcrumbs.vue';
 import UserAvatar from './components/UserAvatar.vue';
 import ActivityLog from './components/ActivityLog.vue';
+import EmojiPicker from './components/EmojiPicker.vue';
 
 // Init Libs
 // PQueue, httpQueue
@@ -26,6 +27,7 @@ import VueUploadComponent from 'vue-upload-component';
 import DatePicker from 'vue2-datepicker';
 import InfiniteLoading from 'vue-infinite-loading';
 import draggable from 'vuedraggable';
+import { Tree, Node } from "tree-vue-component";
 // Components
 import App from './App.vue';
 
@@ -115,12 +117,15 @@ app.component('entity-tree', EntityTree);
 app.component('entity-breadcrumbs', EntityBreadcrumbs);
 app.component('user-avatar', UserAvatar);
 app.component('activity-log', ActivityLog);
+app.component('emoji-picker', EmojiPicker);
 // Third-Party components
 app.component('multiselect', Multiselect);
 app.component('file-upload', VueUploadComponent);
 app.component('date-picker', DatePicker);
 app.component('infinite-loading', InfiniteLoading);
 app.component('draggable', draggable);
+app.component('node', Node);
+app.component('tree', Tree);
 
 // Mount Vue
 app.mount('#app');
