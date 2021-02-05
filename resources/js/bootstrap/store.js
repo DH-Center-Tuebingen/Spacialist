@@ -1,7 +1,10 @@
 import { createStore } from 'vuex';
 
 import { sortTree, Node } from '../helpers/tree.js';
-import { can } from '../helpers/helpers.js';
+import {
+    can,
+    fillEntityData,
+} from '../helpers/helpers.js';
 import { getEntityData } from '../api.js';
 
 export const store = createStore({
@@ -100,6 +103,7 @@ export const store = createStore({
         async getEntity({commit, state}, entityId) {
             let entity = state.entities[entityId];
             if(!entity) {
+                // TODO get entity data (parent ids)
                 entity = {};
             }
             if(!can('view_concept_props')) {
@@ -112,10 +116,12 @@ export const store = createStore({
                     references: [],
                     comments: [],
                 };
+                fillEntityData(entity.data, entity.entity_type_id);
                 commit('setEntity', hiddenEntity);
             } else {
                 entity.data = await getEntityData(entityId);
-                commit('setEntity', entity)
+                fillEntityData(entity.data, entity.entity_type_id);
+                commit('setEntity', entity);
                 
                 return;
 
@@ -206,7 +212,6 @@ export const store = createStore({
             state.attributes = [];
             state.attributeSelections = {};
             state.attributeDependencies = {};
-            console.log(data);
             commit('setAttributes', data.attributes);
             commit('setAttributeSelections', data.selections);
             commit('setAttributeDependencies', data.dependencies);

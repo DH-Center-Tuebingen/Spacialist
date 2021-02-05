@@ -70,10 +70,6 @@
         <div class="tab-content col ps-0 pe-0 overflow-hidden" id="myTabContent">
             <div class="tab-pane fade h-100 show active" id="active-entity-attributes-panel" role="tabpanel">
                 <form id="entity-attribute-form" name="entity-attribute-form" class="h-100" @submit.prevent="saveEntity(state.entity)">
-                    <!-- {{ state.entityAttributes}}
-                    <hr>
-                    {{ state.entityTypeSelections }} -->
-                    {{ state.entity.data }}
                     <attribute-list class="pt-2 h-100 scroll-y-auto scroll-x-hidden" v-if="state.attributesFetched" v-dcan="'view_concept_props'"
                         :attributes="state.entityAttributes"
                         :dependencies="state.entity.dependencies"
@@ -189,10 +185,6 @@
         setup(props) {
             const { t } = useI18n();
             const route = useRoute();
-
-            // onBeforeRouteUpdate(_ => {
-            //     console.log("getting entity ", route.params.id);
-            // })
 
             // FETCH
             store.dispatch('getEntity', route.params.id).then(_ => {
@@ -368,7 +360,6 @@
                     store.dispatch('getEntity', newParams.id).then(_ => {
                         getEntityTypeAttributeSelections();
                         state.initFinished = true;
-                        console.log(state.entity.data, "state entity data");
                     });
                 }
             );

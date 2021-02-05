@@ -1,12 +1,14 @@
 <template>
     <div class="input-group">
-        <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="onInput('B', $event.target.value)" v-model="B"/>
+        <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="onInput('B', $event.target.value)" v-model="state.B"/>
             <span class="input-group-text">&times;</span>
-        <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="onInput('H', $event.target.value)" v-model="H"/>
+        <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="onInput('H', $event.target.value)" v-model="state.H"/>
             <span class="input-group-text">&times;</span>
-        <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="onInput('T', $event.target.value)" v-model="T"/>
+        <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="onInput('T', $event.target.value)" v-model="state.T"/>
         <div>
-            <button class="btn btn-outline-secondary  dropdown-toggle" :disabled="disabled" type="button" data-bs-toggle="dropdown" aria-haspopup="true"     aria-expanded="false">{{unit}}</button>
+            <button class="btn btn-outline-secondary  dropdown-toggle" :disabled="disabled" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {{ state.unit }}
+            </button>
             <div class="dropdown-menu">
                 <a class="dropdown-item" href="#" v-for="(unit, i) in dimensionUnits" @click.prevent="setUnit(unit)" :key="i">
                     {{ unit }}
@@ -17,6 +19,11 @@
 </template>
 
 <script>
+    import {
+        reactive,
+        toRefs,
+    } from 'vue';
+
     export default {
         props: {
             name: String,
@@ -32,27 +39,43 @@
                 required: true,
             }
         },
-        mounted () {
-            this.$el.value = this.value;
-        },
-        methods: {
-            onInput(field, value) {
-                this.$emit('input', value);
-                this.onChange(field, value);
-            },
-            setUnit(unit) {
-                this.onInput('unit', unit);
-                this.unit = unit;
-            }
-        },
-        data () {
+        emits: ['input'],
+        setup(props, context) {
+            const {
+                value,
+                disabled,
+            } = toRefs(props);
+
+            // FUNCTIONS
+            const onInput = (field, value) => {
+                context.emit('input', value);
+                // props.onChange(field, value);
+            };
+            const setUnit = (unit) => {
+                onInput('unit', unit);
+                state.unit = unit;
+            };
+
+            // DATA
+            const dimensionUnits = ['nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'];
+            const state = reactive({
+                B: value.value.B,
+                H: value.value.H,
+                T: value.value.T,
+                unit: value.value.unit,
+            });
+
+            // RETURN
             return {
-                dimensionUnits: ['nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'],
-                B: this.value.B,
-                H: this.value.H,
-                T: this.value.T,
-                unit: this.value.unit
+                // HELPERS
+                // LOCAL
+                disabled,
+                dimensionUnits,
+                onInput,
+                setUnit,
+                // STATE
+                state,
             }
-        }
+        },
     }
 </script>

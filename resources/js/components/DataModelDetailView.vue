@@ -211,8 +211,9 @@
     import { useI18n } from 'vue-i18n';
 
     import {
+        defaultAttributeValue,
         getEntityType,
-      getEntityTypeAttributes,
+        getEntityTypeAttributes,
         getEntityTypes,
         translateConcept,
     } from '../helpers/helpers.js';
@@ -278,19 +279,8 @@
                     let data = {};
                     for(let i=0; i<state.entityAttributes.length; i++) {
                         const curr = state.entityAttributes[i];
-                        let defValue;
                         // several datatypes require a "valid"/non-string v-model
-                        switch(curr.datatype) {
-                            case 'string-mc':
-                                defValue = [];
-                                break;
-                            default:
-                                defValue = '';
-                                break;
-                        }
-                        data[curr.id] = {
-                            value: defValue,
-                        };
+                        data[curr.id] = defaultAttributeValue(curr.datatype);
                     }
                     return data;
                 }),

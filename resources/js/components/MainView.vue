@@ -1,11 +1,11 @@
 <template>
-    <div class="row h-100 overflow-hidden" v-if="initFinished">
-        <div :class="`h-100 d-flex flex-column col-md-${columnPref.left}`" id="tree-container" v-dcan="'view_concepts'" v-if="columnPref.left > 0">
+    <div class="row h-100 overflow-hidden">
+        <div :class="`h-100 d-flex flex-column col-md-${state.columnPref.left}`" id="tree-container" v-dcan="'view_concepts'" v-if="state.columnPref.left > 0">
             <entity-tree
                 class="col px-0">
             </entity-tree>
         </div>
-        <div :class="`h-100 border-start border-end col-md-${columnPref.center}`" id="attribute-container" v-dcan="'view_concepts|view_concept_props'" v-if="columnPref.center > 0">
+        <div :class="`h-100 border-start border-end col-md-${state.columnPref.center}`" id="attribute-container" v-dcan="'view_concepts|view_concept_props'" v-if="state.columnPref.center > 0">
             <router-view>
             </router-view>
             <!-- <router-view
@@ -15,7 +15,7 @@
             >
             </router-view> -->
         </div>
-        <div :class="`h-100 d-flex flex-column col-md-${columnPref.right}`" id="addon-container" v-if="columnPref.right > 0">
+        <div :class="`h-100 d-flex flex-column col-md-${state.columnPref.right}`" id="addon-container" v-if="state.columnPref.right > 0">
             <!-- <ul class="nav nav-tabs">
                 <li class="nav-item" v-for="plugin in $getTabPlugins()">
                     <router-link class="nav-link" :class="{active: tab == plugin.key}" :to="{ query: { tab: plugin.key }}" append>
@@ -73,11 +73,20 @@
     import {
         computed,
         onMounted,
+        reactive,
     } from 'vue';
     import store from '../bootstrap/store.js';
 
     export default {
         setup(props) {
+            // DATA
+            const state = reactive({
+                concepts: computed(_ => store.state.concepts),
+                entityTypes: computed(_ => store.state.entityTypes),
+                columnPref: computed(_ => store.getters.preferenceByKey('prefs.columns')),
+                users: computed(_ => store.state.users),
+            });
+
             // ON MOUNTED
             onMounted(_ => {
                 console.log("mainview component mounted");
@@ -85,11 +94,10 @@
 
             // RETURN
             return {
-                concepts: computed(_ => store.state.concepts),
-                entityTypes: computed(_ => store.state.entityTypes),
-                columnPref: computed(_ => store.getters.preferenceByKey('prefs.columns')),
-                users: computed(_ => store.state.users),
-                initFinished: true
+                // HELPERS
+                // LOCAL
+                // STATE
+                state,
             };
         }
 

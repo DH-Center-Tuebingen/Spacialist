@@ -8,7 +8,7 @@
                 <i class="fas fa-circle fa-sm"></i>
             </span>
         </span>
-        <span>
+        <span :class="{'fw-bold': state.isSelected}">
             {{ data.name }}
         </span>
     </div>
@@ -21,6 +21,8 @@
         reactive,
         toRefs,
     } from 'vue';
+
+    import store from '../bootstrap/store.js';
 
     import {
         getEntityColors
@@ -56,6 +58,7 @@
                         };
                     }
                 }),
+                isSelected: computed(_ => store.getters.entity.id === data.value.id),
             });
 
             // ON MOUNTED

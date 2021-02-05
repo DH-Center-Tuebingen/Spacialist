@@ -170,7 +170,12 @@
             </div>
         </nav>
         <div class="container-fluid my-3 col overflow-hidden">
-            <router-view></router-view>
+            <template v-if="state.init">
+                <router-view></router-view>
+            </template>
+            <template v-else>
+                Loading...
+            </template>
             <video id="rtc-sharing-container" class="video-js d-none"></video>
             <about-dialog></about-dialog>
             <error-modal></error-modal>
@@ -204,6 +209,7 @@
         getToolPlugins,
         getSettingsPlugins,
         hasPreference,
+        initApp,
     } from './helpers/helpers.js';
 
     export default {
@@ -211,11 +217,9 @@
             const { t, locale } = useI18n();
 
             // FETCH
-            fetchPreData(locale);
-            fetchAttributes();
-            fetchUsers();
-            fetchTopEntities();
-            fetchBibliography();
+            initApp(locale).then(_ => {
+                state.init = true;
+            });
 
             // DATA
             const state = reactive({
@@ -243,12 +247,9 @@
                     tools: {},
                     settings: {}
                 },
+                init: false,
                 auth: auth,
                 loggedIn: computed(_ => store.getters.isLoggedIn),
-                concepts: computed(_ => store.state.concepts),
-                entityTypes: computed(_ => store.state.entityTypes),
-                preferences: computed(_ => store.state.preferences),
-                users: computed(_ => store.state.users),
                 authUser: computed(_ => store.getters.user),
                 notifications: computed(_ => {
                     return []; //this.$userNotifications();
@@ -370,7 +371,7 @@
                 getToolPlugins,
                 hasPreference,
                 getSettingsPlugins,
-                logout
+                logout,
             };
         }
     }

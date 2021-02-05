@@ -59,6 +59,7 @@ export async function getEntityData(id) {
     return await $httpQueue.add(
         () => $http.get(`/entity/${id}/data`)
         .then(response => {
+            // PHP returns Array if it is empty
             if(response.data instanceof Array) {
                 response.data = {};
             }

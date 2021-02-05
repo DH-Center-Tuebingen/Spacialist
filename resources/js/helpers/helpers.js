@@ -1,6 +1,23 @@
 import auth from '../bootstrap/auth.js';
 import store from '../bootstrap/store.js';
 
+import {
+    fetchAttributes,
+    fetchBibliography,
+    fetchTopEntities,
+    fetchPreData,
+    fetchUsers,
+} from '../api.js';
+
+export async function initApp(locale) {
+    await fetchPreData(locale);
+    await fetchAttributes();
+    await fetchUsers();
+    await fetchTopEntities();
+    await fetchBibliography();
+    return new Promise(r => r(null));
+}
+
 export function can(permissionString, oneOf) {
     oneOf = oneOf || false;
     const user = store.getters.user;
@@ -117,6 +134,38 @@ export function getEntityTypeAttributeSelections(id) {
 export function getEntityTypeDependencies(id) {
     console.log(store.getters.attributeDependencies, "deps");
     return {};
+}
+
+export function defaultAttributeValue(datatype) {
+    const val = {};
+    switch(datatype) {
+        case 'dimension':
+        case 'epoch':
+        case 'timeperiod':
+            val.value = {};
+            break;
+        case 'string-mc':
+        case 'table':
+        case 'list':
+            val.value = [];
+            break;
+        default:
+            val.value = '';
+            break;
+    }
+    return val;
+}
+
+// Fills non-present attribute values to be used in draggable components (e.g. attribute-list)
+export function fillEntityData(data, etid) {
+    const attrs = getEntityTypeAttributes(etid);
+    for(let i=0; i<attrs.length; i++) {
+        const currAttr = attrs[i];
+        if(!data[currAttr.id]) {
+            data[currAttr.id] = defaultAttributeValue(currAttr.datatype);
+        }
+    }
+    return data;
 }
 
 // Formula based on https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color/3943023#3943023

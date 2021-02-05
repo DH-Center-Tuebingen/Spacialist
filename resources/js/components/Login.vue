@@ -90,6 +90,7 @@
 
     import { useRoute } from 'vue-router';
     import auth from '../bootstrap/auth.js';
+    import router from '../bootstrap/router.js';
     import { useI18n } from 'vue-i18n';
 
     import { fetchPreData } from '../api.js';
@@ -137,7 +138,7 @@
             // ON MOUNTED
             onMounted(_ => {
                 if(auth.check()) {
-                    this.$router.push({
+                    router.push({
                         name: 'home'
                     });
                 }
