@@ -14,6 +14,7 @@ import EntityTree from './components/EntityTree.vue';
 import EntityBreadcrumbs from './components/EntityBreadcrumbs.vue';
 import UserAvatar from './components/UserAvatar.vue';
 import ActivityLog from './components/ActivityLog.vue';
+import CommentList from './components/CommentList.vue';
 import EmojiPicker from './components/EmojiPicker.vue';
 
 // Init Libs
@@ -117,6 +118,7 @@ app.component('entity-tree', EntityTree);
 app.component('entity-breadcrumbs', EntityBreadcrumbs);
 app.component('user-avatar', UserAvatar);
 app.component('activity-log', ActivityLog);
+app.component('comment-list', CommentList);
 app.component('emoji-picker', EmojiPicker);
 // Third-Party components
 app.component('multiselect', Multiselect);

@@ -88,12 +88,13 @@
         onMounted,
     } from 'vue';
 
+    import { useI18n } from 'vue-i18n';
     import { useRoute } from 'vue-router';
     import auth from '../bootstrap/auth.js';
     import router from '../bootstrap/router.js';
-    import { useI18n } from 'vue-i18n';
+    import store from '../bootstrap/store.js';
 
-    import { fetchPreData } from '../api.js';
+    import { initApp } from '../helpers/helpers.js';
     import {
         getErrorMessages,
         getValidClass
@@ -123,15 +124,18 @@
                 } else {
                     data.nickname = state.user.email;
                 }
+                store.dispatch('setAppState', false);
                 auth.login({
                     data: data,
                     staySignedIn: state.user.remember,
                     redirect: state.redirect,
                     fetchUser: true
-                }).then(_ => fetchPreData(locale), e => {
-                    state.error = getErrorMessages(e);
-                }).then(_ => {
+                }).then(_ => initApp(locale))
+                .then(_ => {
+                    store.dispatch('setAppState', true);
                     state.error = {};
+                }).catch(e => {
+                    state.error = getErrorMessages(e);
                 });
             }
 

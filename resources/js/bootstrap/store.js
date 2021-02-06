@@ -10,6 +10,7 @@ import { getEntityData } from '../api.js';
 export const store = createStore({
     state() {
         return {
+            appInitialized: false,
             attributes: [],
             attributeSelections: {},
             attributeDependencies: {},
@@ -30,6 +31,9 @@ export const store = createStore({
         }
     },
     mutations: {
+        setAppInitialized(state, data) {
+            state.appInitialized = data;
+        },
         setAttributes(state, data) {
             state.attributes = data;
         },
@@ -82,11 +86,18 @@ export const store = createStore({
         setEntity(state, data) {
             state.entity = data;
         },
+        setEntityComments(state, data) {
+            if(!state.entity) return;
+            state.entity.comments = data;
+        },
         setFile(state, data) {
             state.file = data;
         }
     },
     actions: {
+        setAppState({commit}, data) {
+            commit('setAppInitialized', data);
+        },
         setBibliography({commit}, data) {
             commit('setBibliography', data);
         },
@@ -179,6 +190,9 @@ export const store = createStore({
                 }));
             }
         },
+        setEntityComments({commit}, data) {
+            commit('setEntityComments', data);
+        },
         setInitialEntities({commit, state}, data) {
             state.tree = [];
             state.entities = {};
@@ -218,6 +232,9 @@ export const store = createStore({
         },
     },
     getters: {
+        appInitialized: state => {
+            return state.appInitialized;
+        },
         attributes: state => {
             return state.attributes;
         },

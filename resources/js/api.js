@@ -55,6 +55,14 @@ export async function fetchPreData(locale) {
     }));
 };
 
+export async function getEntityComments(id) {
+    return fetchComments(id, 'entity');
+};
+
+export async function getAttributeValueComments(id) {
+    return fetchComments(id, 'attribute_value');
+};
+
 export async function getEntityData(id) {
     return await $httpQueue.add(
         () => $http.get(`/entity/${id}/data`)
@@ -96,3 +104,7 @@ export async function deleteUserAvatar(id) {
         () => $http.delete(`user/${id}/avatar`).then(response => response.data)
     );
 };
+
+async function fetchComments(id, type) {
+    return $httpQueue.add(() => $http.get(`/comment/resource/${id}?r=${type}`).then(response => response.data).catch(error => error));
+}

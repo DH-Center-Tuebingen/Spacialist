@@ -1,8 +1,8 @@
 <template>
     <div>
-        <div v-for="comment in comments" :key="comment.id" class="mt-2 d-flex" v-if="!hideComments && comments.length > 0">
+        <div v-for="comment in comments" :key="comment.id" class="mt-2 d-flex" v-show="!commentsHidden">
             <slot name="avatar" :user="comment.author">
-                <a href="#" @click.prevent="$showUserInfo(comment.author)">
+                <a href="#" @click.prevent="showUserInfo(comment.author)">
                     <user-avatar :user="comment.author" :size="avatar"></user-avatar>
                 </a>
             </slot>
@@ -11,7 +11,7 @@
                     <div class="card-header d-flex flex-row justify-content-between py-2 px-3" :class="{'border-0': !comment.content}">
                         <div>
                             <slot name="author" :comment="comment.author">
-                                <a href="#" @click.prevent="$showUserInfo(comment.author)" class="text-body">
+                                <a href="#" @click.prevent="showUserInfo(comment.author)" class="text-body">
                                     <span class="fw-medium">
                                         {{ comment.author.name }}
                                     </span>
@@ -30,22 +30,22 @@
                                 </span>
                                 &bull;
                             </template>
-                            <span class="text-muted fw-light" :title="comment.updated_at | datestring">
-                                {{ comment.updated_at | ago }}
+                            <span class="text-muted fw-light" :title="datestring(comment.updated_at)">
+                                {{ ago(comment.updated_at) }}
                             </span>
                             <span class="dropdown" v-if="!comment.deleted_at">
                                 <span :id="`edit-comment-dropdown-${comment.id}`" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <i class="fas fa-fw fa-ellipsis-h"></i>
                                 </span>
                                 <div class="dropdown-menu" :aria-labelledby="`edit-comment-dropdown-${comment.id}`">
-                                    <a class="dropdown-item" href="#" @click.prevent="enableEditing(comment)" v-if="comment.author.id == $userId() && editing.id != comment.id">
-                                        <i class="fas fa-fw fa-edit text-info"></i> {{ $t('global.edit') }}
+                                    <a class="dropdown-item" href="#" @click.prevent="enableEditing(comment)" v-if="comment.author.id === state.currentUserId && editing.id != comment.id">
+                                        <i class="fas fa-fw fa-edit text-info"></i> {{ t('global.edit') }}
                                     </a>
                                     <a class="dropdown-item" href="#" @click.prevent="emitReplyTo(comment)">
-                                        <i class="fas fa-fw fa-reply text-success"></i> {{ $t('global.reply_to') }}
+                                        <i class="fas fa-fw fa-reply text-success"></i> {{ t('global.reply_to') }}
                                     </a>
-                                    <a class="dropdown-item" href="#" @click.prevent="emitDelete(comment)" v-if="comment.author.id == $userId()">
-                                        <i class="fas fa-fw fa-trash text-danger"></i> {{ $t('global.delete') }}
+                                    <a class="dropdown-item" href="#" @click.prevent="emitDelete(comment)" v-if="comment.author.id === state.currentUserId">
+                                        <i class="fas fa-fw fa-trash text-danger"></i> {{ t('global.delete') }}
                                     </a>
                                 </div>
                             </span>
@@ -57,17 +57,17 @@
                                 <textarea class="form-control" v-model="editing.content"></textarea>
                                 <div class="mt-1 d-flex flex-row justify-content-end">
                                     <button type="button" class="btn btn-success btn-sm me-2" :disabled="editing.content == comment.content" @click="emitEdited(comment, editing.content)">
-                                        <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
+                                        <i class="fas fa-fw fa-save"></i> {{ t('global.save') }}
                                     </button>
                                     <button type="button" class="btn btn-danger btn-sm" @click="disableEditing()">
-                                        <i class="fas fa-fw fa-times"></i> {{ $t('global.cancel') }}
+                                        <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
                                     </button>
                                 </div>
                             </div>
                         </slot>
                         <slot name="body" :comment="comment" v-else-if="!isDeleted(comment)">
                             <div class="card-body px-3 py-2" v-if="comment.content">
-                                <p class="card-text" v-html="$options.filters.mentionify(comment.content)"></p>
+                                <p class="card-text" v-html="mentionify(comment.content)"></p>
                             </div>
                         </slot>
                         <slot name="body-deleted" :comment="comment" v-else>
@@ -82,11 +82,11 @@
                 <div v-if="comment.replies_count > 0" class="d-flex flex-row justify-content-end">
                     <a href="#" class="small text-body" @click.prevent="toggleReplies(comment)">
                         <div v-show="repliesOpen[comment.id]">
-                            <span v-html="$tc('global.comments.hide_reply', comment.replies_count, {cnt: comment.replies_count})"></span>
+                            <span v-html="t('global.comments.hide_reply', {cnt: comment.replies_count}, comment.replies_count)"></span>
                             <i class="fas fa-fw fa-caret-up"></i>
                         </div>
                         <div v-show="!repliesOpen[comment.id]">
-                            <span v-html="$tc('global.comments.show_reply', comment.replies_count, {cnt: comment.replies_count})"></span>
+                            <span v-html="t('global.comments.show_reply', {cnt: comment.replies_count}, comment.replies_count)"></span>
                             <i class="fas fa-fw fa-caret-down"></i>
                         </div>
                     </a>
@@ -102,24 +102,42 @@
                 </comment-list>
             </div>
         </div>
-        <div class="text-center mt-2" v-if="showHideButton && comments.length > 0">
-            <a href="#" @click.prevent="hideComments = !hideComments">
+        <div class="text-center mt-2" v-show="state.displayHideButton">
+            <a href="#" @click.prevent="toggleHideState()">
                 <i class="fas fa-fw fa-comments"></i>
-                <span v-if="hideComments">
-                    {{ $t('global.comments.show') }}
+                <span v-if="state.hideComments">
+                    {{ t('global.comments.show') }}
                 </span>
                 <span v-else>
-                    {{ $t('global.comments.hide') }}
+                    {{ t('global.comments.hide') }}
                 </span>
             </a>
         </div>
-        <p v-else-if="comments.length == 0" class="alert alert-info m-0 mt-2">
-            {{ $t('global.comments.empty_list') }}
-        </p>
+        <div v-if="!state.hasComments" class="alert alert-info m-0 mt-2" role="alert">
+            {{ t('global.comments.empty_list') }}
+        </div>
     </div>
 </template>
 
 <script>
+    import {
+        computed,
+        reactive,
+        toRefs,
+    } from 'vue';
+
+    import { useI18n } from 'vue-i18n';
+
+    import {
+        ago,
+        datestring,
+        mentionify,
+    } from '../helpers/filters.js';
+    import {
+        showUserInfo,
+        userId,
+    } from '../helpers/helpers.js';
+
     export default {
         props: {
             comments: {
@@ -137,7 +155,49 @@
                 default: true
             }
         },
-        mounted() {
+        setup(props, context) {
+            const { t } = useI18n();
+            const {
+                comments,
+                avatar,
+                showHideButton,
+            } = toRefs(props);
+
+            // DATA
+            const state = reactive({
+                hideComments: false,
+                repliesOpen: {},
+                editing: {
+                    id: null,
+                    content: null
+                },
+                currentUserId: computed(_ => userId()),
+                commentsHidden: computed(_ => !state.hasComments || state.hideComments),
+                displayHideButton: computed(_ => showHideButton.value && state.hasComments),
+                hasComments: computed(_ => comments.value.length > 0)
+            });
+
+            // FUNCTIONS
+            const toggleHideState = _ => {
+                state.hideComments = !state.hideComments;
+            };
+
+            // RETURN
+            return {
+                t,
+                // HELPERS
+                ago,
+                datestring,
+                mentionify,
+                showUserInfo,
+                // LOCAL
+                toggleHideState,
+                // PROPS
+                comments,
+                avatar,
+                // STATE
+                state,
+            };
         },
         methods: {
             isDeleted(comment) {
@@ -201,15 +261,5 @@
                 }
             }
         },
-        data() {
-            return {
-                hideComments: false,
-                repliesOpen: {},
-                editing: {
-                    id: null,
-                    content: null
-                }
-            }
-        }
     }
 </script>

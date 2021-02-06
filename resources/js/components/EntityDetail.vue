@@ -63,7 +63,7 @@
             <li class="nav-item" role="presentation">
                 <a class="nav-link" id="active-entity-comments-tab" href="#" @click.prevent="setEntityView('comments')">
                     {{ t('main.entity.tabs.comments') }}
-                    <span class="badge badge-primary">{{ state.entity.comments_count }}</span>
+                    <span class="badge bg-primary">{{ state.entity.comments_count }}</span>
                 </a>
             </li>
         </ul>
@@ -85,11 +85,11 @@
             </div>
             <div class="tab-pane fade h-100 d-flex flex-column" id="active-entity-comments-panel" role="tabpanel">
                 <div class="mb-auto scroll-y-auto" v-if="state.entity.comments">
-                    <!-- <div v-if="commentsFetching" class="mt-2">
+                    <div v-if="state.commentsFetching" class="mt-2">
                         <p class="alert alert-info mb-0" v-html="$t('global.comments.fetching')">
                         </p>
                     </div>
-                    <div v-else-if="commentFetchFailed" class="mt-2">
+                    <div v-else-if="state.commentFetchFailed" class="mt-2">
                         <p class="alert alert-danger mb-0">
                             {{ $t('global.comments.fetching_failed') }}
                             <button type="button" class="d-block mt-2 btn btn-xs btn-outline-success" @click="fetchComments">
@@ -106,18 +106,18 @@
                         @on-delete="deleteComment"
                         @reply-to="addReplyTo"
                         @load-replies="loadReplies">
-                    </comment-list> -->
+                    </comment-list>
                 </div>
                 <hr />
-                <!-- <div v-if="replyTo.comment_id > 0" class="mb-1">
-                    <span class="badge badge-info">
-                        {{ $t('global.replying_to', {name: replyTo.author.name}) }}
+                <div v-if="state.replyTo.comment_id > 0" class="mb-1">
+                    <span class="badge bg-info">
+                        {{ tt('global.replying_to', {name: state.replyTo.author.name}) }}
                         <a href="#" @click.prevent="cancelReplyTo" class="text-white">
                             <i class="fas fa-fw fa-times"></i>
                         </a>
                     </span>
-                </div> -->
-                <form role="form" class="mt-2" @submit.prevent="postComment">
+                </div>
+                <form role="form" @submit.prevent="postComment">
                     <div class="form-group d-flex">
                         <textarea class="form-control" v-model="state.comment" id="comment-content" ref="comCnt" :placeholder="t('global.comments.text_placeholder')"></textarea>
                         <div class="ms-2 mt-auto">
@@ -159,6 +159,9 @@
     import router from '../bootstrap/router.js';
 
     import { date } from '../helpers/filters.js';
+    import {
+        getEntityComments,
+    } from '../api.js';
     import {
         can,
         getEntityColors,
@@ -273,6 +276,15 @@
                 hiddenAttributes: 0,
                 entityHeaderHovered: false,
                 initFinished: false,
+                replyTo: {
+                    comment_id: null,
+                    author: {
+                        name: null,
+                        nickname: null
+                    }
+                },
+                comment: '',
+                commentLoadingState: 'not',
                 entity: computed(_ => store.getters.entity),
                 entityAttributes: computed(_ => store.getters.entityTypeAttributes(state.entity.entity_type_id)),
                 entityTypeSelections: computed(_ => getEntityTypeAttributeSelections(state.entity.entity_type_id)),
@@ -290,7 +302,15 @@
                 lastModified: computed(_ => {
                     return state.entity.updated_at || state.entity.created_at;
                 }),
-                comment: '',
+                commentsFetching: computed(_ => {
+                    return state.commentLoadingState === 'fetching';
+                }),
+                commentsFetched: computed(_ => {
+                    return state.commentLoadingState === 'fetched';
+                }),
+                commentFetchFailed: computed(_ => {
+                    return state.commentLoadingState === 'failed';
+                }),
             });
 
             // FUNCTIONS
@@ -320,10 +340,9 @@
                     newPanel = document.getElementById('active-entity-comments-panel');
                     oldTab = document.getElementById('active-entity-attributes-tab');
                     oldPanel = document.getElementById('active-entity-attributes-panel');
-                    // TODO
-                    // if(!this.commentsFetched) {
-                    //     this.fetchComments();
-                    // }
+                    if(!state.commentsFetched) {
+                        fetchComments();
+                    }
                 } else {
                     newTab = document.getElementById('active-entity-attributes-tab');
                     newPanel = document.getElementById('active-entity-attributes-panel');
@@ -341,6 +360,15 @@
             };
             const setFormState = e => {
                 // TODO implement
+            };
+            const fetchComments = _ => {
+                state.commentLoadingState = 'fetching';
+                getEntityComments(state.entity.id).then(comments => {
+                    store.dispatch('setEntityComments', comments);
+                    state.commentLoadingState = 'fetched';
+                }).catch(e => {
+                    state.commentLoadingState = 'failed';
+                });
             };
             const postComment = e => {
                 // TODO implement
@@ -584,15 +612,6 @@
     //             Vue.set(this.selectedEntity, 'editing', false);
     //             this.newEntityName = '';
     //         },
-    //         fetchComments() {
-    //             this.commentLoadingState = 'fetching';
-    //             $httpQueue.add(() => $http.get(`/comment/resource/${this.selectedEntity.id}?r=entity`).then(response => {
-    //                 this.selectedEntity.comments = response.data;
-    //                 this.commentLoadingState = 'fetched';
-    //             })).catch(error => {
-    //                 this.commentLoadingState = 'failed';
-    //             });
-    //         },
     //         getComment(list, id) {
     //             if(!list || list.length == 0) return;
     //             for(let i=0; i<list.length; i++) {
@@ -777,15 +796,6 @@
     //             dependencyInfoHovered: false,
     //             hiddenAttributes: 0,
     //             referenceAttribute: null,
-    //             commentLoadingState: 'not',
-    //             comment: '',
-    //             replyTo: {
-    //                 comment_id: null,
-    //                 author: {
-    //                     name: null,
-    //                     nickname: null
-    //                 }
-    //             },
     //         }
     //     },
     //     computed: {
@@ -813,15 +823,6 @@
     //                 data.attribute = attribute;
     //             }
     //             return data;
-    //         },
-    //         commentsFetching() {
-    //             return this.commentLoadingState === 'fetching';
-    //         },
-    //         commentsFetched() {
-    //             return this.commentLoadingState === 'fetched';
-    //         },
-    //         commentFetchFailed() {
-    //             return this.commentLoadingState === 'failed';
     //         },
     //     },
     //     watch: {

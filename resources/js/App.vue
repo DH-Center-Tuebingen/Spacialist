@@ -198,18 +198,12 @@
     import { useI18n } from 'vue-i18n';
 
     import {
-        fetchAttributes,
-        fetchBibliography,
-        fetchTopEntities,
-        fetchPreData,
-        fetchUsers,
-    } from './api.js';
-    import {
         getPreference,
         getToolPlugins,
         getSettingsPlugins,
         hasPreference,
         initApp,
+        throwError,
     } from './helpers/helpers.js';
 
     export default {
@@ -218,7 +212,13 @@
 
             // FETCH
             initApp(locale).then(_ => {
-                state.init = true;
+                store.dispatch('setAppState', true);
+            }).catch(e => {
+                if(e.response.status == 401) {
+                    store.dispatch('setAppState', true);
+                } else {
+                    throwError(e);
+                }
             });
 
             // DATA
@@ -247,8 +247,8 @@
                     tools: {},
                     settings: {}
                 },
-                init: false,
                 auth: auth,
+                init: computed(_ => store.getters.appInitialized),
                 loggedIn: computed(_ => store.getters.isLoggedIn),
                 authUser: computed(_ => store.getters.user),
                 notifications: computed(_ => {

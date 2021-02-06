@@ -218,6 +218,22 @@ export function getUsers() {
     return isLoggedIn() ? store.getters.users : [];
 };
 
+export function throwError(error) {
+    if (error.response) {
+        const r = error.response;
+        const req = {
+            status: r.status,
+            url: r.config.url,
+            method: r.config.method.toUpperCase()
+        };
+        this.$showErrorModal(r.data, r.headers, req);
+    } else if (error.request) {
+        this.$showErrorModal(error.request);
+    } else {
+        this.$showErrorModal(error.message || error);
+    }
+};
+
 export const _cloneDeep = require('lodash/cloneDeep');
 export const _debounce = require('lodash/debounce');
 export const _orderBy = require('lodash/orderBy');
@@ -359,22 +375,6 @@ export function showToast(title, text, type, duration) {
         type: type,
         duration: duration
     });
-};
-
-export function throwError(error) {
-    if(error.response) {
-        const r = error.response;
-        const req = {
-            status: r.status,
-            url: r.config.url,
-            method: r.config.method.toUpperCase()
-        };
-        this.$showErrorModal(r.data, r.headers, req);
-    } else if(error.request) {
-        this.$showErrorModal(error.request);
-    } else {
-        this.$showErrorModal(error.message || error);
-    }
 };
 
 export function getValidClass(msgObject, field) {
