@@ -1,6 +1,23 @@
 <template>
     <div class="row d-flex flex-row overflow-hidden h-100" v-dcan="'duplicate_edit_concepts|view_concept_props'">
-        <div class="col-md-5 h-100 d-flex flex-column">
+        <div class="col-md-2 py-2 d-flex flex-column bg-light-dark">
+            <h4>{{ t('main.datamodel.entity.title') }}</h4>
+            <entity-type-list
+                class="col px-0 h-100 scroll-y-auto"
+                :data="state.entityTypes"
+                :selected-id="state.selectedEntityType"
+                @add="onCreateEntityType"
+                @delete="onDeleteEntityType"
+                @duplicate="onDuplicateEntityType"
+                @edit="onEditEntityType"
+                @select="setEntityType">
+            </entity-type-list>
+        </div>
+        <div class="col-md-6 py-2 h-100 bg-light-dark rounded-end ">
+            <router-view>
+            </router-view>
+        </div>
+        <div class="col-md-4 py-2 h-100 d-flex flex-column">
             <h4>{{ t('main.datamodel.attribute.title') }}</h4>
             <div class="col overflow-hidden">
                 <attribute-list
@@ -20,21 +37,6 @@
                 </button>
             </div>
         </div>
-        <div class="col-md-2 d-flex flex-column">
-            <h4>{{ t('main.datamodel.entity.title') }}</h4>
-            <entity-type-list
-                class="col px-0 h-100 scroll-y-auto"
-                :data="state.entityTypes"
-                :selected-id="state.selectedEntityType"
-                @add="onCreateEntityType"
-                @delete="onDeleteEntityType"
-                @duplicate="onDuplicateEntityType"
-                @edit="onEditEntityType"
-                @select="setEntityType">
-            </entity-type-list>
-        </div>
-        <router-view class="col-md-5 h-100">
-        </router-view>
 
         <!-- <modals-container class="visible-overflow" />
 
