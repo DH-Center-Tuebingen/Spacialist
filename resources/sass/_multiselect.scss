@@ -16,9 +16,6 @@
   min-height: 37px !important;
 }
 
-.multiselect-option {
-}
-
 .is-open .multiselect-input {
   border-radius: $input-border-radius !important;
 }
@@ -34,6 +31,8 @@
 .multiselect-tag {
   background: $teal;
   color: $light;
+  font-size: $font-size-base !important;
+  font-weight: $font-weight-base !important;
 }
 
 .multiselect-options {
