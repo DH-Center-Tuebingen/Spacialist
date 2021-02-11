@@ -44,13 +44,13 @@
             </div>
             <div>
                 <i class="fas fa-fw fa-user-edit"></i>
-                <span>
+                <span class="ms-1">
                     {{ date(state.lastModified, undefined, true, true) }}
                 </span>
                 -
-                <a href="#" @click.prevent="showUserInfo(state.entity.user)" class="fw-medium" v-if="state.entity.user">
-                    {{ state.entity.user.name }}
-                    <user-avatar :user="state.entity.user" :size="20" class="align-middle"></user-avatar>
+                <a href="#" @click.prevent="showUserInfo(state.entityUser)" class="fw-medium" v-if="state.entity.user">
+                    {{ state.entityUser.name }}
+                    <user-avatar :user="state.entityUser" :size="20" class="align-middle"></user-avatar>
                 </a>
             </div>
         </div>
@@ -149,6 +149,7 @@
         onMounted,
         watch,
     } from 'vue';
+    
     import {
         useRoute,
     } from 'vue-router';
@@ -168,9 +169,12 @@
         getEntityType,
         getEntityTypeAttributeSelections,
         getEntityTypeDependencies,
-        showUserInfo,
+        getUserBy,
         translateConcept
     } from '../helpers/helpers.js';
+    import {
+        showUserInfo,
+    } from '../helpers/modal.js';
 
     export default {
         props: {
@@ -286,6 +290,7 @@
                 comment: '',
                 commentLoadingState: 'not',
                 entity: computed(_ => store.getters.entity),
+                entityUser: computed(_ => getUserBy(state.entity.user.id)),
                 entityAttributes: computed(_ => store.getters.entityTypeAttributes(state.entity.entity_type_id)),
                 entityTypeSelections: computed(_ => getEntityTypeAttributeSelections(state.entity.entity_type_id)),
                 entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
@@ -385,6 +390,7 @@
             watch(_ => route.params,
                 async newParams => {
                     state.initFinished = false;
+                    if(!newParams.id) return;
                     store.dispatch('getEntity', newParams.id).then(_ => {
                         getEntityTypeAttributeSelections();
                         state.initFinished = true;

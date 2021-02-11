@@ -134,9 +134,11 @@
         mentionify,
     } from '../helpers/filters.js';
     import {
-        showUserInfo,
         userId,
     } from '../helpers/helpers.js';
+    import {
+        showUserInfo,
+    } from '../helpers/modal.js';
 
     export default {
         props: {

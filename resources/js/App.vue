@@ -179,9 +179,11 @@
             <video id="rtc-sharing-container" class="video-js d-none"></video>
             <about-dialog></about-dialog>
             <error-modal></error-modal>
-            <user-info-modal></user-info-modal>
+            <!-- <user-info-modal></user-info-modal> -->
         </div>
         <notifications group="spacialist" position="bottom left" class="m-2" />
+        <modals-container></modals-container>
+        <div class="toast-container ps-3 pb-3" id="toast-container"></div>
     </div>
 </template>
 
@@ -189,6 +191,8 @@
     import {
         reactive,
         computed,
+        inject,
+        nextTick,
         onMounted,
         watch,
     } from 'vue';
@@ -196,6 +200,7 @@
     import store from './bootstrap/store.js';
     import auth from './bootstrap/auth.js';
     import { useI18n } from 'vue-i18n';
+    import { provideToast, useToast } from './plugins/toast.js';
 
     import {
         getPreference,
@@ -209,6 +214,7 @@
     export default {
         setup(props) {
             const { t, locale } = useI18n();
+            store.dispatch('setModalInstance', inject('$vfm'));
 
             // FETCH
             initApp(locale).then(_ => {
@@ -337,7 +343,10 @@
 
             // ON MOUNTED
             onMounted(_ => {
-                console.log("app component mounted");
+                provideToast({
+                    is_tag: false,
+                    container: 'toast-container',
+                });
                 // if (adapter.browserDetails.browser == 'firefox') {
                 //     adapter.browserShim.shimGetDisplayMedia(window, 'window');
                 // }

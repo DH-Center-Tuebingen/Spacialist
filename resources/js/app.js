@@ -2,8 +2,10 @@ import { createApp } from 'vue';
 
 // Third-Party Libs
 const {default: PQueue} = require('p-queue');
-import bootstrap from 'bootstrap';
 import hljs from 'highlight.js';
+
+// Init plugins
+import { provideToast } from './plugins/toast.js';
 
 // Helpers/Filter
 
@@ -29,6 +31,8 @@ import DatePicker from 'vue2-datepicker';
 import InfiniteLoading from 'vue-infinite-loading';
 import draggable from 'vuedraggable';
 import { Tree, Node } from "tree-vue-component";
+import VueFinalModal from 'vue-final-modal';
+
 // Components
 import App from './App.vue';
 
@@ -52,6 +56,8 @@ app.use(i18n);
 app.use(router);
 app.use(store);
 app.use(vueAuth);
+app.use(VueFinalModal());
+app.use(provideToast());
 
 // Directives
 app.directive('dcan', {

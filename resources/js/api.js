@@ -39,6 +39,7 @@ export async function fetchPreData(locale) {
         store.commit('setConcepts', response.data.concepts);
         store.dispatch('setEntityTypes', response.data.entityTypes);
         store.commit('setPreferences', response.data.preferences);
+        store.commit('setSystemPreferences', response.data.system_preferences);
         store.commit('setUsers', response.data.users);
 
         store.commit('setUser', auth.user());

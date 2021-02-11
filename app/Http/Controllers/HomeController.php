@@ -2,15 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Attribute;
-use App\AvailableLayer;
-use App\Bibliography;
-use App\Entity;
 use App\EntityType;
-use App\Permission;
 use App\Preference;
-use App\Role;
 use App\ThConcept;
 use App\User;
 
@@ -39,13 +32,10 @@ class HomeController extends Controller
             }
             $locale = auth()->user()->getLanguage();
         } else {
-            $preferences = Preference::all();
-            $preferenceValues = [];
-            foreach($preferences as $p) {
-                $preferenceValues[$p->label] = Preference::decodePreference($p->label, json_decode($p->default_value));
-            }
             $locale = \App::getLocale();
         }
+
+        $sysPrefs = Preference::getPreferences();
 
         $concepts = ThConcept::getMap($locale);
 
@@ -57,6 +47,7 @@ class HomeController extends Controller
         $users = User::all();
 
         return response()->json([
+            'system_preferences' => $sysPrefs,
             'preferences' => $preferenceValues,
             'concepts' => $concepts,
             'entityTypes' => $entityTypeMap,

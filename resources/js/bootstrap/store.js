@@ -24,15 +24,20 @@ export const store = createStore({
             file: {},
             permissions: [],
             preferences: {},
+            systemPreferences: {},
             roles: [],
             tree: [],
             user: {},
             users: [],
+            vfm: {},
         }
     },
     mutations: {
         setAppInitialized(state, data) {
             state.appInitialized = data;
+        },
+        setModalInstance(state, data) {
+            state.vfm = data;
         },
         setAttributes(state, data) {
             state.attributes = data;
@@ -70,6 +75,9 @@ export const store = createStore({
         setPreferences(state, data) {
             state.preferences = data;
         },
+        setSystemPreferences(state, data) {
+            state.systemPreferences = data;
+        },
         setRoles(state, data) {
             state.roles = data;
         },
@@ -97,6 +105,9 @@ export const store = createStore({
     actions: {
         setAppState({commit}, data) {
             commit('setAppInitialized', data);
+        },
+        setModalInstance({commit}, data) {
+            commit('setModalInstance', data);
         },
         setBibliography({commit}, data) {
             commit('setBibliography', data);
@@ -265,6 +276,9 @@ export const store = createStore({
         preferences: state => {
             return state.preferences;
         },
+        systemPreferences: state => {
+            return state.systemPreferences;
+        },
         roles: state => noPerms => {
             return noPerms ? state.roles.map(r => {
                 // Remove permissions from role
@@ -282,6 +296,7 @@ export const store = createStore({
             ];
         },
         users: state => {
+            console.log("state.users", state.users);
             return state.users;
         },
         deletedUsers: state => {
@@ -298,6 +313,9 @@ export const store = createStore({
         },
         file: state => {
             return state.file;
+        },
+        vfm: state => {
+            return state.vfm;
         },
     }
 });

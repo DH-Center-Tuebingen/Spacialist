@@ -1,7 +1,32 @@
-.modal-content {
-    height: 100% !important;
-    display: flex !important;
-    flex-direction: column !important;
+.vfm.vfm--inset.vfm--fixed {
+    z-index: $zindex-sticky + 1 !important;
+}
+
+.modal-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sp-modal-content {
+  @extend .modal-content;
+  max-width: 50vw;
+}
+
+.sp-modal-content-xl {
+  max-width: 80vw;
+}
+
+.sp-modal-content-lg {
+  max-width: 70vw;
+}
+
+.sp-modal-content-sm {
+  max-width: 30vw;
+}
+
+.sp-modal-content-xs {
+  max-width: 20vw;
 }
 
 .modal-image {

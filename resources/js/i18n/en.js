@@ -175,7 +175,7 @@ const en = {
         column: 'Column | Columns',
         'geometry-type': 'Geometry-Type',
         'depends-on': 'Depends on',
-        preference: 'Preference',
+        preference: 'Preference | Preferences',
         value: 'Value',
         'allow-override': 'Allow Override?',
         tag: 'Tag | Tags',
@@ -432,7 +432,7 @@ const en = {
                 }
             },
             info: {
-                password_reset_link: 'If this option is enabled, you have to set the <code>MAIL_*</code> settings in your <code>.env</code> file. <a href="https://github.com/eScienceCenter/Spacialist/blob/master/INSTALL.md#send-mails" target="_blank">Further informations</a>.',
+                password_reset_link: 'To use this function, you have to set the <code>MAIL_*</code> settings in your <code>.env</code> file. <a href="https://github.com/eScienceCenter/Spacialist/blob/master/INSTALL.md#send-mails" target="_blank">Further informations</a>.',
                 columns: 'The sum of the column values must not be higher than 12.'
             },
             key: {

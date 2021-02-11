@@ -12,8 +12,10 @@ import Users from '../components/Users.vue';
 import Roles from '../components/Roles.vue';
 import DataModel from '../components/DataModel.vue';
 import DataModelDetailView from '../components/DataModelDetailView.vue';
+import Preferences from '../components/Preferences.vue';
 // User
 import UserProfile from '../components/UserProfile.vue';
+import UserPreferences from '../components/UserPreferences.vue';
 import UserActivity from '../components/UserActivity.vue';
 
 import DummyComponent from '../components/DummyComponent.vue';
@@ -202,8 +204,7 @@ export const router = createRouter({
         {
             path: '/preferences',
             name: 'preferences',
-            component: DummyComponent,
-            // component: Preferences,
+            component: Preferences,
             meta: {
                 auth: true
             }
@@ -211,8 +212,7 @@ export const router = createRouter({
         {
             path: '/preferences/u/:id',
             name: 'userpreferences',
-            component: DummyComponent,
-            // component: UserPreferences,
+            component: UserPreferences,
             meta: {
                 auth: true
             }

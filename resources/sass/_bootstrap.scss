@@ -2,3 +2,7 @@
     background-color: $gray-200;
     border-radius: $border-radius;
 }
+
+.dropdown-menu {
+    z-index: $zindex-sticky + 1;
+}

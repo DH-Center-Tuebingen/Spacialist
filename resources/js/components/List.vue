@@ -21,7 +21,7 @@
                 </button>
             </div>
         </div>
-        <ol class="mt-2" v-if="state.expanded && state.entries.length">
+        <ol class="mt-2 mb-0" v-if="state.expanded && state.entries.length">
             <li v-for="(l, i) in state.entries" :key="i">
                 <span v-html="createAnchorFromUrl(l)"></span>
                 <a href="#" class="text-danger" @click.prevent="removeListEntry(i)">

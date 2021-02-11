@@ -55,6 +55,7 @@
         "process": "^0.11.10",
         "tree-vue-component": "^6.0.1",
         "vee-validate": "^4.1.12",
+        "vue-final-modal": "^v3.0.0-beta.1",
         "vue-i18n": "^9.0.0-rc.3",
         "vue-infinite-loading": "^2.4.5",
         "vue-upload-component": "^3.0.50",

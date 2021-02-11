@@ -104,7 +104,7 @@ class Preference extends Model
                 $value = json_encode(['use' => $decodedValue]);
                 break;
             case 'prefs.columns':
-                $value = $decodedValue;
+                $value = json_encode($decodedValue);
                 break;
             case 'prefs.show-tooltips':
                 $value = json_encode(['show' => $decodedValue]);

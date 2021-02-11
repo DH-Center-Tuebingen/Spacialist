@@ -1,326 +1,225 @@
 <template>
-    <table class="table table-striped table-hover" v-if="initFinished" v-dcan="'edit_preferences'">
-        <thead class="thead-light">
-            <tr>
-                <th>{{ $t('global.preference') }}</th>
-                <th>{{ $t('global.value') }}</th>
-                <th>{{ $t('global.allow-override') }}</th>
-                <th>{{ $t('global.save') }}</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>
-                    <strong>{{ $t('main.preference.key.language') }}</strong>
-                </td>
-                <td>
-                    <form class="form-mb-0">
-                        <div class="form-group row">
-                            <label class="col-md-2 col-form-label"></label>
-                            <div class="col-md-10">
-                                <input class="form-control" type="text" v-model="preferences['prefs.gui-language'].value" />
+    <div class="h-100 d-flex flex-column">
+        <h3>
+            {{ t('global.preference', 2) }}
+            <button type="button" class="btn btn-outline-success">
+                <i class="fas fa-fw fa-save"></i>
+                {{ t('global.save') }}
+            </button>
+        </h3>
+        <div class="table-responsive scroll-x-hidden">
+            <table class="table table-light table-striped table-hover mb-0" v-if="state.prefsLoaded" v-dcan="'edit_preferences'">
+                <thead class="sticky-top">
+                    <tr class="text-nowrap">
+                        <th>{{ t('global.preference') }}</th>
+                        <th style="width: 99%;">{{ t('global.value') }}</th>
+                        <th>{{ t('global.allow-override') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <strong>
+                                {{ t('main.preference.key.language') }}
+                            </strong>
+                        </td>
+                        <td>
+                            <gui-language-preference
+                                :data="state.preferences['prefs.gui-language'].value">
+                            </gui-language-preference>
+                        </td>
+                        <td>
+                            <div class="form-check form-switch d-flex justify-content-center">
+                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.gui-language'].allow_override" />
                             </div>
-                        </div>
-                    </form>
-                </td>
-                <td>
-                    <input type="checkbox"  v-model="preferences['prefs.gui-language'].allow_override" />
-                </td>
-                <td>
-                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click.prevent="savePreference(preferences['prefs.gui-language'])">
-                        <i class="fas fa-fw fa-check"></i>
-                    </button>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <strong>{{ $t('main.preference.key.password_reset_link') }}</strong>
-                    <p class="alert alert-info mt-3 w-50" v-html="$t('main.preference.info.password_reset_link')">
-                    </p>
-                </td>
-                <td>
-                    <form class="form-mb-0">
-                        <div class="form-group row">
-                            <label class="col-md-2 col-form-label"></label>
-                            <div class="col-md-10">
-                                <input type="checkbox" v-model="preferences['prefs.enable-password-reset-link'].value" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>{{ t('main.preference.key.password_reset_link') }}</strong>
+                        </td>
+                        <td>
+                            <reset-email-preference
+                                :data="state.preferences['prefs.enable-password-reset-link'].value">
+                            </reset-email-preference>
+                        </td>
+                        <td>
+                            <div class="form-check form-switch d-flex justify-content-center">
+                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.enable-password-reset-link'].allow_override" />
                             </div>
-                        </div>
-                    </form>
-                </td>
-                <td>
-                    <input type="checkbox"  v-model="preferences['prefs.enable-password-reset-link'].allow_override" />
-                </td>
-                <td>
-                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click.prevent="savePreference(preferences['prefs.enable-password-reset-link'])">
-                        <i class="fas fa-fw fa-check"></i>
-                    </button>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <strong>{{ $t('main.preference.key.columns.title') }}</strong>
-                    <p class="alert alert-info mt-3 w-50">
-                        {{ $t('main.preference.info.columns') }}
-                    </p>
-                </td>
-                <td>
-                    <form class="form-mb-0">
-                        <div class="form-group row">
-                            <label for="left-column" class="col-md-2 col-form-label">{{ $t('main.preference.key.columns.left') }}:</label>
-                            <div class="col-md-10">
-                                <input class="form-control" id="left-column" type="number" min="0" :max="getMax('left')" v-model="preferences['prefs.columns'].value.left" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>{{ t('main.preference.key.columns.title') }}</strong>
+                        </td>
+                        <td>
+                            <columns-preference
+                                :data="state.preferences['prefs.columns'].value">
+                            </columns-preference>
+                        </td>
+                        <td>
+                            <div class="form-check form-switch d-flex justify-content-center">
+                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.columns'].allow_override" />
                             </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="center-column" class="col-md-2 col-form-label">{{ $t('main.preference.key.columns.center') }}:</label>
-                            <div class="col-md-10">
-                                <input class="form-control" id="center-column" type="number" min="0" :max="getMax('center')" v-model="preferences['prefs.columns'].value.center" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>{{ t('main.preference.key.tooltips') }}</strong>
+                        </td>
+                        <td>
+                            <tooltips-preference
+                                :data="state.preferences['prefs.show-tooltips'].value">
+                            </tooltips-preference>
+                        </td>
+                        <td>
+                            <div class="form-check form-switch d-flex justify-content-center">
+                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.show-tooltips'].allow_override" />
                             </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="right-column" class="col-md-2 col-form-label">{{ $t('main.preference.key.columns.right') }}:</label>
-                            <div class="col-md-10">
-                                <input class="form-control" id="right-column" type="number" min="0" :max="getMax('right')" v-model="preferences['prefs.columns'].value.right" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>{{ t('main.preference.key.tag-root') }}</strong>
+                        </td>
+                        <td>
+                            <tags-preference
+                                :data="state.preferences['prefs.tag-root'].value">
+                            </tags-preference>
+                        </td>
+                        <td>
+                            <div class="form-check form-switch d-flex justify-content-center">
+                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.tag-root'].allow_override" />
                             </div>
-                        </div>
-                    </form>
-                </td>
-                <td>
-                    <input type="checkbox" v-model="preferences['prefs.columns'].allow_override" />
-                </td>
-                <td>
-                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click.prevent="savePreference(preferences['prefs.columns'])">
-                        <i class="fas fa-fw fa-check"></i>
-                    </button>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <strong>{{ $t('main.preference.key.tooltips') }}</strong>
-                </td>
-                <td>
-                    <form class="form-mb-0">
-                        <div class="form-group row">
-                            <div class="col-md-2"></div>
-                            <div class="col-md-10">
-                                <div class="form-check">
-                                    <input class="form-check-input" id="show-tooltips" type="checkbox" v-model="preferences['prefs.show-tooltips'].value" />
-                                </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>{{ t('main.preference.key.extensions') }}</strong>
+                        </td>
+                        <td>
+                            <extensions-preference
+                                :data="state.preferences['prefs.load-extensions'].value">
+                            </extensions-preference>
+                        </td>
+                        <td>
+                            <div class="form-check form-switch d-flex justify-content-center">
+                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.load-extensions'].allow_override" />
                             </div>
-                        </div>
-                    </form>
-                </td>
-                <td>
-                    <input type="checkbox" v-model="preferences['prefs.show-tooltips'].allow_override" />
-                </td>
-                <td>
-                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click.prevent="savePreference(preferences['prefs.show-tooltips'])">
-                        <i class="fas fa-fw fa-check"></i>
-                    </button>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <strong>{{ $t('main.preference.key.tag-root') }}</strong>
-                </td>
-                <td>
-                    <form class="form-mb-0">
-                        <div class="form-group row">
-                            <label class="col-md-2 col-form-label"></label>
-                            <div class="col-md-10">
-                                <input class="form-control" type="text" v-model="preferences['prefs.tag-root'].value" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>{{ t('main.preference.key.link-thesaurex') }}</strong>
+                        </td>
+                        <td>
+                            <thesaurus-link-preference
+                                :data="state.preferences['prefs.link-to-thesaurex'].value">
+                            </thesaurus-link-preference>
+                        </td>
+                        <td>
+                            <div class="form-check form-switch d-flex justify-content-center">
+                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.link-to-thesaurex'].allow_override" />
                             </div>
-                        </div>
-                    </form>
-                </td>
-                <td>
-                    <input type="checkbox" v-model="preferences['prefs.tag-root'].allow_override" />
-                </td>
-                <td>
-                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click.prevent="savePreference(preferences['prefs.tag-root'])">
-                        <i class="fas fa-fw fa-check"></i>
-                    </button>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <strong>{{ $t('main.preference.key.extensions') }}</strong>
-                </td>
-                <td>
-                    <form class="form-mb-0">
-                        <div class="form-group row" v-for="(extension, key) in preferences['prefs.load-extensions'].value">
-                            <div class="col-md-2"></div>
-                            <div class="col-md-10">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" :id="'extension-'+key" v-model="preferences['prefs.load-extensions'].value[key]" />
-                                    <label class="form-check-label" :for="'extension-'+key">
-                                        {{ key }}
-                                    </label>
-                                </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>{{ t('main.preference.key.project.name') }}</strong>
+                        </td>
+                        <td>
+                            <project-name-preference
+                                :data="state.preferences['prefs.project-name'].value">
+                            </project-name-preference>
+                        </td>
+                        <td>
+                            <div class="form-check form-switch d-flex justify-content-center">
+                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.project-name'].allow_override" />
                             </div>
-                        </div>
-                    </form>
-                </td>
-                <td>
-                    <input type="checkbox" v-model="preferences['prefs.load-extensions'].allow_override" />
-                </td>
-                <td>
-                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click.prevent="savePreference(preferences['prefs.load-extensions'])">
-                        <i class="fas fa-fw fa-check"></i>
-                    </button>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <strong>{{ $t('main.preference.key.link-thesaurex') }}</strong>
-                </td>
-                <td>
-                    <form class="form-mb-0">
-                        <div class="form-group row">
-                            <label class="col-md-2 col-form-label"></label>
-                            <div class="col-md-10">
-                                <input class="form-control" type="text" v-model="preferences['prefs.link-to-thesaurex'].value" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>{{ t('main.preference.key.project.maintainer') }}</strong>
+                        </td>
+                        <td>
+                            <project-maintainer-preference
+                                :data="state.preferences['prefs.project-maintainer'].value">
+                            </project-maintainer-preference>
+                        </td>
+                        <td>
+                            <div class="form-check form-switch d-flex justify-content-center">
+                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.project-maintainer'].allow_override" />
                             </div>
-                        </div>
-                    </form>
-                </td>
-                <td>
-                    <input type="checkbox" v-model="preferences['prefs.link-to-thesaurex'].allow_override" />
-                </td>
-                <td>
-                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click.prevent="savePreference(preferences['prefs.link-to-thesaurex'])">
-                        <i class="fas fa-fw fa-check"></i>
-                    </button>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <strong>{{ $t('main.preference.key.project.name') }}</strong>
-                </td>
-                <td>
-                    <form class="form-mb-0">
-                        <div class="form-group row">
-                            <label class="col-md-2 col-form-label"></label>
-                            <div class="col-md-10">
-                                <input class="form-control" type="text" v-model="preferences['prefs.project-name'].value" />
+                        </td>
+                    </tr>
+                    <tr v-if="state.preferences['prefs.load-extensions'].value.map">
+                        <td>
+                            <strong>{{ t('main.preference.key.map.projection') }}</strong>
+                        </td>
+                        <td>
+                            <map-projection-preference
+                                :data="state.preferences['prefs.map-projection'].value">
+                            </map-projection-preference>
+                        </td>
+                        <td>
+                            <div class="form-check form-switch d-flex justify-content-center">
+                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.map-projection'].allow_override" />
                             </div>
-                        </div>
-                    </form>
-                </td>
-                <td>
-                    <input type="checkbox" v-model="preferences['prefs.project-name'].allow_override" />
-                </td>
-                <td>
-                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click.prevent="savePreference(preferences['prefs.project-name'])">
-                        <i class="fas fa-fw fa-check"></i>
-                    </button>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <strong>{{ $t('main.preference.key.project.maintainer') }}</strong>
-                </td>
-                <td>
-                    <form class="form-mb-0">
-                        <div class="form-group row">
-                            <label class="col-md-2 col-form-label">{{ $t('global.name') }}:</label>
-                            <div class="col-md-10">
-                                <input class="form-control" type="text" v-model="preferences['prefs.project-maintainer'].value.name" />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-md-2 col-form-label">{{ $t('global.email') }}:</label>
-                            <div class="col-md-10">
-                                <input class="form-control" type="text" v-model="preferences['prefs.project-maintainer'].value.email" />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-md-2 col-form-label">{{ $t('global.description') }}:</label>
-                            <div class="col-md-10">
-                                <input class="form-control" type="text" v-model="preferences['prefs.project-maintainer'].value.description" />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-md-2 col-form-label" for="public">{{ $t('main.preference.key.project.public') }}:</label>
-                            <div class="col-md-10">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="public" v-model="preferences['prefs.project-maintainer'].value.public" />
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </td>
-                <td>
-                    <input type="checkbox" v-model="preferences['prefs.project-maintainer'].allow_override" />
-                </td>
-                <td>
-                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click.prevent="savePreference(preferences['prefs.project-maintainer'])">
-                        <i class="fas fa-fw fa-check"></i>
-                    </button>
-                </td>
-            </tr>
-            <tr v-if="preferences['prefs.load-extensions'].value.map">
-                <td>
-                    <strong>{{ $t('main.preference.key.map.projection') }}</strong>
-                </td>
-                <td>
-                    <form class="form-mb-0">
-                        <div class="form-group row">
-                            <label class="col-md-2 col-form-label">{{ $t('main.preference.key.map.epsg') }}:</label>
-                            <div class="col-md-10">
-                                <input class="form-control" type="text" v-model="preferences['prefs.map-projection'].value.epsg" />
-                            </div>
-                        </div>
-                    </form>
-                </td>
-                <td>
-                    <input type="checkbox" v-model="preferences['prefs.map-projection'].allow_override" />
-                </td>
-                <td>
-                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click.prevent="savePreference(preferences['prefs.map-projection'])">
-                        <i class="fas fa-fw fa-check"></i>
-                    </button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </template>
 
 <script>
+    import {
+        computed,
+        reactive,
+    } from 'vue';
+
+    import GuiLanguage from './preferences/GuiLanguage.vue';
+    import ResetEmail from './preferences/ResetEmail.vue';
+    import Columns from './preferences/Columns.vue';
+    import ShowTooltips from './preferences/ShowTooltips.vue';
+    import Tags from './preferences/Tags.vue';
+    import Extensions from './preferences/Extensions.vue';
+    import ThesaurusLink from './preferences/ThesaurusLink.vue';
+    import ProjectName from './preferences/ProjectName.vue';
+    import ProjectMaintainer from './preferences/ProjectMaintainer.vue';
+    import MapProjection from './preferences/MapProjection.vue';
+
+    import { useI18n } from 'vue-i18n';
+
+    import store from '../bootstrap/store.js';
+
+    import {
+        can,
+    } from '../helpers/helpers.js';
+
     export default {
-        beforeRouteEnter(to, from, next) {
-            if(!Vue.prototype.$can('edit_preferences')) {
-                next(vm => vm.init({}));
-            }
-            $httpQueue.add(() => $http.get('preference').then(response => {
-                next(vm => vm.init(response.data));
-            }));
+        components: {
+            'gui-language-preference': GuiLanguage,
+            'reset-email-preference': ResetEmail,
+            'columns-preference': Columns,
+            'tooltips-preference': ShowTooltips,
+            'tags-preference': Tags,
+            'extensions-preference': Extensions,
+            'thesaurus-link-preference': ThesaurusLink,
+            'project-name-preference': ProjectName,
+            'project-maintainer-preference': ProjectMaintainer,
+            'map-projection-preference': MapProjection,
         },
-        mounted() {},
-        methods: {
-            init(preferences) {
-                this.initFinished = false;
-                this.preferences = preferences;
-                this.initFinished = true;
-            },
-            getMax(column) {
-                let columns = ['left', 'center', 'right'];
-                const index = columns.findIndex(c => c == column);
-                // if column is not in columns,
-                // it is invalid
-                if(index == -1) {
-                    return;
-                }
-                columns.splice(index, 1);
-                // Max width is 12 (grid size) - size of all other columns
-                let max = 12;
-                columns.forEach(c => {
-                    max -= this.preferences['prefs.columns'].value[c];
-                });
-                return max;
-            },
-            savePreference(pref) {
+        setup(props, context) {
+            const { t } = useI18n();
+
+            // FUNCTIONS
+            const savePreference = pref => {
+                return;
+                // TODO
                 if(!this.$can('edit_preferences')) return;
                 let data = {};
                 data.label = pref.label;
@@ -338,13 +237,25 @@
                     );
                     this.$setPreference(pref.label, pref.value);
                 });
-            }
-        },
-        data() {
+            };
+
+            // DATA
+            const state = reactive({
+                preferences: computed(_ => store.getters.systemPreferences),
+                prefsLoaded: computed(_ => !!state.preferences),
+            });
+
+            // RETURN
             return {
-                preferences: {},
-                initFinished: false
-            }
+                t,
+                // HELPERS
+                can,
+                // LOCAL
+                savePreference,
+                // PROPS
+                // STATE
+                state,
+            };
         },
     }
 </script>

@@ -175,7 +175,7 @@ const de = {
         column: 'Spalte | Spalten',
         'geometry-type': 'Geometrietyp',
         'depends-on': 'Hängt ab von',
-        preference: 'Einstellung',
+        preference: 'Einstellung | Einstellungen',
         value: 'Wert',
         'allow-override': 'Überschreibbar?',
         tag: 'Schlagwort | Schlagworte',
@@ -429,7 +429,7 @@ const de = {
                 }
             },
             info: {
-                password_reset_link: 'Wenn diese Option aktiviert wird, müssen die <code>MAIL_*</code>-Werte in der <code>.env</code>-Datei gesetzt werden. <a href="https://github.com/eScienceCenter/Spacialist/blob/master/INSTALL.md#send-mails" target="_blank">Weitere Informationen</a>.',
+                password_reset_link: 'Damit diese Funktion genutzt werden kann, müssen die <code>MAIL_*</code>-Werte in der <code>.env</code>-Datei gesetzt sein. <a href="https://github.com/eScienceCenter/Spacialist/blob/master/INSTALL.md#send-mails" target="_blank">Weitere Informationen</a>.',
                 columns: 'Die Summe der Werte der Spalten darf 12 nicht überschreiten.'
             },
             key: {

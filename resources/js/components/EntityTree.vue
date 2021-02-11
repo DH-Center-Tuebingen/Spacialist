@@ -3,7 +3,7 @@
         <h3>
             {{ t('main.entity.title', 2) }}
             <small class="badge bg-secondary fw-light align-middle font-size-50">
-                {{ t('main.entity.count', {cnt: topLevelCount}, topLevelCount) }}
+                {{ t('main.entity.count', {cnt: state.topLevelCount}, state.topLevelCount) }}
             </small>
         </h3>
         <tree-search
@@ -149,9 +149,10 @@
 
             // DATA
             const state = reactive({
+                requestAddNewEntity: () => {},
                 tree: computed(_ => store.getters.tree),
                 entity: computed(_ => store.getters.entity),
-                requestAddNewEntity: () => {},
+                topLevelCount: computed(_ => state.tree.length || 0),
                 sort: {
                     by: 'rank',
                     dir: 'asc'
@@ -591,9 +592,6 @@
     //         }
     //     },
     //     computed: {
-    //         topLevelCount() {
-    //             return this.tree.length || 0;
-    //         },
     //         // drag is only allowed, when sorted by rank (asc)
     //         isDragAllowed() {
     //             return this.sort.by == 'rank' && this.sort.dir == 'asc';

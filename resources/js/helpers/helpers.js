@@ -208,7 +208,11 @@ export function getUserBy(value, attr = 'id') {
     if(isLoggedIn()) {
         const isNum = !isNaN(value);
         const lValue = isNum ? value : value.toLowerCase();
-        return store.users.find(u => isNum ? (u[attr] == lValue) : (u[attr].toLowerCase() == lValue));
+        if(attr == 'id' && value == userId()) {
+            return getUser();
+        } else {
+            return getUsers().find(u => isNum ? (u[attr] == lValue) : (u[attr].toLowerCase() == lValue));
+        }
     } else {
         return null;
     }
@@ -413,14 +417,6 @@ export function createDownloadLink(content, filename, base64 = false, contentTyp
 export function createAnchorFromUrl(url) {
     const urlRegex =/(\b(https?):\/\/[-A-Z0-9+#&=?@%_.]*[-A-Z0-9+#&=?@%_\/])/ig;
     return url.replace(urlRegex, match => `<a href="${match}" target="_blank">${match}</a>`);
-}
-
-export function showUserInfo(user) {
-    console.log("Implement showUserInfo method");
-    // TODO
-    // this.$modal.show('user-info-modal', {
-    //     user: user,
-    // });
 }
 
 export function hasPreference(prefKey, prop) {
