@@ -20,11 +20,13 @@ const defaultConfig = {
     autohide: true,
     channel: 'default',
     icon: false,
+    simple: false,
     container: 'toast-container',
+    container_classes: 'position-absolute start-0 bottom-0',
     is_tag: true,
 };
 
-const perToastConfig = ['duration', 'autohide', 'channel', 'icon'];
+const perToastConfig = ['duration', 'autohide', 'channel', 'icon', 'simple'];
 
 function addToast(message, title, config) {
     const toastId = `toast-${(new Date()).getTime()}`;
@@ -61,6 +63,7 @@ function initializeWrapper(config) {
             throw new Error(`Could not find element with ID ${config.container} in DOM!`);
         }
     }
+    wrapper.classList.add(...config.container_classes.split(' '));
     store.wrapper = wrapper;
 };
 

@@ -427,8 +427,7 @@ const en = {
         preference: {
             toasts: {
                 updated: {
-                    title: 'Preference updated',
-                    msg: '{name} successfully updated.'
+                    msg: 'Preferences successfully updated.'
                 }
             },
             info: {

@@ -206,12 +206,8 @@
                 };
             };
             const savePreferences = _ => {
-                toast.$toast('Test Toast!', 'Test Title', {
-                    duration: 10000,
-                    channel: 'success',
-                    icon: true,
-                });
-                return;
+                if(!state.hasDirtyData) return;
+
                 let entries = [];
                 let updatedLanguage = null;
                 for(let k in state.dirtyData) {
@@ -234,20 +230,21 @@
                     }
                     state.dirtyData = {};
 
-                    // const label = this.$t(`main.preference.labels.${pref.label}`);
-                    // this.$showToast(
-                    //     this.$t('main.preference.toasts.updated.title'),
-                    //     this.$t('main.preference.toasts.updated.msg', {
-                    //         name: label
-                    //     }),
-                    //     'success'
-                    // );
+                    const label = t('main.preference.toasts.updated.msg');
+                    toast.$toast(label, '', {
+                        duration: 2500,
+                        autohide: true,
+                        channel: 'success',
+                        icon: true,
+                        simple: true,
+                    });
                 });
             };
 
             // DATA
             const state = reactive({
                 dirtyData: {},
+                hasDirtyData: computed(_ => Object.keys(state.dirtyData).length > 0),
                 preferences: computed(_ => store.getters.preferences),
                 overrides: computed(_ => {
                     const sysPrefs = store.getters.systemPreferences;

@@ -179,7 +179,6 @@
             <video id="rtc-sharing-container" class="video-js d-none"></video>
             <about-dialog></about-dialog>
             <error-modal></error-modal>
-            <!-- <user-info-modal></user-info-modal> -->
         </div>
         <notifications group="spacialist" position="bottom left" class="m-2" />
         <modals-container></modals-container>
@@ -344,6 +343,11 @@
             // ON MOUNTED
             onMounted(_ => {
                 provideToast({
+                    duration: 2500,
+                    autohide: true,
+                    channel: 'success',
+                    icon: true,
+                    simple: false,
                     is_tag: false,
                     container: 'toast-container',
                 });

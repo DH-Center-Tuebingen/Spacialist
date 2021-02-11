@@ -424,8 +424,7 @@ const de = {
         preference: {
             toasts: {
                 updated: {
-                    title: 'Einstellung aktualisiert',
-                    msg: '{name} wurde erfolgreich aktualisiert.'
+                    msg: 'Einstellungen wurden erfolgreich aktualisiert.'
                 }
             },
             info: {

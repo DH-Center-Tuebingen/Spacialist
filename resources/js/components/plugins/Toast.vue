@@ -1,7 +1,7 @@
 <template>
     <div :id="state.id" class="toast" :class="state.toastClasses" role="alert" aria-live="assertive" aria-atomic="true" :data-bs-autohide="state.autohide" :data-bs-delay="state.duration">
-        <div class="toast-header">
-            <span v-if="state.icon">
+        <div class="toast-header" v-if="!state.simple">
+            <span v-if="state.icon" class="badge rounded-pill me-2" :class="state.badgeClass">
                 <i class="fas fa-fw" :class="state.iconClass"></i>
             </span>
             <strong class="me-auto">
@@ -13,6 +13,7 @@
         <div class="toast-body">
             {{ state.message }}
         </div>
+        <button v-if="state.simplePersist" type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
     </div>
 </template>
 
@@ -30,6 +31,11 @@
                 required: false,
             },
             icon: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
+            simple: {
                 type: Boolean,
                 required: false,
                 default: false,
@@ -59,8 +65,9 @@
             const {
                 id,
                 icon,
-                title,
+                simple,
                 message,
+                title,
                 duration,
                 autohide,
                 channel,
@@ -72,7 +79,9 @@
                 message: message,
                 title: title,
                 duration: duration,
+                simple: simple,
                 autohide: autohide,
+                simplePersist: computed(_ => simple.value && !autohide.value),
                 icon: computed(_ => state.iconClass.length > 0),
                 iconClass: computed(_ => {
                     if(!icon.value) return [];
@@ -89,6 +98,11 @@
                         default:
                             return [];
                     }
+                }),
+                badgeClass: computed(_ => {
+                    if(!icon.value) return [];
+
+                    return `bg-${channel.value}`;
                 }),
                 toastClasses: computed(_ => {
                     let classes = ['border-0'];
@@ -116,7 +130,10 @@
                             break;
                         default:
                             // use default bootstrap styling for unsupported/non-existing channel
-                            return [];
+                            classes = [];
+                    }
+                    if(state.simplePersist) {
+                        classes.push(['d-flex align-items-center']);
                     }
                     return classes;
                 }),
