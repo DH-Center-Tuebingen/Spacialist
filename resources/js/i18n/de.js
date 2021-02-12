@@ -54,7 +54,7 @@ const de = {
             confirm: 'Ja, Änderungen verwerfen',
             confirmpos: 'Nein, Speichern und fortfahren'
         },
-        search: 'Suche...',
+        search: 'Suche…',
         login: 'Einloggen',
         'login-title': 'Anmelden',
         'login-subtitle': 'Willkommen bei Spacialist',

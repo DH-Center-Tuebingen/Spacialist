@@ -24,6 +24,10 @@
         toRefs,
     } from 'vue';
 
+    import {
+        getTs
+    } from '../../helpers/helpers.js';
+
     export default {
         props: {
             id: {
@@ -75,7 +79,7 @@
 
             // DATA
             const state = reactive({
-                id: id || `toast-${(new Date()).getTime()}`,
+                id: id || `toast-${getTs()}`,
                 message: message,
                 title: title,
                 duration: duration,

@@ -7,7 +7,7 @@
                         <span class="input-group-text">
                             <i class="fas fa-fw fa-search"></i>
                         </span>
-                        <input type="text" class="form-control" @input="debouncedSearch" placehoder="Search&ellipsis;">
+                        <input type="text" class="form-control" @input="debouncedSearch" :placeholder="t('global.search')">
                     </div>
                 </form>
             </li>
@@ -344,13 +344,27 @@
                             </div>
                         </td>
                     </tr>
+                    <tr>
+                        <td :colspan="state.maxTableCols">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" @click="getNextEntries()" :disabled="state.allLoaded">
+                                <span v-if="!state.allLoaded">
+                                    <i class="fas fa-fw fa-sync"></i>
+                                    {{ t('main.activity.fetch_next_entries') }}
+                                </span>
+                                <span v-else>
+                                    <i class="fas fa-fw fa-ban"></i>
+                                    No more items
+                                </span>
+                            </button>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
-            <infinite-loading @infinite="getNextEntries">
+            <!-- <infinite-loading @infinite="getNextEntries">
                 <span slot="spinner"></span>
                 <span slot="no-more"></span>
                 <span slot="no-results"></span>
-            </infinite-loading>
+            </infinite-loading> -->
         </div>
 
         <!-- <router-view
@@ -432,6 +446,11 @@
                     state.orderType = 'asc';
                 }
             };
+            const getNextEntries = _ => {
+                if(state.entriesLoaded === state.allEntries.length) return;
+
+                state.entriesLoaded = Math.min(state.entriesLoaded + state.chunkSize, state.allEntries.length);
+            };
 
             // DATA
             const state = reactive({
@@ -449,6 +468,14 @@
                 },
                 deleteItem: {},
                 bibliographyTypes: bibliographyTypes,
+                allLoaded: computed(_ => state.allEntries.length === state.entriesLoaded),
+                maxTableCols: computed(_ => {
+                    if(state.allEntries.length > 0) {
+                        return Object.keys(state.allEntries[0]).length;
+                    } else {
+                        return 0;
+                    }
+                }),
                 orderedBibliography: computed(_ => {
                     const query = state.query.toLowerCase();
                     let filteredEntries = [];
@@ -484,51 +511,22 @@
             // RETURN
             return {
                 t,
+                // HELPERS
                 can,
+                // LOCAL
                 debouncedSearch,
                 setOrderColumn,
+                getNextEntries,
+                // PROPS
+                // STATE
                 state,
             };
         },
-        // beforeRouteEnter(to, from, next) {
-        //     $httpQueue.add(() => $http.get('bibliography').then(response => {
-        //         next(vm => vm.init(response.data));
-        //     }));
-        // },
-        // created() {
-        //     this.debouncedSearch = _debounce(e => {
-        //         this.query = e.target.value;
-        //     }, this.debounceTimeout);
-        // },
-        // mounted() {},
         // methods: {
-        //     init(entries) {
-        //         this.allEntries = entries;
-        //     },
-        //     getNextEntries($state) {
-        //         if(this.entriesLoaded == this.allEntries.length) {
-        //             $state.complete();
-        //         } else {
-        //             this.entriesLoaded = Math.min(this.entriesLoaded + this.chunkSize, this.allEntries.length);
-        //             $state.loaded();
-        //         }
-        //     },
         //     addEntry(entry) {
         //         this.allEntries.push(entry);
         //         if(this.allEntries.length < this.chunkSize) {
         //             this.entriesLoaded++;
-        //         }
-        //     },
-        //     setOrderColumn(column) {
-        //         if(this.orderColumn == column) {
-        //             if(this.orderType == 'asc') {
-        //                 this.orderType = 'desc';
-        //             } else {
-        //                 this.orderType = 'asc';
-        //             }
-        //         } else {
-        //             this.orderColumn = column;
-        //             this.orderType = 'asc';
         //         }
         //     },
         //     inputFile(newFile, oldFile) {

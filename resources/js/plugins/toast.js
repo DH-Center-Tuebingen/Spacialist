@@ -9,6 +9,10 @@ import {
     Toast,
 } from 'bootstrap';
 
+import {
+    getTs
+} from '../helpers/helpers.js';
+
 import ToastComponent from '../components/plugins/Toast.vue';
 
 const store = {
@@ -29,7 +33,7 @@ const defaultConfig = {
 const perToastConfig = ['duration', 'autohide', 'channel', 'icon', 'simple'];
 
 function addToast(message, title, config) {
-    const toastId = `toast-${(new Date()).getTime()}`;
+    const toastId = `toast-${getTs()}`;
     const toastContainer = document.createElement('div');
     render(createVNode(ToastComponent, {
         message: message,

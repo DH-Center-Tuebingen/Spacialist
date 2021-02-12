@@ -54,7 +54,7 @@ const en = {
             confirm: 'Yes, discard changes',
             confirmpos: 'No, save and continue'
         },
-        search: 'Search...',
+        search: 'Search…',
         login: 'Login',
         'login-title': 'Login',
         'login-subtitle': 'Welcome to Spacialist',

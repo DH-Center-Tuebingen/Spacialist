@@ -98,9 +98,8 @@
 
             // FUNCTIONS
             const closeModal = _ => {
-                console.log("should close?");
-                context.emit('input', false);
                 state.show = false;
+                context.emit('input', false);
             }
 
             // DATA

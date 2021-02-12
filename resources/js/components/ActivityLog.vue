@@ -40,7 +40,7 @@
                             {{ i + 1 }}
                             </td>
                         <td v-if="!state.hideUser">
-                            <a href="#" @click.prevent="$showUserInfo(act.causer)" class="text-nowrap">
+                            <a href="#" @click.prevent="showUserInfo(act.causer)" class="text-nowrap">
                                 <user-avatar class="align-middle" :user="act.causer" :size="20"></user-avatar>
                                 <span class="align-middle ms-2">{{ act.causer.name }}</span>
                             </a>
@@ -111,11 +111,14 @@
     import { useI18n } from 'vue-i18n';
 
     import {
-        _orderBy
+        _orderBy,
     } from '../helpers/helpers.js';
     import {
-        date
+        date,
     } from '../helpers/filters.js';
+    import {
+        showUserInfo,
+    } from '../helpers/modal.js';
 
     export default {
         components: {
@@ -258,13 +261,18 @@
             // RETURN
             return {
                 t,
+                // HELPERS
                 date,
+                showUserInfo,
+                // LOCAL
                 sortBy,
                 getIcon,
                 toggleDataShown,
                 togglePrettyPrint,
                 fetchData,
                 onFilterUpdated,
+                // PROPS
+                // STATAE
                 state,
             };
         },
