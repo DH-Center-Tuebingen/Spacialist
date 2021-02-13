@@ -2,7 +2,8 @@
         <draggable v-if="state.componentLoaded"
             class="h-100 pe-1"
             v-model="state.attributeList"
-            item-key="id">
+            item-key="id"
+            :group="group">
                 <template #item="{element, index}">
                     <div class="mb-3 row" @mouseenter="onEnter(index)" @mouseleave="onLeave(index)">
                         <label
@@ -239,6 +240,7 @@
             const { t } = useI18n();
             const {
                 attributes,
+                group,
                 metadataAddon,
                 selections,
                 values,
@@ -348,6 +350,7 @@
                 onMetadata,
                 hasEmitter,
                 // PROPS
+                group,
                 metadataAddon,
                 // STATE
                 state,
