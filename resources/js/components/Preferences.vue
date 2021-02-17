@@ -2,7 +2,7 @@
     <div class="h-100 d-flex flex-column">
         <h3>
             {{ t('global.preference', 2) }}
-            <button type="button" class="btn btn-outline-success">
+            <button type="button" class="btn btn-outline-success" @click="savePreferences()">
                 <i class="fas fa-fw fa-save"></i>
                 {{ t('global.save') }}
             </button>
@@ -25,7 +25,8 @@
                         </td>
                         <td>
                             <gui-language-preference
-                                :data="state.preferences['prefs.gui-language'].value">
+                                :data="state.preferences['prefs.gui-language'].value"
+                                @changed="e => trackChanges('prefs.gui-language', e)">
                             </gui-language-preference>
                         </td>
                         <td>
@@ -40,7 +41,8 @@
                         </td>
                         <td>
                             <reset-email-preference
-                                :data="state.preferences['prefs.enable-password-reset-link'].value">
+                                :data="state.preferences['prefs.enable-password-reset-link'].value"
+                                @changed="e => trackChanges('prefs.enable-password-reset-link', e)">
                             </reset-email-preference>
                         </td>
                         <td>
@@ -55,7 +57,8 @@
                         </td>
                         <td>
                             <columns-preference
-                                :data="state.preferences['prefs.columns'].value">
+                                :data="state.preferences['prefs.columns'].value"
+                                @changed="e => trackChanges('prefs.columns', e)">
                             </columns-preference>
                         </td>
                         <td>
@@ -70,7 +73,8 @@
                         </td>
                         <td>
                             <tooltips-preference
-                                :data="state.preferences['prefs.show-tooltips'].value">
+                                :data="state.preferences['prefs.show-tooltips'].value"
+                                @changed="e => trackChanges('prefs.show-tooltips', e)">
                             </tooltips-preference>
                         </td>
                         <td>
@@ -85,7 +89,8 @@
                         </td>
                         <td>
                             <tags-preference
-                                :data="state.preferences['prefs.tag-root'].value">
+                                :data="state.preferences['prefs.tag-root'].value"
+                                @changed="e => trackChanges('prefs.tag-root', e)">
                             </tags-preference>
                         </td>
                         <td>
@@ -100,7 +105,8 @@
                         </td>
                         <td>
                             <extensions-preference
-                                :data="state.preferences['prefs.load-extensions'].value">
+                                :data="state.preferences['prefs.load-extensions'].value"
+                                @changed="e => trackChanges('prefs.load-extensions', e)">
                             </extensions-preference>
                         </td>
                         <td>
@@ -115,7 +121,8 @@
                         </td>
                         <td>
                             <thesaurus-link-preference
-                                :data="state.preferences['prefs.link-to-thesaurex'].value">
+                                :data="state.preferences['prefs.link-to-thesaurex'].value"
+                                @changed="e => trackChanges('prefs.link-to-thesaurex', e)">
                             </thesaurus-link-preference>
                         </td>
                         <td>
@@ -130,7 +137,8 @@
                         </td>
                         <td>
                             <project-name-preference
-                                :data="state.preferences['prefs.project-name'].value">
+                                :data="state.preferences['prefs.project-name'].value"
+                                @changed="e => trackChanges('prefs.project-name', e)">
                             </project-name-preference>
                         </td>
                         <td>
@@ -145,7 +153,8 @@
                         </td>
                         <td>
                             <project-maintainer-preference
-                                :data="state.preferences['prefs.project-maintainer'].value">
+                                :data="state.preferences['prefs.project-maintainer'].value"
+                                @changed="e => trackChanges('prefs.project-maintainer', e)">
                             </project-maintainer-preference>
                         </td>
                         <td>
@@ -160,7 +169,8 @@
                         </td>
                         <td>
                             <map-projection-preference
-                                :data="state.preferences['prefs.map-projection'].value">
+                                :data="state.preferences['prefs.map-projection'].value"
+                                @changed="e => trackChanges('prefs.map-projection', e)">
                             </map-projection-preference>
                         </td>
                         <td>
@@ -181,6 +191,18 @@
         reactive,
     } from 'vue';
 
+    import { useI18n } from 'vue-i18n';
+
+    import store from '../bootstrap/store.js';
+
+    import { useToast } from '../plugins/toast.js';
+
+    import { patchPreferences } from '../api.js';
+
+    import {
+        can,
+    } from '../helpers/helpers.js';
+
     import GuiLanguage from './preferences/GuiLanguage.vue';
     import ResetEmail from './preferences/ResetEmail.vue';
     import Columns from './preferences/Columns.vue';
@@ -191,14 +213,6 @@
     import ProjectName from './preferences/ProjectName.vue';
     import ProjectMaintainer from './preferences/ProjectMaintainer.vue';
     import MapProjection from './preferences/MapProjection.vue';
-
-    import { useI18n } from 'vue-i18n';
-
-    import store from '../bootstrap/store.js';
-
-    import {
-        can,
-    } from '../helpers/helpers.js';
 
     export default {
         components: {
@@ -215,32 +229,61 @@
         },
         setup(props, context) {
             const { t } = useI18n();
+            const toast = useToast();
 
             // FUNCTIONS
-            const savePreference = pref => {
-                return;
-                // TODO
-                if(!this.$can('edit_preferences')) return;
-                let data = {};
-                data.label = pref.label;
-                data.value = pref.value;
-                if(typeof data.value === 'object') data.value = JSON.stringify(data.value);
-                data.allow_override = pref.allow_override;
-                $http.patch(`preference/${pref.id}`, data).then(response => {
-                    const label = this.$t(`main.preference.labels.${pref.label}`);
-                    this.$showToast(
-                        this.$t('main.preference.toasts.updated.title'),
-                        this.$t('main.preference.toasts.updated.msg', {
-                            name: label
-                        }),
-                        'success'
-                    );
-                    this.$setPreference(pref.label, pref.value);
+            const trackChanges = (label, data) => {
+                state.dirtyData[label] = {
+                    value: data.value,
+                };
+            };
+            const savePreferences = _ => {
+                if(!state.hasDirtyData) return;
+
+                let entries = [];
+                let updatedLanguage = null;
+                for(let k in state.dirtyData) {
+                    const dd = state.dirtyData[k];
+                    if(k == 'prefs.gui-language') {
+                        const userLang = store.getters.preferenceByKey('prefs.gui-language');
+                        const sysLang = state.preferences['prefs.gui-language'];
+                        // if user pref language does not differ from sys pref language
+                        if(userLang === sysLang) {
+                            // update current language in Spacialist
+                            updatedLanguage = dd.value;
+                        }
+                    }
+                    entries.push({
+                        value: dd.value,
+                        allow_override: state.preferences[k].allow_override,
+                        label: k,
+                    });
+                }
+                const data = {
+                    changes: entries,
+                };
+                patchPreferences(data).then(data => {
+                    // Update language if value has changed
+                    if(!!updatedLanguage) {
+                        locale.value = updatedLanguage;
+                    }
+                    state.dirtyData = {};
+    
+                    const label = t('main.preference.toasts.updated.msg');
+                    toast.$toast(label, '', {
+                        duration: 2500,
+                        autohide: true,
+                        channel: 'success',
+                        icon: true,
+                        simple: true,
+                    });
                 });
             };
 
             // DATA
             const state = reactive({
+                dirtyData: {},
+                hasDirtyData: computed(_ => Object.keys(state.dirtyData).length > 0),
                 preferences: computed(_ => store.getters.systemPreferences),
                 prefsLoaded: computed(_ => !!state.preferences),
             });
@@ -251,7 +294,8 @@
                 // HELPERS
                 can,
                 // LOCAL
-                savePreference,
+                trackChanges,
+                savePreferences,
                 // PROPS
                 // STATE
                 state,

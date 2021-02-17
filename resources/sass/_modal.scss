@@ -3,30 +3,35 @@
 }
 
 .modal-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-body {
+    overflow-y: auto;
 }
 
 .sp-modal-content {
-  @extend .modal-content;
-  max-width: 50vw;
+    @extend .modal-content;
+    max-height: 80vh;
+    max-width: 50vw;
 }
 
 .sp-modal-content-xl {
-  max-width: 80vw;
+    max-width: 80vw;
 }
 
 .sp-modal-content-lg {
-  max-width: 70vw;
+    max-width: 70vw;
 }
 
 .sp-modal-content-sm {
-  max-width: 30vw;
+    max-width: 30vw;
 }
 
 .sp-modal-content-xs {
-  max-width: 20vw;
+    max-width: 20vw;
 }
 
 .modal-image {
@@ -35,8 +40,8 @@
 }
 
 .atom-label {
-	text-shadow: -1px 1px 1px rgb(0,0,0);
-	margin-left: 25px;
+    text-shadow: -1px 1px 1px rgb(0,0,0);
+    margin-left: 25px;
 }
 
 .v--modal-overlay {

@@ -19,6 +19,12 @@ const en = {
         confirm: 'OK',
         create: 'Create',
         parse: 'Parse',
+        list: {
+            nr_of_entries: 'No Entries | 1 Entry | {cnt} Entries',
+            no_entries: 'No entries found.',
+            fetch_next_entries: 'Fetch next entries',
+            no_more_entries: 'No more entries',
+        },
         'select-all': 'Select All',
         'select-none': 'Deselect All',
         'delete-name': {
@@ -363,15 +369,12 @@ const en = {
             title: '@:global.activity',
             title_project: 'Project Activity | Project Activities',
             title_user: 'Your Activity | Your Activities',
-            nr_of_entries: 'No Entries | 1 Entry | {cnt} Entries',
-            no_results: 'No results found.',
             rawdata: 'Raw Data',
             apply_filter: 'Apply filter',
             search_in_raw_data: 'Search in raw data',
             hide_filter_panel: 'Hide filter',
             toggle_raw_data: 'Toggle Raw Data',
             toggle_pretty_print: 'Toggle Pretty Print',
-            fetch_next_entries: 'Fetch next entries',
         },
         datamodel: {
             toasts: {
@@ -484,6 +487,8 @@ const en = {
         },
         bibliography: {
             modal: {
+                paste_info_title: 'Note',
+                paste_info: 'You can use <kbd><kbd>ctrl</kbd> + <kbd>v</kbd></kbd> to fill out the fields with a BibTeX entry from your clipboard.',
                 new: {
                     title: 'New Entry',
                     'bibtex-code': 'BibTeX-Code'

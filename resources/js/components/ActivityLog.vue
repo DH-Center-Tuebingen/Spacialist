@@ -5,7 +5,7 @@
             v-if="state.showFilter"
             :hide-user="state.hideUser"
             :hidden-panel="true"
-            @filter-updated="onFilterUpdated">
+            @updated="onFilterUpdated">
         </activity-log-filter>
         <div class="table-responsive h-100 mt-3" v-if="state.sortedActivity.length > 0">
             <table class="table table-light table-striped table-hover">
@@ -76,11 +76,11 @@
                             <button type="button" class="btn btn-outline-secondary btn-sm" @click="fetchData" :disabled="state.disableFetching">
                                 <span v-if="!state.noMoreResults">
                                     <i class="fas fa-fw fa-sync"></i>
-                                    {{ t('main.activity.fetch_next_entries') }}
+                                    {{ t('global.list.fetch_next_entries') }}
                                 </span>
                                 <span v-else>
                                     <i class="fas fa-fw fa-ban"></i>
-                                    No more items
+                                    {{ t('global.list.no_more_entries') }}
                                 </span>
                             </button>
                         </td>
@@ -94,7 +94,7 @@
             </infinite-loading> -->
         </div>
         <div v-else class="alert alert-info mb-0 mt-3" role="alert">
-            {{ t('main.activity.no_results') }}
+            {{ t('global.list.no_entries') }}
         </div>
     </div>
 </template>
@@ -172,8 +172,6 @@
                 noMoreResults,
                 hideUser,
                 actionIcons,
-                onFilter,
-                onFetch,
             } = toRefs(props);
 
             // FUNCTIONS
@@ -216,10 +214,10 @@
             };
             const fetchData = _ => {
                 if(state.disableFetching) return;
-                onFetch.value();
+                props.onFetch();
             };
             const onFilterUpdated = e => {
-                onFilter.value(e.filters);
+                props.onFilter(e.filters);
             };
 
             // DATA

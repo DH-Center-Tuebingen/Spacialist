@@ -62,7 +62,7 @@
         </div>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="closeModal()">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
             <i class="fas fa-fw fa-times"></i> {{ t('global.close') }}
         </button>
     </div>
@@ -89,7 +89,7 @@
                 type: Object,
             },
         },
-        emits: ['input'],
+        emits: ['closing'],
         setup(props, context) {
             const { t } = useI18n();
             const {
@@ -99,7 +99,7 @@
             // FUNCTIONS
             const closeModal = _ => {
                 state.show = false;
-                context.emit('input', false);
+                context.emit('closing', false);
             }
 
             // DATA

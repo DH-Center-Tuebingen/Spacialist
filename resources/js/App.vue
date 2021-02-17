@@ -177,7 +177,6 @@
                 Loading...
             </template>
             <video id="rtc-sharing-container" class="video-js d-none"></video>
-            <about-dialog></about-dialog>
             <error-modal></error-modal>
         </div>
         <notifications group="spacialist" position="bottom left" class="m-2" />
@@ -209,6 +208,9 @@
         initApp,
         throwError,
     } from './helpers/helpers.js';
+    import {
+        showAbout
+    } from './helpers/modal.js';
 
     export default {
         setup(props) {
@@ -320,7 +322,7 @@
                 });
             }
             function showAboutModal() {
-                this.$modal.show('about-modal');
+                showAbout();
             }
 
             // WATCHER
@@ -379,12 +381,17 @@
             // RETURN
             return {
                 t,
-                state,
+                // HELPERS
                 getPreference,
                 getToolPlugins,
                 hasPreference,
                 getSettingsPlugins,
+                // LOCAL
                 logout,
+                showAboutModal,
+                // PROPS
+                // STATE
+                state,
             };
         }
     }

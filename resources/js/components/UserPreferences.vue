@@ -5,7 +5,7 @@
             <small class="text-muted">
                 {{ getUser().name }}
             </small>
-            <button type="button" class="btn btn-outline-success ms-2" @click="savePreferences">
+            <button type="button" class="btn btn-outline-success ms-2" @click="savePreferences()">
                 <i class="fas fa-fw fa-save"></i>
                 {{ t('global.save') }}
             </button>
@@ -150,7 +150,6 @@
 <script>
     import {
         computed,
-        inject,
         reactive,
     } from 'vue';
 
@@ -163,6 +162,8 @@
     import store from '../bootstrap/store.js';
 
     import { useToast } from '../plugins/toast.js';
+
+    import { patchPreferences } from '../api.js';
 
     import {
         can,
@@ -193,7 +194,6 @@
             'project-maintainer-preference': ProjectMaintainer,
             'map-projection-preference': MapProjection,
         },
-        inject: ['toast', '$toast'],
         setup(props, context) {
             const { t, locale } = useI18n();
             const route = useRoute();
@@ -223,13 +223,13 @@
                 const data = {
                     changes: entries,
                 };
-                $http.patch(`preference/${route.params.id}`, data).then(response => {
+                patchPreferences(data, route.params.id).then(data => {
                     // Update language if value has changed
                     if(!!updatedLanguage) {
                         locale.value = updatedLanguage;
                     }
                     state.dirtyData = {};
-
+    
                     const label = t('main.preference.toasts.updated.msg');
                     toast.$toast(label, '', {
                         duration: 2500,

@@ -1,6 +1,13 @@
 import store from './bootstrap/store.js';
 import auth from './bootstrap/auth.js';
 
+// GET AND STORE (FETCH)
+export async function fetchVersion() {
+    await $httpQueue.add(() => $http.get('/version').then(response => {
+        store.dispatch('setVersion', response.data);
+    }));
+}
+
 export async function fetchUsers() {
     await $httpQueue.add(() => $http.get('user').then(response => {
         store.dispatch('setUsers', {
@@ -56,6 +63,7 @@ export async function fetchPreData(locale) {
     }));
 };
 
+// GET
 export async function getEntityComments(id) {
     return fetchComments(id, 'entity');
 };
@@ -83,13 +91,52 @@ export async function getEntityTypeAttributes(id) {
     )
 }
 
+async function fetchComments(id, type) {
+    return $httpQueue.add(() => $http.get(`/comment/resource/${id}?r=${type}`).then(response => response.data).catch(error => error));
+}
+
+export async function getBibtexFile() {
+    return await $httpQueue.add(
+        () => $http.get('bibliography/export').then(response => response.data)
+    );
+}
+
+// POST
 export async function updateEntityTypeRelation(entityType) {
     const id = entityType.id;
     const data = {
         'is_root': entityType.is_root || false,
         'sub_entity_types': entityType.sub_entity_types.map(t => t.id),
     };
-    return await $httpQueue.add(() => $http.post(`/editor/dm/${id}/relation`, data).then(response => response.data));
+    return await $httpQueue.add(
+        () => $http.post(`/editor/dm/${id}/relation`, data).then(response => response.data)
+    );
+};
+
+export async function addOrUpdateBibliographyItem(item) {
+    let data = {};
+    for(let k in item.fields) {
+        data[k] = item.fields[k];
+    }
+    data.type = item.type.name;
+
+    if(item.id) {
+        return $httpQueue.add(
+            () => $http.patch(`bibliography/${item.id}`, data).then(response => response.data)
+        );
+    } else {
+        return $httpQueue.add(
+            () => $http.post('bibliography', data).then(response => response.data)
+        );
+    }
+};
+
+export async function updateBibliography(file) {
+    let formData = new FormData();
+    formData.append('file', file);
+    return await $httpQueue.add(
+        () => $http.post('bibliography/import', formData).then(response => response.data)
+    );
 };
 
 export async function setUserAvatar(id, file) {
@@ -100,12 +147,15 @@ export async function setUserAvatar(id, file) {
     );
 };
 
+// PATCH
+export async function patchPreferences(data, uid) {
+    const endpoint = !!uid ? `preference/${uid}` : 'preference';
+    return await $http.patch(endpoint, data).then(response => response.data);
+}
+
+// DELETE
 export async function deleteUserAvatar(id) {
     return await $httpQueue.add(
         () => $http.delete(`user/${id}/avatar`).then(response => response.data)
     );
 };
-
-async function fetchComments(id, type) {
-    return $httpQueue.add(() => $http.get(`/comment/resource/${id}?r=${type}`).then(response => response.data).catch(error => error));
-}

@@ -1,5 +1,13 @@
 <template>
     <div class="h-100 d-flex flex-column">
+        <h3>
+            Literatur
+            <span class="badge bg-secondary">
+                {{ t('global.list.nr_of_entries', {
+                    cnt: state.allEntries.length
+                }, state.allEntries.length) }}
+            </span>
+        </h3>
         <ul class="list-inline mb-2">
             <li class="list-inline-item">
                 <form class="" id="bibliography-search-form">
@@ -7,12 +15,12 @@
                         <span class="input-group-text">
                             <i class="fas fa-fw fa-search"></i>
                         </span>
-                        <input type="text" class="form-control" @input="debouncedSearch" :placeholder="t('global.search')">
+                        <input type="text" class="form-control" @input="debouncedSearch($event)" :placeholder="t('global.search')">
                     </div>
                 </form>
             </li>
             <li class="list-inline-item">
-                <button type="button" class="btn btn-success" id="bibliography-add-button" @click="showNewItemModal" :disabled="!can('add_remove_bibliography')">
+                <button type="button" class="btn btn-success" id="bibliography-add-button" @click="showNewItemModal()" :disabled="!can('add_remove_bibliography')">
                     <i class="fas fa-fw fa-plus"></i> {{ t('main.bibliography.add') }}
                 </button>
             </li>
@@ -34,7 +42,7 @@
                 </file-upload>
             </li>
             <li class="list-inline-item">
-                <button type="button" class="btn btn-outline-primary" @click="exportFile">
+                <button type="button" class="btn btn-outline-primary" @click="exportFile()">
                     <i class="fas fa-fw fa-file-export"></i> {{ t('main.bibliography.export') }}
                 </button>
             </li>
@@ -51,6 +59,9 @@
             <table class="table table-light table-sm table-striped table-hover">
                 <thead class="sticky-top">
                     <tr>
+                        <th>
+                            #
+                        </th>
                         <th>
                             <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('type')">
                                 {{ t('global.type') }}
@@ -252,7 +263,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="entry in state.orderedBibliography" :key="entry.id">
+                    <tr v-for="(entry, i) in state.orderedBibliography" :key="entry.id">
+                        <td class="fw-bold">
+                            {{ i+1 }}
+                        </td>
                         <td>
                             {{ entry.type }}
                         </td>
@@ -334,7 +348,7 @@
                                     <i class="fas fa-fw fa-ellipsis-h"></i>
                                 </span>
                                 <div class="dropdown-menu overlay-all" aria-labelledby="dropdownMenuButton">
-                                    <a class="dropdown-item" href="#" @click.prevent="editEntry(entry)" :disabled="!can('edit_bibliography')">
+                                    <a class="dropdown-item" href="#" @click.prevent="editItem(entry)" :disabled="!can('edit_bibliography')">
                                         <i class="fas fa-fw fa-edit text-info"></i> {{ t('global.edit') }}
                                     </a>
                                     <a class="dropdown-item" href="#" @click.prevent="requestDeleteEntry(entry)" :disabled="!can('add_remove_bibliography')">
@@ -349,11 +363,11 @@
                             <button type="button" class="btn btn-outline-secondary btn-sm" @click="getNextEntries()" :disabled="state.allLoaded">
                                 <span v-if="!state.allLoaded">
                                     <i class="fas fa-fw fa-sync"></i>
-                                    {{ t('main.activity.fetch_next_entries') }}
+                                    {{ t('global.list.fetch_next_entries') }}
                                 </span>
                                 <span v-else>
                                     <i class="fas fa-fw fa-ban"></i>
-                                    No more items
+                                    {{ t('global.list.no_more_entries') }}
                                 </span>
                             </button>
                         </td>
@@ -419,12 +433,25 @@
 
     import store from '../bootstrap/store.js';
 
-    import { bibliographyTypes } from '../helpers/bibliography.js';
+    import {
+        bibliographyTypes,
+    } from '../helpers/bibliography.js';
+
+    import {
+        addOrUpdateBibliographyItem,
+        getBibtexFile,
+        updateBibliography,
+    } from '../api.js';
     import {
         can,
+        createDownloadLink,
+        getProjectName,
         _debounce,
         _orderBy,
     } from '../helpers/helpers.js';
+    import {
+        showBibliographyEntry,
+    } from '../helpers/modal.js';
 
     export default {
         setup(props, context) {
@@ -451,6 +478,83 @@
 
                 state.entriesLoaded = Math.min(state.entriesLoaded + state.chunkSize, state.allEntries.length);
             };
+            const showNewItemModal = _ => {
+                if(!can('add_remove_bibliography')) return;
+                
+                showBibliographyEntry({
+                    fields: {},
+                }, addBibliographyItem);
+            };
+            const addEntry = entry => {
+                store.dispatch('addBibliographyItem', entry);
+
+                if(state.allEntries.length < state.chunkSize) {
+                    state.entriesLoaded++;
+                }
+            };
+            const updateEntry = entry => {
+                store.dispatch('updateBibliographyItem', entry);
+            };
+            const addEntries = list => {
+                for(let i=0; i<list.length; i++) {
+                    addEntry(list[i]);
+                }
+            };
+            const addBibliographyItem = item => {
+                if(
+                    !can('add_remove_bibliography')
+                    || !item.type
+                    || !item.fields
+                ) {
+                    return new Promise(r => r(null));
+                }
+
+                return addOrUpdateBibliographyItem(item).then(data => {
+                    if(item.id) {
+                        updateEntry(item);
+                    } else {
+                        addEntry(data);
+                    }
+                })
+            };
+            const inputFile = (newFile, oldFile) => {
+                if(!can('add_remove_bibliography|edit_bibliography')) return;
+
+                // Enable automatic upload
+                if(Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error) {
+                    if(!newFile.active) {
+                        newFile.active = true
+                    }
+                }
+            };
+            const importFile = (file, component) => {
+                return updateBibliography(file.file).then(data => {
+                    addEntries(data);
+                });
+            };
+            const exportFile = _ => {
+                getBibtexFile().then(data => {
+                    const filename = getProjectName(true) + '.bibtex';
+                    createDownloadLink(data, filename, false, 'application/x-bibtex');
+                });
+            };
+            const editItem = data => {
+                if(!can('edit_bibliography')) return;
+                const type = bibliographyTypes.find(t => t.name == data.type);
+                if(!type) return;
+                let fields = {};
+                type.fields.forEach(f => {
+                    if(data[f]) {
+                        fields[f] = data[f];
+                    }
+                });
+                const item = {
+                    fields: fields,
+                    type: type,
+                    id: data.id,
+                };
+                showBibliographyEntry(item, addBibliographyItem);
+            };
 
             // DATA
             const state = reactive({
@@ -467,7 +571,6 @@
                     fields: {}
                 },
                 deleteItem: {},
-                bibliographyTypes: bibliographyTypes,
                 allLoaded: computed(_ => state.allEntries.length === state.entriesLoaded),
                 maxTableCols: computed(_ => {
                     if(state.allEntries.length > 0) {
@@ -517,91 +620,17 @@
                 debouncedSearch,
                 setOrderColumn,
                 getNextEntries,
+                showNewItemModal,
+                editItem,
+                inputFile,
+                importFile,
+                exportFile,
                 // PROPS
                 // STATE
                 state,
             };
         },
         // methods: {
-        //     addEntry(entry) {
-        //         this.allEntries.push(entry);
-        //         if(this.allEntries.length < this.chunkSize) {
-        //             this.entriesLoaded++;
-        //         }
-        //     },
-        //     inputFile(newFile, oldFile) {
-        //         if(!can('add_remove_bibliography|edit_bibliography')) return;
-        //         // Wait for response
-        //         if(newFile && oldFile && newFile.success && !oldFile.success) {
-        //             this.allEntries.push(newFile.response);
-        //         }
-        //         // Enable automatic upload
-        //         if(Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error) {
-        //             if(!this.$refs.upload.active) {
-        //                 this.$refs.upload.active = true
-        //             }
-        //         }
-        //     },
-        //     importFile(file, component) {
-        //         let formData = new FormData();
-        //         formData.append('file', file.file);
-        //         return $http.post('bibliography/import', formData);
-        //     },
-        //     exportFile() {
-        //         $httpQueue.add(() => $http.get('bibliography/export').then(response => {
-        //             const filename = this.$getPreference('prefs.project-name') + '.bibtex';
-        //             this.$createDownloadLink(response.data, filename, false, response.headers['content-type']);
-        //         }));
-        //     },
-        //     onModalClose() {
-        //         this.$router.push({
-        //             name: 'bibliography'
-        //         });
-        //     },
-        //     addBibliographyItem(item) {
-        //         const emptyPromise = new Promise(r => r(null));
-        //         if(!can('add_remove_bibliography')) return emptyPromise;
-        //         if(!item.type) return emptyPromise;
-        //         if(!item.fields) return emptyPromise;
-        //         let data = {};
-        //         for(let k in item.fields) {
-        //             data[k] = item.fields[k];
-        //         }
-        //         data.type = item.type.name;
-
-        //         if(item.id) {
-        //             return $httpQueue.add(() => $http.patch(`bibliography/${item.id}`, data).then(response => {
-        //                 let entry = this.allEntries.find(e => e.id == item.id);
-        //                 for(let k in item.fields) {
-        //                     Vue.set(entry, k, item.fields[k]);
-        //                 }
-        //             }));
-        //         } else {
-        //             return $httpQueue.add(() => $http.post('bibliography', data).then(response => {
-        //                 this.addEntry(response.data);
-        //             }));
-        //         }
-        //     },
-        //     editEntry(entry) {
-        //         if(!can('edit_bibliography')) return;
-        //         const type = this.$options.availableTypes.find(t => t.name == entry.type);
-        //         if(!type) return;
-        //         let fields = {};
-        //         type.fields.forEach(f => {
-        //             if(entry[f]) {
-        //                 fields[f] = entry[f];
-        //             }
-        //         });
-        //         Vue.set(this.newItem, 'fields', fields);
-        //         Vue.set(this.newItem, 'type', type);
-        //         Vue.set(this.newItem, 'id', entry.id);
-        //         this.$router.push({
-        //             name: 'bibedit',
-        //             params: {
-        //                 id: entry.id
-        //             }
-        //         });
-        //     },
         //     deleteEntry(entry) {
         //         if(!can('add_remove_bibliography')) return;
         //         $httpQueue.add(() => $http.delete(`bibliography/${entry.id}`).then(response => {
@@ -625,35 +654,6 @@
         //         this.deleteItem = {};
         //         this.$modal.hide('delete-bibliography-item-modal');
         //     },
-        //     showNewItemModal() {
-        //         if(!can('add_remove_bibliography')) return;
-        //         this.newItem = {
-        //             fields: {}
-        //         };
-        //         Vue.set(this.newItem, 'type', this.$options.availableTypes[0]);
-
-        //         this.$router.push({
-        //             name: 'bibnew'
-        //         });
-        //     }
-        // },
-        // data() {
-        //     return {
-        //         allEntries: [],
-        //         entriesLoaded: 0,
-        //         chunkSize: 20,
-        //         orderColumn: 'author',
-        //         orderType: 'asc',
-        //         query: '',
-        //         debouncedSearch: undefined,
-        //         debounceTimeout: 1000,
-        //         files: [],
-        //         showAllFields: false,
-        //         newItem: {
-        //             fields: {}
-        //         },
-        //         deleteItem: {},
-        //     }
         // },
     }
 </script>

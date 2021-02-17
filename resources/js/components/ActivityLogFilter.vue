@@ -117,7 +117,7 @@
                 default: false
             },
         },
-        emits: ['filter-updated'],
+        emits: ['updated'],
         setup(props, context) {
             // FETCH
             const { t } = useI18n();
@@ -128,7 +128,7 @@
 
             // FUNCTIONS
             const filterActivity = filters => {
-                context.emit('filter-updated', {
+                context.emit('updated', {
                     filters: filters
                 });
             };

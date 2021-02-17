@@ -19,6 +19,12 @@ const de = {
         confirm: 'Ok',
         create: 'Anlegen',
         parse: 'Parsen',
+        list: {
+            nr_of_entries: 'Keine Einträge | 1 Eintrag | {cnt} Einträge',
+            no_entries: 'Keine Einträge gefunden.',
+            fetch_next_entries: 'Weitere Einträge laden',
+            no_more_entries: 'Keine weiteren Einträge',
+        },
         'select-all': 'Alle auswählen',
         'select-none': 'Alle abwählen',
         'delete-name': {
@@ -360,15 +366,12 @@ const de = {
             title: '@:global.activity',
             title_project: 'Projekt-Aktivität | Projekt-Aktivitäten',
             title_user: 'Deine Aktivität | Deine Aktivitäten',
-            nr_of_entries: 'Keine Einträge | 1 Eintrag | {cnt} Einträge',
-            no_results: 'Keine Ergebnisse gefunden.',
             rawdata: 'Rohdaten',
             apply_filter: 'Filter anwenden',
             search_in_raw_data: 'In Rohdaten suchen',
             hide_filter_panel: 'Filter verstecken',
             toggle_raw_data: 'Anzeige der Rohdaten umschalten',
             toggle_pretty_print: 'Darstellung umschalten',
-            fetch_next_entries: 'Weitere Einträge laden',
         },
         datamodel: {
             toasts: {
@@ -481,6 +484,8 @@ const de = {
         },
         bibliography: {
             modal: {
+                paste_info_title: 'Beachte',
+                paste_info: 'Du kannst die Felder mit der Tastenkombination <kbd><kbd>Strg</kbd> + <kbd>v</kbd></kbd> mit einem BibTeX-Eintrag aus deiner Zwischenablage ausfüllen.',
                 new: {
                     title: 'Neuer Eintrag',
                     'bibtex-code': 'BibTeX-Code'

@@ -29,6 +29,7 @@ export const store = createStore({
             tree: [],
             user: {},
             users: [],
+            version: {},
             vfm: {},
         }
     },
@@ -50,6 +51,15 @@ export const store = createStore({
         },
         setBibliography(state, data) {
             state.bibliography = data;
+        },
+        addBibliographyItem(state, data) {
+            state.bibliography.push(data);
+        },
+        updateBibliographyItem(state, data) {
+            let entry = state.bibliography.find(e => e.id == data.id);
+            for(let k in data.fields) {
+                entry[k] = data.fields[k];
+            }
         },
         addEntity(state, n) {
             state.entities[n.id] = n;
@@ -100,6 +110,9 @@ export const store = createStore({
         },
         setFile(state, data) {
             state.file = data;
+        },
+        setVersion(state, data) {
+            state.version = data;
         }
     },
     actions: {
@@ -111,6 +124,12 @@ export const store = createStore({
         },
         setBibliography({commit}, data) {
             commit('setBibliography', data);
+        },
+        addBibliographyItem({commit}, data) {
+            commit('addBibliographyItem', data);
+        },
+        updateBibliographyItem({commit}, data) {
+            commit('updateBibliographyItem', data);
         },
         setRoles({commit}, data) {
             commit('setRoles', data.roles);
@@ -241,6 +260,9 @@ export const store = createStore({
             commit('setAttributeSelections', data.selections);
             commit('setAttributeDependencies', data.dependencies);
         },
+        setVersion({commit}, data) {
+            commit('setVersion', data);
+        },
     },
     getters: {
         appInitialized: state => {
@@ -313,6 +335,9 @@ export const store = createStore({
         },
         file: state => {
             return state.file;
+        },
+        version: state => {
+            return state.version;
         },
         vfm: state => {
             return state.vfm;

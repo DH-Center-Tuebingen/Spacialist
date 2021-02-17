@@ -144,15 +144,21 @@ export function truncate(str, length = 80, ellipses = '…') {
     }
     return str;
 };
+export function escapehtml(str) {
+    return str
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;');
+};
 export function bibtexify(value, type) {
-    let rendered = "<pre><code>";
+    let rendered = "<pre class='mb-0'><code>";
     if(type) {
         rendered += "@"+type+" {"
         if(value['citekey']) rendered += value['citekey'] + ",";
         for(let k in value) {
             if(value[k] == null || value[k] == '' || k == 'citekey') continue;
             rendered += "    <br />";
-            rendered += "    " + k + " = \"" + value[k] + "\"";
+            rendered += "    " + k + " = \"" + escapehtml(value[k]) + "\"";
         }
         rendered += "<br />";
         rendered += "}";

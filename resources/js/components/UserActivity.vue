@@ -4,7 +4,7 @@
             <h3>
                 {{ t('main.activity.title_user', 2) }}
                 <span class="badge bg-secondary">
-                    {{ t('main.activity.nr_of_entries', {
+                    {{ t('global.list.nr_of_entries', {
                         cnt: state.pagination.total
                     }, state.pagination.total) }}
                 </span>
