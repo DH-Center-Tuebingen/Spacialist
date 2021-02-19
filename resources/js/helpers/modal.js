@@ -8,6 +8,7 @@ import About from '../components/modals/system/About.vue';
 import UserInfo from '../components/modals/users/UserInfo.vue';
 import BibliographyItem from '../components/modals/bibliography/Item.vue';
 import DeleteBibliographyItem from '../components/modals/bibliography/Delete.vue';
+import DeleteEntityType from '../components/modals/entitytype/Delete.vue';
 
 export function showAbout() {
     const uid = `AboutModal-${getTs()}`;
@@ -66,6 +67,27 @@ export function showDeleteBibliographyEntry() {
         },
         on: {
             closing(e) {
+                store.getters.vfm.hide(uid);
+            }
+        }
+    });
+}
+
+export function showDeleteEntityType(entityType, metadata) {
+    const uid = `DeleteEntityType-${getTs()}`;
+    store.getters.vfm.show({
+        component: DeleteEntityType,
+        bind: {
+            name: uid,
+            entityType: entityType,
+            metadata: metadata,
+        },
+        on: {
+            closing(e) {
+                store.getters.vfm.hide(uid);
+            },
+            confirm(e) {
+                console.log("we can delete!");
                 store.getters.vfm.hide(uid);
             }
         }

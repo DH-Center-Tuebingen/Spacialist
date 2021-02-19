@@ -64,6 +64,11 @@ export const store = createStore({
         addEntity(state, n) {
             state.entities[n.id] = n;
         },
+        addEntityType(state, data) {
+            state.entityTypeAttributes[data.id] = data.attributes.slice();
+            delete data.attributes;
+            state.entityTypes[data.id] = data;
+        },
         addRootEntity(state, n) {
             state.entities[n.id] = n;
             state.tree.push(n);
@@ -246,6 +251,9 @@ export const store = createStore({
         addEntity({commit}, data) {
             const n = new Node(data);
             commit('addEntity', n);
+        },
+        addEntityType({commit}, data) {
+            commit('addEntityType', data);
         },
         setEntityTypes({commit, state}, data) {
             state.entityTypes = {};

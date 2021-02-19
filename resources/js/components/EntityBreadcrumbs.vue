@@ -36,8 +36,6 @@
                 entity,
             } = toRefs(props);
 
-            console.log(entity, "entity in breadcrumb");
-
             const state = reactive({
                 parsedList: computed(_ => {
                     let l = [];

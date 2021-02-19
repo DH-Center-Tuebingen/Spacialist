@@ -1,14 +1,14 @@
 <template>
     <div class="row d-flex flex-row overflow-hidden h-100" v-dcan="'duplicate_edit_concepts|view_concept_props'">
-        <div class="col-md-2 py-2 d-flex flex-column bg-light-dark">
+        <div class="col-md-2 py-2 h-100 d-flex flex-column bg-light-dark">
             <h4>{{ t('main.datamodel.entity.title') }}</h4>
             <entity-type-list
-                class="col px-0 h-100 scroll-y-auto"
+                class="col px-0 h-100 d-flex flex-column overflow-hidden"
                 :data="state.entityTypes"
                 :selected-id="state.selectedEntityType"
-                @add="onCreateEntityType"
-                @delete="onDeleteEntityType"
-                @duplicate="onDuplicateEntityType"
+                @add="addEntityType"
+                @delete="requestDeleteEntityType"
+                @duplicate="duplicateEntityType"
                 @edit="onEditEntityType"
                 @select="setEntityType">
             </entity-type-list>
@@ -139,37 +139,6 @@
             </div>
         </modal>
 
-        <modal name="delete-entity-type-modal" height="auto" :scrollable="true">
-            <div class="modal-content" v-if="openedModal == 'delete-entity-type-modal'">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ $t('global.delete-name.title', {name: $translateConcept(modalSelectedEntityType.thesaurus_url)}) }}</h5>
-                    <button type="button" class="btn-close" aria-label="Close" @click="hideDeleteEntityTypeModal">
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p class="alert alert-info">
-                        {{ $t('global.delete-name.desc', {name: $translateConcept(modalSelectedEntityType.thesaurus_url)}) }}
-                    </p>
-                    <p class="alert alert-danger">
-                        {{
-                            $tc('main.datamodel.entity.modal.delete.alert', entityCount, {
-                                name: $translateConcept(modalSelectedEntityType.thesaurus_url),
-                                cnt: entityCount
-                            })
-                        }}
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" @click="deleteEntityType(modalSelectedEntityType)">
-                        <i class="fas fa-fw fa-check"></i> {{ $t('global.delete') }}
-                    </button>
-                    <button type="button" class="btn btn-secondary" @click="hideDeleteEntityTypeModal">
-                        <i class="fas fa-fw fa-times"></i> {{ $t('global.cancel') }}
-                    </button>
-                </div>
-            </div>
-        </modal>
-
         <modal name="delete-attribute-modal" height="auto" :scrollable="true">
             <div class="modal-content" v-if="openedModal == 'delete-attribute-modal'">
                 <div class="modal-header">
@@ -220,6 +189,19 @@
     import store from '../bootstrap/store.js';
     import router from '../bootstrap/router.js';
 
+    import {
+        duplicateEntityType as duplicateEntityTypeApi,
+        getEntityTypeOccurrenceCount,
+    } from '../api.js';
+
+    import {
+        getEntityTypeAttributes,
+    } from '../helpers/helpers.js';
+
+    import {
+        showDeleteEntityType,
+    } from '../helpers/modal.js';
+
     export default {
         // components: {
         //     CreateAttribute
@@ -237,6 +219,27 @@
                     params: {
                         id: event.type.id
                     }
+                });
+            };
+            const addEntityType = event => {
+                let last = state.entityTypes[state.entityTypes.length-1];
+                let newOne = {...last};
+                newOne.id += 1;
+                store.dispatch('addEntityType', newOne);
+            };
+            const duplicateEntityType = event => {
+                const attrs = getEntityTypeAttributes(event.id).slice();
+                duplicateEntityTypeApi(event.id).then(data => {
+                    data.attributes = attrs;
+                    store.dispatch('addEntityType', data);
+                })
+            };
+            const requestDeleteEntityType = event => {
+                getEntityTypeOccurrenceCount(event.type.id).then(data => {
+                    const metadata = {
+                        entityCount: data,
+                    };
+                    showDeleteEntityType(event.type, metadata);
                 });
             };
 
@@ -263,6 +266,9 @@
                 // HELPERS
                 // LOCAL
                 setEntityType,
+                addEntityType,
+                duplicateEntityType,
+                requestDeleteEntityType,
                 // STATE
                 state,
             }
@@ -409,24 +415,6 @@
         //                 key: 'any'
         //             });
         //             vm.$modal.show('new-entity-type-modal');
-        //         }));
-        //     },
-        //     onDeleteEntityType(event) {
-        //         const entityType = event.type;
-        //         const vm = this;
-        //         const id = entityType.id;
-        //         $httpQueue.add(() => vm.$http.get('/editor/dm/entity_type/occurrence_count/' + id).then(function(response) {
-        //             vm.setEntityCount(response.data);
-        //             vm.setModalSelectedEntityType(entityType);
-        //             vm.openedModal = 'delete-entity-type-modal';
-        //             vm.$modal.show('delete-entity-type-modal');
-        //         }));
-        //     },
-        //     onDuplicateEntityType(event) {
-        //         const id = event.id;
-        //         $httpQueue.add(() => $http.post(`/editor/dm/entity_type/${id}/duplicate`).then(response => {
-        //             this.localEntityTypes.push(response.data);
-        //             this.$addEntityType(response.data);
         //         }));
         //     },
         //     onEditEntityType(event) {

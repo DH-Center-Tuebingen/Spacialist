@@ -1,120 +1,149 @@
 <template>
-    <div>
-        <div v-for="comment in comments" :key="comment.id" class="mt-2 d-flex" v-show="!commentsHidden">
-            <slot name="avatar" :user="comment.author">
-                <a href="#" @click.prevent="showUserInfo(comment.author)">
-                    <user-avatar :user="comment.author" :size="avatar"></user-avatar>
-                </a>
-            </slot>
-            <div class="ms-3 flex-grow-1">
-                <div class="card">
-                    <div class="card-header d-flex flex-row justify-content-between py-2 px-3" :class="{'border-0': !comment.content}">
-                        <div>
-                            <slot name="author" :comment="comment.author">
-                                <a href="#" @click.prevent="showUserInfo(comment.author)" class="text-body">
-                                    <span class="fw-medium">
-                                        {{ comment.author.name }}
-                                    </span>
-                                    &bull;
-                                    <span class="text-muted fw-light">
-                                        {{ comment.author.nickname }}
-                                    </span>
-                                </a>
-                            </slot>
-                        </div>
-                        <div class="small">
-                            <slot name="metadata" class="me-2" :comment="comment"></slot>
-                            <template v-if="comment.updated_at != comment.created_at">
-                                <span class="badge badge-light border">
-                                    {{ $t('global.edited') }}
-                                </span>
-                                &bull;
-                            </template>
-                            <span class="text-muted fw-light" :title="datestring(comment.updated_at)">
-                                {{ ago(comment.updated_at) }}
-                            </span>
-                            <span class="dropdown" v-if="!comment.deleted_at">
-                                <span :id="`edit-comment-dropdown-${comment.id}`" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fas fa-fw fa-ellipsis-h"></i>
-                                </span>
-                                <div class="dropdown-menu" :aria-labelledby="`edit-comment-dropdown-${comment.id}`">
-                                    <a class="dropdown-item" href="#" @click.prevent="enableEditing(comment)" v-if="comment.author.id === state.currentUserId && editing.id != comment.id">
-                                        <i class="fas fa-fw fa-edit text-info"></i> {{ t('global.edit') }}
-                                    </a>
-                                    <a class="dropdown-item" href="#" @click.prevent="emitReplyTo(comment)">
-                                        <i class="fas fa-fw fa-reply text-success"></i> {{ t('global.reply_to') }}
-                                    </a>
-                                    <a class="dropdown-item" href="#" @click.prevent="emitDelete(comment)" v-if="comment.author.id === state.currentUserId">
-                                        <i class="fas fa-fw fa-trash text-danger"></i> {{ t('global.delete') }}
-                                    </a>
+    <div :class="classes">
+        <div :class="listClasses">
+            <div v-show="!state.commentsHidden">
+                <div v-for="comment in comments" :key="comment.id" class="mt-2 d-flex">
+                    <slot name="avatar" :user="comment.author">
+                        <a href="#" @click.prevent="showUserInfo(comment.author)">
+                            <user-avatar :user="comment.author" :size="avatar"></user-avatar>
+                        </a>
+                    </slot>
+                    <div class="ms-3 flex-grow-1">
+                        <div class="card">
+                            <div class="card-header d-flex flex-row justify-content-between py-2 px-3" :class="{'border-0': !comment.content}">
+                                <div>
+                                    <slot name="author" :comment="comment.author">
+                                        <a href="#" @click.prevent="showUserInfo(comment.author)" class="text-body text-decoration-none">
+                                            <span class="fw-medium">
+                                                {{ comment.author.name }}
+                                            </span>
+                                            &bull;
+                                            <span class="text-muted fw-light">
+                                                {{ comment.author.nickname }}
+                                            </span>
+                                        </a>
+                                    </slot>
                                 </div>
-                            </span>
-                        </div>
-                    </div>
-                    <div v-if="!isEmpty(comment)">
-                        <slot name="body-editing" :comment="comment" :content="editing.content" v-if="!isDeleted(comment) && editing.id == comment.id">
-                            <div class="card-body px-3 py-2">
-                                <textarea class="form-control" v-model="editing.content"></textarea>
-                                <div class="mt-1 d-flex flex-row justify-content-end">
-                                    <button type="button" class="btn btn-success btn-sm me-2" :disabled="editing.content == comment.content" @click="emitEdited(comment, editing.content)">
-                                        <i class="fas fa-fw fa-save"></i> {{ t('global.save') }}
-                                    </button>
-                                    <button type="button" class="btn btn-danger btn-sm" @click="disableEditing()">
-                                        <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
-                                    </button>
+                                <div class="small">
+                                    <slot name="metadata" class="me-2" :comment="comment"></slot>
+                                    <template v-if="comment.updated_at != comment.created_at">
+                                        <span class="badge bg-light text-dark border">
+                                            {{ t('global.edited') }}
+                                        </span>
+                                        &bull;
+                                    </template>
+                                    <span class="text-muted fw-light" :title="datestring(comment.updated_at)">
+                                        {{ ago(comment.updated_at) }}
+                                    </span>
+                                    <span class="dropdown ms-1" v-if="!comment.deleted_at">
+                                        <span :id="`edit-comment-dropdown-${comment.id}`" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-fw fa-ellipsis-h"></i>
+                                        </span>
+                                        <div class="dropdown-menu" :aria-labelledby="`edit-comment-dropdown-${comment.id}`">
+                                            <a class="dropdown-item" href="#" @click.prevent="enableEditing(comment)" v-if="comment.author.id === state.currentUserId && state.editing.id != comment.id">
+                                                <i class="fas fa-fw fa-edit text-info"></i> {{ t('global.edit') }}
+                                            </a>
+                                            <a class="dropdown-item" href="#" @click.prevent="setReplyTo(comment)">
+                                                <i class="fas fa-fw fa-reply text-success"></i> {{ t('global.reply_to') }}
+                                            </a>
+                                            <a class="dropdown-item" href="#" @click.prevent="handleDelete(comment)" v-if="comment.author.id === state.currentUserId">
+                                                <i class="fas fa-fw fa-trash text-danger"></i> {{ t('global.delete') }}
+                                            </a>
+                                        </div>
+                                    </span>
                                 </div>
                             </div>
-                        </slot>
-                        <slot name="body" :comment="comment" v-else-if="!isDeleted(comment)">
-                            <div class="card-body px-3 py-2" v-if="comment.content">
-                                <p class="card-text" v-html="mentionify(comment.content)"></p>
+                            <div v-if="!emptyMetadata(comment)">
+                                <slot name="body-editing" :comment="comment" :content="state.editing.content" v-if="!isDeleted(comment) && state.editing.id == comment.id">
+                                    <div class="card-body px-3 py-2">
+                                        <textarea class="form-control" v-model="state.editing.content"></textarea>
+                                        <div class="mt-1 d-flex flex-row justify-content-end">
+                                            <button type="button" class="btn btn-success btn-sm me-2" :disabled="state.editing.content == comment.content" @click="handleEdit(comment, state.editing.content)">
+                                                <i class="fas fa-fw fa-save"></i> {{ t('global.save') }}
+                                            </button>
+                                            <button type="button" class="btn btn-danger btn-sm" @click="disableEditing()">
+                                                <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </slot>
+                                <slot name="body" :comment="comment" v-else-if="!isDeleted(comment)">
+                                    <div class="card-body px-3 py-2" v-if="comment.content">
+                                        <p class="card-text" v-html="mentionify(comment.content)"></p>
+                                    </div>
+                                </slot>
+                                <slot name="body-deleted" :comment="comment" v-else>
+                                    <div class="card-body bg-warning px-3 py-2" style="opacity: 0.75;">
+                                        <p class="card-text font-italic">
+                                            {{ t('global.comments.deleted_info') }}
+                                        </p>
+                                    </div>
+                                </slot>
                             </div>
-                        </slot>
-                        <slot name="body-deleted" :comment="comment" v-else>
-                            <div class="card-body bg-warning px-3 py-2" style="opacity: 0.75;">
-                                <p class="card-text font-italic">
-                                    {{ $t('global.comments.deleted_info') }}
-                                </p>
-                            </div>
-                        </slot>
+                        </div>
+                        <div v-if="comment.replies_count > 0" class="d-flex flex-row justify-content-end">
+                            <a href="#" class="small text-body" @click.prevent="toggleReplies(comment)">
+                                <div v-show="state.repliesOpen[comment.id]">
+                                    <span v-html="t('global.comments.hide_reply', comment.replies_count, {cnt: comment.replies_count})"></span>
+                                    <i class="fas fa-fw fa-caret-up"></i>
+                                </div>
+                                <div v-show="!state.repliesOpen[comment.id]">
+                                    <span v-html="t('global.comments.show_reply', comment.replies_count, {cnt: comment.replies_count})"></span>
+                                    <i class="fas fa-fw fa-caret-down"></i>
+                                </div>
+                            </a>
+                        </div>
+                        <comment-list
+                            v-if="state.repliesOpen[comment.id] && comment.replies"
+                            :comments="comment.replies"
+                            :hide-button="false"
+                            :post-form="false"
+                            @edited="passEdit"
+                            @on-delete="passDelete">
+                        </comment-list>
                     </div>
                 </div>
-                <div v-if="comment.replies_count > 0" class="d-flex flex-row justify-content-end">
-                    <a href="#" class="small text-body" @click.prevent="toggleReplies(comment)">
-                        <div v-show="repliesOpen[comment.id]">
-                            <span v-html="t('global.comments.hide_reply', {cnt: comment.replies_count}, comment.replies_count)"></span>
-                            <i class="fas fa-fw fa-caret-up"></i>
-                        </div>
-                        <div v-show="!repliesOpen[comment.id]">
-                            <span v-html="t('global.comments.show_reply', {cnt: comment.replies_count}, comment.replies_count)"></span>
-                            <i class="fas fa-fw fa-caret-down"></i>
-                        </div>
-                    </a>
-                </div>
-                <comment-list
-                    v-if="repliesOpen[comment.id] && comment.replies"
-                    :comments="comment.replies"
-                    :show-hide-button="false"
-                    @edited="passEdit"
-                    @on-delete="passDelete"
-                    @reply-to="passReplyTo"
-                    @load-replies="passLoadReplies">
-                </comment-list>
+            </div>
+            <div class="text-center mt-2" v-show="state.displayHideButton">
+                <button class="btn btn-sm btn-outline-primary" @click="toggleHideState()">
+                    <i class="fas fa-fw fa-comments"></i>
+                    <span v-if="state.hideComments">
+                        {{ t('global.comments.show') }}
+                        ({{ comments.length }})
+                    </span>
+                    <span v-else>
+                        {{ t('global.comments.hide') }}
+                    </span>
+                </button>
+            </div>
+            <div v-if="!state.hasComments" class="alert alert-info m-0 mt-2" role="alert">
+                {{ t('global.comments.empty_list') }}
             </div>
         </div>
-        <div class="text-center mt-2" v-show="state.displayHideButton">
-            <a href="#" @click.prevent="toggleHideState()">
-                <i class="fas fa-fw fa-comments"></i>
-                <span v-if="state.hideComments">
-                    {{ t('global.comments.show') }}
+        <hr />
+        <div v-if="postForm">
+            <div v-if="state.replyTo.comment_id > 0" class="mb-1">
+                <span class="badge bg-info">
+                    {{ t('global.replying_to', {name: state.replyTo.author.name}) }}
+                    <a href="#" @click.prevent="cancelReplyTo" class="text-white">
+                        <i class="fas fa-fw fa-times"></i>
+                    </a>
                 </span>
-                <span v-else>
-                    {{ t('global.comments.hide') }}
-                </span>
-            </a>
-        </div>
-        <div v-if="!state.hasComments" class="alert alert-info m-0 mt-2" role="alert">
-            {{ t('global.comments.empty_list') }}
+            </div>
+            <form role="form" @submit.prevent="postComment">
+                <div class="form-group d-flex">
+                    <textarea class="form-control" v-model="state.composedMessage" id="comment-content" ref="messageInput" :placeholder="t('global.comments.text_placeholder')"></textarea>
+                    <div class="ms-2 mt-auto">
+                        <emoji-picker @selected="addEmoji"></emoji-picker>
+                    </div>
+                </div>
+                <div class="text-center mt-2">
+                    <button type="submit" class="btn btn-outline-success">
+                        <i class="fas fa-fw fa-save"></i>
+                        {{ t('global.comments.submit') }}
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </template>
@@ -123,6 +152,7 @@
     import {
         computed,
         reactive,
+        ref,
         toRefs,
     } from 'vue';
 
@@ -139,6 +169,12 @@
     import {
         showUserInfo,
     } from '../helpers/modal.js';
+    import {
+        postComment as postCommentApi,
+        getCommentReplies,
+        deleteComment,
+        editComment,
+    } from '../api.js';
 
     export default {
         props: {
@@ -151,19 +187,68 @@
                 type: Number,
                 default: 32
             },
-            showHideButton: {
+            hideButton: {
                 required: false,
                 type: Boolean,
                 default: true
-            }
+            },
+            postForm: {
+                required: false,
+                type: Boolean,
+                default: true,
+            },
+            resource: {
+                required: true,
+                type: Object,
+            },
+            postUrl: {
+                required: false,
+                type: String,
+                default: '/comment',
+            },
+            editUrl: {
+                required: false,
+                type: String,
+                default: '/comment/{cid}',
+            },
+            deleteUrl: {
+                required: false,
+                type: String,
+                default: '/comment/{cid}',
+            },
+            replyUrl: {
+                required: false,
+                type: String,
+                default: '/comment/{cid}/reply',
+            },
+            classes: {
+                required: false,
+                type: String,
+                default: 'd-flex flex-column h-100',
+            },
+            listClasses: {
+                required: false,
+                type: String,
+                default: 'flex-grow-1',
+            },
         },
+        emits: ['added'],
         setup(props, context) {
             const { t } = useI18n();
             const {
                 comments,
                 avatar,
-                showHideButton,
+                hideButton,
+                postForm,
+                resource,
+                postUrl,
+                editUrl,
+                deleteUrl,
+                replyUrl,
+                classes,
+                listClasses,
             } = toRefs(props);
+            const messageInput = ref(null);
 
             // DATA
             const state = reactive({
@@ -173,15 +258,98 @@
                     id: null,
                     content: null
                 },
-                currentUserId: computed(_ => userId()),
-                commentsHidden: computed(_ => !state.hasComments || state.hideComments),
-                displayHideButton: computed(_ => showHideButton.value && state.hasComments),
+                replyTo: {
+                    comment_id: null,
+                    author: {
+                        name: null,
+                        nickname: null
+                    }
+                },
+                composedMessage: '',
+                currentUserId: userId(),
+                commentsHidden: computed(_ => state.hideComments || !state.hasComments),
+                displayHideButton: computed(_ => hideButton.value && state.hasComments),
                 hasComments: computed(_ => comments.value.length > 0)
             });
 
             // FUNCTIONS
+            const resetMessage = _ => {
+                state.composedMessage = '';
+            };
+            const resetReplyTo = _ => {
+                state.replyTo.comment_id = null,
+                state.replyTo.author = {};
+            };
+            const enableEditing = comment => {
+                if(state.editing.id) {
+                    state.editing.content = null;
+                }
+                state.editing.id = comment.id;
+                state.editing.content = comment.content;
+            };
+            const disableEditing = _ => {
+                state.editing.id = null;
+                state.editing.content = null;
+            };
+            const handleEdit = (comment, composedMessage) => {
+                editComment(comment.id, composedMessage, editUrl.value).then(data => {
+                    comment.content = composedMessage;
+                    comment.updated_at = data.updated_at;
+                });
+                disableEditing();
+            };
             const toggleHideState = _ => {
                 state.hideComments = !state.hideComments;
+            };
+            const toggleReplies = comment => {
+                const cid = comment.id;
+                if(state.repliesOpen[cid]) {
+                    state.repliesOpen[cid] = false;
+                } else if(state.repliesOpen[cid] === false) {
+                    state.repliesOpen[cid] = true;
+                } else {
+                    state.repliesOpen[cid] = true;
+                    getCommentReplies(cid, replyUrl.value).then(data => {
+                        comment.replies = data;
+                    });
+                }
+            };
+            const postComment = _ => {
+                if(!state.composedMessage) return;
+
+                const replyTo = state.replyTo.comment_id || null;
+                postCommentApi(state.composedMessage, resource.value, replyTo, null, postUrl.value).then(data => {
+                    context.emit('added', {
+                        comment: data,
+                        replyTo: replyTo,
+                    });
+                    resetMessage();
+                    resetReplyTo();
+                });
+            };
+            const setReplyTo = comment => {
+                state.replyTo.comment_id = comment.id,
+                state.replyTo.author.name = comment.author.name;
+                state.replyTo.author.nickname = comment.author.nickname;
+                messageInput.value.focus();
+            };
+            const cancelReplyTo = _ => {
+                resetReplyTo();
+            };
+            const handleDelete = comment => {
+                const cid = comment.id;
+                deleteComment(cid, deleteUrl.value).then(data => {
+                    comment.deleted_at = Date();
+                });
+            };
+            const addEmoji = event => {
+                state.composedMessage += event.emoji;
+            };
+            const isDeleted = comment => {
+                return !!comment.deleted_at;
+            };
+            const emptyMetadata = comment => {
+                return comment.metadata && comment.metadata.is_empty;
             };
 
             // RETURN
@@ -193,75 +361,28 @@
                 mentionify,
                 showUserInfo,
                 // LOCAL
+                messageInput,
+                enableEditing,
+                disableEditing,
+                handleEdit,
                 toggleHideState,
+                toggleReplies,
+                postComment,
+                setReplyTo,
+                cancelReplyTo,
+                handleDelete,
+                addEmoji,
+                isDeleted,
+                emptyMetadata,
                 // PROPS
                 comments,
                 avatar,
+                postForm,
+                classes,
+                listClasses,
                 // STATE
                 state,
             };
-        },
-        methods: {
-            isDeleted(comment) {
-                return !!comment.deleted_at;
-            },
-            isEmpty(comment) {
-                return comment.metadata && comment.metadata.is_empty;
-            },
-            enableEditing(comment) {
-                if(this.editing.id) {
-                    this.editing.content = null;
-                }
-                this.editing.id = comment.id;
-                this.editing.content = comment.content;
-            },
-            disableEditing() {
-                this.editing.id = null;
-                this.editing.content = null;
-            },
-            emitEdited(comment, newContent) {
-                this.$emit('edited', {
-                    content: newContent,
-                    comment_id: comment.id
-                });
-                this.disableEditing();
-            },
-            emitReplyTo(comment) {
-                this.$emit('reply-to', {
-                    comment: comment
-                });
-            },
-            emitDelete(comment) {
-                this.$emit('on-delete', {
-                    comment_id: comment.id,
-                    reply_to: comment.reply_to
-                });
-            },
-            passEdit(event) {
-                this.$emit('edited', event);
-            },
-            passDelete(event) {
-                this.$emit('on-delete', event);
-            },
-            passReplyTo(event) {
-                this.$emit('reply-to', event);
-            },
-            passLoadReplies(event) {
-                this.$emit('load-replies', event);
-            },
-            toggleReplies(comment) {
-                const cid = comment.id;
-                if(this.repliesOpen[cid]) {
-                    this.repliesOpen[cid] = false;
-                } else if(this.repliesOpen[cid] === false) {
-                    this.repliesOpen[cid] = true;
-                } else {
-                    Vue.set(this.repliesOpen, cid, true);
-                    this.$emit('load-replies', {
-                        comment_id: comment.id
-                    });
-                }
-            }
         },
     }
 </script>

@@ -240,12 +240,6 @@ export function throwError(error) {
     }
 };
 
-export const _cloneDeep = require('lodash/cloneDeep');
-export const _debounce = require('lodash/debounce');
-export const _orderBy = require('lodash/orderBy');
-
-// UNVERIFIED
-
 export function simpleResourceType(resource) {
     switch(resource) {
         case 'App\\Entity':
@@ -259,6 +253,25 @@ export function simpleResourceType(resource) {
             return resource;
     }
 };
+
+export function findInList(list, searchValue, searchKey = 'id', recKey = 'children') {
+    console.log(`Looking for ${searchValue} within key ${searchKey} using rec key ${recKey} in: `, list);
+    if(!list || list.length == 0) return;
+
+    for(let i=0; i<list.length; i++) {
+        if(list[i][searchKey] == searchValue) {
+            return list[i];
+        }
+        const gotIt = findInList(list[i][recKey], searchValue, searchKey, recKey);
+        if(gotIt) return gotIt;
+    }
+};
+
+export const _cloneDeep = require('lodash/cloneDeep');
+export const _debounce = require('lodash/debounce');
+export const _orderBy = require('lodash/orderBy');
+
+// UNVERIFIED
 
 export function getNotificationSourceLink(notification) {
     const query = this.$route.query;
@@ -286,25 +299,6 @@ export function getNotificationSourceLink(notification) {
         default:
             return null;
     }
-};
-
-export function postComment(content, resource, replyToId = null, metadata = null, onFinish = null) {
-    let data = {
-        content: content,
-        resource_id: resource.id,
-        resource_type: simpleResourceType(resource.type),
-    };
-    if(replyToId) {
-        data.reply_to = replyToId;
-    }
-    if(metadata) {
-        data.metadata = metadata;
-    }
-    $httpQueue.add(() => axios.post(`/comment`, data).then(response => {
-        if(onFinish) {
-            onFinish(response.data);
-        }
-    }));
 };
 
 export function userNotifications() {
@@ -541,8 +535,4 @@ export function getSettingsPlugins() {
 
 export function getPlugins() {
     return this.state.plugins;
-}
-
-export function addEntityType(entityType) {
-    this.state.entityTypes[entityType.id] = entityType;
 }

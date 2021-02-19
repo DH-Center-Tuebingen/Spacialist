@@ -1,27 +1,27 @@
 <template>
     <div>
-        <div class="list-group">
-            <a href="#" @click.prevent="selectEntry(entry)" v-for="(entry, i) in state.entries" class="list-group-item list-group-item-action" :class="{ 'active': entry.id == selectedId }" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)" :key="i">
+        <div class="list-group scroll-y-auto px-2">
+            <a href="#" @click.prevent="selectEntry(entry)" v-for="(entry, i) in state.entries" class="list-group-item list-group-item-action d-flex" :class="{ 'active': entry.id == selectedId }" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)" :key="i">
                 <div>
                     <i class="fas fa-fw fa-monument"></i>
                     <span class="p-1">
                         {{ translateConcept(entry.thesaurus_url) }}
                     </span>
                 </div>
-                <div class="ms-auto" v-show="state.hoverStates[i]">
-                    <button class="btn btn-info btn-fab rounded-circle" v-if="state.hasEditListener" @click="$emit('edit', {type: entry})" data-bs-toggle="popover" :data-content="t('global.edit')" data-trigger="hover" data-placement="bottom">
+                <div class="ms-auto" v-if="state.hasOnHoverListener" v-show="state.hoverStates[i]">
+                    <button class="btn btn-info btn-fab rounded-circle" v-if="state.hasEditListener" @click="onEdit(entry)" data-bs-toggle="popover" :data-content="t('global.edit')" data-trigger="hover" data-placement="bottom">
                         <i class="fas fa-fw fa-xs fa-edit" style="vertical-align: 0;"></i>
                     </button>
-                    <button class="btn btn-primary btn-fab rounded-circle" v-if="state.hasDuplicateListener" @click="$emit('duplicate', {id: entry.id})" data-bs-toggle="popover" :data-content="t('global.duplicate')" data-trigger="hover" data-placement="bottom">
+                    <button class="btn btn-primary btn-fab rounded-circle" v-if="state.hasDuplicateListener" @click="onDuplicate(entry)" data-bs-toggle="popover" :data-content="t('global.duplicate')" data-trigger="hover" data-placement="bottom">
                         <i class="fas fa-fw fa-xs fa-clone" style="vertical-align: 0;"></i>
                     </button>
-                    <button class="btn btn-danger btn-fab rounded-circle" v-if="state.hasDeleteListener" @click="$emit('delete', {type: entry})" data-bs-toggle="popover" :data-content="t('global.delete')" data-trigger="hover" data-placement="bottom">
+                    <button class="btn btn-danger btn-fab rounded-circle" v-if="state.hasDeleteListener" @click="onDelete(entry)" data-bs-toggle="popover" :data-content="t('global.delete')" data-trigger="hover" data-placement="bottom">
                         <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
                     </button>
                 </div>
             </a>
         </div>
-        <button v-if="state.hasAddListener" class="btn btn-outline-success btn-sm mt-2" @click.prevent="$emit('add')">
+        <button v-if="state.hasAddListener" class="btn btn-outline-success btn-sm mt-2" @click.prevent="onAdd()">
             <i class="fas fa-fw fa-plus"></i>
             <span>
                 {{ t('main.datamodel.entity.add-button') }}
@@ -56,7 +56,7 @@
                 default: -1,
             }
         },
-        emits: ['edit', 'duplicate', 'delete', 'add', 'select'],
+        emits: ['edit', 'select'],
         setup(props, context) {
             const { t } = useI18n();
             const {
@@ -74,6 +74,18 @@
             };
             const selectEntry = entityType => {
                 context.emit('select', {type: entityType});
+            };
+            const onEdit = entityType => {
+                context.emit('edit', {type: entityType});
+            }
+            const onDuplicate = entityType => {
+                context.emit('duplicate', {id: entityType.id});
+            }
+            const onDelete = entityType => {
+                context.emit('delete', {type: entityType});
+            }
+            const onAdd = _ => {
+                context.emit('add');
             }
 
             // DATA
@@ -84,6 +96,7 @@
                 hasDeleteListener: !!context.attrs.onDelete,
                 hasDuplicateListener: !!context.attrs.onDuplicate,
                 hasEditListener: !!context.attrs.onEdit,
+                hasOnHoverListener: computed(_ => state.hasDeleteListener || state.hasDuplicateListener || state.hasEditListener),
             });
 
             // ON MOUNTED
@@ -100,6 +113,10 @@
                 onEnter,
                 onLeave,
                 selectEntry,
+                onEdit,
+                onDuplicate,
+                onDelete,
+                onAdd,
                 // PROPS
                 selectedId,
                 // STATE

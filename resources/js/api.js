@@ -1,5 +1,8 @@
 import store from './bootstrap/store.js';
 import auth from './bootstrap/auth.js';
+import {
+    simpleResourceType,
+} from './helpers/helpers.js';
 
 // GET AND STORE (FETCH)
 export async function fetchVersion() {
@@ -91,6 +94,12 @@ export async function getEntityTypeAttributes(id) {
     )
 }
 
+export async function getEntityTypeOccurrenceCount(id) {
+    return $httpQueue.add(
+        () => $http.get(`/editor/dm/entity_type/occurrence_count/${id}`).then(response => response.data)
+    );
+}
+
 async function fetchComments(id, type) {
     return $httpQueue.add(() => $http.get(`/comment/resource/${id}?r=${type}`).then(response => response.data).catch(error => error));
 }
@@ -110,6 +119,44 @@ export async function updateEntityTypeRelation(entityType) {
     };
     return await $httpQueue.add(
         () => $http.post(`/editor/dm/${id}/relation`, data).then(response => response.data)
+    );
+};
+
+export async function postComment(content, resource, replyTo = null, metadata = null, endpoint = '/comment') {
+    let data = {
+        content: content,
+        resource_id: resource.id,
+        resource_type: simpleResourceType(resource.type),
+    };
+    if(replyTo) {
+        data.reply_to = replyTo;
+    }
+    if(metadata) {
+        data.metadata = metadata;
+    }
+
+    return $httpQueue.add(
+        () => $http.post(endpoint, data).then(response => response.data)
+    );
+};
+
+export async function editComment(cid, content, endpoint = '/comment/{cid}') {
+    endpoint = endpoint.replaceAll('{cid}', cid);
+
+    const data = {
+        content: content,
+    };
+    
+    return $httpQueue.add(
+        () => $http.patch(endpoint, data).then(response => response.data)
+    );
+};
+
+export async function getCommentReplies(cid, endpoint = '/comment/{cid}/reply') {
+    endpoint = endpoint.replaceAll('{cid}', cid);
+    
+    return $httpQueue.add(
+        () => $http.get(endpoint).then(response => response.data)
     );
 };
 
@@ -147,6 +194,12 @@ export async function setUserAvatar(id, file) {
     );
 };
 
+export async function duplicateEntityType(id) {
+    return $httpQueue.add(
+        () => $http.post(`/editor/dm/entity_type/${id}/duplicate`).then(response => response.data)
+    );
+};
+
 // PATCH
 export async function patchPreferences(data, uid) {
     const endpoint = !!uid ? `preference/${uid}` : 'preference';
@@ -157,5 +210,12 @@ export async function patchPreferences(data, uid) {
 export async function deleteUserAvatar(id) {
     return await $httpQueue.add(
         () => $http.delete(`user/${id}/avatar`).then(response => response.data)
+    );
+};
+
+export async function deleteComment(cid, endpoint = '/comment/{cid}') {
+    endpoint = endpoint.replaceAll('{cid}', cid);
+    return $httpQueue.add(
+        () => $http.delete(endpoint).then(response => response.data)
     );
 };

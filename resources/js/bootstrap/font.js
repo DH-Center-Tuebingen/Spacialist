@@ -9,7 +9,8 @@ import {
 } from '@fortawesome/free-brands-svg-icons';
 import {
     faClipboard,
-    faQuestionCircle
+    faQuestionCircle,
+    faLaugh,
 } from '@fortawesome/free-regular-svg-icons';
 import {
     faAdjust,
@@ -223,6 +224,7 @@ library.add(
     faIdBadge,
     faIndent,
     faInfoCircle,
+    faLaugh,
     faLayerGroup,
     faLightbulb,
     faLink,

@@ -84,7 +84,7 @@
                 </form>
             </div>
             <div class="tab-pane fade h-100 d-flex flex-column" id="active-entity-comments-panel" role="tabpanel">
-                <div class="mb-auto scroll-y-auto" v-if="state.entity.comments">
+                <div class="mb-auto scroll-y-auto h-100" v-if="state.entity.comments">
                     <div v-if="state.commentsFetching" class="mt-2">
                         <p class="alert alert-info mb-0" v-html="$t('global.comments.fetching')">
                         </p>
@@ -102,34 +102,12 @@
                         v-else
                         :avatar="48"
                         :comments="state.entity.comments"
+                        :resource="state.resourceInfo"
                         @edited="editComment"
                         @on-delete="deleteComment"
-                        @reply-to="addReplyTo"
-                        @load-replies="loadReplies">
+                        @added="addComment">
                     </comment-list>
                 </div>
-                <hr />
-                <div v-if="state.replyTo.comment_id > 0" class="mb-1">
-                    <span class="badge bg-info">
-                        {{ tt('global.replying_to', {name: state.replyTo.author.name}) }}
-                        <a href="#" @click.prevent="cancelReplyTo" class="text-white">
-                            <i class="fas fa-fw fa-times"></i>
-                        </a>
-                    </span>
-                </div>
-                <form role="form" @submit.prevent="postComment">
-                    <div class="form-group d-flex">
-                        <textarea class="form-control" v-model="state.comment" id="comment-content" ref="comCnt" :placeholder="t('global.comments.text_placeholder')"></textarea>
-                        <div class="ms-2 mt-auto">
-                            <emoji-picker @selected="addEmoji"></emoji-picker>
-                        </div>
-                    </div>
-                    <div class="text-center mt-2">
-                        <button type="submit" class="btn btn-outline-success">
-                            <i class="fas fa-fw fa-save"></i> {{ t('global.comments.submit') }}
-                        </button>
-                    </div>
-                </form>
             </div>
         </div>
 
@@ -280,14 +258,6 @@
                 hiddenAttributes: 0,
                 entityHeaderHovered: false,
                 initFinished: false,
-                replyTo: {
-                    comment_id: null,
-                    author: {
-                        name: null,
-                        nickname: null
-                    }
-                },
-                comment: '',
                 commentLoadingState: 'not',
                 entity: computed(_ => store.getters.entity),
                 entityUser: computed(_ => getUserBy(state.entity.user.id)),
@@ -300,6 +270,14 @@
                     const entityType = getEntityType(state.entity.entity_type_id);
                     if(!entityType) return;
                     return translateConcept(entityType.thesaurus_url);
+                }),
+                resourceInfo: computed(_ => {
+                    if(!state.entity) return {};
+
+                    return {
+                        id: state.entity.id,
+                        type: 'entity',
+                    };
                 }),
                 showBreadcrumb: computed(_ => {
                     return state.entity.parentIds && state.entity.parentIds.length > 1;
@@ -375,12 +353,23 @@
                     state.commentLoadingState = 'failed';
                 });
             };
-            const postComment = e => {
-                // TODO implement
-            };
-            const addEmoji = event => {
-                state.comment += event.emoji;
-            };
+            const addComment = event => {
+                const comment = event.comment;
+                const replyTo = event.replyTo;
+                if(replyTo) {
+                    const op = state.entity.comments.find(c => c.id == replyTo);
+                    if(op.replies) {
+                        op.replies.push(comment);
+                    }
+                    op.replies_count++;
+                } else {
+                    if(!state.entity.comments) {
+                        state.entity.comments = [];
+                    }
+                    state.entity.comments.push(comment);
+                    state.entity.comments_count++;
+                }
+            }
 
             // ON MOUNTED
             onMounted(_ => {
@@ -412,8 +401,7 @@
                 setEntityView,
                 onEntityHeaderHover,
                 setFormState,
-                postComment,
-                addEmoji,
+                addComment,
                 // STATE
                 state,
             };
@@ -439,14 +427,6 @@
     //     methods: {
     //         reset() {
     //             this.commentLoadingState = 'not';
-    //             this.comment = '';
-    //             this.replyTo = {
-    //                 comment_id: null,
-    //                 author: {
-    //                     name: null,
-    //                     nickname: null
-    //                 }
-    //             };
     //         },
     //         getEntityData(entity) {
     //             this.dataLoaded = false;
@@ -627,90 +607,6 @@
     //                 const gotIt = this.getComment(list[i].replies, id);
     //                 if(gotIt) return gotIt;
     //             }
-    //         },
-    //         loadReplies(event) {
-    //             const cid = event.comment_id;
-    //             $http.get(`/comment/${cid}/reply`).then(response => {
-    //                 let comment = this.getComment(this.selectedEntity.comments, cid);
-    //                 if(comment) {
-    //                     if(!comment.replies) {
-    //                         Vue.set(comment, 'replies', []);
-    //                     }
-    //                     comment.replies = response.data;
-    //                 }
-    //             });
-    //         },
-    //         editComment(event) {
-    //             const cid = event.comment_id;
-    //             const data = {
-    //                 content: event.content
-    //             };
-    //             $http.patch(`/comment/${cid}`, data).then(response => {
-    //                 let comment = this.getComment(this.selectedEntity.comments, cid);
-    //                 if(comment) {
-    //                     comment.content = event.content;
-    //                     comment.updated_at = response.data.updated_at;
-    //                 }
-    //             });
-    //         },
-    //         addReplyTo(event) {
-    //             if(!event.comment) return;
-    //             const comment = event.comment;
-    //             this.replyTo.comment_id = comment.id;
-    //             this.replyTo.author.name = comment.author.name;
-    //             this.replyTo.author.nickname = comment.author.nickname;
-    //             this.$refs.comCnt.focus();
-    //         },
-    //         cancelReplyTo() {
-    //             this.replyTo.comment_id = null;
-    //             this.replyTo.author.name = null;
-    //             this.replyTo.author.nickname = null;
-    //         },
-    //         deleteComment(event) {
-    //             const cid = event.comment_id;
-    //             const parent_id = event.reply_to;
-    //             $http.delete(`/comment/${cid}`).then(response => {
-    //                 let siblings, parent;
-    //                 if(parent_id) {
-    //                     parent = this.getComment(this.selectedEntity.comments, parent_id);
-    //                     siblings = parent.replies;
-    //                 } else {
-    //                     siblings = this.selectedEntity.comments;
-    //                 }
-    //                 const comment = siblings.find(s => s.id == cid);
-    //                 comment.deleted_at = Date();
-    //             });
-    //         },
-    //         postComment() {
-    //             if(!this.comment) return;
-
-    //             let replyToId = null;
-    //             if(this.replyTo.comment_id) {
-    //                 replyToId = this.replyTo.comment_id;
-    //             }
-    //             const resource = {
-    //                 id: this.selectedEntity.id,
-    //                 type: 'entity'
-
-    //             };
-    //             this.$postComment(this.comment, resource, replyToId, null, comment => {
-    //                 const addedComment = comment;
-    //                 if(replyToId) {
-    //                     let comment = this.selectedEntity.comments.find(c => c.id == replyToId);
-    //                     if(comment.replies) {
-    //                         comment.replies.push(addedComment);
-    //                     }
-    //                     comment.replies_count++;
-    //                     this.cancelReplyTo();
-    //                 } else {
-    //                     if(!this.selectedEntity.comments) {
-    //                         this.selectedEntity.comments = [];
-    //                     }
-    //                     this.selectedEntity.comments.push(addedComment);
-    //                     this.selectedEntity.comments_count++;
-    //                 }
-    //                 this.comment = '';
-    //             });
     //         },
     //         getCleanValue(entry, attributes) {
     //             if(!entry) return;
