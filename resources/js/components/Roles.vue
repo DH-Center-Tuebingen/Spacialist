@@ -1,92 +1,93 @@
 <template>
-    <div>
-        <h4>
+    <div class="d-flex flex-column h-100">
+        <h4 class="mb-0">
             {{ t('global.roles') }}
+            <button type="button" class="btn btn-outline-success" @click="showNewRoleModal" :disabled="!can('add_edit_role')">
+                <i class="fas fa-fw fa-plus"></i> {{ t('main.role.add-button') }}
+            </button>
         </h4>
-        <button type="button" class="btn btn-success" @click="showNewRoleModal" :disabled="!can('add_edit_role')">
-            <i class="fas fa-fw fa-plus"></i> {{ t('main.role.add-button') }}
-        </button>
-
-        <table class="table table-striped table-hover" v-if="state.dataInitialized">
-            <thead class="thead-light">
-                <tr>
-                    <th>{{ t('global.name') }}</th>
-                    <th>{{ t('global.display-name') }}</th>
-                    <th>{{ t('global.description') }}</th>
-                    <th>{{ t('global.permissions') }}</th>
-                    <th>{{ t('global.created_at') }}</th>
-                    <th>{{ t('global.updated_at') }}</th>
-                    <th>{{ t('global.options') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="role in state.roleList" :key="role.id">
-                    <td>
-                        {{ role.name }}
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" v-model="role.display_name" required :name="`disp_${role.id}`" />
-                        <!-- <input type="text" class="form-control" v-model="role.display_name" v-validate="" required :name="`disp_${role.id}`" /> -->
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" v-model="role.description" required :name="`desc_${role.id}`" />
-                        <!-- <input type="text" class="form-control" v-model="role.description" v-validate="" required :name="`desc_${role.id}`" /> -->
-                    </td>
-                    <td>
-                        <multiselect
-                            v-model="role.permissions"
-                            :object="true"
-                            :label="'display_name'"
-                            :track-by="'display_name'"
-                            :valueProp="'id'"
-                            :mode="'tags'"
-                            :disabled="!can('add_remove_role')"
-                            :options="state.permissions"
-                            :placeholder="t('main.role.add-permission-placeholder')">
-                        </multiselect>
-                        <!-- <multiselect
-                            label="display_name"
-                            track-by="id"
-                            v-model="role.permissions"
-                            v-validate=""
-                            :closeOnSelect="false"
-                            :disabled="!can('add_remove_permission')"
-                            :hideSelected="true"
-                            :multiple="true"
-                            :name="`perms_${role.id}`"
-                            :options="state.permissions"
-                            :placeholder="t('main.role.add-permission-placeholder')"
-                            :select-label="t('global.select.select')"
-                            :deselect-label="t('global.select.deselect')">
-                        </multiselect> -->
-                    </td>
-                    <td>
-                        {{ date(role.created_at) }}
-                    </td>
-                    <td>
-                        {{ date(role.updated_at) }}
-                    </td>
-                    <td>
-                        <div class="dropdown">
-                            <span id="dropdownMenuButton" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-fw fa-ellipsis-h"></i>
-                                <sup class="notification-info" v-if="roleDirty(role.id)">
-                                    <i class="fas fa-fw fa-xs fa-circle text-warning"></i>
-                                </sup>
-                            </span>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" href="#" v-if="roleDirty(role.id)" :disabled="!can('add_remove_permission')" @click.prevent="onPatchRole(role.id)">
-                                    <i class="fas fa-fw fa-check text-success"></i> {{ t('global.save') }}
-                                </a>
-                                <a class="dropdown-item" href="#" @click.prevent="requestDeleteRole(role.id)" :disabled="!can('delete_role')">
-                                    <i class="fas fa-fw fa-trash text-danger"></i> {{ t('global.delete') }}
-                                </a>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-light flex-grow-1" v-if="state.dataInitialized">
+                <thead class="sticky-top">
+                    <tr>
+                        <th>{{ t('global.name') }}</th>
+                        <th>{{ t('global.display-name') }}</th>
+                        <th>{{ t('global.description') }}</th>
+                        <th>{{ t('global.permissions') }}</th>
+                        <th>{{ t('global.created_at') }}</th>
+                        <th>{{ t('global.updated_at') }}</th>
+                        <th>{{ t('global.options') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="role in state.roleList" :key="role.id">
+                        <td>
+                            {{ role.name }}
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" v-model="role.display_name" required :name="`disp_${role.id}`" />
+                            <!-- <input type="text" class="form-control" v-model="role.display_name" v-validate="" required :name="`disp_${role.id}`" /> -->
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" v-model="role.description" required :name="`desc_${role.id}`" />
+                            <!-- <input type="text" class="form-control" v-model="role.description" v-validate="" required :name="`desc_${role.id}`" /> -->
+                        </td>
+                        <td>
+                            <multiselect
+                                v-model="role.permissions"
+                                :object="true"
+                                :label="'display_name'"
+                                :track-by="'display_name'"
+                                :valueProp="'id'"
+                                :mode="'tags'"
+                                :disabled="!can('add_remove_role')"
+                                :options="state.permissions"
+                                :placeholder="t('main.role.add-permission-placeholder')">
+                            </multiselect>
+                            <!-- <multiselect
+                                label="display_name"
+                                track-by="id"
+                                v-model="role.permissions"
+                                v-validate=""
+                                :closeOnSelect="false"
+                                :disabled="!can('add_remove_permission')"
+                                :hideSelected="true"
+                                :multiple="true"
+                                :name="`perms_${role.id}`"
+                                :options="state.permissions"
+                                :placeholder="t('main.role.add-permission-placeholder')"
+                                :select-label="t('global.select.select')"
+                                :deselect-label="t('global.select.deselect')">
+                            </multiselect> -->
+                        </td>
+                        <td>
+                            {{ date(role.created_at) }}
+                        </td>
+                        <td>
+                            {{ date(role.updated_at) }}
+                        </td>
+                        <td>
+                            <div class="dropdown">
+                                <span id="dropdownMenuButton" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-fw fa-ellipsis-h"></i>
+                                    <sup class="notification-info" v-if="roleDirty(role.id)">
+                                        <i class="fas fa-fw fa-xs fa-circle text-warning"></i>
+                                    </sup>
+                                </span>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="#" v-if="roleDirty(role.id)" :disabled="!can('add_remove_permission')" @click.prevent="onPatchRole(role.id)">
+                                        <i class="fas fa-fw fa-check text-success"></i> {{ t('global.save') }}
+                                    </a>
+                                    <a class="dropdown-item" href="#" @click.prevent="requestDeleteRole(role.id)" :disabled="!can('delete_role')">
+                                        <i class="fas fa-fw fa-trash text-danger"></i> {{ t('global.delete') }}
+                                    </a>
+                                </div>
                             </div>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
         <!-- <modal name="new-role-modal" height="auto" :scrollable="true" v-dcan="'add_edit_role'">
             <div class="modal-content">

@@ -230,6 +230,9 @@ const de = {
         }
     },
     main: {
+        app: {
+            loading_screen_msg: '<span class="fw-light">Lade</span> {appname}<span class="fw-light">&hellip;</span>',
+        },
         entity: {
             title: 'Entität | Entitäten',
             count: 'Keine Top-Level Entitäten | Eine Top-Level Entität | {cnt} Top-Level Entitäten',
@@ -483,6 +486,7 @@ const de = {
             contributor: 'Mitwirkender | Mitwirkende'
         },
         bibliography: {
+            title: 'Literatur',
             modal: {
                 paste_info_title: 'Beachte',
                 paste_info: 'Du kannst die Felder mit der Tastenkombination <kbd><kbd>Strg</kbd> + <kbd>v</kbd></kbd> mit einem BibTeX-Eintrag aus deiner Zwischenablage ausfüllen.',

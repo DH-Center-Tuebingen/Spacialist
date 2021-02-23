@@ -3,7 +3,7 @@
         <div class="col-md-12 h-100 d-flex flex-column">
             <h3>
                 {{ t('main.activity.title_project', 2) }}
-                <span class="badge bg-secondary">
+                <span class="badge bg-secondary fs-50 fw-normal">
                     {{ t('global.list.nr_of_entries', {
                         cnt: state.pagination.total
                     }, state.pagination.total) }}

@@ -3,7 +3,7 @@
         <div class="col-md-12 h-100 d-flex flex-column">
             <h3>
                 {{ t('main.activity.title_user', 2) }}
-                <span class="badge bg-secondary">
+                <span class="badge bg-secondary fs-50 fw-normal">
                     {{ t('global.list.nr_of_entries', {
                         cnt: state.pagination.total
                     }, state.pagination.total) }}
@@ -89,6 +89,7 @@
                     if(f.data_text) {
                         data.text = f.data_text;
                     }
+                    console.log("data", data);
                     return data;
                 })
             });

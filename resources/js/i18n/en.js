@@ -233,6 +233,9 @@ const en = {
         },
     },
     main: {
+        app: {
+            loading_screen_msg: '<span class="fw-light">Loading</span> {appname}',
+        },
         entity: {
             title: 'Entity | Entities',
             count: 'No Top-Level-Entities | One Top-Level-Entity | {cnt} Top-Level-Entities',
@@ -486,6 +489,7 @@ const en = {
             contributor: 'Contributor | Contributors'
         },
         bibliography: {
+            title: 'Literature',
             modal: {
                 paste_info_title: 'Note',
                 paste_info: 'You can use <kbd><kbd>ctrl</kbd> + <kbd>v</kbd></kbd> to fill out the fields with a BibTeX entry from your clipboard.',

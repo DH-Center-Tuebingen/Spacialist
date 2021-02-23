@@ -1,61 +1,65 @@
 <template>
     <div class="h-100 d-flex flex-column">
-        <h3>
-            Literatur
-            <span class="badge bg-secondary">
-                {{ t('global.list.nr_of_entries', {
-                    cnt: state.allEntries.length
-                }, state.allEntries.length) }}
-            </span>
-        </h3>
-        <ul class="list-inline mb-2">
-            <li class="list-inline-item">
-                <form class="" id="bibliography-search-form">
+        <div class="d-flex flex-row justify-content-between">
+            <div class="d-flex flex-row">
+                <h3>
+                    {{ t('main.bibliography.title') }}
+                    <span class="badge bg-secondary fs-50 fw-normal">
+                        {{ t('global.list.nr_of_entries', {
+                            cnt: state.allEntries.length
+                        }, state.allEntries.length) }}
+                    </span>
+                </h3>
+                <form class="ms-3" id="bibliography-search-form">
                     <div class="input-group">
+                        <input type="text" class="form-control" @input="debouncedSearch($event)" :placeholder="t('global.search')">
                         <span class="input-group-text">
                             <i class="fas fa-fw fa-search"></i>
                         </span>
-                        <input type="text" class="form-control" @input="debouncedSearch($event)" :placeholder="t('global.search')">
                     </div>
                 </form>
-            </li>
-            <li class="list-inline-item">
-                <button type="button" class="btn btn-success" id="bibliography-add-button" @click="showNewItemModal()" :disabled="!can('add_remove_bibliography')">
-                    <i class="fas fa-fw fa-plus"></i> {{ t('main.bibliography.add') }}
-                </button>
-            </li>
-            <li class="list-inline-item">
-                <file-upload
-                    accept="application/x-bibtex,text/x-bibtex,text/plain"
-                    extensions="bib,bibtex"
-                    ref="upload"
-                    v-model="files"
-                    :custom-action="importFile"
-                    :directory="false"
-                    :disabled="!can('add_remove_bibliography|edit_bibliography')"
-                    :multiple="false"
-                    :drop="true"
-                    @input-file="inputFile">
-                        <span class="btn btn-outline-primary">
-                            <i class="fas fa-fw fa-file-import"></i> {{ t('main.bibliography.import') }}
-                        </span>
-                </file-upload>
-            </li>
-            <li class="list-inline-item">
-                <button type="button" class="btn btn-outline-primary" @click="exportFile()">
-                    <i class="fas fa-fw fa-file-export"></i> {{ t('main.bibliography.export') }}
-                </button>
-            </li>
-            <li class="list-inline-item">
-                <div class="form-check form-switch">
-                    <input type="checkbox" class="form-check-input" id="show-all-fields-toggle" v-model="state.showAllFields" />
-                    <label class="form-check-label" for="show-all-fields-toggle">
-                        {{ t('main.bibliography.show-all-fields') }}
-                    </label>
-                </div>
-            </li>
-        </ul>
-        <div class="table-responsive flex-grow-1">
+            </div>
+            <div>
+                <ul class="list-inline mb-0">
+                    <li class="list-inline-item">
+                        <button type="button" class="btn btn-success" id="bibliography-add-button" @click="showNewItemModal()" :disabled="!can('add_remove_bibliography')">
+                            <i class="fas fa-fw fa-plus"></i> {{ t('main.bibliography.add') }}
+                        </button>
+                    </li>
+                    <li class="list-inline-item">
+                        <file-upload
+                            accept="application/x-bibtex,text/x-bibtex,text/plain"
+                            extensions="bib,bibtex"
+                            ref="upload"
+                            v-model="files"
+                            :custom-action="importFile"
+                            :directory="false"
+                            :disabled="!can('add_remove_bibliography|edit_bibliography')"
+                            :multiple="false"
+                            :drop="true"
+                            @input-file="inputFile">
+                                <span class="btn btn-outline-primary">
+                                    <i class="fas fa-fw fa-file-import"></i> {{ t('main.bibliography.import') }}
+                                </span>
+                        </file-upload>
+                    </li>
+                    <li class="list-inline-item">
+                        <button type="button" class="btn btn-outline-primary" @click="exportFile()">
+                            <i class="fas fa-fw fa-file-export"></i> {{ t('main.bibliography.export') }}
+                        </button>
+                    </li>
+                    <li class="list-inline-item">
+                        <div class="form-check form-switch">
+                            <input type="checkbox" class="form-check-input" id="show-all-fields-toggle" v-model="state.showAllFields" />
+                            <label class="form-check-label" for="show-all-fields-toggle">
+                                {{ t('main.bibliography.show-all-fields') }}
+                            </label>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="table-responsive flex-grow-1 mt-2">
             <table class="table table-light table-sm table-striped table-hover">
                 <thead class="sticky-top">
                     <tr>

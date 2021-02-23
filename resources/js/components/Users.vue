@@ -2,165 +2,167 @@
     <div class="d-flex flex-column h-100">
         <h4>
             {{ t('main.user.active_users') }}
-        </h4>
-        <div>
             <button type="button" class="btn btn-outline-success" @click="showNewUserModal" :disabled="!can('create_users')">
                 <i class="fas fa-fw fa-plus"></i> {{ t('main.user.add-button') }}
             </button>
-        </div>
-        <table class="table table-striped table-hover flex-grow-1" v-dcan="'view_users'" v-if="state.dataInitialized">
-            <thead class="thead-light">
-                <tr>
-                    <th>{{ t('global.name') }}</th>
-                    <th>{{ t('global.email') }}</th>
-                    <th>{{ t('global.roles') }}</th>
-                    <th>{{ t('global.added_at') }}</th>
-                    <th>{{ t('global.updated_at') }}</th>
-                    <th>{{ t('global.options') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="user in state.userList" :key="user.id">
-                    <td>
-                        {{ user.name }} ({{ user.nickname }})
-                    </td>
-                    <td>
-                        <input type="email" class="form-control" :class="getValidClass(state.error, `email_${user.id}`)" v-model="user.email" :name="`email_${user.id}`" required />
+        </h4>
+        <div class="table-responsive flex-grow-1">
+            <table class="table table-striped table-hover table-light" v-dcan="'view_users'" v-if="state.dataInitialized">
+                <thead class="sticky-top">
+                    <tr>
+                        <th>{{ t('global.name') }}</th>
+                        <th>{{ t('global.email') }}</th>
+                        <th>{{ t('global.roles') }}</th>
+                        <th>{{ t('global.added_at') }}</th>
+                        <th>{{ t('global.updated_at') }}</th>
+                        <th>{{ t('global.options') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="user in state.userList" :key="user.id">
+                        <td>
+                            {{ user.name }} ({{ user.nickname }})
+                        </td>
+                        <td>
+                            <input type="email" class="form-control" :class="getValidClass(state.error, `email_${user.id}`)" v-model="user.email" :name="`email_${user.id}`" required />
 
-                        <div class="invalid-feedback">
-                            <span v-for="(msg, i) in state.error[`email_${user.id}`]" :key="i">
-                                {{ msg }}
-                            </span>
-                        </div>
-                        <!-- <input type="email" class="form-control" :class="getValidClass(state.error, `email_${user.id}`)" v-model="user.email" v-validate="" :name="`email_${user.id}`" required />
-
-                        <div class="invalid-feedback">
-                            <span v-for="(msg, i) in state.error[`email_${user.id}`]" :key="i">
-                                {{ msg }}
-                            </span>
-                        </div> -->
-                    </td>
-                    <td>
-                        <multiselect
-                            v-model="user.roles"
-                            :object="true"
-                            :label="'display_name'"
-                            :track-by="'display_name'"
-                            :valueProp="'id'"
-                            :mode="'tags'"
-                            :disabled="!can('add_remove_role')"
-                            :options="state.roles"
-                            :placeholder="t('main.user.add-role-placeholder')">
-                        </multiselect>
-                        <!-- <multiselect
-                            label="display_name"
-                            track-by="id"
-                            v-model="user.roles"
-                            v-validate=""
-                            :closeOnSelect="false"
-                            :disabled="can('add_remove_role')"
-                            :hideSelected="true"
-                            :multiple="true"
-                            :name="`roles_${user.id}`"
-                            :options="state.roles"
-                            :placeholder="t('main.user.add-role-placeholder')"
-                            :select-label="t('global.select.select')"
-                            :deselect-label="t('global.select.deselect')">
-                        </multiselect> -->
-                    </td>
-                    <td>
-                        {{ date(user.created_at) }}
-                    </td>
-                    <td>
-                        {{ date(user.updated_at) }}
-                    </td>
-                    <td>
-                        <div class="dropdown">
-                            <span id="dropdownMenuButton" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-fw fa-ellipsis-h"></i>
-                                <sup class="notification-info" v-if="userDirty(user.id)">
-                                    <i class="fas fa-fw fa-xs fa-circle text-warning"></i>
-                                </sup>
-                            </span>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" href="#" v-if="userDirty(user.id)" :disabled="!can('add_remove_role')" @click.prevent="onPatchUser(user.id)">
-                                    <i class="fas fa-fw fa-check text-success"></i> {{ t('global.save') }}
-                                </a>
-                                <a class="dropdown-item" href="#" v-if="hasPreference('prefs.enable-password-reset-link')" :disabled="!can('change_password')" @click.prevent="updatePassword(user.email)">
-                                    <i class="fas fa-fw fa-paper-plane text-info"></i> Send Reset-Mail
-                                </a>
-                                <a class="dropdown-item" href="#" :disabled="!can('delete_users')" @click.prevent="requestDeleteUser(user.id)">
-                                    <i class="fas fa-fw fa-user-times text-danger"></i> {{ t('global.deactivate') }}
-                                </a>
+                            <div class="invalid-feedback">
+                                <span v-for="(msg, i) in state.error[`email_${user.id}`]" :key="i">
+                                    {{ msg }}
+                                </span>
                             </div>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                            <!-- <input type="email" class="form-control" :class="getValidClass(state.error, `email_${user.id}`)" v-model="user.email" v-validate="" :name="`email_${user.id}`" required />
+
+                            <div class="invalid-feedback">
+                                <span v-for="(msg, i) in state.error[`email_${user.id}`]" :key="i">
+                                    {{ msg }}
+                                </span>
+                            </div> -->
+                        </td>
+                        <td>
+                            <multiselect
+                                v-model="user.roles"
+                                :object="true"
+                                :label="'display_name'"
+                                :track-by="'display_name'"
+                                :valueProp="'id'"
+                                :mode="'tags'"
+                                :disabled="!can('add_remove_role')"
+                                :options="state.roles"
+                                :placeholder="t('main.user.add-role-placeholder')">
+                            </multiselect>
+                            <!-- <multiselect
+                                label="display_name"
+                                track-by="id"
+                                v-model="user.roles"
+                                v-validate=""
+                                :closeOnSelect="false"
+                                :disabled="can('add_remove_role')"
+                                :hideSelected="true"
+                                :multiple="true"
+                                :name="`roles_${user.id}`"
+                                :options="state.roles"
+                                :placeholder="t('main.user.add-role-placeholder')"
+                                :select-label="t('global.select.select')"
+                                :deselect-label="t('global.select.deselect')">
+                            </multiselect> -->
+                        </td>
+                        <td>
+                            {{ date(user.created_at) }}
+                        </td>
+                        <td>
+                            {{ date(user.updated_at) }}
+                        </td>
+                        <td>
+                            <div class="dropdown">
+                                <span id="dropdownMenuButton" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-fw fa-ellipsis-h"></i>
+                                    <sup class="notification-info" v-if="userDirty(user.id)">
+                                        <i class="fas fa-fw fa-xs fa-circle text-warning"></i>
+                                    </sup>
+                                </span>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="#" v-if="userDirty(user.id)" :disabled="!can('add_remove_role')" @click.prevent="onPatchUser(user.id)">
+                                        <i class="fas fa-fw fa-check text-success"></i> {{ t('global.save') }}
+                                    </a>
+                                    <a class="dropdown-item" href="#" v-if="hasPreference('prefs.enable-password-reset-link')" :disabled="!can('change_password')" @click.prevent="updatePassword(user.email)">
+                                        <i class="fas fa-fw fa-paper-plane text-info"></i> Send Reset-Mail
+                                    </a>
+                                    <a class="dropdown-item" href="#" :disabled="!can('delete_users')" @click.prevent="requestDeleteUser(user.id)">
+                                        <i class="fas fa-fw fa-user-times text-danger"></i> {{ t('global.deactivate') }}
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
         <hr>
 
         <h4>
             {{ t('main.user.deactivated_users') }}
         </h4>
-        <table class="table table-striped table-hover flex-grow-1" v-dcan="'view_users'" v-if="state.deletedUserList.length > 0">
-            <thead class="thead-light">
-                <tr>
-                    <th>{{ t('global.name') }}</th>
-                    <th>{{ t('global.email') }}</th>
-                    <th>{{ t('global.roles') }}</th>
-                    <th>{{ t('global.added_at') }}</th>
-                    <th>{{ t('global.updated_at') }}</th>
-                    <th>{{ t('global.deactivated_at') }}</th>
-                    <th>{{ t('global.options') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="dUser in state.deletedUserList" :key="dUser.id">
-                    <td>
-                        {{ dUser.name }} ({{ dUser.nickname }})
-                    </td>
-                    <td>
-                        {{ dUser.email }}
-                    </td>
-                    <td>
-                        <multiselect
-                            label="display_name"
-                            track-by="id"
-                            v-model="dUser.roles"
-                            :disabled="true"
-                            :multiple="true"
-                            :options="[]"
-                            :placeholder="t('main.user.add-role-placeholder')"
-                            :select-label="t('global.select.select')"
-                            :deselect-label="t('global.select.deselect')">
-                        </multiselect>
-                    </td>
-                    <td>
-                        {{ dUser.created_at }}
-                    </td>
-                    <td>
-                        {{ dUser.updated_at }}
-                    </td>
-                    <td>
-                        {{ dUser.deleted_at }}
-                    </td>
-                    <td>
-                        <div class="dropdown">
-                            <span :id="`deactive-user-dropdown-${dUser.id}`" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-fw fa-ellipsis-h"></i>
-                            </span>
-                            <div class="dropdown-menu" :aria-labelledby="`deactive-user-dropdown-${dUser.id}`">
-                                <a class="dropdown-item" href="#" :disabled="!can('delete_users')" @click.prevent="reactivateUser(dUser.id)">
-                                    <i class="fas fa-fw fa-user-check text-success"></i> {{ t('global.reactivate') }}
-                                </a>
+        <div class="table-responsive flex-grow-1" v-if="state.deletedUserList.length > 0">
+            <table class="table table-striped table-hover table-light" v-dcan="'view_users'">
+                <thead class="sticky-top">
+                    <tr>
+                        <th>{{ t('global.name') }}</th>
+                        <th>{{ t('global.email') }}</th>
+                        <th>{{ t('global.roles') }}</th>
+                        <th>{{ t('global.added_at') }}</th>
+                        <th>{{ t('global.updated_at') }}</th>
+                        <th>{{ t('global.deactivated_at') }}</th>
+                        <th>{{ t('global.options') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="dUser in state.deletedUserList" :key="dUser.id">
+                        <td>
+                            {{ dUser.name }} ({{ dUser.nickname }})
+                        </td>
+                        <td>
+                            {{ dUser.email }}
+                        </td>
+                        <td>
+                            <multiselect
+                                label="display_name"
+                                track-by="id"
+                                v-model="dUser.roles"
+                                :disabled="true"
+                                :multiple="true"
+                                :options="[]"
+                                :placeholder="t('main.user.add-role-placeholder')"
+                                :select-label="t('global.select.select')"
+                                :deselect-label="t('global.select.deselect')">
+                            </multiselect>
+                        </td>
+                        <td>
+                            {{ dUser.created_at }}
+                        </td>
+                        <td>
+                            {{ dUser.updated_at }}
+                        </td>
+                        <td>
+                            {{ dUser.deleted_at }}
+                        </td>
+                        <td>
+                            <div class="dropdown">
+                                <span :id="`deactive-user-dropdown-${dUser.id}`" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-fw fa-ellipsis-h"></i>
+                                </span>
+                                <div class="dropdown-menu" :aria-labelledby="`deactive-user-dropdown-${dUser.id}`">
+                                    <a class="dropdown-item" href="#" :disabled="!can('delete_users')" @click.prevent="reactivateUser(dUser.id)">
+                                        <i class="fas fa-fw fa-user-check text-success"></i> {{ t('global.reactivate') }}
+                                    </a>
+                                </div>
                             </div>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
         <div class="alert alert-info" role="alert" v-else>
             {{ t('main.user.empty_list') }}
         </div>

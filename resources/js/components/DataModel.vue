@@ -18,8 +18,13 @@
             </router-view>
         </div>
         <div class="col-md-4 py-2 h-100 d-flex flex-column">
-            <h4>{{ t('main.datamodel.attribute.title') }}</h4>
-            <div class="col overflow-hidden">
+            <h4>
+                {{ t('main.datamodel.attribute.title') }}
+                <button type="button" class="btn btn-outline-success" @click="onCreateAttribute">
+                    <i class="fas fa-fw fa-plus"></i> {{ t('main.datamodel.attribute.add-button') }}
+                </button>
+            </h4>
+            <div class="col overflow-hidden mt-2">
                 <attribute-list
                     class="h-100 scroll-y-auto scroll-x-hidden"
                     group="attribute-selection"
@@ -30,11 +35,6 @@
                     :show-info="true"
                     @delete="onDeleteAttribute">
                 </attribute-list>
-            </div>
-            <div class="mt-2">
-                <button type="button" class="btn btn-outline-success" @click="onCreateAttribute">
-                    <i class="fas fa-fw fa-plus"></i> {{ t('main.datamodel.attribute.add-button') }}
-                </button>
             </div>
         </div>
 
