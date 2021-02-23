@@ -174,7 +174,12 @@
                 <router-view></router-view>
             </template>
             <template v-else>
-                Loading...
+                <div class="h-100 d-flex flex-column justify-content-center align-items-center">
+                    <div>
+                        <i class="fas fa-5x fa-fw fa-spinner fa-spin"></i>
+                    </div>
+                    <h1 class="mt-5" v-html="t('main.app.loading_screen_msg', {appname: state.appName})"></h1>
+                </div>
             </template>
             <video id="rtc-sharing-container" class="video-js d-none"></video>
             <error-modal></error-modal>
@@ -190,7 +195,6 @@
         reactive,
         computed,
         inject,
-        nextTick,
         onMounted,
         watch,
     } from 'vue';
@@ -202,6 +206,7 @@
 
     import {
         getPreference,
+        getProjectName,
         getToolPlugins,
         getSettingsPlugins,
         hasPreference,
@@ -255,6 +260,7 @@
                     settings: {}
                 },
                 auth: auth,
+                appName: computed(_ => getProjectName()),
                 init: computed(_ => store.getters.appInitialized),
                 loggedIn: computed(_ => store.getters.isLoggedIn),
                 authUser: computed(_ => store.getters.user),
