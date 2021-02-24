@@ -56,9 +56,9 @@ const de = {
         'has-links': 'Hat keine Verknüpfungen | Hat eine Verknüpfung | Hat {cnt} Verknüpfungen',
         discard: {
             title: 'Ungespeicherte Änderungen',
-            msg: 'Ungespeicherte Änderungen in <span class="fw-medium">{name}</span>. Willst du wirklich fortfahren und die Änderungen verwerfen?',
+            msg: 'Es gibt ungespeicherte Änderungen auf der aktuellen Seite. Willst du wirklich fortfahren und die Änderungen verwerfen?',
             confirm: 'Ja, Änderungen verwerfen',
-            confirmpos: 'Nein, Speichern und fortfahren'
+            confirm_and_save: 'Nein, Speichern und fortfahren'
         },
         search: 'Suche…',
         login: 'Einloggen',
