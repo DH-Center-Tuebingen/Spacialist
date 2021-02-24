@@ -1,10 +1,11 @@
 import axios from 'axios';
 import router from './router.js';
 
+const instance = axios.create();
 
-axios.defaults.baseURL = 'api/v1';
-axios.defaults.withCredentials = true;
-axios.interceptors.response.use(response => {
+instance.defaults.baseURL = 'api/v1';
+instance.defaults.withCredentials = true;
+instance.interceptors.response.use(response => {
     return response;
 }, error => {
     const code = error.response.status;
@@ -37,7 +38,13 @@ axios.interceptors.response.use(response => {
 });
 
 export function useHttp() {
-    return axios;
+    return instance;
 }
 
-export default axios;
+export const external = axios.create({
+    headers: {
+        common: {},
+    },
+});;
+
+export default instance;

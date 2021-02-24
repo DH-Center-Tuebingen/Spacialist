@@ -1,3 +1,7 @@
+import {
+    default as http,
+    external,
+} from './bootstrap/http.js';
 import store from './bootstrap/store.js';
 import auth from './bootstrap/auth.js';
 import {
@@ -6,19 +10,19 @@ import {
 
 // GET AND STORE (FETCH)
 export async function fetchVersion() {
-    await $httpQueue.add(() => $http.get('/version').then(response => {
+    await $httpQueue.add(() => http.get('/version').then(response => {
         store.dispatch('setVersion', response.data);
     }));
 }
 
 export async function fetchUsers() {
-    await $httpQueue.add(() => $http.get('user').then(response => {
+    await $httpQueue.add(() => http.get('user').then(response => {
         store.dispatch('setUsers', {
             active: response.data.users,
             deleted: response.data.deleted_users || []
         });
     }));
-    await $httpQueue.add(() => $http.get('role').then(response => {
+    await $httpQueue.add(() => http.get('role').then(response => {
         store.dispatch('setRoles', {
             roles: response.data.roles,
             permissions: response.data.permissions,
@@ -27,25 +31,25 @@ export async function fetchUsers() {
 }
 
 export async function fetchTopEntities() {
-    await $httpQueue.add(() => $http.get('/entity/top').then(response => {
+    await $httpQueue.add(() => http.get('/entity/top').then(response => {
         store.dispatch('setInitialEntities', response.data);
     }));
 };
 
 export async function fetchAttributes() {
-    return await $httpQueue.add(() => $http.get('editor/dm/attribute').then(response => {
+    return await $httpQueue.add(() => http.get('editor/dm/attribute').then(response => {
         store.dispatch('setAttributes', response.data);
     }));
 }
 
 export async function fetchBibliography() {
-    await $httpQueue.add(() => $http.get('bibliography').then(response => {
+    await $httpQueue.add(() => http.get('bibliography').then(response => {
         store.dispatch('setBibliography', response.data);
     }));
 };
 
 export async function fetchPreData(locale) {
-    await $httpQueue.add(() => $http.get('pre').then(response => {
+    await $httpQueue.add(() => http.get('pre').then(response => {
         store.commit('setConcepts', response.data.concepts);
         store.dispatch('setEntityTypes', response.data.entityTypes);
         store.commit('setPreferences', response.data.preferences);
@@ -77,7 +81,7 @@ export async function getAttributeValueComments(id) {
 
 export async function getEntityData(id) {
     return await $httpQueue.add(
-        () => $http.get(`/entity/${id}/data`)
+        () => http.get(`/entity/${id}/data`)
         .then(response => {
             // PHP returns Array if it is empty
             if(response.data instanceof Array) {
@@ -90,24 +94,30 @@ export async function getEntityData(id) {
 
 export async function getEntityTypeAttributes(id) {
     return await $httpQueue.add(
-        () => $http.get(`/editor/entity_type/${id}/attribute`)
+        () => http.get(`/editor/entity_type/${id}/attribute`)
     )
 }
 
 export async function getEntityTypeOccurrenceCount(id) {
     return $httpQueue.add(
-        () => $http.get(`/editor/dm/entity_type/occurrence_count/${id}`).then(response => response.data)
+        () => http.get(`/editor/dm/entity_type/occurrence_count/${id}`).then(response => response.data)
     );
 }
 
 async function fetchComments(id, type) {
-    return $httpQueue.add(() => $http.get(`/comment/resource/${id}?r=${type}`).then(response => response.data).catch(error => error));
+    return $httpQueue.add(() => http.get(`/comment/resource/${id}?r=${type}`).then(response => response.data).catch(error => error));
 }
 
 export async function getBibtexFile() {
     return await $httpQueue.add(
-        () => $http.get('bibliography/export').then(response => response.data)
+        () => http.get('bibliography/export').then(response => response.data)
     );
+}
+
+export async function getIconClassInfo(iconClass) {
+    return external.get(`http://iconclass.org/${iconClass}.json`, {
+        crossdomain: true
+    }).then(response => response.data).catch(e => e);
 }
 
 // POST
@@ -118,7 +128,7 @@ export async function updateEntityTypeRelation(entityType) {
         'sub_entity_types': entityType.sub_entity_types.map(t => t.id),
     };
     return await $httpQueue.add(
-        () => $http.post(`/editor/dm/${id}/relation`, data).then(response => response.data)
+        () => http.post(`/editor/dm/${id}/relation`, data).then(response => response.data)
     );
 };
 
@@ -136,7 +146,7 @@ export async function postComment(content, resource, replyTo = null, metadata = 
     }
 
     return $httpQueue.add(
-        () => $http.post(endpoint, data).then(response => response.data)
+        () => http.post(endpoint, data).then(response => response.data)
     );
 };
 
@@ -148,7 +158,7 @@ export async function editComment(cid, content, endpoint = '/comment/{cid}') {
     };
     
     return $httpQueue.add(
-        () => $http.patch(endpoint, data).then(response => response.data)
+        () => http.patch(endpoint, data).then(response => response.data)
     );
 };
 
@@ -156,7 +166,7 @@ export async function getCommentReplies(cid, endpoint = '/comment/{cid}/reply') 
     endpoint = endpoint.replaceAll('{cid}', cid);
     
     return $httpQueue.add(
-        () => $http.get(endpoint).then(response => response.data)
+        () => http.get(endpoint).then(response => response.data)
     );
 };
 
@@ -169,11 +179,11 @@ export async function addOrUpdateBibliographyItem(item) {
 
     if(item.id) {
         return $httpQueue.add(
-            () => $http.patch(`bibliography/${item.id}`, data).then(response => response.data)
+            () => http.patch(`bibliography/${item.id}`, data).then(response => response.data)
         );
     } else {
         return $httpQueue.add(
-            () => $http.post('bibliography', data).then(response => response.data)
+            () => http.post('bibliography', data).then(response => response.data)
         );
     }
 };
@@ -182,7 +192,7 @@ export async function updateBibliography(file) {
     let formData = new FormData();
     formData.append('file', file);
     return await $httpQueue.add(
-        () => $http.post('bibliography/import', formData).then(response => response.data)
+        () => http.post('bibliography/import', formData).then(response => response.data)
     );
 };
 
@@ -190,32 +200,32 @@ export async function setUserAvatar(id, file) {
     let formData = new FormData();
     formData.append('file', file);
     return await $httpQueue.add(
-        () => $http.post(`user/${id}/avatar`, formData).then(response => response.data)
+        () => http.post(`user/${id}/avatar`, formData).then(response => response.data)
     );
 };
 
 export async function duplicateEntityType(id) {
     return $httpQueue.add(
-        () => $http.post(`/editor/dm/entity_type/${id}/duplicate`).then(response => response.data)
+        () => http.post(`/editor/dm/entity_type/${id}/duplicate`).then(response => response.data)
     );
 };
 
 // PATCH
 export async function patchPreferences(data, uid) {
     const endpoint = !!uid ? `preference/${uid}` : 'preference';
-    return await $http.patch(endpoint, data).then(response => response.data);
+    return await http.patch(endpoint, data).then(response => response.data);
 }
 
 // DELETE
 export async function deleteUserAvatar(id) {
     return await $httpQueue.add(
-        () => $http.delete(`user/${id}/avatar`).then(response => response.data)
+        () => http.delete(`user/${id}/avatar`).then(response => response.data)
     );
 };
 
 export async function deleteComment(cid, endpoint = '/comment/{cid}') {
     endpoint = endpoint.replaceAll('{cid}', cid);
     return $httpQueue.add(
-        () => $http.delete(endpoint).then(response => response.data)
+        () => http.delete(endpoint).then(response => response.data)
     );
 };

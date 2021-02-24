@@ -72,10 +72,6 @@ mix.js('resources/js/app.js', 'public/js').vue()
            ]
        }
    })
-   .autoload({
-    //    jquery: ['$'],
-       axios: ['$http'],
-   })
    .extract();
 if(`public/${appPath}fonts` !== 'public/fonts') {
     mix.copyDirectory(`public/${appPath}fonts`, 'public/fonts');
