@@ -14,10 +14,10 @@
                 <i class="fas fa-fw fa-angle-double-right"></i>
             </button>
             <button type="button" class="btn btn-link" @click="rotateCcw()">
-                <i class="fas fa-fw fa-undo-alt"></i>
+                <i class="fas fa-fw fa-undo"></i>
             </button>
             <button type="button" class="btn btn-link" @click="rotateCw()">
-                <i class="fas fa-fw fa-redo-alt"></i>
+                <i class="fas fa-fw fa-redo"></i>
             </button>
             <input type="number" style="max-width: 100px;" min="1" :max="totalPages" step="1" v-model.number="page" />/{{totalPages}}
             <button type="button" class="btn btn-link" v-if="fullscreenHandler" @click="toggleFullscreen">
