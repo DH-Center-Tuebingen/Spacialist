@@ -274,6 +274,9 @@
             const onLeave = i => {
                 state.hoverStates[i] = false;
             };
+            const updateValue = (eventValue, aid) => {
+                state.attributeValues[aid].value = eventValue;
+            };
             const checkDependency = id => {
 
             };
@@ -341,6 +344,7 @@
                 onAttributeExpand,
                 onEnter,
                 onLeave,
+                updateValue,
                 checkDependency,
                 openGeographyModal,
                 onReorder,
