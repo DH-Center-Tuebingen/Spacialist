@@ -24,10 +24,10 @@
                             {{ user.name }} ({{ user.nickname }})
                         </td>
                         <td>
-                            <input type="email" class="form-control" :class="getValidClass(state.error, `email_${user.id}`)" v-model="user.email" :name="`email_${user.id}`" required />
+                            <input type="email" class="form-control" @input="v.fields[user.id].mail.handleInput" :class="getClassByValidation(v.fields[user.id].mail.errors)" v-model="v.fields[user.id].mail.value" :name="`email_${user.id}`" required />
 
                             <div class="invalid-feedback">
-                                <span v-for="(msg, i) in state.error[`email_${user.id}`]" :key="i">
+                                <span v-for="(msg, i) in v.fields[user.id].mail.errors" :key="i">
                                     {{ msg }}
                                 </span>
                             </div>
@@ -41,7 +41,9 @@
                         </td>
                         <td>
                             <multiselect
-                                v-model="user.roles"
+                                v-model="v.fields[user.id].roles.value"
+                                :class="getClassByValidation(v.fields[user.id].roles.errors)"
+                                :name="`roles_${user.id}`"
                                 :object="true"
                                 :label="'display_name'"
                                 :track-by="'display_name'"
@@ -49,8 +51,15 @@
                                 :mode="'tags'"
                                 :disabled="!can('add_remove_role')"
                                 :options="state.roles"
-                                :placeholder="t('main.user.add-role-placeholder')">
+                                :placeholder="t('main.user.add-role-placeholder')"
+                                @input="v.fields[user.id].roles.handleInput">
                             </multiselect>
+
+                            <div class="invalid-feedback">
+                                <span v-for="(msg, i) in v.fields[user.id].roles.errors" :key="i">
+                                    {{ msg }}
+                                </span>
+                            </div>
                             <!-- <multiselect
                                 label="display_name"
                                 track-by="id"
@@ -82,11 +91,14 @@
                                     </sup>
                                 </span>
                                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                    <a class="dropdown-item" href="#" v-if="userDirty(user.id)" :disabled="!can('add_remove_role')" @click.prevent="onPatchUser(user.id)">
+                                    <a class="dropdown-item" href="#" v-if="userDirty(user.id)" :disabled="!userValid(user.id) || !can('add_remove_role')" @click.prevent="patchUser(user.id)">
                                         <i class="fas fa-fw fa-check text-success"></i> {{ t('global.save') }}
                                     </a>
+                                    <a class="dropdown-item" href="#" v-if="userDirty(user.id)" @click.prevent="resetUser(user.id)">
+                                        <i class="fas fa-fw fa-undo text-warning"></i> {{ t('global.reset') }}
+                                    </a>
                                     <a class="dropdown-item" href="#" v-if="hasPreference('prefs.enable-password-reset-link')" :disabled="!can('change_password')" @click.prevent="updatePassword(user.email)">
-                                        <i class="fas fa-fw fa-paper-plane text-info"></i> Send Reset-Mail
+                                        <i class="fas fa-fw fa-paper-plane text-info"></i> {{ t('global.send_reset_mail') }}
                                     </a>
                                     <a class="dropdown-item" href="#" :disabled="!can('delete_users')" @click.prevent="requestDeleteUser(user.id)">
                                         <i class="fas fa-fw fa-user-times text-danger"></i> {{ t('global.deactivate') }}
@@ -281,13 +293,20 @@
         reactive,
     } from 'vue';
 
+    import { onBeforeRouteLeave } from 'vue-router';
     import { useI18n } from 'vue-i18n';
+    import { useField } from 'vee-validate';
+
+    import * as yup from 'yup';
 
     import store from '../bootstrap/store.js';
 
     import {
+        showDiscard,
+    } from '../helpers/modal.js';
+    import {
         can,
-        getValidClass,
+        getClassByValidation,
         hasPreference,
     } from '../helpers/helpers.js';
     import {
@@ -298,65 +317,138 @@
         setup(props) {
             const { t } = useI18n();
 
+            // FUNCTIONS
+            const userDirty = id => {
+                return v.fields[id].mail.meta.dirty || v.fields[id].roles.meta.dirty;
+            };
+            const userValid = id => {
+                return v.fields[id].mail.meta.valid && v.fields[id].roles.meta.valid;
+            };
+            const resetUser = id => {
+                v.fields[id].mail.reset();
+                v.fields[id].roles.reset();
+            };
+            const cleanUser = id => {
+                v.fields[id].mail.setDirty(false);
+                v.fields[id].roles.setDirty(false);
+            };
+            const patchUser = id => {
+                if(!userValid(id) || !can('add_remove_role')) {
+                    return;
+                }
+                v.fields[id].mail.setDirty(false);
+                v.fields[id].roles.setDirty(false);
+            };
+            const anyUserDirty = _ => {
+                let isDirty = false;
+                for(let i=0; i<state.userList.length; i++) {
+                    const u = state.userList[i];
+                    if(userDirty(u.id)) {
+                        isDirty = true;
+                        break;
+                    }
+                }
+                return isDirty;
+            };
+            // Used in Discard Modal to make all fields undirty
+            const resetData = _ => {
+                for(let i=0; i<state.userList.length; i++) {
+                    cleanUser(state.userList[i].id);
+                }
+            };
+            // Used in Discard Modal to store data before moving on
+            const onBeforeConfirm = _ => {
+                for(let i=0; i<state.userList.length; i++) {
+                    // TODO actually store dirty data
+                    resetUser(state.userList[i].id);
+                }
+                return new Promise(r => r(null));
+            };
+
             // DATA
             const state = reactive({
                 userList: computed(_ => store.getters.users),
                 deletedUserList: computed(_ => store.getters.deletedUsers),
                 roles: computed(_ => store.getters.roles(true)),
                 dataInitialized: computed(_ => state.userList.length > 0 && state.roles.length > 0),
-                newUser: {},
-                error: {},
-                selectedUser: {},
-                discardModal: 'discard-changes-modal'
+            });
+            const v = reactive({
+                fields: computed(_ => {
+                    const list = {};
+                    for(let i=0; i<state.userList.length; i++) {
+                        const u = state.userList[i];
+                        const {
+                            errors: em,
+                            meta: mm,
+                            value: vm,
+                            handleInput: him,
+                            handleReset: hrm,
+                            setDirty: sdm,
+                        } = useField(`email_${u.id}`, yup.string().required().email(), {
+                            initialValue: u.email,
+                        });
+                        const {
+                            errors: er,
+                            meta: mr,
+                            value: vr,
+                            handleInput: hir,
+                            handleReset: hrr,
+                            setDirty: sdr,
+                        } = useField(`roles_${u.id}`, yup.array(), {
+                            initialValue: u.roles,
+                        });
+                        list[u.id] = reactive({
+                            mail: {
+                                errors: em,
+                                meta: mm,
+                                value: vm,
+                                handleInput: him,
+                                reset: hrm,
+                                setDirty: sdm,
+                            },
+                            roles: {
+                                errors: er,
+                                meta: mr,
+                                value: vr,
+                                handleInput: hir,
+                                reset: hrr,
+                                setDirty: sdr,
+                            },
+                        });
+                    }
+                    return list;
+                })
+            });
+
+            // ON BEFORE LEAVE
+            onBeforeRouteLeave(async (to, from) => {
+                if(anyUserDirty()) {
+                    showDiscard(to, resetData, onBeforeConfirm);
+                    return false;
+                } else {
+                    return true;
+                }
             });
 
             // RETURN
             return {
                 t,
+                // HELPERS
                 can,
                 date,
-                getValidClass,
+                getClassByValidation,
                 hasPreference,
+                // LOCAL
+                userDirty,
+                userValid,
+                resetUser,
+                patchUser,
+                // PROPS
+                // STATE
                 state,
-                userDirty: _ => {},
+                v,
             }
         },
-        // beforeRouteEnter(to, from, next) {
-        //     $httpQueue.add(() => $http.get('user').then(response => {
-        //         const users = response.data.users;
-        //         const delUsers = response.data.deleted_users;
-        //         const roles = response.data.roles;
-        //         next(vm => vm.init(users, delUsers, roles));
-        //     }));
-        // },
-        // beforeRouteLeave: function(to, from, next) {
-        //     let loadNext = () => {
-        //         next();
-        //     }
-        //     if(this.isOneDirty) {
-        //         let discardAndContinue = () => {
-        //             loadNext();
-        //         };
-        //         let saveAndContinue = () => {
-        //             let patching = async _ => {
-        //                 await this.$asyncFor(this.userList, async u => {
-        //                     await this.onPatchUser(u.id);
-        //                 });
-        //                 loadNext();
-        //             };
-        //             patching();
-        //         };
-        //         this.$modal.show(this.discardModal, {reference: this.$t('global.settings.users'), onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
-        //     } else {
-        //         loadNext();
-        //     }
-        // },
-        // methods: {
-        //     init(users, delUsers, roles) {
-        //         this.userList = users;
-        //         this.deletedUserList = delUsers;
-        //         this.roles = roles;
-        //     },
         //     showNewUserModal() {
         //         if(!this.$can('create_users')) return;
         //         this.$modal.show('new-user-modal');
@@ -453,43 +545,6 @@
         //         }).catch(e => {
         //         }));
         //     },
-        //     isDirty(fieldname) {
-        //         if(this.fields[fieldname]) {
-        //             return this.fields[fieldname].dirty;
-        //         }
-        //         return false;
-        //     },
-        //     userDirty(uid) {
-        //         const u = this.userList.find(u => u.id == uid);
-        //         return this.isDirty(`roles_${uid}`) ||
-        //             (this.isDirty(`email_${uid}`) && !!u.email);
-        //     },
-        //     setPristine(fieldname) {
-        //         this.$validator.flag(fieldname, {
-        //             dirty: false,
-        //             pristine: true
-        //         });
-        //     },
-        //     setUserPristine(uid) {
-        //         this.setPristine(`roles_${uid}`);
-        //         this.setPristine(`email_${uid}`);
-        //     }
         // },
-        // data() {
-        //     return {
-        //         userList: [],
-        //         deletedUserList: [],
-        //         roles: [],
-        //         newUser: {},
-        //         error: {},
-        //         selectedUser: {},
-        //         discardModal: 'discard-changes-modal'
-        //     }
-        // },
-        // computed: {
-        //     isOneDirty() {
-        //         return Object.keys(this.fields).some(key => this.fields[key].dirty);
-        //     },
-        // }
     }
 </script>

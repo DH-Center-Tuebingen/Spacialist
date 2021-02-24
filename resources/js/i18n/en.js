@@ -6,6 +6,7 @@ const en = {
         reactivate: 'Reactivate',
         remove: 'Remove',
         reset: 'Reset',
+        send_reset_mail: 'Send mail to reset password',
         cancel: 'Cancel',
         close: 'Close',
         add: 'Add',

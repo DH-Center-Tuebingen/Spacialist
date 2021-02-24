@@ -391,6 +391,13 @@ export function getValidClass(msgObject, field) {
     };
 }
 
+export function getClassByValidation(errorList) {
+    return {
+        // 'is-valid': !msgObject[field],
+        'is-invalid': !!errorList && errorList.length > 0,
+    };
+}
+
 export function showErrorModal(errorMsg, headers, request) {
     this.$modal.show('error-modal', {msg: errorMsg, headers: headers, request: request});
 };

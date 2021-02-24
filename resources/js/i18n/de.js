@@ -6,6 +6,7 @@ const de = {
         reactivate: 'Reaktivieren',
         remove: 'Entfernen',
         reset: 'Zurücksetzen',
+        send_reset_mail: 'E-Mail zum Zurücksetzen des Passworts senden',
         cancel: 'Abbrechen',
         close: 'Schließen',
         add: 'Hinzufügen',
