@@ -89,7 +89,6 @@
                     if(f.data_text) {
                         data.text = f.data_text;
                     }
-                    console.log("data", data);
                     return data;
                 })
             });

@@ -210,11 +210,32 @@ export async function duplicateEntityType(id) {
     );
 };
 
+export async function getFilteredActivity(pageUrl, payload) {
+    pageUrl = pageUrl || 'activity';
+    return $httpQueue.add(
+        () => http.post(pageUrl, payload).then(response => {
+            const pagination = response.data;
+            const data = pagination.data;
+            delete pagination.data;
+            return {
+                data: data,
+                pagination: pagination,
+            };
+        })
+    );
+};
+
 // PATCH
 export async function patchPreferences(data, uid) {
     const endpoint = !!uid ? `preference/${uid}` : 'preference';
     return await http.patch(endpoint, data).then(response => response.data);
-}
+};
+
+export async function patchUserData(uid, data) {
+    return $httpQueue.add(
+        () => http.patch(`user/${uid}`, data)
+    );
+};
 
 // DELETE
 export async function deleteUserAvatar(id) {

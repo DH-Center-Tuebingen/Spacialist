@@ -102,6 +102,7 @@
     } from '../helpers/helpers.js';
     import {
         setUserAvatar,
+        patchUserData,
         deleteUserAvatar,
     } from '../api.js';
 
@@ -137,7 +138,7 @@
                 // No changes, no update
                 if(Object.keys(data).length === 0) return;
 
-                $http.patch(`user/${state.user.id}`, data).then(response => {
+                patchUserData(state.user.id, data).then(response => {
                     updateUserObjects(response.data);
                 });
             };

@@ -3,6 +3,10 @@ import {
     reactive,
 } from 'vue';
 
+import {
+    getFilteredActivity,
+} from '../api.js';
+
 export default function() {
     // FUNCTIONS
     const init = _ => {
@@ -17,21 +21,19 @@ export default function() {
         filterActivity(actState.pagination.next_page_url, false, actState.filteredData);
     };
     const filterActivity = (pageUrl, refresh, payload) => {
-        pageUrl = pageUrl ? pageUrl : 'activity';
         actState.isFetching = true;
-        $httpQueue.add(() => $http.post(pageUrl, payload).then(response => {
+        getFilteredActivity(pageUrl, payload).then(data => {
             if(refresh) {
                 actState.filteredActivity.length = 0;
-                actState.filteredActivity = response.data.data;
+                actState.filteredActivity = data.data;
             } else {
                 // response.data.data.forEach(d => actState.filteredActivity.push(d));
-                actState.filteredActivity.push(...response.data.data);
+                actState.filteredActivity.push(...data.data);
                 // actState.filteredActivity.push.apply(actState.filteredActivity, response.data.data);
             }
-            actState.pagination = response.data;
-            delete actState.pagination.data;
+            actState.pagination = data.pagination;
             actState.isFetching = false;
-        }));
+        });
     };
 
     // DATA
