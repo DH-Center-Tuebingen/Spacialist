@@ -6,6 +6,7 @@ import {
     fetchBibliography,
     fetchTopEntities,
     fetchPreData,
+    fetchGeometryTypes,
     fetchUsers,
     fetchVersion,
 } from '../api.js';
@@ -17,6 +18,7 @@ export async function initApp(locale) {
     await fetchTopEntities();
     await fetchBibliography();
     await fetchVersion();
+    await fetchGeometryTypes();
     return new Promise(r => r(null));
 }
 

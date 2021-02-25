@@ -22,6 +22,7 @@ export const store = createStore({
             entityTypes: {},
             entities: {},
             file: {},
+            geometryTypes: [],
             permissions: [],
             preferences: {},
             systemPreferences: {},
@@ -94,6 +95,10 @@ export const store = createStore({
             }
             state.entityTypes = data;
         },
+        setGeometryTypes(state, data) {
+            state.geometryTypes = [];
+            state.geometryTypes = data;
+        },
         sortTree(state, sort) {
             sortTree(sort.by, sort.dir, state.tree);
         },
@@ -148,6 +153,9 @@ export const store = createStore({
         },
         deleteBibliographyItem({commit}, data) {
             commit('deleteBibliographyItem', data);
+        },
+        setGeometryTypes({commit}, data) {
+            commit('setGeometryTypes', data);
         },
         setRoles({commit}, data) {
             commit('setRoles', data.roles);
@@ -312,6 +320,9 @@ export const store = createStore({
         },
         entityTypeAttributes: state => id => {
             return state.entityTypeAttributes[id];
+        },
+        geometryTypes: state => {
+            return state.geometryTypes;
         },
         tree: state => {
             return state.tree;

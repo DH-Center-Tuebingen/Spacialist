@@ -40,64 +40,6 @@
 
         <!-- <modals-container class="visible-overflow" />
 
-        <modal name="new-entity-type-modal" height="auto" :scrollable="true" classes="of-visible">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ $t('main.datamodel.entity.modal.new.title') }}</h5>
-                    <button type="button" class="btn-close" aria-label="Close" @click="hideNewEntityTypeModal">
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form name="newEntityTypeForm" id="newEntityTypeForm" role="form" v-on:submit.prevent="createEntityType(newEntityType)">
-                        <div class="form-group">
-                            <label class="col-form-label col-md-3" for="name">
-                                {{ $t('global.label') }}:
-                            </label>
-                            <div class="col-md-9">
-                                <label-search
-                                    :on-select="newEntityTypeSearchResultSelected"
-                                ></label-search>
-                            </div>
-                        </div>
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="isRoot" v-model="newEntityType.is_root" />
-                            <label class="form-check-label" for="isRoot">
-                                {{ $t('main.datamodel.detail.properties.top-level') }}
-                            </label>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label col-md-3" for="name">
-                                {{ $t('global.geometry-type') }}:
-                            </label>
-                            <div class="col-md-9">
-                                <multiselect
-                                    label="label"
-                                    track-by="id"
-                                    v-model="newEntityType.geomtype"
-                                    :allowEmpty="false"
-                                    :closeOnSelect="true"
-                                    :hideSelected="true"
-                                    :multiple="false"
-                                    :options="availableGeometries"
-                                    :placeholder="$t('global.select.placehoder')"
-                                    :select-label="$t('global.select.select')"
-                                    :deselect-label="$t('global.select.deselect')">
-                                </multiselect>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" form="newEntityTypeForm" :disabled="newEntityTypeDisabled">
-                        <i class="fas fa-fw fa-plus"></i> {{ $t('global.add') }}
-                    </button>
-                    <button type="button" class="btn btn-danger" @click="hideNewEntityTypeModal">
-                        <i class="fas fa-fw fa-ban"></i> {{ $t('global.cancel') }}
-                    </button>
-                </div>
-            </div>
-        </modal>
-
         <modal name="new-attribute-modal" height="auto" :scrollable="true" classes="of-visible">
             <div class="modal-content">
                 <div class="modal-header">
@@ -199,6 +141,7 @@
     } from '../helpers/helpers.js';
 
     import {
+        showAddEntityType,
         showDeleteEntityType,
     } from '../helpers/modal.js';
 
@@ -221,11 +164,8 @@
                     }
                 });
             };
-            const addEntityType = event => {
-                let last = state.entityTypes[state.entityTypes.length-1];
-                let newOne = {...last};
-                newOne.id += 1;
-                store.dispatch('addEntityType', newOne);
+            const addEntityType = _ => {
+                showAddEntityType();
             };
             const duplicateEntityType = event => {
                 const attrs = getEntityTypeAttributes(event.id).slice();
@@ -502,11 +442,5 @@
         //         ]
         //     }
         // },
-        // computed: {
-        //     newEntityTypeDisabled: function() {
-        //         const nct = this.newEntityType;
-        //         return !nct.label || !nct.geomtype;
-        //     }
-        // }
     }
 </script>

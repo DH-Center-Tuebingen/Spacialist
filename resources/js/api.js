@@ -49,7 +49,7 @@ export async function fetchBibliography() {
 };
 
 export async function fetchPreData(locale) {
-    await $httpQueue.add(() => http.get('pre').then(response => {
+    return $httpQueue.add(() => http.get('pre').then(response => {
         store.commit('setConcepts', response.data.concepts);
         store.dispatch('setEntityTypes', response.data.entityTypes);
         store.commit('setPreferences', response.data.preferences);
@@ -69,6 +69,26 @@ export async function fetchPreData(locale) {
         // TODO init spacialist "plugins"
     }));
 };
+
+export async function fetchGeometryTypes() {
+    return $httpQueue.add(
+        () => http.get('editor/dm/geometry').then(response => {
+            let geom = [];
+            for(let i=0; i<response.data.length; i++) {
+                const g = response.data[i];
+                geom.push({
+                    label: g,
+                    key: g.toLowerCase(),
+                });
+            }
+            geom.push({
+                label: 'Any',// TODO l18n
+                key: 'any'
+            });
+            store.dispatch('setGeometryTypes', geom);
+        })
+    );
+}
 
 // GET
 export async function getEntityComments(id) {
