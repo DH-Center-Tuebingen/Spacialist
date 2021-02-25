@@ -463,15 +463,11 @@
             const updateEntry = entry => {
                 store.dispatch('updateBibliographyItem', entry);
             };
-            const deleteEntry = entry => {
-                return deleteBibliographyItem(entry.id).then(data => {
-                    store.dispatch('deleteBibliographyItem', entry);
-
-                    const label = t('main.bibliography.toast.delete.msg', {name: entry.title});
-                    const title = t('main.bibliography.toast.delete.title');
-                    toast.$toast(label, title, {
-                        channel: 'success',
-                    });
+            const onEntryDeleted = entry => {
+                const label = t('main.bibliography.toast.delete.msg', {name: entry.title});
+                const title = t('main.bibliography.toast.delete.title');
+                toast.$toast(label, title, {
+                    channel: 'success',
                 });
             };
             const addEntries = list => {
@@ -537,7 +533,7 @@
             const openDeleteEntryModal = entry => {
                 if(!can('add_remove_bibliography')) return;
 
-                showDeleteBibliographyEntry(entry, deleteEntry);
+                showDeleteBibliographyEntry(entry, onEntryDeleted);
             };
 
             // DATA

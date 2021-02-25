@@ -251,6 +251,12 @@ export async function deleteComment(cid, endpoint = '/comment/{cid}') {
     );
 };
 
+export async function deleteEntityType(etid) {
+    return $httpQueue.add(
+        () => http.delete(`editor/dm/entity_type/${etid}`).then(response => response.data)
+    );
+};
+
 export async function deleteBibliographyItem(id) {
     return $httpQueue.add(
         () => http.delete(`bibliography/${id}`).then(response => response.data)

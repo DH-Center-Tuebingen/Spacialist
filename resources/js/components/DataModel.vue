@@ -239,7 +239,13 @@
                     const metadata = {
                         entityCount: data,
                     };
-                    showDeleteEntityType(event.type, metadata);
+                    showDeleteEntityType(event.type, metadata, _ => {
+                        if(currentRoute.name == 'dmdetail' && currentRoute.params.id == event.type.id) {
+                            router.push({
+                                name: 'dme',
+                            });
+                        }
+                    });
                 });
             };
 

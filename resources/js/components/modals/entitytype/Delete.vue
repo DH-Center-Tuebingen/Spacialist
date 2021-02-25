@@ -12,8 +12,7 @@
             </button>
         </div>
         <div class="modal-body">
-            <div class="alert alert-info" role="alert">
-                {{ t('global.delete-name.desc', {name: translateConcept(entityType.thesaurus_url)}) }}
+            <div class="alert alert-info" role="alert" v-html="t('global.delete-name.desc', {name: translateConcept(entityType.thesaurus_url)})">
             </div>
             <div class="alert alert-danger" role="alert">
                 {{

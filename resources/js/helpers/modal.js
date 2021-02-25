@@ -2,6 +2,11 @@ import store from '../bootstrap/store.js';
 import router from '../bootstrap/router.js';
 
 import {
+    deleteBibliographyItem,
+    deleteEntityType,
+} from '../api.js';
+
+import {
     getTs
 } from '../helpers/helpers.js';
 
@@ -61,18 +66,21 @@ export function showBibliographyEntry(data, onSuccess, onClose) {
     });
 }
 
-export function showDeleteBibliographyEntry(data, onDelete) {
+export function showDeleteBibliographyEntry(entry, onDeleted) {
     const uid = `DeleteBibliographyEntry-${getTs()}`;
     store.getters.vfm.show({
         component: DeleteBibliographyItem,
         bind: {
             name: uid,
-            data: data,
+            data: entry,
         },
         on: {
             delete(e) {
-                onDelete = onDelete || (_ => new Promise(r => r(null)));
-                onDelete(data).then(_ => {
+                deleteBibliographyItem(entry.id).then(_ => {
+                    if(!!onDeleted) {
+                        onDeleted();
+                    }
+                    store.dispatch('deleteBibliographyItem', entry);
                     store.getters.vfm.hide(uid);
                 });
             },
@@ -83,7 +91,7 @@ export function showDeleteBibliographyEntry(data, onDelete) {
     });
 }
 
-export function showDeleteEntityType(entityType, metadata) {
+export function showDeleteEntityType(entityType, metadata, onDeleted) {
     const uid = `DeleteEntityType-${getTs()}`;
     store.getters.vfm.show({
         component: DeleteEntityType,
@@ -97,8 +105,13 @@ export function showDeleteEntityType(entityType, metadata) {
                 store.getters.vfm.hide(uid);
             },
             confirm(e) {
-                console.log("we can delete!");
-                store.getters.vfm.hide(uid);
+                deleteEntityType(entityType.id).then(_ => {
+                    if(!!onDeleted) {
+                        onDeleted();
+                    }
+                    store.dispatch('deleteEntityType', entityType);
+                    store.getters.vfm.hide(uid);
+                });
             }
         }
     });

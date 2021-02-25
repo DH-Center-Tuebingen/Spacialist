@@ -1,5 +1,5 @@
 <template>
-    <div class="h-100 d-flex flex-column">
+    <div class="h-100 d-flex flex-column" v-if="state.entityAvailable">
         <h4>
             {{ t('main.datamodel.detail.properties.title') }}
             <small>
@@ -272,11 +272,11 @@
 
             // DATA
             const state = reactive({
-                initFinished: false,
                 entityType: computed(_ => getEntityType(currentRoute.params.id)),
                 entityAttributes: computed(_ => getEntityTypeAttributes(currentRoute.params.id)),
                 entityValues: computed(_ => {
                     let data = {};
+                    if(!state.entityAttributes) return data;
                     for(let i=0; i<state.entityAttributes.length; i++) {
                         const curr = state.entityAttributes[i];
                         // several datatypes require a "valid"/non-string v-model
@@ -286,6 +286,7 @@
                 }),
                 entitySelections: {},
                 entityDependencies: [],
+                entityAvailable: computed(_ => !!state.entityType),
                 selectedDependency: {
                     attribute: {},
                     operator: undefined,
