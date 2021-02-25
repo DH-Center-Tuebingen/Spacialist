@@ -8,7 +8,7 @@
                         {{ translateConcept(entry.thesaurus_url) }}
                     </span>
                 </div>
-                <div class="ms-auto" v-if="state.hasOnHoverListener" v-show="state.hoverStates[i]">
+                <div class="ms-auto btn-fab-list" v-if="state.hasOnHoverListener" v-show="state.hoverStates[i]">
                     <button class="btn btn-info btn-fab rounded-circle" v-if="state.hasEditListener" @click="onEdit(entry)" data-bs-toggle="popover" :data-content="t('global.edit')" data-trigger="hover" data-placement="bottom">
                         <i class="fas fa-fw fa-xs fa-edit" style="vertical-align: 0;"></i>
                     </button>

@@ -80,6 +80,14 @@ code.normal {
     width: 1.8rem;
 }
 
+.btn-fab-list > .btn-fab {
+    margin-right: 0.25rem;
+}
+
+.btn-fab-list > .btn-fab:last-child {
+    margin-right: 0;
+}
+
 .notification-info, .stacked-icon-text {
     margin-left: -.5rem;
 }
