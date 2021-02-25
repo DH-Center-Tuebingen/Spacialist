@@ -11,6 +11,7 @@ import {
     faClipboard,
     faQuestionCircle,
     faLaugh,
+    faSadCry,
 } from '@fortawesome/free-regular-svg-icons';
 import {
     faAdjust,
@@ -252,6 +253,7 @@ library.add(
     faRoad,
     faRuler,
     faRulerCombined,
+    faSadCry,
     faSave,
     faSearch,
     faSearchPlus,

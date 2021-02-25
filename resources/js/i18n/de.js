@@ -236,6 +236,11 @@ const de = {
     main: {
         app: {
             loading_screen_msg: '<span class="fw-light">Lade</span> {appname}<span class="fw-light">&hellip;</span>',
+            not_found: {
+                title: 'Seite nicht gefunden!',
+                msg: 'Die Seite <code>{site}</code> konnte nicht gefunden werden. Überprüfe die Schreibweise oder wende dich an den Administrator.',
+                go_to: 'Zur Startseite',
+            },
         },
         entity: {
             title: 'Entität | Entitäten',

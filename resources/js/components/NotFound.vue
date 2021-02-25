@@ -1,21 +1,40 @@
 <template>
-    <div class="d-flex flex-column align-items-center">
-        <h2>Not Found</h2>
-        <span>
-            This page does not exist!
-        </span>
+    <div class="h-100 d-flex flex-column align-items-center justify-content-center">
+        <div>
+            <i class="far fa-fw fa-5x fa-sad-cry"></i>
+        </div>
+        <h2 class="display-2 fw-medium">
+            {{ t('main.app.not_found.title') }}
+        </h2>
+        <p class="lead" v-html="t('main.app.not_found.msg', {site: currentRoute.path})">
+        </p>
         <div class="mt-2">
-            <router-link class="btn btn-primary" :to="{name: 'home'}">
-                Go home
+            <router-link class="btn btn-outline-primary" :to="{name: 'home'}">
+                {{ t('main.app.not_found.go_to') }}
             </router-link>
         </div>
     </div>
 </template>
 
 <script>
+    import { useI18n } from 'vue-i18n';
+    import {
+        useRoute,
+    } from 'vue-router';
+
     export default {
         setup() {
-            return {};
+            const { t } = useI18n();
+            const currentRoute = useRoute();
+
+            return {
+                t,
+                // HELPERS
+                // LOCAL
+                currentRoute,
+                // PROPS
+                // STATE
+            };
         }
     }
 </script>

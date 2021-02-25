@@ -236,6 +236,11 @@ const en = {
     main: {
         app: {
             loading_screen_msg: '<span class="fw-light">Loading</span> {appname}',
+            not_found: {
+                title: 'Site not found!',
+                msg: 'Site <code>{site}</code> was not found. Check the spelling or contact the administrator.',
+                go_to: 'To start page',
+            },
         },
         entity: {
             title: 'Entity | Entities',
@@ -491,6 +496,11 @@ const en = {
             contributor: 'Contributor | Contributors'
         },
         bibliography: {
+            not_found: {
+                title: 'Seite nicht gefunden',
+                msg: 'Die Seite {site} konnte nicht gefunden werden. Überprüfe die Schreibweise oder wende dich an den Administrator.',
+                go_to: 'Zur Startseite',
+            },
             title: 'Literature',
             modal: {
                 paste_info_title: 'Note',
