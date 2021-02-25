@@ -101,6 +101,9 @@
         _cloneDeep,
     } from '../helpers/helpers.js';
     import {
+        isValidOrcid,
+    } from '../helpers/validators.js';
+    import {
         setUserAvatar,
         patchUserData,
         deleteUserAvatar,
@@ -127,10 +130,10 @@
                 if(state.localUser.metadata.phonenumber != state.user.metadata.phonenumber) {
                     data.phonenumber = state.localUser.metadata.phonenumber;
                 }
-                if(state.localUser.metadata.orcid != state.user.metadata.orcid && (!state.localUser.metadata.orcid || validateOrcid(state.localUser.metadata.orcid))) {
+                if(state.localUser.metadata.orcid != state.user.metadata.orcid && (!state.localUser.metadata.orcid || isValidOrcid(state.localUser.metadata.orcid))) {
                     data.orcid = state.localUser.metadata.orcid;
                     state.invalidOrcid = false;
-                } else if(state.localUser.metadata.orcid && !validateOrcid(state.localUser.metadata.orcid)) {
+                } else if(state.localUser.metadata.orcid && !isValidOrcid(state.localUser.metadata.orcid)) {
                     state.invalidOrcid = true;
                     return;
                 }
@@ -144,26 +147,6 @@
             };
             const resetUserInfo = _ => {
                 state.localUser = appliedMetadata(state.user);
-            };
-            const validateOrcid = oid => {
-                if(oid === '') {
-                    return false;
-                }
-                if(/^\d{15}[0-9Xx]$/.test(oid)) {
-                    //
-                } else if(/^\d{4}-\d{4}-\d{4}-\d{3}[0-9Xx]$/.test(oid)) {
-                    oid = oid.replaceAll('-', '');
-                } else {
-                    return false;
-                }
-                let tot = 0;
-                for(let i=0; i<oid.length-1; i++) {
-                    let val = Number.parseInt(oid[i]);
-                    tot = (tot+val) * 2;
-                }
-                let chk = (12 - (tot % 11)) % 11;
-                if(chk == 10) chk = 'X';
-                return oid[oid.length-1].toUpperCase() == chk;
             };
             const deleteAvatar = _ => {
                 deleteUserAvatar(state.user.id).then(data => {
