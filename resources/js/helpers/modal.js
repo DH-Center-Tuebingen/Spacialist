@@ -43,7 +43,7 @@ export function showUserInfo(user) {
     });
 }
 
-export function showBibliographyEntry(data, onSuccess) {
+export function showBibliographyEntry(data, onSuccess, onClose) {
     const uid = `AddBibliographyEntry-${getTs()}`;
     store.getters.vfm.show({
         component: BibliographyItem,
@@ -51,6 +51,7 @@ export function showBibliographyEntry(data, onSuccess) {
             name: uid,
             data: data,
             onSuccess: onSuccess,
+            onClose: onClose,
         },
         on: {
             closing(e) {
@@ -60,17 +61,24 @@ export function showBibliographyEntry(data, onSuccess) {
     });
 }
 
-export function showDeleteBibliographyEntry() {
+export function showDeleteBibliographyEntry(data, onDelete) {
     const uid = `DeleteBibliographyEntry-${getTs()}`;
     store.getters.vfm.show({
         component: DeleteBibliographyItem,
         bind: {
             name: uid,
+            data: data,
         },
         on: {
+            delete(e) {
+                onDelete = onDelete || (_ => new Promise(r => r(null)));
+                onDelete(data).then(_ => {
+                    store.getters.vfm.hide(uid);
+                });
+            },
             closing(e) {
                 store.getters.vfm.hide(uid);
-            }
+            },
         }
     });
 }

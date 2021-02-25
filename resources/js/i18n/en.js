@@ -30,7 +30,7 @@ const en = {
         'select-none': 'Deselect All',
         'delete-name': {
             title: 'Delete {name}',
-            desc: 'Do you really want to delete {name}?'
+            desc: 'Do you really want to delete <span class="fw-bold">{name}</span>?'
         },
         'deactivate-name': {
             title: 'Deactivate {name}',
@@ -506,6 +506,12 @@ const en = {
                     title: 'Delete entry',
                     alert: 'Note: If you delete {name}, one reference is deleted, too. | Note: If you delete {name}, {cnt} references are deleted, too.',
                 }
+            },
+            toast: {
+                delete: {
+                    title: 'Entry deleted successfully',
+                    msg: 'Entry {name} is deleted',
+                },
             },
             add: 'Add new Bibliography-Entry',
             import: 'Import BibTeX-File',

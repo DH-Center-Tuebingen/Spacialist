@@ -61,6 +61,12 @@ export const store = createStore({
                 entry[k] = data.fields[k];
             }
         },
+        deleteBibliographyItem(state, data) {
+            const idx = state.bibliography.findIndex(e => e.id == data.id);
+            if(idx > -1) {
+                state.bibliography.splice(idx, 1);
+            }
+        },
         addEntity(state, n) {
             state.entities[n.id] = n;
         },
@@ -135,6 +141,9 @@ export const store = createStore({
         },
         updateBibliographyItem({commit}, data) {
             commit('updateBibliographyItem', data);
+        },
+        deleteBibliographyItem({commit}, data) {
+            commit('deleteBibliographyItem', data);
         },
         setRoles({commit}, data) {
             commit('setRoles', data.roles);

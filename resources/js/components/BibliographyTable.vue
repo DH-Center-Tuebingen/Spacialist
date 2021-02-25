@@ -22,7 +22,15 @@
             <div>
                 <ul class="list-inline mb-0">
                     <li class="list-inline-item">
-                        <button type="button" class="btn btn-success" id="bibliography-add-button" @click="showNewItemModal()" :disabled="!can('add_remove_bibliography')">
+                        <div class="form-check form-switch">
+                            <input type="checkbox" class="form-check-input" id="show-all-fields-toggle" v-model="state.showAllFields" />
+                            <label class="form-check-label" for="show-all-fields-toggle">
+                                {{ t('main.bibliography.show-all-fields') }}
+                            </label>
+                        </div>
+                    </li>
+                    <li class="list-inline-item">
+                        <button type="button" class="btn btn-outline-success" id="bibliography-add-button" @click="showNewItemModal()" :disabled="!can('add_remove_bibliography')">
                             <i class="fas fa-fw fa-plus"></i> {{ t('main.bibliography.add') }}
                         </button>
                     </li>
@@ -47,14 +55,6 @@
                         <button type="button" class="btn btn-outline-primary" @click="exportFile()">
                             <i class="fas fa-fw fa-file-export"></i> {{ t('main.bibliography.export') }}
                         </button>
-                    </li>
-                    <li class="list-inline-item">
-                        <div class="form-check form-switch">
-                            <input type="checkbox" class="form-check-input" id="show-all-fields-toggle" v-model="state.showAllFields" />
-                            <label class="form-check-label" for="show-all-fields-toggle">
-                                {{ t('main.bibliography.show-all-fields') }}
-                            </label>
-                        </div>
                     </li>
                 </ul>
             </div>
@@ -355,7 +355,7 @@
                                     <a class="dropdown-item" href="#" @click.prevent="editItem(entry)" :disabled="!can('edit_bibliography')">
                                         <i class="fas fa-fw fa-edit text-info"></i> {{ t('global.edit') }}
                                     </a>
-                                    <a class="dropdown-item" href="#" @click.prevent="requestDeleteEntry(entry)" :disabled="!can('add_remove_bibliography')">
+                                    <a class="dropdown-item" href="#" @click.prevent="openDeleteEntryModal(entry)" :disabled="!can('add_remove_bibliography')">
                                         <i class="fas fa-fw fa-trash text-danger"></i> {{ t('global.delete') }}
                                     </a>
                                 </div>
@@ -384,45 +384,6 @@
                 <span slot="no-results"></span>
             </infinite-loading> -->
         </div>
-
-        <!-- <router-view
-            v-dcan.one="'add_remove_bibliography|edit_bibliography'"
-            :data="newItem"
-            :available-types="$options.availableTypes"
-            :on-success="addBibliographyItem"
-            :on-close="onModalClose">
-        </router-view>
-
-        <modal name="delete-bibliography-item-modal" height="auto" :scrollable="true" v-dcan="'add_remove_bibliography'">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ t('main.bibliography.modal.delete.title') }}</h5>
-                    <button type="button" class="btn-close" aria-label="Close" @click="hideDeleteEntryModal">
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p class="alert alert-info">
-                        {{ t('global.delete-name.desc', {name: deleteItem.title}) }}
-                    </p>
-                    <p class="alert alert-danger">
-                        {{
-                            t('main.bibliography.modal.delete.alert', {
-                                name: deleteItem.title,
-                                cnt: deleteItem.count
-                            }, deleteItem.count)
-                        }}
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-danger" @click="deleteEntry(deleteItem)">
-                        <i class="fas fa-fw fa-trash"></i> {{ t('global.delete') }}
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary" @click="hideDeleteEntryModal">
-                        <i class="fas fa-fw fa-ban"></i> {{ t('global.cancel') }}
-                    </button>
-                </div>
-            </div>
-        </modal> -->
     </div>
 </template>
 
@@ -437,12 +398,15 @@
 
     import store from '../bootstrap/store.js';
 
+    import { useToast } from '../plugins/toast.js';
+
     import {
         bibliographyTypes,
     } from '../helpers/bibliography.js';
 
     import {
         addOrUpdateBibliographyItem,
+        deleteBibliographyItem,
         getBibtexFile,
         updateBibliography,
     } from '../api.js';
@@ -455,13 +419,13 @@
     } from '../helpers/helpers.js';
     import {
         showBibliographyEntry,
+        showDeleteBibliographyEntry,
     } from '../helpers/modal.js';
 
     export default {
         setup(props, context) {
-            const {
-                t
-            } = useI18n();
+            const { t } = useI18n();
+            const toast = useToast();
             // FETCH
 
             // FUNCTIONS
@@ -498,6 +462,17 @@
             };
             const updateEntry = entry => {
                 store.dispatch('updateBibliographyItem', entry);
+            };
+            const deleteEntry = entry => {
+                return deleteBibliographyItem(entry.id).then(data => {
+                    store.dispatch('deleteBibliographyItem', entry);
+
+                    const label = t('main.bibliography.toast.delete.msg', {name: entry.title});
+                    const title = t('main.bibliography.toast.delete.title');
+                    toast.$toast(label, title, {
+                        channel: 'success',
+                    });
+                });
             };
             const addEntries = list => {
                 for(let i=0; i<list.length; i++) {
@@ -558,6 +533,11 @@
                     id: data.id,
                 };
                 showBibliographyEntry(item, addBibliographyItem);
+            };
+            const openDeleteEntryModal = entry => {
+                if(!can('add_remove_bibliography')) return;
+
+                showDeleteBibliographyEntry(entry, deleteEntry);
             };
 
             // DATA
@@ -626,6 +606,7 @@
                 getNextEntries,
                 showNewItemModal,
                 editItem,
+                openDeleteEntryModal,
                 inputFile,
                 importFile,
                 exportFile,
@@ -634,30 +615,5 @@
                 state,
             };
         },
-        // methods: {
-        //     deleteEntry(entry) {
-        //         if(!can('add_remove_bibliography')) return;
-        //         $httpQueue.add(() => $http.delete(`bibliography/${entry.id}`).then(response => {
-        //             const index = this.allEntries.findIndex(e => e.id == entry.id);
-        //             if(index > -1) {
-        //                 this.allEntries.splice(index, 1);
-        //             }
-        //             this.hideDeleteEntryModal();
-        //         }));
-        //     },
-        //     requestDeleteEntry(entry) {
-        //         const vm = this;
-        //         if(!vm.can('add_remove_bibliography')) return;
-        //         $httpQueue.add(() => vm.$http.get(`bibliography/${entry.id}/ref_count`).then(function(response) {
-        //             vm.deleteItem = Object.assign({}, entry);
-        //             vm.deleteItem.count = response.data;
-        //             vm.$modal.show('delete-bibliography-item-modal');
-        //         }));
-        //     },
-        //     hideDeleteEntryModal() {
-        //         this.deleteItem = {};
-        //         this.$modal.hide('delete-bibliography-item-modal');
-        //     },
-        // },
     }
 </script>

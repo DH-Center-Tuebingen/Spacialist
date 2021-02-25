@@ -30,7 +30,7 @@ const de = {
         'select-none': 'Alle abwählen',
         'delete-name': {
             title: '{name} löschen',
-            desc: 'Willst du {name} wirklich löschen?'
+            desc: 'Willst du <span class="fw-bold">{name}</span> wirklich löschen?'
         },
         'deactivate-name': {
             title: '{name} deaktivieren',
@@ -506,6 +506,12 @@ const de = {
                     title: 'Eintrag löschen',
                     alert: 'Beachte: Wenn du {name} löschst, wird eine Quellenangabe ebenfalls gelöscht. | Beachte: Wenn du {name} löschst, werden {cnt} Quellenangaben ebenfalls gelöscht.',
                 }
+            },
+            toast: {
+                delete: {
+                    title: 'Eintrag erfolgreich gelöscht',
+                    msg: 'Der Eintrag {name} wurde gelöscht',
+                },
             },
             add: 'Neuen Literatur-Eintrag anlegen',
             import: 'BibTeX-Datei importieren',

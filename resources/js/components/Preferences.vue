@@ -271,10 +271,7 @@
     
                     const label = t('main.preference.toasts.updated.msg');
                     toast.$toast(label, '', {
-                        duration: 2500,
-                        autohide: true,
                         channel: 'success',
-                        icon: true,
                         simple: true,
                     });
                 });

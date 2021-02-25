@@ -229,3 +229,9 @@ export async function deleteComment(cid, endpoint = '/comment/{cid}') {
         () => http.delete(endpoint).then(response => response.data)
     );
 };
+
+export async function deleteBibliographyItem(id) {
+    return $httpQueue.add(
+        () => http.delete(`bibliography/${id}`).then(response => response.data)
+    );
+};
