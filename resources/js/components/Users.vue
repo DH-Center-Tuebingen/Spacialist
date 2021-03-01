@@ -329,15 +329,15 @@
                 v.fields[id].roles.reset();
             };
             const cleanUser = id => {
-                v.fields[id].mail.setDirty(false);
-                v.fields[id].roles.setDirty(false);
+                v.fields[id].mail.reset();
+                v.fields[id].roles.reset();
             };
             const patchUser = id => {
                 if(!userValid(id) || !can('add_remove_role')) {
                     return;
                 }
-                v.fields[id].mail.setDirty(false);
-                v.fields[id].roles.setDirty(false);
+                v.fields[id].mail.reset();
+                v.fields[id].roles.reset();
             };
             const anyUserDirty = _ => {
                 let isDirty = false;
@@ -383,7 +383,6 @@
                             value: vm,
                             handleInput: him,
                             handleReset: hrm,
-                            setDirty: sdm,
                         } = useField(`email_${u.id}`, yup.string().required().email(), {
                             initialValue: u.email,
                         });
@@ -393,7 +392,6 @@
                             value: vr,
                             handleInput: hir,
                             handleReset: hrr,
-                            setDirty: sdr,
                         } = useField(`roles_${u.id}`, yup.array(), {
                             initialValue: u.roles,
                         });
@@ -404,7 +402,6 @@
                                 value: vm,
                                 handleInput: him,
                                 reset: hrm,
-                                setDirty: sdm,
                             },
                             roles: {
                                 errors: er,
@@ -412,7 +409,6 @@
                                 value: vr,
                                 handleInput: hir,
                                 reset: hrr,
-                                setDirty: sdr,
                             },
                         });
                     }
