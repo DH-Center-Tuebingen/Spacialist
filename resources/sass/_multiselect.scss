@@ -41,6 +41,7 @@
   border-radius: $input-border-radius !important;
   overflow: auto !important;
   max-height: 400px !important;
+  z-index: $zindex-sticky + 1 !important;
 }
 
 .multiselect-option.is-pointed {

@@ -14,11 +14,8 @@
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item" v-if="state.loggedIn">
-                            <form class="form-inline me-auto">
-                                <div class="form-group">
-                                    SEARCH BAR
-                                    <global-search></global-search>
-                                </div>
+                            <form class="me-auto">
+                                <global-search></global-search>
                             </form>
                         </li>
                     </ul>

@@ -282,3 +282,10 @@ export async function deleteBibliographyItem(id) {
         () => http.delete(`bibliography/${id}`).then(response => response.data)
     );
 };
+
+// SEARCH
+export async function searchGlobal(query = '') {
+    return $httpQueue.add(
+        () => http.get(`search?q=${query}`).then(response => response.data)
+    )
+}

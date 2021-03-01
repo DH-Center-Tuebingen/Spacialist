@@ -18,6 +18,7 @@ import UserAvatar from './components/UserAvatar.vue';
 import ActivityLog from './components/ActivityLog.vue';
 import CommentList from './components/CommentList.vue';
 import EmojiPicker from './components/EmojiPicker.vue';
+import GlobalSearch from './components/search/Global.vue';
 
 // Init Libs
 // PQueue, httpQueue
@@ -126,6 +127,7 @@ app.component('user-avatar', UserAvatar);
 app.component('activity-log', ActivityLog);
 app.component('comment-list', CommentList);
 app.component('emoji-picker', EmojiPicker);
+app.component('global-search', GlobalSearch);
 // Third-Party components
 app.component('multiselect', Multiselect);
 app.component('file-upload', VueUploadComponent);
