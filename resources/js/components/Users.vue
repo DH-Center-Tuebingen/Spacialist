@@ -139,15 +139,16 @@
                         </td>
                         <td>
                             <multiselect
-                                label="display_name"
-                                track-by="id"
                                 v-model="dUser.roles"
+                                :name="`roles_${user.id}`"
+                                :object="true"
+                                :label="'display_name'"
+                                :track-by="'display_name'"
+                                :valueProp="'id'"
+                                :mode="'tags'"
                                 :disabled="true"
-                                :multiple="true"
                                 :options="[]"
-                                :placeholder="t('main.user.add-role-placeholder')"
-                                :select-label="t('global.select.select')"
-                                :deselect-label="t('global.select.deselect')">
+                                :placeholder="t('main.user.add-role-placeholder')">
                             </multiselect>
                         </td>
                         <td>
