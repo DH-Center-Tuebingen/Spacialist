@@ -5,6 +5,11 @@
   min-height: 37px !important;
 }
 
+.multiselect-search, .multiselect-search > .multiselect-input {
+  min-height: 0px !important;
+  height: 32px !important;
+}
+
 .multiselect > * {
   font-size: $font-size-base !important;
   font-weight: $font-weight-base !important;
