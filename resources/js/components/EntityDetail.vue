@@ -130,6 +130,7 @@
     
     import {
         useRoute,
+        onBeforeRouteLeave,
     } from 'vue-router';
 
     import { useI18n } from 'vue-i18n';
@@ -260,7 +261,7 @@
                 initFinished: false,
                 commentLoadingState: 'not',
                 entity: computed(_ => store.getters.entity),
-                entityUser: computed(_ => getUserBy(state.entity.user.id)),
+                entityUser: computed(_ => state.entity.user),
                 entityAttributes: computed(_ => store.getters.entityTypeAttributes(state.entity.entity_type_id)),
                 entityTypeSelections: computed(_ => getEntityTypeAttributeSelections(state.entity.entity_type_id)),
                 entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
@@ -386,6 +387,14 @@
                     });
                 }
             );
+
+            // ON BEFORE LEAVE
+            onBeforeRouteLeave(async (to, from) => {
+                // TODO check for staged data
+
+                store.dispatch('resetEntity');
+                return true;
+            });
 
             // RETURN
             return {

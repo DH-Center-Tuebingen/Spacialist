@@ -249,6 +249,9 @@ export const store = createStore({
         setEntityComments({commit}, data) {
             commit('setEntityComments', data);
         },
+        resetEntity({commit}) {
+            commit('setEntity', {});
+        },
         setInitialEntities({commit, state}, data) {
             state.tree = [];
             state.entities = {};
