@@ -1,4 +1,7 @@
 import dayjs from '../bootstrap/time.js';
+import {
+    getUserBy,
+} from './helpers.js';
 
 export function date(value, format = 'DD.MM.YYYY HH:mm') {
     if(value) {
@@ -167,7 +170,7 @@ export function bibtexify(value, type) {
     return rendered;
 };
 export function mentionify(value) {
-    const template = `<span class="badge badge-primary">@{name}</span>`;
+    const template = `<span class="badge bg-primary">@{name}</span>`;
     const unknownTemplate = `<span class="fw-bold">@{name}</span>`;
     const mentionRegex = /@(\w|\d)+/gi;
     let mentions = value.match(mentionRegex);
@@ -177,7 +180,7 @@ export function mentionify(value) {
     for(let i=0; i<mentions.length; i++) {
         const elem = mentions[i];
         const m = elem.substring(1);
-        const user = app.$getUserBy(m, 'nickname');
+        const user = getUserBy(m, 'nickname');
         const replRegex = new RegExp(elem, 'g');
         let name = m;
         let tpl = unknownTemplate;
