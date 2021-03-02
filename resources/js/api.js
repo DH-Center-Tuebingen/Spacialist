@@ -140,6 +140,12 @@ export async function getIconClassInfo(iconClass) {
     }).then(response => response.data).catch(e => e);
 }
 
+export async function fetchChildren(id) {
+    return $httpQueue.add(
+        () => http.get(`/entity/byParent/${id}`).then(response => response.data)
+    );
+}
+
 // POST
 export async function updateEntityTypeRelation(entityType) {
     const id = entityType.id;
