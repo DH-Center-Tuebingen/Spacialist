@@ -62,6 +62,8 @@ const de = {
             confirm_and_save: 'Nein, Speichern und fortfahren'
         },
         search: 'Suche…',
+        search_no_results: 'Keine Suchergebnisse',
+        search_no_results_for: 'Keine Ergebnisse für den Begriff <span class="fst-italic fw-bold">{term}</span>',
         login: 'Einloggen',
         'login-title': 'Anmelden',
         'login-subtitle': 'Willkommen bei Spacialist',

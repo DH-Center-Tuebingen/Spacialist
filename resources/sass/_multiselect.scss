@@ -49,8 +49,18 @@
   z-index: $zindex-sticky + 1 !important;
 }
 
+.multiselect-option {
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+  min-height: 0px !important;
+}
+
 .multiselect-option.is-pointed {
-  background-color: $white !important;
+  background-color: $primary !important;
+  color: $white !important;
+  font-weight: $font-weight-bold;
 }
 
 .is-multiple .multiselect-option.is-selected,

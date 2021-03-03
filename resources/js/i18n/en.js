@@ -62,6 +62,8 @@ const en = {
             confirm_and_save: 'No, save and continue'
         },
         search: 'Search…',
+        search_no_results: 'No results',
+        search_no_results_for: 'No results for term <span class="fst-italic fw-bold">{term}</span>',
         login: 'Login',
         'login-title': 'Login',
         'login-subtitle': 'Welcome to Spacialist',

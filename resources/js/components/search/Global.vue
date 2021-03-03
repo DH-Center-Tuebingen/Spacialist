@@ -9,6 +9,7 @@
         :valueProp="'id'"
         :mode="'single'"
         :options="query => search(query)"
+        :hideSelected="false"
         :filterResults="false"
         :resolveOnLoad="false"
         :clearOnSearch="true"
@@ -25,7 +26,42 @@
                 </div>
             </template>
             <template v-slot:option="{ option }">
-                #{{ option.id }}: {{ option.name }}
+                <div class="col-3 text-center">
+                    <img :src="option.thumb_url" :alt="option.name" class="w-100" v-if="isImage(option)" />
+                    <span v-else-if="isFile(option)">
+                        <i class="fas fa-fw fa-file"></i>
+                    </span>
+                    <span v-else-if="isEntity(option)">
+                        <i class="fas fa-fw fa-monument"></i>
+                    </span>
+                    <span v-else-if="isBibliography(option)">
+                        <i class="fas fa-fw fa-book"></i>
+                    </span>
+                    <span v-else-if="isGeodata(option)">
+                        <i class="fas fa-fw fa-map-marked-alt"></i>
+                    </span>
+                </div>
+                <div class="col-9 ps-2">
+                    <span v-if="isFile(option)">
+                        {{ option.name }}
+                    </span>
+                    <span v-if="isBibliography(option)">
+                        {{ option.citekey }}
+                        {{ option.author }}
+                        {{ option.title }}
+                    </span>
+                    <span v-if="isEntity(option)">
+                        {{ option.name }}
+                    </span>
+                    <span v-if="isGeodata(option)">
+                        {{ option.id }}
+                    </span>
+                </div>
+            </template>
+            <template v-slot:nooptions="" >
+                <div class="p-2" v-if="!!state.query" v-html="t('global.search_no_results_for', {term: state.query})">
+                </div>
+                <span v-else></span>
             </template>
     </multiselect>
 </template>
@@ -39,10 +75,6 @@
     import { useI18n } from 'vue-i18n';
 
     import {
-        _debounce,
-    } from '../../helpers/helpers.js';
-
-    import {
         searchGlobal,
     } from '../../api.js';
 
@@ -51,7 +83,7 @@
             delay: {
                 type: Number,
                 required: false,
-                default: 500,
+                default: 300,
             },
             limit: {
                 type: Number,
@@ -69,12 +101,32 @@
 
             // FUNCTIONS
             const search = async (query) => {
+                state.query = query;
+                if(!query) {
+                    return await new Promise(r => r([]));
+                }
                 return await searchGlobal(query);
+            };
+            const isFile = searchRes => {
+                return searchRes.group == 'files' && !searchRes.mime_type.startsWith('image/');
+            };
+            const isImage = searchRes => {
+                return searchRes.group == 'files' && searchRes.mime_type.startsWith('image/');
+            };
+            const isEntity = searchRes => {
+                return searchRes.group == 'entity';
+            };
+            const isBibliography = searchRes => {
+                return searchRes.group == 'bibliography';
+            };
+            const isGeodata = searchRes => {
+                return searchRes.group == 'geodata';
             };
 
             // DATA
             const state = reactive({
                 entry: null,
+                query: '',
             });
 
             // RETURN
@@ -83,6 +135,11 @@
                 // HELPER
                 // LOCAL
                 search,
+                isFile,
+                isImage,
+                isEntity,
+                isBibliography,
+                isGeodata,
                 // PROPS
                 delay,
                 limit,
