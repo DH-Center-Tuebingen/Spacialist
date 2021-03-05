@@ -3,6 +3,7 @@
         v-model="state.entry"
         name="global-search"
         class="multiselect-search"
+        :id="state.id"
         :object="false"
         :label="'id'"
         :track-by="'id'"
@@ -28,7 +29,7 @@
             <template v-slot:option="{ option }">
                 <div class="col-3 text-center">
                     <img :src="option.thumb_url" :alt="option.name" class="w-100" v-if="isImage(option)" />
-                    <span v-else-if="isFile(option)">
+                    <span v-else-if="isFile(option, true)">
                         <i class="fas fa-fw fa-file"></i>
                     </span>
                     <span v-else-if="isEntity(option)">
@@ -58,10 +59,12 @@
                     </span>
                 </div>
             </template>
-            <template v-slot:nooptions="" >
+            <template v-slot:nooptions="">
                 <div class="p-2" v-if="!!state.query" v-html="t('global.search_no_results_for', {term: state.query})">
                 </div>
-                <span v-else></span>
+                <div class="p-1 text-muted" v-else>
+                    Enter a term to search globally
+                </div>
             </template>
     </multiselect>
 </template>
@@ -69,6 +72,7 @@
 <script>
     import {
         reactive,
+        onMounted,
         toRefs,
     } from 'vue';
 
@@ -77,6 +81,10 @@
     import {
         searchGlobal,
     } from '../../api.js';
+
+    import {
+        getTs
+    } from '../../helpers/helpers.js';
 
     export default {
         props: {
@@ -107,8 +115,14 @@
                 }
                 return await searchGlobal(query);
             };
-            const isFile = searchRes => {
-                return searchRes.group == 'files' && !searchRes.mime_type.startsWith('image/');
+            const isFile = (searchRes, withoutImages = false) => {
+                let ret = searchRes.group == 'files';
+                if(!ret) return false;
+
+                if(withoutImages) {
+                    ret = !searchRes.mime_type.startsWith('image/');
+                }
+                return ret;
             };
             const isImage = searchRes => {
                 return searchRes.group == 'files' && searchRes.mime_type.startsWith('image/');
@@ -125,6 +139,7 @@
 
             // DATA
             const state = reactive({
+                id: `multiselect-global-search-${getTs()}`,
                 entry: null,
                 query: '',
             });

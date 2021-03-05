@@ -44,9 +44,12 @@
   background-color: $white !important;
   border-color: $input-border-color !important;
   border-radius: $input-border-radius !important;
-  overflow: auto !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
   max-height: 400px !important;
   z-index: $zindex-sticky + 1 !important;
+  word-wrap: break-word !important;
+  width: 20vw !important;
 }
 
 .multiselect-option {
