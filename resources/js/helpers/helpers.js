@@ -269,6 +269,28 @@ export function findInList(list, searchValue, searchKey = 'id', recKey = 'childr
     }
 };
 
+export function only(object, allows = []) {
+    return Object.keys(object)
+        .filter(key => allows.includes(key))
+        .reduce((obj, key) => {
+            return {
+            ...obj,
+            [key]: object[key]
+            };
+        }, {});
+};
+
+export function except(object, excepts = []) {
+    return Object.keys(object)
+        .filter(key => !excepts.includes(key))
+        .reduce((obj, key) => {
+            return {
+            ...obj,
+            [key]: object[key]
+            };
+        }, {});
+};
+
 export const _cloneDeep = require('lodash/cloneDeep');
 export const _debounce = require('lodash/debounce');
 export const _orderBy = require('lodash/orderBy');

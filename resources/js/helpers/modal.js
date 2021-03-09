@@ -2,17 +2,19 @@ import store from '../bootstrap/store.js';
 import router from '../bootstrap/router.js';
 
 import {
+    addUser,
     deleteBibliographyItem,
     deleteEntityType,
 } from '../api.js';
 
 import {
-    getTs
+    can,
+    getTs,
 } from '../helpers/helpers.js';
 
 import About from '../components/modals/system/About.vue';
 import Discard from '../components/modals/system/Discard.vue';
-import UserInfo from '../components/modals/users/UserInfo.vue';
+import AddUser from '../components/modals/user/Add.vue';
 import BibliographyItem from '../components/modals/bibliography/Item.vue';
 import DeleteBibliographyItem from '../components/modals/bibliography/Delete.vue';
 import AddEntityType from '../components/modals/entitytype/Add.vue';
@@ -43,6 +45,31 @@ export function showUserInfo(user) {
         },
         on: {
             closing(e) {
+                store.getters.vfm.hide(uid);
+            }
+        }
+    });
+}
+
+export function showAddUser(onAdded) {
+    const uid = `AddUser-${getTs()}`;
+    store.getters.vfm.show({
+        component: AddUser,
+        bind: {
+            name: uid,
+        },
+        on: {
+            add(e) {
+                if(!can('create_users')) return;
+                addUser(e).then(user => {
+                    if(!!onAdded) {
+                        onAdded();
+                    }
+                    store.dispatch('addUser', user);
+                    store.getters.vfm.hide(uid);
+                });
+            },
+            cancel(e) {
                 store.getters.vfm.hide(uid);
             }
         }

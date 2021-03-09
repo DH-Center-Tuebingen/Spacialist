@@ -2,7 +2,7 @@
     <div class="d-flex flex-column h-100">
         <h4>
             {{ t('main.user.active_users') }}
-            <button type="button" class="btn btn-outline-success" @click="showNewUserModal" :disabled="!can('create_users')">
+            <button type="button" class="btn btn-outline-success" @click="showNewUserModal()" :disabled="!can('create_users')">
                 <i class="fas fa-fw fa-plus"></i> {{ t('main.user.add-button') }}
             </button>
         </h4>
@@ -31,13 +31,6 @@
                                     {{ msg }}
                                 </span>
                             </div>
-                            <!-- <input type="email" class="form-control" :class="getValidClass(state.error, `email_${user.id}`)" v-model="user.email" v-validate="" :name="`email_${user.id}`" required />
-
-                            <div class="invalid-feedback">
-                                <span v-for="(msg, i) in state.error[`email_${user.id}`]" :key="i">
-                                    {{ msg }}
-                                </span>
-                            </div> -->
                         </td>
                         <td>
                             <multiselect
@@ -60,21 +53,6 @@
                                     {{ msg }}
                                 </span>
                             </div>
-                            <!-- <multiselect
-                                label="display_name"
-                                track-by="id"
-                                v-model="user.roles"
-                                v-validate=""
-                                :closeOnSelect="false"
-                                :disabled="can('add_remove_role')"
-                                :hideSelected="true"
-                                :multiple="true"
-                                :name="`roles_${user.id}`"
-                                :options="state.roles"
-                                :placeholder="t('main.user.add-role-placeholder')"
-                                :select-label="t('global.select.select')"
-                                :deselect-label="t('global.select.deselect')">
-                            </multiselect> -->
                         </td>
                         <td>
                             {{ date(user.created_at) }}
@@ -180,88 +158,7 @@
             {{ t('main.user.empty_list') }}
         </div>
 
-        <!-- <modal name="new-user-modal" height="auto" :scrollable="true">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ t('main.user.modal.new.title') }}</h5>
-                    <button type="button" class="btn-close" aria-label="Close" @click="hideNewUserModal">
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="newUserForm" name="newUserForm" role="form" v-on:submit.prevent="onAddUser(state.newUser)">
-                        <div class="form-group">
-                            <label class="col-form-label col-md-3" for="name">
-                                {{ t('global.name') }}
-                                <span class="text-danger">*</span>:
-                            </label>
-                            <div class="col-md-9">
-                                <input class="form-control" :class="getValidClass(state.error, 'name')" type="text" id="name" v-model="state.newUser.name" required />
-
-                                <div class="invalid-feedback">
-                                    <span v-for="(msg, i) in state.error.name" :key="i">
-                                        {{ msg }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label col-md-3" for="nickname">
-                                {{ t('global.nickname') }}
-                                <span class="text-danger">*</span>:
-                            </label>
-                            <div class="col-md-9">
-                                <input class="form-control" :class="getValidClass(state.error, 'nickname')" type="text" id="nickname" v-model="state.newUser.nickname" required />
-
-                                <div class="invalid-feedback">
-                                    <span v-for="(msg, i) in state.error.nickname" :key="i">
-                                        {{ msg }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label col-md-4" for="display_name">
-                                {{ t('global.email') }}
-                                <span class="text-danger">*</span>:
-                            </label>
-                            <div class="col-md-9">
-                                <input class="form-control" :class="getValidClass(state.error, 'email')" type="email" id="display_name" v-model="state.newUser.email" required />
-
-                                <div class="invalid-feedback">
-                                    <span v-for="(msg, i) in state.error.email" :key="i">
-                                        {{ msg }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label col-md-3" for="description">
-                                {{ t('global.password') }}
-                                <span class="text-danger">*</span>:
-                            </label>
-                            <div class="col-md-9">
-                                <input class="form-control" :class="getValidClass(state.error, 'password')" type="password" id="description" v-model="state.newUser.password" required />
-
-                                <div class="invalid-feedback">
-                                    <span v-for="(msg, i) in state.error.password" :key="i">
-                                        {{ msg }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" form="newUserForm">
-                        <i class="fas fa-fw fa-plus"></i> {{ t('global.add') }}
-                    </button>
-                    <button type="button" class="btn btn-danger"     @click="hideNewUserModal">
-                        <i class="fas fa-fw fa-ban"></i> {{ t('global.cancel') }}
-                    </button>
-                </div>
-            </div>
-        </modal>
-
+        <!-- 
         <modal name="confirm-delete-user-modal" height="auto" :scrollable="true">
             <div class="modal-content">
                 <div class="modal-header">
@@ -283,8 +180,7 @@
                     </button>
                 </div>
             </div>
-        </modal>
-        <discard-changes-modal :name="state.discardModal"/> -->
+        </modal>-->
     </div>
 </template>
 
@@ -304,6 +200,7 @@
 
     import {
         showDiscard,
+        showAddUser,
     } from '../helpers/modal.js';
     import {
         can,
@@ -339,6 +236,9 @@
                 }
                 v.fields[id].mail.reset();
                 v.fields[id].roles.reset();
+            };
+            const showNewUserModal = _ => {
+                showAddUser();
             };
             const anyUserDirty = _ => {
                 let isDirty = false;
@@ -440,20 +340,13 @@
                 userValid,
                 resetUser,
                 patchUser,
+                showNewUserModal,
                 // PROPS
                 // STATE
                 state,
                 v,
             }
         },
-        //     showNewUserModal() {
-        //         if(!this.$can('create_users')) return;
-        //         this.$modal.show('new-user-modal');
-        //     },
-        //     hideNewUserModal() {
-        //         this.$modal.hide('new-user-modal');
-        //         this.newUser = {};
-        //     },
         //     onAddUser(newUser) {
         //         if(!this.$can('create_users')) return;
         //         $http.post('user', newUser).then(response => {

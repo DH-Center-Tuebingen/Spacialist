@@ -76,6 +76,9 @@ export const store = createStore({
             delete data.attributes;
             state.entityTypes[data.id] = data;
         },
+        addUser(state, data) {
+            state.users.push(data);
+        },
         deleteEntityType(state, data) {
             delete state.entityTypes[data.id];
             delete state.entityTypeAttributes[data.id];
@@ -278,6 +281,9 @@ export const store = createStore({
         },
         addEntityType({commit}, data) {
             commit('addEntityType', data);
+        },
+        addUser({commit}, data) {
+            commit('addUser', data);
         },
         setEntityTypes({commit, state}, data) {
             state.entityTypes = {};

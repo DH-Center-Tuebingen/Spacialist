@@ -162,6 +162,7 @@ const de = {
         email_or_nick: 'E-Mail-Adresse oder Name',
         phonenumber: 'Telefonnummer',
         password: 'Passwort',
+        confirm_password: 'Passwort wiederholen',
         'remember-me': 'Eingeloggt bleiben',
         'orcid': 'ORCID',
         description: 'Beschreibung',

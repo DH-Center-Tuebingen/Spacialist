@@ -5,6 +5,7 @@ import {
 import store from './bootstrap/store.js';
 import auth from './bootstrap/auth.js';
 import {
+    only,
     simpleResourceType,
 } from './helpers/helpers.js';
 
@@ -147,6 +148,13 @@ export async function fetchChildren(id) {
 }
 
 // POST
+export async function addUser(user) {
+    const data = only(user, ['name', 'nickname', 'email', 'password']);
+    return $httpQueue.add(
+        () =>  http.post('user', data).then(response => response.data)
+    );
+};
+
 export async function updateEntityTypeRelation(entityType) {
     const id = entityType.id;
     const data = {

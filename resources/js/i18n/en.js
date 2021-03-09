@@ -162,6 +162,7 @@ const en = {
         email_or_nick: 'E-Mail Address or Nickname',
         phonenumber: 'Phone number',
         password: 'Password',
+        confirm_password: 'Repeat Password',
         'remember-me': 'Remember me',
         'orcid': 'ORCID',
         description: 'Description',
