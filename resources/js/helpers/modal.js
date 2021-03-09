@@ -14,6 +14,7 @@ import {
 
 import About from '../components/modals/system/About.vue';
 import Discard from '../components/modals/system/Discard.vue';
+import UserInfo from '../components/modals/user/UserInfo.vue';
 import AddUser from '../components/modals/user/Add.vue';
 import BibliographyItem from '../components/modals/bibliography/Item.vue';
 import DeleteBibliographyItem from '../components/modals/bibliography/Delete.vue';

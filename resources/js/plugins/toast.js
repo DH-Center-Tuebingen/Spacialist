@@ -10,7 +10,8 @@ import {
 } from 'bootstrap';
 
 import {
-    getTs
+    getTs,
+    only,
 } from '../helpers/helpers.js';
 
 import ToastComponent from '../components/plugins/Toast.vue';
@@ -71,23 +72,12 @@ function initializeWrapper(config) {
     store.wrapper = wrapper;
 };
 
-function reduceConfig(config, allowed) {
-    return Object.keys(config)
-        .filter(key => allowed.includes(key))
-        .reduce((obj, key) => {
-            return {
-            ...obj,
-            [key]: config[key]
-            };
-        }, {});
-}
-
 function reduceGlobalConfig(config) {
-    return reduceConfig(config, Object.keys(defaultConfig));
+    return only(config, Object.keys(defaultConfig));
 };
 
 function reduceToastConfig(config) {
-    return reduceConfig(config, perToastConfig);
+    return only(config, perToastConfig);
 };
 
 const createToast = config => ({

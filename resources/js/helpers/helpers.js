@@ -123,15 +123,12 @@ export function getEntityTypeAttributeSelections(id) {
     if(!attrs) return {};
     const attrIds = attrs.map(a => a.id);
     const sel = store.getters.attributeSelections;
-    console.log(attrIds, "attrIds");
-    console.log(sel, "sel");
     let filteredSel = {};
     for(let k in sel) {
         if(attrIds.findIndex(aid => aid == k) > -1) {
             filteredSel[k] = sel[k];
         }
     }
-    console.log(filteredSel, "filteredSel");
     return filteredSel;
 }
 
