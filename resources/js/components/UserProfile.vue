@@ -141,8 +141,8 @@
                 // No changes, no update
                 if(Object.keys(data).length === 0) return;
 
-                patchUserData(state.user.id, data).then(response => {
-                    updateUserObjects(response.data);
+                patchUserData(state.user.id, data).then(data => {
+                    updateUserObjects(data);
                 });
             };
             const resetUserInfo = _ => {

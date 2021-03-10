@@ -184,9 +184,12 @@
 
     import store from '../bootstrap/store.js';
 
+    import { useToast } from '../plugins/toast.js';
+
     import {
         reactivateUser as reactivateUserApi,
         sendResetPasswordMail,
+        patchUserData,
     } from '../api.js';
     import {
         showDiscard,
@@ -197,6 +200,7 @@
     import {
         can,
         getClassByValidation,
+        getErrorMessages,
         getUserBy,
         hasPreference,
     } from '../helpers/helpers.js';
@@ -207,6 +211,7 @@
     export default {
         setup(props) {
             const { t } = useI18n();
+            const toast = useToast();
 
             // FUNCTIONS
             const userDirty = id => {
@@ -219,16 +224,47 @@
                 v.fields[id].mail.reset();
                 v.fields[id].roles.reset();
             };
-            const cleanUser = id => {
-                v.fields[id].mail.reset();
-                v.fields[id].roles.reset();
+            const resetUserMeta = id => {
+                v.fields[id].mail.reset({
+                    value: v.fields[id].mail.value,
+                });
+                v.fields[id].roles.reset({
+                    value: v.fields[id].roles.value,
+                });
             };
             const patchUser = id => {
-                if(!userValid(id) || !can('add_remove_role')) {
+                if(!userDirty(id) || !userValid(id) || !can('add_remove_role')) {
                     return;
                 }
-                v.fields[id].mail.reset();
-                v.fields[id].roles.reset();
+
+                const user = getUserBy(id);
+                const data = {};
+
+                if(v.fields[id].roles.meta.dirty) {
+                    let roles = [];
+                    for(let i=0; i<v.fields[id].roles.value.length; i++) {
+                        roles.push(v.fields[id].roles.value[i].id);
+                    }
+                    data.roles = roles;
+                }
+                if(v.fields[id].mail.meta.dirty) {
+                    data.email = user.email;
+                }
+
+                patchUserData(id, data).then(data => {
+                    resetUserMeta(id); // TODO ONLY SET DIRTY = FALSE
+                    user.updated_at = data.updated_at;
+                    const msg = t('main.user.toasts.updated.msg', {
+                        name: user.name
+                    });
+                    const title = t('main.user.toasts.updated.title');
+                    toast.$toast(msg, title, {
+                        channel: 'success',
+                    });
+                }).catch(e => {
+                    getErrorMessages(e);
+                });
+
             };
             const showNewUserModal = _ => {
                 showAddUser();
@@ -261,14 +297,14 @@
             // Used in Discard Modal to make all fields undirty
             const resetData = _ => {
                 for(let i=0; i<state.userList.length; i++) {
-                    cleanUser(state.userList[i].id);
+                    resetUser(state.userList[i].id);
                 }
             };
             // Used in Discard Modal to store data before moving on
             const onBeforeConfirm = _ => {
                 for(let i=0; i<state.userList.length; i++) {
                     // TODO actually store dirty data
-                    resetUser(state.userList[i].id);
+                    resetUserMeta(state.userList[i].id);
                 }
                 return new Promise(r => r(null));
             };
@@ -290,7 +326,7 @@
                             meta: mm,
                             value: vm,
                             handleInput: him,
-                            handleReset: hrm,
+                            resetField: hrm,
                         } = useField(`email_${u.id}`, yup.string().required().email(), {
                             initialValue: u.email,
                         });
@@ -299,7 +335,7 @@
                             meta: mr,
                             value: vr,
                             handleInput: hir,
-                            handleReset: hrr,
+                            resetField: hrr,
                         } = useField(`roles_${u.id}`, yup.array(), {
                             initialValue: u.roles,
                         });
@@ -358,39 +394,5 @@
                 v,
             }
         },
-        //     onPatchUser(id) {
-        //         if(!this.$can('add_remove_role')) return new Promise(r => r());
-        //         if(!this.userDirty(id)) return new Promise(r => r());
-        //         let user = this.userList.find(u => u.id == id);
-        //         if(!user.email) {
-        //             // TODO error message
-        //             return;
-        //         }
-        //         let data = {};
-        //         if(this.isDirty(`roles_${id}`)) {
-        //             let roles = [];
-        //             for(let i=0; i<user.roles.length; i++) {
-        //                 roles.push(user.roles[i].id);
-        //             }
-        //             data.roles = roles;
-        //         }
-        //         if(this.isDirty(`email_${id}`)) {
-        //             data.email = user.email;
-        //         }
-        //         return $httpQueue.add(() => $http.patch(`user/${id}`, data).then(response => {
-        //             this.setUserPristine(id);
-        //             user.updated_at = response.data.updated_at;
-        //             this.$showToast(
-        //                 this.$t('main.user.toasts.updated.title'),
-        //                 this.$t('main.user.toasts.updated.msg', {
-        //                     name: user.name
-        //                 }),
-        //                 'success'
-        //             );
-        //         }).catch(e => {
-        //             this.$getErrorMessages(e, this.error, `_${id}`);
-        //         }));
-        //     },
-        // },
     }
 </script>
