@@ -3,6 +3,7 @@ import router from '../bootstrap/router.js';
 
 import {
     addUser,
+    deactivateUser,
     deleteBibliographyItem,
     deleteEntityType,
 } from '../api.js';
@@ -16,6 +17,7 @@ import About from '../components/modals/system/About.vue';
 import Discard from '../components/modals/system/Discard.vue';
 import UserInfo from '../components/modals/user/UserInfo.vue';
 import AddUser from '../components/modals/user/Add.vue';
+import DeactiveUser from '../components/modals/user/Deactivate.vue';
 import BibliographyItem from '../components/modals/bibliography/Item.vue';
 import DeleteBibliographyItem from '../components/modals/bibliography/Delete.vue';
 import AddEntityType from '../components/modals/entitytype/Add.vue';
@@ -69,6 +71,35 @@ export function showAddUser(onAdded) {
                     store.dispatch('addUser', user);
                     store.getters.vfm.hide(uid);
                 });
+            },
+            cancel(e) {
+                store.getters.vfm.hide(uid);
+            }
+        }
+    });
+}
+
+export function showDeactivateUser(user, onDeactivated) {
+    const uid = `DeactiveUser-${getTs()}`;
+    store.getters.vfm.show({
+        component: DeactiveUser,
+        bind: {
+            name: uid,
+            user: user,
+        },
+        on: {
+            deactivate(e) {
+                if(!can('delete_users')) {
+                    store.getters.vfm.hide(uid);
+                    return;
+                }
+                deactivateUser(user.id).then(data => {
+                    if(!!onDeactivated) {
+                        onDeactivated();
+                    }
+                    store.dispatch('deactivateUser', data);
+                    store.getters.vfm.hide(uid);
+                })
             },
             cancel(e) {
                 store.getters.vfm.hide(uid);

@@ -32,7 +32,7 @@ const en = {
             title: 'Delete {name}',
             desc: 'Do you really want to delete <span class="fw-bold">{name}</span>?'
         },
-        'deactivate-name': {
+        'deactivate_name': {
             title: 'Deactivate {name}',
             desc: 'Do you really want to deactivate {name}?',
             info: 'Certain entries can not be deleted or have to be deactivated first. Otherwise deleting these entries could lead to data loss.'

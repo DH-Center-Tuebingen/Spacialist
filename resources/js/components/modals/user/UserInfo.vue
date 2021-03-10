@@ -31,7 +31,7 @@
                         {{ date(user.created_at, 'DD.MM.YYYY', true, true) }}
                     </span>
                     <br/>
-                    <span v-if="isDeactivated" class="small text-muted bg-warning rounded px-2 py-1" :title="user.deleted_at" v-html="t('global.user.deactivated_since', {dt: date(user.deleted_at, 'DD.MM.YYYY', true, true)})">
+                    <span v-if="state.isDeactivated" class="small text-muted bg-warning rounded px-2 py-1" :title="user.deleted_at" v-html="t('global.user.deactivated_since', {dt: date(user.deleted_at, 'DD.MM.YYYY', true, true)})">
                     </span>
                 </dd>
                 <dt class="col-md-6">

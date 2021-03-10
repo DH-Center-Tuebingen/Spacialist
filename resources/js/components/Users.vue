@@ -21,7 +21,12 @@
                 <tbody>
                     <tr v-for="user in state.userList" :key="user.id">
                         <td>
-                            {{ user.name }} ({{ user.nickname }})
+                            <a href="#" @click.prevent="showUserInfo(user)" class="text-nowrap text-reset text-decoration-none">
+                                <user-avatar class="align-middle" :user="user" :size="20"></user-avatar>
+                                <span class="align-middle ms-2">
+                                    {{ user.name }} <span class="text-muted">{{ user.nickname }}</span>
+                                </span>
+                            </a>
                         </td>
                         <td>
                             <input type="email" class="form-control" @input="v.fields[user.id].mail.handleInput" :class="getClassByValidation(v.fields[user.id].mail.errors)" v-model="v.fields[user.id].mail.value" :name="`email_${user.id}`" required />
@@ -75,10 +80,10 @@
                                     <a class="dropdown-item" href="#" v-if="userDirty(user.id)" @click.prevent="resetUser(user.id)">
                                         <i class="fas fa-fw fa-undo text-warning"></i> {{ t('global.reset') }}
                                     </a>
-                                    <a class="dropdown-item" href="#" v-if="hasPreference('prefs.enable-password-reset-link')" :disabled="!can('change_password')" @click.prevent="updatePassword(user.email)">
+                                    <a class="dropdown-item" href="#" v-if="can('delete_users') && hasPreference('prefs.enable-password-reset-link')" :disabled="!can('change_password')" @click.prevent="updatePassword(user.email)">
                                         <i class="fas fa-fw fa-paper-plane text-info"></i> {{ t('global.send_reset_mail') }}
                                     </a>
-                                    <a class="dropdown-item" href="#" :disabled="!can('delete_users')" @click.prevent="requestDeleteUser(user.id)">
+                                    <a class="dropdown-item" href="#" :disabled="!can('delete_users')" @click.prevent="deactivateUser(user.id)">
                                         <i class="fas fa-fw fa-user-times text-danger"></i> {{ t('global.deactivate') }}
                                     </a>
                                 </div>
@@ -110,7 +115,12 @@
                 <tbody>
                     <tr v-for="dUser in state.deletedUserList" :key="dUser.id">
                         <td>
-                            {{ dUser.name }} ({{ dUser.nickname }})
+                            <a href="#" @click.prevent="showUserInfo(dUser)" class="text-nowrap text-reset text-decoration-none">
+                                <user-avatar class="align-middle" :user="dUser" :size="20"></user-avatar>
+                                <span class="align-middle ms-2">
+                                    {{ dUser.name }} <span class="text-muted">{{ dUser.nickname }}</span>
+                                </span>
+                            </a>
                         </td>
                         <td>
                             {{ dUser.email }}
@@ -118,7 +128,7 @@
                         <td>
                             <multiselect
                                 v-model="dUser.roles"
-                                :name="`roles_${user.id}`"
+                                :name="`roles_${dUser.id}`"
                                 :object="true"
                                 :label="'display_name'"
                                 :track-by="'display_name'"
@@ -130,13 +140,13 @@
                             </multiselect>
                         </td>
                         <td>
-                            {{ dUser.created_at }}
+                            {{ date(dUser.created_at) }}
                         </td>
                         <td>
-                            {{ dUser.updated_at }}
+                            {{ date(dUser.updated_at) }}
                         </td>
                         <td>
-                            {{ dUser.deleted_at }}
+                            {{ date(dUser.deleted_at) }}
                         </td>
                         <td>
                             <div class="dropdown">
@@ -157,30 +167,6 @@
         <div class="alert alert-info" role="alert" v-else>
             {{ t('main.user.empty_list') }}
         </div>
-
-        <!-- 
-        <modal name="confirm-delete-user-modal" height="auto" :scrollable="true">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        {{ t('global.deactivate-name.title', {name: state.selectedUser.name}) }}
-                    </h5>
-                    <button type="button" class="btn-close" aria-label="Close" @click="hideDeleteUserModal">
-                    </button>
-                </div>
-                <div class="modal-body">
-                    {{ t('global.msgbal.deactivate-name.info') }}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success" @click="deleteUser(state.selectedUser.id)">
-                        <i class="fas fa-fw fa-check"></i> {{ t('global.deactivate') }}
-                    </button>
-                    <button type="button" class="btn btn-danger" @click="hideDeleteUserModal">
-                        <i class="fas fa-fw fa-ban"></i> {{ t('global.cancel') }}
-                    </button>
-                </div>
-            </div>
-        </modal>-->
     </div>
 </template>
 
@@ -199,12 +185,18 @@
     import store from '../bootstrap/store.js';
 
     import {
+        reactivateUser as reactivateUserApi,
+    } from '../api.js';
+    import {
         showDiscard,
         showAddUser,
+        showDeactivateUser,
+        showUserInfo,
     } from '../helpers/modal.js';
     import {
         can,
         getClassByValidation,
+        getUserBy,
         hasPreference,
     } from '../helpers/helpers.js';
     import {
@@ -239,6 +231,16 @@
             };
             const showNewUserModal = _ => {
                 showAddUser();
+            };
+            const deactivateUser = id => {
+                if(!can('delete_users')) return;
+                showDeactivateUser(getUserBy(id));
+            };
+            const reactivateUser = id => {
+                if(!can('delete_users')) return;
+                reactivateUserApi(id).then(_ => {
+                    store.dispatch('reactivateUser', id);
+                });
             };
             const anyUserDirty = _ => {
                 let isDirty = false;
@@ -335,12 +337,15 @@
                 date,
                 getClassByValidation,
                 hasPreference,
+                showUserInfo,
                 // LOCAL
                 userDirty,
                 userValid,
                 resetUser,
                 patchUser,
                 showNewUserModal,
+                deactivateUser,
+                reactivateUser,
                 // PROPS
                 // STATE
                 state,
@@ -388,43 +393,6 @@
         //         }).catch(e => {
         //             this.$getErrorMessages(e, this.error, `_${id}`);
         //         }));
-        //     },
-        //     showDeleteUserModal() {
-        //         if(!this.$can('delete_users')) return;
-        //         this.$modal.show('confirm-delete-user-modal');
-        //     },
-        //     hideDeleteUserModal() {
-        //         this.$modal.hide('confirm-delete-user-modal');
-        //         this.selectedUser = {};
-        //     },
-        //     requestDeleteUser(id) {
-        //         if(!this.$can('delete_users')) return;
-        //         this.selectedUser = this.userList.find(u => u.id == id);
-        //         this.showDeleteUserModal();
-        //     },
-        //     deleteUser(id) {
-        //         if(!this.$can('delete_users')) return;
-        //         if(!id) return;
-        //         $http.delete(`user/${id}`).then(response => {
-        //             const index = this.userList.findIndex(u => u.id == id);
-        //             if(index > -1) {
-        //                 const delUsers = this.userList.splice(index, 1);
-        //                 delUsers[0].deleted_at = response.data.deleted_at;
-        //                 this.deletedUserList.push(delUsers[0]);
-        //             }
-        //             this.hideDeleteUserModal();
-        //         });
-        //     },
-        //     reactivateUser(id) {
-        //         if(!this.$can('delete_users')) return;
-        //         if(!id) return;
-        //         $http.patch(`user/restore/${id}`).then(response => {
-        //             const index = this.deletedUserList.findIndex(u => u.id == id);
-        //             if(index > -1) {
-        //                 const reacUsers = this.deletedUserList.splice(index, 1);
-        //                 this.userList.push(reacUsers[0]);
-        //             }
-        //         });
         //     },
         //     updatePassword(email) {
         //         if(!this.$can('change_password')) return;

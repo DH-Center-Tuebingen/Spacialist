@@ -67,11 +67,11 @@
                 </label>
                 <div class="col-12">
                     <input class="form-control d-inline" :class="getClassByValidation(v.fields.password.errors)" type="password" id="password" v-model="v.fields.password.value" @input="v.fields.password.handleInput" required />
-                    <a href="#" class="text-muted ms--4-5" @click.prevent="togglePasswordVisibility('password')">
-                        <span v-show="!state.showPassword.password">
+                    <a href="#" class="text-muted ms--4-5" @click.prevent="togglePasswordVisibility()">
+                        <span v-show="!state.showPassword">
                             <i class="fas fa-fw fa-eye"></i>
                         </span>
-                        <span v-show="state.showPassword.password">
+                        <span v-show="state.showPassword">
                             <i class="fas fa-fw fa-eye-slash"></i>
                         </span>
                     </a>
@@ -89,15 +89,7 @@
                     <span class="text-danger">*</span>:
                 </label>
                 <div class="col-12">
-                    <input class="form-control d-inline" :class="getClassByValidation(v.fields.password_confirm.errors)" type="password" id="password_confirm" v-model="v.fields.password_confirm.value" @input="v.fields.password_confirm.handleInput" required />
-                    <a href="#" class="text-muted ms--4-5" @click.prevent="togglePasswordVisibility('password_confirm')">
-                        <span v-show="!state.showPassword.password_confirm">
-                            <i class="fas fa-fw fa-eye"></i>
-                        </span>
-                        <span v-show="state.showPassword.password_confirm">
-                            <i class="fas fa-fw fa-eye-slash"></i>
-                        </span>
-                    </a>
+                    <input class="form-control" :class="getClassByValidation(v.fields.password_confirm.errors)" type="password" id="password_confirm" v-model="v.fields.password_confirm.value" @input="v.fields.password_confirm.handleInput" required />
 
                     <div class="invalid-feedback">
                         <span v-for="(msg, i) in v.fields.password_confirm.errors" :key="i">
@@ -158,11 +150,14 @@
                 };
                 context.emit('add', user);
             };
-            const togglePasswordVisibility = id => {
-                state.showPassword[id] = !state.showPassword[id];
+            const togglePasswordVisibility = _ => {
+                state.showPassword = !state.showPassword;
 
-                const pw = document.getElementById(id);
-                pw.setAttribute('type', state.showPassword[id] ? 'text' : 'password');
+                const pw = document.getElementById('password');
+                const pwc = document.getElementById('password_confirm');
+                const type = state.showPassword ? 'text' : 'password';
+                pw.setAttribute('type', type);
+                pwc.setAttribute('type', type);
             };
 
             // DATA
@@ -180,10 +175,7 @@
             });
             const state = reactive({
                 show: false,
-                showPassword: {
-                    password: false,
-                    password_confirm: false,
-                },
+                showPassword: false,
                 form: formMeta,
                 submitState: computed(_ => formMeta.dirty && formMeta.valid),
             });

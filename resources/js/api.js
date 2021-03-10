@@ -265,6 +265,12 @@ export async function patchPreferences(data, uid) {
     return await http.patch(endpoint, data).then(response => response.data);
 };
 
+export async function reactivateUser(uid) {
+    return $httpQueue.add(
+        () => http.patch(`user/restore/${uid}`).then(response => response.data)
+    );
+};
+
 export async function patchUserData(uid, data) {
     return $httpQueue.add(
         () => http.patch(`user/${uid}`, data)
@@ -272,6 +278,12 @@ export async function patchUserData(uid, data) {
 };
 
 // DELETE
+export async function deactivateUser(id) {
+    return $httpQueue.add(
+        () =>  http.delete(`user/${id}`).then(response => response.data)
+    );
+};
+
 export async function deleteUserAvatar(id) {
     return await $httpQueue.add(
         () => http.delete(`user/${id}/avatar`).then(response => response.data)

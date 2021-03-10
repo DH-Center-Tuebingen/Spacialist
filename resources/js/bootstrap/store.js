@@ -79,6 +79,21 @@ export const store = createStore({
         addUser(state, data) {
             state.users.push(data);
         },
+        deactivateUser(state, data) {
+            const index = state.users.findIndex(u => u.id == data.id);
+            if(index > -1) {
+                const delUser = state.users.splice(index, 1)[0];
+                delUser.deleted_at = data.deleted_at;
+                state.deletedUsers.push(delUser);
+            }
+        },
+        reactivateUser(state, data) {
+            const index = state.deletedUsers.findIndex(u => u.id == data);
+            if(index > -1) {
+                const reacUser = state.deletedUsers.splice(index, 1)[0];
+                state.users.push(reacUser);
+            }
+        },
         deleteEntityType(state, data) {
             delete state.entityTypes[data.id];
             delete state.entityTypeAttributes[data.id];
@@ -284,6 +299,12 @@ export const store = createStore({
         },
         addUser({commit}, data) {
             commit('addUser', data);
+        },
+        deactivateUser({commit}, data) {
+            commit('deactivateUser', data);
+        },
+        reactivateUser({commit}, data) {
+            commit('reactivateUser', data);
         },
         setEntityTypes({commit, state}, data) {
             state.entityTypes = {};
