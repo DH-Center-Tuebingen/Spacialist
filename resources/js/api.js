@@ -155,6 +155,15 @@ export async function addUser(user) {
     );
 };
 
+export async function sendResetPasswordMail(email) {
+    const data = {
+        email: email,
+    };
+    return $httpQueue.add(
+        () => http.post(`user/reset/password`, data).then(response => response.data)
+    );
+};
+
 export async function updateEntityTypeRelation(entityType) {
     const id = entityType.id;
     const data = {

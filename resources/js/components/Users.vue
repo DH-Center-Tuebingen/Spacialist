@@ -80,7 +80,7 @@
                                     <a class="dropdown-item" href="#" v-if="userDirty(user.id)" @click.prevent="resetUser(user.id)">
                                         <i class="fas fa-fw fa-undo text-warning"></i> {{ t('global.reset') }}
                                     </a>
-                                    <a class="dropdown-item" href="#" v-if="can('delete_users') && hasPreference('prefs.enable-password-reset-link')" :disabled="!can('change_password')" @click.prevent="updatePassword(user.email)">
+                                    <a class="dropdown-item" href="#" v-if="hasPreference('prefs.enable-password-reset-link')" :disabled="!can('change_password')" @click.prevent="updatePassword(user.email)">
                                         <i class="fas fa-fw fa-paper-plane text-info"></i> {{ t('global.send_reset_mail') }}
                                     </a>
                                     <a class="dropdown-item" href="#" :disabled="!can('delete_users')" @click.prevent="deactivateUser(user.id)">
@@ -186,6 +186,7 @@
 
     import {
         reactivateUser as reactivateUserApi,
+        sendResetPasswordMail,
     } from '../api.js';
     import {
         showDiscard,
@@ -241,6 +242,10 @@
                 reactivateUserApi(id).then(_ => {
                     store.dispatch('reactivateUser', id);
                 });
+            };
+            const updatePassword = email => {
+                if(!can('change_password')) return;
+                sendResetPasswordMail(email);
             };
             const anyUserDirty = _ => {
                 let isDirty = false;
@@ -346,21 +351,13 @@
                 showNewUserModal,
                 deactivateUser,
                 reactivateUser,
+                updatePassword,
                 // PROPS
                 // STATE
                 state,
                 v,
             }
         },
-        //     onAddUser(newUser) {
-        //         if(!this.$can('create_users')) return;
-        //         $http.post('user', newUser).then(response => {
-        //             this.userList.push(response.data);
-        //             this.hideNewUserModal();
-        //         }).catch(e => {
-        //             this.$getErrorMessages(e, this.error);
-        //         });
-        //     },
         //     onPatchUser(id) {
         //         if(!this.$can('add_remove_role')) return new Promise(r => r());
         //         if(!this.userDirty(id)) return new Promise(r => r());
@@ -392,15 +389,6 @@
         //             );
         //         }).catch(e => {
         //             this.$getErrorMessages(e, this.error, `_${id}`);
-        //         }));
-        //     },
-        //     updatePassword(email) {
-        //         if(!this.$can('change_password')) return;
-        //         const data = {
-        //             email: email
-        //         };
-        //         $httpQueue.add(() => $http.post(`user/reset/password`, data).then(response => {
-        //         }).catch(e => {
         //         }));
         //     },
         // },
