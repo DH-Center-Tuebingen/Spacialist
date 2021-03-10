@@ -111,8 +111,7 @@ class PreferenceController extends Controller {
             } else {
                 $pref->default_value = $encodedValue;
                 $allowOverride = $c['allow_override'];
-                if(isset($allowOverride)) {
-                    $allowOverride = sp_parse_boolean($allowOverride);
+                if($allowOverride === true || $allowOverride === false) {
                     $removeUserPrefs = $pref->allow_override && !$allowOverride;
                     $pref->allow_override = $allowOverride;
                     // remove stored user prefs, if pref is no longer overridable
