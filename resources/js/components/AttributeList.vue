@@ -40,124 +40,131 @@
                             </sup>
                         </label>
                         <div :class="expandedClasses(index)">
-                            <input class="form-control" :disabled="element.isDisabled" v-if="element.datatype == 'string'" type="text" :id="`attr-${element.id}`" :name="`attr-${element.id}`" v-model="state.attributeValues[element.id].value" @blur="checkDependency(element.id)" />
-
-                            <input class="form-control-plaintext" v-else-if="element.datatype == 'serial'" type="text" :id="`attr-${element.id}`" :name="`attr-${element.id}`" readonly v-model="state.attributeValues[element.id].value" @blur="checkDependency(attribute.id)" />
-
-                            <input class="form-control" :disabled="element.isDisabled" v-else-if="element.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" :id="`attr-${element.id}`" :name="`attr-${element.id}`" v-model.number="state.attributeValues[element.id].value" @blur="checkDependency(element.id)" />
-
-                            <input class="form-control" :disabled="element.isDisabled" v-else-if="element.datatype == 'integer'" type="number" step="1" placeholder="0" :id="`attr-${element.id}`" :name="`attr-${element.id}`" v-model.number="state.attributeValues[element.id].value" @blur="checkDependency(element.id)" />
-
-                            <input class="form-check-input" :disabled="element.isDisabled" v-else-if="element.datatype == 'boolean'" type="checkbox" :id="`attr-${element.id}`" :name="`attr-${element.id}`" v-model="state.attributeValues[element.id].value" @change="checkDependency(element.id)" />
-
-                            <textarea class="form-control" :disabled="element.isDisabled" v-else-if="element.datatype == 'stringf'" :id="`attr-${element.id}`" :name="`attr-${element.id}`" v-model="state.attributeValues[element.id].value" @blur="checkDependency(element.id)"></textarea>
-
-                            <div v-else-if="element.datatype == 'percentage'" class="d-flex">
-                                <input class="form-range" :disabled="element.isDisabled" type="range" step="1" min="0" max="100" :id="`attr-${element.id}`" :name="`attr-${element.id}`" v-model="state.attributeValues[element.id].value" @mouseup="checkDependency(element.id)"/>
-                                <span class="ms-3">{{ state.attributeValues[element.id].value }}%</span>
-                            </div>
-                            <div v-else-if="element.datatype == 'geography'">
-                                <input class="form-control" :disabled="element.isDisabled" type="text" :id="`attr-${element.id}`" :name="`attr-${element.id}`" :placeholder="t('main.entity.attributes.add-wkt')" v-model="state.attributeValues[element.id].value" @blur="checkDependency(element.id)" />
-                                <button type="button" class="btn btn-outline-secondary mt-2" :disabled="element.isDisabled" @click="openGeographyModal(element.id)">
-                                    <i class="fas fa-fw fa-map-marker-alt"></i> {{ t('main.entity.attributes.open-map') }}
-                                </button>
-                            </div>
-                            <div v-else-if="element.datatype == 'entity'">
-                                IMPLEMENT ENTITY SEARCH
-                                <!-- <entity-search
-                                   
-                                    :id="'attribute-'+attribute.id"
-                                    :name="'attribute-'+attribute.id"
-                                    :on-select="selection => setEntitySearchResult(selection, attribute.id)"
-                                    :value="localValues[attribute.id].name">
-                                </entity-search> -->
-                            </div>
-                            <date-picker
-                                class="w-100"
-                                v-else-if="element.datatype == 'date'"
-                                :id="`attr-${element.id}`"
+                            <string-attribute
+                                v-if="element.datatype == 'string'"
                                 :disabled="element.isDisabled"
-                                :disabled-date="(date) => date > new Date()"
-                                :input-class="'form-control'"
-                                :max-date="new Date()"
                                 :name="`attr-${element.id}`"
-                                :show-week-number="true"
+                                :value="state.attributeValues[element.id].value" />
+
+                            <stringfield-attribute
+                                v-else-if="element.datatype == 'stringf'"
+                                :disabled="element.isDisabled"
+                                :name="`attr-${element.id}`"
+                                :value="state.attributeValues[element.id].value" />
+
+                            <integer-attribute
+                                v-else-if="element.datatype == 'integer'"
+                                :disabled="element.isDisabled"
+                                :name="`attr-${element.id}`"
+                                :value="state.attributeValues[element.id].value" />
+
+                            <float-attribute
+                                v-else-if="element.datatype == 'double'"
+                                :disabled="element.isDisabled"
+                                :name="`attr-${element.id}`"
+                                :value="state.attributeValues[element.id].value" />
+
+                            <bool-attribute
+                                v-else-if="element.datatype == 'boolean'"
+                                :disabled="element.isDisabled"
+                                :name="`attr-${element.id}`"
+                                :value="state.attributeValues[element.id].value" />
+
+                            <percentage-attribute
+                                v-else-if="element.datatype == 'percentage'"
+                                :disabled="element.isDisabled"
+                                :name="`attr-${element.id}`"
+                                :value="state.attributeValues[element.id].value" />
+                                
+                            <serial-attribute
+                                v-else-if="element.datatype == 'serial'"
+                                :disabled="element.isDisabled"
+                                :name="`attr-${element.id}`"
+                                :value="state.attributeValues[element.id].value" />
+
+                            <list-attribute
+                                v-else-if="element.datatype == 'list'"
+                                :disabled="element.isDisabled"
+                                :name="`attr-${element.id}`"
+                                :on-change="value => onChange(null, value, element.id)"
+                                :entries="state.attributeValues[element.id].value" />
+
+                            <epoch-attribute
+                                v-else-if="element.datatype == 'epoch' || element.datatype == 'timeperiod'"
+                                :disabled="element.isDisabled"
+                                :name="`attr-${element.id}`"
+                                :on-change="(field, value) => onChange(field, value, element.id)"
                                 :value="state.attributeValues[element.id].value"
-                                :value-type="'date'"
-                                @input="setDateValue($event, element.id)">
-                                <template v-slot:icon-calendar>
-                                    <i class="fas fa-fw fa-calendar-alt"></i>
-                                </template>
-                                <template v-slot:icon-clear>
-                                    <i class="fas fa-fw fa-times"></i>
-                                </template>
-                            </date-picker>
-                            <div v-else-if="element.datatype == 'string-mc'">
-                                <multiselect
-                                    :valueProp="'id'"
-                                    :label="'thesaurus_url'"
-                                    :track-by="'thesaurus_url'"
-                                    :mode="'tags'"
-                                    v-model="state.attributeValues[element.id].value"
-                                    :disabled="element.isDisabled"
-                                    :options="state.selectionLists[element.id] || []"
-                                    :name="`attr-${element.id}`"
-                                    :placeholder="t('global.select.placehoder')"
-                                    @input="(value, id) => checkDependency(element.id)">
-                                </multiselect>
-                            </div>
-                            <div v-else-if="element.datatype == 'string-sc'">
-                                <!-- <multiselect
-                                    :label="'thesaurus_url'"
-                                    :track-by="'thesaurus_url'"
-                                    :mode="'single'"
-                                    v-model="state.attributeValues[element.id].value"
-                                    :disabled="element.isDisabled"
-                                    :loading="dd.loading[element.id]"
-                                    :options="dd.selections[element.id] || []"
-                                    :name="`attr-${element.id}`"
-                                    :placeholder="t('global.select.placehoder')"
-                                    @open="getOptions(element)"
-                                    @input="(value, id) => checkDependency(element.id)">
-                                </multiselect> -->
-                            </div>
-                            <div v-else-if="element.datatype == 'list'">
-                                <list :entries="state.attributeValues[element.id].value" :disabled="element.isDisabled" :on-change="value => onChange(null, value, element.id)" :name="`attr-${element.id}`" />
-                            </div>
-                            <div v-else-if="element.datatype == 'epoch' || element.datatype == 'timeperiod'">
-                                <epoch :name="`attr-${element.id}`" :on-change="(field, value) => onChange(field, value, element.id)" :value="state.attributeValues[element.id].value" :epochs="state.selectionLists[element.id]" :type="element.datatype" :disabled="element.isDisabled"/>
-                            </div>
-                            <div v-else-if="element.datatype == 'dimension'">
-                                <dimension :name="`attr-${element.id}`" :on-change="(field, value) => onChange(field, value, element.id)" :value="state.attributeValues[element.id].value" :disabled="element.isDisabled"/>
-                            </div>
-                            <tabular v-else-if="element.datatype == 'table'" :name="`attr-${element.id}`" :on-change="(field, value) => onChange(field, value, element.id)" :value="state.attributeValues[element.id].value" :selections="state.selectionLists" :attribute="element" :disabled="element.isDisabled" @expanded="e => onAttributeExpand(e, index)"/>
-                            <div v-else-if="element.datatype == 'sql'">
-                                <div v-if="isArray(state.attributeValues[element.id].value)">
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-hovered table-sm">
-                                            <thead class="thead-light">
-                                                <tr>
-                                                    <th v-for="(columnNames, index) in state.attributeValues[element.id].value[0]" :key="index">
-                                                        {{ translateConcept(index) }}
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr v-for="(row, index) in state.attributeValues[element.id].value" :key="index">
-                                                    <td v-for="(column, colIndex) in row" :key="colIndex">
-                                                        {{ translateConcept(column) }}
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div v-else>
-                                    {{ state.attributeValues[element.id].value }}
-                                </div>
-                            </div>
-                            <iconclass v-else-if="element.datatype == 'iconclass'" :name="`attr-${element.id}`" @input="updateValue($event, element.id)" :value="state.attributeValues[element.id].value" :attribute="element" :disabled="element.isDisabled"></iconclass>
-                            <input class="form-control" :disabled="element.isDisabled" v-else type="text" :id="`attr-${element.id}`" v-model="state.attributeValues[element.id].value"  :name="`attr-${element.id}`" @blur="checkDependency(element.id)"/>
+                                :epochs="state.selectionLists[element.id]"
+                                :type="element.datatype" />
+
+                            <dimension-attribute
+                                v-else-if="element.datatype == 'dimension'"
+                                :disabled="element.isDisabled"
+                                :name="`attr-${element.id}`"
+                                :on-change="(field, value) => onChange(field, value, element.id)"
+                                :value="state.attributeValues[element.id].value" />
+
+                            <tabular-attribute
+                                v-else-if="element.datatype == 'table'"
+                                :disabled="element.isDisabled"
+                                :name="`attr-${element.id}`"
+                                :on-change="(field, value) => onChange(field, value, element.id)"
+                                :value="state.attributeValues[element.id].value"
+                                :attribute="element"
+                                :selections="state.selectionLists"
+                                @expanded="e => onAttributeExpand(e, index)" />
+
+                            <iconclass-attribute
+                                v-else-if="element.datatype == 'iconclass'"
+                                :disabled="element.isDisabled"
+                                :name="`attr-${element.id}`"
+                                :value="state.attributeValues[element.id].value"
+                                :attribute="element"
+                                @input="updateValue($event, element.id)" />
+
+                            <geography-attribute
+                                v-else-if="element.datatype == 'geography'"
+                                :disabled="element.isDisabled"
+                                :name="`attr-${element.id}`"
+                                :value="state.attributeValues[element.id].value"
+                                :attribute="element" />
+
+                            <entity-attribute v-else-if="element.datatype == 'entity'"
+                                :disabled="element.isDisabled"
+                                :name="`attr-${element.id}`"
+                                :value="state.attributeValues[element.id].value" />
+
+                            <date-attribute
+                                v-else-if="element.datatype == 'date'"
+                                :disabled="element.isDisabled"
+                                :name="`attr-${element.id}`"
+                                :value="state.attributeValues[element.id].value" />
+
+                            <singlechoice-attribute
+                                v-else-if="element.datatype == 'string-sc'"
+                                :disabled="element.isDisabled"
+                                :name="`attr-${element.id}`"
+                                :value="state.attributeValues[element.id].value" />
+
+                            <multichoice-attribute
+                                v-else-if="element.datatype == 'string-mc'"
+                                :disabled="element.isDisabled"
+                                :name="`attr-${element.id}`"
+                                :value="state.attributeValues[element.id].value"
+                                :selections="state.selectionLists[element.id]" />
+
+                            <sql-attribute
+                                v-else-if="element.datatype == 'sql'"
+                                :disabled="element.isDisabled"
+                                :name="`attr-${element.id}`"
+                                :value="state.attributeValues[element.id].value" />
+
+                            <default-attribute
+                                v-else
+                                :disabled="element.isDisabled"
+                                :name="`attr-${element.id}`"
+                                :value="state.attributeValues[element.id].value" />
                         </div>
                     </div>
                 </template>
@@ -179,11 +186,25 @@
         translateConcept,
     } from '../helpers/helpers.js';
 
-    import Dimension from './Dimension.vue';
-    import Epoch from './Epoch.vue';
-    import List from './List.vue';
-    import Tabular from './Tabular.vue';
-    import Iconclass from './Iconclass.vue';
+    import StringAttr from './attribute/String.vue';
+    import Stringfield from './attribute/Stringfield.vue';
+    import IntegerAttr from './attribute/Integer.vue';
+    import FloatAttr from './attribute/Float.vue';
+    import Bool from './attribute/Bool.vue';
+    import Percentage from './attribute/Percentage.vue';
+    import Serial from './attribute/Serial.vue';
+    import List from './attribute/List.vue';
+    import Epoch from './attribute/Epoch.vue';
+    import Dimension from './attribute/Dimension.vue';
+    import Tabular from './attribute/Tabular.vue';
+    import Iconclass from './attribute/Iconclass.vue';
+    import Geography from './attribute/Geography.vue';
+    import Entity from './attribute/Entity.vue';
+    import DateAttr from './attribute/Date.vue';
+    import SingleChoice from './attribute/SingleChoice.vue';
+    import MultiChoice from './attribute/MultiChoice.vue';
+    import SqlAttr from './attribute/Sql.vue';
+    import DefaultAttr from './attribute/Default.vue';
 
     export default {
         props: {
@@ -229,11 +250,25 @@
             }
         },
         components: {
-            'dimension': Dimension,
-            'epoch': Epoch,
-            'list': List,
-            'tabular': Tabular,
-            'iconclass': Iconclass,
+            'string-attribute': StringAttr,
+            'stringfield-attribute': Stringfield,
+            'integer-attribute': IntegerAttr,
+            'float-attribute': FloatAttr,
+            'bool-attribute': Bool,
+            'percentage-attribute': Percentage,
+            'serial-attribute': Serial,
+            'dimension-attribute': Dimension,
+            'epoch-attribute': Epoch,
+            'list-attribute': List,
+            'tabular-attribute': Tabular,
+            'iconclass-attribute': Iconclass,
+            'geography-attribute': Geography,
+            'entity-attribute': Entity,
+            'date-attribute': DateAttr,
+            'singlechoice-attribute': SingleChoice,
+            'multichoice-attribute': MultiChoice,
+            'sql-attribute': SqlAttr,
+            'default-attribute': DefaultAttr,
         },
         emits: ['edit', 'remove', 'delete', 'reorder', 'metadata', 'dirty'],
         setup(props, context) {
@@ -278,9 +313,6 @@
                 state.attributeValues[aid].value = eventValue;
             };
             const checkDependency = id => {
-
-            };
-            const openGeographyModal = id => {
 
             };
             const onReorder = element => {
@@ -346,7 +378,6 @@
                 onLeave,
                 updateValue,
                 checkDependency,
-                openGeographyModal,
                 onReorder,
                 onEdit,
                 onRemove,

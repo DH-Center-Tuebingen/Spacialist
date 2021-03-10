@@ -288,6 +288,10 @@ export function except(object, excepts = []) {
         }, {});
 };
 
+export function isArray(arr) {
+    return Array.isArray(arr);
+};
+
 export const _cloneDeep = require('lodash/cloneDeep');
 export const _debounce = require('lodash/debounce');
 export const _orderBy = require('lodash/orderBy');

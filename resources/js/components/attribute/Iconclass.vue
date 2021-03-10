@@ -36,11 +36,11 @@
 
     import {
         getIconClassInfo,
-    } from '../api.js';
+    } from '../../api.js';
 
     import {
         getPreference,
-    } from '../helpers/helpers.js';
+    } from '../../helpers/helpers.js';
 
     export default {
         props: {
