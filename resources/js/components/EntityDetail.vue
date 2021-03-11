@@ -343,7 +343,7 @@
                 state.entityHeaderHovered = hoverState;
             };
             const setFormState = e => {
-                // TODO implement
+                state.formDirty = e.dirty && e.valid;
             };
             const fetchComments = _ => {
                 state.commentLoadingState = 'fetching';

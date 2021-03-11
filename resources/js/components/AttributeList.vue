@@ -44,7 +44,8 @@
                                 v-if="element.datatype == 'string'"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
-                                :value="state.attributeValues[element.id].value" />
+                                :value="state.attributeValues[element.id].value"
+                                @change="updateDirtyState" />
 
                             <stringfield-attribute
                                 v-else-if="element.datatype == 'stringf'"
@@ -312,6 +313,9 @@
             const updateValue = (eventValue, aid) => {
                 state.attributeValues[aid].value = eventValue;
             };
+            const updateDirtyState = e => {
+                context.emit('dirty', e);
+            };
             const checkDependency = id => {
 
             };
@@ -377,6 +381,7 @@
                 onEnter,
                 onLeave,
                 updateValue,
+                updateDirtyState,
                 checkDependency,
                 onReorder,
                 onEdit,
