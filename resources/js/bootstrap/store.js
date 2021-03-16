@@ -4,6 +4,7 @@ import { sortTree, Node } from '../helpers/tree.js';
 import {
     can,
     fillEntityData,
+    only,
 } from '../helpers/helpers.js';
 import { getEntityData } from '../api.js';
 
@@ -78,6 +79,17 @@ export const store = createStore({
         },
         addUser(state, data) {
             state.users.push(data);
+        },
+        updateUser(state, data) {
+            const index = state.users.findIndex(u => u.id == data.id);
+            if(index > -1) {
+                const cleanData = only(data, ['email', 'roles', 'updated_at', 'deleted_at',]);
+                const currentData = state.users[index];
+                state.users[index] = {
+                    ...currentData,
+                    ...cleanData,
+                };
+            }
         },
         deactivateUser(state, data) {
             const index = state.users.findIndex(u => u.id == data.id);
@@ -299,6 +311,9 @@ export const store = createStore({
         },
         addUser({commit}, data) {
             commit('addUser', data);
+        },
+        updateUser({commit}, data) {
+            commit('updateUser', data);
         },
         deactivateUser({commit}, data) {
             commit('deactivateUser', data);

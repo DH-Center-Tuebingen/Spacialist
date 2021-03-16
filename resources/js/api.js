@@ -282,7 +282,7 @@ export async function reactivateUser(uid) {
 
 export async function patchUserData(uid, data) {
     return $httpQueue.add(
-        () => http.patch(`user/${uid}`, data).then(response => response.data).catch(e => e)
+        () => http.patch(`user/${uid}`, data).then(response => response.data)
     );
 };
 

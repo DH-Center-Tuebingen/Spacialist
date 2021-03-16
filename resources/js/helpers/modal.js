@@ -221,8 +221,11 @@ export function showDiscard(target, resetData, onBeforeConfirm) {
             },
             saveConfirm(e) {
                 if(!!onBeforeConfirm) {
-                    onBeforeConfirm().then(data => {
+                    onBeforeConfirm().then(_ => {
                         pushRoute();
+                    }).catch(e => {
+                        store.getters.vfm.hide(uid);
+                        return false;
                     });
                 } else {
                     pushRoute();

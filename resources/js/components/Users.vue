@@ -29,10 +29,17 @@
                             </a>
                         </td>
                         <td>
-                            <input type="email" class="form-control" @input="v.fields[user.id].mail.handleInput" :class="getClassByValidation(v.fields[user.id].mail.errors)" v-model="v.fields[user.id].mail.value" :name="`email_${user.id}`" required />
+                            <input
+                                type="email"
+                                class="form-control"
+                                required
+                                :class="getClassByValidation(getErrors(user.id, 'email'))"
+                                :name="`email_${user.id}`"
+                                v-model="v.fields[user.id].email.value"
+                                @input="e => handleUserMailInput(e, user.id)" />
 
                             <div class="invalid-feedback">
-                                <span v-for="(msg, i) in v.fields[user.id].mail.errors" :key="i">
+                                <span v-for="(msg, i) in getErrors(user.id, 'email')" :key="i">
                                     {{ msg }}
                                 </span>
                             </div>
@@ -40,7 +47,7 @@
                         <td>
                             <multiselect
                                 v-model="v.fields[user.id].roles.value"
-                                :class="getClassByValidation(v.fields[user.id].roles.errors)"
+                                :class="getClassByValidation(getErrors(user.id, 'roles'))"
                                 :name="`roles_${user.id}`"
                                 :object="true"
                                 :label="'display_name'"
@@ -54,7 +61,7 @@
                             </multiselect>
 
                             <div class="invalid-feedback">
-                                <span v-for="(msg, i) in v.fields[user.id].roles.errors" :key="i">
+                                <span v-for="(msg, i) in getErrors(user.id, 'roles')" :key="i">
                                     {{ msg }}
                                 </span>
                             </div>
@@ -215,24 +222,24 @@
 
             // FUNCTIONS
             const userDirty = id => {
-                return v.fields[id].mail.meta.dirty || v.fields[id].roles.meta.dirty;
+                return v.fields[id].email.meta.dirty || v.fields[id].roles.meta.dirty;
             };
             const userValid = id => {
-                return v.fields[id].mail.meta.valid && v.fields[id].roles.meta.valid;
+                return v.fields[id].email.meta.valid && v.fields[id].roles.meta.valid;
             };
             const resetUser = id => {
-                v.fields[id].mail.reset();
+                v.fields[id].email.reset();
                 v.fields[id].roles.reset();
             };
             const resetUserMeta = id => {
-                v.fields[id].mail.reset({
-                    value: v.fields[id].mail.value,
+                v.fields[id].email.reset({
+                    value: v.fields[id].email.value,
                 });
                 v.fields[id].roles.reset({
                     value: v.fields[id].roles.value,
                 });
             };
-            const patchUser = id => {
+            const patchUser = async id => {
                 if(!userDirty(id) || !userValid(id) || !can('add_remove_role')) {
                     return;
                 }
@@ -247,13 +254,19 @@
                     }
                     data.roles = roles;
                 }
-                if(v.fields[id].mail.meta.dirty) {
-                    data.email = user.email;
+                if(v.fields[id].email.meta.dirty) {
+                    data.email = v.fields[id].email.value;
                 }
 
-                patchUserData(id, data).then(data => {
-                    resetUserMeta(id); // TODO ONLY SET DIRTY = FALSE
-                    user.updated_at = data.updated_at;
+                return await patchUserData(id, data).then(data => {
+                    state.errors[id] = {};
+                    resetUserMeta(id);
+                    store.dispatch('updateUser', {
+                        id: data.id,
+                        email: data.email,
+                        roles: data.roles,
+                        updated_at: data.updated_at,
+                    });
                     const msg = t('main.user.toasts.updated.msg', {
                         name: user.name
                     });
@@ -262,9 +275,26 @@
                         channel: 'success',
                     });
                 }).catch(e => {
-                    getErrorMessages(e);
+                    state.errors[id] = getErrorMessages(e);
+                    throw e;
                 });
 
+            };
+            const handleUserMailInput = (e, id) => {
+                if(!!state.errors[id]) {
+                    state.errors[id].email = [];
+                }
+                v.fields[id].email.handleInput(e);
+            };
+            const getErrors = (id, field) => {
+                let apiErrors = [];
+                if(!!state.errors[id] && !!state.errors[id][field]) {
+                    apiErrors = state.errors[id][field];
+                }
+                return [
+                    ...v.fields[id][field].errors,
+                    ...apiErrors,
+                ];
             };
             const showNewUserModal = _ => {
                 showAddUser();
@@ -301,12 +331,28 @@
                 }
             };
             // Used in Discard Modal to store data before moving on
-            const onBeforeConfirm = _ => {
+            const onBeforeConfirm = async _ => {
                 for(let i=0; i<state.userList.length; i++) {
-                    // TODO actually store dirty data
-                    resetUserMeta(state.userList[i].id);
+                    const uid = state.userList[i].id;
+                    if(
+                        (
+                            !v.fields[uid].email.meta.dirty ||
+                            (
+                                v.fields[uid].email.meta.dirty &&
+                                v.fields[uid].email.meta.valid
+                            )
+                        ) &&
+                        (
+                            !v.fields[uid].roles.meta.dirty ||
+                            (
+                                v.fields[uid].roles.meta.dirty &&
+                                v.fields[uid].roles.meta.valid
+                            )
+                        )
+                    ) {
+                        await patchUser(uid);
+                    }
                 }
-                return new Promise(r => r(null));
             };
 
             // DATA
@@ -315,6 +361,7 @@
                 deletedUserList: computed(_ => store.getters.deletedUsers),
                 roles: computed(_ => store.getters.roles(true)),
                 dataInitialized: computed(_ => state.userList.length > 0 && state.roles.length > 0),
+                errors: {},
             });
             const v = reactive({
                 fields: computed(_ => {
@@ -340,7 +387,7 @@
                             initialValue: u.roles,
                         });
                         list[u.id] = reactive({
-                            mail: {
+                            email: {
                                 errors: em,
                                 meta: mm,
                                 value: vm,
@@ -384,6 +431,8 @@
                 userValid,
                 resetUser,
                 patchUser,
+                handleUserMailInput,
+                getErrors,
                 showNewUserModal,
                 deactivateUser,
                 reactivateUser,
