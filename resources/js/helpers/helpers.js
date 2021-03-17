@@ -12,6 +12,7 @@ import {
 } from '../api.js';
 
 export async function initApp(locale) {
+    store.dispatch('setAppState', false);
     await fetchPreData(locale);
     await fetchAttributes();
     await fetchUsers();
@@ -19,6 +20,7 @@ export async function initApp(locale) {
     await fetchBibliography();
     await fetchVersion();
     await fetchGeometryTypes();
+    store.dispatch('setAppState', true);
     return new Promise(r => r(null));
 }
 

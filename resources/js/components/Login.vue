@@ -113,7 +113,7 @@
             });
 
             // FUNCTIONS
-            function login() {
+            const login = _ => {
                 let data = {
                     password: state.user.password
                 };
@@ -124,20 +124,21 @@
                 } else {
                     data.nickname = state.user.email;
                 }
-                store.dispatch('setAppState', false);
                 auth.login({
                     data: data,
                     staySignedIn: state.user.remember,
                     redirect: state.redirect,
                     fetchUser: true
-                }).then(_ => initApp(locale))
-                .then(_ => {
-                    store.dispatch('setAppState', true);
-                    state.error = {};
-                }).catch(e => {
+                })
+                .then(_ => initApp(locale))
+                .catch(e => {
                     state.error = getErrorMessages(e);
+                    return Promise.reject('Login failed');
+                })
+                .then(_ => {
+                    state.error = {};
                 });
-            }
+            };
 
             // ON MOUNTED
             onMounted(_ => {
