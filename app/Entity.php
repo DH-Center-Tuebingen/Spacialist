@@ -231,45 +231,36 @@ class Entity extends Model
         return $this->belongsToMany('App\File', 'entity_files', 'entity_id', 'file_id')->orderBy('entity_files.file_id');
     }
 
-    // private function parents() {
-    //     $ancestors = collect([$this]);
-
-    //     while ($ancestors->last() && $ancestors->last()->root_entity_id !== null) {
-    //             $parent = $this->where('id', '=', $ancestors->last()->root_entity_id)->get();
-    //             $ancestors = $ancestors->merge($parent);
-    //         }
-    //     return [
-    //         'ids' => $ancestors->pluck('id')->all(),
-    //         'names' => $ancestors->pluck('name')->all(),
-    //     ];
-    // }
-
     public function getParentIdsAttribute() {
         $res = \DB::select("
             WITH RECURSIVE getpath AS (
-                SELECT ARRAY[]::integer[] || id as path, ARRAY[]::text[] || name as pathn, root_entity_id as parent FROM entities WHERE id = $this->id
+                SELECT id as path, name as pathn, root_entity_id as parent FROM entities WHERE id = $this->id
                 UNION
-                SELECT path || id, pathn || name, root_entity_id FROM getpath LEFT JOIN entities ON entities.id = getpath.parent WHERE entities.id = getpath.parent
+                SELECT id, name, root_entity_id FROM getpath LEFT JOIN entities ON entities.id = getpath.parent WHERE entities.id = getpath.parent
             )
             SELECT path
             FROM getpath
-            WHERE parent IS NULL
         ");
-        return explode(',', substr($res[0]->path, 1, -1));
+        $filtered = array_map(function($elem) {
+            return $elem->path;
+        }, $res);
+        return $filtered;
     }
 
     public function getParentNamesAttribute()
     {
         $res = \DB::select("
             WITH RECURSIVE getpath AS (
-                SELECT ARRAY[]::integer[] || id as path, ARRAY[]::text[] || name as pathn, root_entity_id as parent FROM entities WHERE id = $this->id
+                SELECT id as path, name as pathn, root_entity_id as parent FROM entities WHERE id = $this->id
                 UNION
-                SELECT path || id, pathn || name, root_entity_id FROM getpath LEFT JOIN entities ON entities.id = getpath.parent WHERE entities.id = getpath.parent
+                SELECT id, name, root_entity_id FROM getpath LEFT JOIN entities ON entities.id = getpath.parent WHERE entities.id = getpath.parent
             )
             SELECT pathn
             FROM getpath
-            WHERE parent IS NULL
         ");
-        return explode(',', substr($res[0]->pathn, 1, -1));
+        $filtered = array_map(function($elem) {
+            return $elem->pathn;
+        }, $res);
+        return $filtered;
     }
 }

@@ -2,7 +2,12 @@
     <div @dragenter="onDragEnter" @dragleave="onDragLeave" :id="`tree-node-${data.id}`">
         <span style="width: 2em; display: inline-block; text-align: center;">
             <span class="badge rounded-pill" style="font-size: 9px;" :style="state.colorStyles" :title="data.children_count">
-                {{ numPlus(data.children_count, 3) }}
+                <template v-if="data.children_count">
+                    {{ numPlus(data.children_count, 3) }}
+                </template>
+                <template v-else>
+                    &nbsp;
+                </template>
             </span>
         </span>
         <span :class="{'fw-bold': state.isSelected}">
