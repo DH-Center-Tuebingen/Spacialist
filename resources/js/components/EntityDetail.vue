@@ -131,6 +131,7 @@
     import {
         useRoute,
         onBeforeRouteLeave,
+        onBeforeRouteUpdate,
     } from 'vue-router';
 
     import { useI18n } from 'vue-i18n';
@@ -152,6 +153,7 @@
         translateConcept
     } from '../helpers/helpers.js';
     import {
+        showDiscard,
         showUserInfo,
     } from '../helpers/modal.js';
 
@@ -370,7 +372,12 @@
                     state.entity.comments.push(comment);
                     state.entity.comments_count++;
                 }
-            }
+            };
+            const saveEntity = _ => {
+                console.log("TODO: Implement saveEntity method");
+                state.formDirty = false;
+                return new Promise(r => r(null));
+            };
 
             // ON MOUNTED
             onMounted(_ => {
@@ -390,10 +397,24 @@
 
             // ON BEFORE LEAVE
             onBeforeRouteLeave(async (to, from) => {
-                // TODO check for staged data
-
-                store.dispatch('resetEntity');
-                return true;
+                if(state.formDirty) {
+                    showDiscard(to, _ => state.formDirty = false, saveEntity);
+                    return false;
+                } else {
+                    store.dispatch('resetEntity');
+                    return true;
+                }
+            });
+            onBeforeRouteUpdate(async (to, from) => {
+                if(to.params.id !== route.params.id) {
+                    if(state.formDirty) {
+                        showDiscard(to, _ => state.formDirty = false, saveEntity);
+                        return false;
+                    } else {
+                        store.dispatch('resetEntity');
+                        return true;
+                    }
+                }
             });
 
             // RETURN
@@ -411,6 +432,7 @@
                 onEntityHeaderHover,
                 setFormState,
                 addComment,
+                saveEntity,
                 // STATE
                 state,
             };
