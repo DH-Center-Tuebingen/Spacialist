@@ -42,7 +42,7 @@
                         <div :class="expandedClasses(index)">
                             <string-attribute
                                 v-if="element.datatype == 'string'"
-                                ref="state.attrRefs[element.id]"
+                                :ref="el => setRef(el, element.id)"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
                                 :value="state.attributeValues[element.id].value"
@@ -50,6 +50,7 @@
 
                             <stringfield-attribute
                                 v-else-if="element.datatype == 'stringf'"
+                                :ref="el => setRef(el, element.id)"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
                                 :value="state.attributeValues[element.id].value"
@@ -57,6 +58,7 @@
 
                             <integer-attribute
                                 v-else-if="element.datatype == 'integer'"
+                                :ref="el => setRef(el, element.id)"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
                                 :value="state.attributeValues[element.id].value"
@@ -64,6 +66,7 @@
 
                             <float-attribute
                                 v-else-if="element.datatype == 'double'"
+                                :ref="el => setRef(el, element.id)"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
                                 :value="state.attributeValues[element.id].value"
@@ -71,6 +74,7 @@
 
                             <bool-attribute
                                 v-else-if="element.datatype == 'boolean'"
+                                :ref="el => setRef(el, element.id)"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
                                 :value="state.attributeValues[element.id].value"
@@ -78,6 +82,7 @@
 
                             <percentage-attribute
                                 v-else-if="element.datatype == 'percentage'"
+                                :ref="el => setRef(el, element.id)"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
                                 :value="state.attributeValues[element.id].value"
@@ -91,6 +96,7 @@
 
                             <list-attribute
                                 v-else-if="element.datatype == 'list'"
+                                :ref="el => setRef(el, element.id)"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
                                 :on-change="value => onChange(null, value, element.id)"
@@ -98,6 +104,7 @@
 
                             <epoch-attribute
                                 v-else-if="element.datatype == 'epoch' || element.datatype == 'timeperiod'"
+                                :ref="el => setRef(el, element.id)"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
                                 :on-change="(field, value) => onChange(field, value, element.id)"
@@ -107,6 +114,7 @@
 
                             <dimension-attribute
                                 v-else-if="element.datatype == 'dimension'"
+                                :ref="el => setRef(el, element.id)"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
                                 :on-change="(field, value) => onChange(field, value, element.id)"
@@ -114,6 +122,7 @@
 
                             <tabular-attribute
                                 v-else-if="element.datatype == 'table'"
+                                :ref="el => setRef(el, element.id)"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
                                 :on-change="(field, value) => onChange(field, value, element.id)"
@@ -124,6 +133,7 @@
 
                             <iconclass-attribute
                                 v-else-if="element.datatype == 'iconclass'"
+                                :ref="el => setRef(el, element.id)"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
                                 :value="state.attributeValues[element.id].value"
@@ -132,18 +142,21 @@
 
                             <geography-attribute
                                 v-else-if="element.datatype == 'geography'"
+                                :ref="el => setRef(el, element.id)"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
                                 :value="state.attributeValues[element.id].value"
                                 :attribute="element" />
 
                             <entity-attribute v-else-if="element.datatype == 'entity'"
+                                :ref="el => setRef(el, element.id)"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
                                 :value="state.attributeValues[element.id].value" />
 
                             <date-attribute
                                 v-else-if="element.datatype == 'date'"
+                                :ref="el => setRef(el, element.id)"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
                                 :value="state.attributeValues[element.id].value"
@@ -151,12 +164,14 @@
 
                             <singlechoice-attribute
                                 v-else-if="element.datatype == 'string-sc'"
+                                :ref="el => setRef(el, element.id)"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
                                 :value="state.attributeValues[element.id].value" />
 
                             <multichoice-attribute
                                 v-else-if="element.datatype == 'string-mc'"
+                                :ref="el => setRef(el, element.id)"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
                                 :value="state.attributeValues[element.id].value"
@@ -170,6 +185,7 @@
 
                             <default-attribute
                                 v-else
+                                :ref="el => setRef(el, element.id)"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
                                 :value="state.attributeValues[element.id].value" />
@@ -182,8 +198,10 @@
 <script>
     import {
         computed,
+        onBeforeUpdate,
         onMounted,
         reactive,
+        ref,
         toRefs,
     } from 'vue';
 
@@ -324,6 +342,21 @@
                 console.log(e);
                 context.emit('dirty', e);
             };
+            const resetListValues = _ => {
+                for(let k in attrRefs) {
+                    const curr = attrRefs[k];
+                    curr.resetFieldState();
+                }
+            };
+            const undirtyList = _ => {
+                for(let k in attrRefs) {
+                    const curr = attrRefs[k];
+                    curr.undirtyField();
+                }
+            };
+            const setRef = (el, id) => {
+                attrRefs[id] = el;
+            };
             const checkDependency = id => {
 
             };
@@ -358,20 +391,13 @@
 
             const attrs = context.attrs;
             // DATA
+            const attrRefs = ref({});
             const state = reactive({
                 attributeList: attributes,
                 attributeValues: values,
                 selectionLists: selections,
                 hoverStates: new Array(attributes.value.length).fill(false),
                 expansionStates: new Array(attributes.value.length).fill(false),
-                attrRefs: computed(_ => {
-                    let refs = {};
-                    for(let i=0; i<state.attributes.length; i++) {
-                        const curr = state.attributes[i];
-                        refs[curr.id] = ref(null);
-                    }
-                    return refs;
-                }),
                 componentLoaded: computed(_ => state.attributeList.length > 0 && state.attributeValues),
                 isHoveringPossible: computed(_ => {
                     return !!attrs.reorder || !!attrs.edit || !!attrs.remove || !!attrs.delete;
@@ -382,6 +408,9 @@
             onMounted(_ => {
                 console.log(values, "values raw");
                 console.log(state.attributeValues.value, "state values");
+            });
+            onBeforeUpdate(_ => {
+                attrRefs.value = {};
             });
 
             // RETURN
@@ -398,6 +427,9 @@
                 onLeave,
                 updateValue,
                 updateDirtyState,
+                resetListValues,
+                undirtyList,
+                setRef,
                 checkDependency,
                 onReorder,
                 onEdit,
@@ -409,6 +441,7 @@
                 group,
                 metadataAddon,
                 // STATE
+                attrRefs,
                 state,
             }
         },

@@ -1,6 +1,6 @@
 <template>
     <div @dragenter="onDragEnter" @dragleave="onDragLeave" :id="`tree-node-${data.id}`">
-        <span style="width: 2em; display: inline-block; text-align: center;">
+        <span style="display: inline-block; text-align: center;" class="px-1">
             <span class="badge rounded-pill" style="font-size: 9px;" :style="state.colorStyles" :title="data.children_count">
                 <template v-if="data.children_count">
                     {{ numPlus(data.children_count, 3) }}

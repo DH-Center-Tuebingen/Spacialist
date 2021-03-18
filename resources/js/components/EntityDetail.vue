@@ -28,6 +28,9 @@
                 <button type="submit" form="entity-attribute-form" class="btn btn-success me-2" :disabled="!state.formDirty || !can('duplicate_edit_concepts')">
                     <i class="fas fa-fw fa-save"></i> {{ t('global.save') }}
                 </button>
+                <button type="button" class="btn btn-warning me-2" :disabled="!state.formDirty" @click="resetForm()">
+                    <i class="fas fa-fw fa-undo"></i> {{ t('global.reset') }}
+                </button>
                 <button type="button" class="btn btn-danger" :disabled="!can('delete_move_concepts')" @click="deleteEntity(state.entity)">
                     <i class="fas fa-fw fa-trash"></i> {{ t('global.delete') }}
                 </button>
@@ -70,7 +73,11 @@
         <div class="tab-content col ps-0 pe-0 overflow-hidden" id="myTabContent">
             <div class="tab-pane fade h-100 show active" id="active-entity-attributes-panel" role="tabpanel">
                 <form id="entity-attribute-form" name="entity-attribute-form" class="h-100" @submit.prevent="saveEntity(state.entity)">
-                    <attribute-list class="pt-2 h-100 scroll-y-auto scroll-x-hidden" v-if="state.attributesFetched" v-dcan="'view_concept_props'"
+                    <attribute-list
+                        class="pt-2 h-100 scroll-y-auto scroll-x-hidden"
+                        v-if="state.attributesFetched"
+                        v-dcan="'view_concept_props'"
+                        :ref="attrRef"
                         :attributes="state.entityAttributes"
                         :dependencies="state.entity.dependencies"
                         :disable-drag="true"
@@ -123,8 +130,10 @@
     // import { EventBus } from '../event-bus.js';
     import {
         computed,
-        reactive,
+        onBeforeUpdate,
         onMounted,
+        reactive,
+        ref,
         watch,
     } from 'vue';
     
@@ -250,6 +259,7 @@
             // });
 
             // DATA
+            const attrRef = ref({});
             const state = reactive({
                 colorStyles: computed(_ => {
                     const colors = getEntityColors(state.entity.entity_type_id, 0.75);
@@ -376,12 +386,19 @@
             const saveEntity = _ => {
                 console.log("TODO: Implement saveEntity method");
                 state.formDirty = false;
+                attrRef.undirtyList();
                 return new Promise(r => r(null));
+            };
+            const resetForm = _ => {
+                attrRef.resetListValues();
             };
 
             // ON MOUNTED
             onMounted(_ => {
                 console.log("entity detail component mounted");
+            });
+            onBeforeUpdate(_ => {
+                attrRef.value = {};
             });
 
             watch(_ => route.params,
@@ -433,7 +450,9 @@
                 setFormState,
                 addComment,
                 saveEntity,
+                resetForm,
                 // STATE
+                attrRef,
                 state,
             };
         }
