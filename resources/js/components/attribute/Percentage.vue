@@ -9,9 +9,10 @@
             :disabled="disabled"
             :id="name"
             :name="name"
-            v-model="state.value" />
+            v-model="v.fields.perc.value"
+            @input="v.fields.perc.handleInput" />
         <span class="ms-3">
-            {{ state.value }}%
+            {{ v.fields.perc.value }}%
         </span>
     </div>
 </template>
@@ -20,7 +21,12 @@
     import {
         reactive,
         toRefs,
+        watch,
     } from 'vue';
+
+    import { useField } from 'vee-validate';
+
+    import * as yup from 'yup';
 
     export default {
         props: {
@@ -38,6 +44,7 @@
                 required: true,
             },
         },
+        emits: ['change'],
         setup(props, context) {
             const {
                 name,
@@ -49,8 +56,31 @@
             // FUNCTIONS
 
             // DATA
+            const {
+                handleInput,
+                value: fieldValue,
+                meta,
+            } = useField(`perc_${name.value}`, yup.number(), {
+                initialValue: value.value,
+            });
             const state = reactive({
-                value: value.value,
+
+            });
+            const v = reactive({
+                fields: {
+                    perc: {
+                        value: fieldValue,
+                        handleInput,
+                        meta,
+                    },
+                },
+            });
+
+            watch(v.fields.perc.meta, (newValue, oldValue) => {
+                context.emit('change', {
+                    dirty: v.fields.perc.meta.dirty,
+                    valid: v.fields.perc.meta.valid,
+                });
             });
 
             // RETURN
@@ -63,6 +93,7 @@
                 value,
                 // STATE
                 state,
+                v,
             }
         },
     }

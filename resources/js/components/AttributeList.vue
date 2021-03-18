@@ -42,6 +42,7 @@
                         <div :class="expandedClasses(index)">
                             <string-attribute
                                 v-if="element.datatype == 'string'"
+                                ref="state.attrRefs[element.id]"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
                                 :value="state.attributeValues[element.id].value"
@@ -51,31 +52,36 @@
                                 v-else-if="element.datatype == 'stringf'"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
-                                :value="state.attributeValues[element.id].value" />
+                                :value="state.attributeValues[element.id].value"
+                                @change="updateDirtyState" />
 
                             <integer-attribute
                                 v-else-if="element.datatype == 'integer'"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
-                                :value="state.attributeValues[element.id].value" />
+                                :value="state.attributeValues[element.id].value"
+                                @change="updateDirtyState" />
 
                             <float-attribute
                                 v-else-if="element.datatype == 'double'"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
-                                :value="state.attributeValues[element.id].value" />
+                                :value="state.attributeValues[element.id].value"
+                                @change="updateDirtyState" />
 
                             <bool-attribute
                                 v-else-if="element.datatype == 'boolean'"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
-                                :value="state.attributeValues[element.id].value" />
+                                :value="state.attributeValues[element.id].value"
+                                @change="updateDirtyState" />
 
                             <percentage-attribute
                                 v-else-if="element.datatype == 'percentage'"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
-                                :value="state.attributeValues[element.id].value" />
+                                :value="state.attributeValues[element.id].value"
+                                @change="updateDirtyState" />
                                 
                             <serial-attribute
                                 v-else-if="element.datatype == 'serial'"
@@ -140,7 +146,8 @@
                                 v-else-if="element.datatype == 'date'"
                                 :disabled="element.isDisabled"
                                 :name="`attr-${element.id}`"
-                                :value="state.attributeValues[element.id].value" />
+                                :value="state.attributeValues[element.id].value"
+                                @change="updateDirtyState" />
 
                             <singlechoice-attribute
                                 v-else-if="element.datatype == 'string-sc'"
@@ -314,6 +321,7 @@
                 state.attributeValues[aid].value = eventValue;
             };
             const updateDirtyState = e => {
+                console.log(e);
                 context.emit('dirty', e);
             };
             const checkDependency = id => {
@@ -356,6 +364,14 @@
                 selectionLists: selections,
                 hoverStates: new Array(attributes.value.length).fill(false),
                 expansionStates: new Array(attributes.value.length).fill(false),
+                attrRefs: computed(_ => {
+                    let refs = {};
+                    for(let i=0; i<state.attributes.length; i++) {
+                        const curr = state.attributes[i];
+                        refs[curr.id] = ref(null);
+                    }
+                    return refs;
+                }),
                 componentLoaded: computed(_ => state.attributeList.length > 0 && state.attributeValues),
                 isHoveringPossible: computed(_ => {
                     return !!attrs.reorder || !!attrs.edit || !!attrs.remove || !!attrs.delete;

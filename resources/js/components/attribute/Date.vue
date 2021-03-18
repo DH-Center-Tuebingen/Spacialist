@@ -10,7 +10,8 @@
         :disabled-date="(date) => date > new Date()"
         :max-date="new Date()"
         :show-week-number="true"
-        v-model="state.value">
+        v-model="v.fields.date.value"
+        @input="v.fields.date.handleInput">
         <template v-slot:icon-calendar>
             <i class="fas fa-fw fa-calendar-alt"></i>
         </template>
@@ -24,7 +25,12 @@
     import {
         reactive,
         toRefs,
+        watch,
     } from 'vue';
+
+    import { useField } from 'vee-validate';
+
+    import * as yup from 'yup';
 
     export default {
         props: {
@@ -42,6 +48,7 @@
                 required: true,
             },
         },
+        emits: ['change'],
         setup(props, context) {
             const {
                 name,
@@ -53,8 +60,31 @@
             // FUNCTIONS
 
             // DATA
+            const {
+                handleInput,
+                value: fieldValue,
+                meta,
+            } = useField(`date_${name.value}`, yup.date(), {
+                initialValue: value.value,
+            });
             const state = reactive({
-                value: value.value,
+
+            });
+            const v = reactive({
+                fields: {
+                    date: {
+                        value: fieldValue,
+                        handleInput,
+                        meta,
+                    },
+                },
+            });
+
+            watch(v.fields.date.meta, (newValue, oldValue) => {
+                context.emit('change', {
+                    dirty: v.fields.date.meta.dirty,
+                    valid: v.fields.date.meta.valid,
+                });
             });
 
             // RETURN
@@ -67,6 +97,7 @@
                 value,
                 // STATE
                 state,
+                v,
             }
         },
     }

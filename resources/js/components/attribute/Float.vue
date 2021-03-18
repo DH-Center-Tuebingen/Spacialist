@@ -2,19 +2,25 @@
     <input
         class="form-control"
         type="number"
-        step="any"
+        step="0.01"
         placeholder="0.0"
         :disabled="disabled"
         :id="name"
         :name="name"
-        v-model.number="value" />
+        v-model.number="v.fields.float.value"
+        @input="v.fields.float.handleInput"  />
 </template>
 
 <script>
     import {
         reactive,
         toRefs,
+        watch,
     } from 'vue';
+
+    import { useField } from 'vee-validate';
+
+    import * as yup from 'yup';
 
     export default {
         props: {
@@ -32,6 +38,7 @@
                 required: true,
             },
         },
+        emits: ['change'],
         setup(props, context) {
             const {
                 name,
@@ -43,8 +50,31 @@
             // FUNCTIONS
 
             // DATA
+            const {
+                handleInput,
+                value: fieldValue,
+                meta,
+            } = useField(`float_${name.value}`, yup.number(), {
+                initialValue: value.value,
+            });
             const state = reactive({
 
+            });
+            const v = reactive({
+                fields: {
+                    float: {
+                        value: fieldValue,
+                        handleInput,
+                        meta,
+                    },
+                },
+            });
+
+            watch(v.fields.float.meta, (newValue, oldValue) => {
+                context.emit('change', {
+                    dirty: v.fields.float.meta.dirty,
+                    valid: v.fields.float.meta.valid,
+                });
             });
 
             // RETURN
@@ -57,6 +87,7 @@
                 value,
                 // STATE
                 state,
+                v,
             }
         },
     }

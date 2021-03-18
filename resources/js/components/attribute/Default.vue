@@ -5,14 +5,20 @@
         :disabled="disabled"
         :id="name"
         :name="name"
-        v-model="value" />
+        v-model="v.fields.str.value"
+        @input="v.fields.str.handleInput" />
 </template>
 
 <script>
     import {
         reactive,
         toRefs,
+        watch,
     } from 'vue';
+
+    import { useField } from 'vee-validate';
+
+    import * as yup from 'yup';
 
     export default {
         props: {
@@ -30,6 +36,7 @@
                 required: true,
             },
         },
+        emits: ['change'],
         setup(props, context) {
             const {
                 name,
@@ -41,8 +48,31 @@
             // FUNCTIONS
 
             // DATA
+            const {
+                handleInput,
+                value: fieldValue,
+                meta,
+            } = useField(`str_${name.value}`, yup.string(), {
+                initialValue: value.value,
+            });
             const state = reactive({
 
+            });
+            const v = reactive({
+                fields: {
+                    str: {
+                        value: fieldValue,
+                        handleInput,
+                        meta,
+                    },
+                },
+            });
+
+            watch(v.fields.str.meta, (newValue, oldValue) => {
+                context.emit('change', {
+                    dirty: v.fields.str.meta.dirty,
+                    valid: v.fields.str.meta.valid,
+                });
             });
 
             // RETURN
@@ -55,6 +85,7 @@
                 value,
                 // STATE
                 state,
+                v,
             }
         },
     }

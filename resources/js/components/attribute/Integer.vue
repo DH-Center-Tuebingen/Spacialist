@@ -7,14 +7,20 @@
         :disabled="disabled"
         :id="name"
         :name="name"
-        v-model.number="value" />
+        v-model.number="v.fields.int.value"
+        @input="v.fields.int.handleInput" />
 </template>
 
 <script>
     import {
         reactive,
         toRefs,
+        watch,
     } from 'vue';
+
+    import { useField } from 'vee-validate';
+
+    import * as yup from 'yup';
 
     export default {
         props: {
@@ -32,6 +38,7 @@
                 required: true,
             },
         },
+        emits: ['change'],
         setup(props, context) {
             const {
                 name,
@@ -43,8 +50,31 @@
             // FUNCTIONS
 
             // DATA
+            const {
+                handleInput,
+                value: fieldValue,
+                meta,
+            } = useField(`int_${name.value}`, yup.number().integer(), {
+                initialValue: value.value,
+            });
             const state = reactive({
 
+            });
+            const v = reactive({
+                fields: {
+                    int: {
+                        value: fieldValue,
+                        handleInput,
+                        meta,
+                    },
+                },
+            });
+
+            watch(v.fields.int.meta, (newValue, oldValue) => {
+                context.emit('change', {
+                    dirty: v.fields.int.meta.dirty,
+                    valid: v.fields.int.meta.valid,
+                });
             });
 
             // RETURN
@@ -57,6 +87,7 @@
                 value,
                 // STATE
                 state,
+                v,
             }
         },
     }
