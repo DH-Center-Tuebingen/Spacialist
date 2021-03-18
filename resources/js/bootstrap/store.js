@@ -16,6 +16,7 @@ export const store = createStore({
             attributeSelections: {},
             attributeDependencies: {},
             entityTypeAttributes: {},
+            entityTypeColors: {},
             bibliography: [],
             concepts: {},
             deletedUsers: [],
@@ -157,6 +158,9 @@ export const store = createStore({
         setEntityComments(state, data) {
             if(!state.entity) return;
             state.entity.comments = data;
+        },
+        setEntityTypeColors(state, data) {
+            state.entityTypeColors[data.id] = data.colors;
         },
         setFile(state, data) {
             state.file = data;
@@ -326,6 +330,9 @@ export const store = createStore({
             state.entityTypeAttributes = {};
             commit('setEntityTypes', data);
         },
+        setEntityTypeColors({commit}, data) {
+            commit('setEntityTypeColors', data);
+        },
         deleteEntityType({commit}, data) {
             commit('deleteEntityType', data);
         },
@@ -365,6 +372,9 @@ export const store = createStore({
         },
         entityTypeAttributes: state => id => {
             return state.entityTypeAttributes[id];
+        },
+        entityTypeColors: state => id => {
+            return state.entityTypeColors[id];
         },
         geometryTypes: state => {
             return state.geometryTypes;

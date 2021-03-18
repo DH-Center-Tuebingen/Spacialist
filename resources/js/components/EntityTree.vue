@@ -11,7 +11,7 @@
             :on-multiselect="onSearchMultiSelect"
             :on-clear="resetHighlighting">
         </tree-search>
-        <div class="d-flex flex-column col px-0">
+        <div class="d-flex flex-column col px-0 overflow-hidden">
             <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="requestAddNewEntity()">
                 <i class="fas fa-fw fa-plus"></i> {{ t('main.entity.tree.add') }}
             </button>

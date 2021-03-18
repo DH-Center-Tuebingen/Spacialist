@@ -1,11 +1,8 @@
 <template>
     <div @dragenter="onDragEnter" @dragleave="onDragLeave" :id="`tree-node-${data.id}`">
         <span style="width: 2em; display: inline-block; text-align: center;">
-            <span v-show="data.children_count" class="badge rounded-pill" style="font-size: 9px;" :style="state.colorStyles" :title="data.children_count">
+            <span class="badge rounded-pill" style="font-size: 9px;" :style="state.colorStyles" :title="data.children_count">
                 {{ numPlus(data.children_count, 3) }}
-            </span>
-            <span v-show="!data.children_count" :style="state.colorStyles">
-                <i class="fas fa-circle fa-sm"></i>
             </span>
         </span>
         <span :class="{'fw-bold': state.isSelected}">
@@ -48,16 +45,7 @@
 
             // DATA
             const state = reactive({
-                colorStyles: computed(_ => {
-                    const colors = getEntityColors(data.value.entity_type_id);
-                    if(data.value.children_count) {
-                        return colors;
-                    } else {
-                        return {
-                            color: colors.backgroundColor
-                        };
-                    }
-                }),
+                colorStyles: getEntityColors(data.value.entity_type_id),
                 isSelected: computed(_ => store.getters.entity.id === data.value.id),
             });
 
