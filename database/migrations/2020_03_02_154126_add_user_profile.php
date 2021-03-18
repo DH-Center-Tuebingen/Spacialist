@@ -35,31 +35,34 @@ class AddUserProfile extends Migration
             $table->softDeletes();
         });
 
-        foreach($this->withLasteditor as $le) {
-            $entries = $this->getElements($le);
-
-            Schema::table($le, function (Blueprint $table) {
-                $table->dropColumn('lasteditor');
-                $table->integer('user_id')->nullable();
-            });
-
-            foreach($entries as $e) {
-                try {
-                    $user = User::where('name', $e->lasteditor)->firstOrFail();
-                } catch(ModelNotFoundException $exc) {
-                    $user = User::orderBy('id')->first();
+        activity()->withoutLogs(function () {
+            foreach($this->withLasteditor as $le) {
+                $entries = $this->getElements($le);
+    
+                Schema::table($le, function (Blueprint $table) {
+                    $table->dropColumn('lasteditor');
+                    $table->integer('user_id')->nullable();
+                });
+    
+                foreach($entries as $e) {
+                    try {
+                        $user = User::where('name', $e->lasteditor)->firstOrFail();
+                    } catch(ModelNotFoundException $exc) {
+                        $user = User::orderBy('id')->first();
+                    }
+                    $e->user_id = $user->id;
+                    $e->save();
                 }
-                $e->user_id = $user->id;
-                $e->save();
+    
+                Schema::table($le, function (Blueprint $table) {
+                    $table->integer('user_id')->nullable(false)->change();
+    
+                    $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+                });
+    
             }
+        });
 
-            Schema::table($le, function (Blueprint $table) {
-                $table->integer('user_id')->nullable(false)->change();
-
-                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            });
-
-        }
 
         Storage::makeDirectory('avatars');
     }
