@@ -209,61 +209,80 @@ class EditorController extends Controller {
     public function getAttributeTypes() {
         return response()->json([
             [
-                'datatype' => 'string'
+                'datatype' => 'string',
+                'in_table' => true,
             ],
             [
-                'datatype' => 'stringf'
+                'datatype' => 'stringf',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'double'
+                'datatype' => 'double',
+                'in_table' => true,
             ],
             [
-                'datatype' => 'integer'
+                'datatype' => 'integer',
+                'in_table' => true,
             ],
             [
-                'datatype' => 'boolean'
+                'datatype' => 'boolean',
+                'in_table' => true,
             ],
             [
-                'datatype' => 'string-sc'
+                'datatype' => 'string-sc',
+                'in_table' => true,
             ],
             [
-                'datatype' => 'string-mc'
+                'datatype' => 'string-mc',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'epoch'
+                'datatype' => 'epoch',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'timeperiod'
+                'datatype' => 'timeperiod',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'date'
+                'datatype' => 'date',
+                'in_table' => true,
             ],
             [
-                'datatype' => 'dimension'
+                'datatype' => 'dimension',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'list'
+                'datatype' => 'list',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'geography'
+                'datatype' => 'geography',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'percentage'
+                'datatype' => 'percentage',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'entity'
+                'datatype' => 'entity',
+                'in_table' => true,
             ],
             [
-                'datatype' => 'table'
+                'datatype' => 'table',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'sql'
+                'datatype' => 'sql',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'serial'
+                'datatype' => 'serial',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'iconclass'
+                'datatype' => 'iconclass',
+                'in_table' => true,
             ]
         ]);
     }
