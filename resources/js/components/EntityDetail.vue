@@ -77,7 +77,7 @@
                         class="pt-2 h-100 scroll-y-auto scroll-x-hidden"
                         v-if="state.attributesFetched"
                         v-dcan="'view_concept_props'"
-                        :ref="attrRef"
+                        :ref="el => setAttrRef(el)"
                         :attributes="state.entityAttributes"
                         :dependencies="state.entity.dependencies"
                         :disable-drag="true"
@@ -386,12 +386,15 @@
             const saveEntity = _ => {
                 console.log("TODO: Implement saveEntity method");
                 state.formDirty = false;
-                attrRef.undirtyList();
+                attrRef.value.undirtyList();
                 return new Promise(r => r(null));
             };
             const resetForm = _ => {
-                attrRef.resetListValues();
+                attrRef.value.resetListValues();
             };
+            const setAttrRef = el => {
+                attrRef.value = el;
+            }
 
             // ON MOUNTED
             onMounted(_ => {
@@ -451,6 +454,7 @@
                 addComment,
                 saveEntity,
                 resetForm,
+                setAttrRef,
                 // STATE
                 attrRef,
                 state,
