@@ -58,7 +58,7 @@
                                 :hide-selected="true"
                                 :multiple="true"
                                 :options="tags"
-                                :placeholder="$t('global.select.placehoder')"
+                                :placeholder="$t('global.select.placeholder')"
                                 :select-label="$t('global.select.select')"
                                 :deselect-label="$t('global.select.deselect')">
                             </multiselect>
@@ -87,7 +87,7 @@
                                 :hide-selected="true"
                                 :multiple="true"
                                 :options="filterDateList"
-                                :placeholder="$t('global.select.placehoder')"
+                                :placeholder="$t('global.select.placeholder')"
                                 :select-label="$t('global.select.select')"
                                 :deselect-label="$t('global.select.deselect')">
                             </multiselect>
@@ -108,7 +108,7 @@
                                 :hide-selected="true"
                                 :multiple="true"
                                 :options="filterTypeList"
-                                :placeholder="$t('global.select.placehoder')"
+                                :placeholder="$t('global.select.placeholder')"
                                 :select-label="$t('global.select.select')"
                                 :deselect-label="$t('global.select.deselect')">
                             </multiselect>
@@ -127,7 +127,7 @@
                                 :hide-selected="true"
                                 :multiple="true"
                                 :options="filterCameraList"
-                                :placeholder="$t('global.select.placehoder')"
+                                :placeholder="$t('global.select.placeholder')"
                                 :select-label="$t('global.select.select')"
                                 :deselect-label="$t('global.select.deselect')">
                             </multiselect>
@@ -241,7 +241,7 @@
                                 :hide-selected="true"
                                 :multiple="true"
                                 :options="tags"
-                                :placeholder="$t('global.select.placehoder')"
+                                :placeholder="$t('global.select.placeholder')"
                                 :select-label="$t('global.select.select')"
                                 :deselect-label="$t('global.select.deselect')">
                             </multiselect>
@@ -479,7 +479,7 @@
                                         :hide-selected="true"
                                         :multiple="true"
                                         :options="tags"
-                                        :placeholder="$t('global.select.placehoder')"
+                                        :placeholder="$t('global.select.placeholder')"
                                         :select-label="$t('global.select.select')"
                                         :deselect-label="$t('global.select.deselect')">
                                     </multiselect>

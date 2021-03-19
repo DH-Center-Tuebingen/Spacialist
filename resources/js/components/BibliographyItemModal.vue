@@ -26,7 +26,7 @@
                                 :hideSelected="true"
                                 :multiple="false"
                                 :options="availableTypes"
-                                :placeholder="$t('global.select.placehoder')"
+                                :placeholder="$t('global.select.placeholder')"
                                 :select-label="$t('global.select.select')"
                                 :deselect-label="$t('global.select.deselect')">
                             </multiselect>

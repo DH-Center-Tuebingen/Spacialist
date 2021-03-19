@@ -20,7 +20,7 @@
         <div class="col-md-4 py-2 h-100 d-flex flex-column">
             <h4>
                 {{ t('main.datamodel.attribute.title') }}
-                <button type="button" class="btn btn-outline-success" @click="onCreateAttribute">
+                <button type="button" class="btn btn-outline-success" @click="createAttribute()">
                     <i class="fas fa-fw fa-plus"></i> {{ t('main.datamodel.attribute.add-button') }}
                 </button>
             </h4>
@@ -38,49 +38,7 @@
             </div>
         </div>
 
-        <!-- <modals-container class="visible-overflow" />
-
-        <modal name="new-attribute-modal" height="auto" :scrollable="true" classes="of-visible">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ $t('main.datamodel.attribute.modal.new.title') }}</h5>
-                    <button type="button" class="btn-close" aria-label="Close" @click="hideNewAttributeModal">
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <create-attribute
-                        :attribute-types="attributeTypes"
-                        :external-submit="newAttributeFormId"
-                        v-on:created="createAttribute"
-                        v-on:selected-type="checkAttributeType"
-                        v-on:validation="checkValidation"
-                    >
-                    </create-attribute>
-                    <div v-if="needsColumns">
-                        <h5>
-                            {{ $tc('global.column', 2) }}
-                            <span class="badge">
-                                {{ columns.length }}
-                            </span>
-                        </h5>
-                        <create-attribute
-                            :attribute-types="columnAttributeTypes"
-                            v-on:created="addColumn"
-                        >
-                        </create-attribute>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" :form="newAttributeFormId" :disabled="!validated">
-                        <i class="fas fa-fw fa-plus"></i> {{ $t('global.add') }}
-                    </button>
-                    <button type="button" class="btn btn-danger" @click="hideNewAttributeModal">
-                        <i class="fas fa-fw fa-ban"></i> {{ $t('global.cancel') }}
-                    </button>
-                </div>
-            </div>
-        </modal>
-
+        <!-- 
         <modal name="delete-attribute-modal" height="auto" :scrollable="true">
             <div class="modal-content" v-if="openedModal == 'delete-attribute-modal'">
                 <div class="modal-header">
@@ -143,12 +101,10 @@
     import {
         showAddEntityType,
         showDeleteEntityType,
+        showAddAttribute,
     } from '../helpers/modal.js';
 
     export default {
-        // components: {
-        //     CreateAttribute
-        // },
         setup(props, context) {
             const { t } = useI18n();
             const currentRoute = useRoute();
@@ -188,6 +144,9 @@
                     });
                 });
             };
+            const createAttribute = _ => {
+                showAddAttribute();
+            };
 
             // DATA
             const state = reactive({
@@ -215,6 +174,7 @@
                 addEntityType,
                 duplicateEntityType,
                 requestDeleteEntityType,
+                createAttribute,
                 // STATE
                 state,
             }
@@ -304,20 +264,6 @@
         //                 vm.localEntityTypes.splice(index, 1);
         //             }
         //             vm.hideDeleteEntityTypeModal();
-        //         }));
-        //     },
-        //     onCreateAttribute() {
-        //         $httpQueue.add(() => $http.get('/editor/dm/attribute_types').then(response => {
-        //             this.attributeTypes = [];
-        //             this.columnAttributeTypes = [];
-        //             for(let i=0; i<response.data.length; i++) {
-        //                 const at = response.data[i];
-        //                 this.attributeTypes.push(at);
-        //                 if(this.allowedTableKeys.indexOf(at.datatype) >= 0) {
-        //                     this.columnAttributeTypes.push(at);
-        //                 }
-        //             }
-        //             this.$modal.show('new-attribute-modal');
         //         }));
         //     },
         //     onDeleteAttribute(attribute) {
@@ -423,7 +369,6 @@
         //         entitySelections: {},
         //         entityDependencies: {},
         //         entityValues: {},
-        //         newAttributeFormId: 'new-attribute-form-external-submit',
         //         attributeTypes: [],
         //         columnAttributeTypes: [],
         //         columns: [],

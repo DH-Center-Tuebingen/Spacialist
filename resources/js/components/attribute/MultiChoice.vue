@@ -7,7 +7,7 @@
         :disabled="disabled"
         :options="selections"
         :name="name"
-        :placeholder="t('global.select.placehoder')"
+        :placeholder="t('global.select.placeholder')"
         v-model="value">
     </multiselect>
 </template>

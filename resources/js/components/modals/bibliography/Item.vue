@@ -37,7 +37,7 @@
                         :valueProp="'id'"
                         :searchable="true"
                         :options="bibliographyTypes"
-                        :placeholder="t('global.select.placehoder')">
+                        :placeholder="t('global.select.placeholder')">
                     </multiselect>
                 </div>
             </div>

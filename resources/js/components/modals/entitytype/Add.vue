@@ -43,7 +43,7 @@
                             :valueProp="'id'"
                             :mode="'single'"
                             :options="state.availableGeometryTypes"
-                            :placeholder="t('global.select.placehoder')">
+                            :placeholder="t('global.select.placeholder')">
                         </multiselect>
                     </div>
                 </div>

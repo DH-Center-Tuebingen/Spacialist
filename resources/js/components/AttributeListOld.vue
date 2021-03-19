@@ -102,7 +102,7 @@
                             :multiple="true"
                             :options="localSelections[attribute.id] || []"
                             :name="'attribute-'+attribute.id"
-                            :placeholder="$t('global.select.placehoder')"
+                            :placeholder="$t('global.select.placeholder')"
                             :select-label="$t('global.select.select')"
                             :deselect-label="$t('global.select.deselect')"
                             @input="(value, id) => checkDependency(attribute.id)">
@@ -123,7 +123,7 @@
                             :multiple="false"
                             :options="dd.selections[attribute.id] || []"
                             :name="'attribute-'+attribute.id"
-                            :placeholder="$t('global.select.placehoder')"
+                            :placeholder="$t('global.select.placeholder')"
                             :select-label="$t('global.select.select')"
                             :deselect-label="$t('global.select.deselect')"
                             @open="getOptions(attribute)"

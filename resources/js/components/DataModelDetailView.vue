@@ -27,7 +27,7 @@
                             :track-by="'thesaurus_url'"
                             :valueProp="'id'"
                             :options="state.minimalEntityTypes"
-                            :placeholder="t('global.select.placehoder')">
+                            :placeholder="t('global.select.placeholder')">
                                 <template v-slot:option="{ option }">
                                     {{ translateConcept(option.thesaurus_url) }}
                                 </template>
@@ -113,7 +113,7 @@
                                     :hideSelected="false"
                                     :multiple="false"
                                     :options="depends.attributes"
-                                    :placeholder="t('global.select.placehoder')"
+                                    :placeholder="t('global.select.placeholder')"
                                     @input="dependencyAttributeSelected">
                                 </multiselect>
                                 <multiselect
@@ -127,7 +127,7 @@
                                     :hideSelected="false"
                                     :multiple="false"
                                     :options="dependencyOperators"
-                                    :placeholder="t('global.select.placehoder')">
+                                    :placeholder="t('global.select.placeholder')">
                                 </multiselect>
                                 <div v-if="selectedDependency.attribute && selectedDependency.attribute.id">
                                     <input type="checkbox" class="form-check-input" v-if="dependencyType == 'boolean'" v-model="selectedDependency.value" />
@@ -144,7 +144,7 @@
                                         :hideSelected="false"
                                         :multiple="false"
                                         :options="depends.values"
-                                        :placeholder="t('global.select.placehoder')">
+                                        :placeholder="t('global.select.placeholder')">
                                     </multiselect>
                                     <input type="text" class="form-control" v-else v-model="selectedDependency.value" />
                                 </div>

@@ -103,7 +103,7 @@ const de = {
             invalid_orcid: 'Die eigegebene ORCID ist ungültig',
         },
         select: {
-            placehoder: 'Option auswählen',
+            placeholder: 'Option auswählen',
             select: 'Drücke Enter zum hinzufügen',
             deselect: 'Drücke Enter zum entfernen'
         },

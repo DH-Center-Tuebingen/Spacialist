@@ -30,7 +30,7 @@
                                 :valueProp="'id'"
                                 :disabled="disabled"
                                 :options="selections[column.id] || []"
-                                :placeholder="t('global.select.placehoder')"
+                                :placeholder="t('global.select.placeholder')"
                                 @input="onInput($index, $event.target)">
                             </multiselect>
                         </div>
@@ -64,7 +64,7 @@
                                 :mode="'tags'"
                                 :disabled="disabled"
                                 :options="selections[column.id] || []"
-                                :placeholder="t('global.select.placehoder')">
+                                :placeholder="t('global.select.placeholder')">
                             </multiselect>
                         </div>
                         <div v-else-if="column.datatype == 'entity'">

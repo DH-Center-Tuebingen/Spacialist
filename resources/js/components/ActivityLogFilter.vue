@@ -16,7 +16,7 @@
                             :valueProp="'id'"
                             :trackBy="'name'"
                             :label="'name'"
-                            :placeholder="t('global.select.placehoder')"
+                            :placeholder="t('global.select.placeholder')"
                             :hideSelected="true">
                         </multiselect>
                     </div>

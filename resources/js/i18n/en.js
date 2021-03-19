@@ -103,7 +103,7 @@ const en = {
             invalid_orcid: 'This ORCID is invalid',
         },
         select: {
-            placehoder: 'Select option',
+            placeholder: 'Select option',
             select: 'Press enter to select',
             deselect: 'Press enter to remove'
         },
