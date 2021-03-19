@@ -22,6 +22,7 @@ import BibliographyItem from '../components/modals/bibliography/Item.vue';
 import DeleteBibliographyItem from '../components/modals/bibliography/Delete.vue';
 import AddEntityType from '../components/modals/entitytype/Add.vue';
 import DeleteEntityType from '../components/modals/entitytype/Delete.vue';
+import AddAttribute from '../components/modals/attribute/Add.vue';
 
 export function showAbout() {
     const uid = `AboutModal-${getTs()}`;
@@ -195,6 +196,27 @@ export function showDeleteEntityType(entityType, metadata, onDeleted) {
                     store.dispatch('deleteEntityType', entityType);
                     store.getters.vfm.hide(uid);
                 });
+            }
+        }
+    });
+}
+
+export function showAddAttribute(onAdded) {
+    const uid = `AddAttribute-${getTs()}`;
+    store.getters.vfm.show({
+        component: AddAttribute,
+        bind: {
+            name: uid,
+        },
+        on: {
+            closing(e) {
+                store.getters.vfm.hide(uid);
+            },
+            confirm(e) {
+                if(!!onAdded) {
+                    onAdded();
+                }
+                store.getters.vfm.hide(uid);
             }
         }
     });
