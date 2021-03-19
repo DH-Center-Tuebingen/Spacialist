@@ -9,6 +9,7 @@ import {
     fetchGeometryTypes,
     fetchUsers,
     fetchVersion,
+    fetchAttributeTypes,
 } from '../api.js';
 
 export async function initApp(locale) {
@@ -20,6 +21,7 @@ export async function initApp(locale) {
     await fetchBibliography();
     await fetchVersion();
     await fetchGeometryTypes();
+    await fetchAttributeTypes();
     store.dispatch('setAppState', true);
     return new Promise(r => r(null));
 }

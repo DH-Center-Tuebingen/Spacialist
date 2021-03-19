@@ -91,6 +91,14 @@ export async function fetchGeometryTypes() {
     );
 }
 
+export async function fetchAttributeTypes() {
+    return $httpQueue.add(
+        () => http.get('/editor/dm/attribute_types').then(response => {
+            store.dispatch('setAttributeTypes', response.data);
+        })
+    );
+}
+
 // GET
 export async function getEntityComments(id) {
     return fetchComments(id, 'entity');

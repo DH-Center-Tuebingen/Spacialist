@@ -13,6 +13,7 @@ export const store = createStore({
         return {
             appInitialized: false,
             attributes: [],
+            attributeTypes: [],
             attributeSelections: {},
             attributeDependencies: {},
             entityTypeAttributes: {},
@@ -45,6 +46,9 @@ export const store = createStore({
         },
         setAttributes(state, data) {
             state.attributes = data;
+        },
+        setAttributeTypes(state, data) {
+            state.attributeTypes = data;
         },
         setAttributeSelections(state, data) {
             state.attributeSelections = data;
@@ -344,6 +348,10 @@ export const store = createStore({
             commit('setAttributeSelections', data.selections);
             commit('setAttributeDependencies', data.dependencies);
         },
+        setAttributeTypes({commit, state}, data) {
+            state.attributeTypes = [];
+            commit('setAttributeTypes', data);
+        },
         setVersion({commit}, data) {
             commit('setVersion', data);
         },
@@ -354,6 +362,12 @@ export const store = createStore({
         },
         attributes: state => {
             return state.attributes;
+        },
+        attributeTypes: state => {
+            return state.attributeTypes;
+        },
+        attributeTableTypes: state => {
+            return state.attributeTypes.filter(at => at.in_table);
         },
         attributeSelections: state => {
             return state.attributeSelections;
