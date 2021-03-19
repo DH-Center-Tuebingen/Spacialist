@@ -47,7 +47,9 @@
 
             // FUNCTIONS
             const resetFieldState = _ => {
-                v.fields.str.resetField();
+                v.fields.str.resetField({
+                    value: value.value
+                });
             };
             const undirtyField = _ => {
                 v.fields.str.resetField({
