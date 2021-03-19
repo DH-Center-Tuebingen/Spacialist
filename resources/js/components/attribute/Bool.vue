@@ -48,6 +48,16 @@
             // FETCH
 
             // FUNCTIONS
+            const resetFieldState = _ => {
+                v.fields.bool.resetField({
+                    value: value.value
+                });
+            };
+            const undirtyField = _ => {
+                v.fields.bool.resetField({
+                    value: v.fields.bool.value,
+                });
+            };
 
             // DATA
             const initValue = !!value.value ? true : false;
@@ -55,6 +65,7 @@
                 handleInput,
                 value: fieldValue,
                 meta,
+                resetField,
             } = useField(`perc_${name.value}`, yup.boolean(), {
                 type: 'checkbox',
                 valueProp: initValue,
@@ -69,6 +80,7 @@
                         value: fieldValue,
                         handleInput,
                         meta,
+                        resetField,
                     },
                 },
             });
@@ -84,6 +96,8 @@
             return {
                 // HELPERS
                 // LOCAL
+                resetFieldState,
+                undirtyField,
                 // PROPS
                 name,
                 disabled,

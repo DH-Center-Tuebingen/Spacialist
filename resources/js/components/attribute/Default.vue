@@ -46,12 +46,23 @@
             // FETCH
 
             // FUNCTIONS
+            const resetFieldState = _ => {
+                v.fields.str.resetField({
+                    value: value.value
+                });
+            };
+            const undirtyField = _ => {
+                v.fields.str.resetField({
+                    value: v.fields.str.value,
+                });
+            };
 
             // DATA
             const {
                 handleInput,
                 value: fieldValue,
                 meta,
+                resetField,
             } = useField(`str_${name.value}`, yup.string(), {
                 initialValue: value.value,
             });
@@ -64,6 +75,7 @@
                         value: fieldValue,
                         handleInput,
                         meta,
+                        resetField,
                     },
                 },
             });
@@ -79,6 +91,8 @@
             return {
                 // HELPERS
                 // LOCAL
+                resetFieldState,
+                undirtyField,
                 // PROPS
                 name,
                 disabled,

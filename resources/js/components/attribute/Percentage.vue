@@ -54,12 +54,23 @@
             // FETCH
 
             // FUNCTIONS
+            const resetFieldState = _ => {
+                v.fields.perc.resetField({
+                    value: value.value
+                });
+            };
+            const undirtyField = _ => {
+                v.fields.perc.resetField({
+                    value: v.fields.perc.value,
+                });
+            };
 
             // DATA
             const {
                 handleInput,
                 value: fieldValue,
                 meta,
+                resetField,
             } = useField(`perc_${name.value}`, yup.number(), {
                 initialValue: value.value,
             });
@@ -72,6 +83,7 @@
                         value: fieldValue,
                         handleInput,
                         meta,
+                        resetField,
                     },
                 },
             });
@@ -87,6 +99,8 @@
             return {
                 // HELPERS
                 // LOCAL
+                resetFieldState,
+                undirtyField,
                 // PROPS
                 name,
                 disabled,
