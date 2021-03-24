@@ -8,6 +8,7 @@
                 <div class="mb-3 row" @mouseenter="onEnter(index)" @mouseleave="onLeave(index)">
                     <label
                         class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break"
+                        v-if="!nolabels"
                         :for="`attr-${element.id}`"
                         :class="attributeClasses(element)">
                         <div v-show="!!state.hoverStates[index]">
@@ -273,7 +274,12 @@
             values: {
                 required: true,
                 type: Object
-            }
+            },
+            nolabels: {
+                required: false,
+                type: Boolean,
+                default: false,
+            },
         },
         components: {
             'string-attribute': StringAttr,
@@ -305,6 +311,7 @@
                 metadataAddon,
                 selections,
                 values,
+                nolabels,
             } = toRefs(props);
             // FETCH
 
@@ -318,7 +325,7 @@
             const expandedClasses = i => {
                 let expClasses = {};
 
-                if(state.expansionStates[i]) {
+                if(nolabels.value || state.expansionStates[i]) {
                     expClasses['col-md-12'] = true;
                 } else {
                     expClasses['col-md-9'] = true;
@@ -443,6 +450,7 @@
                 // PROPS
                 group,
                 metadataAddon,
+                nolabels,
                 // STATE
                 attrRefs,
                 state,

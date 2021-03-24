@@ -72,6 +72,8 @@ const de = {
         download: 'Herunterladen',
         'download-name': '{name} herunterladen',
         upload: 'Hochladen',
+        preview: 'Vorschau',
+        no_preview: 'Keine Vorschau verfügbar',
         tools: {
             title: 'Werkzeuge',
             bibliography: 'Literatur',
@@ -129,13 +131,16 @@ const de = {
             table: 'Tabelle',
             sql: 'SQL-Abfrage',
             serial: 'Fortlaufende ID',
-            'serial-info': `Alle Instanzen teilen diesen Identifier als Attribut. Benutze <code class="normal">%d</code> als Zähler.
+            serial_info: `<i class="fas fa-lightbulb me-1"></i>
             <br />
-            <span class="fw-medium">Beispiel:</span>
+            Alle Instanzen teilen diesen Identifier als Attribut. Benutze <code class="normal">%d</code> als Zähler.
+            <br />
+            <span class="fw-medium mt-2">Beispiel:</span>
             <br />
             <code class="normal">Fund_%d_Stein</code> würde zu Fund_1_Stein, Fund_2_Stein, &hellip; führen.
             <br />
             Um eine feste Breite (z.B. 3 für 002 anstatt 2) zu erzwingen, benutze <code class="normal">%03d</code>.`,
+            sql_info: `Du kannst mit <code class="normal">:entity_id</code> in deiner SQL-Abfrage auf die Entität referenzieren, dem dieses Attribut zugewiesen ist.`,
             iconclass: 'Iconclass'
         },
         active: 'Aktiviert',
@@ -185,6 +190,7 @@ const de = {
         recursive: 'Alle Kind-Elemente (Rekursiv)',
         content: 'Inhalt',
         column: 'Spalte | Spalten',
+        add_column: 'Spalte hinzufügen',
         'geometry-type': 'Geometrietyp',
         'depends-on': 'Hängt ab von',
         preference: 'Einstellung | Einstellungen',

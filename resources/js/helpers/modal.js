@@ -7,6 +7,7 @@ import {
     deleteBibliographyItem,
     addEntityType,
     deleteEntityType,
+    addAttribute,
 } from '../api.js';
 
 import {
@@ -166,11 +167,11 @@ export function showAddEntityType(onAdded) {
             },
             confirm(entityType) {
                 addEntityType(entityType).then(data => {
-                if(!!onAdded) {
-                    onAdded();
-                }
+                    if(!!onAdded) {
+                        onAdded();
+                    }
                     store.dispatch('addEntityType', data);
-                store.getters.vfm.hide(uid);
+                    store.getters.vfm.hide(uid);
                 });
             }
         }
@@ -214,11 +215,14 @@ export function showAddAttribute(onAdded) {
             closing(e) {
                 store.getters.vfm.hide(uid);
             },
-            confirm(e) {
-                if(!!onAdded) {
-                    onAdded();
-                }
-                store.getters.vfm.hide(uid);
+            confirm(attribute) {
+                addAttribute(attribute).then(data => {
+                    if(!!onAdded) {
+                        onAdded();
+                    }
+                    store.dispatch('addAttribute', data);
+                    store.getters.vfm.hide(uid);
+                });
             }
         }
     });

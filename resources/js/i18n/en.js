@@ -72,6 +72,8 @@ const en = {
         download: 'Download',
         'download-name': 'Download {name}',
         upload: 'Upload',
+        preview: 'Preview',
+        no_preview: 'No preview available',
         tools: {
             title: 'Tools',
             bibliography: 'Bibliography',
@@ -129,13 +131,16 @@ const en = {
             table: 'Table',
             sql: 'SQL-Query',
             serial: 'Serial (Auto-incrementing ID)',
-            'serial-info': `All instances share this identifier as attribute. Add <code class="normal">%d</code> as counter.
+            serial_info: `<i class="fas fa-lightbulb me-1"></i>
             <br />
-            <span class="fw-medium">Example:</span>
+            All instances share this identifier as attribute. Add <code class="normal">%d</code> as counter.
+            <br />
+            <span class="fw-medium mt-2">Example:</span>
             <br />
             <code class="normal">Find_%d_Stone</code> would create Find_1_Stone, Find_2_Stone, &hellip;
             <br />
             To add a fixed width (e.g. 3 for 002 instead of 2), you can use <code class="normal">%03d</code>.`,
+            sql_info: `You can use <code class="normal">:entity_id</code> in your SQL-Query to reference the entity this attribute is assigned to.`,
             iconclass: 'Iconclass'
         },
         active: 'Active',
@@ -185,6 +190,7 @@ const en = {
         recursive: 'All descendants (recursive)',
         content: 'Content',
         column: 'Column | Columns',
+        add_column: 'Add column',
         'geometry-type': 'Geometry-Type',
         'depends-on': 'Depends on',
         preference: 'Preference | Preferences',
@@ -501,11 +507,6 @@ const en = {
             contributor: 'Contributor | Contributors'
         },
         bibliography: {
-            not_found: {
-                title: 'Seite nicht gefunden',
-                msg: 'Die Seite {site} konnte nicht gefunden werden. Überprüfe die Schreibweise oder wende dich an den Administrator.',
-                go_to: 'Zur Startseite',
-            },
             title: 'Literature',
             modal: {
                 paste_info_title: 'Note',

@@ -79,12 +79,15 @@ export const store = createStore({
         },
         addEntityType(state, data) {
             if(data.attributes) {
-            state.entityTypeAttributes[data.id] = data.attributes.slice();
-            delete data.attributes;
+                state.entityTypeAttributes[data.id] = data.attributes.slice();
+                delete data.attributes;
             } else {
                 state.entityTypeAttributes[data.id] = [];
             }
             state.entityTypes[data.id] = data;
+        },
+        addAttribute(state, data) {
+            state.attributes.push(data);
         },
         addUser(state, data) {
             state.users.push(data);
@@ -351,6 +354,9 @@ export const store = createStore({
             commit('setAttributes', data.attributes);
             commit('setAttributeSelections', data.selections);
             commit('setAttributeDependencies', data.dependencies);
+        },
+        addAttribute({commit}, data) {
+            commit('addAttribute', data);
         },
         setAttributeTypes({commit, state}, data) {
             state.attributeTypes = [];

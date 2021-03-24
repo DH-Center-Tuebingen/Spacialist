@@ -272,6 +272,30 @@ export async function duplicateEntityType(id) {
     );
 };
 
+export async function addAttribute(attribute) {
+    const data = {
+        label_id: attribute.label.id,
+        datatype: attribute.type,
+        recursive: !!attribute.recursive,
+    };
+    if(attribute.rootLabel) {
+        data.root_id = attribute.rootLabel.id;
+    }
+    if(attribute.rootAttributeLabel) {
+        data.root_attribute_id = attribute.rootAttributeLabel.id;
+    }
+    if(attribute.columns && attribute.columns.length > 0) {
+        data.columns = attribute.columns;
+    }
+    if(attribute.textContent) {
+        data.text = attribute.textContent;
+    }
+
+    return $httpQueue.add(
+        () => http.post(`/editor/dm/attribute`, data).then(response => response.data)
+    );
+};
+
 export async function getFilteredActivity(pageUrl, payload) {
     pageUrl = pageUrl || 'activity';
     return $httpQueue.add(
@@ -342,4 +366,16 @@ export async function searchGlobal(query = '') {
     return $httpQueue.add(
         () => http.get(`search?q=${query}`).then(response => response.data)
     )
-}
+};
+
+export async function searchAttribute(query = '') {
+    return $httpQueue.add(
+        () => http.get(`search/attribute?q=${query}`).then(response => response.data)
+    )
+};
+
+export async function searchLabel(query = '') {
+    return $httpQueue.add(
+        () => http.get(`search/label?q=${query}`).then(response => response.data)
+    )
+};

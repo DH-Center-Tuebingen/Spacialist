@@ -1,20 +1,21 @@
 <template>
-    <form :id="formId" name="newAttributeForm" role="form" @submit.prevent="create">
+    <form :id="state.formId" :name="state.formId" role="form" @submit.prevent="create()">
         <div class="mb-3">
-            <label class="col-form-label col-md-3">
+            <label class="col-form-label col-3">
                 {{ t('global.label') }}:
             </label>
-            <div class="col-md-9">
-                <label-search
-                    :on-select="setAttributeLabel"
-                ></label-search>
+            <div class="col">
+                <simple-search
+                    :endpoint="searchLabel"
+                    :key-fn="getConceptLabel"
+                    @selected="e => labelSelected(e, 'label')" />
             </div>
         </div>
         <div class="mb-3">
-            <label class="col-form-label col-md-3">
+            <label class="col-form-label col-3">
                 {{ t('global.type') }}:
             </label>
-            <div class="col-md-9">
+            <div class="col">
                 <multiselect
                     v-model="state.attribute.type"
                     :mode="'single'"
@@ -36,7 +37,7 @@
                 </multiselect>
             </div>
         </div>
-        <div class="mb-3 col-md-12" v-if="isStringSc">
+        <div class="mb-3" v-if="state.isStringSc">
             <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" id="root-type-toggle" v-model="state.attribute.differRoot">
                 <label class="form-check-label" for="root-type-toggle">
@@ -44,53 +45,62 @@
                 </label>
             </div>
         </div>
-        <div class="form-group" v-show="isStringSc && rootTypeToggle">
-            <label class="col-form-label col-md-3">
-                {{ t('global.root-attribute') }}
+        <div class="mb-3" v-show="state.isStringSc && state.attribute.differRoot">
+            <label class="col-form-label col-3">
+                {{ t('global.root-attribute') }}:
             </label>
-            <div class="col-md-9">
-                <attribute-search
-                    :on-select="setAttributeRootId">
-                </attribute-search>
+            <div class="col">
+                <simple-search
+                    :endpoint="searchAttribute"
+                    :key-fn="getAttributeLabel"
+                    @selected="e => labelSelected(e, 'rootAttributeLabel')" />
             </div>
         </div>
-        <div class="form-group" v-show="needsRootElement && !rootTypeToggle">
-            <label class="col-form-label col-md-3">
+        <div class="mb-3" v-show="state.needsRootElement && !state.attribute.differRoot">
+            <label class="col-form-label col-3">
                 {{ t('global.root-element') }}:
             </label>
-            <div class="col-md-9">
-                <label-search
-                    :on-select="setAttributeRoot"
-                ></label-search>
+            <div class="col">
+                <simple-search
+                    :endpoint="searchLabel"
+                    :key-fn="getConceptLabel"
+                    @selected="e => labelSelected(e, 'rootLabel')" />
             </div>
         </div>
-        <div class="form-group" v-show="allowsRestriction && !rootTypeToggle">
-            <label class="col-form-label px-3" for="allow-restrictions">
-                {{ t('global.recursive') }}:
+        <div class="mb-3 form-check form-switch" v-show="state.allowsRestriction && !state.attribute.differRoot">
+            <input class="form-check-input" type="checkbox" id="recursive-attribute-toggle" v-model="state.attribute.recursive">
+            <label class="form-check-label" for="recursive-attribute-toggle">
+                {{ t('global.recursive') }}
             </label>
-            <input type="checkbox" id="allow-restrictions" v-model="state.attribute.recursive" />
         </div>
-        <div class="form-group" v-show="needsTextElement">
-            <div class="alert alert-info" role="alert" v-if="state.attribute.type.datatype == 'serial'">
-                <span v-html="t('global.attributes.serial-info')"></span>
-            </div>
-            <label class="col-form-label col-md-3">
+        <div class="mb-3" v-show="state.needsTextElement">
+            <alert
+                v-if="state.attribute.type == 'serial'"
+                :message="t('global.attributes.serial_info')"
+                :type="'note'"
+                :noicon="false" />
+            <label class="col-form-label col-3">
                 {{ t('global.content') }}:
             </label>
-            <div class="col-md-9">
+            <div class="col">
                 <input type="text" class="form-control" v-model="state.attribute.textContent" />
             </div>
         </div>
-        <div class="form-group" v-show="needsTextareaElement">
-            <label class="col-form-label col-md-3">
+        <div class="mb-3" v-show="state.needsTextareaElement">
+            <label class="col-form-label col-3">
                 {{ t('global.content') }}:
             </label>
-            <div class="col-md-9">
+            <div class="col">
+                <alert
+                    :message="t('global.attributes.sql_info')"
+                    :type="'note'"
+                    :noicon="false" />
                 <textarea class="form-control" v-model="state.attribute.textContent"></textarea>
             </div>
         </div>
-        <button v-show="!external" type="submit" class="btn btn-outline-success" :disabled="!validated">
-            {{ t('global.create') }}
+        <button v-show="!external" type="submit" class="btn btn-outline-success" :disabled="!state.validated">
+            <i class="fas fa-fw fa-plus"></i>
+            {{ state.label }}
         </button>
     </form>
 </template>
@@ -106,6 +116,16 @@
 
     import store from '../bootstrap/store.js';
 
+    import {
+        searchAttribute,
+        searchLabel,
+    } from '../api.js';
+
+    import {
+        translateConcept,
+        getConceptLabel,
+    } from '../helpers/helpers.js';
+
     export default {
         props: {
             type: {
@@ -116,44 +136,71 @@
             external: {
                 required: false,
                 type: String,
-            }
+                default: '',
+            },
+            createText: {
+                required: false,
+                type: String,
+                default: '',
+            },
         },
+        emits: ['created', 'updated', 'validation'],
         setup(props, context) {
             const { t } = useI18n();
             const {
                 type,
                 external,
+                createText,
             } = toRefs(props);
 
             // FUNCTIONS
+            const reset = _ => {
+                state.attribute.recursive = false;
+                state.attribute.type = '';
+                state.attribute.label = null;
+                state.attribute.rootLabel = null;
+                state.attribute.rootAttributeLabel = null;
+                state.attribute.differRoot = false;
+                state.attribute.textContent = '';
+            };
             const create = _ => {
-                if(!this.needsRootElement) {
-                    Vue.delete(this.newAttribute, 'root');
-                    Vue.delete(this.newAttribute, 'root_id');
+                if(!state.attribute.differRoot) {
+                    state.attribute.rootAttributeLabel = null;
                 }
-                if(!this.needsTextElement && !this.needsTextareaElement) {
-                    Vue.delete(this.newAttribute, 'textContent');
+                if(!state.allowsRestriction || state.attribute.differRoot) {
+                    state.attribute.recursive = false;
                 }
-                this.$emit('created', {
-                    attribute: {...this.newAttribute}
-                });
-                this.newAttribute = {
-                    recursive: true
-                };
+                if(!state.needsRootElement) {
+                    state.attribute.rootLabel = null;
+                }
+                if(!state.needsTextElement && !state.needsTextareaElement) {
+                    state.attribute.textContent = '';
+                }
+                context.emit('created', {...state.attribute});
+                reset();
             };
-            const typeSelected = (type, id) => {
-                this.$emit('selected-type', {
-                    type: type.datatype
-                });
+            const emitUpdate = _ => {
+                context.emit('updated', state.attribute);
             };
-            const setAttributeLabel = label => {
-                Vue.set(this.newAttribute, 'label', label);
+            const labelSelected = (e, key) => {
+                const {
+                    added,
+                    removed,
+                    ...label
+                } = e;
+                if(removed) {
+                    state.attribute[key] = null;
+                } else if(added) {
+                    state.attribute[key] = label;
+                }
+                emitUpdate();
             };
-            const setAttributeRoot = label => {
-                Vue.set(this.newAttribute, 'root', label);
+            const typeSelected = e => {
+                state.attribute.type = e;
+                emitUpdate();
             };
-            const setAttributeRootId = label => {
-                Vue.set(this.newAttribute, 'root_id', label.id);
+            const getAttributeLabel = attribute => {
+                return translateConcept(attribute.thesaurus_url);
             };
 
             // DATA
@@ -169,79 +216,65 @@
             const state = reactive({
                 attribute: {
                     recursive: false,
-                    type: {},
+                    type: '',
+                    label: null,
+                    rootLabel: null,
+                    rootAttributeLabel: null,
                     differRoot: false,
+                    textContent: '',
                 },
                 formId: external.value || 'create-attribute-form',
                 attributeTypes: types,
-                allowsRestriction: function() {
-                    return this.newAttribute.type &&
+                label: computed(_ => {
+                    return createText.value || t('global.create');
+                }),
+                validated: computed(_ =>  {
+                    let isValid = state.attribute.label &&
+                        state.attribute.label.id > 0 &&
+                        state.attribute.type &&
+                        state.hasRootElement &&
                         (
-                            this.newAttribute.type.datatype == 'string-sc' ||
-                            this.newAttribute.type.datatype == 'string-mc' ||
-                            this.newAttribute.type.datatype == 'epoch'
-                        );
-                },
-                isStringSc() {
-                    return this.newAttribute.type && this.newAttribute.type.datatype == 'string-sc';
-                },
-                needsRootElement: function() {
-                    return this.newAttribute.type &&
-                        (
-                            this.newAttribute.type.datatype == 'string-sc' ||
-                            this.newAttribute.type.datatype == 'string-mc' ||
-                            this.newAttribute.type.datatype == 'epoch'
-                        );
-                },
-                needsTextElement: function() {
-                    return this.newAttribute.type &&
-                        (
-                            this.newAttribute.type.datatype == 'serial'
-                        );
-                },
-                needsTextareaElement: function() {
-                    return this.newAttribute.type &&
-                        (
-                            this.newAttribute.type.datatype == 'sql'
-                        );
-                },
-                hasRootElement() {
-                    if(!this.needsRootElement) return true;
-                    return (
-                        this.newAttribute.root &&
-                        this.newAttribute.root.id > 0
-                    ) || (
-                        this.newAttribute.type.datatype == 'string-sc' &&
-                        this.newAttribute.root_id
-                    );
-                },
-                validated: function() {
-                    let isValid = this.newAttribute.label &&
-                        this.newAttribute.type &&
-                        this.newAttribute.label.id > 0 &&
-                        this.newAttribute.type.datatype.length > 0 &&
-                        this.hasRootElement &&
-                        (
-                            !this.needsTextareaElement ||
+                            !state.needsTextareaElement ||
                             (
-                                this.needsTextareaElement &&
-                                this.newAttribute.textContent &&
-                                this.newAttribute.textContent.length > 0
-                            )
-                        ) &&
-                        (
-                            !this.needsColumns ||
-                            (
-                                this.needsColumns &&
-                                this.newAttribute.columns &&
-                                this.newAttribute.columns.length > 0
+                                state.needsTextareaElement &&
+                                state.attribute.textContent.length > 0
                             )
                         );
-                    this.$emit('validation', {
-                        state: isValid
-                    });
+                    context.emit('validation', isValid);
                     return isValid;
-                }
+                }),
+                allowsRestriction: computed(_ => {
+                    return  state.attribute.type == 'string-sc' ||
+                            state.attribute.type == 'string-mc' ||
+                            state.attribute.type == 'epoch';
+                }),
+                isStringSc: computed(_ => {
+                    return state.attribute.type == 'string-sc';
+                }),
+                needsRootElement: computed(_ => {
+                    return state.attribute.type == 'string-sc' ||
+                            state.attribute.type == 'string-mc' ||
+                            state.attribute.type == 'epoch';
+                }),
+                needsTextElement: computed(_ => {
+                    return state.attribute.type == 'serial';
+                }),
+                needsTextareaElement: computed(_ => {
+                    return state.attribute.type == 'sql';
+                }),
+                hasRootElement: computed(_ => {
+                    if(!state.needsRootElement) return true;
+                    return (
+                        !state.attribute.differRoot &&
+                        state.attribute.rootLabel &&
+                        state.attribute.rootLabel.id > 0
+                    ) || (
+                        state.attribute.type == 'string-sc' &&
+                        state.attribute.differRoot &&
+                        state.attribute.rootAttributeLabel &&
+                        state.attribute.rootAttributeLabel.id > 0
+                    );
+                }),
             });
 
             // ON MOUNTED
@@ -252,9 +285,16 @@
             return {
                 t,
                 // HELPERS
+                searchAttribute,
+                searchLabel,
+                getConceptLabel,
                 // PROPS
                 external,
                 // LOCAL
+                create,
+                labelSelected,
+                typeSelected,
+                getAttributeLabel,
                 // STATE
                 state,
             }

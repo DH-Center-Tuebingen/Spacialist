@@ -12,6 +12,10 @@
     overflow-y: auto;
 }
 
+.modal-body.nonscrollable {
+    overflow-y: initial !important;
+}
+
 .sp-modal-content {
     @extend .modal-content;
     max-height: 80vh;
