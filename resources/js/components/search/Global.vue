@@ -23,7 +23,7 @@
         :placeholder="t('global.search')">
             <template v-slot:singlelabel="{ value }">
                 <div class="multiselect-single-label">
-                    #{{ value.id }}: {{ value.name }}
+                    {{ value.name }}
                 </div>
             </template>
             <template v-slot:option="{ option }">
@@ -63,7 +63,7 @@
                 <div class="p-2" v-if="!!state.query" v-html="t('global.search_no_results_for', {term: state.query})">
                 </div>
                 <div class="p-1 text-muted" v-else>
-                    Enter a term to search globally
+                    {{ t('global.search_no_term_info_global') }}
                 </div>
             </template>
     </multiselect>

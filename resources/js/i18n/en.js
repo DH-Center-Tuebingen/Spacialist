@@ -64,6 +64,8 @@ const en = {
         search: 'Search…',
         search_no_results: 'No results',
         search_no_results_for: 'No results for term <span class="fst-italic fw-bold">{term}</span>',
+        search_no_term_info: 'Enter a search term',
+        search_no_term_info_global: 'Enter a search term to search globally',
         login: 'Login',
         'login-title': 'Login',
         'login-subtitle': 'Welcome to Spacialist',

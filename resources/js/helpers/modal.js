@@ -5,6 +5,7 @@ import {
     addUser,
     deactivateUser,
     deleteBibliographyItem,
+    addEntityType,
     deleteEntityType,
 } from '../api.js';
 
@@ -163,13 +164,14 @@ export function showAddEntityType(onAdded) {
             closing(e) {
                 store.getters.vfm.hide(uid);
             },
-            confirm(e) {
-                const entityType = e;
-                // TODO post api
+            confirm(entityType) {
+                addEntityType(entityType).then(data => {
                 if(!!onAdded) {
                     onAdded();
                 }
+                    store.dispatch('addEntityType', data);
                 store.getters.vfm.hide(uid);
+                });
             }
         }
     });

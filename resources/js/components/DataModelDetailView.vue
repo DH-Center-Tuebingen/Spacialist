@@ -17,6 +17,17 @@
                     </div>
                 </div>
                 <div class="mb-3 row">
+                    <label for="entity-geometrytype-ro" class="col-form-label col-md-3 text-end">{{ t('global.geometry-type') }}</label>
+                    <div class="col-md-9 d-flex align-items-center">
+                        <span>
+                            {{ state.entityType.layer.type }}
+                        </span>
+                        <!-- <router-link :to="{name: 'ldetail', params: { id: state.entityType.layer.id }}">
+                            {{ t('main.datamodel.detail.manage_layer') }}
+                        </router-link> -->
+                    </div>
+                </div>
+                <div class="mb-3 row">
                     <label class="col-form-label col-md-3 text-end">{{ t('main.datamodel.detail.properties.sub-types') }}</label>
                     <div class="col-md-9">
                         <multiselect

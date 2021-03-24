@@ -83,7 +83,7 @@ export async function fetchGeometryTypes() {
                 });
             }
             geom.push({
-                label: 'Any',// TODO l18n
+                label: 'Any',
                 key: 'any'
             });
             store.dispatch('setGeometryTypes', geom);
@@ -176,7 +176,7 @@ export async function updateEntityTypeRelation(entityType) {
     const id = entityType.id;
     const data = {
         'is_root': entityType.is_root || false,
-        'sub_entity_types': entityType.sub_entity_types.map(t => t.id),
+        'sub_entity_types': entityType.sub_entity_types ? entityType.sub_entity_types.map(t => t.id) : [],
     };
     return await $httpQueue.add(
         () => http.post(`/editor/dm/${id}/relation`, data).then(response => response.data)
@@ -252,6 +252,17 @@ export async function setUserAvatar(id, file) {
     formData.append('file', file);
     return await $httpQueue.add(
         () => http.post(`user/${id}/avatar`, formData).then(response => response.data)
+    );
+};
+
+export async function addEntityType(et) {
+    const data = {
+        concept_url: et.label.concept_url,
+        is_root: et.is_root,
+        geometry_type: et.geometryType.label,
+    };
+    return $httpQueue.add(
+        () => http.post(`/editor/dm/entity_type`, data).then(response => response.data)
     );
 };
 

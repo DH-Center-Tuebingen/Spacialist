@@ -69,7 +69,7 @@ class AppServiceProvider extends ServiceProvider
         Validator::extend('geometry', function ($attribute, $value, $parameters, $validator) {
             $isActualGeometry = in_array($value, \App\Geodata::getAvailableGeometryTypes());
             if(!$isActualGeometry) {
-                return $value == 'any';
+                return $value == 'Any';
             }
             return true;
         });

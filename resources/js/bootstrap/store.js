@@ -78,8 +78,12 @@ export const store = createStore({
             state.entities[n.id] = n;
         },
         addEntityType(state, data) {
+            if(data.attributes) {
             state.entityTypeAttributes[data.id] = data.attributes.slice();
             delete data.attributes;
+            } else {
+                state.entityTypeAttributes[data.id] = [];
+            }
             state.entityTypes[data.id] = data;
         },
         addUser(state, data) {

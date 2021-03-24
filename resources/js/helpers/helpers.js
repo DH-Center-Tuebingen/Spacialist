@@ -104,6 +104,10 @@ export function translateConcept(url) {
     return concepts[url].label;
 }
 
+export function getConceptLabel(concept) {
+    return concept.labels.length ? concept.labels[0].label : '';
+}
+
 export function translateEntityType(id) {
     return translateConcept(getEntityType(id).thesaurus_url);
 }

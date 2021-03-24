@@ -304,19 +304,19 @@ class EditorController extends Controller {
         $this->validate($request, [
             'concept_url' => 'required|exists:th_concept',
             'is_root' => 'required|boolean_string',
-            'geomtype' => 'required|geometry'
+            'geometry_type' => 'required|geometry'
         ]);
 
         $curl = $request->get('concept_url');
         $is_root = sp_parse_boolean($request->get('is_root'));
-        $geomtype = $request->get('geomtype');
+        $geomtype = $request->get('geometry_type');
         $cType = new EntityType();
         $cType->thesaurus_url = $curl;
         $cType->is_root = $is_root;
         $cType->save();
         $cType = EntityType::find($cType->id);
 
-        $layer = AvailableLayer::createFromArray([
+        AvailableLayer::createFromArray([
             'name' => '',
             'url' => '',
             'type' => $geomtype,
@@ -325,6 +325,8 @@ class EditorController extends Controller {
             'is_overlay' => true,
             'entity_type_id' => $cType->id
         ]);
+
+        $cType->load('layer');
 
         return response()->json($cType, 201);
     }
@@ -519,6 +521,7 @@ class EditorController extends Controller {
         }
 
         $duplicate->load('sub_entity_types');
+        $duplicate->load('layer');
 
         return response()->json($duplicate);
     }

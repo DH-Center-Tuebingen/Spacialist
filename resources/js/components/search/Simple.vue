@@ -1,0 +1,148 @@
+<template>
+    <multiselect
+        v-model="state.entry"
+        class="multiselect"
+        :name="state.id"
+        :id="state.id"
+        :object="true"
+        :label="'id'"
+        :track-by="'id'"
+        :valueProp="'id'"
+        :mode="'single'"
+        :options="query => search(query)"
+        :hideSelected="false"
+        :filterResults="false"
+        :resolveOnLoad="false"
+        :clearOnSearch="true"
+        :clearOnSelect="true"
+        :caret="false"
+        :minChars="0"
+        :searchable="true"
+        :delay="delay"
+        :limit="limit"
+        :placeholder="t('global.search')"
+        @select="handleSelection"
+        @deselect="handleDeselection">
+            <template v-slot:singlelabel="{ value }">
+                <div class="multiselect-single-label">
+                    {{ displayResult(value) }}
+                </div>
+            </template>
+            <template v-slot:option="{ option }">
+                {{ displayResult(option) }}
+            </template>
+            <template v-slot:nooptions="">
+                <div class="p-2" v-if="!!state.query" v-html="t('global.search_no_results_for', {term: state.query})">
+                </div>
+                <div class="p-1 text-muted" v-else>
+                    {{ t('global.search_no_term_info') }}
+                </div>
+            </template>
+    </multiselect>
+</template>
+
+<script>
+    import {
+        reactive,
+        toRefs,
+    } from 'vue';
+
+    import { useI18n } from 'vue-i18n';
+
+    import {
+        getTs
+    } from '../../helpers/helpers.js';
+
+    export default {
+        props: {
+            delay: {
+                type: Number,
+                required: false,
+                default: 300,
+            },
+            limit: {
+                type: Number,
+                required: false,
+                default: 10,
+            },
+            endpoint: {
+                type: Function,
+                required: true,
+            },
+            key: {
+                type: String,
+                required: false,
+            },
+            keyFn: {
+                type: Function,
+                required: false,
+            },
+        },
+        emits: ['selected'],
+        setup(props, context) {
+            const { t } = useI18n();
+            const {
+                delay,
+                limit,
+            } = toRefs(props);
+            if(!props.key && !props.keyFn) {
+                throw new Error('You have to either provide a key or key function for your search component!');
+            }
+            // FETCH
+
+            // FUNCTIONS
+            const search = async (query) => {
+                state.query = query;
+                if(!query) {
+                    return await new Promise(r => r([]));
+                }
+                return await props.endpoint(query);
+            };
+            const displayResult = result => {
+                if(!!props.key) {
+                    return result[props.key];
+                } else if(props.keyFn) {
+                    return props.keyFn(result);
+                } else {
+                    // Should never happen ;) :P
+                    throw new Error('Can not display search result!');
+                }
+            };
+            const handleSelection = option => {
+                context.emit('selected', {
+                    ...option,
+                    added: true,
+                });
+            };
+            const handleDeselection = option => {
+                context.emit('selected', {
+                    ...option,
+                    removed: true,
+                });
+            };
+
+            // DATA
+            const state = reactive({
+                id: `multiselect-search-${getTs()}`,
+                entry: null,
+                query: '',
+            });
+
+            // RETURN
+            return {
+                t,
+                // HELPER
+                // LOCAL
+                search,
+                displayResult,
+                handleSelection,
+                handleDeselection,
+                // PROPS
+                delay,
+                limit,
+                // STATE
+                state,
+            };
+        },
+    }
+</script>

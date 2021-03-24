@@ -11,25 +11,26 @@
             <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
             </button>
         </div>
-        <div class="modal-body">
-            <form name="newEntityTypeForm" id="newEntityTypeForm" role="form" v-on:submit.prevent="createEntityType(newEntityType)">
-                <div class="form-group">
+        <div class="modal-body nonscrollable">
+            <form name="newEntityTypeForm" id="newEntityTypeForm" role="form" @submit.prevent="add()">
+                <div class="mb-3">
                     <label class="col-form-label col-md-3" for="name">
                         {{ t('global.label') }}:
                     </label>
                     <div class="col-md-9">
-                        <!-- <label-search
-                            :on-select="newEntityTypeSearchResultSelected"
-                        ></label-search> -->
+                        <simple-search
+                            :endpoint="searchLabel"
+                            :key-fn="getConceptLabel"
+                            @selected="labelSelected" />
                     </div>
                 </div>
-                <div class="form-check">
+                <div class="form-check form-switch mb-3">
                     <input type="checkbox" class="form-check-input" id="isRoot" v-model="state.entityType.is_root" />
                     <label class="form-check-label" for="isRoot">
                         {{ t('main.datamodel.detail.properties.top-level') }}
                     </label>
                 </div>
-                <div class="form-group">
+                <div class="mb-3">
                     <label class="col-form-label col-md-3" for="name">
                         {{ t('global.geometry-type') }}:
                     </label>
@@ -39,8 +40,8 @@
                             :name="'geometry-type-selection'"
                             :object="true"
                             :label="'label'"
-                            :track-by="'label'"
-                            :valueProp="'id'"
+                            :track-by="'key'"
+                            :valueProp="'key'"
                             :mode="'single'"
                             :options="state.availableGeometryTypes"
                             :placeholder="t('global.select.placeholder')">
@@ -50,7 +51,7 @@
             </form>
         </div>
         <div class="modal-footer">
-            <button type="submit" class="btn btn-outline-success" @click="add()" form="newEntityTypeForm" :disabled="state.dataMissing">
+            <button type="submit" class="btn btn-outline-success" form="newEntityTypeForm" :disabled="state.dataMissing">
                     <i class="fas fa-fw fa-plus"></i> {{ t('global.add') }}
                 </button>
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
@@ -70,6 +71,14 @@
 
     import store from '../../../bootstrap/store.js';
 
+    import {
+        searchLabel,
+    } from '../../../api.js';
+
+    import {
+        getConceptLabel,
+    } from '../../../helpers/helpers.js';
+
     export default {
         props: {
         },
@@ -79,12 +88,27 @@
 
             // FUNCTIONS
             const add = _ => {
+                if(state.dataMissing) {
+                    return;
+                }
                 state.show = false;
                 context.emit('confirm', state.entityType);
             };
             const closeModal = _ => {
                 state.show = false;
                 context.emit('closing', false);
+            };
+            const labelSelected = e => {
+                const {
+                    added,
+                    removed,
+                    ...label
+                } = e;
+                if(removed) {
+                    state.entityType.label = null;
+                } else if(added) {
+                    state.entityType.label = label;
+                }
             };
 
             // DATA
@@ -108,10 +132,13 @@
             return {
                 t,
                 // HELPERS
+                searchLabel,
+                getConceptLabel,
                 // PROPS
                 // LOCAL
                 add,
                 closeModal,
+                labelSelected,
                 // STATE
                 state,
             }
