@@ -1,7 +1,7 @@
 <template>
     <div class="alert" :class="state.classes" role="alert">
-        <div v-if="state.hasIcon" class="me-2">
-            <i class="fas fa-fw" :class="state.iconClasses"></i>
+        <div v-if="state.hasIcon" :class="state.iconWrapperClasses">
+            <i class="fas" :class="state.iconClasses"></i>
             <span class="fw-medium">
                 {{ icontext }}
             </span>
@@ -121,6 +121,17 @@
                         case 'error':
                             classes.push('fa-times');
                             break;
+                    }
+                    if(state.hasIconText) {
+                            classes.push('me-2');
+                    }
+                    return classes;
+                }),
+                iconWrapperClasses: computed(_ => {
+                    let classes = [];
+                    if(!state.hasIcon) return classes;
+                    if(!state.hasIconText) {
+                            classes.push('me-2');
                     }
                     return classes;
                 }),

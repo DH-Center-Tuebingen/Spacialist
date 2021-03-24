@@ -17,14 +17,11 @@
     </div>
     <div class="modal-body"
     @paste="handlePasteFromClipboard($event)">
-        <div class="alert alert-info" role="alert">
-            <i class="fas fa-lightbulb me-1"></i>
-            <span class="fw-medium">
-                {{ t('main.bibliography.modal.paste_info_title') }}
-            </span>
-            <br />
-            <span v-html="t('main.bibliography.modal.paste_info')"></span>
-        </div>
+        <alert
+            :message="t('main.bibliography.modal.paste_info')"
+            :type="'note'"
+            :noicon="false"
+            :icontext="t('main.bibliography.modal.paste_info_title')" />
         <form role="form" id="addBibliographyItemForm" class="col px-0 scroll-y-auto" name="addBibliographyItemForm" @submit.prevent="submitItem()">
             <div class="form-group">
                 <label class="col-form-label col-md-3" for="type">{{ t('global.type') }}:</label>

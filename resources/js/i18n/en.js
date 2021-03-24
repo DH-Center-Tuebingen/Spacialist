@@ -246,7 +246,7 @@ const en = {
     },
     main: {
         app: {
-            loading_screen_msg: '<span class="fw-light">Loading</span> {appname}',
+            loading_screen_msg: '<span class="fw-light">Loading</span> {appname}<span class="fw-light">&hellip;</span>',
             not_found: {
                 title: 'Site not found!',
                 msg: 'Site <code>{site}</code> was not found. Check the spelling or contact the administrator.',
