@@ -1,0 +1,141 @@
+<template>
+    <div class="alert" :class="state.classes" role="alert">
+        <div v-if="state.hasIcon" class="me-2">
+            <i class="fas fa-fw" :class="state.iconClasses"></i>
+            <span class="fw-medium">
+                {{ icontext }}
+            </span>
+        </div>
+        <div v-html="message"></div>
+    </div>
+</template>
+
+<script>
+    import {
+        computed,
+        reactive,
+        toRefs,
+    } from 'vue';
+
+    export default {
+        props: {
+            message: {
+                required: true,
+                type: String,
+            },
+            type: {
+                required: false,
+                type: String,
+                default: '',
+            },
+            noicon: {
+                required: false,
+                type: Boolean,
+                default: true,
+            },
+            icontext: {
+                required: false,
+                type: String,
+            }
+        },
+        setup(props, context) {
+            const {
+                message,
+                icontext,
+            } = toRefs(props);
+
+            // FUNCTIONS
+
+            // DATA
+            const state = reactive({
+                hasIcon: computed(_ => {
+                    return !props.noicon && state.supportsIcon;
+                }),
+                hasIconText: computed(_ => {
+                    return state.hasIcon && !!props.icontext;
+                }),
+                supportsIcon: computed(_ => {
+                    switch(props.type) {
+                        case 'success':
+                        case 'note':
+                        case 'info':
+                        case 'warning':
+                        case 'error':
+                            return true;
+                        case 'mono':
+                        default:
+                            return false;
+                    }
+                }),
+                classes: computed(_ => {
+                    let classes = [];
+                    switch(props.type) {
+                        case 'success':
+                            classes.push('alert-success');
+                            break;
+                        case 'note':
+                        case 'info':
+                            classes.push('alert-info');
+                            break;
+                        case 'warning':
+                            classes.push('alert-warning');
+                            break;
+                        case 'error':
+                            classes.push('alert-danger');
+                            break;
+                        case 'mono':
+                            classes.push('alert-secondary');
+                            break;
+                        default:
+                            classes.push('alert-primary');
+                            break;
+                    }
+                    
+                    if(state.hasIcon) {
+                        classes.push('d-flex');
+                        if(state.hasIconText) {
+                            classes.push('flex-column');
+                        } else {
+                            classes.push('flex-row');
+                        }
+                    }
+
+                    return classes;
+                }),
+                iconClasses: computed(_ => {
+                    let classes = [];
+                    if(!state.hasIcon) return classes;
+                    switch(props.type) {
+                        case 'success':
+                            classes.push('fa-check');
+                            break;
+                        case 'note':
+                            classes.push('fa-lightbulb');
+                            break;
+                        case 'info':
+                            classes.push('fa-info-circle');
+                            break;
+                        case 'warning':
+                            classes.push('fa-exclamation-triangle');
+                            break;
+                        case 'error':
+                            classes.push('fa-times');
+                            break;
+                    }
+                    return classes;
+                }),
+            });
+
+            // RETURN
+            return {
+                // HELPERS
+                // PROPS
+                message,
+                icontext,
+                // LOCAL
+                // STATE
+                state,
+            }
+        },
+    }
+</script>
