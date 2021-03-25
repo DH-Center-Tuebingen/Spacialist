@@ -29,6 +29,7 @@
                     class="h-100 scroll-y-auto scroll-x-hidden"
                     group="attribute-selection"
                     :attributes="state.attributeList"
+                    :disabled-attributes="state.selectedEntityTypeAttributeIds"
                     :values="state.attributeListValues"
                     :selections="{}"
                     :is-source="true"
@@ -163,6 +164,7 @@
                 }),
                 entityTypes: computed(_ => Object.values(store.getters.entityTypes)),
                 selectedEntityType: computed(_ => currentRoute.params.id),
+                selectedEntityTypeAttributeIds: computed(_ => state.selectedEntityType ? getEntityTypeAttributes(state.selectedEntityType).map(a => a.id) : []),
             });
 
             // RETURN
