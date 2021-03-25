@@ -29,7 +29,7 @@
                     class="h-100 scroll-y-auto scroll-x-hidden"
                     group="attribute-selection"
                     :attributes="state.attributeList"
-                    :disabled-attributes="state.selectedEntityTypeAttributeIds"
+                    :hidden-attributes="state.selectedEntityTypeAttributeIds"
                     :values="state.attributeListValues"
                     :selections="{}"
                     :is-source="true"

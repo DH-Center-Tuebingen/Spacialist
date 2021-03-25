@@ -7,7 +7,7 @@
         :group="group"
         :move="handleMove">
             <template #item="{element, index}">
-                <div class="mb-3 row" @mouseenter="onEnter(index)" @mouseleave="onLeave(index)">
+                <div class="mb-3 row" @mouseenter="onEnter(index)" @mouseleave="onLeave(index)" v-if="!state.hiddenAttributeList[element.id]">
                     <label
                         class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break"
                         v-if="!nolabels"
@@ -46,7 +46,7 @@
                         <string-attribute
                             v-if="element.datatype == 'string'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="isElementDisabled(element)"
+                            :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="updateDirtyState" />
@@ -54,7 +54,7 @@
                         <stringfield-attribute
                             v-else-if="element.datatype == 'stringf'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="isElementDisabled(element)"
+                            :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="updateDirtyState" />
@@ -62,7 +62,7 @@
                         <integer-attribute
                             v-else-if="element.datatype == 'integer'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="isElementDisabled(element)"
+                            :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="updateDirtyState" />
@@ -70,7 +70,7 @@
                         <float-attribute
                             v-else-if="element.datatype == 'double'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="isElementDisabled(element)"
+                            :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="updateDirtyState" />
@@ -78,7 +78,7 @@
                         <bool-attribute
                             v-else-if="element.datatype == 'boolean'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="isElementDisabled(element)"
+                            :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="updateDirtyState" />
@@ -86,21 +86,21 @@
                         <percentage-attribute
                             v-else-if="element.datatype == 'percentage'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="isElementDisabled(element)"
+                            :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="updateDirtyState" />
                             
                         <serial-attribute
                             v-else-if="element.datatype == 'serial'"
-                            :disabled="isElementDisabled(element)"
+                            :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value" />
 
                         <list-attribute
                             v-else-if="element.datatype == 'list'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="isElementDisabled(element)"
+                            :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :on-change="value => onChange(null, value, element.id)"
                             :entries="state.attributeValues[element.id].value" />
@@ -108,7 +108,7 @@
                         <epoch-attribute
                             v-else-if="element.datatype == 'epoch' || element.datatype == 'timeperiod'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="isElementDisabled(element)"
+                            :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :on-change="(field, value) => onChange(field, value, element.id)"
                             :value="state.attributeValues[element.id].value"
@@ -118,7 +118,7 @@
                         <dimension-attribute
                             v-else-if="element.datatype == 'dimension'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="isElementDisabled(element)"
+                            :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :on-change="(field, value) => onChange(field, value, element.id)"
                             :value="state.attributeValues[element.id].value" />
@@ -126,7 +126,7 @@
                         <tabular-attribute
                             v-else-if="element.datatype == 'table'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="isElementDisabled(element)"
+                            :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :on-change="(field, value) => onChange(field, value, element.id)"
                             :value="state.attributeValues[element.id].value"
@@ -137,7 +137,7 @@
                         <iconclass-attribute
                             v-else-if="element.datatype == 'iconclass'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="isElementDisabled(element)"
+                            :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :attribute="element"
@@ -146,21 +146,21 @@
                         <geography-attribute
                             v-else-if="element.datatype == 'geography'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="isElementDisabled(element)"
+                            :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :attribute="element" />
 
                         <entity-attribute v-else-if="element.datatype == 'entity'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="isElementDisabled(element)"
+                            :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value" />
 
                         <date-attribute
                             v-else-if="element.datatype == 'date'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="isElementDisabled(element)"
+                            :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="updateDirtyState" />
@@ -168,28 +168,28 @@
                         <singlechoice-attribute
                             v-else-if="element.datatype == 'string-sc'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="isElementDisabled(element)"
+                            :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value" />
 
                         <multichoice-attribute
                             v-else-if="element.datatype == 'string-mc'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="isElementDisabled(element)"
+                            :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :selections="state.selectionLists[element.id]" />
 
                         <sql-attribute
                             v-else-if="element.datatype == 'sql'"
-                            :disabled="isElementDisabled(element)"
+                            :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value" />
 
                         <default-attribute
                             v-else
                             :ref="el => setRef(el, element.id)"
-                            :disabled="isElementDisabled(element)"
+                            :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value" />
                     </div>
@@ -241,7 +241,7 @@
                 required: true,
                 type: Array
             },
-            disabledAttributes: {
+            hiddenAttributes: {
                 required: false,
                 type: Array,
                 default: [],
@@ -314,7 +314,7 @@
             const { t } = useI18n();
             const {
                 attributes,
-                disabledAttributes,
+                hiddenAttributes,
                 disableDrag,
                 group,
                 metadataAddon,
@@ -352,16 +352,7 @@
                 state.hoverStates[i] = false;
             };
             const handleMove = (e, orgE) => {
-                if(disableDrag.value) return false;
-
-                if(state.attributeDisabledList[e.draggedContext.element.id]) {
-                    return false;
-                }
-
-                return true;
-            };
-            const isElementDisabled = elem => {
-                return elem.isDisabled || state.attributeDisabledList[elem.id];
+                return !disableDrag.value;
             };
             const updateValue = (eventValue, aid) => {
                 state.attributeValues[aid].value = eventValue;
@@ -433,12 +424,12 @@
                 isHoveringPossible: computed(_ => {
                     return !!attrs.reorder || !!attrs.edit || !!attrs.remove || !!attrs.delete;
                 }),
-                attributeDisabledList: computed(_ => {
+                hiddenAttributeList: computed(_ => {
                     if(!state.componentLoaded) return {};
 
                     const list = {};
-                    for(let i=0; i<disabledAttributes.value.length; i++) {
-                        const disId = disabledAttributes.value[i];
+                    for(let i=0; i<hiddenAttributes.value.length; i++) {
+                        const disId = hiddenAttributes.value[i];
                         list[disId] = true;
                     }
                     return list;
@@ -467,7 +458,6 @@
                 onEnter,
                 onLeave,
                 handleMove,
-                isElementDisabled,
                 updateValue,
                 updateDirtyState,
                 resetListValues,
