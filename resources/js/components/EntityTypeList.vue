@@ -1,21 +1,21 @@
 <template>
     <div>
         <div class="list-group scroll-y-auto px-2">
-            <a href="#" @click.prevent="selectEntry(entry)" v-for="(entry, i) in state.entries" class="list-group-item list-group-item-action d-flex" :class="{ 'active': entry.id == selectedId }" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)" :key="i">
+            <a href="#" @click.prevent="selectEntry(entry)" v-for="(entry, i) in state.entries" class="list-group-item list-group-item-action d-flex flex-row align-items-center" :class="{ 'active': entry.id == selectedId }" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)" :key="i">
                 <div>
                     <i class="fas fa-fw fa-monument"></i>
                     <span class="p-1">
                         {{ translateConcept(entry.thesaurus_url) }}
                     </span>
                 </div>
-                <div class="ms-auto btn-fab-list" v-if="state.hasOnHoverListener" v-show="state.hoverStates[i]">
-                    <button class="btn btn-info btn-fab rounded-circle" v-if="state.hasEditListener" @click="onEdit(entry)" data-bs-toggle="popover" :data-content="t('global.edit')" data-trigger="hover" data-placement="bottom">
+                <div class="ms-auto btn-fab-list" v-if="state.hasOnHoverListener" v-show="state.hoverStates[i]" :class="activeClasses(entry)">
+                    <button class="btn btn-outline-info btn-fab-sm rounded-circle" v-if="state.hasEditListener" @click="onEdit(entry)" data-bs-toggle="popover" :data-content="t('global.edit')" data-trigger="hover" data-placement="bottom">
                         <i class="fas fa-fw fa-xs fa-edit" style="vertical-align: 0;"></i>
                     </button>
-                    <button class="btn btn-primary btn-fab rounded-circle" v-if="state.hasDuplicateListener" @click="onDuplicate(entry)" data-bs-toggle="popover" :data-content="t('global.duplicate')" data-trigger="hover" data-placement="bottom">
+                    <button class="btn btn-outline-primary btn-fab-sm rounded-circle" v-if="state.hasDuplicateListener" @click="onDuplicate(entry)" data-bs-toggle="popover" :data-content="t('global.duplicate')" data-trigger="hover" data-placement="bottom">
                         <i class="fas fa-fw fa-xs fa-clone" style="vertical-align: 0;"></i>
                     </button>
-                    <button class="btn btn-danger btn-fab rounded-circle" v-if="state.hasDeleteListener" @click="onDelete(entry)" data-bs-toggle="popover" :data-content="t('global.delete')" data-trigger="hover" data-placement="bottom">
+                    <button class="btn btn-outline-danger btn-fab-sm rounded-circle" v-if="state.hasDeleteListener" @click="onDelete(entry)" data-bs-toggle="popover" :data-content="t('global.delete')" data-trigger="hover" data-placement="bottom">
                         <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
                     </button>
                 </div>
@@ -72,6 +72,11 @@
             const onLeave = i => {
                 state.hoverStates[i] = false;
             };
+            const activeClasses = entry => {
+                if(entry.id != selectedId.value) return [];
+
+                return ['badge', 'rounded-pill', 'bg-light'];
+            };
             const selectEntry = entityType => {
                 context.emit('select', {type: entityType});
             };
@@ -112,6 +117,7 @@
                 // LOCAL
                 onEnter,
                 onLeave,
+                activeClasses,
                 selectEntry,
                 onEdit,
                 onDuplicate,

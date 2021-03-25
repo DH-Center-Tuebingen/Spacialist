@@ -74,6 +74,7 @@ const de = {
         upload: 'Hochladen',
         preview: 'Vorschau',
         no_preview: 'Keine Vorschau verfügbar',
+        note: 'Beachte',
         tools: {
             title: 'Werkzeuge',
             bibliography: 'Literatur',
@@ -420,7 +421,7 @@ const de = {
                         title: 'Neues Attribut'
                     },
                     delete: {
-                        alert: 'Beachte: Wenn du {name} löschst, wird ein Attributwert ebenfalls gelöscht. | Beachte: Wenn du {name} löschst, werden {cnt} Attributwerte ebenfalls gelöscht.'
+                        alert: 'Wenn du <span class="fw-bold">{name}</span> löschst, wird ein Attributwert ebenfalls gelöscht. | Wenn du <span class="fw-bold">{name}</span> löschst, werden {cnt} Attributwerte ebenfalls gelöscht.'
                     }
                 }
             },
@@ -432,7 +433,7 @@ const de = {
                         title: 'Neuer Entitätstyp'
                     },
                     delete: {
-                        alert: 'Beachte: Wenn du {name} löschst, wird eine Entität ebenfalls gelöscht. | Beachte: Wenn du {name} löschst, werden {cnt} Entitäten ebenfalls gelöscht.'
+                        alert: 'Wenn du <span class="fw-bold">{name}</span> löschst, wird eine Entität ebenfalls gelöscht. | Wenn du <span class="fw-bold">{name}</span> löschst, werden {cnt} Entitäten ebenfalls gelöscht.'
                     }
                 }
             },
@@ -444,7 +445,7 @@ const de = {
                 },
                 attribute: {
                     title: 'Hinzugefügte Attribute',
-                    alert: 'Beachte: Wenn du {name} entfernst, wird ein weiterer Eintrag unter {refname} ebenfalls gelöscht. | Beachte: Wenn du {name} entfernst, werden {cnt} weitere Einträge unter {refname} ebenfalls gelöscht.'
+                    alert: 'Wenn du <span class="fw-bold">{name}</span> entfernst, wird ein weiterer Eintrag unter <span class="fw-bold">{refname}</span> ebenfalls gelöscht. | Wenn du <span class="fw-bold">{name}</span> entfernst, werden {cnt} weitere Einträge unter <span class="fw-bold">{refname}</span> ebenfalls gelöscht.'
                 }
             }
         },
@@ -509,7 +510,6 @@ const de = {
         bibliography: {
             title: 'Literatur',
             modal: {
-                paste_info_title: 'Beachte',
                 paste_info: 'Du kannst die Felder mit der Tastenkombination <kbd><kbd>Strg</kbd> + <kbd>v</kbd></kbd> mit einem BibTeX-Eintrag aus deiner Zwischenablage ausfüllen.',
                 new: {
                     title: 'Neuer Eintrag',
@@ -520,7 +520,7 @@ const de = {
                 },
                 delete: {
                     title: 'Eintrag löschen',
-                    alert: 'Beachte: Wenn du {name} löschst, wird eine Quellenangabe ebenfalls gelöscht. | Beachte: Wenn du {name} löschst, werden {cnt} Quellenangaben ebenfalls gelöscht.',
+                    alert: 'Wenn du <span class="fw-bold">{name}</span> löschst, wird eine Quellenangabe ebenfalls gelöscht. | Wenn du <span class="fw-bold">{name}</span> löschst, werden {cnt} Quellenangaben ebenfalls gelöscht.',
                 }
             },
             toast: {

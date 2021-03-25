@@ -13,24 +13,24 @@
                         v-if="!nolabels"
                         :for="`attr-${element.id}`"
                         :class="attributeClasses(element)">
-                        <div v-show="!!state.hoverStates[index]">
-                            <a v-show="hasEmitter('reorder')" href="" @click.prevent="" class="reorder-handle" data-bs-toggle="popover" :data-content="t('global.resort')" data-trigger="hover" data-placement="bottom">
-                                <i class="fas fa-fw fa-sort text-secondary"></i>
-                            </a>
-                            <button v-show="hasEmitter('edit')" class="btn btn-info btn-fab rounded-circle" @click="onEdit(element)" data-bs-toggle="popover" :data-content="t('global.edit')" data-trigger="hover" data-placement="bottom">
+                        <div v-show="!!state.hoverStates[index]" class="btn-fab-list">
+                            <button v-show="hasEmitter('onReorder')" class="reorder-handle btn btn-outline-secondary btn-fab rounded-circle" data-bs-toggle="popover" :data-content="t('global.resort')" data-trigger="hover" data-placement="bottom">
+                                <i class="fas fa-fw fa-sort"></i>
+                            </button>
+                            <button v-show="hasEmitter('onEdit')" class="btn btn-outline-info btn-fab rounded-circle" @click="onEditHandler(element)" data-bs-toggle="popover" :data-content="t('global.edit')" data-trigger="hover" data-placement="bottom">
                                 <i class="fas fa-fw fa-xs fa-edit" style="vertical-align: 0;"></i>
                             </button>
-                            <button v-show="hasEmitter('remove')" class="btn btn-danger btn-fab rounded-circle" @click="onRemove(element)" data-bs-toggle="popover" :data-content="t('global.remove')" data-trigger="hover" data-placement="bottom">
+                            <button v-show="hasEmitter('onRemove')" class="btn btn-outline-danger btn-fab rounded-circle" @click="onRemoveHandler(element)" data-bs-toggle="popover" :data-content="t('global.remove')" data-trigger="hover" data-placement="bottom">
                                 <i class="fas fa-fw fa-xs fa-times" style="vertical-align: 0;"></i>
                             </button>
-                            <button v-show="hasEmitter('delete')" class="btn btn-danger btn-fab rounded-circle" @click="onDelete(element)" data-bs-toggle="popover" :data-content="t('global.delete')" data-trigger="hover" data-placement="bottom">
+                            <button v-show="hasEmitter('onDelete')" class="btn btn-outline-danger btn-fab rounded-circle" @click="onDeleteHandler(element)" data-bs-toggle="popover" :data-content="t('global.delete')" data-trigger="hover" data-placement="bottom">
                                 <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
                             </button>
                         </div>
                         <span class="text-end col">
                             {{ translateConcept(element.thesaurus_url) }}:
                         </span>
-                        <sup class="clickable" v-if="hasEmitter('metadata')" @click="onMetadata(element)">
+                        <sup class="clickable" v-if="hasEmitter('onMetadata')" @click="onMetadataHandler(element)">
                             <span :class="getCertaintyClass(localValues[element.id].certainty, 'text')">
                                 <i class="fas fa-fw fa-exclamation"></i>
                             </span>
@@ -309,7 +309,7 @@
             'sql-attribute': SqlAttr,
             'default-attribute': DefaultAttr,
         },
-        emits: ['edit', 'remove', 'delete', 'reorder', 'metadata', 'dirty'],
+        emits: ['add', 'dirty'],
         setup(props, context) {
             const { t } = useI18n();
             const {
@@ -382,27 +382,27 @@
             const checkDependency = id => {
 
             };
-            const onReorder = element => {
+            const onReorderHandler = element => {
                 context.emit('reorder', {
                     element: element
                 });
             };
-            const onEdit = element => {
+            const onEditHandler = element => {
                 context.emit('edit', {
                     element: element
                 });
             };
-            const onRemove = element => {
+            const onRemoveHandler = element => {
                 context.emit('remove', {
                     element: element
                 });
             };
-            const onDelete = element => {
+            const onDeleteHandler = element => {
                 context.emit('delete', {
                     element: element
                 });
             };
-            const onMetadata = element => {
+            const onMetadataHandler = element => {
                 context.emit('metadata', {
                     element: element
                 });
@@ -422,7 +422,7 @@
                 expansionStates: new Array(attributes.value.length).fill(false),
                 componentLoaded: computed(_ => state.attributeList.length > 0 && state.attributeValues),
                 isHoveringPossible: computed(_ => {
-                    return !!attrs.reorder || !!attrs.edit || !!attrs.remove || !!attrs.delete;
+                    return !!attrs.onReorder || !!attrs.onEdit || !!attrs.onRemove || !!attrs.onDelete;
                 }),
                 hiddenAttributeList: computed(_ => {
                     if(!state.componentLoaded) return {};
@@ -464,11 +464,11 @@
                 undirtyList,
                 setRef,
                 checkDependency,
-                onReorder,
-                onEdit,
-                onRemove,
-                onDelete,
-                onMetadata,
+                onReorderHandler,
+                onEditHandler,
+                onRemoveHandler,
+                onDeleteHandler,
+                onMetadataHandler,
                 hasEmitter,
                 // PROPS
                 disableDrag,

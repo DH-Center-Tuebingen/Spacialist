@@ -8,6 +8,7 @@ import {
     addEntityType,
     deleteEntityType,
     addAttribute,
+    deleteAttribute,
 } from '../api.js';
 
 import {
@@ -25,6 +26,7 @@ import DeleteBibliographyItem from '../components/modals/bibliography/Delete.vue
 import AddEntityType from '../components/modals/entitytype/Add.vue';
 import DeleteEntityType from '../components/modals/entitytype/Delete.vue';
 import AddAttribute from '../components/modals/attribute/Add.vue';
+import DeleteAttribute from '../components/modals/attribute/Delete.vue';
 
 export function showAbout() {
     const uid = `AboutModal-${getTs()}`;
@@ -221,6 +223,32 @@ export function showAddAttribute(onAdded) {
                         onAdded();
                     }
                     store.dispatch('addAttribute', data);
+                    store.getters.vfm.hide(uid);
+                });
+            }
+        }
+    });
+}
+
+export function showDeleteAttribute(attribute, metadata, onDeleted) {
+    const uid = `DeleteAttribute-${getTs()}`;
+    store.getters.vfm.show({
+        component: DeleteAttribute,
+        bind: {
+            name: uid,
+            attribute: attribute,
+            metadata: metadata,
+        },
+        on: {
+            closing(e) {
+                store.getters.vfm.hide(uid);
+            },
+            confirm(e) {
+                deleteAttribute(attribute.id).then(_ => {
+                    if(!!onDeleted) {
+                        onDeleted();
+                    }
+                    store.dispatch('deleteAttribute', attribute);
                     store.getters.vfm.hide(uid);
                 });
             }

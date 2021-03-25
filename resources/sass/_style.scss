@@ -80,11 +80,19 @@ code.normal {
     width: 1.8rem;
 }
 
-.btn-fab-list > .btn-fab {
+.btn-fab-sm {
+    padding: 0;
+    height: 1.25rem;
+    width: 1.25rem;
+    font-size: 0.8rem;
+    line-height: normal;
+}
+
+.btn-fab-list > .btn-fab, .btn-fab-list > .btn-fab-sm {
     margin-right: 0.25rem;
 }
 
-.btn-fab-list > .btn-fab:last-child {
+.btn-fab-list > .btn-fab:last-child, .btn-fab-list > .btn-fab-sm:last-child {
     margin-right: 0;
 }
 

@@ -13,15 +13,20 @@
         </button>
     </div>
     <div class="modal-body">
-        <div class="alert alert-info" role="alert" v-html="t('global.delete-name.desc', {name: state.data.title})"></div>
-        <div class="alert alert-danger" role="alert">
-            {{
-                t('main.bibliography.modal.delete.alert', {
-                    name: state.data.title,
-                    cnt: state.data.count,
-                }, state.data.count)
-            }}
-        </div>
+        <alert
+            :class="{'mb-0': !state.needsAlert}"
+            :message="t('global.delete-name.desc', {name: state.title})"
+            :type="'info'"
+            :noicon="true" />
+        <alert
+            v-if="state.needsAlert"
+            :message="t('main.bibliography.modal.delete.alert', {
+                    name: state.title,
+                    cnt: state.count,
+                }, state.count)"
+            :type="'warning'"
+            :noicon="false"
+            :icontext="t('global.note')" />
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-outline-danger" @click="confirmDelete()">
@@ -39,6 +44,7 @@
         computed,
         onMounted,
         reactive,
+        toRefs,
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
@@ -52,6 +58,9 @@
         emits: ['delete', 'closing'],
         setup(props, context) {
             const { t } = useI18n();
+            const {
+                data,
+            } = toRefs(props);
 
             // FUNCTIONS
             const confirmDelete = _ => {
@@ -66,7 +75,9 @@
             // DATA
             const state = reactive({
                 show: false,
-                data: props.data,
+                title: computed(_ => data.value.title),
+                count: computed(_ => data.value.count),
+                needsAlert: computed(_ => state.count > 0),
             });
 
             // ON MOUNTED

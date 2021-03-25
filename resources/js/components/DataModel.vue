@@ -93,6 +93,7 @@
     import {
         duplicateEntityType as duplicateEntityTypeApi,
         getEntityTypeOccurrenceCount,
+        getAttributeOccurrenceCount,
     } from '../api.js';
 
     import {
@@ -103,6 +104,7 @@
         showAddEntityType,
         showDeleteEntityType,
         showAddAttribute,
+        showDeleteAttribute,
     } from '../helpers/modal.js';
 
     export default {
@@ -148,6 +150,15 @@
             const createAttribute = _ => {
                 showAddAttribute();
             };
+            const onDeleteAttribute = e => {
+                const attribute = e.element;
+                getAttributeOccurrenceCount(attribute.id).then(data => {
+                    const metadata = {
+                        attributeCount: data,
+                    };
+                    showDeleteAttribute(attribute, metadata);
+                });
+            };
 
             // DATA
             const state = reactive({
@@ -177,6 +188,7 @@
                 duplicateEntityType,
                 requestDeleteEntityType,
                 createAttribute,
+                onDeleteAttribute,
                 // STATE
                 state,
             }

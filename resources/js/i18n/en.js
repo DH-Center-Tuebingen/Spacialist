@@ -74,6 +74,7 @@ const en = {
         upload: 'Upload',
         preview: 'Preview',
         no_preview: 'No preview available',
+        note: 'Note',
         tools: {
             title: 'Tools',
             bibliography: 'Bibliography',
@@ -420,7 +421,7 @@ const en = {
                         title: 'New Attribute'
                     },
                     delete: {
-                        alert: 'Note: If you delete {name}, one attribute value is deleted, too. | Note: If you delete {name}, {cnt} attribute values are deleted, too.'
+                        alert: 'If you delete <span class="fw-bold">{name}</span>, one attribute value is deleted, too. | If you delete <span class="fw-bold">{name}</span>, {cnt} attribute values are deleted, too.'
                     }
                 }
             },
@@ -432,7 +433,7 @@ const en = {
                         title: 'New Entity-Type'
                     },
                     delete: {
-                        alert: 'Note: If you delete {name}, one entity is deleted, too. | Note: If you delete {name}, {cnt} entities are deleted, too.'
+                        alert: 'If you delete <span class="fw-bold">{name}</span>, one entity is deleted, too. | If you delete <span class="fw-bold">{name}</span>, {cnt} entities are deleted, too.'
                     }
                 }
             },
@@ -444,7 +445,7 @@ const en = {
                 },
                 attribute: {
                     title: 'Added Attributes',
-                    alert: 'Note: If you remove {name}, one entry at {refname} is deleted, too. | Note: If you remove {name}, {cnt} entries at {refname} are deleted, too.'
+                    alert: 'If you remove <span class="fw-bold">{name}</span>, one entry at <span class="fw-bold">{refname}</span> is deleted, too. | If you remove <span class="fw-bold">{name}</span>, {cnt} entries at <span class="fw-bold">{refname}</span> are deleted, too.'
                 }
             }
         },
@@ -509,7 +510,6 @@ const en = {
         bibliography: {
             title: 'Literature',
             modal: {
-                paste_info_title: 'Note',
                 paste_info: 'You can use <kbd><kbd>ctrl</kbd> + <kbd>v</kbd></kbd> to fill out the fields with a BibTeX entry from your clipboard.',
                 new: {
                     title: 'New Entry',
@@ -520,7 +520,7 @@ const en = {
                 },
                 delete: {
                     title: 'Delete entry',
-                    alert: 'Note: If you delete {name}, one reference is deleted, too. | Note: If you delete {name}, {cnt} references are deleted, too.',
+                    alert: 'If you delete <span class="fw-bold">{name}</span>, one reference is deleted, too. | If you delete <span class="fw-bold">{name}</span>, {cnt} references are deleted, too.',
                 }
             },
             toast: {

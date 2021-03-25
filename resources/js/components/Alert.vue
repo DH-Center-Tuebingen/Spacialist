@@ -123,7 +123,7 @@
                             break;
                     }
                     if(state.hasIconText) {
-                            classes.push('me-2');
+                        classes.push('me-2');
                     }
                     return classes;
                 }),
@@ -131,7 +131,7 @@
                     let classes = [];
                     if(!state.hasIcon) return classes;
                     if(!state.hasIconText) {
-                            classes.push('me-2');
+                        classes.push('me-2');
                     }
                     return classes;
                 }),

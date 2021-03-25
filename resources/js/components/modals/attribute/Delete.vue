@@ -3,10 +3,10 @@
         classes="modal-container"
         content-class="sp-modal-content sp-modal-content-sm"
         v-model="state.show"
-        name="delete-entity-type-modal">
+        name="delete-attribute-modal">
         <div class="modal-header">
             <h5 class="modal-title">
-                {{ t('global.delete-name.title', {name: translateConcept(entityType.thesaurus_url)}) }}
+                {{ t('global.delete-name.title', {name: translateConcept(attribute.thesaurus_url)}) }}
             </h5>
             <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
             </button>
@@ -14,13 +14,14 @@
         <div class="modal-body">
             <alert
                 :class="{'mb-0': !state.needsAlert}"
-                :message="t('global.delete-name.desc', {name: translateConcept(entityType.thesaurus_url)})"
+                :message="t('global.delete-name.desc', {name: translateConcept(attribute.thesaurus_url)})"
                 :type="'info'"
                 :noicon="true" />
+
             <alert
                 v-if="state.needsAlert"
-                :message="t('main.datamodel.entity.modal.delete.alert', {
-                        name: translateConcept(entityType.thesaurus_url),
+                :message="t('main.datamodel.attribute.modal.delete.alert', {
+                        name: translateConcept(attribute.thesaurus_url),
                         cnt: state.count
                     }, state.count)"
                 :type="'warning'"
@@ -53,7 +54,7 @@
 
     export default {
         props: {
-            entityType: {
+            attribute: {
                 required: true,
                 type: Object,
             },
@@ -66,7 +67,7 @@
         setup(props, context) {
             const { t } = useI18n();
             const {
-                entityType,
+                attribute,
                 metadata,
             } = toRefs(props);
 
@@ -83,7 +84,7 @@
             // DATA
             const state = reactive({
                 show: false,
-                count: computed(_ => metadata.value.entityCount),
+                count: computed(_ => metadata.value.attributeCount),
                 needsAlert: computed(_ => state.count > 0),
             });
 
@@ -98,7 +99,7 @@
                 // HELPERS
                 translateConcept,
                 // PROPS
-                entityType,
+                attribute,
                 // LOCAL
                 confirmDelete,
                 closeModal,

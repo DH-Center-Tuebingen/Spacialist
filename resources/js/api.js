@@ -133,6 +133,16 @@ export async function getEntityTypeOccurrenceCount(id) {
     );
 }
 
+export async function getAttributeOccurrenceCount(aid, etid) {
+    let endpoint = `/editor/dm/attribute/occurrence_count/${aid}`;
+    if(!!etid) {
+        endpoint += `/${etid}`;
+    }
+    return $httpQueue.add(
+        () => http.get(endpoint).then(response => response.data)
+    );
+}
+
 async function fetchComments(id, type) {
     return $httpQueue.add(() => http.get(`/comment/resource/${id}?r=${type}`).then(response => response.data).catch(error => error));
 }
@@ -352,6 +362,12 @@ export async function deleteComment(cid, endpoint = '/comment/{cid}') {
 export async function deleteEntityType(etid) {
     return $httpQueue.add(
         () => http.delete(`editor/dm/entity_type/${etid}`).then(response => response.data)
+    );
+};
+
+export async function deleteAttribute(aid) {
+    return $httpQueue.add(
+        () => http.delete(`editor/dm/attribute/${aid}`).then(response => response.data)
     );
 };
 
