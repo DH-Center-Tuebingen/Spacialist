@@ -31,10 +31,10 @@
                             {{ translateConcept(element.thesaurus_url) }}:
                         </span>
                         <sup class="clickable" v-if="hasEmitter('onMetadata')" @click="onMetadataHandler(element)">
-                            <span :class="getCertaintyClass(localValues[element.id].certainty, 'text')">
+                            <span :class="getCertaintyClass(state.attributeValues[element.id].certainty, 'text')">
                                 <i class="fas fa-fw fa-exclamation"></i>
                             </span>
-                            <span v-if="localValues[element.id].comments_count > 0">
+                            <span v-if="state.attributeValues[element.id].comments_count > 0">
                                 <i class="fas fa-fw fa-comment"></i>
                             </span>
                             <span v-if="metadataAddon(element.thesaurus_url)">

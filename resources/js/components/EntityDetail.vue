@@ -316,7 +316,8 @@
                 if(!state.entity.references[group]) return false;
                 return Object.keys(state.entity.references[group]).length > 0;
             };
-            const showMetadata = attribute => {
+            const showMetadata = e => {
+                const attribute = e.element;
                 router.push({
                     append: true,
                     name: 'entityrefs',
