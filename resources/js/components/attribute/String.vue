@@ -96,7 +96,6 @@
                 // PROPS
                 name,
                 disabled,
-                value,
                 // STATE
                 state,
                 v,
