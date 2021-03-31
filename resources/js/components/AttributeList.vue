@@ -102,8 +102,8 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
-                            :on-change="value => onChange(null, value, element.id)"
-                            :entries="state.attributeValues[element.id].value" />
+                            :entries="state.attributeValues[element.id].value"
+                            @change="updateDirtyState" />
 
                         <epoch-attribute
                             v-else-if="element.datatype == 'epoch' || element.datatype == 'timeperiod'"
@@ -149,7 +149,8 @@
                             :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
-                            :attribute="element" />
+                            :attribute="element"
+                            @change="updateDirtyState" />
 
                         <entity-attribute v-else-if="element.datatype == 'entity'"
                             :ref="el => setRef(el, element.id)"

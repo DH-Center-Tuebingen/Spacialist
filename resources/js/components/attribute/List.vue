@@ -34,9 +34,9 @@
 
 <script>
     import {
-        computed,
         reactive,
         toRefs,
+        watch,
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
@@ -55,47 +55,58 @@
             disabled: {
                 type: Boolean,
             },
-            onChange: {
-                type: Function,
-                required: true,
-            }
         },
+        emits: ['change'],
         setup(props, context) {
             const { t } = useI18n();
             const {
                 name,
                 entries,
                 disabled,
-                onChange,
             } = toRefs(props);
             // FETCH
 
             // FUNCTIONS
-            const onInput = value => {
-                // this.$emit('input', value);
-                // this.onChange(value);
-            };
             const addListEntry = _ => {
-                if(!state.entries.value) {
-                    state.entries.value = [];
-                }
                 state.entries.push(state.input);
-                state.input = "";
-                onInput(state.entries);
+                state.input = '';
+                state.meta.dirty = true;
             };
             const removeListEntry = index => {
                 state.entries.splice(index, 1);
-                onInput(state.entries);
+                state.meta.dirty = true;
             };
             const toggleList = _ => {
                 state.expanded = !state.expanded;
             };
+            const resetFieldState = _ => {
+                state.entries = state.initialValue.slice();
+                state.meta.dirty = false;
+                state.meta.valid = true;
+            };
+            const undirtyField = _ => {
+                state.meta.dirty = false;
+                state.meta.valid = true;
+            };
 
             // DATA
             const state = reactive({
-                input: "",
-                expanded: false,
+                input: '',
                 entries: entries.value.slice(),
+                initialValue: entries.value.slice(),
+                expanded: false,
+                meta: {
+                    dirty: false,
+                    valid: true,
+                }
+            });
+
+            watch(state.meta, (newValue, oldValue) => {
+                console.log("meta updated", state.meta.dirty, state.meta.valid);
+                context.emit('change', {
+                    dirty: state.meta.dirty,
+                    valid: state.meta.valid,
+                });
             });
 
             // RETURN
@@ -104,14 +115,14 @@
                 // HELPERS
                 createAnchorFromUrl,
                 // LOCAL
-                onInput,
                 addListEntry,
                 removeListEntry,
                 toggleList,
+                resetFieldState,
+                undirtyField,
                 // PROPS
                 name,
                 disabled,
-                onChange,
                 // STATE
                 state,
             }
