@@ -61,6 +61,13 @@ const de = {
             confirm: 'Ja, Änderungen verwerfen',
             confirm_and_save: 'Nein, Speichern und fortfahren'
         },
+        error: {
+            alert_title: 'Fehlermeldung:',
+            info_issue: 'Wenn du denkst, dass diese Fehlermeldung ein Bug ist, schaue in unserem <a href="https://github.com/eScienceCenter/Spacialist/issues" target="_blank">Bugtracker</a> auf Github nach, ob der Fehler schon gemeldet wurde oder sogar bereits in einer aktuelleren Version <a href="https://github.com/eScienceCenter/Spacialist/issues?q=is:issue+is:closed" target="_blank">geschlossen</a> wurde (Deine aktuelle Version findest du über Einstellungen > <i class="fas fa-fw fa-info-circle"></i> Über). Wenn es weder gemeldet, noch geschlossen ist, kannst du gerne einen <a href="https://github.com/eScienceCenter/Spacialist/issues/new" target="_blank">neuen Bug</a> melden.',
+            occur: 'Fehler aufgetreten',
+            headers: 'Kopfzeilen',
+            request_failed: `<code class="normal">{method}</code>-Anfrage an den Endpunkt <code class="bg-light-dark rounded px-2 normal text-dark">{url}</code> ist mit Statuscode <span class="fw-medium">{status}</span> fehlgeschlagen.`,
+        },
         search: 'Suche…',
         search_no_results: 'Keine Suchergebnisse',
         search_no_results_for: 'Keine Ergebnisse für den Begriff <span class="fst-italic fw-bold">{term}</span>',

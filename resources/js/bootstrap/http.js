@@ -1,6 +1,10 @@
 import axios from 'axios';
 import router from './router.js';
 
+import {
+    throwError,
+} from '../helpers/helpers.js';
+
 const instance = axios.create();
 
 instance.defaults.baseURL = 'api/v1';

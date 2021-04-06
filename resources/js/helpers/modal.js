@@ -18,6 +18,7 @@ import {
 
 import About from '../components/modals/system/About.vue';
 import Discard from '../components/modals/system/Discard.vue';
+import Error from '../components/modals/system/Error.vue';
 import UserInfo from '../components/modals/user/UserInfo.vue';
 import AddUser from '../components/modals/user/Add.vue';
 import DeactiveUser from '../components/modals/user/Deactivate.vue';
@@ -33,6 +34,57 @@ export function showAbout() {
     store.getters.vfm.show({
         component: About,
         bind: {
+            name: uid,
+        },
+        on: {
+            closing(e) {
+                store.getters.vfm.hide(uid);
+            }
+        }
+    });
+}
+
+export function showDiscard(target, resetData, onBeforeConfirm) {
+    const pushRoute = _ => {
+        store.getters.vfm.hide(uid);
+        resetData();
+        router.push(target);
+    };
+    const uid = `Discard-${getTs()}`;
+    store.getters.vfm.show({
+        component: Discard,
+        bind: {
+            name: uid,
+        },
+        on: {
+            cancel(e) {
+                store.getters.vfm.hide(uid);
+            },
+            confirm(e) {
+                pushRoute();
+            },
+            saveConfirm(e) {
+                if (!!onBeforeConfirm) {
+                    onBeforeConfirm().then(_ => {
+                        pushRoute();
+                    }).catch(e => {
+                        store.getters.vfm.hide(uid);
+                        return false;
+                    });
+                } else {
+                    pushRoute();
+                }
+            },
+        }
+    });
+}
+
+export function showError(data) {
+    const uid = `ErrorModal-${getTs()}`;
+    store.getters.vfm.show({
+        component: Error,
+        bind: {
+            data: data,
             name: uid,
         },
         on: {
@@ -252,41 +304,6 @@ export function showDeleteAttribute(attribute, metadata, onDeleted) {
                     store.getters.vfm.hide(uid);
                 });
             }
-        }
-    });
-}
-
-export function showDiscard(target, resetData, onBeforeConfirm) {
-    const pushRoute = _ => {
-        store.getters.vfm.hide(uid);
-        resetData();
-        router.push(target);
-    };
-    const uid = `Discard-${getTs()}`;
-    store.getters.vfm.show({
-        component: Discard,
-        bind: {
-            name: uid,
-        },
-        on: {
-            cancel(e) {
-                store.getters.vfm.hide(uid);
-            },
-            confirm(e) {
-                pushRoute();
-            },
-            saveConfirm(e) {
-                if(!!onBeforeConfirm) {
-                    onBeforeConfirm().then(_ => {
-                        pushRoute();
-                    }).catch(e => {
-                        store.getters.vfm.hide(uid);
-                        return false;
-                    });
-                } else {
-                    pushRoute();
-                }
-            },
         }
     });
 }

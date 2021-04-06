@@ -61,6 +61,13 @@ const en = {
             confirm: 'Yes, discard changes',
             confirm_and_save: 'No, save and continue'
         },
+        error: {
+            alert_title: 'Error Message:',
+            info_issue: 'If you think this is a bug, please have a look at our <a href="https://github.com/eScienceCenter/Spacialist/issues" target="_blank">issue tracker</a> on github to see if this has been already reported or <a href="https://github.com/eScienceCenter/Spacialist/issues?q=is:issue+is:closed" target="_blank">closed</a> in a later version (Your current version can be found in Settings > <i class="fas fa-fw fa-info-circle"></i> About Dialog). If it is neither reported nor closed, feel free to <a href="https://github.com/eScienceCenter/Spacialist/issues/new" target="_blank">open a new issue</a>.',
+            occur: 'Error occured',
+            headers: 'Headers',
+            request_failed: `<code class="normal">{method}</code>-Request to endpoint <code class="bg-light-dark rounded px-2 normal text-dark">{url}</code> failed with status code <span class="fw-medium">{status}</span>.`,
+        },
         search: 'Search…',
         search_no_results: 'No results',
         search_no_results_for: 'No results for term <span class="fst-italic fw-bold">{term}</span>',
