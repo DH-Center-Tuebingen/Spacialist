@@ -102,7 +102,6 @@
             });
 
             watch(state.meta, (newValue, oldValue) => {
-                console.log("meta updated", state.meta.dirty, state.meta.valid);
                 context.emit('change', {
                     dirty: state.meta.dirty,
                     valid: state.meta.valid,
