@@ -26,6 +26,9 @@ export const store = createStore({
             entities: {},
             file: {},
             geometryTypes: [],
+            mainView: {
+                tab: 'references',
+            },
             permissions: [],
             preferences: {},
             systemPreferences: {},
@@ -129,6 +132,9 @@ export const store = createStore({
         setConcepts(state, data) {
             state.concepts = data;
         },
+        setMainViewTab(state, data) {
+            state.mainView.tab = data;
+        },
         setEntityTypes(state, data) {
             for(let k in data) {
                 const et = data[k];
@@ -211,6 +217,9 @@ export const store = createStore({
         },
         sortTree({commit}, sort) {
             commit('sortTree', sort)
+        },
+        setMainViewTab({commit}, data) {
+            commit('setMainViewTab', data);
         },
         async getEntity({commit, state}, entityId) {
             let entity = state.entities[entityId];
@@ -402,6 +411,9 @@ export const store = createStore({
         },
         geometryTypes: state => {
             return state.geometryTypes;
+        },
+        mainView: state => {
+            return state.mainView;
         },
         tree: state => {
             return state.tree;

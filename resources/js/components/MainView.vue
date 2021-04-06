@@ -8,28 +8,22 @@
         <div :class="`h-100 border-start border-end col-md-${state.columnPref.center}`" id="attribute-container" v-dcan="'view_concepts|view_concept_props'" v-if="state.columnPref.center > 0">
             <router-view>
             </router-view>
-            <!-- <router-view
-                :selected-entity="selectedEntity"
-                :bibliography="bibliography"
-                @detail-updated="setDetailDirty"
-            >
-            </router-view> -->
         </div>
         <div :class="`h-100 d-flex flex-column col-md-${state.columnPref.right}`" id="addon-container" v-if="state.columnPref.right > 0">
-            <!-- <ul class="nav nav-tabs">
-                <li class="nav-item" v-for="plugin in $getTabPlugins()">
+            <ul class="nav nav-tabs">
+                <!-- <li class="nav-item" v-for="plugin in $getTabPlugins()">
                     <router-link class="nav-link" :class="{active: tab == plugin.key}" :to="{ query: { tab: plugin.key }}" append>
                         <i class="fas fa-fw" :class="plugin.icon"></i> {{ $t(plugin.label) }}
                     </router-link>
-                </li>
+                </li> -->
                 <li class="nav-item">
-                    <a href="#" class="nav-link" :class="{active: tab == 'references', disabled: !selectedEntity.id}" @click.prevent="setReferencesTab()">
-                        <i class="fas fa-fw fa-bookmark"></i> {{ $t('main.entity.references.title') }}
+                    <a href="#" class="nav-link" :class="{active: state.tab == 'references', disabled: !state.entity.id}" @click.prevent="setTab('references')">
+                        <i class="fas fa-fw fa-bookmark"></i> {{ t('main.entity.references.title') }}
                     </a>
                 </li>
             </ul>
             <div class="mt-2 col px-0">
-                <keep-alive>
+                <!-- <keep-alive>
                     <component
                         :selected-entity="selectedEntity"
                         :entity-data-loaded="dataLoaded"
@@ -37,17 +31,17 @@
                         :params="$route.query"
                         v-on:update:link="updateLink">
                     </component>
-                </keep-alive>
-                <div v-show="tab == 'references'" class="h-100 scroll-y-auto">
-                    <p class="alert alert-info" v-if="!hasReferences">
-                        {{ $t('main.entity.references.empty') }}
+                </keep-alive> -->
+                <div v-show="state.tab == 'references'" class="h-100 scroll-y-auto">
+                    <p class="alert alert-info" v-if="!state.hasReferences">
+                        {{ t('main.entity.references.empty') }}
                     </p>
-                    <div v-else v-for="(referenceGroup, key) in selectedEntity.references" class="mb-2">
+                    <div v-else v-for="(referenceGroup, key) in state.entity.references" class="mb-2" :key="key">
                         <h5 class="mb-1">
-                            <a href="#" @click.prevent="showMetadataForReferenceGroup(referenceGroup)">{{ $translateConcept(key) }}</a>
+                            <a href="#" @click.prevent="showMetadataForReferenceGroup(referenceGroup)">{{ translateConcept(key) }}</a>
                         </h5>
                         <div class="list-group">
-                            <a class="list-group-item list-group-item-action" v-for="reference in referenceGroup">
+                            <a class="list-group-item list-group-item-action" v-for="(reference, i) in referenceGroup" :key="i">
                                 <blockquote class="blockquote mb-0">
                                     <p class="mb-0">
                                         {{ reference.description }}
@@ -62,10 +56,8 @@
                         </div>
                     </div>
                 </div>
-            </div> -->
-            FILES/MAP COLUMN
+            </div>
         </div>
-        <!-- <discard-changes-modal :name="discardModal"/> -->
     </div>
 </template>
 
@@ -75,16 +67,48 @@
         onMounted,
         reactive,
     } from 'vue';
+    
+    import {
+        onBeforeRouteUpdate,
+    } from 'vue-router';
+
+    import { useI18n } from 'vue-i18n';
+
+    import {
+        useRoute,
+    } from 'vue-router';
+
     import store from '../bootstrap/store.js';
+    import router from '../bootstrap/router.js';
+
+    import {
+        translateConcept,
+    } from '../helpers/helpers.js';
 
     export default {
-        setup(props) {
+        setup(props, context) {
+            const { t } = useI18n();
+            const currentRoute = useRoute();
+
+            // FUNCTIONS
+            const setTab = to => {
+                router.push({
+                    query: {
+                        ...currentRoute.query,
+                        tab: to,
+                    },
+                });
+            };
+
             // DATA
             const state = reactive({
-                concepts: computed(_ => store.state.concepts),
-                entityTypes: computed(_ => store.state.entityTypes),
+                tab: computed(_ => store.getters.mainView.tab),
+                concepts: computed(_ => store.getters.concepts),
+                entity: computed(_ => store.getters.entity),
+                hasReferences: computed(_ => !!state.entity.references),
+                entityTypes: computed(_ => store.getters.entityTypes),
                 columnPref: computed(_ => store.getters.preferenceByKey('prefs.columns')),
-                users: computed(_ => store.state.users),
+                users: computed(_ => store.getters.users),
             });
 
             // ON MOUNTED
@@ -92,10 +116,19 @@
                 console.log("mainview component mounted");
             });
 
+            onBeforeRouteUpdate(async (to, from) => {
+                if(to.query.tab !== from.query.tab) {
+                    store.dispatch('setMainViewTab', to.query.tab);
+                }
+            });
+
             // RETURN
             return {
+                t,
                 // HELPERS
+                translateConcept,
                 // LOCAL
+                setTab,
                 // STATE
                 state,
             };
