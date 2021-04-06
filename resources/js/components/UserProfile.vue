@@ -29,7 +29,7 @@
                         <i class="fas fa-fw fa-save"></i>
                         {{ t('global.save') }}
                     </button>
-                    <button type="button" class="btn btn-outline-warning ms-3" @click="resetUserInfo()">
+                    <button type="button" class="btn btn-outline-warning ms-3" :disabled="!state.isDirty" @click="resetUserInfo()">
                         <i class="fas fa-fw fa-undo"></i>
                         {{ t('global.reset') }}
                     </button>
@@ -89,6 +89,7 @@
         computed,
         reactive,
         ref,
+        watch,
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
@@ -147,6 +148,7 @@
             };
             const resetUserInfo = _ => {
                 state.localUser = appliedMetadata(state.user);
+                state.isDirty = false;
             };
             const deleteAvatar = _ => {
                 deleteUserAvatar(state.user.id).then(data => {
@@ -196,6 +198,12 @@
                 fileQueue: [],
                 invalidOrcid: ref(false),
                 user: computed(_ => appliedMetadata(getUser())),
+                isDirty: false,
+            });
+
+            // WATCHER
+            watch(state.localUser, (newValue, oldValue) => {
+                state.isDirty = true;
             });
 
             // RETURN
