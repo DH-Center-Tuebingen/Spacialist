@@ -6,8 +6,8 @@
                 <i class="fas fa-fw fa-plus"></i> {{ t('main.role.add-button') }}
             </button>
         </h4>
-        <div class="table-responsive">
-            <table class="table table-striped table-hover table-light flex-grow-1" v-if="state.dataInitialized">
+        <div class="table-responsive flex-grow-1">
+            <table class="table table-striped table-hover table-light mb-0" v-if="state.dataInitialized">
                 <thead class="sticky-top">
                     <tr>
                         <th>{{ t('global.name') }}</th>
