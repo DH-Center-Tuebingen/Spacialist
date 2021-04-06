@@ -1,7 +1,7 @@
 import { createApp } from 'vue';
 
 // Third-Party Libs
-const {default: PQueue} = require('p-queue');
+import PQueue from 'p-queue';
 import hljs from 'highlight.js';
 
 // Init plugins
