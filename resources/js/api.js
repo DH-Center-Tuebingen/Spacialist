@@ -104,8 +104,16 @@ export async function getEntityComments(id) {
     return fetchComments(id, 'entity');
 };
 
-export async function getAttributeValueComments(id) {
-    return fetchComments(id, 'attribute_value');
+export async function getAttributeValueComments(eid, aid) {
+    return fetchComments(eid, 'attribute_value', aid);
+};
+
+export async function getCommentReplies(cid, endpoint = '/comment/{cid}/reply') {
+    endpoint = endpoint.replaceAll('{cid}', cid);
+
+    return $httpQueue.add(
+        () => http.get(endpoint).then(response => response.data)
+    );
 };
 
 export async function getEntityData(id) {
@@ -119,7 +127,20 @@ export async function getEntityData(id) {
             return response.data;
         })
     );
-}
+};
+
+export async function getEntityReferences(id) {
+    return await $httpQueue.add(
+        () => http.get(`/entity/${id}/reference`)
+        .then(response => {
+            // PHP returns Array if it is empty
+            if(response.data instanceof Array) {
+                response.data = {};
+            }
+            return response.data;
+        })
+    );
+};
 
 export async function getEntityTypeAttributes(id) {
     return await $httpQueue.add(
@@ -143,8 +164,12 @@ export async function getAttributeOccurrenceCount(aid, etid) {
     );
 }
 
-async function fetchComments(id, type) {
-    return $httpQueue.add(() => http.get(`/comment/resource/${id}?r=${type}`).then(response => response.data).catch(error => error));
+async function fetchComments(id, type, aid = null) {
+    let endpoint = `/comment/resource/${id}?r=${type}`;
+    if(!!aid) {
+        endpoint = `${endpoint}&aid=${aid}`;
+    }
+    return $httpQueue.add(() => http.get(endpoint).then(response => response.data).catch(error => error));
 }
 
 export async function getBibtexFile() {
@@ -205,6 +230,12 @@ export async function postComment(content, resource, replyTo = null, metadata = 
     if(metadata) {
         data.metadata = metadata;
     }
+    if(!content) {
+        if(!data.metadata) {
+            data.metadata = {};
+        }
+        data.metadata.is_empty = true;
+    }
 
     return $httpQueue.add(
         () => http.post(endpoint, data).then(response => response.data)
@@ -220,14 +251,6 @@ export async function editComment(cid, content, endpoint = '/comment/{cid}') {
     
     return $httpQueue.add(
         () => http.patch(endpoint, data).then(response => response.data)
-    );
-};
-
-export async function getCommentReplies(cid, endpoint = '/comment/{cid}/reply') {
-    endpoint = endpoint.replaceAll('{cid}', cid);
-    
-    return $httpQueue.add(
-        () => http.get(endpoint).then(response => response.data)
     );
 };
 
@@ -322,6 +345,12 @@ export async function getFilteredActivity(pageUrl, payload) {
 };
 
 // PATCH
+export async function patchAttribute(entityId, attributeId, data) {
+    $httpQueue.add(
+        () => http.patch(`/entity/${entityId}/attribute/${attributeId}`, data).then(response => response.data)
+    );
+};
+
 export async function patchPreferences(data, uid) {
     const endpoint = !!uid ? `preference/${uid}` : 'preference';
     return await http.patch(endpoint, data).then(response => response.data);

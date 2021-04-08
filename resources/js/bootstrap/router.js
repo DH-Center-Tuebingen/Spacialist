@@ -4,6 +4,7 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import Login from '../components/Login.vue';
 import MainView from '../components/MainView.vue';
 import EntityDetail from '../components/EntityDetail.vue';
+import EntityReferenceModal from '../components/modals/entity/Reference.vue';
 // Tools
 import Bibliography from '../components/BibliographyTable.vue';
 import GlobalActivity from '../components/GlobalActivity.vue';
@@ -120,8 +121,7 @@ export const router = createRouter({
                         {
                             path: 'refs/:aid',
                             name: 'entityrefs',
-                            // component: ReferenceModal
-                            component: DummyComponent
+                            component: EntityReferenceModal,
                         }
                     ]
                 }

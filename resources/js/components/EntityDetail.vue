@@ -98,10 +98,10 @@
                     </div>
                     <div v-else-if="state.commentFetchFailed" class="mt-2">
                         <p class="alert alert-danger mb-0">
-                            {{ $t('global.comments.fetching_failed') }}
+                            {{ t('global.comments.fetching_failed') }}
                             <button type="button" class="d-block mt-2 btn btn-xs btn-outline-success" @click="fetchComments">
                                 <i class="fas fa-fw fa-sync"></i>
-                                {{ $t('global.comments.retry_failed') }}
+                                {{ t('global.comments.retry_failed') }}
                             </button>
                         </p>
                     </div>
@@ -117,17 +117,14 @@
                 </div>
             </div>
         </div>
-
-        <!-- <router-view
-            v-dcan="'view_concept_props'"
-            :bibliography="bibliography"
-            :refs="attributeReferences">
-        </router-view> -->
+        <router-view
+            v-if="state.attributesFetched"
+            :entity="state.entity">
+        </router-view>
     </div>
 </template>
 
 <script>
-    // import { EventBus } from '../event-bus.js';
     import {
         computed,
         onBeforeUpdate,
@@ -148,6 +145,8 @@
     import store from '../bootstrap/store.js';
     import router from '../bootstrap/router.js';
 
+    import { useToast } from '../plugins/toast.js';
+
     import { date } from '../helpers/filters.js';
     import {
         getEntityComments,
@@ -158,12 +157,12 @@
         getEntityType,
         getEntityTypeAttributeSelections,
         getEntityTypeDependencies,
-        getUserBy,
         translateConcept
     } from '../helpers/helpers.js';
     import {
         showDiscard,
         showUserInfo,
+        canShowReferenceModal,
     } from '../helpers/modal.js';
 
     export default {
@@ -182,6 +181,7 @@
         setup(props) {
             const { t } = useI18n();
             const route = useRoute();
+            const toast = useToast();
 
             // FETCH
             store.dispatch('getEntity', route.params.id).then(_ => {
@@ -318,14 +318,25 @@
             };
             const showMetadata = e => {
                 const attribute = e.element;
-                router.push({
-                    append: true,
-                    name: 'entityrefs',
-                    params: {
-                        aid: attribute.id
-                    },
-                    query: route.query
-                });
+                const canOpen = canShowReferenceModal(attribute.id);
+                if(canOpen) {
+                    router.push({
+                        append: true,
+                        name: 'entityrefs',
+                        query: route.query,
+                        params: {
+                            aid: attribute.id,
+                        },
+                    });
+                } else {
+                    toast.$toast('You have to enter data first, before you can edit metadata.', '', {
+                        duration: 2500,
+                        autohide: true,
+                        channel: 'warning',
+                        icon: true,
+                        simple: true,
+                    });
+                }
             };
             const updateDependencyCounter = event => {
                 state.hiddenAttributes = event.counter;
@@ -406,9 +417,10 @@
             });
 
             watch(_ => route.params,
-                async newParams => {
-                    state.initFinished = false;
+                async (newParams, oldParams) => {
+                    if(newParams.id == oldParams.id) return;
                     if(!newParams.id) return;
+                    state.initFinished = false;
                     store.dispatch('getEntity', newParams.id).then(_ => {
                         getEntityTypeAttributeSelections();
                         state.initFinished = true;
@@ -435,6 +447,9 @@
                         store.dispatch('resetEntity');
                         return true;
                     }
+                } else {
+                    // if not id changed, but query, we do not need discard modal
+                    return true;
                 }
             });
 

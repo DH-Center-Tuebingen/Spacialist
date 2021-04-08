@@ -131,14 +131,14 @@
                 </span>
             </div>
             <form role="form" @submit.prevent="postComment">
-                <div class="form-group d-flex">
+                <div class="mb-3 d-flex">
                     <textarea class="form-control" v-model="state.composedMessage" id="comment-content" ref="messageInput" :placeholder="t('global.comments.text_placeholder')"></textarea>
                     <div class="ms-2 mt-auto">
                         <emoji-picker @selected="addEmoji"></emoji-picker>
                     </div>
                 </div>
                 <div class="text-center mt-2">
-                    <button type="submit" class="btn btn-outline-success">
+                    <button type="submit" class="btn btn-outline-success" :disabled="disabled">
                         <i class="fas fa-fw fa-save"></i>
                         {{ t('global.comments.submit') }}
                     </button>
@@ -178,6 +178,11 @@
 
     export default {
         props: {
+            disabled: {
+                required: false,
+                type: Boolean,
+                default: false,
+            },
             comments: {
                 required: true,
                 type: Array
@@ -199,6 +204,10 @@
             },
             resource: {
                 required: true,
+                type: Object,
+            },
+            metadata: {
+                required: false,
                 type: Object,
             },
             postUrl: {
@@ -236,11 +245,13 @@
         setup(props, context) {
             const { t } = useI18n();
             const {
+                disabled,
                 comments,
                 avatar,
                 hideButton,
                 postForm,
                 resource,
+                metadata,
                 postUrl,
                 editUrl,
                 deleteUrl,
@@ -315,10 +326,11 @@
                 }
             };
             const postComment = _ => {
-                if(!state.composedMessage) return;
+                // comment needs at least changed metadata OR a message
+                if(disabled.value || (!state.composedMessage && !metadata.value)) return;
 
                 const replyTo = state.replyTo.comment_id || null;
-                postCommentApi(state.composedMessage, resource.value, replyTo, null, postUrl.value).then(data => {
+                postCommentApi(state.composedMessage, resource.value, replyTo, metadata.value, postUrl.value).then(data => {
                     context.emit('added', {
                         comment: data,
                         replyTo: replyTo,
@@ -375,6 +387,7 @@
                 isDeleted,
                 emptyMetadata,
                 // PROPS
+                disabled,
                 comments,
                 avatar,
                 postForm,

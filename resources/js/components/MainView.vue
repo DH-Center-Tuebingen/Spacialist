@@ -32,26 +32,28 @@
                         v-on:update:link="updateLink">
                     </component>
                 </keep-alive> -->
-                <div v-show="state.tab == 'references'" class="h-100 scroll-y-auto">
+                <div v-show="isTab('references') && !!state.entity.id" class="h-100 scroll-y-auto">
                     <p class="alert alert-info" v-if="!state.hasReferences">
                         {{ t('main.entity.references.empty') }}
                     </p>
-                    <div v-else v-for="(referenceGroup, key) in state.entity.references" class="mb-2" :key="key">
-                        <h5 class="mb-1">
-                            <a href="#" @click.prevent="showMetadataForReferenceGroup(referenceGroup)">{{ translateConcept(key) }}</a>
+                    <div v-else v-for="(referenceGroup, key) in state.entity.references" class="mb-3" :key="key">
+                        <h5 class="mb-1 fw-medium">
+                            <a href="#" class="text-decoration-none" @click.prevent="showMetadataForReferenceGroup(referenceGroup)">
+                                {{ translateConcept(key) }}
+                            </a>
                         </h5>
-                        <div class="list-group">
+                        <div class="list-group ps-2 w-90">
                             <a class="list-group-item list-group-item-action" v-for="(reference, i) in referenceGroup" :key="i">
-                                <blockquote class="blockquote mb-0">
-                                    <p class="mb-0">
+                                <blockquote class="blockquote fw-medium fs-1">
+                                    <p class="text-muted">
                                         {{ reference.description }}
                                     </p>
-                                    <footer class="blockquote-footer">
-                                        {{ reference.bibliography.author }} in <cite :title="reference.bibliography.title">
-                                            {{ reference.bibliography.title }} ,{{ reference.bibliography.year }}
-                                        </cite>
-                                    </footer>
                                 </blockquote>
+                                <figcaption class="blockquote-footer mb-0">
+                                    {{ reference.bibliography.author }} in <cite :title="reference.bibliography.title">
+                                        {{ reference.bibliography.title }} ,{{ reference.bibliography.year }}
+                                    </cite>
+                                </figcaption>
                             </a>
                         </div>
                     </div>
@@ -81,14 +83,20 @@
     import store from '../bootstrap/store.js';
     import router from '../bootstrap/router.js';
 
+    import { useToast } from '../plugins/toast.js';
+
     import {
         translateConcept,
     } from '../helpers/helpers.js';
+    import {
+        canShowReferenceModal,
+    } from '../helpers/modal.js';
 
     export default {
         setup(props, context) {
             const { t } = useI18n();
             const currentRoute = useRoute();
+            const toast = useToast();
 
             // FUNCTIONS
             const setTab = to => {
@@ -97,7 +105,36 @@
                         ...currentRoute.query,
                         tab: to,
                     },
+                    append: true,
                 });
+            };
+            const isTab = id => {
+                return state.tab == id;
+            };
+            const showMetadataForReferenceGroup = referenceGroup => {
+                if(!referenceGroup) return;
+                if(!state.entity) return;
+                const aid = referenceGroup[0].attribute_id;
+
+                const canOpen = canShowReferenceModal(aid);
+                if(canOpen) {
+                    router.push({
+                        append: true,
+                        name: 'entityrefs',
+                        query: currentRoute.query,
+                        params: {
+                            aid: aid,
+                        },
+                    });
+                } else {
+                    toast.$toast('You have to enter data first, before you can edit metadata.', '', {
+                        duration: 2500,
+                        autohide: true,
+                        channel: 'warning',
+                        icon: true,
+                        simple: true,
+                    });
+                }
             };
 
             // DATA
@@ -129,6 +166,8 @@
                 translateConcept,
                 // LOCAL
                 setTab,
+                isTab,
+                showMetadataForReferenceGroup,
                 // STATE
                 state,
             };
@@ -253,19 +292,6 @@
         //     setActivePlugin: function(plugin) {
         //         this.setActiveTab(plugin.key);
         //         this.activePlugin = plugin.tag;
-        //     },
-        //     showMetadataForReferenceGroup(referenceGroup) {
-        //         if(!referenceGroup) return;
-        //         if(!this.selectedEntity) return;
-        //         const aid = referenceGroup[0].attribute_id;
-        //         this.$router.push({
-        //             name: 'entityrefs',
-        //             params: {
-        //                 aid: aid
-        //             },
-        //             query: this.$route.query,
-        //             append: true
-        //         });
         //     },
         //     updateLink(geoId, entityId) {
         //         if(entityId != this.selectedEntity.id) {

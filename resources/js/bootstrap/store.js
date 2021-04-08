@@ -6,7 +6,10 @@ import {
     fillEntityData,
     only,
 } from '../helpers/helpers.js';
-import { getEntityData } from '../api.js';
+import {
+    getEntityData,
+    getEntityReferences,
+} from '../api.js';
 
 export const store = createStore({
     state() {
@@ -242,6 +245,7 @@ export const store = createStore({
             } else {
                 entity.data = await getEntityData(entityId);
                 fillEntityData(entity.data, entity.entity_type_id);
+                entity.references = await getEntityReferences(entityId);
                 commit('setEntity', entity);
                 
                 return;

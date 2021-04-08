@@ -307,3 +307,8 @@ export function showDeleteAttribute(attribute, metadata, onDeleted) {
         }
     });
 }
+
+export function canShowReferenceModal(aid) {
+    const attrValue = store.getters.entity.data[aid];
+    return !!attrValue && attrValue.id;
+}
