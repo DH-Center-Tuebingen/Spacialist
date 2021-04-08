@@ -23,7 +23,7 @@
             :noicon="false"
             :icontext="t('global.note')" />
         <form role="form" id="addBibliographyItemForm" class="col px-0 scroll-y-auto" name="addBibliographyItemForm" @submit.prevent="submitItem()">
-            <div class="form-group">
+            <div class="mb-3">
                 <label class="col-form-label col-md-3" for="type">{{ t('global.type') }}:</label>
                 <div class="col-md-9">
                     <multiselect
@@ -38,7 +38,7 @@
                     </multiselect>
                 </div>
             </div>
-            <div class="form-group" v-for="field in state.typeFields" :key="field.id">
+            <div v-for="field in state.typeFields" :key="field.id">
                 <label class="col-form-label col-md-3">
                     {{ t(`main.bibliography.column.${field}`) }}:
                 </label>

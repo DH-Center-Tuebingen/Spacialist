@@ -14,7 +14,7 @@
                 </h6>
                 <p class="card-text">
                     <form @submit.prevent="login">
-                        <div class="form-group mb-2">
+                        <div class="mb-2">
                             <label for="email" class="col-md-4 col-form-label">
                                 {{ t('global.email_or_nick') }}
                                 <i class="fas fa-fw fa-user"></i>
@@ -34,7 +34,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group mb-2">
+                        <div class="mb-2">
                             <label for="password" class="col-md-4 col-form-label">
                                 {{ t('global.password') }}
                                 <i class="fas fa-fw fa-unlock-alt"></i>
@@ -51,13 +51,13 @@
                             </div>
                         </div>
 
-                        <div class="form-group mb-2" v-if="state.error.global">
+                        <div class="mb-2" v-if="state.error.global">
                             <div class="col-md-6 text-danger small">
                                 {{ state.error.global }}
                             </div>
                         </div>
 
-                        <div class="form-group mb-2">
+                        <div class="mb-2">
                             <div class="col-md-6 col-md-offset-4">
                                 <div class="checkbox">
                                     <label>
@@ -67,7 +67,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <div>
                             <div class="col-md-8 col-md-offset-4">
                                 <button type="submit" class="btn btn-primary">
                                     {{ t('global.login') }}

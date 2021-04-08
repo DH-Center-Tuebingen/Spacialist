@@ -3,7 +3,7 @@
         classes="modal-container"
         content-class="sp-modal-content sp-modal-content-sm"
         v-model="state.show"
-        name="delete-entity-type-modal">
+        name="add-attribute-modal">
         <div class="modal-header">
             <h5 class="modal-title">
                 {{ t('main.datamodel.attribute.modal.new.title') }}

@@ -40,13 +40,13 @@
                     <h4>
                         {{ t('global.user.personal_info_title') }}
                     </h4>
-                    <div class="form-group">
+                    <div class="mb-2">
                         <label class="fw-bold" for="profile-user-info-name">
                             {{ t('global.name') }}:
                         </label>
                         <input type="text" class="form-control" id="profile-user-info-name" v-model="state.localUser.name" />
                     </div>
-                    <div class="form-group mt-2">
+                    <div>
                         <label class="fw-bold" for="profile-user-info-nickname">
                             {{ t('global.nickname') }}:
                         </label>
@@ -57,19 +57,19 @@
                     <h4>
                         {{ t('global.user.contact') }}
                     </h4>
-                    <div class="form-group">
+                    <div class="mb-2">
                         <label class="fw-bold" for="profile-user-contact-email">
                             <i class="fas fa-fw fa-envelope"></i> {{ t('global.email') }}:
                         </label>
                         <input type="email" class="form-control" id="profile-user-contact-email" v-model="state.localUser.email" />
                     </div>
-                    <div class="form-group mt-2">
+                    <div class="mb-2">
                         <label class="fw-bold" for="profile-user-contact-phonenumber">
                             <i class="fas fa-fw fa-mobile-alt"></i> {{ t('global.phonenumber') }}:
                         </label>
                         <input type="tel" class="form-control" id="profile-user-contact-phonenumber" v-model="state.localUser.metadata.phonenumber" />
                     </div>
-                    <div class="form-group mt-2">
+                    <div>
                         <label class="fw-bold" for="profile-user-contact-orcid">
                             <i class="fab fa-fw fa-orcid"></i> {{ t('global.orcid') }}:
                         </label>

@@ -2,7 +2,7 @@
     <div class="row">
         <div class="col-md-4">
             <form role="form" id="filter-activity-form" v-show="!state.hideFilterPanel" name="filter-activity-form" @submit.prevent="filterActivity(state.filters)">
-                <div class="form-group row mb-3" v-if="!state.hideUser">
+                <div class="row mb-3" v-if="!state.hideUser">
                     <label class="col-form-label col-md-3" for="filter-activity-user">
                         {{ t('global.users', 2) }}:
                     </label>
@@ -21,7 +21,7 @@
                         </multiselect>
                     </div>
                 </div>
-                <div class="form-group row mb-3">
+                <div class="row mb-3">
                     <label class="col-form-label col-md-3" for="filter-activity-timespan-from">
                         {{ t('global.timespan') }}:
                     </label>
@@ -68,7 +68,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-group row mb-3">
+                <div class="row mb-3">
                     <label class="col-form-label col-md-3" for="filter-activity-rawdata">
                         {{ t('main.activity.search_in_raw_data') }}:
                     </label>
