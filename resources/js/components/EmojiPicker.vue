@@ -1,5 +1,5 @@
 <template>
-    <button type="button" class="border-0 text-muted" :id="state.pickId">
+    <button type="button" class="btn btn-outline-secondary btn-sm px-1 py-05" :id="state.pickId">
         <span class="far fa-fw fa-laugh"></span>
     </button>
 </template>

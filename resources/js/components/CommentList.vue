@@ -106,7 +106,7 @@
             </div>
             <div class="text-center mt-2" v-show="state.displayHideButton">
                 <button class="btn btn-sm btn-outline-primary" @click="toggleHideState()">
-                    <i class="fas fa-fw fa-comments"></i>
+                    <i class="fas fa-fw fa-comments me-1"></i>
                     <span v-if="state.hideComments">
                         {{ t('global.comments.show') }}
                         ({{ comments.length }})
