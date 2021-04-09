@@ -43,17 +43,24 @@
                             </a>
                         </h5>
                         <div class="list-group ps-2 w-90">
-                            <a class="list-group-item list-group-item-action" v-for="(reference, i) in referenceGroup" :key="i">
-                                <blockquote class="blockquote fw-medium fs-1">
-                                    <p class="text-muted">
-                                        {{ reference.description }}
-                                    </p>
-                                </blockquote>
-                                <figcaption class="blockquote-footer mb-0">
-                                    {{ reference.bibliography.author }} in <cite :title="reference.bibliography.title">
-                                        {{ reference.bibliography.title }} ,{{ reference.bibliography.year }}
-                                    </cite>
-                                </figcaption>
+                            <a class="list-group-item list-group-item-action d-flex flex-row" v-for="(reference, i) in referenceGroup" :key="i">
+                                <div class="flex-grow-1">
+                                    <blockquote class="blockquote fs-09">
+                                        <p class="text-muted">
+                                            {{ reference.description }}
+                                        </p>
+                                    </blockquote>
+                                    <figcaption class="blockquote-footer fw-medium mb-0">
+                                        {{ reference.bibliography.author }} in <cite :title="reference.bibliography.title">
+                                            {{ reference.bibliography.title }} ,{{ reference.bibliography.year }}
+                                        </cite>
+                                    </figcaption>
+                                </div>
+                                <div>
+                                    <span class="text-muted fw-light small">
+                                        {{ date(reference.updated_at) }}
+                                    </span>
+                                </div>
                             </a>
                         </div>
                     </div>
@@ -88,6 +95,9 @@
     import {
         translateConcept,
     } from '../helpers/helpers.js';
+    import {
+        date,
+    } from '../helpers/filters.js';
     import {
         canShowReferenceModal,
     } from '../helpers/modal.js';
@@ -164,6 +174,7 @@
                 t,
                 // HELPERS
                 translateConcept,
+                date,
                 // LOCAL
                 setTab,
                 isTab,

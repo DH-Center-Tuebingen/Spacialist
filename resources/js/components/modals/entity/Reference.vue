@@ -10,11 +10,15 @@
         <div class="modal-header">
             <h5 class="modal-title">
                 {{ t('main.entity.references.title') }}
+                -
+                <small class="fw-medium text-muted">
+                    {{ translateConcept(state.attribute.thesaurus_url) }}
+                </small>
             </h5>
             <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
             </button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body my-2">
             <h5>
                 {{ t('main.entity.references.certainty') }}
             </h5>
@@ -53,103 +57,102 @@
             <h5>
                 {{ t('main.entity.references.bibliography.title') }}
             </h5>
-            <table class="table table-hover">
-                <tbody>
-                    <tr class="d-flex flex-row" v-for="reference in state.references" :key="reference.id">
-                        <td class="text-start py-2 col px-0 ps-1">
-                            <div class="d-flex flex-column">
-                                <h6>{{ reference.bibliography.title }}</h6>
-                                <span class="mb-0">
-                                    {{ reference.bibliography.author }}, <span class="text-muted fw-light">{{ reference.bibliography.year}}</span>
-                                </span>
+            <ul class="list-group">
+                <li class="list-group-item d-flex flex-row justify-content-between" v-for="reference in state.references" :key="reference.id">
+                    <div class="flex-grow-1">
+                        <div v-if="state.editItem.id !== reference.id">
+                            <blockquote class="blockquote fs-09">
+                                <p class="text-muted">
+                                    {{ reference.description }}
+                                </p>
+                            </blockquote>
+                            <figcaption class="blockquote-footer fw-medium mb-0">
+                                {{ reference.bibliography.author }} in <cite :title="reference.bibliography.title">
+                                    {{ reference.bibliography.title }} ,{{ reference.bibliography.year }}
+                                </cite>
+                            </figcaption>
+                        </div>
+                        <div class="d-flex align-items-center" v-else>
+                            <input type="text" class="form-control me-1" v-model="state.editItem.description" />
+                            <button type="button" class="btn btn-outline-success btn-sm me-1" @click.prevent="onUpdateReference(state.editItem)">
+                                <i class="fas fa-fw fa-check"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-danger btn-sm" @click.prevent="cancelEditReference()">
+                                <i class="fas fa-fw fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-row small ms-2">
+                        <span class="text-muted fw-light">
+                            {{ date(reference.updated_at) }}
+                        </span>
+                        <div class="dropdown ms-1">
+                            <span :id="`edit-reference-dropdown-${reference.id}`" class="clickable text-muted" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-fw fa-ellipsis-h"></i>
+                            </span>
+                            <div class="dropdown-menu" :aria-labelledby="`edit-reference-dropdown-${reference.id}`">
+                                <a class="dropdown-item" href="#" @click.prevent="enableEditReference(reference)">
+                                    <i class="fas fa-fw fa-edit text-info"></i> {{ t('global.edit') }}
+                                </a>
+                                <a class="dropdown-item" href="#" @click.prevent="onDeleteReference(reference)">
+                                    <i class="fas fa-fw fa-trash text-danger"></i> {{ t('global.delete') }}
+                                </a>
                             </div>
-                        </td>
-                        <td class="text-end p-2 col">
-                            <div class="d-flex flex-column">
-                                <div>
-                                    <p class="fw-light font-italic mb-0" v-if="editReference.id != reference.id">
-                                        {{ reference.description }}
-                                    </p>
-                                    <div class="d-flex" v-else>
-                                        <input type="text" class="form-control me-1" v-model="editReference.description" />
-                                        <button type="button" class="btn btn-outline-success me-1" @click="onUpdateReference(editReference)">
-                                            <i class="fas fa-fw fa-check"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-outline-danger" @click="cancelEditReference">
-                                            <i class="fas fa-fw fa-times"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <span class="text-muted fw-light">
-                                    {{ date(reference.updated_at, undefined, true, true) }}
-                                </span>
-                            </div>
-                        </td>
-                        <td class="px-0 pe-1">
-                            <div class="dropdown">
-                                <span id="dropdownMenuButton" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fas fa-fw fa-ellipsis-h"></i>
-                                </span>
-                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                    <a class="dropdown-item" href="#" @click="enableEditReference(reference)">
-                                        <i class="fas fa-fw fa-edit text-info"></i> {{ t('global.edit') }}
-                                    </a>
-                                    <a class="dropdown-item" href="#" @click="onDeleteReference(reference)">
-                                        <i class="fas fa-fw fa-trash text-danger"></i> {{ t('global.delete') }}
-                                    </a>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <h6>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <h6 class="mt-2">
                 {{ t('main.entity.references.bibliography.add') }}
             </h6>
-            <form role="form" @submit.prevent="onAddReference(state.newItem)">
-                <div class="row">
-                    <div class="col-md-6">
-                        DROPDOWN
-                        <!-- <multiselect
-                            id="bibliography-search"
-                            label="title"
-                            track-by="id"
+            <form role="form" @submit.prevent="onAddReference()" v-dcan="'add_remove_bibliography'">
+                <div class="d-flex flex-row">
+                    <div class="flex-grow-1">
+                        <multiselect
                             v-model="state.newItem.bibliography"
-                            :closeOnSelect="true"
+                            id="bibliography-search"
+                            :object="true"
+                            :label="'title'"
+                            :track-by="'id'"
                             :hideSelected="true"
-                            :internal-search="false"
-                            :multiple="false"
-                            :options="matchingBibliography"
-                            :placeholder="$t('global.select.placeholder')"
-                            :select-label="$t('global.select.select')"
-                            :deselect-label="$t('global.select.deselect')"
-                            @search-change="onBibliographySearchChanged">
-                            <template slot="singleLabel" slot-scope="props">
-                                <span class="option__desc">
-                                    <span class="option__title">
-                                        {{ props.option.title }}
-                                    </span>
-                                </span>
-                            </template>
-                            <template slot="option" slot-scope="props">
-                                <div class="option__desc">
-                                    <span class="option__title d-block">
-                                        {{ props.option.title }}
-                                    </span>
-                                    <span class="option__small">
-                                        {{ props.option.author }}, <span class="text-muted fw-light">{{ props.option.year}}</span>
-                                    </span>
+                            :value-prop="'id'"
+                            :mode="'single'"
+                            :delay="0"
+                            :minChars="0"
+                            :resolveOnLoad="false"
+                            :filterResults="false"
+                            :options="async query => filterBibliographyList(query)"
+                            :searchable="true"
+                            :placeholder="t('global.select.placeholder')">
+                            <template v-slot:singlelabel="{ value }">
+                                <div class="multiselect-single-label">
+                                    <div>
+                                        <span class="fw-medium">{{ value.title }}</span> by
+                                        <cite>
+                                            {{ value.author }} ({{ value.year }})
+                                        </cite>
+                                    </div>
                                 </div>
                             </template>
-                        </multiselect> -->
+                            <template v-slot:option="{ option }">
+                                <div>
+                                    <span class="fw-medium">{{ option.title }}</span> by
+                                    <cite>
+                                        {{ option.author }} <span class="fw-light">({{ option.year }})</span>
+                                    </cite>
+                                </div>
+                            </template>
+                        </multiselect>
                     </div>
-                    <div class="col-md-6">
+                    <div class="flex-grow-1 ms-1">
                         <textarea class="form-control" v-model="state.newItem.description" :placeholder="t('main.entity.references.bibliography.comment')"></textarea>
                     </div>
+                    <div class="ms-1 mt-auto">
+                        <button type="submit" class="btn btn-outline-success btn-sm px-1 py-05" :disabled="state.addReferenceDisabled" :title="t('main.entity.references.bibliography.add-button')">
+                            <i class="fas fa-fw fa-plus"></i>
+                        </button>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-outline-success col-md-12 mt-2" :disabled="addReferenceDisabled">
-                    <i class="fas fa-fw fa-plus"></i> {{ t('main.entity.references.bibliography.add-button') }}
-                </button>
             </form>
         </div>
         <div class="modal-footer">
@@ -169,6 +172,7 @@
     } from 'vue';
     import { useI18n } from 'vue-i18n';
     import router from '../../../bootstrap/router.js';
+    import store from '../../../bootstrap/store.js';
 
     import {
         can,
@@ -179,6 +183,9 @@
         patchAttribute,
         getAttributeValueComments,
     } from '../../../api.js';
+    import {
+        date,
+    } from '../../../helpers/filters.js';
 
     export default {
         props: {
@@ -255,6 +262,77 @@
                     
                 });
             };
+            const isMatch = (prop, exp) => {
+                return !!prop && !!prop.match(exp);
+            };
+            const filterBibliographyList = query => {
+                console.log(query);
+                const exp = new RegExp(query, 'i');
+                return new Promise(r => r(
+                    state.bibliography.filter(entry => {
+                        return (
+                            isMatch(entry.title, exp) ||
+                            isMatch(entry.booktitle, exp) ||
+                            isMatch(entry.author, exp) ||
+                            isMatch(entry.year, exp) ||
+                            isMatch(entry.citekey, exp) ||
+                            isMatch(entry.journal, exp)
+                        );
+                    })
+                ))
+            };
+            const enableEditReference = reference => {
+                state.editItem = {
+                    ...reference
+                };
+            };
+            const cancelEditReference = _ => {
+                state.editItem = {};
+            };
+            const onAddReference = _ => {
+                if(!can('add_remove_bibliography')) return;
+                const data = {
+                    bibliography_id: state.newItem.bibliography.id,
+                    description: state.newItem.description
+                };
+                $httpQueue.add(() => $http.post(`/entity/${this.entityId}/reference/${this.attributeId}`, data).then(response => {
+                    EventBus.$emit('references-updated', {
+                        action: 'add',
+                        reference: response.data,
+                        group: this.refs.attribute.thesaurus_url
+                    });
+                    state.newItem.bibliography = {};
+                    state.newItem.description = '';
+                }));
+            };
+            const onDeleteReference = reference => {
+                if(!can('add_remove_bibliography')) return;
+                const id = reference.id;
+                $httpQueue.add(() => $http.delete(`/entity/reference/${id}`).then(response => {
+                    // TODO implement removeRefFromEnt
+                    store.dispatch('removeReferenceFromEntity', id);
+                }));
+            };
+            const onUpdateReference = editedReference => {
+                if(!can('edit_bibliography')) return;
+                const id = editedReference.id;
+                const ref = state.references.find(r => r.id == editedReference.id);
+                if(ref.description == editedReference.description) {
+                    return;
+                }
+                const data = {
+                    description: editedReference.description
+                };
+                $httpQueue.add(() => $http.patch(`/entity/reference/${id}`, data).then(response => {
+                    const updData = {
+                        ...data,
+                        id: id,
+                    }
+                    // TODO implement updateReference
+                    store.dispatch('updateReference', updData);
+                    cancelEditReference();
+                }));
+            };
             const closeModal = _ => {
                 state.show = false;
                 router.push({
@@ -269,7 +347,20 @@
             // DATA
             const state = reactive({
                 show: false,
-                newItem: {},
+                newItem: {
+                    bibliography: {},
+                    description: '',
+                },
+                addReferenceDisabled: computed(_ => {
+                    return (
+                        (!!state.newItem.bibliography && !state.newItem.bibliography.id) ||
+                        state.newItem.description.length == 0
+                    );
+                }),
+                editItem: {},
+                attribute: entity.value.data[aid].attribute,
+                references: computed(_ => entity.value.references[state.attribute.thesaurus_url]),
+                bibliography: computed(_ => store.getters.bibliography),
                 startCertainty: entity.value.data[aid].certainty,
                 certainty: entity.value.data[aid].certainty,
                 comments: [],
@@ -300,161 +391,24 @@
                 can,
                 getCertaintyClass,
                 translateConcept,
+                date,
                 // PROPS
                 // LOCAL
                 setCertainty,
                 onUpdateCertainty,
                 editComment,
                 deleteComment,
+                filterBibliographyList,
+                enableEditReference,
+                cancelEditReference,
+                onAddReference,
+                onDeleteReference,
+                onUpdateReference,
                 closeModal,
                 // STATE
                 state,
             }
 
         },
-        // methods: {
-        //     getComment(list, id) {
-        //         if(!list || list.length == 0) return;
-        //         for(let i=0; i<list.length; i++) {
-        //             if(list[i].id == id) {
-        //                 return list[i];
-        //             }
-        //             const gotIt = this.getComment(list[i].replies, id);
-        //             if(gotIt) return gotIt;
-        //         }
-        //     },
-        //     loadReplies(event) {
-        //         const cid = event.comment_id;
-        //         $http.get(`/comment/${cid}/reply`).then(response => {
-        //             let comment = this.getComment(this.comments, cid);
-        //             if(comment) {
-        //                 if(!comment.replies) {
-        //                     Vue.set(comment, 'replies', []);
-        //                 }
-        //                 comment.replies = response.data;
-        //             }
-        //         });
-        //     },
-        //     onBibliographySearchChanged(query) {
-        //         if(!!query && query.length) {
-        //             this.matchingBibliography = this.bibliography.filter(b => {
-        //                 let matchesTitle = false;
-        //                 let matchesAuthor = false;
-        //                 if(b.title) {
-        //                     matchesTitle = b.title.toLowerCase().includes(query.toLowerCase());
-        //                 }
-        //                 if(b.author) {
-        //                     matchesAuthor = b.author.toLowerCase().includes(query.toLowerCase());
-        //                 }
-        //                 return matchesTitle || matchesAuthor;
-        //             });
-        //         } else {
-        //             this.matchingBibliography = this.bibliography.slice();
-        //         }
-        //     },
-        //     onAddReference(item) {
-        //         if(!this.$can('add_remove_bibliography')) return;
-        //         const data = {
-        //             bibliography_id: item.bibliography.id,
-        //             description: item.description
-        //         };
-        //         $httpQueue.add(() => $http.post(`/entity/${this.entityId}/reference/${this.attributeId}`, data).then(response => {
-        //             EventBus.$emit('references-updated', {
-        //                 action: 'add',
-        //                 reference: response.data,
-        //                 group: this.refs.attribute.thesaurus_url
-        //             });
-        //             item.bibliography = {};
-        //             item.description = '';
-        //         }));
-        //     },
-        //     onDeleteReference(reference) {
-        //         if(!this.$can('add_remove_bibliography')) return;
-        //         const id = reference.id;
-        //         $httpQueue.add(() => $http.delete(`/entity/reference/${id}`).then(response => {
-        //             const index = this.refs.refs.findIndex(r => r.id == reference.id);
-        //             if(index > -1) {
-        //                 EventBus.$emit('references-updated', {
-        //                     action: 'delete',
-        //                     reference: reference,
-        //                     group: this.refs.attribute.thesaurus_url
-        //                 });
-        //             }
-        //         }));
-        //     },
-        //     onUpdateReference(editedReference) {
-        //         if(!this.$can('edit_bibliography')) return;
-        //         const id = editedReference.id;
-        //         let ref = this.refs.refs.find(r => r.id == editedReference.id);
-        //         if(ref.description == editedReference.description) {
-        //             return;
-        //         }
-        //         const data = {
-        //             description: editedReference.description
-        //         };
-        //         $httpQueue.add(() => $http.patch(`/entity/reference/${id}`, data).then(response => {
-        //             EventBus.$emit('references-updated', {
-        //                 action: 'edit',
-        //                 reference: response.data,
-        //                 group: this.refs.attribute.thesaurus_url
-        //             });
-        //             this.cancelEditReference();
-        //         }));
-        //     },
-        //     enableEditReference(reference) {
-        //         Vue.set(this, 'editReference', Object.assign({}, reference));
-        //     },
-        //     cancelEditReference() {
-        //         Vue.set(this, 'editReference', {});
-        //     },
-        //     hideModal() {
-        //         this.$modal.hide('entity-references-modal');
-        //     },
-        //     routeBack() {
-        //         this.refs.value.certainty = this.initialCertaintyValue;
-        //         const curr = this.$route;
-        //         this.$router.push({
-        //             name: 'entitydetail',
-        //             params: {
-        //                 id: curr.params.id
-        //             },
-        //             query: curr.query
-        //         });
-        //     }
-        // },
-        // data() {
-        //     return {
-        //         entityId: 0,
-        //         attributeId: 0,
-        //         editReference: {},
-        //         newItem: {
-        //             bibliography: {},
-        //             description: ''
-        //         },
-        //         initialCertaintyValue: null,
-        //         certainty_description: '',
-        //         matchingBibliography: this.bibliography.slice(),
-        //         comments: [],
-        //         replyTo: {
-        //             comment_id: null,
-        //             author: {
-        //                 name: null,
-        //                 nickname: null
-        //             }
-        //         },
-        //     }
-        // },
-        // computed: {
-        //     addReferenceDisabled() {
-        //         return !this.newItem.bibliography.id || this.newItem.description.length == 0;
-        //     }
-        // },
-        // watch: {
-        //     'refs.value.certainty': function(newVal, oldVal) {
-        //         if(!oldVal && newVal) {
-        //             this.initialCertaintyValue = newVal;
-        //         }
-        //     }
-        // }
     }
 </script>
