@@ -96,11 +96,17 @@
                         <comment-list
                             v-if="state.repliesOpen[comment.id] && comment.replies"
                             :comments="comment.replies"
-                            :hide-button="false"
-                            :post-form="false"
-                            @edited="passEdit"
-                            @on-delete="passDelete">
-                        </comment-list>
+                            :hide-button="true"
+                            :post-form="true"
+                            :disabled="disabled"
+                            :avatar="avatar"
+                            :resource="resource"
+                            :postUrl="postUrl"
+                            :editUrl="editUrl"
+                            :deleteUrl="deleteUrl"
+                            :replyUrl="replyUrl"
+                            :classes="classes"
+                            :listClasses="listClasses" />
                     </div>
                 </div>
             </div>
@@ -393,6 +399,11 @@
                 postForm,
                 classes,
                 listClasses,
+                resource,
+                postUrl,
+                editUrl,
+                deleteUrl,
+                replyUrl,
                 // STATE
                 state,
             };

@@ -38,8 +38,6 @@
                 :list-classes="''"
                 :resource="state.resourceInfo"
                 :metadata="state.commentMetadata"
-                @edited="editComment"
-                @on-delete="deleteComment"
                 @added="onUpdateCertainty">
                     <template v-slot:metadata="data">
                         <span class="me-1 small">
@@ -231,35 +229,8 @@
                 };
                 patchAttribute(entity.value.id, aid, data).then(data => {
                     state.comments.push(event.comment);
-                });
-            };
-            const editComment = event => {
-                const cid = event.comment_id;
-                const data = {
-                    content: event.content
-                };
-                $http.patch(`/comment/${cid}`, data).then(response => {
-                    let comment = this.getComment(this.comments, cid);
-                    if(comment) {
-                        comment.content = event.content;
-                        comment.updated_at = response.data.updated_at;
-                    }
-                });
-            };
-            const deleteComment = event => {
-                const cid = event.comment_id;
-                const parent_id = event.reply_to;
-                $http.delete(`/comment/${cid}`).then(response => {
-                    let siblings, parent;
-                    if(parent_id) {
-                        parent = this.getComment(this.comments, parent_id);
-                        siblings = parent.replies;
-                    } else {
-                        siblings = this.comments;
-                    }
-                    const comment = siblings.find(s => s.id == cid);
-                    comment.deleted_at = Date();
-                    
+                    // set startCertainty to new, stored value
+                    state.startCertainty = state.certainty;
                 });
             };
             const isMatch = (prop, exp) => {
@@ -372,10 +343,14 @@
                     };
                 }),
                 commentMetadata: computed(_ => {
-                    return {
-                        certainty_from: state.startCertainty,
-                        certainty_to: state.certainty,
-                    };
+                    if(state.startCertainty == state.certainty) {
+                        return {};
+                    } else {
+                        return {
+                            certainty_from: state.startCertainty,
+                            certainty_to: state.certainty,
+                        };
+                    }
                 }),
             });
 
@@ -396,8 +371,6 @@
                 // LOCAL
                 setCertainty,
                 onUpdateCertainty,
-                editComment,
-                deleteComment,
                 filterBibliographyList,
                 enableEditReference,
                 cancelEditReference,
