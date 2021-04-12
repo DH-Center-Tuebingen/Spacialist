@@ -152,7 +152,7 @@
                 tab: computed(_ => store.getters.mainView.tab),
                 concepts: computed(_ => store.getters.concepts),
                 entity: computed(_ => store.getters.entity),
-                hasReferences: computed(_ => !!state.entity.references),
+                hasReferences: computed(_ => !!state.entity.references && Object.keys(state.entity.references).length > 0),
                 entityTypes: computed(_ => store.getters.entityTypes),
                 columnPref: computed(_ => store.getters.preferenceByKey('prefs.columns')),
                 users: computed(_ => store.getters.users),
