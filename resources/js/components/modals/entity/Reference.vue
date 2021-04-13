@@ -180,6 +180,9 @@
     import {
         patchAttribute,
         getAttributeValueComments,
+        deleteReferenceFromEntity,
+        updateReference,
+        addReference,
     } from '../../../api.js';
     import {
         date,
@@ -252,6 +255,10 @@
                     })
                 ))
             };
+            const resetNewItem = _ => {
+                state.newItem.bibliography = {};
+                state.newItem.description = '';
+            };
             const enableEditReference = reference => {
                 state.editItem = {
                     ...reference
@@ -264,45 +271,32 @@
                 if(!can('add_remove_bibliography')) return;
                 const data = {
                     bibliography_id: state.newItem.bibliography.id,
-                    description: state.newItem.description
+                    description: state.newItem.description,
                 };
-                $httpQueue.add(() => $http.post(`/entity/${this.entityId}/reference/${this.attributeId}`, data).then(response => {
-                    EventBus.$emit('references-updated', {
-                        action: 'add',
-                        reference: response.data,
-                        group: this.refs.attribute.thesaurus_url
-                    });
-                    state.newItem.bibliography = {};
-                    state.newItem.description = '';
-                }));
+                addReference(entity.value.id, state.attribute.id, state.attribute.thesaurus_url, data).then(data => {
+                    resetNewItem();
+                });
             };
             const onDeleteReference = reference => {
                 if(!can('add_remove_bibliography')) return;
                 const id = reference.id;
-                $httpQueue.add(() => $http.delete(`/entity/reference/${id}`).then(response => {
-                    // TODO implement removeRefFromEnt
-                    store.dispatch('removeReferenceFromEntity', id);
-                }));
+                deleteReferenceFromEntity(reference.id, entity.value.id, state.attribute.thesaurus_url).then(data => {
+                    cancelEditReference();
+                });
             };
             const onUpdateReference = editedReference => {
                 if(!can('edit_bibliography')) return;
-                const id = editedReference.id;
                 const ref = state.references.find(r => r.id == editedReference.id);
                 if(ref.description == editedReference.description) {
+                    cancelEditReference();
                     return;
                 }
                 const data = {
                     description: editedReference.description
                 };
-                $httpQueue.add(() => $http.patch(`/entity/reference/${id}`, data).then(response => {
-                    const updData = {
-                        ...data,
-                        id: id,
-                    }
-                    // TODO implement updateReference
-                    store.dispatch('updateReference', updData);
+                updateReference(ref.id, entity.value.id, state.attribute.thesaurus_url, data).then(data => {
                     cancelEditReference();
-                }));
+                });
             };
             const closeModal = _ => {
                 state.show = false;

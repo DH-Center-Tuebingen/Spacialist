@@ -128,6 +128,35 @@ export const store = createStore({
             delete state.entityTypes[data.id];
             delete state.entityTypeAttributes[data.id];
         },
+        addReference(state, data) {
+            let entity = state.entities[data.entity_id];
+            let references = entity.references[data.attribute_url];
+            if(!references) {
+                references = [];
+            }
+            delete data.attribute_url;
+            references.push(data);
+        },
+        updateReference(state, data) {
+            let references = state.entities[data.entity_id].references[data.attribute_url];
+            const ref = references.find(r => {
+                return r.id == data.reference_id;
+            });
+            if(!!ref) {
+                for(let k in data.data) {
+                    ref[k] = data.data[k];
+                }
+            }
+        },
+        removeReferenceFromEntity(state, data) {
+            let references = state.entities[data.entity_id].references[data.attribute_url];
+            const idx = references.findIndex(r => {
+                return r.id == data.reference_id;
+            });
+            if(idx > -1) {
+                references.splice(idx, 1);
+            }
+        },
         addRootEntity(state, n) {
             state.entities[n.id] = n;
             state.tree.push(n);
@@ -359,6 +388,15 @@ export const store = createStore({
         },
         deleteEntityType({commit}, data) {
             commit('deleteEntityType', data);
+        },
+        addReference({commit}, data) {
+            commit('addReference', data);
+        },
+        updateReference({commit}, data) {
+            commit('updateReference', data);
+        },
+        removeReferenceFromEntity({commit}, data) {
+            commit('removeReferenceFromEntity', data);
         },
         setAttributes({commit, state}, data) {
             state.attributes = [];

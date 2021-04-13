@@ -329,6 +329,18 @@ export async function addAttribute(attribute) {
     );
 };
 
+export async function addReference(eid, aid, url, data) {
+    $httpQueue.add(
+        () => http.post(`/entity/${eid}/reference/${aid}`, data).then(response => {
+            store.dispatch('addReference', {
+                ...response.data,
+                attribute_url: url,
+            });
+            return response.data;
+        })
+    );
+};
+
 export async function getFilteredActivity(pageUrl, payload) {
     pageUrl = pageUrl || 'activity';
     return $httpQueue.add(
@@ -368,6 +380,24 @@ export async function patchUserData(uid, data) {
     );
 };
 
+export async function updateReference(id, eid, url, data) {
+    $httpQueue.add(
+        () => http.patch(`/entity/reference/${id}`, data).then(response => {
+                const updData = {
+                    ...data,
+                    updated_at: response.data.updated_at,
+                }
+                store.dispatch('updateReference', {
+                    reference_id: id,
+                    entity_id: eid,
+                    attribute_url: url,
+                    data: updData,
+                });
+                return response.data;
+        })
+    );
+};
+
 // DELETE
 export async function deactivateUser(id) {
     return $httpQueue.add(
@@ -403,6 +433,19 @@ export async function deleteAttribute(aid) {
 export async function deleteBibliographyItem(id) {
     return $httpQueue.add(
         () => http.delete(`bibliography/${id}`).then(response => response.data)
+    );
+};
+
+export async function deleteReferenceFromEntity(id, eid, url) {
+    return $httpQueue.add(
+        () => http.delete(`/entity/reference/${id}`).then(response => {
+            store.dispatch('removeReferenceFromEntity', {
+                reference_id: id,
+                entity_id: eid,
+                attribute_url: url,
+            });
+            return response.data;
+        })
     );
 };
 
