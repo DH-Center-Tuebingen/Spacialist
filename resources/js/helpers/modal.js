@@ -24,6 +24,7 @@ import AddUser from '../components/modals/user/Add.vue';
 import DeactiveUser from '../components/modals/user/Deactivate.vue';
 import BibliographyItem from '../components/modals/bibliography/Item.vue';
 import DeleteBibliographyItem from '../components/modals/bibliography/Delete.vue';
+import AddEntity from '../components/modals/entity/Add.vue';
 import AddEntityType from '../components/modals/entitytype/Add.vue';
 import DeleteEntityType from '../components/modals/entitytype/Delete.vue';
 import AddAttribute from '../components/modals/attribute/Add.vue';
@@ -204,6 +205,32 @@ export function showDeleteBibliographyEntry(entry, onDeleted) {
             closing(e) {
                 store.getters.vfm.hide(uid);
             },
+        }
+    });
+}
+
+export function ShowAddEntity(parentTypeId = null, onAdded) {
+    const uid = `AddEntity-${getTs()}`;
+    store.getters.vfm.show({
+        component: AddEntity,
+        bind: {
+            name: uid,
+            parentTypeId: parentTypeId,
+        },
+        on: {
+            closing(e) {
+                store.getters.vfm.hide(uid);
+            },
+            confirm(entity) {
+                console.log("confirmed", entity);
+                // addEntityType(entityType).then(data => {
+                //     if(!!onAdded) {
+                //         onAdded();
+                //     }
+                //     store.dispatch('addEntityType', data);
+                //     store.getters.vfm.hide(uid);
+                // });
+            }
         }
     });
 }

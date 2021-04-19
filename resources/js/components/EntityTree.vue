@@ -12,7 +12,7 @@
             :on-clear="resetHighlighting">
         </tree-search>
         <div class="d-flex flex-column col px-0 overflow-hidden">
-            <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="requestAddNewEntity()">
+            <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="openAddEntityDialog()">
                 <i class="fas fa-fw fa-plus"></i> {{ t('main.entity.tree.add') }}
             </button>
             <div class="mb-2 d-flex flex-row flex-wrap justify-content-between">
@@ -67,7 +67,7 @@
                 @drop="itemDrop"
                 @toggle="itemToggle">
             </tree> -->
-            <button type="button" class="btn btn-sm btn-outline-success mt-2" @click="requestAddNewEntity()">
+            <button type="button" class="btn btn-sm btn-outline-success mt-2" @click="openAddEntityDialog()">
                 <i class="fas fa-fw fa-plus"></i> {{ t('main.entity.tree.add') }}
             </button>
         </div>
@@ -95,6 +95,8 @@
         fetchChildren,
         sortTree,
     } from '../helpers/tree.js';
+
+    import { ShowAddEntity } from '../helpers/modal.js';
 
     export default {
         components: {
@@ -146,10 +148,12 @@
                     dir: dir
                 });
             };
+            const openAddEntityDialog = _ => {
+                ShowAddEntity();
+            };
 
             // DATA
             const state = reactive({
-                requestAddNewEntity: () => {},
                 tree: computed(_ => store.getters.tree),
                 entity: computed(_ => store.getters.entity),
                 topLevelCount: computed(_ => state.tree.length || 0),
@@ -174,6 +178,7 @@
                 itemClick,
                 itemToggle,
                 setSort,
+                openAddEntityDialog,
                 // STATE
                 state,
             };
