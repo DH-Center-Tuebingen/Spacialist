@@ -332,7 +332,6 @@ class EntityController extends Controller {
         foreach($request->request as $patch) {
             $op = $patch['op'];
             $aid = $patch['params']['aid'];
-            $attr = Attribute::find($aid);
             switch($op) {
                 case 'remove':
                     $attrval = AttributeValue::where([
@@ -362,7 +361,8 @@ class EntityController extends Controller {
 
             // no further action required for deleted attribute values, continue with next patch
             if($op == 'remove') continue;
-
+            
+            $attr = Attribute::find($aid);
             switch($attr->datatype) {
                 // for primitive types: just save them to the db
                 case 'stringf':

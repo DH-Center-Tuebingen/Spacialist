@@ -7,8 +7,8 @@
             :id="name"
             :name="name"
             :placeholder="t('main.entity.attributes.add-wkt')"
-            v-model="v.fields.geo.value"
-            @input="v.fields.geo.handleInput" />
+            v-model="v.value"
+            @input="v.handleInput" />
 
             <button type="button" class="btn btn-outline-secondary mt-2" :disabled="disabled" @click="openGeographyModal(attribute.id)">
                 <i class="fas fa-fw fa-map-marker-alt"></i>
@@ -66,13 +66,13 @@
 
             };
             const resetFieldState = _ => {
-                v.fields.geo.resetField({
+                v.resetField({
                     value: value.value
                 });
             };
             const undirtyField = _ => {
-                v.fields.geo.resetField({
-                    value: v.fields.geo.value,
+                v.resetField({
+                    value: v.value,
                 });
             };
 
@@ -89,20 +89,16 @@
 
             });
             const v = reactive({
-                fields: {
-                    geo: {
-                        value: fieldValue,
-                        handleInput,
-                        meta,
-                        resetField,
-                    },
-                },
+                value: fieldValue,
+                handleInput,
+                meta,
+                resetField,
             });
 
-            watch(v.fields.geo.meta, (newValue, oldValue) => {
+            watch(v.meta, (newValue, oldValue) => {
                 context.emit('change', {
-                    dirty: v.fields.geo.meta.dirty,
-                    valid: v.fields.geo.meta.valid,
+                    dirty: v.meta.dirty,
+                    valid: v.meta.valid,
                 });
             });
 

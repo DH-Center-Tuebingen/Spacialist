@@ -7,8 +7,8 @@
         :disabled="disabled"
         :id="name"
         :name="name"
-        v-model.number="v.fields.float.value"
-        @input="v.fields.float.handleInput"  />
+        v-model.number="v.value"
+        @input="v.handleInput"  />
 </template>
 
 <script>
@@ -49,13 +49,13 @@
 
             // FUNCTIONS
             const resetFieldState = _ => {
-                v.fields.float.resetField({
+                v.resetField({
                     value: value.value
                 });
             };
             const undirtyField = _ => {
-                v.fields.float.resetField({
-                    value: v.fields.float.value,
+                v.resetField({
+                    value: v.value,
                 });
             };
 
@@ -72,20 +72,16 @@
 
             });
             const v = reactive({
-                fields: {
-                    float: {
-                        value: fieldValue,
-                        handleInput,
-                        meta,
-                        resetField,
-                    },
-                },
+                value: fieldValue,
+                handleInput,
+                meta,
+                resetField,
             });
 
-            watch(v.fields.float.meta, (newValue, oldValue) => {
+            watch(v.meta, (newValue, oldValue) => {
                 context.emit('change', {
-                    dirty: v.fields.float.meta.dirty,
-                    valid: v.fields.float.meta.valid,
+                    dirty: v.meta.dirty,
+                    valid: v.meta.valid,
                 });
             });
 

@@ -6,8 +6,8 @@
             :disabled="disabled"
             :id="name"
             :name="name"
-            v-model="v.fields.bool.value"
-            @input="v.fields.bool.handleInput" />
+            v-model="v.value"
+            @input="v.handleInput" />
     </div>
 </template>
 
@@ -49,13 +49,13 @@
 
             // FUNCTIONS
             const resetFieldState = _ => {
-                v.fields.bool.resetField({
+                v.resetField({
                     value: value.value
                 });
             };
             const undirtyField = _ => {
-                v.fields.bool.resetField({
-                    value: v.fields.bool.value,
+                v.resetField({
+                    value: v.value,
                 });
             };
 
@@ -75,20 +75,16 @@
 
             });
             const v = reactive({
-                fields: {
-                    bool: {
-                        value: fieldValue,
-                        handleInput,
-                        meta,
-                        resetField,
-                    },
-                },
+                value: fieldValue,
+                handleInput,
+                meta,
+                resetField,
             });
 
-            watch(v.fields.bool.meta, (newValue, oldValue) => {
+            watch(v.meta, (newValue, oldValue) => {
                 context.emit('change', {
-                    dirty: v.fields.bool.meta.dirty,
-                    valid: v.fields.bool.meta.valid,
+                    dirty: v.meta.dirty,
+                    valid: v.meta.valid,
                 });
             });
 

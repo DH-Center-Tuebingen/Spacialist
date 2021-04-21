@@ -82,6 +82,24 @@ export const store = createStore({
         },
         addEntity(state, n) {
             state.entities[n.id] = n;
+            if(!!n.root_entity_id) {
+                const parent = state.entities[n.root_entity_id];
+                if(parent.childrenLoaded) {
+                    parent.children.push(n);
+                } else {
+                    parent.children_count++;
+                }
+            }
+        },
+        addRootEntity(state, n) {
+            state.entities[n.id] = n;
+            state.tree.push(n);
+        },
+        updateEntity(state, data) {
+            const entity = state.entities[data.id];
+            entity.updated_at = data.updated_at;
+            entity.user_id = data.user_id;
+            entity.user = data.user;
         },
         addEntityType(state, data) {
             if(data.attributes) {
@@ -156,10 +174,6 @@ export const store = createStore({
             if(idx > -1) {
                 references.splice(idx, 1);
             }
-        },
-        addRootEntity(state, n) {
-            state.entities[n.id] = n;
-            state.tree.push(n);
         },
         setConcepts(state, data) {
             state.concepts = data;
@@ -361,7 +375,15 @@ export const store = createStore({
         },
         addEntity({commit}, data) {
             const n = new Node(data);
-            commit('addEntity', n);
+            if(!!data.root_entity_id) {
+                commit('addEntity', n);
+            } else {
+                commit('addRootEntity', n);
+            }
+            return n;
+        },
+        updateEntity({commit}, data) {
+            commit('updateEntity', data);
         },
         addEntityType({commit}, data) {
             commit('addEntityType', data);
@@ -441,6 +463,9 @@ export const store = createStore({
         },
         concepts: state => {
             return state.concepts;
+        },
+        entities: state => {
+            return state.entities;
         },
         entityTypes: state => {
             return state.entityTypes;

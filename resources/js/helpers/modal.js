@@ -5,6 +5,7 @@ import {
     addUser,
     deactivateUser,
     deleteBibliographyItem,
+    addEntity,
     addEntityType,
     deleteEntityType,
     addAttribute,
@@ -209,27 +210,31 @@ export function showDeleteBibliographyEntry(entry, onDeleted) {
     });
 }
 
-export function ShowAddEntity(parentTypeId = null, onAdded) {
+export function ShowAddEntity(parent = null, onAdded) {
     const uid = `AddEntity-${getTs()}`;
     store.getters.vfm.show({
         component: AddEntity,
         bind: {
             name: uid,
-            parentTypeId: parentTypeId,
+            parent: parent,
         },
         on: {
             closing(e) {
                 store.getters.vfm.hide(uid);
             },
             confirm(entity) {
-                console.log("confirmed", entity);
-                // addEntityType(entityType).then(data => {
-                //     if(!!onAdded) {
-                //         onAdded();
-                //     }
-                //     store.dispatch('addEntityType', data);
-                //     store.getters.vfm.hide(uid);
-                // });
+                const entityData = {
+                    type_id: entity.type.id,
+                    parent_id: entity.parent_id,
+                    name: entity.name,
+                };
+                addEntity(entityData).then(data => {
+                    const node = store.dispatch('addEntity', data);
+                    if(!!onAdded) {
+                        onAdded(node);
+                    }
+                    store.getters.vfm.hide(uid);
+                });
             }
         }
     });

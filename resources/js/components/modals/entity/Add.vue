@@ -78,16 +78,16 @@
 
     export default {
         props: {
-            parentTypeId: {
+            parent: {
                 required: false,
-                type: Number,
+                type: Object,
             },
         },
         emits: ['closing', 'confirm'],
         setup(props, context) {
             const { t } = useI18n();
             const {
-                parentTypeId,
+                parent,
             } = toRefs(props);
 
             // FUNCTIONS
@@ -96,7 +96,7 @@
                     return;
                 }
                 state.show = false;
-                context.emit('confirm', state.entityType);
+                context.emit('confirm', state.entity);
             };
             const closeModal = _ => {
                 state.show = false;
@@ -109,10 +109,11 @@
                 entity: {
                     name: '',
                     type: {},
+                    parent_id: null,
                 },
                 entityTypes: computed(_ => {
-                    if(parentTypeId.value) {
-                        return getEntityType(parentTypeId.value).sub_entity_types;
+                    if(parent.value && parent.value.entity_type_id) {
+                        return getEntityType(parent.value.entity_type_id).sub_entity_types;
                     } else {
                         return Object.values(getEntityTypes()).filter(type => type.is_root);
                     }
@@ -124,6 +125,9 @@
 
             if(state.entityTypes.length == 1) {
                 state.entity.type = state.entityTypes[0];
+            }
+            if(parent.value && parent.value.id) {
+                state.entity.parent_id = parent.value.id;
             }
 
             // ON MOUNTED

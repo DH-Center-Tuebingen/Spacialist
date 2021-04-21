@@ -9,10 +9,10 @@
             :disabled="disabled"
             :id="name"
             :name="name"
-            v-model="v.fields.perc.value"
-            @input="v.fields.perc.handleInput" />
+            v-model="v.value"
+            @input="v.handleInput" />
         <span class="ms-3">
-            {{ v.fields.perc.value }}%
+            {{ v.value }}%
         </span>
     </div>
 </template>
@@ -55,13 +55,13 @@
 
             // FUNCTIONS
             const resetFieldState = _ => {
-                v.fields.perc.resetField({
+                v.resetField({
                     value: value.value
                 });
             };
             const undirtyField = _ => {
-                v.fields.perc.resetField({
-                    value: v.fields.perc.value,
+                v.resetField({
+                    value: v.value,
                 });
             };
 
@@ -78,20 +78,16 @@
 
             });
             const v = reactive({
-                fields: {
-                    perc: {
-                        value: fieldValue,
-                        handleInput,
-                        meta,
-                        resetField,
-                    },
-                },
+                value: fieldValue,
+                handleInput,
+                meta,
+                resetField,
             });
 
-            watch(v.fields.perc.meta, (newValue, oldValue) => {
+            watch(v.meta, (newValue, oldValue) => {
                 context.emit('change', {
-                    dirty: v.fields.perc.meta.dirty,
-                    valid: v.fields.perc.meta.valid,
+                    dirty: v.meta.dirty,
+                    valid: v.meta.valid,
                 });
             });
 

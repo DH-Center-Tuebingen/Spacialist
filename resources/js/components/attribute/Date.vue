@@ -10,8 +10,8 @@
         :disabled-date="(date) => date > new Date()"
         :max-date="new Date()"
         :show-week-number="true"
-        v-model="v.fields.date.value"
-        @input="v.fields.date.handleInput">
+        v-model="v.value"
+        @input="v.handleInput">
         <template v-slot:icon-calendar>
             <i class="fas fa-fw fa-calendar-alt"></i>
         </template>
@@ -59,13 +59,13 @@
 
             // FUNCTIONS
             const resetFieldState = _ => {
-                v.fields.date.resetField({
+                v.resetField({
                     value: value.value
                 });
             };
             const undirtyField = _ => {
-                v.fields.date.resetField({
-                    value: v.fields.date.value,
+                v.resetField({
+                    value: v.value,
                 });
             };
 
@@ -82,20 +82,16 @@
 
             });
             const v = reactive({
-                fields: {
-                    date: {
-                        value: fieldValue,
-                        handleInput,
-                        meta,
-                        resetField,
-                    },
-                },
+                value: fieldValue,
+                handleInput,
+                meta,
+                resetField,
             });
 
-            watch(v.fields.date.meta, (newValue, oldValue) => {
+            watch(v.meta, (newValue, oldValue) => {
                 context.emit('change', {
-                    dirty: v.fields.date.meta.dirty,
-                    valid: v.fields.date.meta.valid,
+                    dirty: v.meta.dirty,
+                    valid: v.meta.valid,
                 });
             });
 

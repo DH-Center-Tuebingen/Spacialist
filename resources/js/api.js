@@ -288,6 +288,19 @@ export async function setUserAvatar(id, file) {
     );
 };
 
+export async function addEntity(entity) {
+    const data = {
+        entity_type_id: entity.type_id,
+        name: entity.name,
+    };
+    if(!!entity.parent_id) {
+        data.root_entity_id = entity.parent_id;
+    }
+    return $httpQueue.add(
+        () => http.post(`/entity`, data).then(response => response.data)
+    );
+};
+
 export async function addEntityType(et) {
     const data = {
         concept_url: et.label.concept_url,
@@ -358,8 +371,14 @@ export async function getFilteredActivity(pageUrl, payload) {
 
 // PATCH
 export async function patchAttribute(entityId, attributeId, data) {
-    $httpQueue.add(
+    return $httpQueue.add(
         () => http.patch(`/entity/${entityId}/attribute/${attributeId}`, data).then(response => response.data)
+    );
+};
+
+export async function patchAttributes(entityId, data) {
+    return $httpQueue.add(
+        () => http.patch(`/entity/${entityId}/attributes`, data).then(response => response.data).catch(error => error)
     );
 };
 

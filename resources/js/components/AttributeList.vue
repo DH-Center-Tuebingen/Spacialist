@@ -358,6 +358,20 @@
             const updateValue = (eventValue, aid) => {
                 state.attributeValues[aid].value = eventValue;
             };
+            const getDirtyValues = _ => {
+                const values = {};
+                for(let k in attrRefs) {
+                    const curr = attrRefs[k];
+                    let currValue = null;
+                    if(!!curr.v && curr.v.meta.dirty && curr.v.meta.valid) {
+                        currValue = curr.v.value;
+                    }
+                    if(!!currValue) {
+                        values[k] = currValue;
+                    }
+                }
+                return values;
+            };
             const updateDirtyState = e => {
                 context.emit('dirty', e);
             };
@@ -460,6 +474,7 @@
                 onLeave,
                 handleMove,
                 updateValue,
+                getDirtyValues,
                 updateDirtyState,
                 resetListValues,
                 undirtyList,

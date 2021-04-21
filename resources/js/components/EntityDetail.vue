@@ -150,6 +150,7 @@
     import { date } from '../helpers/filters.js';
     import {
         getEntityComments,
+        patchAttributes,
     } from '../api.js';
     import {
         can,
@@ -396,10 +397,71 @@
                 }
             };
             const saveEntity = _ => {
-                console.log("TODO: Implement saveEntity method");
-                state.formDirty = false;
-                attrRef.value.undirtyList();
-                return new Promise(r => r(null));
+                if(!can('duplicate_edit_concepts')) return;
+                const dirtyValues = attrRef.value.getDirtyValues();
+                var patches = [];
+
+                for(let v in dirtyValues) {
+                    const aid = v;
+                    const data = state.entity.data[aid];
+                    const patch = {
+                        op: null,
+                        value: null,
+                        params: {
+                            aid: aid,
+                        },
+                    };
+                    if(data.id) {
+                        // if data.id exists, there has been an entry in the database, therefore it is a replace/remove operation
+                        if(dirtyValues[v] && dirtyValues[v] != '') {
+                            // value is set, therefore it is a replace
+                            patch.op = 'replace';
+                            patch.value = dirtyValues[v];
+                            // patch.value = getCleanValue(patch.value, entity.attributes);
+                        } else {
+                            // value is empty, therefore it is a remove
+                            patch.op = "remove";
+                        }
+                    } else {
+                        // there has been no entry in the database before, therefore it is an add operation
+                        if(dirtyValues[v] && dirtyValues[v] != '') {
+                            patch.op = "add";
+                            patch.value = dirtyValues[v];
+                            // patch.value = getCleanValue(patch.value, entity.attributes);
+                        } else {
+                            // there has be no entry in the database before and values are not different (should not happen ;))
+                            continue;
+                        }
+                    }
+                    patches.push(patch);
+                }
+                return patchAttributes(state.entity.id, patches).then(data => {
+                    state.formDirty = false;
+                    attrRef.value.undirtyList();
+                    store.dispatch('updateEntity', data);
+
+                    toast.$toast(
+                        t('main.entity.toasts.updated.msg', {
+                            name: data.name
+                        }),
+                        t('main.entity.toasts.updated.title'), {
+                            channel: 'success',
+                            autohide: true,
+                            icon: true,
+                        },
+                    );
+                }).catch(error => {
+                    const r = error.response;
+                    toast.$toast(
+                        r.data.error,
+                        `${r.status}: ${r.statusText}`, {
+                            channel: 'error',
+                            autohide: true,
+                            icon: true,
+                            duration: 5000,
+                        },
+                    );
+                });
             };
             const resetForm = _ => {
                 attrRef.value.resetListValues();

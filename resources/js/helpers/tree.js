@@ -4,6 +4,10 @@ import {
     fetchChildren as fetchChildrenApi,
 } from '../api.js';
 
+import {
+    translateEntityType,
+} from './helpers';
+
 export async function fetchChildren(id, sort = {by: 'rank', dir: 'asc'}) {
     return fetchChildrenApi(id).then(data => {
         return store.dispatch('addEntities', {
@@ -47,19 +51,19 @@ export function sortTree(by, dir, tree) {
                 return value;
             };
             break;
-        // case 'type':
-        //     sortFn = (a, b) => {
-        //         const aurl = this.$translateEntityType(a.entity_type_id);
-        //         const burl = this.$translateEntityType(b.entity_type_id);
-        //         let value = 0;
-        //         if(aurl < burl) value = -1;
-        //         if(aurl > burl) value = 1;
-        //         if(dir == 'desc') {
-        //             value = -value;
-        //         }
-        //         return value;
-        //     };
-        //     break;
+        case 'type':
+            sortFn = (a, b) => {
+                const aurl = translateEntityType(a.entity_type_id);
+                const burl = translateEntityType(b.entity_type_id);
+                let value = 0;
+                if(aurl < burl) value = -1;
+                if(aurl > burl) value = 1;
+                if(dir == 'desc') {
+                    value = -value;
+                }
+                return value;
+            };
+            break;
     }
     sortTreeLevel(tree, sortFn);
 }

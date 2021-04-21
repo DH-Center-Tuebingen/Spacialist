@@ -93,7 +93,6 @@
 
     import {
         fetchChildren,
-        sortTree,
     } from '../helpers/tree.js';
 
     import { ShowAddEntity } from '../helpers/modal.js';
@@ -149,7 +148,7 @@
                 });
             };
             const openAddEntityDialog = _ => {
-                ShowAddEntity();
+                ShowAddEntity(null);
             };
 
             // DATA
