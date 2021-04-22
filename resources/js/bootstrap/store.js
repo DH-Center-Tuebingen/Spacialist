@@ -101,6 +101,13 @@ export const store = createStore({
             entity.user_id = data.user_id;
             entity.user = data.user;
         },
+        updateEntityData(state, data) {
+            const entity = state.entities[data.eid];
+            for(let k in data.data) {
+                console.log("upd data", entity.data[k], k, data.data[k]);
+                entity.data[k].value = data.data[k];
+            }
+        },
         addEntityType(state, data) {
             if(data.attributes) {
                 state.entityTypeAttributes[data.id] = data.attributes.slice();
@@ -384,6 +391,9 @@ export const store = createStore({
         },
         updateEntity({commit}, data) {
             commit('updateEntity', data);
+        },
+        updateEntityData({commit}, data) {
+            commit('updateEntityData', data);
         },
         addEntityType({commit}, data) {
             commit('addEntityType', data);

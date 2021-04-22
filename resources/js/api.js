@@ -169,7 +169,7 @@ async function fetchComments(id, type, aid = null) {
     if(!!aid) {
         endpoint = `${endpoint}&aid=${aid}`;
     }
-    return $httpQueue.add(() => http.get(endpoint).then(response => response.data).catch(error => error));
+    return $httpQueue.add(() => http.get(endpoint).then(response => response.data).catch(error => { throw error; }));
 }
 
 export async function getBibtexFile() {
@@ -378,7 +378,7 @@ export async function patchAttribute(entityId, attributeId, data) {
 
 export async function patchAttributes(entityId, data) {
     return $httpQueue.add(
-        () => http.patch(`/entity/${entityId}/attributes`, data).then(response => response.data).catch(error => error)
+        () => http.patch(`/entity/${entityId}/attributes`, data).then(response => response.data).catch(error => { throw error; })
     );
 };
 

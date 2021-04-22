@@ -439,6 +439,10 @@
                     state.formDirty = false;
                     attrRef.value.undirtyList();
                     store.dispatch('updateEntity', data);
+                    store.dispatch('updateEntityData', {
+                        data: dirtyValues,
+                        eid: state.entity.id,
+                    });
 
                     toast.$toast(
                         t('main.entity.toasts.updated.msg', {

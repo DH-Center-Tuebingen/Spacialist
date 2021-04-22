@@ -5,8 +5,8 @@
                 <button type="button" class="btn btn-outline-secondary" :disabled="disabled" @click="toggleList()">
                     <div v-show="!state.expanded">
                         <i class="fas fa-fw fa-caret-up"></i>
-                        <span v-if="state.entries.length">
-                            ({{ state.entries.length }})
+                        <span v-if="v.value.length">
+                            ({{ v.value.length }})
                         </span>
                     </div>
                     <div v-show="state.expanded">
@@ -21,8 +21,8 @@
                 </button>
             </div>
         </div>
-        <ol class="mt-2 mb-0" v-if="state.expanded && state.entries.length">
-            <li v-for="(l, i) in state.entries" :key="i">
+        <ol class="mt-2 mb-0" v-if="state.expanded && v.value.length">
+            <li v-for="(l, i) in v.value" :key="i">
                 <span v-html="createAnchorFromUrl(l)"></span>
                 <a href="#" class="text-danger" @click.prevent="removeListEntry(i)">
                     <i class="fas fa-fw fa-trash"></i>
@@ -68,44 +68,50 @@
 
             // FUNCTIONS
             const addListEntry = _ => {
-                state.entries.push(state.input);
+                v.value.push(state.input);
+                v.meta.dirty = true;
                 state.input = '';
-                state.meta.dirty = true;
             };
             const removeListEntry = index => {
-                state.entries.splice(index, 1);
-                state.meta.dirty = true;
+                v.value.splice(index, 1);
+                v.meta.dirty = true;
             };
             const toggleList = _ => {
                 state.expanded = !state.expanded;
             };
             const resetFieldState = _ => {
-                state.entries = state.initialValue.slice();
-                state.meta.dirty = false;
-                state.meta.valid = true;
+                v.value = state.initialValue.slice();
+                v.meta.dirty = false;
+                v.meta.valid = true;
             };
             const undirtyField = _ => {
-                state.meta.dirty = false;
-                state.meta.valid = true;
+                state.initialValue = entries.value.slice();
+                v.meta.dirty = false;
+                v.meta.valid = true;
             };
 
             // DATA
             const state = reactive({
                 input: '',
-                entries: entries.value.slice(),
                 initialValue: entries.value.slice(),
                 expanded: false,
-                meta: {
+            });
+            const v = reactive({
+                meta:{
                     dirty: false,
                     valid: true,
-                }
+                },
+                value: entries.value.slice(),
             });
 
-            watch(state.meta, (newValue, oldValue) => {
+            watch(v.meta, (newValue, oldValue) => {
                 context.emit('change', {
-                    dirty: state.meta.dirty,
-                    valid: state.meta.valid,
+                    dirty: v.meta.dirty,
+                    valid: v.meta.valid,
                 });
+            });
+            watch(entries, (newValue, oldValue) => {
+                state.initialValue = newValue.slice();
             });
 
             // RETURN
@@ -124,6 +130,7 @@
                 disabled,
                 // STATE
                 state,
+                v,
             }
         },
     }
