@@ -1,13 +1,13 @@
 <template>
     <div class="input-group">
-        <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="onInput('B', $event.target.value)" v-model="state.B"/>
+        <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="v.B.handleInput" v-model="v.B.value"/>
             <span class="input-group-text">&times;</span>
-        <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="onInput('H', $event.target.value)" v-model="state.H"/>
+        <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="v.H.handleInput" v-model="v.H.value"/>
             <span class="input-group-text">&times;</span>
-        <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="onInput('T', $event.target.value)" v-model="state.T"/>
+        <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="v.T.handleInput" v-model="v.T.value"/>
         <div>
             <button class="btn btn-outline-secondary  dropdown-toggle" :disabled="disabled" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                {{ state.unit }}
+                {{ v.unit.value }}
             </button>
             <div class="dropdown-menu">
                 <a class="dropdown-item" href="#" v-for="(unit, i) in dimensionUnits" @click.prevent="setUnit(unit)" :key="i">
@@ -20,9 +20,15 @@
 
 <script>
     import {
+        computed,
         reactive,
         toRefs,
+        watch,
     } from 'vue';
+
+    import { useField } from 'vee-validate';
+
+    import * as yup from 'yup';
 
     export default {
         props: {
@@ -39,7 +45,7 @@
                 required: true,
             }
         },
-        emits: ['input'],
+        emits: ['change'],
         setup(props, context) {
             const {
                 value,
@@ -47,22 +53,114 @@
             } = toRefs(props);
 
             // FUNCTIONS
-            const onInput = (field, value) => {
-                context.emit('input', value);
-                // props.onChange(field, value);
+            const resetFieldState = _ => {
+                v.B.resetField({
+                    value: value.value.B
+                });
+                v.H.resetField({
+                    value: value.value.H
+                });
+                v.T.resetField({
+                    value: value.value.T
+                });
+                v.unit.value = value.value.unit;
+                v.unit.initialValue = value.value.unit;
+                v.unit.meta.dirty = false;
+            };
+            const undirtyField = _ => {
+                v.B.resetField({
+                    value: v.B.value,
+                });
+                v.H.resetField({
+                    value: v.H.value,
+                });
+                v.T.resetField({
+                    value: v.T.value,
+                });
+                v.unit.initialValue = v.unit.value;
+                v.unit.meta.dirty = false;
             };
             const setUnit = (unit) => {
-                onInput('unit', unit);
-                state.unit = unit;
+                v.unit.value = unit;
+                v.unit.meta.dirty = true;
             };
 
             // DATA
             const dimensionUnits = ['nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'];
+            const {
+                handleInput: hib,
+                value: vb,
+                meta: mb,
+                resetField: rfb,
+            } = useField(`b_${name.value}`, yup.number().positive(), {
+                initialValue: value.value,
+            });
+            const {
+                handleInput: hih,
+                value: vh,
+                meta: mh,
+                resetField: rfh,
+            } = useField(`h_${name.value}`, yup.number().positive(), {
+                initialValue: value.value,
+            });
+            const {
+                handleInput: hit,
+                value: vt,
+                meta: mt,
+                resetField: rft,
+            } = useField(`t_${name.value}`, yup.number().positive(), {
+                initialValue: value.value,
+            });
             const state = reactive({
-                B: value.value.B,
-                H: value.value.H,
-                T: value.value.T,
-                unit: value.value.unit,
+            });
+            const v = reactive({
+                value: computed(_ => {
+                    return {
+                        B: v.B.value,
+                        H: v.H.value,
+                        T: v.T.value,
+                        unit: v.unit.value,
+                    }
+                }),
+                meta: computed(_ => {
+                    return {
+                        dirty: v.B.meta.dirty && v.H.meta.dirty && v.T.meta.dirty && v.unit.meta.dirty,
+                        valid: v.B.meta.valid && v.H.meta.valid && v.T.meta.valid,
+                    }
+                }),
+                B: {
+                    value: vb,
+                    meta: mb,
+                    resetField: rfb,
+                    handleInput: hib,
+                },
+                H: {
+                    value: vh,
+                    meta: mh,
+                    resetField: rfh,
+                    handleInput: hih,
+                },
+                T: {
+                    value: vt,
+                    meta: mt,
+                    resetField: rft,
+                    handleInput: hit,
+                },
+                unit: {
+                    value: value.value.unit,
+                    initialValue: value.value.unit,
+                    meta: {
+                        dirty: false,
+                    }
+                },
+            });
+
+            watch(v.meta, (newValue, oldValue) => {
+                console.log("meta changed");
+                context.emit('change', {
+                    dirty: v.meta.dirty,
+                    valid: v.meta.valid,
+                });
             });
 
             // RETURN
@@ -71,10 +169,12 @@
                 // LOCAL
                 disabled,
                 dimensionUnits,
-                onInput,
+                resetFieldState,
+                undirtyField,
                 setUnit,
                 // STATE
                 state,
+                v,
             }
         },
     }

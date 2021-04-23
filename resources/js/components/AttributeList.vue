@@ -120,8 +120,8 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
-                            :on-change="(field, value) => onChange(field, value, element.id)"
-                            :value="state.attributeValues[element.id].value" />
+                            :value="state.attributeValues[element.id].value"
+                            @change="updateDirtyState" />
 
                         <tabular-attribute
                             v-else-if="element.datatype == 'table'"
@@ -366,7 +366,7 @@
                     if(!!curr.v && curr.v.meta.dirty && curr.v.meta.valid) {
                         currValue = curr.v.value;
                     }
-                    if(!!currValue) {
+                    if(currValue !== null) {
                         values[k] = currValue;
                     }
                 }
