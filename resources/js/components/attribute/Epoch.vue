@@ -3,36 +3,40 @@
         <div class="input-group">
             <div class="input-group-prepend" uib-dropdown>
                 <button type="button" class="btn btn-outline-secondary dropdown-toggle" :disabled="disabled" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <span v-if="state.startLabel">
-                        {{ t(`main.entity.attributes.${state.startLabel}`) }}
+                    <span v-if="v.startLabel.value">
+                        {{ t(`main.entity.attributes.${v.startLabel.value}`) }}
                     </span>
                     <span v-else>
                     </span>
                 </button>
                 <ul class="dropdown-menu">
-                    <a class="dropdown-item" href="#" v-for="(label, i) in state.labels" @click.prevent="setLabel('startLabel', label)" :key="i">
+                    <a class="dropdown-item" href="#" v-for="(label, i) in timeLabels" @click.prevent="setLabel('startLabel', label)" :key="i">
                         {{ t(`main.entity.attributes.${label}`) }}
                     </a>
                 </ul>
             </div>
-            <input type="number" step="1" min="0" pattern="[0-9]+" class="form-control text-center" :disabled="disabled" aria-label="" @input="onInput('start', state.start)" v-model.number="state.start">
+            <input type="number" step="1" min="0" pattern="[0-9]+" class="form-control text-center" :disabled="disabled" aria-label="" @input="v.start.handleInput" v-model.number="v.start.value">
                 <span class="input-group-text">-</span>
-            <input type="number" step="1" min="0" pattern="[0-9]+" class="form-control text-center" :disabled="disabled" aria-label="" @input="onInput('end', state.end)" v-model.number="state.end">
+            <input type="number" step="1" min="0" pattern="[0-9]+" class="form-control text-center" :disabled="disabled" aria-label="" @input="v.end.handleInput" v-model.number="v.end.value">
             <div class="input-group-append">
                 <button type="button" class="btn btn-outline-secondary dropdown-toggle" :disabled="disabled" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <span v-if="state.endLabel">
-                        {{ t(`main.entity.attributes.${state.endLabel}`) }}
+                    <span v-if="v.endLabel.value">
+                        {{ t(`main.entity.attributes.${v.endLabel.value}`) }}
                     </span>
                     <span v-else>
                     </span>
                 </button>
                 <ul uib-dropdown-menu class="dropdown-menu">
-                    <a class="dropdown-item" href="#" v-for="(label, i) in state.labels" @click.prevent="setLabel('endLabel', label)" :key="i">
+                    <a class="dropdown-item" href="#" v-for="(label, i) in timeLabels" @click.prevent="setLabel('endLabel', label)" :key="i">
                         {{ t(`main.entity.attributes.${label}`) }}
                     </a>
                 </ul>
             </div>
         </div>
+        {{v.start.meta}}
+        <hr/>
+        {{v.meta}}
+        {{v.value}}
         <!-- <multiselect class="pt-2"
             label="concept_url"
             track-by="id"
@@ -58,7 +62,12 @@
         computed,
         reactive,
         toRefs,
+        watch,
     } from 'vue';
+
+    import { useField } from 'vee-validate';
+
+    import * as yup from 'yup';
 
     import { useI18n } from 'vue-i18n';
 
@@ -87,11 +96,8 @@
             disabled: {
                 type: Boolean,
             },
-            onChange: {
-                type: Function,
-                required: true,
-            }
         },
+        emits: ['change'],
         setup(props, context) {
             const { t } = useI18n();
             const {
@@ -100,29 +106,103 @@
                 epochs,
                 type,
                 disabled,
-                onChange,
             } = toRefs(props);
             // FETCH
 
             // FUNCTIONS
-            const onInput = (field, value) => {
-                // this.$emit('input', value);
-                // this.onChange(field, value);
-            };
             const setLabel = (field, value) => {
-                // this[field] = value;
-                // onInput(field, value);
+                v[field].handleChange(value);
             };
 
             // DATA
+            const timeLabels = ['BC', 'AD'];
+            const {
+                handleInput: his,
+                value: vs,
+                meta: ms,
+                resetField: rfs,
+            } = useField(`start_${name.value}`, yup.number().positive(), {
+                initialValue: value.value.start,
+            });
+            const {
+                handleInput: hie,
+                value: ve,
+                meta: me,
+                resetField: rfe,
+            } = useField(`end_${name.value}`, yup.number().positive(), {
+                initialValue: value.value.end,
+            });
+            const {
+                handleInput: hisl,
+                handleChange: hcsl,
+                value: vsl,
+                meta: msl,
+                resetField: rfsl,
+            } = useField(`startlabel_${name.value}`, yup.string().matches(/(BC|AD)/), {
+                initialValue: value.value.startLabel,
+            });
+            const {
+                handleInput: hiel,
+                handleChange: hcel,
+                value: vel,
+                meta: mel,
+                resetField: rfel,
+            } = useField(`endlabel_${name.value}`, yup.string().matches(/(BC|AD)/), {
+                initialValue: value.value.endLabel,
+            });
             const state = reactive({
-                labels: ['BC', 'AD'],
-                startLabel: value.startLabel,
-                start: value.start,
-                endLabel: value.endLabel,
-                end: value.end,
                 epoch: value.epoch,
                 hasEpochList: computed(_ => type.value !== 'timeperiod'),
+            });
+            const v = reactive({
+                value: computed(_ => {
+                    return {
+                        start: v.start.value,
+                        startLabel: v.startLabel.value,
+                        end: v.end.value,
+                        endLabel: v.endLabel.value,
+                    };
+                }),
+                meta: computed(_ => {
+                    return {
+                        dirty: v.start.meta.dirty || v.startLabel.meta.dirty || v.end.meta.dirty || v.endLabel.meta.dirty,
+                        valid: v.start.meta.valid && v.startLabel.meta.valid && v.end.meta.valid && v.endLabel.meta.valid,
+                    };
+                }),
+                start: {
+                    value: vs,
+                    meta: ms,
+                    resetField: rfs,
+                    handleInput: his,
+                },
+                startLabel: {
+                    value: vsl,
+                    meta: msl,
+                    resetField: rfsl,
+                    handleInput: hisl,
+                    handleChange: hcsl,
+                },
+                end: {
+                    value: ve,
+                    meta: me,
+                    resetField: rfe,
+                    handleInput: hie,
+                },
+                endLabel: {
+                    value: vel,
+                    meta: mel,
+                    resetField: rfel,
+                    handleInput: hiel,
+                    handleChange: hcel,
+                },
+            });
+
+            watch(v.meta, (newValue, oldValue) => {
+                console.log("epoch new value", newValue, v.meta);
+                context.emit('change', {
+                    dirty: v.meta.dirty,
+                    valid: v.meta.valid,
+                });
             });
 
             // RETURN
@@ -131,15 +211,15 @@
                 // HELPERS
                 translateLabel,
                 // LOCAL
-                onInput,
                 setLabel,
+                timeLabels,
                 // PROPS
                 name,
                 epochs,
                 disabled,
-                onChange,
                 // STATE
                 state,
+                v,
             }
         },
         // mounted () {

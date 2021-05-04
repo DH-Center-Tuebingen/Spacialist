@@ -110,10 +110,10 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
-                            :on-change="(field, value) => onChange(field, value, element.id)"
                             :value="state.attributeValues[element.id].value"
                             :epochs="state.selectionLists[element.id]"
-                            :type="element.datatype" />
+                            :type="element.datatype"
+                            @change="updateDirtyState" />
 
                         <dimension-attribute
                             v-else-if="element.datatype == 'dimension'"
@@ -373,6 +373,7 @@
                 return values;
             };
             const updateDirtyState = e => {
+                console.log("emit dirty", e);
                 context.emit('dirty', e);
             };
             const resetListValues = _ => {

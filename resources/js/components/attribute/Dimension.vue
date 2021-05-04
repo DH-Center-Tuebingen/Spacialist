@@ -40,14 +40,11 @@
             disabled: {
                 type: Boolean,
             },
-            onChange: {
-                type: Function,
-                required: true,
-            }
         },
         emits: ['change'],
         setup(props, context) {
             const {
+                name,
                 value,
                 disabled,
             } = toRefs(props);
@@ -124,7 +121,7 @@
                 }),
                 meta: computed(_ => {
                     return {
-                        dirty: v.B.meta.dirty && v.H.meta.dirty && v.T.meta.dirty && v.unit.meta.dirty,
+                        dirty: v.B.meta.dirty || v.H.meta.dirty || v.T.meta.dirty || v.unit.meta.dirty,
                         valid: v.B.meta.valid && v.H.meta.valid && v.T.meta.valid,
                     }
                 }),
@@ -156,7 +153,6 @@
             });
 
             watch(v.meta, (newValue, oldValue) => {
-                console.log("meta changed");
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
@@ -167,11 +163,13 @@
             return {
                 // HELPERS
                 // LOCAL
-                disabled,
                 dimensionUnits,
                 resetFieldState,
                 undirtyField,
                 setUnit,
+                // PROPS
+                name,
+                disabled,
                 // STATE
                 state,
                 v,
