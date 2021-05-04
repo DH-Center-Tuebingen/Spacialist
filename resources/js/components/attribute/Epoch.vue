@@ -33,10 +33,6 @@
                 </ul>
             </div>
         </div>
-        {{v.start.meta}}
-        <hr/>
-        {{v.meta}}
-        {{v.value}}
         <!-- <multiselect class="pt-2"
             label="concept_url"
             track-by="id"
@@ -110,6 +106,34 @@
             // FETCH
 
             // FUNCTIONS
+            const resetFieldState = _ => {
+                v.start.resetField({
+                    value: value.value.start
+                });
+                v.end.resetField({
+                    value: value.value.end
+                });
+                v.startLabel.resetField({
+                    value: value.value.startLabel
+                });
+                v.endLabel.resetField({
+                    value: value.value.endLabel
+                });
+            };
+            const undirtyField = _ => {
+                v.start.resetField({
+                    value: v.start.value
+                });
+                v.end.resetField({
+                    value: v.end.value
+                });
+                v.startLabel.resetField({
+                    value: v.startLabel.value
+                });
+                v.endLabel.resetField({
+                    value: v.endLabel.value
+                });
+            };
             const setLabel = (field, value) => {
                 v[field].handleChange(value);
             };
@@ -166,7 +190,10 @@
                 meta: computed(_ => {
                     return {
                         dirty: v.start.meta.dirty || v.startLabel.meta.dirty || v.end.meta.dirty || v.endLabel.meta.dirty,
-                        valid: v.start.meta.valid && v.startLabel.meta.valid && v.end.meta.valid && v.endLabel.meta.valid,
+                        valid: ((v.start.meta.dirty && v.start.meta.valid) || !v.start.meta.dirty) &&
+                               ((v.startLabel.meta.dirty && v.startLabel.meta.valid) || !v.startLabel.meta.dirty) &&
+                               ((v.end.meta.dirty && v.end.meta.valid) || !v.end.meta.dirty) &&
+                               ((v.endLabel.meta.dirty && v.endLabel.meta.valid) || !v.endLabel.meta.dirty),
                     };
                 }),
                 start: {
@@ -197,7 +224,7 @@
                 },
             });
 
-            watch(v.meta, (newValue, oldValue) => {
+            watch(_ => v.meta, (newValue, oldValue) => {
                 console.log("epoch new value", newValue, v.meta);
                 context.emit('change', {
                     dirty: v.meta.dirty,
@@ -211,6 +238,8 @@
                 // HELPERS
                 translateLabel,
                 // LOCAL
+                resetFieldState,
+                undirtyField,
                 setLabel,
                 timeLabels,
                 // PROPS

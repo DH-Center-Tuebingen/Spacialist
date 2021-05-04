@@ -122,7 +122,9 @@
                 meta: computed(_ => {
                     return {
                         dirty: v.B.meta.dirty || v.H.meta.dirty || v.T.meta.dirty || v.unit.meta.dirty,
-                        valid: v.B.meta.valid && v.H.meta.valid && v.T.meta.valid,
+                        valid: ((v.B.meta.dirty && v.B.meta.valid) || !v.B.meta.dirty) &&
+                               ((v.H.meta.dirty && v.H.meta.valid) || !v.H.meta.dirty) &&
+                               ((v.T.meta.dirty && v.T.meta.valid) || !v.T.meta.dirty),
                     }
                 }),
                 B: {
@@ -152,7 +154,7 @@
                 },
             });
 
-            watch(v.meta, (newValue, oldValue) => {
+            watch(_ => v.meta, (newValue, oldValue) => {
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
