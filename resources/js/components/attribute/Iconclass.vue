@@ -1,15 +1,21 @@
 <template>
     <div>
         <div class="input-group">
-            <input type="text" class="form-control" :disabled="disabled" v-model="state.value" @input="onInput()" />
+            <input type="text" class="form-control" :disabled="disabled" v-model="v.value" @input="onInput()" />
             <div class="input-group-append">
-                <button type="button" name="button" class="btn btn-outline-secondary" @click="loadIconclassInfo(state.value)">
+                <button type="button" name="button" class="btn btn-outline-secondary" @click="loadIconclassInfo()">
                     <i class="fas fa-fw fa-sync"></i>
                 </button>
             </div>
         </div>
         <div class="bg-light mt-2 p-2 border rounded" v-if="state.infoLoaded">
-            <span class="fw-bold">{{ state.text }}</span>
+            <div class="d-flex flex-row justify-content-between">
+                <span class="fw-bold">
+                    {{ state.text }}
+                </span>
+                <button type="button" class="btn-close" aria-label="Close" @click="closeInfoBox()">
+                </button>
+            </div>
             <hr class="my-2" />
             <div>
                 <span>{{ state.keywords.join(' &bull; ') }}</span>
@@ -27,10 +33,14 @@
 <script>
     import {
         computed,
-        onMounted,
         reactive,
         toRefs,
+        watch,
     } from 'vue';
+
+    import { useField } from 'vee-validate';
+
+    import * as yup from 'yup';
 
     import { useI18n } from 'vue-i18n';
 
@@ -46,14 +56,16 @@
         props: {
             name: String,
             value: {
-                required: false,
                 type: String,
+                required: false,
             },
             disabled: {
                 type: Boolean,
+                required: false,
+                default: false,
             }
         },
-        emits: ['input'],
+        emits: ['change'],
         setup(props, context) {
             const { t } = useI18n();
 
@@ -70,14 +82,28 @@
                 state.info = null;
                 state.requestState = 'not';
             };
+            const closeInfoBox = _ => {
+                resetInfoRequest();
+            };
+            const resetFieldState = _ => {
+                v.resetField({
+                    value: value.value
+                });
+                resetInfoRequest();
+            };
+            const undirtyField = _ => {
+                v.resetField({
+                    value: v.value,
+                });
+            };
             const onInput = _ => {
                 resetInfoRequest();
-                context.emit('input', state.value);
+                v.handleChange(v.value);
             };
-            const loadIconclassInfo = iconClass => {
+            const loadIconclassInfo = _ => {
                 resetInfoRequest();
                 state.requestState = 'requested';
-                getIconClassInfo(iconClass).then(data => {
+                getIconClassInfo(v.value).then(data => {
                     if(!!data) {
                         state.info = data;
                         state.requestState = 'success';
@@ -91,8 +117,15 @@
             };
 
             // DATA
+            const {
+                handleChange,
+                value: fieldValue,
+                meta,
+                resetField,
+            } = useField(`iconclass_${name.value}`, yup.string(), {
+                initialValue: value.value,
+            });
             const state = reactive({
-                value: '',
                 info: null,
                 requestState: 'not',
                 language: getPreference('prefs.gui-language'),
@@ -109,6 +142,19 @@
                     }
                 }),
             });
+            const v = reactive({
+                value: fieldValue,
+                handleChange,
+                meta,
+                resetField,
+            });
+
+            watch(v.meta, (newValue, oldValue) => {
+                context.emit('change', {
+                    dirty: v.meta.dirty,
+                    valid: v.meta.valid,
+                });
+            });
 
             // RETURN
             return {
@@ -116,6 +162,9 @@
                 // HELPERS
                 getPreference,
                 // LOCAL
+                resetFieldState,
+                closeInfoBox,
+                undirtyField,
                 onInput,
                 loadIconclassInfo,
                 // PROPS
@@ -123,6 +172,7 @@
                 value,
                 // STATE
                 state,
+                v,
             };
         },
     }

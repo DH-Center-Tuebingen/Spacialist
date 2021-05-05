@@ -141,7 +141,7 @@
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :attribute="element"
-                            @input="updateValue($event, element.id)" />
+                            @change="updateDirtyState" />
 
                         <geography-attribute
                             v-else-if="element.datatype == 'geography'"
