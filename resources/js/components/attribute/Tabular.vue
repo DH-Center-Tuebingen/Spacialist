@@ -1,9 +1,13 @@
 <template>
     <div>
         <table class="table table-striped table-hovered table-sm">
+            <col style="width: 33%"/>
+            <col style="width: 33%"/>
+            <col style="width: 33%"/>
+            <col style="width: 1%"/>
             <thead class="thead-light">
                 <tr>
-                    <th v-for="(column, i) in attribute.columns" :key="i">
+                    <th v-for="(column, i) in state.columns" :key="i">
                         {{ translateConcept(column.thesaurus_url) }}
                     </th>
                     <th>
@@ -14,76 +18,146 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(row, $index) in value" :key="$index">
-                    <td v-for="(column, i) in attribute.columns" :key="i">
-                        <input class="form-control form-control-sm" v-if="column.datatype == 'string'" type="text" :disabled="disabled" v-model="row[column.id]" @input="onInput($index, $event.target.value)"/>
-                        <input class="form-control form-control-sm" v-else-if="column.datatype == 'double'" type="number" :disabled="disabled" step="any" min="0" placeholder="0.0" v-model.number="row[column.id]" @input="onInput($index, $event.target.value)"/>
-                        <input class="form-control form-control-sm" v-else-if="column.datatype == 'integer'" type="number" :disabled="disabled" step="1" placeholder="0" v-model.number="row[column.id]" @input="onInput($index, $event.target.value)"/>
-                        <input class="form-control form-control-sm" v-else-if="column.datatype == 'boolean'" type="checkbox" :disabled="disabled" v-model="row[column.id]" @input="onInput($index, $event.target.value)"/>
-                        <div v-else-if="column.datatype == 'string-sc'">
-                            <multiselect
-                                class="multiselect-sm"
-                                v-model="row[column.id]"
-                                :mode="'tags'"
-                                :label="'concept_url'"
-                                :track-by="'concept_url'"
-                                :valueProp="'id'"
-                                :disabled="disabled"
-                                :options="selections[column.id] || []"
-                                :placeholder="t('global.select.placeholder')"
-                                @input="onInput($index, $event.target)">
-                            </multiselect>
-                        </div>
-                        <div v-else-if="column.datatype == 'entity'">
-                            <entity-search
-                                :id="`attr-${column.id}`"
-                                :name="`attr-${column.id}`"
-                                :on-select="selection => setEntitySearchResult(selection, row, column.id, $index)"
-                                :value="row[column.id] ? row[column.id].name : ''">
-                            </entity-search>
-                        </div>
+                <tr v-for="(row, $index) in state.locValue" :key="$index">
+                    <td v-for="(column, i) in state.columns" :key="i">
+                        <string-attribute
+                            v-if="column.datatype == 'string'"
+                            :ref="el => setRef(el, `${$index}_${i}`)"
+                            :disabled="disabled || state.deletedRows[$index]"
+                            :name="`attr-${column.id}`"
+                            :value="row[column.id]"
+                            @change="updateDirtyState" />
+
+                        <integer-attribute
+                            v-else-if="column.datatype == 'integer'"
+                            :ref="el => setRef(el, `${$index}_${i}`)"
+                            :disabled="disabled || state.deletedRows[$index]"
+                            :name="`attr-${column.id}`"
+                            :value="row[column.id]"
+                            @change="updateDirtyState" />
+
+                        <float-attribute
+                            v-else-if="column.datatype == 'double'"
+                            :ref="el => setRef(el, `${$index}_${i}`)"
+                            :disabled="disabled || state.deletedRows[$index]"
+                            :name="`attr-${column.id}`"
+                            :value="row[column.id]"
+                            @change="updateDirtyState" />
+
+                        <bool-attribute
+                            v-else-if="column.datatype == 'boolean'"
+                            :ref="el => setRef(el, `${$index}_${i}`)"
+                            :disabled="disabled || state.deletedRows[$index]"
+                            :name="`attr-${column.id}`"
+                            :value="row[column.id]"
+                            @change="updateDirtyState" />
+
+                        <iconclass-attribute
+                            v-else-if="column.datatype == 'iconclass'"
+                            :ref="el => setRef(el, `${$index}_${i}`)"
+                            :disabled="disabled || state.deletedRows[$index]"
+                            :name="`attr-${column.id}`"
+                            :value="row[column.id]"
+                            :attribute="element"
+                            @change="updateDirtyState" />
+
+                        <entity-attribute v-else-if="column.datatype == 'entity'"
+                            :ref="el => setRef(el, `${$index}_${i}`)"
+                            :disabled="disabled || state.deletedRows[$index]"
+                            :name="`attr-${column.id}`"
+                            :value="row[column.id]"
+                            @change="updateDirtyState" />
+
+                        <date-attribute
+                            v-else-if="column.datatype == 'date'"
+                            :ref="el => setRef(el, `${$index}_${i}`)"
+                            :disabled="disabled || state.deletedRows[$index]"
+                            :name="`attr-${column.id}`"
+                            :value="row[column.id]"
+                            @change="updateDirtyState" />
+
+                        <singlechoice-attribute
+                            v-else-if="column.datatype == 'string-sc'"
+                            :ref="el => setRef(el, `${$index}_${i}`)"
+                            :disabled="disabled || state.deletedRows[$index]"
+                            :name="`attr-${column.id}`"
+                            :value="row[column.id]"
+                            @change="updateDirtyState" />
+
+                        <multichoice-attribute
+                            v-else-if="column.datatype == 'string-mc'"
+                            :ref="el => setRef(el, `${$index}_${i}`)"
+                            :disabled="disabled || state.deletedRows[$index]"
+                            :name="`attr-${column.id}`"
+                            :value="row[column.id]"
+                            :selections="{}"
+                            @change="updateDirtyState" />
                     </td>
                     <td>
-                        <button type="button" :disabled="disabled" class="btn btn-danger btn-sm" @click="deleteTableRow($index)">
+                        <button v-if="state.deletedRows[$index]" type="button" class="btn btn-warning btn-sm" @click="restoreTableRow($index)">
+                            <i class="fas fa-fw fa-undo"></i>
+                        </button>
+                        <button v-else type="button" :disabled="disabled" class="btn btn-danger btn-sm" @click="deleteTableRow($index)">
                             <i class="fas fa-fw fa-trash"></i>
                         </button>
                     </td>
                 </tr>
-                <tr>
-                    <td v-for="(column, i) in attribute.columns" :key="i">
-                        <input class="form-control form-control-sm" v-if="column.datatype == 'string'" type="text" :disabled="disabled" v-model="state.newTableCols[column.id]"/>
-                        <input class="form-control form-control-sm" v-else-if="column.datatype == 'double'" type="number" :disabled="disabled" step="any" min="0" placeholder="0.0" v-model.number="state.newTableCols[column.id]"/>
-                        <input class="form-control form-control-sm" v-else-if="column.datatype == 'integer'" type="number" :disabled="disabled" step="1" placeholder="0" v-model.number="state.newTableCols[column.id]"/>
-                        <input class="form-control form-control-sm" v-else-if="column.datatype == 'boolean'" type="checkbox" :disabled="disabled" v-model="state.newTableCols[column.id]"/>
-                        <div v-else-if="column.datatype == 'string-sc'">
-                            <multiselect
-                                class="multiselect-sm"
-                                v-model="state.newTableCols[column.id]"
-                                :label="'concept_url'"
-                                :track-by="'concept_url'"
-                                :mode="'tags'"
-                                :disabled="disabled"
-                                :options="selections[column.id] || []"
-                                :placeholder="t('global.select.placeholder')">
-                            </multiselect>
-                        </div>
-                        <div v-else-if="column.datatype == 'entity'">
-                            <entity-search
-                                :id="`attr-${column.id}`"
-                                :name="`attr-${column.id}`"
-                                :on-select="selection => setEntitySearchResult(selection, state.newTableCols, column.id)"
-                                :value="state.newTableCols[column.id] ? state.newTableCols[column.id].name : ''">
-                            </entity-search>
-                        </div>
+                <tr v-if="!disabled">
+                    <td v-for="(column, i) in state.columns" :key="i">
+                        <string-attribute
+                            v-if="column.datatype == 'string'"
+                            :name="`attr-${column.id}`"
+                            :value="state.newTableCols[column.id]" />
+
+                        <integer-attribute
+                            v-else-if="column.datatype == 'integer'"
+                            :name="`attr-${column.id}`"
+                            :value="state.newTableCols[column.id]" />
+
+                        <float-attribute
+                            v-else-if="column.datatype == 'double'"
+                            :name="`attr-${column.id}`"
+                            :value="state.newTableCols[column.id]" />
+
+                        <bool-attribute
+                            v-else-if="column.datatype == 'boolean'"
+                            :name="`attr-${column.id}`"
+                            :value="state.newTableCols[column.id]" />
+
+                        <iconclass-attribute
+                            v-else-if="column.datatype == 'iconclass'"
+                            :name="`attr-${column.id}`"
+                            :value="state.newTableCols[column.id]"
+                            :attribute="column" />
+
+                        <entity-attribute v-else-if="column.datatype == 'entity'"
+                            :name="`attr-${column.id}`"
+                            :value="state.newTableCols[column.id]" />
+
+                        <date-attribute
+                            v-else-if="column.datatype == 'date'"
+                            :name="`attr-${column.id}`"
+                            :value="state.newTableCols[column.id]" />
+
+                        <singlechoice-attribute
+                            v-else-if="column.datatype == 'string-sc'"
+                            :name="`attr-${column.id}`"
+                            :value="state.newTableCols[column.id]" />
+
+                        <multichoice-attribute
+                            v-else-if="column.datatype == 'string-mc'"
+                            :name="`attr-${column.id}`"
+                            :value="state.newTableCols[column.id]"
+                            :selections="{}" />
                     </td>
                     <td>
-                        <button type="button" :disabled="disabled" class="btn btn-success btn-sm" @click="addTableRow(newTableCols, attribute.columns)">
+                        <button type="button" class="btn btn-success btn-sm" @click="addTableRow(newTableCols, state.columns)">
                             <i class="fas fa-fw fa-plus"></i>
                         </button>
                     </td>
                 </tr>
                 <tr>
-                    <td v-for="(column, i) in attribute.columns" :key="i">
+                    <td v-for="(column, i) in state.columns" :key="i">
                         <form class="d-flex flex-column" v-if="state.chartShown">
                             <div class="form-check" v-show="column.datatype == 'integer'">
                                 <input class="form-check-input" type="checkbox" :id="`include-cb-${column.id}`" v-model="state.chartSet[column.id]" @change="updateChart()" />
@@ -130,6 +204,7 @@
         computed,
         onMounted,
         reactive,
+        ref,
         toRefs,
     } from 'vue';
 
@@ -141,14 +216,34 @@
     import { useI18n } from 'vue-i18n';
 
     import {
+        getAttribute,
         translateConcept,
     } from '../../helpers/helpers.js';
 
+    import StringAttr from './String.vue';
+    import IntegerAttr from './Integer.vue';
+    import FloatAttr from './Float.vue';
+    import Bool from './Bool.vue';
+    import Iconclass from './Iconclass.vue';
+    import Entity from './Entity.vue';
+    import DateAttr from './Date.vue';
+    import SingleChoice from './SingleChoice.vue';
+    import MultiChoice from './MultiChoice.vue';
+
     export default {
         props: {
-            name: String,
+            name: {
+                type: String,
+                required: true,
+            },
+            disabled: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
             value: {
                 type: Array,
+                required: false,
                 default: _ => new Array(),
             },
             selections: {
@@ -157,15 +252,19 @@
             attribute: {
                 type: Object,
             },
-            disabled: {
-                type: Boolean,
-            },
-            onChange: {
-                type: Function,
-                required: true,
-            }
         },
-        emits: ['expanded'],
+        components: {
+            'string-attribute': StringAttr,
+            'integer-attribute': IntegerAttr,
+            'float-attribute': FloatAttr,
+            'bool-attribute': Bool,
+            'iconclass-attribute': Iconclass,
+            'entity-attribute': Entity,
+            'date-attribute': DateAttr,
+            'singlechoice-attribute': SingleChoice,
+            'multichoice-attribute': MultiChoice,
+        },
+        emits: ['change', 'expanded'],
         setup(props, context) {
             const { t } = useI18n();
 
@@ -173,11 +272,10 @@
 
             const {
                 name,
+                disabled,
                 value,
                 selections,
                 attribute,
-                disabled,
-                onChange,
             } = toRefs(props);
 
             // FETCH
@@ -193,7 +291,7 @@
             const toggleChart = _ => {
                 if(state.chartShown) {
                     state.chartShown = false;
-                    if(thstateis.chartCtx) state.chartCtx.destroy();
+                    if(state.chartCtx) state.chartCtx.destroy();
                     state.chartCtx = null;
                 } else {
                     state.chartShown = true;
@@ -215,24 +313,11 @@
                     }
                 });
             };
-            const onInput = (field, value) => {
-                this.$emit('input', value);
-                if(field != null) {
-                    // an entry in an existing row has been changed
-                    // replacing a single value is not supported
-                    // therefore the whole row will be replaced
-                    value = this.value[field];
-                }
-                this.onChange(field, value);
-            };
             const setEntitySearchResult = (result, row, column, field) => {
                 if(result) {
                     row[column] = result;
                 } else {
                     delete row[column];
-                }
-                if(field) {
-                    onInput(field, result);
                 }
             };
             const addTableRow = row => {
@@ -240,17 +325,35 @@
                 for(let k in row) {
                     delete row[k];
                 }
-                onInput(null, this.value);
+            };
+            const restoreTableRow = index => {
+                delete state.deletedRows[index];
+                console.log("would restore", state.locValue[index]);
             };
             const deleteTableRow = index => {
-                this.value.splice(index, 1);
-                onInput(null, this.value);
+                state.deletedRows[index] = true;
+                console.log("would delete", state.locValue[index]);
+            };
+            const storeData = _ => {
+                state.locValue = state.locValue.filter((v, i) => {
+                    return !state.deletedRows[i];
+                });
+                state.deletedRows = {};
+            };
+            const updateDirtyState = e => {
+                context.emit('change', e);
+            };
+            const setRef = (el, idx) => {
+                columnRefs[idx] = el;
             };
 
             // DATA
+            const columnRefs = ref({});
             const state = reactive({
-                locValue: value,
+                locValue: value.value.slice(),
+                columns: computed(_ => getAttribute(attribute.value.id).columns),
                 newTableCols: {},
+                deletedRows: {},
                 expanded: false,
                 chartShown: false,
                 chartId: 'chart-container',
@@ -309,8 +412,17 @@
                 toggleChart,
                 updateChart,
                 setEntitySearchResult,
+                addTableRow,
+                restoreTableRow,
+                deleteTableRow,
+                storeData,
+                updateDirtyState,
+                setRef,
                 // PROPS
                 disabled,
+                value,
+                attribute,
+                selections,
                 // STATE
                 state,
             }

@@ -1,14 +1,23 @@
 <template>
     <multiselect
         :valueProp="'id'"
-        :label="'thesaurus_url'"
-        :track-by="'thesaurus_url'"
+        :label="'concept_url'"
+        :track-by="'concept_url'"
+        :object="true"
         :mode="'single'"
         :disabled="disabled"
         :options="selections"
         :name="name"
         :placeholder="t('global.select.placeholder')"
         v-model="value">
+        <template v-slot:option="{ option }">
+            {{ translateConcept(option.concept_url) }}
+        </template>
+        <template v-slot:singlelabel="{ value }">
+            <div class="px-2">
+                {{ translateConcept(value.concept_url) }}
+            </div>
+        </template>
     </multiselect>
 </template>
 
@@ -19,6 +28,10 @@
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
+
+    import {
+        translateConcept,
+    } from '../../helpers/helpers.js';
 
     export default {
         props: {
@@ -32,7 +45,7 @@
                 default: false,
             },
             value: {
-                type: Number,
+                type: Object,
                 required: true,
             },
             selections: {
@@ -61,6 +74,7 @@
             return {
                 t,
                 // HELPERS
+                translateConcept,
                 // LOCAL
                 // PROPS
                 name,

@@ -112,6 +112,11 @@ export function getConceptLabel(concept) {
     return concept.labels.length ? concept.labels[0].label : '';
 }
 
+export function getAttribute(id) {
+    if(!id) return {};
+    return store.getters.attributes.find(a => a.id == id);
+}
+
 export function translateEntityType(id) {
     return translateConcept(getEntityType(id).thesaurus_url);
 }

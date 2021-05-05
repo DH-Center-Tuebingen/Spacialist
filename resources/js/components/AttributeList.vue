@@ -128,7 +128,6 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
-                            :on-change="(field, value) => onChange(field, value, element.id)"
                             :value="state.attributeValues[element.id].value"
                             :attribute="element"
                             :selections="state.selectionLists"
