@@ -60,9 +60,9 @@
                 v.T.resetField({
                     value: value.value.T
                 });
-                v.unit.value = value.value.unit;
-                v.unit.initialValue = value.value.unit;
-                v.unit.meta.dirty = false;
+                v.unit.resetField({
+                    value: value.value.unit,
+                });
             };
             const undirtyField = _ => {
                 v.B.resetField({
@@ -74,12 +74,12 @@
                 v.T.resetField({
                     value: v.T.value,
                 });
-                v.unit.initialValue = v.unit.value;
-                v.unit.meta.dirty = false;
+                v.unit.resetField({
+                    value: v.unit.value,
+                });
             };
             const setUnit = (unit) => {
-                v.unit.value = unit;
-                v.unit.meta.dirty = true;
+                v.unit.handleChange(unit);
             };
 
             // DATA
@@ -90,7 +90,7 @@
                 meta: mb,
                 resetField: rfb,
             } = useField(`b_${name.value}`, yup.number().positive(), {
-                initialValue: value.value,
+                initialValue: value.value.B,
             });
             const {
                 handleInput: hih,
@@ -98,7 +98,7 @@
                 meta: mh,
                 resetField: rfh,
             } = useField(`h_${name.value}`, yup.number().positive(), {
-                initialValue: value.value,
+                initialValue: value.value.H,
             });
             const {
                 handleInput: hit,
@@ -106,7 +106,16 @@
                 meta: mt,
                 resetField: rft,
             } = useField(`t_${name.value}`, yup.number().positive(), {
-                initialValue: value.value,
+                initialValue: value.value.T,
+            });
+            const {
+                handleInput: hiu,
+                handleChange: hcu,
+                value: vu,
+                meta: mu,
+                resetField: rfu,
+            } = useField(`unit_${name.value}`, yup.string().matches(/(nm|µm|mm|cm|dm|m|km)/), {
+                initialValue: value.value.unit,
             });
             const state = reactive({
             });
@@ -146,11 +155,11 @@
                     handleInput: hit,
                 },
                 unit: {
-                    value: value.value.unit,
-                    initialValue: value.value.unit,
-                    meta: {
-                        dirty: false,
-                    }
+                    value: vu,
+                    meta: mu,
+                    resetField: rfu,
+                    handleInput: hiu,
+                    handleChange: hcu,
                 },
             });
 
