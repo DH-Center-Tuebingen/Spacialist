@@ -280,7 +280,6 @@ export function simpleResourceType(resource) {
 };
 
 export function findInList(list, searchValue, searchKey = 'id', recKey = 'children') {
-    console.log(`Looking for ${searchValue} within key ${searchKey} using rec key ${recKey} in: `, list);
     if(!list || list.length == 0) return;
 
     for(let i=0; i<list.length; i++) {

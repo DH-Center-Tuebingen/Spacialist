@@ -373,7 +373,6 @@
                 return values;
             };
             const updateDirtyState = e => {
-                console.log("emit dirty", e);
                 context.emit('dirty', e);
             };
             const resetListValues = _ => {

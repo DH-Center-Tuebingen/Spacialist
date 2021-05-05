@@ -225,7 +225,6 @@
             });
 
             watch(_ => v.meta, (newValue, oldValue) => {
-                console.log("epoch new value", newValue, v.meta);
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,

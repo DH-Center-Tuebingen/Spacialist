@@ -240,7 +240,6 @@
                 return !!prop && !!prop.match(exp);
             };
             const filterBibliographyList = query => {
-                console.log(query);
                 const exp = new RegExp(query, 'i');
                 return new Promise(r => r(
                     state.bibliography.filter(entry => {
