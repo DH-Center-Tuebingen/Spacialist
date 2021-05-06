@@ -2,6 +2,7 @@ const de = {
     global: {
         save: 'Speichern',
         delete: 'Löschen',
+        restore: 'Wiederherstellen',
         deactivate: 'Deaktivieren',
         reactivate: 'Reaktivieren',
         remove: 'Entfernen',

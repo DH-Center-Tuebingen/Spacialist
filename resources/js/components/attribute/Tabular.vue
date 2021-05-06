@@ -1,5 +1,6 @@
 <template>
     <div>
+        {{ state.locValue }}
         <table class="table table-striped table-hovered table-sm">
             <col style="width: 33%"/>
             <col style="width: 33%"/>
@@ -24,7 +25,7 @@
                             v-if="column.datatype == 'string'"
                             :ref="el => setRef(el, `${$index}_${i}`)"
                             :disabled="disabled || state.deletedRows[$index]"
-                            :name="`attr-${column.id}`"
+                            :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             @change="updateDirtyState" />
 
@@ -32,7 +33,7 @@
                             v-else-if="column.datatype == 'integer'"
                             :ref="el => setRef(el, `${$index}_${i}`)"
                             :disabled="disabled || state.deletedRows[$index]"
-                            :name="`attr-${column.id}`"
+                            :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             @change="updateDirtyState" />
 
@@ -40,7 +41,7 @@
                             v-else-if="column.datatype == 'double'"
                             :ref="el => setRef(el, `${$index}_${i}`)"
                             :disabled="disabled || state.deletedRows[$index]"
-                            :name="`attr-${column.id}`"
+                            :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             @change="updateDirtyState" />
 
@@ -48,7 +49,7 @@
                             v-else-if="column.datatype == 'boolean'"
                             :ref="el => setRef(el, `${$index}_${i}`)"
                             :disabled="disabled || state.deletedRows[$index]"
-                            :name="`attr-${column.id}`"
+                            :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             @change="updateDirtyState" />
 
@@ -56,7 +57,7 @@
                             v-else-if="column.datatype == 'iconclass'"
                             :ref="el => setRef(el, `${$index}_${i}`)"
                             :disabled="disabled || state.deletedRows[$index]"
-                            :name="`attr-${column.id}`"
+                            :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             :attribute="element"
                             @change="updateDirtyState" />
@@ -64,7 +65,7 @@
                         <entity-attribute v-else-if="column.datatype == 'entity'"
                             :ref="el => setRef(el, `${$index}_${i}`)"
                             :disabled="disabled || state.deletedRows[$index]"
-                            :name="`attr-${column.id}`"
+                            :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             @change="updateDirtyState" />
 
@@ -72,7 +73,7 @@
                             v-else-if="column.datatype == 'date'"
                             :ref="el => setRef(el, `${$index}_${i}`)"
                             :disabled="disabled || state.deletedRows[$index]"
-                            :name="`attr-${column.id}`"
+                            :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             @change="updateDirtyState" />
 
@@ -80,7 +81,7 @@
                             v-else-if="column.datatype == 'string-sc'"
                             :ref="el => setRef(el, `${$index}_${i}`)"
                             :disabled="disabled || state.deletedRows[$index]"
-                            :name="`attr-${column.id}`"
+                            :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             @change="updateDirtyState" />
 
@@ -88,65 +89,75 @@
                             v-else-if="column.datatype == 'string-mc'"
                             :ref="el => setRef(el, `${$index}_${i}`)"
                             :disabled="disabled || state.deletedRows[$index]"
-                            :name="`attr-${column.id}`"
+                            :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             :selections="{}"
                             @change="updateDirtyState" />
                     </td>
-                    <td>
-                        <button v-if="state.deletedRows[$index]" type="button" class="btn btn-warning btn-sm" @click="restoreTableRow($index)">
-                            <i class="fas fa-fw fa-undo"></i>
-                        </button>
-                        <button v-else type="button" :disabled="disabled" class="btn btn-danger btn-sm" @click="deleteTableRow($index)">
-                            <i class="fas fa-fw fa-trash"></i>
-                        </button>
+                    <td v-if="!disabled" class="text-center">
+                        <div class="dropdown">
+                            <span :id="`tabular-row-options-${$index}`" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-fw fa-ellipsis-h"></i>
+                            </span>
+                            <div class="dropdown-menu" :aria-labelledby="`tabular-row-options-${$index}`">
+                                <a class="dropdown-item" href="#" @click.prevent="resetRow($index)">
+                                    <i class="fas fa-fw fa-undo text-info"></i> {{ t('global.reset') }}
+                                </a>
+                                <a class="dropdown-item" href="#" v-if="state.deletedRows[$index]" @click.prevent="restoreTableRow($index)">
+                                    <i class="fas fa-fw fa-trash-restore text-warning"></i> {{ t('global.restore') }}
+                                </a>
+                                <a class="dropdown-item" href="#" v-else @click.prevent="markTableRowForDelete($index)">
+                                    <i class="fas fa-fw fa-trash text-danger"></i> {{ t('global.delete') }}
+                                </a>
+                            </div>
+                        </div>
                     </td>
                 </tr>
                 <tr v-if="!disabled">
                     <td v-for="(column, i) in state.columns" :key="i">
                         <string-attribute
                             v-if="column.datatype == 'string'"
-                            :name="`attr-${column.id}`"
+                            :name="`${name}-new-column-attr-${column.id}`"
                             :value="state.newTableCols[column.id]" />
 
                         <integer-attribute
                             v-else-if="column.datatype == 'integer'"
-                            :name="`attr-${column.id}`"
+                            :name="`${name}-new-column-attr-${column.id}`"
                             :value="state.newTableCols[column.id]" />
 
                         <float-attribute
                             v-else-if="column.datatype == 'double'"
-                            :name="`attr-${column.id}`"
+                            :name="`${name}-new-column-attr-${column.id}`"
                             :value="state.newTableCols[column.id]" />
 
                         <bool-attribute
                             v-else-if="column.datatype == 'boolean'"
-                            :name="`attr-${column.id}`"
+                            :name="`${name}-new-column-attr-${column.id}`"
                             :value="state.newTableCols[column.id]" />
 
                         <iconclass-attribute
                             v-else-if="column.datatype == 'iconclass'"
-                            :name="`attr-${column.id}`"
+                            :name="`${name}-new-column-attr-${column.id}`"
                             :value="state.newTableCols[column.id]"
                             :attribute="column" />
 
                         <entity-attribute v-else-if="column.datatype == 'entity'"
-                            :name="`attr-${column.id}`"
+                            :name="`${name}-new-column-attr-${column.id}`"
                             :value="state.newTableCols[column.id]" />
 
                         <date-attribute
                             v-else-if="column.datatype == 'date'"
-                            :name="`attr-${column.id}`"
+                            :name="`${name}-new-column-attr-${column.id}`"
                             :value="state.newTableCols[column.id]" />
 
                         <singlechoice-attribute
                             v-else-if="column.datatype == 'string-sc'"
-                            :name="`attr-${column.id}`"
+                            :name="`${name}-new-column-attr-${column.id}`"
                             :value="state.newTableCols[column.id]" />
 
                         <multichoice-attribute
                             v-else-if="column.datatype == 'string-mc'"
-                            :name="`attr-${column.id}`"
+                            :name="`${name}-new-column-attr-${column.id}`"
                             :value="state.newTableCols[column.id]"
                             :selections="{}" />
                     </td>
@@ -328,11 +339,16 @@
             };
             const restoreTableRow = index => {
                 delete state.deletedRows[index];
-                console.log("would restore", state.locValue[index]);
             };
-            const deleteTableRow = index => {
+            const markTableRowForDelete = index => {
                 state.deletedRows[index] = true;
-                console.log("would delete", state.locValue[index]);
+                updateDirtyState({
+                    dirty: true,
+                    valid: true,
+                });
+            };
+            const resetRow = index => {
+
             };
             const storeData = _ => {
                 state.locValue = state.locValue.filter((v, i) => {
@@ -345,6 +361,23 @@
             };
             const setRef = (el, idx) => {
                 columnRefs[idx] = el;
+            };
+            const resetFieldState = _ => {
+                for(let k in columnRefs) {
+                    const curr = columnRefs[k];
+                    if(!!curr.resetFieldState) {
+                        curr.resetFieldState();
+                    }
+                }
+                state.deletedRows = {};
+            };
+            const undirtyField = _ => {
+                for(let k in columnRefs) {
+                    const curr = columnRefs[k];
+                    if(!!curr.undirtyField) {
+                        curr.undirtyField();
+                    }
+                }
             };
 
             // DATA
@@ -414,11 +447,15 @@
                 setEntitySearchResult,
                 addTableRow,
                 restoreTableRow,
-                deleteTableRow,
+                markTableRowForDelete,
+                resetRow,
                 storeData,
                 updateDirtyState,
                 setRef,
+                resetFieldState,
+                undirtyField,
                 // PROPS
+                name,
                 disabled,
                 value,
                 attribute,

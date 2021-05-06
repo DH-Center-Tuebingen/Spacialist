@@ -2,6 +2,7 @@ const en = {
     global: {
         save: 'Save',
         delete: 'Delete',
+        restore: 'Restore',
         deactivate: 'Deactivate',
         reactivate: 'Reactivate',
         remove: 'Remove',
