@@ -9,7 +9,8 @@
         :options="selections"
         :name="name"
         :placeholder="t('global.select.placeholder')"
-        v-model="value">
+        v-model="v.value"
+        @change="value => v.handleChange(value)">
         <template v-slot:option="{ option }">
             {{ translateConcept(option.concept_url) }}
         </template>
@@ -25,7 +26,12 @@
     import {
         reactive,
         toRefs,
+        watch,
     } from 'vue';
+
+    import { useField } from 'vee-validate';
+
+    import * as yup from 'yup';
 
     import { useI18n } from 'vue-i18n';
 
@@ -50,24 +56,56 @@
             },
             selections: {
                 type: Array,
-                required: false,
-                default: [],
+                required: true,
             },
         },
+        emits: ['change'],
         setup(props, context) {
             const { t } = useI18n();
             const {
                 name,
                 disabled,
                 value,
+                selections,
             } = toRefs(props);
             // FETCH
 
             // FUNCTIONS
+            const resetFieldState = _ => {
+                v.resetField({
+                    value: value.value
+                });
+            };
+            const undirtyField = _ => {
+                v.resetField({
+                    value: v.value,
+                });
+            };
 
             // DATA
+            const {
+                handleChange,
+                value: fieldValue,
+                meta,
+                resetField,
+            } = useField(`sc_${name.value}`, yup.mixed(), {
+                initialValue: value.value,
+            });
             const state = reactive({
 
+            });
+            const v = reactive({
+                value: fieldValue,
+                handleChange,
+                meta,
+                resetField,
+            });
+
+            watch(v.meta, (newValue, oldValue) => {
+                context.emit('change', {
+                    dirty: v.meta.dirty,
+                    valid: v.meta.valid,
+                });
             });
 
             // RETURN
@@ -76,12 +114,15 @@
                 // HELPERS
                 translateConcept,
                 // LOCAL
+                resetFieldState,
+                undirtyField,
                 // PROPS
                 name,
                 disabled,
-                value,
+                selections,
                 // STATE
                 state,
+                v,
             }
         },
     }

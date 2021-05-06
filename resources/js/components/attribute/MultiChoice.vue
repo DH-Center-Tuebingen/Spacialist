@@ -1,14 +1,25 @@
 <template>
     <multiselect
         :valueProp="'id'"
-        :label="'thesaurus_url'"
-        :track-by="'thesaurus_url'"
+        :label="'concept_url'"
+        :track-by="'concept_url'"
+        :object="true"
         :mode="'tags'"
         :disabled="disabled"
         :options="selections"
         :name="name"
         :placeholder="t('global.select.placeholder')"
-        v-model="value">
+        v-model="v.value"
+        @change="value => v.handleChange(value)">
+        <template v-slot:option="{ option }">
+            {{ translateConcept(option.concept_url) }}
+        </template>
+        <template v-slot:tag="{ option, handleTagRemove, disabled }">
+            <div class="multiselect-tag">
+                {{ translateConcept(option.concept_url) }}
+                <i v-if="!disabled" @click.prevent @mousedown.prevent.stop="handleTagRemove(option, $event)" />
+            </div>
+        </template>
     </multiselect>
 </template>
 
@@ -16,9 +27,18 @@
     import {
         reactive,
         toRefs,
+        watch,
     } from 'vue';
 
+    import { useField } from 'vee-validate';
+
+    import * as yup from 'yup';
+
     import { useI18n } from 'vue-i18n';
+
+    import {
+        translateConcept,
+    } from '../../helpers/helpers.js';
 
     export default {
         props: {
@@ -32,13 +52,12 @@
                 default: false,
             },
             value: {
-                type: Number,
+                type: Object,
                 required: true,
             },
             selections: {
                 type: Array,
-                required: false,
-                default: [],
+                required: true,
             },
         },
         setup(props, context) {
@@ -47,27 +66,63 @@
                 name,
                 disabled,
                 value,
+                selections,
             } = toRefs(props);
             // FETCH
 
             // FUNCTIONS
+            const resetFieldState = _ => {
+                v.resetField({
+                    value: value.value
+                });
+            };
+            const undirtyField = _ => {
+                v.resetField({
+                    value: v.value,
+                });
+            };
 
             // DATA
+            const {
+                handleChange,
+                value: fieldValue,
+                meta,
+                resetField,
+            } = useField(`mc_${name.value}`, yup.mixed(), {
+                initialValue: value.value,
+            });
             const state = reactive({
 
+            });
+            const v = reactive({
+                value: fieldValue,
+                handleChange,
+                meta,
+                resetField,
+            });
+
+            watch(v.meta, (newValue, oldValue) => {
+                context.emit('change', {
+                    dirty: v.meta.dirty,
+                    valid: v.meta.valid,
+                });
             });
 
             // RETURN
             return {
                 t,
                 // HELPERS
+                translateConcept,
                 // LOCAL
+                resetFieldState,
+                undirtyField,
                 // PROPS
                 name,
                 disabled,
-                value,
+                selections,
                 // STATE
                 state,
+                v,
             }
         },
     }

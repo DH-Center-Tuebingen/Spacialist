@@ -111,7 +111,7 @@
                             :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
-                            :epochs="state.selectionLists[element.id]"
+                            :epochs="selections[element.id]"
                             :type="element.datatype"
                             @change="updateDirtyState" />
 
@@ -130,8 +130,9 @@
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :attribute="element"
-                            :selections="state.selectionLists"
-                            @expanded="e => onAttributeExpand(e, index)" />
+                            :selections="selections"
+                            @expanded="e => onAttributeExpand(e, index)"
+                            @change="updateDirtyState" />
 
                         <iconclass-attribute
                             v-else-if="element.datatype == 'iconclass'"
@@ -170,7 +171,9 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value" />
+                            :value="state.attributeValues[element.id].value"
+                            :selections="selections[element.id]"
+                            @change="updateDirtyState" />
 
                         <multichoice-attribute
                             v-else-if="element.datatype == 'string-mc'"
@@ -178,7 +181,8 @@
                             :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
-                            :selections="state.selectionLists[element.id]" />
+                            :selections="selections[element.id]"
+                            @change="updateDirtyState" />
 
                         <sql-attribute
                             v-else-if="element.datatype == 'sql'"
@@ -431,7 +435,6 @@
             const state = reactive({
                 attributeList: attributes,
                 attributeValues: values,
-                selectionLists: selections,
                 hoverStates: new Array(attributes.value.length).fill(false),
                 expansionStates: new Array(attributes.value.length).fill(false),
                 componentLoaded: computed(_ => state.attributeList.length > 0 && state.attributeValues),
@@ -489,6 +492,7 @@
                 disableDrag,
                 group,
                 nolabels,
+                selections,
                 // STATE
                 attrRefs,
                 state,
