@@ -50,7 +50,7 @@
             // FUNCTIONS
             const resetFieldState = _ => {
                 v.resetField({
-                    value: value.value
+                    value: initValue,
                 });
             };
             const undirtyField = _ => {
