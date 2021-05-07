@@ -262,6 +262,15 @@ const de = {
                 go_to: 'Zur Startseite',
             },
         },
+        csv: {
+            uploader: {
+                title: 'CSV-Uploader',
+                delimiter: 'Trennzeichen',
+                delimiter_with_info: "Trennzeichen (',', ';', …)",
+                has_header: 'Hat eine Kopfzeile?',
+                nr_of_shown_rows: 'Anzahl der angezeigten Zeilen',
+            },
+        },
         entity: {
             title: 'Entität | Entitäten',
             count: 'Keine Top-Level Entitäten | Eine Top-Level Entität | {cnt} Top-Level Entitäten',

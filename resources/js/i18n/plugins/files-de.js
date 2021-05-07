@@ -84,11 +84,6 @@ const de = {
                     },
                     previous: 'Vorherige Datei',
                     next: 'Nächste Datei',
-                    csv: {
-                        delimiter: 'Trennzeichen',
-                        header: 'Kopfzeile?',
-                        rows: 'Anzahl der angezeigten Zeilen'
-                    },
                     threed: {
                         'load-sub-models': 'Modelle aus Sub-Entitäten laden'
                     },

@@ -51,6 +51,7 @@
         "bootstrap": "^5.0.0-beta3",
         "buffer": "^6.0.3",
         "chart.js": "^3.1.0",
+        "d3-dsv": "^2.0.0",
         "dayjs": "^1.10.4",
         "highlight.js": "^10.6.0",
         "lodash": "^4.17.20",

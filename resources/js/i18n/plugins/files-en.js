@@ -84,11 +84,6 @@ const en = {
                     },
                     previous: 'Previous File',
                     next: 'Next File',
-                    csv: {
-                        delimiter: 'Delimiter',
-                        header: 'Header Row?',
-                        rows: 'Number of displayed rows'
-                    },
                     threed: {
                         'load-sub-models': 'Load models of Sub-Entities'
                     },

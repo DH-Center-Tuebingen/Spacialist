@@ -262,6 +262,15 @@ const en = {
                 go_to: 'To start page',
             },
         },
+        csv: {
+            uploader: {
+                title: 'CSV-Uploader',
+                delimiter: 'Delimiter',
+                delimiter_with_info: "Delimiter (',', ';', …)",
+                has_header: 'Has Header Row?',
+                nr_of_shown_rows: 'Number of shown rows',
+            },
+        },
         entity: {
             title: 'Entity | Entities',
             count: 'No Top-Level-Entities | One Top-Level-Entity | {cnt} Top-Level-Entities',

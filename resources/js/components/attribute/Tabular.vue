@@ -10,10 +10,13 @@
                     <th v-for="(column, i) in state.columns" :key="i">
                         {{ translateConcept(column.thesaurus_url) }}
                     </th>
-                    <th>
-                        <button type="button" class="btn btn-outline-secondary btn-sm" @click="emitExpandToggle()">
+                    <th class="d-flex flex-row">
+                        <a class="text-body" href="#" @click.prevent="emitExpandToggle()">
                             <i class="fas fa-fw fa-expand"></i>
-                        </button>
+                        </a>
+                        <a class="text-body" href="#" @click.prevent="openCsvUpload()">
+                            <i class="fas fa-fw fa-file-upload"></i>
+                        </a>
                     </th>
                 </tr>
             </thead>
@@ -245,6 +248,11 @@
         _cloneDeep,
     } from '../../helpers/helpers.js';
 
+    import {
+        showCsvPreviewer,
+        showCsvColumnPicker,
+    } from '../../helpers/modal.js';
+
     import StringAttr from './String.vue';
     import IntegerAttr from './Integer.vue';
     import FloatAttr from './Float.vue';
@@ -329,6 +337,17 @@
                     }
                 }
             };
+            const openCsvUpload = _ => {
+                showCsvPreviewer(null, csv => {
+                    showCsvColumnPicker({
+                        max: Object.keys(state.columns).length,
+                        force_max: false,
+                        selection: csv.header,
+                    }, columns => {
+                        addTableRowFromCsv(columns, csv.data);
+                    });
+                });
+            };
             const emitExpandToggle = _ => {
                 state.expanded = !state.expanded;
                 context.emit('expanded', {
@@ -367,6 +386,22 @@
                 } else {
                     delete row[column];
                 }
+            };
+            const addTableRowFromCsv = (columns, data) => {
+                const rows = [];
+                for(let i=0; i<data.length; i++) {
+                    const rowValue = {};
+                    const curr = data[i];
+                    let colIdx = 0;
+                    for(let k in state.columns) {
+                        rowValue[k] = curr[columns[colIdx]];
+                        colIdx++;
+                        // If less columns selected than exist, stop adding new/non-existing column data
+                        if(colIdx == columns.length) break;
+                    }
+                    rows.push(rowValue);
+                }
+                v.handleChange(v.value.concat(rows));
             };
             const addTableRow = _ => {
                 const rowValue = {};
@@ -502,6 +537,7 @@
                 // LOCAL
                 resetFieldState,
                 undirtyField,
+                openCsvUpload,
                 emitExpandToggle,
                 toggleChart,
                 updateChart,

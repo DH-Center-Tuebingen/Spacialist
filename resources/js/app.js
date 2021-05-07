@@ -21,6 +21,7 @@ import EmojiPicker from './components/EmojiPicker.vue';
 import GlobalSearch from './components/search/Global.vue';
 import SimpleSearch from './components/search/Simple.vue';
 import Alert from './components/Alert.vue';
+import CsvTable from './components/CsvTable.vue';
 
 // Init Libs
 // PQueue, httpQueue
@@ -132,6 +133,7 @@ app.component('emoji-picker', EmojiPicker);
 app.component('global-search', GlobalSearch);
 app.component('simple-search', SimpleSearch);
 app.component('alert', Alert);
+app.component('csv-table', CsvTable);
 // Third-Party components
 app.component('multiselect', Multiselect);
 app.component('file-upload', VueUploadComponent);

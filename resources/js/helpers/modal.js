@@ -20,6 +20,8 @@ import {
 import About from '../components/modals/system/About.vue';
 import Discard from '../components/modals/system/Discard.vue';
 import Error from '../components/modals/system/Error.vue';
+import CsvPreviewer from '../components/modals/csv/Preview.vue';
+import CsvPicker from '../components/modals/csv/Picker.vue';
 import UserInfo from '../components/modals/user/UserInfo.vue';
 import AddUser from '../components/modals/user/Add.vue';
 import DeactiveUser from '../components/modals/user/Deactivate.vue';
@@ -93,6 +95,52 @@ export function showError(data) {
             closing(e) {
                 store.getters.vfm.hide(uid);
             }
+        }
+    });
+}
+
+export function showCsvPreviewer(data, onConfirm) {
+    const uid = `CsvPreviewerModal-${getTs()}`;
+    store.getters.vfm.show({
+        component: CsvPreviewer,
+        bind: {
+            data: data,
+            name: uid,
+        },
+        on: {
+            confirm(e) {
+                store.getters.vfm.hide(uid);
+                if(!!onConfirm) {
+                    onConfirm(e);
+                }
+            },
+            closing(e) {
+                store.getters.vfm.hide(uid);
+            },
+        }
+    });
+}
+
+export function showCsvColumnPicker(data, onConfirm) {
+    const uid = `CsvPickerModal-${getTs()}`;
+    store.getters.vfm.show({
+        component: CsvPicker,
+        bind: {
+            max: data.max,
+            force_max: data.force_max,
+            selection: data.selection,
+            name: uid,
+        },
+        on: {
+            confirm(e) {
+                store.getters.vfm.hide(uid);
+                if(!!onConfirm) {
+                    onConfirm(e);
+                }
+            },
+            closing(e) {
+                store.getters.vfm.hide(uid);
+            },
         }
     });
 }

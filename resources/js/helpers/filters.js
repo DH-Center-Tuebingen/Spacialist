@@ -147,6 +147,10 @@ export function truncate(str, length = 80, ellipses = '…') {
     }
     return str;
 };
+export function ucfirst(str) {
+    if(!str) return str;
+    return str[0].toUpperCase() + str.substring(1);
+};
 export function escapehtml(str) {
     return str
         .replace(/&/g,'&amp;')
