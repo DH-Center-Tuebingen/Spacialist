@@ -1,6 +1,5 @@
 <template>
     <div>
-        {{ state.locValue }}
         <table class="table table-striped table-hovered table-sm">
             <col style="width: 33%"/>
             <col style="width: 33%"/>
@@ -19,76 +18,76 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(row, $index) in state.locValue" :key="$index">
+                <tr v-for="(row, $index) in v.value" :key="$index">
                     <td v-for="(column, i) in state.columns" :key="i">
                         <string-attribute
                             v-if="column.datatype == 'string'"
-                            :ref="el => setRef(el, `${$index}_${i}`)"
-                            :disabled="disabled || state.deletedRows[$index]"
+                            :ref="el => setRef(el, `${$index}_${column.id}`)"
+                            :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             @change="updateDirtyState" />
 
                         <integer-attribute
                             v-else-if="column.datatype == 'integer'"
-                            :ref="el => setRef(el, `${$index}_${i}`)"
-                            :disabled="disabled || state.deletedRows[$index]"
+                            :ref="el => setRef(el, `${$index}_${column.id}`)"
+                            :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             @change="updateDirtyState" />
 
                         <float-attribute
                             v-else-if="column.datatype == 'double'"
-                            :ref="el => setRef(el, `${$index}_${i}`)"
-                            :disabled="disabled || state.deletedRows[$index]"
+                            :ref="el => setRef(el, `${$index}_${column.id}`)"
+                            :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             @change="updateDirtyState" />
 
                         <bool-attribute
                             v-else-if="column.datatype == 'boolean'"
-                            :ref="el => setRef(el, `${$index}_${i}`)"
-                            :disabled="disabled || state.deletedRows[$index]"
+                            :ref="el => setRef(el, `${$index}_${column.id}`)"
+                            :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             @change="updateDirtyState" />
 
                         <iconclass-attribute
                             v-else-if="column.datatype == 'iconclass'"
-                            :ref="el => setRef(el, `${$index}_${i}`)"
-                            :disabled="disabled || state.deletedRows[$index]"
+                            :ref="el => setRef(el, `${$index}_${column.id}`)"
+                            :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             :attribute="element"
                             @change="updateDirtyState" />
 
                         <entity-attribute v-else-if="column.datatype == 'entity'"
-                            :ref="el => setRef(el, `${$index}_${i}`)"
-                            :disabled="disabled || state.deletedRows[$index]"
+                            :ref="el => setRef(el, `${$index}_${column.id}`)"
+                            :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             @change="updateDirtyState" />
 
                         <date-attribute
                             v-else-if="column.datatype == 'date'"
-                            :ref="el => setRef(el, `${$index}_${i}`)"
-                            :disabled="disabled || state.deletedRows[$index]"
+                            :ref="el => setRef(el, `${$index}_${column.id}`)"
+                            :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             @change="updateDirtyState" />
 
                         <singlechoice-attribute
                             v-else-if="column.datatype == 'string-sc'"
-                            :ref="el => setRef(el, `${$index}_${i}`)"
-                            :disabled="disabled || state.deletedRows[$index]"
+                            :ref="el => setRef(el, `${$index}_${column.id}`)"
+                            :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             @change="updateDirtyState" />
 
                         <multichoice-attribute
                             v-else-if="column.datatype == 'string-mc'"
-                            :ref="el => setRef(el, `${$index}_${i}`)"
-                            :disabled="disabled || state.deletedRows[$index]"
+                            :ref="el => setRef(el, `${$index}_${column.id}`)"
+                            :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             :selections="{}"
@@ -103,7 +102,7 @@
                                 <a class="dropdown-item" href="#" @click.prevent="resetRow($index)">
                                     <i class="fas fa-fw fa-undo text-info"></i> {{ t('global.reset') }}
                                 </a>
-                                <a class="dropdown-item" href="#" v-if="state.deletedRows[$index]" @click.prevent="restoreTableRow($index)">
+                                <a class="dropdown-item" href="#" v-if="row.mark_deleted" @click.prevent="restoreTableRow($index)">
                                     <i class="fas fa-fw fa-trash-restore text-warning"></i> {{ t('global.restore') }}
                                 </a>
                                 <a class="dropdown-item" href="#" v-else @click.prevent="markTableRowForDelete($index)">
@@ -117,52 +116,61 @@
                     <td v-for="(column, i) in state.columns" :key="i">
                         <string-attribute
                             v-if="column.datatype == 'string'"
+                            :ref="el => setAddRef(el, `${column.id}`)"
                             :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newTableCols[column.id]" />
+                            :value="state.newRowColumns[column.id]" />
 
                         <integer-attribute
                             v-else-if="column.datatype == 'integer'"
+                            :ref="el => setAddRef(el, `${column.id}`)"
                             :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newTableCols[column.id]" />
+                            :value="state.newRowColumns[column.id]" />
 
                         <float-attribute
                             v-else-if="column.datatype == 'double'"
+                            :ref="el => setAddRef(el, `${column.id}`)"
                             :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newTableCols[column.id]" />
+                            :value="state.newRowColumns[column.id]" />
 
                         <bool-attribute
                             v-else-if="column.datatype == 'boolean'"
+                            :ref="el => setAddRef(el, `${column.id}`)"
                             :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newTableCols[column.id]" />
+                            :value="state.newRowColumns[column.id]" />
 
                         <iconclass-attribute
                             v-else-if="column.datatype == 'iconclass'"
+                            :ref="el => setAddRef(el, `${column.id}`)"
                             :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newTableCols[column.id]"
+                            :value="state.newRowColumns[column.id]"
                             :attribute="column" />
 
                         <entity-attribute v-else-if="column.datatype == 'entity'"
+                            :ref="el => setAddRef(el, `${column.id}`)"
                             :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newTableCols[column.id]" />
+                            :value="state.newRowColumns[column.id]" />
 
                         <date-attribute
                             v-else-if="column.datatype == 'date'"
+                            :ref="el => setAddRef(el, `${column.id}`)"
                             :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newTableCols[column.id]" />
+                            :value="state.newRowColumns[column.id]" />
 
                         <singlechoice-attribute
                             v-else-if="column.datatype == 'string-sc'"
+                            :ref="el => setAddRef(el, `${column.id}`)"
                             :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newTableCols[column.id]" />
+                            :value="state.newRowColumns[column.id]" />
 
                         <multichoice-attribute
                             v-else-if="column.datatype == 'string-mc'"
+                            :ref="el => setAddRef(el, `${column.id}`)"
                             :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newTableCols[column.id]"
+                            :value="state.newRowColumns[column.id]"
                             :selections="{}" />
                     </td>
                     <td>
-                        <button type="button" class="btn btn-success btn-sm" @click="addTableRow(newTableCols, state.columns)">
+                        <button type="button" class="btn btn-success btn-sm" @click="addTableRow()">
                             <i class="fas fa-fw fa-plus"></i>
                         </button>
                     </td>
@@ -217,7 +225,12 @@
         reactive,
         ref,
         toRefs,
+        watch,
     } from 'vue';
+
+    import { useField } from 'vee-validate';
+
+    import * as yup from 'yup';
 
     import {
         Chart,
@@ -229,6 +242,7 @@
     import {
         getAttribute,
         translateConcept,
+        _cloneDeep,
     } from '../../helpers/helpers.js';
 
     import StringAttr from './String.vue';
@@ -292,6 +306,29 @@
             // FETCH
 
             // FUNCTIONS
+            const resetFieldState = _ => {
+                v.resetField({
+                    value: value.value
+                });
+                for(let k in columnRefs) {
+                    const curr = columnRefs[k];
+                    if(!!curr && !!curr.v && curr.v.meta.dirty && !!curr.resetFieldState) {
+                        curr.resetFieldState();
+                    }
+                }
+                state.deletedRows = {};
+            };
+            const undirtyField = _ => {
+                v.resetField({
+                    value: v.value,
+                });
+                for(let k in columnRefs) {
+                    const curr = columnRefs[k];
+                    if(!!curr.v && curr.v.meta.dirty && !!curr.undirtyField) {
+                        curr.undirtyField();
+                    }
+                }
+            };
             const emitExpandToggle = _ => {
                 state.expanded = !state.expanded;
                 context.emit('expanded', {
@@ -331,24 +368,38 @@
                     delete row[column];
                 }
             };
-            const addTableRow = row => {
-                this.value.push(_clone(row));
-                for(let k in row) {
-                    delete row[k];
+            const addTableRow = _ => {
+                const rowValue = {};
+                for(let k in state.columns) {
+                    const reference = newRowRefs[k];
+                    if(!!reference.v.value) {
+                        rowValue[k] = reference.v.value;
+                        if(!!reference.resetFieldState) {
+                            reference.resetFieldState();
+                        }
+                    }
                 }
+                v.handleChange(v.value.concat([rowValue]));
+                state.newRowColumns = {};
             };
             const restoreTableRow = index => {
-                delete state.deletedRows[index];
+                const currentValue = v.value;
+                delete currentValue[index].mark_deleted;
+                v.handleChange(currentValue);
             };
             const markTableRowForDelete = index => {
-                state.deletedRows[index] = true;
-                updateDirtyState({
-                    dirty: true,
-                    valid: true,
-                });
+                const currentValue = _cloneDeep(v.value);
+                currentValue[index].mark_deleted = true;
+                v.handleChange(currentValue);
             };
             const resetRow = index => {
-
+                for(let k in state.columns) {
+                    const reference = columnRefs[`${index}_${state.columns[k].id}`];
+                    if(!!reference.resetFieldState) {
+                        reference.resetFieldState();
+                    }
+                }
+                restoreTableRow(index);
             };
             const storeData = _ => {
                 state.locValue = state.locValue.filter((v, i) => {
@@ -359,33 +410,28 @@
             const updateDirtyState = e => {
                 context.emit('change', e);
             };
+            const setAddRef = (el, idx) => {
+                newRowRefs[idx] = el;
+            };
             const setRef = (el, idx) => {
                 columnRefs[idx] = el;
-            };
-            const resetFieldState = _ => {
-                for(let k in columnRefs) {
-                    const curr = columnRefs[k];
-                    if(!!curr.resetFieldState) {
-                        curr.resetFieldState();
-                    }
-                }
-                state.deletedRows = {};
-            };
-            const undirtyField = _ => {
-                for(let k in columnRefs) {
-                    const curr = columnRefs[k];
-                    if(!!curr.undirtyField) {
-                        curr.undirtyField();
-                    }
-                }
             };
 
             // DATA
             const columnRefs = ref({});
+            const newRowRefs = ref({});
+            const {
+                handleChange,
+                value: fieldValue,
+                meta,
+                resetField,
+            } = useField(`tabular_${name.value}`, yup.array(), {
+                initialValue: value.value,
+            });
             const state = reactive({
                 locValue: value.value.slice(),
                 columns: computed(_ => getAttribute(attribute.value.id).columns),
-                newTableCols: {},
+                newRowColumns: {},
                 deletedRows: {},
                 expanded: false,
                 chartShown: false,
@@ -429,6 +475,19 @@
                     };
                 }),
             });
+            const v = reactive({
+                value: fieldValue,
+                handleChange,
+                meta,
+                resetField,
+            });
+
+            watch(v.meta, (newValue, oldValue) => {
+                context.emit('change', {
+                    dirty: v.meta.dirty,
+                    valid: v.meta.valid,
+                });
+            });
 
             // ON MOUNTED
             onMounted(_ => {
@@ -441,6 +500,8 @@
                 // HELPERS
                 translateConcept,
                 // LOCAL
+                resetFieldState,
+                undirtyField,
                 emitExpandToggle,
                 toggleChart,
                 updateChart,
@@ -451,24 +512,25 @@
                 resetRow,
                 storeData,
                 updateDirtyState,
+                setAddRef,
                 setRef,
                 resetFieldState,
                 undirtyField,
                 // PROPS
                 name,
                 disabled,
-                value,
                 attribute,
                 selections,
                 // STATE
                 state,
+                v,
             }
         },
         // mounted () {
         //     this.$el.value = this.value;
         //     for(let k in this.attribute.columns) {
         //         const c = this.attribute.columns[k];
-        //         Vue.set(this.newTableCols, c.id, null);
+        //         Vue.set(this.newRowColumns, c.id, null);
         //     }
         // },
     }
