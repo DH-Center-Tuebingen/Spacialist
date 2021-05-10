@@ -33,23 +33,29 @@
                 </ul>
             </div>
         </div>
-        <!-- <multiselect class="pt-2"
-            label="concept_url"
-            track-by="id"
-            @input="onInput('epoch', epoch)"
+        <multiselect
+            class="mt-2"
             v-if="state.hasEpochList"
-            v-model="epoch"
-            :allowEmpty="true"
-            :closeOnSelect="true"
-            :customLabel="translateLabel"
+            :valueProp="'concept_url'"
+            :label="'concept_url'"
+            :track-by="'concept_url'"
+            :object="true"
+            :mode="'single'"
             :disabled="disabled"
-            :hideSelected="true"
-            :multiple="false"
             :options="epochs"
-            :placeholder="$t('global.select.placeholder')"
-            :select-label="$t('global.select.select')"
-            :deselect-label="$t('global.select.deselect')">
-        </multiselect> -->
+            :name="name"
+            :placeholder="t('global.select.placeholder')"
+            v-model="v.epoch.value"
+            @change="value => v.epoch.handleChange(value)">
+            <template v-slot:option="{ option }">
+                {{ translateConcept(option.concept_url) }}
+            </template>
+            <template v-slot:singlelabel="{ value }">
+                <div class="px-2">
+                    {{ translateConcept(value.concept_url) }}
+                </div>
+            </template>
+        </multiselect>
     </div>
 </template>
 
@@ -68,7 +74,7 @@
     import { useI18n } from 'vue-i18n';
 
     import {
-        translateLabel,
+        translateConcept,
     } from '../../helpers/helpers.js';
 
     export default {
@@ -119,6 +125,9 @@
                 v.endLabel.resetField({
                     value: value.value.endLabel
                 });
+                v.epoch.resetField({
+                    value: value.value.epoch
+                });
             };
             const undirtyField = _ => {
                 v.start.resetField({
@@ -132,6 +141,9 @@
                 });
                 v.endLabel.resetField({
                     value: v.endLabel.value
+                });
+                v.epoch.resetField({
+                    value: v.epoch.value
                 });
             };
             const setLabel = (field, value) => {
@@ -174,8 +186,16 @@
             } = useField(`endlabel_${name.value}`, yup.string().matches(/(BC|AD)/), {
                 initialValue: value.value.endLabel,
             });
+            const {
+                handleInput: hiep,
+                handleChange: hcep,
+                value: vep,
+                meta: mep,
+                resetField: rfep,
+            } = useField(`epoch_${name.value}`, yup.mixed(), {
+                initialValue: value.value.epoch,
+            });
             const state = reactive({
-                epoch: value.epoch,
                 hasEpochList: computed(_ => type.value !== 'timeperiod'),
             });
             const v = reactive({
@@ -185,15 +205,17 @@
                         startLabel: v.startLabel.value,
                         end: v.end.value,
                         endLabel: v.endLabel.value,
+                        epoch: v.epoch.value,
                     };
                 }),
                 meta: computed(_ => {
                     return {
-                        dirty: v.start.meta.dirty || v.startLabel.meta.dirty || v.end.meta.dirty || v.endLabel.meta.dirty,
+                        dirty: v.start.meta.dirty || v.startLabel.meta.dirty || v.end.meta.dirty || v.endLabel.meta.dirty || v.epoch.meta.dirty,
                         valid: ((v.start.meta.dirty && v.start.meta.valid) || !v.start.meta.dirty) &&
                                ((v.startLabel.meta.dirty && v.startLabel.meta.valid) || !v.startLabel.meta.dirty) &&
                                ((v.end.meta.dirty && v.end.meta.valid) || !v.end.meta.dirty) &&
-                               ((v.endLabel.meta.dirty && v.endLabel.meta.valid) || !v.endLabel.meta.dirty),
+                               ((v.endLabel.meta.dirty && v.endLabel.meta.valid) || !v.endLabel.meta.dirty) &&
+                               ((v.epoch.meta.dirty && v.epoch.meta.valid) || !v.epoch.meta.dirty),
                     };
                 }),
                 start: {
@@ -222,6 +244,13 @@
                     handleInput: hiel,
                     handleChange: hcel,
                 },
+                epoch: {
+                    value: vep,
+                    meta: mep,
+                    resetField: rfep,
+                    handleInput: hiep,
+                    handleChange: hcep,
+                },
             });
 
             watch(_ => v.meta, (newValue, oldValue) => {
@@ -235,7 +264,7 @@
             return {
                 t,
                 // HELPERS
-                translateLabel,
+                translateConcept,
                 // LOCAL
                 resetFieldState,
                 undirtyField,
