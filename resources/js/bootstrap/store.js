@@ -81,12 +81,15 @@ export const store = createStore({
             }
         },
         addEntity(state, n) {
+            const doCount = !n.already_existing;
+            delete n.already_existing;
             state.entities[n.id] = n;
             if(!!n.root_entity_id) {
                 const parent = state.entities[n.root_entity_id];
                 if(parent.childrenLoaded) {
                     parent.children.push(n);
-                } else {
+                }
+                if(doCount) {
                     parent.children_count++;
                 }
             }
@@ -370,11 +373,15 @@ export const store = createStore({
             });
             sortTree('rank', 'asc', state.tree);
         },
-        addEntities({commit}, data) {
+        loadEntities({commit}, data) {
             let nodes = [];
             data.entities.forEach(e => {
                 const n = new Node(e);
-                commit('addEntity', n);
+                commit('addEntity', {
+                    ...n,
+                    // flag to make sure to not increase children_count as we simply load already existing children
+                    already_existing: true,
+                });
                 nodes.push(n);
             });
             sortTree(data.sort.by, data.sort.dir, nodes);

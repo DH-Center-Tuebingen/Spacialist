@@ -10,7 +10,7 @@ import {
 
 export async function fetchChildren(id, sort = {by: 'rank', dir: 'asc'}) {
     return fetchChildrenApi(id).then(data => {
-        return store.dispatch('addEntities', {
+        return store.dispatch('loadEntities', {
             entities: data,
             sort: sort,
         });
