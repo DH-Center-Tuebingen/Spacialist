@@ -21,8 +21,7 @@
         :delay="delay"
         :limit="limit"
         :placeholder="t('global.search')"
-        @select="handleSelection"
-        @deselect="handleDeselection">
+        @change="handleSelection">
             <template v-slot:singlelabel="{ value }">
                 <div class="multiselect-single-label">
                     {{ displayResult(value) }}
@@ -69,13 +68,18 @@
                 type: Function,
                 required: true,
             },
-            key: {
+            keyText: {
                 type: String,
                 required: false,
             },
             keyFn: {
                 type: Function,
                 required: false,
+            },
+            defaultValue: {
+                type: Object,
+                required: false,
+                default: null,
             },
         },
         emits: ['selected'],
@@ -84,8 +88,12 @@
             const {
                 delay,
                 limit,
+                endpoint,
+                keyText,
+                keyFn,
+                defaultValue,
             } = toRefs(props);
-            if(!props.key && !props.keyFn) {
+            if(!keyText && !keyFn) {
                 throw new Error('You have to either provide a key or key function for your search component!');
             }
             // FETCH
@@ -99,32 +107,33 @@
                 return await props.endpoint(query);
             };
             const displayResult = result => {
-                if(!!props.key) {
-                    return result[props.key];
-                } else if(props.keyFn) {
-                    return props.keyFn(result);
+                if(!!keyText) {
+                    return result[keyText.value];
+                } else if(keyFn) {
+                    return keyFn.value(result);
                 } else {
                     // Should never happen ;) :P
                     throw new Error('Can not display search result!');
                 }
             };
             const handleSelection = option => {
-                context.emit('selected', {
-                    ...option,
-                    added: true,
-                });
-            };
-            const handleDeselection = option => {
-                context.emit('selected', {
-                    ...option,
-                    removed: true,
-                });
+                let data = {}
+                if(!!option) {
+                    data = {
+                        ...option,
+                        added: true,
+                    };
+                } else {
+                    data.removed = true;
+                }
+                state.entry = option;
+                context.emit('selected', data);
             };
 
             // DATA
             const state = reactive({
                 id: `multiselect-search-${getTs()}`,
-                entry: null,
+                entry: defaultValue,
                 query: '',
             });
 
@@ -136,7 +145,6 @@
                 search,
                 displayResult,
                 handleSelection,
-                handleDeselection,
                 // PROPS
                 delay,
                 limit,

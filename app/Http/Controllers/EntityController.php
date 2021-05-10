@@ -208,8 +208,7 @@ class EntityController extends Controller {
                 default:
                     break;
             }
-            $value = $a->getValue();
-            $a->value = $value;
+            $a->value = $a->getValue();
             $data[$a->attribute_id] = $a;
         }
 

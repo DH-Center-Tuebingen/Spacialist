@@ -486,3 +486,9 @@ export async function searchLabel(query = '') {
         () => http.get(`search/label?q=${query}`).then(response => response.data)
     )
 };
+
+export async function searchEntity(query = '') {
+    return $httpQueue.add(
+        () => http.get(`search/entity?q=${query}`).then(response => response.data)
+    )
+};

@@ -156,7 +156,8 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value" />
+                            :value="convertEntityValue(state.attributeValues[element.id])"
+                            @change="updateDirtyState" />
 
                         <date-attribute
                             v-else-if="element.datatype == 'date'"
@@ -428,6 +429,12 @@
             const hasEmitter = which => {
                 return !!attrs[which];
             };
+            const convertEntityValue = value => {
+                return {
+                    id: value.value,
+                    name: value.name,
+                };
+            };
 
             const attrs = context.attrs;
             // DATA
@@ -488,6 +495,7 @@
                 onDeleteHandler,
                 onMetadataHandler,
                 hasEmitter,
+                convertEntityValue,
                 // PROPS
                 disableDrag,
                 group,

@@ -107,7 +107,6 @@ export const store = createStore({
         updateEntityData(state, data) {
             const entity = state.entities[data.eid];
             for(let k in data.data) {
-                console.log("upd data", entity.data[k], k, data.data[k]);
                 entity.data[k].value = data.data[k];
             }
         },
