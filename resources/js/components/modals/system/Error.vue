@@ -3,7 +3,7 @@
         classes="modal-container"
         content-class="sp-modal-content sp-modal-content-sm"
         v-model="state.show"
-        name="about-modal">
+        name="error-modal">
         <div class="modal-header">
             <h5 class="modal-title">
                 {{
@@ -63,11 +63,10 @@
         reactive,
         toRefs,
     } from 'vue';
+
     import { useI18n } from 'vue-i18n';
-import Alert from '../../Alert.vue';
 
     export default {
-  components: { Alert },
         props: {
             data: {
                 required: true,
@@ -81,7 +80,6 @@ import Alert from '../../Alert.vue';
             const {
                 data,
             } = toRefs(props);
-            console.log(data.value.msg.toString());
 
             // FUNCTIONS
             const closeModal = _ => {
