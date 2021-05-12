@@ -4,7 +4,7 @@
         name="global-search"
         class="multiselect-search"
         :id="state.id"
-        :object="false"
+        :object="true"
         :label="'id'"
         :track-by="'id'"
         :valueProp="'id'"
@@ -20,7 +20,8 @@
         :searchable="true"
         :delay="delay"
         :limit="limit"
-        :placeholder="t('global.search')">
+        :placeholder="t('global.search')"
+        @select="optionSelected">
             <template v-slot:singlelabel="{ value }">
                 <div class="multiselect-single-label">
                     {{ value.name }}
@@ -85,6 +86,12 @@
     import {
         getTs
     } from '../../helpers/helpers.js';
+    import {
+        routeToBibliography,
+        routeToEntity,
+        routeToFile,
+        routeToGeodata,
+    } from '../../helpers/routing.js';
 
     export default {
         props: {
@@ -128,7 +135,7 @@
                 return searchRes.group == 'files' && searchRes.mime_type.startsWith('image/');
             };
             const isEntity = searchRes => {
-                return searchRes.group == 'entity';
+                return searchRes.group == 'entities';
             };
             const isBibliography = searchRes => {
                 return searchRes.group == 'bibliography';
@@ -136,11 +143,26 @@
             const isGeodata = searchRes => {
                 return searchRes.group == 'geodata';
             };
+            const optionSelected = option => {
+                if(isEntity(option)) {
+                    routeToEntity(option.id);
+                }
+                if(isFile(option)) {
+                    routeToFile(option.id);
+                }
+                if(isBibliography(option)) {
+                    routeToBibliography(option.id);
+                }
+                if(isGeodata(option)) {
+                    routeToGeodata(option.id);
+                }
+                state.entry = {};
+            };
 
             // DATA
             const state = reactive({
                 id: `multiselect-global-search-${getTs()}`,
-                entry: null,
+                entry: {},
                 query: '',
             });
 
@@ -155,6 +177,7 @@
                 isEntity,
                 isBibliography,
                 isGeodata,
+                optionSelected,
                 // PROPS
                 delay,
                 limit,
