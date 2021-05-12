@@ -190,6 +190,18 @@ export async function fetchChildren(id) {
     );
 }
 
+export async function getMapLayers() {
+    return $httpQueue.add(
+        () => http.get('map/layer?basic=1').then(response => response.data)
+    );
+};
+
+export async function getMapProjection(srid) {
+    return $httpQueue.add(
+        () => http.get(`map/epsg/${srid}`).then(response => response.data)
+    );
+}
+
 // POST
 export async function addUser(user) {
     const data = only(user, ['name', 'nickname', 'email', 'password']);
