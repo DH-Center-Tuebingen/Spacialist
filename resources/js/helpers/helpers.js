@@ -156,12 +156,12 @@ export function getEntityType(id) {
 }
 
 export function getEntityTypes() {
-    return store.getters.entityTypes;
+    return store.getters.entityTypes || [];
 }
 
 export function getEntityTypeAttributes(id) {
     if(!id) return [];
-    return store.getters.entityTypeAttributes(id);
+    return store.getters.entityTypeAttributes(id) || [];
 }
 
 export function getEntityTypeAttributeSelections(id) {
