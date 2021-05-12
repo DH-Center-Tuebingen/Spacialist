@@ -4,13 +4,26 @@ All notable changes to this project will be documented in this file.
 ## 0.9 - Isfahan
 ### Added
 - Global State for shared information (Vuex)
+- Reset unsaved Entity attribute values
+- Delete/Restore individual rows in tabular attribute
+- Load csv data into tabular attribute
+- Preview resulting attribute in _New Attribute_ Dialog
 ### Fixed
+- Improved Attribute Validation
 ### Changed
 - Update Laravel to Version 8
 - Update VueJS to Version 3
+- Restructure Bootstrapping and Setup of App
+- Restructure Layout of Data Model Editor for better UX
+- Restructure Layout of Preference Pages
+- Replace most of Checkboxes with Switches
 - Update Dependencies
   - Bootstrap 5
-  - Dropdown Plugin
+  - Multiselect (switched from [vue-multiselect](https://github.com/shentao/vue-multiselect) to [multiselect](https://github.com/vueform/multiselect))
+  - Modals (switched from [vue-js-modal](https://github.com/euvl/vue-js-modal) to [vue-final-modal](https://github.com/vue-final/vue-final-modal))
+  - Validation (Updated [vee-validate](https://github.com/logaretm/vee-validate) from v2 to v4)
+### Removed/Deprecated
+- Dropped Infinite Loading Plugin (for now as there is no proper replacement)
 
 ## 0.8 - Helgö
 ### Added
