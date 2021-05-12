@@ -103,6 +103,9 @@ export const store = createStore({
             entity.updated_at = data.updated_at;
             entity.user_id = data.user_id;
             entity.user = data.user;
+            if(!!data.name) {
+                entity.name = data.name;
+            }
         },
         updateEntityData(state, data) {
             const entity = state.entities[data.eid];

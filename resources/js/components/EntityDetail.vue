@@ -10,16 +10,16 @@
                             <i id="dependency-info" class="fas fa-fw fa-xs fa-eye-slash"></i>
                         </span>
                     </small>
-                    <a href="#" v-if="state.entityHeaderHovered" class="text-dark" @click.prevent="enableEntityNameEditing()">
+                    <a href="#" v-if="state.entityHeaderHovered" class="text-secondary" @click.prevent="editEntityName()">
                         <i class="fas fa-fw fa-edit fa-xs"></i>
                     </a>
                 </span>
-                <form class="form-inline" v-else>
-                    <input type="text" class="form-control me-2" v-model="newEntityName" />
-                    <button type="submit" class="btn btn-outline-success me-2" @click="updateEntityName(state.entity, newEntityName)">
+                <form class="d-flex flex -row" v-else>
+                    <input type="text" class="form-control form-control-sm me-2" v-model="state.editedEntityName" />
+                    <button type="submit" class="btn btn-outline-success btn-sm me-2" @click="updateEntityName()">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
-                    <button type="reset" class="btn btn-outline-danger" @click="cancelUpdateEntityName()">
+                    <button type="reset" class="btn btn-outline-danger btn-sm" @click="cancelEditEntityName()">
                         <i class="fas fa-fw fa-ban"></i>
                     </button>
                 </form>
@@ -70,7 +70,7 @@
                 </a>
             </li>
         </ul>
-        <div class="tab-content col ps-0 pe-0 overflow-hidden" id="myTabContent">
+        <div class="tab-content col ps-0 pe-0 overflow-hidden" id="entity-detail-tab-content">
             <div class="tab-pane fade h-100 show active" id="active-entity-attributes-panel" role="tabpanel">
                 <form id="entity-attribute-form" name="entity-attribute-form" class="h-100" @submit.prevent="saveEntity(state.entity)">
                     <attribute-list
@@ -151,6 +151,7 @@
     import {
         getEntityComments,
         patchAttributes,
+        patchEntityName,
     } from '../api.js';
     import {
         can,
@@ -271,6 +272,7 @@
                 formDirty: false,
                 hiddenAttributes: 0,
                 entityHeaderHovered: false,
+                editedEntityName: '',
                 initFinished: false,
                 commentLoadingState: 'not',
                 entity: computed(_ => store.getters.entity),
@@ -341,6 +343,28 @@
             };
             const updateDependencyCounter = event => {
                 state.hiddenAttributes = event.counter;
+            };
+            const editEntityName = _ => {
+                state.editedEntityName = state.entity.name;
+                state.entity.editing = true;
+            };
+            const updateEntityName = _ => {
+                // If name does not change, just cancel
+                if(state.entity.name == state.editedEntityName) {
+                    cancelUpdateEntityName();
+                } else {
+                    patchEntityName(state.entity.id, state.editedEntityName).then(data => {
+                        store.dispatch('updateEntity', {
+                            ...data,
+                            name: state.editedEntityName,
+                        });
+                        cancelEditEntityName();
+                    });
+                }
+            };
+            const cancelEditEntityName = _ => {
+                state.entity.editing = false;
+                state.editedEntityName = '';
             };
             const setEntityView = tab => {
                 let newTab, oldTab, newPanel, oldPanel;
@@ -530,6 +554,9 @@
                 hasReferenceGroup,
                 showMetadata,
                 updateDependencyCounter,
+                editEntityName,
+                updateEntityName,
+                cancelEditEntityName,
                 setEntityView,
                 onEntityHeaderHover,
                 setFormState,

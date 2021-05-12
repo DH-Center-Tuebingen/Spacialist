@@ -382,6 +382,14 @@ export async function getFilteredActivity(pageUrl, payload) {
 };
 
 // PATCH
+export async function patchEntityName(eid, name) {
+    const data = {
+        name: name,
+    };
+    return $httpQueue.add(
+        () => http.patch(`entity/${eid}/name`, data).then(response => response.data)
+    );
+};
 export async function patchAttribute(entityId, attributeId, data) {
     return $httpQueue.add(
         () => http.patch(`/entity/${entityId}/attribute/${attributeId}`, data).then(response => response.data)
