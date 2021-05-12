@@ -10,7 +10,7 @@
             v-model="v.value"
             @input="v.handleInput" />
 
-            <button type="button" class="btn btn-outline-secondary mt-2" :disabled="disabled" @click="openGeographyModal(attribute.id)">
+            <button type="button" class="btn btn-outline-secondary mt-2" :disabled="disabled" @click="openGeographyModal()">
                 <i class="fas fa-fw fa-map-marker-alt"></i>
                 {{ t('main.entity.attributes.open-map') }}
             </button>
@@ -30,6 +30,10 @@
 
     import { useI18n } from 'vue-i18n';
 
+    import {
+        showMapPicker
+    } from '../../helpers/modal.js';
+
     export default {
         props: {
             name: {
@@ -42,7 +46,7 @@
                 default: false,
             },
             value: {
-                type: Number,
+                type: String,
                 required: true,
             },
             attribute: {
@@ -62,8 +66,13 @@
             // FETCH
 
             // FUNCTIONS
-            const openGeographyModal = id => {
-
+            const updateValue = newValue => {
+                v.handleChange(newValue);
+            };
+            const openGeographyModal = _ => {
+                showMapPicker({
+                    value: v.value,
+                }, updateValue);
             };
             const resetFieldState = _ => {
                 v.resetField({
@@ -78,6 +87,7 @@
 
             // DATA
             const {
+                handleChange,
                 handleInput,
                 value: fieldValue,
                 meta,
@@ -89,8 +99,9 @@
 
             });
             const v = reactive({
-                value: fieldValue,
+                handleChange,
                 handleInput,
+                value: fieldValue,
                 meta,
                 resetField,
             });

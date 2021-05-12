@@ -22,6 +22,7 @@ import Discard from '../components/modals/system/Discard.vue';
 import Error from '../components/modals/system/Error.vue';
 import CsvPreviewer from '../components/modals/csv/Preview.vue';
 import CsvPicker from '../components/modals/csv/Picker.vue';
+import MapPicker from '../components/modals/map/Picker.vue';
 import UserInfo from '../components/modals/user/UserInfo.vue';
 import AddUser from '../components/modals/user/Add.vue';
 import DeactiveUser from '../components/modals/user/Deactivate.vue';
@@ -141,6 +142,28 @@ export function showCsvColumnPicker(data, onConfirm) {
             closing(e) {
                 store.getters.vfm.hide(uid);
             },
+        }
+    });
+}
+
+export function showMapPicker(data, onConfirm) {
+    const uid = `MapPicker-${getTs()}`;
+    store.getters.vfm.show({
+        component: MapPicker,
+        bind: {
+            name: uid,
+            data: data,
+        },
+        on: {
+            closing(e) {
+                store.getters.vfm.hide(uid);
+            },
+            confirm(e) {
+                if(!!onConfirm) {
+                    onConfirm(e);
+                }
+                store.getters.vfm.hide(uid);
+            }
         }
     });
 }
