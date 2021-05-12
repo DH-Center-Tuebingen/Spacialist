@@ -10,11 +10,13 @@ import {
     deleteEntityType,
     addAttribute,
     deleteAttribute,
+    deleteEntity,
 } from '../api.js';
 
 import {
     can,
     getTs,
+    handleDeletedEntity,
 } from '../helpers/helpers.js';
 
 import About from '../components/modals/system/About.vue';
@@ -29,6 +31,7 @@ import DeactiveUser from '../components/modals/user/Deactivate.vue';
 import BibliographyItem from '../components/modals/bibliography/Item.vue';
 import DeleteBibliographyItem from '../components/modals/bibliography/Delete.vue';
 import AddEntity from '../components/modals/entity/Add.vue';
+import DeleteEntity from '../components/modals/entity/Delete.vue';
 import AddEntityType from '../components/modals/entitytype/Add.vue';
 import DeleteEntityType from '../components/modals/entitytype/Delete.vue';
 import AddAttribute from '../components/modals/attribute/Add.vue';
@@ -305,6 +308,36 @@ export function ShowAddEntity(parent = null, onAdded) {
                         onAdded(node);
                     }
                     store.getters.vfm.hide(uid);
+                });
+            }
+        }
+    });
+}
+
+export function showDeleteEntity(entityId, onDeleted) {
+    const uid = `DeleteEntity-${getTs()}`;
+    store.getters.vfm.show({
+        component: DeleteEntity,
+        bind: {
+            name: uid,
+            entityId: entityId,
+        },
+        on: {
+            closing(e) {
+                store.getters.vfm.hide(uid);
+            },
+            confirm() {
+                const entity = store.getters.entities[entityId];
+                deleteEntity(entityId).then(_ => {
+                    store.getters.vfm.hide(uid);
+                    store.dispatch('deleteEntity', {
+                        id: entityId,
+                    });
+                    handleDeletedEntity(entity).then(_ => {
+                        if(!!onDeleted) {
+                            onDeleted(entity);
+                        }
+                    });
                 });
             }
         }

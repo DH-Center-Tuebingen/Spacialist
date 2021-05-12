@@ -457,6 +457,12 @@ export async function deleteComment(cid, endpoint = '/comment/{cid}') {
     );
 };
 
+export async function deleteEntity(eid) {
+    return $httpQueue.add(
+        () => http.delete(`entity/${eid}`).then(response => response.data)
+    );
+};
+
 export async function deleteEntityType(etid) {
     return $httpQueue.add(
         () => http.delete(`editor/dm/entity_type/${etid}`).then(response => response.data)

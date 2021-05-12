@@ -1,5 +1,6 @@
 import auth from '../bootstrap/auth.js';
 import store from '../bootstrap/store.js';
+import router from '../bootstrap/router.js';
 
 import {
     fetchAttributes,
@@ -111,6 +112,34 @@ export function translateConcept(url) {
 export function getConceptLabel(concept) {
     return concept.labels.length ? concept.labels[0].label : '';
 }
+
+export async function handleDeletedEntity(entity) {
+    const currentRoute = router.currentRoute.value;
+    // Currently an entity is selected, thus maybe route back is needed
+    if(currentRoute.name == 'entitydetail' || currentRoute.name == 'entitydetail') {
+        const selectedEntityId = currentRoute.params.id;
+        // Selected entity is deleted entity
+        if(selectedEntityId == entity.id) {
+            router.push({
+                append: true,
+                name: 'home',
+                query: currentRoute.query
+            });
+        } else {
+            const selectedEntity = store.getters.entities[selectedEntityId];
+            const idx = selectedEntity.parentIds.findIndex(pid => pid == entity.id);
+            // Selected entity is child of deleted entity
+            if(idx > -1) {
+                router.push({
+                    append: true,
+                    name: 'home',
+                    query: currentRoute.query
+                });
+            }
+        }
+    }
+    return new Promise(r => r(null));
+};
 
 export function getAttribute(id) {
     if(!id) return {};

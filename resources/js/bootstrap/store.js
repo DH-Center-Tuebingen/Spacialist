@@ -107,6 +107,25 @@ export const store = createStore({
                 entity.name = data.name;
             }
         },
+        deleteEntity(state, data) {
+            const entity = state.entities[data.id];
+            if(entity.root_entity_id) {
+                const parent = state.entities[entity.root_entity_id];
+                if(parent.childrenLoaded) {
+                    const idx = parent.children.findIndex(c => c.id == entity.id);
+                    if(idx > -1) {
+                        parent.children.splice(idx, 1);
+                    }
+                }
+                parent.children_count--;
+            } else {
+                const idx = state.tree.findIndex(l => l.id == entity.id);
+                if(idx > -1) {
+                    state.tree.splice(idx, 1);
+                }
+            }
+            delete state.entities[data.id];
+        },
         updateEntityData(state, data) {
             const entity = state.entities[data.eid];
             for(let k in data.data) {
@@ -400,6 +419,9 @@ export const store = createStore({
         },
         updateEntity({commit}, data) {
             commit('updateEntity', data);
+        },
+        deleteEntity({commit}, data) {
+            commit('deleteEntity', data);
         },
         updateEntityData({commit}, data) {
             commit('updateEntityData', data);

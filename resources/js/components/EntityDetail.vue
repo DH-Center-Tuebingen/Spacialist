@@ -31,7 +31,7 @@
                 <button type="button" class="btn btn-warning me-2" :disabled="!state.formDirty" @click="resetForm()">
                     <i class="fas fa-fw fa-undo"></i> {{ t('global.reset') }}
                 </button>
-                <button type="button" class="btn btn-danger" :disabled="!can('delete_move_concepts')" @click="deleteEntity(state.entity)">
+                <button type="button" class="btn btn-danger" :disabled="!can('delete_move_concepts')" @click="confirmDeleteEntity()">
                     <i class="fas fa-fw fa-trash"></i> {{ t('global.delete') }}
                 </button>
             </span>
@@ -163,6 +163,7 @@
     } from '../helpers/helpers.js';
     import {
         showDiscard,
+        showDeleteEntity,
         showUserInfo,
         canShowReferenceModal,
     } from '../helpers/modal.js';
@@ -190,75 +191,6 @@
                 getEntityTypeAttributeSelections();
                 state.initFinished = true;
             });
-            // onBeforeRouteUpdate((to, from) => {
-            //     console.log(to);
-            //     if(!this.$can('view_concept_props')) {
-            //         store.dispatch('hideEntityData');
-            //         Vue.set(this.selectedEntity, 'data', {});
-            //         Vue.set(this.selectedEntity, 'attributes', []);
-            //         Vue.set(this.selectedEntity, 'selections', {});
-            //         Vue.set(this.selectedEntity, 'dependencies', []);
-            //         Vue.set(this.selectedEntity, 'references', []);
-            //         Vue.set(this.selectedEntity, 'comments', []);
-            //     }
-            //     if(!store.entity.comments || store.entity.comments_count === 0) {
-            //         Vue.set(store.entity, 'comments', []);
-            //     }
-            //     const cid = store.entity.id;
-            //     const ctid = store.entity.entity_type_id;
-            //     return $httpQueue.add(() => $http.get(`/entity/${cid}/data`).then(response => {
-            //         // if result is empty, php returns [] instead of {}
-            //         if(response.data instanceof Array) {
-            //             response.data = {};
-            //         }
-            //         Vue.set(store.entity, 'data', response.data);
-            //         return $http.get(`/editor/entity_type/${ctid}/attribute`);
-            //     }).then(response => {
-            //         store.entity.attributes = [];
-            //         let data = response.data;
-            //         for(let i=0; i<data.attributes.length; i++) {
-            //             let aid = data.attributes[i].id;
-            //             if(!store.entity.data[aid]) {
-            //                 let val = {};
-            //                 switch(data.attributes[i].datatype) {
-            //                     case 'dimension':
-            //                     case 'epoch':
-            //                     case 'timeperiod':
-            //                         val.value = {};
-            //                         break;
-            //                     case 'table':
-            //                     case 'list':
-            //                         val.value = [];
-            //                         break;
-            //                 }
-            //                 Vue.set(store.entity.data, aid, val);
-            //             } else {
-            //                 const val = store.entity.data[aid].value;
-            //                 switch(data.attributes[i].datatype) {
-            //                     case 'date':
-            //                         const dtVal = new Date(val);
-            //                         store.entity.data[aid].value = dtVal;
-            //                         break;
-            //                 }
-            //             }
-            //             store.entity.attributes.push(data.attributes[i]);
-            //         }
-            //         // if result is empty, php returns [] instead of {}
-            //         if(data.selections instanceof Array) {
-            //             data.selections = {};
-            //         }
-            //         if(data.dependencies instanceof Array) {
-            //             data.dependencies = {};
-            //         }
-            //         Vue.set(store.entity, 'selections', data.selections);
-            //         Vue.set(store.entity, 'dependencies', data.dependencies);
-
-            //         const aid = this.$route.params.aid;
-            //         this.setReferenceAttribute(aid);
-            //         Vue.set(this, 'dataLoaded', true);
-            //         this.setEntityView();
-            //     }));
-            // });
 
             // DATA
             const attrRef = ref({});
@@ -365,6 +297,11 @@
             const cancelEditEntityName = _ => {
                 state.entity.editing = false;
                 state.editedEntityName = '';
+            };
+            const confirmDeleteEntity = _ => {
+                if(!can('delete_move_concepts')) return;
+
+                showDeleteEntity(state.entity.id);
             };
             const setEntityView = tab => {
                 let newTab, oldTab, newPanel, oldPanel;
@@ -557,6 +494,7 @@
                 editEntityName,
                 updateEntityName,
                 cancelEditEntityName,
+                confirmDeleteEntity,
                 setEntityView,
                 onEntityHeaderHover,
                 setFormState,
@@ -569,28 +507,7 @@
                 state,
             };
         }
-
-    // export default {
-    //     beforeRouteEnter(to, from, next) {
-    //         next(vm => vm.getEntityData(vm.selectedEntity));
-    //     },
-    //     beforeRouteUpdate(to, from, next) {
-    //         if(to.params.id != from.params.id) {
-    //             this.reset();
-    //             this.getEntityData(this.selectedEntity).then(r => {
-    //                 next();
-    //             });
-    //         } else {
-    //             if(to.params.aid) {
-    //                 this.setReferenceAttribute(to.params.aid);
-    //             }
-    //             next();
-    //         }
-    //     },
     //     methods: {
-    //         reset() {
-    //             this.commentLoadingState = 'not';
-    //         },
     //         getEntityData(entity) {
     //             this.dataLoaded = false;
     //             if(!this.$can('view_concept_props')) {
@@ -661,170 +578,6 @@
     //                 this.setEntityView();
     //             }));
     //         },
-    //         saveEntity(entity) {
-    //             if(!this.$can('duplicate_edit_concepts')) return;
-    //             let cid = entity.id;
-    //             var patches = [];
-    //             for(let f in this.fields) {
-    //                 if(this.fields.hasOwnProperty(f) && f.startsWith('attribute-')) {
-    //                     if(this.fields[f].dirty) {
-    //                         let aid = Number(f.replace(/^attribute-/, ''));
-    //                         let data = entity.data[aid];
-    //                         var patch = {};
-    //                         patch.params = {};
-    //                         patch.params.aid = aid;
-    //                         patch.params.cid = cid;
-    //                         if(data.id) {
-    //                             // if data.id exists, there has been an entry in the database, therefore it is a replace/remove operation
-    //                             patch.params.id = data.id;
-    //                             if(data.value && data.value != '') {
-    //                                 // value is set, therefore it is a replace
-    //                                 patch.op = "replace";
-    //                                 patch.value = data.value;
-    //                                 patch.value = this.getCleanValue(data, entity.attributes);
-    //                             } else {
-    //                                 // value is empty, therefore it is a remove
-    //                                 patch.op = "remove";
-    //                             }
-    //                         } else {
-    //                             // there has been no entry in the database before, therefore it is an add operation
-    //                             if(data.value && data.value != '') {
-    //                                 patch.op = "add";
-    //                                 data.attribute = entity.attributes.find(a => a.id == aid);
-    //                                 patch.value = this.getCleanValue(data, entity.attributes);
-    //                             } else {
-    //                                 // there has be no entry in the database before and values are not different (should not happen ;))
-    //                                 continue;
-    //                             }
-    //                         }
-    //                         patches.push(patch);
-    //                     }
-    //                 }
-    //             }
-    //             return $httpQueue.add(() => $http.patch('/entity/'+cid+'/attributes', patches).then(response => {
-    //                 this.resetFlags();
-    //                 this.$showToast(
-    //                     this.$t('main.entity.toasts.updated.title'),
-    //                     this.$t('main.entity.toasts.updated.msg', {
-    //                         name: entity.name
-    //                     }),
-    //                     'success'
-    //                 );
-    //                 this.setModificationFields(response.data);
-    //             }).catch(error => {
-    //                 const r = error.response;
-    //                 this.$showToast(
-    //                     `${r.status}: ${r.statusText}`,
-    //                     r.data.error,
-    //                     'error',
-    //                     5000
-    //                 );
-    //             })
-    //         );
-    //         },
-    //         deleteEntity(entity) {
-    //             EventBus.$emit('entity-delete', {
-    //                 entity: entity
-    //             });
-    //         },
-    //         onEntityHeaderHover(hoverState) {
-    //             this.entityHeaderHovered = hoverState;
-    //         },
-    //         enableEntityNameEditing() {
-    //             this.newEntityName = this.selectedEntity.name;
-    //             Vue.set(this.selectedEntity, 'editing', true);
-    //         },
-    //         updateEntityName(entity, name) {
-    //             // If name does not change, just cancel
-    //             if(entity.name == name) {
-    //                 this.cancelUpdateEntityName();
-    //             } else {
-    //                 const data = {
-    //                     name: name
-    //                 };
-    //                 $httpQueue.add(() => $http.patch(`entity/${entity.id}/name`, data).then(response => {
-    //                     EventBus.$emit('entity-update', {
-    //                         type: 'name',
-    //                         entity_id: entity.id,
-    //                         value: name
-    //                     });
-    //                     const d = response.data;
-    //                     entity.name = d.name;
-    //                     entity.user_id = d.user_id;
-    //                     entity.updated_at = d.updated_at;
-    //                     entity.user = d.user;
-    //                     this.cancelUpdateEntityName();
-    //                 }));
-    //             }
-    //         },
-    //         cancelUpdateEntityName() {
-    //             Vue.set(this.selectedEntity, 'editing', false);
-    //             this.newEntityName = '';
-    //         },
-    //         getComment(list, id) {
-    //             if(!list || list.length == 0) return;
-    //             for(let i=0; i<list.length; i++) {
-    //                 if(list[i].id == id) {
-    //                     return list[i];
-    //                 }
-    //                 const gotIt = this.getComment(list[i].replies, id);
-    //                 if(gotIt) return gotIt;
-    //             }
-    //         },
-    //         getCleanValue(entry, attributes) {
-    //             if(!entry) return;
-    //             const v = entry.value;
-    //             switch(entry.attribute.datatype) {
-    //                 case 'string-sc':
-    //                     return {
-    //                         id: v.id,
-    //                         concept_url: v.concept_url
-    //                     };
-    //                 case 'string-mc':
-    //                     return v.map(smc => {
-    //                         return {
-    //                             id: smc.id,
-    //                             concept_url: smc.concept_url
-    //                         };
-    //                     });
-    //                 case 'table':
-    //                     return v.map(row => {
-    //                         for(let k in row) {
-    //                             const col = row[k];
-    //                             const aid = entry.attribute.id;
-    //                             const tattr = attributes.find(a => a.id == aid);
-    //                             const attr = tattr.columns[k];
-    //                             // return necessary fields only
-    //                             switch(attr.datatype) {
-    //                                 case 'string-sc':
-    //                                     row[k] = {
-    //                                         id: col.id,
-    //                                         concept_url: col.concept_url
-    //                                     };
-    //                                     break;
-    //                                 case 'entity':
-    //                                     row[k] = {
-    //                                         id: col.id,
-    //                                         name: col.name
-    //                                     };
-    //                                     break;
-    //                                 default:
-    //                                     row[k] = col;
-    //                                     break;
-    //                             }
-    //                         }
-    //                         return row;
-    //                     });
-    //                 default:
-    //                     return entry.value;
-    //             }
-    //         },
-    //         setModificationFields(entity) {
-    //             if(!this.selectedEntity && !this.selectedEntity.id) return;
-
-    //             this.selectedEntity.user = entity.user;
-    //             this.selectedEntity.updated_at = entity.updated_at;
-    //         },
     //         dependencyInfoHoverOver(event) {
     //             if(this.dependencyInfoHovered) {
     //                 return;
@@ -844,61 +597,6 @@
     //             this.dependencyInfoHovered = false;
     //             $('#dependency-info').popover('dispose');
     //         },
-    //         setReferenceAttribute(aid) {
-    //             this.referenceAttribute = aid;
-    //         },
-    //         resetFlags() {
-    //             this.$validator.fields.items.forEach(field => {
-    //                 field.reset();
-    //             });
-    //         },
     //     },
-    //     data() {
-    //         return {
-    //             newEntityName: '',
-    //             entityHeaderHovered: false,
-    //             dataLoaded: false,
-    //             dependencyInfoHovered: false,
-    //             hiddenAttributes: 0,
-    //             referenceAttribute: null,
-    //         }
-    //     },
-    //     computed: {
-    //         isFormDirty() {
-    //             return Object.keys(this.fields).some(key => this.fields[key].dirty) && !this.errors.any();
-    //         },
-    //         hasData() {
-    //             return this.dataLoaded &&
-    //                 !!this.selectedEntity &&
-    //                 !!this.selectedEntity.attributes &&
-    //                 !!this.selectedEntity.selections
-    //         },
-    //         attributeReferences() {
-    //             let data = {
-    //                 refs: [],
-    //                 value: {},
-    //                 attribute: {}
-    //             };
-    //             if(!this.selectedEntity.attributes) return data;
-    //             if(this.referenceAttribute) {
-    //                 const attribute = this.selectedEntity.attributes.find(a => a.id == this.referenceAttribute);
-    //                 if(!attribute) return data;
-    //                 data.refs = this.hasReferenceGroup(attribute.thesaurus_url) ? this.selectedEntity.references[attribute.thesaurus_url] : [];
-    //                 data.value = this.selectedEntity.data[this.referenceAttribute];
-    //                 data.attribute = attribute;
-    //             }
-    //             return data;
-    //         },
-    //     },
-    //     watch: {
-    //         isFormDirty(newDirty, oldDirty) {
-    //             if(newDirty != oldDirty) {
-    //                 this.$emit('detail-updated', {
-    //                     isDirty: newDirty,
-    //                     onDiscard: newDirty ? this.saveEntity : entity => {}
-    //                 });
-    //             }
-    //         }
-    //     }
     }
 </script>

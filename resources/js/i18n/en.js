@@ -312,6 +312,9 @@ const en = {
                 edit: {
                     title: 'Edit Entity - {name}'
                 },
+                delete: {
+                    alert: 'If you delete <span class="fw-bold">{name}</span>, at least one entity is deleted, too. | If you delete <span class="fw-bold">{name}</span>, at least {cnt} entities are deleted, too.',
+                },
                 screencast: {
                     title: 'Save Screencast',
                     info: 'Screencast recorded. What do you want to do with it?',

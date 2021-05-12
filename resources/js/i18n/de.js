@@ -312,6 +312,9 @@ const de = {
                 edit: {
                     title: 'Entität editieren - {name}'
                 },
+                delete: {
+                    alert: 'Wenn du <span class="fw-bold">{name}</span> löschst, wird mindestens eine Entität ebenfalls gelöscht. | Wenn du <span class="fw-bold">{name}</span> löschst, werden mindestens {cnt} Entitäten ebenfalls gelöscht.',
+                },
                 screencast: {
                     title: 'Screencast speichern',
                     info: 'Screencast erfolgreich aufgenommen. Was möchtest du damit tun?',
