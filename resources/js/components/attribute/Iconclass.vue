@@ -21,7 +21,7 @@
                 <span>{{ state.keywords.join(' &bull; ') }}</span>
             </div>
             <footer class="blockquote-footer mt-2">
-                <span v-html="t('main.entity.attributes.iconclass.cite_info', {class: state.value})"></span>
+                <span v-html="t('main.entity.attributes.iconclass.cite_info', {class: v.value})"></span>
             </footer>
         </div>
         <p class="alert alert-danger my-2" v-if="state.infoErrored">

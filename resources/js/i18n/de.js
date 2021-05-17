@@ -361,7 +361,7 @@ const de = {
                 ad: '@:main.entity.attributes.AD',
                 hidden: 'keine Attribute ausgeblendet | ein Attribut ausgeblendet | {cnt} Attribute ausgeblendet',
                 iconclass: {
-                    cite_info: 'Infos von <cite title="Iconclass"><a href="http://iconclass.org/{class}.json">http://iconclass.org/{class}.json</a></cite>',
+                    cite_info: 'Infos von <cite title="Iconclass"><a href="http://iconclass.org/{class}.json" target="_blank">http://iconclass.org/{class}.json</a></cite>',
                     doesnt_exist: 'Diese Iconclass existiert nicht',
                 },
                 table: {
