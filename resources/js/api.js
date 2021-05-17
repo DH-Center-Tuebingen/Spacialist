@@ -7,6 +7,7 @@ import auth from './bootstrap/auth.js';
 import {
     only,
     simpleResourceType,
+    getEntityTypeAttributes as storedEntityTypeAttributes,
 } from './helpers/helpers.js';
 
 // GET AND STORE (FETCH)
@@ -354,6 +355,27 @@ export async function addAttribute(attribute) {
     );
 };
 
+export async function addEntityTypeAttribute(etid, aid, to) {
+    console.log("inaosdinia", etid, aid, to);
+    const attrs = storedEntityTypeAttributes(etid);
+    // Already added
+    if(attrs[to].id == aid) {
+        return;
+    }
+    
+    const rank = to + 1;
+    const data = {
+        attribute_id: aid,
+        position: rank,
+    };
+
+    return $httpQueue.add(
+        () => http.post(`/editor/dm/entity_type/${etid}/attribute`, data).then(response => {
+            store.dispatch('addEntityAttribute', response.data);
+        })
+    );
+};
+
 export async function addReference(eid, aid, url, data) {
     $httpQueue.add(
         () => http.post(`/entity/${eid}/reference/${aid}`, data).then(response => {
@@ -390,6 +412,7 @@ export async function patchEntityName(eid, name) {
         () => http.patch(`entity/${eid}/name`, data).then(response => response.data)
     );
 };
+
 export async function patchAttribute(entityId, attributeId, data) {
     return $httpQueue.add(
         () => http.patch(`/entity/${entityId}/attribute/${attributeId}`, data).then(response => response.data)
@@ -399,6 +422,34 @@ export async function patchAttribute(entityId, attributeId, data) {
 export async function patchAttributes(entityId, data) {
     return $httpQueue.add(
         () => http.patch(`/entity/${entityId}/attributes`, data).then(response => response.data).catch(error => { throw error; })
+    );
+};
+
+export async function reorderEntityAttributes(etid, aid, from, to) {
+    if(from == to) {
+        return;
+    }
+    const attrs = storedEntityTypeAttributes(etid);
+    // Return if moved attribute does not match
+    if(attrs[from].id != aid) {
+        return;
+    }
+    
+    const rank = to + 1;
+    const data = {
+        position: rank
+    };
+
+    return $httpQueue.add(
+        () => http.patch(`/editor/dm/entity_type/${etid}/attribute/${aid}/position`, data).then(response => {
+            store.dispatch('reorderAttributes', {
+                rank: rank,
+                from: from,
+                to: to,
+                entity_type_id: etid,
+                attribute_id: aid,
+            });
+        })
     );
 };
 

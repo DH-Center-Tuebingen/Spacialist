@@ -132,6 +132,46 @@ export const store = createStore({
                 entity.data[k].value = data.data[k];
             }
         },
+        addEntityAttribute(state, data) {
+            const attrs = state.entityTypeAttributes[data.entity_type_id];
+            attrs.splice(data.position-1, 0, data);
+            for(let i=data.position; i<attrs.length; i++) {
+                if(attrs[i].position) {
+                    attrs[i].position++;
+                } else if(attrs[i].pivot && attrs[i].pivot.position) {
+                    attrs[i].pivot.position++;
+                }
+            }
+        },
+        reorderAttributes(state, data) {
+            const {
+                rank,
+                from,
+                to,
+                entity_type_id,
+            } = data;
+            const attrs = state.entityTypeAttributes[entity_type_id];
+            attrs[from].position = rank;
+            const movedAttrs = attrs.splice(from, 1);
+            attrs.splice(to, 0, ...movedAttrs);
+            if(from < to) {
+                for(let i=from; i<to; i++) {
+                    if(attrs[i].position) {
+                        attrs[i].position++;
+                    } else if(attrs[i].pivot && attrs[i].pivot.position) {
+                        attrs[i].pivot.position++;
+                    }
+                }
+            } else {
+                for(let i=to+1; i<=from; i++) {
+                    if(attrs[i].position) {
+                        attrs[i].position--;
+                    } else if(attrs[i].pivot && attrs[i].pivot.position) {
+                        attrs[i].pivot.position--;
+                    }
+                }
+            }
+        },
         addEntityType(state, data) {
             if(data.attributes) {
                 state.entityTypeAttributes[data.id] = data.attributes.slice();
@@ -425,6 +465,12 @@ export const store = createStore({
         },
         updateEntityData({commit}, data) {
             commit('updateEntityData', data);
+        },
+        addEntityAttribute({commit}, data) {
+            commit('addEntityAttribute', data);
+        },
+        reorderAttributes({commit}, data) {
+            commit('reorderAttributes', data);
         },
         addEntityType({commit}, data) {
             commit('addEntityType', data);

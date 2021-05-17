@@ -73,6 +73,7 @@
                     group="attribute-selection"
                     :attributes="state.entityAttributes"
                     :values="state.entityValues"
+                    :disable-drag="false"
                     :selections="{}"
                     :show-info="true"
                     @add="addAttributeToEntityType"
@@ -230,6 +231,8 @@
     } from '../helpers/helpers.js';
 
     import {
+        reorderEntityAttributes,
+        addEntityTypeAttribute,
         updateEntityTypeRelation,
     } from '../api.js';
 
@@ -267,19 +270,18 @@
             const removeAllEntityTypes = _ => {
                 state.entityType.sub_entity_types = [];
             };
-            // TODO DUMMY FUNCTIONS
-            const addAttributeToEntityType = _ => {
-                
-            }
+            const addAttributeToEntityType = e => {
+                addEntityTypeAttribute(currentRoute.params.id, e.element.id, e.to);
+            };
             const onEditEntityAttribute = _ => {
 
-            }
+            };
             const onRemoveAttributeFromEntityType = _ => {
 
-            }
-            const reorderEntityAttribute = _ => {
-
-            }
+            };
+            const reorderEntityAttribute = e => {
+                reorderEntityAttributes(currentRoute.params.id, e.element.id, e.from, e.to);
+            };
 
             // DATA
             const state = reactive({
@@ -446,36 +448,6 @@
         //             );
         //         }));
         //     },
-        //     addAttributeToEntityType(oldIndex, index) {
-        //         const ctid = this.entityType.id;
-        //         const attribute = this.attributes[oldIndex];
-        //         let attributes = this.entityAttributes;
-        //         let data = {};
-        //         data.attribute_id = attribute.id;
-        //         data.position = index + 1;
-        //         $httpQueue.add(() => $http.post(`/editor/dm/entity_type/${ctid}/attribute`, data).then(response => {
-        //             const res = response.data;
-        //             // Add element to attribute list
-        //             attributes.splice(index, 0, res.attribute);
-        //             attribute.isDisabled = true;
-        //             Vue.set(this.entityValues, res.attribute.id, '');
-        //             // Update position attribute of successors
-        //             for(let i=index+1; i<attributes.length; i++) {
-        //                 attributes[i].position++;
-        //             }
-        //             const attrName = this.$translateConcept(res.attribute.thesaurus_url);
-        //             const etName = this.$translateConcept(this.entityType.thesaurus_url);
-        //             this.$showToast(
-        //                 this.$t('main.datamodel.toasts.added-attribute.title'),
-        //                 this.$t('main.datamodel.toasts.added-attribute.msg', {
-        //                     name: attrName,
-        //                     etName: etName
-        //                 }),
-        //                 'success'
-        //             );
-        //         }));
-
-        //     },
         //     editEntityAttribute(attribute, options) {
         //         const vm = this;
         //         if(vm.editEntityAttributeDisabled) return;
@@ -535,32 +507,6 @@
         //                 }
         //             }
         //             this.hideRemoveAttributeModal();
-        //         }));
-        //     },
-        //     reorderEntityAttribute(oldIndex, index) {
-        //         let attribute = this.entityAttributes[oldIndex];
-        //         const ctid = this.entityType.id;
-        //         let aid = attribute.id;
-        //         let position = index + 1;
-        //         // same index, nothing to do
-        //         if(oldIndex == index) {
-        //             return;
-        //         }
-        //         let data = {};
-        //         data.position = position;
-        //         $httpQueue.add(() => $http.patch(`/editor/dm/entity_type/${ctid}/attribute/${aid}/position`, data).then(response => {
-        //             attribute.position = position;
-        //             this.entityAttributes.splice(oldIndex, 1);
-        //             this.entityAttributes.splice(index, 0, attribute);
-        //             if(oldIndex < index) {
-        //                 for(let i=oldIndex; i<index; i++) {
-        //                     this.entityAttributes[i].position--;
-        //                 }
-        //             } else { // oldIndex > index
-        //                 for(let i=index+1; i<=oldIndex; i++) {
-        //                     this.entityAttributes[i].position++;
-        //                 }
-        //             }
         //         }));
         //     },
         //     dependencyAttributeSelected(attribute) {

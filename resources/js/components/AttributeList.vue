@@ -5,7 +5,8 @@
         item-key="id"
         :disabled="disableDrag"
         :group="group"
-        :move="handleMove">
+        :move="handleMove"
+        @change="handleUpdate">
             <template #item="{element, index}">
                 <div class="mb-3 row" @mouseenter="onEnter(index)" @mouseleave="onLeave(index)" v-if="!state.hiddenAttributeList[element.id]">
                     <label
@@ -359,6 +360,23 @@
             const handleMove = (e, orgE) => {
                 return !disableDrag.value;
             };
+            const handleUpdate = (e) => {
+                if(!!e.moved) {
+                    // only handle event if position changed
+                    if(e.moved.oldIndex != e.moved.newIndex) {
+                        onReorderHandler({
+                            element: e.moved.element,
+                            from: e.moved.oldIndex,
+                            to: e.moved.newIndex,
+                        });
+                    }
+                } else if(!!e.added) {
+                    context.emit('add', {
+                        element: e.added.element,
+                        to: e.added.newIndex,
+                    });
+                }
+            };
             const updateValue = (eventValue, aid) => {
                 state.attributeValues[aid].value = eventValue;
             };
@@ -401,10 +419,8 @@
             const checkDependency = id => {
 
             };
-            const onReorderHandler = element => {
-                context.emit('reorder', {
-                    element: element
-                });
+            const onReorderHandler = data => {
+                context.emit('reorder', data);
             };
             const onEditHandler = element => {
                 context.emit('edit', {
@@ -482,6 +498,7 @@
                 onEnter,
                 onLeave,
                 handleMove,
+                handleUpdate,
                 updateValue,
                 getDirtyValues,
                 updateDirtyState,
@@ -489,7 +506,6 @@
                 undirtyList,
                 setRef,
                 checkDependency,
-                onReorderHandler,
                 onEditHandler,
                 onRemoveHandler,
                 onDeleteHandler,
