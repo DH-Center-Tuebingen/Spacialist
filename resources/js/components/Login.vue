@@ -21,16 +21,7 @@
                             </label>
 
                             <div class="col-md-6">
-                                <input id="email" type="text" class="form-control" :class="getValidClass(state.error, 'email|nickname')" v-model="state.user.email" name="email" required autofocus>
-
-                                <div class="invalid-feedback">
-                                    <span v-for="(msg, i) in state.error.email" :key="i">
-                                        {{ msg }}
-                                    </span>
-                                    <span v-for="(msg, i) in state.error.nickname" :key="i">
-                                        {{ msg }}
-                                    </span>
-                                </div>
+                                <input id="email" type="text" class="form-control" :class="getValidClass(state.error, 'email|nickname|global')" v-model="state.user.email" name="email" required autofocus>
                             </div>
                         </div>
 
@@ -41,13 +32,7 @@
                             </label>
 
                             <div class="col-md-6">
-                                <input id="password" type="password" class="form-control" :class="getValidClass(state.error, 'password')" v-model="state.user.password" name="password" required>
-
-                                <div class="invalid-feedback">
-                                    <span v-for="(msg, i) in state.error.password" :key="i">
-                                        {{ msg }}
-                                    </span>
-                                </div>
+                                <input id="password" type="password" class="form-control" :class="getValidClass(state.error, 'password|global')" v-model="state.user.password" name="password" required>
                             </div>
                         </div>
 
@@ -133,7 +118,7 @@
                 .then(_ => initApp(locale))
                 .catch(e => {
                     state.error = getErrorMessages(e);
-                    return Promise.reject('Login failed');
+                    return Promise.reject();
                 })
                 .then(_ => {
                     state.error = {};
