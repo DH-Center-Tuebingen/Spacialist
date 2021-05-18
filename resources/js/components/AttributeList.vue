@@ -8,23 +8,23 @@
         :move="handleMove"
         @change="handleUpdate">
             <template #item="{element, index}">
-                <div class="mb-3 row" @mouseenter="onEnter(index)" @mouseleave="onLeave(index)" v-if="!state.hiddenAttributeList[element.id]">
+                <div class="mb-3 row" @mouseenter="onEnter(index)" @mouseleave="onLeave(index)" v-if="!state.hiddenAttributeList[element.id] || showHidden">
                     <label
                         class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break"
                         v-if="!nolabels"
                         :for="`attr-${element.id}`"
                         :class="attributeClasses(element)">
                         <div v-show="!!state.hoverStates[index]" class="btn-fab-list">
-                            <button v-show="hasEmitter('onReorder')" class="reorder-handle btn btn-outline-secondary btn-fab rounded-circle" data-bs-toggle="popover" :data-content="t('global.resort')" data-trigger="hover" data-placement="bottom">
+                            <button v-show="hasEmitter('onReorderList')" class="reorder-handle btn btn-outline-secondary btn-fab rounded-circle" data-bs-toggle="popover" :data-content="t('global.resort')" data-trigger="hover" data-placement="bottom">
                                 <i class="fas fa-fw fa-sort"></i>
                             </button>
-                            <button v-show="hasEmitter('onEdit')" class="btn btn-outline-info btn-fab rounded-circle" @click="onEditHandler(element)" data-bs-toggle="popover" :data-content="t('global.edit')" data-trigger="hover" data-placement="bottom">
+                            <button v-show="hasEmitter('onEditElement')" class="btn btn-outline-info btn-fab rounded-circle" @click="onEditHandler(element)" data-bs-toggle="popover" :data-content="t('global.edit')" data-trigger="hover" data-placement="bottom">
                                 <i class="fas fa-fw fa-xs fa-edit" style="vertical-align: 0;"></i>
                             </button>
-                            <button v-show="hasEmitter('onRemove')" class="btn btn-outline-danger btn-fab rounded-circle" @click="onRemoveHandler(element)" data-bs-toggle="popover" :data-content="t('global.remove')" data-trigger="hover" data-placement="bottom">
+                            <button v-show="hasEmitter('onRemoveElement')" class="btn btn-outline-danger btn-fab rounded-circle" @click="onRemoveHandler(element)" data-bs-toggle="popover" :data-content="t('global.remove')" data-trigger="hover" data-placement="bottom">
                                 <i class="fas fa-fw fa-xs fa-times" style="vertical-align: 0;"></i>
                             </button>
-                            <button v-show="hasEmitter('onDelete')" class="btn btn-outline-danger btn-fab rounded-circle" @click="onDeleteHandler(element)" data-bs-toggle="popover" :data-content="t('global.delete')" data-trigger="hover" data-placement="bottom">
+                            <button v-show="hasEmitter('onDeleteElement')" class="btn btn-outline-danger btn-fab rounded-circle" @click="onDeleteHandler(element)" data-bs-toggle="popover" :data-content="t('global.delete')" data-trigger="hover" data-placement="bottom">
                                 <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
                             </button>
                         </div>
@@ -47,7 +47,7 @@
                         <string-attribute
                             v-if="element.datatype == 'string'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="updateDirtyState" />
@@ -55,7 +55,7 @@
                         <stringfield-attribute
                             v-else-if="element.datatype == 'stringf'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="updateDirtyState" />
@@ -63,7 +63,7 @@
                         <integer-attribute
                             v-else-if="element.datatype == 'integer'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="updateDirtyState" />
@@ -71,7 +71,7 @@
                         <float-attribute
                             v-else-if="element.datatype == 'double'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="updateDirtyState" />
@@ -79,7 +79,7 @@
                         <bool-attribute
                             v-else-if="element.datatype == 'boolean'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="updateDirtyState" />
@@ -87,21 +87,21 @@
                         <percentage-attribute
                             v-else-if="element.datatype == 'percentage'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="updateDirtyState" />
                             
                         <serial-attribute
                             v-else-if="element.datatype == 'serial'"
-                            :disabled="element.isDisabled"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value" />
 
                         <list-attribute
                             v-else-if="element.datatype == 'list'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :entries="state.attributeValues[element.id].value"
                             @change="updateDirtyState" />
@@ -109,7 +109,7 @@
                         <epoch-attribute
                             v-else-if="element.datatype == 'epoch' || element.datatype == 'timeperiod'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :epochs="selections[element.id]"
@@ -119,7 +119,7 @@
                         <dimension-attribute
                             v-else-if="element.datatype == 'dimension'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="updateDirtyState" />
@@ -127,7 +127,7 @@
                         <tabular-attribute
                             v-else-if="element.datatype == 'table'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :attribute="element"
@@ -138,7 +138,7 @@
                         <iconclass-attribute
                             v-else-if="element.datatype == 'iconclass'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :attribute="element"
@@ -147,7 +147,7 @@
                         <geography-attribute
                             v-else-if="element.datatype == 'geography'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :attribute="element"
@@ -155,7 +155,7 @@
 
                         <entity-attribute v-else-if="element.datatype == 'entity'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="convertEntityValue(state.attributeValues[element.id])"
                             @change="updateDirtyState" />
@@ -163,7 +163,7 @@
                         <date-attribute
                             v-else-if="element.datatype == 'date'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="updateDirtyState" />
@@ -171,7 +171,7 @@
                         <singlechoice-attribute
                             v-else-if="element.datatype == 'string-sc'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :selections="selections[element.id]"
@@ -180,7 +180,7 @@
                         <multichoice-attribute
                             v-else-if="element.datatype == 'string-mc'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :selections="selections[element.id]"
@@ -188,14 +188,14 @@
 
                         <sql-attribute
                             v-else-if="element.datatype == 'sql'"
-                            :disabled="element.isDisabled"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value" />
 
                         <default-attribute
                             v-else
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value" />
                     </div>
@@ -251,6 +251,11 @@
                 required: false,
                 type: Array,
                 default: [],
+            },
+            showHidden: {
+                required: false,
+                type: Boolean,
+                default: false,
             },
             dependencies: {
                 required: false,
@@ -315,12 +320,13 @@
             'sql-attribute': SqlAttr,
             'default-attribute': DefaultAttr,
         },
-        emits: ['add', 'dirty'],
+        emits: ['dirty'],
         setup(props, context) {
             const { t } = useI18n();
             const {
                 attributes,
                 hiddenAttributes,
+                showHidden,
                 disableDrag,
                 group,
                 metadataAddon,
@@ -371,9 +377,15 @@
                         });
                     }
                 } else if(!!e.added) {
-                    context.emit('add', {
+                    context.emit('add-element', {
                         element: e.added.element,
                         to: e.added.newIndex,
+                    });
+                } else if(!!e.removed) {
+                    context.emit('remove-element', {
+                        element: e.removed.element,
+                        from: e.removed.oldIndex,
+                        modal: false,
                     });
                 }
             };
@@ -420,20 +432,21 @@
 
             };
             const onReorderHandler = data => {
-                context.emit('reorder', data);
+                context.emit('reorder-list', data);
             };
             const onEditHandler = element => {
-                context.emit('edit', {
+                context.emit('edit-element', {
                     element: element
                 });
             };
             const onRemoveHandler = element => {
-                context.emit('remove', {
-                    element: element
+                context.emit('remove-element', {
+                    element: element,
+                    modal: true,
                 });
             };
             const onDeleteHandler = element => {
-                context.emit('delete', {
+                context.emit('delete-element', {
                     element: element
                 });
             };
@@ -462,7 +475,7 @@
                 expansionStates: new Array(attributes.value.length).fill(false),
                 componentLoaded: computed(_ => state.attributeList.length > 0 && state.attributeValues),
                 isHoveringPossible: computed(_ => {
-                    return !!attrs.onReorder || !!attrs.onEdit || !!attrs.onRemove || !!attrs.onDelete;
+                    return !!attrs.onReorderList || !!attrs.onEditElement || !!attrs.onRemoveElement || !!attrs.onDeleteElement;
                 }),
                 hiddenAttributeList: computed(_ => {
                     if(!state.componentLoaded) return {};
@@ -513,6 +526,7 @@
                 hasEmitter,
                 convertEntityValue,
                 // PROPS
+                showHidden,
                 disableDrag,
                 group,
                 nolabels,

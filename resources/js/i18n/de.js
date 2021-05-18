@@ -436,6 +436,7 @@ const de = {
             attribute: {
                 title: 'Verfügbare Attribute',
                 'add-button': 'Attribut hinzufügen',
+                show_hidden: 'Ausgeblendete anzeigen',
                 modal: {
                     new: {
                         title: 'Neues Attribut'

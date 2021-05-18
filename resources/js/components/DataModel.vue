@@ -18,64 +18,39 @@
             </router-view>
         </div>
         <div class="col-md-4 py-2 h-100 d-flex flex-column">
-            <h4>
-                {{ t('main.datamodel.attribute.title') }}
-                <button type="button" class="btn btn-outline-success" @click="createAttribute()">
-                    <i class="fas fa-fw fa-plus"></i> {{ t('main.datamodel.attribute.add-button') }}
-                </button>
-            </h4>
+            <div class="d-flex flex-row justify-content-between">
+                <h4>
+                    {{ t('main.datamodel.attribute.title') }}
+                    <button type="button" class="btn btn-outline-success" @click="createAttribute()">
+                        <i class="fas fa-fw fa-plus"></i> {{ t('main.datamodel.attribute.add-button') }}
+                    </button>
+                </h4>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="toggle-hidden-attributes" v-model="state.showHiddenAttributes">
+                    <label class="form-check-label" for="toggle-hidden-attributes">
+                        {{ t('main.datamodel.attribute.show_hidden') }}
+                    </label>
+                </div>
+            </div>
             <div class="col overflow-hidden mt-2">
                 <attribute-list
                     class="h-100 scroll-y-auto scroll-x-hidden"
                     group="attribute-selection"
                     :attributes="state.attributeList"
                     :hidden-attributes="state.selectedEntityTypeAttributeIds"
+                    :show-hidden="state.showHiddenAttributes"
                     :values="state.attributeListValues"
                     :selections="{}"
                     :is-source="true"
                     :show-info="true"
-                    @delete="onDeleteAttribute">
+                    @delete-element="onDeleteAttribute">
                 </attribute-list>
             </div>
         </div>
-
-        <!-- 
-        <modal name="delete-attribute-modal" height="auto" :scrollable="true">
-            <div class="modal-content" v-if="openedModal == 'delete-attribute-modal'">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ $t('global.delete-name.title', {name: $translateConcept(modalSelectedAttribute.thesaurus_url)}) }}</h5>
-                    <button type="button" class="btn-close" aria-label="Close" @click="hideDeleteAttributeModal">
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p class="alert alert-info">
-                        {{ $t('global.delete-name.desc', {name: $translateConcept(modalSelectedAttribute.thesaurus_url)}) }}
-                    </p>
-                    <p class="alert alert-danger">
-                        {{
-                            $tc('main.datamodel.attribute.modal.delete.alert', attributeValueCount, {
-                                name: $translateConcept(modalSelectedAttribute.thesaurus_url),
-                                cnt: attributeValueCount
-                            })
-                        }}
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" @click="deleteAttribute(modalSelectedAttribute)">
-                        <i class="fas fa-fw fa-check"></i> {{ $t('global.delete') }}
-                    </button>
-                    <button type="button" class="btn btn-secondary" @click="hideDeleteAttributeModal">
-                        <i class="fas fa-fw fa-times"></i> {{ $t('global.cancel') }}
-                    </button>
-                </div>
-            </div>
-        </modal> -->
     </div>
 </template>
 
 <script>
-    // import CreateAttribute from './CreateAttribute.vue';
-    // import EditEntityTypeModal from './modals/EditEntityType.vue';
     import {
         computed,
         reactive,
@@ -173,6 +148,7 @@
                     }
                     return data;
                 }),
+                showHiddenAttributes: false,
                 entityTypes: computed(_ => Object.values(store.getters.entityTypes)),
                 selectedEntityType: computed(_ => currentRoute.params.id),
                 selectedEntityTypeAttributeIds: computed(_ => state.selectedEntityType ? getEntityTypeAttributes(state.selectedEntityType).map(a => a.id) : []),

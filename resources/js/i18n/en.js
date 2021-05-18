@@ -436,6 +436,7 @@ const en = {
             attribute: {
                 title: 'Available Attributes',
                 'add-button': 'Add Attribute',
+                show_hidden: 'Show hidden',
                 modal: {
                     new: {
                         title: 'New Attribute'

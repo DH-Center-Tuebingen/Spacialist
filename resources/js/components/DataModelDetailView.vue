@@ -76,111 +76,19 @@
                     :disable-drag="false"
                     :selections="{}"
                     :show-info="true"
-                    @add="addAttributeToEntityType"
-                    @edit="onEditEntityAttribute"
-                    @remove="onRemoveAttributeFromEntityType"
-                    @reorder="reorderEntityAttribute">
+                    @add-element="addAttributeToEntityType"
+                    @edit-element="onEditEntityAttribute"
+                    @remove-element="onRemoveAttributeFromEntityType"
+                    @reorder-list="reorderEntityAttribute">
                 </attribute-list>
             </div>
         </div>
-
-        <!-- <modal name="edit-entity-attribute-modal" height="auto" :scrollable="true">
-            <div class="modal-content" v-if="openedModal == 'edit-entity-attribute-modal'">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ t('global.edit-name.title', {name: translateConcept(modalSelectedAttribute.thesaurus_url)}) }}</h5>
-                    <button type="button" class="btn-close" aria-label="Close" @click="hideEditEntityAttributeModal">
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="editEntityAttributeForm" name="editEntityAttributeForm" role="form" v-on:submit.prevent="editEntityAttribute(modalSelectedAttribute, selectedDependency)">
-                        <div class="form-group row">
-                            <label class="col-form-label col-md-3">
-                                {{ t('global.label') }}:
-                            </label>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control-plaintext" :value="translateConcept(modalSelectedAttribute.thesaurus_url)" readonly />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-form-label col-md-3">
-                                {{ t('global.type') }}:
-                            </label>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control-plaintext" :value="t(`global.attributes.${modalSelectedAttribute.datatype}`)" readonly />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-form-label col-md-3">
-                                {{ t('global.depends-on') }}:
-                            </label>
-                            <div class="col-md-9">
-                                <multiselect
-                                    class="mb-2"
-                                    label="thesaurus_url"
-                                    track-by="id"
-                                    v-model="selectedDependency.attribute"
-                                    :allowEmpty="true"
-                                    :closeOnSelect="true"
-                                    :customLabel="translateLabel"
-                                    :hideSelected="false"
-                                    :multiple="false"
-                                    :options="depends.attributes"
-                                    :placeholder="t('global.select.placeholder')"
-                                    @input="dependencyAttributeSelected">
-                                </multiselect>
-                                <multiselect
-                                    class="mb-2"
-                                    label="id"
-                                    track-by="id"
-                                    v-if="selectedDependency.attribute && selectedDependency.attribute.id"
-                                    v-model="selectedDependency.operator"
-                                    :allowEmpty="true"
-                                    :closeOnSelect="true"
-                                    :hideSelected="false"
-                                    :multiple="false"
-                                    :options="dependencyOperators"
-                                    :placeholder="t('global.select.placeholder')">
-                                </multiselect>
-                                <div v-if="selectedDependency.attribute && selectedDependency.attribute.id">
-                                    <input type="checkbox" class="form-check-input" v-if="dependencyType == 'boolean'" v-model="selectedDependency.value" />
-                                    <input type="number" class="form-control" step="1" v-else-if="dependencyType == 'integer'" v-model="selectedDependency.value" />
-                                    <input type="number" class="form-control" step="0.01" v-else-if="dependencyType == 'double'" v-model="selectedDependency.value" />
-                                    <multiselect
-                                        label="concept_url"
-                                        track-by="id"
-                                        v-else-if="dependencyType == 'select'"
-                                        v-model="selectedDependency.value"
-                                        :allowEmpty="true"
-                                        :closeOnSelect="true"
-                                        :customLabel="translateLabel"
-                                        :hideSelected="false"
-                                        :multiple="false"
-                                        :options="depends.values"
-                                        :placeholder="t('global.select.placeholder')">
-                                    </multiselect>
-                                    <input type="text" class="form-control" v-else v-model="selectedDependency.value" />
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" form="editEntityAttributeForm" class="btn btn-success" :disabled="editEntityAttributeDisabled">
-                        <i class="fas fa-fw fa-save"></i> {{ t('global.update') }}
-                    </button>
-                    <button type="button" class="btn btn-secondary" @click="hideEditEntityAttributeModal">
-                        <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
-                    </button>
-                </div>
-            </div>
-        </modal> -->
     </div>
 </template>
 
 <script>
     import {
         computed,
-        onMounted,
         reactive,
     } from 'vue';
 
@@ -189,6 +97,8 @@
     } from 'vue-router';
 
     import { useI18n } from 'vue-i18n';
+
+    import store from '../bootstrap/store.js';
 
     import { useToast } from '../plugins/toast.js';
 
@@ -205,20 +115,15 @@
         addEntityTypeAttribute,
         updateEntityTypeRelation,
         getAttributeOccurrenceCount,
+        removeEntityTypeAttribute,
     } from '../api.js';
 
     import {
+      showEditAttribute,
         showRemoveAttribute,
     } from '../helpers/modal.js';
 
     export default {
-        // beforeRouteEnter(to, from, next) {
-        //     next(vm => vm.init(to.params.id));
-        // },
-        // beforeRouteUpdate(to, from, next) {
-        //     this.init(to.params.id);
-        //     next();
-        // },
         setup(props, context) {
             const { t } = useI18n();
             const currentRoute = useRoute();
@@ -251,15 +156,26 @@
             const addAttributeToEntityType = e => {
                 addEntityTypeAttribute(currentRoute.params.id, e.element.id, e.to);
             };
-            const onEditEntityAttribute = _ => {
-
+            const onEditEntityAttribute = e => {
+                showEditAttribute(e.element.id, currentRoute.params.id);
             };
             const onRemoveAttributeFromEntityType = e => {
-                getAttributeOccurrenceCount(e.element.id, currentRoute.params.id).then(cnt => {
-                    showRemoveAttribute(currentRoute.params.id, e.element.id, {
-                        count: cnt,
+                const etid = currentRoute.params.id;
+                const aid = e.element.id;
+                if(e.modal) {
+                    getAttributeOccurrenceCount(aid, etid).then(cnt => {
+                        showRemoveAttribute(etid, aid, {
+                            count: cnt,
+                        });
                     });
-                });
+                } else {
+                    removeEntityTypeAttribute(etid, aid).then(_ => {
+                        store.dispatch('removeEntityTypeAttribute', {
+                            entity_type_id: etid,
+                            attribute_id: aid,
+                        });
+                    });
+                }
             };
             const reorderEntityAttribute = e => {
                 reorderEntityAttributes(currentRoute.params.id, e.element.id, e.from, e.to);
@@ -386,32 +302,6 @@
             }
         },
         // methods: {
-        //     init(id) {
-        //         this.initFinished = false;
-        //         this.entityAttributes = [];
-        //         this.entityType = this.$getEntityTypes()[id];
-        //         $httpQueue.add(() => $http.get(`/editor/entity_type/${id}/attribute`)
-        //             .then(response => {
-        //                 let data = response.data;
-        //                 // if result is empty, php returns [] instead of {}
-        //                 if(data.selections instanceof Array) {
-        //                     data.selections = {};
-        //                 }
-        //                 this.entitySelections = data.selections;
-        //                 this.entityDependencies = data.dependencies;
-        //                 for(let i=0; i<data.attributes.length; i++) {
-        //                     this.entityAttributes.push(data.attributes[i]);
-        //                     // Set values for all entity attributes to '', so values in <attributes> are existant
-        //                     Vue.set(this.entityValues, data.attributes[i].id, '');
-        //                 }
-        //                 for(let i=0; i<this.attributes.length; i++) {
-        //                     let id = this.attributes[i].id;
-        //                     let index = this.entityAttributes.findIndex(a => a.id == id);
-        //                     this.attributes[i].isDisabled = index > -1;
-        //                 }
-        //                 this.initFinished = true;
-        //             }));
-        //     },
         //     editEntityAttribute(attribute, options) {
         //         const vm = this;
         //         if(vm.editEntityAttributeDisabled) return;
@@ -447,13 +337,6 @@
         //         }
         //         this.openedModal = 'edit-entity-attribute-modal';
         //         this.$modal.show('edit-entity-attribute-modal');
-        //     },
-        //     hideEditEntityAttributeModal() {
-        //         this.$modal.hide('edit-entity-attribute-modal');
-        //         this.openedModal = '';
-        //         this.selectedDependency.attribute = {};
-        //         this.selectedDependency.operator = undefined;
-        //         this.selectedDependency.value = undefined;
         //     },
         //     dependencyAttributeSelected(attribute) {
         //         const vm = this;
@@ -516,15 +399,6 @@
         //                     break;
         //             }
         //         }
-        //     },
-        //     setAttributeValueCount(cnt) {
-        //         this.attributeValueCount = cnt;
-        //     },
-        //     setModalSelectedAttribute(attribute) {
-        //         this.modalSelectedAttribute = Object.assign({}, attribute);
-        //     },
-        //     setModalSelectedEntityType(entityType) {
-        //         this.modalSelectedEntityType = Object.assign({}, entityType);
         //     },
         // },
     }

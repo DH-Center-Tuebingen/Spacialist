@@ -358,7 +358,7 @@ export async function addAttribute(attribute) {
 export async function addEntityTypeAttribute(etid, aid, to) {
     const attrs = storedEntityTypeAttributes(etid);
     // Already added
-    if(attrs[to].id == aid) {
+    if(attrs.length < to && attrs[to].id == aid) {
         return;
     }
     

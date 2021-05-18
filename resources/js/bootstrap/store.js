@@ -157,6 +157,20 @@ export const store = createStore({
                 }
             }
         },
+        deleteAttribute(state, data) {
+            const idx = state.attributes.findIndex(a => a.id == data.id);
+            if(idx > -1) {
+                state.attributes.splice(idx, 1);
+            }
+            // Also remove from entity type attribute lists
+            for(let k in state.entityTypeAttributes) {
+                const curr = state.entityTypeAttributes[k];
+                const etIdx = curr.findIndex(a => a.id == data.id);
+                if(etIdx > -1) {
+                    curr.splice(etIdx, 1);
+                }
+            }
+        },
         reorderAttributes(state, data) {
             const {
                 rank,
@@ -485,6 +499,9 @@ export const store = createStore({
         },
         removeEntityTypeAttribute({commit}, data) {
             commit('removeEntityTypeAttribute', data);
+        },
+        deleteAttribute({commit}, data) {
+            commit('deleteAttribute', data);
         },
         reorderAttributes({commit}, data) {
             commit('reorderAttributes', data);
