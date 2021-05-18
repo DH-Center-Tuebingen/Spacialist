@@ -11,6 +11,7 @@ import {
     addAttribute,
     deleteAttribute,
     deleteEntity,
+    removeEntityTypeAttribute,
 } from '../api.js';
 
 import {
@@ -34,6 +35,7 @@ import AddEntity from '../components/modals/entity/Add.vue';
 import DeleteEntity from '../components/modals/entity/Delete.vue';
 import AddEntityType from '../components/modals/entitytype/Add.vue';
 import DeleteEntityType from '../components/modals/entitytype/Delete.vue';
+import RemoveAttribute from '../components/modals/entitytype/RemoveAttribute.vue';
 import AddAttribute from '../components/modals/attribute/Add.vue';
 import DeleteAttribute from '../components/modals/attribute/Delete.vue';
 
@@ -387,6 +389,35 @@ export function showDeleteEntityType(entityType, metadata, onDeleted) {
                         onDeleted();
                     }
                     store.dispatch('deleteEntityType', entityType);
+                    store.getters.vfm.hide(uid);
+                });
+            }
+        }
+    });
+}
+
+export function showRemoveAttribute(etid, aid, metadata, onDeleted) {
+    const uid = `RemoveAttribute-${getTs()}`;
+    store.getters.vfm.show({
+        component: RemoveAttribute,
+        bind: {
+            name: uid,
+            attributeId: aid,
+            metadata: metadata,
+        },
+        on: {
+            closing(e) {
+                store.getters.vfm.hide(uid);
+            },
+            confirm(e) {
+                removeEntityTypeAttribute(etid, aid).then(_ => {
+                    if(!!onDeleted) {
+                        onDeleted();
+                    }
+                    store.dispatch('removeEntityTypeAttribute', {
+                        entity_type_id: etid,
+                        attribute_id: aid,
+                    });
                     store.getters.vfm.hide(uid);
                 });
             }

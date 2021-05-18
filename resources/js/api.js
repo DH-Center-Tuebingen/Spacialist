@@ -356,7 +356,6 @@ export async function addAttribute(attribute) {
 };
 
 export async function addEntityTypeAttribute(etid, aid, to) {
-    console.log("inaosdinia", etid, aid, to);
     const attrs = storedEntityTypeAttributes(etid);
     // Already added
     if(attrs[to].id == aid) {
@@ -371,7 +370,21 @@ export async function addEntityTypeAttribute(etid, aid, to) {
 
     return $httpQueue.add(
         () => http.post(`/editor/dm/entity_type/${etid}/attribute`, data).then(response => {
-            store.dispatch('addEntityAttribute', response.data);
+            const relation = response.data.attribute;
+            delete response.data.attribute;
+
+            store.dispatch('addEntityTypeAttribute', {
+                ...response.data,
+                id: relation.id,
+                entity_attribute_id: response.data.id,
+                datatype: relation.datatype,
+                thesaurus_url: relation.thesaurus_url,
+                thesaurus_root_url: relation.thesaurus_root_url,
+                text: relation.text,
+                parent_id: relation.parent_id,
+                root_attribute_id: relation.root_attribute_id,
+                recursive: relation.recursive,
+            });
         })
     );
 };
@@ -517,6 +530,12 @@ export async function deleteEntity(eid) {
 export async function deleteEntityType(etid) {
     return $httpQueue.add(
         () => http.delete(`editor/dm/entity_type/${etid}`).then(response => response.data)
+    );
+};
+
+export async function removeEntityTypeAttribute(etid, aid) {
+    return $httpQueue.add(
+        () => http.delete(`/editor/dm/entity_type/${etid}/attribute/${aid}`).then(response => response.data)
     );
 };
 

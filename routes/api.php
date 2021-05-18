@@ -77,7 +77,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::post('/dm/entity_type', 'EditorController@addEntityType');
     Route::post('/dm/{id}/relation', 'EditorController@setRelationInfo')->where('id', '[0-9]+');
     Route::post('/dm/attribute', 'EditorController@addAttribute');
-    Route::post('/dm/entity_type/{ctid}/attribute', 'EditorController@addAttributeToEntityType')->where('ctid', '[0-9]+');
+    Route::post('/dm/entity_type/{etid}/attribute', 'EditorController@addAttributeToEntityType')->where('etid', '[0-9]+');
     Route::post('/dm/entity_type/{ctid}/duplicate', 'EditorController@duplicateEntityType')->where('ctid', '[0-9]+');
 
     Route::patch('/dm/entity_type/{ctid}/label', 'EditorController@patchLabel')->where('ctid', '[0-9]+');
@@ -86,7 +86,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 
     Route::delete('/dm/entity_type/{id}', 'EditorController@deleteEntityType')->where('id', '[0-9]+');
     Route::delete('/dm/attribute/{id}', 'EditorController@deleteAttribute')->where('id', '[0-9]+');
-    Route::delete('/dm/entity_type/{ctid}/attribute/{aid}', 'EditorController@removeAttributeFromEntityType')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
+    Route::delete('/dm/entity_type/{etid}/attribute/{aid}', 'EditorController@removeAttributeFromEntityType')->where('etid', '[0-9]+')->where('aid', '[0-9]+');
 });
 
 // USER

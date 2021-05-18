@@ -416,7 +416,7 @@ class EditorController extends Controller {
         return response()->json($attr, 201);
     }
 
-    public function addAttributeToEntityType(Request $request, $ctid) {
+    public function addAttributeToEntityType(Request $request, $etid) {
         $user = auth()->user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response()->json([
@@ -431,10 +431,10 @@ class EditorController extends Controller {
         $aid = $request->get('attribute_id');
         $pos = $request->get('position');
         if(!isset($pos)) {
-            $attrsCnt = EntityAttribute::where('entity_type_id', '=', $ctid)->count();
+            $attrsCnt = EntityAttribute::where('entity_type_id', '=', $etid)->count();
             $pos = $attrsCnt + 1; // add new attribute to the end
         } else {
-            $successors = EntityAttribute::where('entity_type_id', $ctid)
+            $successors = EntityAttribute::where('entity_type_id', $etid)
                 ->where('position', '>=', $pos)
                 ->get();
             foreach($successors as $s) {
@@ -442,34 +442,29 @@ class EditorController extends Controller {
                 $s->save();
             }
         }
-        $ca = new EntityAttribute();
-        $ca->entity_type_id = $ctid;
-        $ca->attribute_id = $aid;
-        $ca->position = $pos;
-        $ca->save();
-        $ca = EntityAttribute::find($ca->id);
+        $entityAttr = new EntityAttribute();
+        $entityAttr->entity_type_id = $etid;
+        $entityAttr->attribute_id = $aid;
+        $entityAttr->position = $pos;
+        $entityAttr->save();
+        $entityAttr = EntityAttribute::find($entityAttr->id);
 
-        $a = Attribute::find($aid);
+        $attr = Attribute::find($aid);
 
         // If new attribute is serial, add attribute to all existing entities
-        if($a->datatype == 'serial') {
-            $entites = Entity::where('entity_type_id', $ctid)
+        if($attr->datatype == 'serial') {
+            $entites = Entity::where('entity_type_id', $etid)
                 ->orderBy('created_at', 'asc')
                 ->get();
             $ctr = 1;
             foreach($entites as $e) {
-                Entity::addSerial($e->id, $aid, $a->text, $ctr, $user->id);
+                Entity::addSerial($e->id, $aid, $attr->text, $ctr, $user->id);
                 $ctr++;
             }
         }
 
-        $ca->load('attribute');
-        return response()->json($ca, 201);
-        // return response()->json(DB::table('entity_types as c')
-        //         ->where('ca.id', $ca->id)
-        //         ->join('entity_attributes as ca', 'c.id', '=', 'ca.entity_type_id')
-        //         ->join('attributes as a', 'ca.attribute_id', '=', 'a.id')
-        //         ->first(), 201);
+        $entityAttr->load('attribute');
+        return response()->json($entityAttr, 201);
     }
 
     public function duplicateEntityType(Request $request, $ctid) {
@@ -704,7 +699,7 @@ class EditorController extends Controller {
         return response()->json(null, 204);
     }
 
-    public function removeAttributeFromEntityType($ctid, $aid) {
+    public function removeAttributeFromEntityType($etid, $aid) {
         $user = auth()->user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response()->json([
@@ -713,7 +708,7 @@ class EditorController extends Controller {
         }
         $ca = EntityAttribute::where([
             ['attribute_id', '=', $aid],
-            ['entity_type_id', '=', $ctid]
+            ['entity_type_id', '=', $etid]
         ])->first();
 
         if($ca === null){
@@ -727,14 +722,14 @@ class EditorController extends Controller {
 
         $successors = EntityAttribute::where([
                 ['position', '>', $pos],
-                ['entity_type_id', '=', $ctid]
+                ['entity_type_id', '=', $etid]
             ])->get();
         foreach($successors as $s) {
             $s->position--;
             $s->save();
         }
 
-        $entityIds = Entity::where('entity_type_id', $ctid)
+        $entityIds = Entity::where('entity_type_id', $etid)
             ->pluck('id')
             ->toArray();
         AttributeValue::where('attribute_id', $aid)

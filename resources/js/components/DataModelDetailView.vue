@@ -173,38 +173,6 @@
                     </button>
                 </div>
             </div>
-        </modal>
-
-        <modal name="remove-attribute-from-ct-modal" height="auto" :scrollable="true">
-            <div class="modal-content" v-if="openedModal == 'remove-attribute-from-ct-modal'">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ t('global.remove-name.title', {name: translateConcept(modalSelectedAttribute.thesaurus_url)}) }}</h5>
-                    <button type="button" class="btn-close" aria-label="Close" @click="hideRemoveAttributeModal">
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p class="alert alert-info">
-                        {{ t('global.remove-name.desc', {name: translateConcept(modalSelectedAttribute.thesaurus_url)}) }}
-                    </p>
-                    <p class="alert alert-danger">
-                        {{
-                            t('main.datamodel.detail.attribute.alert', {
-                                name: translateConcept(modalSelectedAttribute.thesaurus_url),
-                                cnt: attributeValueCount,
-                                refname: translateConcept(modalSelectedEntityType.thesaurus_url)
-                            }, attributeValueCount)
-                        }}
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" @click="removeAttributeFromEntityType(modalSelectedAttribute)">
-                        <i class="fas fa-fw fa-check"></i> {{ t('global.delete') }}
-                    </button>
-                    <button type="button" class="btn btn-secondary" @click="hideRemoveAttributeModal">
-                        <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
-                    </button>
-                </div>
-            </div>
         </modal> -->
     </div>
 </template>
@@ -222,6 +190,8 @@
 
     import { useI18n } from 'vue-i18n';
 
+    import { useToast } from '../plugins/toast.js';
+
     import {
         defaultAttributeValue,
         getEntityType,
@@ -234,7 +204,12 @@
         reorderEntityAttributes,
         addEntityTypeAttribute,
         updateEntityTypeRelation,
+        getAttributeOccurrenceCount,
     } from '../api.js';
+
+    import {
+        showRemoveAttribute,
+    } from '../helpers/modal.js';
 
     export default {
         // beforeRouteEnter(to, from, next) {
@@ -247,21 +222,24 @@
         setup(props, context) {
             const { t } = useI18n();
             const currentRoute = useRoute();
+            const toast = useToast();
             // FETCH
 
             // FUNCTIONS
             const updateEntityType = _ => {
                 if(!state.entityType.id) return;
-                updateEntityTypeRelation(state.entityType).then(data => {
-                    // const name = translateConcept(state.entityType.thesaurus_url);
-                    // this.$showToast(
-                    //     this.$t('main.datamodel.toasts.updated-type.title'),
-                    //     this.$t('main.datamodel.toasts.updated-type.msg', {
-                    //         name: name
-                    //     }),
-                    //     'success'
-                    // );
-                })
+                updateEntityTypeRelation(state.entityType).then(_ => {
+                    const name = translateConcept(state.entityType.thesaurus_url);
+                    toast.$toast(
+                        t('main.datamodel.toasts.updated-type.msg', {
+                            name: name
+                        }),
+                        t('main.datamodel.toasts.updated-type.title'),
+                        {
+                            channel: 'success',
+                        }
+                    );
+                });
             };
             const addAllEntityTypes = _ => {
                 state.entityType.sub_entity_types = [];
@@ -276,8 +254,12 @@
             const onEditEntityAttribute = _ => {
 
             };
-            const onRemoveAttributeFromEntityType = _ => {
-
+            const onRemoveAttributeFromEntityType = e => {
+                getAttributeOccurrenceCount(e.element.id, currentRoute.params.id).then(cnt => {
+                    showRemoveAttribute(currentRoute.params.id, e.element.id, {
+                        count: cnt,
+                    });
+                });
             };
             const reorderEntityAttribute = e => {
                 reorderEntityAttributes(currentRoute.params.id, e.element.id, e.from, e.to);
@@ -430,24 +412,6 @@
         //                 this.initFinished = true;
         //             }));
         //     },
-        //     updateEntityType() {
-        //         if(!this.entityType.id) return;
-        //         const id = this.entityType.id;
-        //         const data = {
-        //             'is_root': this.entityType.is_root || false,
-        //             'sub_entity_types': this.entityType.sub_entity_types.map(t => t.id)
-        //         };
-        //         $httpQueue.add(() => $http.post(`/editor/dm/${id}/relation`, data).then(response => {
-        //             const name = this.$translateConcept(this.entityType.thesaurus_url);
-        //             this.$showToast(
-        //                 this.$t('main.datamodel.toasts.updated-type.title'),
-        //                 this.$t('main.datamodel.toasts.updated-type.msg', {
-        //                     name: name
-        //                 }),
-        //                 'success'
-        //             );
-        //         }));
-        //     },
         //     editEntityAttribute(attribute, options) {
         //         const vm = this;
         //         if(vm.editEntityAttributeDisabled) return;
@@ -491,24 +455,6 @@
         //         this.selectedDependency.operator = undefined;
         //         this.selectedDependency.value = undefined;
         //     },
-        //     removeAttributeFromEntityType(attribute) {
-        //         const ctid = this.entityType.id;
-        //         const aid = attribute.id;
-        //         $httpQueue.add(() => this.$http.delete('/editor/dm/entity_type/'+ctid+'/attribute/'+aid).then(response => {
-        //             const index = this.entityAttributes.findIndex(function(a) {
-        //                 return a.id == attribute.id;
-        //             });
-        //             if(index > -1) {
-        //                 // Remove element from attribute list
-        //                 this.entityAttributes.splice(index, 1);
-        //                 // Update position attribute of successors
-        //                 for(let i=index; i<this.entityAttributes.length; i++) {
-        //                     this.entityAttributes[i].position--;
-        //                 }
-        //             }
-        //             this.hideRemoveAttributeModal();
-        //         }));
-        //     },
         //     dependencyAttributeSelected(attribute) {
         //         const vm = this;
         //         if(!attribute) {
@@ -544,21 +490,6 @@
         //         }
         //     },
         //     // Modal Methods
-        //     onRemoveAttributeFromEntityType(attribute) {
-        //         const aid = attribute.id;
-        //         const ctid = this.entityType.id;
-        //         $httpQueue.add(() => $http.get(`/editor/dm/attribute/occurrence_count/${aid}/${ctid}`).then(response => {
-        //             this.setModalSelectedAttribute(attribute);
-        //             this.setModalSelectedEntityType(this.entityType);
-        //             this.setAttributeValueCount(response.data);
-        //             this.openedModal = 'remove-attribute-from-ct-modal';
-        //             this.$modal.show('remove-attribute-from-ct-modal');
-        //         }));
-        //     },
-        //     hideRemoveAttributeModal() {
-        //         this.$modal.hide('remove-attribute-from-ct-modal');
-        //         this.openedModal = '';
-        //     },
         //     setSelectedDependency(values) {
         //         if(!values) return;
         //         let aid;

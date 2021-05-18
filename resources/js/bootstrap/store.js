@@ -132,10 +132,24 @@ export const store = createStore({
                 entity.data[k].value = data.data[k];
             }
         },
-        addEntityAttribute(state, data) {
+        addEntityTypeAttribute(state, data) {
             const attrs = state.entityTypeAttributes[data.entity_type_id];
             attrs.splice(data.position-1, 0, data);
             for(let i=data.position; i<attrs.length; i++) {
+                if(attrs[i].position) {
+                    attrs[i].position++;
+                } else if(attrs[i].pivot && attrs[i].pivot.position) {
+                    attrs[i].pivot.position++;
+                }
+            }
+        },
+        removeEntityTypeAttribute(state, data) {
+            const attrs = state.entityTypeAttributes[data.entity_type_id];
+            const idx = attrs.findIndex(a => a.id == data.attribute_id);
+            if(idx > -1) {
+                attrs.splice(idx, 1);
+            }
+            for(let i=idx; i<attrs.length; i++) {
                 if(attrs[i].position) {
                     attrs[i].position++;
                 } else if(attrs[i].pivot && attrs[i].pivot.position) {
@@ -466,8 +480,11 @@ export const store = createStore({
         updateEntityData({commit}, data) {
             commit('updateEntityData', data);
         },
-        addEntityAttribute({commit}, data) {
-            commit('addEntityAttribute', data);
+        addEntityTypeAttribute({commit}, data) {
+            commit('addEntityTypeAttribute', data);
+        },
+        removeEntityTypeAttribute({commit}, data) {
+            commit('removeEntityTypeAttribute', data);
         },
         reorderAttributes({commit}, data) {
             commit('reorderAttributes', data);
