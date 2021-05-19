@@ -18,7 +18,7 @@
             <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
             </button>
         </div>
-        <div class="modal-body my-2">
+        <div class="modal-body my-2 nonscrollable">
             <h5>
                 {{ t('main.entity.references.certainty') }}
             </h5>
@@ -117,9 +117,9 @@
                             :mode="'single'"
                             :delay="0"
                             :minChars="0"
-                            :resolveOnLoad="false"
+                            :resolveOnLoad="true"
                             :filterResults="false"
-                            :options="async query => filterBibliographyList(query)"
+                            :options="async query => await filterBibliographyList(query)"
                             :searchable="true"
                             :placeholder="t('global.select.placeholder')">
                             <template v-slot:singlelabel="{ value }">
@@ -239,20 +239,24 @@
             const isMatch = (prop, exp) => {
                 return !!prop && !!prop.match(exp);
             };
-            const filterBibliographyList = query => {
-                const exp = new RegExp(query, 'i');
-                return new Promise(r => r(
-                    state.bibliography.filter(entry => {
-                        return (
-                            isMatch(entry.title, exp) ||
-                            isMatch(entry.booktitle, exp) ||
-                            isMatch(entry.author, exp) ||
-                            isMatch(entry.year, exp) ||
-                            isMatch(entry.citekey, exp) ||
-                            isMatch(entry.journal, exp)
-                        );
-                    })
-                ))
+            const filterBibliographyList = async query => {
+                if(!query) {
+                    return await new Promise(r => r(state.bibliography));
+                } else {
+                    const exp = new RegExp(query, 'i');
+                    return await new Promise(r => r(
+                        state.bibliography.filter(entry => {
+                            return (
+                                isMatch(entry.title, exp) ||
+                                isMatch(entry.booktitle, exp) ||
+                                isMatch(entry.author, exp) ||
+                                isMatch(entry.year, exp) ||
+                                isMatch(entry.citekey, exp) ||
+                                isMatch(entry.journal, exp)
+                            );
+                        })
+                    ));
+                }
             };
             const resetNewItem = _ => {
                 state.newItem.bibliography = {};
