@@ -52,8 +52,8 @@
         </div>
         <div class="modal-footer">
             <button type="submit" class="btn btn-outline-success" form="newEntityForm" :disabled="state.dataMissing">
-                    <i class="fas fa-fw fa-plus"></i> {{ t('global.add') }}
-                </button>
+                <i class="fas fa-fw fa-plus"></i> {{ t('global.add') }}
+            </button>
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
                 <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
             </button>

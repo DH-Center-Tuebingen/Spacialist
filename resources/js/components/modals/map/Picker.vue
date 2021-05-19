@@ -109,7 +109,6 @@
                 state.show = true;
                 state.layersFetched = false;
                 getLayers().then(layers => {
-                    console.log("layers: ", layers);
                     state.layers = layers;
                     state.layersFetched = true;
                 });

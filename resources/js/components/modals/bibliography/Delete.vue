@@ -30,7 +30,7 @@
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-outline-danger" @click="confirmDelete()">
-                        <i class="fas fa-fw fa-trash"></i> {{ t('global.delete') }}
+            <i class="fas fa-fw fa-trash"></i> {{ t('global.delete') }}
         </button>
         <button type="button" class="btn btn-outline-secondary" @click="closeModal()">
             <i class="fas fa-fw fa-ban"></i> {{ t('global.cancel') }}
