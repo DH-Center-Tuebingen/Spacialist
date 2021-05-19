@@ -39,6 +39,7 @@ import EditEntityType from '../components/modals/entitytype/Edit.vue';
 import DeleteEntityType from '../components/modals/entitytype/Delete.vue';
 import RemoveAttribute from '../components/modals/entitytype/RemoveAttribute.vue';
 import AddAttribute from '../components/modals/attribute/Add.vue';
+import EditAttribute from '../components/modals/attribute/Edit.vue';
 import DeleteAttribute from '../components/modals/attribute/Delete.vue';
 
 export function showAbout() {
@@ -414,6 +415,25 @@ export function showDeleteEntityType(entityType, metadata, onDeleted) {
                     store.dispatch('deleteEntityType', entityType);
                     store.getters.vfm.hide(uid);
                 });
+            }
+        }
+    });
+}
+
+export function showEditAttribute(aid, etid) {
+    const uid = `EditAttribute-${getTs()}`;
+    store.getters.vfm.show({
+        component: EditAttribute,
+        bind: {
+            name: uid,
+            attributeId: aid,
+        },
+        on: {
+            closing(e) {
+                store.getters.vfm.hide(uid);
+            },
+            confirm(e) {
+                console.log("roger roger", e);
             }
         }
     });
