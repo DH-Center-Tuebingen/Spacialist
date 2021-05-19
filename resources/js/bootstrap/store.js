@@ -107,6 +107,11 @@ export const store = createStore({
                 entity.name = data.name;
             }
         },
+        updateEntityType(state, data) {
+            const entityType = state.entityTypes[data.id];
+            entityType.updated_at = data.updated_at;
+            entityType.thesaurus_url = data.thesaurus_url;
+        },
         deleteEntity(state, data) {
             const entity = state.entities[data.id];
             if(entity.root_entity_id) {
@@ -487,6 +492,9 @@ export const store = createStore({
         },
         updateEntity({commit}, data) {
             commit('updateEntity', data);
+        },
+        updateEntityType({commit}, data) {
+            commit('updateEntityType', data);
         },
         deleteEntity({commit}, data) {
             commit('deleteEntity', data);

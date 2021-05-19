@@ -56,7 +56,6 @@
                 default: -1,
             }
         },
-        emits: ['edit', 'select'],
         setup(props, context) {
             const { t } = useI18n();
             const {
@@ -78,29 +77,29 @@
                 return ['badge', 'rounded-pill', 'bg-light'];
             };
             const selectEntry = entityType => {
-                context.emit('select', {type: entityType});
+                context.emit('select-element', {type: entityType});
             };
             const onEdit = entityType => {
-                context.emit('edit', {type: entityType});
+                context.emit('edit-element', {type: entityType});
             }
             const onDuplicate = entityType => {
-                context.emit('duplicate', {id: entityType.id});
+                context.emit('duplicate-element', {id: entityType.id});
             }
             const onDelete = entityType => {
-                context.emit('delete', {type: entityType});
+                context.emit('delete-element', {type: entityType});
             }
             const onAdd = _ => {
-                context.emit('add');
+                context.emit('add-element');
             }
 
             // DATA
             const state = reactive({
                 hoverStates: new Array(data.value.length).fill(false),
                 entries: computed(_ => data.value.slice()),
-                hasAddListener: !!context.attrs.onAdd,
-                hasDeleteListener: !!context.attrs.onDelete,
-                hasDuplicateListener: !!context.attrs.onDuplicate,
-                hasEditListener: !!context.attrs.onEdit,
+                hasAddListener: !!context.attrs.onAddElement,
+                hasDeleteListener: !!context.attrs.onDeleteElement,
+                hasDuplicateListener: !!context.attrs.onDuplicateElement,
+                hasEditListener: !!context.attrs.onEditElement,
                 hasOnHoverListener: computed(_ => state.hasDeleteListener || state.hasDuplicateListener || state.hasEditListener),
             });
 
@@ -129,11 +128,5 @@
                 state,
             }
         },
-        // beforeMount() {
-        //     // Enable popovers
-        //     $(function () {
-        //         $('[data-bs-toggle="popover"]').popover()
-        //     });
-        // },
     }
 </script>

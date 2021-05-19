@@ -438,6 +438,29 @@ export async function patchAttributes(entityId, data) {
     );
 };
 
+export async function patchEntityType(etid, updatedProps) {
+    // If no props updated, do nothing
+    if(Object.keys(updatedProps).length < 1) {
+        return;
+    }
+
+    // Currently only thesaurus_url is allowed to be changed
+    const data = {
+        data: only(updatedProps, ['thesaurus_url'])
+    };
+
+    return $httpQueue.add(
+        () => http.patch(`/editor/dm/entity_type/${etid}`, data).then(response => {
+            store.dispatch('updateEntityType', {
+                ...data.data,
+                id: etid,
+                updated_at: response.data.updated_at,
+            });
+            return response.data;
+        })
+    );
+};
+
 export async function reorderEntityAttributes(etid, aid, from, to) {
     if(from == to) {
         return;
@@ -462,6 +485,7 @@ export async function reorderEntityAttributes(etid, aid, from, to) {
                 entity_type_id: etid,
                 attribute_id: aid,
             });
+            return response.data;
         })
     );
 };

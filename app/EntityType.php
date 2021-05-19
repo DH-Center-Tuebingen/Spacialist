@@ -20,6 +20,10 @@ class EntityType extends Model
         'is_root',
     ];
 
+    const patchRules = [
+        'thesaurus_url' => 'string',
+    ];
+
     protected static $logOnlyDirty = true;
     protected static $logFillable = true;
     protected static $logAttributes = ['id'];

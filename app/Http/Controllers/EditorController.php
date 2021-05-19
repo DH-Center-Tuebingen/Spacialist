@@ -13,6 +13,7 @@ use App\EntityType;
 use App\EntityTypeRelation;
 use App\Geodata;
 use App\ThConcept;
+use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -523,7 +524,7 @@ class EditorController extends Controller {
 
     // PATCH
 
-    public function patchLabel(Request $request, $ctid) {
+    public function patchEntityType(Request $request, $etid) {
         $user = auth()->user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response()->json([
@@ -531,20 +532,28 @@ class EditorController extends Controller {
             ], 403);
         }
         $this->validate($request, [
-            'label' => 'required|string|exists:th_concept,concept_url'
+            'data' => 'required|array'
         ]);
 
         try {
-            $entityType = EntityType::findOrFail($ctid);
+            $entityType = EntityType::findOrFail($etid);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity-type does not exist')
             ], 400);
         }
-        $entityType->thesaurus_url = $request->get('label');
+        $data = Arr::only($request->get('data'), array_keys(EntityType::patchRules));
+        if(count($data) < 1) {
+            return response()->json([
+                'error' => __('The given data is invalid')
+            ], 400);
+        }
+        foreach($data as $key => $prop) {
+            $entityType->{$key} = $prop;
+        }
         $entityType->save();
 
-        return response()->json(null, 204);
+        return response()->json($entityType, 200);
     }
 
     public function reorderAttribute(Request $request, $ctid, $aid) {

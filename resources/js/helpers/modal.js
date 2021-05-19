@@ -12,6 +12,7 @@ import {
     deleteAttribute,
     deleteEntity,
     removeEntityTypeAttribute,
+    patchEntityType,
 } from '../api.js';
 
 import {
@@ -34,6 +35,7 @@ import DeleteBibliographyItem from '../components/modals/bibliography/Delete.vue
 import AddEntity from '../components/modals/entity/Add.vue';
 import DeleteEntity from '../components/modals/entity/Delete.vue';
 import AddEntityType from '../components/modals/entitytype/Add.vue';
+import EditEntityType from '../components/modals/entitytype/Edit.vue';
 import DeleteEntityType from '../components/modals/entitytype/Delete.vue';
 import RemoveAttribute from '../components/modals/entitytype/RemoveAttribute.vue';
 import AddAttribute from '../components/modals/attribute/Add.vue';
@@ -363,6 +365,27 @@ export function showAddEntityType(onAdded) {
                         onAdded();
                     }
                     store.dispatch('addEntityType', data);
+                    store.getters.vfm.hide(uid);
+                });
+            }
+        }
+    });
+}
+
+export function showEditEntityType(entityType) {
+    const uid = `EditEntityType-${getTs()}`;
+    store.getters.vfm.show({
+        component: EditEntityType,
+        bind: {
+            name: uid,
+            entityType: entityType,
+        },
+        on: {
+            closing(e) {
+                store.getters.vfm.hide(uid);
+            },
+            confirm(editedProps) {
+                patchEntityType(entityType.id, editedProps).then(_ => {
                     store.getters.vfm.hide(uid);
                 });
             }

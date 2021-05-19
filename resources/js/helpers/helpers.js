@@ -91,6 +91,13 @@ export function getTs() {
     return d.getTime();
 }
 
+export function getConcept(url) {
+    if(!url || !hasConcept(url)) {
+        return {};
+    }
+    return store.getters.concepts[url];
+}
+
 export function hasConcept(url) {
     if(!url) return false;
     return !!store.getters.concepts[url];
