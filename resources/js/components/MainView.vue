@@ -236,52 +236,6 @@
         // },
         // mounted() {},
         // methods: {
-        //     getNewEntity(id) {
-        //         return $httpQueue.add(() => $http.get(`/entity/${id}`).then(response => {
-        //             this.selectedEntity = response.data;
-        //             return $http.get(`/entity/${id}/reference`);
-        //         }).then(response => {
-        //             Vue.set(this.selectedEntity, 'references', response.data);
-        //         }));
-        //     },
-        //     resetEntity() {
-        //         this.selectedEntity = {};
-        //     },
-        //     init(bibliography, openTab, entityData, entityReferences) {
-        //         this.initFinished = false;
-        //         this.bibliography = bibliography;
-        //         if(entityData) {
-        //             this.selectedEntity = entityData;
-        //         }
-        //         if(entityReferences) {
-        //             if(Array.isArray(entityReferences) && !entityReferences.length) {
-        //                 entityReferences = {};
-        //             }
-        //             Vue.set(this.selectedEntity, 'references', entityReferences);
-        //         } else {
-        //             Vue.set(this.selectedEntity, 'references', {});
-        //         }
-        //         if(openTab) {
-        //             this.setTabOrPlugin(openTab);
-        //         }
-        //         EventBus.$on('entity-update', this.handleEntityUpdate);
-        //         EventBus.$on('references-updated', this.handleReferenceUpdate);
-        //         this.initFinished = true;
-        //         return new Promise(r => r(null));
-        //     },
-        //     setDetailDirty(event) {
-        //         this.discardState.dirty = event.isDirty;
-        //         this.discardState.callback = event.onDiscard;
-        //     },
-        //     setReferencesTab() {
-        //         if(!this.selectedEntity.id) return;
-        //         this.$router.push({
-        //             append: true,
-        //             query: {
-        //                 tab: 'references'
-        //             }
-        //         });
-        //     },
         //     setTabOrPlugin(key) {
         //         if(key == 'references') {
         //             this.setActiveTab('references');
