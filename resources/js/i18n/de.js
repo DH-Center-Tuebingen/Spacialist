@@ -82,7 +82,7 @@ const de = {
         upload: 'Hochladen',
         preview: 'Vorschau',
         no_preview: 'Keine Vorschau verfügbar',
-        note: 'Beachte',
+        note: 'Hinweis',
         tools: {
             title: 'Werkzeuge',
             bibliography: 'Literatur',
