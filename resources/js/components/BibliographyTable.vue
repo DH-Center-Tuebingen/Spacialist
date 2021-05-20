@@ -36,6 +36,7 @@
                     </li>
                     <li class="list-inline-item">
                         <file-upload
+                            class="btn btn-outline-primary clickable"
                             accept="application/x-bibtex,text/x-bibtex,text/plain"
                             extensions="bib,bibtex"
                             ref="upload"
@@ -46,7 +47,7 @@
                             :multiple="false"
                             :drop="true"
                             @input-file="inputFile">
-                                <span class="btn btn-outline-primary">
+                                <span>
                                     <i class="fas fa-fw fa-file-import"></i> {{ t('main.bibliography.import') }}
                                 </span>
                         </file-upload>
