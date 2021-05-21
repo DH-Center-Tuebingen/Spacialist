@@ -17,6 +17,7 @@ import {
 
 import {
     can,
+    getEntityTypeAttributes,
     getTs,
     handleDeletedEntity,
 } from '../helpers/helpers.js';
@@ -427,6 +428,7 @@ export function showEditAttribute(aid, etid) {
         bind: {
             name: uid,
             attributeId: aid,
+            attributeSelection: getEntityTypeAttributes(etid),
         },
         on: {
             closing(e) {

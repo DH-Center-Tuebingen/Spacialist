@@ -32,6 +32,67 @@
                     <input type="text" class="form-control" :value="t(`global.attributes.${state.attribute.datatype}`)" disabled />
                 </div>
             </div>
+            <div class="row">
+                <label class="col-form-label col-md-2">
+                    {{ t('global.depends-on') }}:
+                </label>
+                <div class="col-md-10">
+                    <multiselect
+                        :valueProp="'id'"
+                        :label="'thesaurus_url'"
+                        :track-by="'id'"
+                        :object="true"
+                        :mode="'single'"
+                        :hideSelected="true"
+                        :options="state.selection"
+                        :placeholder="t('global.select.placeholder')"
+                        v-model="state.dependency.attribute"
+                        @change="dependantSelected">
+                        <template v-slot:option="{ option }">
+                            {{ translateConcept(option.thesaurus_url) }}
+                        </template>
+                        <template v-slot:singlelabel="{ value }">
+                            <div class="px-2">
+                                {{ translateConcept(value.thesaurus_url) }}
+                            </div>
+                        </template>
+                    </multiselect>
+                    <multiselect
+                        v-if="state.attributeSelected"
+                        class="mt-2"
+                        :valueProp="'id'"
+                        :label="'label'"
+                        :track-by="'id'"
+                        :mode="'single'"
+                        :object="true"
+                        :hideSelected="true"
+                        :options="state.operatorList"
+                        :placeholder="t('global.select.placeholder')"
+                        v-model="state.dependency.operator"
+                        @change="operatorSelected">
+                    </multiselect>
+                    <div
+                        v-if="state.attributeSelected && state.operatorSelected"
+                        class="mt-2">
+                        <div class="form-check form-switch" v-if="state.inputType == 'boolean'">
+                            <input type="checkbox" class="form-check-input" id="dependency-boolean-value" v-model="state.dependency.value" />
+                        </div>
+                        <input type="number" class="form-control" :step="state.dependency.attribute.datatype == 'double' ? 0.01 : 1" v-else-if="state.inputType == 'number'" v-model="state.dependency.value" />
+                        <multiselect
+                            v-else-if="state.inputType == 'select'"
+                            :valueProp="'id'"
+                            :label="'concept_url'"
+                            :track-by="'id'"
+                            :hideSelected="true"
+                            :mode="'single'"
+                            :options="depends.values"
+                            :placeholder="t('global.select.placeholder')"
+                            v-model="state.dependency.value">
+                        </multiselect>
+                        <input type="text" class="form-control" v-else v-model="selectedDependency.value" />
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="modal-footer">
             <button type="submit" class="btn btn-outline-success" @click="confirmEdit()">
@@ -42,78 +103,6 @@
             </button>
         </div>
     </vue-final-modal>
-
-        <!-- <form id="editEntityAttributeForm" name="editEntityAttributeForm" role="form" v-on:submit.prevent="editEntityAttribute(modalSelectedAttribute, selectedDependency)">
-                        <div class="form-group row">
-                            <label class="col-form-label col-md-3">
-                                {{ t('global.label') }}:
-                            </label>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control-plaintext" :value="translateConcept(modalSelectedAttribute.thesaurus_url)" readonly />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-form-label col-md-3">
-                                {{ t('global.type') }}:
-                            </label>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control-plaintext" :value="t(`global.attributes.${modalSelectedAttribute.datatype}`)" readonly />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-form-label col-md-3">
-                                {{ t('global.depends-on') }}:
-                            </label>
-                            <div class="col-md-9">
-                                <multiselect
-                                    class="mb-2"
-                                    label="thesaurus_url"
-                                    track-by="id"
-                                    v-model="selectedDependency.attribute"
-                                    :allowEmpty="true"
-                                    :closeOnSelect="true"
-                                    :customLabel="translateLabel"
-                                    :hideSelected="false"
-                                    :multiple="false"
-                                    :options="depends.attributes"
-                                    :placeholder="t('global.select.placeholder')"
-                                    @input="dependencyAttributeSelected">
-                                </multiselect>
-                                <multiselect
-                                    class="mb-2"
-                                    label="id"
-                                    track-by="id"
-                                    v-if="selectedDependency.attribute && selectedDependency.attribute.id"
-                                    v-model="selectedDependency.operator"
-                                    :allowEmpty="true"
-                                    :closeOnSelect="true"
-                                    :hideSelected="false"
-                                    :multiple="false"
-                                    :options="dependencyOperators"
-                                    :placeholder="t('global.select.placeholder')">
-                                </multiselect>
-                                <div v-if="selectedDependency.attribute && selectedDependency.attribute.id">
-                                    <input type="checkbox" class="form-check-input" v-if="dependencyType == 'boolean'" v-model="selectedDependency.value" />
-                                    <input type="number" class="form-control" step="1" v-else-if="dependencyType == 'integer'" v-model="selectedDependency.value" />
-                                    <input type="number" class="form-control" step="0.01" v-else-if="dependencyType == 'double'" v-model="selectedDependency.value" />
-                                    <multiselect
-                                        label="concept_url"
-                                        track-by="id"
-                                        v-else-if="dependencyType == 'select'"
-                                        v-model="selectedDependency.value"
-                                        :allowEmpty="true"
-                                        :closeOnSelect="true"
-                                        :customLabel="translateLabel"
-                                        :hideSelected="false"
-                                        :multiple="false"
-                                        :options="depends.values"
-                                        :placeholder="t('global.select.placeholder')">
-                                    </multiselect>
-                                    <input type="text" class="form-control" v-else v-model="selectedDependency.value" />
-                                </div>
-                            </div>
-                        </div>
-                    </form> -->
 </template>
 
 <script>
@@ -136,12 +125,17 @@
                 required: true,
                 type: Number,
             },
+            attributeSelection: {
+                required: true,
+                type: Array,
+            },
         },
         emits: ['closing', 'confirm'],
         setup(props, context) {
             const { t } = useI18n();
             const {
                 attributeId,
+                attributeSelection,
             } = toRefs(props);
 
             // FUNCTIONS
@@ -153,11 +147,129 @@
                 state.show = false;
                 context.emit('closing', false);
             };
+            const dependantSelected = e => {
+            };
+            const operatorSelected = e => {
+            };
 
             // DATA
+            const operators = [
+                {
+                    id: 1,
+                    label: '=',
+                },
+                {
+                    id: 2,
+                    label: '!=',
+                },
+                {
+                    id: 3,
+                    label: '<',
+                },
+                {
+                    id: 4,
+                    label: '>',
+                },
+            ];
             const state = reactive({
                 show: false,
+                dependency: {
+                    attribute: null,
+                    operator: null,
+                    value: null,
+                },
+                operatorList: computed(_ => {
+                    if(!state.attributeSelected) return [];
+
+                    switch(state.dependency.attribute.datatype) {
+                        case 'string':
+                        case 'stringf':
+                        case 'string-sc':
+                        case 'string-mc':
+                        case 'geography':
+                        case 'entity':
+                        case 'iconclass':
+                        case 'epoch':
+                        case 'timeperiod':
+                        case 'dimension':
+                        case 'list':
+                        case 'table':
+                        case 'sql':
+                        case 'serial':
+                            return operators.filter(o => {
+                                switch(o.id) {
+                                    case 1:
+                                    case 2:
+                                        return true;
+                                    default:
+                                        return false;
+                                }
+                            });
+                        case 'double':
+                        case 'integer':
+                        case 'date':
+                        case 'percentage':
+                            return operators.filter(o => {
+                                switch(o.id) {
+                                    case 1:
+                                    case 2:
+                                    case 3:
+                                    case 4:
+                                        return true;
+                                    default:
+                                        return false;
+                                }
+                            });
+                        case 'boolean':
+                            return operators.filter(o => {
+                                switch(o.id) {
+                                    case 1:
+                                        return true;
+                                    default:
+                                        return false;
+                                }
+                            });
+                    }
+                }),
+                inputType: computed(_ => {
+                    if(!state.attributeSelected || !state.operatorSelected) return 'unsupported';
+
+                    switch(state.dependency.attribute.datatype) {
+                        case 'string':
+                        case 'stringf':
+                        case 'geography':
+                        case 'iconclass':
+                        case 'serial':
+                            return 'text';
+                        case 'double':
+                        case 'integer':
+                        case 'percentage':
+                            return 'number';
+                        case 'boolean':
+                            return 'boolean';
+                        case 'date':
+                            return 'date';
+                        case 'string-sc':
+                        case 'string-mc':
+                        case 'entity':
+                            return 'select';
+                        case 'epoch':
+                        case 'timeperiod':
+                        case 'dimension':
+                        case 'list':
+                        case 'table':
+                        case 'sql':
+                            return 'unsupported';
+                    }
+                }),
                 attribute: computed(_ => getAttribute(attributeId.value)),
+                selection: computed(_ => {
+                    return attributeSelection.value.filter(a => {
+                        return a.id != attributeId.value;
+                    });
+                }),
+                attributeSelected: computed(_ => state.dependency.attribute && state.dependency.attribute.id),
+                operatorSelected: computed(_ => state.dependency.operator && state.dependency.operator.id),
             });
 
             // ON MOUNTED
@@ -174,6 +286,8 @@
                 // LOCAL
                 confirmEdit,
                 closeModal,
+                dependantSelected,
+                operatorSelected,
                 // STATE
                 state,
             }
