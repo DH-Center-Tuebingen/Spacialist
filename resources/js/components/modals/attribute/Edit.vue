@@ -7,7 +7,7 @@
         <div class="modal-header">
             <h5 class="modal-title">
                 {{
-                    t('global.edit-name.title', {
+                    t('main.entity.modals.edit.title_attribute', {
                         name: translateConcept(state.attribute.thesaurus_url)
                     })
                 }}

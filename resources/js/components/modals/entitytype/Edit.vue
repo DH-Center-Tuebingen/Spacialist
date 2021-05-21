@@ -7,7 +7,7 @@
         <div class="modal-header">
             <h5 class="modal-title">
                 {{
-                    t('main.entity.modals.edit.title', {
+                    t('main.entity.modals.edit.title_type', {
                         name: translateConcept(entityType.thesaurus_url)
                     })
                 }}

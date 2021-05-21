@@ -310,7 +310,8 @@ const de = {
                     title: 'Neue Entität'
                 },
                 edit: {
-                    title: 'Entität editieren - {name}'
+                    title_type: 'Entitätstyp editieren - {name}',
+                    title_attribute: 'Attribut editieren - {name}',
                 },
                 delete: {
                     alert: 'Wenn du <span class="fw-bold">{name}</span> löschst, wird mindestens eine Entität ebenfalls gelöscht. | Wenn du <span class="fw-bold">{name}</span> löschst, werden mindestens {cnt} Entitäten ebenfalls gelöscht.',

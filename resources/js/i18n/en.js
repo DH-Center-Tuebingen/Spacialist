@@ -310,7 +310,8 @@ const en = {
                     title: 'New Entity'
                 },
                 edit: {
-                    title: 'Edit Entity - {name}'
+                    title_type: 'Edit Entitytype - {name}',
+                    title_attribute: 'Edit Attribute - {name}',
                 },
                 delete: {
                     alert: 'If you delete <span class="fw-bold">{name}</span>, at least one entity is deleted, too. | If you delete <span class="fw-bold">{name}</span>, at least {cnt} entities are deleted, too.',
