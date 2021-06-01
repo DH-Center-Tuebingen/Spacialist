@@ -490,6 +490,27 @@ export async function reorderEntityAttributes(etid, aid, from, to) {
     );
 };
 
+export async function updateAttributeDependency(etid, aid, dependency) {
+    const data = {};
+    if(!!dependency.attribute) {
+        data.attribute = dependency.attribute.id;
+        data.operator = dependency.operator.label;
+        data.value = dependency.value.value || dependency.value;
+    }
+    return $httpQueue.add(
+        () => http.patch(`/editor/dm/entity_type/${etid}/attribute/${aid}/dependency`, data).then(response => {
+            // store.dispatch('reorderAttributes', {
+            //     rank: rank,
+            //     from: from,
+            //     to: to,
+            //     entity_type_id: etid,
+            //     attribute_id: aid,
+            // });
+            // return response.data;
+        })
+    );
+};
+
 export async function patchPreferences(data, uid) {
     const endpoint = !!uid ? `preference/${uid}` : 'preference';
     return await http.patch(endpoint, data).then(response => response.data);

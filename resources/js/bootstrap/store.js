@@ -18,7 +18,6 @@ export const store = createStore({
             attributes: [],
             attributeTypes: [],
             attributeSelections: {},
-            attributeDependencies: {},
             entityTypeAttributes: {},
             entityTypeColors: {},
             bibliography: [],
@@ -58,9 +57,6 @@ export const store = createStore({
         },
         setAttributeSelections(state, data) {
             state.attributeSelections = data;
-        },
-        setAttributeDependencies(state, data) {
-            state.attributeDependencies = data;
         },
         setBibliography(state, data) {
             state.bibliography = data;
@@ -552,10 +548,8 @@ export const store = createStore({
         setAttributes({commit, state}, data) {
             state.attributes = [];
             state.attributeSelections = {};
-            state.attributeDependencies = {};
             commit('setAttributes', data.attributes);
             commit('setAttributeSelections', data.selections);
-            commit('setAttributeDependencies', data.dependencies);
         },
         addAttribute({commit}, data) {
             commit('addAttribute', data);
@@ -583,9 +577,6 @@ export const store = createStore({
         },
         attributeSelections: state => {
             return state.attributeSelections;
-        },
-        attributeDependencies: state => {
-            return state.attributeDependencies;
         },
         bibliography: state => {
             return state.bibliography;

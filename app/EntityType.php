@@ -49,7 +49,7 @@ class EntityType extends Model
     }
 
     public function attributes() {
-        return $this->belongsToMany('App\Attribute', 'entity_attributes')->withPivot('position')->orderBy('entity_attributes.position');
+        return $this->belongsToMany('App\Attribute', 'entity_attributes')->withPivot(['position', 'depends_on'])->orderBy('entity_attributes.position');
     }
 
     public function sub_entity_types() {

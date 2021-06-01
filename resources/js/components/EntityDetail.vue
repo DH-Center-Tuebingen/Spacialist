@@ -6,13 +6,18 @@
                 <span v-if="!state.entity.editing">
                     {{ state.entity.name }}
                     <small>
-                        <span v-show="state.hiddenAttributes > 0" @mouseenter="dependencyInfoHoverOver" @mouseleave="dependencyInfoHoverOut">
-                            <i id="dependency-info" class="fas fa-fw fa-xs fa-eye-slash"></i>
-                        </span>
+                        <button id="hidden-attributes-icon" v-show="state.hiddenAttributeCount > 0" class="border-0 bg-body text-secondary me-1" data-bs-container="body" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="bottom" :data-bs-content="state.hiddenAttributeListing" data-bs-html="true" data-bs-custom-class="popover-p-2" @mousedown="showHiddenAttributes()" @mouseup="hideHiddenAttributes()">
+                            <span v-show="state.hiddenAttributeState">
+                                <i class="fas fa-fw fa-xs fa-eye"></i>
+                            </span>
+                            <span v-show="!state.hiddenAttributeState">
+                                <i class="fas fa-fw fa-xs fa-eye-slash"></i>
+                            </span>
+                        </button>
+                        <a href="#" v-if="state.entityHeaderHovered" class="text-secondary" @click.prevent="editEntityName()">
+                            <i class="fas fa-fw fa-edit fa-xs"></i>
+                        </a>
                     </small>
-                    <a href="#" v-if="state.entityHeaderHovered" class="text-secondary" @click.prevent="editEntityName()">
-                        <i class="fas fa-fw fa-edit fa-xs"></i>
-                    </a>
                 </span>
                 <form class="d-flex flex -row" v-else>
                     <input type="text" class="form-control form-control-sm me-2" v-model="state.editedEntityName" />
@@ -79,14 +84,14 @@
                         v-dcan="'view_concept_props'"
                         :ref="el => setAttrRef(el)"
                         :attributes="state.entityAttributes"
-                        :dependencies="state.entity.dependencies"
+                        :hidden-attributes="state.hiddenAttributeList"
+                        :show-hidden="state.hiddenAttributeState"
                         :disable-drag="true"
                         :metadata-addon="hasReferenceGroup"
                         :selections="state.entityTypeSelections"
                         :values="state.entity.data"
                         @dirty="setFormState"
-                        @metadata="showMetadata"
-                        @attr-dep-change="updateDependencyCounter">
+                        @metadata="showMetadata">
                     </attribute-list>
                 </form>
             </div>
@@ -142,6 +147,10 @@
 
     import { useI18n } from 'vue-i18n';
 
+    import {
+        Popover,
+    } from 'bootstrap';
+
     import store from '../bootstrap/store.js';
     import router from '../bootstrap/router.js';
 
@@ -155,6 +164,7 @@
     } from '../api.js';
     import {
         can,
+        getAttribute,
         getEntityColors,
         getEntityType,
         getEntityTypeAttributeSelections,
@@ -190,6 +200,7 @@
             store.dispatch('getEntity', route.params.id).then(_ => {
                 getEntityTypeAttributeSelections();
                 state.initFinished = true;
+                updateAllDependencies();
             });
 
             // DATA
@@ -202,11 +213,12 @@
                     };
                 }),
                 formDirty: false,
-                hiddenAttributes: 0,
+                hiddenAttributes: {},
                 entityHeaderHovered: false,
                 editedEntityName: '',
                 initFinished: false,
                 commentLoadingState: 'not',
+                hiddenAttributeState: false,
                 entity: computed(_ => store.getters.entity),
                 entityUser: computed(_ => state.entity.user),
                 entityAttributes: computed(_ => store.getters.entityTypeAttributes(state.entity.entity_type_id)),
@@ -218,6 +230,49 @@
                     const entityType = getEntityType(state.entity.entity_type_id);
                     if(!entityType) return;
                     return translateConcept(entityType.thesaurus_url);
+                }),
+                hiddenAttributeList: computed(_ => {
+                    const keys = Object.keys(state.hiddenAttributes);
+                    const values = Object.values(state.hiddenAttributes);
+                    const list = [];
+                    for(let i=0; i<keys.length; i++) {
+                        if(values[i].hide) {
+                            list.push(keys[i]);
+                        }
+                    }
+                    return list;
+                }),
+                hiddenAttributeCount: computed(_ => state.hiddenAttributeList.length),
+                hiddenAttributeListing: computed(_ => {
+                    let listing = `<div>`;
+                    if(!!state.attributesFetched) {
+                        const keys = Object.keys(state.hiddenAttributes);
+                        const values = Object.values(state.hiddenAttributes);
+                        const listGroups = {};
+                        for(let i=0; i<keys.length; i++) {
+                            const k = keys[i];
+                            const v = values[i];
+                            if(v.hide) {
+                                if(!listGroups[v.by]) {
+                                    listGroups[v.by] = [];
+                                }
+                                listGroups[v.by].push(k);
+                            }
+                        }
+                        for(let k in listGroups) {
+                            const grpAttr = getAttribute(k);
+                            listing += `<span class="text-muted fw-light fs-6"># ${translateConcept(grpAttr.thesaurus_url)}</span>`;
+                            listing += `<ol class="mb-0">`;
+                            // const data = state.entity.data[keys[i]];
+                            for(let i=0; i<listGroups[k].length; i++) {
+                                const attr = getAttribute(listGroups[k][i]);
+                                listing += `<li><span class="fw-bold">${translateConcept(attr.thesaurus_url)}</span></li>`;
+                            }
+                            listing += `</ol>`;
+                        }
+                    }
+                    listing += `</div>`;
+                    return listing;
                 }),
                 resourceInfo: computed(_ => {
                     if(!state.entity) return {};
@@ -273,9 +328,6 @@
                     });
                 }
             };
-            const updateDependencyCounter = event => {
-                state.hiddenAttributes = event.counter;
-            };
             const editEntityName = _ => {
                 state.editedEntityName = state.entity.name;
                 state.entity.editing = true;
@@ -297,6 +349,45 @@
             const cancelEditEntityName = _ => {
                 state.entity.editing = false;
                 state.editedEntityName = '';
+            };
+            const updateDependencyState = (aid, value) => {
+                const attrDeps = state.entityTypeDependencies[aid];
+                if(!attrDeps) return;
+                attrDeps.forEach(ad => {
+                    let matches = false;
+                    switch(ad.operator) {
+                        case '=':
+                            matches = value == ad.value;
+                            break;
+                        case '!=':
+                            matches = value != ad.value;
+                            break;
+                        case '<':
+                            matches = value < ad.value;
+                            break;
+                        case '>':
+                            matches = value > ad.value;
+                            break;
+                    }
+                    state.hiddenAttributes[ad.dependant] = {
+                        hide: matches,
+                        by: aid,
+                    };
+                });
+            };
+            const updateAllDependencies = _ => {
+                if(!state.entityAttributes) return;
+                
+                for(let i=0; i<state.entityAttributes.length; i++) {
+                    const curr = state.entityAttributes[i];
+                    updateDependencyState(curr.id, state.entity.data[curr.id].value);
+                }
+            };
+            const showHiddenAttributes = _ => {
+                state.hiddenAttributeState = true;
+            };
+            const hideHiddenAttributes = _ => {
+                state.hiddenAttributeState = false;
             };
             const confirmDeleteEntity = _ => {
                 if(!can('delete_move_concepts')) return;
@@ -330,6 +421,7 @@
             };
             const setFormState = e => {
                 state.formDirty = e.dirty && e.valid;
+                updateDependencyState(e.attribute_id, e.value);
             };
             const fetchComments = _ => {
                 state.commentLoadingState = 'fetching';
@@ -438,6 +530,12 @@
             // ON MOUNTED
             onMounted(_ => {
                 console.log("entity detail component mounted");
+                var hiddenAttrElem = document.getElementById('hidden-attributes-icon');
+                if(!!hiddenAttrElem) {
+                    new Popover(hiddenAttrElem, {
+                        title: _ => t('main.entity.attributes.hidden', {cnt: state.hiddenAttributeCount}, state.hiddenAttributeCount),
+                    });
+                }
             });
             onBeforeUpdate(_ => {
                 attrRef.value = {};
@@ -451,6 +549,7 @@
                     store.dispatch('getEntity', newParams.id).then(_ => {
                         getEntityTypeAttributeSelections();
                         state.initFinished = true;
+                        updateAllDependencies();
                     });
                 }
             );
@@ -490,10 +589,11 @@
                 // LOCAL
                 hasReferenceGroup,
                 showMetadata,
-                updateDependencyCounter,
                 editEntityName,
                 updateEntityName,
                 cancelEditEntityName,
+                showHiddenAttributes,
+                hideHiddenAttributes,
                 confirmDeleteEntity,
                 setEntityView,
                 onEntityHeaderHover,

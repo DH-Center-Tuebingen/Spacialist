@@ -105,6 +105,7 @@
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
+                    value: v.value,
                 });
             });
 

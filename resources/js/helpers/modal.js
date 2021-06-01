@@ -13,6 +13,7 @@ import {
     deleteEntity,
     removeEntityTypeAttribute,
     patchEntityType,
+    updateAttributeDependency,
 } from '../api.js';
 
 import {
@@ -435,7 +436,9 @@ export function showEditAttribute(aid, etid) {
                 store.getters.vfm.hide(uid);
             },
             confirm(e) {
-                console.log("roger roger", e);
+                updateAttributeDependency(etid, aid, e).then(_ => {
+                    store.getters.vfm.hide(uid);
+                });
             }
         }
     });

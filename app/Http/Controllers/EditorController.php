@@ -164,22 +164,8 @@ class EditorController extends Controller {
             ], 403);
         }
         $attributes = Attribute::whereNull('parent_id')->orderBy('id')->get();
-        // foreach($attributes as $a) {
-        //     $a->columns = Attribute::where('parent_id', $a->id)->get();
-        // }
         $selections = [];
-        $dependencies = [];
         foreach ($attributes as $a) {
-            if (isset($a->depends_on)) {
-                $dependsOn = json_decode($a->depends_on);
-                foreach ($dependsOn as $depAttr => $dep) {
-                    if (!isset($dependencies[$depAttr])) {
-                        $dependencies[$depAttr] = [];
-                    }
-                    $dependencies[$depAttr][] = $dep;
-                }
-            }
-            unset($a->depends_on);
             switch ($a->datatype) {
                 case 'string-sc':
                 case 'string-mc':
@@ -203,7 +189,6 @@ class EditorController extends Controller {
         return response()->json([
             'attributes' => $attributes,
             'selections' => $selections,
-            'dependencies' => $dependencies
         ]);
     }
 
@@ -609,7 +594,7 @@ class EditorController extends Controller {
         return response()->json(null, 204);
     }
 
-    public function patchDependency(Request $request, $ctid, $aid) {
+    public function patchDependency(Request $request, $etid, $aid) {
         $user = auth()->user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response()->json([
@@ -617,14 +602,14 @@ class EditorController extends Controller {
             ], 403);
         }
         $this->validate($request, [
-            'd_attribute' => 'required|nullable|integer|exists:entity_attributes,attribute_id',
-            'd_operator' => 'required|nullable|in:<,>,=',
-            'd_value' => 'required|nullable'
+            'attribute' => 'required|nullable|integer|exists:entity_attributes,attribute_id',
+            'operator' => 'required|nullable|in:<,>,=,!=',
+            'value' => 'required|nullable'
         ]);
 
         $entityAttribute = EntityAttribute::where([
             ['attribute_id', '=', $aid],
-            ['entity_type_id', '=', $ctid]
+            ['entity_type_id', '=', $etid]
         ])->first();
 
         if($entityAttribute === null){
@@ -633,9 +618,9 @@ class EditorController extends Controller {
             ], 400);
         }
 
-        $dAttribute = $request->get('d_attribute');
-        $dOperator = $request->get('d_operator');
-        $dValue = $request->get('d_value');
+        $dAttribute = $request->get('attribute');
+        $dOperator = $request->get('operator');
+        $dValue = $request->get('value');
 
         if(
             !(

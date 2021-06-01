@@ -171,6 +171,35 @@ export function getEntityTypeAttributes(id) {
     return store.getters.entityTypeAttributes(id) || [];
 }
 
+export function getEntityTypeDependencies(id, aid) {
+    if(!id) return {};
+    const attrs = store.getters.entityTypeAttributes(id);
+    if(!attrs) return {};
+    if(!!aid) {
+        const attr = attrs.find(a => a.id == aid);
+        return !!attr ? attr.pivot.depends_on : {};
+    } else {
+        const dependencies = {};
+        attrs.forEach(a => {
+            if(!!a.pivot.depends_on) {
+                const deps = JSON.parse(a.pivot.depends_on);
+                const keys = Object.keys(deps);
+                const values = Object.values(deps);
+                for(let i=0; i<keys.length; i++) {
+                    const currKey = keys[i];
+                    const currValue = values[i];
+                    if(!dependencies[currKey]) {
+                        dependencies[currKey] = [];
+                    }
+                    dependencies[currKey].push(currValue);
+                }
+            }
+        });
+        return dependencies;
+    }
+
+}
+
 export function getEntityTypeAttributeSelections(id) {
     const attrs = getEntityTypeAttributes(id);
     if(!attrs) return {};
@@ -183,11 +212,6 @@ export function getEntityTypeAttributeSelections(id) {
         }
     }
     return filteredSel;
-}
-
-export function getEntityTypeDependencies(id) {
-    console.log(store.getters.attributeDependencies, "deps");
-    return {};
 }
 
 export function defaultAttributeValue(datatype) {

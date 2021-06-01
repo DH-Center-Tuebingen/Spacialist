@@ -50,7 +50,7 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, element.id)" />
 
                         <stringfield-attribute
                             v-else-if="element.datatype == 'stringf'"
@@ -58,7 +58,7 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, element.id)" />
 
                         <integer-attribute
                             v-else-if="element.datatype == 'integer'"
@@ -66,7 +66,7 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, element.id)" />
 
                         <float-attribute
                             v-else-if="element.datatype == 'double'"
@@ -74,7 +74,7 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, element.id)" />
 
                         <bool-attribute
                             v-else-if="element.datatype == 'boolean'"
@@ -82,7 +82,7 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, element.id)" />
 
                         <percentage-attribute
                             v-else-if="element.datatype == 'percentage'"
@@ -90,7 +90,7 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, element.id)" />
                             
                         <serial-attribute
                             v-else-if="element.datatype == 'serial'"
@@ -104,7 +104,7 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :entries="state.attributeValues[element.id].value"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, element.id)" />
 
                         <epoch-attribute
                             v-else-if="element.datatype == 'epoch' || element.datatype == 'timeperiod'"
@@ -114,7 +114,7 @@
                             :value="state.attributeValues[element.id].value"
                             :epochs="selections[element.id]"
                             :type="element.datatype"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, element.id)" />
 
                         <dimension-attribute
                             v-else-if="element.datatype == 'dimension'"
@@ -122,7 +122,7 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, element.id)" />
 
                         <tabular-attribute
                             v-else-if="element.datatype == 'table'"
@@ -133,7 +133,7 @@
                             :attribute="element"
                             :selections="selections"
                             @expanded="e => onAttributeExpand(e, index)"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, element.id)" />
 
                         <iconclass-attribute
                             v-else-if="element.datatype == 'iconclass'"
@@ -142,7 +142,7 @@
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :attribute="element"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, element.id)" />
 
                         <geography-attribute
                             v-else-if="element.datatype == 'geography'"
@@ -151,14 +151,14 @@
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :attribute="element"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, element.id)" />
 
                         <entity-attribute v-else-if="element.datatype == 'entity'"
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="convertEntityValue(state.attributeValues[element.id])"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, element.id)" />
 
                         <date-attribute
                             v-else-if="element.datatype == 'date'"
@@ -166,7 +166,7 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, element.id)" />
 
                         <singlechoice-attribute
                             v-else-if="element.datatype == 'string-sc'"
@@ -175,7 +175,7 @@
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :selections="selections[element.id]"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, element.id)" />
 
                         <multichoice-attribute
                             v-else-if="element.datatype == 'string-mc'"
@@ -184,7 +184,7 @@
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :selections="selections[element.id]"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, element.id)" />
 
                         <sql-attribute
                             v-else-if="element.datatype == 'sql'"
@@ -197,7 +197,8 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value" />
+                            :value="state.attributeValues[element.id].value"
+                            @change="e => updateDirtyState(e, element.id)" />
                     </div>
                 </div>
             </template>
@@ -397,7 +398,8 @@
                 for(let k in attrRefs) {
                     const curr = attrRefs[k];
                     let currValue = null;
-                    if(!!curr.v && curr.v.meta.dirty && curr.v.meta.valid) {
+                    // curr is e.g. null if attribute is hidden
+                    if(!!curr && !!curr.v && curr.v.meta.dirty && curr.v.meta.valid) {
                         currValue = curr.v.value;
                     }
                     if(currValue !== null) {
@@ -406,13 +408,16 @@
                 }
                 return values;
             };
-            const updateDirtyState = e => {
-                context.emit('dirty', e);
+            const updateDirtyState = (e, aid) => {
+                context.emit('dirty', {
+                    ...e,
+                    attribute_id: aid,
+                });
             };
             const resetListValues = _ => {
                 for(let k in attrRefs) {
                     const curr = attrRefs[k];
-                    if(!!curr.resetFieldState) {
+                    if(!!curr && !!curr.resetFieldState) {
                         curr.resetFieldState();
                     }
                 }
@@ -420,7 +425,7 @@
             const undirtyList = _ => {
                 for(let k in attrRefs) {
                     const curr = attrRefs[k];
-                    if(!!curr.undirtyField) {
+                    if(!!curr && !!curr.undirtyField) {
                         curr.undirtyField();
                     }
                 }

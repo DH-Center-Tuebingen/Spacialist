@@ -89,13 +89,13 @@
                             :placeholder="t('global.select.placeholder')"
                             v-model="state.dependency.value">
                         </multiselect>
-                        <input type="text" class="form-control" v-else v-model="selectedDependency.value" />
+                        <input type="text" class="form-control" v-else v-model="state.dependency.value" />
                     </div>
                 </div>
             </div>
         </div>
         <div class="modal-footer">
-            <button type="submit" class="btn btn-outline-success" @click="confirmEdit()">
+            <button type="submit" class="btn btn-outline-success" :disabled="!state.isValid" @click="confirmEdit()">
                 <i class="fas fa-fw fa-save"></i> {{ t('global.update') }}
             </button>
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
@@ -141,7 +141,7 @@
             // FUNCTIONS
             const confirmEdit = _ => {
                 state.show = false;
-                context.emit('confirm', false);
+                context.emit('confirm', state.dependency);
             };
             const closeModal = _ => {
                 state.show = false;
@@ -178,6 +178,13 @@
                     operator: null,
                     value: null,
                 },
+                isValid: computed(_ => {
+                    return (
+                        state.dependency.attribute && state.dependency.operator && state.dependency.value
+                    ) || (
+                        !state.dependency.attribute && !state.dependency.operator && !state.dependency.value
+                    );
+                }),
                 operatorList: computed(_ => {
                     if(!state.attributeSelected) return [];
 
