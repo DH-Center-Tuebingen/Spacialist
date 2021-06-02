@@ -429,6 +429,7 @@ export function showEditAttribute(aid, etid) {
         bind: {
             name: uid,
             attributeId: aid,
+            entityTypeId: etid,
             attributeSelection: getEntityTypeAttributes(etid),
         },
         on: {

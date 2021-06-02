@@ -246,6 +246,11 @@ export const store = createStore({
             delete state.entityTypes[data.id];
             delete state.entityTypeAttributes[data.id];
         },
+        updateDependency(state, data) {
+            const attrs = state.entityTypeAttributes[data.entity_type_id];
+            const attr = attrs.find(a => a.id == data.attribute_id);
+            attr.pivot.depends_on = data.data;
+        },
         addReference(state, data) {
             let entity = state.entities[data.entity_id];
             let references = entity.references[data.attribute_url];
@@ -535,6 +540,9 @@ export const store = createStore({
         },
         deleteEntityType({commit}, data) {
             commit('deleteEntityType', data);
+        },
+        updateDependency({commit}, data) {
+            commit('updateDependency', data);
         },
         addReference({commit}, data) {
             commit('addReference', data);

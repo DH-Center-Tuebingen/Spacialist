@@ -499,14 +499,14 @@ export async function updateAttributeDependency(etid, aid, dependency) {
     }
     return $httpQueue.add(
         () => http.patch(`/editor/dm/entity_type/${etid}/attribute/${aid}/dependency`, data).then(response => {
-            // store.dispatch('reorderAttributes', {
-            //     rank: rank,
-            //     from: from,
-            //     to: to,
-            //     entity_type_id: etid,
-            //     attribute_id: aid,
-            // });
-            // return response.data;
+            const data = Object.values(response.data).length > 0 ? response.data : null;
+            store.dispatch('updateDependency', {
+                entity_type_id: etid,
+                attribute_id: aid,
+                data: data,
+            });
+
+            return data;
         })
     );
 };

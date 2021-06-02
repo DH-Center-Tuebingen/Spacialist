@@ -77,7 +77,7 @@
                         <div class="form-check form-switch" v-if="state.inputType == 'boolean'">
                             <input type="checkbox" class="form-check-input" id="dependency-boolean-value" v-model="state.dependency.value" />
                         </div>
-                        <input type="number" class="form-control" :step="state.dependency.attribute.datatype == 'double' ? 0.01 : 1" v-else-if="state.inputType == 'number'" v-model="state.dependency.value" />
+                        <input type="number" class="form-control" :step="state.dependency.attribute.datatype == 'double' ? 0.01 : 1" v-else-if="state.inputType == 'number'" v-model.number="state.dependency.value" />
                         <multiselect
                             v-else-if="state.inputType == 'select'"
                             :valueProp="'id'"
@@ -116,12 +116,17 @@
 
     import {
         getAttribute,
+        getEntityTypeDependencies,
         translateConcept,
     } from '../../../helpers/helpers.js';
 
     export default {
         props: {
             attributeId: {
+                required: true,
+                type: Number,
+            },
+            entityTypeId: {
                 required: true,
                 type: Number,
             },
@@ -135,6 +140,7 @@
             const { t } = useI18n();
             const {
                 attributeId,
+                entityTypeId,
                 attributeSelection,
             } = toRefs(props);
 
@@ -270,6 +276,7 @@
                     }
                 }),
                 attribute: computed(_ => getAttribute(attributeId.value)),
+                activeDependency: computed(_ => getEntityTypeDependencies(entityTypeId.value, attributeId.value)),
                 selection: computed(_ => {
                     return attributeSelection.value.filter(a => {
                         return a.id != attributeId.value;
@@ -282,6 +289,14 @@
             // ON MOUNTED
             onMounted(_ => {
                 state.show = true;
+                if(!!state.activeDependency) {
+                    for(let k in state.activeDependency) {
+                        const dep = state.activeDependency[k];
+                        state.dependency.attribute = getAttribute(k);
+                        state.dependency.operator = operators.find(o => o.label == dep.operator);
+                        state.dependency.value = dep.value;
+                    }
+                }
             });
 
             // RETURN

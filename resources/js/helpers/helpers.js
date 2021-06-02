@@ -182,7 +182,7 @@ export function getEntityTypeDependencies(id, aid) {
         const dependencies = {};
         attrs.forEach(a => {
             if(!!a.pivot.depends_on) {
-                const deps = JSON.parse(a.pivot.depends_on);
+                const deps = a.pivot.depends_on;
                 const keys = Object.keys(deps);
                 const values = Object.values(deps);
                 for(let i=0; i<keys.length; i++) {

@@ -236,7 +236,7 @@
                     const values = Object.values(state.hiddenAttributes);
                     const list = [];
                     for(let i=0; i<keys.length; i++) {
-                        if(values[i].hide) {
+                        if(values[i].hide && (!state.hiddenAttributes[values[i].by] || !state.hiddenAttributes[values[i].by].hide)) {
                             list.push(keys[i]);
                         }
                     }
@@ -252,7 +252,7 @@
                         for(let i=0; i<keys.length; i++) {
                             const k = keys[i];
                             const v = values[i];
-                            if(v.hide) {
+                            if(v.hide && (!state.hiddenAttributes[v.by] || !state.hiddenAttributes[v.by].hide)) {
                                 if(!listGroups[v.by]) {
                                     listGroups[v.by] = [];
                                 }

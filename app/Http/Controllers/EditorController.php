@@ -602,9 +602,9 @@ class EditorController extends Controller {
             ], 403);
         }
         $this->validate($request, [
-            'attribute' => 'required|nullable|integer|exists:entity_attributes,attribute_id',
-            'operator' => 'required|nullable|in:<,>,=,!=',
-            'value' => 'required|nullable'
+            'attribute' => 'integer|exists:entity_attributes,attribute_id',
+            'operator' => 'string|in:<,>,=,!=',
+            'value' => 'string'
         ]);
 
         $entityAttribute = EntityAttribute::where([
@@ -622,34 +622,30 @@ class EditorController extends Controller {
         $dOperator = $request->get('operator');
         $dValue = $request->get('value');
 
-        if(
-            !(
-                isset($dAttribute) &&
-                isset($dOperator) &&
-                isset($dValue)
-            ) &&
-            !(
-                !isset($dAttribute) &&
-                !isset($dOperator) &&
-                !isset($dValue)
-            )
-        ) {
+        $allSet = isset($dAttribute) && isset($dOperator) && isset($dValue);
+        $noneSet = !isset($dAttribute) && !isset($dOperator) && !isset($dValue);
+
+        if(!($allSet) && !($noneSet)) {
             return response()->json([
                 'error' => __('Please provide either all dependency fields or none')
             ], 400);
         }
 
-        $dependsOn = [
-            $dAttribute => [
-                'operator' => $dOperator,
-                'value' => $dValue,
-                'dependant' => $aid
-            ]
-        ];
+        if($allSet) {
+            $dependsOn = [
+                $dAttribute => [
+                    'operator' => $dOperator,
+                    'value' => $dValue,
+                    'dependant' => $aid
+                ]
+            ];
+        } else {
+            $dependsOn = null;
+        }
 
-        $entityAttribute->depends_on = json_encode($dependsOn);
+        $entityAttribute->depends_on = $dependsOn;
         $entityAttribute->save();
-        return response()->json(null, 204);
+        return response()->json($entityAttribute->depends_on, 200);
     }
 
     // DELETE

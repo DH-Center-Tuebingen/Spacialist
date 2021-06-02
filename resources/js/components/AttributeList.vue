@@ -42,6 +42,9 @@
                                 <i class="fas fa-fw fa-bookmark"></i>
                             </span>
                         </sup>
+                        <sup v-if="hasEmitter('onEditElement') && !!element.pivot.depends_on" class="font-size-50">
+                            <i class="fas fa-fw fa-circle text-warning"></i>
+                        </sup>
                     </label>
                     <div :class="expandedClasses(index)">
                         <string-attribute
@@ -258,11 +261,6 @@
                 type: Boolean,
                 default: false,
             },
-            dependencies: {
-                required: false,
-                type: Object,
-                default: _ => new Object()
-            },
             disableDrag: {
                 required: false,
                 type: Boolean,
@@ -285,10 +283,6 @@
             selections: {
                 required: true,
                 type: Object
-            },
-            showInfo: { // shows parent on hover
-                required: false,
-                type: Boolean
             },
             values: {
                 required: true,
@@ -534,6 +528,7 @@
                 showHidden,
                 disableDrag,
                 group,
+                metadataAddon,
                 nolabels,
                 selections,
                 // STATE
