@@ -29,7 +29,7 @@
                             :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, $index, column.id)" />
 
                         <integer-attribute
                             v-else-if="column.datatype == 'integer'"
@@ -37,7 +37,7 @@
                             :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, $index, column.id)" />
 
                         <float-attribute
                             v-else-if="column.datatype == 'double'"
@@ -45,7 +45,7 @@
                             :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, $index, column.id)" />
 
                         <bool-attribute
                             v-else-if="column.datatype == 'boolean'"
@@ -53,7 +53,7 @@
                             :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, $index, column.id)" />
 
                         <iconclass-attribute
                             v-else-if="column.datatype == 'iconclass'"
@@ -62,14 +62,14 @@
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             :attribute="element"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, $index, column.id)" />
 
                         <entity-attribute v-else-if="column.datatype == 'entity'"
                             :ref="el => setRef(el, `${$index}_${column.id}`)"
                             :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, $index, column.id)" />
 
                         <date-attribute
                             v-else-if="column.datatype == 'date'"
@@ -77,7 +77,7 @@
                             :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
-                            @change="updateDirtyState" />
+                            @change="e => updateDirtyState(e, $index, column.id)" />
 
                         <singlechoice-attribute
                             v-else-if="column.datatype == 'string-sc'"
@@ -85,7 +85,8 @@
                             :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
-                            @change="updateDirtyState" />
+                            :selections="state.selections[column.id]"
+                            @change="e => updateDirtyState(e, $index, column.id)" />
 
                         <multichoice-attribute
                             v-else-if="column.datatype == 'string-mc'"
@@ -93,8 +94,8 @@
                             :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
-                            :selections="{}"
-                            @change="updateDirtyState" />
+                            :selections="state.selections[column.id]"
+                            @change="e => updateDirtyState(e, $index, column.id)" />
                     </td>
                     <td v-if="!disabled" class="text-center">
                         <div class="dropdown">
@@ -163,14 +164,15 @@
                             v-else-if="column.datatype == 'string-sc'"
                             :ref="el => setAddRef(el, `${column.id}`)"
                             :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newRowColumns[column.id]" />
+                            :value="state.newRowColumns[column.id]"
+                            :selections="state.selections[column.id]" />
 
                         <multichoice-attribute
                             v-else-if="column.datatype == 'string-mc'"
                             :ref="el => setAddRef(el, `${column.id}`)"
                             :name="`${name}-new-column-attr-${column.id}`"
                             :value="state.newRowColumns[column.id]"
-                            :selections="{}" />
+                            :selections="state.selections[column.id]" />
                     </td>
                     <td>
                         <button type="button" class="btn btn-success btn-sm" @click="addTableRow()">
@@ -241,6 +243,7 @@
     } from 'chart.js';
 
     import { useI18n } from 'vue-i18n';
+    import store from '../../bootstrap/store.js';
 
     import {
         getAttribute,
@@ -328,7 +331,7 @@
             };
             const undirtyField = _ => {
                 v.resetField({
-                    value: v.value,
+                    value: v.value.filter(cv => !cv.mark_deleted),
                 });
                 for(let k in columnRefs) {
                     const curr = columnRefs[k];
@@ -436,13 +439,10 @@
                 }
                 restoreTableRow(index);
             };
-            const storeData = _ => {
-                state.locValue = state.locValue.filter((v, i) => {
-                    return !state.deletedRows[i];
-                });
-                state.deletedRows = {};
-            };
-            const updateDirtyState = e => {
+            const updateDirtyState = (e, rowIdx, columnId) => {
+                const currentValue = _cloneDeep(v.value);
+                currentValue[rowIdx][columnId] = e.value;
+                v.handleChange(currentValue);
                 context.emit('change', e);
             };
             const setAddRef = (el, idx) => {
@@ -464,8 +464,19 @@
                 initialValue: value.value,
             });
             const state = reactive({
-                locValue: value.value.slice(),
                 columns: computed(_ => getAttribute(attribute.value.id).columns),
+                selections: computed(_ => {
+                    const list = {};
+                    if(!state.columns) return list;
+
+                    for(let k in state.columns) {
+                        const curr = state.columns[k];
+                        if(curr.datatype == 'string-sc' || curr.datatype == 'string-mc') {
+                            list[curr.id] = store.getters.attributeSelections[curr.id];
+                        }
+                    }
+                    return list;
+                }),
                 newRowColumns: {},
                 deletedRows: {},
                 expanded: false,
@@ -547,7 +558,6 @@
                 restoreTableRow,
                 markTableRowForDelete,
                 resetRow,
-                storeData,
                 updateDirtyState,
                 setAddRef,
                 setRef,

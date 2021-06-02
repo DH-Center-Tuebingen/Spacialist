@@ -397,6 +397,10 @@
                         currValue = curr.v.value;
                     }
                     if(currValue !== null) {
+                        // filter out deleted table rows
+                        if(curr.attribute.datatype == 'table') {
+                            currValue = currValue.filter(cv => !cv.mark_deleted);
+                        }
                         values[k] = currValue;
                     }
                 }
