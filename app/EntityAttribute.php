@@ -22,6 +22,10 @@ class EntityAttribute extends Model
         'depends_on',
     ];
 
+    protected $casts = [
+        'depends_on' => 'array',
+    ];
+
     protected static $logOnlyDirty = true;
     protected static $logFillable = true;
     protected static $logAttributes = ['id'];

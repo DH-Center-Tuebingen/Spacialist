@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\EntityAttributePivot;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -49,7 +50,7 @@ class EntityType extends Model
     }
 
     public function attributes() {
-        return $this->belongsToMany('App\Attribute', 'entity_attributes')->withPivot(['position', 'depends_on'])->orderBy('entity_attributes.position');
+        return $this->belongsToMany('App\Attribute', 'entity_attributes')->withPivot(['position', 'depends_on'])->orderBy('entity_attributes.position')->using(EntityAttributePivot::class);
     }
 
     public function sub_entity_types() {
