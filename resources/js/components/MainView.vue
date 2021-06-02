@@ -183,55 +183,9 @@
                 state,
             };
         }
-
-        // beforeRouteEnter(to, from, next) {
-        //     let bibliography, entityData;
-        //     $httpQueue.add(() => $http.get('bibliography').then(response => {
-        //         bibliography = response.data;
-        //         if(to.params.id) {
-        //             return $http.get(`/entity/${to.params.id}`);
-        //         } else {
-        //             return new Promise(resolve => resolve(null));
-        //         }
-        //     }).then(response => {
-        //         entityData = response ? response.data : null;
-        //         if(to.params.id) {
-        //             return $http.get(`/entity/${to.params.id}/reference`);
-        //         } else {
-        //             return new Promise(resolve => resolve(null));
-        //         }
-        //     }).then(response => {
-        //         next(vm => vm.init(bibliography, to.query.tab, entityData, response ? response.data : null));
-        //     }));
-        // },
         // beforeRouteUpdate(to, from, next) {
         //     if(to.query.tab) {
         //         this.setTabOrPlugin(to.query.tab);
-        //     }
-        //     let loadNext = () => {
-        //         if(to.params.id) {
-        //             if(to.params.id != from.params.id) {
-        //                 this.getNewEntity(to.params.id).then(r => {
-        //                     next();
-        //                 });
-        //             } else {
-        //                 next();
-        //             }
-        //         } else {
-        //             this.resetEntity();
-        //             next();
-        //         }
-        //     }
-        //     if(this.discardState.dirty) {
-        //         let discardAndContinue = () => {
-        //             loadNext();
-        //         };
-        //         let saveAndContinue = () => {
-        //             this.discardState.callback(this.selectedEntity).then(loadNext);
-        //         };
-        //         this.$modal.show(this.discardModal, {reference: this.selectedEntity.name, onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
-        //     } else {
-        //         loadNext();
         //     }
         // },
         // mounted() {},
@@ -264,65 +218,14 @@
         //         }
         //         this.selectedEntity.geodata_id = geoId;
         //     },
-        //     handleEntityUpdate(e) {
-        //         if(this.selectedEntity && this.selectedEntity.id == e.entity_id) {
-        //             switch(e.type) {
-        //                 case 'name':
-        //                     this.selectedEntity.name = e.value;
-        //                 break;
-        //                 default:
-        //                     vm.$throwError({message: `Unknown event type ${e.type} received.`});
-        //             }
-        //         }
-        //     },
-        //     handleReferenceUpdate(e) {
-        //         const r = e.reference;
-        //         const grp = this.selectedEntity.references[e.group];
-        //         switch(e.action) {
-        //             case 'add':
-        //                 if(!grp) {
-        //                     Vue.set(this.selectedEntity.references, e.group, []);
-        //                 }
-        //                 this.selectedEntity.references[e.group].push(r);
-        //                 break;
-        //             case 'delete':
-        //                 const idx = grp.findIndex(ref => ref.id == r.id);
-        //                 if(idx > -1) {
-        //                     this.selectedEntity.references[e.group].splice(idx, 1);
-        //                 }
-        //                 if(!grp.length) {
-        //                     Vue.delete(this.selectedEntity.references, e.group);
-        //                 }
-        //                 break;
-        //             case 'edit':
-        //                 let ref = grp.find(ref => ref.id == r.id);
-        //                 ref.description = r.description;
-        //                 ref.updated_at = r.updated_at;
-        //                 break;
-        //         }
-        //     }
         // },
         // data() {
         //     return {
-        //         bibliography: {},
-        //         initFinished: false,
-        //         selectedEntity: {},
-        //         referenceModal: {},
-        //         dataLoaded: false,
-        //         defaultKey: undefined,
         //         plugins: this.$getTabPlugins(),
         //         activePlugin: '',
-        //         discardModal: 'discard-changes-modal',
-        //         discardState: {
-        //             dirty: false,
-        //             callback: () => {}
-        //         }
         //     }
         // },
         // computed: {
-        //     hasReferences: function() {
-        //         return this.selectedEntity && this.selectedEntity.references && Object.keys(this.selectedEntity.references).length;
-        //     },
         //     tab: {
         //         get() {
         //             if(this.defaultKey) return this.defaultKey;
