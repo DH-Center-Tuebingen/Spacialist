@@ -1,6 +1,6 @@
 <template>
     <div>
-        <table class="table table-striped table-hovered table-sm">
+        <table class="table table-striped table-hovered table-sm mb-0">
             <col style="width: 33%"/>
             <col style="width: 33%"/>
             <col style="width: 33%"/>
@@ -180,7 +180,7 @@
                         </button>
                     </td>
                 </tr>
-                <tr>
+                <tr class="border-0">
                     <td v-for="(column, i) in state.columns" :key="i">
                         <form class="d-flex flex-column" v-if="state.chartShown">
                             <div class="form-check" v-show="column.datatype == 'integer'">
