@@ -237,13 +237,15 @@ const de = {
             tab_unread_empty_list: 'Du bist auf dem neusten Stand. Keine neuen Benachrichtigungen!',
             tab_system_empty_list: 'Keine System-Benachrichtigungen. Du musst nichts unternehmen!',
             body: {
-                title: 'Neue Benachrichtigung',
+                title_new: 'Neue Benachrichtigung',
+                title_read: 'Benachrichtigung',
                 type: {
                     system: 'System-Nachricht'
                 },
                 user_left_comment_on: 'hat bei <span class="fw-bold">{name}</span> einen Kommentar hinterlassen.',
                 reply: 'Antworten',
-                mention_info: 'Schreibe deine Antwort. Verwende @nickname um andere Nutzer zu erwähnen.',
+                mention_info: "Schreibe deine Antwort. Verwende {'@'}nickname um andere Nutzer zu erwähnen.",
+                goto_comments: 'Kommentarbereich öffnen',
                 reply_sent: 'Antwort abgeschickt',
                 reply_to_user: '<span class="fw-bold">{name}</span> antworten',
                 reply_to_chat: 'Als Kommentar antworten',

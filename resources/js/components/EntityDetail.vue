@@ -64,12 +64,12 @@
         </div>
         <ul class="nav nav-tabs" id="myTab" role="tablist">
             <li class="nav-item" role="presentation">
-                <a class="nav-link active" id="active-entity-attributes-tab" href="#" @click.prevent="setEntityView('attributes')">
+                <a class="nav-link active" id="active-entity-attributes-tab" href="#" @click.prevent="setDetailPanel('attributes')">
                     {{ t('main.entity.tabs.attributes') }}
                 </a>
             </li>
             <li class="nav-item" role="presentation">
-                <a class="nav-link" id="active-entity-comments-tab" href="#" @click.prevent="setEntityView('comments')">
+                <a class="nav-link" id="active-entity-comments-tab" href="#" @click.prevent="setDetailPanel('comments')">
                     {{ t('main.entity.tabs.comments') }}
                     <span class="badge bg-primary">{{ state.entity.comments_count }}</span>
                 </a>
@@ -394,7 +394,18 @@
 
                 showDeleteEntity(state.entity.id);
             };
-            const setEntityView = tab => {
+            const setDetailPanel = tab => {
+                const query = {
+                    view: tab,
+                };
+                router.push({
+                    query: {
+                        ...route.query,
+                        ...query,
+                    }
+                });
+            };
+            const setDetailPanelView = tab => {
                 let newTab, oldTab, newPanel, oldPanel;
                 if(tab === 'comments') {
                     newTab = document.getElementById('active-entity-comments-tab');
@@ -554,6 +565,14 @@
                 }
             );
 
+            watch(_ => route.query.view,
+                async (newValue, oldValue) => {
+                    if(newValue == oldValue) return;
+
+                    setDetailPanelView(newValue || 'attributes');
+                }
+            );
+
             // ON BEFORE LEAVE
             onBeforeRouteLeave(async (to, from) => {
                 if(state.formDirty) {
@@ -595,7 +614,7 @@
                 showHiddenAttributes,
                 hideHiddenAttributes,
                 confirmDeleteEntity,
-                setEntityView,
+                setDetailPanel,
                 onEntityHeaderHover,
                 setFormState,
                 addComment,

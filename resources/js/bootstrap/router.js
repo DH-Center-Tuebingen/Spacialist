@@ -18,6 +18,7 @@ import Preferences from '../components/Preferences.vue';
 import UserProfile from '../components/UserProfile.vue';
 import UserPreferences from '../components/UserPreferences.vue';
 import UserActivity from '../components/UserActivity.vue';
+import UserNotifications from '../components/notification/UserNotifications.vue';
 
 import DummyComponent from '../components/DummyComponent.vue';
 import NotFound from '../components/NotFound.vue';
@@ -220,8 +221,7 @@ export const router = createRouter({
         {
             path: '/notifications/:id',
             name: 'notifications',
-            component: DummyComponent,
-            // component: UserNotifications,
+            component: UserNotifications,
             meta: {
                 auth: true
             }

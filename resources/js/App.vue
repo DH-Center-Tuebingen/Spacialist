@@ -36,7 +36,7 @@
                         <li class="nav-item dropdown" v-if="state.loggedIn">
                             <a href="#" class="nav-link" id="notifications-navbar" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true">
                                 <i class="fas fa-fw fa-bell"></i>
-                                <span class="badge badge-danger align-text-bottom" v-if="state.unreadNotifications.length">
+                                <span class="badge bg-danger ms-1 align-text-bottom" v-if="state.unreadNotifications.length">
                                     {{ state.unreadNotifications.length }}
                                 </span>
                             </a>
@@ -179,9 +179,7 @@
                 </div>
             </template>
             <video id="rtc-sharing-container" class="video-js d-none"></video>
-            <error-modal></error-modal>
         </div>
-        <notifications group="spacialist" position="bottom left" class="m-2" />
         <modals-container></modals-container>
         <div class="toast-container ps-3 pb-3" id="toast-container"></div>
     </div>
@@ -209,7 +207,13 @@
         hasPreference,
         initApp,
         throwError,
+        userNotifications,
     } from './helpers/helpers.js';
+
+    import {
+        markAsRead,
+        markAllAsRead,
+    } from './api/notification.js';
     import {
         showAbout
     } from './helpers/modal.js';
@@ -232,7 +236,6 @@
 
             // DATA
             const state = reactive({
-                // plugins: {},
                 // rtc: {
                 //     data: null,
                 //     player: null,
@@ -262,10 +265,10 @@
                 loggedIn: computed(_ => store.getters.isLoggedIn),
                 authUser: computed(_ => store.getters.user),
                 notifications: computed(_ => {
-                    return []; //this.$userNotifications();
+                    return userNotifications();
                 }),
                 unreadNotifications: computed(_ => {
-                    return []; //this.notifications.filter(n => !n.read_at);
+                    return state.notifications.filter(n => !n.read_at);
                 }),
             });
 
@@ -310,13 +313,13 @@
                 this.rtc.player.record().stop();
             }
             function markNotificationAsRead(event) {
-                this.$markAsRead(event.id);
+                markAsRead(event.id);
             }
             function markAllNotificationsAsRead() {
-                this.$markAllAsRead();
+                markAllAsRead();
             }
             function deleteNotification(event) {
-                this.$deleteNotification(event.id);
+                deleteNotification(event.id);
             }
             function logout() {
                 auth.logout({
@@ -390,6 +393,9 @@
                 hasPreference,
                 getSettingsPlugins,
                 // LOCAL
+                markNotificationAsRead,
+                markAllNotificationsAsRead,
+                deleteNotification,
                 logout,
                 showAboutModal,
                 // PROPS

@@ -296,6 +296,15 @@ export function userId() {
     return getUser().id || -1;
 };
 
+export function getUsers() {
+    const fallback = [];
+    if(isLoggedIn()) {
+        return store.getters.users || fallback;
+    } else {
+        return fallback;
+    }
+};
+
 export function getUserBy(value, attr = 'id') {
     if(isLoggedIn()) {
         const isNum = !isNaN(value);
@@ -308,10 +317,6 @@ export function getUserBy(value, attr = 'id') {
     } else {
         return null;
     }
-};
-
-export function getUsers() {
-    return isLoggedIn() ? store.getters.users : [];
 };
 
 export function throwError(error) {
@@ -525,7 +530,8 @@ export function slugify(s, delimiter = '-') {
 // UNVERIFIED
 
 export function getNotificationSourceLink(notification) {
-    const query = this.$route.query;
+    const currentRoute = router.currentRoute.value;
+    const query = currentRoute.query;
     switch(simpleResourceType(notification.data.resource.type)) {
         case 'entity':
             return {
@@ -555,60 +561,6 @@ export function getNotificationSourceLink(notification) {
 export function userNotifications() {
     return getUser().notifications || [];
 };
-
-export function markAsRead(id, from = $userNotifications()) {
-    const elem = from.find(elem => elem.id === id)
-    if(elem) {
-        return $httpQueue.add(() => axios.patch(`notification/read/${id}`).then(response => {
-            elem.read_at = Date();
-        }));
-    }
-}
-
-export function markAllAsRead(ids = null, from = userNotifications()) {
-    if(!ids) {
-        ids = from.map(elem => elem.id);
-    }
-    const data = {
-        ids: ids
-    };
-    return $httpQueue.add(() => axios.patch(`notification/read/`, data).then(response => {
-        let idsC = _clone(ids);
-        from.forEach(elem => {
-            const idx = idsC.findIndex(id => id === elem.id);
-            if(idx > -1) {
-                elem.read_at = Date();
-                idsC.splice(idx, 1);
-            }
-        });
-    }));
-}
-
-export function deleteNotification(id, from = userNotifications()) {
-    return $httpQueue.add(() => axios.delete(`notification/${id}`).then(response => {
-        const idx = from.findIndex(elem => elem.id === id);
-        if(idx > -1) {
-            from.splice(idx, 1);
-        }
-    }));
-}
-
-export function deleteAllNotifications(ids = null, from = userNotifications()) {
-    if(!ids) {
-        ids = from.map(elem => elem.id);
-    }
-    const data = {
-        ids: ids
-    };
-    return $httpQueue.add(() => axios.patch(`notification/`, data).then(response => {
-        ids.forEach(id => {
-            const idx = from.findIndex(elem => elem.id === id);
-            if(idx > -1) {
-                from.splice(idx, 1);
-            }
-        });
-    }));
-}
 
 export async function asyncFor(arr, callback) {
     for(let i=0; i<arr.length; i++) {

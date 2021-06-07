@@ -237,13 +237,15 @@ const en = {
             tab_unread_empty_list: 'You are up-to-date. No new notifications for you!',
             tab_system_empty_list: 'No system notifications. No action to take for you!',
             body: {
-                title: 'New Notification',
+                title_new: 'New Notification',
+                title_read: 'Notification',
                 type: {
                     system: 'system-message'
                 },
                 user_left_comment_on: 'left a comment on <span class="fw-bold">{name}</span>.',
                 reply: 'Reply',
-                mention_info: 'Write your reply. Use @nickname to mention other users.',
+                mention_info: "Write your reply. Use {'@'}nickname to mention other users.",
+                goto_comments: 'Open comment section',
                 reply_sent: 'Reply sent',
                 reply_to_user: 'Reply to <span class="fw-bold">{name}</span>',
                 reply_to_chat: 'Reply to comment section',

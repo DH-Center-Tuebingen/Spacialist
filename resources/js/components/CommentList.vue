@@ -215,6 +215,7 @@
             metadata: {
                 required: false,
                 type: Object,
+                default: {},
             },
             postUrl: {
                 required: false,

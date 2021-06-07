@@ -22,6 +22,7 @@ import GlobalSearch from './components/search/Global.vue';
 import SimpleSearch from './components/search/Simple.vue';
 import InteractiveMap from './components/map/InteractiveMap.vue';
 import Alert from './components/Alert.vue';
+import NotificationBody from './components/notification/NotificationBody.vue';
 import CsvTable from './components/CsvTable.vue';
 
 // Init Libs
@@ -135,6 +136,7 @@ app.component('global-search', GlobalSearch);
 app.component('simple-search', SimpleSearch);
 app.component('sp-map', InteractiveMap);
 app.component('alert', Alert);
+app.component('notification-body', NotificationBody);
 app.component('csv-table', CsvTable);
 // Third-Party components
 app.component('multiselect', Multiselect);
