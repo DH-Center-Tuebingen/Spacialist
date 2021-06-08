@@ -114,6 +114,7 @@
                         v-else
                         :avatar="48"
                         :comments="state.entity.comments"
+                        :hide-button="false"
                         :resource="state.resourceInfo"
                         @edited="editComment"
                         @on-delete="deleteComment"
@@ -405,7 +406,7 @@
                     }
                 });
             };
-            const setDetailPanelView = tab => {
+            const setDetailPanelView = (tab = 'attributes') => {
                 let newTab, oldTab, newPanel, oldPanel;
                 if(tab === 'comments') {
                     newTab = document.getElementById('active-entity-comments-tab');
@@ -565,11 +566,18 @@
                 }
             );
 
+            watch(_ => state.entity,
+                async (newValue, oldValue) => {
+                    if(!newValue && !newValue.id) return;
+                    setDetailPanelView(route.query.view);
+                }
+            );
+
             watch(_ => route.query.view,
                 async (newValue, oldValue) => {
                     if(newValue == oldValue) return;
 
-                    setDetailPanelView(newValue || 'attributes');
+                    setDetailPanelView(newValue);
                 }
             );
 
