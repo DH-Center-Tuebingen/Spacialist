@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - Preview resulting attribute in _New Attribute_ Dialog
 ### Fixed
 - Improved Attribute Validation
+- Editing Entity Name
 ### Changed
 - Update Laravel to Version 8
 - Update VueJS to Version 3

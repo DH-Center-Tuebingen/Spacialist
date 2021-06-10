@@ -19,9 +19,9 @@
                         </a>
                     </small>
                 </span>
-                <form class="d-flex flex -row" v-else>
+                <form class="d-flex flex-row" v-else @submit.prevent="updateEntityName()">
                     <input type="text" class="form-control form-control-sm me-2" v-model="state.editedEntityName" />
-                    <button type="submit" class="btn btn-outline-success btn-sm me-2" @click="updateEntityName()">
+                    <button type="submit" class="btn btn-outline-success btn-sm me-2">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                     <button type="reset" class="btn btn-outline-danger btn-sm" @click="cancelEditEntityName()">
