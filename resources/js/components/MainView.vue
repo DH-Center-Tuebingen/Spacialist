@@ -8,6 +8,12 @@
         <div :class="`h-100 border-start border-end col-md-${state.columnPref.center}`" id="attribute-container" v-dcan="'view_concepts|view_concept_props'" v-if="state.columnPref.center > 0">
             <router-view>
             </router-view>
+            <alert
+                v-if="!state.isDetailLoaded"
+                :message="t('main.entity.detail_tab_none_selected')"
+                :type="'info'"
+                :noicon="false"
+                :icontext="t('global.information')"/>
         </div>
         <div :class="`h-100 d-flex flex-column col-md-${state.columnPref.right}`" id="addon-container" v-if="state.columnPref.right > 0">
             <ul class="nav nav-tabs">
@@ -155,7 +161,7 @@
                 hasReferences: computed(_ => !!state.entity.references && Object.keys(state.entity.references).length > 0),
                 entityTypes: computed(_ => store.getters.entityTypes),
                 columnPref: computed(_ => store.getters.preferenceByKey('prefs.columns')),
-                users: computed(_ => store.getters.users),
+                isDetailLoaded: computed(_ => currentRoute.name == 'entitydetail'),
             });
 
             // ON MOUNTED

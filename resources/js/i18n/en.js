@@ -83,6 +83,7 @@ const en = {
         preview: 'Preview',
         no_preview: 'No preview available',
         note: 'Note',
+        information: 'Information',
         tools: {
             title: 'Tools',
             bibliography: 'Bibliography',
@@ -243,9 +244,11 @@ const en = {
                     system: 'system-message'
                 },
                 user_left_comment_on: 'left a comment on <span class="fw-bold">{name}</span>.',
+                user_edited_entity: 'made changes to <span class="fw-bold">{name}</span>.',
                 reply: 'Reply',
                 mention_info: "Write your reply. Use {'@'}nickname to mention other users.",
                 goto_comments: 'Open comment section',
+                goto_entity: 'Open entity detail',
                 reply_sent: 'Reply sent',
                 reply_to_user: 'Reply to <span class="fw-bold">{name}</span>',
                 reply_to_chat: 'Reply to comment section',
@@ -276,6 +279,7 @@ const en = {
         entity: {
             title: 'Entity | Entities',
             count: 'No Top-Level-Entities | One Top-Level-Entity | {cnt} Top-Level-Entities',
+            detail_tab_none_selected: 'No Entity selected. Select an Entity from the tree to see the details in this tab.',
             toasts: {
                 updated: {
                     title: 'Entity updated',
@@ -480,6 +484,7 @@ const en = {
                 }
             },
             info: {
+                set_to_language: 'Set to <span class="fw-bold">{lang}</span>',
                 password_reset_link: 'To use this function, you have to set the <code>MAIL_*</code> settings in your <code>.env</code> file. <a href="https://github.com/eScienceCenter/Spacialist/blob/master/INSTALL.md#send-mails" target="_blank">Further informations</a>.',
                 columns: 'The sum of the column values must not be higher than 12.'
             },

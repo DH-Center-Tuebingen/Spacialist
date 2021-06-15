@@ -83,6 +83,7 @@ const de = {
         preview: 'Vorschau',
         no_preview: 'Keine Vorschau verfügbar',
         note: 'Hinweis',
+        information: 'Information',
         tools: {
             title: 'Werkzeuge',
             bibliography: 'Literatur',
@@ -243,9 +244,11 @@ const de = {
                     system: 'System-Nachricht'
                 },
                 user_left_comment_on: 'hat bei <span class="fw-bold">{name}</span> einen Kommentar hinterlassen.',
+                user_edited_entity: 'hat an <span class="fw-bold">{name}</span> Änderungen vorgenommen.',
                 reply: 'Antworten',
                 mention_info: "Schreibe deine Antwort. Verwende {'@'}nickname um andere Nutzer zu erwähnen.",
                 goto_comments: 'Kommentarbereich öffnen',
+                goto_entity: 'Entitätsdetails öffnen',
                 reply_sent: 'Antwort abgeschickt',
                 reply_to_user: '<span class="fw-bold">{name}</span> antworten',
                 reply_to_chat: 'Als Kommentar antworten',
@@ -276,6 +279,7 @@ const de = {
         entity: {
             title: 'Entität | Entitäten',
             count: 'Keine Top-Level Entitäten | Eine Top-Level Entität | {cnt} Top-Level Entitäten',
+            detail_tab_none_selected: 'Keine Entität ausgewählt. Wähle aus dem Baum eine Entität aus um hier Details dazu zu erhalten.',
             toasts: {
                 updated: {
                     title: 'Entität aktualisiert',
@@ -480,6 +484,7 @@ const de = {
                 }
             },
             info: {
+                set_to_language: 'Auf <span class="fw-bold">{lang}</span> stellen',
                 password_reset_link: 'Damit diese Funktion genutzt werden kann, müssen die <code>MAIL_*</code>-Werte in der <code>.env</code>-Datei gesetzt sein. <a href="https://github.com/eScienceCenter/Spacialist/blob/master/INSTALL.md#send-mails" target="_blank">Weitere Informationen</a>.',
                 columns: 'Die Summe der Werte der Spalten darf 12 nicht überschreiten.'
             },
