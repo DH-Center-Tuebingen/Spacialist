@@ -17,7 +17,7 @@
             <input class="form-control" type="text" v-model="data.description" :readonly="readonly" @input="onChange" />
         </div>
     </div>
-    <div class="row mb-3">
+    <div class="row">
         <label class="col-md-2 col-form-label text-end" for="public">{{ t('main.preference.key.project.public') }}:</label>
         <div class="col-md-10 d-flex flex-row align-items-center">
             <div class="form-check form-switch">

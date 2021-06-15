@@ -639,7 +639,6 @@ export const store = createStore({
             ];
         },
         users: state => {
-            console.log("state.users", state.users);
             return state.users;
         },
         deletedUsers: state => {

@@ -116,8 +116,6 @@
                         :comments="state.entity.comments"
                         :hide-button="false"
                         :resource="state.resourceInfo"
-                        @edited="editComment"
-                        @on-delete="deleteComment"
                         @added="addComment">
                     </comment-list>
                 </div>

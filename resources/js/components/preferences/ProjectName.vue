@@ -1,5 +1,5 @@
 <template>
-    <div class="row mb-3">
+    <div class="row">
         <label class="col-md-2 form-label"></label>
         <div class="col-md-10">
             <input class="form-control" type="text" v-model="data" :readonly="readonly" @input="onChange" />

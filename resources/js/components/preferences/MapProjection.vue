@@ -1,5 +1,5 @@
 <template>
-    <div class="row mb-3">
+    <div class="row">
         <label class="col-md-2 col-form-label text-end">
             {{ t('main.preference.key.map.epsg') }}:
         </label>

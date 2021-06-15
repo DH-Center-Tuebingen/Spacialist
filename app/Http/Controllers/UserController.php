@@ -75,7 +75,7 @@ class UserController extends Controller
     public function login(Request $request) {
         $this->validate($request, [
             'email' => 'required_without:nickname|email|max:255',
-            'nickname' => 'required_without:email|alpha_num|max:255',
+            'nickname' => 'required_without:email|alpha_dash|max:255',
             'password' => 'required'
         ]);
 

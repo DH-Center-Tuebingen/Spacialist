@@ -1,5 +1,5 @@
 <template>
-    <div class="row mb-3" v-for="(extension, key) in data" :key="key">
+    <div class="row" v-for="(extension, key) in data" :key="key">
         <div class="col-md-2"></div>
         <div class="col-md-10">
             <div class="form-check form-switch">

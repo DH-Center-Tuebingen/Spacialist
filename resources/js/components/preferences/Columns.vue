@@ -17,7 +17,7 @@
             <input class="form-control" id="right-column" type="number" min="0" :max="state.maxRight" v-model="data.right" :readonly="readonly" @input="onChange" />
         </div>
     </div>
-    <div class="row mt-3">
+    <div class="row">
         <div class="col-md-10 offset-md-2">
             <div class="alert bg-info mb-0 w-50" role="alert">
                 {{ t('main.preference.info.columns') }}

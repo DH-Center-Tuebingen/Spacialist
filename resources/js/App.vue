@@ -45,7 +45,7 @@
                                     <span>
                                         {{ t('global.notifications.count', {cnt: state.notifications.length}) }}
                                     </span>
-                                    <a href="#" class="text-light" @click.prevent.stop="markAllNotificationsAsRead()">
+                                    <a href="#" class="text-light" @click.prevent.stop="markAllNotificationsAsRead()" v-if="state.unreadNotifications.length">
                                         {{ t('global.notifications.mark_all_as_read') }}
                                     </a>
                                 </div>
@@ -136,7 +136,7 @@
                                     <i class="fas fa-fw" :class="plugin.icon"></i> {{ t(plugin.label) }}
                                 </router-link>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#" @click="showAboutModal">
+                                <a class="dropdown-item" href="#" @click.prevent="showAboutModal">
                                     <i class="fas fa-fw fa-info-circle"></i> {{ t('global.settings.about') }}
                                 </a>
                             </div>
@@ -213,6 +213,7 @@
     import {
         markAsRead,
         markAllAsRead,
+        deleteNotification as deleteNotificationHelper,
     } from './api/notification.js';
     import {
         showAbout
@@ -312,24 +313,24 @@
                 if(!this.rtc.player) return;
                 this.rtc.player.record().stop();
             }
-            function markNotificationAsRead(event) {
-                markAsRead(event.id);
-            }
-            function markAllNotificationsAsRead() {
+            const markNotificationAsRead = event => {
+                markAsRead(event);
+            };
+            const markAllNotificationsAsRead = _ => {
                 markAllAsRead();
-            }
-            function deleteNotification(event) {
-                deleteNotification(event.id);
-            }
-            function logout() {
+            };
+            const deleteNotification = event => {
+                deleteNotificationHelper(event);
+            };
+            const logout = _ => {
                 auth.logout({
                     makeRequest: true,
                     redirect: '/login'
                 });
-            }
-            function showAboutModal() {
+            };
+            const showAboutModal = _ => {
                 showAbout();
-            }
+            };
 
             // WATCHER
             watch(state.loggedIn, (newValue, oldValue) => {

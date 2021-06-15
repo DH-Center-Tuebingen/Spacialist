@@ -41,6 +41,8 @@
         setup(props, context) {
             const {
                 message,
+                type,
+                noicon,
                 icontext,
             } = toRefs(props);
 
@@ -49,13 +51,13 @@
             // DATA
             const state = reactive({
                 hasIcon: computed(_ => {
-                    return !props.noicon && state.supportsIcon;
+                    return !noicon.value && state.supportsIcon;
                 }),
                 hasIconText: computed(_ => {
-                    return state.hasIcon && !!props.icontext;
+                    return state.hasIcon && !!icontext.value;
                 }),
                 supportsIcon: computed(_ => {
-                    switch(props.type) {
+                    switch(type.value) {
                         case 'success':
                         case 'note':
                         case 'info':
@@ -69,7 +71,7 @@
                 }),
                 classes: computed(_ => {
                     let classes = [];
-                    switch(props.type) {
+                    switch(type.value) {
                         case 'success':
                             classes.push('alert-success');
                             break;
@@ -105,7 +107,7 @@
                 iconClasses: computed(_ => {
                     let classes = [];
                     if(!state.hasIcon) return classes;
-                    switch(props.type) {
+                    switch(type.value) {
                         case 'success':
                             classes.push('fa-check');
                             break;

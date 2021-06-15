@@ -40,7 +40,7 @@
                 :metadata="state.commentMetadata"
                 @added="onUpdateCertainty">
                     <template v-slot:metadata="data">
-                        <span class="me-1 small">
+                        <span class="me-1 small" v-if="Object.keys(data.comment.metadata).length > 0">
                             <span class="badge" :class="getCertaintyClass(data.comment.metadata.certainty_from)">
                                 {{ data.comment.metadata.certainty_from || '???' }}
                             </span>

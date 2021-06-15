@@ -221,6 +221,7 @@
     import { useI18n } from 'vue-i18n';
 
     import {
+        getAttribute,
         getCertaintyClass,
         translateConcept,
     } from '../helpers/helpers.js';
@@ -398,7 +399,7 @@
                     }
                     if(currValue !== null) {
                         // filter out deleted table rows
-                        if(curr.attribute.datatype == 'table') {
+                        if(getAttribute(k).datatype == 'table') {
                             currValue = currValue.filter(cv => !cv.mark_deleted);
                         }
                         values[k] = currValue;
