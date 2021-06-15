@@ -1,11 +1,77 @@
 <template>
     <div class="d-flex flex-column">
-        <h3>
-            {{ t('main.entity.title', 2) }}
-            <small class="badge bg-secondary fw-light align-middle font-size-50">
-                {{ t('main.entity.count', {cnt: state.topLevelCount}, state.topLevelCount) }}
-            </small>
-        </h3>
+        <div class="d-flex flex-row justify-content-between mb-2">
+            <h3 class="mb-0">
+                {{ t('main.entity.title', 2) }}
+                <small class="badge bg-secondary fw-light align-middle font-size-50">
+                    {{ t('main.entity.count', {cnt: state.topLevelCount}, state.topLevelCount) }}
+                </small>
+            </h3>
+            <div class="dropdown">
+                <span id="tree-options-dropdown" class="clickable align-middle btn btn-outline-primary btn-sm" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="fa-stack d-inline">
+                        <i class="fas fa-filter"></i>
+                        <i class="fas fa-ellipsis-h" data-fa-transform="start-4"></i>
+                    </span>
+                </span>
+                <div class="dropdown-menu" aria-labelledby="tree-options-dropdown">
+                    <a class="dropdown-item" href="#" :class="getSortingStateClass('rank', 'asc')" @click.prevent="setSort('rank', 'asc')">
+                        <i class="fas fa-fw fa-sort-numeric-down"></i>
+                        <span class="ms-2">
+                            {{ t('main.entity.tree.sorts.asc.rank') }}
+                        </span>
+                    </a>
+                    <a class="dropdown-item" href="#" :class="getSortingStateClass('rank', 'desc')" @click.prevent="setSort('rank', 'desc')">
+                        <i class="fas fa-fw fa-sort-numeric-up"></i>
+                        <span class="ms-2">
+                            {{ t('main.entity.tree.sorts.desc.rank') }}
+                        </span>
+                    </a>
+                    <a class="dropdown-item" href="#" :class="getSortingStateClass('alpha', 'asc')" @click.prevent="setSort('alpha', 'asc')">
+                        <i class="fas fa-fw fa-sort-alpha-down"></i>
+                        <span class="ms-2">
+                            {{ t('main.entity.tree.sorts.asc.name') }}
+                        </span>
+                    </a>
+                    <a class="dropdown-item" href="#" :class="getSortingStateClass('alpha', 'desc')" @click.prevent="setSort('alpha', 'desc')">
+                        <i class="fas fa-fw fa-sort-alpha-up"></i>
+                        <span class="ms-2">
+                            {{ t('main.entity.tree.sorts.desc.name') }}
+                        </span>
+                    </a>
+                    <a class="dropdown-item" href="#" :class="getSortingStateClass('children', 'asc')" @click.prevent="setSort('children', 'asc')">
+                        <i class="fas fa-fw fa-sort-amount-down"></i>
+                        <span class="ms-2">
+                            {{ t('main.entity.tree.sorts.asc.children') }}
+                        </span>
+                    </a>
+                    <a class="dropdown-item" href="#" :class="getSortingStateClass('children', 'desc')" @click.prevent="setSort('children', 'desc')">
+                        <i class="fas fa-fw fa-sort-amount-up"></i>
+                        <span class="ms-2">
+                            {{ t('main.entity.tree.sorts.desc.children') }}
+                        </span>
+                    </a>
+                    <a class="dropdown-item" href="#" :class="getSortingStateClass('type', 'asc')" @click.prevent="setSort('type', 'asc')">
+                        <span class="fa-stack d-inline">
+                            <i class="fas fa-long-arrow-alt-down"></i>
+                            <i class="fas fa-monument" data-fa-transform="start-4"></i>
+                        </span>
+                        <span class="ms-2">
+                            {{ t('main.entity.tree.sorts.asc.type') }}
+                        </span>
+                    </a>
+                    <a class="dropdown-item" href="#" :class="getSortingStateClass('type', 'desc')" @click.prevent="setSort('type', 'desc')">
+                        <span class="fa-stack d-inline">
+                            <i class="fas fa-long-arrow-alt-up"></i>
+                            <i class="fas fa-monument" data-fa-transform="start-4"></i>
+                        </span>
+                        <span class="ms-2">
+                            {{ t('main.entity.tree.sorts.desc.type') }}
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </div>
         <tree-search
             class="mb-2"
             :on-multiselect="onSearchMultiSelect"
@@ -15,38 +81,6 @@
             <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="openAddEntityDialog()">
                 <i class="fas fa-fw fa-plus"></i> {{ t('main.entity.tree.add') }}
             </button>
-            <div class="mb-2 d-flex flex-row flex-wrap justify-content-between">
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('rank', 'asc')" data-bs-toggle="popover" :data-bs-content="t('main.entity.tree.sorts.asc.rank')" data-bs-trigger="hover" data-bs-placement="bottom">
-                    <i class="fas fa-fw fa-sort-numeric-down"></i>
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('rank', 'desc')" data-bs-toggle="popover" :data-bs-content="t('main.entity.tree.sorts.desc.rank')" data-bs-trigger="hover" data-bs-placement="bottom">
-                    <i class="fas fa-fw fa-sort-numeric-up"></i>
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('alpha', 'asc')" data-bs-toggle="popover" :data-bs-content="t('main.entity.tree.sorts.asc.name')" data-bs-trigger="hover" data-bs-placement="bottom">
-                    <i class="fas fa-fw fa-sort-alpha-down"></i>
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('alpha', 'desc')" data-bs-toggle="popover" :data-bs-content="t('main.entity.tree.sorts.desc.name')" data-bs-trigger="hover" data-bs-placement="bottom">
-                    <i class="fas fa-fw fa-sort-alpha-up"></i>
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('children', 'asc')" data-bs-toggle="popover" :data-bs-content="t('main.entity.tree.sorts.asc.children')" data-bs-trigger="hover" data-bs-placement="bottom">
-                    <i class="fas fa-fw fa-sort-amount-down"></i>
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('children', 'desc')" data-bs-toggle="popover" :data-bs-content="t('main.entity.tree.sorts.desc.children')" data-bs-trigger="hover" data-bs-placement="bottom">
-                    <i class="fas fa-fw fa-sort-amount-up"></i>
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('type', 'asc')" data-bs-toggle="popover" :data-bs-content="t('main.entity.tree.sorts.asc.type')" data-bs-trigger="hover" data-bs-placement="bottom">
-                    <span class="fa-stack d-inline">
-                        <i class="fas fa-long-arrow-alt-down"></i>
-                        <i class="fas fa-monument" data-fa-transform="start-4" style="margin-right: -0.2rem;"></i>
-                    </span>
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('type', 'desc')" data-bs-toggle="popover" :data-bs-content="t('main.entity.tree.sorts.desc.type')" data-bs-trigger="hover" data-bs-placement="bottom">
-                    <span class="fa-stack d-inline">
-                        <i class="fas fa-long-arrow-alt-up"></i>
-                        <i class="fas fa-monument" data-fa-transform="start-4" style="margin-right: -0.2rem;"></i>
-                    </span>
-                </button>
-            </div>
             <tree
                 id="entity-tree"
                 class="col px-0 scroll-y-auto"
@@ -139,6 +173,15 @@
                 }
                 item.state.opened = !item.state.opened;
             };
+            const getSortingStateClass = (attr, dir) => {
+                if(state.sort.by == attr && state.sort.dir == dir) {
+                    return [
+                        'active',
+                    ];
+                } else {
+                    return [];
+                }
+            };
             const setSort = (attr, dir) => {
                 state.sort.by = attr;
                 state.sort.dir = dir;
@@ -176,6 +219,7 @@
                 // LOCAL
                 itemClick,
                 itemToggle,
+                getSortingStateClass,
                 setSort,
                 openAddEntityDialog,
                 // STATE
