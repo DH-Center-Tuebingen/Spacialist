@@ -532,29 +532,42 @@ export function slugify(s, delimiter = '-') {
 export function getNotificationSourceLink(notification) {
     const currentRoute = router.currentRoute.value;
     const query = currentRoute.query;
-    switch(simpleResourceType(notification.data.resource.type)) {
-        case 'entity':
-            return {
-                name: 'entitydetail',
-                params: {
-                    id: notification.data.resource.id
-                },
-                query: {
-                    ...query,
-                    view: 'comments',
-                }
+    if(notification.type == 'App\\Notifications\\CommentPosted') {
+        switch(simpleResourceType(notification.data.resource.type)) {
+            case 'entity':
+                return {
+                    name: 'entitydetail',
+                    params: {
+                        id: notification.data.resource.id
+                    },
+                    query: {
+                        ...query,
+                        view: 'comments',
+                    }
+                };
+            case 'attribute_value':
+                return {
+                    name: 'entityrefs',
+                    params: {
+                        id: notification.data.resource.meta.entity_id,
+                        aid: notification.data.resource.meta.attribute_id,
+                    },
+                    query: query
+                };
+            default:
+                return null;
+        }
+    } else if(notification.type == 'App\\Notifications\\EntityUpdated') {
+        return {
+            name: 'entitydetail',
+            params: {
+                id: notification.data.resource.id
+            },
+            query: {
+                ...query,
+                view: 'attributes',
             }
-        case 'attribute_value':
-            return {
-                name: 'entityrefs',
-                params: {
-                    id: notification.data.resource.meta.entity_id,
-                    aid: notification.data.resource.meta.attribute_id,
-                },
-                query: query
-            }
-        default:
-            return null;
+        };
     }
 };
 
