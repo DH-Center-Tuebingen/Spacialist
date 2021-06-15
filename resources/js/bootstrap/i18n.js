@@ -17,4 +17,8 @@ export function useI18n() {
     return i18n;
 }
 
+export function getSupportedLanguages() {
+    return Object.keys(messages);
+}
+
 export default i18n;

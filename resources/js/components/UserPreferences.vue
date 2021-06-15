@@ -15,7 +15,7 @@
                 <thead class="sticky-top">
                     <tr class="text-nowrap">
                         <th>{{ t('global.preference') }}</th>
-                        <th style="width: 99%;">{{ t('global.value') }}</th>
+                        <th style="width: 99%;" class="text-end">{{ t('global.value') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -29,6 +29,7 @@
                             <gui-language-preference
                                 :data="state.preferences['prefs.gui-language']"
                                 :readonly="!state.overrides['prefs.gui-language']"
+                                :browser-default="true"
                                 @changed="e => trackChanges('prefs.gui-language', e)">
                             </gui-language-preference>
                         </td>
@@ -201,6 +202,7 @@
 
             // FUNCTIONS
             const trackChanges = (label, data) => {
+                state.preferences[label] = data.value;
                 state.dirtyData[label] = {
                     value: data.value,
                 };
