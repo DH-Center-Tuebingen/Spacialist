@@ -305,6 +305,15 @@ export function getUsers() {
     }
 };
 
+export function getRoles() {
+    const fallback = [];
+    if(isLoggedIn()) {
+        return store.getters.roles(true) || fallback;
+    } else {
+        return fallback;
+    }
+};
+
 export function getUserBy(value, attr = 'id') {
     if(isLoggedIn()) {
         const isNum = !isNaN(value);
@@ -314,6 +323,16 @@ export function getUserBy(value, attr = 'id') {
         } else {
             return getUsers().find(u => isNum ? (u[attr] == lValue) : (u[attr].toLowerCase() == lValue));
         }
+    } else {
+        return null;
+    }
+};
+
+export function getRoleBy(value, attr = 'id') {
+    if(isLoggedIn()) {
+        const isNum = !isNaN(value);
+        const lValue = isNum ? value : value.toLowerCase();
+        return getRoles().find(r => isNum ? (r[attr] == lValue) : (r[attr].toLowerCase() == lValue));
     } else {
         return null;
     }

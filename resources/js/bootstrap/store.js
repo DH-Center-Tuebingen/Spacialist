@@ -242,6 +242,26 @@ export const store = createStore({
                 state.users.push(reacUser);
             }
         },
+        addRole(state, data) {
+            state.roles.push(data);
+        },
+        updateRole(state, data) {
+            const index = state.roles.findIndex(r => r.id == data.id);
+            if(index > -1) {
+                const cleanData = only(data, ['display_name', 'description', 'permissions', 'updated_at', 'deleted_at',]);
+                const currentData = state.roles[index];
+                state.roles[index] = {
+                    ...currentData,
+                    ...cleanData,
+                };
+            }
+        },
+        deleteRole(state, data) {
+            const index = state.roles.findIndex(r => r.id == data.id);
+            if(index > -1) {
+                state.roles.splice(index, 1);
+            }
+        },
         deleteEntityType(state, data) {
             delete state.entityTypes[data.id];
             delete state.entityTypeAttributes[data.id];
@@ -529,6 +549,15 @@ export const store = createStore({
         },
         reactivateUser({commit}, data) {
             commit('reactivateUser', data);
+        },
+        addRole({commit}, data) {
+            commit('addRole', data);
+        },
+        updateRole({commit}, data) {
+            commit('updateRole', data);
+        },
+        deleteRole({commit}, data) {
+            commit('deleteRole', data);
         },
         setEntityTypes({commit, state}, data) {
             state.entityTypes = {};

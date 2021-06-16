@@ -14,6 +14,8 @@ import {
     removeEntityTypeAttribute,
     patchEntityType,
     updateAttributeDependency,
+    addRole,
+    deleteRole,
 } from '../api.js';
 
 import {
@@ -32,6 +34,8 @@ import MapPicker from '../components/modals/map/Picker.vue';
 import UserInfo from '../components/modals/user/UserInfo.vue';
 import AddUser from '../components/modals/user/Add.vue';
 import DeactiveUser from '../components/modals/user/Deactivate.vue';
+import AddRole from '../components/modals/role/Add.vue';
+import DeleteRole from '../components/modals/role/Delete.vue';
 import BibliographyItem from '../components/modals/bibliography/Item.vue';
 import DeleteBibliographyItem from '../components/modals/bibliography/Delete.vue';
 import AddEntity from '../components/modals/entity/Add.vue';
@@ -240,6 +244,58 @@ export function showDeactivateUser(user, onDeactivated) {
                     store.dispatch('deactivateUser', data);
                     store.getters.vfm.hide(uid);
                 })
+            },
+            cancel(e) {
+                store.getters.vfm.hide(uid);
+            }
+        }
+    });
+}
+
+export function showAddRole(onAdded) {
+    const uid = `AddRole-${getTs()}`;
+    store.getters.vfm.show({
+        component: AddRole,
+        bind: {
+            name: uid,
+        },
+        on: {
+            add(e) {
+                if(!can('add_edit_role')) return;
+                addRole(e).then(role => {
+                    if(!!onAdded) {
+                        onAdded();
+                    }
+                    store.dispatch('addRole', role);
+                    store.getters.vfm.hide(uid);
+                });
+            },
+            cancel(e) {
+                store.getters.vfm.hide(uid);
+            }
+        }
+    });
+}
+
+export function showDeleteRole(role, onDeleted) {
+    const uid = `DeleteRole-${getTs()}`;
+    store.getters.vfm.show({
+        component: DeleteRole,
+        bind: {
+            name: uid,
+            role: role,
+        },
+        on: {
+            confirm(e) {
+                if(!can('delete_role')) return;
+
+                deleteRole(role.id).then(_ => {
+                    if(!!onDeleted) {
+                        onDeleted();
+                    }
+                    store.dispatch('deleteRole', role);
+                    store.getters.vfm.hide(uid);
+                });
             },
             cancel(e) {
                 store.getters.vfm.hide(uid);

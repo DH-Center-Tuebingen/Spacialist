@@ -410,7 +410,10 @@ const de = {
             modal: {
                 new: {
                     title: 'Neue Rolle'
-                }
+                },
+                delete: {
+                    alert: 'Wenn du <span class="fw-bold">{name}</span> löschst, wird die Zugehörigkeit von einem Benutzer entfernt. | Wenn du <span class="fw-bold">{name}</span> löschst, wird die Zugehörigkeit von {cnt} Benutzern entfernt.',
+                },
             },
             'add-permission-placeholder': 'Berechtigungen hinzufügen'
         },

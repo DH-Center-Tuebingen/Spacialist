@@ -410,7 +410,10 @@ const en = {
             modal: {
                 new: {
                     title: 'New Role'
-                }
+                },
+                delete: {
+                    alert: 'If you delete <span class="fw-bold">{name}</span>, the connection to one user is deleted. | If you delete <span class="fw-bold">{name}</span>, the connection to {cnt} users is deleted.',
+                },
             },
             'add-permission-placeholder': 'Add permissions'
         },

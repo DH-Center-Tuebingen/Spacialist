@@ -211,6 +211,13 @@ export async function addUser(user) {
     );
 };
 
+export async function addRole(role) {
+    const data = only(role, ['name', 'display_name', 'description']);
+    return $httpQueue.add(
+        () =>  http.post('role', data).then(response => response.data)
+    );
+};
+
 export async function sendResetPasswordMail(email) {
     const data = {
         email: email,
@@ -528,6 +535,12 @@ export async function patchUserData(uid, data) {
     );
 };
 
+export async function patchRoleData(rid, data) {
+    return $httpQueue.add(
+        () => http.patch(`role/${rid}`, data).then(response => response.data)
+    );
+};
+
 export async function updateReference(id, eid, url, data) {
     $httpQueue.add(
         () => http.patch(`/entity/reference/${id}`, data).then(response => {
@@ -550,6 +563,12 @@ export async function updateReference(id, eid, url, data) {
 export async function deactivateUser(id) {
     return $httpQueue.add(
         () =>  http.delete(`user/${id}`).then(response => response.data)
+    );
+};
+
+export async function deleteRole(id) {
+    return $httpQueue.add(
+        () => http.delete(`role/${id}`).then(response => response.data)
     );
 };
 
