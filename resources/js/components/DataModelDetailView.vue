@@ -42,10 +42,10 @@
                                 <template v-slot:option="{ option }">
                                     {{ translateConcept(option.thesaurus_url) }}
                                 </template>
-                                <template v-slot:tag="{ option, remove, disabled }">
+                                <template v-slot:tag="{ option, handleTagRemove, disabled }">
                                     <div class="multiselect-tag">
                                         {{ translateConcept(option.thesaurus_url) }}
-                                        <i v-if="!disabled" @click.prevent @mousedown.prevent.stop="remove(option)" />
+                                        <i v-if="!disabled" @click.prevent @mousedown.prevent.stop="handleTagRemove(option, $event)" />
                                     </div>
                                 </template>
                         </multiselect>
