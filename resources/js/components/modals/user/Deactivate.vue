@@ -3,7 +3,7 @@
     classes="modal-container"
     content-class="sp-modal-content sp-modal-content-xs"
     v-model="state.show"
-    name="user-info-modal">
+    name="deactivate-user-modal">
     <div class="modal-header">
         <h5 class="modal-title">
             {{

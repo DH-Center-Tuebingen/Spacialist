@@ -74,13 +74,13 @@
                         </td>
                         <td>
                             <div class="dropdown">
-                                <span id="dropdownMenuButton" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span :id="`user-options-dropdown-${user.id}`" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <i class="fas fa-fw fa-ellipsis-h"></i>
                                     <sup class="notification-info" v-if="userDirty(user.id)">
                                         <i class="fas fa-fw fa-xs fa-circle text-warning"></i>
                                     </sup>
                                 </span>
-                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <div class="dropdown-menu" :aria-labelledby="`user-options-dropdown-${user.id}`">
                                     <a class="dropdown-item" href="#" v-if="userDirty(user.id)" :disabled="!userValid(user.id) || !can('add_remove_role')" @click.prevent="patchUser(user.id)">
                                         <i class="fas fa-fw fa-check text-success"></i> {{ t('global.save') }}
                                     </a>
@@ -248,11 +248,7 @@
                 const data = {};
 
                 if(v.fields[id].roles.meta.dirty) {
-                    let roles = [];
-                    for(let i=0; i<v.fields[id].roles.value.length; i++) {
-                        roles.push(v.fields[id].roles.value[i].id);
-                    }
-                    data.roles = roles;
+                    data.roles = v.fields[id].roles.value.map(r => r.id);
                 }
                 if(v.fields[id].email.meta.dirty) {
                     data.email = v.fields[id].email.value;
