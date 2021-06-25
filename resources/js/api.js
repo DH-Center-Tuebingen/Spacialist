@@ -321,6 +321,13 @@ export async function addEntity(entity) {
     );
 };
 
+export async function duplicateEntity(entity) {
+    const data = {};
+    return $httpQueue.add(
+        () => http.post(`/entity/${entity.id}/duplicate`, data).then(response => response.data)
+    );
+};
+
 export async function addEntityType(et) {
     const data = {
         concept_url: et.label.concept_url,
@@ -442,6 +449,22 @@ export async function patchAttribute(entityId, attributeId, data) {
 export async function patchAttributes(entityId, data) {
     return $httpQueue.add(
         () => http.patch(`/entity/${entityId}/attributes`, data).then(response => response.data).catch(error => { throw error; })
+    );
+};
+
+export async function moveEntity(entityId, parentId = null, rank = null) {
+    const data = {
+        parent_id: parentId,
+    };
+    if(!!rank) {
+        data.rank = rank;
+    } else {
+        data.rank = 0;
+        data.to_end = true;
+    }
+
+    return $httpQueue.add(
+        () => http.patch(`/entity/${entityId}/rank`, data).then(response => response.data)
     );
 };
 

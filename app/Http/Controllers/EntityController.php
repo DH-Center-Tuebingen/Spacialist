@@ -6,12 +6,15 @@ use App\Attribute;
 use App\AttributeValue;
 use App\Entity;
 use App\EntityAttribute;
+use App\EntityFile;
 use App\EntityType;
 use App\Geodata;
+use App\Reference;
 use App\ThConcept;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class EntityController extends Controller {
     /**
@@ -310,6 +313,64 @@ class EntityController extends Controller {
         }
     }
 
+    public function duplicateEntity(Request $request, $id) {
+        $user = auth()->user();
+        if(!$user->can('create_concepts')) {
+            return response()->json([
+                'error' => __('You do not have the permission to duplicate an entity')
+            ], 403);
+        }
+
+        try {
+            $entity = Entity::without(['user', 'parentIds', 'parentNames'])->findOrFail($id);
+            unset($entity->comments_count);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist')
+            ], 400);
+        }
+
+        $duplicate = $entity->replicate();
+        $duplicate->created_at = Carbon::now();
+        $duplicate->geodata_id = null;
+        if(isset($duplicate->root_entity_id)) {
+            $duplicate->rank = Entity::where('root_entity_id', $duplicate->root_entity_id)->max('rank') + 1;
+        } else {
+            $duplicate->rank = Entity::whereNull('root_entity_id')->max('rank') + 1;
+        }
+        $duplicate->user_id = $user->id;
+        $duplicate->name = sp_copyname($duplicate->name);
+        $duplicate->save();
+
+        // Files, bibliographies, attribute_values
+        $fileLinks = EntityFile::where('entity_id', $entity->id)->get();
+        foreach($fileLinks as $fileLink) {
+            $newLink = $fileLink->replicate();
+            $newLink->entity_id = $duplicate->id;
+            $newLink->user_id = $user->id;
+            $newLink->save();
+        }
+        $refs = Reference::where('entity_id', $entity->id)->get();
+        foreach($refs as $ref) {
+            $newLink = $ref->replicate();
+            $newLink->entity_id = $duplicate->id;
+            $newLink->user_id = $user->id;
+            $newLink->created_at = Carbon::now();
+            $newLink->save();
+        }
+        $values = AttributeValue::where('entity_id', $entity->id)->get();
+        foreach($values as $val) {
+            unset($val->comments_count);
+            $newValue = $val->replicate();
+            $newValue->entity_id = $duplicate->id;
+            $newValue->user_id = $user->id;
+            $newValue->created_at = Carbon::now();
+            $newValue->save();
+        }
+
+        return response()->json($duplicate, 201);
+    }
+
     // PATCH
 
     public function patchAttributes($id, Request $request) {
@@ -538,6 +599,7 @@ class EntityController extends Controller {
         $this->validate($request, [
             'rank' => 'required|integer',
             'parent_id' => 'nullable|integer|exists:entities,id',
+            'to_end' => 'boolean',
         ]);
 
         try {
@@ -550,6 +612,15 @@ class EntityController extends Controller {
 
         $rank = $request->get('rank');
         $parent_id = $request->get('parent_id');
+        $addToEnd = $request->get('to_end');
+
+        if($addToEnd) {
+            if(isset($parent_id)) {
+                $rank = Entity::where('root_entity_id', $parent_id)->max('rank') + 1;
+            } else {
+                $rank = Entity::whereNull('root_entity_id')->max('rank') + 1;
+            }
+        }
 
         Entity::patchRanks($rank, $id, $parent_id, $user);
         return response()->json(null, 204);

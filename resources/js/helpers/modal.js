@@ -16,6 +16,7 @@ import {
     updateAttributeDependency,
     addRole,
     deleteRole,
+    moveEntity,
 } from '../api.js';
 
 import {
@@ -39,6 +40,7 @@ import DeleteRole from '../components/modals/role/Delete.vue';
 import BibliographyItem from '../components/modals/bibliography/Item.vue';
 import DeleteBibliographyItem from '../components/modals/bibliography/Delete.vue';
 import AddEntity from '../components/modals/entity/Add.vue';
+import MoveEntity from '../components/modals/entity/Move.vue';
 import DeleteEntity from '../components/modals/entity/Delete.vue';
 import AddEntityType from '../components/modals/entitytype/Add.vue';
 import EditEntityType from '../components/modals/entitytype/Edit.vue';
@@ -369,6 +371,30 @@ export function ShowAddEntity(parent = null, onAdded) {
                     const node = store.dispatch('addEntity', data);
                     if(!!onAdded) {
                         onAdded(node);
+                    }
+                    store.getters.vfm.hide(uid);
+                });
+            }
+        }
+    });
+}
+
+export function ShowMoveEntity(entity, onAdded) {
+    const uid = `MoveEntity-${getTs()}`;
+    store.getters.vfm.show({
+        component: MoveEntity,
+        bind: {
+            name: uid,
+            entity: entity,
+        },
+        on: {
+            cancel(e) {
+                store.getters.vfm.hide(uid);
+            },
+            confirm(parentId) {
+                moveEntity(entity.id, parentId).then(data => {
+                    if(!!onAdded) {
+                        onAdded(entity.id, parentId, data);
                     }
                     store.getters.vfm.hide(uid);
                 });

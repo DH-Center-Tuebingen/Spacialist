@@ -35,6 +35,12 @@ if(!function_exists('sp_loggable_models')) {
     }
 }
 
+if(!function_exists('sp_copyname')) {
+    function sp_copyname($name) {
+        return $name . " - " . __("Copy");
+    }
+}
+
 if(!function_exists('sp_parse_boolean')) {
     function sp_parse_boolean($str) {
         $acceptable = [true, 1, '1', 'true', 'TRUE'];

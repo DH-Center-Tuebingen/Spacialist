@@ -214,6 +214,12 @@ export function getEntityTypeAttributeSelections(id) {
     return filteredSel;
 }
 
+export function isAllowedSubEntityType(parentId, id) {
+    const parent = store.getters.entityTypes[parentId];
+    if(!parent) return false;
+    return parent.sub_entity_types.some(et => et.id == id);
+}
+
 export function defaultAttributeValue(datatype) {
     const val = {};
     switch(datatype) {

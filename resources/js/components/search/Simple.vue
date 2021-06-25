@@ -68,6 +68,10 @@
                 type: Function,
                 required: true,
             },
+            filterFn: {
+                type: Function,
+                required: false,
+            },
             keyText: {
                 type: String,
                 required: false,
@@ -89,6 +93,7 @@
                 delay,
                 limit,
                 endpoint,
+                filterFn,
                 keyText,
                 keyFn,
                 defaultValue,
@@ -104,7 +109,12 @@
                 if(!query) {
                     return await new Promise(r => r([]));
                 }
-                return await props.endpoint(query);
+                const results = await endpoint.value(query);
+                if(!!filterFn && !!filterFn.value) {
+                    return filterFn.value(results, query);
+                } else {
+                    return results;
+                }
             };
             const displayResult = result => {
                 if(!!keyText) {
