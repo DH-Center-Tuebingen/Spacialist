@@ -12,7 +12,7 @@ import { provideToast } from './plugins/toast.js';
 // Reusable Components
 import AttributeList from './components/AttributeList.vue';
 import EntityTypeList from './components/EntityTypeList.vue';
-import EntityTree from './components/EntityTree.vue';
+import EntityTree from './components/tree/Entity.vue';
 import EntityBreadcrumbs from './components/EntityBreadcrumbs.vue';
 import UserAvatar from './components/UserAvatar.vue';
 import ActivityLog from './components/ActivityLog.vue';
@@ -36,7 +36,7 @@ import VueUploadComponent from 'vue-upload-component';
 import DatePicker from 'vue2-datepicker';
 import InfiniteLoading from 'vue-infinite-loading';
 import draggable from 'vuedraggable';
-import { Tree, Node } from "tree-vue-component";
+import { Tree, Node, } from "tree-vue-component";
 import VueFinalModal from 'vue-final-modal';
 
 // Components

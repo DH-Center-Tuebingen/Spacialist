@@ -74,6 +74,7 @@
         </div>
         <tree-search
             class="mb-2"
+            @selected="searchResultSelected"
             :on-multiselect="onSearchMultiSelect"
             :on-clear="resetHighlighting">
         </tree-search>
@@ -119,23 +120,24 @@
     import { useRoute } from 'vue-router';
     import { useI18n } from 'vue-i18n';
 
-    // import { Tree, Node } from "tree-vue-component";
-    // import TreeNode from '../components/TreeNode.vue';
+    import TreeSearch from './Search.vue';
 
-    import store from '../bootstrap/store.js';
-    import router from '../bootstrap/router.js';
+    import store from '../../bootstrap/store.js';
+    import router from '../../bootstrap/router.js';
 
     import {
         fetchChildren,
-    } from '../helpers/tree.js';
+    } from '../../helpers/tree.js';
 
-    import { ShowAddEntity } from '../helpers/modal.js';
+    import { ShowAddEntity } from '../../helpers/modal.js';
+import { getNodeFromPath } from 'tree-component';
 
     export default {
         components: {
             // node: Node,
             // treenode: TreeNode,
             // tree: Tree,
+            'tree-search': TreeSearch,
         },
         setup(props) {
             const { t } = useI18n();
@@ -193,11 +195,69 @@
             const openAddEntityDialog = _ => {
                 ShowAddEntity(null);
             };
+            const openPath = async (ids) => {
+                const index = ids.pop();
+                const elem = store.getters.entities[index];
+                if(ids.length == 0) {
+                    return elem;
+                }
+                if(!elem.childrenLoaded) {
+                    elem.state.loading = true;
+                    const children = await fetchChildren(elem.id, state.sort);
+                    elem.state.loading = false;
+                    elem.children = children;
+                    elem.childrenLoaded = true;
+                    // Have to get current elemen from tree (not entities array) as well
+                    // otherwise children and childrenLoaded props are not correctly set
+                    const htmlElem = document.getElementById(`tree-node-${elem.id}`).parentElement;
+                    const node = getNodeFromPath(state.tree, htmlElem.getAttribute('data-path').split(','));
+                    node.children = children;
+                    node.childrenLoaded = true;
+                }
+                elem.state.opened = true;
+                return openPath(ids, elem.children);
+            };
+            const resetHighlighting = _ => {
+                state.highlightedItems.forEach(i => i.state.highlighted = false);
+                state.highlightedItems = [];
+            };
+            const highlightItems = async items => {
+                for(let i=0; i<items.length; i++) {
+                    await openPath(items[i].parentIds).then(targetNode => {
+                        targetNode.state.highlighted = true;
+                        state.highlightedItems.push(targetNode);
+                    });
+                }
+                // items.forEach(i => {
+                //     return openPath(i.parentIds).then(targetNode => {
+                //         targetNode.state.highlighted = true;
+                //         state.highlightedItems.push(targetNode);
+                //     });
+                // });
+            };
+            const searchResultSelected = item => {
+                resetHighlighting();
+                if(!item) return;
+
+                if(item.glob) {
+                    highlightItems(item.results);
+                } else {
+                    router.push({
+                        name: 'entitydetail',
+                        params: {
+                            id: item.id
+                        },
+                        query: currentRoute.query
+                    });
+                }
+            };
 
             // DATA
             const state = reactive({
+                highlightedItems: [],
                 tree: computed(_ => store.getters.tree),
                 entity: computed(_ => store.getters.entity),
+                entities: computed(_ => store.getters.entities),
                 topLevelCount: computed(_ => state.tree.length || 0),
                 sort: {
                     by: 'rank',
@@ -205,14 +265,10 @@
                 },
             });
 
-            console.log(state.tree);
-
             // ON MOUNTED
             onMounted(_ => {
                 console.log("entity tree component mounted");
-            });
-
-            // RETURN
+            });this
             return {
                 t,
                 // HELPERS
@@ -222,6 +278,7 @@
                 getSortingStateClass,
                 setSort,
                 openAddEntityDialog,
+                searchResultSelected,
                 // STATE
                 state,
             };
@@ -563,40 +620,8 @@
     //         droppedToRootLevel(tgt, tgtPath) {
     //             return tgt.state.dropPosition != DropPosition.inside && tgtPath.length == 1;
     //         },
-    //         onSearchMultiSelect(items) {
-    //             this.resetHighlighting();
-    //             this.highlightItems(items);
-    //         },
     //         onSearchClear() {
     //             this.resetHighlighting();
-    //         },
-    //         highlightItems(items) {
-    //             items.forEach(i => {
-    //                 return this.openPath(i.parentIds).then(targetNode => {
-    //                     targetNode.state.highlighted = true;
-    //                     this.highlightedItems.push(targetNode);
-    //                 });
-    //             });
-    //         },
-    //         resetHighlighting() {
-    //             this.highlightedItems.forEach(i => i.state.highlighted = false);
-    //             this.highlightedItems = [];
-    //         },
-    //         async openPath(ids, tree=this.tree) {
-    //             const index = ids.pop();
-    //             const elem = this.entities[index];
-    //             if(ids.length == 0) {
-    //                 return elem;
-    //             }
-    //             if(!elem.childrenLoaded) {
-    //                 elem.state.loading = true;
-    //                 const children = await this.fetchChildren(elem.id);
-    //                 elem.state.loading = false;
-    //                 elem.children = children;
-    //                 elem.childrenLoaded = true;
-    //             }
-    //             elem.state.opened = true;
-    //             return this.openPath(ids, elem.children);
     //         },
     //         selectEntity() {
     //             if(!this.selectedEntity.id) return;

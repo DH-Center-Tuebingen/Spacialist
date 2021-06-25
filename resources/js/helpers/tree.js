@@ -1,4 +1,4 @@
-import TreeNode from '../components/TreeNode.vue';
+import TreeNode from '../components/tree/Node.vue';
 import store from '../bootstrap/store.js';
 import {
     fetchChildren as fetchChildrenApi,
@@ -99,18 +99,5 @@ export class Node {
         // this.dragDelay = vm.dragDelay;
         // this.dragAllowed = _ => vm.isDragAllowed;
         // this.onToggle = vm.itemToggle;
-        // this.contextmenu = TreeContextmenu;
-        this.onContextMenuAdd = function(parent) {
-            vm.requestAddNewEntity(parent);
-        };
-        this.onContextMenuDuplicate = function(entity, path) {
-            const parent = entity.root_entity_id ? vm.entities[entity.root_entity_id] : null;
-            vm.onAdd(entity, parent);
-        };
-        this.onContextMenuDelete = function(entity, path) {
-            EventBus.$emit('entity-delete', {
-                entity: entity
-            });
-        };
     }
 }
