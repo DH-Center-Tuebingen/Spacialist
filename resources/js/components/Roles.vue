@@ -3,7 +3,7 @@
         <h4 class="mb-0">
             {{ t('global.roles') }}
             <button type="button" class="btn btn-outline-success" @click="showAddRoleModal()" :disabled="!can('add_edit_role')">
-                <i class="fas fa-fw fa-plus"></i> {{ t('main.role.add-button') }}
+                <i class="fas fa-fw fa-plus"></i> {{ t('main.role.add_button') }}
             </button>
         </h4>
         <div class="table-responsive flex-grow-1">
@@ -11,7 +11,7 @@
                 <thead class="sticky-top">
                     <tr>
                         <th>{{ t('global.name') }}</th>
-                        <th>{{ t('global.display-name') }}</th>
+                        <th>{{ t('global.display_name') }}</th>
                         <th>{{ t('global.description') }}</th>
                         <th>{{ t('global.permissions') }}</th>
                         <th>{{ t('global.created_at') }}</th>
@@ -68,7 +68,7 @@
                                 :mode="'tags'"
                                 :disabled="!can('add_remove_permission')"
                                 :options="state.permissions"
-                                :placeholder="t('main.role.add-permission-placeholder')"
+                                :placeholder="t('main.role.add_permission_placeholder')"
                                 @input="v.fields[role.id].permissions.handleInput">
                             </multiselect>
 

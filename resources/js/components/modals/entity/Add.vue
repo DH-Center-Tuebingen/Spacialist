@@ -7,6 +7,9 @@
         <div class="modal-header">
             <h5 class="modal-title">
                 {{ t('main.entity.modals.add.title') }}
+                <small v-if="state.hasParent">
+                    {{ parent.name }}
+                </small>
             </h5>
             <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
             </button>
@@ -111,6 +114,7 @@
                     type: {},
                     parent_id: null,
                 },
+                hasParent: computed(_ => !!parent.value),
                 entityTypes: computed(_ => {
                     if(parent.value && parent.value.entity_type_id) {
                         return getEntityType(parent.value.entity_type_id).sub_entity_types;
@@ -141,6 +145,7 @@
                 // HELPERS
                 translateConcept,
                 // PROPS
+                parent,
                 // LOCAL
                 add,
                 closeModal,

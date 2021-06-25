@@ -2,8 +2,6 @@
     <div class="row">
         <label class="col-md-2 form-label"></label>
         <div class="col-md-10">
-            <!-- <input class="form-control" type="text" v-model="data" :readonly="readonly" @input="onChange" /> -->
-
             <multiselect
                 v-model="data"
                 id="language-search"
@@ -15,24 +13,6 @@
                 :readonly="readonly"
                 :placeholder="t('global.select.placeholder')"
                 @change="onChange">
-                <!-- <template v-slot:singlelabel="{ value }">
-                    <div class="multiselect-single-label">
-                        <div>
-                            <span class="fw-medium">{{ value.title }}</span> by
-                            <cite>
-                                {{ value.author }} ({{ value.year }})
-                            </cite>
-                        </div>
-                    </div>
-                </template>
-                <template v-slot:option="{ option }">
-                    <div>
-                        <span class="fw-medium">{{ option.title }}</span> by
-                        <cite>
-                            {{ option.author }} <span class="fw-light">({{ option.year }})</span>
-                        </cite>
-                    </div>
-                </template> -->
             </multiselect>
             <button type="button" class="btn btn-outline-primary mt-2" @click="setBrowserLanguage()" :disabled="readonly" v-if="state.showSetButton" v-html="t('main.preference.info.set_to_language', {lang: state.browserLanguage})" />
         </div>

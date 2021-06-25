@@ -22,7 +22,7 @@
                 <h4>
                     {{ t('main.datamodel.attribute.title') }}
                     <button type="button" class="btn btn-outline-success" @click="createAttribute()">
-                        <i class="fas fa-fw fa-plus"></i> {{ t('main.datamodel.attribute.add-button') }}
+                        <i class="fas fa-fw fa-plus"></i> {{ t('main.datamodel.attribute.add_button') }}
                     </button>
                 </h4>
                 <div class="form-check form-switch">

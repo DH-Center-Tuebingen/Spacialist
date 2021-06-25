@@ -85,7 +85,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <strong>{{ t('main.preference.key.tag-root') }}</strong>
+                            <strong>{{ t('main.preference.key.tag_root') }}</strong>
                         </td>
                         <td>
                             <tags-preference
@@ -117,7 +117,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <strong>{{ t('main.preference.key.link-thesaurex') }}</strong>
+                            <strong>{{ t('main.preference.key.link_thesaurex') }}</strong>
                         </td>
                         <td>
                             <thesaurus-link-preference

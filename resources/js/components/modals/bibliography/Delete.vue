@@ -15,7 +15,7 @@
     <div class="modal-body">
         <alert
             :class="{'mb-0': !state.needsAlert}"
-            :message="t('global.delete-name.desc', {name: state.title})"
+            :message="t('global.delete_name.desc', {name: state.title})"
             :type="'info'"
             :noicon="true" />
         <alert

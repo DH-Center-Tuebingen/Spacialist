@@ -20,6 +20,7 @@ const en = {
         clear: 'Clear',
         confirm: 'OK',
         create: 'Create',
+        move: 'Move',
         parse: 'Parse',
         list: {
             nr_of_entries: 'No Entries | 1 Entry | {cnt} Entries',
@@ -27,35 +28,32 @@ const en = {
             fetch_next_entries: 'Fetch next entries',
             no_more_entries: 'No more entries',
         },
-        'select-all': 'Select All',
-        'select-none': 'Deselect All',
-        'delete-name': {
+        select_all: 'Select All',
+        select_none: 'Deselect All',
+        delete_name: {
             title: 'Delete {name}',
             desc: 'Do you really want to delete <span class="fw-bold">{name}</span>?'
         },
-        'deactivate_name': {
+        deactivate_name: {
             title: 'Deactivate {name}',
             desc: 'Do you really want to deactivate {name}?',
             info: 'Certain entries can not be deleted or have to be deactivated first. Otherwise deleting these entries could lead to data loss.'
         },
-        'edit-name': {
-            title: 'Edit {name}'
-        },
-        'remove-name': {
+        remove_name: {
             title: 'Remove {name}',
             desc: 'Do you really want to remove {name}?'
         },
-        'unlink-name': {
+        unlink_name: {
             title: 'Remove Link - {name}',
             desc: 'Do you really want to unlink {file} from {ent}?'
         },
-        'all-entities': 'All Entities',
+        all_entities: 'All Entities',
         unlinked: 'Unlinked',
         unlink: 'Unlink',
         link: 'Link',
-        'unlink-from': 'Unlink from {name}',
-        'link-to': 'Link to {name}',
-        'has-links': 'Has no links | Has one link | Has {cnt} links',
+        unlink_from: 'Unlink from {name}',
+        link_to: 'Link to {name}',
+        has_links: 'Has no links | Has one link | Has {cnt} links',
         discard: {
             title: 'Unsaved Changes',
             msg: 'There are unsaved changes on the current page. Do you really want to continue and discard changes?',
@@ -75,13 +73,13 @@ const en = {
         search_no_term_info: 'Enter a search term',
         search_no_term_info_global: 'Enter a search term to search globally',
         login: 'Login',
-        'login-title': 'Login',
-        'login-subtitle': 'Welcome to Spacialist',
+        login_title: 'Login',
+        login_subtitle: 'Welcome to Spacialist',
         download: 'Download',
-        'download-name': 'Download {name}',
+        download_with_name: 'Download {name}',
         upload: 'Upload',
         preview: 'Preview',
-        no_preview: 'No preview available',
+        preview_not_available: 'No preview available',
         note: 'Note',
         information: 'Information',
         tools: {
@@ -119,7 +117,7 @@ const en = {
         select: {
             placeholder: 'Select option',
             select: 'Press enter to select',
-            deselect: 'Press enter to remove'
+            deselect: 'Press enter to remove',
         },
         attribute: 'Attribute',
         attributes: {
@@ -153,7 +151,6 @@ const en = {
             sql_info: `You can use <code class="normal">:entity_id</code> in your SQL-Query to reference the entity this attribute is assigned to.`,
             iconclass: 'Iconclass'
         },
-        active: 'Active',
         activity: 'Activity',
         action: 'Action',
         users: 'User | Users',
@@ -174,14 +171,14 @@ const en = {
         url: 'URL',
         name: 'Name',
         nickname: 'Nickname',
-        'display-name': 'Displayname',
+        display_name: 'Displayname',
         email: 'E-Mail Address',
         email_or_nick: 'E-Mail Address or Nickname',
         phonenumber: 'Phone number',
         password: 'Password',
         confirm_password: 'Repeat Password',
-        'remember-me': 'Remember me',
-        'orcid': 'ORCID',
+        remember_me: 'Remember me',
+        orcid: 'ORCID',
         description: 'Description',
         roles: 'Roles',
         permissions: 'Permissions',
@@ -194,22 +191,23 @@ const en = {
         reply_to: 'Reply',
         replying_to: 'In reply to {name}',
         type: 'Type',
-        'root-attribute': 'Parent-Attribute',
-        'root-attribute-toggle': 'Use value of an existing attribute as Parent-Element',
-        'root-element': 'Parent-Element',
+        parent_entity: 'Parent-Entity',
+        root_attribute: 'Parent-Attribute',
+        root_attribute_toggle: 'Use value of an existing attribute as Parent-Element',
+        root_element: 'Parent-Element',
         recursive: 'All descendants (recursive)',
         content: 'Content',
         column: 'Column | Columns',
         add_column: 'Add column',
-        'geometry-type': 'Geometry-Type',
-        'depends-on': 'Depends on',
+        geometry_type: 'Geometry-Type',
+        depends_on: 'Depends on',
         preference: 'Preference | Preferences',
         value: 'Value',
-        'allow-override': 'Allow Override?',
+        allow_override: 'Allow Override?',
         tag: 'Tag | Tags',
         set: 'Set',
-        'has-tags': 'Has no tags | Has one tag | Has {cnt} tags',
-        'from-subentity': 'Is from Sub-Entity',
+        has_tags: 'Has no tags | Has one tag | Has {cnt} tags',
+        from_subentity: 'Is from Sub-Entity',
         comments: {
             deleted_info: 'Comment deleted',
             empty_list: 'No comments yet.',
@@ -292,6 +290,12 @@ const en = {
             },
             tree: {
                 add: 'Add new Top-Level-Entity',
+                contextmenu: {
+                    add: 'Add Sub-Entity',
+                    duplicate: 'Create Duplicate',
+                    move: 'Move in Tree',
+                    delete: 'Delete Entity',
+                },
                 sorts: {
                     asc: {
                         rank: 'Rank - Ascending (Drag & Drop)',
@@ -313,7 +317,11 @@ const en = {
             },
             modals: {
                 add: {
-                    title: 'New Entity'
+                    title: 'New Entity',
+                },
+                move: {
+                    title: 'Move Entity',
+                    to_root: 'Add to Root',
                 },
                 edit: {
                     title_type: 'Edit Entitytype - {name}',
@@ -335,33 +343,27 @@ const en = {
                     }
                 }
             },
-            menu: {
-                add: 'Add new Entity',
-
-            },
             references: {
                 title: 'References',
                 empty: 'No References found',
                 certainty: 'Certainty',
-                certaintyc: 'Comment',
-                certaintyu: 'Update Certainty',
                 bibliography: {
                     title: 'Literature',
                     add: 'Add new Reference',
                     comment: 'Comment',
-                    'add-button': 'Add Reference'
+                    add_button: 'Add Reference',
                 },
                 toasts: {
-                    'updated-certainty': {
+                    updated_certainty: {
                         title: 'Certainty updated',
                         msg: 'Certainty of {name} successfully set to {i}%.'
                     }
                 }
             },
             attributes: {
-                'open-map': 'Open Map',
-                'add-wkt': 'Add WKT',
-                'set-location': 'Set Location',
+                open_map: 'Open Map',
+                add_wkt: 'Add WKT',
+                set_location: 'Set Location',
                 BC: 'BC',
                 bc: '@:main.entity.attributes.BC',
                 AD: 'AD',
@@ -382,7 +384,7 @@ const en = {
             }
         },
         user: {
-            'add-button': 'Add new User',
+            add_button: 'Add new User',
             active_users: 'Active Users',
             deactivated_users: 'Deactivated Users',
             empty_list: 'User-list is empty',
@@ -397,10 +399,10 @@ const en = {
                     title: 'New User'
                 }
             },
-            'add-role-placeholder': 'Add roles'
+            add_role_placeholder: 'Add roles'
         },
         role: {
-            'add-button': 'Add new Role',
+            add_button: 'Add new Role',
             toasts: {
                 updated: {
                     title: 'Role updated',
@@ -415,10 +417,9 @@ const en = {
                     alert: 'If you delete <span class="fw-bold">{name}</span>, the connection to one user is deleted. | If you delete <span class="fw-bold">{name}</span>, the connection to {cnt} users is deleted.',
                 },
             },
-            'add-permission-placeholder': 'Add permissions'
+            add_permission_placeholder: 'Add permissions'
         },
         activity: {
-            title: '@:global.activity',
             title_project: 'Project Activity | Project Activities',
             title_user: 'Your Activity | Your Activities',
             rawdata: 'Raw Data',
@@ -430,11 +431,11 @@ const en = {
         },
         datamodel: {
             toasts: {
-                'updated-type': {
+                updated_type: {
                     title: 'Entity-Type updated',
                     msg: '{name} successfully updated.'
                 },
-                'added-attribute': {
+                added_attribute: {
                     title: 'Attribute added',
                     msg: '{name} successfully added to {etName}.'
                 },
@@ -445,7 +446,7 @@ const en = {
             },
             attribute: {
                 title: 'Available Attributes',
-                'add-button': 'Add Attribute',
+                add_button: 'Add Attribute',
                 show_hidden: 'Show hidden',
                 modal: {
                     new: {
@@ -458,7 +459,7 @@ const en = {
             },
             entity: {
                 title: 'Available Entity-Types',
-                'add-button': 'Add Entity-Type',
+                add_button: 'Add Entity-Type',
                 modal: {
                     new: {
                         title: 'New Entity-Type'
@@ -471,8 +472,8 @@ const en = {
             detail: {
                 properties: {
                     title: 'Properties',
-                    'top-level': 'Top-Level-Entity-Type?',
-                    'sub-types': 'Allowed Sub-Entity-Types'
+                    top_level: 'Top-Level-Entity-Type?',
+                    sub_types: 'Allowed Sub-Entity-Types'
                 },
                 attribute: {
                     title: 'Added Attributes',
@@ -501,9 +502,9 @@ const en = {
                     right: 'Right Column',
                 },
                 tooltips: 'Show Tooltips',
-                'tag-root': 'Thesaurus-URI for Tags',
+                tag_root: 'Thesaurus-URI for Tags',
                 extensions: 'Loaded Extensions',
-                'link-thesaurex': 'Show link to ThesauRex',
+                link_thesaurex: 'Show link to ThesauRex',
                 project: {
                     name: 'Projectname',
                     maintainer: 'Maintainer',
@@ -514,19 +515,6 @@ const en = {
                     epsg: 'EPSG-Code'
                 }
             },
-            labels: {
-                prefs: {
-                    'gui-language': '@:main.preference.key.language',
-                    'columns': '@:main.preference.key.columns.title',
-                    'show-tooltips': '@:main.preference.key.tooltips',
-                    'tag-root': '@:main.preference.key.tag-root',
-                    'load-extensions': '@:main.preference.key.extensions',
-                    'link-to-thesaurex': '@:main.preference.key.link-thesaurex',
-                    'project-name': '@:main.preference.key.project.name',
-                    'project-maintainer': '@:main.preference.key.project.maintainer',
-                    'map-projection': '@:main.preference.key.map.projection',
-                }
-            }
         },
         about: {
             title: 'About Spacialist',
@@ -534,9 +522,9 @@ const en = {
             release: {
                 name: 'Release Name',
                 time: 'Release Date',
-                'full-name': 'Full Name'
+                full_name: 'Full Name'
             },
-            'build-info': 'Built with <i class="fab fa-fw fa-laravel"></i> & <i class="fab fa-fw fa-vuejs"></i>!',
+            build_info: 'Built with <i class="fab fa-fw fa-laravel"></i> & <i class="fab fa-fw fa-vuejs"></i>!',
             contributor: 'Contributor | Contributors'
         },
         bibliography: {
@@ -545,7 +533,7 @@ const en = {
                 paste_info: 'You can use <kbd><kbd>ctrl</kbd> + <kbd>v</kbd></kbd> to fill out the fields with a BibTeX entry from your clipboard.',
                 new: {
                     title: 'New Entry',
-                    'bibtex-code': 'BibTeX-Code'
+                    bibtex_code: 'BibTeX-Code'
                 },
                 edit: {
                     title: 'Edit entry'
@@ -564,9 +552,9 @@ const en = {
             add: 'Add new Bibliography-Entry',
             import: 'Import BibTeX-File',
             export: 'Export BibTeX-File',
-            'show-all-fields': 'Show all fields',
+            show_all_fields: 'Show all fields',
             column: {
-                'cite-key': 'Citation-Key',
+                citekey: 'Citation-Key',
                 author: 'Author',
                 editor: 'Editor',
                 title: 'Title',
@@ -591,13 +579,13 @@ const en = {
             }
         },
         map: {
-            'init-error': 'Several init-*-Attributes are provided. Only one is allowed.',
+            init_error: 'Several init-*-Attributes are provided. Only one is allowed.',
             layer: 'Layer | Layers',
             baselayer: 'Baselayer | Baselayers',
             overlay:'Overlay | Overlays',
-            'entity-layers': 'Entity-Layer',
-            'geometry-name': 'Geometry #{id}',
-            'coords-in-epsg': 'Coordinates in EPSG:{epsg}',
+            entity_layers: 'Entity-Layer',
+            geometry_name: 'Geometry #{id}',
+            coords_in_epsg: 'Coordinates in EPSG:{epsg}',
             length: 'Length',
             area: 'Area',
             draw: {
@@ -612,13 +600,13 @@ const en = {
                 },
                 modify: {
                     desc: 'Modify geometries',
-                    'pos-desc': 'Save modifications',
-                    'neg-desc': 'Discard modifications'
+                    pos_desc: 'Save modifications',
+                    neg_desc: 'Discard modifications'
                 },
                 delete: {
                     desc: 'Delete geometries',
-                    'pos-desc': 'Confirm delete',
-                    'neg-desc': 'Discard delete'
+                    pos_desc: 'Confirm delete',
+                    neg_desc: 'Discard delete'
                 },
                 measure: {
                     desc: 'Toggle measuring tape'

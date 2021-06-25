@@ -7,10 +7,10 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">
-                    {{ t('global.login-title') }}
+                    {{ t('global.login_title') }}
                 </h5>
                 <h6 class="card-subtitle mb-2 text-muted">
-                    {{ t('global.login-subtitle') }}
+                    {{ t('global.login_subtitle') }}
                 </h6>
                 <p class="card-text">
                     <form @submit.prevent="login">
@@ -46,7 +46,7 @@
                             <div class="col-md-6 col-md-offset-4">
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" name="remember" v-model="state.user.remember"> {{ t('global.remember-me') }}
+                                        <input type="checkbox" name="remember" v-model="state.user.remember"> {{ t('global.remember_me') }}
                                     </label>
                                 </div>
                             </div>

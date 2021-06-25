@@ -6,7 +6,7 @@
         name="remove-attribute-from-entity-type-modal">
         <div class="modal-header">
             <h5 class="modal-title">
-                {{ t('global.remove-name.title', {name: translateConcept(state.attribute.thesaurus_url)}) }}
+                {{ t('global.remove_name.title', {name: translateConcept(state.attribute.thesaurus_url)}) }}
             </h5>
             <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
             </button>
@@ -14,7 +14,7 @@
         <div class="modal-body">
             <alert
                 :class="{'mb-0': !state.needsAlert}"
-                :message="t('global.remove-name.desc', {name: translateConcept(state.attribute.thesaurus_url)})"
+                :message="t('global.remove_name.desc', {name: translateConcept(state.attribute.thesaurus_url)})"
                 :type="'info'"
                 :noicon="true" />
             <alert

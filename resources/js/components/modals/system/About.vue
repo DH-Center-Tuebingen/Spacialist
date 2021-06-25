@@ -35,7 +35,7 @@
                         {{ date(state.version.time) }}
                     </span>
                 </dd>
-                <dt class="col-md-6 text-end">{{ t('main.about.release.full-name') }}</dt>
+                <dt class="col-md-6 text-end">{{ t('main.about.release.full_name') }}</dt>
                 <dd class="col-md-6">
                     {{ state.version.full }}
                 </dd>
@@ -56,7 +56,7 @@
             </div>
             <hr />
             <div class="d-flex flex-row justify-content-between">
-                <span v-html="t('main.about.build-info')">
+                <span v-html="t('main.about.build_info')">
                 </span>
                 <div>
                     <a href="https://www.facebook.com/esciencecenter" target="_blank">

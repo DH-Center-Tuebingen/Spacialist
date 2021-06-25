@@ -41,13 +41,13 @@
             <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" id="root-type-toggle" v-model="state.attribute.differRoot">
                 <label class="form-check-label" for="root-type-toggle">
-                    {{ t('global.root-attribute-toggle') }}
+                    {{ t('global.root_attribute_toggle') }}
                 </label>
             </div>
         </div>
         <div class="mb-3" v-show="state.isStringSc && state.attribute.differRoot">
             <label class="col-form-label col-3">
-                {{ t('global.root-attribute') }}:
+                {{ t('global.root_attribute') }}:
             </label>
             <div class="col">
                 <simple-search
@@ -58,7 +58,7 @@
         </div>
         <div class="mb-3" v-show="state.needsRootElement && !state.attribute.differRoot">
             <label class="col-form-label col-3">
-                {{ t('global.root-element') }}:
+                {{ t('global.root_element') }}:
             </label>
             <div class="col">
                 <simple-search

@@ -5,7 +5,7 @@
         <a :href="file.url" :download="file.name" target="_blank">
             <i class="fas fa-fw fa-file-download fa-5x mb-2"></i>
             <h4>
-                {{ $t('global.download-name', {name: file.name}) }}
+                {{ $t('global.download_with_name', {name: file.name}) }}
             </h4>
         </a>
         <div v-if="supportsHtmlRendering && !htmlLoaded">

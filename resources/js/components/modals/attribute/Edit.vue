@@ -34,7 +34,7 @@
             </div>
             <div class="row">
                 <label class="col-form-label col-md-2">
-                    {{ t('global.depends-on') }}:
+                    {{ t('global.depends_on') }}:
                 </label>
                 <div class="col-md-10">
                     <multiselect

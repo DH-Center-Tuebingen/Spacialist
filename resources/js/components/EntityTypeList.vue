@@ -24,7 +24,7 @@
         <button v-if="state.hasAddListener" class="btn btn-outline-success btn-sm mt-2" @click.prevent="onAdd()">
             <i class="fas fa-fw fa-plus"></i>
             <span>
-                {{ t('main.datamodel.entity.add-button') }}
+                {{ t('main.datamodel.entity.add_button') }}
             </span>
         </button>
     </div>

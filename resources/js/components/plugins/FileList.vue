@@ -111,13 +111,13 @@
                         </div>
                         <div>
                             <div class="position-absolute top-0 right-0 m-2">
-                                <span v-if="showLinks && getFileLinks(file).length" :title="$tc('global.has-links', getFileLinks(file).length, {cnt: getFileLinks(file).length})">
+                                <span v-if="showLinks && getFileLinks(file).length" :title="$tc('global.has_links', getFileLinks(file).length, {cnt: getFileLinks(file).length})">
                                     <i class="fas fa-fw fa-link text-info"></i>
                                 </span>
-                                <span v-if="isFromSubEntity(file)" :title="$tc('global.from-subentity')">
+                                <span v-if="isFromSubEntity(file)" :title="$tc('global.from_subentity')">
                                     <i class="fas fa-fw fa-sitemap text-info"></i>
                                 </span>
-                                <span v-if="getFileTags(file).length" :title="$tc('global.has-tags', getFileTags(file).length, {cnt: getFileTags(file).length})">
+                                <span v-if="getFileTags(file).length" :title="$tc('global.has_tags', getFileTags(file).length, {cnt: getFileTags(file).length})">
                                     <i class="fas fa-fw fa-tags text-info"></i>
                                 </span>
                             </div>
@@ -198,13 +198,13 @@
                         {{ file.name }}
                     </div>
                     <div class="d-flex justify-content-end align-items-center">
-                        <span v-if="showLinks && getFileLinks(file).length" :title="$tc('global.has-links', getFileLinks(file).length, {cnt: getFileLinks(file).length})">
+                        <span v-if="showLinks && getFileLinks(file).length" :title="$tc('global.has_links', getFileLinks(file).length, {cnt: getFileLinks(file).length})">
                             <i class="fas fa-fw fa-link text-info"></i>
                         </span>
-                        <span v-if="isFromSubEntity(file)" class="ms-2" :title="$tc('global.from-subentity')">
+                        <span v-if="isFromSubEntity(file)" class="ms-2" :title="$tc('global.from_subentity')">
                             <i class="fas fa-fw fa-sitemap text-info"></i>
                         </span>
-                        <span v-if="getFileTags(file).length" class="ms-2" :title="$tc('global.has-tags', getFileTags(file).length, {cnt: getFileTags(file).length})">
+                        <span v-if="getFileTags(file).length" class="ms-2" :title="$tc('global.has_tags', getFileTags(file).length, {cnt: getFileTags(file).length})">
                             <i class="fas fa-fw fa-tags text-info"></i>
                         </span>
                     </div>

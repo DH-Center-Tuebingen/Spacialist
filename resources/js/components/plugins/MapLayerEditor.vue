@@ -25,13 +25,13 @@
         <modal name="delete-layer-modal" height="auto" :scrollable="true">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">{{ $t('global.delete-name.title', {name: getTitle(selectedLayer)}) }}</h5>
+                    <h5 class="modal-title">{{ $t('global.delete_name.title', {name: getTitle(selectedLayer)}) }}</h5>
                     <button type="button" class="btn-close" aria-label="Close" @click="hideDeleteLayerModal">
                     </button>
                 </div>
                 <div class="modal-body">
                     <p class="alert alert-info">
-                        {{ $t('global.delete-name.desc', {name: getTitle(selectedLayer)}) }}</i>
+                        {{ $t('global.delete_name.desc', {name: getTitle(selectedLayer)}) }}</i>
                     </p>
                 </div>
                 <div class="modal-footer">

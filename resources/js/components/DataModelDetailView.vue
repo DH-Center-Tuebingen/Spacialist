@@ -12,12 +12,12 @@
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="entity-type-root-toggle" v-model="state.entityType.is_root">
                         <label class="form-check-label" for="entity-type-root-toggle">
-                            {{ t('main.datamodel.detail.properties.top-level') }}
+                            {{ t('main.datamodel.detail.properties.top_level') }}
                         </label>
                     </div>
                 </div>
                 <div class="mb-3 row">
-                    <label for="entity-geometrytype-ro" class="col-form-label col-md-3 text-end">{{ t('global.geometry-type') }}</label>
+                    <label for="entity-geometrytype-ro" class="col-form-label col-md-3 text-end">{{ t('global.geometry_type') }}</label>
                     <div class="col-md-9 d-flex align-items-center">
                         <span>
                             {{ state.entityType.layer.type }}
@@ -28,7 +28,7 @@
                     </div>
                 </div>
                 <div class="mb-3 row">
-                    <label class="col-form-label col-md-3 text-end">{{ t('main.datamodel.detail.properties.sub-types') }}</label>
+                    <label class="col-form-label col-md-3 text-end">{{ t('main.datamodel.detail.properties.sub_types') }}</label>
                     <div class="col-md-9">
                         <multiselect
                             v-model="state.entityType.sub_entity_types"
@@ -51,10 +51,10 @@
                         </multiselect>
                         <div class="pt-2">
                             <button type="button" class="btn btn-outline-success me-2" @click="addAllEntityTypes">
-                                <i class="fas fa-fw fa-tasks"></i> {{ t('global.select-all') }}
+                                <i class="fas fa-fw fa-tasks"></i> {{ t('global.select_all') }}
                             </button>
                             <button type="button" class="btn btn-outline-danger" @click="removeAllEntityTypes">
-                                <i class="fas fa-fw fa-times"></i> {{ t('global.select-none') }}
+                                <i class="fas fa-fw fa-times"></i> {{ t('global.select_none') }}
                             </button>
                         </div>
                     </div>
@@ -136,10 +136,10 @@
                 updateEntityTypeRelation(state.entityType).then(_ => {
                     const name = translateConcept(state.entityType.thesaurus_url);
                     toast.$toast(
-                        t('main.datamodel.toasts.updated-type.msg', {
+                        t('main.datamodel.toasts.updated_type.msg', {
                             name: name
                         }),
-                        t('main.datamodel.toasts.updated-type.title'),
+                        t('main.datamodel.toasts.updated_type.title'),
                         {
                             channel: 'success',
                         }

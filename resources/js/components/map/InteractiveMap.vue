@@ -15,19 +15,19 @@
                     <!-- <button type="button" class="btn btn-fab rounded-circle btn-outline-info" v-show="interactionMode != 'modify'" data-bs-toggle="popover" :data-content="t('main.map.draw.modify.desc')" data-trigger="hover" data-placement="bottom" @click="setInteractionMode('modify')">
                         <i class="fas fa-fw fa-edit"></i>
                     </button>
-                    <button type="button" class="btn btn-fab rounded-circle btn-outline-success" v-show="interactionMode == 'modify'" data-bs-toggle="popover" :data-content="t('main.map.draw.modify.pos-desc')" data-trigger="hover" data-placement="bottom" @click="updateFeatures">
+                    <button type="button" class="btn btn-fab rounded-circle btn-outline-success" v-show="interactionMode == 'modify'" data-bs-toggle="popover" :data-content="t('main.map.draw.modify.pos_desc')" data-trigger="hover" data-placement="bottom" @click="updateFeatures">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
-                    <button type="button" class="btn btn-fab rounded-circle btn-outline-danger" v-show="interactionMode == 'modify'" data-bs-toggle="popover" :data-content="t('main.map.draw.modify.neg-desc')" data-trigger="hover" data-placement="bottom" @click="cancelUpdateFeatures">
+                    <button type="button" class="btn btn-fab rounded-circle btn-outline-danger" v-show="interactionMode == 'modify'" data-bs-toggle="popover" :data-content="t('main.map.draw.modify.neg_desc')" data-trigger="hover" data-placement="bottom" @click="cancelUpdateFeatures">
                         <i class="fas fa-fw fa-times"></i>
                     </button>
                     <button type="button" class="btn btn-fab rounded-circle btn-outline-danger" v-show="interactionMode != 'delete'" data-bs-toggle="popover" :data-content="t('main.map.draw.delete.desc')" data-trigger="hover" data-placement="bottom" @click="setInteractionMode('delete')">
                         <i class="fas fa-fw fa-trash"></i>
                     </button>
-                    <button type="button" class="btn btn-fab rounded-circle btn-outline-success" v-show="interactionMode == 'delete'" data-bs-toggle="popover" :data-content="t('main.map.draw.delete.pos-desc')" data-trigger="hover" data-placement="bottom" @click="deleteFeatures">
+                    <button type="button" class="btn btn-fab rounded-circle btn-outline-success" v-show="interactionMode == 'delete'" data-bs-toggle="popover" :data-content="t('main.map.draw.delete.pos_desc')" data-trigger="hover" data-placement="bottom" @click="deleteFeatures">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
-                    <button type="button" class="btn btn-fab rounded-circle btn-outline-danger" v-show="interactionMode == 'delete'" data-bs-toggle="popover" :data-content="t('main.map.draw.delete.neg-desc')" data-trigger="hover" data-placement="bottom" @click="cancelDeleteFeatures">
+                    <button type="button" class="btn btn-fab rounded-circle btn-outline-danger" v-show="interactionMode == 'delete'" data-bs-toggle="popover" :data-content="t('main.map.draw.delete.neg_desc')" data-trigger="hover" data-placement="bottom" @click="cancelDeleteFeatures">
                         <i class="fas fa-fw fa-times"></i>
                     </button>
                     <button type="button" class="btn btn-fab rounded-circle btn-outline-primary" data-bs-toggle="popover" :data-content="t('main.map.draw.measure.desc')" data-trigger="hover" data-placement="bottom" @click="toggleMeasurements">
@@ -220,7 +220,7 @@
                     layers: state.mapOverlays,
                 });
                 state.mapLayerGroups.entity = new Group({
-                    title: t('main.map.entity-layers'),
+                    title: t('main.map.entity_layers'),
                     openInLayerSwitcher: true,
                     layers: state.mapEntityLayers,
                 });
@@ -239,7 +239,7 @@
                 // Thus we create a separate layer for it
                 const wktLayer = createVectorLayer({
                     show: true,
-                    title: t('global.all-entities'),
+                    title: t('global.all_entities'),
                     visible: true,
                     opacity: 1,
                     layer: 'entity',

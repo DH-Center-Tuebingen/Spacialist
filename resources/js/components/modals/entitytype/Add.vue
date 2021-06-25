@@ -27,12 +27,12 @@
                 <div class="form-check form-switch mb-3">
                     <input type="checkbox" class="form-check-input" id="isRoot" v-model="state.entityType.is_root" />
                     <label class="form-check-label" for="isRoot">
-                        {{ t('main.datamodel.detail.properties.top-level') }}
+                        {{ t('main.datamodel.detail.properties.top_level') }}
                     </label>
                 </div>
                 <div class="mb-3">
                     <label class="col-form-label col-md-3" for="name">
-                        {{ t('global.geometry-type') }}:
+                        {{ t('global.geometry_type') }}:
                     </label>
                     <div class="col-md-9">
                         <multiselect

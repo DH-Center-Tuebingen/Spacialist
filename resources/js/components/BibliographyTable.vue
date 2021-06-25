@@ -25,7 +25,7 @@
                         <div class="form-check form-switch">
                             <input type="checkbox" class="form-check-input" id="show-all-fields-toggle" v-model="state.showAllFields" />
                             <label class="form-check-label" for="show-all-fields-toggle">
-                                {{ t('main.bibliography.show-all-fields') }}
+                                {{ t('main.bibliography.show_all_fields') }}
                             </label>
                         </div>
                     </li>
@@ -82,7 +82,7 @@
                         </th>
                         <th>
                             <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('citekey')">
-                                {{ t('main.bibliography.column.cite-key') }}
+                                {{ t('main.bibliography.column.citekey') }}
                                 <span v-show="orderColumn == 'citekey'">
                                     <span v-show="orderType == 'asc'">
                                         <i class="fas fa-fw fa-sort-down"></i>

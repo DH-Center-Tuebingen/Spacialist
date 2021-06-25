@@ -20,6 +20,7 @@ const de = {
         clear: 'Leeren',
         confirm: 'Ok',
         create: 'Anlegen',
+        move: 'Verschieben',
         parse: 'Parsen',
         list: {
             nr_of_entries: 'Keine Einträge | 1 Eintrag | {cnt} Einträge',
@@ -27,35 +28,32 @@ const de = {
             fetch_next_entries: 'Weitere Einträge laden',
             no_more_entries: 'Keine weiteren Einträge',
         },
-        'select-all': 'Alle auswählen',
-        'select-none': 'Alle abwählen',
-        'delete-name': {
+        select_all: 'Alle auswählen',
+        select_none: 'Alle abwählen',
+        delete_name: {
             title: '{name} löschen',
             desc: 'Willst du <span class="fw-bold">{name}</span> wirklich löschen?'
         },
-        'deactivate_name': {
+        deactivate_name: {
             title: '{name} deaktivieren',
             desc: 'Willst du {name} wirklich deaktivieren?',
             info: 'Gewisse Einträge können nur/erst deaktiviert werden, da es sonst zu unvorhergesehenem Datenverlust kommen kann.'
         },
-        'edit-name': {
-            title: '{name} editieren'
-        },
-        'remove-name': {
+        remove_name: {
             title: '{name} entfernen',
             desc: 'Willst du {name} wirklich entfernen?'
         },
-        'unlink-name': {
+        unlink_name: {
             title: 'Verknüpfung entfernen - {name}',
             desc: 'Willst du die Verknüpfung von {file} und {ent} wirklich entfernen?'
         },
-        'all-entities': 'Alle Entitäten',
+        all_entities: 'Alle Entitäten',
         unlinked: 'Unverknüpft',
         unlink: 'Verknüpfung entfernen',
         link: 'Verknüpfen',
-        'unlink-from': 'Verknüpfung mit {name} entfernen',
-        'link-to': 'Mit {name} verknüpfen',
-        'has-links': 'Hat keine Verknüpfungen | Hat eine Verknüpfung | Hat {cnt} Verknüpfungen',
+        unlink_from: 'Verknüpfung mit {name} entfernen',
+        link_to: 'Mit {name} verknüpfen',
+        has_links: 'Hat keine Verknüpfungen | Hat eine Verknüpfung | Hat {cnt} Verknüpfungen',
         discard: {
             title: 'Ungespeicherte Änderungen',
             msg: 'Es gibt ungespeicherte Änderungen auf der aktuellen Seite. Willst du wirklich fortfahren und die Änderungen verwerfen?',
@@ -75,13 +73,13 @@ const de = {
         search_no_term_info: 'Gib einen Suchbegriff ein',
         search_no_term_info_global: 'Gib einen Suchbegriff ein um das gesamte System zu durchsuchen',
         login: 'Einloggen',
-        'login-title': 'Anmelden',
-        'login-subtitle': 'Willkommen bei Spacialist',
+        login_title: 'Anmelden',
+        login_subtitle: 'Willkommen bei Spacialist',
         download: 'Herunterladen',
-        'download-name': '{name} herunterladen',
+        download_with_name: '{name} herunterladen',
         upload: 'Hochladen',
         preview: 'Vorschau',
-        no_preview: 'Keine Vorschau verfügbar',
+        preview_not_available: 'Keine Vorschau verfügbar',
         note: 'Hinweis',
         information: 'Information',
         tools: {
@@ -119,7 +117,7 @@ const de = {
         select: {
             placeholder: 'Option auswählen',
             select: 'Drücke Enter zum hinzufügen',
-            deselect: 'Drücke Enter zum entfernen'
+            deselect: 'Drücke Enter zum entfernen',
         },
         attribute: 'Attribut',
         attributes: {
@@ -153,7 +151,6 @@ const de = {
             sql_info: `Du kannst mit <code class="normal">:entity_id</code> in deiner SQL-Abfrage auf die Entität referenzieren, dem dieses Attribut zugewiesen ist.`,
             iconclass: 'Iconclass'
         },
-        active: 'Aktiviert',
         activity: 'Aktivitäten',
         action: 'Aktion',
         users: 'Benutzer',
@@ -174,14 +171,14 @@ const de = {
         url: 'URL',
         name: 'Name',
         nickname: 'Spitzname',
-        'display-name': 'Anzeigename',
+        display_name: 'Anzeigename',
         email: 'E-Mail-Adresse',
         email_or_nick: 'E-Mail-Adresse oder Name',
         phonenumber: 'Telefonnummer',
         password: 'Passwort',
         confirm_password: 'Passwort wiederholen',
-        'remember-me': 'Eingeloggt bleiben',
-        'orcid': 'ORCID',
+        remember_me: 'Eingeloggt bleiben',
+        orcid: 'ORCID',
         description: 'Beschreibung',
         roles: 'Rollen',
         permissions: 'Berechtigungen',
@@ -194,22 +191,23 @@ const de = {
         reply_to: 'Antworten',
         replying_to: 'Antwort an {name}',
         type: 'Typ',
-        'root-attribute': 'Eltern-Attribut',
-        'root-attribute-toggle': 'Wert eines vorhandenen Attributs als Eltern-Element verwenden',
-        'root-element': 'Eltern-Element',
+        parent_entity: 'Eltern-Entität',
+        root_attribute: 'Eltern-Attribut',
+        root_attribute_toggle: 'Wert eines vorhandenen Attributs als Eltern-Element verwenden',
+        root_element: 'Eltern-Element',
         recursive: 'Alle Kind-Elemente (Rekursiv)',
         content: 'Inhalt',
         column: 'Spalte | Spalten',
         add_column: 'Spalte hinzufügen',
-        'geometry-type': 'Geometrietyp',
-        'depends-on': 'Hängt ab von',
+        geometry_type: 'Geometrietyp',
+        depends_on: 'Hängt ab von',
         preference: 'Einstellung | Einstellungen',
         value: 'Wert',
-        'allow-override': 'Überschreibbar?',
+        allow_override: 'Überschreibbar?',
         tag: 'Schlagwort | Schlagworte',
         set: 'Setzen',
-        'has-tags': 'Hat keine Schlagworte | Hat ein Schlagwort | Hat {cnt} Schlagworte',
-        'from-subentity': 'Gehört zu einer Sub-Entität',
+        has_tags: 'Hat keine Schlagworte | Hat ein Schlagwort | Hat {cnt} Schlagworte',
+        from_subentity: 'Gehört zu einer Sub-Entität',
         comments: {
             deleted_info: 'Kommentar gelöscht',
             empty_list: 'Bisher keine Kommentare hinzugefügt.',
@@ -254,9 +252,6 @@ const de = {
                 reply_to_chat: 'Als Kommentar antworten',
             }
         },
-        validations: {
-            required: '',
-        },
     },
     main: {
         app: {
@@ -292,6 +287,12 @@ const de = {
             },
             tree: {
                 add: 'Neue Top-Level Entität hinzufügen',
+                contextmenu: {
+                    add: 'Unterentität hinzufügen',
+                    duplicate: 'Duplikat erzeugen',
+                    move: 'Im Baum verschieben',
+                    delete: 'Entität löschen',
+                },
                 sorts: {
                     asc: {
                         rank: 'Rang - Aufsteigend (Drag & Drop)',
@@ -313,7 +314,11 @@ const de = {
             },
             modals: {
                 add: {
-                    title: 'Neue Entität'
+                    title: 'Neue Entität',
+                },
+                move: {
+                    title: 'Entität verschieben',
+                    to_root: 'Auf oberster Ebene hinzufügen',
                 },
                 edit: {
                     title_type: 'Entitätstyp editieren - {name}',
@@ -335,33 +340,27 @@ const de = {
                     }
                 }
             },
-            menu: {
-                add: 'Neue Entität hinzufügen',
-
-            },
             references: {
                 title: 'Quellenangaben',
                 empty: 'Keine Quellen gefunden',
                 certainty: 'Sicherheit',
-                certaintyc: 'Kommentar',
-                certaintyu: 'Sicherheit aktualisieren',
                 bibliography: {
                     title: 'Quellen',
                     add: 'Neue Quellen hinzufügen',
                     comment: 'Kommentar',
-                    'add-button': 'Quelle hinzufügen'
+                    add_button: 'Quelle hinzufügen',
                 },
                 toasts: {
-                    'updated-certainty': {
+                    updated_certainty: {
                         title: 'Sicherheit aktualisiert',
                         msg: 'Sicherheit von {name} erfolgreich auf {i}% gesetzt.'
                     }
                 }
             },
             attributes: {
-                'open-map': 'Karte öffnen',
-                'add-wkt': 'WKT hinzufügen',
-                'set-location': 'Position setzen',
+                open_map: 'Karte öffnen',
+                add_wkt: 'WKT hinzufügen',
+                set_location: 'Position setzen',
                 BC: 'v. Chr.',
                 bc: '@:main.entity.attributes.BC',
                 AD: 'n. Chr.',
@@ -382,7 +381,7 @@ const de = {
             }
         },
         user: {
-            'add-button': 'Neuen Benutzer hinzufügen',
+            add_button: 'Neuen Benutzer hinzufügen',
             active_users: 'Aktive Benutzer',
             deactivated_users: 'Deaktivierte Benutzer',
             empty_list: 'Benutzerliste ist leer',
@@ -397,10 +396,10 @@ const de = {
                     title: 'Neuer Benutzer'
                 }
             },
-            'add-role-placeholder': 'Rollen hinzufügen'
+            add_role_placeholder: 'Rollen hinzufügen'
         },
         role: {
-            'add-button': 'Neue Rolle hinzufügen',
+            add_button: 'Neue Rolle hinzufügen',
             toasts: {
                 updated: {
                     title: 'Rolle aktualisiert',
@@ -415,10 +414,9 @@ const de = {
                     alert: 'Wenn du <span class="fw-bold">{name}</span> löschst, wird die Zugehörigkeit von einem Benutzer entfernt. | Wenn du <span class="fw-bold">{name}</span> löschst, wird die Zugehörigkeit von {cnt} Benutzern entfernt.',
                 },
             },
-            'add-permission-placeholder': 'Berechtigungen hinzufügen'
+            add_permission_placeholder: 'Berechtigungen hinzufügen'
         },
         activity: {
-            title: '@:global.activity',
             title_project: 'Projekt-Aktivität | Projekt-Aktivitäten',
             title_user: 'Deine Aktivität | Deine Aktivitäten',
             rawdata: 'Rohdaten',
@@ -430,11 +428,11 @@ const de = {
         },
         datamodel: {
             toasts: {
-                'updated-type': {
+                updated_type: {
                     title: 'Entitätstyp aktualisiert',
                     msg: '{name} erfolgreich aktualisiert.'
                 },
-                'added-attribute': {
+                added_attribute: {
                     title: 'Attribut hinzugefügt',
                     msg: '{name} erfolgreich zu {etName} hinzugefügt.'
                 },
@@ -445,7 +443,7 @@ const de = {
             },
             attribute: {
                 title: 'Verfügbare Attribute',
-                'add-button': 'Attribut hinzufügen',
+                add_button: 'Attribut hinzufügen',
                 show_hidden: 'Ausgeblendete anzeigen',
                 modal: {
                     new: {
@@ -458,7 +456,7 @@ const de = {
             },
             entity: {
                 title: 'Verfügbare Entitätstypen',
-                'add-button': 'Entitätstyp hinzufügen',
+                add_button: 'Entitätstyp hinzufügen',
                 modal: {
                     new: {
                         title: 'Neuer Entitätstyp'
@@ -471,8 +469,8 @@ const de = {
             detail: {
                 properties: {
                     title: 'Eigenschaften',
-                    'top-level': 'Top-Level Entitätstyp?',
-                    'sub-types': 'Erlaubte Unter-Entitätstypen'
+                    top_level: 'Top-Level Entitätstyp?',
+                    sub_types: 'Erlaubte Unter-Entitätstypen'
                 },
                 attribute: {
                     title: 'Hinzugefügte Attribute',
@@ -501,9 +499,9 @@ const de = {
                     right: 'Rechte Spalte',
                 },
                 tooltips: 'Infos anzeigen',
-                'tag-root': 'Thesaurus-URI für Schlagworte',
+                tag_root: 'Thesaurus-URI für Schlagworte',
                 extensions: 'Geladene Erweiterungen',
-                'link-thesaurex': 'Link zu ThesauRex anzeigen',
+                link_thesaurex: 'Link zu ThesauRex anzeigen',
                 project: {
                     name: 'Projektname',
                     maintainer: 'Verantwortlicher',
@@ -514,19 +512,6 @@ const de = {
                     epsg: 'EPSG-Code'
                 }
             },
-            labels: {
-                prefs: {
-                    'gui-language': '@:main.preference.key.language',
-                    'columns': '@:main.preference.key.columns.title',
-                    'show-tooltips': '@:main.preference.key.tooltips',
-                    'tag-root': '@:main.preference.key.tag-root',
-                    'load-extensions': '@:main.preference.key.extensions',
-                    'link-to-thesaurex': '@:main.preference.key.link-thesaurex',
-                    'project-name': '@:main.preference.key.project.name',
-                    'project-maintainer': '@:main.preference.key.project.maintainer',
-                    'map-projection': '@:main.preference.key.map.projection',
-                }
-            }
         },
         about: {
             title: 'Über Spacialist',
@@ -534,9 +519,9 @@ const de = {
             release: {
                 name: 'Name der Veröffentlichung',
                 time: 'Datum der Veröffentlichung',
-                'full-name': 'Vollständiger Name'
+                full_name: 'Vollständiger Name'
             },
-            'build-info': 'Mit <i class="fab fa-fw fa-laravel"></i> & <i class="fab fa-fw fa-vuejs"></i> erstellt!',
+            build_info: 'Mit <i class="fab fa-fw fa-laravel"></i> & <i class="fab fa-fw fa-vuejs"></i> erstellt!',
             contributor: 'Mitwirkender | Mitwirkende'
         },
         bibliography: {
@@ -545,7 +530,7 @@ const de = {
                 paste_info: 'Du kannst die Felder mit der Tastenkombination <kbd><kbd>Strg</kbd> + <kbd>v</kbd></kbd> mit einem BibTeX-Eintrag aus deiner Zwischenablage ausfüllen.',
                 new: {
                     title: 'Neuer Eintrag',
-                    'bibtex-code': 'BibTeX-Code'
+                    bibtex_code: 'BibTeX-Code'
                 },
                 edit: {
                     title: 'Eintrag editieren'
@@ -564,9 +549,9 @@ const de = {
             add: 'Neuen Literatur-Eintrag anlegen',
             import: 'BibTeX-Datei importieren',
             export: 'BibTeX-Datei exportieren',
-            'show-all-fields': 'Alle Felder anzeigen',
+            show_all_fields: 'Alle Felder anzeigen',
             column: {
-                'cite-key': 'Zitations-Schlüssel',
+                citekey: 'Zitations-Schlüssel',
                 author: 'Autor',
                 editor: 'Herausgeber',
                 title: 'Titel',
@@ -591,13 +576,13 @@ const de = {
             }
         },
         map: {
-            'init-error': 'Mehrere init-*-Attribute gesetzt. Es darf nur eines gesetzt sein.',
+            init_error: 'Mehrere init-*-Attribute gesetzt. Es darf nur eines gesetzt sein.',
             layer: 'Ebene | Ebenen',
             baselayer: 'Basis-Ebene | Basis-Ebenen',
             overlay:'Overlay | Overlays',
-            'entity-layers': 'Entitäts-Ebenen',
-            'geometry-name': 'Geometrie #{id}',
-            'coords-in-epsg': 'Koordinaten in EPSG:{epsg}',
+            entity_layers: 'Entitäts-Ebenen',
+            geometry_name: 'Geometrie #{id}',
+            coords_in_epsg: 'Koordinaten in EPSG:{epsg}',
             length: 'Länge',
             area: 'Fläche',
             draw: {
@@ -612,13 +597,13 @@ const de = {
                 },
                 modify: {
                     desc: 'Geometrien bearbeiten',
-                    'pos-desc': 'Änderungen speichern',
-                    'neg-desc': 'Änderungen verwerfen'
+                    pos_desc: 'Änderungen speichern',
+                    neg_desc: 'Änderungen verwerfen'
                 },
                 delete: {
                     desc: 'Geometrien löschen',
-                    'pos-desc': 'Löschen bestätigen',
-                    'neg-desc': 'Löschen verwerfen'
+                    pos_desc: 'Löschen bestätigen',
+                    neg_desc: 'Löschen verwerfen'
                 },
                 measure: {
                     desc: 'Maßband umschalten'

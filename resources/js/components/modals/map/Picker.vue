@@ -7,7 +7,7 @@
         <div class="modal-header">
             <h5 class="modal-title">
                 {{
-                    t('main.entity.attributes.set-location')
+                    t('main.entity.attributes.set_location')
                 }}
             </h5>
             <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">

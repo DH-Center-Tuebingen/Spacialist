@@ -6,7 +6,7 @@
         name="delete-entity-modal">
         <div class="modal-header">
             <h5 class="modal-title">
-                {{ t('global.delete-name.title', {name: role.display_name}) }}
+                {{ t('global.delete_name.title', {name: role.display_name}) }}
             </h5>
             <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
             </button>
@@ -14,7 +14,7 @@
         <div class="modal-body">
             <alert
                 :class="{'mb-0': !state.needsAlert}"
-                :message="t('global.delete-name.desc', {name: role.display_name})"
+                :message="t('global.delete_name.desc', {name: role.display_name})"
                 :type="'info'"
                 :noicon="true" />
             <alert

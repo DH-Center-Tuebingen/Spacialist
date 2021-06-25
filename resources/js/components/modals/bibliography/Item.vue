@@ -54,7 +54,7 @@
             </div>
         </form>
         <h5 class="mt-3">
-            {{ t('main.bibliography.modal.new.bibtex-code') }}
+            {{ t('main.bibliography.modal.new.bibtex_code') }}
             <small class="clickable" @click="toggleShowBibtexCode()">
                 <span v-show="state.bibtexCodeShown">
                     <i class="fas fa-fw fa-caret-up"></i>

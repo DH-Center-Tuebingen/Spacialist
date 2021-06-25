@@ -32,7 +32,7 @@
             </div>
             <div class="mb-3">
                 <label class="col-form-label col-12" for="nickname">
-                    {{ t('global.display-name') }}
+                    {{ t('global.display_name') }}
                     <span class="text-danger">*</span>:
                 </label>
                 <div class="col-12">

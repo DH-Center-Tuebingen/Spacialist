@@ -3,7 +3,7 @@
         <h4>
             {{ t('main.user.active_users') }}
             <button type="button" class="btn btn-outline-success" @click="showNewUserModal()" :disabled="!can('create_users')">
-                <i class="fas fa-fw fa-plus"></i> {{ t('main.user.add-button') }}
+                <i class="fas fa-fw fa-plus"></i> {{ t('main.user.add_button') }}
             </button>
         </h4>
         <div class="table-responsive flex-grow-1">
@@ -56,7 +56,7 @@
                                 :mode="'tags'"
                                 :disabled="!can('add_remove_role')"
                                 :options="state.roles"
-                                :placeholder="t('main.user.add-role-placeholder')"
+                                :placeholder="t('main.user.add_role_placeholder')"
                                 @input="v.fields[user.id].roles.handleInput">
                             </multiselect>
 
@@ -143,7 +143,7 @@
                                 :mode="'tags'"
                                 :disabled="true"
                                 :options="[]"
-                                :placeholder="t('main.user.add-role-placeholder')">
+                                :placeholder="t('main.user.add_role_placeholder')">
                             </multiselect>
                         </td>
                         <td>

@@ -518,7 +518,7 @@
                                 <button type="button" class="btn btn-outline-success mb-3" @click.prevent="linkFile(selectedFile, selectedEntity)" v-if="!linkedToCurrentEntity && selectedEntity.id">
                                     <span class="fa-stack d-inline">
                                         <i class="fas fa-monument"></i>
-                                        <i class="fas fa-plus" data-fa-transform="shrink-5 left-10 down-5"></i> {{ $t('global.link-to', {name: selectedEntity.name})}}
+                                        <i class="fas fa-plus" data-fa-transform="shrink-5 left-10 down-5"></i> {{ $t('global.link_to', {name: selectedEntity.name})}}
                                     </span>
                                 </button>
                                 <h5>
@@ -641,13 +641,13 @@
         <modal name="delete-file-modal" width="50%" height="50%">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">{{ $t('global.delete-name.title', {name: contextMenuFile.name}) }}</h5>
+                    <h5 class="modal-title">{{ $t('global.delete_name.title', {name: contextMenuFile.name}) }}</h5>
                     <button type="button" class="btn-close" aria-label="Close" @click="hideDeleteFileModal">
                     </button>
                 </div>
                 <div class="modal-body">
                     <p class="alert alert-info">
-                        {{ $t('global.delete-name.desc', {name: contextMenuFile.name}) }}
+                        {{ $t('global.delete_name.desc', {name: contextMenuFile.name}) }}
                     </p>
                     <p class="alert alert-danger">
                         {{
@@ -673,7 +673,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        {{ $t('global.unlink-name.title', {name: contextMenuFile.name}) }}
+                        {{ $t('global.unlink_name.title', {name: contextMenuFile.name}) }}
                     </h5>
                     <button type="button" class="btn-close" aria-label="Close" @click="hideUnlinkFileModal">
                     </button>
@@ -681,7 +681,7 @@
                 <div class="modal-body">
                     <p class="alert alert-info">
                         {{
-                            $t('global.unlink-name.desc', {
+                            $t('global.unlink_name.desc', {
                                 file: contextMenuFile.name,
                                 ent: contextMenuEntity.name
                             })
@@ -1628,11 +1628,11 @@
                         getLabel: file => {
                             const isLinkedTo = file.entities.some(c => vm.selectedEntity.id == c.id);
                             if(isLinkedTo) {
-                                return vm.$t('global.unlink-from', {
+                                return vm.$t('global.unlink_from', {
                                     name: vm.selectedEntity.name
                                 });
                             } else {
-                                return vm.$t('global.link-to', {
+                                return vm.$t('global.link_to', {
                                     name: vm.selectedEntity.name
                                 });
                             }

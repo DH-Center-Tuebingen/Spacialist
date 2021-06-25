@@ -152,7 +152,7 @@
                     case 'date':
                         return new Date();
                     case 'sql':
-                        return t('global.no_preview');
+                        return t('global.preview_not_available');
                     case 'epoch':
                     case 'dimension':
                     case 'entity':

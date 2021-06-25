@@ -146,7 +146,7 @@
                         <textarea class="form-control" v-model="state.newItem.description" :placeholder="t('main.entity.references.bibliography.comment')"></textarea>
                     </div>
                     <div class="ms-1 mt-auto">
-                        <button type="submit" class="btn btn-outline-success btn-sm px-1 py-05" :disabled="state.addReferenceDisabled" :title="t('main.entity.references.bibliography.add-button')">
+                        <button type="submit" class="btn btn-outline-success btn-sm px-1 py-05" :disabled="state.addReferenceDisabled" :title="t('main.entity.references.bibliography.add_button')">
                             <i class="fas fa-fw fa-plus"></i>
                         </button>
                     </div>
