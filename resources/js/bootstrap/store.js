@@ -1,6 +1,6 @@
 import { createStore } from 'vuex';
 
-import { sortTree, Node } from '../helpers/tree.js';
+import { sortTree, Node, openPath } from '../helpers/tree.js';
 import {
     can,
     fillEntityData,
@@ -8,6 +8,7 @@ import {
 } from '../helpers/helpers.js';
 import {
     getEntityData,
+    getEntityParentIds,
     getEntityReferences,
 } from '../api.js';
 
@@ -395,8 +396,9 @@ export const store = createStore({
         async getEntity({commit, state}, entityId) {
             let entity = state.entities[entityId];
             if(!entity) {
-                // TODO get entity data (parent ids)
-                entity = {};
+                const ids = await getEntityParentIds(entityId);
+                await openPath(ids);
+                entity = state.entities[entityId];
             }
             if(!can('view_concept_props')) {
                 const hiddenEntity = {

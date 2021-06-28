@@ -379,7 +379,7 @@ export function ShowAddEntity(parent = null, onAdded) {
     });
 }
 
-export function ShowMoveEntity(entity, onAdded) {
+export function ShowMoveEntity(entity, onMoved) {
     const uid = `MoveEntity-${getTs()}`;
     store.getters.vfm.show({
         component: MoveEntity,
@@ -393,8 +393,29 @@ export function ShowMoveEntity(entity, onAdded) {
             },
             confirm(parentId) {
                 moveEntity(entity.id, parentId).then(data => {
-                    if(!!onAdded) {
-                        onAdded(entity.id, parentId, data);
+                    let oldSiblings;
+                    if(!!entity.root_entity_id) {
+                        oldSiblings = store.getters.entities[entity.root_entity_id].children;
+                    } else {
+                        oldSiblings = store.getters.tree;
+                    }
+                    const idx = oldSiblings.findIndex(n => n.id == entity.id);
+                    if(idx > -1) {
+                        oldSiblings.splice(idx, 1);
+                    }
+                    if(!parentId) {
+                        store.getters.tree.push(entity);
+                    } else {
+                        const parent = store.getters.entities[parentId];
+                        if(!!parent) {
+                            if(parent.childrenLoaded) {
+                                parent.children.push(entity);
+                            }
+                            parent.children_count++;
+                        }
+                    }
+                    if(!!onMoved) {
+                        onMoved(entity.id, parentId, data);
                     }
                     store.getters.vfm.hide(uid);
                 });

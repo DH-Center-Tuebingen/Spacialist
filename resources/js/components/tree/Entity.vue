@@ -127,10 +127,10 @@
 
     import {
         fetchChildren,
+        openPath,
     } from '../../helpers/tree.js';
 
     import { ShowAddEntity } from '../../helpers/modal.js';
-import { getNodeFromPath } from 'tree-component';
 
     export default {
         components: {
@@ -195,45 +195,17 @@ import { getNodeFromPath } from 'tree-component';
             const openAddEntityDialog = _ => {
                 ShowAddEntity(null);
             };
-            const openPath = async (ids) => {
-                const index = ids.pop();
-                const elem = store.getters.entities[index];
-                if(ids.length == 0) {
-                    return elem;
-                }
-                if(!elem.childrenLoaded) {
-                    elem.state.loading = true;
-                    const children = await fetchChildren(elem.id, state.sort);
-                    elem.state.loading = false;
-                    elem.children = children;
-                    elem.childrenLoaded = true;
-                    // Have to get current elemen from tree (not entities array) as well
-                    // otherwise children and childrenLoaded props are not correctly set
-                    const htmlElem = document.getElementById(`tree-node-${elem.id}`).parentElement;
-                    const node = getNodeFromPath(state.tree, htmlElem.getAttribute('data-path').split(','));
-                    node.children = children;
-                    node.childrenLoaded = true;
-                }
-                elem.state.opened = true;
-                return openPath(ids, elem.children);
-            };
             const resetHighlighting = _ => {
                 state.highlightedItems.forEach(i => i.state.highlighted = false);
                 state.highlightedItems = [];
             };
             const highlightItems = async items => {
                 for(let i=0; i<items.length; i++) {
-                    await openPath(items[i].parentIds).then(targetNode => {
+                    await openPath(items[i].parentIds, state.sort).then(targetNode => {
                         targetNode.state.highlighted = true;
                         state.highlightedItems.push(targetNode);
                     });
                 }
-                // items.forEach(i => {
-                //     return openPath(i.parentIds).then(targetNode => {
-                //         targetNode.state.highlighted = true;
-                //         state.highlightedItems.push(targetNode);
-                //     });
-                // });
             };
             const searchResultSelected = item => {
                 resetHighlighting();

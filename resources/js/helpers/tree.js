@@ -1,5 +1,6 @@
 import TreeNode from '../components/tree/Node.vue';
 import store from '../bootstrap/store.js';
+import { getNodeFromPath } from 'tree-component';
 import {
     fetchChildren as fetchChildrenApi,
 } from '../api.js';
@@ -76,6 +77,29 @@ function sortTreeLevel(tree, fn) {
             sortTreeLevel(n.children, fn);
         }
     });
+}
+
+export async function openPath(ids, sort = {by: 'rank', dir: 'asc'}) {
+    const index = ids.pop();
+    const elem = store.getters.entities[index];
+    if(ids.length == 0) {
+        return elem;
+    }
+    if(!elem.childrenLoaded) {
+        elem.state.loading = true;
+        const children = await fetchChildren(elem.id, sort);
+        elem.state.loading = false;
+        elem.children = children;
+        elem.childrenLoaded = true;
+        // Have to get current elemen from tree (not entities array) as well
+        // otherwise children and childrenLoaded props are not correctly set
+        const htmlElem = document.getElementById(`tree-node-${elem.id}`).parentElement;
+        const node = getNodeFromPath(store.getters.tree, htmlElem.getAttribute('data-path').split(','));
+        node.children = children;
+        node.childrenLoaded = true;
+    }
+    elem.state.opened = true;
+    return openPath(ids, elem.children);
 }
 
 export class Node {

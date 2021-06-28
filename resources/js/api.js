@@ -117,6 +117,15 @@ export async function getCommentReplies(cid, endpoint = '/comment/{cid}/reply') 
     );
 };
 
+export async function getEntityParentIds(id) {
+    return await $httpQueue.add(
+        () => http.get(`/entity/${id}/parentIds`)
+        .then(response => {
+            return response.data;
+        })
+    );
+};
+
 export async function getEntityData(id) {
     return await $httpQueue.add(
         () => http.get(`/entity/${id}/data`)
