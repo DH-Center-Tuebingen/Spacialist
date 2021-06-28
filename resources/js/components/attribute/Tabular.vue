@@ -17,6 +17,9 @@
                         <a class="text-body" href="#" @click.prevent="openCsvUpload()">
                             <i class="fas fa-fw fa-file-upload"></i>
                         </a>
+                        <a class="text-body" href="#" @click.prevent="downloadAs('csv')">
+                            <i class="fas fa-fw fa-file-download"></i>
+                        </a>
                     </th>
                 </tr>
             </thead>
@@ -81,15 +84,6 @@
 
                         <singlechoice-attribute
                             v-else-if="column.datatype == 'string-sc'"
-                            :ref="el => setRef(el, `${$index}_${column.id}`)"
-                            :disabled="disabled || row.mark_deleted"
-                            :name="`${name}-column-attr-${column.id}`"
-                            :value="row[column.id]"
-                            :selections="state.selections[column.id]"
-                            @change="e => updateDirtyState(e, $index, column.id)" />
-
-                        <multichoice-attribute
-                            v-else-if="column.datatype == 'string-mc'"
                             :ref="el => setRef(el, `${$index}_${column.id}`)"
                             :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
@@ -162,13 +156,6 @@
 
                         <singlechoice-attribute
                             v-else-if="column.datatype == 'string-sc'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newRowColumns[column.id]"
-                            :selections="state.selections[column.id]" />
-
-                        <multichoice-attribute
-                            v-else-if="column.datatype == 'string-mc'"
                             :ref="el => setAddRef(el, `${column.id}`)"
                             :name="`${name}-new-column-attr-${column.id}`"
                             :value="state.newRowColumns[column.id]"
@@ -246,7 +233,9 @@
     import store from '../../bootstrap/store.js';
 
     import {
+      createDownloadLink,
         getAttribute,
+        slugify,
         translateConcept,
         _cloneDeep,
     } from '../../helpers/helpers.js';
@@ -264,7 +253,8 @@
     import Entity from './Entity.vue';
     import DateAttr from './Date.vue';
     import SingleChoice from './SingleChoice.vue';
-    import MultiChoice from './MultiChoice.vue';
+
+    let d3 = require('d3-dsv');
 
     export default {
         props: {
@@ -298,7 +288,6 @@
             'entity-attribute': Entity,
             'date-attribute': DateAttr,
             'singlechoice-attribute': SingleChoice,
-            'multichoice-attribute': MultiChoice,
         },
         emits: ['change', 'expanded'],
         setup(props, context) {
@@ -340,6 +329,21 @@
                     }
                 }
             };
+            
+            const getSimpleValue = (datatype, valueObject) => {
+                switch(datatype) {
+                    case 'string':
+                    case 'integer':
+                    case 'double':
+                    case 'boolean':
+                    case 'date':
+                    case 'iconclass':
+                    case 'entity':
+                        return valueObject;
+                    case 'string-sc':
+                        return translateConcept(valueObject.concept_url);
+                }
+            };
             const openCsvUpload = _ => {
                 showCsvPreviewer(null, csv => {
                     showCsvColumnPicker({
@@ -350,6 +354,27 @@
                         addTableRowFromCsv(columns, csv.data);
                     });
                 });
+            };
+            const downloadAs = (type) => {
+                let content = '';
+                let contentType = 'text/plain';
+                let filename = slugify(translateConcept(attribute.value.thesaurus_url));
+                switch(type) {
+                    case 'csv':
+                    default:
+                        const data = v.value.map(r => {
+                            const newR = {};
+                            for(let k in r) {
+                                newR[translateConcept(state.columns[k].thesaurus_url)] = getSimpleValue(state.columns[k].datatype, r[k]);
+                            }
+                            return newR;
+                        });
+                        content = d3.csvFormat(data);
+                        contentType = 'text/csv';
+                        filename += '.csv';
+                        break;
+                }
+                createDownloadLink(content, filename, false, contentType);
             };
             const emitExpandToggle = _ => {
                 state.expanded = !state.expanded;
@@ -550,6 +575,7 @@
                 resetFieldState,
                 undirtyField,
                 openCsvUpload,
+                downloadAs,
                 emitExpandToggle,
                 toggleChart,
                 updateChart,

@@ -15,10 +15,10 @@
             </button>
         </div>
         <div class="modal-body nonscrollable">
-            <form name="newEntityForm" id="newEntityForm" role="form" @submit.prevent="add()">
+            <form name="moveEntityForm" id="moveEntityForm" role="form" @submit.prevent="move()">
                 <div class="form-check form-switch" v-if="state.hasParent">
-                    <input class="form-check-input" type="checkbox" id="add-to-root" v-model="state.moveToRoot">
-                    <label class="form-check-label" for="add-to-root">
+                    <input class="form-check-input" type="checkbox" id="move-to-root" v-model="state.moveToRoot">
+                    <label class="form-check-label" for="move-to-root">
                         {{ t('main.entity.modals.move.to_root') }}
                     </label>
                 </div>
@@ -38,7 +38,7 @@
             </form>
         </div>
         <div class="modal-footer">
-            <button type="submit" class="btn btn-outline-success" form="newEntityForm" :disabled="state.dataMissing">
+            <button type="submit" class="btn btn-outline-success" form="moveEntityForm" :disabled="state.dataMissing">
                 <i class="fas fa-fw fa-plus"></i> {{ t('global.move') }}
             </button>
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
@@ -60,7 +60,10 @@
     import {
         searchEntity,
     } from '../../../api.js';
-import { isAllowedSubEntityType } from '../../../helpers/helpers.js';
+
+    import {
+        isAllowedSubEntityType,
+    } from '../../../helpers/helpers.js';
 
     export default {
         props: {
@@ -97,7 +100,7 @@ import { isAllowedSubEntityType } from '../../../helpers/helpers.js';
                     return isAllowedSubEntityType(r.entity_type_id, entity.value.entity_type_id);
                 });
             };
-            const add = _ => {
+            const move = _ => {
                 if(state.dataMissing) {
                     return;
                 }
@@ -135,7 +138,7 @@ import { isAllowedSubEntityType } from '../../../helpers/helpers.js';
                 // LOCAL
                 entitySelected,
                 filterEntityResults,
-                add,
+                move,
                 closeModal,
                 // STATE
                 state,

@@ -358,7 +358,20 @@ export async function addAttribute(attribute) {
         data.root_attribute_id = attribute.rootAttributeLabel.id;
     }
     if(attribute.columns && attribute.columns.length > 0) {
-        data.columns = attribute.columns;
+        data.columns = attribute.columns.map(c => {
+            const mappedC = {...c};
+            if(mappedC.label) {
+                mappedC.label_id = mappedC.label.id;
+                delete mappedC.label;
+            }
+            if(mappedC.rootLabel) {
+                mappedC.root_id = mappedC.rootLabel.id;
+                delete mappedC.rootLabel;
+            }
+            mappedC.datatype = mappedC.type;
+            delete mappedC.type;
+            return mappedC;
+        });
     }
     if(attribute.textContent) {
         data.text = attribute.textContent;

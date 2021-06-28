@@ -30,7 +30,7 @@
                 </form>
             </h3>
             <span>
-                <button type="submit" form="entity-attribute-form" class="btn btn-success me-2" :disabled="!state.formDirty || !can('duplicate_edit_concepts')">
+                <button type="submit" form="entity-attribute-form" class="btn btn-success me-2" :disabled="!state.formDirty || !can('duplicate_edit_concepts')" @click.prevent="saveEntity()">
                     <i class="fas fa-fw fa-save"></i> {{ t('global.save') }}
                 </button>
                 <button type="button" class="btn btn-warning me-2" :disabled="!state.formDirty" @click="resetForm()">
@@ -77,7 +77,7 @@
         </ul>
         <div class="tab-content col ps-0 pe-0 overflow-hidden" id="entity-detail-tab-content">
             <div class="tab-pane fade h-100 show active" id="active-entity-attributes-panel" role="tabpanel">
-                <form id="entity-attribute-form" name="entity-attribute-form" class="h-100" @submit.prevent="saveEntity(state.entity)">
+                <form id="entity-attribute-form" name="entity-attribute-form" class="h-100">
                     <attribute-list
                         class="pt-2 h-100 scroll-y-auto scroll-x-hidden"
                         v-if="state.attributesFetched"

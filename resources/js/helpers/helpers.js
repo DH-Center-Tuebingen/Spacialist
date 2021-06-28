@@ -150,7 +150,7 @@ export async function handleDeletedEntity(entity) {
 
 export function getAttribute(id) {
     if(!id) return {};
-    return store.getters.attributes.find(a => a.id == id);
+    return store.getters.attributes.find(a => a.id == id) || {};
 }
 
 export function translateEntityType(id) {

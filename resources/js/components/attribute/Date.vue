@@ -11,7 +11,7 @@
         :max-date="new Date()"
         :show-week-number="true"
         v-model="v.value"
-        @input="v.handleInput">
+        @input="handleInput">
         <template v-slot:icon-calendar>
             <i class="fas fa-fw fa-calendar-alt"></i>
         </template>
@@ -44,7 +44,7 @@
                 default: false,
             },
             value: {
-                type: Number,
+                type: String,
                 required: true,
             },
         },
@@ -60,30 +60,35 @@
             // FUNCTIONS
             const resetFieldState = _ => {
                 v.resetField({
-                    value: value.value
+                    value: new Date(value.value)
                 });
             };
             const undirtyField = _ => {
                 v.resetField({
-                    value: v.value,
+                    value: new Date(v.value),
                 });
             };
+            const handleInput = value => {
+                // add timezone offset before handle change
+                const correctValue = new Date(value.getTime() - (value.getTimezoneOffset()*60*1000));
+                v.handleChange(correctValue);
+            }
 
             // DATA
             const {
-                handleInput,
+                handleChange,
                 value: fieldValue,
                 meta,
                 resetField,
             } = useField(`date_${name.value}`, yup.date(), {
-                initialValue: value.value,
+                initialValue: new Date(value.value),
             });
             const state = reactive({
 
             });
             const v = reactive({
                 value: fieldValue,
-                handleInput,
+                handleChange,
                 meta,
                 resetField,
             });
@@ -102,6 +107,7 @@
                 // LOCAL
                 resetFieldState,
                 undirtyField,
+                handleInput,
                 // PROPS
                 name,
                 disabled,

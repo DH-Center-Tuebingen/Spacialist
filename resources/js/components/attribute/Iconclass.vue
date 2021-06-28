@@ -3,7 +3,7 @@
         <div class="input-group">
             <input type="text" class="form-control" :disabled="disabled" v-model="v.value" @input="onInput()" />
             <div class="input-group-append">
-                <button type="button" name="button" class="btn btn-outline-secondary" @click="loadIconclassInfo()">
+                <button type="button" class="btn btn-outline-secondary" @click="loadIconclassInfo()">
                     <i class="fas fa-fw fa-sync"></i>
                 </button>
             </div>

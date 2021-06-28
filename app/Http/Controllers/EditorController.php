@@ -353,7 +353,7 @@ class EditorController extends Controller {
             'datatype' => 'required|string',
             'root_id' => 'nullable|integer|exists:th_concept,id',
             'root_attribute_id' => 'nullable|integer|exists:attributes,id',
-            'columns' => 'nullable|json',
+            'columns' => 'nullable|array',
             'text' => 'string',
             'recursive' => 'nullable|boolean_string'
         ]);
@@ -379,16 +379,20 @@ class EditorController extends Controller {
         $attr->save();
 
         if($datatype == 'table') {
-            $cols = json_decode($request->get('columns'));
+            $cols = $request->input('columns');
+            info($cols);
             foreach($cols as $col) {
-                if(!isset($col->label_id) && !isset($col->datatype)) continue;
-                $curl = ThConcept::find($col->label_id)->concept_url;
+                info($col);
+                info("Do I have a label? ".$col['label_id']);
+                info("Do I have a datatype? ".$col['datatype']);
+                if(!isset($col['label_id']) && !isset($col['datatype'])) continue;
+                $curl = ThConcept::find($col['label_id'])->concept_url;
                 $childAttr = new Attribute();
                 $childAttr->thesaurus_url = $curl;
-                $childAttr->datatype = $col->datatype;
-                $childAttr->recursive = sp_parse_boolean($col->recursive);
-                if(isset($col->root_id)) {
-                    $pid = $col->root_id;
+                $childAttr->datatype = $col['datatype'];
+                $childAttr->recursive = sp_parse_boolean($col['recursive']);
+                if(isset($col['root_id'])) {
+                    $pid = $col['root_id'];
                     $purl = ThConcept::find($pid)->concept_url;
                     $childAttr->thesaurus_root_url = $purl;
                 }

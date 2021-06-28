@@ -20,7 +20,7 @@
                 </h6>
             </li>
             <li>
-                <a class="dropdown-item" href="#" @click.prevent="addNewEntity()" @dblclick.stop.prevent="">
+                <a class="dropdown-item" href="#" @click.stop.prevent="addNewEntity()" @dblclick.stop.prevent="">
                     <i class="fas fa-fw fa-plus text-success"></i>
                     <span class="ms-2">
                         {{ t('main.entity.tree.contextmenu.add') }}
@@ -28,7 +28,7 @@
                 </a>
             </li>
             <li>
-                <a class="dropdown-item" href="#" @click.prevent="duplicateEntity()" @dblclick.stop.prevent="">
+                <a class="dropdown-item" href="#" @click.stop.prevent="duplicateEntity()" @dblclick.stop.prevent="">
                     <i class="fas fa-fw fa-clone text-primary"></i>
                     <span class="ms-2">
                         {{ t('main.entity.tree.contextmenu.duplicate') }}
@@ -36,7 +36,7 @@
                 </a>
             </li>
             <li>
-                <a class="dropdown-item" href="#" @click.prevent="moveEntity()" @dblclick.stop.prevent="">
+                <a class="dropdown-item" href="#" @click.stop.prevent="moveEntity()" @dblclick.stop.prevent="">
                     <i class="fas fa-fw fa-external-link-alt text-primary"></i>
                     <span class="ms-2">
                         {{ t('main.entity.tree.contextmenu.move') }}
@@ -44,7 +44,7 @@
                 </a>
             </li>
             <li>
-                <a class="dropdown-item" href="#" @click.prevent="deleteEntity()" @dblclick.stop.prevent="">
+                <a class="dropdown-item" href="#" @click.stop.prevent="deleteEntity()" @dblclick.stop.prevent="">
                     <i class="fas fa-fw fa-trash text-danger"></i>
                     <span class="ms-2">
                         {{ t('main.entity.tree.contextmenu.delete') }}
