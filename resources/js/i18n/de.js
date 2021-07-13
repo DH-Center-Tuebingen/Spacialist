@@ -98,6 +98,7 @@ const de = {
             title: 'Einstellungen',
             users: 'Benutzerverwaltung',
             roles: 'Rollenverwaltung',
+            plugins: 'Erweiterungen',
             datamodel: 'Datenmodell-Editor',
             system: 'System-Einstellungen',
             about: 'Über'

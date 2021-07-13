@@ -98,6 +98,7 @@ const en = {
             title: 'Settings',
             users: 'User Management',
             roles: 'Role Management',
+            plugins: 'Plugins',
             datamodel: 'Data-Model-Editor',
             system: 'System Preferences',
             about: 'About'

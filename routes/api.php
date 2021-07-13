@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1')->group(function() {
     Route::get('/pre', 'HomeController@getGlobalData');
+    Route::get('/plugins', 'HomeController@getPlugins');
     Route::get('/version', function() {
         $versionInfo = new App\VersionInfo();
         return response()->json([

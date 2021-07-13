@@ -101,6 +101,12 @@ export async function fetchAttributeTypes() {
 }
 
 // GET
+export async function getPlugins() {
+    return $httpQueue.add(
+        () => http.get(`/plugins`).then(response => response.data)
+    );
+};
+
 export async function getEntityComments(id) {
     return fetchComments(id, 'entity');
 };

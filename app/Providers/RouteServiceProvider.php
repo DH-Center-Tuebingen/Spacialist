@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Plugin;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
@@ -84,6 +85,8 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapPluginRoutes()
     {
+        if(!Schema::hasTable('plugins')) return;
+
         $installedPlugins = Plugin::whereNotNull('installed_at')->get();
 
         foreach($installedPlugins as $plugin) {

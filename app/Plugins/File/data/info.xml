@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<info>
+    <name>Files Plugin</name>
+    <description>Files Plugin which extends Spacialist by adding an file upload function and also linking files to entities</description>
+    <version>3.0.0</version>
+    <licence>agpl</licence>
+    <authors>
+        <author>Vinzenz Rosenkranz</author>
+    </authors>
+</info>

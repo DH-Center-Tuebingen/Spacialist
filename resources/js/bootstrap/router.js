@@ -11,6 +11,7 @@ import GlobalActivity from '../components/GlobalActivity.vue';
 // Settings
 import Users from '../components/Users.vue';
 import Roles from '../components/Roles.vue';
+import Plugins from '../components/Plugins.vue';
 import DataModel from '../components/DataModel.vue';
 import DataModelDetailView from '../components/DataModelDetailView.vue';
 import Preferences from '../components/Preferences.vue';
@@ -175,6 +176,14 @@ export const router = createRouter({
             path: '/mg/roles',
             name: 'roles',
             component: Roles,
+            meta: {
+                auth: true
+            }
+        },
+        {
+            path: '/mg/plugins',
+            name: 'plugins',
+            component: Plugins,
             meta: {
                 auth: true
             }
