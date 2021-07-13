@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Plugin;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
 class RouteServiceProvider extends ServiceProvider
@@ -39,6 +41,8 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->mapWebRoutes();
 
+        $this->mapPluginRoutes();
+
         //
     }
 
@@ -69,5 +73,30 @@ class RouteServiceProvider extends ServiceProvider
              ->middleware('api')
              ->namespace($this->namespace)
              ->group(base_path('routes/api.php'));
+    }
+
+    /**
+     * Define the "api" routes for the application.
+     *
+     * These routes are typically stateless.
+     *
+     * @return void
+     */
+    protected function mapPluginRoutes()
+    {
+        $installedPlugins = Plugin::whereNotNull('installed_at')->get();
+
+        foreach($installedPlugins as $plugin) {
+            info("Installing Plugin $plugin->name...");
+            $snkName = Str::snake($plugin->name);
+            $prefix = "api/v1/$snkName";
+            $namespace = "App\\Plugins\\$plugin->name\\Controllers";
+            $routesPath = "app/Plugins/$plugin->name/routes/api.php";
+
+            Route::prefix($prefix)
+                 ->middleware('api')
+                 ->namespace($namespace)
+                 ->group(base_path($routesPath));
+        }
     }
 }
