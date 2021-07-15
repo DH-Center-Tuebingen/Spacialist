@@ -15,7 +15,6 @@ use Illuminate\Http\Request;
 
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1')->group(function() {
     Route::get('/pre', 'HomeController@getGlobalData');
-    Route::get('/plugins', 'HomeController@getPlugins');
     Route::get('/version', function() {
         $versionInfo = new App\VersionInfo();
         return response()->json([
@@ -26,6 +25,13 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
             'time' => $versionInfo->getTime()
         ]);
     });
+
+    // PLUGINS
+    Route::get('/plugin', 'PluginController@getPlugins');
+    Route::get('/plugin/{id}', 'PluginController@installPlugin')->where('id', '[0-9]+');
+    Route::get('/plugin/script/{id}/{name}', 'PluginController@loadScript')->where('id', '[0-9]+');
+    Route::delete('/plugin/{id}', 'PluginController@uninstallPlugin')->where('id', '[0-9]+');
+    Route::delete('/plugin/remove/{id}', 'PluginController@removePlugin')->where('id', '[0-9]+');
 });
 
 // ENTITY

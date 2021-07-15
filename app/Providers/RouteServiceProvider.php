@@ -90,7 +90,6 @@ class RouteServiceProvider extends ServiceProvider
         $installedPlugins = Plugin::whereNotNull('installed_at')->get();
 
         foreach($installedPlugins as $plugin) {
-            info("Installing Plugin $plugin->name...");
             $snkName = Str::snake($plugin->name);
             $prefix = "api/v1/$snkName";
             $namespace = "App\\Plugins\\$plugin->name\\Controllers";

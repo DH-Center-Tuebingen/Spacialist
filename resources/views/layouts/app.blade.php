@@ -22,5 +22,10 @@
     <script src="js/manifest.js"></script>
     <script src="js/vendor.js"></script>
     <script src="js/app.js"></script>
+    @foreach($plugins as $plugin)
+        <script type="text/javascript">
+            {!! $plugin->loadScript('script.js') !!}
+        </script>
+    @endforeach
 </body>
 </html>

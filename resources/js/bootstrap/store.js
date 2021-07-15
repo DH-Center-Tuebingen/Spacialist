@@ -356,7 +356,10 @@ export const store = createStore({
         },
         setVersion(state, data) {
             state.version = data;
-        }
+        },
+        setPlugins(state, data) {
+            state.plugins = data;
+        },
     },
     actions: {
         setAppState({commit}, data) {
@@ -600,6 +603,9 @@ export const store = createStore({
         setVersion({commit}, data) {
             commit('setVersion', data);
         },
+        setPlugins({commit}, data) {
+            commit('setPlugins', data);
+        },
     },
     getters: {
         appInitialized: state => {
@@ -689,6 +695,9 @@ export const store = createStore({
         },
         version: state => {
             return state.version;
+        },
+        plugins: state => {
+            return state.plugins;
         },
         vfm: state => {
             return state.vfm;

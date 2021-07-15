@@ -16,8 +16,8 @@ class SetupPlugins extends Migration
         Schema::create('plugins', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
-            $table->text('description');
-            $table->text('path');
+            $table->string('version');
+            $table->string('update_available')->nullable();
             $table->timestamp('installed_at')->nullable();
             $table->timestamps();
         });

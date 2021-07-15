@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app', ['plugins' => []])
 
 @section('content')
     <div class="col-md-4 offset-md-4">

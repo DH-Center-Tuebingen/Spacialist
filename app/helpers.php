@@ -6,6 +6,19 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
+if(!function_exists('sp_remove_dir')) {
+    function sp_remove_dir($dir) {
+        foreach(glob("{$dir}/*") as $file) {
+            if(is_dir($file)) {
+                sp_remove_dir($file);
+            } else if(!is_link($file)) {
+                unlink($file);
+            }
+        }
+        rmdir($dir);
+    }
+}
+
 if(!function_exists('sp_loggable_models')) {
     function sp_loggable_models() {
         $loggableModels = [];

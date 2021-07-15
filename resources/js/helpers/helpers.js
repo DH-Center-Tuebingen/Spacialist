@@ -10,6 +10,7 @@ import {
     fetchGeometryTypes,
     fetchUsers,
     fetchVersion,
+    fetchPlugins,
     fetchAttributeTypes,
 } from '../api.js';
 
@@ -25,6 +26,7 @@ export async function initApp(locale) {
     await fetchTopEntities();
     await fetchBibliography();
     await fetchVersion();
+    await fetchPlugins();
     await fetchGeometryTypes();
     await fetchAttributeTypes();
     store.dispatch('setAppState', true);

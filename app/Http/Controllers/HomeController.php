@@ -3,13 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\EntityType;
+use App\Plugin;
 use App\Preference;
 use App\ThConcept;
 use App\User;
-
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
@@ -59,33 +56,6 @@ class HomeController extends Controller
         ]);
     }
 
-    public function getPlugins(Request $request) {
-        $plugins = [];
-
-        if($request->query('installed') == 1) {
-            $plugins = Plugin::whereNotNull('installed_at')->get();
-        } else if($request->query('uninstalled') == 1) {
-            $plugins = Plugin::whereNull('installed_at')->get();
-        } else {
-            $pluginPath = base_path('app/Plugins');
-            $availablePlugins = File::directories($pluginPath);
-            foreach($availablePlugins as $ap) {
-                // info(Str::afterLast($ap, '/'));
-                $path = Str::finish($ap, '/') . 'data/info.xml';
-                if(!File::isFile($path)) continue;
-
-                $xmlString = file_get_contents($path);
-                $xmlObject = simplexml_load_string($xmlString);
-
-                $plugins[] = json_decode(json_encode($xmlObject), true);
-            }
-        }
-
-        return response()->json([
-            'plugins' => $plugins,
-        ]);
-    }
-
     /**
      * Show the application dashboard.
      *
@@ -101,6 +71,8 @@ class HomeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index() {
-        return view('home');
+        $plugins = Plugin::getInstalled();
+        return view('home')
+            ->with('plugins', $plugins);
     }
 }

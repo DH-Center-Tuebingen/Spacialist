@@ -17,6 +17,47 @@ export async function fetchVersion() {
     }));
 }
 
+export async function fetchPlugins() {
+    await $httpQueue.add(
+        () => http.get('/plugin').then(response => {
+            store.dispatch('setPlugins', response.data);
+        })
+    );
+}
+
+export async function installPlugin(id) {
+    return $httpQueue.add(
+        () => http.get(`/plugin/${id}`).then(response => {
+            // store.dispatch('setPluginState', {
+            //     installed_at: response.data.installed_at,
+            //     updated_at: response.data.updated_at,
+            // });
+        })
+    );
+}
+
+export async function uninstallPlugin(id) {
+    return $httpQueue.add(
+        () => http.delete(`/plugin/${id}`).then(response => {
+            // store.dispatch('setPluginState', {
+            //     installed_at: response.data.installed_at,
+            //     updated_at: response.data.updated_at,
+            // });
+        })
+    );
+}
+
+export async function removePlugin(id) {
+    return $httpQueue.add(
+        () => http.delete(`/plugin/remove/${id}`).then(response => {
+            // store.dispatch('setPluginState', {
+            //     installed_at: response.data.installed_at,
+            //     updated_at: response.data.updated_at,
+            // });
+        })
+    );
+}
+
 export async function fetchUsers() {
     await $httpQueue.add(() => http.get('user').then(response => {
         store.dispatch('setUsers', {
@@ -101,12 +142,6 @@ export async function fetchAttributeTypes() {
 }
 
 // GET
-export async function getPlugins() {
-    return $httpQueue.add(
-        () => http.get(`/plugins`).then(response => response.data)
-    );
-};
-
 export async function getEntityComments(id) {
     return fetchComments(id, 'entity');
 };
