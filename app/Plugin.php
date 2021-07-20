@@ -30,7 +30,6 @@ class Plugin extends Model
     public function loadScript($name) {
         $scriptPath = base_path("app/Plugins/$this->name/js/$name");
         if (!File::isFile($scriptPath)) {
-            info("is not a file at $scriptPath");
             return '';
         }
 
@@ -39,7 +38,7 @@ class Plugin extends Model
     }
 
     public static function getInfo($path) {
-        $infoPath = Str::finish($path, '/') . 'app/info.xml';
+        $infoPath = Str::finish($path, '/') . 'App/info.xml';
         if(!File::isFile($infoPath)) return false;
 
         $xmlString = file_get_contents($infoPath);

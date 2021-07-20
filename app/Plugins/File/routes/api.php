@@ -13,4 +13,6 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::get('/', 'FileController@init');
+// Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v2/file')->group(function () {
+    Route::get('/', 'FileController@get');
+// });

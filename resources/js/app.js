@@ -56,6 +56,8 @@ import i18n from './bootstrap/i18n.js';
 // Font Awesome
 import './bootstrap/font.js';
 import { can } from './helpers/helpers.js';
+// Plugin System
+import { SpPS } from './bootstrap/plugins.js';
 
 const app = createApp(App);
 app.use(i18n);
@@ -146,6 +148,8 @@ app.component('infinite-loading', InfiniteLoading);
 app.component('draggable', draggable);
 app.component('node', Node);
 app.component('tree', Tree);
+
+SpPS.initialize(app);
 
 // Mount Vue
 app.mount('#app');

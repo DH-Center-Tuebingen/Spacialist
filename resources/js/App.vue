@@ -79,9 +79,12 @@
                                 <i class="fas fa-fw fa-cogs"></i> {{ t('global.tools.title') }}
                             </a>
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="tools-navbar">
-                                <router-link class="dropdown-item" v-for="plugin in getToolPlugins()" :to="plugin.href" :key="plugin.key">
+                                <a href="#" class="dropdown-item" v-for="(plugin, i) in state.plugins.tools" :key="i">
                                     <i class="fas fa-fw" :class="plugin.icon"></i> {{ t(plugin.label) }}
-                                </router-link>
+                                </a>
+                                <!-- <router-link class="dropdown-item" v-for="plugin in state.plugins.tools" :to="plugin.href" :key="plugin.key">
+                                    <i class="fas fa-fw" :class="plugin.icon"></i> {{ t(plugin.label) }}
+                                </router-link> -->
                                 <router-link :to="{name: 'bibliography'}" class="dropdown-item">
                                     <i class="fas fa-fw fa-book"></i> {{ t('global.tools.bibliography') }}
                                 </router-link>
@@ -135,9 +138,12 @@
                                 <router-link :to="{name: 'preferences'}" class="dropdown-item">
                                     <i class="fas fa-fw fa-cog"></i> {{ t('global.settings.system') }}
                                 </router-link>
-                                <router-link class="dropdown-item" v-for="plugin in getSettingsPlugins()" :to="plugin.href" :key="plugin.key">
+                                <a class="dropdown-item" v-for="(plugin, i) in state.plugins.settings" href="#" :key="i">
                                     <i class="fas fa-fw" :class="plugin.icon"></i> {{ t(plugin.label) }}
-                                </router-link>
+                                </a>
+                                <!-- <router-link class="dropdown-item" v-for="plugin in state.plugins.settings" :to="plugin.href" :key="plugin.key">
+                                    <i class="fas fa-fw" :class="plugin.icon"></i> {{ t(plugin.label) }}
+                                </router-link> -->
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#" @click.prevent="showAboutModal">
                                     <i class="fas fa-fw fa-info-circle"></i> {{ t('global.settings.about') }}
@@ -205,8 +211,6 @@
     import {
         getPreference,
         getProjectName,
-        getToolPlugins,
-        getSettingsPlugins,
         hasPreference,
         initApp,
         throwError,
@@ -258,11 +262,7 @@
                 //         }
                 //     }
                 // }
-                plugins: {
-                    tab: {},
-                    tools: {},
-                    settings: {}
-                },
+                plugins: computed(_ => store.getters.slotPlugins()),
                 auth: auth,
                 appName: computed(_ => getProjectName()),
                 init: computed(_ => store.getters.appInitialized),
@@ -394,9 +394,7 @@
                 t,
                 // HELPERS
                 getPreference,
-                getToolPlugins,
                 hasPreference,
-                getSettingsPlugins,
                 // LOCAL
                 markNotificationAsRead,
                 markAllNotificationsAsRead,

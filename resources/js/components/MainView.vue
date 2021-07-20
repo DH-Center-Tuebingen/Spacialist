@@ -17,11 +17,11 @@
         </div>
         <div :class="`h-100 d-flex flex-column col-md-${state.columnPref.right}`" id="addon-container" v-if="state.columnPref.right > 0">
             <ul class="nav nav-tabs">
-                <!-- <li class="nav-item" v-for="plugin in $getTabPlugins()">
-                    <router-link class="nav-link" :class="{active: tab == plugin.key}" :to="{ query: { tab: plugin.key }}" append>
-                        <i class="fas fa-fw" :class="plugin.icon"></i> {{ $t(plugin.label) }}
+                <li class="nav-item" v-for="(plugin, i) in state.tabPlugins" :key="i">
+                    <router-link class="nav-link" :class="{active: state.tab == plugin.key}" :to="{ query: { tab: plugin.key }}" append>
+                        <i class="fas fa-fw" :class="plugin.icon"></i> {{ t(plugin.label) }}
                     </router-link>
-                </li> -->
+                </li>
                 <li class="nav-item">
                     <a href="#" class="nav-link" :class="{active: state.tab == 'references', disabled: !state.entity.id}" @click.prevent="setTab('references')">
                         <i class="fas fa-fw fa-bookmark"></i> {{ t('main.entity.references.title') }}
@@ -29,15 +29,12 @@
                 </li>
             </ul>
             <div class="mt-2 col px-0">
-                <!-- <keep-alive>
+                <keep-alive>
                     <component
-                        :selected-entity="selectedEntity"
-                        :entity-data-loaded="dataLoaded"
-                        :is="activePlugin"
-                        :params="$route.query"
+                        :is="state.tabComponent"
                         v-on:update:link="updateLink">
                     </component>
-                </keep-alive> -->
+                </keep-alive>
                 <div v-show="isTab('references') && !!state.entity.id" class="h-100 scroll-y-auto">
                     <p class="alert alert-info" v-if="!state.hasReferences">
                         {{ t('main.entity.references.empty') }}
@@ -156,12 +153,21 @@
             // DATA
             const state = reactive({
                 tab: computed(_ => store.getters.mainView.tab),
+                tabComponent: computed(_ => {
+                    const plugin = state.tabPlugins.find(p => p.key == state.tab);
+                    if(!!plugin) {
+                        return plugin.componentTag;
+                    } else {
+                        return '';
+                    }
+                }),
                 concepts: computed(_ => store.getters.concepts),
                 entity: computed(_ => store.getters.entity),
                 hasReferences: computed(_ => !!state.entity.references && Object.keys(state.entity.references).length > 0),
                 entityTypes: computed(_ => store.getters.entityTypes),
                 columnPref: computed(_ => store.getters.preferenceByKey('prefs.columns')),
                 isDetailLoaded: computed(_ => currentRoute.name == 'entitydetail'),
+                tabPlugins: computed(_ => store.getters.slotPlugins('tab')),
             });
 
             // ON MOUNTED

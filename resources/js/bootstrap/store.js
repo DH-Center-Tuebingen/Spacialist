@@ -40,6 +40,12 @@ export const store = createStore({
             user: {},
             users: [],
             version: {},
+            plugins: [],
+            registeredPluginSlots: {
+                tab: [],
+                tools: [],
+                settings: [],
+            },
             vfm: {},
         }
     },
@@ -360,6 +366,9 @@ export const store = createStore({
         setPlugins(state, data) {
             state.plugins = data;
         },
+        registerPluginInSlot(state, data) {
+            state.registeredPluginSlots[data.slot].push(data);
+        },
     },
     actions: {
         setAppState({commit}, data) {
@@ -606,6 +615,9 @@ export const store = createStore({
         setPlugins({commit}, data) {
             commit('setPlugins', data);
         },
+        registerPluginInSlot({commit}, data) {
+            commit('registerPluginInSlot', data);
+        },
     },
     getters: {
         appInitialized: state => {
@@ -698,6 +710,10 @@ export const store = createStore({
         },
         plugins: state => {
             return state.plugins;
+        },
+        slotPlugins: state => slot => {
+            const p = state.registeredPluginSlots;
+            return slot ? p[slot] : p;
         },
         vfm: state => {
             return state.vfm;

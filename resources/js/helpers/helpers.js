@@ -626,19 +626,3 @@ export function createDownloadLink(content, filename, base64 = false, contentTyp
 export function setPreference(prefKey, value) {
     this.state.preferences[prefKey] = value;
 }
-
-export function getTabPlugins() {
-    return this.state.plugins.tab;
-}
-
-export function getToolPlugins() {
-    return this.state.plugins.tools;
-}
-
-export function getSettingsPlugins() {
-    return this.state.plugins.settings;
-}
-
-export function getPlugins() {
-    return this.state.plugins;
-}
