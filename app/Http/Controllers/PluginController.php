@@ -109,14 +109,16 @@ class PluginController extends Controller
             $plugin = Plugin::where('id', $id)->whereNull('installed_at')->first();
             $name = $plugin->name;
             $migrationPath = base_path("app/Plugins/$name/database/migrations");
-            $migrations = File::files($migrationPath);
-            foreach ($migrations as $migration) {
-                $filename = $migration->getFilename();
-                info($filename);
-                Artisan::call('migrate', [
-                    '--path' => "/app/Plugins/$name/database/migrations/$filename",
-                    '--force' => true,
-                ]);
+            if(file_exists($migrationPath) && is_dir($migrationPath)) {
+                $migrations = File::files($migrationPath);
+                foreach ($migrations as $migration) {
+                    $filename = $migration->getFilename();
+                    info($filename);
+                    Artisan::call('migrate', [
+                        '--path' => "/app/Plugins/$name/database/migrations/$filename",
+                        '--force' => true,
+                    ]);
+                }
             }
             $plugin->installed_at = Carbon::now();
             $plugin->save();
