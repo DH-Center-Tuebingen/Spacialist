@@ -32,6 +32,7 @@
                 <keep-alive>
                     <component
                         :is="state.tabComponent"
+                        :http="global_api"
                         v-on:update:link="updateLink">
                     </component>
                 </keep-alive>
@@ -92,6 +93,9 @@
 
     import store from '../bootstrap/store.js';
     import router from '../bootstrap/router.js';
+    import {
+        global_api,
+    } from '../bootstrap/http.js';
 
     import { useToast } from '../plugins/toast.js';
 
@@ -187,6 +191,7 @@
                 // HELPERS
                 translateConcept,
                 date,
+                global_api,
                 // LOCAL
                 setTab,
                 isTab,

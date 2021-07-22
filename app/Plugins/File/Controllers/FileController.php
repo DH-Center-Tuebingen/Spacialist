@@ -19,12 +19,12 @@ class FileController extends Controller
     }
 
     public function get(Request $request, $page = 1) {
-        // $user = auth()->user();
-        // if (!$user->can('view_files')) {
-        //     return response()->json([
-        //         'error' => __('You do not have the permission to view files')
-        //     ], 403);
-        // }
+        $user = auth()->user();
+        if (!$user->can('view_files')) {
+            return response()->json([
+                'error' => __('You do not have the permission to view files')
+            ], 403);
+        }
         $filters = $request->input('filters', []);
         $type = $request->input('t', 'all');
         $files = \App\Plugins\File\App\File::filter($page, [], $type);

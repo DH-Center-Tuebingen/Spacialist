@@ -43,12 +43,40 @@ instance.interceptors.response.use(response => {
 
 export function useHttp() {
     return instance;
-}
+};
 
 export const external = axios.create({
     headers: {
         common: {},
     },
-});;
+});
+
+export const global_api = (verb, url, data, external = false) => {
+    if(external) {
+        if(verb.toLowerCase() == 'get' || verb.toLowerCase() == 'delete') {
+            return $httpQueue.add(
+                () => external[verb](url, {
+                    crossdomain: true,
+                }).then(response => response.data)
+            )
+        } else {
+            return $httpQueue.add(
+                () => external[verb](url, data, {
+                    crossdomain: true,
+                }).then(response => response.data)
+            )
+        }
+    } else {
+        if(verb.toLowerCase() == 'get' || verb.toLowerCase() == 'delete') {
+            return $httpQueue.add(
+                () => instance[verb](url).then(response => response.data)
+            )
+        } else {
+            return $httpQueue.add(
+                () => instance[verb](url, data).then(response => response.data)
+            )
+        }
+    }
+};
 
 export default instance;

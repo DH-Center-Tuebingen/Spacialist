@@ -98,7 +98,7 @@
             <div class="tab-pane fade h-100 d-flex flex-column" id="active-entity-comments-panel" role="tabpanel">
                 <div class="mb-auto scroll-y-auto h-100" v-if="state.entity.comments">
                     <div v-if="state.commentsFetching" class="mt-2">
-                        <p class="alert alert-info mb-0" v-html="$t('global.comments.fetching')">
+                        <p class="alert alert-info mb-0" v-html="t('global.comments.fetching')">
                         </p>
                     </div>
                     <div v-else-if="state.commentFetchFailed" class="mt-2">

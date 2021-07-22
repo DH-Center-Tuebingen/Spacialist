@@ -94,7 +94,7 @@ export const SpPS = {
             }
         }
         store.dispatch('registerPluginInSlot', mergedOptions);
-    }
+    },
 }
 
 export default SpPS;
