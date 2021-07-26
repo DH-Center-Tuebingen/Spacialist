@@ -149,7 +149,7 @@ app.component('draggable', draggable);
 app.component('node', Node);
 app.component('tree', Tree);
 
-SpPS.initialize(app);
+SpPS.initialize(app, i18n.global.t);
 
 // Mount Vue
 app.mount('#app');

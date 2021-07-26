@@ -2,6 +2,13 @@ import { only } from "../helpers/helpers";
 import store from "./store.js";
 import i18n from "./i18n.js";
 
+// TODO workaround to get reactivity support in plugins
+// replace with proper solution!
+import {
+    computed,
+    reactive,
+} from 'vue';
+
 const defaultPluginOptions = {
     id: null,
     i18n: {}, // object of languages (key is e.g. 'en', 'de', 'fr', ...)
@@ -20,10 +27,17 @@ export const SpPS = {
     data: {
         plugins: [],
         app: null,
+        t: null,
+        vue_api: {
+            computed,
+            reactive,
+            entity: computed(_ => store.getters.entity),
+        },
     },
-    initialize: app => {
+    initialize: (app, t) => {
         global.SpPS = SpPS;
         SpPS.data.app = app;
+        SpPS.data.t = t;
     },
     registerI18n: (id, messages) => {
         for(let k in messages) {
