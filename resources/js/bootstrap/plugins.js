@@ -2,12 +2,10 @@ import { only } from "../helpers/helpers";
 import store from "./store.js";
 import i18n from "./i18n.js";
 
-// TODO workaround to get reactivity support in plugins
-// replace with proper solution!
-import {
-    computed,
-    reactive,
-} from 'vue';
+import * as Vue from 'vue';
+
+import * as filters from '@/helpers/filters.js';
+import * as helpers from '@/helpers/helpers.js';
 
 const defaultPluginOptions = {
     id: null,
@@ -15,7 +13,7 @@ const defaultPluginOptions = {
 }
 const defaultSlotOptions = {
     of: null, // id of registered plugin
-    slot: 'tools', // one of 'tab', 'tools' or 'settings'
+    slot: 'tab', // one of 'tab', 'tools' or 'settings'
     icon: '',
     label: '',
     key: null,
@@ -23,19 +21,25 @@ const defaultSlotOptions = {
     componentTag: null,
 }
 
+global.Vue = Vue;
+
 export const SpPS = {
+    api: {
+        filters: filters,
+        helpers: helpers,
+        store: {
+            dispatch: store.dispatch,
+            getters: store.getters,
+        },
+    },
     data: {
         plugins: [],
         app: null,
         t: null,
-        vue_api: {
-            computed,
-            reactive,
-            entity: computed(_ => store.getters.entity),
-        },
     },
     initialize: (app, t) => {
         global.SpPS = SpPS;
+        global.t = t;
         SpPS.data.app = app;
         SpPS.data.t = t;
     },

@@ -1,10 +1,6 @@
 <template>
     <div>
         <table class="table table-striped table-hovered table-sm mb-0">
-            <col style="width: 33%"/>
-            <col style="width: 33%"/>
-            <col style="width: 33%"/>
-            <col style="width: 1%"/>
             <thead class="thead-light">
                 <tr>
                     <th v-for="(column, i) in state.columns" :key="i">

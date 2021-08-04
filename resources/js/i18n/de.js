@@ -19,6 +19,7 @@ const de = {
         replace: 'Ersetzen',
         clear: 'Leeren',
         confirm: 'Ok',
+        apply: 'Anwenden',
         create: 'Anlegen',
         move: 'Verschieben',
         parse: 'Parsen',

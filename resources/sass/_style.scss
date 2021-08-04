@@ -48,8 +48,12 @@ code.normal {
     align-items: center;
 }
 
-.drag-container:empty::after {
-    content: "Drop items here";
+.reference-group {
+    margin-bottom: map-get($utilities, margin, values, 3);
+}
+
+.reference-group:last-child {
+    margin-bottom: 0rem !important;
 }
 
 .logo {

@@ -116,7 +116,7 @@ export function length(value, precision = 2, isArea = false) {
     const sizeInUnit = length * factor;
     return sizeInUnit.toFixed(precision) +  ' ' + unit;
 };
-export function bytes(value, precision = 2) {
+export function bytes(value, precision = 2, hideZeros = false) {
     if(!value) return value;
 
     const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
@@ -131,7 +131,11 @@ export function bytes(value, precision = 2) {
 
     const unit = units[unitIndex];
     const sizeInUnit = bytes / Math.pow(1024, unitIndex);
-    return sizeInUnit.toFixed(precision) +  ' ' + unit;
+    let finalValue = sizeInUnit;
+    if(!hideZeros || !Number.isInteger(sizeInUnit)) {
+        finalValue = finalValue.toFixed(precision);
+    }
+    return `${finalValue} ${unit}`;
 };
 export function toFixed(value, precision = 2) {
     if(precision < 0) precision = 2;

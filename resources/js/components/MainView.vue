@@ -28,19 +28,18 @@
                     </a>
                 </li>
             </ul>
-            <div class="mt-2 col px-0">
+            <div class="mt-2 col px-0 overflow-hidden">
                 <keep-alive>
                     <component
                         :is="state.tabComponent"
-                        :http="global_api"
-                        v-on:update:link="updateLink">
+                        :http="global_api">
                     </component>
                 </keep-alive>
                 <div v-show="isTab('references') && !!state.entity.id" class="h-100 scroll-y-auto">
                     <p class="alert alert-info" v-if="!state.hasReferences">
                         {{ t('main.entity.references.empty') }}
                     </p>
-                    <div v-else v-for="(referenceGroup, key) in state.entity.references" class="mb-3" :key="key">
+                    <div v-else v-for="(referenceGroup, key) in state.entity.references" class="reference-group" :key="key">
                         <h5 class="mb-1 fw-medium">
                             <a href="#" class="text-decoration-none" @click.prevent="showMetadataForReferenceGroup(referenceGroup)">
                                 {{ translateConcept(key) }}
@@ -177,6 +176,7 @@
             // ON MOUNTED
             onMounted(_ => {
                 console.log("mainview component mounted");
+                store.dispatch('setMainViewTab', currentRoute.query.tab);
             });
 
             onBeforeRouteUpdate(async (to, from) => {

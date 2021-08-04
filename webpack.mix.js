@@ -42,11 +42,6 @@ mix.js('resources/js/app.js', 'public/js').vue()
            fonts: appPath + 'fonts'
        }
    })
-   .webpackConfig({
-      output: {
-         publicPath: '/' + appPath
-      },
-   })
    .webpackConfig(webpack => {
        return {
            resolve: {
@@ -59,6 +54,9 @@ mix.js('resources/js/app.js', 'public/js').vue()
                    fs: false
                }
            },
+            output: {
+                publicPath: '/' + appPath
+            },
            plugins: [
                new webpack.ProvidePlugin({
                     process : 'process/browser',
@@ -76,3 +74,7 @@ mix.js('resources/js/app.js', 'public/js').vue()
 if(`public/${appPath}fonts` !== 'public/fonts') {
     mix.copyDirectory(`public/${appPath}fonts`, 'public/fonts');
 }
+mix.alias({
+    '@': path.join(__dirname, 'resources/js'),
+    vue$: path.join(__dirname, 'node_modules/vue/dist/vue.esm-bundler.js')
+})

@@ -20,6 +20,7 @@ const en = {
         clear: 'Clear',
         confirm: 'OK',
         create: 'Create',
+        apply: 'Apply',
         move: 'Move',
         parse: 'Parse',
         list: {

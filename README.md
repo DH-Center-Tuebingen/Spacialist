@@ -18,6 +18,11 @@ Spacialist is a customizable Web-based platform for collecting, managing, analyz
 ## Installation
 Installation procedures and system requirements are described [here](INSTALL.md).
 
+## Plugins (Beta)
+Since Release _Isfahan_ Spacialist is extensible by plugins. If you are a developer and want to create your own plugin, please refer to this [HowTo Guide](PLUGINS.md).
+
+A list with all available plugins is **coming soon**.
+
 ## Testing
 All PHPUnit tests are based on the `DemoSeeder` seed. To run tests, follow these steps:
 
