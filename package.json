@@ -67,6 +67,7 @@
         "vue-infinite-loading": "^2.4.5",
         "vue-upload-component": "^3.0.50",
         "vue2-datepicker": "^4.0.0-beta.2",
+        "vue3-markdown-it": "^1.0.9",
         "vuedraggable": "^4.0.1",
         "yup": "^0.32.9"
     }

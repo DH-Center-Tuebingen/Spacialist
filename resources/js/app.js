@@ -38,6 +38,7 @@ import InfiniteLoading from 'vue-infinite-loading';
 import draggable from 'vuedraggable';
 import { Tree, Node, } from "tree-vue-component";
 import VueFinalModal from 'vue-final-modal';
+import Markdown from 'vue3-markdown-it';
 
 // Components
 import App from './App.vue';
@@ -66,6 +67,7 @@ app.use(store);
 app.use(vueAuth);
 app.use(VueFinalModal());
 app.use(provideToast());
+app.use(Markdown);
 
 // Directives
 app.directive('dcan', {
