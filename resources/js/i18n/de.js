@@ -273,6 +273,9 @@ const de = {
                 has_header: 'Hat eine Kopfzeile?',
                 nr_of_shown_rows: 'Anzahl der angezeigten Zeilen',
             },
+            picker: {
+                title: 'CSV-Picker',
+            },
         },
         entity: {
             title: 'Entität | Entitäten',

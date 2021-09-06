@@ -45,7 +45,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-outline-success" data-bs-dismiss="modal" :disabled="!state.hasPickedEnough" @click="confirmModal()">
-                <i class="fas fa-fw fa-times"></i> {{ t('global.create') }}
+                <i class="fas fa-fw fa-check"></i> {{ t('global.create') }}
             </button>
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
                 <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}

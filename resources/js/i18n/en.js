@@ -276,6 +276,9 @@ const en = {
                 has_header: 'Has Header Row?',
                 nr_of_shown_rows: 'Number of shown rows',
             },
+            picker: {
+                title: 'CSV-Picker',
+            },
         },
         entity: {
             title: 'Entity | Entities',
