@@ -111,6 +111,7 @@
                     case 'string':
                     case 'stringf':
                     case 'iconclass':
+                    case 'rism':
                     case 'geography':
                         return '';
                     case 'integer':

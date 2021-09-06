@@ -151,7 +151,8 @@ const en = {
             <br />
             To add a fixed width (e.g. 3 for 002 instead of 2), you can use <code class="normal">%03d</code>.`,
             sql_info: `You can use <code class="normal">:entity_id</code> in your SQL-Query to reference the entity this attribute is assigned to.`,
-            iconclass: 'Iconclass'
+            iconclass: 'Iconclass',
+            rism: 'RISM',
         },
         activity: 'Activity',
         action: 'Action',
@@ -374,6 +375,10 @@ const en = {
                 iconclass: {
                     cite_info: 'Infos from <cite title="Iconclass"><a href="http://iconclass.org/{class}.json" target="_blank">http://iconclass.org/{class}.json</a></cite>',
                     doesnt_exist: 'This iconclass does not exist'
+                },
+                rism: {
+                    cite_info: 'Infos from <cite title="Muscat-SRU-Interface"><a href="https://muscat.rism.info/sru/sources?operation=searchRetrieve&version=1.1&query=id={id}&maximumRecords=1" target="_blank">https://muscat.rism.info/sru/sources?operation=searchRetrieve&version=1.1&query=id={id}&maximumRecords=1</a></cite>',
+                    doesnt_exist: 'THIS RSIM-Entry does not exist',
                 },
                 table: {
                     chart: {

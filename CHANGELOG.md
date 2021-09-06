@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - Delete/Restore individual rows in tabular attribute
 - Load csv data into tabular attribute
 - Preview resulting attribute in _New Attribute_ Dialog
+- [RISM](https://rism.info/de/index.html)-Attribute
 ### Fixed
 - Improved Attribute Validation
 - Editing Entity Name

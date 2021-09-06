@@ -147,6 +147,15 @@
                             :attribute="element"
                             @change="e => updateDirtyState(e, element.id)" />
 
+                        <rism-attribute
+                            v-else-if="element.datatype == 'rism'"
+                            :ref="el => setRef(el, element.id)"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
+                            :name="`attr-${element.id}`"
+                            :value="state.attributeValues[element.id].value"
+                            :attribute="element"
+                            @change="e => updateDirtyState(e, element.id)" />
+
                         <geography-attribute
                             v-else-if="element.datatype == 'geography'"
                             :ref="el => setRef(el, element.id)"
@@ -238,6 +247,7 @@
     import Dimension from './attribute/Dimension.vue';
     import Tabular from './attribute/Tabular.vue';
     import Iconclass from './attribute/Iconclass.vue';
+    import RISM from './attribute/Rism.vue';
     import Geography from './attribute/Geography.vue';
     import Entity from './attribute/Entity.vue';
     import DateAttr from './attribute/Date.vue';
@@ -308,6 +318,7 @@
             'list-attribute': List,
             'tabular-attribute': Tabular,
             'iconclass-attribute': Iconclass,
+            'rism-attribute': RISM,
             'geography-attribute': Geography,
             'entity-attribute': Entity,
             'date-attribute': DateAttr,
@@ -477,7 +488,7 @@
                 attributeValues: values,
                 hoverStates: new Array(attributes.value.length).fill(false),
                 expansionStates: new Array(attributes.value.length).fill(false),
-                componentLoaded: computed(_ => state.attributeList.length > 0 && state.attributeValues),
+                componentLoaded: computed(_ => state.attributeValues),
                 isHoveringPossible: computed(_ => {
                     return !!attrs.onReorderList || !!attrs.onEditElement || !!attrs.onRemoveElement || !!attrs.onDeleteElement;
                 }),

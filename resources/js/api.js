@@ -235,6 +235,12 @@ export async function getIconClassInfo(iconClass) {
     }).then(response => response.data).catch(e => e);
 }
 
+export async function getRismInfo(rismId) {
+    return external.get(`https://muscat.rism.info/sru/sources?operation=searchRetrieve&version=1.1&query=id=${rismId}&maximumRecords=1`, {
+        crossdomain: true
+    }).then(response => response.data).catch(e => e);
+}
+
 export async function fetchChildren(id) {
     return $httpQueue.add(
         () => http.get(`/entity/byParent/${id}`).then(response => response.data)

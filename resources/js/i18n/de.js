@@ -151,7 +151,8 @@ const de = {
             <br />
             Um eine feste Breite (z.B. 3 für 002 anstatt 2) zu erzwingen, benutze <code class="normal">%03d</code>.`,
             sql_info: `Du kannst mit <code class="normal">:entity_id</code> in deiner SQL-Abfrage auf die Entität referenzieren, dem dieses Attribut zugewiesen ist.`,
-            iconclass: 'Iconclass'
+            iconclass: 'Iconclass',
+            rism: 'RISM',
         },
         activity: 'Aktivitäten',
         action: 'Aktion',
@@ -371,6 +372,10 @@ const de = {
                 iconclass: {
                     cite_info: 'Infos von <cite title="Iconclass"><a href="http://iconclass.org/{class}.json" target="_blank">http://iconclass.org/{class}.json</a></cite>',
                     doesnt_exist: 'Diese Iconclass existiert nicht',
+                },
+                rism: {
+                    cite_info: 'Infos von <cite title="Muscat-SRU-Schnittstelle"><a href="https://muscat.rism.info/sru/sources?operation=searchRetrieve&version=1.1&query=id={id}&maximumRecords=1" target="_blank">https://muscat.rism.info/sru/sources?operation=searchRetrieve&version=1.1&query=id={id}&maximumRecords=1</a></cite>',
+                    doesnt_exist: 'Dieser RSIM-Eintrag existiert nicht',
                 },
                 table: {
                     chart: {

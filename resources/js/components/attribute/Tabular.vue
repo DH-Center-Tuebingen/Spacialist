@@ -63,6 +63,15 @@
                             :attribute="element"
                             @change="e => updateDirtyState(e, $index, column.id)" />
 
+                        <rism-attribute
+                            v-else-if="column.datatype == 'rism'"
+                            :ref="el => setRef(el, `${$index}_${column.id}`)"
+                            :disabled="disabled || row.mark_deleted"
+                            :name="`${name}-column-attr-${column.id}`"
+                            :value="row[column.id]"
+                            :attribute="element"
+                            @change="e => updateDirtyState(e, $index, column.id)" />
+
                         <entity-attribute v-else-if="column.datatype == 'entity'"
                             :ref="el => setRef(el, `${$index}_${column.id}`)"
                             :disabled="disabled || row.mark_deleted"
@@ -134,6 +143,13 @@
 
                         <iconclass-attribute
                             v-else-if="column.datatype == 'iconclass'"
+                            :ref="el => setAddRef(el, `${column.id}`)"
+                            :name="`${name}-new-column-attr-${column.id}`"
+                            :value="state.newRowColumns[column.id]"
+                            :attribute="column" />
+
+                        <rism-attribute
+                            v-else-if="column.datatype == 'rism'"
                             :ref="el => setAddRef(el, `${column.id}`)"
                             :name="`${name}-new-column-attr-${column.id}`"
                             :value="state.newRowColumns[column.id]"
@@ -246,6 +262,7 @@
     import FloatAttr from './Float.vue';
     import Bool from './Bool.vue';
     import Iconclass from './Iconclass.vue';
+    import RISM from './Rism.vue';
     import Entity from './Entity.vue';
     import DateAttr from './Date.vue';
     import SingleChoice from './SingleChoice.vue';
@@ -281,6 +298,7 @@
             'float-attribute': FloatAttr,
             'bool-attribute': Bool,
             'iconclass-attribute': Iconclass,
+            'rism-attribute': RISM,
             'entity-attribute': Entity,
             'date-attribute': DateAttr,
             'singlechoice-attribute': SingleChoice,

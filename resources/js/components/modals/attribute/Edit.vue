@@ -202,6 +202,7 @@
                         case 'geography':
                         case 'entity':
                         case 'iconclass':
+                        case 'rism':
                         case 'epoch':
                         case 'timeperiod':
                         case 'dimension':
@@ -252,6 +253,7 @@
                         case 'stringf':
                         case 'geography':
                         case 'iconclass':
+                        case 'rism':
                         case 'serial':
                             return 'text';
                         case 'double':

@@ -69,7 +69,7 @@ export const global_api = (verb, url, data, external = false) => {
     } else {
         if(verb.toLowerCase() == 'get' || verb.toLowerCase() == 'delete') {
             return $httpQueue.add(
-                () => instance[verb](url).then(response => response.data)
+                () => instance[verb](url, data).then(response => response.data)
             )
         } else {
             return $httpQueue.add(

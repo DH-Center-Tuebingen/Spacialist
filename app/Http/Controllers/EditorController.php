@@ -269,6 +269,10 @@ class EditorController extends Controller {
             [
                 'datatype' => 'iconclass',
                 'in_table' => true,
+            ],
+            [
+                'datatype' => 'rism',
+                'in_table' => true,
             ]
         ]);
     }
