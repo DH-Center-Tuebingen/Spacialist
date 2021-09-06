@@ -17,6 +17,7 @@ class SetupPlugins extends Migration
             $table->bigIncrements('id');
             $table->string('name');
             $table->string('version');
+            $table->uuid('uuid');
             $table->string('update_available')->nullable();
             $table->timestamp('installed_at')->nullable();
             $table->timestamps();

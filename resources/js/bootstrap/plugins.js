@@ -1,6 +1,10 @@
 import { only } from "../helpers/helpers";
 import store from "./store.js";
+import router from "./router.js";
 import i18n from "./i18n.js";
+import {
+    global_api,
+} from './http.js';
 
 import * as Vue from 'vue';
 
@@ -31,6 +35,8 @@ export const SpPS = {
             dispatch: store.dispatch,
             getters: store.getters,
         },
+        router: router,
+        http: global_api,
     },
     data: {
         plugins: [],

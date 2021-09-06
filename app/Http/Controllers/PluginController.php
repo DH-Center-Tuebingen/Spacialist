@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class PluginController extends Controller
 {
@@ -63,6 +65,7 @@ class PluginController extends Controller
                     $plugin = new Plugin();
                     $plugin->name = $id;
                     $plugin->version = $info['version'];
+                    $plugin->uuid = Str::uuid();
                     $plugin->save();
                 } else if($plugin->version != $info['version']) {
                     // installed version splitted
@@ -120,6 +123,17 @@ class PluginController extends Controller
                     ]);
                 }
             }
+            $scriptPath = base_path("app/Plugins/$name/js/script.js");
+            if(file_exists($scriptPath)) {
+                $uuid = $plugin->uuid;
+                $slug = Str::slug($name);
+                $filehandle = fopen($scriptPath, 'r');
+                Storage::put(
+                    "plugins/${slug}-${uuid}.js",
+                    $filehandle,
+                );
+                fclose($filehandle);
+            }
             $plugin->installed_at = Carbon::now();
             $plugin->save();
             return response()->json($plugin);
@@ -140,6 +154,12 @@ class PluginController extends Controller
                     '--path' => "/app/Plugins/$name/database/migrations/$filename",
                     '--force' => true,
                 ]);
+            }
+            
+            $uuid = $plugin->uuid;
+            $slug = Str::slug($name);
+            if(Storage::exists("plugins/${slug}-${uuid}.js")) {
+                Storage::delete("plugins/${slug}-${uuid}.js");
             }
 
             $plugin->installed_at = null;

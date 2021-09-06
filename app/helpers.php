@@ -19,6 +19,12 @@ if(!function_exists('sp_remove_dir')) {
     }
 }
 
+if(!function_exists('sp_slug')) {
+    function sp_slug($str) {
+        return Str::slug($str);
+    }
+}
+
 if(!function_exists('sp_loggable_models')) {
     function sp_loggable_models() {
         $loggableModels = [];

@@ -31,8 +31,7 @@
             <div class="mt-2 col px-0 overflow-hidden">
                 <keep-alive>
                     <component
-                        :is="state.tabComponent"
-                        :http="global_api">
+                        :is="state.tabComponent">
                     </component>
                 </keep-alive>
                 <div v-show="isTab('references') && !!state.entity.id" class="h-100 scroll-y-auto">
@@ -92,9 +91,6 @@
 
     import store from '../bootstrap/store.js';
     import router from '../bootstrap/router.js';
-    import {
-        global_api,
-    } from '../bootstrap/http.js';
 
     import { useToast } from '../plugins/toast.js';
 
@@ -191,7 +187,6 @@
                 // HELPERS
                 translateConcept,
                 date,
-                global_api,
                 // LOCAL
                 setTab,
                 isTab,

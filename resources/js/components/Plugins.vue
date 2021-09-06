@@ -38,11 +38,11 @@
                         <div class="">
                             <button type="button" class="btn btn-sm btn-outline-warning" v-if="isInstalled(plugin)" @click="uninstall(plugin)">
                                 <i class="fas fa-fw fa-times"></i>
-                                Uninstall
+                                Deactivate
                             </button>
                             <button type="button" class="btn btn-sm btn-outline-success" v-else @click="install(plugin)">
                                 <i class="fas fa-fw fa-plus"></i>
-                                Install
+                                Activate
                             </button>
                             <button type="button" class="btn btn-sm btn-outline-primary ms-2" v-if="updateAvailable(plugin)" @click="update(plugin)">
                                 <i class="fas fa-fw fa-download"></i>
