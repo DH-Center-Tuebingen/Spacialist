@@ -30,6 +30,7 @@ class Entity extends Model
     protected $appends = [
         'parentIds',
         'parentNames',
+        'attributeLinks',
     ];
 
     protected $with = [
@@ -229,6 +230,19 @@ class Entity extends Model
 
     public function files() {
         return $this->belongsToMany('App\File', 'entity_files', 'entity_id', 'file_id')->orderBy('entity_files.file_id');
+    }
+
+    public function getAttributeLinksAttribute() {
+        $links = AttributeValue::where('entity_val', $this->id)->get();
+        $entities = [];
+        foreach($links as $link) {
+            $entity = Entity::find($link->entity_id);
+            $entities[] = [
+                'id' => $entity->id,
+                'name' => $entity->name,
+            ];
+        }
+        return $entities;
     }
 
     public function getParentIdsAttribute() {

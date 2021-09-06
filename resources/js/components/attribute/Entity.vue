@@ -4,6 +4,9 @@
         :key-text="'name'"
         :default-value="v.fieldValue"
         @selected="e => entitySelected(e)" />
+    <router-link :to="{name: 'entitydetail', params: {id: v.fieldValue.id}, query: state.query}" v-if="v.value" class="btn btn-outline-secondary btn-sm mt-2">
+        {{ t('main.entity.attributes.entity.go_to', {name: v.fieldValue.name}) }}
+    </router-link>
 </template>
 
 <script>
@@ -13,6 +16,12 @@
         toRefs,
         watch,
     } from 'vue';
+
+    import { useI18n } from 'vue-i18n';
+
+    import {
+        useRoute,
+    } from 'vue-router';
 
     import { useField } from 'vee-validate';
 
@@ -40,6 +49,8 @@
         },
         emits: ['change'],
         setup(props, context) {
+            const { t } = useI18n();
+            const route = useRoute();
             const {
                 name,
                 disabled,
@@ -83,7 +94,7 @@
                 initialValue: value.value,
             });
             const state = reactive({
-
+                query: computed(_ => route.query),
             });
             const v = reactive({
                 fieldValue,
@@ -103,6 +114,7 @@
 
             // RETURN
             return {
+                t,
                 // HELPERS
                 searchEntity,
                 // LOCAL

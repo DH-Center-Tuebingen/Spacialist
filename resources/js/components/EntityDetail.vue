@@ -14,6 +14,18 @@
                                 <i class="fas fa-fw fa-xs fa-eye-slash"></i>
                             </span>
                         </button>
+                        <span class="dropdown bg-body text-secondary clickable me-2" v-if="state.hasAttributeLinks">
+                            <span class="dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="fas fa-fw fa-xs fa-link"></i>
+                            </span>
+                            <ul class="dropdown-menu">
+                                <li v-for="link in state.entity.attributeLinks" :key="link.id">
+                                    <router-link :to="{name: 'entitydetail', params: {id: link.id}, query: state.routeQuery}" class="dropdown-item">
+                                        {{ link.name }}
+                                    </router-link>
+                                </li>
+                            </ul>
+                        </span>
                         <a href="#" v-if="state.entityHeaderHovered" class="text-secondary" @click.prevent="editEntityName()">
                             <i class="fas fa-fw fa-edit fa-xs"></i>
                         </a>
@@ -218,11 +230,13 @@
                 initFinished: false,
                 commentLoadingState: 'not',
                 hiddenAttributeState: false,
+                routeQuery: computed(_ => route.query),
                 entity: computed(_ => store.getters.entity),
                 entityUser: computed(_ => state.entity.user),
                 entityAttributes: computed(_ => store.getters.entityTypeAttributes(state.entity.entity_type_id)),
                 entityTypeSelections: computed(_ => getEntityTypeAttributeSelections(state.entity.entity_type_id)),
                 entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
+                hasAttributeLinks: computed(_ => state.entity.attributeLinks && state.entity.attributeLinks.length > 0),
                 attributesFetched: computed(_ => state.initFinished && state.entity.data && !!state.entityAttributes && state.entityAttributes.length > 0),
                 entityTypeLabel: computed(_ => {
                     // if(!state.entity) return;
@@ -595,6 +609,7 @@
                         showDiscard(to, _ => state.formDirty = false, saveEntity);
                         return false;
                     } else {
+                        state.hiddenAttributes = {};
                         store.dispatch('resetEntity');
                         return true;
                     }

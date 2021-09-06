@@ -372,6 +372,9 @@ const en = {
                 AD: 'AD',
                 ad: '@:main.entity.attributes.AD',
                 hidden: 'no attributes hidden | one attribute hidden | {cnt} attributes hidden',
+                entity: {
+                    go_to: 'Go to {name}',
+                },
                 iconclass: {
                     cite_info: 'Infos from <cite title="Iconclass"><a href="http://iconclass.org/{class}.json" target="_blank">http://iconclass.org/{class}.json</a></cite>',
                     doesnt_exist: 'This iconclass does not exist'

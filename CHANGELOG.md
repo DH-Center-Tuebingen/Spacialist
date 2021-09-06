@@ -9,6 +9,8 @@ All notable changes to this project will be documented in this file.
 - Load csv data into tabular attribute
 - Preview resulting attribute in _New Attribute_ Dialog
 - [RISM](https://rism.info/de/index.html)-Attribute
+- Button to jump from _Entity_ Attribute to linked Entity
+- List with all entities that reference currently selected entity in _Entity_ Attribute
 ### Fixed
 - Improved Attribute Validation
 - Editing Entity Name
