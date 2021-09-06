@@ -2,11 +2,9 @@
     <div>
         <div class="input-group">
             <input type="text" class="form-control" :disabled="disabled" v-model="v.value" @input="onInput()" />
-            <div class="input-group-append">
-                <button type="button" class="btn btn-outline-secondary" @click="loadIconclassInfo()">
-                    <i class="fas fa-fw fa-sync"></i>
-                </button>
-            </div>
+            <button type="button" class="btn btn-outline-secondary" :disabled="v.noContent" @click="loadIconclassInfo()">
+                <i class="fas fa-fw fa-eye"></i>
+            </button>
         </div>
         <div class="bg-light mt-2 p-2 border rounded" v-if="state.infoLoaded">
             <div class="d-flex flex-row justify-content-between">
@@ -147,6 +145,7 @@
                 handleChange,
                 meta,
                 resetField,
+                noContent: computed(_ => !v.value),
             });
 
             watch(v.meta, (newValue, oldValue) => {

@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file.
 - Improved Attribute Validation
 - Editing Entity Name
 ### Changed
+- Disable _Loading Iconclass Button_ when attribute value is not set
+- Switch Icon for _Loading Iconclass Button_
 - Update Laravel to Version 8
 - Update VueJS to Version 3
 - Restructure Bootstrapping and Setup of App
