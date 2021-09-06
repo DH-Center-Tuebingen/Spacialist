@@ -13,7 +13,7 @@
                     <tr class="text-nowrap">
                         <th>{{ t('global.preference') }}</th>
                         <th style="width: 99%;" class="text-end">{{ t('global.value') }}</th>
-                        <th>{{ t('global.allow-override') }}</th>
+                        <th>{{ t('global.allow_override') }}</th>
                     </tr>
                 </thead>
                 <tbody>
