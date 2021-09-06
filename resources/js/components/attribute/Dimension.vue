@@ -5,15 +5,13 @@
         <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="v.H.handleInput" v-model="v.H.value"/>
             <span class="input-group-text">&times;</span>
         <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="v.T.handleInput" v-model="v.T.value"/>
-        <div>
-            <button class="btn btn-outline-secondary  dropdown-toggle" :disabled="disabled" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                {{ v.unit.value }}
-            </button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item" href="#" v-for="(unit, i) in dimensionUnits" @click.prevent="setUnit(unit)" :key="i">
-                    {{ unit }}
-                </a>
-            </div>
+        <button class="btn btn-outline-secondary  dropdown-toggle" :disabled="disabled" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            {{ v.unit.value }}
+        </button>
+        <div class="dropdown-menu">
+            <a class="dropdown-item" href="#" v-for="(unit, i) in dimensionUnits" @click.prevent="setUnit(unit)" :key="i">
+                {{ unit }}
+            </a>
         </div>
     </div>
 </template>

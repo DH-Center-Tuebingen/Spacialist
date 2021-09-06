@@ -1,37 +1,33 @@
 <template>
     <div>
         <div class="input-group">
-            <div class="input-group-prepend" uib-dropdown>
-                <button type="button" class="btn btn-outline-secondary dropdown-toggle" :disabled="disabled" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <span v-if="v.startLabel.value">
-                        {{ t(`main.entity.attributes.${v.startLabel.value}`) }}
-                    </span>
-                    <span v-else>
-                    </span>
-                </button>
-                <ul class="dropdown-menu">
-                    <a class="dropdown-item" href="#" v-for="(label, i) in timeLabels" @click.prevent="setLabel('startLabel', label)" :key="i">
-                        {{ t(`main.entity.attributes.${label}`) }}
-                    </a>
-                </ul>
-            </div>
+            <button type="button" class="btn btn-outline-secondary dropdown-toggle" :disabled="disabled" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span v-if="v.startLabel.value">
+                    {{ t(`main.entity.attributes.${v.startLabel.value}`) }}
+                </span>
+                <span v-else>
+                </span>
+            </button>
+            <ul class="dropdown-menu">
+                <a class="dropdown-item" href="#" v-for="(label, i) in timeLabels" @click.prevent="setLabel('startLabel', label)" :key="i">
+                    {{ t(`main.entity.attributes.${label}`) }}
+                </a>
+            </ul>
             <input type="number" step="1" min="0" pattern="[0-9]+" class="form-control text-center" :disabled="disabled" aria-label="" @input="v.start.handleInput" v-model.number="v.start.value">
                 <span class="input-group-text">-</span>
             <input type="number" step="1" min="0" pattern="[0-9]+" class="form-control text-center" :disabled="disabled" aria-label="" @input="v.end.handleInput" v-model.number="v.end.value">
-            <div class="input-group-append">
-                <button type="button" class="btn btn-outline-secondary dropdown-toggle" :disabled="disabled" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <span v-if="v.endLabel.value">
-                        {{ t(`main.entity.attributes.${v.endLabel.value}`) }}
-                    </span>
-                    <span v-else>
-                    </span>
-                </button>
-                <ul uib-dropdown-menu class="dropdown-menu">
-                    <a class="dropdown-item" href="#" v-for="(label, i) in timeLabels" @click.prevent="setLabel('endLabel', label)" :key="i">
-                        {{ t(`main.entity.attributes.${label}`) }}
-                    </a>
-                </ul>
-            </div>
+            <button type="button" class="btn btn-outline-secondary dropdown-toggle" :disabled="disabled" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span v-if="v.endLabel.value">
+                    {{ t(`main.entity.attributes.${v.endLabel.value}`) }}
+                </span>
+                <span v-else>
+                </span>
+            </button>
+            <ul uib-dropdown-menu class="dropdown-menu">
+                <a class="dropdown-item" href="#" v-for="(label, i) in timeLabels" @click.prevent="setLabel('endLabel', label)" :key="i">
+                    {{ t(`main.entity.attributes.${label}`) }}
+                </a>
+            </ul>
         </div>
         <multiselect
             class="mt-2"

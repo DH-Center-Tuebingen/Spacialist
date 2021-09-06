@@ -51,11 +51,9 @@
                         <div class="form-group">
                             <div class="input-group">
                                 <input type="search" class="form-control" :placeholder="$t('plugins.files.modal.detail.dicom.metadata.search-placeholder')" v-model="metadataQuery"/>
-                                <div class="input-group-append">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-fw fa-search" aria-hidden="true"></i>
-                                    </span>
-                                </div>
+                                <span class="input-group-text">
+                                    <i class="fas fa-fw fa-search" aria-hidden="true"></i>
+                                </span>
                             </div>
                         </div>
                     </form>
