@@ -116,7 +116,7 @@
                     <div v-else-if="state.commentFetchFailed" class="mt-2">
                         <p class="alert alert-danger mb-0">
                             {{ t('global.comments.fetching_failed') }}
-                            <button type="button" class="d-block mt-2 btn btn-xs btn-outline-success" @click="fetchComments">
+                            <button type="button" class="d-block mt-2 btn btn-sm btn-outline-success" @click="fetchComments">
                                 <i class="fas fa-fw fa-sync"></i>
                                 {{ t('global.comments.retry_failed') }}
                             </button>

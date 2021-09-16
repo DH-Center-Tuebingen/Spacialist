@@ -22,7 +22,7 @@
         </form>
         <div class="table-responsive">
             <table class="table table-striped table-hover" :class="{ 'table-sm': small }">
-                <thead class="thead-light sticky-top">
+                <thead class="table-light sticky-top">
                     <tr>
                         <th v-for="(header, i) in state.computedRows.header" :key="i">
                             {{ ucfirst(header) }}

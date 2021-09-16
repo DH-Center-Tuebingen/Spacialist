@@ -67,7 +67,10 @@
                 <hr />
             </form>
             <h4>{{ t('main.datamodel.detail.attribute.title') }}</h4>
-            <div class="col overflow-hidden flex-grow-1">
+            <div class="col overflow-hidden flex-grow-1 position-relative">
+                <div v-if="state.entityAttributes.length == 0" class="position-absolute d-flex justify-content-center align-items-center h-100 w-100 rounded text-muted bg-light-dark border border-3 border-secondary border-dashed">
+                    <h4>Drag attributes here</h4>
+                </div>
                 <attribute-list
                     class="h-100 scroll-y-auto scroll-x-hidden"
                     group="attribute-selection"

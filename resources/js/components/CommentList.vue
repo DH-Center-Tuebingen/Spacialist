@@ -74,7 +74,7 @@
                                 </slot>
                                 <slot name="body-deleted" :comment="comment" v-else>
                                     <div class="card-body bg-warning px-3 py-2" style="opacity: 0.75;">
-                                        <p class="card-text font-italic">
+                                        <p class="card-text fst-italic">
                                             {{ t('global.comments.deleted_info') }}
                                         </p>
                                     </div>

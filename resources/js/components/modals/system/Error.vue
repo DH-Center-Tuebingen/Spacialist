@@ -17,7 +17,7 @@
             <p v-if="state.hasRequest" v-html="t('global.error.request_failed', {method: data.request.method, url: data.request.url, status: data.request.status})">
             </p>
             <alert
-                :message="`<span class='fw-light font-italic'>${data.msg.error || JSON.stringify(data.msg)}</span>`"
+                :message="`<span class='fw-light fst-italic'>${data.msg.error || JSON.stringify(data.msg)}</span>`"
                 :type="'error'"
                 :noicon="false"
                 :icontext="t('global.error.alert_title')" />
