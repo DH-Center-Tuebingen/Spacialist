@@ -15,4 +15,5 @@ use Illuminate\Http\Request;
 
 // Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v2/file')->group(function () {
     Route::get('/', 'FileController@get');
+    Route::patch('/{id}', 'FileController@patchProperty')->where('id', '[0-9]+');
 // });
