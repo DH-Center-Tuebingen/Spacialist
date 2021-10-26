@@ -5,18 +5,31 @@
             <h3 class="mb-0" @mouseenter="onEntityHeaderHover(true)" @mouseleave="onEntityHeaderHover(false)">
                 <span v-if="!state.entity.editing">
                     {{ state.entity.name }}
-                    <small>
-                        <button id="hidden-attributes-icon" v-show="state.hiddenAttributeCount > 0" class="border-0 bg-body text-secondary me-1" data-bs-container="body" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="bottom" :data-bs-content="state.hiddenAttributeListing" data-bs-html="true" data-bs-custom-class="popover-p-2" @mousedown="showHiddenAttributes()" @mouseup="hideHiddenAttributes()">
+                    <small class="d-inline-flex gap-1">
+                        <button id="hidden-attributes-icon" v-show="state.hiddenAttributeCount > 0" class="border-0 bg-body text-secondary p-0" data-bs-container="body" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="bottom" :data-bs-content="state.hiddenAttributeListing" data-bs-html="true" data-bs-custom-class="popover-p-2" @mousedown="showHiddenAttributes()" @mouseup="hideHiddenAttributes()">
                             <span v-show="state.hiddenAttributeState">
-                                <i class="fas fa-fw fa-xs fa-eye"></i>
+                                <span class="fa-layers fa-fw">
+                                    <i class="fas fa-eye fa-xs"></i>
+                                    <span class="fa-layers-counter fa-counter-lg" style="background:Tomato">
+                                        {{ state.hiddenAttributeCount }}
+                                    </span>
+                                </span>
                             </span>
                             <span v-show="!state.hiddenAttributeState">
-                                <i class="fas fa-fw fa-xs fa-eye-slash"></i>
+                                <span class="fa-layers fa-fw">
+                                    <i class="fas fa-eye-slash fa-xs"></i>
+                                    <span class="fa-layers-counter fa-counter-lg" style="background:Tomato">
+                                        {{ state.hiddenAttributeCount }}
+                                    </span>
+                                </span>
                             </span>
                         </button>
-                        <span class="dropdown bg-body text-secondary clickable me-2" v-if="state.hasAttributeLinks">
-                            <span class="dropdown-toggle" data-bs-toggle="dropdown">
-                                <i class="fas fa-fw fa-xs fa-link"></i>
+                        <span class="dropdown bg-body text-secondary clickable me-1" v-if="state.hasAttributeLinks">
+                            <span class="fa-layers fa-fw" data-bs-toggle="dropdown">
+                                <i class="fas fa-fw fa-xs fa-link fa-xs"></i>
+                                <span class="fa-layers-counter fa-counter-lg" style="background:Tomato">
+                                    {{ state.entity.attributeLinks.length }}
+                                </span>
                             </span>
                             <ul class="dropdown-menu">
                                 <li v-for="link in state.entity.attributeLinks" :key="link.id">
@@ -610,7 +623,7 @@
                         return false;
                     } else {
                         state.hiddenAttributes = {};
-                        store.dispatch('resetEntity');
+                        // store.dispatch('resetEntity');
                         return true;
                     }
                 } else {

@@ -56,7 +56,11 @@ import vueAuth from './bootstrap/auth.js';
 import i18n from './bootstrap/i18n.js';
 // Font Awesome
 import './bootstrap/font.js';
-import { can } from './helpers/helpers.js';
+import {
+  can,
+  _debounce,
+  getElementAttribute,
+} from './helpers/helpers.js';
 // Plugin System
 import { SpPS } from './bootstrap/plugins.js';
 
@@ -125,7 +129,59 @@ app.directive('highlightjs', {
       }
     });
   }
-})
+});
+app.directive('infinite-scroll', {
+  mounted(el, binding) {
+    const options = {
+      disabled: false,
+      delay: 200,
+      offset: 0,
+    };
+
+    const disabled = !!getElementAttribute(el, 'infinite-scroll-disabled', options.disabled, 'bool');
+    const delay = getElementAttribute(el, 'infinite-scroll-delay', options.delay, 'int');
+    const offset = getElementAttribute(el, 'infinite-scroll-offset', options.offset, 'int');
+
+    if(!disabled) {
+      el.onscroll = _debounce(_ => {
+        const position = el.clientHeight + el.scrollTop;
+        const threshold = el.scrollHeight - offset;
+
+        if(position >= threshold) {
+          binding.value();
+        }
+      }, delay);
+    }
+  },
+  updated(el, binding) {
+    const options = {
+      disabled: false,
+      delay: 200,
+      offset: 0,
+    };
+
+    const disabled = !!getElementAttribute(el, 'infinite-scroll-disabled', options.disabled, 'bool');
+
+    if(disabled) {
+      el.onscroll = null;
+    } else if(!disabled && !el.onscroll) {
+      const delay = getElementAttribute(el, 'infinite-scroll-delay', options.delay, 'int');
+      const offset = getElementAttribute(el, 'infinite-scroll-offset', options.offset, 'int');
+
+      el.onscroll = _debounce(_ => {
+        const position = el.clientHeight + el.scrollTop;
+        const threshold = el.scrollHeight - offset;
+
+        if(position >= threshold) {
+          binding.value();
+        }
+      }, delay);
+    }
+  },
+  beforeUnmount(el, binding) {
+      el.onscroll = null;
+  }
+});
 
 // Components
 app.component('attribute-list', AttributeList);

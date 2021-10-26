@@ -135,7 +135,7 @@ code.normal {
 }
 
 .card:hover .card-hover {
-    opacity: .25;
+    opacity: .15;
 }
 
 .card:hover .card-hover-overlay {
@@ -146,8 +146,17 @@ code.normal {
     opacity: 1;
 }
 
-.font-size-50 {
-    font-size: 50%;
+.card-hover-addons, .list-hover-addons {
+    display: none !important;
+}
+.card:hover .card-hover-addons, .list-item:hover .list-hover-addons {
+    display: block !important;
+}
+
+.fa-counter-lg {
+    font-size: 2.5rem;
+    top: -5px;
+    right: -5px;
 }
 
 .table-cell-250 td, .table-cell-250 ul {

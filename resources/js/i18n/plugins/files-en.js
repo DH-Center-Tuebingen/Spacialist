@@ -1,23 +1,7 @@
 const en = {
     plugins: {
         files: {
-            title: 'Files',
             header: {
-                linked: 'Linked Files',
-                unlinked: 'Unlinked Files',
-                all: 'All Files',
-                upload: 'Upload FIles',
-                rules: {
-                    title: 'Filter Rules',
-                    types: {
-                        file: 'File Type',
-                        camera: 'Camera Model',
-                        date: 'Date',
-                        name: 'File Name',
-                    },
-                    apply: 'Apply Filters',
-                    active: 'no filter active | one filter active | {cnt} filters active'
-                },
                 export: {
                     selected: 'export selected files <span class="badge badge-secondary">{cnt}</span>'
                 }
@@ -66,13 +50,6 @@ const en = {
             modal: {
                 detail: {
                     title: '{name} - Details',
-                    properties: 'Properties',
-                    links: 'Links',
-                    exif: 'Exif-Data',
-                    'toggle-edit': 'Toggle Edit-Mode',
-                    'toggle-highlight': 'Toggle Highlighting',
-                    'toggle-csv': 'Toggle CSV-Rendering',
-                    'toggle-md': 'Toggle Markdown-Rendering',
                     'toggle-html': 'Toggle HTML-Rendering',
                     'no-links': 'No links. Select a entity first or use the search below to link to entities.',
                     'link-further-entities': 'Link to further entities',
@@ -143,10 +120,6 @@ const en = {
                     no_preview: 'No preview available for this file type.'
                 }
             },
-            list: {
-                display: 'Displaying {from}-{to} of {total} files',
-                none: 'No files'
-            }
         }
     }
 }

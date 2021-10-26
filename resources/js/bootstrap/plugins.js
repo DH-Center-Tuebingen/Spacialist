@@ -1,15 +1,24 @@
-import { only } from "../helpers/helpers";
+import { only } from "@/helpers/helpers";
 import store from "./store.js";
 import router from "./router.js";
 import i18n from "./i18n.js";
 import {
     global_api,
+    api_base,
 } from './http.js';
+
+import { addToast } from '@/plugins/toast.js';
 
 import * as Vue from 'vue';
 
 import * as filters from '@/helpers/filters.js';
 import * as helpers from '@/helpers/helpers.js';
+import {
+    searchEntity,
+} from '@/api.js';
+import {
+    Node
+} from '@/helpers/tree.js';
 
 const defaultPluginOptions = {
     id: null,
@@ -25,18 +34,34 @@ const defaultSlotOptions = {
     componentTag: null,
 }
 
+const {
+    currentRoute,
+    push,
+} = router;
+
 global.Vue = Vue;
 
 export const SpPS = {
     api: {
         filters: filters,
         helpers: helpers,
+        searches: {
+            entity: searchEntity,
+        },
         store: {
             dispatch: store.dispatch,
             getters: store.getters,
         },
-        router: router,
+        router: {
+            currentRoute,
+            push,
+        },
+        toast: addToast,
         http: global_api,
+        endpoint: api_base,
+        tree: {
+            Node: Node,
+        },
     },
     data: {
         plugins: [],

@@ -9,7 +9,7 @@
             </h3>
             <div class="dropdown">
                 <span id="tree-options-dropdown" class="clickable align-middle btn btn-outline-primary btn-sm" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <span class="fa-stack d-inline">
+                    <span class="fa-stack h-auto">
                         <i class="fas fa-filter"></i>
                         <i class="fas fa-ellipsis-h" data-fa-transform="start-4"></i>
                     </span>

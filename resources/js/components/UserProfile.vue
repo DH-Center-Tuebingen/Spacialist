@@ -159,6 +159,8 @@
                 });
             };
             const updateUserObjects = data => {
+                // Workaround to update avatar image, because url may not change
+                data.avatar_url += `#${Date.now()}`;
                 auth.user({
                     ...getUser(),
                     ...data
@@ -180,7 +182,7 @@
                 }
 
                 // Enable automatic upload
-                if(Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error) {
+                if(!!newFile && (Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error)) {
                     if(!newFile.active) {
                         newFile.active = true
                     }

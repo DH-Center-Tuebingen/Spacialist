@@ -5,7 +5,7 @@
                 <span v-if="p.last" :title="p.name">
                     {{ truncate(p.name, 25) }}
                 </span>
-                <router-link v-else :to="{name: 'entitydetail', params: {id: p.id}}" append :title="p.name">
+                <router-link v-else :to="{name: 'entitydetail', params: {id: p.id}, query: currentRoute.query}" append :title="p.name">
                     {{ truncate(p.name, 25) }}
                 </router-link>
             </li>
@@ -21,6 +21,10 @@
     } from 'vue';
 
     import {
+        useRoute,
+    } from 'vue-router';
+
+    import {
         truncate,
     } from '../helpers/filters.js';
 
@@ -32,6 +36,7 @@
             }
         },
         setup(props) {
+            const currentRoute = useRoute();
             const {
                 entity,
             } = toRefs(props);
@@ -60,6 +65,7 @@
                 // HELPERS
                 truncate,
                 // LOCAL
+                currentRoute,
                 // PROPS
                 // STATE
                 state,

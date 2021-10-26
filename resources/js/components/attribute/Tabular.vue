@@ -6,7 +6,7 @@
                     <th v-for="(column, i) in state.columns" :key="i">
                         {{ translateConcept(column.thesaurus_url) }}
                     </th>
-                    <th class="d-flex flex-row">
+                    <th>
                         <a class="text-body" href="#" @click.prevent="emitExpandToggle()">
                             <i class="fas fa-fw fa-expand"></i>
                         </a>

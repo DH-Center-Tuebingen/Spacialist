@@ -1,57 +1,4 @@
-<template>
-    <div class="h-100">
-        <transition name="fade">
-            <div class="progress mb-2" style="height: 1px;" v-if="progress<100">
-                <div class="progress-bar" role="progressbar" :style="{width: progress+'%'}" :aria-valuenow="progress" aria-valuemin="0" aria-valuemax="100">
-                    <span class="sr-only">{{progress}}</span>
-                </div>
-            </div>
-        </transition>
-        <div :id="containerId" class="w-100 h-100">
-            <div id="file-controls" class="position-relative">
-                <button type="button" class="btn btn-outline-info position-absolute m-2" v-if="entity.id" @click="loadAllSubModels" style="left: 0;">
-                    {{ $t('plugins.files.modal.detail.threed.load-sub-models') }}
-                </button>
-                <button type="button" class="btn btn-outline-info position-absolute m-2" v-if="fullscreenHandler" @click="toggleFullscreen" style="right: 0;">
-                    <i class="fas fa-fw fa-expand"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-</template>
-
 <script>
-    import {
-        AmbientLight,
-        AnimationMixer,
-        BoxBufferGeometry,
-        Color,
-        Clock,
-        DirectionalLight,
-        DoubleSide,
-        Geometry,
-        GridHelper,
-        Group,
-        HemisphereLight,
-        IcosahedronBufferGeometry,
-        Line,
-        MathUtils as TMath,
-        LOD,
-        Matrix4,
-        Mesh,
-        MeshPhongMaterial,
-        PCFSoftShadowMap,
-        PerspectiveCamera,
-        Raycaster,
-        Scene,
-        SpotLight,
-        TextureLoader,
-        Vector2,
-        Vector3,
-        WebGLRenderer,
-    } from 'three';
-    import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-    import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
     import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
     import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
     import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -64,23 +11,6 @@
     import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 
     export default {
-        props: {
-            file: {
-                required: true,
-                type: Object
-            },
-            entity: {
-                required: false,
-                type: Object
-            },
-            fullscreenHandler: {
-                required: false,
-                type: Object
-            }
-        },
-        mounted() {
-            this.startup();
-        },
         destroyed() {
             window.removeEventListener('resize', this.onWindowResize, false);
             this.renderer.domElement.removeEventListener('mousedown', this.onMouseDown, false);
@@ -129,99 +59,6 @@
                 const py = this.guiConfig.positionY;
                 const pz = this.guiConfig.positionZ;
                 this.activeMesh.position.set(px, py, pz);
-            },
-            getFileType: function(file) {
-                if(file.mime_type == 'model/vnd.collada+xml') {
-                    return 'dae'
-                }
-                if(file.mime_type == 'model/gltf-binary' || file.mime_type == 'model/gltf+json') {
-                    return 'gltf'
-                }
-                if(file.mime_type == 'chemical/x-pdb') {
-                    return 'pdb'
-                }
-                let extension = this.getFileExtension(file.name);
-                switch(extension) {
-                    case 'dae':
-                        return 'dae';
-                    case 'gltf':
-                        return 'gltf';
-                    case 'pdb':
-                        return 'pdb';
-                    case 'obj':
-                        return 'obj';
-                    case 'fbx':
-                        return 'fbx';
-                    default:
-                        return undefined;
-                }
-            },
-            getFileExtension: function(filename) {
-                return filename.substr(filename.lastIndexOf('.')+1);
-            },
-            startup: function() {
-                this.init();
-                this.loadModel(this.file);
-                this.animate();
-            },
-            init: function() {
-                this.gui = new dat.GUI({
-                    autoPlace: false,
-                    hideable: true,
-                    closed: true
-                });
-                this.guiConfig = {
-                    scaleX: this.scale,
-                    scaleY: this.scale,
-                    scaleZ: this.scale,
-                    positionX: 0,
-                    positionY: 0,
-                    positionZ: 0
-                };
-                this.guiCtrl['scaleX'] = this.gui.add(this.guiConfig, 'scaleX', 0.01, 100, 0.01).onChange(this.setScale);
-                this.guiCtrl['scaleY'] = this.gui.add(this.guiConfig, 'scaleY', 0.01, 100, 0.01).onChange(this.setScale);
-                this.guiCtrl['scaleZ'] = this.gui.add(this.guiConfig, 'scaleZ', 0.01, 100, 0.01).onChange(this.setScale);
-                this.guiCtrl['positionX'] = this.gui.add(this.guiConfig, 'positionX', -100, 100, 0.01).onChange(this.setPosition);
-                this.guiCtrl['positionY'] = this.gui.add(this.guiConfig, 'positionY', -100, 100, 0.01).onChange(this.setPosition);
-                this.guiCtrl['positionZ'] = this.gui.add(this.guiConfig, 'positionZ', -100, 100, 0.01).onChange(this.setPosition);
-
-                // initially hide gui
-                dat.GUI.toggleHide();
-
-                this.container = document.getElementById(this.containerId);
-                document.getElementById('file-controls').appendChild(this.gui.domElement);
-                this.containerWidth = this.container.clientWidth;
-                this.containerHeight = this.container.clientHeight;
-
-                this.renderer = new WebGLRenderer({
-                    antialias: true
-                });
-                this.renderer.setPixelRatio(window.devicePixelRatio);
-        		this.renderer.setSize(this.containerWidth, this.containerHeight);
-        		this.renderer.shadowMap.enabled = true;
-        		this.renderer.shadowMap.type = PCFSoftShadowMap;
-        		this.renderer.gammaInput = true;
-        		this.renderer.gammaOutput = true;
-                this.camera = new PerspectiveCamera(45, this.containerWidth/this.containerHeight, 0.1, 2000);
-                this.camera.position.set(5, 0, 0);
-                this.camera.lookAt(new Vector3(0, 0, 0));
-                this.camera.up.set(0, 1, 0);
-
-                this.scene = new Scene();
-                this.group = new Group();
-
-                this.initEventListeners();
-                this.initLights();
-                this.initControls();
-                if(navigator.getVRDisplays) {
-                    this.container.appendChild(VRButton.createButton(this.renderer));
-                    this.initViveControls();
-                }
-
-                this.container.appendChild(this.renderer.domElement);
-                this.scene.add(this.camera);
-                this.scene.add(this.group);
-        		this.scene.add(new GridHelper(100, 10));
             },
             selectObject(object) {
                 dat.GUI.toggleHide();
@@ -284,48 +121,9 @@
                     models.forEach(m => vm.loadModel(m));
                 }));
             },
-            loadModel: function(file) {
-                const fileType = this.getFileType(file);
-                if(!fileType) return;
-                switch(fileType) {
-                    case 'dae':
-                        this.loadCollada(file);
-                        break;
-                    case 'gltf':
-                        this.loadGltf(file);
-                        break;
-                    case 'obj':
-                        this.loadObj(file);
-                        break;
-                    case 'fbx':
-                        this.loadFbx(file);
-                        break;
-                    case 'pdb':
-                        this.loadProteinDb(file);
-                        break;
-                }
-            },
             toggleFullscreen() {
                 if(!this.fullscreenHandler) return;
                 this.fullscreenHandler.toggle(document.getElementById(this.containerId))
-            },
-            animate: function() {
-                this.animationId = requestAnimationFrame(this.animate);
-                if(this.animationMixer.update) {
-                     this.animationMixer.update(this.animationClock.getDelta());
-                }
-                this.render();
-            },
-            render: function() {
-                if(!this.renderer) return;
-                if(this.renderer.vr && this.renderer.vr.enabled) {
-                    this.grabController.update();
-                    this.flashlightController.update();
-                }
-                this.renderer.render(this.scene, this.camera);
-                if(this.labelRenderer) {
-                    this.labelRenderer.render(this.scene, this.camera);
-                }
             },
             initEventListeners: function() {
                 window.addEventListener('resize', this.onWindowResize, false);
@@ -345,74 +143,6 @@
         		this.directionalLight.shadow.mapSize.set(4096, 4096);
                 this.scene.add(this.hemisphereLight);
         		this.scene.add(this.directionalLight);
-            },
-            initControls: function() {
-                this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-                this.transformControls = new TransformControls(this.camera, this.renderer.domElement);
-                this.transformControls.enabled = false;
-
-                this.transformControls.addEventListener('change', _ => {
-                    if(this.transformControls.object) {
-                        const s = this.transformControls.object.scale;
-                        const p = this.transformControls.object.position;
-                        this.guiConfig.scaleX = s.x;
-                        this.guiConfig.scaleY = s.y;
-                        this.guiConfig.scaleZ = s.z;
-                        this.guiConfig.positionX = p.x;
-                        this.guiConfig.positionY = p.y;
-                        this.guiConfig.positionZ = p.z;
-                        for(let k in this.guiCtrl) {
-                            this.guiCtrl[k].updateDisplay();
-                        }
-                    }
-                    this.render();
-                });
-                // Disable orbit controls on gizmo drag
-                this.transformControls.addEventListener('dragging-changed', event => {
-                    this.controls.enabled = !event.value;
-                });
-                window.addEventListener('keydown', event => {
-                    if(event.target.tagName.toUpperCase() == 'INPUT') return;
-                    if(event.target.tagName.toUpperCase() == 'TEXTAREA') return;
-                    switch(event.keyCode) {
-                        case 17: // CTRL
-                            this.transformControls.setTranslationSnap(1);
-							this.transformControls.setRotationSnap(TMath.degToRad(15));
-                            break;
-                        case 32: // SPACE
-                            if(this.transformControls.enabled) {
-                                this.removeTransformControls();
-                            }
-                            break;
-                        case 81: // Q
-                            this.transformControls.setSpace(this.transformControls.space === 'local' ? 'world' : 'local');
-                            break;
-                        case 87: // W
-                            this.transformControls.setMode("translate");
-                            break;
-                        case 69: // E
-                            this.transformControls.setMode("rotate");
-                            break;
-                        case 82: // R
-                            this.transformControls.setMode("scale");
-                            break;
-                        case 70: // F
-                            if(this.transformControls.enabled) {
-                                this.zoomToObject(this.activeMesh);
-                            }
-                            break;
-                    }
-                });
-                window.addEventListener('keyup', event => {
-                    if(event.target.tagName.toUpperCase() == 'INPUT') return;
-                    if(event.target.tagName.toUpperCase() == 'TEXTAREA') return;
-                    switch(event.keyCode) {
-                        case 17: // CTRL
-                            this.transformControls.setTranslationSnap(null);
-							this.transformControls.setRotationSnap(null);
-                            break;
-                    }
-                });
             },
             initViveEventListeners: function() {
                 // Vive Events
@@ -492,33 +222,6 @@
                 }
             },
             // Loaders
-            loadCollada: function(file) {
-                const loader = new ColladaLoader();
-                loader.load(file.url, collada => {
-                    const object = collada.scene;
-                    if(object.rotation.x != 0) {
-                        this.$showToast('Import Note', 'Your collada file has an up axis different from Y_UP.', 'warn', 5000)
-                        object.rotation.x = 0;
-                    }
-                    this.addModelToScene(object);
-                },
-                event => { // onProgress
-                    this.updateProgress(event);
-                },
-                event => { // onError
-                });
-            },
-            loadGltf: function(file) {
-                const loader = new GLTFLoader();
-                loader.load(file.url, data => {
-                    const gltf = data;
-                    const object = gltf.scene;
-                    this.addModelToScene(object, gltf.animations);
-                }, event => {
-                    this.updateProgress(event);
-                }, error => {
-                });
-            },
             loadObj: function(file) {
                 const url = file.url;
                 const sep = url.lastIndexOf('/')+1;
@@ -558,151 +261,6 @@
                     event => { // on
                     }
                 );
-            },
-            loadFbx: function(file) {
-                const url = file.url;
-                const loader = new FBXLoader();
-                loader.load(url, object => {
-                    this.addModelToScene(object);
-                }, event => {
-                    this.updateProgress(event);
-                }, event => {
-                });
-            },
-            loadProteinDb: function(file) {
-                const vm = this;
-                let labelRenderer = new CSS2DRenderer();
-                labelRenderer.setSize(this.containerWidth, this.containerHeight);
-				labelRenderer.domElement.style.position = 'absolute';
-				labelRenderer.domElement.style.top = '0';
-				labelRenderer.domElement.style.pointerEvents = 'none';
-                this.container.appendChild(labelRenderer.domElement);
-                this.loadMolecules(file.url);
-            },
-            loadMolecules: function(url) {
-                const vm = this;
-                while(this.group.children.length > 0) {
-                    let object = this.group.children[0];
-                    object.parent.remove(object);
-                }
-                let pdbLoader = new PDBLoader();
-                pdbLoader.load(url, function(pdb) {
-                    var atoms = pdb.geometryAtoms;
-                    let bonds = pdb.geometryBonds;
-                    let json = pdb.json;
-
-                    let boxGeometry = new BoxBufferGeometry(1, 1, 1);
-                    let sphereGeometry = new IcosahedronBufferGeometry(1, 2);
-
-                    let offset = atoms.center();
-                    bonds.translate(offset.x, offset.y, offset.z);
-
-                    let positions = atoms.getAttribute('position');
-                    let colors = atoms.getAttribute('color');
-
-                    let position = new Vector3();
-                    let color = new Color();
-
-                    for(let i=0; i<positions.count; i++) {
-                        position.x = positions.getX(i);
-                        position.y = positions.getY(i);
-                        position.z = positions.getZ(i);
-
-                        color.r = colors.getX(i);
-                        color.g = colors.getY(i);
-                        color.b = colors.getZ(i);
-
-                        let material = new MeshPhongMaterial({color: color});
-
-                        let object = new Mesh(sphereGeometry, material);
-                        object.position.copy(position);
-                        object.position.multiplyScalar(1);
-                        object.scale.multiplyScalar(0.33);
-                        vm.group.add(object);
-
-                        let atom = json.atoms[i];
-        				let text = document.createElement('div');
-        				text.className = 'atom-label';
-        				text.style.color = 'rgb(' + atom[3][0] + ',' + atom[3][1] + ',' + atom[3][2] + ')';
-        				text.textContent = atom[4];
-        				let label = new CSS2DObject(text);
-        				label.position.copy(object.position);
-        				vm.group.add(label);
-                    }
-
-                    positions = bonds.getAttribute('position');
-                    let start = new Vector3();
-                    let end = new Vector3();
-
-                    for(let i=0; i<positions.count; i+=2) {
-                        start.x = positions.getX(i);
-                        start.y = positions.getY(i);
-                        start.z = positions.getZ(i);
-
-                        end.x = positions.getX(i+1);
-                        end.y = positions.getY(i+1);
-                        end.z = positions.getZ(i+1);
-
-                        start.multiplyScalar(1);
-                        end.multiplyScalar(1);
-
-                        let object = new Mesh(boxGeometry, new MeshPhongMaterial(0xffffff));
-                        object.position.copy(start);
-                        object.position.lerp(end, 0.5);
-                        object.scale.set(0.1, 0.1, start.distanceTo(end));
-                        object.lookAt(end);
-                        vm.group.add(object);
-                    }
-                    vm.onWindowResize();
-                },
-                function(event) { // onProgress
-                    vm.updateProgress(event);
-                });
-            },
-            addModelToScene(model, extAnimations) {
-                // Play first animation if available
-                const animations = extAnimations ? extAnimations : model.animations;
-                if(animations && animations.length) {
-                    this.animationMixer = new AnimationMixer(model);
-                    this.animationMixer.clipAction(animations[0]).play();
-                }
-
-                const mid = model.uuid;
-                const isLod = this.hasModelLods(model);
-                let lod = new LOD();
-
-                for(let i=0; i<model.children.length; i++) {
-                    let node = model.children[i].clone();
-                    if(isLod) {
-                        this.lodParts[node.uuid] = mid;
-                    }
-                    if(node.isMesh) {
-                        node.castShadow = true;
-                        node.receiveShadow = true;
-                        if(node.material) {
-                            node.material.side = DoubleSide;
-                        }
-                        node.geometry.computeBoundingBox();
-                        const offset = node.geometry.boundingBox.getCenter();
-                        node.geometry.applyMatrix4(new Matrix4().makeTranslation(-offset.x, -offset.y, -offset.z));
-                        node.position.copy(offset);
-                        if(isLod) {
-                            lod.addLevel(node, (i+1) * 10);
-                            this.raycastTargets.push(node);
-                        } else {
-                            // push original node if not a LoD, because
-                            // original model is added to group later
-                            this.raycastTargets.push(model.children[i]);
-                        }
-                    }
-                }
-                if(isLod) {
-                    this.lodGroup[mid] = lod;
-                    this.group.add(lod);
-                } else {
-                    this.group.add(model);
-                }
-                this.onWindowResize();
             },
             intersectAtClick(event) {
                 this.mouse.x = (event.layerX / this.renderer.domElement.clientWidth) * 2 - 1;
@@ -847,59 +405,6 @@
         			this.directionalLight.intensity = this.directionalIntensity;
         		}
             },
-            updateProgress: function(event) {
-                if(event.lengthComputable) {
-                    this.progress = Math.round(event.loaded / event.total * 100);
-                }
-            }
         },
-        data() {
-            return {
-                container: {},
-                containerId: 'three-container',
-                progress: 0,
-                // three
-                scale: 1,
-                gui: null,
-                guiCtrl: {},
-                guiConfig: null,
-                animationClock: new Clock(),
-                animationId: -1,
-                animationMixer: {},
-                camera: {},
-                controls: {},
-                transformControls: {},
-                activeMesh: null,
-                containerWidth: 200,
-                containerHeight: 100,
-                directionalLight: {},
-                heimisphereLight: {},
-                group: {},
-                lodGroup: {},
-                lodParts: {},
-                raycastTargets: [],
-                mouse: new Vector2(),
-                mouseDown: 0,
-                mouseMoving: false,
-                raycaster: new Raycaster(),
-                renderer: {},
-                scene: {},
-	            tempMatrix: new Matrix4(),
-                // controllers
-                grabController: null,
-                flashlightController: null,
-                flashlight: {},
-                flashlightOn: false,
-                flashlightIntensity: 1,
-                hemisphereIntensity: 1,
-                directionalIntensity: 1
-            }
-        },
-        watch: {
-            file(newFile, oldFile) {
-                if(newFile && oldFile && newFile.id == oldFile.id) return;
-                this.loadModel(newFile);
-            }
-        }
     }
 </script>

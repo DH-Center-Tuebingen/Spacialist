@@ -103,7 +103,7 @@ export async function openPath(ids, sort = {by: 'rank', dir: 'asc'}) {
 }
 
 export class Node {
-    constructor(data, vm) {
+    constructor(data, component) {
         Object.assign(this, data);
         this.text = this.name;
         this.state = {
@@ -119,7 +119,7 @@ export class Node {
         this.icon = false;
         this.children = [];
         this.childrenLoaded = this.children.length == this.children_count;
-        this.component = TreeNode;
+        this.component = component || TreeNode;
         // this.dragDelay = vm.dragDelay;
         // this.dragAllowed = _ => vm.isDragAllowed;
         // this.onToggle = vm.itemToggle;

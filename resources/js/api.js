@@ -91,6 +91,12 @@ export async function fetchBibliography() {
     }));
 };
 
+export async function fetchTags() {
+    await $httpQueue.add(() => http.get('tag').then(response => {
+        store.dispatch('setTags', response.data);
+    }));
+};
+
 export async function fetchPreData(locale) {
     return $httpQueue.add(() => http.get('pre').then(response => {
         store.commit('setConcepts', response.data.concepts);

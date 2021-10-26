@@ -35,6 +35,7 @@ export const store = createStore({
             permissions: [],
             preferences: {},
             systemPreferences: {},
+            tags: [],
             roles: [],
             tree: [],
             user: {},
@@ -334,6 +335,9 @@ export const store = createStore({
         setSystemPreferences(state, data) {
             state.systemPreferences = data;
         },
+        setTags(state, data) {
+            state.tags = data;
+        },
         setRoles(state, data) {
             state.roles = data;
         },
@@ -391,6 +395,9 @@ export const store = createStore({
         },
         setGeometryTypes({commit}, data) {
             commit('setGeometryTypes', data);
+        },
+        setTags({commit}, data) {
+            commit('setTags', data);
         },
         setRoles({commit}, data) {
             commit('setRoles', data.roles);
@@ -670,6 +677,9 @@ export const store = createStore({
         },
         systemPreferences: state => {
             return state.systemPreferences;
+        },
+        tags: state => {
+            return state.tags;
         },
         roles: state => noPerms => {
             return noPerms ? state.roles.map(r => {

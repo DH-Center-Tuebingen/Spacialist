@@ -54,6 +54,7 @@
   z-index: $zindex-sticky + 1 !important;
   word-wrap: break-word !important;
   width: 20vw !important;
+  position: absolute !important;
 }
 
 .multiselect-option {

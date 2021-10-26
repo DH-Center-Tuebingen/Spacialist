@@ -5,6 +5,7 @@ import router from '../bootstrap/router.js';
 import {
     fetchAttributes,
     fetchBibliography,
+    fetchTags,
     fetchTopEntities,
     fetchPreData,
     fetchGeometryTypes,
@@ -25,6 +26,7 @@ export async function initApp(locale) {
     await fetchUsers();
     await fetchTopEntities();
     await fetchBibliography();
+    await fetchTags();
     await fetchVersion();
     await fetchPlugins();
     await fetchGeometryTypes();
@@ -409,6 +411,18 @@ export function except(object, excepts = []) {
             };
         }, {});
 };
+
+export function getElementAttribute(el, attribute, defaultValue, type = 'string') {
+    let value = el.getAttribute(attribute);
+    if(value) {
+        if(type == 'int') {
+            value = parseInt(value);
+        } else if(type == 'bool') {
+            value = value === true || value == 'true' || value == 1;
+        }
+    }
+    return value || defaultValue;
+}
 
 export function isArray(arr) {
     return Array.isArray(arr);

@@ -51,32 +51,70 @@ export const external = axios.create({
     },
 });
 
-export const global_api = (verb, url, data, external = false) => {
+export const global_api = (verb, url, data, external = false, withHeaders = false) => {
     if(external) {
         if(verb.toLowerCase() == 'get' || verb.toLowerCase() == 'delete') {
             return $httpQueue.add(
                 () => external[verb](url, {
                     crossdomain: true,
-                }).then(response => response.data)
+                }).then(response => {
+                    if(withHeaders) {
+                        return {
+                            data: response.data,
+                            headers: response.headers,
+                        };
+                    } else {
+                        return response.data;
+                    }
+                })
             )
         } else {
             return $httpQueue.add(
                 () => external[verb](url, data, {
                     crossdomain: true,
-                }).then(response => response.data)
+                }).then(response => {
+                    if(withHeaders) {
+                        return {
+                            data: response.data,
+                            headers: response.headers,
+                        };
+                    } else {
+                        return response.data;
+                    }
+                })
             )
         }
     } else {
         if(verb.toLowerCase() == 'get' || verb.toLowerCase() == 'delete') {
             return $httpQueue.add(
-                () => instance[verb](url, data).then(response => response.data)
+                () => instance[verb](url, data).then(response => {
+                    if(withHeaders) {
+                        return {
+                            data: response.data,
+                            headers: response.headers,
+                        };
+                    } else {
+                        return response.data;
+                    }
+                })
             )
         } else {
             return $httpQueue.add(
-                () => instance[verb](url, data).then(response => response.data)
+                () => instance[verb](url, data).then(response => {
+                    if(withHeaders) {
+                        return {
+                            data: response.data,
+                            headers: response.headers,
+                        };
+                    } else {
+                        return response.data;
+                    }
+                })
             )
         }
     }
 };
+
+export const api_base = instance.defaults.baseURL;
 
 export default instance;

@@ -1,23 +1,7 @@
 const de = {
     plugins: {
         files: {
-            title: 'Dateien',
             header: {
-                linked: 'Verknüpfte Dateien',
-                unlinked: 'Unverknüpfte Dateien',
-                all: 'Alle Dateien',
-                upload: 'Dateien hochladen',
-                rules: {
-                    title: 'Filterregeln',
-                    types: {
-                        file: 'Dateityp',
-                        camera: 'Kameramodell',
-                        date: 'Datum',
-                        name: 'Dateiname',
-                    },
-                    apply: 'Filter anwenden',
-                    active: 'keine Filter aktiv | ein Filter aktiv | {cnt} Filter aktiv'
-                },
                 export: {
                     selected: 'Ausgewählte Dateien exportieren <span class="badge badge-secondary">{cnt}</span>'
                 }
@@ -60,19 +44,12 @@ const de = {
                 error: 'Fehler beim Hochladen der Datei.',
                 finish: {
                     title: 'Dateiupload von {files} Datei abgeschlossen | Dateiupload von {files} Dateien abgeschlossen',
-                    msg: 'Es sind keine Fehler aufgetreten | Es ist bei einer Datei ein Fehler augetreten. | Es sind bei {files} Dateien  Fehler aufgetreten'
+                    msg: 'Es sind keine Fehler aufgetreten | Es ist bei einer Datei ein Fehler augetreten. | Es sind bei {files} Dateien Fehler aufgetreten'
                 }
             },
             modal: {
                 detail: {
                     title: '{name} - Details',
-                    properties: 'Eigenschaften',
-                    links: 'Verknüpfungen',
-                    exif: 'Exif-Daten',
-                    'toggle-edit': 'Editiermodus umschalten',
-                    'toggle-highlight': 'Hervorhebung umschalten',
-                    'toggle-csv': 'CSV-Anzeige umschalten',
-                    'toggle-md': 'Markdown-Anzeige umschalten',
                     'toggle-html': 'HTML-Anzeige umschalten',
                     'no-links': 'Keine Verknüpfungen. Wähle eine Entität aus oder benutze die Suche hier drunter, um Entitäten zu verknüpfen.',
                     'link-further-entities': 'Mit weiteren Entitäten verknüpfen',
@@ -143,10 +120,6 @@ const de = {
                     no_preview: 'Für diesen Dateityp ist keine Vorschau verfügbar.'
                 }
             },
-            list: {
-                display: 'Zeige {from}-{to} von {total} Dateien an',
-                none: 'Keine Dateien vorhanden'
-            }
         }
     }
 }

@@ -33,7 +33,7 @@ const defaultConfig = {
 
 const perToastConfig = ['duration', 'autohide', 'channel', 'icon', 'simple'];
 
-function addToast(message, title, config) {
+export function addToast(message, title, config) {
     const toastId = `toast-${getTs()}`;
     const toastContainer = document.createElement('div');
     render(createVNode(ToastComponent, {
