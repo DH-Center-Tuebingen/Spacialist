@@ -16,19 +16,19 @@
                         <button type="button" class="btn btn-sm p-1 btn-outline-info" v-show="interactionMode != 'modify'" data-bs-toggle="popover" :data-content="$t('main.map.draw.modify.desc')" data-trigger="hover" data-placement="bottom" @click="setInteractionMode('modify')">
                             <i class="fas fa-fw fa-edit"></i>
                         </button>
-                        <button type="button" class="btn btn-sm p-1 btn-outline-success" v-show="interactionMode == 'modify'" data-bs-toggle="popover" :data-content="$t('main.map.draw.modify.pos-desc')" data-trigger="hover" data-placement="bottom" @click="updateFeatures">
+                        <button type="button" class="btn btn-sm p-1 btn-outline-success" v-show="interactionMode == 'modify'" data-bs-toggle="popover" :data-content="$t('main.map.draw.modify.pos_desc')" data-trigger="hover" data-placement="bottom" @click="updateFeatures">
                             <i class="fas fa-fw fa-check"></i>
                         </button>
-                        <button type="button" class="btn btn-sm p-1 btn-outline-danger" v-show="interactionMode == 'modify'" data-bs-toggle="popover" :data-content="$t('main.map.draw.modify.neg-desc')" data-trigger="hover" data-placement="bottom" @click="cancelUpdateFeatures">
+                        <button type="button" class="btn btn-sm p-1 btn-outline-danger" v-show="interactionMode == 'modify'" data-bs-toggle="popover" :data-content="$t('main.map.draw.modify.neg_desc')" data-trigger="hover" data-placement="bottom" @click="cancelUpdateFeatures">
                             <i class="fas fa-fw fa-times"></i>
                         </button>
                         <button type="button" class="btn btn-sm p-1 btn-outline-danger" v-show="interactionMode != 'delete'" data-bs-toggle="popover" :data-content="$t('main.map.draw.delete.desc')" data-trigger="hover" data-placement="bottom" @click="setInteractionMode('delete')">
                             <i class="fas fa-fw fa-trash"></i>
                         </button>
-                        <button type="button" class="btn btn-sm p-1 btn-outline-success" v-show="interactionMode == 'delete'" data-bs-toggle="popover" :data-content="$t('main.map.draw.delete.pos-desc')" data-trigger="hover" data-placement="bottom" @click="deleteFeatures">
+                        <button type="button" class="btn btn-sm p-1 btn-outline-success" v-show="interactionMode == 'delete'" data-bs-toggle="popover" :data-content="$t('main.map.draw.delete.pos_desc')" data-trigger="hover" data-placement="bottom" @click="deleteFeatures">
                             <i class="fas fa-fw fa-check"></i>
                         </button>
-                        <button type="button" class="btn btn-sm p-1 btn-outline-danger" v-show="interactionMode == 'delete'" data-bs-toggle="popover" :data-content="$t('main.map.draw.delete.neg-desc')" data-trigger="hover" data-placement="bottom" @click="cancelDeleteFeatures">
+                        <button type="button" class="btn btn-sm p-1 btn-outline-danger" v-show="interactionMode == 'delete'" data-bs-toggle="popover" :data-content="$t('main.map.draw.delete.neg_desc')" data-trigger="hover" data-placement="bottom" @click="cancelDeleteFeatures">
                             <i class="fas fa-fw fa-times"></i>
                         </button>
                         <button type="button" class="btn btn-sm p-1 btn-outline-primary" data-bs-toggle="popover" :data-content="$t('main.map.draw.measure.desc')" data-trigger="hover" data-placement="bottom" @click="toggleMeasurements">
@@ -37,11 +37,11 @@
                     </div>
                     <div>
                         <button type="button" class="btn btn-sm p-1 btn-outline-primary" v-show="linkPossible" @click="link(selectedFeature, selectedEntity)">
-                            <i class="fas fa-fw fa-link"></i> {{ $t('global.link-to', {name: selectedEntity.name}) }}
+                            <i class="fas fa-fw fa-link"></i> {{ $t('global.link_to', {name: selectedEntity.name}) }}
                         </button>
                         <button type="button" class="btn btn-sm p-1 btn-outline-primary" v-show="unlinkPossible" @click="unlink(selectedFeature, linkedEntity)">
                             <i class="fas fa-fw fa-unlink"></i> <span v-if="linkedEntity">
-                                {{ $t('global.unlink-from', {name: linkedEntity.name}) }}
+                                {{ $t('global.unlink_from', {name: linkedEntity.name}) }}
                             </span>
                         </button>
                     </div>
@@ -81,7 +81,7 @@
                         </template>
                         <dt class="clickable" @click="overlayInfo.showCoordinates = !overlayInfo.showCoordinates">
                             {{
-                                $t('main.map.coords-in-epsg', {
+                                $t('main.map.coords_in_epsg', {
                                     epsg: epsg.epsg
                                 })
                             }}
@@ -145,48 +145,29 @@
 
     import 'ol/ol.css';
     import Collection from 'ol/Collection';
-    import {defaults as defaultControls} from 'ol/control.js';
     import { getCenter as getExtentCenter, extend as extendExtent} from 'ol/extent';
     import Feature from 'ol/Feature';
     import Graticule from 'ol/layer/Graticule';
-    import { defaults as defaultInteractions } from 'ol/interaction';
     import Map from 'ol/Map';
     import {unByKey} from 'ol/Observable.js';
     import Overlay from 'ol/Overlay';
-    import { get as getProjection, addProjection, transform as transformProj } from 'ol/proj';
-    import { register as registerProj } from 'ol/proj/proj4';
+    import { transform as transformProj } from 'ol/proj';
     import {getArea, getLength} from 'ol/sphere';
-    import View from 'ol/View';
 
-    import FullScreen from 'ol/control/FullScreen';
-    import OverviewMap from 'ol/control/OverviewMap';
-    import Rotate from 'ol/control/Rotate';
-    import ScaleLine from 'ol/control/ScaleLine';
-
-    import {never as neverCond, shiftKeyOnly, platformModifierKeyOnly} from 'ol/events/condition';
+    import {never as neverCond} from 'ol/events/condition';
 
     import WKT from 'ol/format/WKT';
     import GeoJSON from 'ol/format/GeoJSON';
 
     import Point from 'ol/geom/Point';
-
-    import DragRotate from 'ol/interaction/DragRotate';
-    import DragZoom from 'ol/interaction/DragZoom';
     import Draw from 'ol/interaction/Draw';
     import Modify from 'ol/interaction/Modify';
-    import PinchRotate from 'ol/interaction/PinchRotate';
-    import PinchZoom from 'ol/interaction/PinchZoom';
     import Select from 'ol/interaction/Select';
     import Snap from 'ol/interaction/Snap';
 
     import Group from 'ol/layer/Group';
-    import TileLayer from 'ol/layer/Tile';
     import VectorLayer from 'ol/layer/Vector';
 
-    import BingMaps from 'ol/source/BingMaps';
-    import OSM from 'ol/source/OSM';
-    import TileImage from 'ol/source/TileImage';
-    import TileWMS from 'ol/source/TileWMS';
     import Vector from 'ol/source/Vector';
 
     import CircleStyle from 'ol/style/Circle';
@@ -194,8 +175,6 @@
     import Stroke from 'ol/style/Stroke';
     import Style from 'ol/style/Style';
     import Text from 'ol/style/Text';
-
-    import proj4 from 'proj4';
 
     import LayerSwitcher from 'ol-ext/control/LayerSwitcher';
     import Chart from 'ol-ext/style/Chart';
@@ -496,16 +475,6 @@
                 this.overlays = {};
                 this.baselayers = {};
             },
-            initLayers() {
-                for(let k in this.layers) {
-                    const l = this.layers[k];
-                    if(l.is_overlay) {
-                        this.overlays[k] = l;
-                    } else {
-                        this.baselayers[k] = l;
-                    }
-                }
-            },
             resetLayerData() {
                 this.baselayerLayers = [];
                 this.overlayLayers = [];
@@ -515,7 +484,7 @@
                 const vm = this;
 
                 if(vm.initWkt.length && vm.initGeojson.length) {
-                    vm.$showErrorModal(vm.$t('main.map.init-error'));
+                    vm.$showErrorModal(vm.$t('main.map.init_error'));
                     return;
                 }
 
@@ -665,19 +634,10 @@
                     vm.initLayerData();
 
                     vm.baselayersGroup = new Group({
-                        title: vm.$tc('main.map.baselayer', 2),
-                        openInLayerSwitcher: true,
-                        layers: vm.baselayerLayers
                     });
                     vm.overlaysGroup = new Group({
-                        title: vm.$tc('main.map.overlay', 2),
-                        openInLayerSwitcher: true,
-                        layers: vm.overlayLayers
                     });
                     vm.entityLayersGroup = new Group({
-                        title: vm.$t('main.map.entity-layers'),
-                        openInLayerSwitcher: true,
-                        layers: vm.entityLayers
                     });
 
                     vm.overlay = new Overlay({
@@ -693,37 +653,7 @@
                         offset: [2, 5]
                     });
 
-                    vm.map = new Map({
-                        controls: defaultControls().extend([
-                            new FullScreen(),
-                            new LayerSwitcher(),
-                            new OverviewMap(),
-                            new Rotate(),
-                            new ScaleLine()
-                        ]),
-                        interactions: defaultInteractions().extend([
-                            new DragRotate({
-                                condition: platformModifierKeyOnly
-                            }),
-                            new DragZoom({
-                                condition: shiftKeyOnly
-                            }),
-                            new PinchRotate(),
-                            new PinchZoom(),
-                        ]),
-                        layers: [vm.baselayersGroup, vm.overlaysGroup, vm.entityLayersGroup],
-                        target: vm.id,
-                        view: new View({
-                            center: [0, 0],
-                            projection: 'EPSG:3857',
-                            zoom: 2,
-                            extent: vm.defaultExtent
-                        }),
-                        overlays: [
-                            vm.overlay,
-                            vm.hoverPopup
-                        ]
-                    });
+                    vm.map = new Map({});
                     vm.setExtent();
 
                     vm.map.on('pointermove', function(e) {
@@ -755,7 +685,7 @@
                             const coords = getExtentCenter(geometry.getExtent());
                             vm.hoverPopup.setPosition(coords);
 
-                            const geomName = vm.$t('main.map.geometry-name', {id: props.id});
+                            const geomName = vm.$t('main.map.geometry_name', {id: props.id});
                             const title = props.entity ?
                                 `${props.entity.name} (${geomName})` :
                                 geomName;
@@ -826,91 +756,6 @@
                     EventBus.$on('entity-update', this.handleEntityUpdate);
                     EventBus.$on('entity-deleted', this.handleEntityDelete);
                 }
-            },
-            initMapProjection() {
-                if(!this.epsg) {
-                    this.init();
-                    return;
-                }
-                const name = `EPSG:${this.epsg.epsg}`;
-                proj4.defs(name, this.epsg.proj4);
-                registerProj(proj4);
-                const projection = getProjection(name);
-                addProjection(projection);
-                if(this.initProjection != name && this.initProjection != 'EPSG:4326' && this.initProjection != 'EPSG:3857') {
-                    const srid = this.initProjection.split(':')[1];
-                    $httpQueue.add(() => $http.get(`map/epsg/${srid}`).then(response => {
-                        proj4.defs(this.initProjection, response.data.proj4text);
-                        registerProj(proj4);
-                        const projection = getProjection(this.initProjection);
-                        addProjection(projection);
-
-                        this.init();
-                    }));
-                } else {
-                    this.init();
-                }
-            },
-            createNewLayer(l) {
-                let source;
-                switch(l.type) {
-                    case 'xyz':
-                        source = new TileImage({
-                            url: l.url,
-                            attributions: l.attribution,
-                            wrapX: false
-                        });
-                        break;
-                    case 'wms':
-                        source = new TileWMS({
-                            url: l.url,
-                            attributions: l.attribution,
-                            wrapX: false,
-                            serverType: 'geoserver',
-                            params: {
-                                layers: l.layers,
-                                tiled: true
-                            }
-                        });
-                        break;
-                    case 'bing':
-                        source = new BingMaps({
-                            key: l.api_key,
-                            /*
-                            # Supported
-                            - Aerial
-                            - AerialWithLabels (Deprecated)
-                            - AerialWithLabelsOnDemand
-                            - CanvasDark
-                            - CanvasLight
-                            - CanvasGray
-                            - RoadOnDemand
-                            # Not Supported?
-                            - Birdseye
-                            - BirdseyeWithLabels
-                            - BirdseyeV2
-                            - BirdseyeV2WithLabels
-                            - Streetside
-                             */
-                            imagerySet: l.layer_type,
-                            wrapX: false,
-                        });
-                        break;
-                    default:
-                        source = new OSM({
-                            wrapX: false
-                        });
-                        break;
-                }
-                return new TileLayer({
-                    title: l.name,
-                    baseLayer: !l.is_overlay,
-                    displayInLayerSwitcher: true,
-                    visible: l.visible,
-                    opacity: parseFloat(l.opacity),
-                    layer: 'osm',
-                    source: source
-                });
             },
             getEntityLayers() {
                 return this.entityLayersGroup.getLayers().getArray();
@@ -1433,45 +1278,6 @@
                     this.modify.setActive(false, cancelled);
                 }
             },
-            createStyle(color = '#ffcc33', width = 2) {
-                let polygonFillColor;
-                let r, g, b, a;
-                const fillAlphaMultiplier = 0.2;
-                if(color.startsWith('#')) {
-                    [r, g, b] = this.$rgb2hex(color);
-                    a = 1 * fillAlphaMultiplier;
-                } else if(color.startsWith('rgba')) {
-                    // cut off rgba and () and get alpha value
-                    [r, g, b, a] = color.substring(5, color.length-1).split(',');
-                    a *= fillAlphaMultiplier;
-                }
-                polygonFillColor = `rgba(${r}, ${g}, ${b}, ${a})`;
-                const cacheKey = polygonFillColor.replace(/ /g, '');
-                let style = this.cachedStyles[cacheKey];
-                if(!style) {
-                    style = this.cachedStyles[cacheKey] = new Style({
-                        fill: new Fill({
-                            color: polygonFillColor
-                        }),
-                        stroke: new Stroke({
-                            color: color,
-                            width: width
-                        }),
-                        image: new CircleStyle({
-                            radius: width*3,
-                            fill: new Fill({
-                                color: color
-                            }),
-                            stroke: new Stroke({
-                                color: 'rgba(0, 0, 0, 0.2)',
-                                width: 2
-                            })
-                        })
-                    });
-                }
-
-                return style;
-            },
             drawFeature(feature) {
                 this.snap.addFeature(feature);
                 this.onDrawend(feature, this.wktFormat.writeFeature(feature, {
@@ -1708,7 +1514,6 @@
                 }
                 return fixedCoord;
             },
-
             updatePopup(f) {
                 const element = this.overlay.getElement();
                 if(!f.getId) {
@@ -1718,7 +1523,7 @@
                 };
                 const props = f.getProperties();
                 const geometry = f.getGeometry();
-                const geomName = this.$t('main.map.geometry-name', {id: props.id});
+                const geomName = this.$t('main.map.geometry_name', {id: props.id});
                 const coords = getExtentCenter(geometry.getExtent());
                 this.overlay.setPosition(coords);
 
@@ -1838,8 +1643,6 @@
                 selectedFeature: {},
                 wktFormat: new WKT(),
                 geoJsonFormat: new GeoJSON(),
-                // EPSG:3857 bounds (taken from epsg.io/3857)
-                defaultExtent: [-20026376.39, -20048966.10, 20026376.39, 20048966.10]
             }
         },
         computed: {

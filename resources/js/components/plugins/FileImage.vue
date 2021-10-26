@@ -406,30 +406,6 @@
                 const now = this.$getTs();
                 return `${this.file.url}?t=${now}`;
             },
-            fabricSupported() {
-                return this.isJpeg() || this.isPng();
-            },
-            panelClasses() {
-                if(this.filterPanelActive) {
-                    return {
-                        filters: {
-                            'col-md-2': true
-                        },
-                        image: {
-                            'col-md-10': true
-                        }
-                    };
-                } else {
-                    return {
-                        filters: {
-                            'd-none': true
-                        },
-                        image: {
-                            'col-md-12': true
-                        }
-                    };
-                }
-            }
         },
         watch: {
             file(newFile, oldFile) {
