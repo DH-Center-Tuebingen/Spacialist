@@ -174,38 +174,23 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::post('', 'ActivityController@getFiltered');
 });
 
+// TAGS
+Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/tag')->group(function() {
+    Route::get('', 'TagController@getAll');
+});
+
 // EXTENSIONS
 
 // FILE
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/file')->group(function() {
     Route::get('/{id}', 'FileController@getFile')->where('id', '[0-9]+');
-    Route::get('/{id}/archive/list', 'FileController@getArchiveFileList')->where('id', '[0-9]+');
-    Route::get('/{id}/archive/download', 'FileController@downloadArchivedFile')->where('id', '[0-9]+');
-    Route::get('/{id}/as_html', 'FileController@getAsHtml')->where('id', '[0-9]+');
     Route::get('/{id}/link_count', 'FileController@getLinkCount')->where('id', '[0-9]+');
     Route::get('/{id}/sub_files', 'FileController@getSubFiles')->where('id', '[0-9]+');
-    // Filters
-    Route::get('/filter/category', 'FileController@getCategories');
-    Route::get('/filter/camera', 'FileController@getCameraNames');
-    Route::get('/filter/date', 'FileController@getDates');
-    Route::get('/tags', 'FileController@getTags');
 
-
-    Route::post('', 'FileController@getFiles');
     Route::post('/unlinked', 'FileController@getUnlinkedFiles');
     Route::post('/linked/{cid}', 'FileController@getLinkedFiles')->where('cid', '[0-9]+');
-    Route::post('/new', 'FileController@uploadFile');
-    // Should be patch, but file upload is not allowed as patch
-    Route::post('/{id}/patch', 'FileController@patchContent')->where('id', '[0-9]+');
-    Route::post('/export', 'FileController@exportFiles');
-
-    Route::patch('/{id}/property', 'FileController@patchProperty')->where('id', '[0-9]+');
-    Route::patch('/{id}/tag', 'FileController@patchTags')->where('id', '[0-9]+');
-
-    Route::put('/{id}/link', 'FileController@linkToEntity')->where('id', '[0-9]+');
 
     Route::delete('/{id}', 'FileController@deleteFile')->where('id', '[0-9]+');
-    Route::delete('/{fid}/link/{cid}', 'FileController@unlinkEntity')->where('fid', '[0-9]+')->where('cid', '[0-9]+');
 });
 
 // MAP

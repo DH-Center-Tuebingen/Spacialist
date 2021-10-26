@@ -284,144 +284,6 @@ class File extends Model
         return $subFiles;
     }
 
-    public static function createFromUpload($input, $user, $metadata) {
-        $filename = $input->getClientOriginalName();
-        $ext = $input->getClientOriginalExtension();
-        // filename without extension and trailing '.'
-        $baseFilename = substr($filename, 0, strlen($filename) - (strlen($ext) + 1));
-        $filename = self::getUniqueFilename($baseFilename, $ext);
-        $filehandle = fopen($input->getRealPath(), 'r');
-        Storage::put(
-            $filename,
-            $filehandle
-        );
-        fclose($filehandle);
-
-        $mimeType = $input->getMimeType();
-        $lastModified = date('Y-m-d H:i:s', Storage::lastModified($filename));
-
-        $file = new File();
-        $file->modified = $lastModified;
-        $file->user_id = $user->id;
-        $file->mime_type = $mimeType;
-        $file->name = $filename;
-        $file->created = $lastModified;
-
-        if(isset($metadata)) {
-            if(isset($metadata['copyright'])) {
-                $file->copyright = $metadata['copyright'];
-            }
-            if(isset($metadata['description'])) {
-                $file->description = $metadata['description'];
-            }
-        }
-
-        $file->save();
-        if(isset($metadata)) {
-            if(isset($metadata['tags'])) {
-                foreach($metadata['tags'] as $tid) {
-                    try {
-                        ThConcept::findOrFail($tid);
-                    } catch(ModelNotFoundException $e) {
-                        return response()->json([
-                            'error' => __('This tag does not exist')
-                        ], 400);
-                    }
-                    $tag = new FileTag();
-                    $tag->file_id = $file->id;
-                    $tag->concept_id = $tid;
-                    $tag->save();
-                }
-            }
-        }
-
-        if($file->isImage()) {
-            $fileUrl = sp_get_storage_file_path($filename);
-            $nameNoExt = $baseFilename;
-            $thumbFilename = self::getUniqueFilename($nameNoExt . self::THUMB_SUFFIX, self::EXP_SUFFIX);
-
-            $imageInfo = getimagesize($fileUrl);
-            $width = $imageInfo[0];
-            $height = $imageInfo[1];
-            $mime = $imageInfo[2];//$imageInfo['mime'];
-            if($width > self::THUMB_WIDTH) {
-                switch($mime) {
-                    case IMAGETYPE_JPEG:
-                        $image = imagecreatefromjpeg($fileUrl);
-                        break;
-                    case IMAGETYPE_PNG:
-                        $image = imagecreatefrompng($fileUrl);
-                        break;
-                    case IMAGETYPE_GIF:
-                        $image = imagecreatefromgif($fileUrl);
-                        break;
-                    default:
-                        // use imagemagick to convert from unsupported file format to jpg, which is supported by native php
-                        $im = new \Imagick($fileUrl);
-                        $uniqueName = self::getUniqueFilename($nameNoExt, self::EXP_SUFFIX);
-                        $fileUrl = sp_get_storage_file_path($uniqueName);
-                        $im->setImageFormat(self::EXP_FORMAT);
-                        $im->writeImage($fileUrl);
-                        $im->clear();
-                        $im->destroy();
-                        $image = imagecreatefromjpeg($fileUrl);
-                }
-                $scaled = imagescale($image, self::THUMB_WIDTH);
-                ob_start();
-                imagejpeg($scaled);
-                $image = ob_get_clean();
-                Storage::put(
-                    $thumbFilename,
-                    $image
-                );
-            } else {
-                Storage::copy($filename, $thumbFilename);
-            }
-            $file->thumb = $thumbFilename;
-
-            if($mime === IMAGETYPE_JPEG || $mime === IMAGETYPE_TIFF_II || $mime === IMAGETYPE_TIFF_MM) {
-                $exif = @exif_read_data($fileUrl, 'ANY_TAG', true);
-                if($exif !== false) {
-                    if(sp_has_exif($exif, 'IFD0', 'Make')) {
-                        $make = $exif['IFD0']['Make'];
-                    }
-                    if(sp_has_exif($exif, 'IFD0', 'Model')) {
-                        $model = $exif['IFD0']['Model'];
-                    } else {
-                        $model = '';
-                    }
-                    if(isset($make)) {
-                        $model = $model . " ($make)";
-                    }
-                    $file->cameraname = $model;
-
-                    if(sp_has_exif($exif, 'IFD0', 'Copyright')) {
-                        $copyright = $exif['IFD0']['Copyright'];
-                    } else {
-                        $copyright = '';
-                    }
-                    $file->copyright = $copyright;
-
-                    if(sp_has_exif($exif, 'IFD0', 'ImageDescription')) {
-                        $description = $exif['IFD0']['ImageDescription'];
-                    } else {
-                        $description = '';
-                    }
-                    $file->description = $description;
-
-                    if(sp_has_exif($exif, 'EXIF', 'DateTimeOriginal')) {
-                        $dateOrig = strtotime($exif['EXIF']['DateTimeOriginal']);
-                        $dateOrig = date('Y-m-d H:i:s', $dateOrig);
-                        $file->created = $dateOrig;
-                    }
-                }
-            }
-            $file->save();
-        }
-        $file = File::find($file->id);
-        return $file;
-    }
-
     public static function uploadAvatar($file, $user) {
         Storage::delete($user->avatar);
         $filename = $user->id . "." . $file->getClientOriginalExtension();
@@ -429,81 +291,6 @@ class File extends Model
             'avatars',
             $filename
         );
-    }
-
-    public function setContent($fileObject) {
-        $filehandle = fopen($fileObject->getRealPath(), 'r');
-        Storage::put(
-            $this->name,
-            $filehandle
-        );
-        fclose($filehandle);
-        $lastModified = date('Y-m-d H:i:s', Storage::lastModified($this->name));
-
-        $this->mime_type = $fileObject->getMimeType();
-        $this->modified = $lastModified;
-        $this->save();
-    }
-
-    public function rename($newName) {
-        if(Storage::exists($newName)) {
-            return false;
-        }
-
-        Storage::move($this->name, $newName);
-        $this->name = $newName;
-        if($this->isImage()) {
-            $nameNoExt = pathinfo($newName, PATHINFO_FILENAME);
-            $newThumb = self::getUniqueFilename($nameNoExt . self::THUMB_SUFFIX, self::EXP_SUFFIX);
-            Storage::move($this->thumb, $newThumb);
-            $this->thumb = $newThumb;
-        }
-        return $this->save();
-    }
-
-    public function link($eid, $user) {
-        $link = new EntityFile();
-        $link->file_id = $this->id;
-        $link->entity_id = $eid;
-        $link->user_id = $user->id;
-        $link->save();
-    }
-
-    public function unlink($eid) {
-        $link = EntityFile::where('entity_id', $eid)
-            ->where('file_id', $this->id)
-            ->delete();
-    }
-
-    public function setFileInfo() {
-        $this->url = sp_get_public_url($this->name);
-        if($this->isImage()) {
-            $this->thumb_url = sp_get_public_url($this->thumb);
-        }
-
-        try {
-            Storage::get($this->name);
-            $this->size = Storage::size($this->name);
-            $this->modified_unix = Storage::lastModified($this->name);
-        } catch(FileNotFoundException $e) {
-        }
-
-        $this->created_unix = strtotime($this->created);
-    }
-
-    public function getArchiveFileList() {
-        if(!$this->isArchive()) return [];
-        $path = sp_get_storage_file_path($this->name);
-        $archive = UnifiedArchive::open($path);
-        $fileList = $this->getContainingFiles($archive->getFileNames(), $archive);
-
-        return $fileList;
-    }
-
-    public function getArchivedFileContent($filepath) {
-        $path = sp_get_storage_file_path($this->name);
-        $archive = UnifiedArchive::open($path);
-        return base64_encode($archive->getFileContent($filepath));
     }
 
     public static function createArchiveFromList($fileList) {
@@ -522,48 +309,6 @@ class File extends Model
             'path' => $zip,
             'type' => 'application/zip'
         ];
-    }
-
-    private function getContainingFiles($files, $archive, $prefix = '') {
-        $tree = new \stdClass();
-        $tree->children = [];
-        foreach($files as $file) {
-            // explode folders
-            $parentFolders = explode("/", $file);
-            $currentFile = array_pop($parentFolders);
-            $currentFolderString = '';
-            $currentFolder = $tree;
-            foreach($parentFolders as $pf) {
-                $currentFolderString .= "$pf/";
-                $index = false;
-                for($i=0; $i<count($currentFolder->children); $i++) {
-                    $curr = $currentFolder->children[$i];
-                    if($curr->isDirectory && $curr->cleanFilename == $pf) {
-                        $index = $i;
-                        break;
-                    }
-                }
-                if($index === false) {
-                    $newFolder = new \stdClass();
-                    $newFolder->children = [];
-                    $newFolder->isDirectory = true;
-                    $newFolder->path = $currentFolderString;
-                    $newFolder->compressedSize = 0;
-                    $newFolder->uncompressedSize = 0;
-                    $newFolder->modificationTime = 0;
-                    $newFolder->isCompressed = false;
-                    $newFolder->cleanFilename = $pf;
-                    $currentFolder->children[] = $newFolder;
-                    $index = count($currentFolder->children) - 1;
-                }
-                $currentFolder = $currentFolder->children[$index];
-            }
-            $data = $archive->getFileData($prefix.$file);
-            $data->isDirectory = false;
-            $data->cleanFilename = $currentFile;
-            $currentFolder->children[] = $data;
-        }
-        return $tree->children;
     }
 
     public function deleteFile() {
@@ -622,8 +367,8 @@ class File extends Model
     }
 
     public static function add3d($query, $or = false) {
-        $mimeTypes = ['model/vnd.collada+xml', 'model/gltf-binary', 'model/gltf+json', 'chemical/x-pdb'];
-        $extensions = ['.dae', '.obj', '.pdb', '.gltf', '.fbx'];
+        $mimeTypes = ['model/vnd.collada+xml', 'model/gltf-binary', 'model/gltf+json', 'chemical/x-pdb', 'text/x-gcode', 'application/sla'];
+        $extensions = ['.dae', '.obj', '.pdb', '.gltf', '.glb', '.fbx', '.gcode', '.g', '.stl', '.ply'];
         return self::getCategory($mimeTypes, $extensions, null, $query, $or);
     }
 
@@ -640,10 +385,10 @@ class File extends Model
     }
 
     public static function addTexts($query, $or = false) {
-        $mimeTypes = ['application/javascript', 'application/json', 'application/x-latex', 'application/x-tex'];
+        $mimeTypes = ['application/javascript', 'application/json', 'application/x-latex', 'application/x-tex', 'text/comma-separated-values', 'text/csv', 'text/x-markdown', 'text/markdown'];
         $mimeWildcards = ['text/'];
-        $extensions = ['.txt', '.md', '.markdown', '.mkd', '.csv', '.json', '.css', '.htm', '.html', '.shtml', '.js', '.rtx', '.rtf', '.tsv', '.xml'];
-        return self::getCategory($mimeTypes, $extensions, null, $query, $or);
+        $extensions = ['.txt', '.md', '.markdown', '.mkd', '.csv', '.json', '.css', '.htm', '.html', '.shtml', '.js', '.rtx', '.rtf', '.tsv'];
+        return self::getCategory($mimeTypes, $extensions, $mimeWildcards, $query, $or);
     }
 
     public static function addDocuments($query, $or = false) {
@@ -934,37 +679,5 @@ class File extends Model
             }
         }
         return $is;
-    }
-
-    private static function getUniqueFilename($filename, $extension) {
-        $cnt = 0;
-        $cutoff = 0;
-        if(preg_match('/.*\.(\d+)\.?$/', $filename, $matches)) {
-            if(count($matches) > 1) {
-                $cnt = intval($matches[1]);
-            }
-            // cut off number and leading '.'
-            $cutoff += strlen($matches[1]) + 1;
-        }
-        if(Str::endsWith($filename, '.')) {
-            $cutoff++;
-        }
-        if($cutoff > 0) {
-            $filename = substr($filename, 0, -$cutoff);
-        }
-        if(Str::startsWith($extension, '.')) {
-            $extension = substr($extension, 1);
-        }
-        if($cnt > 0) {
-            $uniqueFilename = "$filename.$cnt.$extension";
-            $cnt++;
-        } else {
-            $uniqueFilename = "$filename.$extension";
-        }
-        while(Storage::exists($uniqueFilename)) {
-            $uniqueFilename = "$filename.$cnt.$extension";
-            $cnt++;
-        }
-        return $uniqueFilename;
     }
 }
