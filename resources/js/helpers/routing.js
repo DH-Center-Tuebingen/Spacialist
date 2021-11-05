@@ -14,6 +14,7 @@ export function routeToEntity(id) {
         params: {
             id: id,
         },
+        query: currentRoute.query,
     });
 };
 

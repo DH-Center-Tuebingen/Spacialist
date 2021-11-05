@@ -41,8 +41,6 @@ class PluginController extends Controller
             }
 
             $xmlString = file_get_contents($scriptPath);
-            info("FOUND!");
-            info($xmlString);
             // $xmlObject = simplexml_load_string($xmlString);
 
             // return json_decode(json_encode($xmlObject), true);

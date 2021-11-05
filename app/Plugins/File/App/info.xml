@@ -4,7 +4,7 @@
     <title>Files Plugin v2</title>
     <description>Files Plugin which extends __Spacialist__ by adding an file upload function and also linking files to entities</description>
     <version>3.0.1</version>
-    <licence>agpl</licence>
+    <licence>mit</licence>
     <authors>
         <author>Vinzenz Rosenkranz</author>
     </authors>

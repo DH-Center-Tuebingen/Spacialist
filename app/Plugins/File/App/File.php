@@ -20,9 +20,14 @@ use lsolesen\pel\PelJpeg;
 use lsolesen\pel\PelJpegInvalidMarkerException;
 use lsolesen\pel\PelTag;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
+use Nicolaslopezj\Searchable\SearchableTrait;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class File extends Model
 {
+    use SearchableTrait;
+    use LogsActivity;
+
     protected $table = 'files';
     /**
      * The attributes that are assignable.
@@ -45,6 +50,20 @@ class File extends Model
         'category',
         'exif'
     ];
+
+    protected $searchable = [
+        'columns' => [
+            'name' => 10,
+            'description' => 8,
+            'cameraname' => 1,
+            'copyright' => 1,
+        ],
+    ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
+    protected static $ignoreChangedAttributes = ['user_id'];
 
     private const THUMB_SUFFIX = "_thumb";
     private const THUMB_WIDTH = 256;

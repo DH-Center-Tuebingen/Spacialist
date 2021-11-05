@@ -567,16 +567,31 @@
             // ON MOUNTED
             onMounted(_ => {
                 console.log("entity detail component mounted");
-                var hiddenAttrElem = document.getElementById('hidden-attributes-icon');
+                let hiddenAttrElem = document.getElementById('hidden-attributes-icon');
                 if(!!hiddenAttrElem) {
                     new Popover(hiddenAttrElem, {
                         title: _ => t('main.entity.attributes.hidden', {cnt: state.hiddenAttributeCount}, state.hiddenAttributeCount),
+                        content: state.hiddenAttributeListing,
                     });
                 }
             });
             onBeforeUpdate(_ => {
                 attrRef.value = {};
             });
+
+            watch(_ => state.hiddenAttributeCount,
+                async (newCount, oldCount) => {
+                    if(newCount > 0) {
+                        let hiddenAttrElem = document.getElementById('hidden-attributes-icon');
+                        if(!!hiddenAttrElem) {
+                            new Popover(hiddenAttrElem, {
+                                title: _ => t('main.entity.attributes.hidden', {cnt: state.hiddenAttributeCount}, state.hiddenAttributeCount),
+                                content: state.hiddenAttributeListing,
+                            });
+                        }
+                    }
+                }
+            );
 
             watch(_ => route.params,
                 async (newParams, oldParams) => {

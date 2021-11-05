@@ -34,7 +34,6 @@ window.$httpQueue = queue;
 import Multiselect from '@vueform/multiselect';
 import VueUploadComponent from 'vue-upload-component';
 import DatePicker from 'vue2-datepicker';
-import InfiniteLoading from 'vue-infinite-loading';
 import draggable from 'vuedraggable';
 import { Tree, Node, } from "tree-vue-component";
 import VueFinalModal from 'vue-final-modal';
@@ -108,6 +107,7 @@ app.directive('dcan', {
 app.directive('highlightjs', {
   deep: true,
   beforeMount(el, binding) {
+    if(!binding.value) return;
     // on first bind, highlight all targets
     let targets = el.querySelectorAll('code');
     targets.forEach((target) => {
@@ -120,6 +120,7 @@ app.directive('highlightjs', {
     });
   },
   updated(el, binding) {
+    if(!binding.value) return;
     // after an update, re-fill the content and then highlight
     let targets = el.querySelectorAll('code');
     targets.forEach((target) => {
@@ -202,7 +203,6 @@ app.component('csv-table', CsvTable);
 app.component('multiselect', Multiselect);
 app.component('file-upload', VueUploadComponent);
 app.component('date-picker', DatePicker);
-app.component('infinite-loading', InfiniteLoading);
 app.component('draggable', draggable);
 app.component('node', Node);
 app.component('tree', Tree);

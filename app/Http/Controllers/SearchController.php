@@ -6,7 +6,7 @@ use App\Attribute;
 use App\Bibliography;
 use App\SearchableEntity;
 use App\EntityType;
-use App\File;
+use App\Plugins\File\App\File;
 use App\Geodata;
 use App\ThConcept;
 use App\ThLanguage;

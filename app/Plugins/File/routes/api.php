@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 |
 */
 
-// Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v2/file')->group(function () {
+Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('')->group(function () {
     Route::get('/{id}/as_html', 'FileController@asHtml')->where('id', '[0-9]+');
     Route::get('/{id}/archive/list', 'FileController@getArchiveFileList')->where('id', '[0-9]+');
     Route::get('/{id}/archive/download', 'FileController@downloadArchivedFile')->where('id', '[0-9]+');
@@ -34,4 +34,4 @@ use Illuminate\Http\Request;
 
     Route::delete('/{id}', 'FileController@deleteFile')->where('id', '[0-9]+');
     Route::delete('/{id}/link/{eid}', 'FileController@unlinkEntity')->where('id', '[0-9]+')->where('eid', '[0-9]+');
-// });
+});

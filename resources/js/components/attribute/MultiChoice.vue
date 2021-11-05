@@ -17,7 +17,9 @@
         <template v-slot:tag="{ option, handleTagRemove, disabled }">
             <div class="multiselect-tag">
                 {{ translateConcept(option.concept_url) }}
-                <i v-if="!disabled" @click.prevent @mousedown.prevent.stop="handleTagRemove(option, $event)" />
+                <span v-if="!disabled" class="multiselect-tag-remove" @click.prevent @mousedown.prevent.stop="handleTagRemove(option, $event)">
+                    <span class="multiselect-tag-remove-icon"></span>
+                </span>
             </div>
         </template>
     </multiselect>
