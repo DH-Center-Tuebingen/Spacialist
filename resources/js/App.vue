@@ -79,12 +79,6 @@
                                 <i class="fas fa-fw fa-cogs"></i> {{ t('global.tools.title') }}
                             </a>
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="tools-navbar">
-                                <a href="#" class="dropdown-item" v-for="(plugin, i) in state.plugins.tools" :key="i">
-                                    <i class="fas fa-fw" :class="plugin.icon"></i> {{ t(plugin.label) }}
-                                </a>
-                                <!-- <router-link class="dropdown-item" v-for="plugin in state.plugins.tools" :to="plugin.href" :key="plugin.key">
-                                    <i class="fas fa-fw" :class="plugin.icon"></i> {{ t(plugin.label) }}
-                                </router-link> -->
                                 <router-link :to="{name: 'bibliography'}" class="dropdown-item">
                                     <i class="fas fa-fw fa-book"></i> {{ t('global.tools.bibliography') }}
                                 </router-link>
@@ -96,6 +90,9 @@
                                 </a> -->
                                 <router-link :to="{name: 'globalactivity'}" class="dropdown-item">
                                     <i class="fas fa-fw fa-clock"></i> {{ t('global.activity') }}
+                                </router-link>
+                                <router-link class="dropdown-item" v-for="plugin in state.plugins.tools" :to="`/${plugin.of}/${plugin.href}`" :key="plugin.key">
+                                    <i class="fas fa-fw" :class="plugin.icon"></i> {{ t(plugin.label) }}
                                 </router-link>
                                 <template v-if="hasPreference('prefs.load-extensions', 'data-analysis') || hasPreference('prefs.link-to-thesaurex')">
                                     <div class="dropdown-divider"></div>
@@ -138,9 +135,9 @@
                                 <router-link :to="{name: 'preferences'}" class="dropdown-item">
                                     <i class="fas fa-fw fa-cog"></i> {{ t('global.settings.system') }}
                                 </router-link>
-                                <a class="dropdown-item" v-for="(plugin, i) in state.plugins.settings" href="#" :key="i">
+                                <router-link class="dropdown-item" v-for="plugin in state.plugins.settings" :to="`/${plugin.of}/${plugin.href}`" :key="plugin.key">
                                     <i class="fas fa-fw" :class="plugin.icon"></i> {{ t(plugin.label) }}
-                                </a>
+                                </router-link>
                                 <!-- <router-link class="dropdown-item" v-for="plugin in state.plugins.settings" :to="plugin.href" :key="plugin.key">
                                     <i class="fas fa-fw" :class="plugin.icon"></i> {{ t(plugin.label) }}
                                 </router-link> -->
@@ -159,10 +156,10 @@
                                 <router-link :to="{name: 'userprofile'}" class="dropdown-item">
                                     <i class="fas fa-fw fa-id-badge"></i> {{ t('global.user.profile') }}
                                 </router-link>
-                                <router-link :to="{name: 'userpreferences', params: { id: state.authUser.id }}" class="dropdown-item">
+                                <router-link :to="{name: 'userpreferences', params: { id: state.authUser.id }}" class="dropdown-item" v-if="state.authUser.id">
                                     <i class="fas fa-fw fa-user-cog"></i> {{ t('global.user.settings') }}
                                 </router-link>
-                                <router-link :to="{name: 'useractivity', params: { id: state.authUser.id }}" class="dropdown-item">
+                                <router-link :to="{name: 'useractivity', params: { id: state.authUser.id }}" class="dropdown-item" v-if="state.authUser.id">
                                     <i class="fas fa-fw fa-user-clock"></i> {{ t('global.activity') }}
                                 </router-link>
                                 <a class="dropdown-item" href="#"

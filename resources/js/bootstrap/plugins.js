@@ -20,9 +20,12 @@ import {
     Node
 } from '@/helpers/tree.js';
 
+import RouteRootDummy from '@/components/plugins/RouteRootDummy.vue';
+
 const defaultPluginOptions = {
     id: null,
     i18n: {}, // object of languages (key is e.g. 'en', 'de', 'fr', ...)
+    routes: {},
 }
 const defaultSlotOptions = {
     of: null, // id of registered plugin
@@ -32,6 +35,7 @@ const defaultSlotOptions = {
     key: null,
     component: null,
     componentTag: null,
+    href: '', // for 'tools' and 'settings'
 }
 
 const {
@@ -99,6 +103,25 @@ export const SpPS = {
 
         }
     },
+    registerRoutes: (id, routes) => {
+        const pluginRoute = {
+            path: `/${id}`,
+            name: id,
+            component: RouteRootDummy,
+            children: [],
+            meta: {
+                auth: true
+            }
+        };
+        routes.forEach(r => {
+            pluginRoute.children.push({
+                path: r.path,
+                component: r.component,
+                name: `${id}_${r.path.replaceAll('/', '_')}`,
+            });
+        });
+        router.addRoute(pluginRoute);
+    },
     register: (options) => {
         if(!options.id) {
             throw new Error('Your plugin needs an id to be installed!');
@@ -112,6 +135,9 @@ export const SpPS = {
         };
         if(Object.keys(mergedOptions.i18n).length > 0) {
             SpPS.registerI18n(mergedOptions.id, mergedOptions.i18n);
+        }
+        if(mergedOptions.routes.length > 0) {
+            SpPS.registerRoutes(mergedOptions.id, mergedOptions.routes);
         }
         SpPS.data.plugins.push(mergedOptions);
     },
