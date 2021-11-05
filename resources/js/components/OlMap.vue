@@ -656,50 +656,6 @@
                     vm.map = new Map({});
                     vm.setExtent();
 
-                    vm.map.on('pointermove', function(e) {
-                        if(e.dragging) return;
-                        if(
-                            !vm.drawDisabled &&
-                            (
-                                vm.draw.getActive() ||
-                                vm.modify.getActive() ||
-                                vm.delete.getActive()
-                            )
-                        ) return;
-                        if(vm.measurementActive) return;
-
-                        const element = vm.hoverPopup.getElement();
-                        const feature = vm.getFeatureForEvent(e);
-                        if(feature != vm.lastHoveredFeature) {
-                            $(element).tooltip('dispose');
-                            // Reset lastHoveredFeature if no feature selected
-                            if(!feature) vm.lastHoveredFeature = null;
-                        } else {
-                            // same feature, no update needed
-                            return;
-                        }
-                        if(feature) {
-                            vm.lastHoveredFeature = feature;
-                            const geometry = feature.getGeometry();
-                            const props = feature.getProperties();
-                            const coords = getExtentCenter(geometry.getExtent());
-                            vm.hoverPopup.setPosition(coords);
-
-                            const geomName = vm.$t('main.map.geometry_name', {id: props.id});
-                            const title = props.entity ?
-                                `${props.entity.name} (${geomName})` :
-                                geomName;
-                            $(element).tooltip({
-                                container: vm.viewport || '#map',
-                                placement: 'bottom',
-                                animation: true,
-                                html: true,
-                                title: title
-                            });
-                            $(element).tooltip('show');
-                        }
-                    });
-
                     // Update popover position on map render (e.g. pan, zoom)
                     vm.map.on('postrender', function(e) {
                         if(!vm.hoverPopup) return;

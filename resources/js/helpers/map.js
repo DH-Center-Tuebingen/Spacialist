@@ -25,6 +25,53 @@ import Style from 'ol/style/Style';
 
 import { rgb2hex } from './helpers';
 
+export function formatLengthArea(value, precision = 2, isArea = false) {
+    if(!value) return value;
+
+    const length = parseFloat(value);
+
+    if(!isFinite(value) || isNaN(length)) {
+        return length;
+    }
+    let unit;
+    let factor;
+    if(isArea) {
+        if(length < 0.00001) {
+            unit = 'mm²';
+            factor = 100000;
+        } else if(length < 0.01) {
+            unit = 'cm²';
+            factor = 10000;
+        } else if(length < 100) {
+            unit = 'm²';
+            factor = 1;
+        } else if(length < 100000) {
+            unit = 'ha';
+            factor = 0.0001;
+        } else {
+            unit = 'km²';
+            factor = 0.000001;
+        }
+    } else {
+        if(length < 0.01) {
+            unit = 'mm';
+            factor = 1000;
+        } else if(length < 1) {
+            unit = 'cm';
+            factor = 100;
+        } else if(length < 1000) {
+            unit = 'm';
+            factor = 1;
+        } else {
+            unit = 'km';
+            factor = 0.001;
+        }
+    }
+
+    const sizeInUnit = length * factor;
+    return `${sizeInUnit.toFixed(precision)} ${unit}`;
+};
+
 export function createStyle(color = '#ffcc33', width = 2) {
     let polygonFillColor;
     let r, g, b, a;
@@ -151,6 +198,7 @@ export function createVectorLayer(data = {}) {
         baseLayer: false,
         displayInLayerSwitcher: !!data.show,
         title: data.title || 'Draw Layer',
+        type: data.type || 'undefined',
         visible: !!data.visible,
         opacity: data.opacity ? parseFloat(data.opacity) : 0,
         color: data.color,

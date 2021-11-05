@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="h-100"> 
         <div :id="state.mapId" class="map h-100">
             <div class="d-flex flex-column ol-bar ol-right ol-bottom">
                 <div v-if="drawing" class="d-flex flex-column align-items-end">
@@ -12,42 +12,139 @@
                     <button type="button" class="btn btn-fab rounded-circle" :class="{'btn-primary': actionState.drawType == 'Polygon', 'btn-outline-primary': actionState.drawType != 'Polygon'}" data-bs-toggle="popover" :data-content="t('main.map.draw.polygon.desc')" data-trigger="hover" data-placement="bottom" @click="toggleDrawType('Polygon')">
                         <i class="fas fa-fw fa-draw-polygon"></i>
                     </button>
-                    <!-- <button type="button" class="btn btn-fab rounded-circle btn-outline-info" v-show="interactionMode != 'modify'" data-bs-toggle="popover" :data-content="t('main.map.draw.modify.desc')" data-trigger="hover" data-placement="bottom" @click="setInteractionMode('modify')">
+                    <button type="button" class="btn btn-fab rounded-circle btn-outline-info" v-show="actionState.interactionMode != 'modify'" data-bs-toggle="popover" :data-content="t('main.map.draw.modify.desc')" data-trigger="hover" data-placement="bottom" @click="setInteractionMode('modify')">
                         <i class="fas fa-fw fa-edit"></i>
                     </button>
-                    <button type="button" class="btn btn-fab rounded-circle btn-outline-success" v-show="interactionMode == 'modify'" data-bs-toggle="popover" :data-content="t('main.map.draw.modify.pos_desc')" data-trigger="hover" data-placement="bottom" @click="updateFeatures">
+                    <button type="button" class="btn btn-fab rounded-circle btn-outline-success" v-show="actionState.interactionMode == 'modify'" data-bs-toggle="popover" :data-content="t('main.map.draw.modify.pos_desc')" data-trigger="hover" data-placement="bottom" @click="updateFeatures()">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
-                    <button type="button" class="btn btn-fab rounded-circle btn-outline-danger" v-show="interactionMode == 'modify'" data-bs-toggle="popover" :data-content="t('main.map.draw.modify.neg_desc')" data-trigger="hover" data-placement="bottom" @click="cancelUpdateFeatures">
+                    <button type="button" class="btn btn-fab rounded-circle btn-outline-danger" v-show="actionState.interactionMode == 'modify'" data-bs-toggle="popover" :data-content="t('main.map.draw.modify.neg_desc')" data-trigger="hover" data-placement="bottom" @click="updateFeatures(false)">
                         <i class="fas fa-fw fa-times"></i>
                     </button>
-                    <button type="button" class="btn btn-fab rounded-circle btn-outline-danger" v-show="interactionMode != 'delete'" data-bs-toggle="popover" :data-content="t('main.map.draw.delete.desc')" data-trigger="hover" data-placement="bottom" @click="setInteractionMode('delete')">
+                    <button type="button" class="btn btn-fab rounded-circle btn-outline-danger" v-show="actionState.interactionMode != 'delete'" data-bs-toggle="popover" :data-content="t('main.map.draw.delete.desc')" data-trigger="hover" data-placement="bottom" @click="setInteractionMode('delete')">
                         <i class="fas fa-fw fa-trash"></i>
                     </button>
-                    <button type="button" class="btn btn-fab rounded-circle btn-outline-success" v-show="interactionMode == 'delete'" data-bs-toggle="popover" :data-content="t('main.map.draw.delete.pos_desc')" data-trigger="hover" data-placement="bottom" @click="deleteFeatures">
+                    <button type="button" class="btn btn-fab rounded-circle btn-outline-success" v-show="actionState.interactionMode == 'delete'" data-bs-toggle="popover" :data-content="t('main.map.draw.delete.pos_desc')" data-trigger="hover" data-placement="bottom" @click="deleteFeatures()">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
-                    <button type="button" class="btn btn-fab rounded-circle btn-outline-danger" v-show="interactionMode == 'delete'" data-bs-toggle="popover" :data-content="t('main.map.draw.delete.neg_desc')" data-trigger="hover" data-placement="bottom" @click="cancelDeleteFeatures">
+                    <button type="button" class="btn btn-fab rounded-circle btn-outline-danger" v-show="actionState.interactionMode == 'delete'" data-bs-toggle="popover" :data-content="t('main.map.draw.delete.neg_desc')" data-trigger="hover" data-placement="bottom" @click="deleteFeatures(false)">
                         <i class="fas fa-fw fa-times"></i>
                     </button>
-                    <button type="button" class="btn btn-fab rounded-circle btn-outline-primary" data-bs-toggle="popover" :data-content="t('main.map.draw.measure.desc')" data-trigger="hover" data-placement="bottom" @click="toggleMeasurements">
+                    <button type="button" class="btn btn-fab rounded-circle" :class="{'btn-primary': actionState.measuring, 'btn-outline-primary': !actionState.measuring}" data-bs-toggle="popover" :data-content="t('main.map.draw.measure.desc')" data-trigger="hover" data-placement="bottom" @click="toggleMeasurements()">
                         <i class="fas fa-fw fa-ruler-combined"></i>
-                    </button> -->
+                    </button>
                 </div>
             </div>
         </div>
     </div>
+    <div :id="actionState.popupIds.p" class="popup popover ol-popover bs-popover-top" role="tooltip">
+        <h4 class="popover-header">
+            <span class="fw-medium">
+                {{ actionState.overlayData.title }}
+            </span>
+            <span v-if="actionState.overlayData.subtitle">
+                ({{ actionState.overlayData.subtitle }})
+            </span>
+        </h4>
+        <div class="popover-body">
+            <dl class="mb-0">
+                <dt>
+                    {{ t('global.type') }}
+                </dt>
+                <dd>
+                    {{ actionState.overlayData.type }}
+                </dd>
+                <template v-if="actionState.overlayIsPolygon || actionState.overlayIsLine">
+                    <dt>
+                        <span v-if="actionState.overlayIsLine">
+                            {{ t('main.map.length') }}
+                        </span>
+                        <span v-else-if="actionState.overlayIsPolygon">
+                            {{ t('main.map.area') }}
+                        </span>
+                    </dt>
+                    <dd>
+                        <span data-bs-toggle="tooltip" :title="`${actionState.overlayData.size.in_m}${actionState.overlayData.size.unit}`">
+                            {{ actionState.overlayData.size.combined }}
+                        </span>
+                    </dd>
+                </template>
+                <dt class="clickable" @click="actionState.overlayData.showCoordinates = !actionState.overlayData.showCoordinates">
+                    {{
+                        t('main.map.coords_in_epsg', {
+                            epsg: state.epsgCode
+                        })
+                    }}
+                    <span class="fw-normal">
+                        ({{ actionState.overlayCoordinatesAsList.length }})
+                    </span>
+                    <span v-show="actionState.overlayData.showCoordinates">
+                        <i class="fas fa-fw fa-caret-up"></i>
+                    </span>
+                    <span v-show="!actionState.overlayData.showCoordinates">
+                        <i class="fas fa-fw fa-caret-down"></i>
+                    </span>
+                </dt>
+                <dd class="mb-0 mh-300p scroll-y-auto">
+                    <div v-if="actionState.overlayData.showCoordinates">
+                        <table class="table table-striped table-borderless table-sm mb-0">
+                            <tbody>
+                                <tr v-for="(c, i) in actionState.overlayCoordinatesAsList" :key="i">
+                                    <td class="text-start">
+                                        <input type="number" class="form-control form-control-sm" step="0.000001" v-model.number="actionState.overlayCoordinateEdit[0]" v-if="actionState.coordinateEditMode" />
+                                        <span v-else>
+                                            {{ toFixed(c.x, 4) }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <input type="number" class="form-control form-control-sm" step="0.000001" v-model.number="actionState.overlayCoordinateEdit[1]" v-if="actionState.coordinateEditMode" />
+                                        <span v-else>
+                                            {{ toFixed(c.y, 4) }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end clickable" v-if="actionState.overlayIsPoint">
+                                        <div class="d-flex flex-row gap-1" v-if="actionState.coordinateEditMode">
+                                            <a href="" @click.prevent="confirmOverlayCoordinateEditing()">
+                                                <i class="fas fa-fw fa-check" ></i>
+                                            </a>
+                                            <a href="" @click.prevent="confirmOverlayCoordinateEditing(false)">
+                                                <i class="fas fa-fw fa-times" ></i>
+                                            </a>
+                                        </div>
+                                        <a href="" @click.prevent="enableOverlayCoordinateEditing(c)" v-else>
+                                            <i class="fas fa-fw fa-edit" ></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </dd>
+            </dl>
+        </div>
+        <div class="arrow ol-arrow"></div>
+    </div>
+    <div :id="actionState.popupIds.h" class="tooltip" role="tooltip">
+    </div>
+    <div :id="actionState.popupIds.m" class="tooltip tooltip-measure"></div>
 </template>
 
 <script>
     import {
         computed,
+        nextTick,
         onMounted,
         reactive,
         toRefs,
+        watch,
     } from 'vue';
     
     import { useI18n } from 'vue-i18n';
+
+    import {
+        Tooltip,
+        Popover,
+    } from 'bootstrap';
 
     import 'ol/ol.css';
     import Collection from 'ol/Collection';
@@ -56,6 +153,9 @@
     import Feature from 'ol/Feature';
     import Map from 'ol/Map';
     import View from 'ol/View';
+    import Overlay from 'ol/Overlay';
+    import { transform as transformProj } from 'ol/proj';
+    import {getArea, getLength} from 'ol/sphere';
 
     import FullScreen from 'ol/control/FullScreen';
     import OverviewMap from 'ol/control/OverviewMap';
@@ -63,6 +163,8 @@
     import ScaleLine from 'ol/control/ScaleLine';
 
     import {never as neverCond, shiftKeyOnly, platformModifierKeyOnly} from 'ol/events/condition';
+
+    import { getCenter as getExtentCenter, extend as extendExtent} from 'ol/extent';
 
     import WKT from 'ol/format/WKT';
     import GeoJSON from 'ol/format/GeoJSON';
@@ -77,23 +179,33 @@
 
     import LayerSwitcher from 'ol-ext/control/LayerSwitcher';
 
-    import '../../../sass/ol-ext-layerswitcher.scss';
+    import '@/../sass/ol-ext-layerswitcher.scss';
 
     import {
         createNewLayer,
         createStyle,
         createVectorLayer,
+        formatLengthArea,
         registerProjection,
-    } from '../../helpers/map.js';
+    } from '@/helpers/map.js';
 
     import {
-      getEntityType,
+        getEntityType,
         getTs,
-        translateConcept
-    } from '../../helpers/helpers.js';
+        translateConcept,
+        _throttle,
+    } from '@/helpers/helpers.js';
+
+    import {
+        toFixed,
+    } from '@/helpers/filters.js';
 
     export default {
         props: {
+            selection: {
+                type: Number,
+                required: false,
+            },
             layers: {
                 type: Object,
                 required: true,
@@ -129,11 +241,12 @@
                 default: 'ol',
             },
         },
-        emits: ['added'],
+        emits: ['added', 'select'],
         setup(props, context) {
             const { t } = useI18n();
 
             const {
+                selection,
                 layers,
                 data,
                 projection,
@@ -143,6 +256,61 @@
             } = toRefs(props);
 
             // FUNCTIONS
+            const transformCoordinates = (c, clist, rev = false) => {
+                if(!c[0] || !c[1]) {
+                    return null;
+                };
+                let fromEpsg = rev ? state.epsgCode : 'EPSG:3857';
+                let toEpsg = rev ? 'EPSG:3857' : state.epsgCode;
+                const transCoord = transformProj(c, fromEpsg, toEpsg);
+                const fixedCoord = {
+                    x: transCoord[0],
+                    y: transCoord[1]
+                };
+                if(clist) {
+                    clist.push(fixedCoord);
+                }
+                return fixedCoord;
+            };
+            const getFeaturesAtEvent = (e, tolerance = 5, first = true) => {
+                const features = state.map.getFeaturesAtPixel(e.pixel, {
+                    hitTolerance: tolerance,
+                });
+
+                return features ? (first ? features[0] : features) : null;
+            };
+            const getEntityExtent = _ => {
+                const layers = state.mapLayerGroups.entity.getLayers();
+                let entityExtent = null;
+                layers.forEach(l => {
+                    const source = l.getSource();
+                    if(source) {
+                        const sourceExtent = source.getExtent();
+                        if(!entityExtent) {
+                            entityExtent = sourceExtent;
+                        } else {
+                            entityExtent = extendExtent(entityExtent, sourceExtent);
+                        }
+                    }
+                });
+                return entityExtent;
+            };
+            const setExtent = (to = null) => {
+                const newExtent = to || getEntityExtent() || defaultExtent;
+
+                for(let i=0; i<newExtent.length; i++) {
+                    if(newExtent[i] == Infinity || newExtent[i] == -Infinity) {
+                        newExtent[i] = defaultExtent[i];
+                    }
+                }
+
+                state.extent = newExtent;
+                state.map.getView().fit(state.extent, {
+                    duration: 250,
+                    padding: [25, 25, 25, 25],
+                    maxZoom: 19, // set max zoom on fit to max osm zoom level
+                });
+            };
             const getAssociatedLayer = feature => {
                 if(data.value.format == 'wkt') {
                     const layerGroup = state.mapLayerGroups.entity.getLayers().getArray();
@@ -153,6 +321,13 @@
                     }
                 }
                 return null;
+            };
+            const anyInteractionActive = _ => {
+                return drawing.value && (
+                    actionState.draw.getActive() ||
+                    actionState.modify.getActive() ||
+                    actionState.delete.getActive()
+                );
             };
             const drawFeature = feature => {
                 const layer = getAssociatedLayer(feature);
@@ -175,7 +350,6 @@
                 });
             };
             const initializeLayers = _ => {
-                let geojsonLayers = {};
                 for(let k in layers.value) {
                     const l = layers.value[k];
                     if(l.is_overlay) {
@@ -193,16 +367,18 @@
                             } else {
                                 layerName = t('global.unlinked');
                             }
-                            geojsonLayers[l.id] = createVectorLayer({
-                                show: true,
-                                title: layerName,
-                                visible: l.visible,
-                                opacity: parseFloat(l.opacity),
-                                color: l.color,
-                                layer: 'entity',
-                                layer_id: l.id,
-                            });
-                            state.mapEntityLayers.push(geojsonLayers[l.id]);
+                            state.mapEntityLayers.push(
+                                createVectorLayer({
+                                    show: true,
+                                    title: layerName,
+                                    type: l.type,
+                                    visible: l.visible,
+                                    opacity: parseFloat(l.opacity),
+                                    color: l.color,
+                                    layer: 'entity',
+                                    layer_id: l.id,
+                                })
+                            );
                         }
                     } else {
                         state.mapBaselayers.push(createNewLayer(l));
@@ -258,10 +434,37 @@
                 }
             };
             const loadGeojsonData = features => {
-
+                features.forEach(f => {
+                    const feature = geojsonFormat.readFeature(f.geom, {
+                        featureProjection: 'EPSG:3857',
+                        dataProjection: state.inputEpsgCode,
+                    });
+                    // TODO confirm
+                    feature.setProperties(f.props);
+                    // TODO ...
+                });
             };
-            const loadCollectionData = features => {
-
+            const loadCollectionData = collection => {
+                const features = geojsonFormat.readFeatures(collection, {
+                    featureProjection: 'EPSG:3857',
+                    dataProjection: state.inputEpsgCode,
+                });
+                features.forEach(f => {
+                    let layer;
+                    const p = f.getProperties();
+                    if(p.entity) {
+                        const et = Object.values(layers.value).find(l => l.entity_type_id == p.entity_type_id);
+                        layer = Object.values(state.mapEntityLayers).find(l => l.getProperties().layer_id == et.id);
+                    } else {
+                        layer = Object.values(state.mapEntityLayers).find(l => l.getProperties().type.toLowerCase() == 'unlinked');
+                    }
+                    const color = layer.getProperties().color;
+                    const src = layer.getSource();
+                    const defaultStyle = createStyle(color);
+                    f.setStyle(defaultStyle);
+                    src.addFeature(f);
+                    state.featureList[p.id] = f;
+                });
             };
             const initializeData = _ => {
                 if(!data.value || (!data.value.format && !data.value.features)) {
@@ -276,7 +479,7 @@
                         loadGeojsonData(data.value.features);
                         break;
                     case 'collection':
-                        loadCollectionData(data.value.features);
+                        loadCollectionData(data.value.collection);
                         break;
                 }
             };
@@ -284,6 +487,113 @@
                 state.mapLayerGroups.base.setLayers(new Collection(state.mapBaselayers));
                 state.mapLayerGroups.overlay.setLayers(new Collection(state.mapOverlays));
                 state.mapLayerGroups.entity.setLayers(new Collection(state.mapEntityLayers));
+                setExtent();
+            };
+            const initializeMapEvents = _ => {
+                state.map.on('pointermove', _throttle(e => {
+                    if(e.dragging) return;
+                    if(anyInteractionActive()) return;
+                    if(actionState.measuring) return;
+
+                    const feature = getFeaturesAtEvent(e);
+                    if(feature != actionState.hoveredFeature) {
+                        // Dispose tooltip from hover popup
+                        if(!!actionState.hoveredFeature) {
+                            // actionState.bsPopup.hide();
+                            actionState.bsPopup.dispose();
+                        }
+                        if(!feature) {
+                            actionState.hoveredFeature = null;
+                        }
+                    } else {
+                        // same feature, no update needed
+                        return;
+                    }
+                    if(!!feature) {
+                        actionState.hoveredFeature = feature;
+                        const geometry = feature.getGeometry();
+                        const props = feature.getProperties();
+                        const coords = getExtentCenter(geometry.getExtent());
+                        actionState.popup.setPosition(coords);
+
+                        let title = t('main.map.geometry_name', {id: props.id});
+                        if(props.entity) {
+                            title = `${props.entity_name} (${title})`;
+                        }
+
+                        actionState.bsPopup = new Tooltip(actionState.popup.getElement(), {
+                            container: state.viewport || '#map',
+                            placement: 'top',
+                            animation: true,
+                            html: false,
+                            title: title,
+                        });
+                        // actionState.popup.getElement().setAttribute('data-bs-original-title', title);
+                        actionState.bsPopup.show();
+                    }
+                }, 200));
+                state.map.on('postrender', _throttle(e => {
+                    if(!actionState.bsPopup || !actionState.hoveredFeature) return;
+
+                    actionState.bsPopup.update();
+                }, 200));
+                state.map.on('singleclick', e => {
+                    if(anyInteractionActive()) return;
+                    if(actionState.measuring) return;
+
+                    const feature = getFeaturesAtEvent(e);
+                    // if(!!feature) {
+                    //     const geometry = feature.getGeometry();
+                    //     const props = feature.getProperties();
+                    //     const coords = getExtentCenter(geometry.getExtent());
+                    //     let title = t('main.map.geometry_name', {id: props.id});
+                    //     let subtitle = '';
+                    //     const sizes = {
+                    //         in_m: 0,
+                    //         unit: '',
+                    //         combined: '',
+                    //     };
+
+                    //     if(props.entity) {
+                    //         subtitle = title;
+                    //         title = props.entity_name;
+                    //     }
+
+                    //     switch(geometry.getType()) {
+                    //         case 'LineString':
+                    //         case 'MultiLineString':
+                    //             sizes.in_m = getLength(geometry);
+                    //             sizes.unit = 'm';
+                    //             sizes.combined = formatLengthArea(sizes.in_m, 2);
+                    //             break;
+                    //         case 'Polygon':
+                    //         case 'MultiPolygon':
+                    //             sizes.in_m = getArea(geometry);
+                    //             sizes.unit = 'm²';
+                    //             sizes.combined = formatLengthArea(sizes.in_m, 2, true);
+                    //             break;
+                    //     }
+
+                    //     actionState.overlay.setPosition(coords);
+                    //     actionState.overlayData = {
+                    //         title: title,
+                    //         subtitle: subtitle,
+                    //         size: sizes,
+                    //         feature: feature,
+                    //         type: geometry.getType(),
+                    //         coordinates: geometry.getCoordinates(),
+                    //     };
+
+                    //     actionState.bsOverlay.show();
+                    // } else {
+                    //     actionState.overlay.setPosition();
+                    //     actionState.bsOverlay.hide();
+                    //     actionState.overlayData = {};
+                    //     // vm.selectedFeature = {};
+                    // }
+
+                    context.emit('select', feature);
+                });
             };
             const initializeDrawFeatures = _ => {
                 // If drawing is disabled, skip initializing it
@@ -368,8 +678,29 @@
                 actionState.draw.Polygon.on('drawend', event => {
                     drawFeature(event.feature);
                 });
-                
-                console.log("action state draw", actionState.draw);
+            };
+            const confirmOverlayCoordinateEditing = (confirm = true) => {
+                if(confirm) {
+                    // update coords
+                } else {
+                    // cancel
+                    actionState.overlayCoordinateEdit = [];
+                }
+                actionState.coordinateEditMode = false;
+            };
+            const enableOverlayCoordinateEditing = c => {
+                actionState.overlayCoordinateEdit = [c.x, c.y];
+                actionState.coordinateEditMode = true;
+            }
+            const toggleMeasurements = _ => {
+                console.log("toggle measurements");
+                actionState.measuring = !actionState.measuring;
+
+                // if(actionState.measuring) {
+                //     addMeasureingInteraction();
+                // } else {
+                //     removeMeasuringInteraction();
+                // }
             };
             // Interactions (Draw, Modify, Delete)
             const setInteractionMode = (mode, type, cancelled) => {
@@ -422,7 +753,29 @@
                     setInteractionMode('');
                 }
                 actionState.draw.getActive() && actionState.draw.setActive(true, type);
-            }
+            };
+            const updateFeatures = (confirm = true) => {
+                if(confirm) {
+                    // Update Features
+                    console.log("update features");
+                    setInteractionMode('');
+                } else {
+                    // Cancel Update
+                    console.log("CANCEL: update features");
+                    setInteractionMode('', true);
+                }
+            };
+            const deleteFeatures = (confirm = true) => {
+                if(confirm) {
+                    // Delete Features
+                    console.log("delete features");
+                    setInteractionMode('');
+                } else {
+                    // Cancel delete
+                    console.log("CANCEL: delete features");
+                    setInteractionMode('', true);
+                }
+            };
 
             // DATA
             // EPSG:3857 bounds (taken from epsg.io/3857)
@@ -431,6 +784,7 @@
             const geojsonFormat = new GeoJSON();
             const state = reactive({
                 map: null,
+                extent: defaultExtent,
                 mapId: `interactive-map-container-${getTs()}`,
                 mapLayerGroups: {
                     base: null,
@@ -440,68 +794,244 @@
                 mapOverlays: [],
                 mapBaselayers: [],
                 mapEntityLayers: [],
+                featureList: {},
                 epsgCode: computed(_ => `EPSG:${projection.value}`),
                 inputEpsgCode: computed(_ => `EPSG:${inputProjection.value}`),
+                viewport: computed(_ => {
+                    if(!state.map) return;
+                    const target = state.map.getTarget();
+                    if(!target) return;
+                    const container = document.getElementById(target);
+                    if(!container) return;
+                    const viewports = container.getElementsByClassName('ol-viewport');
+                    if(!viewports) return;
+                    if(!viewports.length) return;
+                    return viewports[0];
+                }),
             });
             const actionState = reactive({
+                overlay: null,
+                bsOverlay: null,
+                popup: null,
+                bsPopup: null,
+                overlayData: {},
+                coordinateEditMode: false,
+                overlayCoordinateEdit: [],
+                measuring: false,
+                hoveredFeature: null,
                 drawType: '',
                 interactionMode: '',
                 drawingLayer: null,
                 draw: {},
                 modify: {},
                 delete: {},
+                popupIds: computed(_ => {
+                    return {
+                        p: `${state.mapId}-popup`,
+                        h: `${state.mapId}-hover-popup`,
+                        m: `${state.mapId}-measure-popup`,
+                    }
+                }),
+                overlayOpen: computed(_ => Object.keys(actionState.overlayData).length > 0),
+                overlayIsPoint: computed(_ => {
+                    return actionState.overlayOpen && (
+                        actionState.overlayData.type == 'Point' ||
+                        actionState.overlayData.type == 'MultiPoint'
+                    );
+                }),
+                overlayIsLine: computed(_ => {
+                    return actionState.overlayOpen && (
+                        actionState.overlayData.type == 'LineString' ||
+                        actionState.overlayData.type == 'MultiLineString'
+                    );
+                }),
+                overlayIsPolygon: computed(_ => {
+                    return actionState.overlayOpen && (
+                        actionState.overlayData.type == 'Polygon' ||
+                        actionState.overlayData.type == 'MultiPolygon'
+                    );
+                }),
+                overlayCoordinatesAsList: computed(_ => {
+                    if(!actionState.overlayData.coordinates) return [];
+
+                    const cl = actionState.overlayData.coordinates;
+                    const coordList = [];
+
+                    switch(actionState.overlayData.type) {
+                        case 'Point':
+                            transformCoordinates(cl, coordList);
+                            break;
+                        case 'LineString':
+                        case 'MultiPoint':
+                            cl.forEach(c => {
+                                transformCoordinates(c, coordList);
+                            });
+                            break;
+                        case 'Polygon':
+                        case 'MultiLineString':
+                            cl.forEach(cg => {
+                                cg.forEach(c => {
+                                    transformCoordinates(c, coordList);
+                                });
+                            });
+                            break;
+                        case 'MultiPolygon':
+                            cl.forEach(cg => {
+                                cg.forEach(innerCg => {
+                                    innerCg.forEach(c => {
+                                        transformCoordinates(c, coordList);
+                                    });
+                                });
+                            });
+                            break;
+                    }
+
+                    return coordList;
+                }),
             })
 
             // ON MOUNTED
             onMounted(async _ => {
-                initializeLayers();
                 await initializeProjections();
-                initializeData();
-                updateLayerGroups();
 
-                state.map = new Map({
-                    controls: defaultControls().extend([
-                        new FullScreen(),
-                        new LayerSwitcher(),
-                        new OverviewMap(),
-                        new Rotate(),
-                        new ScaleLine()
-                    ]),
-                    interactions: defaultInteractions().extend([
-                        new DragRotate({
-                            condition: platformModifierKeyOnly
+                nextTick(_ => {
+                    initializeLayers();
+                    initializeData();
+
+                    state.map = new Map({
+                        controls: defaultControls().extend([
+                            new FullScreen(),
+                            new LayerSwitcher(),
+                            new OverviewMap(),
+                            new Rotate(),
+                            new ScaleLine()
+                        ]),
+                        interactions: defaultInteractions().extend([
+                            new DragRotate({
+                                condition: platformModifierKeyOnly
+                            }),
+                            new DragZoom({
+                                condition: shiftKeyOnly
+                            }),
+                            new PinchRotate(),
+                            new PinchZoom(),
+                        ]),
+                        layers: [
+                            state.mapLayerGroups.base,
+                            state.mapLayerGroups.overlay,
+                            state.mapLayerGroups.entity,
+                        ],
+                        target: state.mapId,
+                        view: new View({
+                            center: [0, 0],
+                            projection: 'EPSG:3857',
+                            zoom: 2,
+                            extent: state.extent,
                         }),
-                        new DragZoom({
-                            condition: shiftKeyOnly
-                        }),
-                        new PinchRotate(),
-                        new PinchZoom(),
-                    ]),
-                    layers: [state.mapLayerGroups.base, state.mapLayerGroups.overlay, state.mapLayerGroups.entity],
-                    target: state.mapId,
-                    view: new View({
-                        center: [0, 0],
-                        projection: 'EPSG:3857',
-                        zoom: 2,
-                        extent: defaultExtent
-                    }),
-                    overlays: [
-                        // vm.overlay,
-                        // vm.hoverPopup
-                    ]
+                    });
+
+                    const overlayElem = document.getElementById(actionState.popupIds.p);
+                    const hoverElem = document.getElementById(actionState.popupIds.h);
+                    actionState.bsOverlay = new Popover(overlayElem);
+                    actionState.bsPopup = new Tooltip(hoverElem, {
+                        container: state.viewport || '#map',
+                        placement: 'top',
+                        animation: true,
+                        html: false,
+                        title: 'None',
+                    });
+
+                    actionState.overlay = new Overlay({
+                        element: overlayElem,
+                        positioning: 'bottom-center',
+                        autoPan: true,
+                        autoPanAnimation: {
+                            duration: 250,
+                        },
+                    });
+                    actionState.popup = new Overlay({
+                        element: hoverElem,
+                        positioning: 'bottom-center',
+                        autoPan: false,
+                    });
+                    state.map.addOverlay(actionState.overlay);
+                    state.map.addOverlay(actionState.popup);
+
+                    updateLayerGroups();
+                    initializeDrawFeatures();
+                    initializeMapEvents();
                 });
+            });
 
-                initializeDrawFeatures();
+            // WATCHER
+            watch(_ => selection.value, (newValue, oldValue) => {
+                    const feature = state.featureList[newValue];
+                    if(!!feature) {
+                        const geometry = feature.getGeometry();
+                        const props = feature.getProperties();
+                        const coords = getExtentCenter(geometry.getExtent());
+                        let title = t('main.map.geometry_name', {id: props.id});
+                        let subtitle = '';
+                        const sizes = {
+                            in_m: 0,
+                            unit: '',
+                            combined: '',
+                        };
+
+                        if(props.entity) {
+                            subtitle = title;
+                            title = props.entity_name;
+                        }
+
+                        switch(geometry.getType()) {
+                            case 'LineString':
+                            case 'MultiLineString':
+                                sizes.in_m = getLength(geometry);
+                                sizes.unit = 'm';
+                                sizes.combined = formatLengthArea(sizes.in_m, 2);
+                                break;
+                            case 'Polygon':
+                            case 'MultiPolygon':
+                                sizes.in_m = getArea(geometry);
+                                sizes.unit = 'm²';
+                                sizes.combined = formatLengthArea(sizes.in_m, 2, true);
+                                break;
+                        }
+
+                        actionState.overlay.setPosition(coords);
+                        actionState.overlayData = {
+                            title: title,
+                            subtitle: subtitle,
+                            size: sizes,
+                            feature: feature,
+                            type: geometry.getType(),
+                            coordinates: geometry.getCoordinates(),
+                        };
+
+                        actionState.bsOverlay.show();
+                    } else {
+                        actionState.overlay.setPosition();
+                        actionState.bsOverlay.hide();
+                        actionState.overlayData = {};
+                        // vm.selectedFeature = {};
+                    }
             });
 
             // RETURN
             return {
                 t,
                 // HELPERS
+                toFixed,
                 // PROPS
                 drawing,
                 // LOCAL
+                confirmOverlayCoordinateEditing,
+                enableOverlayCoordinateEditing,
+                toggleMeasurements,
+                setInteractionMode,
                 toggleDrawType,
+                updateFeatures,
+                deleteFeatures,
                 // STATE
                 state,
                 actionState,

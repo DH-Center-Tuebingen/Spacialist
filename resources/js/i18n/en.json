@@ -587,7 +587,8 @@
             "overlay": "Overlay | Overlays",
             "entity_layers": "Entity-Layer",
             "geometry_name": "Geometry #{id}",
-            "coords_in_epsg": "Coordinates in EPSG:{epsg}",
+            "coords_in_epsg": "Coordinates in {epsg}",
+            "coords_in_epsg_nr": "Coordinates in EPSG:{epsg}",
             "length": "Length",
             "area": "Area",
             "draw": {

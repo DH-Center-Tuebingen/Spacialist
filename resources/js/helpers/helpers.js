@@ -430,6 +430,7 @@ export function isArray(arr) {
 
 export const _cloneDeep = require('lodash/cloneDeep');
 export const _debounce = require('lodash/debounce');
+export const _throttle = require('lodash/throttle');
 export const _orderBy = require('lodash/orderBy');
 
 export function showErrorModal(errorMsg, headers, request) {
