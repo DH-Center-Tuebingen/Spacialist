@@ -808,6 +808,14 @@
                     if(!viewports.length) return;
                     return viewports[0];
                 }),
+                // Can not watch on data itself or array, thus track length
+                dataFeatureLength: computed(_ => {
+                    if(data.value.format == 'collection') {
+                        return data.value.collection.features.length;
+                    } else {
+                        return data.value.features.length;
+                    }
+                }),
             });
             const actionState = reactive({
                 overlay: null,
@@ -1015,6 +1023,23 @@
                         actionState.overlayData = {};
                         // vm.selectedFeature = {};
                     }
+            });
+
+            watch(_ => state.dataFeatureLength, (newValue, oldValue) => {
+                const layers = [
+                    ...state.mapLayerGroups.base.getLayers().getArray(),
+                    ...state.mapLayerGroups.overlay.getLayers().getArray(),
+                    ...state.mapLayerGroups.entity.getLayers().getArray(),
+                ];
+
+                layers.forEach(l => {
+                    l.getSource().clear();
+                });
+
+                state.featureList = {};
+
+                initializeData();
+                setExtent();
             });
 
             // RETURN

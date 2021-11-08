@@ -195,11 +195,6 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 
 // MAP
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/map')->group(function() {
-    Route::get('', 'MapController@getData');
-    Route::get('layer', 'MapController@getLayers');
-    Route::get('layer/entity', 'MapController@getEntityTypeLayers');
-    Route::get('layer/{id}', 'MapController@getLayer')->where('id', '[0-9]+');
-    Route::get('layer/{id}/geometry', 'MapController@getGeometriesByLayer')->where('id', '[0-9]+');
     Route::get('epsg/{srid}', 'MapController@getEpsg')->where('srid', '[0-9]+');
     Route::get('export/{id}', 'MapController@exportLayer')->where('id', '[0-9]+');
 
