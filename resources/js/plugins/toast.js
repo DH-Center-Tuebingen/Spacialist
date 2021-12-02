@@ -90,15 +90,18 @@ const createToast = config => ({
 });
 
 const toastSymbol = Symbol();
+let toastInstance = null;
 
 export function provideToast(toastConfig = {}) {
     const reducedConfig = reduceGlobalConfig({...defaultConfig, ...toastConfig});
     const toast = createToast(reducedConfig);
+    toastInstance = toast;
     provide(toastSymbol, toast);
 }
 
 export function useToast() {
-    const toast = inject(toastSymbol);
+    // const toast = inject(toastSymbol);
+    const toast = toastInstance;
     if (!toast) throw new Error("No toast provided!");
 
     if(!store.wrapper) {

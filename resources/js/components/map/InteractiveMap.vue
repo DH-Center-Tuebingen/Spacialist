@@ -240,6 +240,10 @@
                 required: false,
                 default: 'ol',
             },
+            triggerDataRescan: {
+                type: String,
+                required: false,
+            },
         },
         emits: ['added', 'select'],
         setup(props, context) {
@@ -253,6 +257,7 @@
                 inputProjection,
                 resetEach,
                 drawing,
+                triggerDataRescan,
             } = toRefs(props);
 
             // FUNCTIONS
@@ -403,11 +408,10 @@
             };
             const initializeProjections = async _ => {
                 // If desired epsg code is default, skip initialization
-                if(projection.value == 3857) {
-                    return;
+                if(projection.value != 3857) {
+                    await registerProjection(projection.value);
                 }
 
-                await registerProjection(projection.value);
                 await registerProjection(inputProjection.value);
             };
             const loadWktData = features => {
@@ -452,15 +456,27 @@
                 features.forEach(f => {
                     let layer;
                     const p = f.getProperties();
+                    console.log("current feature", f, p);
                     if(p.entity) {
                         const et = Object.values(layers.value).find(l => l.entity_type_id == p.entity_type_id);
                         layer = Object.values(state.mapEntityLayers).find(l => l.getProperties().layer_id == et.id);
                     } else {
                         layer = Object.values(state.mapEntityLayers).find(l => l.getProperties().type.toLowerCase() == 'unlinked');
                     }
+                    let symbolStyle;
+                    if(p.style) {
+                        console.log("should load style");
+                        symbolStyle = p.style.symbol;
+                    }
+                    if(p.labels) {
+                        console.log("should load labels");
+                    }
+                    if(p.charts) {
+                        console.log("should load charts");
+                    }
                     const color = layer.getProperties().color;
                     const src = layer.getSource();
-                    const defaultStyle = createStyle(color);
+                    const defaultStyle = createStyle(color, 2, symbolStyle);
                     f.setStyle(defaultStyle);
                     src.addFeature(f);
                     state.featureList[p.id] = f;
@@ -482,6 +498,22 @@
                         loadCollectionData(data.value.collection);
                         break;
                 }
+            };
+            const reinitializeData = _ => {
+                const layers = [
+                    ...state.mapLayerGroups.base.getLayers().getArray(),
+                    ...state.mapLayerGroups.overlay.getLayers().getArray(),
+                    ...state.mapLayerGroups.entity.getLayers().getArray(),
+                ];
+
+                layers.forEach(l => {
+                    l.getSource().clear();
+                });
+
+                state.featureList = {};
+
+                initializeData();
+                setExtent();
             };
             const updateLayerGroups = _ => {
                 state.mapLayerGroups.base.setLayers(new Collection(state.mapBaselayers));
@@ -1026,20 +1058,11 @@
             });
 
             watch(_ => state.dataFeatureLength, (newValue, oldValue) => {
-                const layers = [
-                    ...state.mapLayerGroups.base.getLayers().getArray(),
-                    ...state.mapLayerGroups.overlay.getLayers().getArray(),
-                    ...state.mapLayerGroups.entity.getLayers().getArray(),
-                ];
+                reinitializeData();
+            });
 
-                layers.forEach(l => {
-                    l.getSource().clear();
-                });
-
-                state.featureList = {};
-
-                initializeData();
-                setExtent();
+            watch(_ => triggerDataRescan.value, (newValue, oldValue) => {
+                reinitializeData();
             });
 
             // RETURN

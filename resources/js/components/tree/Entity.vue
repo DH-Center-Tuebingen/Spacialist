@@ -114,6 +114,7 @@
     import {
         computed,
         onMounted,
+        onUnmounted,
         reactive
     } from 'vue';
 
@@ -240,7 +241,11 @@
             // ON MOUNTED
             onMounted(_ => {
                 console.log("entity tree component mounted");
-            });this
+                // document.addEventListener('click', check)
+            });
+            onUnmounted(_ => {
+
+            });
             return {
                 t,
                 // HELPERS

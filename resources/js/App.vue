@@ -220,7 +220,7 @@
         deleteNotification as deleteNotificationHelper,
     } from './api/notification.js';
     import {
-        showAbout
+        showAbout,
     } from './helpers/modal.js';
 
     export default {
@@ -361,6 +361,7 @@
                     is_tag: false,
                     container: 'toast-container',
                 });
+                useToast();
                 // if (adapter.browserDetails.browser == 'firefox') {
                 //     adapter.browserShim.shimGetDisplayMedia(window, 'window');
                 // }

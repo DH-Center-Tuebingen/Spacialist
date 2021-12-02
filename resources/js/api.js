@@ -253,9 +253,13 @@ export async function fetchChildren(id) {
     );
 }
 
-export async function getMapLayers() {
+export async function getMapLayers(includeEntityLayers) {
+    let url = `map/layer`;
+    if(!includeEntityLayers) {
+        url += `?basic=1`;
+    }
     return $httpQueue.add(
-        () => http.get('map/layer?basic=1').then(response => response.data)
+        () => http.get(url).then(response => response.data)
     );
 };
 

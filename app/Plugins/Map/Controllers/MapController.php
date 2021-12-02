@@ -140,7 +140,31 @@ class MapController extends Controller
         return response()->json($geodata);
     }
 
+    public function getEpsg($srid) {
+        $epsg = \DB::table('spatial_ref_sys')
+            ->where('srid', $srid)
+            ->first();
+        return response()->json($epsg);
+    }
+
     // POST
+
+    public function addGeometry(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('create_edit_geodata')) {
+            return response()->json([
+                'error' => __('You do not have the permission to add geometric data')
+            ], 403);
+        }
+        $this->validate($request, [
+            'collection' => 'required|json',
+            'srid' => 'required|integer',
+            'metadata' => 'nullable|json',
+        ]);
+
+        $objs = Geodata::createFromFeatureCollection(json_decode($request->get('collection')), $request->get('srid'), json_decode($request->get('metadata')), $user);
+        return response()->json($objs);
+    }
 
     // PATCH
 

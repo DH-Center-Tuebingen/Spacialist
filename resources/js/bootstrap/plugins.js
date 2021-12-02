@@ -13,14 +13,22 @@ import * as Vue from 'vue';
 
 import * as filters from '@/helpers/filters.js';
 import * as helpers from '@/helpers/helpers.js';
+import * as colors from '@/helpers/colors.js';
+import {
+    getLayers,
+} from '@/helpers/map.js';
+import {
+    Node
+} from '@/helpers/tree.js';
 import {
     searchEntity,
 } from '@/api.js';
 import {
-    Node
-} from '@/helpers/tree.js';
+    iconList,
+} from '@/bootstrap/font.js';
 
 import RouteRootDummy from '@/components/plugins/RouteRootDummy.vue';
+import * as buffer from 'buffer';
 
 const defaultPluginOptions = {
     id: null,
@@ -44,11 +52,19 @@ const {
 } = router;
 
 global.Vue = Vue;
+window.Buffer = buffer.Buffer;
 
 export const SpPS = {
     api: {
         filters: filters,
         helpers: helpers,
+        colors: colors,
+        mapHelpers: {
+            getLayers,
+        },
+        font: {
+            iconList
+        },
         searches: {
             entity: searchEntity,
         },
@@ -118,6 +134,7 @@ export const SpPS = {
                 path: r.path,
                 component: r.component,
                 name: `${id}_${r.path.replaceAll('/', '_')}`,
+                children: r.children,
             });
         });
         router.addRoute(pluginRoute);

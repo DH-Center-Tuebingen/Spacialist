@@ -19,6 +19,7 @@ import TileWMS from 'ol/source/TileWMS';
 import Vector from 'ol/source/Vector';
 
 import CircleStyle from 'ol/style/Circle';
+import Text from 'ol/style/Text';
 import Fill from 'ol/style/Fill';
 import Stroke from 'ol/style/Stroke';
 import Style from 'ol/style/Style';
@@ -72,7 +73,7 @@ export function formatLengthArea(value, precision = 2, isArea = false) {
     return `${sizeInUnit.toFixed(precision)} ${unit}`;
 };
 
-export function createStyle(color = '#ffcc33', width = 2) {
+export function createStyle(color = '#ffcc33', width = 2, fromSymbol) {
     let polygonFillColor;
     let r, g, b, a;
     const fillAlphaMultiplier = 0.2;
@@ -86,7 +87,7 @@ export function createStyle(color = '#ffcc33', width = 2) {
     }
     polygonFillColor = `rgba(${r}, ${g}, ${b}, ${a})`;
 
-    return new Style({
+    const options = {
         fill: new Fill({
             color: polygonFillColor
         }),
@@ -94,7 +95,20 @@ export function createStyle(color = '#ffcc33', width = 2) {
             color: color,
             width: width
         }),
-        image: new CircleStyle({
+    };
+
+    if(fromSymbol) {
+        // TODO opacity
+        options.text = new Text({
+            text: String.fromCodePoint(`0x${fromSymbol.unicode}`),
+            font: `${fromSymbol.size}px FontAwesome`,
+            // textBaseline: 'bottom',
+            fill: new Fill({
+                color: fromSymbol.color,
+            })
+        });
+    } else {
+        options.image = new CircleStyle({
             radius: width*3,
             fill: new Fill({
                 color: color
@@ -103,12 +117,14 @@ export function createStyle(color = '#ffcc33', width = 2) {
                 color: 'rgba(0, 0, 0, 0.2)',
                 width: 2
             })
-        })
-    });
+        });
+    }
+
+    return new Style(options);
 };
 
-export async function getLayers() {
-    const data = await getMapLayers();
+export async function getLayers(includeEntityLayers = false) {
+    const data = await getMapLayers(includeEntityLayers);
     const layers = {};
     for(let i=0; i<data.baselayers.length; i++) {
         const l = data.baselayers[i];
@@ -217,10 +233,14 @@ export async function registerProjection(srid) {
         return new Promise(r => r(epsg));
     }
     const epsg = `EPSG:${srid}`;
-    getMapProjection(srid).then(data => {
-        proj4.defs(epsg, data.proj4text);
-        registerProj(proj4);
-        addProjection(getProjection(epsg));
-        return new Promise(r => r(epsg));
+    return getMapProjection(srid).then(data => {
+        if(data) {
+            proj4.defs(epsg, data.proj4text);
+            registerProj(proj4);
+            addProjection(getProjection(epsg));
+            return new Promise(r => r(epsg));
+        } else {
+            return new Promise(r => r(null));
+        }
     });
 };

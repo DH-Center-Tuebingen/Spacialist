@@ -58,7 +58,7 @@ class EntityController extends Controller {
         return response()->json($entity);
     }
 
-    public function getDataForEntityType(Request $request, $ctid, $aid) {
+    public function getDataForEntityType(Request $request, $etid, $aid) {
         $user = auth()->user();
         if(!$user->can('view_concepts')) {
             return response()->json([
@@ -66,7 +66,7 @@ class EntityController extends Controller {
             ], 403);
         }
         try {
-            $entityType = EntityType::findOrFail($ctid);
+            $entityType = EntityType::findOrFail($etid);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity type does not exist')
@@ -80,12 +80,12 @@ class EntityController extends Controller {
             ], 400);
         }
         $constraints = $request->query();
-        $entities = Entity::where('entity_type_id', $ctid);
-        foreach($constraints as $relatiion => $cons) {
+        $entities = Entity::where('entity_type_id', $etid);
+        foreach($constraints as $relation => $cons) {
             if($cons == 'has') {
-                $entities->whereHas($relatiion);
+                $entities->has($relation);
             } else if($cons == 'hasnot') {
-                $entities->whereDoesntHave($relatiion);
+                $entities->doesntHave($relation);
             }
         }
         $entities = $entities->get();
@@ -113,7 +113,7 @@ class EntityController extends Controller {
         $sqls = EntityAttribute::whereHas('attribute', function(Builder $q) {
                 $q->where('datatype', 'sql');
             })
-            ->where('entity_type_id', $ctid)
+            ->where('entity_type_id', $etid)
             ->where('attribute_id', $aid)
             ->get();
 

@@ -38,7 +38,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/entity')->group(function() {
     Route::get('/top', 'EntityController@getTopEntities');
     Route::get('/{id}', 'EntityController@getEntity')->where('id', '[0-9]+');
-    Route::get('/entity_type/{ctid}/data/{aid}', 'EntityController@getDataForEntityType')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
+    Route::get('/entity_type/{etid}/data/{aid}', 'EntityController@getDataForEntityType')->where('etid', '[0-9]+')->where('aid', '[0-9]+');
     Route::get('/{id}/data', 'EntityController@getData')->where('id', '[0-9]+');
     Route::get('/{id}/data/{aid}', 'EntityController@getData')->where('id', '[0-9]+')->where('aid', '[0-9]+');
     Route::get('/{id}/reference', 'ReferenceController@getByEntity')->where('id', '[0-9]+');
@@ -195,10 +195,8 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 
 // MAP
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/map')->group(function() {
-    Route::get('epsg/{srid}', 'MapController@getEpsg')->where('srid', '[0-9]+');
     Route::get('export/{id}', 'MapController@exportLayer')->where('id', '[0-9]+');
 
-    Route::post('', 'MapController@addGeometry');
     Route::post('epsg/text', 'MapController@getEpsgByText');
     Route::post('/layer', 'MapController@addLayer');
     Route::post('/link/{gid}/{eid}', 'MapController@link')->where('gid', '[0-9]+')->where('eid', '[0-9]+');

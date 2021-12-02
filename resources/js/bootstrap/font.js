@@ -9,7 +9,7 @@ import "@fontsource/source-code-pro/400.css";
 import "@fontsource/source-code-pro/500.css";
 
 // Font Awesome
-import { library, dom } from '@fortawesome/fontawesome-svg-core';
+import { library, dom, findIconDefinition } from '@fortawesome/fontawesome-svg-core';
 import {
     faFacebookSquare,
     faGithub,
@@ -20,7 +20,7 @@ import {
 } from '@fortawesome/free-brands-svg-icons';
 import {
     faCircle as faCircleReg,
-    faClipboard,
+    faClipboard as faClipboardReg,
     faQuestionCircle,
     faLaugh,
     faSadCry,
@@ -49,6 +49,7 @@ import {
     faCheck,
     faCheckCircle,
     faCircle,
+    faClipboard,
     faClock,
     faClone,
     faCog,
@@ -114,6 +115,7 @@ import {
     faO,
     faPalette,
     faPaperPlane,
+    faPaste,
     faPause,
     faPaw,
     faPlay,
@@ -162,6 +164,7 @@ import {
     faUndoAlt,
     faUnlink,
     faUnlockAlt,
+    faUpload,
     faUser,
     faUserClock,
     faUserCheck,
@@ -171,6 +174,7 @@ import {
     faUserTimes,
     faVolumeMute,
     faVolumeUp,
+    faWindowMaximize,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -180,7 +184,7 @@ library.add(
     faLaravel,
     faOrcid,
     faVuejs,
-    faClipboard,
+    faClipboardReg,
     faQuestionCircle,
     faAdjust,
     faAngleDoubleLeft,
@@ -206,6 +210,7 @@ library.add(
     faCheckCircle,
     faCircle,
     faCircleReg,
+    faClipboard,
     faClock,
     faClone,
     faCog,
@@ -272,6 +277,7 @@ library.add(
     faO,
     faPalette,
     faPaperPlane,
+    faPaste,
     faPause,
     faPaw,
     faPlay,
@@ -321,6 +327,7 @@ library.add(
     faUndoAlt,
     faUnlink,
     faUnlockAlt,
+    faUpload,
     faUser,
     faUserClock,
     faUserCheck,
@@ -330,5 +337,32 @@ library.add(
     faUserTimes,
     faVolumeMute,
     faVolumeUp,
+    faWindowMaximize,
 )
 dom.watch();
+
+export const iconList = fw => {
+    let list = [];
+    for(let k in library.definitions) {
+        const set = library.definitions[k];
+        const addedCodes = {};
+        for(let l in set) {
+            const icon = set[l];
+            const iconCode = icon[3];
+            const uniqueCode = `${k}_${iconCode}`;
+            const def = findIconDefinition({prefix: k, iconName: l});
+            if(!addedCodes[uniqueCode]) {
+                addedCodes[uniqueCode] = true;
+                let str = `${k} fa-${def.iconName}`;
+                if(fw) str += ` fa-fw`;
+                list.push({
+                    class: str,
+                    key: def.iconName,
+                    unicode: def.icon[3].padStart(4, "0"),
+                    label: def.iconName,
+                });
+            }
+        }
+    }
+    return list;
+};

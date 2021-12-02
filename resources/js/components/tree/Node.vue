@@ -13,7 +13,7 @@
                 {{ data.name }}
             </span>
         </a>
-        <ul class="dropdown-menu" :id="`tree-node-${data.id}-contextmenu`">
+        <ul class="dropdown-menu" :id="`tree-node-${data.id}-contextmenu`" v-if="state.ddVisible">
             <li>
                 <h6 class="dropdown-header" @click.stop.prevent="" @dblclick.stop.prevent="">
                     {{ data.name }}
@@ -58,6 +58,7 @@
 <script>
     import {
         computed,
+        nextTick,
         onMounted,
         reactive,
         toRefs,
@@ -107,9 +108,13 @@
                 // To prevent opening dropdown the DD toggle must have class 'disabled'
                 // This also prevents API call .toggle() to work...
                 // Thus we remove the 'disabled' class before the API call and add it back afterwards
-                state.ddDomElem.classList.remove('disabled');
-                state.bsElem.toggle();
-                state.ddDomElem.classList.add('disabled');
+                state.ddVisible = !state.ddVisible;
+                nextTick(_ => {
+                    state.bsElem = new Dropdown(state.ddDomElem);
+                    state.ddDomElem.classList.remove('disabled');
+                    state.bsElem.toggle();
+                    state.ddDomElem.classList.add('disabled');
+                });
             };
             const addNewEntity = _ => {
                 ShowAddEntity(data.value);
@@ -132,6 +137,7 @@
             const state = reactive({
                 ddDomElem: null,
                 bsElem: null,
+                ddVisible: false,
                 colorStyles: computed(_ => getEntityColors(data.value.entity_type_id)),
                 isSelected: computed(_ => store.getters.entity.id === data.value.id),
             });
@@ -140,7 +146,6 @@
             onMounted(_ => {
                 console.log("tree node component mounted");
                 state.ddDomElem = document.getElementById(`tree-node-cm-toggle-${data.value.id}`);
-                state.bsElem = new Dropdown(state.ddDomElem);
             });
 
             // RETURN

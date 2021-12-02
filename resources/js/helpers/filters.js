@@ -155,6 +155,11 @@ export function ucfirst(str) {
     if(!str) return str;
     return str[0].toUpperCase() + str.substring(1);
 };
+export function kebab2pascalcase(str) {
+    if(!str) return str;
+
+    return str.split('-').map(word => ucfirst(word)).join('');
+};
 export function escapehtml(str) {
     return str
         .replace(/&/g,'&amp;')

@@ -24,6 +24,7 @@ import InteractiveMap from './components/map/InteractiveMap.vue';
 import Alert from './components/Alert.vue';
 import NotificationBody from './components/notification/NotificationBody.vue';
 import CsvTable from './components/CsvTable.vue';
+import Gradient from './components/Gradient.vue';
 
 // Init Libs
 // PQueue, httpQueue
@@ -69,7 +70,6 @@ app.use(router);
 app.use(store);
 app.use(vueAuth);
 app.use(VueFinalModal());
-app.use(provideToast());
 app.use(Markdown);
 
 // Directives
@@ -199,6 +199,7 @@ app.component('sp-map', InteractiveMap);
 app.component('alert', Alert);
 app.component('notification-body', NotificationBody);
 app.component('csv-table', CsvTable);
+app.component('color-gradient', Gradient);
 // Third-Party components
 app.component('multiselect', Multiselect);
 app.component('file-upload', VueUploadComponent);
