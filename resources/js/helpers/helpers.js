@@ -233,6 +233,7 @@ export function defaultAttributeValue(datatype) {
             val.value = {};
             break;
         case 'string-mc':
+        case 'entity-mc':
         case 'table':
         case 'list':
             val.value = [];

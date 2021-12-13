@@ -2,9 +2,11 @@
     <simple-search
         :endpoint="searchEntity"
         :key-text="'name'"
+        :mode="state.mode"
         :default-value="v.fieldValue"
-        @selected="e => entitySelected(e)" />
-    <router-link :to="{name: 'entitydetail', params: {id: v.fieldValue.id}, query: state.query}" v-if="v.value" class="btn btn-outline-secondary btn-sm mt-2">
+        @selected="e => entitySelected(e)"
+        @entry-click="e => entryClicked(e)" />
+    <router-link v-if="!multiple && v.value" :to="{name: 'entitydetail', params: {id: v.fieldValue.id}, query: state.query}" class="btn btn-outline-secondary btn-sm mt-2">
         {{ t('main.entity.attributes.entity.go_to', {name: v.fieldValue.name}) }}
     </router-link>
 </template>
@@ -27,6 +29,8 @@
 
     import * as yup from 'yup';
 
+    import router from '@/bootstrap/router.js';
+
     import {
         searchEntity,
     } from '../../api.js';
@@ -36,6 +40,11 @@
             name: {
                 type: String,
                 required: true,
+            },
+            multiple: {
+                type: Boolean,
+                required: false,
+                default: false,
             },
             disabled: {
                 type: Boolean,
@@ -53,6 +62,7 @@
             const route = useRoute();
             const {
                 name,
+                multiple,
                 disabled,
                 value,
             } = toRefs(props);
@@ -67,11 +77,28 @@
                 } = e;
                 let data;
                 if(removed) {
-                    data = null;
+                    if(multiple.value) {
+                        data = entity.values;
+                    } else {
+                        data = null;
+                    }
                 } else if(added) {
-                    data = entity;
+                    if(multiple.value) {
+                        data = entity.values;
+                    } else {
+                        data = entity;
+                    }
                 }
                 v.handleChange(data);
+            };
+            const entryClicked = e => {
+                router.push({
+                    name: 'entitydetail',
+                    params: {
+                        id: e.id,
+                    },
+                    query: route.query
+                });
             };
             const resetFieldState = _ => {
                 v.resetField({
@@ -95,13 +122,24 @@
             });
             const state = reactive({
                 query: computed(_ => route.query),
+                mode: computed(_ => multiple.value ? 'tags' : 'single'),
             });
             const v = reactive({
                 fieldValue,
                 handleChange,
                 meta,
                 resetField,
-                value: computed(_ => v.fieldValue ? v.fieldValue.id : null),
+                value: computed(_ => {
+                    let value = null;
+                    if(v.fieldValue) {
+                        if(multiple.value) {
+                            value = v.fieldValue.map(fv => fv.id);
+                        } else {
+                            value = v.fieldValue.id;
+                        }
+                    }
+                    return value;
+                }),
             });
 
             watch(v.meta, (newValue, oldValue) => {
@@ -119,10 +157,12 @@
                 searchEntity,
                 // LOCAL
                 entitySelected,
+                entryClicked,
                 resetFieldState,
                 undirtyField,
                 // PROPS
                 name,
+                multiple,
                 disabled,
                 value,
                 // STATE

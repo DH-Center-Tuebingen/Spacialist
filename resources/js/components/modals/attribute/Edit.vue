@@ -201,6 +201,7 @@
                         case 'string-mc':
                         case 'geography':
                         case 'entity':
+                        case 'entity-mc':
                         case 'iconclass':
                         case 'rism':
                         case 'epoch':
@@ -267,6 +268,7 @@
                         case 'string-sc':
                         case 'string-mc':
                         case 'entity':
+                        case 'entity-mc':
                             return 'select';
                         case 'epoch':
                         case 'timeperiod':

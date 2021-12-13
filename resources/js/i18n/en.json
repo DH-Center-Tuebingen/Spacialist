@@ -132,6 +132,7 @@
             "boolean": "Checkbox",
             "percentage": "Percentage",
             "entity": "Entity",
+            "entity-mc": "Entity (Multiple Choice)",
             "epoch": "Time Period and Epoch",
             "timeperiod": "Time Period",
             "date": "Date",

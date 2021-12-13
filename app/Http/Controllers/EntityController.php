@@ -100,8 +100,11 @@ class EntityController extends Controller {
         foreach($values as $value) {
             switch($value->attribute->datatype) {
                 case 'entity':
-                    $value->name = Entity::find($value->entity_val)->name;
-                    $value->value = Entity::find($value->entity_val)->name;
+                    $entity = Entity::find($value->entity_val)->name;
+                    $value->name = $entity;
+                    $value->value = $entity;
+                    break;
+                case 'entity-mc':
                     break;
                 default:
                     $value->value = $value->getValue();
@@ -207,6 +210,13 @@ class EntityController extends Controller {
                     break;
                 case 'entity':
                     $a->name = Entity::find($a->entity_val)->name;
+                    break;
+                case 'entity-mc':
+                    $value = [];
+                    foreach(json_decode($a->json_val) as $dec) {
+                        $value[] = Entity::find($dec)->name;
+                    }
+                    $a->name = $value;
                     break;
                 default:
                     break;
@@ -492,6 +502,9 @@ class EntityController extends Controller {
                     break;
                 case 'entity':
                     $attrval->entity_val = $value;
+                    break;
+                case 'entity-mc':
+                    $attrval->json_val = json_encode($value);
                     break;
                 case 'geography':
                     $attrval->geography_val = Geodata::parseWkt($value);

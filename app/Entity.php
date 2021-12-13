@@ -233,7 +233,14 @@ class Entity extends Model
     }
 
     public function getAttributeLinksAttribute() {
-        $links = AttributeValue::where('entity_val', $this->id)->get();
+        $entityMcAttributes = Attribute::where('datatype', 'entity-mc')
+            ->get()->pluck('id')->toArray();
+        $links = AttributeValue::where('entity_val', $this->id)
+            ->orWhere(function($query) use($entityMcAttributes) {
+                $query->whereJsonContains('json_val', $this->id)
+                    ->whereIn('attribute_id', $entityMcAttributes);
+            })
+            ->get();
         $entities = [];
         foreach($links as $link) {
             $entity = Entity::find($link->entity_id);

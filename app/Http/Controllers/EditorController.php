@@ -255,6 +255,10 @@ class EditorController extends Controller {
                 'in_table' => true,
             ],
             [
+                'datatype' => 'entity-mc',
+                'in_table' => true,
+            ],
+            [
                 'datatype' => 'table',
                 'in_table' => false,
             ],

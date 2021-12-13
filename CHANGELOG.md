@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - Preview resulting attribute in _New Attribute_ Dialog
 - [RISM](https://rism.info/de/index.html)-Attribute
 - Button to jump from _Entity_ Attribute to linked Entity
+- _Entity Multiple Choice_-Attribute
 - List with all entities that reference currently selected entity in _Entity_ Attribute
 ### Fixed
 - Improved Attribute Validation

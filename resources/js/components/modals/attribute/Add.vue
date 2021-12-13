@@ -149,6 +149,7 @@
                         return str.replaceAll(toRepl, ctr);
                     case 'list':
                     case 'string-mc':
+                    case 'entity-mc':
                         return [];
                     case 'date':
                         return new Date();

@@ -8,7 +8,7 @@
         :label="'id'"
         :track-by="'id'"
         :valueProp="'id'"
-        :mode="'single'"
+        :mode="mode"
         :options="query => search(query)"
         :hideSelected="false"
         :filterResults="false"
@@ -25,6 +25,16 @@
             <template v-slot:singlelabel="{ value }">
                 <div class="multiselect-single-label">
                     {{ displayResult(value) }}
+                </div>
+            </template>
+            <template v-slot:tag="{ option, handleTagRemove, disabled }">
+                <div class="multiselect-tag">
+                    <span @click.prevent="handleTagClick(option)">
+                        {{ displayResult(option) }}
+                    </span>
+                    <span v-if="!disabled" class="multiselect-tag-remove" @click.prevent @mousedown.prevent.stop="handleTagRemove(option, $event)">
+                        <span class="multiselect-tag-remove-icon"></span>
+                    </span>
                 </div>
             </template>
             <template v-slot:option="{ option }">
@@ -80,13 +90,18 @@
                 type: Function,
                 required: false,
             },
+            mode: {
+                type: String,
+                required: false,
+                default: 'single',
+            },
             defaultValue: {
                 type: Object,
                 required: false,
                 default: null,
             },
         },
-        emits: ['selected'],
+        emits: ['selected', 'entry-click'],
         setup(props, context) {
             const { t } = useI18n();
             const {
@@ -96,6 +111,7 @@
                 filterFn,
                 keyText,
                 keyFn,
+                mode,
                 defaultValue,
             } = toRefs(props);
             if(!keyText && !keyFn) {
@@ -129,15 +145,25 @@
             const handleSelection = option => {
                 let data = {}
                 if(!!option) {
-                    data = {
-                        ...option,
-                        added: true,
-                    };
+                    if(mode.value == 'single') {
+                        data = {
+                            ...option,
+                            added: true,
+                        };
+                    } else {
+                        data = {
+                            values: option,
+                            added: true,
+                        }
+                    }
                 } else {
                     data.removed = true;
                 }
                 state.entry = option;
                 context.emit('selected', data);
+            };
+            const handleTagClick = option => {
+                context.emit('entry-click', option);
             };
 
             // DATA
@@ -155,9 +181,11 @@
                 search,
                 displayResult,
                 handleSelection,
+                handleTagClick,
                 // PROPS
                 delay,
                 limit,
+                mode,
                 // STATE
                 state,
             };

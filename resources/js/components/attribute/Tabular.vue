@@ -155,9 +155,10 @@
                             :value="state.newRowColumns[column.id]"
                             :attribute="column" />
 
-                        <entity-attribute v-else-if="column.datatype == 'entity'"
+                        <entity-attribute v-else-if="column.datatype == 'entity' || column.datatype == 'entity-mc'"
                             :ref="el => setAddRef(el, `${column.id}`)"
                             :name="`${name}-new-column-attr-${column.id}`"
+                            :multiple="column.datatype == 'entity-mc'"
                             :value="state.newRowColumns[column.id]" />
 
                         <date-attribute
@@ -353,6 +354,7 @@
                     case 'date':
                     case 'iconclass':
                     case 'entity':
+                    case 'entity-mc':
                         return valueObject;
                     case 'string-sc':
                         return translateConcept(valueObject.concept_url);

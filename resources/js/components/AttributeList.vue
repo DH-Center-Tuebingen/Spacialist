@@ -165,11 +165,12 @@
                             :attribute="element"
                             @change="e => updateDirtyState(e, element.id)" />
 
-                        <entity-attribute v-else-if="element.datatype == 'entity'"
+                        <entity-attribute v-else-if="element.datatype == 'entity' || element.datatype == 'entity-mc'"
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
                             :name="`attr-${element.id}`"
-                            :value="convertEntityValue(state.attributeValues[element.id])"
+                            :multiple="element.datatype == 'entity-mc'"
+                            :value="convertEntityValue(state.attributeValues[element.id], element.datatype == 'entity-mc')"
                             @change="e => updateDirtyState(e, element.id)" />
 
                         <date-attribute
@@ -473,11 +474,20 @@
             const hasEmitter = which => {
                 return !!attrs[which];
             };
-            const convertEntityValue = value => {
-                return {
-                    id: value.value,
-                    name: value.name,
-                };
+            const convertEntityValue = (value, isMultiple) => {
+                if(isMultiple) {
+                    return value.value.map((v, i) => {
+                        return {
+                            id: v,
+                            name: value.name[i],
+                        };
+                    });
+                } else {
+                    return {
+                        id: value.value,
+                        name: value.name,
+                    };
+                }
             };
 
             const attrs = context.attrs;
@@ -507,7 +517,6 @@
             // ON MOUNTED
             onMounted(_ => {
                 console.log(values, "values raw");
-                console.log(state.attributeValues.value, "state values");
             });
             onBeforeUpdate(_ => {
                 attrRefs.value = {};
