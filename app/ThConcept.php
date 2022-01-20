@@ -3,6 +3,7 @@
 namespace App;
 
 use \DB;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -27,6 +28,18 @@ class ThConcept extends Model
     protected static $logFillable = true;
     protected static $logAttributes = ['id'];
     protected static $ignoreChangedAttributes = ['user_id'];
+
+    public static function getByString($str) {
+        if(!isset($str) || $str === '') return null;
+
+        $concept = ThConcept::where('concept_url', $str)->first();
+        if(!isset($concept)) {
+            $concept = ThConcept::whereHas('labels', function(Builder $query) use ($str) {
+                $query->where('label', $str);
+            })->first();
+        }
+        return $concept;
+    }
 
     public static function getMap($lang = 'en') {
         $concepts = \DB::select(\DB::raw("

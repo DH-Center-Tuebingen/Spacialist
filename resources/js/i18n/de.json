@@ -264,7 +264,9 @@
                 "delimiter": "Trennzeichen",
                 "delimiter_with_info": "Trennzeichen (',', ';', …)",
                 "has_header": "Hat eine Kopfzeile?",
-                "nr_of_shown_rows": "Anzahl der angezeigten Zeilen"
+                "show_linenumbers": "Zeilennummern anzeigen",
+                "nr_of_shown_rows": "Anzahl der angezeigten Zeilen",
+                "nr_of_skipped_rows": "Anzahl der übersprungenen Zeilen"
             },
             "picker": {
                 "title": "CSV-Picker"
@@ -580,6 +582,19 @@
                 "organization": "Organisation",
                 "school": "Schule"
             }
+        },
+        "importer": {
+            "title": "Daten-Importer",
+            "upload_csv_info": "Wähle eine CSV-Datei aus um Daten zum importieren.",
+            "drop_csv_file": "CSV-Datei hier ablegen",
+            "selected_entity_type": "Entitätstyp",
+            "column_entity_name": "Entitätsname-Spalte",
+            "column_entity_parent": "Übergeordnete Entität-Spalte",
+            "import_btn": "Starte Datenimport",
+            "no_missing_values": "Keine fehlenden Werte. Du kannst loslegen!",
+            "missing_required_values": "{miss} von 1 Eintrag ist leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das. | {miss} von {total} Einträgen sind leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das.",
+            "missing_non_required_values": "{miss} von 1 Eintrag ist leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen. | {miss} von {total} Einträgen sind leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen.",
+            "success": "Import von 1 Eintrag abgeschlossen | Import von {cnt} Einträgen abgeschlossen"
         },
         "map": {
             "init_error": "Mehrere init-*-Attribute gesetzt. Es darf nur eines gesetzt sein.",

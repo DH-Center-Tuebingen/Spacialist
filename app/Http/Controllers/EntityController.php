@@ -8,6 +8,8 @@ use App\Entity;
 use App\EntityAttribute;
 use App\EntityFile;
 use App\EntityType;
+use App\Exceptions\AmbiguousValueException;
+use App\Exceptions\InvalidDataException;
 use App\Geodata;
 use App\Reference;
 use App\ThConcept;
@@ -15,6 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class EntityController extends Controller {
     /**
@@ -379,6 +382,128 @@ class EntityController extends Controller {
         }
 
         return response()->json($duplicate, 201);
+    }
+
+    public function importData(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('create_concepts')) {
+            return response()->json([
+                'error' => __('You do not have the permission to import entity data')
+            ], 403);
+        }
+        $this->validate($request, [
+            'file' => 'required|file',
+            'metadata' => 'required|json',
+            'data' => 'required|json',
+        ]);
+
+        $file = $request->file('file');
+        $metadata = json_decode($request->get('metadata'), true);
+        $data = json_decode($request->get('data'), true);
+        $handle = fopen($file->getRealPath(), 'r');
+
+        $headerRow = null;
+        $headerRead = false;
+        $hasParent = false;
+        $attributeIdx = [];
+        $attributeTypes = [];
+        $addedEntities = [];
+
+        DB::beginTransaction();
+
+        while(($row = fgetcsv($handle, 0, $metadata['delimiter'])) !== false) {
+            if(!$headerRead) {
+                $headerRead = true;
+                $headerRow = $row;
+                for($i = 0; $i<count($row); $i++) {
+                    if($row[$i] == $data['name_column']) {
+                        $nameIdx = $i;
+                    } else if(isset($data['parent_column']) && $row[$i] == $data['parent_column']) {
+                        $parentIdx = $i;
+                        $hasParent = true;
+                    } else {
+                        foreach($data['attributes'] as $id => $a) {
+                            if($a == $row[$i]) {
+                                $attributeIdx[$id] = $i;
+                                $attributeTypes[$id] = Attribute::find($id)->datatype;
+                                break;
+                            }
+                        }
+                    }
+                }
+                continue;
+            }
+            $rootEntityPath = $hasParent ? $row[$parentIdx] : null;
+
+            try {
+                $rootEntityId = Entity::getFromPath($rootEntityPath);
+            } catch(AmbiguousValueException $ave) {
+                DB::rollBack();
+                return response()->json([
+                    'error' => __($ave->getMessage()),
+                    'data' => [
+                        'count' => count($addedEntities) + 1,
+                        'entry' => $row[$nameIdx],
+                        'on' => $headerRow[$parentIdx],
+                        'on_index' => $parentIdx + 1,
+                        'on_value' => $row[$parentIdx],
+                    ],
+                ], 400);
+            }
+
+            $res = Entity::create([
+                'name' => $row[$nameIdx],
+            ], $data['entity_type_id'], $user, $rootEntityId);
+
+            if($res['type'] === 'entity') {
+                $addedEntities[] = $res['entity'];
+                $eid = $res['entity']->id;
+                foreach($attributeIdx as $key => $val) {
+                    $aid = intval($key);
+                    $type = $attributeTypes[$aid];
+                    $attrVal = new AttributeValue();
+                    $attrVal->entity_id = $eid;
+                    $attrVal->attribute_id = $aid;
+                    $attrVal->certainty = 100;
+                    $attrVal->user_id = $user->id;
+                    try {
+                        $setValue = $attrVal->setValue($row[$val], $type);
+                        if($setValue === null) {
+                            continue;
+                        }
+                        $attrVal->save();
+                    } catch(InvalidDataException | AmbiguousValueException $e) {
+                        DB::rollBack();
+                        $colIdx = $val + 1;
+                        return response()->json([
+                            'error' => __($e->getMessage()),
+                            'data' => [
+                                'count' => count($addedEntities),
+                                'entry' => $row[$nameIdx],
+                                'on' => $headerRow[$val],
+                                'on_index' => $colIdx,
+                                'on_value' => $row[$val],
+                            ],
+                        ], 400);
+                    }
+                }
+            } else {
+                DB::rollBack();
+                return response()->json([
+                    'error' => $res['msg'],
+                    'data' => [
+                        'count' => count($addedEntities) + 1,
+                        'entry' => $row[$nameIdx],
+                        'on' => __('Create Entity from given data'),
+                    ],
+                ], $res['code']);
+            }
+        }
+        fclose($handle);
+
+        DB::commit();
+
+        return response()->json($addedEntities, 201);
     }
 
     // PATCH

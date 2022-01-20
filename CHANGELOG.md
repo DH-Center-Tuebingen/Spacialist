@@ -12,6 +12,8 @@ All notable changes to this project will be documented in this file.
 - Button to jump from _Entity_ Attribute to linked Entity
 - _Entity Multiple Choice_-Attribute
 - List with all entities that reference currently selected entity in _Entity_ Attribute
+- Line numbers and skipping rows to CSV table component
+- CSV-based Data Importer
 ### Fixed
 - Improved Attribute Validation
 - Editing Entity Name

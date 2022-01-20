@@ -2,8 +2,10 @@
 
 namespace App;
 
+use App\Exceptions\AmbiguousValueException;
 use App\Traits\CommentTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Nicolaslopezj\Searchable\SearchableTrait;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -64,6 +66,36 @@ class Entity extends Model
         // 'root_entity_id'   => 'integer|exists:entities,id',
         // 'geodata_id'        => 'integer|exists:geodata,id'
     ];
+
+    public static function getFromPath($path, $delimiter = "\\\\") {
+        if(!isset($path)) {
+            return null;
+        }
+
+        $parts = explode($delimiter, $path);
+        $last = end($parts);
+        $res = DB::select("
+            WITH RECURSIVE path AS(
+                SELECT id as final_id, id, root_entity_id, name as pathstr
+                FROM entities
+                WHERE name = ?
+                UNION ALL
+                SELECT final_id, e.id, e.root_entity_id, e.name || ? || p.pathstr
+                FROM entities e
+                INNER JOIN path p ON p.root_entity_id = e.id
+            )
+            SELECT final_id
+            FROM path
+            WHERE pathstr = ?
+        ", ["$last", "$delimiter", "$path"]);
+        if(count($res) > 1) {
+            throw new AmbiguousValueException("Path '$path' is ambiguous");
+        } else if(count($res) === 1) {
+            return $res[0]->final_id;
+        } else {
+            return null;
+        }
+    }
 
     public static function create($fields, $entityTypeId, $user, $rootEntityId = null) {
         $isChild = isset($rootEntityId);

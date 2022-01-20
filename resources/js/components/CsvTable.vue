@@ -13,11 +13,23 @@
                     {{ t('main.csv.uploader.has_header') }}
                 </label>
             </div>
+            <div class="col-auto form-check form-switch" v-if="linenumbers">
+                <input class="form-check-input" type="checkbox" id="show-linenumbers" v-model="state.showLinenumbers">
+                <label class="form-check-label" for="show-linenumbers">
+                    {{ t('main.csv.uploader.show_linenumbers') }}
+                </label>
+            </div>
             <div class="col-auto">
                 <label for="row-count" class="visually-hidden">
                     {{ t('main.csv.uploader.nr_of_shown_rows') }}
                 </label>
-                <input type="text" class="form-control" id="row-count" v-model.number="state.showCount" :placeholder="t('main.csv.uploader.nr_of_shown_rows')" />
+                <input type="number" class="form-control" id="row-count" v-model.number="state.showCount" min="0" :max="state.maxRows" step="1" :placeholder="t('main.csv.uploader.nr_of_shown_rows')" />
+            </div>
+            <div class="col-auto">
+                <label for="skipped-row-count" class="visually-hidden">
+                    {{ t('main.csv.uploader.nr_of_skipped_rows') }}
+                </label>
+                <input type="number" class="form-control" id="skipped-row-count" v-model.number="state.skippedCount" min="0" :max="state.maxSkippedRows" step="1" :placeholder="t('main.csv.uploader.nr_of_skipped_rows')" />
             </div>
             <div class="col-auto">
                 <a href="#" class="text-reset" @click.prevent="toggleShowPreview()">
@@ -34,6 +46,9 @@
             <table class="table table-striped table-hover" :class="{ 'table-sm': small }">
                 <thead class="table-light sticky-top">
                     <tr>
+                        <th v-if="state.showLinenumbers">
+                            #
+                        </th>
                         <th v-for="(header, i) in state.computedRows.header" :key="i">
                             {{ ucfirst(header) }}
                         </th>
@@ -41,6 +56,11 @@
                 </thead>
                 <tbody>
                     <tr v-for="(row, i) in state.computedRows.striped_data" :key="i">
+                        <td v-if="state.showLinenumbers">
+                            <span class="fw-bold">
+                                {{ i + 1 + state.skippedCount}}
+                            </span>
+                        </td>
                         <td v-for="(column, j) in row" :key="j">
                             {{ column }}
                         </td>
@@ -83,6 +103,11 @@
                 required: false,
                 default: true,
             },
+            linenumbers: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
         },
         emits: ['parse'],
         setup(props, context) {
@@ -91,6 +116,7 @@
             const {
                 content,
                 small,
+                linenumbers,
             } = toRefs(props);
 
             // FETCH
@@ -99,7 +125,7 @@
             const toggleShowPreview = _ => {
                 state.showPreview = !state.showPreview;
             };
-            const recomputeRows = _ => {
+            const recomputeRows = (internal = false) => {
                 if(!content.value || !state.dsv) {
                     state.computedRows = {};
                     return;
@@ -108,6 +134,7 @@
                     header: null,
                     data: null,
                     striped_data: null,
+                    delimiter: state.delimiter || ',',
                 };
                 const headerRow = content.value.split('\n')[0];
                 const header = state.dsv.parseRows(headerRow)[0];
@@ -122,22 +149,34 @@
                     res.data = state.dsv.parseRows(content.value);
                     res.header = headerPlaceholder;
                 }
-                res.striped_data = res.data.slice(
-                    0,
-                    Math.min(state.showCount || 10, res.data.length)
-                );
-                context.emit('parse', res);
                 state.computedRows = res;
+                state.computedRows.striped_data = res.data.slice(state.stripedStart, state.stripedEnd);
+
+                if(!internal) {
+                    context.emit('parse', state.computedRows);
+                }
             };
 
             // DATA
             const state = reactive({
                 delimiter: ',',
                 hasHeaderRow: true,
+                showLinenumbers: false,
                 showCount: 10,
+                skippedCount: 0,
                 showPreview: true,
                 computedRows: {},
                 dsv: computed(_ => d3.dsvFormat(state.delimiter || ',')),
+                rows: computed(_ => state.computedRows.data ? state.computedRows.data.length : 0),
+                maxRows: computed(_ => state.rows - state.skippedCount),
+                maxSkippedRows: computed(_ => state.rows > 0 ?  state.rows - 1 : 0),
+                stripedStart: computed(_ => state.skippedCount || 0),
+                stripedEnd: computed(_ => {
+                    return Math.min(
+                        (state.skippedCount || 0) + (state.showCount || 10),
+                        state.rows
+                    );
+                }),
             });
 
             onMounted(_ => {
@@ -148,6 +187,15 @@
             });
             watch(_ => state.dsv, _ => {
                 recomputeRows();
+            });
+            watch(_ => state.hasHeaderRow, _ => {
+                recomputeRows();
+            });
+            watch(_ => state.showCount, _ => {
+                recomputeRows(true);
+            });
+            watch(_ => state.skippedCount, _ => {
+                recomputeRows(true);
             });
 
             // RETURN
@@ -160,6 +208,7 @@
                 // PROPS
                 content,
                 small,
+                linenumbers,
                 // STATE
                 state,
             }

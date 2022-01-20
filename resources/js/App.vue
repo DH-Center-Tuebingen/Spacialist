@@ -91,6 +91,9 @@
                                 <router-link :to="{name: 'globalactivity'}" class="dropdown-item">
                                     <i class="fas fa-fw fa-clock"></i> {{ t('global.activity') }}
                                 </router-link>
+                                <router-link :to="{name: 'dataimporter'}" class="dropdown-item">
+                                    <i class="fas fa-fw fa-file-import"></i> {{ t('main.importer.title') }}
+                                </router-link>
                                 <router-link class="dropdown-item" v-for="plugin in state.plugins.tools" :to="`/${plugin.of}/${plugin.href}`" :key="plugin.key">
                                     <i class="fas fa-fw" :class="plugin.icon"></i> {{ t(plugin.label) }}
                                 </router-link>

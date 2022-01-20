@@ -90,11 +90,13 @@ export const store = createStore({
             state.entities[n.id] = n;
             if(!!n.root_entity_id) {
                 const parent = state.entities[n.root_entity_id];
-                if(parent.childrenLoaded) {
-                    parent.children.push(n);
-                }
-                if(doCount) {
-                    parent.children_count++;
+                if(!!parent) {
+                    if(parent.childrenLoaded) {
+                        parent.children.push(n);
+                    }
+                    if(doCount) {
+                        parent.children_count++;
+                    }
                 }
             }
         },
@@ -436,61 +438,7 @@ export const store = createStore({
                 fillEntityData(entity.data, entity.entity_type_id);
                 entity.references = await getEntityReferences(entityId);
                 commit('setEntity', entity);
-                
                 return;
-
-                return $httpQueue.add(() => $http.get(`/entity/${cid}/data`).then(response => {
-                    // if result is empty, php returns [] instead of {}
-                    if(response.data instanceof Array) {
-                        response.data = {};
-                    }
-                    Vue.set(this.selectedEntity, 'data', response.data);
-                    return $http.get(`/editor/entity_type/${ctid}/attribute`);
-                }).then(response => {
-                    this.selectedEntity.attributes = [];
-                    let data = response.data;
-                    for(let i=0; i<data.attributes.length; i++) {
-                        let aid = data.attributes[i].id;
-                        if(!this.selectedEntity.data[aid]) {
-                            let val = {};
-                            switch(data.attributes[i].datatype) {
-                                case 'dimension':
-                                case 'epoch':
-                                case 'timeperiod':
-                                    val.value = {};
-                                    break;
-                                case 'table':
-                                case 'list':
-                                    val.value = [];
-                                    break;
-                            }
-                            Vue.set(this.selectedEntity.data, aid, val);
-                        } else {
-                            const val = this.selectedEntity.data[aid].value;
-                            switch(data.attributes[i].datatype) {
-                                case 'date':
-                                    const dtVal = new Date(val);
-                                    this.selectedEntity.data[aid].value = dtVal;
-                                    break;
-                            }
-                        }
-                        this.selectedEntity.attributes.push(data.attributes[i]);
-                    }
-                    // if result is empty, php returns [] instead of {}
-                    if(data.selections instanceof Array) {
-                        data.selections = {};
-                    }
-                    if(data.dependencies instanceof Array) {
-                        data.dependencies = {};
-                    }
-                    Vue.set(this.selectedEntity, 'selections', data.selections);
-                    Vue.set(this.selectedEntity, 'dependencies', data.dependencies);
-
-                    const aid = this.$route.params.aid;
-                    this.setReferenceAttribute(aid);
-                    Vue.set(this, 'dataLoaded', true);
-                    this.setEntityView();
-                }));
             }
         },
         setEntityComments({commit}, data) {

@@ -29,6 +29,7 @@ import {
 import About from '../components/modals/system/About.vue';
 import Discard from '../components/modals/system/Discard.vue';
 import Error from '../components/modals/system/Error.vue';
+import ImportError from '../components/modals/system/ImportError.vue';
 import CsvPreviewer from '../components/modals/csv/Preview.vue';
 import CsvPicker from '../components/modals/csv/Picker.vue';
 import MapPicker from '../components/modals/map/Picker.vue';
@@ -110,6 +111,22 @@ export function showError(data) {
         },
         on: {
             closing(e) {
+                store.getters.vfm.hide(uid);
+            }
+        }
+    });
+}
+
+export function showImportError(data) {
+    const uid = `ImportErrorModa-${getTs()}`;
+    store.getters.vfm.show({
+        component: ImportError,
+        bind: {
+            data: data,
+            name: uid,
+        },
+        on: {
+            closing() {
                 store.getters.vfm.hide(uid);
             }
         }

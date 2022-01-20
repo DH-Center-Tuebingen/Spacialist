@@ -394,6 +394,12 @@ export async function duplicateEntity(entity) {
     );
 };
 
+export async function importEntityData(data) {
+    return $httpQueue.add(
+        () => http.post(`/entity/import`, data).then(response => response.data).catch(e => {throw e})
+    );
+};
+
 export async function addEntityType(et) {
     const data = {
         concept_url: et.label.concept_url,
@@ -477,6 +483,12 @@ export async function addEntityTypeAttribute(etid, aid, to) {
                 parent_id: relation.parent_id,
                 root_attribute_id: relation.root_attribute_id,
                 recursive: relation.recursive,
+                pivot: {
+                    entity_type_id: response.data.entity_type_id,
+                    attribute_id: response.data.attribute_id,
+                    position: response.data.position,
+                    depends_on: response.data.depends_on,
+                },
             });
         })
     );

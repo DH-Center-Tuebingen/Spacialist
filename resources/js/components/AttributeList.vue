@@ -475,17 +475,31 @@
                 return !!attrs[which];
             };
             const convertEntityValue = (value, isMultiple) => {
+                let actValue = null;
+                if(value == '') {
+                    if(isMultiple) {
+                        actValue = {
+                            value: [],
+                            name: [],
+                        };
+                    } else {
+                        actValue = {};
+                    }
+                } else {
+                    actValue = value;
+                }
+
                 if(isMultiple) {
-                    return value.value.map((v, i) => {
+                    return actValue.value.map((v, i) => {
                         return {
                             id: v,
-                            name: value.name[i],
+                            name: actValue.name[i],
                         };
                     });
                 } else {
                     return {
-                        id: value.value,
-                        name: value.name,
+                        id: actValue.value,
+                        name: actValue.name,
                     };
                 }
             };

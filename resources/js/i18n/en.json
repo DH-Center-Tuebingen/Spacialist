@@ -23,6 +23,7 @@
         "apply": "Apply",
         "move": "Move",
         "parse": "Parse",
+        "remove_file": "Remove file",
         "list": {
             "nr_of_entries": "No Entries | 1 Entry | {cnt} Entries",
             "no_entries": "No entries found.",
@@ -264,7 +265,9 @@
                 "delimiter": "Delimiter",
                 "delimiter_with_info": "Delimiter (',', ';', …)",
                 "has_header": "Has Header Row?",
-                "nr_of_shown_rows": "Number of shown rows"
+                "show_linenumbers": "Show Line numbers",
+                "nr_of_shown_rows": "Number of shown rows",
+                "nr_of_skipped_rows": "Number of skipped rows"
             },
             "picker": {
                 "title": "CSV-Picker"
@@ -320,7 +323,7 @@
                     "to_root": "Add to Root"
                 },
                 "edit": {
-                    "title_type": "Edit Entitytype - {name}",
+                    "title_type": "Edit Entity-Type - {name}",
                     "title_attribute": "Edit Attribute - {name}"
                 },
                 "delete": {
@@ -580,6 +583,19 @@
                 "organization": "Organization",
                 "school": "School"
             }
+        },
+        "importer": {
+            "title": "Data-Importer",
+            "upload_csv_info": "Select a CSV file to import data.",
+            "drop_csv_file": "Drop CSV file here",
+            "selected_entity_type": "Entity-Type",
+            "column_entity_name": "Entity Name-Column",
+            "column_entity_parent": "Entity Parent-Column",
+            "import_btn": "Start Import",
+            "no_missing_values": "No missing values for this attribute. You are all set!",
+            "missing_required_values": "{miss} out of 1 entry is empty! This option does not allow empty values. Please fix this. | {miss} out of {total} entries are empty! This option does not allow empty values. Please fix this.",
+            "missing_non_required_values": "{miss} out of 1 entry is empty! Filled values are not required for this attribute, so you can go on but may want to re-check. | {miss} out of {total} entries are empty! Filled values are not required for this attribute, so you can go on but may want to re-check.",
+            "success": "Import of 1 entry finished | Import of {cnt} entries finished"
         },
         "map": {
             "init_error": "Several init-*-Attributes are provided. Only one is allowed.",

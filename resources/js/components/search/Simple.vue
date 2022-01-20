@@ -133,9 +133,9 @@
                 }
             };
             const displayResult = result => {
-                if(!!keyText) {
+                if(!!keyText && !!keyText.value) {
                     return result[keyText.value];
-                } else if(keyFn) {
+                } else if(!!keyFn && !!keyFn.value) {
                     return keyFn.value(result);
                 } else {
                     // Should never happen ;) :P

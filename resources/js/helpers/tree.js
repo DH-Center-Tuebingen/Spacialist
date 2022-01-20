@@ -1,4 +1,6 @@
 import TreeNode from '../components/tree/Node.vue';
+
+import { ref } from 'vue';
 import store from '../bootstrap/store.js';
 import { getNodeFromPath } from 'tree-component';
 import {
@@ -71,8 +73,11 @@ export function sortTree(by, dir, tree) {
 
 function sortTreeLevel(tree, fn) {
     if(!tree) return;
-    tree.sort(fn);
-    tree.forEach(n => {
+
+    const treeVal = Array.isArray(tree) ? tree : tree.value;
+
+    treeVal.sort(fn);
+    treeVal.forEach(n => {
         if(n.childrenLoaded) {
             sortTreeLevel(n.children, fn);
         }
@@ -117,8 +122,9 @@ export class Node {
             dropAllowed: true,
         };
         this.icon = false;
-        this.children = [];
-        this.childrenLoaded = this.children.length == this.children_count;
+        this.children = ref([]);
+        this.childrenLoaded = ref(this.children.length == this.children_count);
+        this.children_count = ref(this.children_count);
         this.component = component || TreeNode;
         // this.dragDelay = vm.dragDelay;
         // this.dragAllowed = _ => vm.isDragAllowed;

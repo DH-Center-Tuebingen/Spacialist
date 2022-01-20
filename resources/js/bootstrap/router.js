@@ -8,6 +8,7 @@ import EntityReferenceModal from '../components/modals/entity/Reference.vue';
 // Tools
 import Bibliography from '../components/BibliographyTable.vue';
 import GlobalActivity from '../components/GlobalActivity.vue';
+import DataImporter from '../components/DataImporter.vue';
 // Settings
 import Users from '../components/Users.vue';
 import Roles from '../components/Roles.vue';
@@ -156,6 +157,22 @@ export const router = createRouter({
             }
         },
         {
+            path: '/activity/g',
+            name: 'globalactivity',
+            component: GlobalActivity,
+            meta: {
+                auth: true
+            }
+        },
+        {
+            path: '/import',
+            name: 'dataimporter',
+            component: DataImporter,
+            meta: {
+                auth: true
+            }
+        },
+        {
             path: '/login',
             name: 'login',
             component: Login,
@@ -184,14 +201,6 @@ export const router = createRouter({
             path: '/mg/plugins',
             name: 'plugins',
             component: Plugins,
-            meta: {
-                auth: true
-            }
-        },
-        {
-            path: '/activity/g',
-            name: 'globalactivity',
-            component: GlobalActivity,
             meta: {
                 auth: true
             }
