@@ -7,6 +7,7 @@ use App\Plugin;
 use App\Preference;
 use App\ThConcept;
 use App\User;
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
@@ -33,6 +34,7 @@ class HomeController extends Controller
             }
             $locale = auth()->user()->getLanguage();
         } else {
+            $preferenceValues = [];
             $locale = \App::getLocale();
         }
 
@@ -61,8 +63,20 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function welcome() {
-        return view('welcome');
+    public function welcome(Request $request) {
+        $activeSite = 'start';
+        $siteFromReq = $request->get('s', 'start');
+        switch($siteFromReq) {
+            case 'about':
+                $activeSite = 'about';
+                break;
+            case 'access':
+                $activeSite = 'access';
+                break;
+        }
+        return view('welcome', [
+            'site' => $activeSite,
+        ]);
     }
 
     /**

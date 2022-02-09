@@ -14,7 +14,12 @@
     <div class="row mb-3">
         <label class="col-md-2 col-form-label text-end">{{ t('global.description') }}:</label>
         <div class="col-md-10">
-            <input class="form-control" type="text" v-model="data.description" :readonly="readonly" @input="onChange" />
+            <textarea class="form-control" rows="1" v-model="data.description" :readonly="readonly" @input="onChange" />
+        </div>
+        <div class="offset-2 mt-1">
+            <button type="button" class="btn btn-sm btn-outline-primary" @click="openMdEditor()">
+                Edit as Markdown
+            </button>
         </div>
     </div>
     <div class="row">
@@ -37,6 +42,9 @@
     import {
         _debounce
     } from '../../helpers/helpers.js';
+    import {
+        showMarkdownEditor
+    } from '../../helpers/modal.js';
     
     export default {
         props: {
@@ -70,6 +78,12 @@
                     }
                 });
             }, 250);
+            const openMdEditor = _ => {
+                showMarkdownEditor(data.value.description, text => {
+                    data.value.description = text;
+                    onChange();
+                });
+            };
 
             // DATA
 
@@ -78,6 +92,7 @@
                 t,
                 // LOCAL
                 onChange,
+                openMdEditor,
                 // PROPS
                 data,
                 readonly,
