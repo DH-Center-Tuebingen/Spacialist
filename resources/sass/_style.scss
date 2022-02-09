@@ -172,3 +172,8 @@ code.normal {
     background-color: $gray-200 !important;
     border-radius: $input-border-radius !important;
 }
+
+.rendered-markdown li > p {
+    display: inline !important;
+    margin: 0px !important;
+}

@@ -1,0 +1,17 @@
+p.paragraph {
+    margin-bottom: 0px !important;
+}
+
+.milkdown-menu-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.milkdown {
+    flex-grow: 1;
+    background: #EBF2FD;
+    border-radius: $border-radius-lg;
+    padding: map-get($spacers, 3);
+    margin-top: map-get($spacers, 1);
+}

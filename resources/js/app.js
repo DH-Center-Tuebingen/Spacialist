@@ -25,6 +25,7 @@ import Alert from './components/Alert.vue';
 import NotificationBody from './components/notification/NotificationBody.vue';
 import CsvTable from './components/CsvTable.vue';
 import Gradient from './components/Gradient.vue';
+import MarkdownEditor from './components/mde/Main.vue';
 
 // Init Libs
 // PQueue, httpQueue
@@ -200,6 +201,7 @@ app.component('alert', Alert);
 app.component('notification-body', NotificationBody);
 app.component('csv-table', CsvTable);
 app.component('color-gradient', Gradient);
+app.component('md-editor', MarkdownEditor);
 // Third-Party components
 app.component('multiselect', Multiselect);
 app.component('file-upload', VueUploadComponent);

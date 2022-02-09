@@ -33,6 +33,7 @@ import ImportError from '../components/modals/system/ImportError.vue';
 import CsvPreviewer from '../components/modals/csv/Preview.vue';
 import CsvPicker from '../components/modals/csv/Picker.vue';
 import MapPicker from '../components/modals/map/Picker.vue';
+import MarkdownEditor from '../components/modals/system/MarkdownEditor.vue';
 import UserInfo from '../components/modals/user/UserInfo.vue';
 import AddUser from '../components/modals/user/Add.vue';
 import DeactiveUser from '../components/modals/user/Deactivate.vue';
@@ -195,6 +196,28 @@ export function showMapPicker(data, onConfirm) {
                 if(!!onConfirm) {
                     onConfirm(e);
                 }
+                store.getters.vfm.hide(uid);
+            }
+        }
+    });
+}
+
+export function showMarkdownEditor(data, onConfirm) {
+    const uid = `MdEditorModal-${getTs()}`;
+    store.getters.vfm.show({
+        component: MarkdownEditor,
+        bind: {
+            name: uid,
+            data: data,
+        },
+        on: {
+            confirm(e) {
+                if(!!onConfirm) {
+                    onConfirm(e);
+                }
+                store.getters.vfm.hide(uid);
+            },
+            closing(e) {
                 store.getters.vfm.hide(uid);
             }
         }
