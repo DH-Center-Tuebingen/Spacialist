@@ -30,7 +30,7 @@
                             <date-picker
                                 class="mx-datepicker-col-5"
                                 id="filter-activity-timespan-from"
-                                v-model="state.filters.from"
+                                v-model:value="state.filters.from"
                                 :disabled-date="(date) => date > (state.filters.to ? state.filters.to : new Date())"
                                 :input-class="'form-control'"
                                 :show-week-number="true"
@@ -53,7 +53,7 @@
                             <date-picker
                                 class="mx-datepicker-col-5"
                                 id="filter-activity-timespan-to"
-                                v-model="state.filters.to"
+                                v-model:value="state.filters.to"
                                 :disabled-date="(date) => date > new Date() || date < (state.filters.from ? state.filters.from : new Date(0))"
                                 :input-class="'form-control'"
                                 :show-week-number="true"

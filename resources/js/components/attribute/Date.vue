@@ -10,7 +10,7 @@
         :disabled-date="(date) => date > new Date()"
         :max-date="new Date()"
         :show-week-number="true"
-        v-model="v.value"
+        v-model:value="v.value"
         @input="handleInput">
         <template v-slot:icon-calendar>
             <i class="fas fa-fw fa-calendar-alt"></i>

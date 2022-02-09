@@ -61,7 +61,7 @@
         "process": "^0.11.10",
         "proj4": "^2.7.5",
         "tree-vue-component": "^6.0.1",
-        "vee-validate": "^4.5.4",
+        "vue-datepicker-next": "^1.0.2",
         "vue-final-modal": "^v3.4.3",
         "vue-i18n": "^9.1.9",
         "vue-upload-component": "^3.0.50",

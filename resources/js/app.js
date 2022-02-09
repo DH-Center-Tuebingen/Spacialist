@@ -34,7 +34,7 @@ window.$httpQueue = queue;
 // Third-Party Components
 import Multiselect from '@vueform/multiselect';
 import VueUploadComponent from 'vue-upload-component';
-import DatePicker from 'vue2-datepicker';
+import DatePicker from 'vue-datepicker-next';
 import draggable from 'vuedraggable';
 import { Tree, Node, } from "tree-vue-component";
 import VueFinalModal from 'vue-final-modal';
