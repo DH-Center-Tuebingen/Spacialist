@@ -146,7 +146,7 @@ class FileController extends Controller
             ], 403);
         }
         $filters = $request->input('filters', []);
-        $entity = $request->input('entity_id', null);
+        $entity = $request->query('id', null);
         $type = $request->query('t', 'unlinked');
         $skip = $request->query('skip', 0);
         $files = File::filter($page, $filters, $type, $entity, $skip);
