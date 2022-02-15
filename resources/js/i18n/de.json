@@ -256,6 +256,18 @@
                 "title": "Seite nicht gefunden!",
                 "msg": "Die Seite <code>{site}</code> konnte nicht gefunden werden. Überprüfe die Schreibweise oder wende dich an den Administrator.",
                 "go_to": "Zur Startseite"
+            },
+            "screencast": {
+                "title": "Screencast speichern",
+                "info": "Screencast erfolgreich aufgenommen. Was möchtest du damit tun?",
+                "actions": {
+                    "local": {
+                        "button": "Lokal speichern"
+                    },
+                    "server": {
+                        "button": "In Spacialist speichern"
+                    }
+                }
             }
         },
         "csv": {
@@ -327,18 +339,6 @@
                 },
                 "delete": {
                     "alert": "Wenn du <span class=\"fw-bold\">{name}</span> löschst, wird mindestens eine Entität ebenfalls gelöscht. | Wenn du <span class=\"fw-bold\">{name}</span> löschst, werden mindestens {cnt} Entitäten ebenfalls gelöscht."
-                },
-                "screencast": {
-                    "title": "Screencast speichern",
-                    "info": "Screencast erfolgreich aufgenommen. Was möchtest du damit tun?",
-                    "actions": {
-                        "local": {
-                            "button": "Lokal speichern"
-                        },
-                        "server": {
-                            "button": "In Spacialist speichern"
-                        }
-                    }
                 }
             },
             "references": {

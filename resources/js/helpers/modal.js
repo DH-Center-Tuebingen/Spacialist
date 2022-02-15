@@ -29,6 +29,7 @@ import {
 import About from '../components/modals/system/About.vue';
 import Discard from '../components/modals/system/Discard.vue';
 import Error from '../components/modals/system/Error.vue';
+import SaveScreencast from '../components/modals/system/SaveScreencast.vue';
 import ImportError from '../components/modals/system/ImportError.vue';
 import CsvPreviewer from '../components/modals/csv/Preview.vue';
 import CsvPicker from '../components/modals/csv/Picker.vue';
@@ -114,6 +115,25 @@ export function showError(data) {
             closing(e) {
                 store.getters.vfm.hide(uid);
             }
+        }
+    });
+}
+
+export function showSaveScreencast(data) {
+    const uid = `SaveScreencastModal-${getTs()}`;
+    store.getters.vfm.show({
+        component: SaveScreencast,
+        bind: {
+            data: data,
+            name: uid,
+        },
+        on: {
+            closing(e) {
+                store.getters.vfm.hide(uid);
+            },
+            confirm(e) {
+                store.getters.vfm.hide(uid);
+            },
         }
     });
 }

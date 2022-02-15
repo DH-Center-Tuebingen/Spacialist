@@ -257,6 +257,18 @@
                 "title": "Site not found!",
                 "msg": "Site <code>{site}</code> was not found. Check the spelling or contact the administrator.",
                 "go_to": "To start page"
+            },
+            "screencast": {
+                "title": "Save Screencast",
+                "info": "Screencast recorded. What do you want to do with it?",
+                "actions": {
+                    "local": {
+                        "button": "Store local"
+                    },
+                    "server": {
+                        "button": "Store in Spacialist"
+                    }
+                }
             }
         },
         "csv": {
@@ -328,18 +340,6 @@
                 },
                 "delete": {
                     "alert": "If you delete <span class=\"fw-bold\">{name}</span>, at least one entity is deleted, too. | If you delete <span class=\"fw-bold\">{name}</span>, at least {cnt} entities are deleted, too."
-                },
-                "screencast": {
-                    "title": "Save Screencast",
-                    "info": "Screencast recorded. What do you want to do with it?",
-                    "actions": {
-                        "local": {
-                            "button": "Store local"
-                        },
-                        "server": {
-                            "button": "Store in Spacialist"
-                        }
-                    }
                 }
             },
             "references": {
