@@ -51,6 +51,10 @@ export function can(permissionString, oneOf) {
     }
 }
 
+export function hasPlugin(id) {
+    return store.getters.plugins.some(p => p.name == id);
+}
+
 export function getErrorMessages(error, suffix = '') {
     let msgObject = {};
     const r = error.response;
@@ -89,6 +93,8 @@ export function getCertaintyClass(certainty, prefix = 'bg') {
 
     return classes;
 }
+
+export const multiselectResetClasslist = {clear: 'multiselect-clear multiselect-clear-reset'};
 
 export function getTs() {
     const d = new Date();

@@ -38,6 +38,7 @@
                 </label>
                 <div class="col-md-10">
                     <multiselect
+                        :classes="multiselectResetClasslist"
                         :valueProp="'id'"
                         :label="'thesaurus_url'"
                         :track-by="'id'"
@@ -52,7 +53,7 @@
                             {{ translateConcept(option.thesaurus_url) }}
                         </template>
                         <template v-slot:singlelabel="{ value }">
-                            <div class="px-2">
+                            <div class="multiselect-single-label">
                                 {{ translateConcept(value.thesaurus_url) }}
                             </div>
                         </template>
@@ -60,6 +61,7 @@
                     <multiselect
                         v-if="state.attributeSelected"
                         class="mt-2"
+                        :classes="multiselectResetClasslist"
                         :valueProp="'id'"
                         :label="'label'"
                         :track-by="'id'"
@@ -80,14 +82,23 @@
                         <input type="number" class="form-control" :step="state.dependency.attribute.datatype == 'double' ? 0.01 : 1" v-else-if="state.inputType == 'number'" v-model.number="state.dependency.value" />
                         <multiselect
                             v-else-if="state.inputType == 'select'"
+                            :classes="multiselectResetClasslist"
                             :valueProp="'id'"
                             :label="'concept_url'"
                             :track-by="'id'"
                             :hideSelected="true"
                             :mode="'single'"
-                            :options="depends.values"
+                            :options="state.dependantOptions"
                             :placeholder="t('global.select.placeholder')"
                             v-model="state.dependency.value">
+                            <template v-slot:option="{ option }">
+                                {{ translateConcept(option.concept_url) }}
+                            </template>
+                            <template v-slot:singlelabel="{ value }">
+                                <div class="multiselect-single-label">
+                                    {{ translateConcept(value.concept_url) }}
+                                </div>
+                            </template>
                         </multiselect>
                         <input type="text" class="form-control" v-else v-model="state.dependency.value" />
                     </div>
@@ -114,11 +125,14 @@
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
+    import store from "@/bootstrap/store.js";
+
     import {
         getAttribute,
         getEntityTypeDependencies,
         translateConcept,
-    } from '../../../helpers/helpers.js';
+        multiselectResetClasslist,
+    } from '@/helpers/helpers.js';
 
     export default {
         props: {
@@ -184,6 +198,13 @@
                     operator: null,
                     value: null,
                 },
+                dependantOptions: computed(_ => {
+                    if(state.attributeSelected && state.operatorSelected && state.inputType == 'select') {
+                        return store.getters.attributeSelections[state.dependency.attribute.id];
+                    } else {
+                        return [];
+                    }
+                }),
                 isValid: computed(_ => {
                     return (
                         state.dependency.attribute && state.dependency.operator && state.dependency.value
@@ -276,6 +297,7 @@
                         case 'list':
                         case 'table':
                         case 'sql':
+                        default:
                             return 'unsupported';
                     }
                 }),
@@ -308,6 +330,7 @@
                 t,
                 // HELPERS
                 translateConcept,
+                multiselectResetClasslist,
                 // PROPS
                 // LOCAL
                 confirmEdit,

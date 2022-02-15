@@ -1,8 +1,8 @@
 <template>
     <div class="h-100 d-flex flex-column">
-        <h3>
+        <h3 class="d-flex flex-row gap-2 align-items-center">
             {{ t('global.preference', 2) }}
-            <button type="button" class="btn btn-outline-success" @click="savePreferences()">
+            <button type="button" class="btn btn-outline-success btn-sm" @click="savePreferences()">
                 <i class="fas fa-fw fa-save"></i>
                 {{ t('global.save') }}
             </button>
@@ -101,22 +101,6 @@
                     </tr>
                     <tr>
                         <td>
-                            <strong>{{ t('main.preference.key.extensions') }}</strong>
-                        </td>
-                        <td>
-                            <extensions-preference
-                                :data="state.preferences['prefs.load-extensions'].value"
-                                @changed="e => trackChanges('prefs.load-extensions', e)">
-                            </extensions-preference>
-                        </td>
-                        <td>
-                            <div class="form-check form-switch d-flex justify-content-center">
-                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.load-extensions'].allow_override" />
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
                             <strong>{{ t('main.preference.key.link_thesaurex') }}</strong>
                         </td>
                         <td>
@@ -208,7 +192,6 @@
     import Columns from './preferences/Columns.vue';
     import ShowTooltips from './preferences/ShowTooltips.vue';
     import Tags from './preferences/Tags.vue';
-    import Extensions from './preferences/Extensions.vue';
     import ThesaurusLink from './preferences/ThesaurusLink.vue';
     import ProjectName from './preferences/ProjectName.vue';
     import ProjectMaintainer from './preferences/ProjectMaintainer.vue';
@@ -221,7 +204,6 @@
             'columns-preference': Columns,
             'tooltips-preference': ShowTooltips,
             'tags-preference': Tags,
-            'extensions-preference': Extensions,
             'thesaurus-link-preference': ThesaurusLink,
             'project-name-preference': ProjectName,
             'project-maintainer-preference': ProjectMaintainer,

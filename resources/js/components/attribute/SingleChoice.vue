@@ -1,5 +1,6 @@
 <template>
     <multiselect
+        :classes="multiselectResetClasslist"
         :valueProp="'id'"
         :label="'concept_url'"
         :track-by="'concept_url'"
@@ -15,7 +16,7 @@
             {{ translateConcept(option.concept_url) }}
         </template>
         <template v-slot:singlelabel="{ value }">
-            <div class="px-2">
+            <div class="multiselect-single-label">
                 {{ translateConcept(value.concept_url) }}
             </div>
         </template>
@@ -37,6 +38,7 @@
 
     import {
         translateConcept,
+        multiselectResetClasslist,
     } from '../../helpers/helpers.js';
 
     export default {
@@ -114,6 +116,7 @@
                 t,
                 // HELPERS
                 translateConcept,
+                multiselectResetClasslist,
                 // LOCAL
                 resetFieldState,
                 undirtyField,

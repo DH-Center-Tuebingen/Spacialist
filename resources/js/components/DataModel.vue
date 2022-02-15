@@ -19,9 +19,9 @@
         </div>
         <div class="col-md-4 py-2 h-100 d-flex flex-column">
             <div class="d-flex flex-row justify-content-between">
-                <h4>
+                <h4 class="d-flex flex-row gap-2 align-items-center">
                     {{ t('main.datamodel.attribute.title') }}
-                    <button type="button" class="btn btn-outline-success" @click="createAttribute()">
+                    <button type="button" class="btn btn-outline-success btn-sm" @click="createAttribute()">
                         <i class="fas fa-fw fa-plus"></i> {{ t('main.datamodel.attribute.add_button') }}
                     </button>
                 </h4>

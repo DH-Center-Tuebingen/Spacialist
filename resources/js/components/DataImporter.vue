@@ -22,6 +22,7 @@
                         </label>
                         <multiselect
                             id="import-entity-type"
+                            :classes="multiselectResetClasslist"
                             :valueProp="'id'"
                             :label="'thesaurus_url'"
                             :track-by="'id'"
@@ -36,7 +37,7 @@
                                 {{ translateConcept(option.thesaurus_url) }}
                             </template>
                             <template v-slot:singlelabel="{ value }">
-                                <div class="px-2">
+                                <div class="multiselect-single-label">
                                     {{ translateConcept(value.thesaurus_url) }}
                                 </div>
                             </template>

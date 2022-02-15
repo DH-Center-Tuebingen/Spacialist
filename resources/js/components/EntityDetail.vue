@@ -54,20 +54,20 @@
                     </button>
                 </form>
             </h3>
-            <span>
-                <button type="submit" form="entity-attribute-form" class="btn btn-success me-2" :disabled="!state.formDirty || !can('duplicate_edit_concepts')" @click.prevent="saveEntity()">
+            <div class="d-flex flex-row gap-2">
+                <button type="submit" form="entity-attribute-form" class="btn btn-outline-success btn-sm" :disabled="!state.formDirty || !can('duplicate_edit_concepts')" @click.prevent="saveEntity()">
                     <i class="fas fa-fw fa-save"></i> {{ t('global.save') }}
                 </button>
-                <button type="button" class="btn btn-warning me-2" :disabled="!state.formDirty" @click="resetForm()">
+                <button type="button" class="btn btn-outline-warning btn-sm" :disabled="!state.formDirty" @click="resetForm()">
                     <i class="fas fa-fw fa-undo"></i> {{ t('global.reset') }}
                 </button>
-                <button type="button" class="btn btn-danger" :disabled="!can('delete_move_concepts')" @click="confirmDeleteEntity()">
+                <button type="button" class="btn btn-outline-danger btn-sm" :disabled="!can('delete_move_concepts')" @click="confirmDeleteEntity()">
                     <i class="fas fa-fw fa-trash"></i> {{ t('global.delete') }}
                 </button>
-            </span>
+            </div>
         </div>
         <div class="d-flex justify-content-between my-2">
-            <div>
+            <div class="d-flex flex-row gap-1">
                 <span :style="state.colorStyles">
                     <i class="fas fa-fw fa-circle"></i>
                 </span>

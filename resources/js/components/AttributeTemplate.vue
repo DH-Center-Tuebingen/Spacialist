@@ -30,7 +30,7 @@
                             {{ t(`global.attributes.${option.datatype}`) }}
                         </template>
                         <template v-slot:singlelabel="{ value }">
-                            <div class="px-2">
+                            <div class="multiselect-single-label">
                                 {{ t(`global.attributes.${value.datatype}`) }}
                             </div>
                         </template>

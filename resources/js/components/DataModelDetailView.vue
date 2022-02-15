@@ -51,11 +51,11 @@
                                     </div>
                                 </template>
                         </multiselect>
-                        <div class="pt-2">
-                            <button type="button" class="btn btn-outline-success me-2" @click="addAllEntityTypes">
+                        <div class="mt-2 d-flex flex-row gap-2">
+                            <button type="button" class="btn btn-outline-success btn-sm" @click="addAllEntityTypes">
                                 <i class="fas fa-fw fa-tasks"></i> {{ t('global.select_all') }}
                             </button>
-                            <button type="button" class="btn btn-outline-danger" @click="removeAllEntityTypes">
+                            <button type="button" class="btn btn-outline-danger btn-sm" @click="removeAllEntityTypes">
                                 <i class="fas fa-fw fa-times"></i> {{ t('global.select_none') }}
                             </button>
                         </div>

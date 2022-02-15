@@ -1,8 +1,8 @@
 <template>
     <div class="d-flex flex-column h-100">
-        <h4 class="mb-0">
+        <h4 class="d-flex flex-row gap-2 align-items-center">
             {{ t('global.roles') }}
-            <button type="button" class="btn btn-outline-success" @click="showAddRoleModal()" :disabled="!can('add_edit_role')">
+            <button type="button" class="btn btn-outline-success btn-sm" @click="showAddRoleModal()" :disabled="!can('add_edit_role')">
                 <i class="fas fa-fw fa-plus"></i> {{ t('main.role.add_button') }}
             </button>
         </h4>

@@ -7,7 +7,7 @@
             :hidden-panel="true"
             @updated="onFilterUpdated">
         </activity-log-filter>
-        <div class="table-responsive h-100 mt-3" v-if="state.sortedActivity.length > 0">
+        <div class="table-responsive h-100 mt-3" v-if="state.sortedActivity.length > 0" v-infinite-scroll="fetchData" :infinite-scroll-disabled="state.noMoreResults" infinite-scroll-delay="200" infinite-scroll-offset="100">
             <table class="table table-light table-striped table-hover">
                 <thead class="sticky-top">
                     <tr>
@@ -71,27 +71,8 @@
                             </div>
                         </td>
                     </tr>
-                    <tr>
-                        <td :colspan="hideUser ? '4' : '5'">
-                            <button type="button" class="btn btn-outline-secondary btn-sm" @click="fetchData" :disabled="state.disableFetching">
-                                <span v-if="!state.noMoreResults">
-                                    <i class="fas fa-fw fa-sync"></i>
-                                    {{ t('global.list.fetch_next_entries') }}
-                                </span>
-                                <span v-else>
-                                    <i class="fas fa-fw fa-ban"></i>
-                                    {{ t('global.list.no_more_entries') }}
-                                </span>
-                            </button>
-                        </td>
-                    </tr>
                 </tbody>
             </table>
-            <!-- <infinite-loading @infinite="fetchData">
-                <span slot="spinner"></span>
-                <span slot="no-more"></span>
-                <span slot="no-results"></span>
-            </infinite-loading> -->
         </div>
         <div v-else class="alert alert-info mb-0 mt-3" role="alert">
             {{ t('global.list.no_entries') }}

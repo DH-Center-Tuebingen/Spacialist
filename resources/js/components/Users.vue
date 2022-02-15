@@ -1,8 +1,8 @@
 <template>
     <div class="d-flex flex-column h-100">
-        <h4>
+        <h4 class="d-flex flex-row gap-2 align-items-center">
             {{ t('main.user.active_users') }}
-            <button type="button" class="btn btn-outline-success" @click="showNewUserModal()" :disabled="!can('create_users')">
+            <button type="button" class="btn btn-outline-success btn-sm" @click="showNewUserModal()" :disabled="!can('create_users')">
                 <i class="fas fa-fw fa-plus"></i> {{ t('main.user.add_button') }}
             </button>
         </h4>

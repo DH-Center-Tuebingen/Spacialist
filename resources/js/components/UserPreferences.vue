@@ -1,11 +1,11 @@
 <template>
     <div class="h-100 d-flex flex-column">
-        <h3>
+        <h3 class="d-flex flex-row gap-2 align-items-center">
             {{ t('global.preference', 2) }}
             <small class="text-muted">
                 {{ getUser().name }}
             </small>
-            <button type="button" class="btn btn-outline-success ms-2" @click="savePreferences()">
+            <button type="button" class="btn btn-outline-success btn-sm" @click="savePreferences()">
                 <i class="fas fa-fw fa-save"></i>
                 {{ t('global.save') }}
             </button>
