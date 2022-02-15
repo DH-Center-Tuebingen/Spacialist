@@ -49,11 +49,11 @@ class MapController extends Controller
         $basicOnly = isset($basic);
         $asDict = isset($dict);
         $baselayers = AvailableLayer::where('is_overlay', false)
-            ->orderBy('id')
+            ->orderBy('position')
             ->get();
         $overlayQuery = AvailableLayer::with('entity_type')
             ->where('is_overlay', true)
-            ->orderBy('id');
+            ->orderBy('position');
         if($basicOnly) {
             $overlayQuery->whereNull('entity_type_id')
                 ->where('type', '!=', 'unlinked');
@@ -81,7 +81,7 @@ class MapController extends Controller
         $entityLayers = AvailableLayer::with(['entity_type'])
             ->whereNotNull('entity_type_id')
             ->orWhere('type', 'unlinked')
-            ->orderBy('id')
+            ->orderBy('position')
             ->get();
 
         return response()->json($entityLayers);
@@ -166,9 +166,86 @@ class MapController extends Controller
         return response()->json($objs);
     }
 
+    public function addLayer(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('create_edit_geodata')) {
+            return response()->json([
+                'error' => __('You do not have the permission to add layers')
+            ], 403);
+        }
+        $this->validate($request, [
+            'name' => 'required|string',
+            'url' => 'required|string',
+            'type' => 'required|string',
+            'overlay' => 'nullable|boolean_string',
+        ]);
+
+        $name = $request->get('name');
+        $url = $request->get('url');
+        $type = $request->get('type');
+        $isOverlay = $request->has('overlay') && $request->get('overlay') == 'true';
+
+        $layer = AvailableLayer::createFromArray([
+            'name' => $name,
+            'url' => $url,
+            'type' => $type,
+            'opacity' => 1,
+            'visible' => true,
+            'is_overlay' => $isOverlay,
+        ]);
+
+        return response()->json($layer);
+    }
+
     // PATCH
+
+    public function updateLayer($id, Request $request) {
+        $user = auth()->user();
+        if(!$user->can('create_edit_geodata')) {
+            return response()->json([
+                'error' => __('You do not have the permission to update layers')
+            ], 403);
+        }
+        $this->validate($request, AvailableLayer::patchRules);
+        try {
+            $layer = AvailableLayer::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This layer does not exist')
+            ], 400);
+        }
+
+        $requestData = $request->only(array_keys(AvailableLayer::patchRules));
+        $layer->patch($requestData);
+        return response()->json(null, 204);
+    }
 
     // PUT
 
     // DELETE
+
+    public function deleteLayer($id) {
+        $user = auth()->user();
+        if(!$user->can('upload_remove_geodata')) {
+            return response()->json([
+                'error' => __('You do not have the permission to delete layers')
+            ], 403);
+        }
+        try {
+            $layer = AvailableLayer::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This layer does not exist')
+            ], 400);
+        }
+        if(isset($layer->entity_type_id) || $layer->type == 'unlinked') {
+            return response()->json([
+                'error' => __('This layer can not be deleted')
+            ], 400);
+        }
+
+        $layer->delete();
+
+        return response()->json(null, 204);
+    }
 }

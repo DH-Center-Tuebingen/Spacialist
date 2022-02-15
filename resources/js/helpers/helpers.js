@@ -19,6 +19,10 @@ import {
     showError
 } from './modal.js';
 
+import {
+    splitColor,
+} from './colors.js';
+
 export async function initApp(locale) {
     store.dispatch('setAppState', false);
     await fetchPreData(locale);
@@ -68,14 +72,6 @@ export function getErrorMessages(error, suffix = '') {
         msgObject.global = r.data.error;
     }
     return msgObject;
-}
-
-export function rgb2hex(rgb) {
-    let colors = rgb.substring(1);
-    let r = parseInt(colors.substring(0, 2), 16);
-    let g = parseInt(colors.substring(2, 4), 16);
-    let b = parseInt(colors.substring(4, 6), 16);
-    return [r, g, b];
 }
 
 export function getCertaintyClass(certainty, prefix = 'bg') {
@@ -268,7 +264,7 @@ export function calculateEntityColors(id, alpha = 0.5) {
     const et = getEntityType(id);
     if(!et || !et.layer) return {};
     let r, g, b, a;
-    [r, g, b] = rgb2hex(et.layer.color);
+    [r, g, b] = splitColor(et.layer.color);
     const cs = [r, g, b].map(c => {
         c /= 255.0;
         if(c <= 0.03928) c /= 12.92;

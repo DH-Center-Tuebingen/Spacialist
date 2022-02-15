@@ -263,6 +263,21 @@ export async function getMapLayers(includeEntityLayers) {
     );
 };
 
+export async function moveMapLayer(id, neighborId) {
+    const data = {
+        neighbor: neighborId,
+    };
+    return $httpQueue.add(
+        () => http.patch(`/map/layer/${id}/switch`, data).then(response => response.data)
+    );
+};
+
+export async function changeMapLayerClass(id) {
+    return $httpQueue.add(
+        () => http.patch(`/map/layer/${id}/move`).then(response => response.data)
+    );
+};
+
 export async function getMapProjection(srid) {
     return $httpQueue.add(
         () => http.get(`map/epsg/${srid}`).then(response => response.data)

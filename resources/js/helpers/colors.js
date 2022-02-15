@@ -139,6 +139,38 @@ export const gradients = [
     },
 ];
 
+export const splitColor = value => {
+    console.log("value is", value);
+    let r, g, b, a;
+    if(value.startsWith('#')) {
+        const colors = value.substring(1);
+        r = parseInt(colors.substring(0, 2), 16);
+        g = parseInt(colors.substring(2, 4), 16);
+        b = parseInt(colors.substring(4, 6), 16);
+        if(colors.length == 8) {
+            a = parseInt(colors.substring(6, 8), 16) / 255;
+        } else {
+            a = 1;
+        }
+        return [r, g, b];
+    } else if(value.startsWith('rgba')) {
+        const channels = value.match(/rgba\((\d+),\s?(\d+),\s?(\d+),\s?(\d+|\d?\.\d+)\)/);
+        console.log("this is the color", value, channels);
+        r = channels[1];
+        g = channels[2];
+        b = channels[3];
+        a = channels[4];
+    } else if(value.startsWith('rgb')) {
+        const channels = value.match(/rgb\((\d+),\s?(\d+),\s?(\d+)\)/);
+        r = channels[1];
+        g = channels[2];
+        b = channels[3];
+        a = 1;
+    }
+
+    return [r, g, b, a];
+}
+
 export const calculateColorSteps = (key, steps) => {
     const grad = gradients.find(g => g.key == key);
 

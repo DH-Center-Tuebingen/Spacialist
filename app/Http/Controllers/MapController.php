@@ -169,32 +169,6 @@ class MapController extends Controller
         return response()->json($epsg);
     }
 
-    public function addLayer(Request $request) {
-        $user = auth()->user();
-        if(!$user->can('create_edit_geodata')) {
-            return response()->json([
-                'error' => __('You do not have the permission to add layers')
-            ], 403);
-        }
-        $this->validate($request, [
-            'name' => 'required|string',
-            'is_overlay' => 'nullable|boolean_string'
-        ]);
-
-        $isOverlay = $request->has('is_overlay') && $request->get('is_overlay') == 'true';
-
-        $layer = AvailableLayer::createFromArray([
-            'name' => $request->get('name'),
-            'url' => '',
-            'type' => '',
-            'opacity' => 1,
-            'visible' => true,
-            'is_overlay' => $isOverlay,
-        ]);
-
-        return response()->json($layer);
-    }
-
     public function link(Request $request, $gid, $eid) {
         $user = auth()->user();
         if(!$user->can('link_geodata')) {
@@ -277,14 +251,42 @@ class MapController extends Controller
         return response()->json(null, 204);
     }
 
-    public function updateLayer($id, Request $request) {
+    public function changeLayerPositions($id, Request $request) {
         $user = auth()->user();
         if(!$user->can('create_edit_geodata')) {
             return response()->json([
-                'error' => __('You do not have the permission to update layers')
+                'error' => __('You do not have the permission to sort layers')
             ], 403);
         }
-        $this->validate($request, AvailableLayer::patchRules);
+        $this->validate($request, [
+            'neighbor' => 'required|integer|exists:available_layers,id',
+        ]);
+        $neighborId = $request->get('neighbor');
+        try {
+            $layer = AvailableLayer::findOrFail($id);
+            $neighbor = AvailableLayer::findOrFail($neighborId);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This layer does not exist')
+            ], 400);
+        }
+
+        $tmpPos = $layer->position;
+        $layer->position = $neighbor->position;
+        $neighbor->position = $tmpPos;
+        $layer->save();
+        $neighbor->save();
+
+        return response()->json(null, 204);
+    }
+
+    public function moveLayer($id, Request $request) {
+        $user = auth()->user();
+        if(!$user->can('create_edit_geodata')) {
+            return response()->json([
+                'error' => __('You do not have the permission to move layers')
+            ], 403);
+        }
         try {
             $layer = AvailableLayer::findOrFail($id);
         } catch (ModelNotFoundException $e) {
@@ -293,8 +295,21 @@ class MapController extends Controller
             ], 400);
         }
 
-        $layer->patch($request->toArray());
-        return response()->json(null, 204);
+        $oldPosition = $layer->position;
+        $layer->is_overlay = !$layer->is_overlay;
+        $layer->position = AvailableLayer::where('is_overlay', $layer->is_overlay)->max('position') + 1;
+        $layer->save();
+        $oldSiblings = AvailableLayer::where('is_overlay', !$layer->is_overlay)->where('position', '>', $oldPosition)->get();
+        foreach($oldSiblings as $s) {
+            $s->position = $s->position - 1;
+            $s->save();
+        }
+
+        $data = [
+            'position' => $layer->position,
+        ];
+
+        return response()->json($data, 200);
     }
 
     // DELETE
@@ -314,31 +329,6 @@ class MapController extends Controller
             ], 400);
         }
         $geodata->delete();
-
-        return response()->json(null, 204);
-    }
-
-    public function deleteLayer($id) {
-        $user = auth()->user();
-        if(!$user->can('upload_remove_geodata')) {
-            return response()->json([
-                'error' => __('You do not have the permission to delete layers')
-            ], 403);
-        }
-        try {
-            $layer = AvailableLayer::findOrFail($id);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This layer does not exist')
-            ], 400);
-        }
-        if(isset($layer->entity_type_id) || $layer->type == 'unlinked') {
-            return response()->json([
-                'error' => __('This layer can not be deleted')
-            ], 400);
-        }
-
-        $layer->delete();
 
         return response()->json(null, 204);
     }

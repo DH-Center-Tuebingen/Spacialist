@@ -465,7 +465,6 @@
                     }
                     let symbolStyle;
                     if(p.style) {
-                        console.log("should load style");
                         symbolStyle = p.style.symbol;
                     }
                     if(p.labels) {

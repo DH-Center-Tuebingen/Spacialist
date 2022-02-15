@@ -1,4 +1,9 @@
-import { getMapLayers, getMapProjection } from '../api';
+import {
+    getMapLayers,
+    getMapProjection,
+    moveMapLayer,
+    changeMapLayerClass,
+} from '@/api';
 
 import proj4 from 'proj4';
 import {
@@ -24,7 +29,7 @@ import Fill from 'ol/style/Fill';
 import Stroke from 'ol/style/Stroke';
 import Style from 'ol/style/Style';
 
-import { rgb2hex } from './helpers';
+import { splitColor } from './colors.js';
 
 export function formatLengthArea(value, precision = 2, isArea = false) {
     if(!value) return value;
@@ -74,17 +79,12 @@ export function formatLengthArea(value, precision = 2, isArea = false) {
 };
 
 export function createStyle(color = '#ffcc33', width = 2, fromSymbol) {
+    // console.log("fromSymbol", fromSymbol);
     let polygonFillColor;
     let r, g, b, a;
     const fillAlphaMultiplier = 0.2;
-    if(color.startsWith('#')) {
-        [r, g, b] = rgb2hex(color);
-        a = 1 * fillAlphaMultiplier;
-    } else if(color.startsWith('rgba')) {
-        // cut off rgba and () and get alpha value
-        [r, g, b, a] = color.substring(5, color.length-1).split(',');
-        a *= fillAlphaMultiplier;
-    }
+    [r, g, b, a] = splitColor(color);
+    a *= fillAlphaMultiplier;
     polygonFillColor = `rgba(${r}, ${g}, ${b}, ${a})`;
 
     const options = {
@@ -98,13 +98,20 @@ export function createStyle(color = '#ffcc33', width = 2, fromSymbol) {
     };
 
     if(fromSymbol) {
-        // TODO opacity
+        if(fromSymbol.hidden) {
+            return new Style();
+        }
+
+        let tr, tg, tb, ta;
+        // console.log("from symbol color", fromSymbol.color, fromSymbol);
+        [tr, tg, tb, ta] = splitColor(fromSymbol.color);
+        a *= fromSymbol.opacity;
         options.text = new Text({
             text: String.fromCodePoint(`0x${fromSymbol.unicode}`),
             font: `${fromSymbol.size}px FontAwesome`,
             // textBaseline: 'bottom',
             fill: new Fill({
-                color: fromSymbol.color,
+                color: `rgba(${tr}, ${tg}, ${tb}, ${ta})`,
             })
         });
     } else {
@@ -135,6 +142,16 @@ export async function getLayers(includeEntityLayers = false) {
         layers[l.id] = l;
     }
     return layers;
+}
+
+export async function switchLayerPositions(id, neighborId) {
+    const data = await moveMapLayer(id, neighborId);
+    return data;
+}
+
+export async function changeLayerClass(id) {
+    const data = await changeMapLayerClass(id);
+    return data;
 }
 
 export function createNewLayer(layerData) {

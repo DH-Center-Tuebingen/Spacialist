@@ -22,4 +22,9 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix(''
     Route::get('epsg/{srid}', 'MapController@getEpsg')->where('srid', '[0-9]+');
     
     Route::post('', 'MapController@addGeometry');
+    Route::post('/layer', 'MapController@addLayer');
+    
+    Route::patch('/layer/{id}', 'MapController@updateLayer')->where('id', '[0-9]+');
+
+    Route::delete('layer/{id}', 'MapController@deleteLayer')->where('id', '[0-9]+');
 });
