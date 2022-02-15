@@ -1,4 +1,9 @@
-import { createRouter, createWebHashHistory } from 'vue-router';
+import {
+    createRouter,
+    createWebHashHistory,
+    onBeforeRouteUpdate,
+    onBeforeRouteLeave,
+} from 'vue-router';
 
 // Pages
 import Login from '../components/Login.vue';
@@ -24,6 +29,11 @@ import UserNotifications from '../components/notification/UserNotifications.vue'
 
 import DummyComponent from '../components/DummyComponent.vue';
 import NotFound from '../components/NotFound.vue';
+
+export {
+    onBeforeRouteUpdate,
+    onBeforeRouteLeave,
+};
 
 export const router = createRouter({
     history: createWebHashHistory(),

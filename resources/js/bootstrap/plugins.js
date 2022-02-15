@@ -1,7 +1,11 @@
 import { only } from "@/helpers/helpers";
 import store from "./store.js";
-import router from "./router.js";
 import i18n from "./i18n.js";
+import {
+    router,
+    onBeforeRouteLeave,
+    onBeforeRouteUpdate,
+} from "./router.js";
 import {
     global_api,
     api_base,
@@ -16,6 +20,8 @@ import * as helpers from '@/helpers/helpers.js';
 import * as colors from '@/helpers/colors.js';
 import {
     getLayers,
+    switchLayerPositions,
+    changeLayerClass,
 } from '@/helpers/map.js';
 import {
     Node
@@ -34,6 +40,8 @@ const defaultPluginOptions = {
     id: null,
     i18n: {}, // object of languages (key is e.g. 'en', 'de', 'fr', ...)
     routes: {},
+    store: null,
+    api: null,
 }
 const defaultSlotOptions = {
     of: null, // id of registered plugin
@@ -61,6 +69,8 @@ export const SpPS = {
         colors: colors,
         mapHelpers: {
             getLayers,
+            switchLayerPositions,
+            changeLayerClass,
         },
         font: {
             iconList
@@ -68,12 +78,11 @@ export const SpPS = {
         searches: {
             entity: searchEntity,
         },
-        store: {
-            dispatch: store.dispatch,
-            getters: store.getters,
-        },
+        store: store,
         router: {
             currentRoute,
+            onBeforeRouteLeave,
+            onBeforeRouteUpdate,
             push,
         },
         toast: addToast,
@@ -84,7 +93,7 @@ export const SpPS = {
         },
     },
     data: {
-        plugins: [],
+        plugins: {},
         app: null,
         t: null,
     },
@@ -143,7 +152,7 @@ export const SpPS = {
         if(!options.id) {
             throw new Error('Your plugin needs an id to be installed!');
         }
-        if(SpPS.data.plugins.findIndex(p => p.id == options.id) > -1) {
+        if(!!SpPS.data.plugins[options.id]) {
             throw new Error('A plugin with that ID is already installed!');
         }
         const mergedOptions = {
@@ -156,10 +165,13 @@ export const SpPS = {
         if(mergedOptions.routes.length > 0) {
             SpPS.registerRoutes(mergedOptions.id, mergedOptions.routes);
         }
-        SpPS.data.plugins.push(mergedOptions);
+        if(mergedOptions.store) {
+            store.registerModule(`pluginstore/${mergedOptions.id}`, mergedOptions.store);
+        }
+        SpPS.data.plugins[options.id] = mergedOptions;
     },
     intoSlot: (options) => {
-        if(!options.of || SpPS.data.plugins.findIndex(p => p.id == options.of) == -1) {
+        if(!options.of || !SpPS.data.plugins[options.of]) {
             throw new Error('This plugin part has no associated plugin or that plugin is not installed!');
         }
         if(!options.slot) {

@@ -21,7 +21,7 @@
                                     </span>
                                 </h6>
                                 <p class="card-text border-start border-warning border-4 ps-2">
-                                    {{ plugin.metadata.description }}
+                                    <vue3-markdown-it :source="plugin.metadata.description" />
                                 </p>
                             </div>
                             <div>
