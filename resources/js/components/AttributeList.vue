@@ -402,8 +402,8 @@
             };
             const getDirtyValues = _ => {
                 const values = {};
-                for(let k in attrRefs) {
-                    const curr = attrRefs[k];
+                for(let k in attrRefs.value) {
+                    const curr = attrRefs.value[k];
                     let currValue = null;
                     // curr is e.g. null if attribute is hidden
                     if(!!curr && !!curr.v && curr.v.meta.dirty && curr.v.meta.valid) {
@@ -426,23 +426,23 @@
                 });
             };
             const resetListValues = _ => {
-                for(let k in attrRefs) {
-                    const curr = attrRefs[k];
+                for(let k in attrRefs.value) {
+                    const curr = attrRefs.value[k];
                     if(!!curr && !!curr.resetFieldState) {
                         curr.resetFieldState();
                     }
                 }
             };
             const undirtyList = _ => {
-                for(let k in attrRefs) {
-                    const curr = attrRefs[k];
+                for(let k in attrRefs.value) {
+                    const curr = attrRefs.value[k];
                     if(!!curr && !!curr.undirtyField) {
                         curr.undirtyField();
                     }
                 }
             };
             const setRef = (el, id) => {
-                attrRefs[id] = el;
+                attrRefs.value[id] = el;
             };
             const checkDependency = id => {
 

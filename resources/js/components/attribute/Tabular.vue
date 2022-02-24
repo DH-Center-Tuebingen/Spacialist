@@ -325,8 +325,8 @@
                 v.resetField({
                     value: value.value
                 });
-                for(let k in columnRefs) {
-                    const curr = columnRefs[k];
+                for(let k in columnRefs.value) {
+                    const curr = columnRefs.value[k];
                     if(!!curr && !!curr.v && curr.v.meta.dirty && !!curr.resetFieldState) {
                         curr.resetFieldState();
                     }
@@ -337,8 +337,8 @@
                 v.resetField({
                     value: v.value.filter(cv => !cv.mark_deleted),
                 });
-                for(let k in columnRefs) {
-                    const curr = columnRefs[k];
+                for(let k in columnRefs.value) {
+                    const curr = columnRefs.value[k];
                     if(!!curr.v && curr.v.meta.dirty && !!curr.undirtyField) {
                         curr.undirtyField();
                     }
@@ -450,7 +450,7 @@
             const addTableRow = _ => {
                 const rowValue = {};
                 for(let k in state.columns) {
-                    const reference = newRowRefs[k];
+                    const reference = newRowRefs.value[k];
                     if(!!reference.v.value) {
                         rowValue[k] = reference.v.value;
                         if(!!reference.resetFieldState) {
@@ -473,7 +473,7 @@
             };
             const resetRow = index => {
                 for(let k in state.columns) {
-                    const reference = columnRefs[`${index}_${state.columns[k].id}`];
+                    const reference = columnRefs.value[`${index}_${state.columns[k].id}`];
                     if(!!reference.resetFieldState) {
                         reference.resetFieldState();
                     }
@@ -487,10 +487,10 @@
                 context.emit('change', e);
             };
             const setAddRef = (el, idx) => {
-                newRowRefs[idx] = el;
+                newRowRefs.value[idx] = el;
             };
             const setRef = (el, idx) => {
-                columnRefs[idx] = el;
+                columnRefs.value[idx] = el;
             };
 
             // DATA
