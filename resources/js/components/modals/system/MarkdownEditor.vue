@@ -71,7 +71,6 @@
             // ON MOUNTED
             onMounted(_ => {
                 state.show = true;
-                console.log(editorRef);
             });
 
             // RETURN

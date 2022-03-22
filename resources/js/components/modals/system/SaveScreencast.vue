@@ -88,14 +88,15 @@
             const { t } = useI18n();
 
             // FUNCTIONS
+            const getFilename = _ => `spacialist-screencapture-${getTs()}.webm`;
             const storeLocal = _ => {
-                createDownloadLink(data.value.data, `spacialist-screencapture-${getTs()}.webm`, false, 'video/webm');
+                createDownloadLink(data.value.data, getFilename(), false, 'video/webm');
                 state.show = false;
                 context.emit('confirm', false);
             };
             const storeOnServer = _ => {
                 if(hasPlugin('File')) {
-                    SpPS.data.plugins.file.api.uploadFile(state.content);
+                    SpPS.data.plugins.file.api.uploadFile(state.content, {}, getFilename());
                 };
                 state.show = false;
                 context.emit('confirm', false);

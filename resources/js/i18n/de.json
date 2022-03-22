@@ -23,6 +23,7 @@
         "create": "Anlegen",
         "move": "Verschieben",
         "parse": "Parsen",
+        "remove_file": "Datei entfernen",
         "list": {
             "nr_of_entries": "Keine Einträge | 1 Eintrag | {cnt} Einträge",
             "no_entries": "Keine Einträge gefunden.",
