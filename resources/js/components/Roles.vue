@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex flex-column h-100">
+    <div class="d-flex flex-column h-100" v-if="state.setupFinished">
         <h4 class="d-flex flex-row gap-2 align-items-center">
             {{ t('global.roles') }}
             <button type="button" class="btn btn-outline-success btn-sm" @click="showAddRoleModal()" :disabled="!can('add_edit_role')">
@@ -32,7 +32,7 @@
                                 :class="getClassByValidation(getErrors(role.id, 'display_name'))"
                                 :name="`displayname_${role.id}`"
                                 v-model="v.fields[role.id].display_name.value"
-                                @input="e => v.fields[role.id].display_name.handleInput(e)" />
+                                @input="e => v.fields[role.id].display_name.handleChange(e)" />
 
                             <div class="invalid-feedback">
                                 <span v-for="(msg, i) in getErrors(role.id, 'display_name')" :key="i">
@@ -48,7 +48,7 @@
                                 :class="getClassByValidation(getErrors(role.id, 'description'))"
                                 :name="`description_${role.id}`"
                                 v-model="v.fields[role.id].description.value"
-                                @input="e => v.fields[role.id].description.handleInput(e)" />
+                                @input="e => v.fields[role.id].description.handleChange(e)" />
 
                             <div class="invalid-feedback">
                                 <span v-for="(msg, i) in getErrors(role.id, 'description')" :key="i">
@@ -69,7 +69,7 @@
                                 :disabled="!can('add_remove_permission')"
                                 :options="state.permissions"
                                 :placeholder="t('main.role.add_permission_placeholder')"
-                                @input="v.fields[role.id].permissions.handleInput">
+                                @input="v.fields[role.id].permissions.handleChange">
                             </multiselect>
 
                             <div class="invalid-feedback">
@@ -112,7 +112,9 @@
 <script>
     import {
         computed,
+        onMounted,
         reactive,
+        watch,
     } from 'vue';
 
     import { onBeforeRouteLeave } from 'vue-router';
@@ -147,6 +149,76 @@ import { patchRoleData } from '../api.js';
             const toast = useToast();
 
             // FUNCTIONS
+            const updateValidationState = roles => {
+                const currentIds = roles.map(r => r.id);
+                const oldIds = Object.keys(v.fields);
+
+                for(let i=0; i<oldIds.length; i++) {
+                    const oid = oldIds[i];
+
+                    // Delete validation rules if role is deleted
+                    if(!currentIds.includes(oid) && !!v.fields[oid]) {
+                        delete v.fields[oid];
+                    }
+                }
+
+                for(let i=0; i<roles.length; i++) {
+                    const r = roles[i];
+                    // do not initialize existing roles
+                    if(!!v.fields[r.id]) continue;
+
+                    const {
+                        errors: edn,
+                        meta: mdn,
+                        value: vdn,
+                        handleChange: hidn,
+                        resetField: hrdn,
+                    } = useField(`displayname_${r.id}`, yup.string().required().max(255), {
+                        initialValue: r.display_name,
+                    });
+                    const {
+                        errors: edesc,
+                        meta: mdesc,
+                        value: vdesc,
+                        handleChange: hidesc,
+                        resetField: hrdesc,
+                    } = useField(`description_${r.id}`, yup.string().required().max(255), {
+                        initialValue: r.description,
+                    });
+                    const {
+                        errors: ep,
+                        meta: mp,
+                        value: vp,
+                        handleChange: hip,
+                        resetField: hrp,
+                    } = useField(`permissions_${r.id}`, yup.array(), {
+                        initialValue: r.permissions,
+                    });
+                    v.fields[r.id] = reactive({
+                        display_name: {
+                            errors: edn,
+                            meta: mdn,
+                            value: vdn,
+                            handleChange: hidn,
+                            reset: hrdn,
+                        },
+                        description: {
+                            errors: edesc,
+                            meta: mdesc,
+                            value: vdesc,
+                            handleChange: hidesc,
+                            reset: hrdesc,
+                        },
+                        permissions: {
+                            errors: ep,
+                            meta: mp,
+                            value: vp,
+                            handleChange: hip,
+                            reset: hrp,
+                        },
+                    });
+                }
+            };
             const roleDirty = id => {
                 return v.fields[id].display_name.meta.dirty ||
                     v.fields[id].description.meta.dirty ||
@@ -218,8 +290,9 @@ import { patchRoleData } from '../api.js';
                 if(!!state.errors[id] && !!state.errors[id][field]) {
                     apiErrors = state.errors[id][field];
                 }
+                const formErrors = v.fields[id] ? v.fields[id][field].errors : [];
                 return [
-                    ...v.fields[id][field].errors,
+                    ...formErrors,
                     ...apiErrors,
                 ];
             };
@@ -282,69 +355,25 @@ import { patchRoleData } from '../api.js';
 
             // DATA
             const state = reactive({
+                setupFinished: false,
                 roleList: computed(_ => store.getters.roles()),
                 permissions: computed(_ => store.getters.permissions),
                 dataInitialized: computed(_ => state.roleList.length > 0 && state.permissions.length > 0),
                 errors: {},
             });
             const v = reactive({
-                fields: computed(_ => {
-                    const list = {};
-                    for(let i=0; i<state.roleList.length; i++) {
-                        const r = state.roleList[i];
-                        const {
-                            errors: edn,
-                            meta: mdn,
-                            value: vdn,
-                            handleInput: hidn,
-                            resetField: hrdn,
-                        } = useField(`displayname_${r.id}`, yup.string().required().max(255), {
-                            initialValue: r.display_name,
-                        });
-                        const {
-                            errors: edesc,
-                            meta: mdesc,
-                            value: vdesc,
-                            handleInput: hidesc,
-                            resetField: hrdesc,
-                        } = useField(`description_${r.id}`, yup.string().required().max(255), {
-                            initialValue: r.description,
-                        });
-                        const {
-                            errors: ep,
-                            meta: mp,
-                            value: vp,
-                            handleInput: hip,
-                            resetField: hrp,
-                        } = useField(`permissions_${r.id}`, yup.array(), {
-                            initialValue: r.permissions,
-                        });
-                        list[r.id] = reactive({
-                            display_name: {
-                                errors: edn,
-                                meta: mdn,
-                                value: vdn,
-                                handleInput: hidn,
-                                reset: hrdn,
-                            },
-                            description: {
-                                errors: edesc,
-                                meta: mdesc,
-                                value: vdesc,
-                                handleInput: hidesc,
-                                reset: hrdesc,
-                            },
-                            permissions: {
-                                errors: ep,
-                                meta: mp,
-                                value: vp,
-                                handleInput: hip,
-                                reset: hrp,
-                            },
-                        });
-                    }
-                    return list;
-                })
+                fields: {},
+            });
+
+            // ON MOUNTED
+            onMounted(_ => {
+                updateValidationState(state.roleList);
+                state.setupFinished = true;
+            })
+
+            // WATCHER
+            watch(_ => state.roleList, (newValue) => {
+                updateValidationState(newValue);
             });
 
             // ON BEFORE LEAVE

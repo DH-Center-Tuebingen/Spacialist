@@ -123,16 +123,49 @@
             } = useForm({
                 validationSchema: schema,
             });
+            const {
+                errors: en,
+                meta: mn,
+                value: vn,
+                handleChange: hcn,
+            } = useField('name');
+            const {
+                errors: edn,
+                meta: mdn,
+                value: vdn,
+                handleChange: hcdn,
+            } = useField('display_name');
+            const {
+                errors: ed,
+                meta: md,
+                value: vd,
+                handleChange: hcd,
+            } = useField('description');
+
             const state = reactive({
                 show: false,
                 form: formMeta,
-                submitState: computed(_ => formMeta.dirty && formMeta.valid),
             });
             const v = reactive({
                 fields: {
-                    name: useField(`name`),
-                    display_name: useField(`display_name`),
-                    description: useField(`description`),
+                    name: {
+                        errors: en,
+                        meta: mn,
+                        value: vn,
+                        handleChange: hcn,
+                    },
+                    display_name: {
+                        errors: edn,
+                        meta: mdn,
+                        value: vdn,
+                        handleChange: hcdn,
+                    },
+                    description: {
+                        errors: ed,
+                        meta: md,
+                        value: vd,
+                        handleChange: hcd,
+                    },
                 },
                 schema: schema,
             });

@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex flex-column h-100">
+    <div class="d-flex flex-column h-100" v-if="state.setupFinished">
         <h4 class="d-flex flex-row gap-2 align-items-center">
             {{ t('main.user.active_users') }}
             <button type="button" class="btn btn-outline-success btn-sm" @click="showNewUserModal()" :disabled="!can('create_users')">
@@ -57,7 +57,7 @@
                                 :disabled="!can('add_remove_role')"
                                 :options="state.roles"
                                 :placeholder="t('main.user.add_role_placeholder')"
-                                @input="v.fields[user.id].roles.handleInput">
+                                @input="v.fields[user.id].roles.handleChange">
                             </multiselect>
 
                             <div class="invalid-feedback">
@@ -180,7 +180,9 @@
 <script>
     import {
         computed,
+        onMounted,
         reactive,
+        watch,
     } from 'vue';
 
     import { onBeforeRouteLeave } from 'vue-router';
@@ -221,6 +223,60 @@
             const toast = useToast();
 
             // FUNCTIONS
+            const updateValidationState = users => {
+                const currentIds = users.map(u => u.id);
+                const oldIds = Object.keys(v.fields);
+
+                for(let i=0; i<oldIds.length; i++) {
+                    const oid = oldIds[i];
+
+                    // Delete validation rules if user is deactivated
+                    if(!currentIds.includes(oid) && !!v.fields[oid]) {
+                        delete v.fields[oid];
+                    }
+                }
+
+                for(let i=0; i<users.length; i++) {
+                    const u = users[i];
+                    // do not initialize existing users
+                    if(!!v.fields[u.id]) continue;
+
+                    const {
+                        errors: em,
+                        meta: mm,
+                        value: vm,
+                        handleChange: him,
+                        resetField: hrm,
+                    } = useField(`email_${u.id}`, yup.string().required().email(), {
+                        initialValue: u.email,
+                    });
+                    const {
+                        errors: er,
+                        meta: mr,
+                        value: vr,
+                        handleChange: hir,
+                        resetField: hrr,
+                    } = useField(`roles_${u.id}`, yup.array(), {
+                        initialValue: u.roles,
+                    });
+                    v.fields[u.id] = reactive({
+                        email: {
+                            errors: em,
+                            meta: mm,
+                            value: vm,
+                            handleChange: him,
+                            reset: hrm,
+                        },
+                        roles: {
+                            errors: er,
+                            meta: mr,
+                            value: vr,
+                            handleChange: hir,
+                            reset: hrr,
+                        },
+                    });
+                }
+            };
             const userDirty = id => {
                 return v.fields[id].email.meta.dirty || v.fields[id].roles.meta.dirty;
             };
@@ -280,15 +336,16 @@
                 if(!!state.errors[id]) {
                     state.errors[id].email = [];
                 }
-                v.fields[id].email.handleInput(e);
+                v.fields[id].email.handleChange(e);
             };
             const getErrors = (id, field) => {
                 let apiErrors = [];
                 if(!!state.errors[id] && !!state.errors[id][field]) {
                     apiErrors = state.errors[id][field];
                 }
+                const formErrors = v.fields[id] ? v.fields[id][field].errors : [];
                 return [
-                    ...v.fields[id][field].errors,
+                    ...formErrors,
                     ...apiErrors,
                 ];
             };
@@ -353,6 +410,7 @@
 
             // DATA
             const state = reactive({
+                setupFinished: false,
                 userList: computed(_ => store.getters.users),
                 deletedUserList: computed(_ => store.getters.deletedUsers),
                 roles: computed(_ => store.getters.roles(true)),
@@ -360,47 +418,18 @@
                 errors: {},
             });
             const v = reactive({
-                fields: computed(_ => {
-                    const list = {};
-                    for(let i=0; i<state.userList.length; i++) {
-                        const u = state.userList[i];
-                        const {
-                            errors: em,
-                            meta: mm,
-                            value: vm,
-                            handleInput: him,
-                            resetField: hrm,
-                        } = useField(`email_${u.id}`, yup.string().required().email(), {
-                            initialValue: u.email,
-                        });
-                        const {
-                            errors: er,
-                            meta: mr,
-                            value: vr,
-                            handleInput: hir,
-                            resetField: hrr,
-                        } = useField(`roles_${u.id}`, yup.array(), {
-                            initialValue: u.roles,
-                        });
-                        list[u.id] = reactive({
-                            email: {
-                                errors: em,
-                                meta: mm,
-                                value: vm,
-                                handleInput: him,
-                                reset: hrm,
-                            },
-                            roles: {
-                                errors: er,
-                                meta: mr,
-                                value: vr,
-                                handleInput: hir,
-                                reset: hrr,
-                            },
-                        });
-                    }
-                    return list;
-                })
+                fields: {},
+            });
+
+            // ON MOUNTED
+            onMounted(_ => {
+                updateValidationState(state.userList);
+                state.setupFinished = true;
+            })
+
+            // WATCHER
+            watch(_ => state.userList, (newValue) => {
+                updateValidationState(newValue);
             });
 
             // ON BEFORE LEAVE

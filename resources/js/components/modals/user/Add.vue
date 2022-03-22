@@ -21,7 +21,7 @@
                     <span class="text-danger">*</span>:
                 </label>
                 <div class="col-12">
-                    <input class="form-control" :class="getClassByValidation(v.fields.name.errors)" type="text" id="name" v-model="v.fields.name.value" @input="v.fields.name.handleInput" required />
+                    <input class="form-control" :class="getClassByValidation(v.fields.name.errors)" type="text" id="name" v-model="v.fields.name.value" @input="v.fields.name.handleChange" required />
 
                     <div class="invalid-feedback">
                         <span v-for="(msg, i) in v.fields.name.errors" :key="i">
@@ -36,7 +36,7 @@
                     <span class="text-danger">*</span>:
                 </label>
                 <div class="col-12">
-                    <input class="form-control" :class="getClassByValidation(v.fields.nickname.errors)" type="text" id="nickname" v-model="v.fields.nickname.value" @input="v.fields.nickname.handleInput" required />
+                    <input class="form-control" :class="getClassByValidation(v.fields.nickname.errors)" type="text" id="nickname" v-model="v.fields.nickname.value" @input="v.fields.nickname.handleChange" required />
 
                     <div class="invalid-feedback">
                         <span v-for="(msg, i) in v.fields.nickname.errors" :key="i">
@@ -51,7 +51,7 @@
                     <span class="text-danger">*</span>:
                 </label>
                 <div class="col-12">
-                    <input class="form-control" :class="getClassByValidation(v.fields.email.errors)" type="email" id="email" v-model="v.fields.email.value" @input="v.fields.email.handleInput" required />
+                    <input class="form-control" :class="getClassByValidation(v.fields.email.errors)" type="email" id="email" v-model="v.fields.email.value" @input="v.fields.email.handleChange" required />
 
                     <div class="invalid-feedback">
                         <span v-for="(msg, i) in v.fields.email.errors" :key="i">
@@ -66,7 +66,7 @@
                     <span class="text-danger">*</span>:
                 </label>
                 <div class="col-12">
-                    <input class="form-control d-inline" :class="getClassByValidation(v.fields.password.errors)" type="password" id="password" v-model="v.fields.password.value" @input="v.fields.password.handleInput" required />
+                    <input class="form-control d-inline" :class="getClassByValidation(v.fields.password.errors)" type="password" id="password" v-model="v.fields.password.value" @input="v.fields.password.handleChange" required />
                     <a href="#" class="text-muted ms--4-5" @click.prevent="togglePasswordVisibility()">
                         <span v-show="!state.showPassword">
                             <i class="fas fa-fw fa-eye"></i>
@@ -89,7 +89,7 @@
                     <span class="text-danger">*</span>:
                 </label>
                 <div class="col-12">
-                    <input class="form-control" :class="getClassByValidation(v.fields.password_confirm.errors)" type="password" id="password_confirm" v-model="v.fields.password_confirm.value" @input="v.fields.password_confirm.handleInput" required />
+                    <input class="form-control" :class="getClassByValidation(v.fields.password_confirm.errors)" type="password" id="password_confirm" v-model="v.fields.password_confirm.value" @input="v.fields.password_confirm.handleChange" required />
 
                     <div class="invalid-feedback">
                         <span v-for="(msg, i) in v.fields.password_confirm.errors" :key="i">
@@ -173,22 +173,79 @@
             } = useForm({
                 validationSchema: schema,
             });
+            const {
+                errors: en,
+                meta: mn,
+                value: vn,
+                handleChange: hcn,
+            } = useField('name');
+            const {
+                errors: enn,
+                meta: mnn,
+                value: vnn,
+                handleChange: hcnn,
+            } = useField('nickname');
+            const {
+                errors: ee,
+                meta: me,
+                value: ve,
+                handleChange: hce,
+            } = useField('email');
+            const {
+                errors: ep,
+                meta: mp,
+                value: vp,
+                handleChange: hcp,
+            } = useField('password');
+            const {
+                errors: epc,
+                meta: mpc,
+                value: vpc,
+                handleChange: hcpc,
+            } = useField('password_confirm');
+
             const state = reactive({
                 show: false,
                 showPassword: false,
                 form: formMeta,
-                submitState: computed(_ => formMeta.dirty && formMeta.valid),
             });
             const v = reactive({
                 fields: {
-                    name: useField(`name`),
-                    nickname: useField(`nickname`),
-                    email: useField(`email`),
-                    password: useField(`password`),
-                    password_confirm: useField(`password_confirm`),
+                    name: {
+                        errors: en,
+                        meta: mn,
+                        value: vn,
+                        handleChange: hcn,
+                    },
+                    nickname: {
+                        errors: enn,
+                        meta: mnn,
+                        value: vnn,
+                        handleChange: hcnn,
+                    },
+                    email: {
+                        errors: ee,
+                        meta: me,
+                        value: ve,
+                        handleChange: hce,
+                    },
+                    password: {
+                        errors: ep,
+                        meta: mp,
+                        value: vp,
+                        handleChange: hcp,
+                    },
+                    password_confirm: {
+                        errors: epc,
+                        meta: mpc,
+                        value: vpc,
+                        handleChange: hcpc,
+                    },
                 },
                 schema: schema,
             });
+
+            console.log(formMeta);
 
             // ON MOUNTED
             onMounted(_ => {
