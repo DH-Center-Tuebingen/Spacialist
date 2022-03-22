@@ -20,11 +20,14 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix(''
     Route::get('layer/{id}', 'MapController@getLayer')->where('id', '[0-9]+');
     Route::get('layer/{id}/geometry', 'MapController@getGeometriesByLayer')->where('id', '[0-9]+');
     Route::get('epsg/{srid}', 'MapController@getEpsg')->where('srid', '[0-9]+');
+    Route::get('export/{id}', 'MapController@exportLayer')->where('id', '[0-9]+');
     
     Route::post('', 'MapController@addGeometry');
     Route::post('/layer', 'MapController@addLayer');
+    Route::post('/link', 'MapController@link');
     
     Route::patch('/layer/{id}', 'MapController@updateLayer')->where('id', '[0-9]+');
 
     Route::delete('layer/{id}', 'MapController@deleteLayer')->where('id', '[0-9]+');
+    Route::delete('/link/{gid}/{eid}', 'MapController@unlink')->where('gid', '[0-9]+')->where('eid', '[0-9]+');
 });

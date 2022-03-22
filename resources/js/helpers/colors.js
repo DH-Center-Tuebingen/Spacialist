@@ -140,7 +140,6 @@ export const gradients = [
 ];
 
 export const splitColor = value => {
-    console.log("value is", value);
     let r, g, b, a;
     if(value.startsWith('#')) {
         const colors = value.substring(1);
@@ -155,7 +154,6 @@ export const splitColor = value => {
         return [r, g, b];
     } else if(value.startsWith('rgba')) {
         const channels = value.match(/rgba\((\d+),\s?(\d+),\s?(\d+),\s?(\d+|\d?\.\d+)\)/);
-        console.log("this is the color", value, channels);
         r = channels[1];
         g = channels[2];
         b = channels[3];

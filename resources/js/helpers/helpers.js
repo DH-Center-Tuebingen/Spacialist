@@ -97,6 +97,21 @@ export function getTs() {
     return d.getTime();
 }
 
+export function getOrderedDate(short = false, withTime = false) {
+    const d = new Date();
+    const iso = d.toISOString();
+    if(withTime) {
+        return iso;
+    } else {
+        const woTime = iso.substring(0, iso.indexOf('T'));
+        if(short) {
+            return woTime.replaceAll('-', '');
+        } else {
+            return woTime;
+        }
+    }
+}
+
 export function getConcept(url) {
     if(!url || !hasConcept(url)) {
         return {};
@@ -245,6 +260,53 @@ export function defaultAttributeValue(datatype) {
             break;
     }
     return val;
+}
+
+export function getAttributeValueAsString(rawValue, datatype) {
+    if(!rawValue || !datatype) {
+        return null;
+    }
+
+    let strValue = null;
+
+    switch(datatype) {
+        case 'string':
+        case 'stringf':
+        case 'double':
+        case 'integer':
+        case 'boolean':
+        case 'date':
+        case 'geography':
+        case 'percentage':
+        case 'serial':
+        case 'iconclass':
+        case 'rism':
+            strValue = rawValue;
+            break;
+        case 'epoch':
+        case 'timeperiod':
+            strValue = `${rawValue.start} (${rawValue.startLabel}) - ${rawValue.end} (${rawValue.endLabel})`;
+            if(datatype == 'epoch') {
+                strValue += `[${translateConcept(rawValue.epoch.concept_url)}]`;
+            }
+            break;
+        case 'dimension':
+            strValue = `${rawValue.B} x ${rawValue.H} x ${rawValue.T} ${rawValue.unit}`;
+            break;
+        case 'list':
+            strValue = rawValue.join(', ');
+            break;
+        case 'string-sc':
+        case 'string-mc':
+        case 'entity':
+        case 'entity-mc':
+        case 'table':
+        case 'sql':
+            strValue = `TODO: ${datatype}`;
+            break;
+    }
+
+    return strValue;
 }
 
 // Fills non-present attribute values to be used in draggable components (e.g. attribute-list)

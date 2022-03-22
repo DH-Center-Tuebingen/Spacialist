@@ -196,17 +196,13 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 
 // MAP
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/map')->group(function() {
-    Route::get('export/{id}', 'MapController@exportLayer')->where('id', '[0-9]+');
-
     Route::post('epsg/text', 'MapController@getEpsgByText');
-    Route::post('/link/{gid}/{eid}', 'MapController@link')->where('gid', '[0-9]+')->where('eid', '[0-9]+');
 
     Route::patch('/{id}', 'MapController@updateGeometry')->where('id', '[0-9]+');
     Route::patch('/layer/{id}/switch', 'MapController@changeLayerPositions')->where('id', '[0-9]+');
     Route::patch('/layer/{id}/move', 'MapController@moveLayer')->where('id', '[0-9]+');
 
     Route::delete('/{id}', 'MapController@delete')->where('id', '[0-9]+');
-    Route::delete('/link/{gid}/{eid}', 'MapController@unlink')->where('gid', '[0-9]+')->where('eid', '[0-9]+');
 });
 
 // ANALYSIS

@@ -38,13 +38,18 @@
         </div>
     </div>
     <div :id="actionState.popupIds.p" class="popup popover ol-popover bs-popover-top" role="tooltip">
-        <h4 class="popover-header">
-            <span class="fw-medium">
-                {{ actionState.overlayData.title }}
-            </span>
-            <span v-if="actionState.overlayData.subtitle">
-                ({{ actionState.overlayData.subtitle }})
-            </span>
+        <h4 class="popover-header d-flex flex-row justify-content-between align-items-center">
+            <div>
+                <span class="fw-medium">
+                    {{ actionState.overlayData.title }}
+                </span>
+                <span v-if="actionState.overlayData.subtitle">
+                    ({{ actionState.overlayData.subtitle }})
+                </span>
+            </div>
+            <div>
+                <slot name="action"></slot>
+            </div>
         </h4>
         <div class="popover-body">
             <dl class="mb-0">
@@ -235,6 +240,11 @@
                 required: false,
                 default: true,
             },
+            extent: {
+                type: Object,
+                required: false,
+                default: {}
+            },
             provider: {
                 type: String,
                 required: false,
@@ -256,6 +266,7 @@
                 projection,
                 inputProjection,
                 resetEach,
+                extent,
                 drawing,
                 triggerDataRescan,
             } = toRefs(props);
@@ -456,26 +467,28 @@
                 features.forEach(f => {
                     let layer;
                     const p = f.getProperties();
-                    console.log("current feature", f, p);
+                    // console.log("current feature", f, p);
                     if(p.entity) {
                         const et = Object.values(layers.value).find(l => l.entity_type_id == p.entity_type_id);
                         layer = Object.values(state.mapEntityLayers).find(l => l.getProperties().layer_id == et.id);
                     } else {
                         layer = Object.values(state.mapEntityLayers).find(l => l.getProperties().type.toLowerCase() == 'unlinked');
                     }
-                    let symbolStyle;
+                    const styleOptions = {
+                        forFeature: f,
+                    };
                     if(p.style) {
-                        symbolStyle = p.style.symbol;
+                        styleOptions.symbolStyle = p.style.symbol;
                     }
-                    if(p.labels) {
-                        console.log("should load labels");
+                    if(p.label) {
+                        styleOptions.labelStyle = p.label;
                     }
                     if(p.charts) {
                         console.log("should load charts");
                     }
                     const color = layer.getProperties().color;
                     const src = layer.getSource();
-                    const defaultStyle = createStyle(color, 2, symbolStyle);
+                    const defaultStyle = createStyle(color, 2, styleOptions);
                     f.setStyle(defaultStyle);
                     src.addFeature(f);
                     state.featureList[p.id] = f;
@@ -573,56 +586,6 @@
                     if(actionState.measuring) return;
 
                     const feature = getFeaturesAtEvent(e);
-                    // if(!!feature) {
-                    //     const geometry = feature.getGeometry();
-                    //     const props = feature.getProperties();
-                    //     const coords = getExtentCenter(geometry.getExtent());
-                    //     let title = t('main.map.geometry_name', {id: props.id});
-                    //     let subtitle = '';
-                    //     const sizes = {
-                    //         in_m: 0,
-                    //         unit: '',
-                    //         combined: '',
-                    //     };
-
-                    //     if(props.entity) {
-                    //         subtitle = title;
-                    //         title = props.entity_name;
-                    //     }
-
-                    //     switch(geometry.getType()) {
-                    //         case 'LineString':
-                    //         case 'MultiLineString':
-                    //             sizes.in_m = getLength(geometry);
-                    //             sizes.unit = 'm';
-                    //             sizes.combined = formatLengthArea(sizes.in_m, 2);
-                    //             break;
-                    //         case 'Polygon':
-                    //         case 'MultiPolygon':
-                    //             sizes.in_m = getArea(geometry);
-                    //             sizes.unit = 'm²';
-                    //             sizes.combined = formatLengthArea(sizes.in_m, 2, true);
-                    //             break;
-                    //     }
-
-                    //     actionState.overlay.setPosition(coords);
-                    //     actionState.overlayData = {
-                    //         title: title,
-                    //         subtitle: subtitle,
-                    //         size: sizes,
-                    //         feature: feature,
-                    //         type: geometry.getType(),
-                    //         coordinates: geometry.getCoordinates(),
-                    //     };
-
-                    //     actionState.bsOverlay.show();
-                    // } else {
-                    //     actionState.overlay.setPosition();
-                    //     actionState.bsOverlay.hide();
-                    //     actionState.overlayData = {};
-                    //     // vm.selectedFeature = {};
-                    // }
-
                     context.emit('select', feature);
                 });
             };
@@ -1054,6 +1017,61 @@
                         actionState.overlayData = {};
                         // vm.selectedFeature = {};
                     }
+            });
+
+            watch(_ => extent.value, (newValue, oldValue) => {
+                const layers = [
+                    ...state.mapLayerGroups.base.getLayers().getArray(),
+                    ...state.mapLayerGroups.overlay.getLayers().getArray(),
+                    ...state.mapLayerGroups.entity.getLayers().getArray(),
+                ];
+                const id = newValue.id;
+
+                let bbox = [];
+                switch(newValue.type) {
+                    case 'bbox':
+                        bbox = newValue.bbox;
+                        break;
+                    case 'layer':
+                        for(let i=0; i<layers.length; i++) {
+                            const l = layers[i];
+                            const p = l.getProperties();
+                            if(p.layer_id == id) {
+                                bbox = l.getSource().getExtent();
+                                break;
+                            }
+                        }
+                        break;
+                    case 'layer_by_feature':
+                        const found = false;
+
+                        for(let i=0; i<layers.length; i++) {
+                            const l = layers[i];
+                            const s = l.getSource();
+                            const features = s.getFeatures();
+                            for(let j=0; j<features.length; j++) {
+                                const f = features[j];
+                                if(f.getProperties().id == id) {
+                                    bbox = s.getExtent();
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if(found) {
+                                break;
+                            }
+                        }
+                        break;
+                    default:
+                        // only bbox or layer type is supported
+                        return;
+                }
+
+                if(!bbox || bbox.length == 0) {
+                    return;
+                }
+
+                setExtent(bbox);
             });
 
             watch(_ => state.dataFeatureLength, (newValue, oldValue) => {

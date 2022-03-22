@@ -78,7 +78,7 @@ export function formatLengthArea(value, precision = 2, isArea = false) {
     return `${sizeInUnit.toFixed(precision)} ${unit}`;
 };
 
-export function createStyle(color = '#ffcc33', width = 2, fromSymbol) {
+export function createStyle(color = '#ffcc33', width = 2, styleOptions = {}) {
     // console.log("fromSymbol", fromSymbol);
     let polygonFillColor;
     let r, g, b, a;
@@ -97,7 +97,8 @@ export function createStyle(color = '#ffcc33', width = 2, fromSymbol) {
         }),
     };
 
-    if(fromSymbol) {
+    if(styleOptions.symbolStyle) {
+        const fromSymbol = styleOptions.symbolStyle;
         if(fromSymbol.hidden) {
             return new Style();
         }
@@ -125,6 +126,54 @@ export function createStyle(color = '#ffcc33', width = 2, fromSymbol) {
                 width: 2
             })
         });
+    }
+    if(styleOptions.labelStyle) {
+        const labelStyle = styleOptions.labelStyle;
+        const text = {};
+        if(labelStyle.font && labelStyle.font.active) {
+            const font = labelStyle.font;
+            text.font = `${font.style} ${font.transform} ${font.weight} ${font.size}px sans-serif`;
+            [r, g, b] = splitColor(font.color);
+            a = font.opacity;
+            text.fill = new Fill({
+                color: `rgba(${r}, ${g}, ${b}, ${a})`
+            });
+        }
+        if(labelStyle.buffer && labelStyle.buffer.active) {
+            const buffer = labelStyle.buffer;
+            [r, g, b] = splitColor(buffer.color);
+            a = buffer.opacity;
+            text.stroke = new Stroke({
+                color: `rgba(${r}, ${g}, ${b}, ${a})`,
+                width: buffer.size,
+            });
+        }
+        if(labelStyle.background && labelStyle.background.active) {
+            const background = labelStyle.background;
+            [r, g, b] = splitColor(background.fill_color);
+            a = background.opacity;
+            text.backgroundFill = new Fill({
+                color: `rgba(${r}, ${g}, ${b}, ${a})`
+            });
+            [r, g, b] = splitColor(background.border_color);
+            text.backgroundStroke = new Stroke({
+                color: `rgba(${r}, ${g}, ${b}, ${a})`,
+                width: background.border_size
+            });
+            const x = background.pad_x;
+            const y = background.pad_y;
+            text.padding = [y, x, y, x];
+        }
+        if(labelStyle.placement && labelStyle.placement.active) {
+            const placement = labelStyle.placement;
+            text.offsetX = placement.offset_x;
+            text.offsetY = placement.offset_y;
+            text.textAlign = placement.alignment;
+            text.textBaseline = placement.baseline;
+        }
+        const featureText = labelStyle.getText(styleOptions.forFeature);
+        text.text = featureText.toString();
+        options.text = new Text(text);
     }
 
     return new Style(options);
