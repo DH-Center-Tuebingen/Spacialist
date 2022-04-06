@@ -92,6 +92,29 @@ export function getCertaintyClass(certainty, prefix = 'bg') {
 
 export const multiselectResetClasslist = {clear: 'multiselect-clear multiselect-clear-reset'};
 
+export function getInputCursorPosition(input) {
+    const div = document.createElement('div');
+    const compStyle = getComputedStyle(input);
+    for(const k of compStyle) {
+        div.style[k] = compStyle[k];
+    }
+    div.style.height = 'auto';
+    div.textContent = input.value.substr(0, input.selectionStart);
+
+    const span = document.createElement('span');
+    span.textContent = input.value.substr(input.selectionStart) || '.'
+    div.appendChild(span);
+    document.body.appendChild(div);
+    const offsetX = span.offsetLeft + input.offsetLeft;
+    const offsetY = span.offsetTop + input.offsetTop;
+    document.body.removeChild(div);
+
+    return {
+        x: offsetX,
+        y: offsetY,
+    };
+}
+
 export function getTs() {
     const d = new Date();
     return d.getTime();
@@ -380,7 +403,20 @@ export function getUsers() {
     }
 };
 
-export function getRoles() {
+// where can be any of 'start', 'end', 'whole' (default)
+export function filterUsers(term, ci=true, where='whole') {
+    const flags = ci ? 'i' : '';
+    let pattern = term;
+    if(where == 'start') {
+        pattern = `^${pattern}`;
+    } else if(where == 'end') {
+        pattern = `${pattern}$`;
+    }
+    const regex = new RegExp(pattern, flags);
+    return getUsers().filter(u => {
+        return regex.test(u.name) || regex.test(u.nickname);
+    });
+};
     const fallback = [];
     if(isLoggedIn()) {
         return store.getters.roles(true) || fallback;

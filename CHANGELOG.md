@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 - List with all entities that reference currently selected entity in _Entity_ Attribute
 - Line numbers and skipping rows to CSV table component
 - CSV-based Data Importer
+- Supply matching user list for mentioning (type '@' in comment to get a searchable list)
 ### Fixed
 - Improved Attribute Validation
 - Editing Entity Name

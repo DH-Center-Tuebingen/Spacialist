@@ -137,11 +137,21 @@
                 </span>
             </div>
             <form role="form" @submit.prevent="postComment">
-                <div class="mb-3 d-flex">
-                    <textarea class="form-control" v-model="state.composedMessage" id="comment-content" ref="messageInput" :placeholder="t('global.comments.text_placeholder')"></textarea>
+                <div class="mb-3 d-flex position-relative">
+                    <textarea class="form-control" v-model="state.composedMessage" id="comment-content" ref="messageInput" :placeholder="t('global.comments.text_placeholder')" @input="checkForMentionInput" @keydown.esc="cancelMentionInput()"></textarea>
                     <div class="ms-2 mt-auto">
                         <emoji-picker @selected="addEmoji"></emoji-picker>
                     </div>
+                    <ul class="list-group position-absolute bg-light m-2" v-if="state.mentionSearch.show" :style="state.mentionSearch.offset">
+                        <li class="list-group-item list-group-item-hover clickable d-flex flex-row gap-2 align-items-center" v-for="user in state.mentionSearch.result" :key="user.id" @click="insertMention(user)">
+                            <span class="fw-bold">
+                                {{ user.name }}
+                            </span>
+                            <span class="text-muted small">
+                                {{ user.nickname }}
+                            </span>
+                        </li>
+                    </ul>
                 </div>
                 <div class="text-center mt-2">
                     <button type="submit" class="btn btn-outline-success" :disabled="disabled">
@@ -171,6 +181,8 @@
     } from '../helpers/filters.js';
     import {
         userId,
+        filterUsers,
+        getInputCursorPosition,
     } from '../helpers/helpers.js';
     import {
         showUserInfo,
@@ -283,6 +295,15 @@
                         nickname: null
                     }
                 },
+                mentionSearch: {
+                    show: false,
+                    query: '',
+                    result: [],
+                    position: -1,
+                    positionEnd: -1,
+                    offset: '',
+                    target: null,
+                },
                 composedMessage: '',
                 currentUserId: userId(),
                 commentsHidden: computed(_ => state.hideComments || !state.hasComments),
@@ -364,6 +385,52 @@
             const addEmoji = event => {
                 state.composedMessage += event.emoji;
             };
+            const cancelMentionInput = _ => {
+                state.mentionSearch.show = false;
+                state.mentionSearch.query = '';
+                state.mentionSearch.result = [];
+                state.mentionSearch.position = -1;
+                state.mentionSearch.positionEnd = -1;
+                state.mentionSearch.offset = '';
+                state.mentionSearch.target = null;
+            };
+            const checkForMentionInput = event => {
+                if(!state.mentionSearch.show && event.data == '@') {
+                    state.mentionSearch.show = true;
+                    state.mentionSearch.query = '';
+                    state.mentionSearch.result = filterUsers(state.mentionQuery);
+                    state.mentionSearch.position = event.target.selectionStart;
+                    state.mentionSearch.target = event.target;
+                } else if(state.mentionSearch.show) {
+                    // If char got deleted...
+                    if(event.inputType == 'deleteContentBackward') {
+                        // ...and that char was our mention trigger (@)
+                        // hide mention search
+                        if(state.mentionSearch.position - 1 == event.target.selectionStart) {
+                            cancelMentionInput();
+                            return;
+                        } else {
+                            state.mentionSearch.query = state.mentionSearch.query.slice(0, -1);
+                            state.mentionSearch.result = filterUsers(state.mentionSearch.query);
+                        }
+                    } else {
+                        state.mentionSearch.query += event.data;
+                        state.mentionSearch.result = filterUsers(state.mentionSearch.query);
+                    }
+                    state.mentionSearch.positionEnd = event.target.selectionStart;
+                }
+
+                const cursorPos = getInputCursorPosition(event.target);
+                state.mentionSearch.offset = `left: ${cursorPos.x}px`;
+            };
+            const insertMention = user => {
+                const from = state.mentionSearch.position;
+                const to = state.mentionSearch.positionEnd;
+                const msg = state.composedMessage;
+                const newMsg = msg.substring(0, from) + user.nickname + msg.substring(to);
+                state.composedMessage = newMsg;
+                cancelMentionInput();
+            };
             const isDeleted = comment => {
                 return !!comment.deleted_at;
             };
@@ -391,6 +458,9 @@
                 cancelReplyTo,
                 handleDelete,
                 addEmoji,
+                cancelMentionInput,
+                checkForMentionInput,
+                insertMention,
                 isDeleted,
                 emptyMetadata,
                 // PROPS

@@ -138,6 +138,15 @@
     cursor: not-allowed;
 }
 
+.list-group-item-hover:hover {
+    background-color: $primary;
+    color: $light;
+}
+
+.list-group-item-hover:hover .text-muted {
+    color: $light !important;
+}
+
 .breadcrumb-item-slash {
     + .breadcrumb-item-slash {
     &::before {
