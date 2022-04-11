@@ -269,7 +269,8 @@
                         "button": "Store in Spacialist"
                     }
                 }
-            }
+            },
+            "page_access_denied": "You do not have permission(s) to access this page. Missing permissions: {perm}"
         },
         "csv": {
             "uploader": {
@@ -409,6 +410,37 @@
         },
         "role": {
             "add_button": "Add new Role",
+            "permissions": {
+                "access_control_title": "Access Control",
+                "types": {
+                    "read": "Read",
+                    "write": "Write",
+                    "create": "Create",
+                    "delete": "Delete",
+                    "share": "Share",
+                    "write_info": "this also includes similar operations such as moving",
+                    "create_info": "this also includes similar operations such as duplicating",
+                    "share_info": "this also includes similar operations such as exporting"
+                },
+                "groups": {
+                    "entity": "Entities",
+                    "entity_data": "Form Data",
+                    "attribute": "Attributes",
+                    "entity_type": "Entity-Types",
+                    "bibliography": "Bibliography",
+                    "comments": "Comments",
+                    "users_roles": "Users & Roles",
+                    "preferences": "Preferences",
+                    "thesaurus": "Thesaurus",
+                    "is_plugin": "Plugin"
+                }
+            },
+            "preset": {
+                "derive_from_preset": "Derive permissions from preset",
+                "derived_from": "Derived from:",
+                "administrator": "Administrator",
+                "guest": "Guest"
+            },
             "toasts": {
                 "updated": {
                     "title": "Role updated",

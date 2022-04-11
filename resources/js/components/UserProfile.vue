@@ -151,7 +151,7 @@
                 state.isDirty = false;
             };
             const deleteAvatar = _ => {
-                deleteUserAvatar(state.user.id).then(data => {
+                deleteUserAvatar().then(data => {
                     updateUserObjects({
                         avatar: false,
                         avatar_url: '',
@@ -172,7 +172,7 @@
                 state.avatarUser = appliedMetadata(getUser());
             };
             const uploadFile = (file, component) => {
-                return setUserAvatar(state.user.id, file.file).then(data => {
+                return setUserAvatar(file.file).then(data => {
                     updateUserObjects(data)
                 });
             };

@@ -23,7 +23,7 @@ class MapController extends Controller
 
     public function getData() {
         $user = auth()->user();
-        if(!$user->can('view_geodata')) {
+        if(!$user->can('geodata_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view the geo data')
             ], 403);
@@ -62,7 +62,7 @@ class MapController extends Controller
 
     public function updateGeometry($id, Request $request) {
         $user = auth()->user();
-        if(!$user->can('create_edit_geodata')) {
+        if(!$user->can('geodata_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to edit geometric data')
             ], 403);
@@ -86,7 +86,7 @@ class MapController extends Controller
 
     public function changeLayerPositions($id, Request $request) {
         $user = auth()->user();
-        if(!$user->can('create_edit_geodata')) {
+        if(!$user->can('geodata_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to sort layers')
             ], 403);
@@ -115,7 +115,7 @@ class MapController extends Controller
 
     public function moveLayer($id, Request $request) {
         $user = auth()->user();
-        if(!$user->can('create_edit_geodata')) {
+        if(!$user->can('geodata_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to move layers')
             ], 403);
@@ -149,7 +149,7 @@ class MapController extends Controller
 
     public function delete($id) {
         $user = auth()->user();
-        if(!$user->can('upload_remove_geodata')) {
+        if(!$user->can('geodata_delete')) {
             return response()->json([
                 'error' => __('You do not have the permission to delete geo data')
             ], 403);

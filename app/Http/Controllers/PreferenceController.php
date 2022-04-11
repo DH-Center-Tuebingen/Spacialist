@@ -19,12 +19,24 @@ class PreferenceController extends Controller {
 
     // GET
     public function getPreferences() {
+        $user = auth()->user();
+        if(!$user->can('preferences_read')) {
+            return response()->json([
+                'error' => __('You are not allowed to read preferences')
+            ], 403);
+        }
+
         $preferences = Preference::getPreferences();
         return response()->json($preferences);
     }
 
     public function getUserPreferences($id) {
         $user = auth()->user();
+        if(!isset($user) || ($user->id != $id && !$user->can('preferences_write'))) {
+            return response()->json([
+                'error' => __('You are not allowed to access preferences of another user')
+            ], 403);
+        }
 
         try {
             User::findOrFail($id);
@@ -34,11 +46,6 @@ class PreferenceController extends Controller {
             ], 400);
         }
 
-        if(!isset($user) || $user->id != $id) {
-            return response()->json([
-                'error' => __('You are not allowed to access preferences of another user')
-            ], 403);
-        }
         $preferences = Preference::getUserPreferences($id);
         return response()->json($preferences);
     }
@@ -47,7 +54,20 @@ class PreferenceController extends Controller {
 
     // PATCH
     public function patchPreferences(Request $request, $uid = -1) {
+        $user = auth()->user();
         $isUserPref = $uid > 0;
+
+        // If user who tries to set preferences is not supplied uid,
+        // check if they are allowed to set preferences of other users
+        if($isUserPref && $user->id !== $uid && !$user->can('preferences_write')) {
+            return response()->json([
+                'error' => __('You do not have the permission to edit preferences of another user')
+            ], 403);
+        } else if(!$isUserPref && !$user->can('preferences_write')) {
+            return response()->json([
+                'error' => __('You do not have the permission to edit system preferences')
+            ], 403);
+        }
         // When try to set preferences of user, check for existence first
         if($isUserPref) {
             try {
@@ -59,27 +79,9 @@ class PreferenceController extends Controller {
             }
         }
 
-        $user = auth()->user();
-
-        // If user who tries to set preferences is not supplied uid,
-        // check if they are allowed to set preferences of other users
-        if($user->id !== $uid && !$user->can('edit_preferences')) {
-            return response()->json([
-                'error' => __('You do not have the permission to edit preferences')
-            ], 403);
-        }
-
         $this->validate($request, [
             'changes' => 'required|array',
-            // 'label' => 'required|string|exists:preferences,label',
-            // 'value' => 'nullable',
-            // 'user_id' => 'nullable|integer|exists:users,id',
-            // 'allow_override' => 'nullable|boolean_string'
         ]);
-
-        // $label = $request->get('label');
-        // $value = $request->get('value');
-        // $allowOverride = $request->get('allow_override');
 
         $changes = $request->get('changes');
 

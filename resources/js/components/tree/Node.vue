@@ -128,7 +128,7 @@
                 ShowMoveEntity(data.value);
             };
             const deleteEntity = _ => {
-                if(!can('delete_move_concepts')) return;
+                if(!can('entity_delete')) return;
 
                 showDeleteEntity(data.value.id);
             };

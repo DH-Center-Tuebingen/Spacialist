@@ -31,7 +31,7 @@
                 </div>
             </div>
             <div class="mb-3">
-                <label class="col-form-label col-12" for="nickname">
+                <label class="col-form-label col-12" for="display-name">
                     {{ t('global.display_name') }}
                     <span class="text-danger">*</span>:
                 </label>
@@ -46,7 +46,7 @@
                 </div>
             </div>
             <div class="mb-3">
-                <label class="col-form-label col-12" for="email">
+                <label class="col-form-label col-12" for="description">
                     {{ t('global.description') }}
                     <span class="text-danger">*</span>:
                 </label>
@@ -58,6 +58,33 @@
                             {{ msg }}
                         </span>
                     </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="col-form-label col-12" for="derive-from">
+                    {{ t('main.role.preset.derive_from_preset') }}:
+                </label>
+                <div class="col-12">
+                    <multiselect
+                        id="derive-from"
+                        v-model="v.fields.derived_from.value"
+                        :classes="multiselectResetClasslist"
+                        :object="true"
+                        :label="'name'"
+                        :track-by="'id'"
+                        :valueProp="'id'"
+                        :mode="'single'"
+                        :options="state.rolePresets"
+                        :placeholder="t('main.role.add_permission_placeholder')">
+                            <template v-slot:option="{ option }">
+                                {{ t(`main.role.preset.${option.name}`) }}
+                            </template>
+                            <template v-slot:singlelabel="{ value }">
+                                <div class="multiselect-single-label">
+                                    {{ t(`main.role.preset.${value.name}`) }}
+                                </div>
+                            </template>
+                    </multiselect>
                 </div>
             </div>
         </form>
@@ -85,10 +112,12 @@
 
     import * as yup from 'yup';
 
+    import store from '@/bootstrap/store.js';
+
     import {
-        can,
         getClassByValidation,
-    } from '../../../helpers/helpers.js';
+        multiselectResetClasslist,
+    } from '@/helpers/helpers.js';
 
     export default {
         props: {
@@ -108,6 +137,7 @@
                     name: v.fields.name.value,
                     display_name: v.fields.display_name.value,
                     description: v.fields.description.value,
+                    derived_from: v.fields.derived_from.value ? v.fields.derived_from.value.id : null,
                 };
                 context.emit('add', role);
             };
@@ -145,6 +175,7 @@
             const state = reactive({
                 show: false,
                 form: formMeta,
+                rolePresets: computed(_ => store.getters.rolePresets),
             });
             const v = reactive({
                 fields: {
@@ -166,6 +197,9 @@
                         value: vd,
                         handleChange: hcd,
                     },
+                    derived_from: {
+                        value: null,
+                    },
                 },
                 schema: schema,
             });
@@ -180,6 +214,7 @@
                 t,
                 // HELPERS
                 getClassByValidation,
+                multiselectResetClasslist,
                 // PROPS
                 // LOCAL
                 closeModal,

@@ -26,7 +26,7 @@ class MapController extends Controller
 
     public function getData() {
         $user = auth()->user();
-        if(!$user->can('view_geodata')) {
+        if(!$user->can('geodata_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view the geo data')
             ], 403);
@@ -51,7 +51,7 @@ class MapController extends Controller
 
     public function getLayers(Request $request) {
         $user = auth()->user();
-        if(!$user->can('view_geodata')) {
+        if(!$user->can('geodata_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view layers')
             ], 403);
@@ -85,7 +85,7 @@ class MapController extends Controller
 
     public function getEntityTypeLayers() {
         $user = auth()->user();
-        if(!$user->can('view_geodata')) {
+        if(!$user->can('geodata_read') || !$user->can('entity_type_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view layers')
             ], 403);
@@ -101,7 +101,7 @@ class MapController extends Controller
 
     public function getLayer($id) {
         $user = auth()->user();
-        if(!$user->can('view_geodata')) {
+        if(!$user->can('geodata_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view a layer')
             ], 403);
@@ -119,7 +119,7 @@ class MapController extends Controller
 
     public function getGeometriesByLayer($id) {
         $user = auth()->user();
-        if(!$user->can('view_geodata')) {
+        if(!$user->can('geodata_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view geodata')
             ], 403);
@@ -153,6 +153,13 @@ class MapController extends Controller
     }
 
     public function getEpsg($srid) {
+        $user = auth()->user();
+        if(!$user->can('geodata_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to view epsg codes')
+            ], 403);
+        }
+
         $epsg = \DB::table('spatial_ref_sys')
             ->where('srid', $srid)
             ->first();
@@ -161,7 +168,7 @@ class MapController extends Controller
 
     public function exportLayer(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('view_geodata')) {
+        if(!$user->can('geodata_share')) {
             return response()->json([
                 'error' => __('You do not have the permission to export layers')
             ], 403);
@@ -263,7 +270,7 @@ class MapController extends Controller
 
     public function addGeometry(Request $request) {
         $user = auth()->user();
-        if(!$user->can('create_edit_geodata')) {
+        if(!$user->can('geodata_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to add geometric data')
             ], 403);
@@ -275,12 +282,20 @@ class MapController extends Controller
         ]);
 
         $objs = Geodata::createFromFeatureCollection(json_decode($request->get('collection')), $request->get('srid'), json_decode($request->get('metadata')), $user);
-        return response()->json($objs);
+
+        if(isset($objs['type']) && $objs['type'] == 'error') {
+            return response()->json([
+                'error' => $objs['msg']
+            ], $objs['code']);
+        } else {
+            return response()->json($objs);
+        }
+
     }
 
     public function addLayer(Request $request) {
         $user = auth()->user();
-        if(!$user->can('create_edit_geodata')) {
+        if(!$user->can('geodata_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to add layers')
             ], 403);
@@ -311,7 +326,7 @@ class MapController extends Controller
 
     public function link(Request $request) {
         $user = auth()->user();
-        if(!$user->can('link_geodata')) {
+        if(!$user->can('geodata_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to link geo data')
             ], 403);
@@ -376,7 +391,7 @@ class MapController extends Controller
 
     public function updateLayer($id, Request $request) {
         $user = auth()->user();
-        if(!$user->can('create_edit_geodata')) {
+        if(!$user->can('geodata_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to update layers')
             ], 403);
@@ -401,7 +416,7 @@ class MapController extends Controller
 
     public function deleteLayer($id) {
         $user = auth()->user();
-        if(!$user->can('upload_remove_geodata')) {
+        if(!$user->can('geodata_delete')) {
             return response()->json([
                 'error' => __('You do not have the permission to delete layers')
             ], 403);
@@ -426,7 +441,7 @@ class MapController extends Controller
 
     public function unlink(Request $request, $gid, $eid) {
         $user = auth()->user();
-        if(!$user->can('link_geodata')) {
+        if(!$user->can('geodata_delete')) {
             return response()->json([
                 'error' => __('You do not have the permission to unlink geo data')
             ], 403);

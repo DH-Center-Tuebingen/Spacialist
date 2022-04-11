@@ -30,9 +30,11 @@
                     {{ state.certainty }}%
                 </div>
             </div>
+            <div v-dcan="'comments_read'"></div>
             <comment-list
+                v-if="can('comments_read')"
                 :avatar="48"
-                :disabled="!can('duplicate_edit_concepts')"
+                :disabled="!can('comments_write')"
                 :comments="state.comments"
                 :classes="''"
                 :list-classes="''"
@@ -103,7 +105,7 @@
             <h6 class="mt-2">
                 {{ t('main.entity.references.bibliography.add') }}
             </h6>
-            <form role="form" @submit.prevent="onAddReference()" v-dcan="'add_remove_bibliography'">
+            <form role="form" @submit.prevent="onAddReference()" v-dcan="'bibliography_read|entity_data_write'">
                 <div class="d-flex flex-row">
                     <div class="flex-grow-1">
                         <multiselect
@@ -169,24 +171,24 @@
         toRefs,
     } from 'vue';
     import { useI18n } from 'vue-i18n';
-    import router from '../../../bootstrap/router.js';
-    import store from '../../../bootstrap/store.js';
+    import router from '@/bootstrap/router.js';
+    import store from '@/bootstrap/store.js';
 
     import {
         can,
         getCertaintyClass,
         translateConcept,
-    } from '../../../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
     import {
         patchAttribute,
         getAttributeValueComments,
         deleteReferenceFromEntity,
         updateReference,
         addReference,
-    } from '../../../api.js';
+    } from '@/api.js';
     import {
         date,
-    } from '../../../helpers/filters.js';
+    } from '@/helpers/filters.js';
 
     export default {
         props: {
@@ -203,9 +205,11 @@
             const aid = router.currentRoute.value.params.aid;
 
             // FETCH
-            getAttributeValueComments(entity.value.id, aid).then(comments => {
-                state.comments = comments;
-            });
+            if(can('comments_read')) {
+                getAttributeValueComments(entity.value.id, aid).then(comments => {
+                    state.comments = comments;
+                });
+            }
 
             // FUNCTIONS
             const setCertainty = event => {
@@ -271,7 +275,7 @@
                 state.editItem = {};
             };
             const onAddReference = _ => {
-                if(!can('add_remove_bibliography')) return;
+                if(!can('bibliography_read|entity_data_write')) return;
                 const data = {
                     bibliography_id: state.newItem.bibliography.id,
                     description: state.newItem.description,
@@ -281,14 +285,14 @@
                 });
             };
             const onDeleteReference = reference => {
-                if(!can('add_remove_bibliography')) return;
+                if(!can('bibliography_read|entity_data_write')) return;
                 const id = reference.id;
                 deleteReferenceFromEntity(reference.id, entity.value.id, state.attribute.thesaurus_url).then(data => {
                     cancelEditReference();
                 });
             };
             const onUpdateReference = editedReference => {
-                if(!can('edit_bibliography')) return;
+                if(!can('bibliography_read|entity_data_write')) return;
                 const ref = state.references.find(r => r.id == editedReference.id);
                 if(ref.description == editedReference.description) {
                     cancelEditReference();

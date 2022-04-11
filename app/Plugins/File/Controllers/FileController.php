@@ -25,7 +25,7 @@ class FileController extends Controller
 
     public function asHtml($id) {
         $user = auth()->user();
-        if(!$user->can('view_files')) {
+        if(!$user->can('file_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view a specific file as HTML')
             ], 403);
@@ -42,7 +42,7 @@ class FileController extends Controller
 
     public function getArchiveFileList($id) {
         $user = auth()->user();
-        if(!$user->can('view_files')) {
+        if(!$user->can('file_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view a specific file')
             ], 403);
@@ -61,7 +61,7 @@ class FileController extends Controller
 
     public function downloadArchivedFile(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('view_files')) {
+        if(!$user->can('file_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to download parts of a zip file')
             ], 403);
@@ -89,7 +89,7 @@ class FileController extends Controller
 
         $type = $request->get('t');
 
-        if(!$user->can('view_files')) {
+        if(!$user->can('file_read')) {
             switch($type) {
                 case 'category':
                     $msg = __('You do not have the permission to get the file categories');
@@ -140,7 +140,7 @@ class FileController extends Controller
 
     public function getFiles(Request $request, $page = 1) {
         $user = auth()->user();
-        if (!$user->can('view_files')) {
+        if (!$user->can('file_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view files')
             ], 403);
@@ -155,7 +155,7 @@ class FileController extends Controller
 
     public function replaceFileContent(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('manage_files')) {
+        if(!$user->can('file_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to edit a file\'s content')
             ], 403);
@@ -180,7 +180,7 @@ class FileController extends Controller
 
     public function uploadFile(Request $request) {
         $user = auth()->user();
-        if(!$user->can('manage_files')) {
+        if(!$user->can('file_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to upload files')
             ], 403);
@@ -209,7 +209,7 @@ class FileController extends Controller
 
     public function exportFiles(Request $request) {
         $user = auth()->user();
-        if(!$user->can('export_files')) {
+        if(!$user->can('file_share')) {
             return response()->json([
                 'error' => __('You do not have the permission to export files')
             ], 403);
@@ -238,7 +238,7 @@ class FileController extends Controller
 
     public function deleteFilesBatch(Request $request) {
         $user = auth()->user();
-        if(!$user->can('manage_files')) {
+        if(!$user->can('file_delete')) {
             return response()->json([
                 'error' => __('You do not have the permission to delete files')
             ], 403);
@@ -269,7 +269,7 @@ class FileController extends Controller
     public function patchProperty(Request $request, $id)
     {
         $user = auth()->user();
-        if (!$user->can('manage_files')) {
+        if (!$user->can('file_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to modify file properties')
             ], 403);
@@ -314,7 +314,7 @@ class FileController extends Controller
 
     public function patchTags(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('manage_files')) {
+        if(!$user->can('file_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to modify file properties')
             ], 403);
@@ -360,7 +360,7 @@ class FileController extends Controller
 
     public function linkToEntity(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('link_files')) {
+        if(!$user->can('file_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to link files')
             ], 403);
@@ -386,7 +386,7 @@ class FileController extends Controller
 
     public function deleteFile($id) {
         $user = auth()->user();
-        if(!$user->can('manage_files')) {
+        if(!$user->can('file_delete')) {
             return response()->json([
                 'error' => __('You do not have the permission to delete files')
             ], 403);
@@ -406,7 +406,7 @@ class FileController extends Controller
 
     public function unlinkEntity($id, $eid) {
         $user = auth()->user();
-        if(!$user->can('link_files')) {
+        if(!$user->can('file_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to unlink files')
             ], 403);

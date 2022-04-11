@@ -30,7 +30,7 @@
                         </div>
                     </li>
                     <li class="list-inline-item">
-                        <button type="button" class="btn btn-outline-success" id="bibliography-add-button" @click="showNewItemModal()" :disabled="!can('add_remove_bibliography')">
+                        <button type="button" class="btn btn-outline-success" id="bibliography-add-button" @click="showNewItemModal()" :disabled="!can('bibliography_create')">
                             <i class="fas fa-fw fa-plus"></i> {{ t('main.bibliography.add') }}
                         </button>
                     </li>
@@ -43,7 +43,7 @@
                             v-model="files"
                             :custom-action="importFile"
                             :directory="false"
-                            :disabled="!can('add_remove_bibliography|edit_bibliography')"
+                            :disabled="!can('bibliography_write|bibliography_create')"
                             :multiple="false"
                             :drop="true"
                             @input-file="inputFile">
@@ -353,10 +353,10 @@
                                     <i class="fas fa-fw fa-ellipsis-h"></i>
                                 </span>
                                 <div class="dropdown-menu overlay-all" aria-labelledby="dropdownMenuButton">
-                                    <a class="dropdown-item" href="#" @click.prevent="editItem(entry)" :disabled="!can('edit_bibliography')">
+                                    <a class="dropdown-item" href="#" @click.prevent="editItem(entry)" :disabled="!can('bibliography_write')">
                                         <i class="fas fa-fw fa-edit text-info"></i> {{ t('global.edit') }}
                                     </a>
-                                    <a class="dropdown-item" href="#" @click.prevent="openDeleteEntryModal(entry)" :disabled="!can('add_remove_bibliography')">
+                                    <a class="dropdown-item" href="#" @click.prevent="openDeleteEntryModal(entry)" :disabled="!can('bibliography_delete')">
                                         <i class="fas fa-fw fa-trash text-danger"></i> {{ t('global.delete') }}
                                     </a>
                                 </div>
@@ -448,7 +448,7 @@
                 state.entriesLoaded = Math.min(state.entriesLoaded + state.chunkSize, state.allEntries.length);
             };
             const showNewItemModal = _ => {
-                if(!can('add_remove_bibliography')) return;
+                if(!can('bibliography_create')) return;
                 
                 showBibliographyEntry({
                     fields: {},
@@ -478,7 +478,7 @@
             };
             const addBibliographyItem = item => {
                 if(
-                    !can('add_remove_bibliography')
+                    !can('bibliography_create')
                     || !item.type
                     || !item.fields
                 ) {
@@ -494,7 +494,7 @@
                 })
             };
             const inputFile = (newFile, oldFile) => {
-                if(!can('add_remove_bibliography|edit_bibliography')) return;
+                if(!can('bibliography_write|bibliography_create')) return;
 
                 // Enable automatic upload
                 if(Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error) {
@@ -509,13 +509,15 @@
                 });
             };
             const exportFile = _ => {
+                if(!can('bibliography_share')) return;
+
                 getBibtexFile().then(data => {
                     const filename = getProjectName(true) + '.bibtex';
                     createDownloadLink(data, filename, false, 'application/x-bibtex');
                 });
             };
             const editItem = data => {
-                if(!can('edit_bibliography')) return;
+                if(!can('bibliography_write')) return;
                 const type = bibliographyTypes.find(t => t.name == data.type);
                 if(!type) return;
                 let fields = {};
@@ -532,7 +534,7 @@
                 showBibliographyEntry(item, addBibliographyItem);
             };
             const openDeleteEntryModal = entry => {
-                if(!can('add_remove_bibliography')) return;
+                if(!can('bibliography_delete')) return;
 
                 showDeleteBibliographyEntry(entry, onEntryDeleted);
             };

@@ -2,7 +2,7 @@
     <div class="d-flex flex-column h-100" v-if="state.setupFinished">
         <h4 class="d-flex flex-row gap-2 align-items-center">
             {{ t('global.roles') }}
-            <button type="button" class="btn btn-outline-success btn-sm" @click="showAddRoleModal()" :disabled="!can('add_edit_role')">
+            <button type="button" class="btn btn-outline-success btn-sm" @click="showAddRoleModal()" :disabled="!can('users_roles_create')">
                 <i class="fas fa-fw fa-plus"></i> {{ t('main.role.add_button') }}
             </button>
         </h4>
@@ -24,7 +24,7 @@
                         <td>
                             {{ role.name }}
                         </td>
-                        <td>
+                        <td v-if="v.fields[role.id]">
                             <input
                                 type="text"
                                 class="form-control"
@@ -40,7 +40,7 @@
                                 </span>
                             </div>
                         </td>
-                        <td>
+                        <td v-if="v.fields[role.id]">
                             <input
                                 type="text"
                                 class="form-control"
@@ -56,26 +56,20 @@
                                 </span>
                             </div>
                         </td>
-                        <td>
-                            <multiselect
-                                v-model="v.fields[role.id].permissions.value"
-                                :class="getClassByValidation(getErrors(role.id, 'permissions'))"
-                                :name="`permissions_${role.id}`"
-                                :object="true"
-                                :label="'display_name'"
-                                :track-by="'display_name'"
-                                :valueProp="'id'"
-                                :mode="'tags'"
-                                :disabled="!can('add_remove_permission')"
-                                :options="state.permissions"
-                                :placeholder="t('main.role.add_permission_placeholder')"
-                                @input="v.fields[role.id].permissions.handleChange">
-                            </multiselect>
-
-                            <div class="invalid-feedback">
-                                <span v-for="(msg, i) in getErrors(role.id, 'permissions')" :key="i">
-                                    {{ msg }}
-                                </span>
+                        <td v-if="v.fields[role.id]">
+                            <div class="d-flex flex-row gap-2">
+                                <div class="d-flex flex-row gap-2 align-items-center" v-if="role.derived">
+                                    <span class="text-muted">
+                                        {{ t('main.role.preset.derived_from') }}
+                                    </span>
+                                    <span class="badge bg-primary">
+                                        <i class="fas fa-fw fa-shield-alt"></i>
+                                        {{ t(`main.role.preset.${role.derived.name}`) }}
+                                    </span>
+                                </div>
+                                <a href="#" v-if="can('users_roles_write')" class="text-decoration-none text-info" @click.prevent="openAccessControlModal(role.id)" :title="t('global.edit')">
+                                    <i class="fas fa-fw fa-edit"></i>
+                                </a>
                             </div>
                         </td>
                         <td>
@@ -93,10 +87,10 @@
                                     </sup>
                                 </span>
                                 <div class="dropdown-menu" :aria-labelledby="`role-options-dropdown-${role.id}`">
-                                    <a class="dropdown-item" href="#" v-if="roleDirty(role.id)" :disabled="!can('add_remove_permission')" @click.prevent="patchRole(role.id)">
+                                    <a class="dropdown-item" href="#" v-if="roleDirty(role.id)" :disabled="!can('users_roles_write')" @click.prevent="patchRole(role.id)">
                                         <i class="fas fa-fw fa-check text-success"></i> {{ t('global.save') }}
                                     </a>
-                                    <a class="dropdown-item" href="#" @click.prevent="deleteRole(role.id)" :disabled="!can('delete_role')">
+                                    <a class="dropdown-item" href="#" @click.prevent="deleteRole(role.id)" :disabled="!can('users_roles_delete')">
                                         <i class="fas fa-fw fa-trash text-danger"></i> {{ t('global.delete') }}
                                     </a>
                                 </div>
@@ -131,6 +125,7 @@
         showDiscard,
         showAddRole,
         showDeleteRole,
+        showAccessControlModal,
     } from '../helpers/modal.js';
     import {
         can,
@@ -141,7 +136,9 @@
     import {
         date,
     } from '../helpers/filters.js';
-import { patchRoleData } from '../api.js';
+    import {
+        patchRoleData,
+    } from '../api.js';
 
     export default {
         setup(props) {
@@ -185,15 +182,6 @@ import { patchRoleData } from '../api.js';
                     } = useField(`description_${r.id}`, yup.string().required().max(255), {
                         initialValue: r.description,
                     });
-                    const {
-                        errors: ep,
-                        meta: mp,
-                        value: vp,
-                        handleChange: hip,
-                        resetField: hrp,
-                    } = useField(`permissions_${r.id}`, yup.array(), {
-                        initialValue: r.permissions,
-                    });
                     v.fields[r.id] = reactive({
                         display_name: {
                             errors: edn,
@@ -209,30 +197,24 @@ import { patchRoleData } from '../api.js';
                             handleChange: hidesc,
                             reset: hrdesc,
                         },
-                        permissions: {
-                            errors: ep,
-                            meta: mp,
-                            value: vp,
-                            handleChange: hip,
-                            reset: hrp,
-                        },
                     });
                 }
             };
             const roleDirty = id => {
+                if(!v.fields[id]) return false;
+
                 return v.fields[id].display_name.meta.dirty ||
-                    v.fields[id].description.meta.dirty ||
-                    v.fields[id].permissions.meta.dirty;
+                    v.fields[id].description.meta.dirty;
             };
             const roleValid = id => {
+                if(!v.fields[id]) return false;
+                
                 return v.fields[id].display_name.meta.valid ||
-                    v.fields[id].description.meta.valid ||
-                    v.fields[id].permissions.meta.valid;
+                    v.fields[id].description.meta.valid;
             };
             const resetRole = id => {
                 v.fields[id].display_name.reset();
                 v.fields[id].description.reset();
-                v.fields[id].permissions.reset();
             };
             const resetRoleMeta = id => {
                 v.fields[id].display_name.reset({
@@ -241,19 +223,13 @@ import { patchRoleData } from '../api.js';
                 v.fields[id].description.reset({
                     value: v.fields[id].description.value,
                 });
-                v.fields[id].permissions.reset({
-                    value: v.fields[id].permissions.value,
-                });
             };
             const patchRole = async id => {
-                if(!roleDirty(id) || !roleValid(id) || !can('add_edit_role')) {
+                if(!roleDirty(id) || !roleValid(id) || !can('users_roles_write')) {
                     return;
                 }
 
                 const data = {};
-                if(v.fields[id].permissions.meta.dirty) {
-                    data.permissions = v.fields[id].permissions.value.map(p => p.id);
-                }
                 if(v.fields[id].display_name.meta.dirty) {
                     data.display_name = v.fields[id].display_name.value;
                 }
@@ -268,7 +244,6 @@ import { patchRoleData } from '../api.js';
                         id: data.id,
                         display_name: data.display_name,
                         description: data.description,
-                        permissions: data.permissions,
                         updated_at: data.updated_at,
                     });
                     const role = getRoleBy(id);
@@ -297,11 +272,11 @@ import { patchRoleData } from '../api.js';
                 ];
             };
             const showAddRoleModal = _ => {
-                if(!can('add_edit_role')) return;
+                if(!can('users_roles_create')) return;
                 showAddRole();
             };
             const deleteRole = rid => {
-                if(!can('delete_role')) return;
+                if(!can('users_roles_delete')) return;
                 showDeleteRole(getRoleBy(rid));
             };
             const anyRoleDirty = _ => {
@@ -314,6 +289,11 @@ import { patchRoleData } from '../api.js';
                     }
                 }
                 return isDirty;
+            };
+            const openAccessControlModal = roleId => {
+                if(!can('users_roles_write')) return;
+
+                showAccessControlModal(roleId);
             };
             // Used in Discard Modal to make all fields undirty
             const resetData = _ => {
@@ -339,13 +319,6 @@ import { patchRoleData } from '../api.js';
                                 v.fields[rid].description.meta.dirty &&
                                 v.fields[rid].description.meta.valid
                             )
-                        ) &&
-                        (
-                            !v.fields[rid].permissions.meta.dirty ||
-                            (
-                                v.fields[rid].permissions.meta.dirty &&
-                                v.fields[rid].permissions.meta.valid
-                            )
                         )
                     ) {
                         await patchRole(rid);
@@ -357,8 +330,7 @@ import { patchRoleData } from '../api.js';
             const state = reactive({
                 setupFinished: false,
                 roleList: computed(_ => store.getters.roles()),
-                permissions: computed(_ => store.getters.permissions),
-                dataInitialized: computed(_ => state.roleList.length > 0 && state.permissions.length > 0),
+                dataInitialized: computed(_ => state.roleList.length > 0),
                 errors: {},
             });
             const v = reactive({
@@ -372,8 +344,8 @@ import { patchRoleData } from '../api.js';
             })
 
             // WATCHER
-            watch(_ => state.roleList, (newValue) => {
-                updateValidationState(newValue);
+            watch(_ => state.roleList.length, _ => {
+                updateValidationState(state.roleList);
             });
 
             // ON BEFORE LEAVE
@@ -401,6 +373,7 @@ import { patchRoleData } from '../api.js';
                 deleteRole,
                 getErrors,
                 showAddRoleModal,
+                openAccessControlModal,
                 // PROPS
                 // STATE
                 state,

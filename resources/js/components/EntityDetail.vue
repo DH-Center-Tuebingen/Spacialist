@@ -39,7 +39,7 @@
                                 </li>
                             </ul>
                         </span>
-                        <a href="#" v-if="state.entityHeaderHovered" class="text-secondary" @click.prevent="editEntityName()">
+                        <a href="#" v-if="state.entityHeaderHovered && can('entity_write')" class="text-secondary" @click.prevent="editEntityName()">
                             <i class="fas fa-fw fa-edit fa-xs"></i>
                         </a>
                     </small>
@@ -55,13 +55,13 @@
                 </form>
             </h3>
             <div class="d-flex flex-row gap-2">
-                <button type="submit" form="entity-attribute-form" class="btn btn-outline-success btn-sm" :disabled="!state.formDirty || !can('duplicate_edit_concepts')" @click.prevent="saveEntity()">
+                <button type="submit" form="entity-attribute-form" class="btn btn-outline-success btn-sm" :disabled="!state.formDirty || !can('entity_data_write')" @click.prevent="saveEntity()">
                     <i class="fas fa-fw fa-save"></i> {{ t('global.save') }}
                 </button>
                 <button type="button" class="btn btn-outline-warning btn-sm" :disabled="!state.formDirty" @click="resetForm()">
                     <i class="fas fa-fw fa-undo"></i> {{ t('global.reset') }}
                 </button>
-                <button type="button" class="btn btn-outline-danger btn-sm" :disabled="!can('delete_move_concepts')" @click="confirmDeleteEntity()">
+                <button type="button" class="btn btn-outline-danger btn-sm" :disabled="!can('entity_delete')" @click="confirmDeleteEntity()">
                     <i class="fas fa-fw fa-trash"></i> {{ t('global.delete') }}
                 </button>
             </div>
@@ -87,7 +87,7 @@
                 </a>
             </div>
         </div>
-        <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <ul class="nav nav-tabs" id="myTab" role="tablist" v-show="can('comments_read')">
             <li class="nav-item" role="presentation">
                 <a class="nav-link active" id="active-entity-attributes-tab" href="#" @click.prevent="setDetailPanel('attributes')">
                     {{ t('main.entity.tabs.attributes') }}
@@ -106,7 +106,7 @@
                     <attribute-list
                         class="pt-2 h-100 scroll-y-auto scroll-x-hidden"
                         v-if="state.attributesFetched"
-                        v-dcan="'view_concept_props'"
+                        v-dcan="'entity_data_read'"
                         :ref="el => setAttrRef(el)"
                         :attributes="state.entityAttributes"
                         :hidden-attributes="state.hiddenAttributeList"
@@ -120,7 +120,7 @@
                     </attribute-list>
                 </form>
             </div>
-            <div class="tab-pane fade h-100 d-flex flex-column" id="active-entity-comments-panel" role="tabpanel">
+            <div class="tab-pane fade h-100 d-flex flex-column" id="active-entity-comments-panel" role="tabpanel" v-show="can('comments_read')">
                 <div class="mb-auto scroll-y-auto h-100" v-if="state.entity.comments">
                     <div v-if="state.commentsFetching" class="mt-2">
                         <p class="alert alert-info mb-0" v-html="t('global.comments.fetching')">
@@ -355,6 +355,8 @@
                 }
             };
             const editEntityName = _ => {
+                if(!can('entity_write')) return;
+
                 state.editedEntityName = state.entity.name;
                 state.entity.editing = true;
             };
@@ -416,7 +418,7 @@
                 state.hiddenAttributeState = false;
             };
             const confirmDeleteEntity = _ => {
-                if(!can('delete_move_concepts')) return;
+                if(!can('entity_delete')) return;
 
                 showDeleteEntity(state.entity.id);
             };
@@ -461,6 +463,8 @@
                 updateDependencyState(e.attribute_id, e.value);
             };
             const fetchComments = _ => {
+                if(!can('comments_read')) return;
+
                 state.commentLoadingState = 'fetching';
                 getEntityComments(state.entity.id).then(comments => {
                     store.dispatch('setEntityComments', comments);
@@ -487,7 +491,7 @@
                 }
             };
             const saveEntity = _ => {
-                if(!can('duplicate_edit_concepts')) return;
+                if(!can('entity_data_write')) return;
                 const dirtyValues = attrRef.value.getDirtyValues();
                 var patches = [];
 

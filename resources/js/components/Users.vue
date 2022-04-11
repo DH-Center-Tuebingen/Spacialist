@@ -2,12 +2,12 @@
     <div class="d-flex flex-column h-100" v-if="state.setupFinished">
         <h4 class="d-flex flex-row gap-2 align-items-center">
             {{ t('main.user.active_users') }}
-            <button type="button" class="btn btn-outline-success btn-sm" @click="showNewUserModal()" :disabled="!can('create_users')">
+            <button type="button" class="btn btn-outline-success btn-sm" @click="showNewUserModal()" :disabled="!can('users_roles_create')">
                 <i class="fas fa-fw fa-plus"></i> {{ t('main.user.add_button') }}
             </button>
         </h4>
         <div class="table-responsive flex-grow-1">
-            <table class="table table-striped table-hover table-light" v-dcan="'view_users'" v-if="state.dataInitialized">
+            <table class="table table-striped table-hover table-light" v-dcan="'users_roles_read'" v-if="state.dataInitialized">
                 <thead class="sticky-top">
                     <tr>
                         <th>{{ t('global.name') }}</th>
@@ -54,7 +54,7 @@
                                 :track-by="'display_name'"
                                 :valueProp="'id'"
                                 :mode="'tags'"
-                                :disabled="!can('add_remove_role')"
+                                :disabled="!can('users_roles_write')"
                                 :options="state.roles"
                                 :placeholder="t('main.user.add_role_placeholder')"
                                 @input="v.fields[user.id].roles.handleChange">
@@ -81,16 +81,16 @@
                                     </sup>
                                 </span>
                                 <div class="dropdown-menu" :aria-labelledby="`user-options-dropdown-${user.id}`">
-                                    <a class="dropdown-item" href="#" v-if="userDirty(user.id)" :disabled="!userValid(user.id) || !can('add_remove_role')" @click.prevent="patchUser(user.id)">
+                                    <a class="dropdown-item" href="#" v-if="userDirty(user.id)" :disabled="!userValid(user.id) || !can('users_roles_write')" @click.prevent="patchUser(user.id)">
                                         <i class="fas fa-fw fa-check text-success"></i> {{ t('global.save') }}
                                     </a>
                                     <a class="dropdown-item" href="#" v-if="userDirty(user.id)" @click.prevent="resetUser(user.id)">
                                         <i class="fas fa-fw fa-undo text-warning"></i> {{ t('global.reset') }}
                                     </a>
-                                    <a class="dropdown-item" href="#" v-if="hasPreference('prefs.enable-password-reset-link')" :disabled="!can('change_password')" @click.prevent="updatePassword(user.email)">
+                                    <a class="dropdown-item" href="#" v-if="hasPreference('prefs.enable-password-reset-link')" :disabled="!can('users_roles_write')" @click.prevent="updatePassword(user.email)">
                                         <i class="fas fa-fw fa-paper-plane text-info"></i> {{ t('global.send_reset_mail') }}
                                     </a>
-                                    <a class="dropdown-item" href="#" :disabled="!can('delete_users')" @click.prevent="deactivateUser(user.id)">
+                                    <a class="dropdown-item" href="#" :disabled="!can('users_roles_delete')" @click.prevent="deactivateUser(user.id)">
                                         <i class="fas fa-fw fa-user-times text-danger"></i> {{ t('global.deactivate') }}
                                     </a>
                                 </div>
@@ -107,7 +107,7 @@
             {{ t('main.user.deactivated_users') }}
         </h4>
         <div class="table-responsive flex-grow-1" v-if="state.deletedUserList.length > 0">
-            <table class="table table-striped table-hover table-light" v-dcan="'view_users'">
+            <table class="table table-striped table-hover table-light" v-dcan="'users_roles_read'">
                 <thead class="sticky-top">
                     <tr>
                         <th>{{ t('global.name') }}</th>
@@ -161,7 +161,7 @@
                                     <i class="fas fa-fw fa-ellipsis-h"></i>
                                 </span>
                                 <div class="dropdown-menu" :aria-labelledby="`deactive-user-dropdown-${dUser.id}`">
-                                    <a class="dropdown-item" href="#" :disabled="!can('delete_users')" @click.prevent="reactivateUser(dUser.id)">
+                                    <a class="dropdown-item" href="#" :disabled="!can('users_roles_delete')" @click.prevent="reactivateUser(dUser.id)">
                                         <i class="fas fa-fw fa-user-check text-success"></i> {{ t('global.reactivate') }}
                                     </a>
                                 </div>
@@ -296,7 +296,7 @@
                 });
             };
             const patchUser = async id => {
-                if(!userDirty(id) || !userValid(id) || !can('add_remove_role')) {
+                if(!userDirty(id) || !userValid(id) || !can('users_roles_write')) {
                     return;
                 }
 
@@ -353,17 +353,17 @@
                 showAddUser();
             };
             const deactivateUser = id => {
-                if(!can('delete_users')) return;
+                if(!can('users_roles_delete')) return;
                 showDeactivateUser(getUserBy(id));
             };
             const reactivateUser = id => {
-                if(!can('delete_users')) return;
+                if(!can('users_roles_delete')) return;
                 reactivateUserApi(id).then(_ => {
                     store.dispatch('reactivateUser', id);
                 });
             };
             const updatePassword = email => {
-                if(!can('change_password')) return;
+                if(!can('users_roles_write')) return;
                 sendResetPasswordMail(email);
             };
             const anyUserDirty = _ => {

@@ -245,8 +245,6 @@
                 schema: schema,
             });
 
-            console.log(formMeta);
-
             // ON MOUNTED
             onMounted(_ => {
                 state.show = true;

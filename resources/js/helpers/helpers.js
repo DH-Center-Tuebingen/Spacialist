@@ -417,9 +417,11 @@ export function filterUsers(term, ci=true, where='whole') {
         return regex.test(u.name) || regex.test(u.nickname);
     });
 };
+
+export function getRoles(withPermissions = false) {
     const fallback = [];
     if(isLoggedIn()) {
-        return store.getters.roles(true) || fallback;
+        return store.getters.roles(!withPermissions) || fallback;
     } else {
         return fallback;
     }
@@ -439,11 +441,11 @@ export function getUserBy(value, attr = 'id') {
     }
 };
 
-export function getRoleBy(value, attr = 'id') {
+export function getRoleBy(value, attr = 'id', withPermissions = false) {
     if(isLoggedIn()) {
         const isNum = !isNaN(value);
         const lValue = isNum ? value : value.toLowerCase();
-        return getRoles().find(r => isNum ? (r[attr] == lValue) : (r[attr].toLowerCase() == lValue));
+        return getRoles(withPermissions).find(r => isNum ? (r[attr] == lValue) : (r[attr].toLowerCase() == lValue));
     } else {
         return null;
     }

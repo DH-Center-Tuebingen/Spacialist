@@ -13,12 +13,26 @@ class BibliographyController extends Controller
 
     // GET
     public function getBibliography() {
+        $user = auth()->user();
+        if(!$user->can('bibliography_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to read bibliography')
+            ], 403);
+        }
+
         $bibliography = Bibliography::orderBy('id')->get();
 
         return response()->json($bibliography);
     }
 
     public function exportBibtex() {
+        $user = auth()->user();
+        if(!$user->can('bibliography_share')) {
+            return response()->json([
+                'error' => __('You do not have the permission to export bibliography')
+            ], 403);
+        }
+
         $entries = Bibliography::orderBy('author', 'asc')->get();
         $content = '';
         foreach($entries as $e) {
@@ -52,6 +66,13 @@ class BibliographyController extends Controller
     }
 
     public function getReferenceCount($id) {
+        $user = auth()->user();
+        if(!$user->can('bibliography_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to read bibliography')
+            ], 403);
+        }
+
         try {
             $bib = Bibliography::findOrFail($id);
         } catch(ModelNotFoundException $e) {
@@ -67,7 +88,7 @@ class BibliographyController extends Controller
 
     public function addItem(Request $request) {
         $user = auth()->user();
-        if(!$user->can('add_remove_bibliography')) {
+        if(!$user->can('bibliography_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to add new bibliography')
             ], 403);
@@ -86,9 +107,9 @@ class BibliographyController extends Controller
 
     public function importBibtex(Request $request) {
         $user = auth()->user();
-        if(!$user->can('add_remove_bibliography')) {
+        if(!$user->can('bibliography_create') || !$user->can('bibliography_write')) {
             return response()->json([
-                'error' => __('You do not have the permission to add new bibliography')
+                'error' => __('You do not have the permission to add new/modify existing bibliography items')
             ], 403);
         }
         $this->validate($request, [
@@ -132,7 +153,7 @@ class BibliographyController extends Controller
 
     public function updateItem(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('edit_bibliography')) {
+        if(!$user->can('bibliography_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to edit existing bibliography')
             ], 403);
@@ -160,7 +181,7 @@ class BibliographyController extends Controller
 
     public function deleteItem($id) {
         $user = auth()->user();
-        if(!$user->can('add_remove_bibliography')) {
+        if(!$user->can('bibliography_delete')) {
             return response()->json([
                 'error' => __('You do not have the permission to remove bibliography entries')
             ], 403);

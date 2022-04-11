@@ -69,6 +69,7 @@ export async function fetchUsers() {
         store.dispatch('setRoles', {
             roles: response.data.roles,
             permissions: response.data.permissions,
+            presets: response.data.presets,
         });
     }));
 }
@@ -293,7 +294,7 @@ export async function addUser(user) {
 };
 
 export async function addRole(role) {
-    const data = only(role, ['name', 'display_name', 'description']);
+    const data = only(role, ['name', 'display_name', 'description', 'derived_from']);
     return $httpQueue.add(
         () =>  http.post('role', data).then(response => response.data)
     );
@@ -381,11 +382,11 @@ export async function updateBibliography(file) {
     );
 };
 
-export async function setUserAvatar(id, file) {
+export async function setUserAvatar(file) {
     let formData = new FormData();
     formData.append('file', file);
     return await $httpQueue.add(
-        () => http.post(`user/${id}/avatar`, formData).then(response => response.data)
+        () => http.post(`user/avatar`, formData).then(response => response.data)
     );
 };
 
@@ -701,9 +702,9 @@ export async function deleteRole(id) {
     );
 };
 
-export async function deleteUserAvatar(id) {
+export async function deleteUserAvatar() {
     return await $httpQueue.add(
-        () => http.delete(`user/${id}/avatar`).then(response => response.data)
+        () => http.delete(`user/avatar`).then(response => response.data)
     );
 };
 

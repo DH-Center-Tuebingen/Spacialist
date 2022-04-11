@@ -1,5 +1,7 @@
-import store from '../bootstrap/store.js';
-import router from '../bootstrap/router.js';
+import store from '@/bootstrap/store.js';
+import router from '@/bootstrap/router.js';
+
+import { addToast } from '@/plugins/toast.js';
 
 import {
     addUser,
@@ -15,16 +17,18 @@ import {
     patchEntityType,
     updateAttributeDependency,
     addRole,
+    patchRoleData,
     deleteRole,
     moveEntity,
-} from '../api.js';
+} from '@/api.js';
 
 import {
     can,
     getEntityTypeAttributes,
     getTs,
+    getRoleBy,
     handleDeletedEntity,
-} from '../helpers/helpers.js';
+} from '@/helpers/helpers.js';
 
 import About from '../components/modals/system/About.vue';
 import Discard from '../components/modals/system/Discard.vue';
@@ -38,6 +42,7 @@ import MarkdownEditor from '../components/modals/system/MarkdownEditor.vue';
 import UserInfo from '../components/modals/user/UserInfo.vue';
 import AddUser from '../components/modals/user/Add.vue';
 import DeactiveUser from '../components/modals/user/Deactivate.vue';
+import AccessControl from '../components/modals/role/AccessControl.vue';
 import AddRole from '../components/modals/role/Add.vue';
 import DeleteRole from '../components/modals/role/Delete.vue';
 import BibliographyItem from '../components/modals/bibliography/Item.vue';
@@ -269,7 +274,7 @@ export function showAddUser(onAdded) {
         },
         on: {
             add(e) {
-                if(!can('create_users')) return;
+                if(!can('users_roles_create')) return;
                 addUser(e).then(user => {
                     if(!!onAdded) {
                         onAdded();
@@ -295,7 +300,7 @@ export function showDeactivateUser(user, onDeactivated) {
         },
         on: {
             deactivate(e) {
-                if(!can('delete_users')) {
+                if(!can('users_roles_delete')) {
                     store.getters.vfm.hide(uid);
                     return;
                 }
@@ -314,6 +319,41 @@ export function showDeactivateUser(user, onDeactivated) {
     });
 }
 
+export function showAccessControlModal(roleId) {
+    const uid = `AccessControl-${getTs()}`;
+    store.getters.vfm.show({
+        component: AccessControl,
+        bind: {
+            name: uid,
+            roleId: roleId,
+        },
+        on: {
+            save(e) {
+                const data = {
+                    permissions: e,
+                };
+                patchRoleData(roleId, data).then(data => {
+                    store.dispatch('updateRole', {
+                        id: roleId,
+                        permissions: data.permissions,
+                    });
+                    const role = getRoleBy(roleId);
+                    const msg = t('main.role.toasts.updated.msg', {
+                        name: role.display_name
+                    });
+                    const title = t('main.role.toasts.updated.title');
+                    addToast(msg, title, {
+                        channel: 'success',
+                    });
+                })
+            },
+            cancel(e) {
+                store.getters.vfm.hide(uid);
+            }
+        }
+    });
+}
+
 export function showAddRole(onAdded) {
     const uid = `AddRole-${getTs()}`;
     store.getters.vfm.show({
@@ -323,7 +363,7 @@ export function showAddRole(onAdded) {
         },
         on: {
             add(e) {
-                if(!can('add_edit_role')) return;
+                if(!can('users_roles_create')) return;
                 addRole(e).then(role => {
                     if(!!onAdded) {
                         onAdded();
@@ -349,7 +389,7 @@ export function showDeleteRole(role, onDeleted) {
         },
         on: {
             confirm(e) {
-                if(!can('delete_role')) return;
+                if(!can('users_roles_delete')) return;
 
                 deleteRole(role.id).then(_ => {
                     if(!!onDeleted) {

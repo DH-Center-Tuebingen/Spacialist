@@ -12,9 +12,9 @@ import {
 import {
     getTs,
     only,
-} from '../helpers/helpers.js';
+} from '@/helpers/helpers.js';
 
-import ToastComponent from '../components/plugins/Toast.vue';
+import ToastComponent from '@/components/plugins/Toast.vue';
 
 const store = {
     wrapper: null,
@@ -36,11 +36,12 @@ const perToastConfig = ['duration', 'autohide', 'channel', 'icon', 'simple'];
 export function addToast(message, title, config) {
     const toastId = `toast-${getTs()}`;
     const toastContainer = document.createElement('div');
+    const finalConfig = reduceToastConfig({...defaultConfig, ...config});
     render(createVNode(ToastComponent, {
         message: message,
         title: title,
         id: toastId,
-        ...config,
+        ...finalConfig,
     }), toastContainer);
     store.wrapper.appendChild(toastContainer);
     const toastElem = document.getElementById(toastId);

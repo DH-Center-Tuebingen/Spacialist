@@ -80,14 +80,14 @@ app.directive('dcan', {
         const canI = can(bindings.value, bindings.modifiers.one);
         
         if(!canI) {
-            this.warning = document.createElement('p');
-            this.warning.className = 'alert alert-warning v-can-warning';
-            this.warning.innerHTML = 'You do not have permission to access this page';
+            const warningElem = document.createElement('p');
+            warningElem.className = 'alert alert-warning v-can-warning';
+            warningElem.innerHTML = i18n.global.t('main.app.page_access_denied', {perm: bindings.value});
             for(let i=0; i<el.children.length; i++) {
                 let c = el.children[i];
                 c.classList.add('v-can-hidden');
             }
-            el.appendChild(this.warning);
+            el.appendChild(warningElem);
         }
     },
     unmounted(el) {

@@ -21,11 +21,23 @@ class EditorController extends Controller {
     // GET
 
     public function getEntityTypeOccurrenceCount($id) {
+        $user = auth()->user();
+        if(!$user->can('entity_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to get an entity type\'s occurrences')
+            ], 403);
+        }
         $cnt = Entity::where('entity_type_id', $id)->count();
         return response()->json($cnt);
     }
 
     public function getAttributeValueOccurrenceCount($aid, $ctid = -1) {
+        $user = auth()->user();
+        if(!$user->can('entity_data_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to get an attribute value\'s occurrences')
+            ], 403);
+        }
         $query = AttributeValue::where('attribute_id', $aid);
         if($ctid > -1) {
             $query->where('entity_type_id', $ctid);
@@ -37,7 +49,7 @@ class EditorController extends Controller {
 
     public function getEntityType($id) {
         $user = auth()->user();
-        if(!$user->can('view_concepts')) {
+        if(!$user->can('entity_type_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to get an entity type\'s data')
             ], 403);
@@ -54,7 +66,7 @@ class EditorController extends Controller {
 
     public function getEntityTypeAttributes($id) {
         $user = auth()->user();
-        if(!$user->can('view_concept_props')) {
+        if(!$user->can('entity_type_read') || !$user->can('attribute_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view entity data')
             ], 403);
@@ -108,7 +120,7 @@ class EditorController extends Controller {
 
     public function getAttributeSelection($id) {
         $user = auth()->user();
-        if(!$user->can('view_concept_props')) {
+        if(!$user->can('attribute_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view entity data')
             ], 403);
@@ -147,7 +159,7 @@ class EditorController extends Controller {
 
     public function getTopEntityTypes() {
         $user = auth()->user();
-        if(!$user->can('view_concept_props')) {
+        if(!$user->can('entity_type_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view entity data')
             ], 403);
@@ -158,7 +170,7 @@ class EditorController extends Controller {
 
     public function getAttributes() {
         $user = auth()->user();
-        if(!$user->can('view_concept_props')) {
+        if(!$user->can('attribute_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view entity data')
             ], 403);
@@ -193,6 +205,12 @@ class EditorController extends Controller {
     }
 
     public function getAttributeTypes() {
+        $user = auth()->user();
+        if(!$user->can('attribute_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to view available attribute types')
+            ], 403);
+        }
         return response()->json([
             [
                 'datatype' => 'string',
@@ -290,7 +308,7 @@ class EditorController extends Controller {
 
     public function addEntityType(Request $request) {
         $user = auth()->user();
-        if(!$user->can('create_concepts')) {
+        if(!$user->can('entity_type_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to create a new entity type')
             ], 403);
@@ -327,7 +345,7 @@ class EditorController extends Controller {
 
     public function setRelationInfo(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_type_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to modify entity relations')
             ], 403);
@@ -351,7 +369,7 @@ class EditorController extends Controller {
 
     public function addAttribute(Request $request) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('attribute_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to add attributes')
             ], 403);
@@ -390,9 +408,6 @@ class EditorController extends Controller {
             $cols = $request->input('columns');
             info($cols);
             foreach($cols as $col) {
-                info($col);
-                info("Do I have a label? ".$col['label_id']);
-                info("Do I have a datatype? ".$col['datatype']);
                 if(!isset($col['label_id']) && !isset($col['datatype'])) continue;
                 $curl = ThConcept::find($col['label_id'])->concept_url;
                 $childAttr = new Attribute();
@@ -416,7 +431,7 @@ class EditorController extends Controller {
 
     public function addAttributeToEntityType(Request $request, $etid) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('attribute_write') || !$user->can('entity_type_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to add attributes to an entity type')
             ], 403);
@@ -467,7 +482,7 @@ class EditorController extends Controller {
 
     public function duplicateEntityType(Request $request, $ctid) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_type_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to duplicate an entity type')
             ], 403);
@@ -523,7 +538,7 @@ class EditorController extends Controller {
 
     public function patchEntityType(Request $request, $etid) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_type_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to modify entity-type labels')
             ], 403);
@@ -555,7 +570,7 @@ class EditorController extends Controller {
 
     public function reorderAttribute(Request $request, $ctid, $aid) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_type_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to reorder attributes')
             ], 403);
@@ -608,7 +623,7 @@ class EditorController extends Controller {
 
     public function patchDependency(Request $request, $etid, $aid) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_type_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to add/modify attribute dependencies')
             ], 403);
@@ -664,7 +679,7 @@ class EditorController extends Controller {
 
     public function deleteEntityType($id) {
         $user = auth()->user();
-        if(!$user->can('delete_move_concepts')) {
+        if(!$user->can('entity_type_delete')) {
             return response()->json([
                 'error' => __('You do not have the permission to delete entity types')
             ], 403);
@@ -684,7 +699,7 @@ class EditorController extends Controller {
 
     public function deleteAttribute($id) {
         $user = auth()->user();
-        if(!$user->can('delete_move_concepts')) {
+        if(!$user->can('attribute_delete')) {
             return response()->json([
                 'error' => __('You do not have the permission to delete attributes')
             ], 403);
@@ -703,7 +718,7 @@ class EditorController extends Controller {
 
     public function removeAttributeFromEntityType($etid, $aid) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_type_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to remove attributes from entity types')
             ], 403);

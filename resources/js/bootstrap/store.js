@@ -40,6 +40,7 @@ export const store = createStore({
                     systemPreferences: {},
                     tags: [],
                     roles: [],
+                    rolePresets: [],
                     tree: [],
                     user: {},
                     users: [],
@@ -346,6 +347,9 @@ export const store = createStore({
                 setRoles(state, data) {
                     state.roles = data;
                 },
+                setRolePresets(state, data) {
+                    state.rolePresets = data;
+                },
                 setPermissions(state, data) {
                     state.permissions = data;
                 },
@@ -407,6 +411,7 @@ export const store = createStore({
                 setRoles({commit}, data) {
                     commit('setRoles', data.roles);
                     commit('setPermissions', data.permissions);
+                    commit('setRolePresets', data.presets);
                 },
                 setUsers({commit}, data) {
                     commit('setUsers', data);
@@ -424,7 +429,7 @@ export const store = createStore({
                         await openPath(ids);
                         entity = state.entities[entityId];
                     }
-                    if(!can('view_concept_props')) {
+                    if(!can('entity_data_read')) {
                         const hiddenEntity = {
                             ...entity,
                             data: {},
@@ -638,6 +643,9 @@ export const store = createStore({
                         let {permissions, ...role} = r;
                         return role;
                     }) : state.roles;
+                },
+                rolePresets: state => {
+                    return state.rolePresets;
                 },
                 permissions: state => {
                     return state.permissions;

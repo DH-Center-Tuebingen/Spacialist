@@ -13,7 +13,7 @@ class ActivityController extends Controller
     // GET
     public function getAll(Request $request) {
         $user = auth()->user();
-        if(!$user->can('view_users')) {
+        if(!$user->can('users_roles_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view activity logs')
             ], 403);
@@ -24,7 +24,7 @@ class ActivityController extends Controller
 
     public function getByUser(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('view_users') && $user->id !== $id) {
+        if(!$user->can('users_roles_read') && $user->id !== $id) {
             return response()->json([
                 'error' => __('You do not have the permission to view activity logs')
             ], 403);
@@ -48,7 +48,7 @@ class ActivityController extends Controller
 
     public function getFiltered(Request $request, $page = 1) {
         $user = auth()->user();
-        if(!$user->can('view_users')) {
+        if(!$user->can('users_roles_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view activity logs')
             ], 403);

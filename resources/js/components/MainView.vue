@@ -1,11 +1,11 @@
 <template>
     <div class="row h-100 overflow-hidden">
-        <div :class="`h-100 d-flex flex-column col-md-${state.columnPref.left}`" id="tree-container" v-dcan="'view_concepts'" v-if="state.columnPref.left > 0">
+        <div :class="`h-100 d-flex flex-column col-md-${state.columnPref.left}`" id="tree-container" v-dcan="'entity_read'" v-if="state.columnPref.left > 0">
             <entity-tree
                 class="col px-0 h-100">
             </entity-tree>
         </div>
-        <div :class="`h-100 border-start border-end col-md-${state.columnPref.center}`" id="attribute-container" v-dcan="'view_concepts|view_concept_props'" v-if="state.columnPref.center > 0">
+        <div :class="`h-100 border-start border-end col-md-${state.columnPref.center}`" id="attribute-container" v-dcan="'entity_read|entity_data_read'" v-if="state.columnPref.center > 0">
             <router-view>
             </router-view>
             <alert

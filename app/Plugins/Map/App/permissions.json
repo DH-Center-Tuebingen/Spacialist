@@ -1,0 +1,29 @@
+{
+    "geodata": [
+        {
+            "name": "read",
+            "display_name": "Read Geodata",
+            "description": "Ability to read geodata"
+        },
+        {
+            "name": "write",
+            "display_name": "Write and Link Geodata",
+            "description": "Ability to write and link geodata"
+        },
+        {
+            "name": "create",
+            "display_name": "Create Geodata",
+            "description": "Ability to create geodata"
+        },
+        {
+            "name": "delete",
+            "display_name": "Delete Geodata",
+            "description": "Ability to delete geodata"
+        },
+        {
+            "name": "share",
+            "display_name": "Share Geodata",
+            "description": "Ability to share and export geodata"
+        }
+    ]
+}

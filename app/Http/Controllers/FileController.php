@@ -26,7 +26,7 @@ class FileController extends Controller
 
     public function getFile($id) {
         $user = auth()->user();
-        if(!$user->can('view_files')) {
+        if(!$user->can('file_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view a specific file')
             ], 403);
@@ -43,7 +43,7 @@ class FileController extends Controller
 
     public function getSubFiles(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('view_files')) {
+        if(!$user->can('file_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view successors of a specific file')
             ], 403);
@@ -64,7 +64,7 @@ class FileController extends Controller
 
     public function getLinkCount($id) {
         $user = auth()->user();
-        if(!$user->can('view_files')) {
+        if(!$user->can('file_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to get number of links of a specific file')
             ], 403);
@@ -83,7 +83,7 @@ class FileController extends Controller
 
     public function getFiles(Request $request, $page = 1) {
         $user = auth()->user();
-        if(!$user->can('view_files')) {
+        if(!$user->can('file_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view files')
             ], 403);
@@ -95,7 +95,7 @@ class FileController extends Controller
 
     public function getUnlinkedFiles(Request $request, $page = 1) {
         $user = auth()->user();
-        if(!$user->can('view_files')) {
+        if(!$user->can('file_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view files')
             ], 403);
@@ -107,7 +107,7 @@ class FileController extends Controller
 
     public function getLinkedFiles(Request $request, $cid, $page = 1) {
         $user = auth()->user();
-        if(!$user->can('view_files')) {
+        if(!$user->can('file_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view files')
             ], 403);
@@ -119,7 +119,7 @@ class FileController extends Controller
 
     public function patchContent(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('manage_files')) {
+        if(!$user->can('file_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to edit a file\'s content')
             ], 403);
@@ -144,7 +144,7 @@ class FileController extends Controller
 
     public function exportFiles(Request $request) {
         $user = auth()->user();
-        if(!$user->can('export_files')) {
+        if(!$user->can('file_share')) {
             return response()->json([
                 'error' => __('You do not have the permission to export files')
             ], 403);
@@ -172,7 +172,7 @@ class FileController extends Controller
 
     public function patchProperty(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('manage_files')) {
+        if(!$user->can('file_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to modify file properties')
             ], 403);

@@ -23,7 +23,7 @@ class CommentController extends Controller {
 
     public function getComments(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('view_concepts')) {
+        if(!$user->can('comments_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to get comments')
             ], 403);
@@ -66,7 +66,7 @@ class CommentController extends Controller {
 
     public function getCommentReplies($id) {
         $user = auth()->user();
-        if(!$user->can('view_concepts')) {
+        if(!$user->can('comments_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to get comments')
             ], 403);
@@ -87,7 +87,7 @@ class CommentController extends Controller {
     public function addComment(Request $request)
     {
         $user = auth()->user();
-        if (!$user->can('create_concepts')) {
+        if (!$user->can('comments_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to add comments')
             ], 403);
@@ -138,7 +138,7 @@ class CommentController extends Controller {
     public function patchComment(Request $request, $id)
     {
         $user = auth()->user();
-        if (!$user->can('delete_move_concepts')) {
+        if (!$user->can('comments_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to edit a comment')
             ], 403);
@@ -169,7 +169,7 @@ class CommentController extends Controller {
 
     public function deleteComment($id) {
         $user = auth()->user();
-        if(!$user->can('delete_move_concepts')) {
+        if(!$user->can('comments_delete')) {
             return response()->json([
                 'error' => __('You do not have the permission to delete a comment')
             ], 403);

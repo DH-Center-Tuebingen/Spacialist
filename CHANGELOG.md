@@ -19,6 +19,9 @@ All notable changes to this project will be documented in this file.
 - Improved Attribute Validation
 - Editing Entity Name
 ### Changed
+- Revamp Role Permission Configuration
+  - Add Presets to Derive Role Permission Set from
+  - Allow Plugins to have their own Permission Set and extend existing Role Presets
 - Disable _Loading Iconclass Button_ when attribute value is not set
 - Switch Icon for _Loading Iconclass Button_
 - Update Laravel to Version 8

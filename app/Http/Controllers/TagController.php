@@ -18,7 +18,7 @@ class TagController extends Controller {
 
     public function getAll() {
         $user = auth()->user();
-        if(!$user->can('view_concepts_th')) {
+        if(!$user->can('thesaurus_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to get tags')
             ], 403);

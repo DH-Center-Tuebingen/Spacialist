@@ -1,5 +1,5 @@
 <template>
-    <div class="row d-flex flex-row overflow-hidden h-100" v-dcan="'duplicate_edit_concepts|view_concept_props'">
+    <div class="row d-flex flex-row overflow-hidden h-100" v-dcan="'entity_data_write|entity_data_read'">
         <div class="col-md-2 py-2 h-100 d-flex flex-column bg-light-dark">
             <h4>{{ t('main.datamodel.entity.title') }}</h4>
             <entity-type-list

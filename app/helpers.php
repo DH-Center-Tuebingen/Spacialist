@@ -2,6 +2,7 @@
 
 use App\Bibliography;
 use App\ThConcept;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -22,6 +23,22 @@ if(!function_exists('sp_remove_dir')) {
 if(!function_exists('sp_slug')) {
     function sp_slug($str) {
         return Str::slug($str);
+    }
+}
+
+if(!function_exists('sp_get_permission_groups')) {
+    function sp_get_permission_groups($onlyGroups = false) {
+        $corePermissionPath = base_path("storage/framework/App/core-permissions.json");
+        if(!File::isFile($corePermissionPath)) {
+            return response()->json([]);
+        }
+        $permissionSets = json_decode(file_get_contents($corePermissionPath), true);
+
+        if($onlyGroups) {
+            return array_keys($permissionSets);
+        } else {
+            return $permissionSets;
+        }
     }
 }
 

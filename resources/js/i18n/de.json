@@ -269,7 +269,8 @@
                         "button": "In Spacialist speichern"
                     }
                 }
-            }
+            },
+            "page_access_denied": "Du hast nicht die nötigen Berechtigungen um diese Seite zu sehen. Fehlende Berechtigungen: {perm}"
         },
         "csv": {
             "uploader": {
@@ -409,6 +410,37 @@
         },
         "role": {
             "add_button": "Neue Rolle hinzufügen",
+            "permissions": {
+                "access_control_title": "Berechtigungssteuerung",
+                "types": {
+                    "read": "Lesen",
+                    "write": "Schreiben",
+                    "create": "Erstellen",
+                    "delete": "Löschen",
+                    "share": "Teilen",
+                    "write_info": "beinhaltet auch ähnliche Operationen wie Verschieben",
+                    "create_info": "beinhaltet auch ähnliche Operationen wie Duplizieren",
+                    "share_info": "beinhaltet auch ähnliche Operationen wie Exportieren"
+                },
+                "groups": {
+                    "entity": "Entitäten",
+                    "entity_data": "Formulardaten",
+                    "attribute": "Attribute",
+                    "entity_type": "Entitätstypen",
+                    "bibliography": "Literatur",
+                    "comments": "Kommentare",
+                    "users_roles": "Benutzer & Rollen",
+                    "preferences": "Einstellungen",
+                    "thesaurus": "Thesaurus",
+                    "is_plugin": "Erweiterung"
+                }
+            },
+            "preset": {
+                "derive_from_preset": "Berechtigungen aus Vorlage übernehmen",
+                "derived_from": "Basiert auf:",
+                "administrator": "Administrator",
+                "guest": "Gast"
+            },
             "toasts": {
                 "updated": {
                     "title": "Rolle aktualisiert",

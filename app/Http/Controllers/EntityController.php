@@ -33,7 +33,7 @@ class EntityController extends Controller {
 
     public function getTopEntities() {
         $user = auth()->user();
-        if(!$user->can('view_concepts')) {
+        if(!$user->can('entity_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to get entities')
             ], 403);
@@ -45,7 +45,7 @@ class EntityController extends Controller {
 
     public function getEntity($id) {
         $user = auth()->user();
-        if(!$user->can('view_concepts')) {
+        if(!$user->can('entity_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to get a specific entity')
             ], 403);
@@ -63,7 +63,7 @@ class EntityController extends Controller {
 
     public function getDataForEntityType(Request $request, $etid, $aid) {
         $user = auth()->user();
-        if(!$user->can('view_concepts')) {
+        if(!$user->can('entity_read') || !$user->can('entity_type_read') || !$user->can('entity_data_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to get an entity\'s data')
             ], 403);
@@ -171,7 +171,7 @@ class EntityController extends Controller {
 
     public function getData($id, $aid = null) {
         $user = auth()->user();
-        if(!$user->can('view_concepts')) {
+        if(!$user->can('entity_read') || !$user->can('entity_data_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to get an entity\'s data')
             ], 403);
@@ -280,7 +280,7 @@ class EntityController extends Controller {
 
     public function getParentIds($id) {
         $user = auth()->user();
-        if(!$user->can('view_concepts')) {
+        if(!$user->can('entity_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to get an entity\'s parent id\'s')
             ], 403);
@@ -297,6 +297,13 @@ class EntityController extends Controller {
     }
 
     public function getEntitiesByParent($id) {
+        $user = auth()->user();
+        if(!$user->can('entity_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to get an entity set')
+            ], 403);
+        }
+
         return Entity::getEntitiesByParent($id);
     }
 
@@ -304,7 +311,7 @@ class EntityController extends Controller {
 
     public function addEntity(Request $request) {
         $user = auth()->user();
-        if(!$user->can('create_concepts')) {
+        if(!$user->can('entity_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to add a new entity')
             ], 403);
@@ -328,7 +335,7 @@ class EntityController extends Controller {
 
     public function duplicateEntity(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('create_concepts')) {
+        if(!$user->can('entity_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to duplicate an entity')
             ], 403);
@@ -386,7 +393,7 @@ class EntityController extends Controller {
 
     public function importData(Request $request) {
         $user = auth()->user();
-        if(!$user->can('create_concepts')) {
+        if(!$user->can('entity_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to import entity data')
             ], 403);
@@ -510,7 +517,7 @@ class EntityController extends Controller {
 
     public function patchAttributes($id, Request $request) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_data_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to modify an entity\'s data')
             ], 403);
@@ -655,7 +662,7 @@ class EntityController extends Controller {
 
     public function patchAttribute($id, $aid, Request $request) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_data_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to modify an entity\'s data')
             ], 403);
@@ -701,7 +708,7 @@ class EntityController extends Controller {
 
     public function patchName($id, Request $request) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to modify an entity\'s data')
             ], 403);
@@ -730,7 +737,7 @@ class EntityController extends Controller {
 
     public function moveEntity(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('delete_move_concepts')) {
+        if(!$user->can('entity_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to modify an entity')
             ], 403);
@@ -769,7 +776,7 @@ class EntityController extends Controller {
 
     public function deleteEntity($id) {
         $user = auth()->user();
-        if(!$user->can('delete_move_concepts')) {
+        if(!$user->can('entity_delete')) {
             return response()->json([
                 'error' => __('You do not have the permission to delete an entity')
             ], 403);

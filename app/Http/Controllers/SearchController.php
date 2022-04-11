@@ -26,63 +26,89 @@ class SearchController extends Controller {
 
     public function searchGlobal(Request $request) {
         $user = auth()->user();
-        if(!$user->can('view_concepts')) {
-            return response()->json([
-                'error' => __('You do not have the permission to search global')
-            ], 403);
-        }
         $q = $request->query('q');
         if(Str::startsWith($q, self::$shebangPrefix['bibliography'])) {
-            $matches = Bibliography::search(Str::after($q, self::$shebangPrefix['bibliography']))->get();
-            $matches->map(function($m) {
-                $m->group = 'bibliography';
-                return $m;
-            });
+            if(!$user->can('bibliography_read')) {
+                $matches = [];
+            } else {
+                $matches = Bibliography::search(Str::after($q, self::$shebangPrefix['bibliography']))->get();
+                $matches->map(function($m) {
+                    $m->group = 'bibliography';
+                    return $m;
+                });
+            }
         } else if(Str::startsWith($q, self::$shebangPrefix['entities'])) {
-            $matches = SearchableEntity::search(Str::after($q, self::$shebangPrefix['entities']))->get();
-            $matches->map(function($m) {
-                $m->group = 'entities';
-                return $m;
-            });
+            if(!$user->can('entity_read') || !$user->can('entity_data_read')) {
+                $matches = [];
+            } else {
+                $matches = SearchableEntity::search(Str::after($q, self::$shebangPrefix['entities']))->get();
+                $matches->map(function($m) {
+                    $m->group = 'entities';
+                    return $m;
+                });
+            }
         } else if(Str::startsWith($q, self::$shebangPrefix['files'])) {
-            $files = File::search(Str::after($q, self::$shebangPrefix['files']));
-            $matches = $files->get();
-            $matches->map(function($m) {
-                $m->group = 'files';
-                $m->setFileInfo();
-                return $m;
-            });
+            if(!$user->can('file_read')) {
+                $matches = [];
+            } else {
+                $files = File::search(Str::after($q, self::$shebangPrefix['files']));
+                $matches = $files->get();
+                $matches->map(function($m) {
+                    $m->group = 'files';
+                    $m->setFileInfo();
+                    return $m;
+                });
+            }
         } else if(Str::startsWith($q, self::$shebangPrefix['geodata'])) {
-            $matches = Geodata::search(Str::after($q, self::$shebangPrefix['geodata']))->get();
-            $matches->map(function($m) {
-                $m->group = 'geodata';
-                return $m;
-            });
+            if(!$user->can('geodata_read')) {
+                $matches = [];
+            } else {
+                $matches = Geodata::search(Str::after($q, self::$shebangPrefix['geodata']))->get();
+                $matches->map(function($m) {
+                    $m->group = 'geodata';
+                    return $m;
+                });
+            }
         } else {
-            $files = File::search($q)->get();
-            $files->map(function($f) {
-                $f->group = 'files';
-                $f->setFileInfo();
-                return $f;
-            });
-            $entities = SearchableEntity::search($q)->get();
-            $entities->map(function($e) {
-                $e->group = 'entities';
-                return $e;
-            });
-            $geodata = Geodata::search($q)->get();
-            $geodata->map(function($g) {
-                $g->group = 'geodata';
-                return $g;
-            });
-            $bibliography = Bibliography::search($q)->get();
-            $bibliography->map(function($b) {
-                $b->group = 'bibliography';
-                return $b;
-            });
-            $matches = $files->concat($entities)
-                ->concat($geodata)
-                ->concat($bibliography)
+            $matches = collect([]);
+
+            if($user->can('file_read')) {
+                $files = File::search($q)->get();
+                $files->map(function($f) {
+                    $f->group = 'files';
+                    $f->setFileInfo();
+                    return $f;
+                });
+                $matches = $matches->concat($files);
+            }
+
+            if($user->can('entity_read') && $user->can('entity_data_read')) {
+                $entities = SearchableEntity::search($q)->get();
+                $entities->map(function($e) {
+                    $e->group = 'entities';
+                    return $e;
+                });
+                $matches = $matches->concat($entities);
+            }
+
+            if($user->can('geodata_read')) {
+                $geodata = Geodata::search($q)->get();
+                $geodata->map(function($g) {
+                    $g->group = 'geodata';
+                    return $g;
+                });
+                $matches = $matches->concat($geodata);
+            }
+
+            if($user->can('bibliography_read')) {
+                $bibliography = Bibliography::search($q)->get();
+                $bibliography->map(function($b) {
+                    $b->group = 'bibliography';
+                    return $b;
+                });
+                $matches = $matches->concat($bibliography);
+            }
+            $matches = $matches
                 ->sortByDesc('relevance')
                 ->values()
                 ->all();
@@ -92,7 +118,7 @@ class SearchController extends Controller {
 
     public function searchEntityByName(Request $request) {
         $user = auth()->user();
-        if(!$user->can('view_concepts')) {
+        if(!$user->can('entity_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to search for entities')
             ], 403);
@@ -107,7 +133,7 @@ class SearchController extends Controller {
 
     public function searchEntityTypes(Request $request) {
         $user = auth()->user();
-        if(!$user->can('view_concepts')) {
+        if(!$user->can('entity_type_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to search for entities')
             ], 403);
@@ -135,7 +161,7 @@ class SearchController extends Controller {
 
     public function searchInThesaurus(Request $request) {
         $user = auth()->user();
-        if(!$user->can('view_concepts_th')) {
+        if(!$user->can('thesaurus_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to search for concepts')
             ], 403);
@@ -174,6 +200,13 @@ class SearchController extends Controller {
     }
 
     public function searchInAttributes(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('thesaurus_read') || !$user->can('attributes_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to search for attributes')
+            ], 403);
+        }
+
         $q = $request->query('q');
         $lang = auth()->user()->getLanguage();
         $langId = ThLanguage::where('short_name', $lang)->value('id');
@@ -201,7 +234,7 @@ class SearchController extends Controller {
 
     public function getConceptChildren($id, Request $request) {
         $user = auth()->user();
-        if(!$user->can('view_concepts')) {
+        if(!$user->can('thesaurus_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to search for concepts')
             ], 403);
