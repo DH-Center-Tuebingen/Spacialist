@@ -153,13 +153,13 @@ export const splitColor = value => {
         }
         return [r, g, b];
     } else if(value.startsWith('rgba')) {
-        const channels = value.match(/rgba\((\d+),\s?(\d+),\s?(\d+),\s?(\d+|\d?\.\d+)\)/);
+        const channels = value.match(/rgba\((\d+|\d+\.\d+),\s?(\d+|\d+\.\d+),\s?(\d+|\d+\.\d+),\s?(\d+|\d?\.\d+)\)/);
         r = channels[1];
         g = channels[2];
         b = channels[3];
         a = channels[4];
     } else if(value.startsWith('rgb')) {
-        const channels = value.match(/rgb\((\d+),\s?(\d+),\s?(\d+)\)/);
+        const channels = value.match(/rgb\((\d+|\d+\.\d+),\s?(\d+|\d+\.\d+),\s?(\d+|\d+\.\d+)\)/);
         r = channels[1];
         g = channels[2];
         b = channels[3];
