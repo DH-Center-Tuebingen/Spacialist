@@ -29,7 +29,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     // PLUGINS
     Route::get('/plugin', 'PluginController@getPlugins');
     Route::get('/plugin/{id}', 'PluginController@installPlugin')->where('id', '[0-9]+');
-    Route::get('/plugin/script/{id}/{name}', 'PluginController@loadScript')->where('id', '[0-9]+');
+    Route::patch('/plugin/{id}', 'PluginController@updatePlugin')->where('id', '[0-9]+');
     Route::delete('/plugin/{id}', 'PluginController@uninstallPlugin')->where('id', '[0-9]+');
     Route::delete('/plugin/remove/{id}', 'PluginController@removePlugin')->where('id', '[0-9]+');
 });

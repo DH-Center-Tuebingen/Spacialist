@@ -4,13 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Plugin;
 use App\Preference;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class PluginController extends Controller
 {
@@ -28,62 +23,8 @@ class PluginController extends Controller
         $this->middleware('guest')->only('welcome');
     }
 
-    public function loadScript(Request $request, $id, $name) {
-        $emptyResponse = response()->json('');
-
-        try {
-            $plugin = Plugin::where('id', $id)->whereNotNull('installed_at')->firstOrFail();
-            // $scriptName = $request->get('filename');
-            $scriptPath = base_path("app/Plugins/$plugin->name/js/$name");
-            if(!File::isFile($scriptPath)) {
-                info("is not a file at $scriptPath");
-                return $emptyResponse;
-            }
-
-            $xmlString = file_get_contents($scriptPath);
-            // $xmlObject = simplexml_load_string($xmlString);
-
-            // return json_decode(json_encode($xmlObject), true);
-            return response()->json($xmlString);
-
-        } catch (ModelNotFoundException $e) {
-            return $emptyResponse;
-        }
-    }
-
     public function getPlugins(Request $request) {
-        $pluginPath = base_path('app/Plugins');
-        $availablePlugins = File::directories($pluginPath);
-        foreach($availablePlugins as $ap) {
-            $info = Plugin::getInfo($ap);
-            if($info !== false) {
-                $id = $info['name'];
-                $plugin = Plugin::where('name', $id)->first();
-                if(!isset($plugin)) {
-                    $plugin = new Plugin();
-                    $plugin->name = $id;
-                    $plugin->version = $info['version'];
-                    $plugin->uuid = Str::uuid();
-                    $plugin->save();
-                } else if($plugin->version != $info['version']) {
-                    // installed version splitted
-                    preg_match('/(\d+)\.(\d+).(\d+)(-.+)?/', $plugin->version, $iv);
-                    // available/latest version splitted
-                    preg_match('/(\d+)\.(\d+).(\d+)(-.+)?/', $info['version'], $lv);
-
-                    if(
-                        ($lv[1] > $iv[1] || $lv[2] > $iv[2] || $lv[3] > $iv[3]) ||
-                        (!isset($lv[4]) && isset($iv[4])) ||
-                        (isset($lv[4]) && isset($iv[4]) && $lv[4] > $iv[4])
-                    ) {
-                        $plugin->update_available = $info['version'];
-                    } else {
-                        $plugin->update_available = null;
-                    }
-                    $plugin->save();
-                }
-            }
-        }
+        Plugin::discoverPlugins();
 
         $plugins = [];
         if($request->query('installed') == 1) {
@@ -108,60 +49,35 @@ class PluginController extends Controller
             return response()->json([], 204);
         } catch(ModelNotFoundException $e) {
             $plugin = Plugin::where('id', $id)->whereNull('installed_at')->first();
-            $name = $plugin->name;
-            $migrationPath = base_path("app/Plugins/$name/database/migrations");
-            if(file_exists($migrationPath) && is_dir($migrationPath)) {
-                $migrations = File::files($migrationPath);
-                foreach ($migrations as $migration) {
-                    $filename = $migration->getFilename();
-                    info($filename);
-                    Artisan::call('migrate', [
-                        '--path' => "/app/Plugins/$name/database/migrations/$filename",
-                        '--force' => true,
-                    ]);
-                }
+            try {
+                $plugin->handleInstallation();
+            } catch(ModelNotFoundException $e) {
+                return response()->json([
+                    'error' => __('Error while installing plugin. Preset does not exist.')
+                ], 403);
             }
-            $scriptPath = base_path("app/Plugins/$name/js/script.js");
-            if(file_exists($scriptPath)) {
-                $uuid = $plugin->uuid;
-                $slug = Str::slug($name);
-                $filehandle = fopen($scriptPath, 'r');
-                Storage::put(
-                    "plugins/${slug}-${uuid}.js",
-                    $filehandle,
-                );
-                fclose($filehandle);
-            }
-            $plugin->installed_at = Carbon::now();
-            $plugin->save();
+
             return response()->json($plugin);
         }
+    }
+
+    public function updatePlugin(Request $request, $id) {
+        try {
+            $plugin = Plugin::firstOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('Error while installing plugin. Preset does not exist.')
+            ], 403);
+        }
+
+        $plugin->handleUpdate();
+        return response()->json([], 204);
     }
 
     public function uninstallPlugin(Request $request, $id) {
         try {
             $plugin = Plugin::where('id', $id)->whereNotNull('installed_at')->firstOrFail();
-            $name = $plugin->name;
-            $migrationPath = base_path("app/Plugins/$name/database/migrations");
-            $migrations = File::files($migrationPath);
-            // undo migrations in reversed order
-            rsort($migrations);
-            foreach($migrations as $migration) {
-                $filename = $migration->getFilename();
-                Artisan::call('migrate:rollback', [
-                    '--path' => "/app/Plugins/$name/database/migrations/$filename",
-                    '--force' => true,
-                ]);
-            }
-            
-            $uuid = $plugin->uuid;
-            $slug = Str::slug($name);
-            if(Storage::exists("plugins/${slug}-${uuid}.js")) {
-                Storage::delete("plugins/${slug}-${uuid}.js");
-            }
-
-            $plugin->installed_at = null;
-            $plugin->save();
+            $plugin->handleUninstall();
             return response()->json($plugin);
         } catch (ModelNotFoundException $e) {
             // Already uninstalled
@@ -171,27 +87,14 @@ class PluginController extends Controller
 
     public function removePlugin(Request $request, $id) {
         try {
-            $plugin = Plugin::where('id', $id)->whereNotNull('installed_at')->firstOrFail();
-            $name = $plugin->name;
-            $migrationPath = base_path("app/Plugins/$name/database/migrations");
-            $migrations = File::files($migrationPath);
-            // undo migrations in reversed order
-            rsort($migrations);
-            foreach($migrations as $migration) {
-                $filename = $migration->getFilename();
-                Artisan::call('migrate:rollback', [
-                    '--path' => "/app/Plugins/$name/database/migrations/$filename",
-                    '--force' => true,
-                ]);
-            }
+            $plugin = Plugin::firstOrFail($id);
         } catch (ModelNotFoundException $e) {
-            // Not installed
-            $plugin = Plugin::where('id', $id)->firstOrFail();
-            $name = $plugin->name;
+            return response()->json([
+                'error' => __('This plugin does not exist.')
+            ], 403);
         }
 
-        sp_remove_dir(base_path("app/Plugins/$name"));
-
+        $plugin->handleRemove();
         $plugin->delete();
         return response()->json([], 204);
     }

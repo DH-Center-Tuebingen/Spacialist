@@ -5,7 +5,7 @@
         </h4>
         <div class="row row-cols-3 g-3">
             <div class="col" v-for="plugin in state.plugins" :key="plugin.name">
-                <div class="card h-100" v-if="!plugin.isnomore">
+                <div class="card h-100">
                     <div class="card-body d-flex flex-column">
                         <div class="d-flex flex-row flex-grow-1 mb-3">
                             <div class="">
@@ -67,13 +67,14 @@
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
-    import store from '../bootstrap/store.js';
+    import store from '@/bootstrap/store.js';
 
     import {
         installPlugin,
         uninstallPlugin,
+        updatePlugin,
         removePlugin,
-    } from '../api.js';
+    } from '@/api.js';
 
     export default {
         setup(props) {
@@ -88,19 +89,15 @@
             };
             const install = plugin => {
                 installPlugin(plugin.id);
-                plugin.installed_at = new Date();
             };
             const uninstall = plugin => {
                 uninstallPlugin(plugin.id);
-                plugin.installed_at = null;
             };
             const update = plugin => {
-                // updatePlugin(plugin.name);
-                plugin.update_available = null;
+                updatePlugin(plugin.id);
             };
             const remove = plugin => {
                 removePlugin(plugin.id);
-                plugin.isnomore = true;
             };
 
             // DATA

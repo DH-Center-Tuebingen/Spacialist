@@ -1,16 +1,21 @@
 import { createStore } from 'vuex';
 
-import { sortTree, Node, openPath } from '../helpers/tree.js';
+import {
+    sortTree,
+    Node,
+    openPath,
+} from '@/helpers/tree.js';
 import {
     can,
     fillEntityData,
     only,
-} from '../helpers/helpers.js';
+    slugify,
+} from '@/helpers/helpers.js';
 import {
     getEntityData,
     getEntityParentIds,
     getEntityReferences,
-} from '../api.js';
+} from '@/api.js';
 
 export const store = createStore({
     modules: {
@@ -100,6 +105,7 @@ export const store = createStore({
                             }
                             if(doCount) {
                                 parent.children_count++;
+                                parent.state.openable = true;
                             }
                         }
                     }
@@ -133,6 +139,7 @@ export const store = createStore({
                             }
                         }
                         parent.children_count--;
+                        parent.state.openable = parent.children_count > 0;
                     } else {
                         const idx = state.tree.findIndex(l => l.id == entity.id);
                         if(idx > -1) {
@@ -379,6 +386,40 @@ export const store = createStore({
                 setPlugins(state, data) {
                     state.plugins = data;
                 },
+                updatePlugin(state, data) {
+                    const idx = state.plugins.findIndex(p => p.id == data.plugin_id);
+                    if(idx == -1) return;
+
+                    let plugin = null;
+
+                    if(data.deleted) {
+                        const delPlugins = state.plugins.splice(idx, 1);
+                        plugin = delPlugins[0];
+                    } else {
+                        const props = only(data.properties, ['installed_at', 'updated_at']);
+                        const updPlugin = state.plugins[idx];
+                        for(let k in props) {
+                            updPlugin[k] = props[k];
+                        }
+                        if(data.uninstalled) {
+                            plugin = updPlugin;
+                        }
+                    }
+
+                    if(plugin) {
+                        const slots = state.registeredPluginSlots;
+                        const pluginId = slugify(plugin.name);
+                        for(let k in slots) {
+                            const slot = slots[k];
+                            slot.forEach(slotPlugin => {
+                                if(slotPlugin.of == pluginId) {
+                                    const spIdx = slot.findIndex(sp => sp.of == pluginId);
+                                    slot.splice(spIdx, 1);
+                                }
+                            });
+                        }
+                    }
+                },
                 registerPluginInSlot(state, data) {
                     state.registeredPluginSlots[data.slot].push(data);
                 },
@@ -577,6 +618,9 @@ export const store = createStore({
                 },
                 setPlugins({commit}, data) {
                     commit('setPlugins', data);
+                },
+                updatePlugin({commit}, data) {
+                    commit('updatePlugin', data);
                 },
                 registerPluginInSlot({commit}, data) {
                     commit('registerPluginInSlot', data);

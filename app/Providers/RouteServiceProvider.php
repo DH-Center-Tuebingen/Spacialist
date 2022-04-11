@@ -5,7 +5,6 @@ namespace App\Providers;
 use App\Plugin;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Str;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
 class RouteServiceProvider extends ServiceProvider
@@ -90,8 +89,8 @@ class RouteServiceProvider extends ServiceProvider
         $installedPlugins = Plugin::whereNotNull('installed_at')->get();
 
         foreach($installedPlugins as $plugin) {
-            $snkName = Str::snake($plugin->name);
-            $prefix = "api/v1/$snkName";
+            $slug = $plugin->slugName();
+            $prefix = "api/v1/$slug";
             $namespace = "App\\Plugins\\$plugin->name\\Controllers";
             $routesPath = "app/Plugins/$plugin->name/routes/api.php";
 

@@ -28,10 +28,28 @@ export async function fetchPlugins() {
 export async function installPlugin(id) {
     return $httpQueue.add(
         () => http.get(`/plugin/${id}`).then(response => {
-            // store.dispatch('setPluginState', {
-            //     installed_at: response.data.installed_at,
-            //     updated_at: response.data.updated_at,
-            // });
+            store.dispatch('updatePlugin', {
+                plugin_id: id,
+                properties: {
+                    installed_at: response.data.installed_at,
+                    updated_at: response.data.updated_at,
+                },
+            });
+        })
+    );
+}
+
+export async function updatePlugin(id) {
+    return $httpQueue.add(
+        () => http.delete(`/plugin/${id}`).then(response => {
+            store.dispatch('updatePlugin', {
+                plugin_id: id,
+                uninstalled: true,
+                properties: {
+                    installed_at: response.data.installed_at,
+                    updated_at: response.data.updated_at,
+                },
+            });
         })
     );
 }
@@ -39,10 +57,14 @@ export async function installPlugin(id) {
 export async function uninstallPlugin(id) {
     return $httpQueue.add(
         () => http.delete(`/plugin/${id}`).then(response => {
-            // store.dispatch('setPluginState', {
-            //     installed_at: response.data.installed_at,
-            //     updated_at: response.data.updated_at,
-            // });
+            store.dispatch('updatePlugin', {
+                plugin_id: id,
+                uninstalled: true,
+                properties: {
+                    installed_at: response.data.installed_at,
+                    updated_at: response.data.updated_at,
+                },
+            });
         })
     );
 }
@@ -50,10 +72,10 @@ export async function uninstallPlugin(id) {
 export async function removePlugin(id) {
     return $httpQueue.add(
         () => http.delete(`/plugin/remove/${id}`).then(response => {
-            // store.dispatch('setPluginState', {
-            //     installed_at: response.data.installed_at,
-            //     updated_at: response.data.updated_at,
-            // });
+            store.dispatch('updatePlugin', {
+                plugin_id: id,
+                deleted: true,
+            });
         })
     );
 }
