@@ -805,6 +805,14 @@ class File extends Model
                     $q = $fs['regex'] ? Str::replace('*', '%', $fs['value']) : '%'.$fs['value'].'%';
                     $builder->orWhere('name', $op, $q);
                     break;
+                case 'metadata':
+                    if(!isset($fs['value'])) break;
+                    $op = $fs['case'] ? 'like' : 'ilike';
+                    $q = $fs['regex'] ? Str::replace('*', '%', $fs['value']) : '%'.$fs['value'].'%';
+                    $builder
+                        ->orWhere('copyright', $op, $q)
+                        ->orWhere('description', $op, $q);
+                    break;
                 case 'tags':
                     $builder->whereHas('tags', function($query) use ($fs) {
                         $query->where(function($subquery) use ($fs) {
