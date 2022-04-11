@@ -4,6 +4,7 @@ namespace App\Plugins\Map\App;
 
 use App\Entity;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use MStaack\LaravelPostgis\Geometries\Geometry;
 use MStaack\LaravelPostgis\Eloquent\PostgisTrait;
 use MStaack\LaravelPostgis\Exceptions\UnknownWKTTypeException;
@@ -74,10 +75,13 @@ class Geodata extends Model
         if($setName) {
             $nameCol = $metadata->name_column;
         }
+        
+        DB::beginTransaction();
+
         foreach($collection->features as $feature) {
             $geom = json_encode($feature->geometry);
             // ST_GeomFromGeoJSON doesn't support srid...
-            $wkt = \DB::select("SELECT ST_AsText(ST_Transform(ST_GeomFromText(ST_AsText(ST_GeomFromGeoJSON('$geom')), $srid), 4326)) AS wkt")[0]->wkt;
+            $wkt = DB::select("SELECT ST_AsText(ST_Transform(ST_GeomFromText(ST_AsText(ST_GeomFromGeoJSON('$geom')), $srid), 4326)) AS wkt")[0]->wkt;
             $parsedWkt = self::parseWkt($wkt);
             if(!isset($parsedWkt)) continue;
             $geodata = new self();
@@ -93,16 +97,19 @@ class Geodata extends Model
                 ];
                 $res = Entity::create($fields, $type, $user, $hasRoot ? $root : null);
 
-                if($res['type'] === 'error') {
-                    return response()->json([
-                        'error' => $res['msg']
-                    ], $res['code']);
+                if($res['type'] == 'error') {
+                    DB::rollBack();
+
+                    return $res;
                 }
             }
 
             $geodata->entity;
             $objs[] = $geodata;
         }
+
+        DB::commit();
+
         return $objs;
     }
 
