@@ -530,7 +530,6 @@
 
             // ON MOUNTED
             onMounted(_ => {
-                console.log(values, "values raw");
             });
             onBeforeUpdate(_ => {
                 attrRefs.value = {};

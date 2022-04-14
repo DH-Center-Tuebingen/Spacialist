@@ -136,7 +136,6 @@
                 keywords: 'none',
                 text: computed(_ => {
                     if(state.infoLoaded) {
-                        console.log("doc", state.info);
                         const record = state.info.getElementsByTagName('zs:records')[0].children[0];
                         const recordData = record.getElementsByTagName('zs:recordData')[0];
                         const marcRecord = recordData.getElementsByTagName('marc:record')[0];
