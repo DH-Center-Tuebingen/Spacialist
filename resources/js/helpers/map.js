@@ -79,10 +79,9 @@ export function formatLengthArea(value, precision = 2, isArea = false) {
 };
 
 export function createStyle(color = '#ffcc33', width = 2, styleOptions = {}) {
-    // console.log("fromSymbol", fromSymbol);
     let polygonFillColor;
     let r, g, b, a;
-    const fillAlphaMultiplier = 0.2;
+    const fillAlphaMultiplier = 0.3;
     [r, g, b, a] = splitColor(color);
     a *= fillAlphaMultiplier;
     polygonFillColor = `rgba(${r}, ${g}, ${b}, ${a})`;

@@ -151,7 +151,7 @@ export const splitColor = value => {
         } else {
             a = 1;
         }
-        return [r, g, b];
+        return [r, g, b, a];
     } else if(value.startsWith('rgba')) {
         const channels = value.match(/rgba\((\d+|\d+\.\d+),\s?(\d+|\d+\.\d+),\s?(\d+|\d+\.\d+),\s?(\d+|\d?\.\d+)\)/);
         r = channels[1];
