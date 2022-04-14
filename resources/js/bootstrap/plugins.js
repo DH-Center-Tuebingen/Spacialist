@@ -22,6 +22,8 @@ import {
     getLayers,
     switchLayerPositions,
     changeLayerClass,
+    getGeoJsonFormat,
+    getWktFormat,
 } from '@/helpers/map.js';
 import {
     Node
@@ -71,6 +73,8 @@ export const SpPS = {
             getLayers,
             switchLayerPositions,
             changeLayerClass,
+            getGeoJsonFormat,
+            getWktFormat,
         },
         font: {
             iconList

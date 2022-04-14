@@ -17,6 +17,9 @@ import {
 import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
 
+import WKT from 'ol/format/WKT';
+import GeoJSON from 'ol/format/GeoJSON';
+
 import BingMaps from 'ol/source/BingMaps';
 import OSM from 'ol/source/OSM';
 import TileImage from 'ol/source/TileImage';
@@ -30,6 +33,22 @@ import Stroke from 'ol/style/Stroke';
 import Style from 'ol/style/Style';
 
 import { splitColor } from './colors.js';
+
+const convertFormats = {};
+
+export function getGeoJsonFormat() {
+    if(!convertFormats.geojson) {
+        convertFormats.geojson = new GeoJSON();
+    }
+    return convertFormats.geojson;
+};
+
+export function getWktFormat() {
+    if(!convertFormats.wkt) {
+        convertFormats.wkt = new WKT();
+    }
+    return convertFormats.wkt;
+};
 
 export function formatLengthArea(value, precision = 2, isArea = false) {
     if(!value) return value;
@@ -77,6 +96,48 @@ export function formatLengthArea(value, precision = 2, isArea = false) {
     const sizeInUnit = length * factor;
     return `${sizeInUnit.toFixed(precision)} ${unit}`;
 };
+
+export function createOptionBasedStyle(options) {
+    if(!options.default) {
+        return new Style();
+    }
+
+    const styleOpts = {};
+
+    if(options.fill) {
+        styleOpts.fill = new Fill({
+            color: options.fill.color || options.default.color,
+        });
+    }
+    if(options.stroke) {
+        const strokeOpts = {
+            color: options.stroke.color || options.default.color,
+            width: options.stroke.width || options.default.width,
+        };
+        if(options.stroke.dash) {
+            strokeOpts.lineDash = options.stroke.dash;
+        }
+        styleOpts.stroke = new Stroke(strokeOpts);
+    }
+    if(options.image) {
+        const imageOpts = {
+            radius: options.image.radius || options.default.width * 3,
+        };
+        if(options.image.stroke) {
+            imageOpts.stroke = new Stroke({
+                color: options.image.stroke.color || options.default.color,
+            });
+        }
+        if(options.image.fill) {
+            imageOpts.fill = new Fill({
+                color: options.image.fill.color || options.default.color,
+            });
+        }
+        styleOpts.image = new CircleStyle(imageOpts);
+    }
+
+    return new Style(styleOpts);
+}
 
 export function createStyle(color = '#ffcc33', width = 2, styleOptions = {}) {
     let polygonFillColor;
@@ -288,7 +349,7 @@ export function createVectorLayer(data = {}) {
         source: new Vector({
             wrapX: false
         }),
-        style: createStyle(),
+        style: createStyle(data.color),
     });
 };
 

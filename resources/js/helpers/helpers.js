@@ -672,6 +672,15 @@ export function slugify(s, delimiter = '-') {
     return s.toLowerCase();
 }
 
+export function hash(str) {
+    let hash = 0;
+    for(let i=0; i<str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+    }
+    return hash;
+}
+
 // UNVERIFIED
 
 export function getNotificationSourceLink(notification) {

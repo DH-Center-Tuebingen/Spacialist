@@ -410,6 +410,58 @@ class MapController extends Controller
         return response()->json(null, 204);
     }
 
+    public function updateGeometries(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('geodata_write')) {
+            return response()->json([
+                'error' => __('You do not have the permission to modify geodata')
+            ], 403);
+        }
+        $this->validate($request, [
+            'geodata' => 'required|array',
+            'srid' => 'required|integer|exists:spatial_ref_sys,srid'
+        ]);
+
+        $srid = $request->get('srid');
+        $geometryList = $request->input('geodata');
+        foreach($geometryList as $gid => $geometryData) {
+            try {
+                $geodata = Geodata::findOrFail($gid);
+                $geodata->patch($geometryData, $srid, $user);
+            } catch (ModelNotFoundException $e) {
+                // TODO return on error?
+                // If so, rollback
+            }
+        }
+
+        return response()->json(null, 204);
+    }
+
+    public function deleteGeometries(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('geodata_delete')) {
+            return response()->json([
+                'error' => __('You do not have the permission to delete geodata')
+            ], 403);
+        }
+        $this->validate($request, [
+            'geodata' => 'required|array',
+        ]);
+
+        $geodataIds = $request->input('geodata');
+        foreach($geodataIds as $gid) {
+            try {
+                $geodata = Geodata::findOrFail($gid);
+                $geodata->delete();
+            } catch (ModelNotFoundException $e) {
+                // TODO return on error?
+                // If so, rollback
+            }
+        }
+
+        return response()->json(null, 204);
+    }
+
     // PUT
 
     // DELETE

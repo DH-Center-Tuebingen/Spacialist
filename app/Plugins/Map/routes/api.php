@@ -27,6 +27,9 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix(''
     Route::post('/link', 'MapController@link');
     
     Route::patch('/layer/{id}', 'MapController@updateLayer')->where('id', '[0-9]+');
+    Route::patch('/geometry', 'MapController@updateGeometries');
+    // have to use patch, because delete does not support data
+    Route::patch('/geometry/delete', 'MapController@deleteGeometries');
 
     Route::delete('layer/{id}', 'MapController@deleteLayer')->where('id', '[0-9]+');
     Route::delete('/link/{gid}/{eid}', 'MapController@unlink')->where('gid', '[0-9]+')->where('eid', '[0-9]+');

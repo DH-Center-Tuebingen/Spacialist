@@ -30,7 +30,7 @@
                     <button type="button" class="btn btn-fab rounded-circle btn-outline-danger" v-show="actionState.interactionMode == 'delete'" data-bs-toggle="popover" :data-content="t('main.map.draw.delete.neg_desc')" data-trigger="hover" data-placement="bottom" @click="deleteFeatures(false)">
                         <i class="fas fa-fw fa-times"></i>
                     </button>
-                    <button type="button" class="btn btn-fab rounded-circle" :class="{'btn-primary': actionState.measuring, 'btn-outline-primary': !actionState.measuring}" data-bs-toggle="popover" :data-content="t('main.map.draw.measure.desc')" data-trigger="hover" data-placement="bottom" @click="toggleMeasurements()">
+                    <button type="button" class="btn btn-fab rounded-circle" :class="{'btn-primary': actionState.measure.active, 'btn-outline-primary': !actionState.measure.active}" data-bs-toggle="popover" :data-content="t('main.map.draw.measure.desc')" data-trigger="hover" data-placement="bottom" @click="toggleMeasurements()">
                         <i class="fas fa-fw fa-ruler-combined"></i>
                     </button>
                 </div>
@@ -48,7 +48,7 @@
                 </span>
             </div>
             <div>
-                <slot name="action"></slot>
+                <slot name="action" :post-action-hook="data => postAction(data, actionState.overlayData.feature)"></slot>
             </div>
         </h4>
         <div class="popover-body">
@@ -131,7 +131,12 @@
     </div>
     <div :id="actionState.popupIds.h" class="tooltip" role="tooltip">
     </div>
-    <div :id="actionState.popupIds.m" class="tooltip tooltip-measure"></div>
+    <div :id="actionState.popupIds.m" class="tooltip tooltip-measure bs-tooltip-bottom" role="tooltip">
+        <div class="tooltip-arrow"></div>
+        <div class="tooltip-inner">
+            {{ actionState.measure.length }}
+        </div>
+    </div>
 </template>
 
 <script>
@@ -157,6 +162,7 @@
     import { defaults as defaultInteractions } from 'ol/interaction';
     import Feature from 'ol/Feature';
     import Map from 'ol/Map';
+    import {unByKey} from 'ol/Observable.js';
     import View from 'ol/View';
     import Overlay from 'ol/Overlay';
     import { transform as transformProj } from 'ol/proj';
@@ -171,14 +177,14 @@
 
     import { getCenter as getExtentCenter, extend as extendExtent} from 'ol/extent';
 
-    import WKT from 'ol/format/WKT';
-    import GeoJSON from 'ol/format/GeoJSON';
-
     import Draw from 'ol/interaction/Draw';
     import DragRotate from 'ol/interaction/DragRotate';
     import DragZoom from 'ol/interaction/DragZoom';
+    import Modify from 'ol/interaction/Modify';
     import PinchRotate from 'ol/interaction/PinchRotate';
     import PinchZoom from 'ol/interaction/PinchZoom';
+    import Select from 'ol/interaction/Select';
+    import Snap from 'ol/interaction/Snap';
 
     import Group from 'ol/layer/Group';
 
@@ -188,10 +194,13 @@
 
     import {
         createNewLayer,
+        createOptionBasedStyle,
         createStyle,
         createVectorLayer,
         formatLengthArea,
         registerProjection,
+        getGeoJsonFormat,
+        getWktFormat,
     } from '@/helpers/map.js';
 
     import {
@@ -214,6 +223,11 @@
             layers: {
                 type: Object,
                 required: true,
+            },
+            stylePerLayer: {
+                type: Boolean,
+                required: false,
+                default: true,
             },
             data: {
                 type: Object,
@@ -262,6 +276,7 @@
             const {
                 selection,
                 layers,
+                stylePerLayer,
                 data,
                 projection,
                 inputProjection,
@@ -272,6 +287,50 @@
             } = toRefs(props);
 
             // FUNCTIONS
+            const setOverlay = feature => {
+                const geometry = feature.getGeometry();
+                const props = feature.getProperties();
+                const coords = getExtentCenter(geometry.getExtent());
+                let title = t('main.map.geometry_name', {id: props.id});
+                let subtitle = '';
+                const sizes = {
+                    in_m: 0,
+                    unit: '',
+                    combined: '',
+                };
+
+                if(props.entity) {
+                    subtitle = title;
+                    title = props.entity_name;
+                }
+
+                switch(geometry.getType()) {
+                    case 'LineString':
+                    case 'MultiLineString':
+                        sizes.in_m = getLength(geometry);
+                        sizes.unit = 'm';
+                        sizes.combined = formatLengthArea(sizes.in_m, 2);
+                        break;
+                    case 'Polygon':
+                    case 'MultiPolygon':
+                        sizes.in_m = getArea(geometry);
+                        sizes.unit = 'm²';
+                        sizes.combined = formatLengthArea(sizes.in_m, 2, true);
+                        break;
+                }
+
+                actionState.overlay.setPosition(coords);
+                actionState.overlayData = {
+                    title: title,
+                    subtitle: subtitle,
+                    size: sizes,
+                    feature: feature,
+                    type: geometry.getType(),
+                    coordinates: geometry.getCoordinates(),
+                };
+
+                actionState.bsOverlay.show();
+            };
             const transformCoordinates = (c, clist, rev = false) => {
                 if(!c[0] || !c[1]) {
                     return null;
@@ -328,8 +387,8 @@
                 });
             };
             const getAssociatedLayer = feature => {
+                const layerGroup = state.mapLayerGroups.entity.getLayers().getArray();
                 if(data.value.format == 'wkt') {
-                    const layerGroup = state.mapLayerGroups.entity.getLayers().getArray();
                     for(let i=0; i<layerGroup.length; i++) {
                         if(layerGroup[i].get('layer_id')) {
                             return layerGroup[i];
@@ -347,23 +406,33 @@
             };
             const drawFeature = feature => {
                 const layer = getAssociatedLayer(feature);
-                if(!layer) return;
-                const source = layer.getSource();
-                if(resetEach.value) {
-                    if(source.getFeatures().length) {
-                        source.clear();
+                let cnt = -1;
+                if(layer) {
+                    const source = layer.getSource();
+                    if(resetEach.value) {
+                        if(source.getFeatures().length) {
+                            source.clear();
+                        }
                     }
+                    source.addFeature(feature);
+                    cnt = source.getFeatures().length;
                 }
-                source.addFeature(feature);
+
+                if(actionState.snap) {
+                    actionState.snap.addFeature(feature);
+                }
                 const wktStr = wktFormat.writeFeature(feature, {
                     featureProjection: 'EPSG:3857',
                     dataProjection: state.inputEpsgCode,
                 });
-                context.emit('added', {
+                const data = {
                     feature: feature,
                     wkt: wktStr,
-                    count: source.getFeatures().length,
-                });
+                };
+                if(cnt > -1) {
+                    data.count = cnt;
+                }
+                context.emit('added', data);
             };
             const initializeLayers = _ => {
                 for(let k in layers.value) {
@@ -425,6 +494,68 @@
 
                 await registerProjection(inputProjection.value);
             };
+            const getLayerForFeature = f => {
+                const p = f.getProperties();
+                if(p.entity) {
+                    const et = Object.values(layers.value).find(l => l.entity_type_id == p.entity_type_id);
+                    return Object.values(state.mapEntityLayers).find(l => l.getProperties().layer_id == et.id);
+                } else {
+                    return Object.values(state.mapEntityLayers).find(l => l.getProperties().type.toLowerCase() == 'unlinked');
+                }
+            };
+            const removeFeatureFromLayer = f => {
+                const layer = getLayerForFeature(f);
+                if(layer) {
+                    layer.getSource().removeFeature(f);
+                }
+            };
+            const getLayerBy = (prop, value) => {
+                const layers = [
+                    ...state.mapLayerGroups.base.getLayers().getArray(),
+                    ...state.mapLayerGroups.overlay.getLayers().getArray(),
+                    ...state.mapLayerGroups.entity.getLayers().getArray(),
+                ];
+
+                return layers.find(l => l.getProperties()[prop] == value);
+            };
+            const computeStyleAndLayerForFeature = (f, add = true) => {
+                const layer = getLayerForFeature(f);
+                let finalStyle = null;
+                const layerProps = layer.getProperties();
+                const color = layerProps.color;
+                
+                const p = f.getProperties();
+                if(stylePerLayer.value) {
+                    if(!state.layerStyleCache[layerProps.layer_id]) {
+                        state.layerStyleCache[layerProps.layer_id] = createStyle(color);
+                    }
+
+                    finalStyle = state.layerStyleCache[layerProps.layer_id];
+                } else {
+                    const styleOptions = {
+                        forFeature: f,
+                    };
+
+                    if(p.style) {
+                        styleOptions.symbolStyle = p.style.symbol;
+                    }
+                    if(p.label) {
+                        styleOptions.labelStyle = p.label;
+                    }
+                    if(p.charts) {
+                        console.log("should load charts");
+                    }
+                    finalStyle = createStyle(color, 2, styleOptions);
+                }
+                f.setStyle(finalStyle);
+                f.setProperties({
+                    layer_id: layerProps.layer_id,
+                }, true);
+                if(add) {
+                    layer.getSource().addFeature(f);
+                }
+                state.featureList[p.id] = f;
+            };
             const loadWktData = features => {
                 // As WKT can not have any metadata, we do not know which layer this should be displayed on
                 // Thus we create a separate layer for it
@@ -465,33 +596,7 @@
                     dataProjection: state.inputEpsgCode,
                 });
                 features.forEach(f => {
-                    let layer;
-                    const p = f.getProperties();
-                    // console.log("current feature", f, p);
-                    if(p.entity) {
-                        const et = Object.values(layers.value).find(l => l.entity_type_id == p.entity_type_id);
-                        layer = Object.values(state.mapEntityLayers).find(l => l.getProperties().layer_id == et.id);
-                    } else {
-                        layer = Object.values(state.mapEntityLayers).find(l => l.getProperties().type.toLowerCase() == 'unlinked');
-                    }
-                    const styleOptions = {
-                        forFeature: f,
-                    };
-                    if(p.style) {
-                        styleOptions.symbolStyle = p.style.symbol;
-                    }
-                    if(p.label) {
-                        styleOptions.labelStyle = p.label;
-                    }
-                    if(p.charts) {
-                        console.log("should load charts");
-                    }
-                    const color = layer.getProperties().color;
-                    const src = layer.getSource();
-                    const defaultStyle = createStyle(color, 2, styleOptions);
-                    f.setStyle(defaultStyle);
-                    src.addFeature(f);
-                    state.featureList[p.id] = f;
+                    computeStyleAndLayerForFeature(f);
                 });
             };
             const initializeData = _ => {
@@ -537,7 +642,7 @@
                 state.map.on('pointermove', _throttle(e => {
                     if(e.dragging) return;
                     if(anyInteractionActive()) return;
-                    if(actionState.measuring) return;
+                    if(actionState.measure.active) return;
 
                     const feature = getFeaturesAtEvent(e);
                     if(feature != actionState.hoveredFeature) {
@@ -583,11 +688,95 @@
                 }, 200));
                 state.map.on('singleclick', e => {
                     if(anyInteractionActive()) return;
-                    if(actionState.measuring) return;
+                    if(actionState.measure.active) return;
 
                     const feature = getFeaturesAtEvent(e);
                     context.emit('select', feature);
                 });
+            };
+            const getLineLength = geometry => {
+                const length = getLength(geometry);
+                let str;
+                if(length >= 1000) {
+                    str = `${(length / 1000).toFixed(2)} km`;
+                } else {
+                    str = `${length.toFixed(2)} m`;
+                }
+                return str;
+            };
+            const initMeasureInteraction = _ => {
+                actionState.measure.layer = createVectorLayer({
+                    show: false,
+                    title: 'Measure Layer',
+                    visible: true,
+                    opacity: 1,
+                    color: '#000000',
+                    layer: 'measure',
+                    layer_id: 'measure-layer',
+                });
+                state.map.addLayer(actionState.measure.layer);
+                actionState.measure.draw = new Draw({
+                    source: actionState.measure.layer.getSource(),
+                    type: 'LineString',
+                    style: createOptionBasedStyle({
+                        default: {
+                            color: 'rgba(255, 255, 255, 0.2',
+                            width: 2,
+                        },
+                        fill: {},
+                        stroke: {
+                            color: 'rgba(0, 0, 0, 0.5',
+                            dash: [10, 10],
+                        },
+                        image: {
+                            stroke: {
+                                color: 'rgba(0, 0, 0, 0.2',
+                            },
+                            fill: {},
+                        }
+                    }),
+                });
+                actionState.measure.tooltipElement = document.getElementById(actionState.popupIds.m);
+                actionState.measure.tooltip = new Overlay({
+                    element: actionState.measure.tooltipElement,
+                    offset: [0, 5]
+                });
+                state.map.addOverlay(actionState.measure.tooltip);
+            };
+            const addMeasureInteraction = _ => {
+                state.map.addInteraction(actionState.measure.draw);
+                let measureListener;
+                actionState.measure.draw.on('drawstart', event => {
+                    actionState.measure.tooltipElement.classList.add('show');
+                    // Remove existing measures
+                    actionState.measure.layer.getSource().clear();
+                    let coords = event.coordinate;
+                    measureListener = event.feature.getGeometry().on('change', ce => {
+                        let geom = ce.target;
+                        coords = geom.getLastCoordinate();
+                        // actionState.measure.bsPopup.dispose();
+                        actionState.measure.tooltip.setPosition(coords);
+                        actionState.measure.length = getLineLength(geom);
+                    });
+                });
+                actionState.measure.draw.on('drawend', event => {
+                    // actionState.measure.tooltipElement.classList.remove('show');
+                    unByKey(measureListener);
+                });
+            };
+            const removeMeasureInteraction = _ => {
+                actionState.measure.tooltipElement.classList.remove('show');
+                actionState.measure.layer.getSource().clear();
+                state.map.removeInteraction(actionState.measure.draw);
+            };
+            const toggleMeasurements = _ => {
+                actionState.measure.active = !actionState.measure.active;
+
+                if(actionState.measure.active) {
+                    addMeasureInteraction();
+                } else {
+                    removeMeasureInteraction();
+                }
             };
             const initializeDrawFeatures = _ => {
                 // If drawing is disabled, skip initializing it
@@ -631,19 +820,122 @@
                     }),
                 };
                 actionState.modify = {
+                    uneditedFeatures: {},
+                    editedFeatures: {},
+                    editCntr: 0,
+                    modify: {},
+                    select: {},
                     init: _ => {
+                        actionState.modify.select = new Select({
+                            hitTolerance: 5,
+                            toggleCondition: neverCond,
+                            wrapX: false
+                        });
+                        state.map.addInteraction(actionState.modify.select);
+                        actionState.modify.modify = new Modify({
+                            features: actionState.modify.select.getFeatures(),
+                            wrapX: false
+                        });
+                        state.map.addInteraction(actionState.modify.modify);
+                        actionState.modify.setEvents();
+                        actionState.modify.editedFeatures = {};
+                        actionState.modify.uneditedFeatures = {};
+                        actionState.modify.editCntr = 0;
+                    },
+                    setEvents: _ => {
+                        actionState.modify.select.on('select', event => {
+                            // config allows only one selected feature
+                            if(event.selected.length > 0) {
+                                const f = event.selected[0];
+                                actionState.modify.editedFeatures[f.ol_uid] = f;
+                                if(!actionState.modify.uneditedFeatures[f.ol_uid]) {
+                                    actionState.modify.uneditedFeatures[f.ol_uid] = f.clone();
+                                    actionState.modify.editCntr++;
+                                }
+                            }
+                        });
                     },
                     getActive: _ => {
+                        return actionState.modify.select.getActive() || actionState.modify.modify.getActive();
                     },
-                    setActive: (active, type) => {
+                    setActive: (active, cancelled) => {
+                        actionState.modify.select.setActive(active);
+                        actionState.modify.modify.setActive(active);
+
+                        if(!active && actionState.modify.editCntr > 0) {
+                            if(cancelled) {
+                                for(let k in actionState.modify.editedFeatures) {
+                                    const uneditedGeometry = actionState.modify.uneditedFeatures[k].getGeometry();
+                                    actionState.modify.editedFeatures[k].setGeometry(uneditedGeometry);
+                                }
+                            } else {
+                                context.emit('modified', {
+                                    features: Object.values(actionState.modify.editedFeatures),
+                                });
+                            }
+                        }
+
+                        actionState.modify.editedFeatures = {};
+                        actionState.modify.uneditedFeatures = {};
+                        actionState.modify.select.getFeatures().clear();
+                        actionState.modify.editCntr = 0;
                     },
                 };
                 actionState.delete = {
+                    deletedFeatures: {},
+                    delCntr: 0,
                     init: _ => {
+                        actionState.delete.select = new Select({
+                            hitTolerance: 5,
+                            toggleCondition: neverCond,
+                            wrapX: false,
+                            style: null,
+                        });
+                        state.map.addInteraction(actionState.delete.select);
+                        actionState.delete.setEvents();
+                        actionState.delete.deletedFeatures = {};
+                        actionState.delete.delCntr = 0;
+                    },
+                    setEvents: _ => {
+                        actionState.delete.select.on('select', event => {
+                            // config allows only one selected feature
+                            if(event.selected.length) {
+                                const f = event.selected[0];
+                                actionState.delete.deletedFeatures[f.ol_uid] = f.clone();
+                                actionState.delete.select.getLayer(f)
+                                    .getSource()
+                                    .removeFeature(f);
+                                actionState.delete.select.getFeatures().clear();
+                                actionState.delete.delCntr++;
+                            }
+                        });
                     },
                     getActive: _ => {
+                        return actionState.delete.select.getActive();
                     },
-                    setActive: (active, type) => {
+                    setActive: (active, cancelled) => {
+                        actionState.delete.select.setActive(active);
+
+                        if(!active && actionState.delete.delCntr > 0) {
+                            if(cancelled) {
+                                // If delete was cancelled, readd deleted features
+                                for(let k in actionState.delete.deletedFeatures) {
+                                    const delFeature = actionState.delete.deletedFeatures[k];
+                                    const fromLayer = getLayerBy('layer_id', delFeature.getProperties().layer_id);
+                                    if(fromLayer) {
+                                        fromLayer.getSource().addFeature(delFeature);
+                                    }
+                                }
+                            } else {
+                                context.emit('deleted', {
+                                    features: Object.values(actionState.delete.deletedFeatures),
+                                });
+                            }
+                        }
+
+                        actionState.delete.select.getFeatures().clear();
+                        actionState.delete.deletedFeatures = {};
+                        actionState.delete.delCntr = 0;
                     },
                 };
 
@@ -657,10 +949,10 @@
                 // TODO add draw layer to map
                 // this.entityLayers.push(vm.vector);
 
-                // this.initMeasureInteraction();
-                // if(this.measurementActive) {
-                //     this.addMeasureInteraction();
-                // }
+                initMeasureInteraction();
+                if(actionState.measure.active) {
+                    addMeasureInteraction();
+                }
 
                 // Event Listeners
                 actionState.draw.Point.on('drawend', event => {
@@ -682,35 +974,51 @@
                 }
                 actionState.coordinateEditMode = false;
             };
+            const getFeaturesInExtent = layer => {
+                const allLayers = !layer;
+                const currentExtent = state.map.getView().calculateExtent(state.map.getSize());
+                const extentFeatures = [];
+                const layers = allLayers ? state.mapLayerGroups.entity.getLayers() : [layer];
+                layers.forEach(lg => {
+                    const src = lg.getSource();
+                    if(src && !!src.forEachFeatureInExtent) {
+                        src.forEachFeatureInExtent(currentExtent, f => {
+                            extentFeatures.push(f);
+                        });
+                    }
+                });
+                return new Collection(extentFeatures);
+            };
+            const updateSnap = features => {
+                if(!!actionState.snap) {
+                    state.map.removeInteraction(actionState.snap);
+                }
+                if(!!features) {
+                    actionState.snap = new Snap({
+                        features: features
+                    });
+                    state.map.addInteraction(actionState.snap);
+                }
+            };
             const enableOverlayCoordinateEditing = c => {
                 actionState.overlayCoordinateEdit = [c.x, c.y];
                 actionState.coordinateEditMode = true;
-            }
-            const toggleMeasurements = _ => {
-                console.log("toggle measurements");
-                actionState.measuring = !actionState.measuring;
-
-                // if(actionState.measuring) {
-                //     addMeasureingInteraction();
-                // } else {
-                //     removeMeasuringInteraction();
-                // }
             };
             // Interactions (Draw, Modify, Delete)
-            const setInteractionMode = (mode, type, cancelled) => {
+            const setInteractionMode = (mode, cancelled, drawMode) => {
                 const currMode = actionState.interactionMode;
                 actionState.interactionMode = mode;
                 // only set snap features, when mode is set and not delete
                 // because delete does not need snapping
                 if(!!mode && mode != 'delete') {
-                    // this.updateSnap(this.getFeaturesInExtent());
+                    updateSnap(getFeaturesInExtent());
                 } else {
-                    // this.updateSnap();
+                    updateSnap();
                 }
 
                 switch(mode) {
                     case 'draw':
-                        actionState.draw.setActive(true, type);
+                        actionState.draw.setActive(true, drawMode);
                         actionState.modify.setActive(false, cancelled);
                         actionState.delete.setActive(false, cancelled);
                         break;
@@ -727,9 +1035,6 @@
                         actionState.delete.setActive(true);
                         break;
                     default:
-                        if(cancelled) {
-                            actionState.modify.setChangeState('cancel');
-                        }
                         actionState.drawType = '';
                         actionState.interactionMode = '';
                         actionState.draw.setActive(false);
@@ -742,40 +1047,47 @@
                 const currType = actionState.drawType;
                 actionState.drawType = type;
                 if(actionState.interactionMode != 'draw') {
-                    setInteractionMode('draw', type, true);
+                    setInteractionMode('draw', true, type);
                 } else if(currType == type) {
                     setInteractionMode('');
                 }
-                actionState.draw.getActive() && actionState.draw.setActive(true, type);
+
+                if(actionState.draw.getActive()) {
+                    actionState.draw.setActive(true, type);
+                }
             };
             const updateFeatures = (confirm = true) => {
                 if(confirm) {
                     // Update Features
-                    console.log("update features");
                     setInteractionMode('');
                 } else {
                     // Cancel Update
-                    console.log("CANCEL: update features");
                     setInteractionMode('', true);
                 }
             };
             const deleteFeatures = (confirm = true) => {
                 if(confirm) {
                     // Delete Features
-                    console.log("delete features");
                     setInteractionMode('');
                 } else {
                     // Cancel delete
-                    console.log("CANCEL: delete features");
                     setInteractionMode('', true);
+                }
+            };
+            const postAction = (data, feature) => {
+                feature.setProperties(data.properties);
+                if(data.recreateStyle && stylePerLayer.value) {
+                    removeFeatureFromLayer(feature);
+                    computeStyleAndLayerForFeature(feature);
+                    setOverlay(feature);
                 }
             };
 
             // DATA
             // EPSG:3857 bounds (taken from epsg.io/3857)
             const defaultExtent = [-20026376.39, -20048966.10, 20026376.39, 20048966.10];
-            const wktFormat = new WKT();
-            const geojsonFormat = new GeoJSON();
+            const wktFormat = getWktFormat();
+            const geojsonFormat = getGeoJsonFormat();
             const state = reactive({
                 map: null,
                 extent: defaultExtent,
@@ -788,6 +1100,7 @@
                 mapOverlays: [],
                 mapBaselayers: [],
                 mapEntityLayers: [],
+                layerStyleCache: {},
                 featureList: {},
                 epsgCode: computed(_ => `EPSG:${projection.value}`),
                 inputEpsgCode: computed(_ => `EPSG:${inputProjection.value}`),
@@ -819,7 +1132,14 @@
                 overlayData: {},
                 coordinateEditMode: false,
                 overlayCoordinateEdit: [],
-                measuring: false,
+                measure: {
+                    active: false,
+                    layer: null,
+                    draw: {},
+                    tooltipElement: null,
+                    tooltip: null,
+                    length: '0m',
+                },
                 hoveredFeature: null,
                 drawType: '',
                 interactionMode: '',
@@ -827,6 +1147,7 @@
                 draw: {},
                 modify: {},
                 delete: {},
+                snap: {},
                 popupIds: computed(_ => {
                     return {
                         p: `${state.mapId}-popup`,
@@ -969,48 +1290,7 @@
             watch(_ => selection.value, (newValue, oldValue) => {
                     const feature = state.featureList[newValue];
                     if(!!feature) {
-                        const geometry = feature.getGeometry();
-                        const props = feature.getProperties();
-                        const coords = getExtentCenter(geometry.getExtent());
-                        let title = t('main.map.geometry_name', {id: props.id});
-                        let subtitle = '';
-                        const sizes = {
-                            in_m: 0,
-                            unit: '',
-                            combined: '',
-                        };
-
-                        if(props.entity) {
-                            subtitle = title;
-                            title = props.entity_name;
-                        }
-
-                        switch(geometry.getType()) {
-                            case 'LineString':
-                            case 'MultiLineString':
-                                sizes.in_m = getLength(geometry);
-                                sizes.unit = 'm';
-                                sizes.combined = formatLengthArea(sizes.in_m, 2);
-                                break;
-                            case 'Polygon':
-                            case 'MultiPolygon':
-                                sizes.in_m = getArea(geometry);
-                                sizes.unit = 'm²';
-                                sizes.combined = formatLengthArea(sizes.in_m, 2, true);
-                                break;
-                        }
-
-                        actionState.overlay.setPosition(coords);
-                        actionState.overlayData = {
-                            title: title,
-                            subtitle: subtitle,
-                            size: sizes,
-                            feature: feature,
-                            type: geometry.getType(),
-                            coordinates: geometry.getCoordinates(),
-                        };
-
-                        actionState.bsOverlay.show();
+                        setOverlay(feature);
                     } else {
                         actionState.overlay.setPosition();
                         actionState.bsOverlay.hide();
@@ -1097,6 +1377,7 @@
                 toggleDrawType,
                 updateFeatures,
                 deleteFeatures,
+                postAction,
                 // STATE
                 state,
                 actionState,
