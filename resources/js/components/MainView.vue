@@ -81,6 +81,7 @@
     
     import {
         onBeforeRouteUpdate,
+        onBeforeRouteLeave,
     } from 'vue-router';
 
     import { useI18n } from 'vue-i18n';
@@ -179,6 +180,9 @@
                 if(to.query.tab !== from.query.tab) {
                     store.dispatch('setMainViewTab', to.query.tab);
                 }
+            });
+            onBeforeRouteLeave((to, from) => {
+                store.dispatch('setMainViewTab', null);
             });
 
             // RETURN
