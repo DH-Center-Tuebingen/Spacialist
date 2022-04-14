@@ -28,13 +28,15 @@ export async function fetchPlugins() {
 export async function installPlugin(id) {
     return $httpQueue.add(
         () => http.get(`/plugin/${id}`).then(response => {
+            const plugin = response.data.plugin;
             store.dispatch('updatePlugin', {
                 plugin_id: id,
                 properties: {
-                    installed_at: response.data.installed_at,
-                    updated_at: response.data.updated_at,
+                    installed_at: plugin.installed_at,
+                    updated_at: plugin.updated_at,
                 },
             });
+            return response.data;
         })
     );
 }
@@ -65,6 +67,7 @@ export async function uninstallPlugin(id) {
                     updated_at: response.data.updated_at,
                 },
             });
+            return response.data;
         })
     );
 }
@@ -76,6 +79,7 @@ export async function removePlugin(id) {
                 plugin_id: id,
                 deleted: true,
             });
+            return response.data;
         })
     );
 }

@@ -34,6 +34,16 @@ class Plugin extends Model
         return Str::slug($this->name);
     }
 
+    public function publicName($withPath = true) {
+        $slug = $this->slugName();
+        $uuid = $this->uuid;
+        $name = "${slug}-${uuid}.js";
+        if($withPath) {
+            $name = "plugins/$name";
+        }
+        return $name;
+    }
+
     public static function getInfo($path) {
         $infoPath = Str::finish($path, '/') . 'App/info.xml';
         if(!File::isFile($infoPath)) return false;
@@ -198,11 +208,9 @@ class Plugin extends Model
         $name = $this->name;
         $scriptPath = base_path("app/Plugins/$name/js/script.js");
         if(file_exists($scriptPath)) {
-            $uuid = $this->uuid;
-            $slug = $this->slugName();
             $filehandle = fopen($scriptPath, 'r');
             Storage::put(
-                "plugins/${slug}-${uuid}.js",
+                $this->publicName(),
                 $filehandle,
             );
             fclose($filehandle);
@@ -210,10 +218,9 @@ class Plugin extends Model
     }
 
     private function removeScript() {
-        $uuid = $this->uuid;
-        $slug = $this->slugName();
-        if(Storage::exists("plugins/${slug}-${uuid}.js")) {
-            Storage::delete("plugins/${slug}-${uuid}.js");
+        $path = $this->publicName();
+        if(Storage::exists($path)) {
+            Storage::delete($path);
         }
     }
 

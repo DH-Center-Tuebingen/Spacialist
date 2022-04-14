@@ -7,8 +7,8 @@
             <div class="col" v-for="plugin in state.plugins" :key="plugin.name">
                 <div class="card h-100">
                     <div class="card-body d-flex flex-column">
-                        <div class="d-flex flex-row flex-grow-1 mb-3">
-                            <div class="">
+                        <div class="d-flex flex-row flex-grow-1 mb-3 justify-content-between">
+                            <div class="pe-2">
                                 <h5 class="card-title mb-1">
                                     {{ plugin.metadata.title }}
                                 </h5>
@@ -24,8 +24,8 @@
                                     <vue3-markdown-it :source="plugin.metadata.description" />
                                 </p>
                             </div>
-                            <div>
-                                <h6 class="mb-0">
+                            <div class="border-start ps-2">
+                                <h6 class="mb-0 text-end">
                                     Authors
                                 </h6>
                                 <ul class="list-group list-group-flush">
@@ -76,6 +76,11 @@
         removePlugin,
     } from '@/api.js';
 
+    import {
+        appendScript,
+        removeScript,
+    } from '@/helpers/plugins.js';
+
     export default {
         setup(props) {
             const { t } = useI18n();
@@ -88,16 +93,22 @@
                 return !!plugin.update_available;
             };
             const install = plugin => {
-                installPlugin(plugin.id);
+                installPlugin(plugin.id).then(data => {
+                    appendScript(data.install_location);
+                });
             };
             const uninstall = plugin => {
-                uninstallPlugin(plugin.id);
+                uninstallPlugin(plugin.id).then(data => {
+                    removeScript(data.uninstall_location);
+                });
             };
             const update = plugin => {
                 updatePlugin(plugin.id);
             };
             const remove = plugin => {
-                removePlugin(plugin.id);
+                removePlugin(plugin.id).then(data => {
+                    removeScript(data.uninstall_location);
+                });
             };
 
             // DATA

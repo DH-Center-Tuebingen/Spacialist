@@ -57,7 +57,10 @@ class PluginController extends Controller
                 ], 403);
             }
 
-            return response()->json($plugin);
+            return response()->json([
+                'plugin' => $plugin,
+                'install_location' => $plugin->publicName(),
+            ]);
         }
     }
 
@@ -78,7 +81,10 @@ class PluginController extends Controller
         try {
             $plugin = Plugin::where('id', $id)->whereNotNull('installed_at')->firstOrFail();
             $plugin->handleUninstall();
-            return response()->json($plugin);
+            return response()->json([
+                'plugin' => $plugin,
+                'uninstall_location' => $plugin->publicName(),
+            ]);
         } catch (ModelNotFoundException $e) {
             // Already uninstalled
             return response()->json([], 204);
@@ -96,6 +102,8 @@ class PluginController extends Controller
 
         $plugin->handleRemove();
         $plugin->delete();
-        return response()->json([], 204);
+        return response()->json([
+            'uninstall_location' => $plugin->publicName(),
+        ]);
     }
 }
