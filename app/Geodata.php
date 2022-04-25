@@ -8,6 +8,7 @@ use MStaack\LaravelPostgis\Eloquent\PostgisTrait;
 use MStaack\LaravelPostgis\Exceptions\UnknownWKTTypeException;
 use Nicolaslopezj\Searchable\SearchableTrait;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Geodata extends Model
 {
@@ -37,17 +38,21 @@ class Geodata extends Model
         ]
     ];
 
-    protected static $logOnlyDirty = true;
-    protected static $logFillable = true;
-    protected static $logAttributes = ['id'];
-    protected static $ignoreChangedAttributes = ['user_id'];
-
     protected static $availableGeometryTypes = [
         'Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon'
     ];
 
     public static function getAvailableGeometryTypes() {
         return self::$availableGeometryTypes;
+    }
+
+    public function getActivitylogOptions() : LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['id'])
+            ->logFillable()
+            ->dontLogIfAttributesChangedOnly(['user_id'])
+            ->logOnlyDirty();
     }
 
     public function patch($geometryAsStr, $srid, $user) {

@@ -5,7 +5,6 @@ namespace App\Plugins\File\App;
 use App\EntityFile;
 use App\FileTag;
 use App\ThConcept;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -22,6 +21,7 @@ use lsolesen\pel\PelTag;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 use Nicolaslopezj\Searchable\SearchableTrait;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class File extends Model
 {
@@ -60,15 +60,24 @@ class File extends Model
         ],
     ];
 
-    protected static $logOnlyDirty = true;
-    protected static $logFillable = true;
-    protected static $logAttributes = ['id'];
-    protected static $ignoreChangedAttributes = ['user_id'];
+    // protected static $logOnlyDirty = true;
+    // protected static $logFillable = true;
+    // protected static $logAttributes = ['id'];
+    // protected static $ignoreChangedAttributes = ['user_id'];
 
     private const THUMB_SUFFIX = "_thumb";
     private const THUMB_WIDTH = 256;
     private const EXP_SUFFIX = ".jpg";
     private const EXP_FORMAT = "jpg";
+
+    public function getActivitylogOptions() : LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['id'])
+            ->logFillable()
+            ->dontLogIfAttributesChangedOnly(['user_id'])
+            ->logOnlyDirty();
+    }
 
     private function createOrUpdateThumbnail($filename, $extension, $url) {
         $baseFilename = substr($filename, 0, strlen($filename) - (strlen($extension) + 1));
@@ -292,11 +301,10 @@ class File extends Model
             $this->thumb_url = sp_get_public_url($this->thumb);
         }
 
-        try {
-            Storage::get($this->name);
+        $content = Storage::get($this->name);
+        if(isset($content)) {
             $this->size = Storage::size($this->name);
             $this->modified_unix = Storage::lastModified($this->name);
-        } catch (FileNotFoundException $e) {
         }
 
         $this->created_unix = strtotime($this->created);
@@ -502,11 +510,11 @@ class File extends Model
 
     private function getExifData() {
         if(!$this->isImage()) return null;
+        $content = Storage::get($this->name);
+        if(!isset($content)) return null;
+
         try {
-            $content = Storage::get($this->name);
             $data = new PelDataWindow($content);
-        } catch(FileNotFoundException $e) {
-            return null;
         } catch(PelDataWindowOffsetException $e) {
             return null;
         }

@@ -4,15 +4,11 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class ThConceptLabel extends Model
 {
     use LogsActivity;
-
-    protected static $logOnlyDirty = true;
-    protected static $logFillable = true;
-    protected static $logAttributes = ['id'];
-    protected static $ignoreChangedAttributes = ['user_id'];
 
     protected $table = 'th_concept_label';
     /**
@@ -27,6 +23,15 @@ class ThConceptLabel extends Model
         'label',
         'concept_label_type',
     ];
+
+    public function getActivitylogOptions() : LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['id'])
+            ->logFillable()
+            ->dontLogIfAttributesChangedOnly(['user_id'])
+            ->logOnlyDirty();
+    }
 
     public function user() {
         return $this->belongsTo('App\User');

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Nicolaslopezj\Searchable\SearchableTrait;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Bibliography extends Model
 {
@@ -79,11 +80,6 @@ class Bibliography extends Model
         ]
     ];
 
-    protected static $logOnlyDirty = true;
-    protected static $logFillable = true;
-    protected static $logAttributes = ['id'];
-    protected static $ignoreChangedAttributes = ['user_id'];
-
     const patchRules = [
         'author'    => 'string',
         'editor'    => 'string',
@@ -111,6 +107,15 @@ class Bibliography extends Model
         'school'    => 'string',
         'series'    => 'string'
     ];
+
+    public function getActivitylogOptions() : LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['id'])
+            ->logFillable()
+            ->dontLogIfAttributesChangedOnly(['user_id'])
+            ->logOnlyDirty();
+    }
 
     public function fieldsFromRequest($request, $user) {
         $fields = $request->toArray();

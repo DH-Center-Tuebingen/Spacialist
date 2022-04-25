@@ -2,13 +2,13 @@
 
 namespace App;
 
-use App\Exceptions\AmbiguousValueException;
 use App\Exceptions\InvalidDataException;
 use Illuminate\Database\Eloquent\Model;
 use MStaack\LaravelPostgis\Eloquent\PostgisTrait;
 use App\Traits\CommentTrait;
 use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class AttributeValue extends Model
 {
@@ -53,14 +53,18 @@ class AttributeValue extends Model
         'geography_val',
     ];
 
-    protected static $logOnlyDirty = true;
-    protected static $logFillable = true;
-    protected static $logAttributes = ['id'];
-    protected static $ignoreChangedAttributes = ['user_id'];
-
     const patchRules = [
         'certainty' => 'integer|between:0,100',
     ];
+
+    public function getActivitylogOptions() : LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['id'])
+            ->logFillable()
+            ->dontLogIfAttributesChangedOnly(['user_id'])
+            ->logOnlyDirty();
+    }
 
     public function getValue() {
         return $this->str_val ??

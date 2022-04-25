@@ -3,6 +3,7 @@
 namespace App;
 
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Role extends \Spatie\Permission\Models\Role
 {
@@ -20,10 +21,6 @@ class Role extends \Spatie\Permission\Models\Role
         'guard_name',
     ];
 
-    protected static $logOnlyDirty = true;
-    protected static $logFillable = true;
-    protected static $logAttributes = ['id'];
-
     const rules = [
         'name'          => 'required|alpha_dash|max:255|unique:roles',
         'display_name'  => 'string|max:255',
@@ -34,6 +31,14 @@ class Role extends \Spatie\Permission\Models\Role
         'display_name'  => 'string|max:255',
         'description'   => 'string|max:255',
     ];
+
+    public function getActivitylogOptions() : LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['id'])
+            ->logFillable()
+            ->logOnlyDirty();
+    }
 
     public function derived() {
         return $this->hasOne('App\RolePreset', 'id', 'derived_from');

@@ -4,14 +4,11 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class EntityFile extends Model
 {
     use LogsActivity;
-
-    protected static $logOnlyDirty = true;
-    protected static $logFillable = true;
-    protected static $ignoreChangedAttributes = ['user_id'];
 
     protected $table = 'entity_files';
 
@@ -31,6 +28,14 @@ class EntityFile extends Model
         'entity_id',
         'user_id',
     ];
+
+    public function getActivitylogOptions() : LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->dontLogIfAttributesChangedOnly(['user_id'])
+            ->logOnlyDirty();
+    }
 
     public function user() {
         return $this->belongsTo('App\User');

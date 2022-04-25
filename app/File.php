@@ -3,15 +3,10 @@
 namespace App;
 
 use App\EntityFile;
-use App\FileTag;
-use App\ThConcept;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use lsolesen\pel\Pel;
 use lsolesen\pel\PelJpeg;
-use lsolesen\pel\PelTiff;
 use lsolesen\pel\PelTag;
 use lsolesen\pel\PelIfd;
 use lsolesen\pel\PelDataWindow;
@@ -20,6 +15,7 @@ use lsolesen\pel\PelJpegInvalidMarkerException;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 use Nicolaslopezj\Searchable\SearchableTrait;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class File extends Model
 {
@@ -58,16 +54,20 @@ class File extends Model
         ],
     ];
 
-    protected static $logOnlyDirty = true;
-    protected static $logFillable = true;
-    protected static $logAttributes = ['id'];
-    protected static $ignoreChangedAttributes = ['user_id'];
-
 
     private const THUMB_SUFFIX = "_thumb";
     private const THUMB_WIDTH = 256;
     private const EXP_SUFFIX = ".jpg";
     private const EXP_FORMAT = "jpg";
+
+    public function getActivitylogOptions() : LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['id'])
+            ->logFillable()
+            ->dontLogIfAttributesChangedOnly(['user_id'])
+            ->logOnlyDirty();
+    }
 
     public static function applyFilters($builder, $filters) {
         foreach($filters as $col => $fs) {
@@ -512,11 +512,10 @@ class File extends Model
 
     private function getExifData() {
         if(!$this->isImage()) return null;
+        $content = Storage::get($this->name);
+        if(!isset($content)) return null;
         try {
-            $content = Storage::get($this->name);
             $data = new PelDataWindow($content);
-        } catch(FileNotFoundException $e) {
-            return null;
         } catch(PelDataWindowOffsetException $e) {
             return null;
         }

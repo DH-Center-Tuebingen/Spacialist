@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Reference extends Model
 {
@@ -23,11 +24,6 @@ class Reference extends Model
         'user_id',
     ];
 
-    protected static $logOnlyDirty = true;
-    protected static $logFillable = true;
-    protected static $logAttributes = ['id'];
-    protected static $ignoreChangedAttributes = ['user_id'];
-
     const rules = [
         'bibliography_id' => 'required|integer|exists:bibliography,id',
         'description' => 'string|nullable'
@@ -36,6 +32,15 @@ class Reference extends Model
     const patchRules = [
         'description' => 'string|nullable'
     ];
+
+    public function getActivitylogOptions() : LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['id'])
+            ->logFillable()
+            ->dontLogIfAttributesChangedOnly(['user_id'])
+            ->logOnlyDirty();
+    }
 
     public static function add($values, $user) {
         $reference = new self();

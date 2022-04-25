@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Nicolaslopezj\Searchable\SearchableTrait;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Entity extends Model
 {
@@ -48,11 +49,6 @@ class Entity extends Model
         ],
     ];
 
-    protected static $logOnlyDirty = true;
-    protected static $logFillable = true;
-    protected static $logAttributes = ['id'];
-    protected static $ignoreChangedAttributes = ['user_id'];
-
     const rules = [
         'name'              => 'required|string',
         'entity_type_id'   => 'required|integer|exists:entity_types,id',
@@ -66,6 +62,15 @@ class Entity extends Model
         // 'root_entity_id'   => 'integer|exists:entities,id',
         // 'geodata_id'        => 'integer|exists:geodata,id'
     ];
+
+    public function getActivitylogOptions() : LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['id'])
+            ->logFillable()
+            ->dontLogIfAttributesChangedOnly(['user_id'])
+            ->logOnlyDirty();
+    }
 
     public static function getFromPath($path, $delimiter = "\\\\") {
         if(!isset($path)) {
@@ -184,7 +189,7 @@ class Entity extends Model
         return $entities->orderBy('rank')->get();
     }
 
-    public static function patchRanks($rank, $id, $parent = null, $user) {
+    public static function patchRanks($rank, $id, $parent, $user) {
         $entity = Entity::find($id);
 
         $hasParent = isset($parent);

@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -1181,16 +1180,18 @@ class ApiFileTest extends TestCase
         $this->assertEquals(5, $linkCnt);
         $fileCount = File::count();
         $this->assertEquals(7, $fileCount);
-        try {
-            Storage::get('spacialist_screenshot.png');
+
+        $content = Storage::get('spacialist_screenshot.png');
+        if(isset($content)) {
             $this->assertTrue(true);
-        } catch(FileNotFoundException $e) {
+        } else {
             $this->assertTrue(false);
         }
-        try {
-            Storage::get('spacialist_screenshot_thumb.jpg');
+
+        $content = Storage::get('spacialist_screenshot_thumb.jpg');
+        if(isset($content)) {
             $this->assertTrue(true);
-        } catch(FileNotFoundException $e) {
+        } else {
             $this->assertTrue(false);
         }
         $response = $this->withHeaders([
@@ -1203,16 +1204,17 @@ class ApiFileTest extends TestCase
         $this->assertEquals(4, $linkCnt);
         $fileCount = File::count();
         $this->assertEquals(6, $fileCount);
-        try {
-            Storage::get('spacialist_screenshot.png');
+
+        $content = Storage::get('spacialist_screenshot.png');
+        if(isset($content)) {
             $this->assertTrue(false);
-        } catch(FileNotFoundException $e) {
+        } else {
             $this->assertTrue(true);
         }
-        try {
-            Storage::get('spacialist_screenshot_thumb.jpg');
+        $content = Storage::get('spacialist_screenshot_thumb.jpg');
+        if(isset($content)) {
             $this->assertTrue(false);
-        } catch(FileNotFoundException $e) {
+        } else {
             $this->assertTrue(true);
         }
     }

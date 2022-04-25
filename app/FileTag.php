@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class FileTag extends Model
 {
@@ -20,7 +21,11 @@ class FileTag extends Model
          'concept_id'
      ];
 
-     protected static $logOnlyDirty = true;
-     protected static $logFillable = true;
-     protected static $logAttributes = ['id'];
+    public function getActivitylogOptions() : LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['id'])
+            ->logFillable()
+            ->logOnlyDirty();
+    }
 }
