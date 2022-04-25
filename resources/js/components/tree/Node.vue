@@ -70,23 +70,23 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import store from '../../bootstrap/store.js';
+    import store from '@/bootstrap/store.js';
 
     import {
         ShowAddEntity,
         showDeleteEntity,
         ShowMoveEntity,
-    } from '../../helpers/modal.js';
+    } from '@/helpers/modal.js';
     import {
         duplicateEntity as duplicateEntityApi,
-    } from '../../api.js';
+    } from '@/api.js';
     import {
         can,
         getEntityColors
-    } from '../../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
     import {
         numPlus
-    } from '../../helpers/filters.js';
+    } from '@/helpers/filters.js';
 
     export default {
         props: {
@@ -104,17 +104,31 @@
             // FETCH
 
             // FUNCTIONS
-            const togglePopup = _ => {
-                // To prevent opening dropdown the DD toggle must have class 'disabled'
-                // This also prevents API call .toggle() to work...
-                // Thus we remove the 'disabled' class before the API call and add it back afterwards
-                state.ddVisible = !state.ddVisible;
+            const hidePopup = _ => {
+                state.bsElem.hide();
+                state.bsElem.dispose();
+                state.bsElem = null;
+                state.ddVisible = false;
+            };
+            const showPopup = _ => {
+                state.ddVisible = true;
                 nextTick(_ => {
+                    // To prevent opening the dropdown on normal click on Node,
+                    // the DD toggle must have class 'disabled'
+                    // This also prevents BS API call .show() to work...
+                    // Thus we remove the 'disabled' class before the API call and add it back afterwards
                     state.bsElem = new Dropdown(state.ddDomElem);
                     state.ddDomElem.classList.remove('disabled');
-                    state.bsElem.toggle();
+                    state.bsElem.show();
                     state.ddDomElem.classList.add('disabled');
-                });
+                })
+            };
+            const togglePopup = _ => {
+                if(state.ddVisible) {
+                    hidePopup();
+                } else {
+                    showPopup();
+                }
             };
             const addNewEntity = _ => {
                 ShowAddEntity(data.value);
@@ -146,6 +160,9 @@
             onMounted(_ => {
                 console.log("tree node component mounted");
                 state.ddDomElem = document.getElementById(`tree-node-cm-toggle-${data.value.id}`);
+                state.ddDomElem.addEventListener('hidden.bs.dropdown', _ => {
+                    hidePopup();
+                });
             });
 
             // RETURN
