@@ -29,8 +29,10 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix(''
 
     Route::patch('/{id}', 'FileController@patchProperty')->where('id', '[0-9]+');
     Route::patch('/{id}/tag', 'FileController@patchTags')->where('id', '[0-9]+');
+    Route::patch('/unlink', 'FileController@unlinkBatch')->where('id', '[0-9]+');
 
     Route::put('/{id}/link', 'FileController@linkToEntity')->where('id', '[0-9]+');
+    Route::put('/link', 'FileController@linkBatch')->where('id', '[0-9]+');
 
     Route::delete('/{id}', 'FileController@deleteFile')->where('id', '[0-9]+');
     Route::delete('/{id}/link/{eid}', 'FileController@unlinkEntity')->where('id', '[0-9]+')->where('eid', '[0-9]+');

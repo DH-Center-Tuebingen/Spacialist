@@ -6,9 +6,9 @@ use App\Entity;
 use App\FileTag;
 use App\Http\Controllers\Controller;
 use App\Plugins\File\App\File;
-use App\Preference;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class FileController extends Controller
@@ -16,8 +16,6 @@ class FileController extends Controller
     // GET
     public function init(Request $request)
     {
-        info("init file");
-
         return response()->json([
             'status' => 'success',
         ]);
@@ -80,7 +78,6 @@ class FileController extends Controller
             ], 400);
         }
         $fileInfo = $file->getArchivedFileContent($filepath);
-        info($fileInfo);
         return response($fileInfo['content'])->header('Content-Type', $fileInfo['mime_type']);
     }
 
@@ -356,6 +353,38 @@ class FileController extends Controller
         return response()->json(null, 204);
     }
 
+    public function unlinkBatch(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('file_write')) {
+            return response()->json([
+                'error' => __('You do not have the permission to link files')
+            ], 403);
+        }
+        $this->validate($request, [
+            'entity_id' => 'required|integer|exists:entities,id',
+            'files' => 'required|array',
+        ]);
+
+        $eid = $request->get('entity_id');
+        DB::beginTransaction();
+
+        foreach($request->get('files') as $fid) {
+            try {
+                $file = File::findOrFail($fid);
+                $file->unlink($eid);
+            } catch(ModelNotFoundException $e) {
+                DB::rollBack();
+                return response()->json([
+                    'error' => __('This file does not exist')
+                ], 400);
+            }
+        }
+
+        DB::commit();
+
+        return response()->json(null, 204);
+    }
+
     // PUT
 
     public function linkToEntity(Request $request, $id) {
@@ -378,6 +407,38 @@ class FileController extends Controller
         }
 
         $file->link($request->get('entity_id'), $user);
+
+        return response()->json(null, 204);
+    }
+
+    public function linkBatch(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('file_write')) {
+            return response()->json([
+                'error' => __('You do not have the permission to link files')
+            ], 403);
+        }
+        $this->validate($request, [
+            'entity_id' => 'required|integer|exists:entities,id',
+            'files' => 'required|array',
+        ]);
+
+        $eid = $request->get('entity_id');
+        DB::beginTransaction();
+
+        foreach($request->get('files') as $fid) {
+            try {
+                $file = File::findOrFail($fid);
+                $file->link($eid, $user);
+            } catch(ModelNotFoundException $e) {
+                DB::rollBack();
+                return response()->json([
+                    'error' => __('This file does not exist')
+                ], 400);
+            }
+        }
+
+        DB::commit();
 
         return response()->json(null, 204);
     }
