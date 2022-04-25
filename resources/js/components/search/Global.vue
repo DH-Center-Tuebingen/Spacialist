@@ -2,7 +2,6 @@
     <multiselect
         v-model="state.entry"
         name="global-search"
-        class="multiselect-search"
         :id="state.id"
         :object="true"
         :label="'id'"

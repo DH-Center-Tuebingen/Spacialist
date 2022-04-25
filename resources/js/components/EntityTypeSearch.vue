@@ -18,7 +18,7 @@
             <button class="btn btn-outline-secondary" type="button" @click="clearItem">
                 <i class="fas fa-fw fa-times"></i>
             </button>
-            <span class="input-group-text multiselect-search">
+            <span class="input-group-text">
                 <i class="fas fa-spinner fa-spin" v-if="loading"></i>
                 <template v-else>
                     <i class="fas fa-fw fa-search"></i>
