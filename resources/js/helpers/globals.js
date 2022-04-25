@@ -2,27 +2,27 @@ export function getContributors() {
     return [
         {
             name: 'Vinzenz Rosenkranz',
-            roles: 'Lead Development',
+            roles: ['development_lead', 'project_lead'],
         },
         {
             name: 'Benjamin Mitzkus',
-            roles: 'Development',
+            roles: ['development'],
         },
         {
             name: 'Dirk Seidensticker',
-            roles: 'Archaeological Support',
+            roles: ['support_archaeology'],
         },
         {
             name: 'Benjamin Glissmann',
-            roles: 'Archaeological Support',
+            roles: ['support_archaeology'],
         },
         {
             name: 'Michael Derntl',
-            roles: 'Development- & Database-Support',
+            roles: ['support_development', 'support_database'],
         },
         {
             name: 'Matthias Lang',
-            roles: 'Archaeological Support, Project Lead',
+            roles: ['support_archaeology', 'project_lead_former'],
         }
     ];
 };

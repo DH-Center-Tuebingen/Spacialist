@@ -42,16 +42,14 @@
             </dl>
             <hr />
             <h5>{{ t('main.about.contributor', 2) }}</h5>
-            <div class="row">
-                <div v-for="contributor in contributors" class="col-md-6 d-flex flex-column" :key="contributor.name">
+            <div class="row gy-1">
+                <div v-for="contributor in contributors" class="col-md-6 d-flex flex-column align-items-start" :key="contributor.name">
                     <span>
                         {{ contributor.name }}
                     </span>
-                    <div>
-                        <span class="badge bg-primary">
-                            {{ contributor.roles }}
-                        </span>
-                    </div>
+                    <span class="badge bg-primary">
+                        {{ transJoin(contributor.roles) }}
+                    </span>
                 </div>
             </div>
             <hr />
@@ -84,16 +82,17 @@
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
-    import store from '../../../bootstrap/store.js';
+    import store from '@/bootstrap/store.js';
 
     import {
         date,
         datestring,
-    } from '../../../helpers/filters.js';
+        join,
+    } from '@/helpers/filters.js';
 
     import {
         getContributors,
-    } from '../../../helpers/globals.js';
+    } from '@/helpers/globals.js';
 
     export default {
         emits: ['closing'],
@@ -104,6 +103,9 @@
             const closeModal = _ => {
                 state.show = false;
                 context.emit('closing', false);
+            }
+            const transJoin = roles => {
+                return join(roles.map(rn => t(`main.about.roles.${rn}`)));
             }
 
             // DATA
@@ -128,6 +130,7 @@
                 // LOCAL
                 contributors,
                 closeModal,
+                transJoin,
                 // STATE
                 state,
             }

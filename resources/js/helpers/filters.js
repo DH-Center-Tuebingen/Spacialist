@@ -166,6 +166,11 @@ export function escapehtml(str) {
         .replace(/</g,'&lt;')
         .replace(/>/g,'&gt;');
 };
+export function join(arr, separator = ', ') {
+    if(!arr && !Array.isArray(arr)) return arr;
+
+    return arr.join(separator);
+};
 export function bibtexify(value, type) {
     let rendered = "<pre class='mb-0'><code>";
     if(type) {

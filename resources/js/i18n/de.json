@@ -563,7 +563,16 @@
                 "full_name": "Vollständiger Name"
             },
             "build_info": "Mit <i class=\"fab fa-fw fa-laravel\"></i> & <i class=\"fab fa-fw fa-vuejs\"></i> erstellt!",
-            "contributor": "Mitwirkender | Mitwirkende"
+            "contributor": "Mitwirkender | Mitwirkende",
+            "roles": {
+                "development": "Entwicklung",
+                "development_lead": "Entwicklungsleiter",
+                "support_development": "Entwicklungsunterstützung",
+                "support_database": "Datenbankunterstützung",
+                "support_archaeology": "Archäologische Unterstützung",
+                "project_lead": "Projektleitung",
+                "project_lead_former": "Ehemalige Projektleitung"
+            }
         },
         "bibliography": {
             "title": "Literatur",
