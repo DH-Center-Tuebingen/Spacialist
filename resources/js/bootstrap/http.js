@@ -15,13 +15,18 @@ instance.interceptors.response.use(response => {
     const code = error.response.status;
     switch(code) {
         case 401:
-            // TODO how to redirect in vue-router?
-            let redirectTo = ''
             // Only append redirect query if from another route than login
             // to prevent recursivly appending current route's full path
             // on reloading login page
-            if(router.currentRoute.name != 'login') {
-                redirectTo = router.currentRoute.value.fullPath;
+            if(router.currentRoute.name != 'login' && !!router.currentRoute.value.redirectedFrom) {
+                const redirectPath = router.currentRoute.value.redirectedFrom.fullPath;
+                router.push({
+                    name: 'login',
+                    query: {
+                        ...router.currentRoute.value.query,
+                        redirect: redirectPath,
+                    },
+                });
             }
             // auth().logout({
             //     redirect: {

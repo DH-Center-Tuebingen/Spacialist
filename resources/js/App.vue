@@ -232,6 +232,10 @@
         watch,
     } from 'vue';
 
+    import {
+        router,
+    } from "@/bootstrap/router.js";
+
     import videojs from 'video.js';
     // import adapter from 'webrtc-adapter';
     import Record from 'videojs-record';
@@ -259,6 +263,9 @@
         showAbout,
         showSaveScreencast,
     } from '@/helpers/modal.js';
+    import {
+        searchParamsToObject
+    } from '@/helpers/routing.js';
 
     export default {
         setup(props) {
@@ -359,16 +366,19 @@
             };
 
             // WATCHER
-            watch(state.loggedIn, (newValue, oldValue) => {
-                // prevent notification dropdown from close on click
-                if(newVal && !oldVal) {
-                    this.$nextTick(_ => {
-                        $('.dropdown-menu.stays-open').on("click.bs.dropdown", function (e) {
-                            console.log("hier?");
-                            e.stopPropagation();
-                            e.preventDefault();
+            watch(_ => state.loggedIn, (newValue, oldValue) => {
+                if(newValue && !oldValue) {
+                    const route = router.currentRoute.value;
+                    if(route.query.redirect) {
+                        // get path without potential query params
+                        const path = route.query.redirect.split('?')[0];
+                        // extract query params to explicitly set in new route
+                        const query = searchParamsToObject(route.query.redirect);
+                        router.push({
+                            path: path,
+                            query: query,
                         });
-                    })
+                    }
                 }
             });
             watch(state.auth, (newValue, oldValue) => {
