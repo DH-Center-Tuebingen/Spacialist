@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Permission;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class PermissionRoleTableSeeder extends Seeder
 {
@@ -14,182 +16,46 @@ class PermissionRoleTableSeeder extends Seeder
      */
     public function run()
     {
-        \DB::table('role_has_permissions')->insert(array (
-            0 =>
-            array (
-                'permission_id' => 1,
-                'role_id' => 1,
-            ),
-            1 =>
-            array (
-                'permission_id' => 2,
-                'role_id' => 1,
-            ),
-            2 =>
-            array (
-                'permission_id' => 3,
-                'role_id' => 1,
-            ),
-            3 =>
-            array (
-                'permission_id' => 4,
-                'role_id' => 1,
-            ),
-            4 =>
-            array (
-                'permission_id' => 4,
-                'role_id' => 2,
-            ),
-            5 =>
-            array (
-                'permission_id' => 5,
-                'role_id' => 1,
-            ),
-            6 =>
-            array (
-                'permission_id' => 5,
-                'role_id' => 2,
-            ),
-            7 =>
-            array (
-                'permission_id' => 6,
-                'role_id' => 1,
-            ),
-            8 =>
-            array (
-                'permission_id' => 7,
-                'role_id' => 1,
-            ),
-            9 =>
-            array (
-                'permission_id' => 8,
-                'role_id' => 1,
-            ),
-            10 =>
-            array (
-                'permission_id' => 9,
-                'role_id' => 1,
-            ),
-            11 =>
-            array (
-                'permission_id' => 10,
-                'role_id' => 1,
-            ),
-            12 =>
-            array (
-                'permission_id' => 11,
-                'role_id' => 1,
-            ),
-            13 =>
-            array (
-                'permission_id' => 11,
-                'role_id' => 2,
-            ),
-            14 =>
-            array (
-                'permission_id' => 12,
-                'role_id' => 1,
-            ),
-            15 =>
-            array (
-                'permission_id' => 13,
-                'role_id' => 1,
-            ),
-            16 =>
-            array (
-                'permission_id' => 13,
-                'role_id' => 2,
-            ),
-            17 =>
-            array (
-                'permission_id' => 14,
-                'role_id' => 1,
-            ),
-            18 =>
-            array (
-                'permission_id' => 15,
-                'role_id' => 1,
-            ),
-            19 =>
-            array (
-                'permission_id' => 16,
-                'role_id' => 1,
-            ),
-            20 =>
-            array (
-                'permission_id' => 17,
-                'role_id' => 1,
-            ),
-            21 =>
-            array (
-                'permission_id' => 18,
-                'role_id' => 1,
-            ),
-            22 =>
-            array (
-                'permission_id' => 19,
-                'role_id' => 1,
-            ),
-            23 =>
-            array (
-                'permission_id' => 20,
-                'role_id' => 1,
-            ),
-            24 =>
-            array (
-                'permission_id' => 21,
-                'role_id' => 1,
-            ),
-            25 =>
-            array (
-                'permission_id' => 22,
-                'role_id' => 1,
-            ),
-            26 =>
-            array (
-                'permission_id' => 23,
-                'role_id' => 1,
-            ),
-            27 =>
-            array (
-                'permission_id' => 24,
-                'role_id' => 1,
-            ),
-            28 =>
-            array (
-                'permission_id' => 25,
-                'role_id' => 1,
-            ),
-            29 =>
-            array (
-                'permission_id' => 26,
-                'role_id' => 1,
-            ),
-            30 =>
-            array (
-                'permission_id' => 27,
-                'role_id' => 1,
-            ),
-            31 =>
-            array (
-                'permission_id' => 28,
-                'role_id' => 1,
-            ),
-            32 =>
-            array (
-                'permission_id' => 29,
-                'role_id' => 1,
-            ),
-            33 =>
-            array (
-                'permission_id' => 30,
-                'role_id' => 1,
-            ),
-            34 =>
-            array (
-                'permission_id' => 30,
-                'role_id' => 2,
-            ),
-        ));
+        $adminPermissions = [
+            'entity_read', 'entity_write', 'entity_create', 'entity_delete', 'entity_share',
+            'entity_data_read', 'entity_data_write', 'entity_data_create', 'entity_data_delete', 'entity_data_share',
+            'attribute_read', 'attribute_write', 'attribute_create', 'attribute_delete', 'attribute_share',
+            'entity_type_read', 'entity_type_write', 'entity_type_create', 'entity_type_delete', 'entity_type_share',
+            'bibliography_read', 'bibliography_write', 'bibliography_create', 'bibliography_delete', 'bibliography_share',
+            'comments_read', 'comments_write', 'comments_create', 'comments_delete', 'comments_share',
+            'users_roles_read', 'users_roles_write', 'users_roles_create', 'users_roles_delete', 'users_roles_share',
+            'preferences_read', 'preferences_write', 'preferences_create', 'preferences_delete', 'preferences_share',
+            'thesaurus_read', 'thesaurus_write', 'thesaurus_create', 'thesaurus_delete', 'thesaurus_share',
+        ];
+        $guestPermissions = [
+            'entity_read',
+            'entity_data_read',
+            'attribute_read',
+            'entity_type_read',
+            'bibliography_read',
+            'comments_read',
+            'users_roles_read',
+            'preferences_read',
+            'thesaurus_read',
+        ];
+        $permissions = Permission::all();
+
+        $insertData = [];
+        foreach($permissions as $p) {
+            if(in_array($p->name, $adminPermissions)) {
+                $insertData[] = [
+                    'permission_id' => $p->id,
+                    'role_id' => 1,
+                ];
+            }
+            if(in_array($p->name, $guestPermissions)) {
+                $insertData[] = [
+                    'permission_id' => $p->id,
+                    'role_id' => 2,
+                ];
+            }
+        }
+        
+        DB::table('role_has_permissions')->insert($insertData);
     }
 }
