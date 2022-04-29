@@ -170,37 +170,54 @@ class Plugin extends Model
         return json_decode(file_get_contents($rolePresets), true);
     }
 
+    private function getClassWithPrefix($classname) {
+        return "App\\Plugins\\$this->name\\Migration\\$classname";
+    }
+
     private function getMigrationPath() {
-        return base_path("app/Plugins/$this->name/database/migrations");
+        return base_path("app/Plugins/$this->name/Migration");
+    }
+    private function getSortedMigrations(bool $desc = false) : array {
+        $migrationPath = $this->getMigrationPath();
+        if(file_exists($migrationPath) && is_dir($migrationPath)) {
+            $migrations = collect(File::files($migrationPath))->map(function($f) {
+                return $f->getFilename();
+            });
+            if($desc) {
+                $migrations = $migrations->sortDesc();
+            } else {
+                $migrations = $migrations->sort();
+            }
+
+            return $migrations->values()->toArray();
+        }
+
+        return [];
     }
 
     private function runMigrations() {
-        $migrationPath = $this->getMigrationPath();
-        if(file_exists($migrationPath) && is_dir($migrationPath)) {
-            $migrations = File::files($migrationPath);
-            foreach ($migrations as $migration) {
-                $filename = $migration->getFilename();
-                Artisan::call('migrate', [
-                    '--path' => "/app/Plugins/$this->name/database/migrations/$filename",
-                    '--force' => true,
-                ]);
-            }
+        foreach($this->getSortedMigrations() as $migration) {
+            preg_match("/^[1-9]\d{3}_\d{2}_\d{2}_\d{6}_(.*)\.php$/", $migration, $matches);
+            if(count($matches) != 2) continue;
+
+            $className = Str::studly($matches[1]);
+            require(base_path("app/Plugins/$this->name/Migration/$migration"));
+            $prefixedClassName = $this->getClassWithPrefix($className);
+            $instance = new $prefixedClassName();
+            call_user_func([$instance, 'migrate']);
         }
     }
 
     private function rollbackMigrations() {
-        $migrationPath = $this->getMigrationPath();
-        if(file_exists($migrationPath) && is_dir($migrationPath)) {
-            $migrations = File::files($migrationPath);
-            // undo migrations in reversed order
-            rsort($migrations);
-            foreach($migrations as $migration) {
-                $filename = $migration->getFilename();
-                Artisan::call('migrate:rollback', [
-                    '--path' => "/app/Plugins/$this->name/database/migrations/$filename",
-                    '--force' => true,
-                ]);
-            }
+        foreach($this->getSortedMigrations(true) as $migration) {
+            preg_match("/^[1-9]\d{3}_\d{2}_\d{2}_\d{6}_(.*)\.php$/", $migration, $matches);
+            if(count($matches) != 2) continue;
+
+            $className = Str::studly($matches[1]);
+            require(base_path("app/Plugins/$this->name/Migration/$migration"));
+            $prefixedClassName = $this->getClassWithPrefix($className);
+            $instance = new $prefixedClassName();
+            call_user_func([$instance, 'rollback']);
         }
     }
 
