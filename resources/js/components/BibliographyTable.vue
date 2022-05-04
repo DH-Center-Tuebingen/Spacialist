@@ -40,7 +40,7 @@
                             accept="application/x-bibtex,text/x-bibtex,text/plain"
                             extensions="bib,bibtex"
                             ref="upload"
-                            v-model="files"
+                            v-model="state.files"
                             :custom-action="importFile"
                             :directory="false"
                             :disabled="!can('bibliography_write|bibliography_create')"
@@ -397,31 +397,30 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import store from '../bootstrap/store.js';
+    import store from '@/bootstrap/store.js';
 
-    import { useToast } from '../plugins/toast.js';
+    import { useToast } from '@/plugins/toast.js';
 
     import {
         bibliographyTypes,
-    } from '../helpers/bibliography.js';
+    } from '@/helpers/bibliography.js';
 
     import {
         addOrUpdateBibliographyItem,
-        deleteBibliographyItem,
         getBibtexFile,
         updateBibliography,
-    } from '../api.js';
+    } from '@/api.js';
     import {
         can,
         createDownloadLink,
         getProjectName,
         _debounce,
         _orderBy,
-    } from '../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
     import {
         showBibliographyEntry,
         showDeleteBibliographyEntry,
-    } from '../helpers/modal.js';
+    } from '@/helpers/modal.js';
 
     export default {
         setup(props, context) {
@@ -497,7 +496,7 @@
                 if(!can('bibliography_write|bibliography_create')) return;
 
                 // Enable automatic upload
-                if(Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error) {
+                if(!!newFile && (Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error)) {
                     if(!newFile.active) {
                         newFile.active = true
                     }

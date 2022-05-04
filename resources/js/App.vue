@@ -379,6 +379,14 @@
                             query: query,
                         });
                     }
+                    // prevent notification dropdown from close on click
+                    // this.$nextTick(_ => {
+                    //     $('.dropdown-menu.stays-open').on("click.bs.dropdown", function (e) {
+                    //         console.log("hier?");
+                    //         e.stopPropagation();
+                    //         e.preventDefault();
+                    //     });
+                    // })
                 }
             });
             watch(state.auth, (newValue, oldValue) => {
