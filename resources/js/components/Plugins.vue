@@ -1,10 +1,26 @@
 <template>
     <div class="d-flex flex-column h-100">
         <h4>
-            {{ t('global.settings.plugins') }}
+            {{ t('main.plugins.title') }}
+            <file-upload
+                class="btn btn-sm btn-outline-primary clickable"
+                accept="application/zip"
+                extensions="zip"
+                ref="upload"
+                v-model="state.files"
+                :custom-action="uploadZip"
+                :directory="false"
+                :disabled="!can('preferences_create')"
+                :multiple="false"
+                :drop="true"
+                @input-file="inputFile">
+                    <span>
+                        <i class="fas fa-fw fa-file-import"></i> {{ t('main.plugins.upload') }}
+                    </span>
+            </file-upload>
         </h4>
         <div class="row row-cols-3 g-3">
-            <div class="col" v-for="plugin in state.plugins" :key="plugin.name">
+            <div class="col" v-for="plugin in state.sortedPlugins" :key="plugin.name">
                 <div class="card h-100">
                     <div class="card-body d-flex flex-column">
                         <div class="d-flex flex-row flex-grow-1 mb-3 justify-content-between">
@@ -26,7 +42,7 @@
                             </div>
                             <div class="border-start ps-2">
                                 <h6 class="mb-0 text-end">
-                                    Authors
+                                    {{ t('main.plugins.authors') }}
                                 </h6>
                                 <ul class="list-group list-group-flush">
                                     <li class="list-group-item" v-for="(author, i) in plugin.metadata.authors" :key="i">
@@ -38,19 +54,19 @@
                         <div class="">
                             <button type="button" class="btn btn-sm btn-outline-warning" v-if="isInstalled(plugin)" @click="uninstall(plugin)">
                                 <i class="fas fa-fw fa-times"></i>
-                                Deactivate
+                                {{ t('main.plugins.deactivate') }}
                             </button>
                             <button type="button" class="btn btn-sm btn-outline-success" v-else @click="install(plugin)">
                                 <i class="fas fa-fw fa-plus"></i>
-                                Activate
+                                {{ t('main.plugins.activate') }}
                             </button>
                             <button type="button" class="btn btn-sm btn-outline-primary ms-2" v-if="updateAvailable(plugin)" @click="update(plugin)">
                                 <i class="fas fa-fw fa-download"></i>
-                                Update to <span class="fw-bold">{{ plugin.update_available }}</span>
+                                <span v-html="t('main.plugins.update_to', {version: plugin.update_available})"/>
                             </button>
                             <button type="button" class="btn btn-sm btn-outline-danger ms-2" @click="remove(plugin)">
                                 <i class="fas fa-fw fa-trash"></i>
-                                Remove
+                                {{ t('main.plugins.remove') }}
                             </button>
                         </div>
                     </div>
@@ -70,11 +86,16 @@
     import store from '@/bootstrap/store.js';
 
     import {
+        uploadPlugin,
         installPlugin,
         uninstallPlugin,
         updatePlugin,
         removePlugin,
     } from '@/api.js';
+
+    import {
+        can,
+    } from '@/helpers/helpers.js';
 
     import {
         appendScript,
@@ -110,16 +131,35 @@
                     removeScript(data.uninstall_location);
                 });
             };
+            const inputFile = (newFile, oldFile) => {
+                if(!can('preferences_create')) return;
+
+                // Enable automatic upload
+                if(!!newFile && (Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error)) {
+                    if(!newFile.active) {
+                        newFile.active = true
+                    }
+                }
+            };
+            const uploadZip = (file, component) => {
+                return uploadPlugin(file.file).then(_ => {
+                    state.files = [];
+
+                });
+            };
 
             // DATA
             const state = reactive({
                 plugins: computed(_ => store.getters.plugins),
+                sortedPlugins: computed(_ => Object.values(state.plugins).sort((a, b) => a.metadata.title > b.metadata.title)),
+                files: [],
             });
 
             // RETURN
             return {
                 t,
                 // HELPERS
+                can,
                 // LOCAL
                 isInstalled,
                 updateAvailable,
@@ -127,6 +167,8 @@
                 uninstall,
                 update,
                 remove,
+                inputFile,
+                uploadZip,
                 // PROPS
                 // STATE
                 state,

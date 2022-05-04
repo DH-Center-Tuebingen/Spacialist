@@ -25,13 +25,19 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
             'time' => $versionInfo->getTime()
         ]);
     });
+});
 
-    // PLUGINS
-    Route::get('/plugin', 'PluginController@getPlugins');
-    Route::get('/plugin/{id}', 'PluginController@installPlugin')->where('id', '[0-9]+');
-    Route::patch('/plugin/{id}', 'PluginController@updatePlugin')->where('id', '[0-9]+');
-    Route::delete('/plugin/{id}', 'PluginController@uninstallPlugin')->where('id', '[0-9]+');
-    Route::delete('/plugin/remove/{id}', 'PluginController@removePlugin')->where('id', '[0-9]+');
+// PLUGINS
+Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/plugin')->group(function() {
+    Route::get('', 'PluginController@getPlugins');
+    Route::get('/{id}', 'PluginController@installPlugin')->where('id', '[0-9]+');
+
+    Route::post('', 'PluginController@uploadPlugin');
+
+    Route::patch('/{id}', 'PluginController@updatePlugin')->where('id', '[0-9]+');
+
+    Route::delete('/{id}', 'PluginController@uninstallPlugin')->where('id', '[0-9]+');
+    Route::delete('/remove/{id}', 'PluginController@removePlugin')->where('id', '[0-9]+');
 });
 
 // ENTITY

@@ -25,6 +25,17 @@ export async function fetchPlugins() {
     );
 }
 
+export async function uploadPlugin(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return $httpQueue.add(
+        () => http.post(`/plugin`, formData).then(response => {
+            store.dispatch('addPlugin', response.data);
+        })
+    );
+}
+
 export async function installPlugin(id) {
     return $httpQueue.add(
         () => http.get(`/plugin/${id}`).then(response => {

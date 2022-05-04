@@ -554,6 +554,15 @@
                 }
             }
         },
+        "plugins": {
+            "title": "Plugins",
+            "upload": "Upload Plugin",
+            "authors": "Authors",
+            "deactivate": "Deactivate",
+            "activate": "Activate",
+            "remove": "Remove",
+            "update_to": "Update to <span class=\"fw-bold\">{ version }</span>"
+        },
         "about": {
             "title": "About Spacialist",
             "desc": "Development of Spacialist is co-funded by the Ministry of Science, Research and the Arts Baden-Württemberg in the \"E-Science\" funding programme.",

@@ -72,26 +72,64 @@ class Plugin extends Model
         }
     }
 
-    public static function discoverPlugins() {
+    public static function updateOrCreateFromInfo(array $info) : Plugin {
+        $id = $info['name'];
+        $plugin = self::where('name', $id)->first();
+        // discovered new Plugin, add it to DB
+        if(!isset($plugin)) {
+            $plugin = new self();
+            $plugin->name = $id;
+            $plugin->version = $info['version'];
+            $plugin->uuid = Str::uuid();
+            $plugin->save();
+        } else {
+            $plugin->updateUpdateState($info['version']);
+        }
+
+        return $plugin;
+    }
+
+    public static function updateState() : void {
         $pluginPath = base_path('app/Plugins');
         $availablePlugins = File::directories($pluginPath);
-        foreach($availablePlugins as $ap) {
+
+        self::discoverPlugins($availablePlugins);
+        self::cleanupPlugins($availablePlugins);
+    }
+
+    public static function cleanupPlugins(array $list) : void {
+        $pluginNames = [];
+
+        foreach($list as $p) {
+            $pluginNames[] = File::basename($p);
+        }
+
+        $nonExistingPlugins = self::whereNotIn('name', $pluginNames)->get();
+
+        foreach($nonExistingPlugins as $removedPlugin) {
+            $removedPlugin->delete();
+        }
+    }
+
+    public static function discoverPlugins(array $list) : void {
+        foreach($list as $ap) {
             $info = self::getInfo($ap);
             if($info !== false) {
-                $id = $info['name'];
-                $plugin = self::where('name', $id)->first();
-                // discovered new Plugin, add it to DB
-                if(!isset($plugin)) {
-                    $plugin = new self();
-                    $plugin->name = $id;
-                    $plugin->version = $info['version'];
-                    $plugin->uuid = Str::uuid();
-                    $plugin->save();
-                } else {
-                    $plugin->updateUpdateState($info['version']);
-                }
+                self::updateOrCreateFromInfo($info);
             }
         }
+    }
+
+    public static function discoverPluginByName($name) : Plugin|null {
+        $pluginPath = base_path("app/Plugins/$name");
+        $info = self::getInfo($pluginPath);
+        if($info === false) {
+            return null;
+        }
+
+        $plugin = self::updateOrCreateFromInfo($info);
+
+        return $plugin;
     }
 
     public function updateUpdateState($fromInfoVersion) {

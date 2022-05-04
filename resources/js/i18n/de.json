@@ -554,6 +554,15 @@
                 }
             }
         },
+        "plugins": {
+            "title": "Erweiterungen",
+            "upload": "Plugin hochladen",
+            "authors": "Ersteller",
+            "deactivate": "Deaktivieren",
+            "activate": "Aktivieren",
+            "remove": "Löschen",
+            "update_to": "Auf <span class=\"fw-bold\">{ version }</span> aktualisieren"
+        },
         "about": {
             "title": "Über Spacialist",
             "desc": "Spacialist wird vom Ministerium für Wissenschaft, Forschung und Kunst, Baden-Württemberg im Rahmen des \"E-Science\"-Programms gefördert.",

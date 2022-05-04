@@ -386,6 +386,9 @@ export const store = createStore({
                 setPlugins(state, data) {
                     state.plugins = data;
                 },
+                addPlugin(state, data) {
+                    state.plugins.push(data);
+                },
                 updatePlugin(state, data) {
                     const idx = state.plugins.findIndex(p => p.id == data.plugin_id);
                     if(idx == -1) return;
@@ -618,6 +621,9 @@ export const store = createStore({
                 },
                 setPlugins({commit}, data) {
                     commit('setPlugins', data);
+                },
+                addPlugin({commit}, data) {
+                    commit('addPlugin', data);
                 },
                 updatePlugin({commit}, data) {
                     commit('updatePlugin', data);

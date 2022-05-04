@@ -6,6 +6,8 @@ use App\Plugin;
 use App\Preference;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use ZipArchive;
+use Illuminate\Support\Str;
 
 class PluginController extends Controller
 {
@@ -24,7 +26,7 @@ class PluginController extends Controller
     }
 
     public function getPlugins(Request $request) {
-        Plugin::discoverPlugins();
+        Plugin::updateState();
 
         $plugins = [];
         if($request->query('installed') == 1) {
@@ -40,6 +42,85 @@ class PluginController extends Controller
         }
 
         return response()->json($plugins);
+    }
+
+    public function uploadPlugin(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('preferences_create')) {
+            return response()->json([
+                'error' => __('You do not have the permission to upload plugin as zip')
+            ], 403);
+        }
+        $this->validate($request, [
+            'file' => 'required|file'
+        ]);
+
+        $file = $request->file('file');
+
+        $mandatoryFiles = [
+            'App/info.xml',
+            'js/script.js',
+            'routes/api.php',
+        ];
+
+        $zipFile = new ZipArchive;
+        $isOpen = $zipFile->open($file->getRealPath(), ZipArchive::RDONLY);
+
+        if(!$isOpen) {
+            return response()->json([
+                'error' => __('Could not open provided plugin zip file. Aborting.')
+            ], 403);
+        }
+
+        $rootFolder = $zipFile->getNameIndex(0);
+        if(!Str::endsWith($rootFolder, '/')) {
+            return response()->json([
+                'error' => __('Format mismatch. Only a folder is allowed on root level.')
+            ], 403);
+        }
+        $pluginName = substr($rootFolder, 0, -1);
+        $modelName = "$pluginName.php";
+        if($zipFile->locateName("{$rootFolder}App/{$modelName}") === false) {
+            return response()->json([
+                'error' => __('Format mismatch. You need a model file matching your root folder\'s name.')
+            ], 403);
+        }
+        foreach($mandatoryFiles as $filepath) {
+            if($zipFile->locateName("{$rootFolder}{$filepath}") === false) {
+                return response()->json([
+                    'error' => __("Format mismatch. Mandatory file '{$rootFolder}{$filepath}' is missing.")
+                ], 403);
+            }
+        }
+
+        $pluginPath = base_path("app/Plugins/$pluginName");
+        if(file_exists($pluginPath)) {
+            return response()->json([
+                'error' => __("A plugin with the name '$pluginName' already exists. Aborting.")
+            ], 403);
+        }
+
+        $extractPath = base_path('app/Plugins/');
+        $extracted = $zipFile->extractTo($extractPath);
+        $zipFile->close();
+        // usleep(5000000);
+
+        if(!$extracted) {
+            return response()->json([
+                'error' => __("Error while extracting zip file. Please check file permissions or ask your system adminstrator.")
+            ], 403);
+        }
+
+        $plugin = Plugin::discoverPluginByName($pluginName);
+
+        if(!isset($plugin)) {
+            return response()->json([
+                'error' => __("Error while reading from extracted content. Please check file permissions or ask your system adminstrator.")
+            ], 403);
+        }
+
+        $plugin->metadata = $plugin->getMetadata();
+        return response()->json($plugin);
     }
 
     public function installPlugin(Request $request, $id) {
