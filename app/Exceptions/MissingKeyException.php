@@ -4,6 +4,6 @@ namespace App\Exceptions;
 
 use Exception;
 
-class ColumnDoesNotExistException extends Exception
+class MissingKeyException extends Exception
 {
 }
