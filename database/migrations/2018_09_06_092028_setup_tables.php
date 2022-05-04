@@ -2,7 +2,6 @@
 
 use App\Attribute;
 use App\AttributeValue;
-use App\FileTag;
 use App\Preference;
 use App\ThConcept;
 use Illuminate\Support\Facades\Schema;
@@ -13,13 +12,10 @@ class SetupTables extends Migration
 {
     private static $newTableNames = [
         'context_attributes' => 'entity_attributes',
-        'context_photos' => 'entity_files',
         'context_type_relations' => 'entity_type_relations',
         'context_types' => 'entity_types',
         'contexts' => 'entities',
         'literature' => 'bibliography',
-        'photo_tags' => 'file_tags',
-        'photos' => 'files',
         'sources' => 'references',
     ];
 
@@ -36,16 +32,9 @@ class SetupTables extends Migration
         'entity_attributes' => [
             'context_type_id' => 'entity_type_id'
         ],
-        'entity_files' => [
-            'photo_id' => 'file_id',
-            'context_id' => 'entity_id'
-        ],
         'entities' => [
             'context_type_id' => 'entity_type_id',
             'root_context_id' => 'root_entity_id'
-        ],
-        'file_tags' => [
-            'photo_id' => 'file_id'
         ],
         'references' => [
             'context_id' => 'entity_id',
@@ -54,7 +43,6 @@ class SetupTables extends Migration
     ];
 
     private static $newPermissions = [
-        'photo' => 'file',
         'literature' => 'bibliography'
     ];
 
@@ -108,11 +96,6 @@ class SetupTables extends Migration
     }
 
     private function migrateFromPreviousVersion() {
-        // Drop Unused File Columns
-        Schema::table('photos', function (Blueprint $table) {
-            $table->dropColumn('photographer_id');
-            $table->dropColumn('orientation');
-        });
         // Create Password Resets
         Schema::create('password_resets', function (Blueprint $table) {
             $table->string('email')->index();
@@ -165,7 +148,6 @@ class SetupTables extends Migration
         $this->migrateTableNames();
         $this->migrateColumnNames();
         $this->migrateDatatypes();
-        $this->migrateFileTags();
         $this->migratePermissionNames();
         $this->migrateEntityRelations();
     }
@@ -287,29 +269,6 @@ class SetupTables extends Migration
         }
     }
 
-    private function migrateFileTags() {
-        $fileTags = FileTag::all();
-        Schema::dropIfExists('file_tags');
-        Schema::create('file_tags', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('file_id');
-            $table->integer('concept_id');
-            $table->timestamps();
-
-            $table->foreign('file_id')->references('id')->on('files')->onDelete('cascade');
-            $table->foreign('concept_id')->references('id')->on('th_concept')->onDelete('cascade');
-        });
-        foreach($fileTags as $ft) {
-            $newFt = new FileTag();
-            $conceptId = ThConcept::where('concept_url', $ft->concept_url)
-                ->value('id');
-            $newFt->id = $ft->id;
-            $newFt->file_id = $ft->file_id;
-            $newFt->concept_id = $conceptId;
-            $newFt->save();
-        }
-    }
-
     private function migratePermissionNames() {
         foreach(self::$newPermissions as $old => $new) {
             \DB::unprepared("
@@ -402,20 +361,6 @@ class SetupTables extends Migration
         	$table->text('organization')->nullable();
         	$table->text('school')->nullable();
         	$table->text('series')->nullable();
-            $table->text('lasteditor');
-            $table->timestamps();
-        });
-        // Create Files
-        Schema::create('files', function (Blueprint $table) {
-            $table->increments('id');
-            $table->text('name');
-            $table->timestamp('modified');
-            $table->timestamp('created');
-            $table->text('cameraname')->nullable();
-            $table->text('thumb')->nullable();
-            $table->text('copyright')->nullable();
-            $table->text('description')->nullable();
-            $table->text('mime_type')->nullable();
             $table->text('lasteditor');
             $table->timestamps();
         });
@@ -518,31 +463,18 @@ class SetupTables extends Migration
             $table->foreign('entity_type_id')->references('id')->on('entity_types')->onDelete('cascade');
             $table->foreign('attribute_id')->references('id')->on('attributes')->onDelete('cascade');
         });
-        // Create Geodata
-        // enable the postgis extension
-        Schema::getConnection()->statement('CREATE EXTENSION IF NOT EXISTS postgis');
-        // create new table
-        Schema::create('geodata', function (Blueprint $table){
-            $table->increments('id');
-            $table->geography('geom');
-            $table->text('color')->nullable();
-            $table->text('lasteditor');
-            $table->timestamps();
-        });
         // Create Entities
         Schema::create('entities', function (Blueprint $table) {
             $table->increments('id');
 			$table->text('name');
             $table->integer('entity_type_id');
 			$table->integer('root_entity_id')->nullable();
-            $table->integer('geodata_id')->unique()->nullable();
             $table->integer('rank')->nullable();
             $table->text('lasteditor');
             $table->timestamps();
 
 			$table->foreign('entity_type_id')->references('id')->on('entity_types')->onDelete('cascade');
 			$table->foreign('root_entity_id')->references('id')->on('entities')->onDelete('cascade');
-            $table->foreign('geodata_id')->references('id')->on('geodata');
         });
         // Create AttributeValues
         Schema::create('attribute_values', function (Blueprint $table) {
@@ -646,24 +578,6 @@ class SetupTables extends Migration
 
             $table->foreign('entity_type_id')->references('id')->on('entity_types')->onDelete('cascade');
         });
-        // Create FileTags
-        Schema::create('file_tags', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('file_id');
-            $table->integer('concept_id');
-            $table->timestamps();
-
-            $table->foreign('file_id')->references('id')->on('files')->onDelete('cascade');
-            $table->foreign('concept_id')->references('id')->on('th_concept')->onDelete('cascade');
-        });
-        // Create EntityFiles
-        Schema::create('entity_files', function (Blueprint $table) {
-            $table->integer('file_id');
-            $table->integer('entity_id');
-            $table->text('lasteditor');
-            $table->foreign('file_id')->references('id')->on('files')->onDelete('cascade');
-            $table->foreign('entity_id')->references('id')->on('entities')->onDelete('cascade');
-        });
         // Create Preferences
         Schema::create('preferences', function (Blueprint $table) {
             $table->increments('id');
@@ -705,7 +619,7 @@ class SetupTables extends Migration
             ],
             [
                 'label' => 'prefs.load-extensions',
-                'default_value' => json_encode(['map' => true, 'files' => true, 'data-analysis' => true]),
+                'default_value' => json_encode(['data-analysis' => true]),
                 'allow_override' => false
             ],
             [
@@ -746,8 +660,6 @@ class SetupTables extends Migration
     private function rollbackToScratch() {
         Schema::dropIfExists('user_preferences');
         Schema::dropIfExists('preferences');
-        Schema::dropIfExists('entity_files');
-        Schema::dropIfExists('file_tags');
         Schema::dropIfExists('available_layers');
         Schema::dropIfExists('permission_role');
         Schema::dropIfExists('permissions');
@@ -756,7 +668,6 @@ class SetupTables extends Migration
         Schema::dropIfExists('references');
         Schema::dropIfExists('attribute_values');
         Schema::dropIfExists('entities');
-        Schema::dropIfExists('geodata');
         Schema::dropIfExists('entity_attributes');
         Schema::dropIfExists('entity_type_relations');
         Schema::dropIfExists('entity_types');
@@ -772,17 +683,11 @@ class SetupTables extends Migration
         Schema::dropIfExists('th_language');
         Schema::dropIfExists('th_concept');
         Schema::dropIfExists('th_concept_master');
-        Schema::dropIfExists('files');
         Schema::dropIfExists('bibliography');
         Schema::getConnection()->statement('DROP EXTENSION postgis');
     }
 
     private function rollbackToPreviousVersion() {
-        // Re-Create Unused File Columns
-        Schema::table('files', function (Blueprint $table) {
-            $table->integer('photographer_id')->nullable();
-            $table->integer('orientation')->nullable()->default(1);
-        });
         // Drop Password Resets
         Schema::drop('password_resets');
         // Remove Maintainer and Map Projection Preferences
@@ -801,7 +706,6 @@ class SetupTables extends Migration
 
         $this->rollbackEntityRelations();
         $this->rollbackDatatypes();
-        $this->rollbackFileTags();
         $this->rollbackColumnNames();
         $this->rollbackTableNames();
         $this->rollbackPermissionNames();
@@ -860,29 +764,6 @@ class SetupTables extends Migration
                 }
                 $table->delete();
             }
-        }
-    }
-
-    private function rollbackFileTags() {
-        $fileTags = FileTag::all();
-        Schema::dropIfExists('file_tags');
-        Schema::create('file_tags', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('file_id');
-            $table->text('concept_url');
-            $table->timestamps();
-
-            $table->foreign('file_id')->references('id')->on('files')->onDelete('cascade');
-            $table->foreign('concept_url')->references('concept_url')->on('th_concept')->onDelete('cascade');
-        });
-        foreach($fileTags as $ft) {
-            $newFt = new FileTag();
-            $conceptUrl = ThConcept::where('id', $ft->concept_id)
-                ->value('concept_url');
-            $newFt->id = $ft->id;
-            $newFt->file_id = $ft->file_id;
-            $newFt->concept_url = $conceptUrl;
-            $newFt->save();
         }
     }
 
