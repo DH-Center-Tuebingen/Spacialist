@@ -1,28 +1,34 @@
 # Plugins
 
+Supported since Release 0.9 (_Isfahan_).
+
 **Please Note!**
 Plugins are in beta (since Release _Isfahan_) and installation or the overall API may change!
 
 ## Plugin structure
+
 Before actually creating a plugin, here is how the folder structure of your plugin **has** to be:
 
 - `App`: Hosting your Laravel Models and an `info.xml` file with several metadata of your plugin
 - `Controllers`: Hosting your Laravel Controllers
-- `database`: Place your Laravel migration files here
+- `Migration`: Place your migration files here
 - `js`: This is the destination folder for your Vue/JavaScript code. **Important**: Bundle **all** your JavaScript code into a single `script.js` file!
 - `routes`: Place for your (API) routes to connect your JS code with the Laravel Backend (`api.php`)
 
 ## Creating a Plugin
+
 The easiest way to setup a new plugin is to start with an empty vue-cli project.
 
 ### Init
+
 ```bash
 vue create spacialist_my_plugin
 ```
 
 For further information on how to install vue-cli, please head to [their page](https://cli.vuejs.org/guide/).
 
-Your `package.json` should look something like this
+Your `package.json` should look something like this:
+
 ```json
 {
   // ...
@@ -72,7 +78,8 @@ Your `package.json` should look something like this
 
 Edit/Create the following files for the neccessary configs:
 
-**babel.config.js**
+#### babel.config.js
+
 ```js
 module.exports = {
   presets: [
@@ -80,7 +87,9 @@ module.exports = {
   ],
 }
 ```
-**vue.config.js**
+
+#### vue.config.js
+
 ```js
 module.exports = {
     productionSourceMap: false,
@@ -98,13 +107,14 @@ Then, create all the needed folders:
 ```bash
 mkdir App
 mkdir Controllers
-mkdir -p database/migrations
+mkdir Migration
 mkdir js
 mkdir -p src/components
 mkdir src/i18n
 ```
 
-### Info.xml
+#### info.xml
+
 This File is mandatory and stores all the information about your plugin. Author, Licence, Version, Description, ...
 
 ```xml
@@ -122,10 +132,23 @@ This File is mandatory and stores all the information about your plugin. Author,
 
 ```
 
+#### permissions.json and role-presets.json
+
+In `permissions.json` you can define any new permission (set) needed for your plugin. Each set is an array identified by an **unique** key. This array consists of **five** objects with three keys (`name`, `display_name` and `description`) where `name` must be one of:
+
+1. `read`
+2. `write`
+3. `create`
+4. `delete`
+5. `share`
+
+`role-presets.json` can be used to extend existing core role sets. It consists of an array of objects. Each object has two keys (`extends` and `rule_set`). Value of `extends` is the name of the core role-preset (e.g. `administrator` or `guest`). `rule_set` is an array of all permissions from all your sets you want that role to have (e.g. `['my_plugin_read', 'my_plugin_delete']`).
+
 ### JavaScript
 
 Spacialist exposes two global functions inside the global `SpPS` object.
 `register({})`: Is used to register a new plugin. Parameters are:
+
 ```js
 {
     id: 'Your ID', // id of your plugin, used to reference that plugin in different slots
@@ -138,7 +161,9 @@ Spacialist exposes two global functions inside the global `SpPS` object.
     }
 }
 ```
+
 `intoSlot({})`: A plugin can be installed into different slots. Currently supported are `tab`, `tools` or `settings`.
+
 ```js
 {
     of: 'Your ID', // mandatory,
@@ -155,7 +180,6 @@ Spacialist exposes two global functions inside the global `SpPS` object.
 Your plugin **has** to be exported as lib without bundled Vue. Vue is globally available in Spacialist and bundled Vue would break Reactivity and other stuff (e.g. Text Nodes)
 
 `t()` for translations is also globally available. You only have to return `t` inside your `setup()` function to use it inside your templates.
-
 
 ### Installing the plugin
 
