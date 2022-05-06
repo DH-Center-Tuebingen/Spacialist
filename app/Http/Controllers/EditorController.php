@@ -12,6 +12,7 @@ use App\EntityAttribute;
 use App\EntityType;
 use App\EntityTypeRelation;
 use App\Geodata;
+use App\Plugin;
 use App\ThConcept;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
@@ -300,8 +301,12 @@ class EditorController extends Controller {
     }
 
     public function getAvailableGeometryTypes() {
-        $types = Geodata::getAvailableGeometryTypes();
-        return response()->json($types);
+        if(Plugin::isInstalled('Map')) {
+            $types = \App\Plugins\Map\App\Geodata::getAvailableGeometryTypes();
+            return response()->json($types);
+        } else {
+            return response()->json();
+        }
     }
 
     // POST

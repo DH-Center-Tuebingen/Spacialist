@@ -26,6 +26,10 @@ class Plugin extends Model
         'title',
     ];
 
+    public static function isInstalled($name) {
+        return self::whereNotNull('installed_at')->where('name', $name)->exists();
+    }
+
     public static function getInstalled() {
         return self::whereNotNull('installed_at')->get();
     }
@@ -208,8 +212,8 @@ class Plugin extends Model
         return json_decode(file_get_contents($rolePresets), true);
     }
 
-    private function getClassWithPrefix($classname) {
-        return "App\\Plugins\\$this->name\\Migration\\$classname";
+    private function getClassWithPrefix($path, $classname) {
+        return "App\\Plugins\\$this->name\\$path\\$classname";
     }
 
     private function getMigrationPath() {
@@ -240,7 +244,7 @@ class Plugin extends Model
 
             $className = Str::studly($matches[1]);
             require(base_path("app/Plugins/$this->name/Migration/$migration"));
-            $prefixedClassName = $this->getClassWithPrefix($className);
+            $prefixedClassName = $this->getClassWithPrefix('Migration', $className);
             $instance = new $prefixedClassName();
             call_user_func([$instance, 'migrate']);
         }
@@ -253,7 +257,7 @@ class Plugin extends Model
 
             $className = Str::studly($matches[1]);
             require(base_path("app/Plugins/$this->name/Migration/$migration"));
-            $prefixedClassName = $this->getClassWithPrefix($className);
+            $prefixedClassName = $this->getClassWithPrefix('Migration', $className);
             $instance = new $prefixedClassName();
             call_user_func([$instance, 'rollback']);
         }
