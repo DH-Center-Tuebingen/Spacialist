@@ -29,6 +29,8 @@ class AddUserProfile extends Migration
      */
     public function up()
     {
+        activity()->disableLogging();
+
         Schema::table('users', function (Blueprint $table) {
             $table->text('avatar')->nullable();
             $table->jsonb('metadata')->nullable();
@@ -65,6 +67,8 @@ class AddUserProfile extends Migration
 
 
         Storage::makeDirectory('avatars');
+
+        activity()->enableLogging();
     }
 
     /**
@@ -74,6 +78,8 @@ class AddUserProfile extends Migration
      */
     public function down()
     {
+        activity()->disableLogging();
+
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('avatar');
             $table->dropColumn('metadata');
@@ -104,6 +110,8 @@ class AddUserProfile extends Migration
         }
 
         Storage::deleteDirectory('avatars');
+
+        activity()->enableLogging();
     }
 
     private function getElements($tableName) {

@@ -17,12 +17,16 @@ return new class extends Migration
      */
     public function up()
     {
+        activity()->disableLogging();
+
         $obsoleteMigrations = DB::table('migrations')
             ->whereIn('migration', self::migrationNames)
             ->get();
         foreach($obsoleteMigrations as $obsMig) {
             $obsMig->delete();
         }
+
+        activity()->enableLogging();
     }
 
     /**

@@ -13,6 +13,8 @@ class SetupPlugins extends Migration
      */
     public function up()
     {
+        activity()->disableLogging();
+
         Schema::create('plugins', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
@@ -22,6 +24,8 @@ class SetupPlugins extends Migration
             $table->timestamp('installed_at')->nullable();
             $table->timestamps();
         });
+
+        activity()->enableLogging();
     }
 
     /**
@@ -31,6 +35,10 @@ class SetupPlugins extends Migration
      */
     public function down()
     {
+        activity()->disableLogging();
+
         Schema::dropIfExists('plugins');
+
+        activity()->enableLogging();
     }
 }
