@@ -19,12 +19,9 @@ return new class extends Migration
     {
         activity()->disableLogging();
 
-        $obsoleteMigrations = DB::table('migrations')
+        DB::table('migrations')
             ->whereIn('migration', self::migrationNames)
-            ->get();
-        foreach($obsoleteMigrations as $obsMig) {
-            $obsMig->delete();
-        }
+            ->delete();
 
         activity()->enableLogging();
     }
