@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Role;
 use App\Permission;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Seeder;
 
 class RolesPermissionsSeeder extends Seeder
@@ -68,12 +69,16 @@ class RolesPermissionsSeeder extends Seeder
             foreach($permSet as $perm) {
                 $name = $group . "_" . $perm['name'];
 
-                $permission = new Permission();
-                $permission->name = $name;
-                $permission->display_name = $perm['display_name'];
-                $permission->description = $perm['description'];
-                $permission->guard_name = 'web';
-                $permission->save();
+                try {
+                    $permission = Permission::where('name', $name)->firstOrFail();
+                } catch(ModelNotFoundException $e) {
+                    $permission = new Permission();
+                    $permission->name = $name;
+                    $permission->display_name = $perm['display_name'];
+                    $permission->description = $perm['description'];
+                    $permission->guard_name = 'web';
+                    $permission->save();
+                }
 
                 if(in_array($name, $adminPermissions)) {
                     $admin->givePermissionTo($permission);
