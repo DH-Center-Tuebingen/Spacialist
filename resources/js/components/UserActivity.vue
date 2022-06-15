@@ -35,11 +35,11 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import ActivityMixin from './ActivityMixin.js';
+    import ActivityMixin from '@/components/ActivityMixin.js';
 
     import {
         userId
-    } from '../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
 
     export default {
         setup(props) {

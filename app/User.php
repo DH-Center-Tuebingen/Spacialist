@@ -6,6 +6,7 @@ use App\Traits\SoftDeletesWithTrashed;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Storage;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 use Spatie\Activitylog\Traits\CausesActivity;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -63,6 +64,15 @@ class User extends Authenticatable implements JWTSubject
         $langObj = Preference::getUserPreference($this->id, 'prefs.gui-language');
         if(isset($langObj)) return $langObj->value;
         return 'en';
+    }
+
+    public function uploadAvatar($file) {
+        Storage::delete($this->avatar);
+        $filename = $this->id . "." . $file->getClientOriginalExtension();
+        return $file->storeAs(
+            'avatars',
+            $filename
+        );
     }
 
     public function setPermissions() {

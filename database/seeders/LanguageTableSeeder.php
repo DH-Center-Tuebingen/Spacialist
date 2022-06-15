@@ -5,11 +5,15 @@ namespace Database\Seeders;
 use App\ThLanguage;
 use App\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class LanguageTableSeeder extends Seeder
 {
     public function run() {
-        $user = User::orderBy('id')->first();
+        $user = User::where('name', 'Admin')->first();
+
+        DB::table('th_language')->delete();
+
         $de = new ThLanguage();
         $de->user_id = $user->id;
         $de->display_name   = 'Deutsch';
@@ -20,20 +24,5 @@ class LanguageTableSeeder extends Seeder
         $en->display_name  = 'English';
         $en->short_name    = 'en';
         $en->save();
-        $es = new ThLanguage();
-        $es->user_id = $user->id;
-        $es->display_name  = 'Español';
-        $es->short_name    = 'es';
-        $es->save();
-        $fr = new ThLanguage();
-        $fr->user_id = $user->id;
-        $fr->display_name  = 'Français';
-        $fr->short_name    = 'fr';
-        $fr->save();
-        $it = new ThLanguage();
-        $it->user_id = $user->id;
-        $it->display_name  = 'Italiano';
-        $it->short_name    = 'it';
-        $it->save();
     }
 }

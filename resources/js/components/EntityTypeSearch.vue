@@ -35,7 +35,7 @@
 </template>
 
 <script>
-    import TypeaheadSearch from './TypeaheadSearch.vue';
+    import TypeaheadSearch from '@/TypeaheadSearch.vue';
 
     export default {
         extends: TypeaheadSearch,

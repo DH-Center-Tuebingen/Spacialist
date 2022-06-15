@@ -191,31 +191,34 @@
 
     import * as yup from 'yup';
 
-    import store from '../bootstrap/store.js';
+    import store from '@/bootstrap/store.js';
 
-    import { useToast } from '../plugins/toast.js';
+    import { useToast } from '@/plugins/toast.js';
 
     import {
         reactivateUser as reactivateUserApi,
         sendResetPasswordMail,
         patchUserData,
-    } from '../api.js';
+    } from '@/api.js';
+
     import {
         showDiscard,
         showAddUser,
         showDeactivateUser,
         showUserInfo,
-    } from '../helpers/modal.js';
+    } from '@/helpers/modal.js';
+
     import {
         can,
         getClassByValidation,
         getErrorMessages,
         getUserBy,
         hasPreference,
-    } from '../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
+    
     import {
         date,
-    } from '../helpers/filters.js';
+    } from '@/helpers/filters.js';
 
     export default {
         setup(props) {

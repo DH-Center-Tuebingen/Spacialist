@@ -178,21 +178,21 @@
         ago,
         datestring,
         mentionify,
-    } from '../helpers/filters.js';
+    } from '@/helpers/filters.js';
     import {
         userId,
         filterUsers,
         getInputCursorPosition,
-    } from '../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
     import {
         showUserInfo,
-    } from '../helpers/modal.js';
+    } from '@/helpers/modal.js';
     import {
         postComment as postCommentApi,
         getCommentReplies,
         deleteComment,
         editComment,
-    } from '../api.js';
+    } from '@/api.js';
 
     export default {
         props: {

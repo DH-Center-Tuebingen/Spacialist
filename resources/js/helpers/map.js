@@ -32,7 +32,7 @@ import Fill from 'ol/style/Fill';
 import Stroke from 'ol/style/Stroke';
 import Style from 'ol/style/Style';
 
-import { splitColor } from './colors.js';
+import { splitColor } from '@/helpers/colors.js';
 
 const convertFormats = {};
 

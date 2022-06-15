@@ -243,7 +243,7 @@
     } from 'chart.js';
 
     import { useI18n } from 'vue-i18n';
-    import store from '../../bootstrap/store.js';
+    import store from '@/bootstrap/store.js';
 
     import {
       createDownloadLink,
@@ -251,22 +251,22 @@
         slugify,
         translateConcept,
         _cloneDeep,
-    } from '../../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
 
     import {
         showCsvPreviewer,
         showCsvColumnPicker,
-    } from '../../helpers/modal.js';
+    } from '@/helpers/modal.js';
 
-    import StringAttr from './String.vue';
-    import IntegerAttr from './Integer.vue';
-    import FloatAttr from './Float.vue';
-    import Bool from './Bool.vue';
-    import Iconclass from './Iconclass.vue';
-    import RISM from './Rism.vue';
-    import Entity from './Entity.vue';
-    import DateAttr from './Date.vue';
-    import SingleChoice from './SingleChoice.vue';
+    import StringAttr from '@/components/attribute/String.vue';
+    import IntegerAttr from '@/components/attribute/Integer.vue';
+    import FloatAttr from '@/components/attribute/Float.vue';
+    import Bool from '@/components/attribute/Bool.vue';
+    import Iconclass from '@/components/attribute/Iconclass.vue';
+    import RISM from '@/components/attribute/Rism.vue';
+    import Entity from '@/components/attribute/Entity.vue';
+    import DateAttr from '@/components/attribute/Date.vue';
+    import SingleChoice from '@/components/attribute/SingleChoice.vue';
 
     let d3 = require('d3-dsv');
 

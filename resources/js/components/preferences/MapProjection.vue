@@ -18,7 +18,7 @@
 
     import {
         _debounce
-    } from '../../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
 
     export default {
         props: {

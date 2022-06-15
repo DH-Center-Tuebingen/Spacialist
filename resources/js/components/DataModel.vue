@@ -62,18 +62,18 @@
         useRoute,
     } from 'vue-router';
 
-    import store from '../bootstrap/store.js';
-    import router from '../bootstrap/router.js';
+    import store from '@/bootstrap/store.js';
+    import router from '@/bootstrap/router.js';
 
     import {
         duplicateEntityType as duplicateEntityTypeApi,
         getEntityTypeOccurrenceCount,
         getAttributeOccurrenceCount,
-    } from '../api.js';
+    } from '@/api.js';
 
     import {
         getEntityTypeAttributes,
-    } from '../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
 
     import {
         showAddEntityType,
@@ -81,7 +81,7 @@
         showAddAttribute,
         showDeleteAttribute,
         showEditEntityType,
-    } from '../helpers/modal.js';
+    } from '@/helpers/modal.js';
 
     export default {
         setup(props, context) {

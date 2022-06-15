@@ -117,28 +117,28 @@
 
     import * as yup from 'yup';
 
-    import store from '../bootstrap/store.js';
+    import store from '@/bootstrap/store.js';
 
-    import { useToast } from '../plugins/toast.js';
+    import { useToast } from '@/plugins/toast.js';
 
     import {
         showDiscard,
         showAddRole,
         showDeleteRole,
         showAccessControlModal,
-    } from '../helpers/modal.js';
+    } from '@/helpers/modal.js';
     import {
         can,
         getClassByValidation,
         getErrorMessages,
         getRoleBy,
-    } from '../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
     import {
         date,
-    } from '../helpers/filters.js';
+    } from '@/helpers/filters.js';
     import {
         patchRoleData,
-    } from '../api.js';
+    } from '@/api.js';
 
     export default {
         setup(props) {

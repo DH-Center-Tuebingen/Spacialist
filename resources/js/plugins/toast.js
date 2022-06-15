@@ -1,6 +1,5 @@
 import {
     createVNode,
-    inject,
     provide,
     render,
 } from 'vue';

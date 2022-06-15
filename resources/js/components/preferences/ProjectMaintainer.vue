@@ -41,10 +41,10 @@
 
     import {
         _debounce
-    } from '../../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
     import {
         showMarkdownEditor
-    } from '../../helpers/modal.js';
+    } from '@/helpers/modal.js';
     
     export default {
         props: {

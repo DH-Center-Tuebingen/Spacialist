@@ -80,7 +80,7 @@
 
     import {
         date,
-    } from '../../../helpers/filters.js';
+    } from '@/helpers/filters.js';
 
     export default {
         props: {

@@ -154,14 +154,14 @@
 
     import {
         userNotifications,
-    } from '../../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
 
     import {
         markAsRead,
         markAllAsRead,
         deleteNotification,
         deleteAllNotifications,
-    } from '../../api/notification.js';
+    } from '@/api/notification.js';
 
     export default {
         setup(props, context) {

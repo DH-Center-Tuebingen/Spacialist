@@ -121,23 +121,20 @@
     import { useRoute } from 'vue-router';
     import { useI18n } from 'vue-i18n';
 
-    import TreeSearch from './Search.vue';
+    import TreeSearch from '@/components/tree/Search.vue';
 
-    import store from '../../bootstrap/store.js';
-    import router from '../../bootstrap/router.js';
+    import store from '@/bootstrap/store.js';
+    import router from '@/bootstrap/router.js';
 
     import {
         fetchChildren,
         openPath,
-    } from '../../helpers/tree.js';
+    } from '@/helpers/tree.js';
 
-    import { ShowAddEntity } from '../../helpers/modal.js';
+    import { ShowAddEntity } from '@/helpers/modal.js';
 
     export default {
         components: {
-            // node: Node,
-            // treenode: TreeNode,
-            // tree: Tree,
             'tree-search': TreeSearch,
         },
         setup(props) {
@@ -261,13 +258,13 @@
             };
         }
     }
-    // import TreeNode from './TreeNode.vue';
-    // import TreeContextmenu from './TreeContextmenu.vue';
-    // import TreeSearch from './TreeSearch.vue';
+    // import TreeNode from '@/TreeNode.vue';
+    // import TreeContextmenu from '@/TreeContextmenu.vue';
+    // import TreeSearch from '@/TreeSearch.vue';
 
     // import * as treeUtility from 'tree-vue-component';
-    // import AddNewEntityModal from './modals/AddNewEntity.vue';
-    // import DeleteEntityModal from './modals/DeleteEntity.vue';
+    // import AddNewEntityModal from '@/helpers/modals/AddNewEntity.vue';
+    // import DeleteEntityModal from '@/helpers/modals/DeleteEntity.vue';
 
     // const DropPosition = {
     //     empty: 0,

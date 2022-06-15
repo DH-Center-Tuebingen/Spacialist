@@ -23,8 +23,8 @@
     import {
         gfm,
     } from '@milkdown/preset-gfm';
-    import { spac } from './theme.js';
-    import { menu } from './menu.js';
+    import { spac } from '@/components/mde/theme.js';
+    import { menu } from '@/components/mde/menu.js';
     import { listener, listenerCtx } from '@milkdown/plugin-listener';
     import { history } from '@milkdown/plugin-history';
     import { clipboard } from '@milkdown/plugin-clipboard';

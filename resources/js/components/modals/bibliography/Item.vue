@@ -93,13 +93,13 @@
     import {
         getErrorMessages,
         getValidClass,
-    } from '../../../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
     import {
         bibtexify,
-    } from '../../../helpers/filters.js';
+    } from '@/helpers/filters.js';
     import {
         bibliographyTypes,
-    } from '../../../helpers/bibliography.js';
+    } from '@/helpers/bibliography.js';
 
     export default {
         props: {

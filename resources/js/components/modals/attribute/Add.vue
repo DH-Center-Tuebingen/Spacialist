@@ -69,7 +69,7 @@
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
-    import AttributeTemplate from '../../AttributeTemplate.vue';
+    import AttributeTemplate from '@/components/AttributeTemplate.vue';
 
     export default {
         components: {

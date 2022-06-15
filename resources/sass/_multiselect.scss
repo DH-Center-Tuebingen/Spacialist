@@ -1,79 +1,11 @@
-.multiselect {
-  background-color: $white !important;
-  border-color: $input-border-color !important;
-  border-radius: $input-border-radius !important;
-  min-height: 37px !important;
-}
-
-.multiselect-search, .multiselect-search > .multiselect-input {
-  min-height: 0px !important;
-  height: 32px !important;
-}
-
-.multiselect > * {
-  font-size: $font-size-base !important;
-  font-weight: $font-weight-base !important;
-}
-
-.multiselect-input {
-  border-color: $input-border-color !important;
-  border-radius: $input-border-radius !important;
-  min-height: 37px !important;
-}
-
 .multiselect-clear {
-  height: 32px !important;
   margin-right: auto !important;
 }
 
-.is-open .multiselect-input {
-  border-radius: $input-border-radius !important;
+.multiselect-clear-reset {
+  margin-right: initial !important;
 }
 
-.is-disabled .multiselect-input {
-  background: $input-disabled-bg !important;
-}
-
-.multiselect-placeholder {
-  color: $text-muted !important;
-} 
-
-.multiselect-tag {
-  background: $teal;
-  color: $light;
-  font-size: $font-size-base !important;
-  font-weight: $font-weight-base !important;
-}
-
-.multiselect-options {
-  background-color: $white !important;
-  border-color: $input-border-color !important;
-  border-radius: $input-border-radius !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  max-height: 400px !important;
-  z-index: $zindex-sticky + 1 !important;
-  word-wrap: break-word !important;
-  width: 20vw !important;
-  position: absolute !important;
-}
-
-.multiselect-option {
-  padding-left: 0.5rem !important;
-  padding-right: 0.5rem !important;
-  padding-top: 0.25rem !important;
-  padding-bottom: 0.25rem !important;
-  // min-height: 0px !important;
-}
-
-.multiselect-option.is-pointed {
-  background-color: $primary !important;
-  color: $white !important;
-  font-weight: $font-weight-bold;
-}
-
-.is-multiple .multiselect-option.is-selected,
-.is-tags .multiselect-option.is-selected {
-  color: $body-color !important;
-  background-color: $white !important;
+.multiselect-search {
+  position: relative !important;
 }

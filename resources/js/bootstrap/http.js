@@ -1,9 +1,9 @@
 import axios from 'axios';
-import router from './router.js';
+import router from '@/bootstrap/router.js';
 
 import {
     throwError,
-} from '../helpers/helpers.js';
+} from '@/helpers/helpers.js';
 
 const instance = axios.create();
 

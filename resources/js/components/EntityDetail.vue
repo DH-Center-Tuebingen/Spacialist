@@ -175,17 +175,17 @@
         Popover,
     } from 'bootstrap';
 
-    import store from '../bootstrap/store.js';
-    import router from '../bootstrap/router.js';
+    import store from '@/bootstrap/store.js';
+    import router from '@/bootstrap/router.js';
 
-    import { useToast } from '../plugins/toast.js';
+    import { useToast } from '@/plugins/toast.js';
 
-    import { date } from '../helpers/filters.js';
+    import { date } from '@/helpers/filters.js';
     import {
         getEntityComments,
         patchAttributes,
         patchEntityName,
-    } from '../api.js';
+    } from '@/api.js';
     import {
         can,
         getAttribute,
@@ -194,13 +194,13 @@
         getEntityTypeAttributeSelections,
         getEntityTypeDependencies,
         translateConcept
-    } from '../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
     import {
         showDiscard,
         showDeleteEntity,
         showUserInfo,
         canShowReferenceModal,
-    } from '../helpers/modal.js';
+    } from '@/helpers/modal.js';
 
     export default {
         props: {

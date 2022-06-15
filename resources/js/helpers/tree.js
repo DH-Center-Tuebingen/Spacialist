@@ -1,15 +1,15 @@
-import TreeNode from '../components/tree/Node.vue';
+import TreeNode from '@/components/tree/Node.vue';
 
 import { ref } from 'vue';
-import store from '../bootstrap/store.js';
+import store from '@/bootstrap/store.js';
 import { getNodeFromPath } from 'tree-component';
 import {
     fetchChildren as fetchChildrenApi,
-} from '../api.js';
+} from '@/api.js';
 
 import {
     translateEntityType,
-} from './helpers';
+} from '@/helpers/helpers.js';
 
 export async function fetchChildren(id, sort = {by: 'rank', dir: 'asc'}) {
     return fetchChildrenApi(id).then(data => {

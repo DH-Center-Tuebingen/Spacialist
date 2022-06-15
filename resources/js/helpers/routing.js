@@ -1,4 +1,4 @@
-import router from '../bootstrap/router.js';
+import router from '@/bootstrap/router.js';
 
 export function routeToEntity(id) {
     const currentRoute = router.currentRoute.value;

@@ -113,16 +113,16 @@
         truncate,
         datestring,
         ago,
-    } from '../../helpers/filters.js';
+    } from '@/helpers/filters.js';
     import {
         getUserBy,
         getNotificationSourceLink,
         simpleResourceType,
         translateConcept,
-    } from '../../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
     import {
         showUserInfo,
-    } from '../../helpers/modal.js';
+    } from '@/helpers/modal.js';
 
     export default {
         props: {

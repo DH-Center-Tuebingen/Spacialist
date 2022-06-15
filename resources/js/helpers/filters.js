@@ -1,7 +1,7 @@
-import dayjs from '../bootstrap/time.js';
+import dayjs from '@/bootstrap/time.js';
 import {
     getUserBy,
-} from './helpers.js';
+} from '@/helpers/helpers.js';
 
 export function date(value, format = 'DD.MM.YYYY HH:mm') {
     if(value) {

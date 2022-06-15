@@ -5,7 +5,7 @@ import {
 
 import {
     getFilteredActivity,
-} from '../api.js';
+} from '@/api.js';
 
 export default function() {
     // FUNCTIONS

@@ -77,7 +77,7 @@
         getEntityType,
         getEntityTypes,
         translateConcept,
-    } from '../../../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
 
     export default {
         props: {

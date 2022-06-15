@@ -90,20 +90,20 @@
         useRoute,
     } from 'vue-router';
 
-    import store from '../bootstrap/store.js';
-    import router from '../bootstrap/router.js';
+    import store from '@/bootstrap/store.js';
+    import router from '@/bootstrap/router.js';
 
-    import { useToast } from '../plugins/toast.js';
+    import { useToast } from '@/plugins/toast.js';
 
     import {
         translateConcept,
-    } from '../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
     import {
         date,
-    } from '../helpers/filters.js';
+    } from '@/helpers/filters.js';
     import {
         canShowReferenceModal,
-    } from '../helpers/modal.js';
+    } from '@/helpers/modal.js';
 
     export default {
         setup(props, context) {

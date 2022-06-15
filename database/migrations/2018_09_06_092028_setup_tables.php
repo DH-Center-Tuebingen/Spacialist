@@ -7,6 +7,7 @@ use App\ThConcept;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
 class SetupTables extends Migration
 {
@@ -90,7 +91,7 @@ class SetupTables extends Migration
         if(!Schema::hasTable('migrations')) {
             return true;
         }
-        return !\DB::table('migrations')
+        return !DB::table('migrations')
             ->where('migration', '2017_10_26_094535_fix_ranks')
             ->exists();
     }
@@ -138,12 +139,6 @@ class SetupTables extends Migration
         Schema::table('context_attributes', function (Blueprint $table) {
             $table->jsonb('depends_on')->nullable();
         });
-
-        $p = Preference::where('label', 'prefs.load-extensions')->first();
-        $value = json_decode($p->default_value);
-        unset($value->bibliography);
-        $p->default_value = json_encode($value);
-        $p->save();
 
         $this->migrateTableNames();
         $this->migrateColumnNames();
@@ -271,7 +266,7 @@ class SetupTables extends Migration
 
     private function migratePermissionNames() {
         foreach(self::$newPermissions as $old => $new) {
-            \DB::unprepared("
+            DB::unprepared("
                 UPDATE permissions
                 SET name = replace(name, '$old', '$new'), display_name = replace(display_name, '$old', '$new'), description = replace(description, '$old', '$new')
                 WHERE name LIKE '%$old%' OR display_name LIKE '%$old%' OR description LIKE '%$old%'
@@ -308,11 +303,11 @@ class SetupTables extends Migration
             $table->foreign('child_id')->references('id')->on('entity_types')->onDelete('cascade');
         });
 
-        $ids = \DB::table('entity_types')->select('id')->get();
-        foreach(\DB::table('entity_types')->get() as $ct) {
+        $ids = DB::table('entity_types')->select('id')->get();
+        foreach(DB::table('entity_types')->get() as $ct) {
             if($ct->type === 0) {
                 foreach($ids as $id) {
-                    \DB::table('entity_type_relations')
+                    DB::table('entity_type_relations')
                         ->insert([
                             'parent_id' => $ct->id,
                             'child_id' => $id->id
@@ -618,11 +613,6 @@ class SetupTables extends Migration
                 'allow_override' => false
             ],
             [
-                'label' => 'prefs.load-extensions',
-                'default_value' => json_encode(['data-analysis' => true]),
-                'allow_override' => false
-            ],
-            [
                 'label' => 'prefs.link-to-thesaurex',
                 'default_value' => json_encode(['url' => '']),
                 'allow_override' => false
@@ -787,7 +777,7 @@ class SetupTables extends Migration
 
     private function rollbackPermissionNames() {
         foreach(self::$newPermissions as $new => $old) {
-            \DB::unprepared("
+            DB::unprepared("
                 UPDATE permissions
                 SET name = replace(name, '$old', '$new'), display_name = replace(display_name, '$old', '$new'), description = replace(description, '$old', '$new')
                 WHERE name LIKE '%$old%' OR display_name LIKE '%$old%' OR description LIKE '%$old%'

@@ -1,11 +1,11 @@
 import {
     default as http,
-} from '../bootstrap/http.js';
+} from '@/bootstrap/http.js';
 
 import {
     userNotifications,
     _cloneDeep,
-} from '../helpers/helpers.js';
+} from '@/helpers/helpers.js';
 
 export async function markAsRead(id, from = userNotifications()) {
     const elem = from.find(elem => elem.id === id)

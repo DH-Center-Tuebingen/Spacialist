@@ -59,11 +59,11 @@
 
     import {
         searchEntity,
-    } from '../../../api.js';
+    } from '@/api.js';
 
     import {
         isAllowedSubEntityType,
-    } from '../../../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
 
     export default {
         props: {

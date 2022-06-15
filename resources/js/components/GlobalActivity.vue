@@ -35,7 +35,7 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import ActivityMixin from './ActivityMixin.js';
+    import ActivityMixin from '@/components/ActivityMixin.js';
 
     export default {
         setup(props) {

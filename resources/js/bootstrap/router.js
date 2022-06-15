@@ -6,29 +6,29 @@ import {
 } from 'vue-router';
 
 // Pages
-import Login from '../components/Login.vue';
-import MainView from '../components/MainView.vue';
-import EntityDetail from '../components/EntityDetail.vue';
-import EntityReferenceModal from '../components/modals/entity/Reference.vue';
+import Login from '@/components/Login.vue';
+import MainView from '@/components/MainView.vue';
+import EntityDetail from '@/components/EntityDetail.vue';
+import EntityReferenceModal from '@/components/modals/entity/Reference.vue';
 // Tools
-import Bibliography from '../components/BibliographyTable.vue';
-import GlobalActivity from '../components/GlobalActivity.vue';
-import DataImporter from '../components/DataImporter.vue';
+import Bibliography from '@/components/BibliographyTable.vue';
+import GlobalActivity from '@/components/GlobalActivity.vue';
+import DataImporter from '@/components/DataImporter.vue';
 // Settings
-import Users from '../components/Users.vue';
-import Roles from '../components/Roles.vue';
-import Plugins from '../components/Plugins.vue';
-import DataModel from '../components/DataModel.vue';
-import DataModelDetailView from '../components/DataModelDetailView.vue';
-import Preferences from '../components/Preferences.vue';
+import Users from '@/components/Users.vue';
+import Roles from '@/components/Roles.vue';
+import Plugins from '@/components/Plugins.vue';
+import DataModel from '@/components/DataModel.vue';
+import DataModelDetailView from '@/components/DataModelDetailView.vue';
+import Preferences from '@/components/Preferences.vue';
 // User
-import UserProfile from '../components/UserProfile.vue';
-import UserPreferences from '../components/UserPreferences.vue';
-import UserActivity from '../components/UserActivity.vue';
-import UserNotifications from '../components/notification/UserNotifications.vue';
+import UserProfile from '@/components/UserProfile.vue';
+import UserPreferences from '@/components/UserPreferences.vue';
+import UserActivity from '@/components/UserActivity.vue';
+import UserNotifications from '@/components/notification/UserNotifications.vue';
 
-import DummyComponent from '../components/DummyComponent.vue';
-import NotFound from '../components/NotFound.vue';
+import DummyComponent from '@/components/DummyComponent.vue';
+import NotFound from '@/components/NotFound.vue';
 
 export {
     onBeforeRouteUpdate,

@@ -141,7 +141,7 @@
 </template>
 
 <script>
-    import { EventBus } from '../event-bus.js';
+    import { EventBus } from '@/event-bus.js';
 
     import 'ol/ol.css';
     import Collection from 'ol/Collection';
@@ -179,7 +179,7 @@
     import LayerSwitcher from 'ol-ext/control/LayerSwitcher';
     import Chart from 'ol-ext/style/Chart';
 
-    import '../../sass/ol-ext-layerswitcher.scss';
+    import '@/sass/ol-ext-layerswitcher.scss';
 
     export default {
         props: {

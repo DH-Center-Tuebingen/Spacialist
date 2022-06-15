@@ -8,7 +8,7 @@
             </button>
         </h3>
         <div class="table-responsive scroll-x-hidden">
-            <table class="table table-light table-striped table-hover mb-0" v-if="state.prefsLoaded" v-dcan="'edit_preferences'">
+            <table class="table table-light table-striped table-hover mb-0" v-if="state.prefsLoaded" v-dcan="'preferences_write'">
                 <thead class="sticky-top">
                     <tr class="text-nowrap">
                         <th>{{ t('global.preference') }}</th>
@@ -177,25 +177,25 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import store from '../bootstrap/store.js';
+    import store from '@/bootstrap/store.js';
 
-    import { useToast } from '../plugins/toast.js';
+    import { useToast } from '@/plugins/toast.js';
 
-    import { patchPreferences } from '../api.js';
+    import { patchPreferences } from '@/api.js';
 
     import {
         can,
-    } from '../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
 
-    import GuiLanguage from './preferences/GuiLanguage.vue';
-    import ResetEmail from './preferences/ResetEmail.vue';
-    import Columns from './preferences/Columns.vue';
-    import ShowTooltips from './preferences/ShowTooltips.vue';
-    import Tags from './preferences/Tags.vue';
-    import ThesaurusLink from './preferences/ThesaurusLink.vue';
-    import ProjectName from './preferences/ProjectName.vue';
-    import ProjectMaintainer from './preferences/ProjectMaintainer.vue';
-    import MapProjection from './preferences/MapProjection.vue';
+    import GuiLanguage from '@/components/preferences/GuiLanguage.vue';
+    import ResetEmail from '@/components/preferences/ResetEmail.vue';
+    import Columns from '@/components/preferences/Columns.vue';
+    import ShowTooltips from '@/components/preferences/ShowTooltips.vue';
+    import Tags from '@/components/preferences/Tags.vue';
+    import ThesaurusLink from '@/components/preferences/ThesaurusLink.vue';
+    import ProjectName from '@/components/preferences/ProjectName.vue';
+    import ProjectMaintainer from '@/components/preferences/ProjectMaintainer.vue';
+    import MapProjection from '@/components/preferences/MapProjection.vue';
 
     export default {
         components: {

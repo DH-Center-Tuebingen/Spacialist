@@ -94,21 +94,21 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import auth from '../bootstrap/auth.js';
-    import store from '../bootstrap/store.js';
+    import auth from '@/bootstrap/auth.js';
+    import store from '@/bootstrap/store.js';
 
     import {
         getUser,
         _cloneDeep,
-    } from '../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
     import {
         isValidOrcid,
-    } from '../helpers/validators.js';
+    } from '@/helpers/validators.js';
     import {
         setUserAvatar,
         patchUserData,
         deleteUserAvatar,
-    } from '../api.js';
+    } from '@/api.js';
 
     export default {
         setup(props) {

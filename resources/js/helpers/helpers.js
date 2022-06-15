@@ -1,6 +1,6 @@
-import auth from '../bootstrap/auth.js';
-import store from '../bootstrap/store.js';
-import router from '../bootstrap/router.js';
+import auth from '@/bootstrap/auth.js';
+import store from '@/bootstrap/store.js';
+import router from '@/bootstrap/router.js';
 
 import {
     fetchAttributes,
@@ -13,15 +13,15 @@ import {
     fetchVersion,
     fetchPlugins,
     fetchAttributeTypes,
-} from '../api.js';
+} from '@/api.js';
 
 import {
     showError
-} from './modal.js';
+} from '@/helpers/modal.js';
 
 import {
     splitColor,
-} from './colors.js';
+} from '@/helpers/colors.js';
 
 export async function initApp(locale) {
     store.dispatch('setAppState', false);

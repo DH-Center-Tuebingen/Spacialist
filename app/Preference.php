@@ -6,7 +6,7 @@ use App\UserPreference;
 use Illuminate\Database\Eloquent\Model;
 
 class Preference extends Model
-{    
+{
     /**
      * The attributes that are assignable.
      *
@@ -15,14 +15,6 @@ class Preference extends Model
     protected $fillable = [
     ];
 
-    protected static $logOnlyDirty = true;
-    protected static $logFillable = true;
-    protected static $logAttributes = [
-        'id',
-        'label',
-        'default_value',
-        'allow_override'
-    ];
 
     public static function getPreferences() {
         $prefs = self::orderBy('id')->get();

@@ -69,15 +69,15 @@
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
-    import store from '../../../bootstrap/store.js';
+    import store from '@/bootstrap/store.js';
 
     import {
         searchLabel,
-    } from '../../../api.js';
+    } from '@/api.js';
 
     import {
         getConceptLabel,
-    } from '../../../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
 
     export default {
         props: {

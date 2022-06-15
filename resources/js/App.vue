@@ -131,7 +131,7 @@
                         <li class="nav-item dropdown" v-if="state.loggedIn">
                             <a href="#" class="nav-link dropdown-toggle" id="settings-dropdown" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true">
                                 <i class="fas fa-fw fa-sliders-h"></i>
-                                {{ t('global.settings.title') }} <span class="caret"></span>
+                                {{ t('global.settings.title') }}
                             </a>
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="settings-dropdown">
                                 <router-link :to="{name: 'users'}" class="dropdown-item">

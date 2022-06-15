@@ -30,7 +30,7 @@
 
     import {
         getSupportedLanguages,
-    } from '../../bootstrap/i18n.js';
+    } from '@/bootstrap/i18n.js';
 
     export default {
         props: {

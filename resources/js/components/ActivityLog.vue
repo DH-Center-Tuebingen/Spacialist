@@ -81,7 +81,7 @@
 </template>
 
 <script>
-    import ActivityLogFilter from './ActivityLogFilter.vue';
+    import ActivityLogFilter from '@/components/ActivityLogFilter.vue';
 
     import {
         computed,
@@ -93,13 +93,13 @@
 
     import {
         _orderBy,
-    } from '../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
     import {
         date,
-    } from '../helpers/filters.js';
+    } from '@/helpers/filters.js';
     import {
         showUserInfo,
-    } from '../helpers/modal.js';
+    } from '@/helpers/modal.js';
 
     export default {
         components: {

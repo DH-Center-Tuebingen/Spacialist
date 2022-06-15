@@ -33,7 +33,7 @@
 
     import {
         searchEntity,
-    } from '../../api.js';
+    } from '@/api.js';
 
     export default {
         props: {

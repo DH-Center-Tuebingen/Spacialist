@@ -9,7 +9,7 @@ import {
 import {
     global_api,
     api_base,
-} from './http.js';
+} from '@/bootstrap/http.js';
 
 import { addToast } from '@/plugins/toast.js';
 

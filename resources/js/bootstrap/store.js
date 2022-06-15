@@ -633,60 +633,24 @@ export const store = createStore({
                 },
             },
             getters: {
-                appInitialized: state => {
-                    return state.appInitialized;
-                },
-                attributes: state => {
-                    return state.attributes;
-                },
-                attributeTypes: state => {
-                    return state.attributeTypes;
-                },
-                attributeTableTypes: state => {
-                    return state.attributeTypes.filter(at => at.in_table);
-                },
-                attributeSelections: state => {
-                    return state.attributeSelections;
-                },
-                bibliography: state => {
-                    return state.bibliography;
-                },
-                concepts: state => {
-                    return state.concepts;
-                },
-                entities: state => {
-                    return state.entities;
-                },
-                entityTypes: state => {
-                    return state.entityTypes;
-                },
-                entityTypeAttributes: state => id => {
-                    return state.entityTypeAttributes[id];
-                },
-                entityTypeColors: state => id => {
-                    return state.entityTypeColors[id];
-                },
-                geometryTypes: state => {
-                    return state.geometryTypes;
-                },
-                mainView: state => {
-                    return state.mainView;
-                },
-                tree: state => {
-                    return state.tree;
-                },
-                preferenceByKey: state => key => {
-                    return state.preferences[key];
-                },
-                preferences: state => {
-                    return state.preferences;
-                },
-                systemPreferences: state => {
-                    return state.systemPreferences;
-                },
-                tags: state => {
-                    return state.tags;
-                },
+                appInitialized: state => state.appInitialized,
+                attributes: state => state.attributes,
+                attributeTypes: state => state.attributeTypes,
+                attributeTableTypes: state => state.attributeTypes.filter(at => at.in_table),
+                attributeSelections: state => state.attributeSelections,
+                bibliography: state => state.bibliography,
+                concepts: state => state.concepts,
+                entities: state => state.entities,
+                entityTypes: state => state.entityTypes,
+                entityTypeAttributes: state => id => state.entityTypeAttributes[id],
+                entityTypeColors: state => id => state.entityTypeColors[id],
+                geometryTypes: state => state.geometryTypes,
+                mainView: state => state.mainView,
+                tree: state => state.tree,
+                preferenceByKey: state => key => state.preferences[key],
+                preferences: state => state.preferences,
+                systemPreferences: state => state.systemPreferences,
+                tags: state => state.tags,
                 roles: state => noPerms => {
                     return noPerms ? state.roles.map(r => {
                         // Remove permissions from role
@@ -694,49 +658,27 @@ export const store = createStore({
                         return role;
                     }) : state.roles;
                 },
-                rolePresets: state => {
-                    return state.rolePresets;
-                },
-                permissions: state => {
-                    return state.permissions;
-                },
+                rolePresets: state => state.rolePresets,
+                permissions: state => state.permissions,
                 allUsers: state => {
                     return [
                         ...state.users,
                         ...state.deletedUsers
                     ];
                 },
-                users: state => {
-                    return state.users;
-                },
-                deletedUsers: state => {
-                    return state.deletedUsers;
-                },
-                user: state => {
-                    return state.user;
-                },
-                isLoggedIn: state => {
-                    return !!state.user;
-                },
-                entity: state => {
-                    return state.entity;
-                },
-                file: state => {
-                    return state.file;
-                },
-                version: state => {
-                    return state.version;
-                },
-                plugins: state => {
-                    return state.plugins;
-                },
+                users: state => state.users,
+                deletedUsers: state => state.deletedUsers,
+                user: state => state.user,
+                isLoggedIn: state => !!state.user,
+                entity: state => state.entity,
+                file: state => state.file,
+                version: state => state.version,
+                plugins: state => state.plugins,
                 slotPlugins: state => slot => {
                     const p = state.registeredPluginSlots;
                     return slot ? p[slot] : p;
                 },
-                vfm: state => {
-                    return state.vfm;
-                },
+                vfm: state => state.vfm,
             }
         },
         pluginstore: {

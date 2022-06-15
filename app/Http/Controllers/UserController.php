@@ -218,7 +218,7 @@ class UserController extends Controller
         }
 
         $file = $request->file('file');
-        $path = File::uploadAvatar($file, $user);
+        $path = $user->uploadAvatar($file);
         $user->avatar = $path;
         $user->save();
 
@@ -268,7 +268,7 @@ class UserController extends Controller
 
         if(!$user->can('users_roles_write')) {
             return response()->json([
-                'error' => __('You do not have the permission to set user roles')
+                'error' => __('You do not have the permission to modify user data')
             ], 403);
         }
         $this->validate($request, [

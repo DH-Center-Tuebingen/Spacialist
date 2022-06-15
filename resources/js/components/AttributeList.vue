@@ -234,28 +234,28 @@
         getAttribute,
         getCertaintyClass,
         translateConcept,
-    } from '../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
 
-    import StringAttr from './attribute/String.vue';
-    import Stringfield from './attribute/Stringfield.vue';
-    import IntegerAttr from './attribute/Integer.vue';
-    import FloatAttr from './attribute/Float.vue';
-    import Bool from './attribute/Bool.vue';
-    import Percentage from './attribute/Percentage.vue';
-    import Serial from './attribute/Serial.vue';
-    import List from './attribute/List.vue';
-    import Epoch from './attribute/Epoch.vue';
-    import Dimension from './attribute/Dimension.vue';
-    import Tabular from './attribute/Tabular.vue';
-    import Iconclass from './attribute/Iconclass.vue';
-    import RISM from './attribute/Rism.vue';
-    import Geography from './attribute/Geography.vue';
-    import Entity from './attribute/Entity.vue';
-    import DateAttr from './attribute/Date.vue';
-    import SingleChoice from './attribute/SingleChoice.vue';
-    import MultiChoice from './attribute/MultiChoice.vue';
-    import SqlAttr from './attribute/Sql.vue';
-    import DefaultAttr from './attribute/Default.vue';
+    import StringAttr from '@/components/attribute/String.vue';
+    import Stringfield from '@/components/attribute/Stringfield.vue';
+    import IntegerAttr from '@/components/attribute/Integer.vue';
+    import FloatAttr from '@/components/attribute/Float.vue';
+    import Bool from '@/components/attribute/Bool.vue';
+    import Percentage from '@/components/attribute/Percentage.vue';
+    import Serial from '@/components/attribute/Serial.vue';
+    import List from '@/components/attribute/List.vue';
+    import Epoch from '@/components/attribute/Epoch.vue';
+    import Dimension from '@/components/attribute/Dimension.vue';
+    import Tabular from '@/components/attribute/Tabular.vue';
+    import Iconclass from '@/components/attribute/Iconclass.vue';
+    import RISM from '@/components/attribute/Rism.vue';
+    import Geography from '@/components/attribute/Geography.vue';
+    import Entity from '@/components/attribute/Entity.vue';
+    import DateAttr from '@/components/attribute/Date.vue';
+    import SingleChoice from '@/components/attribute/SingleChoice.vue';
+    import MultiChoice from '@/components/attribute/MultiChoice.vue';
+    import SqlAttr from '@/components/attribute/Sql.vue';
+    import DefaultAttr from '@/components/attribute/Default.vue';
 
     export default {
         props: {

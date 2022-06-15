@@ -60,7 +60,6 @@ class AddUserProfile extends Migration
 
         }
 
-
         Storage::makeDirectory('avatars');
 
         activity()->enableLogging();
@@ -119,10 +118,6 @@ class AddUserProfile extends Migration
                 return \App\Entity::all();
             case 'entity_files':
                 return \App\EntityFile::all();
-            case 'files':
-                return \App\File::all();
-            case 'geodata':
-                return \App\Geodata::all();
             case 'references':
                 return \App\Reference::all();
             case 'th_concept':

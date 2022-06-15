@@ -5,27 +5,27 @@ import PQueue from 'p-queue';
 import hljs from 'highlight.js';
 
 // Init plugins
-import { provideToast } from './plugins/toast.js';
+import { provideToast } from '@/plugins/toast.js';
 
 // Helpers/Filter
 
 // Reusable Components
-import AttributeList from './components/AttributeList.vue';
-import EntityTypeList from './components/EntityTypeList.vue';
-import EntityTree from './components/tree/Entity.vue';
-import EntityBreadcrumbs from './components/EntityBreadcrumbs.vue';
-import UserAvatar from './components/UserAvatar.vue';
-import ActivityLog from './components/ActivityLog.vue';
-import CommentList from './components/CommentList.vue';
-import EmojiPicker from './components/EmojiPicker.vue';
-import GlobalSearch from './components/search/Global.vue';
-import SimpleSearch from './components/search/Simple.vue';
-import InteractiveMap from './components/map/InteractiveMap.vue';
-import Alert from './components/Alert.vue';
-import NotificationBody from './components/notification/NotificationBody.vue';
-import CsvTable from './components/CsvTable.vue';
-import Gradient from './components/Gradient.vue';
-import MarkdownEditor from './components/mde/Main.vue';
+import AttributeList from '@/components/AttributeList.vue';
+import EntityTypeList from '@/components/EntityTypeList.vue';
+import EntityTree from '@/components/tree/Entity.vue';
+import EntityBreadcrumbs from '@/components/EntityBreadcrumbs.vue';
+import UserAvatar from '@/components/UserAvatar.vue';
+import ActivityLog from '@/components/ActivityLog.vue';
+import CommentList from '@/components/CommentList.vue';
+import EmojiPicker from '@/components/EmojiPicker.vue';
+import GlobalSearch from '@/components/search/Global.vue';
+import SimpleSearch from '@/components/search/Simple.vue';
+import InteractiveMap from '@/components/map/InteractiveMap.vue';
+import Alert from '@/components/Alert.vue';
+import NotificationBody from '@/components/notification/NotificationBody.vue';
+import CsvTable from '@/components/CsvTable.vue';
+import Gradient from '@/components/Gradient.vue';
+import MarkdownEditor from '@/components/mde/Main.vue';
 
 // Init Libs
 // PQueue, httpQueue
@@ -42,28 +42,29 @@ import VueFinalModal from 'vue-final-modal';
 import Markdown from 'vue3-markdown-it';
 
 // Components
-import App from './App.vue';
+import App from '@/App.vue';
 
 // Init required libs
 // Vuex
-import store from './bootstrap/store.js';
+import store from '@/bootstrap/store.js';
 // Vue-Router
-import router from './bootstrap/router.js';
+import router from '@/bootstrap/router.js';
 // Axios
-import './bootstrap/http.js';
+import '@/bootstrap/http.js';
 // Vue-Auth
-import vueAuth from './bootstrap/auth.js';
+import vueAuth from '@/bootstrap/auth.js';
 // vue-i18n
-import i18n from './bootstrap/i18n.js';
+import i18n from '@/bootstrap/i18n.js';
 // Font Awesome
-import './bootstrap/font.js';
+import '@/bootstrap/font.js';
+
 import {
   can,
   _debounce,
   getElementAttribute,
-} from './helpers/helpers.js';
+} from '@/helpers/helpers.js';
 // Plugin System
-import { SpPS } from './bootstrap/plugins.js';
+import { SpPS } from '@/bootstrap/plugins.js';
 
 const app = createApp(App);
 app.use(i18n);

@@ -80,17 +80,17 @@
 
     import {
         searchGlobal,
-    } from '../../api.js';
+    } from '@/api.js';
 
     import {
         getTs
-    } from '../../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
     import {
         routeToBibliography,
         routeToEntity,
         routeToFile,
         routeToGeodata,
-    } from '../../helpers/routing.js';
+    } from '@/helpers/routing.js';
 
     export default {
         props: {

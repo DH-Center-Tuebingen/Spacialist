@@ -1,5 +1,6 @@
 <?php
 
+use App\Preference;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +23,8 @@ return new class extends Migration
         DB::table('migrations')
             ->whereIn('migration', self::migrationNames)
             ->delete();
+        
+        Preference::where('label', 'prefs.load-extensions')->delete();
 
         activity()->enableLogging();
     }

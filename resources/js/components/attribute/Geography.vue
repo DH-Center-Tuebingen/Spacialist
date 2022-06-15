@@ -32,7 +32,7 @@
 
     import {
         showMapPicker
-    } from '../../helpers/modal.js';
+    } from '@/helpers/modal.js';
 
     export default {
         props: {

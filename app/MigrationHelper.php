@@ -116,10 +116,6 @@ class MigrationHelper
 
     private static function applyConstraint(Blueprint $table, string $columnName, array $options) {
         if($options['type'] == 'foreign') {
-                        
-                    }
-
-        if($options['type'] == 'foreign') {
             if(!array_key_exists('references', $options)) {
                 throw new MissingKeyException("Missing key in array. Key 'references' not found in input array.");
             }

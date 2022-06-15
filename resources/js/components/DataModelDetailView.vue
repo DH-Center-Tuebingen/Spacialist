@@ -103,9 +103,9 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import store from '../bootstrap/store.js';
+    import store from '@/bootstrap/store.js';
 
-    import { useToast } from '../plugins/toast.js';
+    import { useToast } from '@/plugins/toast.js';
 
     import {
         defaultAttributeValue,
@@ -113,7 +113,7 @@
         getEntityTypeAttributes,
         getEntityTypes,
         translateConcept,
-    } from '../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
 
     import {
         reorderEntityAttributes,
@@ -121,12 +121,12 @@
         updateEntityTypeRelation,
         getAttributeOccurrenceCount,
         removeEntityTypeAttribute,
-    } from '../api.js';
+    } from '@/api.js';
 
     import {
       showEditAttribute,
         showRemoveAttribute,
-    } from '../helpers/modal.js';
+    } from '@/helpers/modal.js';
 
     export default {
         setup(props, context) {

@@ -54,13 +54,13 @@
 
     import {
         searchLabel,
-    } from '../../../api.js';
+    } from '@/api.js';
 
     import {
         translateConcept,
         getConceptLabel,
         getConcept,
-    } from '../../../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
 
     export default {
         props: {

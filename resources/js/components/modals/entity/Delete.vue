@@ -47,7 +47,7 @@
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
-    import store from '../../../bootstrap/store.js';
+    import store from '@/bootstrap/store.js';
 
     export default {
         props: {

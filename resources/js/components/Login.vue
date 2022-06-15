@@ -75,15 +75,14 @@
 
     import { useI18n } from 'vue-i18n';
     import { useRoute } from 'vue-router';
-    import auth from '../bootstrap/auth.js';
-    import router from '../bootstrap/router.js';
-    import store from '../bootstrap/store.js';
+    import auth from '@/bootstrap/auth.js';
+    import router from '@/bootstrap/router.js';
 
-    import { initApp } from '../helpers/helpers.js';
     import {
+        initApp,
         getErrorMessages,
         getValidClass
-    } from '../helpers/helpers.js';
+    } from '@/helpers/helpers.js';
 
     export default {
         setup() {

@@ -1,21 +1,21 @@
 import {
     default as http,
     external,
-} from './bootstrap/http.js';
-import store from './bootstrap/store.js';
-import auth from './bootstrap/auth.js';
+} from '@/bootstrap/http.js';
+import store from '@/bootstrap/store.js';
+import auth from '@/bootstrap/auth.js';
 import {
     only,
     simpleResourceType,
     getEntityTypeAttributes as storedEntityTypeAttributes,
-} from './helpers/helpers.js';
+} from '@/helpers/helpers.js';
 
 // GET AND STORE (FETCH)
 export async function fetchVersion() {
     await $httpQueue.add(() => http.get('/version').then(response => {
         store.dispatch('setVersion', response.data);
     }));
-}
+};
 
 export async function fetchPlugins() {
     await $httpQueue.add(
@@ -23,7 +23,7 @@ export async function fetchPlugins() {
             store.dispatch('setPlugins', response.data);
         })
     );
-}
+};
 
 export async function uploadPlugin(file) {
     const formData = new FormData();
@@ -34,7 +34,7 @@ export async function uploadPlugin(file) {
             store.dispatch('addPlugin', response.data);
         })
     );
-}
+};
 
 export async function installPlugin(id) {
     return $httpQueue.add(
@@ -50,7 +50,7 @@ export async function installPlugin(id) {
             return response.data;
         })
     );
-}
+};
 
 export async function updatePlugin(id) {
     return $httpQueue.add(
@@ -65,7 +65,7 @@ export async function updatePlugin(id) {
             });
         })
     );
-}
+};
 
 export async function uninstallPlugin(id) {
     return $httpQueue.add(
@@ -81,7 +81,7 @@ export async function uninstallPlugin(id) {
             return response.data;
         })
     );
-}
+};
 
 export async function removePlugin(id) {
     return $httpQueue.add(
@@ -93,9 +93,10 @@ export async function removePlugin(id) {
             return response.data;
         })
     );
-}
+};
 
 export async function fetchUsers() {
+    store.commit('setUser', auth.user());
     await $httpQueue.add(() => http.get('user').then(response => {
         store.dispatch('setUsers', {
             active: response.data.users,
@@ -109,7 +110,7 @@ export async function fetchUsers() {
             presets: response.data.presets,
         });
     }));
-}
+};
 
 export async function fetchTopEntities() {
     await $httpQueue.add(() => http.get('/entity/top').then(response => {
@@ -121,7 +122,7 @@ export async function fetchAttributes() {
     return await $httpQueue.add(() => http.get('editor/dm/attribute').then(response => {
         store.dispatch('setAttributes', response.data);
     }));
-}
+};
 
 export async function fetchBibliography() {
     await $httpQueue.add(() => http.get('bibliography').then(response => {
@@ -141,9 +142,6 @@ export async function fetchPreData(locale) {
         store.dispatch('setEntityTypes', response.data.entityTypes);
         store.commit('setPreferences', response.data.preferences);
         store.commit('setSystemPreferences', response.data.system_preferences);
-        store.commit('setUsers', response.data.users);
-
-        store.commit('setUser', auth.user());
         
         if(auth.ready()) {
             auth.load().then(_ => {
@@ -152,8 +150,6 @@ export async function fetchPreData(locale) {
         } else {
             locale.value = store.getters.preferenceByKey('prefs.gui-language');
         }
-
-        // TODO init spacialist "plugins"
     }));
 };
 
@@ -175,7 +171,7 @@ export async function fetchGeometryTypes() {
             store.dispatch('setGeometryTypes', geom);
         })
     );
-}
+};
 
 export async function fetchAttributeTypes() {
     return $httpQueue.add(
@@ -183,7 +179,7 @@ export async function fetchAttributeTypes() {
             store.dispatch('setAttributeTypes', response.data);
         })
     );
-}
+};
 
 // GET
 export async function getEntityComments(id) {
@@ -241,13 +237,13 @@ export async function getEntityTypeAttributes(id) {
     return await $httpQueue.add(
         () => http.get(`/editor/entity_type/${id}/attribute`)
     )
-}
+};
 
 export async function getEntityTypeOccurrenceCount(id) {
     return $httpQueue.add(
         () => http.get(`/editor/dm/entity_type/occurrence_count/${id}`).then(response => response.data)
     );
-}
+};
 
 export async function getAttributeOccurrenceCount(aid, etid) {
     let endpoint = `/editor/dm/attribute/occurrence_count/${aid}`;
@@ -257,7 +253,7 @@ export async function getAttributeOccurrenceCount(aid, etid) {
     return $httpQueue.add(
         () => http.get(endpoint).then(response => response.data)
     );
-}
+};
 
 async function fetchComments(id, type, aid = null) {
     let endpoint = `/comment/resource/${id}?r=${type}`;
@@ -265,31 +261,31 @@ async function fetchComments(id, type, aid = null) {
         endpoint = `${endpoint}&aid=${aid}`;
     }
     return $httpQueue.add(() => http.get(endpoint).then(response => response.data).catch(error => { throw error; }));
-}
+};
 
 export async function getBibtexFile() {
     return await $httpQueue.add(
         () => http.get('bibliography/export').then(response => response.data)
     );
-}
+};
 
 export async function getIconClassInfo(iconClass) {
     return external.get(`http://iconclass.org/${iconClass}.json`, {
         crossdomain: true
     }).then(response => response.data).catch(e => e);
-}
+};
 
 export async function getRismInfo(rismId) {
     return external.get(`https://muscat.rism.info/sru/sources?operation=searchRetrieve&version=1.1&query=id=${rismId}&maximumRecords=1`, {
         crossdomain: true
     }).then(response => response.data).catch(e => e);
-}
+};
 
 export async function fetchChildren(id) {
     return $httpQueue.add(
         () => http.get(`/entity/byParent/${id}`).then(response => response.data)
     );
-}
+};
 
 export async function getMapLayers(includeEntityLayers) {
     let url = `map/layer`;
@@ -320,7 +316,7 @@ export async function getMapProjection(srid) {
     return $httpQueue.add(
         () => http.get(`map/epsg/${srid}`).then(response => response.data)
     );
-}
+};
 
 // POST
 export async function addUser(user) {

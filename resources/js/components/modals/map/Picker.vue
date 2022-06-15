@@ -58,7 +58,7 @@
     
     import {
         getLayers
-    } from '../../../helpers/map.js';
+    } from '@/helpers/map.js';
 
     export default {
         props: {
