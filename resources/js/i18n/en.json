@@ -64,7 +64,7 @@
         },
         "error": {
             "alert_title": "Error Message:",
-            "info_issue": "If you think this is a bug, please have a look at our <a href=\"https://github.com/eScienceCenter/Spacialist/issues\" target=\"_blank\">issue tracker</a> on github to see if this has been already reported or <a href=\"https://github.com/eScienceCenter/Spacialist/issues?q=is:issue+is:closed\" target=\"_blank\">closed</a> in a later version (Your current version can be found in Settings > <i class=\"fas fa-fw fa-info-circle\"></i> About Dialog). If it is neither reported nor closed, feel free to <a href=\"https://github.com/eScienceCenter/Spacialist/issues/new\" target=\"_blank\">open a new issue</a>.",
+            "info_issue": "If you think this is a bug, please have a look at our <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues\" target=\"_blank\">issue tracker</a> on github to see if this has been already reported or <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues?q=is:issue+is:closed\" target=\"_blank\">closed</a> in a later version (Your current version can be found in Settings > <i class=\"fas fa-fw fa-info-circle\"></i> About Dialog). If it is neither reported nor closed, feel free to <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues/new\" target=\"_blank\">open a new issue</a>.",
             "occur": "Error occured",
             "headers": "Headers",
             "request_failed": "<code class=\"normal\">{method}</code>-Request to endpoint <code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code> failed with status code <span class=\"fw-medium\">{status}</span>."
@@ -527,7 +527,7 @@
             },
             "info": {
                 "set_to_language": "Set to <span class=\"fw-bold\">{lang}</span>",
-                "password_reset_link": "To use this function, you have to set the <code>MAIL_*</code> settings in your <code>.env</code> file. <a href=\"https://github.com/eScienceCenter/Spacialist/blob/master/INSTALL.md#send-mails\" target=\"_blank\">Further informations</a>.",
+                "password_reset_link": "To use this function, you have to set the <code>MAIL_*</code> settings in your <code>.env</code> file. <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/blob/master/INSTALL.md#send-mails\" target=\"_blank\">Further informations</a>.",
                 "columns": "The sum of the column values must not be higher than 12."
             },
             "key": {

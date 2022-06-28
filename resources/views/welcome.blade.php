@@ -34,7 +34,7 @@
                 <h1>Welcome to {{ $p['prefs.project-name'] }}!</h1>
 
                 <p class="lead d-inline-block p-3 my-5 bg-primary bg-opacity-10 rounded-3">
-                    This project is realized using <a href="https://uni-tuebingen.de/forschung/forschungsinfrastruktur/escience-center/spacialist-1/" target="_blank">Spacialist</a> as foundation.
+                    This project is realized using <a href="https://uni-tuebingen.de/forschung/forschungsinfrastruktur/digital-humanities-center/spacialist-1/" target="_blank">Spacialist</a> as foundation.
                     <br/>
                     On this welcome page you can find some more information about the content of the project, the maintainers and how you can gain access.
                 </p>

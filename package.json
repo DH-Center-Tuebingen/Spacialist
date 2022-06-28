@@ -5,14 +5,14 @@
     "description": "A Virtual Research Environment for the Spatial Humanities",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/eScienceCenter/Spacialist.git"
+        "url": "git+https://github.com/DH-Center-Tuebingen/Spacialist.git"
     },
     "author": "Vinzenz Rosenkranz <vinzenz.rosenkranz@uni-tuebingen.de>",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/eScienceCenter/Spacialist/issues"
+        "url": "https://github.com/DH-Center-Tuebingen/Spacialist/issues"
     },
-    "homepage": "https://github.com/eScienceCenter/Spacialist#readme",
+    "homepage": "https://github.com/DH-Center-Tuebingen/Spacialist#readme",
     "scripts": {
         "dev": "npm run development",
         "development": "npx mix",

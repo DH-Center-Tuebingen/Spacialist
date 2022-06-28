@@ -184,7 +184,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Entity as table column datatype
 - Entity type to entity detail form header
-- Demo Seeder (See [INSTALL.md](https://github.com/eScienceCenter/Spacialist/blob/0.6.3/INSTALL.md#migrations) for more details)
+- Demo Seeder (See [INSTALL.md](https://github.com/DH-Center-Tuebingen/Spacialist/blob/0.6.3/INSTALL.md#migrations) for more details)
 - Show notification if attribute is deleted
 - Color indicator (based on entity layer color) to tree and entity-detail view (replaces monument icon)
 - Apply new preference values without reload
@@ -530,7 +530,7 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
 - Objects Tree View
 - Object Property Editor
 - Geomap
-- Data Analysis (based on https://github.com/eScienceCenter/dbWebGen)
+- Data Analysis (based on https://github.com/DH-Center-Tuebingen/dbWebGen)
 - Bibliography Manager
 - Photo Manager: upload and linking
 - User Manager: users, roles, permissions

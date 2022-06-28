@@ -61,7 +61,7 @@ However, since we switched to a different code base, you have to get the new dep
 2. Clone This Repository
 
     ```bash
-    git clone https://github.com/eScienceCenter/Spacialist
+    git clone https://github.com/DH-Center-Tuebingen/Spacialist
     ```
 
 3. Download Dependencies

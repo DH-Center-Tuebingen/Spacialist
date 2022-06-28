@@ -1,5 +1,5 @@
 ## Submitting issues
-If you have questions about how to install or use Spacialist, please send us an [email](mailto:spacialist@escience.uni-tuebingen.de).
+If you have questions about how to install or use Spacialist, please send us an [email](mailto:spacialist@dh-center.uni-tuebingen.de).
 
 ### Guidelines
 - Please search the existing issues first, it's likely that your issue was already reported or even fixed.
@@ -16,4 +16,4 @@ like `git config --global alias.ci 'commit -s'`. Now you can commit with
 `git ci` and the commit will be signed.
 
 ## Translations
-Translations are currently in the [i18n](https://github.com/eScienceCenter/Spacialist/tree/master/resources/js/i18n) (Frontend) and [lang](https://github.com/eScienceCenter/Spacialist/tree/master/resources/lang) (Backend) subfolder. See existing languages for required files and structure. If you want to add a new language please note that your language has to be added to [app.js](https://github.com/eScienceCenter/Spacialist/tree/master/resources/app.js) file.
+Translations are currently in the [i18n](https://github.com/DH-Center-Tuebingen/Spacialist/tree/master/resources/js/i18n) (Frontend) and [lang](https://github.com/DH-Center-Tuebingen/Spacialist/tree/master/resources/lang) (Backend) subfolder. See existing languages for required files and structure. If you want to add a new language please note that your language has to be added to [app.js](https://github.com/DH-Center-Tuebingen/Spacialist/tree/master/resources/app.js) file.
