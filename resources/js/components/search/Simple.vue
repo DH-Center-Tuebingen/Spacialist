@@ -38,7 +38,22 @@
                 </div>
             </template>
             <template v-slot:option="{ option }">
-                {{ displayResult(option) }}
+                <span v-if="!state.enableChain">
+                    {{ displayResult(option) }}
+                </span>
+                <div class="d-flex flex-column" v-else>
+                    <span>
+                        {{ displayResult(option) }}
+                    </span>
+                    <ol class="breadcrumb m-0 p-0 bg-none small">
+                        <li class="breadcrumb-item text-muted small" v-for="anc in option[chain]"
+                            :key="`search-result-multiselect-${state.id}-${anc}`">
+                            <span>
+                                {{ anc }}
+                            </span>
+                        </li>
+                    </ol>
+                </div>
             </template>
             <template v-slot:nooptions="">
                 <div class="p-2" v-if="!!state.query" v-html="t('global.search_no_results_for', {term: state.query})">
@@ -52,6 +67,7 @@
 
 <script>
     import {
+        computed,
         reactive,
         toRefs,
     } from 'vue';
@@ -90,6 +106,10 @@
                 type: Function,
                 required: false,
             },
+            chain: {
+                type: String,
+                required: false,
+            },
             mode: {
                 type: String,
                 required: false,
@@ -111,6 +131,7 @@
                 filterFn,
                 keyText,
                 keyFn,
+                chain,
                 mode,
                 defaultValue,
             } = toRefs(props);
@@ -171,6 +192,7 @@
                 id: `multiselect-search-${getTs()}`,
                 entry: defaultValue,
                 query: '',
+                enableChain: computed(_ => chain.value && chain.value.length > 0),
             });
 
             // RETURN
@@ -185,6 +207,7 @@
                 // PROPS
                 delay,
                 limit,
+                chain,
                 mode,
                 // STATE
                 state,

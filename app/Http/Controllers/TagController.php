@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
 use App\Preference;
 
 class TagController extends Controller {
@@ -26,7 +27,7 @@ class TagController extends Controller {
         $tagObj = Preference::where('label', 'prefs.tag-root')
             ->value('default_value');
         $tagUri = json_decode($tagObj)->uri;
-        $tags = \DB::select("
+        $tags = DB::select("
             WITH RECURSIVE
             top AS (
                 SELECT br.narrower_id as id, c2.concept_url

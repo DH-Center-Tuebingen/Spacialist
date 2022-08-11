@@ -30,6 +30,8 @@ All notable changes to this project will be documented in this file.
 - Restructure Layout of Data Model Editor for better UX
 - Restructure Layout of Preference Pages
 - Replace most of Checkboxes with Switches
+- Replace Infinite Loading Plugin with simple directive
+- Replace search backend (and adding search for attribute value)
 - Update Dependencies
   - Bootstrap 5
   - Multiselect (switched from [vue-multiselect](https://github.com/shentao/vue-multiselect) to [multiselect](https://github.com/vueform/multiselect))

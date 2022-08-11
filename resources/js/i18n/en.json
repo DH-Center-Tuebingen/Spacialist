@@ -259,6 +259,7 @@
                 "go_to": "To start page"
             },
             "screencast": {
+                "recording_begins_in_s": "Screencast recording begins in: a second | Screencast recording begins in: {t} seconds",
                 "title": "Save Screencast",
                 "info": "Screencast recorded. What do you want to do with it?",
                 "actions": {

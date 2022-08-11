@@ -2,6 +2,7 @@
     <simple-search
         :endpoint="searchEntity"
         :key-text="'name'"
+        :chain="'ancestors'"
         :mode="state.mode"
         :default-value="v.fieldValue"
         @selected="e => entitySelected(e)"

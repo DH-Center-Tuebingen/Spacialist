@@ -33,6 +33,7 @@
                             name="type"
                             id="type"
                             v-model="state.entity.type"
+                            :classes="multiselectResetClasslist"
                             :object="true"
                             :label="'thesaurus_url'"
                             :track-by="'id'"
@@ -77,6 +78,7 @@
         getEntityType,
         getEntityTypes,
         translateConcept,
+        multiselectResetClasslist,
     } from '@/helpers/helpers.js';
 
     export default {
@@ -144,6 +146,7 @@
                 t,
                 // HELPERS
                 translateConcept,
+                multiselectResetClasslist,
                 // PROPS
                 parent,
                 // LOCAL

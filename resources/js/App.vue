@@ -210,9 +210,12 @@
                 </div>
             </template>
             <div class="position-absolute top-50 start-50" v-show="state.recordingTimeout > 0">
-                <h1 class="mb-0">
+                <h1 class="mb-0 ms--50">
                     <span class="badge rounded-pill bg-dark text-light">
-                        {{ state.recordingTimeout }}
+                        {{ t('main.app.screencast.recording_begins_in_s', {t: state.recordingTimeout}, state.recordingTimeout) }}
+                        <a href="#" class="text-reset" @click.prevent="cancelScreencast()">
+                            <i class="fas fa-fw fa-times"></i>
+                        </a>
                     </span>
                 </h1>
             </div>
@@ -301,6 +304,7 @@
                     },
                 },
             };
+            let recTimerId = -1;
             const state = reactive({
                 recordingTimeout: 0,
                 isRecording: false,
@@ -322,13 +326,13 @@
             const triggerDelayedRecord = (countdown = 5) => {
                 state.recordingTimeout = countdown;
                 const dest = (new Date()).getTime() + (countdown * 1000);
-                const timerId = setInterval(_ => {
+                recTimerId = setInterval(_ => {
                     const now = (new Date()).getTime();
                     const dist = Math.ceil((dest - now) / 1000);
                     state.recordingTimeout = dist;
                     if(dist < 0) {
                         state.recordingTimeout = 0;
-                        clearInterval(timerId);
+                        clearInterval(recTimerId);
                         rtc.player.record().start();
                     }
                 }, 1000);
@@ -345,6 +349,14 @@
             const stopRecording = _ => {
                 if(!rtc.player) return;
                 rtc.player.record().stop();
+            };
+            const cancelScreencast = _ => {
+                state.recordingTimeout = 0;
+                clearInterval(recTimerId);
+                if(rtc.player) {
+                    rtc.player.record().stop();
+                    rtc.player.record().stopDevice();
+                }
             };
             const markNotificationAsRead = event => {
                 markAsRead(event);
@@ -442,6 +454,7 @@
                 // LOCAL
                 startRecording,
                 stopRecording,
+                cancelScreencast,
                 markNotificationAsRead,
                 markAllNotificationsAsRead,
                 deleteNotification,

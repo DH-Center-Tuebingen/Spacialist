@@ -2,7 +2,7 @@
 
 namespace App;
 
-use \DB;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -47,7 +47,7 @@ class ThConcept extends Model
     }
 
     public static function getMap($lang = 'en') {
-        $concepts = \DB::select(\DB::raw("
+        $concepts = DB::select(DB::raw("
             WITH summary AS
             (
                 SELECT th_concept.id, concept_url, is_top_concept, label, language_id, th_language.short_name,

@@ -581,6 +581,7 @@
             });
             onBeforeUpdate(_ => {
                 attrRef.value = {};
+                state.commentLoadingState = 'not';
             });
 
             watch(_ => state.hiddenAttributeCount,

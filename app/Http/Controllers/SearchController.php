@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Attribute;
+use App\AttributeValue;
 use App\Bibliography;
-use App\SearchableEntity;
+use App\Entity;
 use App\EntityType;
 use App\Plugins\File\App\File;
-use App\Geodata;
+use App\Plugins\Map\App\SearchAspect\GeodataAspect;
+use App\SearchAspect\AttributeValueAspect;
 use App\ThConcept;
 use App\ThLanguage;
 
@@ -15,6 +17,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
+use Spatie\Searchable\Search;
+use Spatie\Searchable\ModelSearchAspect;
 
 class SearchController extends Controller {
     private static $shebangPrefix = [
@@ -24,95 +28,59 @@ class SearchController extends Controller {
         'geodata' => '!g ',
     ];
 
+    private function stripShebang($query) {
+        if($this->isBib($query)) {
+            return Str::after($query, self::$shebangPrefix['bibliography']);
+        } else if($this->isEntity($query)) {
+            return Str::after($query, self::$shebangPrefix['entities']);
+        } else if($this->isFile($query)) {
+            return Str::after($query, self::$shebangPrefix['files']);
+        } else if($this->isGeodata($query)) {
+            return Str::after($query, self::$shebangPrefix['geodata']);
+        } else {
+            return $query;
+        }
+    }
+
+    private function noShebang($query) {
+        return !Str::startsWith($query, '!') || !($this->isBib($query) || $this->isEntity($query) || $this->isFile($query) || $this->isGeodata($query));
+    }
+
+    private function isBib($query) {
+        return Str::startsWith($query, self::$shebangPrefix['bibliography']);
+    }
+
+    private function isEntity($query) {
+        return Str::startsWith($query, self::$shebangPrefix['entities']);
+    }
+
+    private function isFile($query) {
+        return Str::startsWith($query, self::$shebangPrefix['files']);
+    }
+
+    private function isGeodata($query) {
+        return Str::startsWith($query, self::$shebangPrefix['geodata']);
+    }
+
     public function searchGlobal(Request $request) {
         $user = auth()->user();
         $q = $request->query('q');
-        if(Str::startsWith($q, self::$shebangPrefix['bibliography'])) {
-            if(!$user->can('bibliography_read')) {
-                $matches = [];
-            } else {
-                $matches = Bibliography::search(Str::after($q, self::$shebangPrefix['bibliography']))->get();
-                $matches->map(function($m) {
-                    $m->group = 'bibliography';
-                    return $m;
-                });
-            }
-        } else if(Str::startsWith($q, self::$shebangPrefix['entities'])) {
-            if(!$user->can('entity_read') || !$user->can('entity_data_read')) {
-                $matches = [];
-            } else {
-                $matches = SearchableEntity::search(Str::after($q, self::$shebangPrefix['entities']))->get();
-                $matches->map(function($m) {
-                    $m->group = 'entities';
-                    return $m;
-                });
-            }
-        } else if(Str::startsWith($q, self::$shebangPrefix['files'])) {
-            if(!$user->can('file_read')) {
-                $matches = [];
-            } else {
-                $files = File::search(Str::after($q, self::$shebangPrefix['files']));
-                $matches = $files->get();
-                $matches->map(function($m) {
-                    $m->group = 'files';
-                    $m->setFileInfo();
-                    return $m;
-                });
-            }
-        } else if(Str::startsWith($q, self::$shebangPrefix['geodata'])) {
-            if(!$user->can('geodata_read')) {
-                $matches = [];
-            } else {
-                $matches = Geodata::search(Str::after($q, self::$shebangPrefix['geodata']))->get();
-                $matches->map(function($m) {
-                    $m->group = 'geodata';
-                    return $m;
-                });
-            }
-        } else {
-            $matches = collect([]);
-
-            if($user->can('file_read')) {
-                $files = File::search($q)->get();
-                $files->map(function($f) {
-                    $f->group = 'files';
-                    $f->setFileInfo();
-                    return $f;
-                });
-                $matches = $matches->concat($files);
-            }
-
-            if($user->can('entity_read') && $user->can('entity_data_read')) {
-                $entities = SearchableEntity::search($q)->get();
-                $entities->map(function($e) {
-                    $e->group = 'entities';
-                    return $e;
-                });
-                $matches = $matches->concat($entities);
-            }
-
-            if($user->can('geodata_read')) {
-                $geodata = Geodata::search($q)->get();
-                $geodata->map(function($g) {
-                    $g->group = 'geodata';
-                    return $g;
-                });
-                $matches = $matches->concat($geodata);
-            }
-
-            if($user->can('bibliography_read')) {
-                $bibliography = Bibliography::search($q)->get();
-                $bibliography->map(function($b) {
-                    $b->group = 'bibliography';
-                    return $b;
-                });
-                $matches = $matches->concat($bibliography);
-            }
-            $matches = $matches
-                ->sortByDesc('relevance')
-                ->values()
-                ->all();
+        $stripedQuery = $this->stripShebang($q);
+        $search = new Search();
+        if(($this->noShebang($q) || $this->isBib($q)) && $user->can('bibliography_read')) {
+            $search = $search->registerModel(Bibliography::class, Bibliography::getSearchCols());
         }
+        if(($this->noShebang($q) || $this->isEntity($q)) && ($user->can('entity_read') && $user->can('entity_data_read'))) {
+            $search = $search->registerModel(Entity::class, Entity::getSearchCols());
+            $search = $search->registerAspect(AttributeValueAspect::class);
+        }
+        if(($this->noShebang($q) || $this->isFile($q)) && $user->can('file_read') ) {
+            $search = $search->registerModel(File::class, File::getSearchCols());
+        }
+        if(($this->noShebang($q) || $this->isGeodata($q)) && $user->can('geodata_read')) {
+            $search = $search->registerAspect(GeodataAspect::class);
+        }
+        $matches = $search->search($stripedQuery);
         return response()->json($matches);
     }
 
@@ -124,7 +92,7 @@ class SearchController extends Controller {
             ], 403);
         }
         $q = $request->query('q');
-        $matches = SearchableEntity::where('name', 'ilike', '%'.$q.'%')
+        $matches = Entity::where('name', 'ilike', '%'.$q.'%')
             ->orderBy('name')
             ->get();
         $matches->each->append(['ancestors']);

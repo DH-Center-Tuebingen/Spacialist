@@ -6,17 +6,19 @@ use App\Exceptions\InvalidDataException;
 use Illuminate\Database\Eloquent\Model;
 use MStaack\LaravelPostgis\Eloquent\PostgisTrait;
 use App\Traits\CommentTrait;
-use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Searchable\Searchable;
+use Spatie\Searchable\SearchResult;
 
-class AttributeValue extends Model
+class AttributeValue extends Model implements Searchable
 {
     use PostgisTrait;
     use CommentTrait;
     use LogsActivity;
 
     protected $table = 'attribute_values';
+    public $searchableType = 'entity_attribute';
     /**
      * The attributes that are assignable.
      *
@@ -64,6 +66,13 @@ class AttributeValue extends Model
             ->logFillable()
             ->dontLogIfAttributesChangedOnly(['user_id'])
             ->logOnlyDirty();
+    }
+
+    public function getSearchResult(): SearchResult {
+        return new SearchResult(
+            $this,
+            Entity::find($this->entity_id)->name,
+        );
     }
 
     public function getValue() {

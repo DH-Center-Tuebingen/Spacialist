@@ -9,8 +9,10 @@ use Illuminate\Support\Facades\DB;
 use Nicolaslopezj\Searchable\SearchableTrait;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Searchable\Searchable;
+use Spatie\Searchable\SearchResult;
 
-class Entity extends Model
+class Entity extends Model implements Searchable
 {
     use CommentTrait;
     use SearchableTrait;
@@ -40,13 +42,8 @@ class Entity extends Model
         'user',
     ];
 
-    protected $searchable = [
-        'columns' => [
-            'entities.name' => 10,
-        ],
-        'joins' => [
-
-        ],
+    protected const searchCols = [
+        'name' => 10,
     ];
 
     const rules = [
@@ -70,6 +67,17 @@ class Entity extends Model
             ->logFillable()
             ->dontLogIfAttributesChangedOnly(['user_id'])
             ->logOnlyDirty();
+    }
+
+    public function getSearchResult(): SearchResult {
+        return new SearchResult(
+            $this,
+            $this->name,
+        );
+    }
+
+    public static function getSearchCols(): array {
+        return array_keys(self::searchCols);
     }
 
     public static function getFromPath($path, $delimiter = "\\\\") {
@@ -246,7 +254,7 @@ class Entity extends Model
     }
 
     public function geodata() {
-        return $this->belongsTo('App\Geodata');
+        return $this->belongsTo('App\Plugins\Map\App\Geodata');
     }
 
     public function root_entity() {
@@ -289,36 +297,68 @@ class Entity extends Model
         return $entities;
     }
 
-    public function getParentIdsAttribute() {
-        $res = \DB::select("
+    public function parents() {
+        $res = DB::select("
             WITH RECURSIVE getpath AS (
                 SELECT id as path, name as pathn, root_entity_id as parent FROM entities WHERE id = $this->id
                 UNION
                 SELECT id, name, root_entity_id FROM getpath LEFT JOIN entities ON entities.id = getpath.parent WHERE entities.id = getpath.parent
             )
-            SELECT path
+            SELECT path, pathn
             FROM getpath
         ");
-        $filtered = array_map(function($elem) {
-            return $elem->path;
-        }, $res);
-        return $filtered;
+        $ids = [];
+        $names = [];
+        foreach($res as $path) {
+            $ids[] = $path->path;
+            $names[] = $path->pathn;
+        }
+
+        return [
+            'ids' => $ids,
+            'names' => $names,
+        ];
+    }
+
+    public function getParentIdsAttribute() {
+        // $res = DB::select("
+        //     WITH RECURSIVE getpath AS (
+        //         SELECT id as path, name as pathn, root_entity_id as parent FROM entities WHERE id = $this->id
+        //         UNION
+        //         SELECT id, name, root_entity_id FROM getpath LEFT JOIN entities ON entities.id = getpath.parent WHERE entities.id = getpath.parent
+        //     )
+        //     SELECT path
+        //     FROM getpath
+        // ");
+        // $filtered = array_map(function($elem) {
+        //     return $elem->path;
+        // }, $res);
+        // return $filtered;
+        return $this->parents()['ids'];
     }
 
     public function getParentNamesAttribute()
     {
-        $res = \DB::select("
-            WITH RECURSIVE getpath AS (
-                SELECT id as path, name as pathn, root_entity_id as parent FROM entities WHERE id = $this->id
-                UNION
-                SELECT id, name, root_entity_id FROM getpath LEFT JOIN entities ON entities.id = getpath.parent WHERE entities.id = getpath.parent
-            )
-            SELECT pathn
-            FROM getpath
-        ");
-        $filtered = array_map(function($elem) {
-            return $elem->pathn;
-        }, $res);
-        return $filtered;
+        // $res = DB::select("
+        //     WITH RECURSIVE getpath AS (
+        //         SELECT id as path, name as pathn, root_entity_id as parent FROM entities WHERE id = $this->id
+        //         UNION
+        //         SELECT id, name, root_entity_id FROM getpath LEFT JOIN entities ON entities.id = getpath.parent WHERE entities.id = getpath.parent
+        //     )
+        //     SELECT pathn
+        //     FROM getpath
+        // ");
+        // $filtered = array_map(function($elem) {
+        //     return $elem->pathn;
+        // }, $res);
+        // return $filtered;
+        return $this->parents()['names'];
+    }
+
+    public function getAncestorsAttribute()
+    {
+        $parents = array_reverse($this->getParentNamesAttribute());
+        array_pop($parents);
+        return $parents;
     }
 }

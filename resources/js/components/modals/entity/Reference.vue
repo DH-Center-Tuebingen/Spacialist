@@ -18,7 +18,7 @@
             <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
             </button>
         </div>
-        <div class="modal-body my-2 nonscrollable">
+        <div class="modal-body my-2">
             <h5>
                 {{ t('main.entity.references.certainty') }}
             </h5>
@@ -127,8 +127,9 @@
                             <template v-slot:singlelabel="{ value }">
                                 <div class="multiselect-single-label">
                                     <div>
-                                        <span class="fw-medium">{{ value.title }}</span> by
-                                        <cite>
+                                        <span class="fw-medium">{{ value.title }}</span>
+                                        -
+                                        <cite class="small">
                                             {{ value.author }} ({{ value.year }})
                                         </cite>
                                     </div>
@@ -136,8 +137,10 @@
                             </template>
                             <template v-slot:option="{ option }">
                                 <div>
-                                    <span class="fw-medium">{{ option.title }}</span> by
-                                    <cite>
+                                    <div>
+                                        <span class="fw-medium">{{ option.title }}</span>
+                                    </div>
+                                    <cite class="small">
                                         {{ option.author }} <span class="fw-light">({{ option.year }})</span>
                                     </cite>
                                 </div>

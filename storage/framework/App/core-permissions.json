@@ -214,5 +214,32 @@
             "display_name": "Share Preferences",
             "description": "Ability to share system preferences (currently unused)"
         }
+    ],
+    "thesaurus": [
+        {
+            "name": "read",
+            "display_name": "Read Thesaurus Concepts",
+            "description": "Ability to read thesaurus concepts"
+        },
+        {
+            "name": "write",
+            "display_name": "Write Thesaurus Concepts",
+            "description": "Ability to write and move thesaurus concepts"
+        },
+        {
+            "name": "create",
+            "display_name": "Create Thesaurus Concepts",
+            "description": "Ability to create and duplicate thesaurus concepts"
+        },
+        {
+            "name": "delete",
+            "display_name": "Delete Thesaurus Concepts",
+            "description": "Ability to delete thesaurus concepts"
+        },
+        {
+            "name": "share",
+            "display_name": "Share Thesaurus Concepts",
+            "description": "Ability to share and export thesaurus concepts"
+        }
     ]
 }

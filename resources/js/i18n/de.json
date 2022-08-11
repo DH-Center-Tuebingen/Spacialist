@@ -248,6 +248,9 @@
                 "reply_to_user": "<span class=\"fw-bold\">{name}</span> antworten",
                 "reply_to_chat": "Als Kommentar antworten"
             }
+        },
+        "markdown_editor": {
+            "title": "Markdown-Editor"
         }
     },
     "main": {
@@ -259,6 +262,7 @@
                 "go_to": "Zur Startseite"
             },
             "screencast": {
+                "recording_begins_in_s": "Screencast-Aufnahme beginnt in: einer Sekunde | Screencast-Aufnahme beginnt in: {t} Sekunden",
                 "title": "Screencast speichern",
                 "info": "Screencast erfolgreich aufgenommen. Was möchtest du damit tun?",
                 "actions": {

@@ -35,18 +35,18 @@
                                     <span class="text-muted fw-light" :title="datestring(comment.updated_at)">
                                         {{ ago(comment.updated_at) }}
                                     </span>
-                                    <span class="dropdown ms-1" v-if="!comment.deleted_at">
+                                    <span class="dropdown ms-1" v-if="!comment.deleted_at && (showEditButton(comment) || showDeleteButton(comment) || state.showReplyTo)">
                                         <span :id="`edit-comment-dropdown-${comment.id}`" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                             <i class="fas fa-fw fa-ellipsis-h"></i>
                                         </span>
                                         <div class="dropdown-menu" :aria-labelledby="`edit-comment-dropdown-${comment.id}`">
-                                            <a class="dropdown-item" href="#" @click.prevent="enableEditing(comment)" v-if="comment.author.id === state.currentUserId && state.editing.id != comment.id">
+                                            <a class="dropdown-item" href="#" @click.prevent="enableEditing(comment)" v-if="showEditButton(comment)">
                                                 <i class="fas fa-fw fa-edit text-info"></i> {{ t('global.edit') }}
                                             </a>
-                                            <a class="dropdown-item" href="#" @click.prevent="setReplyTo(comment)">
+                                            <a class="dropdown-item" href="#" @click.prevent="setReplyTo(comment)" v-if="state.showReplyTo">
                                                 <i class="fas fa-fw fa-reply text-success"></i> {{ t('global.reply_to') }}
                                             </a>
-                                            <a class="dropdown-item" href="#" @click.prevent="handleDelete(comment)" v-if="comment.author.id === state.currentUserId">
+                                            <a class="dropdown-item" href="#" @click.prevent="handleDelete(comment)" v-if="showDeleteButton(comment)">
                                                 <i class="fas fa-fw fa-trash text-danger"></i> {{ t('global.delete') }}
                                             </a>
                                         </div>
@@ -97,7 +97,7 @@
                             v-if="state.repliesOpen[comment.id] && comment.replies"
                             :comments="comment.replies"
                             :hide-button="true"
-                            :post-form="true"
+                            :post-form="false"
                             :disabled="disabled"
                             :avatar="avatar"
                             :resource="resource"
@@ -308,7 +308,8 @@
                 currentUserId: userId(),
                 commentsHidden: computed(_ => state.hideComments || !state.hasComments),
                 displayHideButton: computed(_ => hideButton.value && state.hasComments),
-                hasComments: computed(_ => comments.value.length > 0)
+                hasComments: computed(_ => comments.value.length > 0),
+                showReplyTo: computed(_ => postForm && postForm.value),
             });
 
             // FUNCTIONS
@@ -318,6 +319,12 @@
             const resetReplyTo = _ => {
                 state.replyTo.comment_id = null,
                 state.replyTo.author = {};
+            };
+            const showEditButton = comment => {
+                return comment.author.id === state.currentUserId && state.editing.id != comment.id;
+            };
+            const showDeleteButton = comment => {
+                return comment.author.id === state.currentUserId;
             };
             const enableEditing = comment => {
                 if(state.editing.id) {
@@ -448,6 +455,8 @@
                 showUserInfo,
                 // LOCAL
                 messageInput,
+                showEditButton,
+                showDeleteButton,
                 enableEditing,
                 disableEditing,
                 handleEdit,

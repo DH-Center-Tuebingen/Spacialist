@@ -9,6 +9,9 @@
             {{
                 t('global.markdown_editor.title')
             }}
+            <small>
+                {{ t('main.preference.key.project.maintainer') }}
+            </small>
         </h5>
         <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
         </button>
