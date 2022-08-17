@@ -133,6 +133,32 @@ app.directive('highlightjs', {
     });
   }
 });
+app.directive('resize', {
+  beforeMount(el, binding) {
+    if(!binding.value) return;
+    
+    const resizeCallback = binding.value;
+    window.addEventListener('resize', () => {
+      const height = document.documentElement.clientHeight;
+      const width = document.documentElement.clientWidth;
+      resizeCallback({
+        height: height,
+        width: width,
+      });
+    });
+  },
+  updated(el, binding) {
+    if(!binding.value) return;
+    // after an update, re-fill the content and then highlight
+    let targets = el.querySelectorAll('code');
+    targets.forEach((target) => {
+      if(binding.value) {
+        target.innerHTML = binding.value;
+        hljs.highlightElement(target);
+      }
+    });
+  }
+});
 app.directive('infinite-scroll', {
   mounted(el, binding) {
     const options = {
