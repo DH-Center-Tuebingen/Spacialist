@@ -1,10 +1,10 @@
 <p>
-    <a href="https://codecov.io/gh/eScienceCenter/Spacialist">
-        <img src="https://codecov.io/gh/eScienceCenter/Spacialist/branch/master/graph/badge.svg?token=4VVZQDJXSM"/>
+    <a href="https://codecov.io/gh/DH-Center-Tuebingen/Spacialist">
+        <img src="https://codecov.io/gh/DH-Center-Tuebingen/Spacialist/branch/master/graph/badge.svg?token=4VVZQDJXSM"/>
     </a>
-    <img src="https://github.com/eScienceCenter/Spacialist/workflows/PhpUnit/badge.svg"/>
-    <a href='https://david-dm.org/eScienceCenter/Spacialist'>
-        <img src='https://david-dm.org/eScienceCenter/Spacialist.svg' alt='Dependency Status' />
+    <img src="https://github.com/DH-Center-Tuebingen/Spacialist/workflows/PhpUnit/badge.svg"/>
+    <a href='https://david-dm.org/DH-Center-Tuebingen/Spacialist'>
+        <img src='https://david-dm.org/DH-Center-Tuebingen/Spacialist.svg' alt='Dependency Status' />
     </a>
     <a href='https://opensource.org/licenses/MIT'>
         <img src='https://img.shields.io/badge/License-MIT-yellow.svg' alt='License: MIT' />
