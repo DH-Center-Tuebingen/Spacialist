@@ -1,6 +1,6 @@
 <template>
     <div @dragenter="onDragEnter" @dragleave="onDragLeave" :id="`tree-node-${data.id}`">
-        <a href="" :id="`tree-node-cm-toggle-${data.id}`" @contextmenu.stop.prevent="togglePopup()" class="text-body text-decoration-none disabled" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false">
+        <a href="" :id="`tree-node-cm-toggle-${data.id}`" @click.prevent @contextmenu.stop.prevent="togglePopup()" class="text-body text-decoration-none disabled" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false">
             <span style="display: inline-block; text-align: center;" class="px-1">
                 <span v-if="data.children_count" class="badge rounded-pill" style="font-size: 9px;" :style="state.colorStyles" :title="data.children_count">
                     {{ numPlus(data.children_count, 3) }}
@@ -146,6 +146,12 @@
 
                 showDeleteEntity(data.value.id);
             };
+            const onDragEnter = _ => {
+
+            };
+            const onDragLeave = _ => {
+
+            };
 
             // DATA
             const state = reactive({
@@ -176,6 +182,8 @@
                 duplicateEntity,
                 moveEntity,
                 deleteEntity,
+                onDragEnter,
+                onDragLeave,
                 // PROPS
                 data,
                 // STATE
