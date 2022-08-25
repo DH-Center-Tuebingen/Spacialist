@@ -38,7 +38,7 @@
         </div>
     </div>
     <div :id="actionState.popupIds.p" class="popup popover ol-popover bs-popover-top" role="tooltip">
-        <h4 class="popover-header d-flex flex-row justify-content-between align-items-center">
+        <h4 class="popover-header d-flex flex-row gap-2 justify-content-between align-items-center">
             <div>
                 <span class="fw-medium">
                     {{ actionState.overlayData.title }}

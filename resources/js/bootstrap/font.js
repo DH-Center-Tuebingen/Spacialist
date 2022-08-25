@@ -102,6 +102,7 @@ import {
     faFolder,
     faGlobeAfrica,
     faH,
+    faHandPointer,
     faHourglassEmpty,
     faI,
     faIdBadge,
@@ -195,7 +196,6 @@ import {
     faVolumeMute,
     faVolumeUp,
     faWindowMaximize,
-    faGripLines,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -281,8 +281,8 @@ library.add(
     faFilter,
     faFolder,
     faGlobeAfrica,
-    faGripLines,
     faH,
+    faHandPointer,
     faHourglassEmpty,
     faI,
     faIdBadge,

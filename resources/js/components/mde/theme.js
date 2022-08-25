@@ -1,5 +1,13 @@
 import {
     themeFactory,
+    ThemeColor,
+    ThemeSize,
+    ThemeFont,
+    ThemeIcon,
+    ThemeGlobal,
+    ThemeScrollbar,
+    ThemeShadow,
+    ThemeBorder,
 } from '@milkdown/core';
 
 const iconMapping = {
@@ -33,7 +41,7 @@ const iconMapping = {
     },
     divider: {
         label: 'divider',
-        icon: 'fa-grip-lines',
+        icon: 'fa-minus',
     },
     image: {
         label: 'image',
@@ -109,7 +117,7 @@ const iconMapping = {
     },
     select: {
         label: 'select',
-        icon: 'select_all',
+        icon: 'fa-hand-pointer',
     },
     unchecked: {
         label: 'unchecked',
@@ -186,12 +194,12 @@ const override =
             .milkdown {
                 color: ${palette('neutral', 0.87)};
                 background: ${palette('surface')};
-                font-family: ${font.typography};
+                font-family: ${font('typography')};
                 ${mixin.shadow?.()};
                 box-sizing: border-box;
                 ${mixin.scrollbar?.()};
                 .ProseMirror-selectednode {
-                    outline: ${size.lineWidth} solid ${palette('line')};
+                    outline: ${size('lineWidth')} solid ${palette('line')};
                 }
                 li.ProseMirror-selectednode {
                     outline: none;
@@ -209,43 +217,83 @@ const override =
             }
         `;
 
-export const spacialistTheme = themeFactory(emotion => ({
-    font: {
-        typography: ['Raleway'],
-        code: ['Source Code Pro'],
-    },
-    size: {
-        radius: '2px',
-        lineWidth: '1px',
-    },
-    color: {
-        primary: '#0d6efd', // Bootstrap Blue (Primary)
-        secondary: '#6C757D',
-        neutral: '#6c757d',
-        background: '#6C757D',
-        solid: '#6c757d',
-        // shadow: '#00f',
-        line: '#212529',
-        surface: '#EBF2FD',
-    },
-    global: themeTool => {
-        const css = emotion.injectGlobal;
-        css`
-            ${view(emotion)};
-            ${override(emotion)(themeTool)}
-        `;
-    },
-    slots: () => ({
-        icon: id => {
-            const span = document.createElement('span');
-            const type = iconMapping[id].type || 'fas';
-            span.className = `${type} fa-fw ${iconMapping[id].icon}`;
-            return span;
-        },
-        label: id => {
-            return '';
+export const spacialistTheme = themeFactory((emotion, manager) => {
+    manager.set(ThemeFont, key => {
+        if(key == 'typography') {
+            return 'Raleway';
+        } else if (key == 'code') {
+            return 'Source Code Pro';
+        } else {
+            return 'monospace';
         }
-    })
-}));
+    });
+    manager.set(ThemeSize, key => {
+        if(key == 'radius') {
+            return '2px';
+        } else if(key == 'lineWidth') {
+            return '1px';
+        } else {
+            return '1px';
+        }
+    });
+    manager.set(ThemeColor, ([key, opacity]) => {
+        opacity = opacity || 1;
+        switch(key) {
+            case 'primary':
+                return `rgba(13, 110, 253, ${opacity})`; // Bootstrap Blue (Primary)
+            case 'secondary':
+                return `rgba(108, 117, 125, ${opacity})`;
+            case 'neutral':
+                return `rgba(108, 117, 125, ${opacity})`;
+            case 'background':
+                return `rgba(108, 117, 125, ${opacity})`;
+            case 'solid':
+                return `rgba(108, 117, 125, ${opacity})`;
+            // case 'shadow':
+            //     return `#00f`;
+            case 'line':
+                return `rgba(33, 37, 41, ${opacity})`;
+            case 'surface':
+                return `rgba(235, 242, 253, ${opacity})`;
+            default:
+                return `rgba(0, 0, 0, ${opacity})`;
+        }
+    });
+    manager.set(ThemeGlobal, _ => {
+        const options = {
+            palette: (color, opacity = 1) => manager.get(ThemeColor, [color, opacity]),
+            size: (key) => manager.get(ThemeSize, key),
+            font: (font) => manager.get(ThemeFont, font),
+            mixin: {
+                scrollbar: _ => manager.get(ThemeScrollbar, _),
+                shadow: _ => manager.get(ThemeShadow, _),
+                border: (dir = '') => manager.get(ThemeBorder, dir),
+            }
+        };
+
+        emotion.injectGlobal`
+            ${view(emotion)};
+            ${override(emotion)(options)}
+        `;
+    });
+    manager.set(ThemeIcon, key => {
+        const target = iconMapping[key];
+        if(!target) return;
+
+        const {
+            icon,
+            label,
+        } = target;
+        const span = document.createElement('span');
+        const type = target.type || 'fas';
+        span.className = `${type} fa-fw ${icon}`;
+        span.textContent = '';
+
+        return {
+            dom: span,
+            label,
+        };
+    });
+});
 
 export const spac = spacialistTheme;

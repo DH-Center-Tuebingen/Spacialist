@@ -1,9 +1,9 @@
 <template>
   <vue-final-modal
-    classes="modal-container"
+    classes="modal-container modal"
     content-class="sp-modal-content sp-modal-content-xl h-100"
     v-model="state.show"
-    name="user-info-modal">
+    name="markdown-editor-modal">
     <div class="modal-header">
         <h5 class="modal-title">
             {{

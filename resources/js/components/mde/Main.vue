@@ -4,8 +4,6 @@
 
 <script>
     import {
-        computed,
-        onMounted,
         reactive,
         toRefs,
     } from 'vue';
@@ -24,8 +22,8 @@
         gfm,
     } from '@milkdown/preset-gfm';
     import { spac } from '@/components/mde/theme.js';
-    import { menu } from '@/components/mde/menu.js';
     import { listener, listenerCtx } from '@milkdown/plugin-listener';
+    import { menu } from '@milkdown/plugin-menu';
     import { history } from '@milkdown/plugin-history';
     import { clipboard } from '@milkdown/plugin-clipboard';
     import { prism } from '@milkdown/plugin-prism';
@@ -37,9 +35,6 @@
     import { upload } from '@milkdown/plugin-upload';
 
     export default {
-        // components: {
-        //     EditorContent,
-        // },
         components: {
             VueEditor,
         },
@@ -72,7 +67,6 @@
                         });
                     })
                     .use(spac)
-                    // .use(commonmark)
                     .use(gfm)
                     .use(listener)
                     .use(history)

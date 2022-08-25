@@ -1,6 +1,6 @@
 <template>
   <vue-final-modal
-    classes="modal-container"
+    classes="modal-container modal"
     content-class="sp-modal-content sp-modal-content-sm"
     :lock-scroll="false"
     v-model="state.show"

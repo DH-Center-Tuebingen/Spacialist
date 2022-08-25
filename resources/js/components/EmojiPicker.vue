@@ -10,7 +10,7 @@
         onMounted,
     } from 'vue';
 
-    import { EmojiButton } from '@joeattardi/emoji-button';
+    import { createPopup } from '@picmo/popup-picker';
 
     export default {
         emits: ['selected'],
@@ -18,25 +18,27 @@
             // DATA
             const state = reactive({
                 pickId: `emoji-picker-${Date.now()}`,
-                picker: new EmojiButton({
-                    autoHide: false,
-                    position: 'bottom-end',
-                    zIndex: 1021
-                }),
             });
 
             // ON MOUNTED
             onMounted(_ => {
                 const emojiButton = document.getElementById(state.pickId);
-    
-                state.picker.on('emoji', emoji => {
-                    context.emit('selected', {
-                        emoji: emoji.emoji
-                    });
+
+                const picker = createPopup({}, {
+                    triggerElement: emojiButton,
+                    referenceElement: emojiButton,
+                    position: 'bottom-end',
+                    hideOnEmojiSelect: false,
                 });
-    
+
                 emojiButton.addEventListener('click', _ => {
-                    state.picker.togglePicker(emojiButton);
+                    picker.toggle();
+                });
+
+                picker.addEventListener('emoji:select', event => {
+                    context.emit('selected', {
+                        emoji: event.emoji
+                    });
                 });
             });
 
