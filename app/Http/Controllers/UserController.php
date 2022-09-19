@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Attribute;
+use App\Entity;
 use App\File;
 use App\Permission;
 use App\Role;
 use App\User;
 use App\Http\Controllers\Controller;
+use App\Plugin;
+use App\RolePreset;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -32,6 +36,52 @@ class UserController extends Controller
         $user = User::with('notifications')->find(auth()->user()->id);
         $user->setPermissions();
 
+        // Load notification source data into info property
+        $user->notifications->map(function($n) {
+            if($n->type == 'App\Notifications\CommentPosted') {
+                $skip = false;
+                switch($n->data['resource']['type']) {
+                    case 'App\Entity':
+                        try {
+                            $name = Entity::findOrFail($n->data['resource']['id'])->name;
+                        } catch (ModelNotFoundException $e) {
+                            $skip = true;
+                        }
+                        break;
+                    case 'App\AttributeValue':
+                    case 'attribute_values':
+                        try {
+                            $name = Entity::findOrFail($n->data['resource']['meta']['entity_id'])->name;
+                            $attrUrl = Attribute::findOrFail($n->data['resource']['meta']['attribute_id'])->thesaurus_url;
+                        } catch (ModelNotFoundException $e) {
+                            $skip = true;
+                        }
+                        break;
+                    default:
+                        $skip = true;
+                        break;
+                }
+                if(!$skip) {
+                    $data = [
+                        'name' => $name,
+                    ];
+                    if(isset($attrUrl)) {
+                        $data['attribute_url'] = $attrUrl;
+                    }
+                    
+                    $n->info = $data;
+                }
+            } else if($n->type == 'App\Notifications\EntityUpdated') {
+                try {
+                    $n->info = [
+                        'name' => Entity::findOrFail($n->data['resource']['id'])->name,
+                    ];
+                } catch (ModelNotFoundException $e) {
+                }
+            }
+            return $n;
+        });
+
         return response()->json([
             'status' => 'success',
             'data' => $user
@@ -40,44 +90,69 @@ class UserController extends Controller
 
     public function getUsers() {
         $user = auth()->user();
-        if(!$user->can('view_users')) {
+        if(!$user->can('users_roles_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view users')
             ], 403);
         }
-        $users = User::withoutTrashed()->with('roles')->orderBy('id')->get();
-        $delUsers = User::onlyTrashed()->with('roles')->orderBy('id')->get();
-        $roles = Role::orderBy('id')->get();
+        $users = User::with('roles')->withoutTrashed()->orderBy('id')->get();
+        $delUsers = User::with('roles')->onlyTrashed()->orderBy('id')->get();
 
         return response()->json([
             'users' => $users,
             'deleted_users' => $delUsers,
-            'roles' => $roles
         ]);
     }
 
     public function getRoles() {
         $user = auth()->user();
-        if(!$user->can('view_users')) {
+        if(!$user->can('users_roles_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view roles')
             ], 403);
         }
-        $roles = Role::with('permissions')->orderBy('id')->get();
+        $roles = Role::with(['permissions', 'derived'])->orderBy('id')->get();
         $perms = Permission::orderBy('id')->get();
+        $presets = RolePreset::all();
 
         return response()->json([
             'roles' => $roles,
-            'permissions' => $perms
+            'permissions' => $perms,
+            'presets' => $presets,
         ]);
+    }
+
+    public function getAccessGroups(Request $request) {
+        $user = auth()->user();
+        // TODO which perm?
+        if(!$user->can('users_roles_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to view roles')
+            ], 403);
+        }
+
+        $withPlugins = $request->query('plugins');
+
+        $groups['core'] = sp_get_permission_groups(true);
+
+        if($withPlugins) {
+            $installedPlugins = Plugin::getInstalled();
+            $groups['plugins'] = [];
+            foreach($installedPlugins as $plugin) {
+                $slug = $plugin->slugName();
+                $groups['plugins'][$slug] = $plugin->getPermissionGroups();
+            }
+        }
+
+        return response()->json($groups);
     }
 
     // POST
 
     public function login(Request $request) {
         $this->validate($request, [
-            'email' => 'required_without:nickname|email|max:255|exists:users,email',
-            'nickname' => 'required_without:email|alpha_num|max:255|exists:users,nickname',
+            'email' => 'required_without:nickname|email|max:255',
+            'nickname' => 'required_without:email|alpha_dash|max:255',
             'password' => 'required'
         ]);
 
@@ -100,7 +175,7 @@ class UserController extends Controller
 
     public function addUser(Request $request) {
         $user = auth()->user();
-        if(!$user->can('create_users')) {
+        if(!$user->can('users_roles_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to add new users')
             ], 403);
@@ -128,14 +203,14 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    public function addAvatar(Request $request, $id) {
+    public function addAvatar(Request $request) {
         $user = auth()->user();
         $this->validate($request, [
             'file' => 'required|file',
         ]);
 
         try {
-            $user = User::findOrFail($id);
+            $user = User::findOrFail($user->id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This user does not exist')
@@ -143,7 +218,7 @@ class UserController extends Controller
         }
 
         $file = $request->file('file');
-        $path = File::uploadAvatar($file, $user);
+        $path = $user->uploadAvatar($file);
         $user->avatar = $path;
         $user->save();
 
@@ -155,7 +230,7 @@ class UserController extends Controller
 
     public function addRole(Request $request) {
         $user = auth()->user();
-        if(!$user->can('add_edit_role')) {
+        if(!$user->can('users_roles_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to add roles')
             ], 403);
@@ -167,8 +242,17 @@ class UserController extends Controller
         foreach($request->only(array_keys(Role::rules)) as $key => $value) {
             $role->{$key} = $value;
         }
+
+        if($request->has('derived_from')) {
+            $preset = RolePreset::find($request->get('derived_from'));
+            $permissions = $preset->fullSet;
+            $role->syncPermissions($permissions);
+        }
+
         $role->save();
         $role = Role::find($role->id);
+        $role->load(['derived', 'permissions']);
+
         return response()->json($role);
     }
 
@@ -182,9 +266,9 @@ class UserController extends Controller
     public function patchUser(Request $request, $id) {
         $user = auth()->user();
 
-        if(!$user->can('add_remove_role')) {
+        if(!$user->can('users_roles_write')) {
             return response()->json([
-                'error' => __('You do not have the permission to set user roles')
+                'error' => __('You do not have the permission to modify user data')
             ], 403);
         }
         $this->validate($request, [
@@ -256,9 +340,9 @@ class UserController extends Controller
     public function restoreUser($id)
     {
         $user = auth()->user();
-        if (!$user->can('delete_users')) {
+        if (!$user->can('users_roles_delete')) {
             return response()->json([
-                'error' => __('You do not have the permission to delete users')
+                'error' => __('You do not have the permission to restore users')
             ], 403);
         }
 
@@ -276,7 +360,7 @@ class UserController extends Controller
 
     public function patchRole(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('add_remove_permission')) {
+        if(!$user->can('users_roles_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to set role permissions')
             ], 403);
@@ -324,7 +408,7 @@ class UserController extends Controller
 
     public function deleteUser($id) {
         $user = auth()->user();
-        if(!$user->can('delete_users')) {
+        if(!$user->can('users_roles_delete')) {
             return response()->json([
                 'error' => __('You do not have the permission to delete users')
             ], 403);
@@ -344,7 +428,7 @@ class UserController extends Controller
 
     public function deleteRole($id) {
         $user = auth()->user();
-        if(!$user->can('view_concepts')) {
+        if(!$user->can('users_roles_delete')) {
             return response()->json([
                 'error' => __('You do not have the permission to delete roles')
             ], 403);
@@ -362,16 +446,11 @@ class UserController extends Controller
         return response()->json(null, 204);
     }
 
-    public function deleteAvatar($id) {
+    public function deleteAvatar() {
         $user = auth()->user();
-        if(!$user->can('delete_users')) {
-            return response()->json([
-                'error' => __('You do not have the permission to delete users')
-            ], 403);
-        }
 
         try {
-            $user = User::findOrFail($id);
+            $user = User::findOrFail($user->id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This user does not exist')

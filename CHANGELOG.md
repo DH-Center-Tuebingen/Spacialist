@@ -1,6 +1,45 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.9 - Isfahan
+### Added
+- Global State for shared information (Vuex)
+- Reset unsaved Entity attribute values
+- Delete/Restore individual rows in tabular attribute
+- Load csv data into tabular attribute
+- Preview resulting attribute in _New Attribute_ Dialog
+- [RISM](https://rism.info/de/index.html)-Attribute
+- Button to jump from _Entity_ Attribute to linked Entity
+- _Entity Multiple Choice_-Attribute
+- List with all entities that reference currently selected entity in _Entity_ Attribute
+- Line numbers and skipping rows to CSV table component
+- CSV-based Data Importer
+- Supply matching user list for mentioning (type '@' in comment to get a searchable list)
+### Fixed
+- Improved Attribute Validation
+- Editing Entity Name
+### Changed
+- Revamp Role Permission Configuration
+  - Add Presets to Derive Role Permission Set from
+  - Allow Plugins to have their own Permission Set and extend existing Role Presets
+- Disable _Loading Iconclass Button_ when attribute value is not set
+- Switch Icon for _Loading Iconclass Button_
+- Update Laravel to Version 8
+- Update VueJS to Version 3
+- Restructure Bootstrapping and Setup of App
+- Restructure Layout of Data Model Editor for better UX
+- Restructure Layout of Preference Pages
+- Replace most of Checkboxes with Switches
+- Replace Infinite Loading Plugin with simple directive
+- Replace search backend (and adding search for attribute value)
+- Update Dependencies
+  - Bootstrap 5
+  - Multiselect (switched from [vue-multiselect](https://github.com/shentao/vue-multiselect) to [multiselect](https://github.com/vueform/multiselect))
+  - Modals (switched from [vue-js-modal](https://github.com/euvl/vue-js-modal) to [vue-final-modal](https://github.com/vue-final/vue-final-modal))
+  - Validation (Updated [vee-validate](https://github.com/logaretm/vee-validate) from v2 to v4)
+### Removed/Deprecated
+- Dropped Infinite Loading Plugin (for now as there is no proper replacement)
+
 ## 0.8 - Helgö
 ### Added
 - Support to extend all data with a comment section. Currently:
@@ -147,7 +186,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Entity as table column datatype
 - Entity type to entity detail form header
-- Demo Seeder (See [INSTALL.md](https://github.com/eScienceCenter/Spacialist/blob/0.6.3/INSTALL.md#migrations) for more details)
+- Demo Seeder (See [INSTALL.md](https://github.com/DH-Center-Tuebingen/Spacialist/blob/0.6.3/INSTALL.md#migrations) for more details)
 - Show notification if attribute is deleted
 - Color indicator (based on entity layer color) to tree and entity-detail view (replaces monument icon)
 - Apply new preference values without reload
@@ -493,7 +532,7 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
 - Objects Tree View
 - Object Property Editor
 - Geomap
-- Data Analysis (based on https://github.com/eScienceCenter/dbWebGen)
+- Data Analysis (based on https://github.com/DH-Center-Tuebingen/dbWebGen)
 - Bibliography Manager
 - Photo Manager: upload and linking
 - User Manager: users, roles, permissions

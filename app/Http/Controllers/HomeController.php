@@ -2,17 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Attribute;
-use App\AvailableLayer;
-use App\Bibliography;
-use App\Entity;
 use App\EntityType;
-use App\Permission;
+use App\Plugin;
 use App\Preference;
-use App\Role;
 use App\ThConcept;
 use App\User;
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
@@ -39,28 +34,24 @@ class HomeController extends Controller
             }
             $locale = auth()->user()->getLanguage();
         } else {
-            $preferences = Preference::all();
             $preferenceValues = [];
-            foreach($preferences as $p) {
-                $preferenceValues[$p->label] = Preference::decodePreference($p->label, json_decode($p->default_value));
-            }
             $locale = \App::getLocale();
         }
 
+        $sysPrefs = Preference::getPreferences();
+
         $concepts = ThConcept::getMap($locale);
 
-        $entityTypes = EntityType::with(['sub_entity_types', 'layer'])
+        $entityTypes = EntityType::with(['sub_entity_types', 'layer', 'attributes'])
             ->orderBy('id')
             ->get();
         $entityTypeMap = $entityTypes->getDictionary();
 
-        $users = User::all();
-
         return response()->json([
+            'system_preferences' => $sysPrefs,
             'preferences' => $preferenceValues,
             'concepts' => $concepts,
             'entityTypes' => $entityTypeMap,
-            'users' => $users
         ]);
     }
 
@@ -69,8 +60,20 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function welcome() {
-        return view('welcome');
+    public function welcome(Request $request) {
+        $activeSite = 'start';
+        $siteFromReq = $request->get('s', 'start');
+        switch($siteFromReq) {
+            case 'about':
+                $activeSite = 'about';
+                break;
+            case 'access':
+                $activeSite = 'access';
+                break;
+        }
+        return view('welcome', [
+            'site' => $activeSite,
+        ]);
     }
 
     /**
@@ -79,6 +82,8 @@ class HomeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index() {
-        return view('home');
+        $plugins = Plugin::getInstalled();
+        return view('home')
+            ->with('plugins', $plugins);
     }
 }

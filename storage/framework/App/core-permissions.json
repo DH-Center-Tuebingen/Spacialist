@@ -1,0 +1,245 @@
+{
+    "entity": [
+        {
+            "name": "read",
+            "display_name": "Read Entities",
+            "description": "Ability to read entities"
+        },
+        {
+            "name": "write",
+            "display_name": "Write and Move Entities",
+            "description": "Ability to write and move entities"
+        },
+        {
+            "name": "create",
+            "display_name": "Create and Duplicate Entities",
+            "description": "Ability to create, import and duplicate entities"
+        },
+        {
+            "name": "delete",
+            "display_name": "Delete Entities",
+            "description": "Ability to delete entities"
+        },
+        {
+            "name": "share",
+            "display_name": "Share Entities",
+            "description": "Ability to share and export entities"
+        }
+    ],
+    "entity_data": [
+        {
+            "name": "read",
+            "display_name": "Read Entity data",
+            "description": "Ability to read entity data"
+        },
+        {
+            "name": "write",
+            "display_name": "Write Entity data",
+            "description": "Ability to write entity data"
+        },
+        {
+            "name": "create",
+            "display_name": "Create Entity data",
+            "description": "Ability to create entity data"
+        },
+        {
+            "name": "delete",
+            "display_name": "Delete Entity data",
+            "description": "Ability to delete entity data"
+        },
+        {
+            "name": "share",
+            "display_name": "Share Entity data",
+            "description": "Ability to share and export entity data"
+        }
+    ],
+    "attribute": [
+        {
+            "name": "read",
+            "display_name": "Read Attributes",
+            "description": "Ability to read attributes"
+        },
+        {
+            "name": "write",
+            "display_name": "Write Attributes",
+            "description": "Ability to write attributes"
+        },
+        {
+            "name": "create",
+            "display_name": "Create Attributes",
+            "description": "Ability to create attributes"
+        },
+        {
+            "name": "delete",
+            "display_name": "Delete Attributes",
+            "description": "Ability to delete attributes"
+        },
+        {
+            "name": "share",
+            "display_name": "Share Attributes",
+            "description": "Ability to share attributes"
+        }
+    ],
+    "entity_type": [
+        {
+            "name": "read",
+            "display_name": "Read Entity Types",
+            "description": "Ability to read entity types"
+        },
+        {
+            "name": "write",
+            "display_name": "Write Entity Types",
+            "description": "Ability to write entity types and their associated data"
+        },
+        {
+            "name": "create",
+            "display_name": "Create Entity Types",
+            "description": "Ability to create and duplicate entity types"
+        },
+        {
+            "name": "delete",
+            "display_name": "Delete Entity Types",
+            "description": "Ability to delete entity types"
+        },
+        {
+            "name": "share",
+            "display_name": "Share Entity Types",
+            "description": "Ability to share entity types"
+        }
+    ],
+    "bibliography": [
+        {
+            "name": "read",
+            "display_name": "Read Bibliography items",
+            "description": "Ability to read bibliography items"
+        },
+        {
+            "name": "write",
+            "display_name": "Write Bibliography items",
+            "description": "Ability to write bibliography items"
+        },
+        {
+            "name": "create",
+            "display_name": "Create Bibliography items",
+            "description": "Ability to create bibliography items"
+        },
+        {
+            "name": "delete",
+            "display_name": "Delete Bibliography items",
+            "description": "Ability to delete bibliography items"
+        },
+        {
+            "name": "share",
+            "display_name": "Share Bibliography items",
+            "description": "Ability to share and export bibliography items"
+        }
+    ],
+    "comments": [
+        {
+            "name": "read",
+            "display_name": "Read comments",
+            "description": "Ability to read comments"
+        },
+        {
+            "name": "write",
+            "display_name": "Write comments",
+            "description": "Ability to edit comments and replies"
+        },
+        {
+            "name": "create",
+            "display_name": "Create comments",
+            "description": "Ability to create comments and replies"
+        },
+        {
+            "name": "delete",
+            "display_name": "Delete comments",
+            "description": "Ability to delete comments"
+        },
+        {
+            "name": "share",
+            "display_name": "Share comments",
+            "description": "Ability to share and export comments"
+        }
+    ],
+    "users_roles": [
+        {
+            "name": "read",
+            "display_name": "Read Users & Roles",
+            "description": "Ability to read users and roles"
+        },
+        {
+            "name": "write",
+            "display_name": "Write Users & Roles",
+            "description": "Ability to write users and roles"
+        },
+        {
+            "name": "create",
+            "display_name": "Create Users & Roles",
+            "description": "Ability to create users and roles"
+        },
+        {
+            "name": "delete",
+            "display_name": "Delete Users & Roles",
+            "description": "Ability to delete and deactivate users and roles"
+        },
+        {
+            "name": "share",
+            "display_name": "Share Users & Roles",
+            "description": "Ability to share users and roles"
+        }
+    ],
+    "preferences": [
+        {
+            "name": "read",
+            "display_name": "Read Preferences",
+            "description": "Ability to read system preferences"
+        },
+        {
+            "name": "write",
+            "display_name": "Write Preferences",
+            "description": "Ability to write system preferences"
+        },
+        {
+            "name": "create",
+            "display_name": "Create Preferences",
+            "description": "Ability to create system preferences (currently unused)"
+        },
+        {
+            "name": "delete",
+            "display_name": "Delete Preferences",
+            "description": "Ability to delete system preferences (currently unused)"
+        },
+        {
+            "name": "share",
+            "display_name": "Share Preferences",
+            "description": "Ability to share system preferences (currently unused)"
+        }
+    ],
+    "thesaurus": [
+        {
+            "name": "read",
+            "display_name": "Read Thesaurus Concepts",
+            "description": "Ability to read thesaurus concepts"
+        },
+        {
+            "name": "write",
+            "display_name": "Write Thesaurus Concepts",
+            "description": "Ability to write and move thesaurus concepts"
+        },
+        {
+            "name": "create",
+            "display_name": "Create Thesaurus Concepts",
+            "description": "Ability to create and duplicate thesaurus concepts"
+        },
+        {
+            "name": "delete",
+            "display_name": "Delete Thesaurus Concepts",
+            "description": "Ability to delete thesaurus concepts"
+        },
+        {
+            "name": "share",
+            "display_name": "Share Thesaurus Concepts",
+            "description": "Ability to share and export thesaurus concepts"
+        }
+    ]
+}

@@ -6,11 +6,18 @@ use App\Attribute;
 use App\AttributeValue;
 use App\Entity;
 use App\EntityAttribute;
+use App\EntityFile;
 use App\EntityType;
+use App\Exceptions\AmbiguousValueException;
+use App\Exceptions\InvalidDataException;
+use App\Geodata;
+use App\Reference;
 use App\ThConcept;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class EntityController extends Controller {
     /**
@@ -26,7 +33,7 @@ class EntityController extends Controller {
 
     public function getTopEntities() {
         $user = auth()->user();
-        if(!$user->can('view_concepts')) {
+        if(!$user->can('entity_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to get entities')
             ], 403);
@@ -38,7 +45,7 @@ class EntityController extends Controller {
 
     public function getEntity($id) {
         $user = auth()->user();
-        if(!$user->can('view_concepts')) {
+        if(!$user->can('entity_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to get a specific entity')
             ], 403);
@@ -54,15 +61,15 @@ class EntityController extends Controller {
         return response()->json($entity);
     }
 
-    public function getDataForEntityType(Request $request, $ctid, $aid) {
+    public function getDataForEntityType(Request $request, $etid, $aid) {
         $user = auth()->user();
-        if(!$user->can('view_concepts')) {
+        if(!$user->can('entity_read') || !$user->can('entity_type_read') || !$user->can('entity_data_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to get an entity\'s data')
             ], 403);
         }
         try {
-            $entityType = EntityType::findOrFail($ctid);
+            $entityType = EntityType::findOrFail($etid);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity type does not exist')
@@ -76,12 +83,12 @@ class EntityController extends Controller {
             ], 400);
         }
         $constraints = $request->query();
-        $entities = Entity::where('entity_type_id', $ctid);
-        foreach($constraints as $relatiion => $cons) {
+        $entities = Entity::where('entity_type_id', $etid);
+        foreach($constraints as $relation => $cons) {
             if($cons == 'has') {
-                $entities->whereHas($relatiion);
+                $entities->has($relation);
             } else if($cons == 'hasnot') {
-                $entities->whereDoesntHave($relatiion);
+                $entities->doesntHave($relation);
             }
         }
         $entities = $entities->get();
@@ -96,8 +103,11 @@ class EntityController extends Controller {
         foreach($values as $value) {
             switch($value->attribute->datatype) {
                 case 'entity':
-                    $value->name = Entity::find($value->entity_val)->name;
-                    $value->value = Entity::find($value->entity_val)->name;
+                    $entity = Entity::find($value->entity_val)->name;
+                    $value->name = $entity;
+                    $value->value = $entity;
+                    break;
+                case 'entity-mc':
                     break;
                 default:
                     $value->value = $value->getValue();
@@ -109,7 +119,7 @@ class EntityController extends Controller {
         $sqls = EntityAttribute::whereHas('attribute', function(Builder $q) {
                 $q->where('datatype', 'sql');
             })
-            ->where('entity_type_id', $ctid)
+            ->where('entity_type_id', $etid)
             ->where('attribute_id', $aid)
             ->get();
 
@@ -137,7 +147,7 @@ class EntityController extends Controller {
                         ':entity_id' => $eid
                     ];
                 }
-                $sqlValue = \DB::select($text, $safes);
+                $sqlValue = DB::select($text, $safes);
                 // Check if only one result exists
                 if(count($sqlValue) === 1) {
                     // Get all column indices (keys) using the first row
@@ -161,7 +171,7 @@ class EntityController extends Controller {
 
     public function getData($id, $aid = null) {
         $user = auth()->user();
-        if(!$user->can('view_concepts')) {
+        if(!$user->can('entity_read') || !$user->can('entity_data_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to get an entity\'s data')
             ], 403);
@@ -204,11 +214,17 @@ class EntityController extends Controller {
                 case 'entity':
                     $a->name = Entity::find($a->entity_val)->name;
                     break;
+                case 'entity-mc':
+                    $value = [];
+                    foreach(json_decode($a->json_val) as $dec) {
+                        $value[] = Entity::find($dec)->name;
+                    }
+                    $a->name = $value;
+                    break;
                 default:
                     break;
             }
-            $value = $a->getValue();
-            $a->value = $value;
+            $a->value = $a->getValue();
             $data[$a->attribute_id] = $a;
         }
 
@@ -241,7 +257,7 @@ class EntityController extends Controller {
                     ':entity_id' => $id
                 ];
             }
-            $sqlValue = \DB::select($text, $safes);
+            $sqlValue = DB::select($text, $safes);
             // Check if only one result exists
             if(count($sqlValue) === 1) {
                 // Get all column indices (keys) using the first row
@@ -264,7 +280,7 @@ class EntityController extends Controller {
 
     public function getParentIds($id) {
         $user = auth()->user();
-        if(!$user->can('view_concepts')) {
+        if(!$user->can('entity_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to get an entity\'s parent id\'s')
             ], 403);
@@ -281,6 +297,13 @@ class EntityController extends Controller {
     }
 
     public function getEntitiesByParent($id) {
+        $user = auth()->user();
+        if(!$user->can('entity_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to get an entity set')
+            ], 403);
+        }
+
         return Entity::getEntitiesByParent($id);
     }
 
@@ -288,7 +311,7 @@ class EntityController extends Controller {
 
     public function addEntity(Request $request) {
         $user = auth()->user();
-        if(!$user->can('create_concepts')) {
+        if(!$user->can('entity_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to add a new entity')
             ], 403);
@@ -310,11 +333,191 @@ class EntityController extends Controller {
         }
     }
 
+    public function duplicateEntity(Request $request, $id) {
+        $user = auth()->user();
+        if(!$user->can('entity_create')) {
+            return response()->json([
+                'error' => __('You do not have the permission to duplicate an entity')
+            ], 403);
+        }
+
+        try {
+            $entity = Entity::without(['user', 'parentIds', 'parentNames'])->findOrFail($id);
+            unset($entity->comments_count);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist')
+            ], 400);
+        }
+
+        $duplicate = $entity->replicate();
+        $duplicate->created_at = Carbon::now();
+        $duplicate->geodata_id = null;
+        if(isset($duplicate->root_entity_id)) {
+            $duplicate->rank = Entity::where('root_entity_id', $duplicate->root_entity_id)->max('rank') + 1;
+        } else {
+            $duplicate->rank = Entity::whereNull('root_entity_id')->max('rank') + 1;
+        }
+        $duplicate->user_id = $user->id;
+        $duplicate->name = sp_copyname($duplicate->name);
+        $duplicate->save();
+
+        // Files, bibliographies, attribute_values
+        $fileLinks = EntityFile::where('entity_id', $entity->id)->get();
+        foreach($fileLinks as $fileLink) {
+            $newLink = $fileLink->replicate();
+            $newLink->entity_id = $duplicate->id;
+            $newLink->user_id = $user->id;
+            $newLink->save();
+        }
+        $refs = Reference::where('entity_id', $entity->id)->get();
+        foreach($refs as $ref) {
+            $newLink = $ref->replicate();
+            $newLink->entity_id = $duplicate->id;
+            $newLink->user_id = $user->id;
+            $newLink->created_at = Carbon::now();
+            $newLink->save();
+        }
+        $values = AttributeValue::where('entity_id', $entity->id)->get();
+        foreach($values as $val) {
+            unset($val->comments_count);
+            $newValue = $val->replicate();
+            $newValue->entity_id = $duplicate->id;
+            $newValue->user_id = $user->id;
+            $newValue->created_at = Carbon::now();
+            $newValue->save();
+        }
+
+        return response()->json($duplicate, 201);
+    }
+
+    public function importData(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('entity_create')) {
+            return response()->json([
+                'error' => __('You do not have the permission to import entity data')
+            ], 403);
+        }
+        $this->validate($request, [
+            'file' => 'required|file',
+            'metadata' => 'required|json',
+            'data' => 'required|json',
+        ]);
+
+        $file = $request->file('file');
+        $metadata = json_decode($request->get('metadata'), true);
+        $data = json_decode($request->get('data'), true);
+        $handle = fopen($file->getRealPath(), 'r');
+
+        $headerRow = null;
+        $headerRead = false;
+        $hasParent = false;
+        $attributeIdx = [];
+        $attributeTypes = [];
+        $addedEntities = [];
+
+        DB::beginTransaction();
+
+        while(($row = fgetcsv($handle, 0, $metadata['delimiter'])) !== false) {
+            if(!$headerRead) {
+                $headerRead = true;
+                $headerRow = $row;
+                for($i = 0; $i<count($row); $i++) {
+                    if($row[$i] == $data['name_column']) {
+                        $nameIdx = $i;
+                    } else if(isset($data['parent_column']) && $row[$i] == $data['parent_column']) {
+                        $parentIdx = $i;
+                        $hasParent = true;
+                    } else {
+                        foreach($data['attributes'] as $id => $a) {
+                            if($a == $row[$i]) {
+                                $attributeIdx[$id] = $i;
+                                $attributeTypes[$id] = Attribute::find($id)->datatype;
+                                break;
+                            }
+                        }
+                    }
+                }
+                continue;
+            }
+            $rootEntityPath = $hasParent ? $row[$parentIdx] : null;
+
+            try {
+                $rootEntityId = Entity::getFromPath($rootEntityPath);
+            } catch(AmbiguousValueException $ave) {
+                DB::rollBack();
+                return response()->json([
+                    'error' => __($ave->getMessage()),
+                    'data' => [
+                        'count' => count($addedEntities) + 1,
+                        'entry' => $row[$nameIdx],
+                        'on' => $headerRow[$parentIdx],
+                        'on_index' => $parentIdx + 1,
+                        'on_value' => $row[$parentIdx],
+                    ],
+                ], 400);
+            }
+
+            $res = Entity::create([
+                'name' => $row[$nameIdx],
+            ], $data['entity_type_id'], $user, $rootEntityId);
+
+            if($res['type'] === 'entity') {
+                $addedEntities[] = $res['entity'];
+                $eid = $res['entity']->id;
+                foreach($attributeIdx as $key => $val) {
+                    $aid = intval($key);
+                    $type = $attributeTypes[$aid];
+                    $attrVal = new AttributeValue();
+                    $attrVal->entity_id = $eid;
+                    $attrVal->attribute_id = $aid;
+                    $attrVal->certainty = 100;
+                    $attrVal->user_id = $user->id;
+                    try {
+                        $setValue = $attrVal->setValue($row[$val], $type);
+                        if($setValue === null) {
+                            continue;
+                        }
+                        $attrVal->save();
+                    } catch(InvalidDataException | AmbiguousValueException $e) {
+                        DB::rollBack();
+                        $colIdx = $val + 1;
+                        return response()->json([
+                            'error' => __($e->getMessage()),
+                            'data' => [
+                                'count' => count($addedEntities),
+                                'entry' => $row[$nameIdx],
+                                'on' => $headerRow[$val],
+                                'on_index' => $colIdx,
+                                'on_value' => $row[$val],
+                            ],
+                        ], 400);
+                    }
+                }
+            } else {
+                DB::rollBack();
+                return response()->json([
+                    'error' => $res['msg'],
+                    'data' => [
+                        'count' => count($addedEntities) + 1,
+                        'entry' => $row[$nameIdx],
+                        'on' => __('Create Entity from given data'),
+                    ],
+                ], $res['code']);
+            }
+        }
+        fclose($handle);
+
+        DB::commit();
+
+        return response()->json($addedEntities, 201);
+    }
+
     // PATCH
 
     public function patchAttributes($id, Request $request) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_data_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to modify an entity\'s data')
             ], 403);
@@ -331,7 +534,6 @@ class EntityController extends Controller {
         foreach($request->request as $patch) {
             $op = $patch['op'];
             $aid = $patch['params']['aid'];
-            $attr = Attribute::find($aid);
             switch($op) {
                 case 'remove':
                     $attrval = AttributeValue::where([
@@ -361,13 +563,14 @@ class EntityController extends Controller {
 
             // no further action required for deleted attribute values, continue with next patch
             if($op == 'remove') continue;
-
+            
+            $attr = Attribute::find($aid);
             switch($attr->datatype) {
                 // for primitive types: just save them to the db
                 case 'stringf':
                 case 'string':
-                case 'geography':
                 case 'iconclass':
+                case 'rism':
                     $attrval->str_val = $value;
                     break;
                 case 'double':
@@ -432,6 +635,12 @@ class EntityController extends Controller {
                 case 'entity':
                     $attrval->entity_val = $value;
                     break;
+                case 'entity-mc':
+                    $attrval->json_val = json_encode($value);
+                    break;
+                case 'geography':
+                    $attrval->geography_val = Geodata::parseWkt($value);
+                    break;
             }
             $attrval->user_id = $user->id;
             $attrval->save();
@@ -453,7 +662,7 @@ class EntityController extends Controller {
 
     public function patchAttribute($id, $aid, Request $request) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_data_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to modify an entity\'s data')
             ], 403);
@@ -499,7 +708,7 @@ class EntityController extends Controller {
 
     public function patchName($id, Request $request) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to modify an entity\'s data')
             ], 403);
@@ -528,7 +737,7 @@ class EntityController extends Controller {
 
     public function moveEntity(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('delete_move_concepts')) {
+        if(!$user->can('entity_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to modify an entity')
             ], 403);
@@ -536,6 +745,7 @@ class EntityController extends Controller {
         $this->validate($request, [
             'rank' => 'required|integer',
             'parent_id' => 'nullable|integer|exists:entities,id',
+            'to_end' => 'boolean',
         ]);
 
         try {
@@ -548,6 +758,15 @@ class EntityController extends Controller {
 
         $rank = $request->get('rank');
         $parent_id = $request->get('parent_id');
+        $addToEnd = $request->get('to_end');
+
+        if($addToEnd) {
+            if(isset($parent_id)) {
+                $rank = Entity::where('root_entity_id', $parent_id)->max('rank') + 1;
+            } else {
+                $rank = Entity::whereNull('root_entity_id')->max('rank') + 1;
+            }
+        }
 
         Entity::patchRanks($rank, $id, $parent_id, $user);
         return response()->json(null, 204);
@@ -557,7 +776,7 @@ class EntityController extends Controller {
 
     public function deleteEntity($id) {
         $user = auth()->user();
-        if(!$user->can('delete_move_concepts')) {
+        if(!$user->can('entity_delete')) {
             return response()->json([
                 'error' => __('You do not have the permission to delete an entity')
             ], 403);

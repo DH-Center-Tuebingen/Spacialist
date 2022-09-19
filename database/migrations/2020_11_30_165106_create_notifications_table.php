@@ -13,6 +13,8 @@ class CreateNotificationsTable extends Migration
      */
     public function up()
     {
+        activity()->disableLogging();
+
         Schema::create('notifications', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('type');
@@ -21,6 +23,8 @@ class CreateNotificationsTable extends Migration
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
         });
+
+        activity()->enableLogging();
     }
 
     /**
@@ -30,6 +34,10 @@ class CreateNotificationsTable extends Migration
      */
     public function down()
     {
+        activity()->disableLogging();
+
         Schema::dropIfExists('notifications');
+
+        activity()->enableLogging();
     }
 }

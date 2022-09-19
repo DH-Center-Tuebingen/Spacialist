@@ -15,7 +15,7 @@
             @keydown.esc="reset"
             @keydown.up="up"/>
         <div class="input-group-append">
-            <span class="input-group-text multiselect-search">
+            <span class="input-group-text">
                 <i class="fas fa-spinner fa-spin" v-if="loading"></i>
                 <template v-else>
                     <i class="fas fa-fw fa-search" v-show="isEmpty"></i>
@@ -32,7 +32,7 @@
 </template>
 
 <script>
-    import TypeaheadSearch from './TypeaheadSearch.vue';
+    import TypeaheadSearch from '@/TypeaheadSearch.vue';
 
     export default {
         extends: TypeaheadSearch,

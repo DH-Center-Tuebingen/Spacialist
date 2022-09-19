@@ -16,8 +16,4 @@ class UserPreference extends Model
         'user_id',
         'value',
     ];
-
-    protected static $logOnlyDirty = true;
-    protected static $logFillable = true;
-    protected static $logAttributes = ['id'];
 }

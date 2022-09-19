@@ -17,6 +17,8 @@ class AddCommentTable extends Migration
      */
     public function up()
     {
+        activity()->disableLogging();
+
         Schema::create('comments', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedInteger('user_id');
@@ -56,6 +58,8 @@ class AddCommentTable extends Migration
         Schema::table('attribute_values', function (Blueprint $table) {
             $table->dropColumn('certainty_description');
         });
+
+        activity()->enableLogging();
     }
 
     /**
@@ -65,6 +69,8 @@ class AddCommentTable extends Migration
      */
     public function down()
     {
+        activity()->disableLogging();
+
         Schema::table('attribute_values', function (Blueprint $table) {
             $table->text('certainty_description')->nullable();
         });
@@ -83,5 +89,7 @@ class AddCommentTable extends Migration
         }
 
         Schema::dropIfExists('comments');
+
+        activity()->enableLogging();
     }
 }

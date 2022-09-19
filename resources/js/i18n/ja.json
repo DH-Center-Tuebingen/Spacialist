@@ -1,0 +1,637 @@
+{
+    "main": {
+        "importer": {
+            "no_missing_values": "この属性に欠落している値はありません。 準備万端です！",
+            "missing_required_values": "一つのエントリのうち{miss}は空です！ このオプションでは、空の値は許可されません。 これを修正してください。 | {total}エントリのうち{miss}は空です！ このオプションでは、空の値は許可されません。 これを修正してください。",
+            "missing_non_required_values": "一つのエントリのうち{miss}は空です！ この属性には入力された値は必要ないため、続行できますが、再確認することをお勧めします。 | {total}エントリのうち{miss}は空です！ この属性には入力された値は必要ないため、続行できますが、再確認することをお勧めします",
+            "success": "一つのエントリのインポートが終了しました | {cnt}エントリのインポートが終了しました",
+            "title": "データインポーター",
+            "upload_csv_info": "CSVファイルを選択してデータをインポートする",
+            "drop_csv_file": "ここにCSVファイルをドロップする",
+            "selected_entity_type": "エンティティタイプ",
+            "column_entity_name": "エンティティ名カラム",
+            "column_entity_parent": "エンティティの親カラム",
+            "import_btn": "インポートを開始"
+        },
+        "map": {
+            "init_error": "いくつかのinit-*-属性が提供されています。 一つだけ許可されます。",
+            "layer": "レイヤー | レイヤー",
+            "baselayer": "ベースレイヤー | ベースレイヤー",
+            "overlay": "オーバーレイ | オーバーレイ",
+            "entity_layers": "エンティティレイヤー",
+            "geometry_name": "ジオメトリ #{id}",
+            "coords_in_epsg": "{epsg}の座標",
+            "coords_in_epsg_nr": "EPSGの座標:{epsg}",
+            "length": "長さ",
+            "area": "底面",
+            "draw": {
+                "point": {
+                    "desc": "ポイントを作成"
+                },
+                "linestring": {
+                    "desc": "線作成"
+                },
+                "polygon": {
+                    "desc": "ポリゴン作成"
+                },
+                "modify": {
+                    "desc": "ジオメトリを編集する",
+                    "pos_desc": "変更内容を保存",
+                    "neg_desc": "変更を破棄する"
+                },
+                "delete": {
+                    "desc": "ジオメトリを削除する",
+                    "pos_desc": "削除の確認",
+                    "neg_desc": "削除を破棄"
+                },
+                "measure": {
+                    "desc": "巻尺を切り替え"
+                }
+            }
+        },
+        "app": {
+            "loading_screen_msg": "<span class=\"fw-light\">読み込み中</span> {appname}<span class=\"fw-light\">&hellip;</span>",
+            "not_found": {
+                "title": "サイトが見つかりません!",
+                "msg": "サイト<code>{site}</code>は見つかりませんでした。スペルを確認するか、管理者にお問い合わせください",
+                "go_to": "スタートページへ"
+            },
+            "screencast": {
+                "title": "スクリーンキャストの保存",
+                "info": "スクリーンキャストを録画しました。どうしますか？",
+                "actions": {
+                    "local": {
+                        "button": "ローカルに保存"
+                    },
+                    "server": {
+                        "button": "Spacialistに保存"
+                    }
+                }
+            }
+        },
+        "csv": {
+            "uploader": {
+                "title": "CSVアップローダー",
+                "delimiter": "デリミタ",
+                "delimiter_with_info": "デリミタ (',', ';', …)",
+                "has_header": "ヘッダー行はありますか？",
+                "show_linenumbers": "行番号を表示する",
+                "nr_of_shown_rows": "表示された行の数",
+                "nr_of_skipped_rows": "スキップされた行の数"
+            },
+            "picker": {
+                "title": "CSVピッカー"
+            }
+        },
+        "entity": {
+            "title": "エンティティ",
+            "count": "トップレベルのエンティティはありません | 一つのトップレベルエンティティ | {cnt}トップレベルのエンティティ",
+            "detail_tab_none_selected": "エンティティが選択されていません。 ツリーからエンティティを選択して、このタブの詳細を表示します",
+            "toasts": {
+                "updated": {
+                    "title": "エンティティが更新されました",
+                    "msg": "{name}のタグが正常に更新されました。"
+                },
+                "deleted": {
+                    "title": "エンティティ削除",
+                    "msg": "{name}は正常に削除されました。"
+                }
+            },
+            "tree": {
+                "add": "新しいトップレベルのエンティティを追加する",
+                "contextmenu": {
+                    "add": "サブエンティティの追加する",
+                    "duplicate": "複製を作成する",
+                    "move": "ツリー内移動",
+                    "delete": "エンティティの削除"
+                },
+                "sorts": {
+                    "asc": {
+                        "rank": "順位 - 昇順（ドラッグ＆ドロップ）",
+                        "name": "順位 - 昇順",
+                        "children": "サブエンティティを数える - 昇順",
+                        "type": "エンティティタイプ - 昇順"
+                    },
+                    "desc": {
+                        "rank": "順位 - 降順",
+                        "name": "名前 - 降順",
+                        "children": "サブエンティティを数える - 降順",
+                        "type": "エンティティタイプ - 降順"
+                    }
+                }
+            },
+            "tabs": {
+                "attributes": "属性",
+                "comments": "コメント"
+            },
+            "modals": {
+                "add": {
+                    "title": "新しいエンティティ"
+                },
+                "move": {
+                    "title": "エンティティの移動する",
+                    "to_root": "トップレベルで追加する"
+                },
+                "edit": {
+                    "title_type": "エンティティタイプ - {name}を編集する",
+                    "title_attribute": "属性 - {name}を編集 する"
+                },
+                "delete": {
+                    "alert": "<span class=\"fw-bold\">{name}</span>を削除すると、少なくとも一つのエンティティも削除されます。 | <span class=\"fw-bold\">{name}</span>を削除すると、少なくとも{cnt}のエンティティも削除されます。"
+                }
+            },
+            "references": {
+                "title": "参考文献",
+                "empty": "参考文献はありません",
+                "certainty": "確実性",
+                "bibliography": {
+                    "title": "文献",
+                    "add": "新規参考文献を追加する",
+                    "comment": "コメント",
+                    "add_button": "参考文献を追加する"
+                },
+                "toasts": {
+                    "updated_certainty": {
+                        "title": "確実性が更新されました",
+                        "msg": "{name}の確実性は正常に{i}%％に設定されました"
+                    }
+                }
+            },
+            "attributes": {
+                "open_map": "ープンマップ",
+                "add_wkt": "WKTを追加する",
+                "set_location": "場所を設定する",
+                "BC": "紀元前",
+                "bc": "@:main.entity.attributes.BC",
+                "AD": "紀元後",
+                "ad": "@:main.entity.attributes.AD",
+                "hidden": "非表示の属性なし | 一つの属性が非表示 | {cnt}属性が非表示",
+                "entity": {
+                    "go_to": "{name}に移動する"
+                },
+                "iconclass": {
+                    "cite_info": "<cite title=\"Iconclass\"><a href=\"http://iconclass.org/{class}.json\" target=\"_blank\">http://iconclass.org/{class}.json</a></cite>からの情報",
+                    "doesnt_exist": "このアイコンクラス（iconClass ）は存在しません"
+                },
+                "rism": {
+                    "cite_info": "<cite title=\"Muscat-SRU-Schnittstelle\"><a href=\"https://muscat.rism.info/sru/sources?operation=searchRetrieve&version=1.1&query=id={id}&maximumRecords=1\" target=\"_blank\">https://muscat.rism.info/sru/sources?operation=searchRetrieve&version=1.1&query=id={id}&maximumRecords=1</a></cite>からの情報",
+                    "doesnt_exist": "このRSIM-エントリは存在しません"
+                },
+                "table": {
+                    "chart": {
+                        "number_sets": "最後の{cnt}個のデータセット",
+                        "include_in": "チャートで使用する",
+                        "use_difference": "差分を利用する",
+                        "use_as_label": "ラベルとして使用する"
+                    }
+                }
+            }
+        },
+        "user": {
+            "add_button": "新規ユーザー追加する",
+            "active_users": "アクティブユーザー",
+            "deactivated_users": "非アクティブ化されたユーザー",
+            "empty_list": "ユーザーリストが空です",
+            "toasts": {
+                "updated": {
+                    "title": "ユーザー更新",
+                    "msg": "{name}が正常に更新されました。"
+                }
+            },
+            "modal": {
+                "new": {
+                    "title": "新規ユーザー"
+                }
+            },
+            "add_role_placeholder": "役割の追加する"
+        },
+        "role": {
+            "add_button": "新しい役割を追加する",
+            "toasts": {
+                "updated": {
+                    "title": "役割の更新されました",
+                    "msg": "{name} が正常に更新されました"
+                }
+            },
+            "modal": {
+                "new": {
+                    "title": "新しい役割"
+                },
+                "delete": {
+                    "alert": "<span class=\"fw-bold\">{name}</span>を削除すると、一人のユーザーとの接続が削除されます。 | <span class=\"fw-bold\">{name}</span>を削除すると、{cnt}人のユーザーとの接続が削除されます。"
+                }
+            },
+            "add_permission_placeholder": "権限を追加する"
+        },
+        "activity": {
+            "title_project": "プロジェクト活動 | プロジェクト活動",
+            "title_user": "あなたの活動 | あなたの活動",
+            "rawdata": "生データ",
+            "apply_filter": "フィルタを適用する",
+            "search_in_raw_data": "生データで検索する",
+            "hide_filter_panel": "フィルタを非表示にする",
+            "toggle_raw_data": "生データの表示を切り換え",
+            "toggle_pretty_print": "表示切り換え"
+        },
+        "bibliography": {
+            "column": {
+                "publisher": "出版社",
+                "citekey": "引用キー",
+                "author": "著者",
+                "editor": "編集者",
+                "title": "タイトル",
+                "journal": "ジャーナル",
+                "year": "年",
+                "month": "月",
+                "pages": "ページ",
+                "volume": "巻",
+                "number": "番号",
+                "chapter": "章",
+                "edition": "版",
+                "series": "シリーズ",
+                "booktitle": "書籍名",
+                "address": "場所",
+                "note": "備考",
+                "misc": "その他",
+                "howpublished": "参考",
+                "institution": "施設",
+                "organization": "組織",
+                "school": "学校"
+            },
+            "title": "書誌",
+            "modal": {
+                "paste_info": "<kbd><kbd>Strg</kbd> + <kbd>v</kbd></kbd> を使用して、クリップボードからBibTeXエントリをフィールドに入力できます。",
+                "new": {
+                    "title": "新規記入",
+                    "bibtex_code": "BibTeX-コード"
+                },
+                "edit": {
+                    "title": "記入を編集する"
+                },
+                "delete": {
+                    "title": "記入を消す",
+                    "alert": "<span class=\"fw-bold\">{name}</span>を削除すると、1つの参照も削除されます。 | <span class=\"fw-bold\">{name}</span>を削除すると、{cnt}参照も削除されます。"
+                }
+            },
+            "toast": {
+                "delete": {
+                    "title": "記入が正常に削除されました",
+                    "msg": "記入{name}が削除されます"
+                }
+            },
+            "add": "新しい参考文献記入を追加する",
+            "import": "BibTeXファイルをインポートする",
+            "export": "BibTeXファイルのエクスポートする",
+            "show_all_fields": "すべてのフィールドを表示する"
+        },
+        "datamodel": {
+            "toasts": {
+                "updated_type": {
+                    "title": "エンティティタイプが更新されました",
+                    "msg": "{name}は正常に更新されました"
+                },
+                "added_attribute": {
+                    "title": "属性が追加されました",
+                    "msg": "{name}が{etName}に正常に追加されました"
+                },
+                "attribute_deleted": {
+                    "title": "属性が削除されました",
+                    "msg": "{name}は正常に削除されました"
+                }
+            },
+            "attribute": {
+                "title": "使用可能な属性",
+                "add_button": "属性を追加する",
+                "show_hidden": "非表示にする",
+                "modal": {
+                    "new": {
+                        "title": "新しい属性"
+                    },
+                    "delete": {
+                        "alert": "<span class=\"fw-bold\">{name}</span>を削除すると、属性値も一つ削除されます。 | <span class=\"fw-bold\">{name}</span>を削除すると、{cnt}属性値も削除されます"
+                    }
+                }
+            },
+            "entity": {
+                "title": "利用可能なエンティティタイプ",
+                "add_button": "エンティティタイプを追加する",
+                "modal": {
+                    "new": {
+                        "title": "新しいエンティティタイプ"
+                    },
+                    "delete": {
+                        "alert": "<span class=\"fw-bold\">{name}</span>を削除すると、一つのエンティティも削除されます。 | <span class=\"fw-bold\">{name}</span>を削除すると、{cnt}エンティティも削除されます"
+                    }
+                }
+            },
+            "detail": {
+                "properties": {
+                    "title": "プロパティ",
+                    "top_level": "トップレベルのエンティティタイプ？",
+                    "sub_types": "許可されるサブエンティティタイプ"
+                },
+                "attribute": {
+                    "title": "追加された属性",
+                    "alert": "<span class=\"fw-bold\">{name}</span>を削除すると、<span class=\"fw-bold\">{refname}</span>の一つのエントリも削除されます。 | <span class=\"fw-bold\">{name}</span>を削除すると、<span class=\"fw-bold\">{refname}</span>の{cnt}エントリも削除されます。"
+                }
+            }
+        },
+        "preference": {
+            "toasts": {
+                "updated": {
+                    "msg": "プリファレンスが正常に更新されました"
+                }
+            },
+            "info": {
+                "set_to_language": "<span class=\"fw-bold\">{lang}</span>に設定する",
+                "password_reset_link": "この機能を使用するには、<code>.env</code>ファイルで<code>MAIL_*</code>設定を行う必要があります。<a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/blob/master/INSTALL.md#send-mails\" target=\"_blank\">詳細情報</a>.",
+                "columns": "カラムの値の合計は12を超えてはなりません"
+            },
+            "key": {
+                "language": "言語",
+                "password_reset_link": "パスワードリセットリンクを有効にする",
+                "columns": {
+                    "title": "メインビューの列",
+                    "left": "左のカラム",
+                    "center": "センターカラム",
+                    "right": "右のカラム"
+                },
+                "tooltips": "ツールチップを表示する",
+                "tag_root": "シソーラス-タグのURI",
+                "extensions": "ロードされた拡張機能",
+                "link_thesaurex": "ThesauRexへのリンクを表示",
+                "project": {
+                    "name": "プロジェクト名",
+                    "maintainer": "責任者",
+                    "public": "一般に公開されているもの"
+                },
+                "map": {
+                    "projection": "地図投影法",
+                    "epsg": "EPSGコード"
+                }
+            }
+        },
+        "about": {
+            "title": "Spacialistについて",
+            "desc": "Spacialistの開発は、\"E-Science\"資金提供プログラムにおいて、科学研究芸術省のバーデン・ヴュルテンベルクによって共同出資されています。",
+            "release": {
+                "name": "発売名",
+                "time": "発売日",
+                "full_name": "フルネーム"
+            },
+            "build_info": "<i class=\"fab fa-fw fa-laravel\"></i> & <i class=\"fab fa-fw fa-vuejs\"></i>で構築",
+            "contributor": "寄稿者 | 寄稿者"
+        }
+    },
+    "global": {
+        "save": "保存",
+        "delete": "削除",
+        "restore": "リストア",
+        "deactivate": "非アクティブ化",
+        "reactivate": "再アクティブ化",
+        "remove": "除去する",
+        "reset": "リセット",
+        "send_reset_mail": "パスワード再設定のためのメール送信",
+        "cancel": "キャンセル",
+        "close": "閉じる",
+        "add": "書き添え",
+        "edit": "編集する",
+        "edited": "編集済み",
+        "duplicate": "複製",
+        "resort": "順を変え",
+        "update": "更新",
+        "replace": "置き換え",
+        "clear": "クリア",
+        "confirm": "OK",
+        "create": "作成する",
+        "apply": "適用する",
+        "move": "移動",
+        "parse": "構文解析する",
+        "remove_file": "ファイルを削除する",
+        "list": {
+            "nr_of_entries": "エントリーなし | 一つのエントリ | {cnt}エントリ",
+            "no_entries": "エントリが見つかりません",
+            "fetch_next_entries": "次のエントリを取得する",
+            "no_more_entries": "これ以上のエントリはありません"
+        },
+        "description": "記述",
+        "select_all": "すべて選択",
+        "select_none": "すべての選択を解除",
+        "delete_name": {
+            "title": "{name}を削除する",
+            "desc": "本当に<span class=\"fw-bold\">{name}</span>を削除しますか？"
+        },
+        "deactivate_name": {
+            "title": "{name}を非アクティブ化する",
+            "desc": "本当に{name}を非アクティブ化しますか？",
+            "info": "特定のエントリは削除できないか、最初に非アクティブ化する必要があります。 そうしないと、これらのエントリを削除するとデータが失われる可能性があります。"
+        },
+        "remove_name": {
+            "title": "{name}を削除します",
+            "desc": "本当に{name}を削除しますか？"
+        },
+        "unlink_name": {
+            "title": "リンク - {name}を削除",
+            "desc": "本当に{file}を{ent}からリンク解除しますか？"
+        },
+        "all_entities": "すべてのエンティティ",
+        "unlinked": "リンクされていない",
+        "unlink": "リンクを解除する",
+        "link": "リンク",
+        "unlink_from": "{name}からリンクを解除します",
+        "link_to": "{name}へのリンク",
+        "has_links": "リンクはありません | リンクが一つあります | {cnt}リンクがあります",
+        "discard": {
+            "title": "保存されていない変更",
+            "msg": "現在のページには未保存の変更があります。本当にこのまま続けて変更を削除しますか？",
+            "confirm": "はい、変更を削除します",
+            "confirm_and_save": "いいえ、保存して続行します"
+        },
+        "error": {
+            "alert_title": "エラーメッセージが表示されます：",
+            "info_issue": "もしこれがバグだと思うのなら、<a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues\" target=\"_blank\">github の課題追跡システム</a>で、すでに報告されていないか、<a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues?q=is:issue+is:closed\" target=\"_blank\"> 新しいバージョン</a>になっていないか見てください（現在のバージョンは設定から確認できます> <i class=\"fas fa-fw fa-info-circle\"></i>について）。もし、報告されておらず、閉じられている場合は、<a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues/new\" target=\"_blank\">新しい問題</a>を作成してください。",
+            "occur": "エラーが発生しました",
+            "headers": "ヘッダー",
+            "request_failed": "<code class=\"normal\">{method}</code>-エンドポイント<code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code>へのリクエストはステータスコード<span class=\"fw-medium\">{status}</span>で失敗しました。"
+        },
+        "search": "検索…",
+        "search_no_results": "結果なし",
+        "search_no_results_for": "用語<span class=\"fst-italic fw-bold\">{term}</span>に該当する結果はありません",
+        "search_no_term_info": "検索語を入力する",
+        "search_no_term_info_global": "グローバルに検索する場合は、検索語を入力してください",
+        "login": "ログイン",
+        "login_title": "ログイン",
+        "login_subtitle": "Spacialistへようこそ",
+        "download": "Hダウンロード",
+        "download_with_name": "{name}ダウンロード",
+        "upload": "アップロード",
+        "preview": "プレビュー",
+        "preview_not_available": "プレビューはありません",
+        "note": "備考",
+        "information": "情報",
+        "tools": {
+            "title": "ツール",
+            "bibliography": "書誌情報",
+            "analysis": "データ分析",
+            "thesaurex": "ThesauRex",
+            "dbwebgen": "dbWebGen",
+            "external": "外部ツール",
+            "record": {
+                "start": "録音を開始する",
+                "stop": "録画の停止"
+            }
+        },
+        "settings": {
+            "title": "設定",
+            "users": "ユーザー管理",
+            "roles": "役割の管理",
+            "plugins": "プラグイン",
+            "datamodel": "データモデル・エディター",
+            "system": "システム環境設定",
+            "about": "について"
+        },
+        "user": {
+            "settings": "設定",
+            "profile": "プロフィール",
+            "logout": "ログアウト",
+            "info_title": "ユーザー情報",
+            "personal_info_title": "個人情報",
+            "member_since": "会員登録日",
+            "deactivated_since": "<span class=\"fw-bold\">以来非アクティブ化</span> {dt}",
+            "contact": "連絡先",
+            "avatar": "アバター",
+            "invalid_orcid": "このORCIDは無効です"
+        },
+        "select": {
+            "placeholder": "オプション選択",
+            "select": "Enterキーで選択",
+            "deselect": "Enterキーで削除"
+        },
+        "attribute": "属性",
+        "attributes": {
+            "string": "テキストフィールド",
+            "stringf": "テキストボックス",
+            "string-sc": "シングルチョイスドロップダウン",
+            "string-mc": "マルチチョイスドロップダウン",
+            "double": "浮動小数点数",
+            "integer": "数値入力（整数）",
+            "boolean": "チェックボックス",
+            "percentage": "パーセンテージ",
+            "entity": "Entität",
+            "entity-mc": "エンティティ（複数選択可）",
+            "epoch": "期間とエポック",
+            "timeperiod": "エポック",
+            "date": "日付",
+            "dimension": "寸法（幅x長さx高さ）",
+            "list": "リスト",
+            "geography": "WKT（ウェルノーン・バイナリ）",
+            "table": "テーブル",
+            "sql": "SQL-クエリ",
+            "serial": "シリアル(自動インクリメントID)",
+            "serial_info": "<i class=\"fas fa-lightbulb me-1\"></i><br />すべてのインスタンスはこの識別子を属性として共有する。カウンタとして<code class=\"normal\">%d</code>を追加する。<br /><span class=\"fw-medium mt-2\">例:</span><br /><code class=\"normal\">Fund_%d_Stein</code>は Fund_1_Stein, Fund_2_Stein, &hellip; を生成します。<br />固定幅（例えば002の場合2ではなく3）を追加するには、<code class=\"normal\">%03d</code>を使用することができます。",
+            "sql_info": "SQL-Queryで<code class=\"normal\">:entity_id</code>を使用すると、この属性が割り当てられているエンティティを参照することができます。",
+            "iconclass": "アイコンクラス",
+            "rism": "RISM"
+        },
+        "activity": "活動",
+        "action": "アクション",
+        "users": "ユーザー",
+        "timespan": "@:global.attributes.timeperiod",
+        "visible": "可視",
+        "invisible": "非表示",
+        "opacity": "不透明度",
+        "transparency": "透明性",
+        "text": "テキスト",
+        "font": "フォント",
+        "mode": "モード",
+        "size": "サイズ",
+        "duration": "持続時間",
+        "color": "カラー",
+        "format": "形式",
+        "version": "バージョン",
+        "label": "ラベル",
+        "url": "URL",
+        "name": "名称",
+        "nickname": "ニックネーム",
+        "display_name": "表示名",
+        "email": "E-mailアドレス",
+        "email_or_nick": "E-Mailアドレスまたはニックネーム",
+        "phonenumber": "電話番号",
+        "password": "パスワード",
+        "confirm_password": "パスワードを再度入力してください",
+        "remember_me": "私を記憶する",
+        "orcid": "ORCID",
+        "roles": "ロール",
+        "permissions": "権限",
+        "added_at": "追加した",
+        "created_at": "作成した",
+        "updated_at": "更新しました",
+        "timestamp": "タイムスタンプ",
+        "deactivated_at": "非アクティブ化",
+        "options": "オプション",
+        "reply_to": "返事する",
+        "replying_to": "{name}への返信",
+        "type": "タイプ",
+        "parent_entity": "親エンティティ",
+        "root_attribute": "親属性",
+        "root_attribute_toggle": "既存の属性の値を親要素として使用する",
+        "root_element": "親要素",
+        "recursive": "すべての子要素（再帰的）",
+        "content": "コンテンツ",
+        "column": "カラム | カラム複数",
+        "add_column": "カラムの追加",
+        "geometry_type": "ジオメトリタイプ",
+        "depends_on": "による",
+        "preference": "プリファレンス | プリファレンス複数",
+        "value": "値",
+        "allow_override": "オーバーライドを許可するか？",
+        "tag": "タグ | タグ複数",
+        "set": "セット",
+        "has_tags": "タグを持たない | タグを一つ持つ | {cnt}タグを個持つ",
+        "from_subentity": "サブエンティティのものである",
+        "comments": {
+            "deleted_info": "コメント削除",
+            "empty_list": "まだコメントはありません",
+            "hide": "コメントを隠す",
+            "show": "コメントを表示する",
+            "submit": "コメントを投稿する",
+            "text_placeholder": "コメントを入力する",
+            "hide_reply": "返信を<span class=\"fw-bold\">一つ</span>隠す | <span class=\"fw-bold\">{cnt}</span>返信を隠す",
+            "show_reply": "返信を<span class=\"fw-bold\">一つ</span>件表示する | <span class=\"fw-bold\">{cnt}</span>返信を表示する",
+            "fetching": "コメント取得中&hellip;",
+            "fetching_failed": "コメントの取得に失敗しました！",
+            "retry_failed": "再試行"
+        },
+        "notifications": {
+            "title": "通知",
+            "count": "通知({cnt})",
+            "mark_all_as_read": "すべてを既読にする",
+            "delete_all": "すべて削除",
+            "empty_list": "通知なし",
+            "view_all": "すべて表示",
+            "tab_all": "全て",
+            "tab_unread": "未読",
+            "tab_read": "読んだ",
+            "tab_system": "システム通知",
+            "tab_default_empty_list": "あなたは最新の状態です。あなたへの通知はありません",
+            "tab_unread_empty_list": "あなたは最新の状態です。あなたへの新しい通知はありません",
+            "tab_system_empty_list": "システムからの通知はありません。何もする必要はありません！",
+            "body": {
+                "title_new": "新しい通知",
+                "title_read": "通知",
+                "type": {
+                    "system": "システムメッセージ"
+                },
+                "user_left_comment_on": "は<span class=\"fw-bold\">{name}</span>にコメントを残しました",
+                "user_edited_entity": "は<span class=\"fw-bold\">{name}</span>に変更を加えました",
+                "reply": "返信",
+                "mention_info": "返信を書いてください。他のユーザーについて言及する場合は、{'@'}ニックネームを使用します",
+                "goto_comments": "コメント欄を開く",
+                "goto_entity": "エンティティ詳細を開く",
+                "reply_sent": "送信された回答",
+                "reply_to_user": "<span class=\"fw-bold\">{name}</span>に返信する",
+                "reply_to_chat": "コメント欄への返信する"
+            }
+        }
+    }
+}

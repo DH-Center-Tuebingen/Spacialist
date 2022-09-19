@@ -5,7 +5,7 @@ We recommend a recent unix/linux-based OS. Please check if your desired OS meets
 The following packages you should be able to install from your package manager:
 - git
 - Apache (or any other web server-software, e.g. nginx)
-- PHP (`>= 7.1.3`) with the following extensions installed and enabled:
+- PHP (`>= 8.0.2`) with the following extensions installed and enabled:
   - Imagick
   - memcached (on Windows this will not work -- see later)
   - mbstring
@@ -14,8 +14,8 @@ The following packages you should be able to install from your package manager:
   - zip
 - libapache2-mod-php (on Unix systems)
 - [composer](https://getcomposer.org)
-- PostGIS (`>= 2.0`)
-- PostgreSQL (`>= 9.1.0`)
+- PostGIS (`>= 2.5`)
+- PostgreSQL (`>= 13`)
 - ImageMagick
 - ufraw
 - memcached (extension DLL not available for Windows at the moment, see later)
@@ -39,6 +39,10 @@ After switching to the new branch/release, you should get rid of the old depende
 2. Remove entire `lumen` folder (`rm -rf lumen`)
 3. Remove `bower_components` (if coming from a very old version) and `node_modules` (`rm -rf bower_components node_modules`)
 
+## Migration from >= 0.6 and < 0.9 (Federsee, Giza, Helgö)
+Some parts of Spacialist (Map, Files) have been released as separate Plugin. Thus, migrations have changed and only migrating from scratch or from the latest pre-0.9-Release (Helgö) is supported.
+However, since we switched to a different code base, you have to get the new dependencies (see _Download Dependencies_ in [Package Installation](INSTALL.md#package-installation)).
+
 ## Setup
 ### Package Installation
 
@@ -57,7 +61,7 @@ After switching to the new branch/release, you should get rid of the old depende
 2. Clone This Repository
 
     ```bash
-    git clone https://github.com/eScienceCenter/Spacialist
+    git clone https://github.com/DH-Center-Tuebingen/Spacialist
     ```
 
 3. Download Dependencies

@@ -2,8 +2,10 @@
 
 namespace App;
 
+use App\EntityAttributePivot;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class EntityType extends Model
 {
@@ -20,9 +22,17 @@ class EntityType extends Model
         'is_root',
     ];
 
-    protected static $logOnlyDirty = true;
-    protected static $logFillable = true;
-    protected static $logAttributes = ['id'];
+    const patchRules = [
+        'thesaurus_url' => 'string',
+    ];
+
+    public function getActivitylogOptions() : LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['id'])
+            ->logFillable()
+            ->logOnlyDirty();
+    }
 
     public function setRelationInfo($isRoot = false, $subTypes = []) {
         $this->is_root = $isRoot;
@@ -45,7 +55,7 @@ class EntityType extends Model
     }
 
     public function attributes() {
-        return $this->belongsToMany('App\Attribute', 'entity_attributes')->withPivot('position')->orderBy('entity_attributes.position');
+        return $this->belongsToMany('App\Attribute', 'entity_attributes')->withPivot(['position', 'depends_on'])->orderBy('entity_attributes.position')->using(EntityAttributePivot::class);
     }
 
     public function sub_entity_types() {

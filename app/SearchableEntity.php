@@ -3,27 +3,25 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use Nicolaslopezj\Searchable\SearchableTrait;
 
-class SearchableEntity extends Model
+use Spatie\Searchable\Searchable;
+use Spatie\Searchable\SearchResult;
+
+class SearchableEntity extends Model implements Searchable
 {
-    use SearchableTrait;
-
     protected $table = 'entities';
-
-    protected $searchable = [
-        'columns' => [
-            'entities.name' => 10,
-        ],
-        'joins' => [
-
-        ],
-    ];
 
     protected $appends = [
         'parentIds',
         'parentNames',
     ];
+
+    public function getSearchResult(): SearchResult {
+        return new SearchResult(
+            $this,
+            $this->name,
+        );
+    }
 
     private function parents()
     {

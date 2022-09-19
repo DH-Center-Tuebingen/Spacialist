@@ -1,23 +1,7 @@
 const de = {
     plugins: {
         files: {
-            title: 'Dateien',
             header: {
-                linked: 'Verknüpfte Dateien',
-                unlinked: 'Unverknüpfte Dateien',
-                all: 'Alle Dateien',
-                upload: 'Dateien hochladen',
-                rules: {
-                    title: 'Filterregeln',
-                    types: {
-                        file: 'Dateityp',
-                        camera: 'Kameramodell',
-                        date: 'Datum',
-                        name: 'Dateiname',
-                    },
-                    apply: 'Filter anwenden',
-                    active: 'keine Filter aktiv | ein Filter aktiv | {cnt} Filter aktiv'
-                },
                 export: {
                     selected: 'Ausgewählte Dateien exportieren <span class="badge badge-secondary">{cnt}</span>'
                 }
@@ -60,19 +44,12 @@ const de = {
                 error: 'Fehler beim Hochladen der Datei.',
                 finish: {
                     title: 'Dateiupload von {files} Datei abgeschlossen | Dateiupload von {files} Dateien abgeschlossen',
-                    msg: 'Es sind keine Fehler aufgetreten | Es ist bei einer Datei ein Fehler augetreten. | Es sind bei {files} Dateien  Fehler aufgetreten'
+                    msg: 'Es sind keine Fehler aufgetreten | Es ist bei einer Datei ein Fehler augetreten. | Es sind bei {files} Dateien Fehler aufgetreten'
                 }
             },
             modal: {
                 detail: {
                     title: '{name} - Details',
-                    properties: 'Eigenschaften',
-                    links: 'Verknüpfungen',
-                    exif: 'Exif-Daten',
-                    'toggle-edit': 'Editiermodus umschalten',
-                    'toggle-highlight': 'Hervorhebung umschalten',
-                    'toggle-csv': 'CSV-Anzeige umschalten',
-                    'toggle-md': 'Markdown-Anzeige umschalten',
                     'toggle-html': 'HTML-Anzeige umschalten',
                     'no-links': 'Keine Verknüpfungen. Wähle eine Entität aus oder benutze die Suche hier drunter, um Entitäten zu verknüpfen.',
                     'link-further-entities': 'Mit weiteren Entitäten verknüpfen',
@@ -84,11 +61,6 @@ const de = {
                     },
                     previous: 'Vorherige Datei',
                     next: 'Nächste Datei',
-                    csv: {
-                        delimiter: 'Trennzeichen',
-                        header: 'Kopfzeile?',
-                        rows: 'Anzahl der angezeigten Zeilen'
-                    },
                     threed: {
                         'load-sub-models': 'Modelle aus Sub-Entitäten laden'
                     },
@@ -111,7 +83,7 @@ const de = {
                     },
                     archive: {
                         info: 'Klicke auf Dateien um sie direkt herunterzuladen. Das Herunterladen ganzer Ordner wird noch nicht unterstützt.',
-                        files_in_folder: 'Enthält <span class="font-weight-medium">keine</span> Dateien | Enthält <span class="font-weight-medium">eine</span> Datei | Enthält <span class="font-weight-medium">{cnt}</span> Dateien'
+                        files_in_folder: 'Enthält <span class="fw-medium">keine</span> Dateien | Enthält <span class="fw-medium">eine</span> Datei | Enthält <span class="fw-medium">{cnt}</span> Dateien'
                     },
                     undef: {
                         info: `Der Dateityp <code>{mime}</code> von <span class="font-italic">{name}</span> wird im Moment nicht von Spacialist unterstützt.
@@ -135,7 +107,7 @@ const de = {
                     replace: {
                         button: 'Datei ersetzen',
                         confirm: 'Willst du die Datei ({size}) durch {name} ({size2}) ersetzen?',
-                        different_mime: 'Die Dateien haben einen unterschiedlichen Mime-Type. Wenn du fortfährst, wird der Typ von <span class="font-weight-medium">{mime_old}</span> zu <span class="font-weight-medium">{mime_new}</span> geändert. Du solltest daher den Dateinamen anpassen.'
+                        different_mime: 'Die Dateien haben einen unterschiedlichen Mime-Type. Wenn du fortfährst, wird der Typ von <span class="fw-medium">{mime_old}</span> zu <span class="fw-medium">{mime_new}</span> geändert. Du solltest daher den Dateinamen anpassen.'
                     }
                 },
                 delete: {
@@ -148,10 +120,6 @@ const de = {
                     no_preview: 'Für diesen Dateityp ist keine Vorschau verfügbar.'
                 }
             },
-            list: {
-                display: 'Zeige {from}-{to} von {total} Dateien an',
-                none: 'Keine Dateien vorhanden'
-            }
         }
     }
 }

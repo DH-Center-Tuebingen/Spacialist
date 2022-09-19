@@ -12,7 +12,9 @@ use App\EntityAttribute;
 use App\EntityType;
 use App\EntityTypeRelation;
 use App\Geodata;
+use App\Plugin;
 use App\ThConcept;
+use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -20,11 +22,23 @@ class EditorController extends Controller {
     // GET
 
     public function getEntityTypeOccurrenceCount($id) {
+        $user = auth()->user();
+        if(!$user->can('entity_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to get an entity type\'s occurrences')
+            ], 403);
+        }
         $cnt = Entity::where('entity_type_id', $id)->count();
         return response()->json($cnt);
     }
 
     public function getAttributeValueOccurrenceCount($aid, $ctid = -1) {
+        $user = auth()->user();
+        if(!$user->can('entity_data_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to get an attribute value\'s occurrences')
+            ], 403);
+        }
         $query = AttributeValue::where('attribute_id', $aid);
         if($ctid > -1) {
             $query->where('entity_type_id', $ctid);
@@ -36,7 +50,7 @@ class EditorController extends Controller {
 
     public function getEntityType($id) {
         $user = auth()->user();
-        if(!$user->can('view_concepts')) {
+        if(!$user->can('entity_type_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to get an entity type\'s data')
             ], 403);
@@ -53,7 +67,7 @@ class EditorController extends Controller {
 
     public function getEntityTypeAttributes($id) {
         $user = auth()->user();
-        if(!$user->can('view_concept_props')) {
+        if(!$user->can('entity_type_read') || !$user->can('attribute_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view entity data')
             ], 403);
@@ -107,7 +121,7 @@ class EditorController extends Controller {
 
     public function getAttributeSelection($id) {
         $user = auth()->user();
-        if(!$user->can('view_concept_props')) {
+        if(!$user->can('attribute_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view entity data')
             ], 403);
@@ -146,7 +160,7 @@ class EditorController extends Controller {
 
     public function getTopEntityTypes() {
         $user = auth()->user();
-        if(!$user->can('view_concept_props')) {
+        if(!$user->can('entity_type_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view entity data')
             ], 403);
@@ -157,90 +171,149 @@ class EditorController extends Controller {
 
     public function getAttributes() {
         $user = auth()->user();
-        if(!$user->can('view_concept_props')) {
+        if(!$user->can('attribute_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view entity data')
             ], 403);
         }
         $attributes = Attribute::whereNull('parent_id')->orderBy('id')->get();
-        foreach($attributes as $a) {
-            $a->columns = Attribute::where('parent_id', $a->id)->get();
+        $selections = [];
+        foreach ($attributes as $a) {
+            switch ($a->datatype) {
+                case 'string-sc':
+                case 'string-mc':
+                case 'epoch':
+                    $selections[$a->id] = ThConcept::getChildren($a->thesaurus_root_url, $a->recursive);
+                    break;
+                case 'table':
+                    $a->columns = Attribute::where('parent_id', $a->id)->get()->keyBy('id');
+                    // Only string-sc is allowed in tables
+                    $columns = Attribute::where('parent_id', $a->id)
+                        ->where('datatype', 'string-sc')
+                        ->get();
+                    foreach ($columns as $c) {
+                        $selections[$c->id] = ThConcept::getChildren($c->thesaurus_root_url, $c->recursive);
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
-        return response()->json($attributes);
+        return response()->json([
+            'attributes' => $attributes,
+            'selections' => $selections,
+        ]);
     }
 
     public function getAttributeTypes() {
+        $user = auth()->user();
+        if(!$user->can('attribute_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to view available attribute types')
+            ], 403);
+        }
         return response()->json([
             [
-                'datatype' => 'string'
+                'datatype' => 'string',
+                'in_table' => true,
             ],
             [
-                'datatype' => 'stringf'
+                'datatype' => 'stringf',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'double'
+                'datatype' => 'double',
+                'in_table' => true,
             ],
             [
-                'datatype' => 'integer'
+                'datatype' => 'integer',
+                'in_table' => true,
             ],
             [
-                'datatype' => 'boolean'
+                'datatype' => 'boolean',
+                'in_table' => true,
             ],
             [
-                'datatype' => 'string-sc'
+                'datatype' => 'string-sc',
+                'in_table' => true,
             ],
             [
-                'datatype' => 'string-mc'
+                'datatype' => 'string-mc',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'epoch'
+                'datatype' => 'epoch',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'timeperiod'
+                'datatype' => 'timeperiod',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'date'
+                'datatype' => 'date',
+                'in_table' => true,
             ],
             [
-                'datatype' => 'dimension'
+                'datatype' => 'dimension',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'list'
+                'datatype' => 'list',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'geography'
+                'datatype' => 'geography',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'percentage'
+                'datatype' => 'percentage',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'entity'
+                'datatype' => 'entity',
+                'in_table' => true,
             ],
             [
-                'datatype' => 'table'
+                'datatype' => 'entity-mc',
+                'in_table' => true,
             ],
             [
-                'datatype' => 'sql'
+                'datatype' => 'table',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'serial'
+                'datatype' => 'sql',
+                'in_table' => false,
             ],
             [
-                'datatype' => 'iconclass'
+                'datatype' => 'serial',
+                'in_table' => false,
+            ],
+            [
+                'datatype' => 'iconclass',
+                'in_table' => true,
+            ],
+            [
+                'datatype' => 'rism',
+                'in_table' => true,
             ]
         ]);
     }
 
     public function getAvailableGeometryTypes() {
-        $types = Geodata::getAvailableGeometryTypes();
-        return response()->json($types);
+        if(Plugin::isInstalled('Map')) {
+            $types = \App\Plugins\Map\App\Geodata::getAvailableGeometryTypes();
+            return response()->json($types);
+        } else {
+            return response()->json();
+        }
     }
 
     // POST
 
     public function addEntityType(Request $request) {
         $user = auth()->user();
-        if(!$user->can('create_concepts')) {
+        if(!$user->can('entity_type_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to create a new entity type')
             ], 403);
@@ -248,19 +321,19 @@ class EditorController extends Controller {
         $this->validate($request, [
             'concept_url' => 'required|exists:th_concept',
             'is_root' => 'required|boolean_string',
-            'geomtype' => 'required|geometry'
+            'geometry_type' => 'required|geometry'
         ]);
 
         $curl = $request->get('concept_url');
         $is_root = sp_parse_boolean($request->get('is_root'));
-        $geomtype = $request->get('geomtype');
+        $geomtype = $request->get('geometry_type');
         $cType = new EntityType();
         $cType->thesaurus_url = $curl;
         $cType->is_root = $is_root;
         $cType->save();
         $cType = EntityType::find($cType->id);
 
-        $layer = AvailableLayer::createFromArray([
+        AvailableLayer::createFromArray([
             'name' => '',
             'url' => '',
             'type' => $geomtype,
@@ -270,12 +343,14 @@ class EditorController extends Controller {
             'entity_type_id' => $cType->id
         ]);
 
+        $cType->load('layer');
+
         return response()->json($cType, 201);
     }
 
     public function setRelationInfo(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_type_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to modify entity relations')
             ], 403);
@@ -299,7 +374,7 @@ class EditorController extends Controller {
 
     public function addAttribute(Request $request) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('attribute_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to add attributes')
             ], 403);
@@ -309,7 +384,7 @@ class EditorController extends Controller {
             'datatype' => 'required|string',
             'root_id' => 'nullable|integer|exists:th_concept,id',
             'root_attribute_id' => 'nullable|integer|exists:attributes,id',
-            'columns' => 'nullable|json',
+            'columns' => 'nullable|array',
             'text' => 'string',
             'recursive' => 'nullable|boolean_string'
         ]);
@@ -335,16 +410,17 @@ class EditorController extends Controller {
         $attr->save();
 
         if($datatype == 'table') {
-            $cols = json_decode($request->get('columns'));
+            $cols = $request->input('columns');
+            info($cols);
             foreach($cols as $col) {
-                if(!isset($col->label_id) && !isset($col->datatype)) continue;
-                $curl = ThConcept::find($col->label_id)->concept_url;
+                if(!isset($col['label_id']) && !isset($col['datatype'])) continue;
+                $curl = ThConcept::find($col['label_id'])->concept_url;
                 $childAttr = new Attribute();
                 $childAttr->thesaurus_url = $curl;
-                $childAttr->datatype = $col->datatype;
-                $childAttr->recursive = sp_parse_boolean($col->recursive);
-                if(isset($col->root_id)) {
-                    $pid = $col->root_id;
+                $childAttr->datatype = $col['datatype'];
+                $childAttr->recursive = sp_parse_boolean($col['recursive']);
+                if(isset($col['root_id'])) {
+                    $pid = $col['root_id'];
                     $purl = ThConcept::find($pid)->concept_url;
                     $childAttr->thesaurus_root_url = $purl;
                 }
@@ -358,9 +434,9 @@ class EditorController extends Controller {
         return response()->json($attr, 201);
     }
 
-    public function addAttributeToEntityType(Request $request, $ctid) {
+    public function addAttributeToEntityType(Request $request, $etid) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('attribute_write') || !$user->can('entity_type_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to add attributes to an entity type')
             ], 403);
@@ -373,10 +449,10 @@ class EditorController extends Controller {
         $aid = $request->get('attribute_id');
         $pos = $request->get('position');
         if(!isset($pos)) {
-            $attrsCnt = EntityAttribute::where('entity_type_id', '=', $ctid)->count();
+            $attrsCnt = EntityAttribute::where('entity_type_id', '=', $etid)->count();
             $pos = $attrsCnt + 1; // add new attribute to the end
         } else {
-            $successors = EntityAttribute::where('entity_type_id', $ctid)
+            $successors = EntityAttribute::where('entity_type_id', $etid)
                 ->where('position', '>=', $pos)
                 ->get();
             foreach($successors as $s) {
@@ -384,39 +460,34 @@ class EditorController extends Controller {
                 $s->save();
             }
         }
-        $ca = new EntityAttribute();
-        $ca->entity_type_id = $ctid;
-        $ca->attribute_id = $aid;
-        $ca->position = $pos;
-        $ca->save();
-        $ca = EntityAttribute::find($ca->id);
+        $entityAttr = new EntityAttribute();
+        $entityAttr->entity_type_id = $etid;
+        $entityAttr->attribute_id = $aid;
+        $entityAttr->position = $pos;
+        $entityAttr->save();
+        $entityAttr = EntityAttribute::find($entityAttr->id);
 
-        $a = Attribute::find($aid);
+        $attr = Attribute::find($aid);
 
         // If new attribute is serial, add attribute to all existing entities
-        if($a->datatype == 'serial') {
-            $entites = Entity::where('entity_type_id', $ctid)
+        if($attr->datatype == 'serial') {
+            $entites = Entity::where('entity_type_id', $etid)
                 ->orderBy('created_at', 'asc')
                 ->get();
             $ctr = 1;
             foreach($entites as $e) {
-                Entity::addSerial($e->id, $aid, $a->text, $ctr, $user->id);
+                Entity::addSerial($e->id, $aid, $attr->text, $ctr, $user->id);
                 $ctr++;
             }
         }
 
-        $ca->load('attribute');
-        return response()->json($ca, 201);
-        // return response()->json(DB::table('entity_types as c')
-        //         ->where('ca.id', $ca->id)
-        //         ->join('entity_attributes as ca', 'c.id', '=', 'ca.entity_type_id')
-        //         ->join('attributes as a', 'ca.attribute_id', '=', 'a.id')
-        //         ->first(), 201);
+        $entityAttr->load('attribute');
+        return response()->json($entityAttr, 201);
     }
 
     public function duplicateEntityType(Request $request, $ctid) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_type_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to duplicate an entity type')
             ], 403);
@@ -463,39 +534,48 @@ class EditorController extends Controller {
         }
 
         $duplicate->load('sub_entity_types');
+        $duplicate->load('layer');
 
         return response()->json($duplicate);
     }
 
     // PATCH
 
-    public function patchLabel(Request $request, $ctid) {
+    public function patchEntityType(Request $request, $etid) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_type_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to modify entity-type labels')
             ], 403);
         }
         $this->validate($request, [
-            'label' => 'required|string|exists:th_concept,concept_url'
+            'data' => 'required|array'
         ]);
 
         try {
-            $entityType = EntityType::findOrFail($ctid);
+            $entityType = EntityType::findOrFail($etid);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity-type does not exist')
             ], 400);
         }
-        $entityType->thesaurus_url = $request->get('label');
+        $data = Arr::only($request->get('data'), array_keys(EntityType::patchRules));
+        if(count($data) < 1) {
+            return response()->json([
+                'error' => __('The given data is invalid')
+            ], 400);
+        }
+        foreach($data as $key => $prop) {
+            $entityType->{$key} = $prop;
+        }
         $entityType->save();
 
-        return response()->json(null, 204);
+        return response()->json($entityType, 200);
     }
 
     public function reorderAttribute(Request $request, $ctid, $aid) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_type_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to reorder attributes')
             ], 403);
@@ -546,22 +626,22 @@ class EditorController extends Controller {
         return response()->json(null, 204);
     }
 
-    public function patchDependency(Request $request, $ctid, $aid) {
+    public function patchDependency(Request $request, $etid, $aid) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_type_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to add/modify attribute dependencies')
             ], 403);
         }
         $this->validate($request, [
-            'd_attribute' => 'required|nullable|integer|exists:entity_attributes,attribute_id',
-            'd_operator' => 'required|nullable|in:<,>,=',
-            'd_value' => 'required|nullable'
+            'attribute' => 'integer|exists:entity_attributes,attribute_id',
+            'operator' => 'string|in:<,>,=,!=',
+            'value' => 'string'
         ]);
 
         $entityAttribute = EntityAttribute::where([
             ['attribute_id', '=', $aid],
-            ['entity_type_id', '=', $ctid]
+            ['entity_type_id', '=', $etid]
         ])->first();
 
         if($entityAttribute === null){
@@ -570,45 +650,41 @@ class EditorController extends Controller {
             ], 400);
         }
 
-        $dAttribute = $request->get('d_attribute');
-        $dOperator = $request->get('d_operator');
-        $dValue = $request->get('d_value');
+        $dAttribute = $request->get('attribute');
+        $dOperator = $request->get('operator');
+        $dValue = $request->get('value');
 
-        if(
-            !(
-                isset($dAttribute) &&
-                isset($dOperator) &&
-                isset($dValue)
-            ) &&
-            !(
-                !isset($dAttribute) &&
-                !isset($dOperator) &&
-                !isset($dValue)
-            )
-        ) {
+        $allSet = isset($dAttribute) && isset($dOperator) && isset($dValue);
+        $noneSet = !isset($dAttribute) && !isset($dOperator) && !isset($dValue);
+
+        if(!($allSet) && !($noneSet)) {
             return response()->json([
                 'error' => __('Please provide either all dependency fields or none')
             ], 400);
         }
 
-        $dependsOn = [
-            $dAttribute => [
-                'operator' => $dOperator,
-                'value' => $dValue,
-                'dependant' => $aid
-            ]
-        ];
+        if($allSet) {
+            $dependsOn = [
+                $dAttribute => [
+                    'operator' => $dOperator,
+                    'value' => $dValue,
+                    'dependant' => $aid
+                ]
+            ];
+        } else {
+            $dependsOn = null;
+        }
 
-        $entityAttribute->depends_on = json_encode($dependsOn);
+        $entityAttribute->depends_on = $dependsOn;
         $entityAttribute->save();
-        return response()->json(null, 204);
+        return response()->json($entityAttribute->depends_on, 200);
     }
 
     // DELETE
 
     public function deleteEntityType($id) {
         $user = auth()->user();
-        if(!$user->can('delete_move_concepts')) {
+        if(!$user->can('entity_type_delete')) {
             return response()->json([
                 'error' => __('You do not have the permission to delete entity types')
             ], 403);
@@ -628,7 +704,7 @@ class EditorController extends Controller {
 
     public function deleteAttribute($id) {
         $user = auth()->user();
-        if(!$user->can('delete_move_concepts')) {
+        if(!$user->can('attribute_delete')) {
             return response()->json([
                 'error' => __('You do not have the permission to delete attributes')
             ], 403);
@@ -645,16 +721,16 @@ class EditorController extends Controller {
         return response()->json(null, 204);
     }
 
-    public function removeAttributeFromEntityType($ctid, $aid) {
+    public function removeAttributeFromEntityType($etid, $aid) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_type_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to remove attributes from entity types')
             ], 403);
         }
         $ca = EntityAttribute::where([
             ['attribute_id', '=', $aid],
-            ['entity_type_id', '=', $ctid]
+            ['entity_type_id', '=', $etid]
         ])->first();
 
         if($ca === null){
@@ -668,14 +744,14 @@ class EditorController extends Controller {
 
         $successors = EntityAttribute::where([
                 ['position', '>', $pos],
-                ['entity_type_id', '=', $ctid]
+                ['entity_type_id', '=', $etid]
             ])->get();
         foreach($successors as $s) {
             $s->position--;
             $s->save();
         }
 
-        $entityIds = Entity::where('entity_type_id', $ctid)
+        $entityIds = Entity::where('entity_type_id', $etid)
             ->pluck('id')
             ->toArray();
         AttributeValue::where('attribute_id', $aid)

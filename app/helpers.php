@@ -1,10 +1,45 @@
 <?php
 
-use App\Bibliography;
 use App\ThConcept;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+
+if(!function_exists('sp_remove_dir')) {
+    function sp_remove_dir($dir) {
+        foreach(glob("{$dir}/*") as $file) {
+            if(is_dir($file)) {
+                sp_remove_dir($file);
+            } else if(!is_link($file)) {
+                unlink($file);
+            }
+        }
+        rmdir($dir);
+    }
+}
+
+if(!function_exists('sp_slug')) {
+    function sp_slug($str) {
+        return Str::slug($str);
+    }
+}
+
+if(!function_exists('sp_get_permission_groups')) {
+    function sp_get_permission_groups($onlyGroups = false) {
+        $corePermissionPath = base_path("storage/framework/App/core-permissions.json");
+        if(!File::isFile($corePermissionPath)) {
+            return response()->json([]);
+        }
+        $permissionSets = json_decode(file_get_contents($corePermissionPath), true);
+
+        if($onlyGroups) {
+            return array_keys($permissionSets);
+        } else {
+            return $permissionSets;
+        }
+    }
+}
 
 if(!function_exists('sp_loggable_models')) {
     function sp_loggable_models() {
@@ -32,6 +67,12 @@ if(!function_exists('sp_loggable_models')) {
         }
 
         return $loggableModels;
+    }
+}
+
+if(!function_exists('sp_copyname')) {
+    function sp_copyname($name) {
+        return $name . " - " . __("Copy");
     }
 }
 

@@ -16,6 +16,8 @@ class EmailToLowercase extends Migration
      */
     public function up()
     {
+        activity()->disableLogging();
+
         $users = User::all();
 
         foreach($users as $user) {
@@ -23,6 +25,8 @@ class EmailToLowercase extends Migration
             $user->nickname = Str::lower($user->nickname);
             $user->save();
         }
+
+        activity()->enableLogging();
     }
 
     /**

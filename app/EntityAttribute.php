@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class EntityAttribute extends Model
 {
@@ -22,9 +23,17 @@ class EntityAttribute extends Model
         'depends_on',
     ];
 
-    protected static $logOnlyDirty = true;
-    protected static $logFillable = true;
-    protected static $logAttributes = ['id'];
+    protected $casts = [
+        'depends_on' => 'array',
+    ];
+
+    public function getActivitylogOptions() : LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['id'])
+            ->logFillable()
+            ->logOnlyDirty();
+    }
 
     public function attribute() {
         return $this->belongsTo('App\Attribute');

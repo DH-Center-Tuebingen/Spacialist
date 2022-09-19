@@ -7,14 +7,15 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 use App\User;
-
-use Tymon\JWTAuth\Facades\JWTAuth;
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
     use WithFaker;
     use DatabaseTransactions;
+    use ArraySubsetAsserts;
 
     protected $connectionsToTransact = [
         'testing'

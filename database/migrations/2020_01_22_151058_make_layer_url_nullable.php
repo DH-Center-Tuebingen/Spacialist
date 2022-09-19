@@ -13,9 +13,13 @@ class MakeLayerUrlNullable extends Migration
      */
     public function up()
     {
+        activity()->disableLogging();
+
         Schema::table('available_layers', function (Blueprint $table) {
             $table->text('url')->nullable()->change();
         });
+
+        activity()->enableLogging();
     }
 
     /**
@@ -25,8 +29,12 @@ class MakeLayerUrlNullable extends Migration
      */
     public function down()
     {
+        activity()->disableLogging();
+
         Schema::table('available_layers', function (Blueprint $table) {
             $table->text('url')->nullable(false)->change();
         });
+
+        activity()->enableLogging();
     }
 }

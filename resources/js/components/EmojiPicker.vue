@@ -1,40 +1,50 @@
 <template>
-    <button type="button" class="btn btn-outline-secondary" :id="pickId">
-        😀
+    <button type="button" class="btn btn-outline-secondary btn-sm px-1 py-05" :id="state.pickId">
+        <span class="far fa-fw fa-laugh"></span>
     </button>
 </template>
 
 <script>
-    import { EmojiButton } from '@joeattardi/emoji-button';
+    import {
+        reactive,
+        onMounted,
+    } from 'vue';
+
+    import { createPopup } from '@picmo/popup-picker';
 
     export default {
-        mounted() {
-            const emojiButton = document.getElementById(this.pickId);
+        emits: ['selected'],
+        setup(props, context) {
+            // DATA
+            const state = reactive({
+                pickId: `emoji-picker-${Date.now()}`,
+            });
 
-            this.picker.on('emoji', emoji => {
-                this.$emit('selected', {
-                    emoji: emoji.emoji
+            // ON MOUNTED
+            onMounted(_ => {
+                const emojiButton = document.getElementById(state.pickId);
+
+                const picker = createPopup({}, {
+                    triggerElement: emojiButton,
+                    referenceElement: emojiButton,
+                    position: 'bottom-end',
+                    hideOnEmojiSelect: false,
+                });
+
+                emojiButton.addEventListener('click', _ => {
+                    picker.toggle();
+                });
+
+                picker.addEventListener('emoji:select', event => {
+                    context.emit('selected', {
+                        emoji: event.emoji
+                    });
                 });
             });
 
-            emojiButton.addEventListener('click', _ => {
-                this.picker.togglePicker(emojiButton);
-            });
-        },
-        data() {
             return {
-                uid: Date.now(),
-                picker: new EmojiButton({
-                    autoHide: false,
-                    position: 'bottom-end',
-                    zIndex: 1021
-                }),
+                state,
             }
         },
-        computed: {
-            pickId() {
-                return `emoji-picker-${this.uid}`;
-            }
-        }
     }
 </script>

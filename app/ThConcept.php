@@ -2,9 +2,11 @@
 
 namespace App;
 
-use \DB;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class ThConcept extends Model
 {
@@ -23,13 +25,29 @@ class ThConcept extends Model
         'user_id',
     ];
 
-    protected static $logOnlyDirty = true;
-    protected static $logFillable = true;
-    protected static $logAttributes = ['id'];
-    protected static $ignoreChangedAttributes = ['user_id'];
+    public function getActivitylogOptions() : LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['id'])
+            ->logFillable()
+            ->dontLogIfAttributesChangedOnly(['user_id'])
+            ->logOnlyDirty();
+    }
+
+    public static function getByString($str) {
+        if(!isset($str) || $str === '') return null;
+
+        $concept = ThConcept::where('concept_url', $str)->first();
+        if(!isset($concept)) {
+            $concept = ThConcept::whereHas('labels', function(Builder $query) use ($str) {
+                $query->where('label', $str);
+            })->first();
+        }
+        return $concept;
+    }
 
     public static function getMap($lang = 'en') {
-        $concepts = \DB::select(\DB::raw("
+        $concepts = DB::select(DB::raw("
             WITH summary AS
             (
                 SELECT th_concept.id, concept_url, is_top_concept, label, language_id, th_language.short_name,

@@ -27,11 +27,24 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     });
 });
 
+// PLUGINS
+Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/plugin')->group(function() {
+    Route::get('', 'PluginController@getPlugins');
+    Route::get('/{id}', 'PluginController@installPlugin')->where('id', '[0-9]+');
+
+    Route::post('', 'PluginController@uploadPlugin');
+
+    Route::patch('/{id}', 'PluginController@updatePlugin')->where('id', '[0-9]+');
+
+    Route::delete('/{id}', 'PluginController@uninstallPlugin')->where('id', '[0-9]+');
+    Route::delete('/remove/{id}', 'PluginController@removePlugin')->where('id', '[0-9]+');
+});
+
 // ENTITY
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/entity')->group(function() {
     Route::get('/top', 'EntityController@getTopEntities');
     Route::get('/{id}', 'EntityController@getEntity')->where('id', '[0-9]+');
-    Route::get('/entity_type/{ctid}/data/{aid}', 'EntityController@getDataForEntityType')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
+    Route::get('/entity_type/{etid}/data/{aid}', 'EntityController@getDataForEntityType')->where('etid', '[0-9]+')->where('aid', '[0-9]+');
     Route::get('/{id}/data', 'EntityController@getData')->where('id', '[0-9]+');
     Route::get('/{id}/data/{aid}', 'EntityController@getData')->where('id', '[0-9]+')->where('aid', '[0-9]+');
     Route::get('/{id}/reference', 'ReferenceController@getByEntity')->where('id', '[0-9]+');
@@ -39,6 +52,8 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::get('/byParent/{id}', 'EntityController@getEntitiesByParent')->where('id', '[0-9]+');
 
     Route::post('', 'EntityController@addEntity');
+    Route::post('/{id}/duplicate', 'EntityController@duplicateEntity')->where('id', '[0-9]+');
+    Route::post('/import', 'EntityController@importData')->where('id', '[0-9]+')->where('aid', '[0-9]+');
     Route::post('/{id}/reference/{aid}', 'ReferenceController@addReference')->where('id', '[0-9]+')->where('aid', '[0-9]+');
 
     Route::patch('/{id}/attributes', 'EntityController@patchAttributes')->where('id', '[0-9]+');
@@ -77,16 +92,16 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::post('/dm/entity_type', 'EditorController@addEntityType');
     Route::post('/dm/{id}/relation', 'EditorController@setRelationInfo')->where('id', '[0-9]+');
     Route::post('/dm/attribute', 'EditorController@addAttribute');
-    Route::post('/dm/entity_type/{ctid}/attribute', 'EditorController@addAttributeToEntityType')->where('ctid', '[0-9]+');
+    Route::post('/dm/entity_type/{etid}/attribute', 'EditorController@addAttributeToEntityType')->where('etid', '[0-9]+');
     Route::post('/dm/entity_type/{ctid}/duplicate', 'EditorController@duplicateEntityType')->where('ctid', '[0-9]+');
 
-    Route::patch('/dm/entity_type/{ctid}/label', 'EditorController@patchLabel')->where('ctid', '[0-9]+');
+    Route::patch('/dm/entity_type/{etid}', 'EditorController@patchEntityType')->where('etid', '[0-9]+');
     Route::patch('/dm/entity_type/{ctid}/attribute/{aid}/position', 'EditorController@reorderAttribute')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
-    Route::patch('/dm/entity_type/{ctid}/attribute/{aid}/dependency', 'EditorController@patchDependency')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
+    Route::patch('/dm/entity_type/{etid}/attribute/{aid}/dependency', 'EditorController@patchDependency')->where('etid', '[0-9]+')->where('aid', '[0-9]+');
 
     Route::delete('/dm/entity_type/{id}', 'EditorController@deleteEntityType')->where('id', '[0-9]+');
     Route::delete('/dm/attribute/{id}', 'EditorController@deleteAttribute')->where('id', '[0-9]+');
-    Route::delete('/dm/entity_type/{ctid}/attribute/{aid}', 'EditorController@removeAttributeFromEntityType')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
+    Route::delete('/dm/entity_type/{etid}/attribute/{aid}', 'EditorController@removeAttributeFromEntityType')->where('etid', '[0-9]+')->where('aid', '[0-9]+');
 });
 
 // USER
@@ -97,9 +112,10 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::get('/auth/user', 'UserController@getUser');
     Route::get('/user', 'UserController@getUsers');
     Route::get('/role', 'UserController@getRoles');
+    Route::get('/access/groups', 'UserController@getAccessGroups');
 
     Route::post('/user', 'UserController@addUser');
-    Route::post('/user/{id}/avatar', 'UserController@addAvatar')->where('id', '[0-9]+');
+    Route::post('/user/avatar', 'UserController@addAvatar')->where('id', '[0-9]+');
     Route::post('/user/reset/password', 'Auth\\ForgotPasswordController@sendResetLinkEmail');
     Route::post('/role', 'UserController@addRole');
     Route::post('/auth/logout', 'UserController@logout');
@@ -110,7 +126,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 
     Route::delete('/user/{id}', 'UserController@deleteUser')->where('id', '[0-9]+');
     Route::delete('/role/{id}', 'UserController@deleteRole')->where('id', '[0-9]+');
-    Route::delete('/user/{id}/avatar', 'UserController@deleteAvatar')->where('id', '[0-9]+');
+    Route::delete('/user/avatar', 'UserController@deleteAvatar')->where('id', '[0-9]+');
 });
 
 // COMMENTS
@@ -140,7 +156,8 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::get('', 'PreferenceController@getPreferences');
     Route::get('/{id}', 'PreferenceController@getUserPreferences')->where('id', '[0-9]+');
 
-    Route::patch('/{id}', 'PreferenceController@patchPreference')->where('id', '[0-9]+');
+    Route::patch('/', 'PreferenceController@patchPreferences');
+    Route::patch('/{uid}', 'PreferenceController@patchPreferences')->where('uid', '[0-9]+');
 });
 
 // BIBLIOGRAPHY
@@ -165,61 +182,34 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::post('', 'ActivityController@getFiltered');
 });
 
+// TAGS
+Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/tag')->group(function() {
+    Route::get('', 'TagController@getAll');
+});
+
 // EXTENSIONS
 
 // FILE
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/file')->group(function() {
     Route::get('/{id}', 'FileController@getFile')->where('id', '[0-9]+');
-    Route::get('/{id}/archive/list', 'FileController@getArchiveFileList')->where('id', '[0-9]+');
-    Route::get('/{id}/archive/download', 'FileController@downloadArchivedFile')->where('id', '[0-9]+');
-    Route::get('/{id}/as_html', 'FileController@getAsHtml')->where('id', '[0-9]+');
     Route::get('/{id}/link_count', 'FileController@getLinkCount')->where('id', '[0-9]+');
     Route::get('/{id}/sub_files', 'FileController@getSubFiles')->where('id', '[0-9]+');
-    // Filters
-    Route::get('/filter/category', 'FileController@getCategories');
-    Route::get('/filter/camera', 'FileController@getCameraNames');
-    Route::get('/filter/date', 'FileController@getDates');
-    Route::get('/tags', 'FileController@getTags');
 
-
-    Route::post('', 'FileController@getFiles');
     Route::post('/unlinked', 'FileController@getUnlinkedFiles');
     Route::post('/linked/{cid}', 'FileController@getLinkedFiles')->where('cid', '[0-9]+');
-    Route::post('/new', 'FileController@uploadFile');
-    // Should be patch, but file upload is not allowed as patch
-    Route::post('/{id}/patch', 'FileController@patchContent')->where('id', '[0-9]+');
-    Route::post('/export', 'FileController@exportFiles');
-
-    Route::patch('/{id}/property', 'FileController@patchProperty')->where('id', '[0-9]+');
-    Route::patch('/{id}/tag', 'FileController@patchTags')->where('id', '[0-9]+');
-
-    Route::put('/{id}/link', 'FileController@linkToEntity')->where('id', '[0-9]+');
 
     Route::delete('/{id}', 'FileController@deleteFile')->where('id', '[0-9]+');
-    Route::delete('/{fid}/link/{cid}', 'FileController@unlinkEntity')->where('fid', '[0-9]+')->where('cid', '[0-9]+');
 });
 
 // MAP
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/map')->group(function() {
-    Route::get('', 'MapController@getData');
-    Route::get('layer', 'MapController@getLayers');
-    Route::get('layer/entity', 'MapController@getEntityTypeLayers');
-    Route::get('layer/{id}', 'MapController@getLayer')->where('id', '[0-9]+');
-    Route::get('layer/{id}/geometry', 'MapController@getGeometriesByLayer')->where('id', '[0-9]+');
-    Route::get('epsg/{srid}', 'MapController@getEpsg')->where('srid', '[0-9]+');
-    Route::get('export/{id}', 'MapController@exportLayer')->where('id', '[0-9]+');
-
-    Route::post('', 'MapController@addGeometry');
     Route::post('epsg/text', 'MapController@getEpsgByText');
-    Route::post('/layer', 'MapController@addLayer');
-    Route::post('/link/{gid}/{eid}', 'MapController@link')->where('gid', '[0-9]+')->where('eid', '[0-9]+');
 
     Route::patch('/{id}', 'MapController@updateGeometry')->where('id', '[0-9]+');
-    Route::patch('/layer/{id}', 'MapController@updateLayer')->where('id', '[0-9]+');
+    Route::patch('/layer/{id}/switch', 'MapController@changeLayerPositions')->where('id', '[0-9]+');
+    Route::patch('/layer/{id}/move', 'MapController@moveLayer')->where('id', '[0-9]+');
 
     Route::delete('/{id}', 'MapController@delete')->where('id', '[0-9]+');
-    Route::delete('layer/{id}', 'MapController@deleteLayer')->where('id', '[0-9]+');
-    Route::delete('/link/{gid}/{eid}', 'MapController@unlink')->where('gid', '[0-9]+')->where('eid', '[0-9]+');
 });
 
 // ANALYSIS

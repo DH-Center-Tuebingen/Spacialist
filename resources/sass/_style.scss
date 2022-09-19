@@ -15,7 +15,6 @@ body, #app {
 }
 
 code {
-    font-family: "Source Code Pro" !important;
     font-size: 1.2em !important;
     font-weight: 500 !important;
 }
@@ -34,7 +33,8 @@ code.normal {
 }
 
 .overlay-all {
-    z-index: 2000;
+    // TODO still needed?
+    // z-index: 2000;
 }
 
 .drag-container:empty {
@@ -48,8 +48,12 @@ code.normal {
     align-items: center;
 }
 
-.drag-container:empty::after {
-    content: "Drop items here";
+.reference-group {
+    margin-bottom: map-get($utilities, margin, values, 3);
+}
+
+.reference-group:last-child {
+    margin-bottom: 0rem !important;
 }
 
 .logo {
@@ -77,6 +81,22 @@ code.normal {
     padding: 0;
     height: 1.8rem;
     width: 1.8rem;
+}
+
+.btn-fab-sm {
+    padding: 0;
+    height: 1.25rem;
+    width: 1.25rem;
+    font-size: 0.8rem;
+    line-height: normal;
+}
+
+.btn-fab-list > .btn-fab, .btn-fab-list > .btn-fab-sm {
+    margin-right: 0.25rem;
+}
+
+.btn-fab-list > .btn-fab:last-child, .btn-fab-list > .btn-fab-sm:last-child {
+    margin-right: 0;
 }
 
 .notification-info, .stacked-icon-text {
@@ -115,7 +135,7 @@ code.normal {
 }
 
 .card:hover .card-hover {
-    opacity: .25;
+    opacity: .15;
 }
 
 .card:hover .card-hover-overlay {
@@ -126,8 +146,17 @@ code.normal {
     opacity: 1;
 }
 
-.font-size-50 {
-    font-size: 50%;
+.card-hover-addons, .list-hover-addons {
+    display: none !important;
+}
+.card:hover .card-hover-addons, .list-item:hover .list-hover-addons {
+    display: block !important;
+}
+
+.fa-counter-lg {
+    font-size: 2.5rem;
+    top: -5px;
+    right: -5px;
 }
 
 .table-cell-250 td, .table-cell-250 ul {
@@ -142,4 +171,9 @@ code.normal {
 .hover-item:hover {
     background-color: $gray-200 !important;
     border-radius: $input-border-radius !important;
+}
+
+.rendered-markdown li > p {
+    display: inline !important;
+    margin: 0px !important;
 }

@@ -22,5 +22,9 @@
     <script src="js/manifest.js"></script>
     <script src="js/vendor.js"></script>
     <script src="js/app.js"></script>
+    @foreach($plugins as $plugin)
+        <script src="storage/plugins/{!! sp_slug($plugin->name) !!}-{!! $plugin->uuid !!}.js">
+        </script>
+    @endforeach
 </body>
 </html>

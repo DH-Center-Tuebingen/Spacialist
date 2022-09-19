@@ -1,4 +1,5 @@
 let mix = require('laravel-mix');
+const path = require('path');
 
 /*
  |--------------------------------------------------------------------------
@@ -31,49 +32,50 @@ const appPath = process.env.MIX_APP_PATH;
  |
  */
 
-mix.js('resources/js/app.js', 'public/js')
+mix.js('resources/js/app.js', 'public/js').vue()
    .sass('resources/sass/app.scss', 'public/css')
-   .copy(
-       'node_modules/vue-multiselect/dist/vue-multiselect.min.css',
-       'public/css'
-   )
+//    .copy(
+//        'node_modules/vue-multiselect/dist/vue-multiselect.min.css',
+//        'public/css'
+//    )
    .options({
        fileLoaderDirs: {
            fonts: appPath + 'fonts'
        }
    })
-   .webpackConfig({
-      output: {
-         publicPath: '/' + appPath
-      },
-      node: {
-         fs: 'empty'
-      }
-   })
    .webpackConfig(webpack => {
        return {
            resolve: {
-               alias: {
-                   videojs: 'video.js',
-                   WaveSurfer: 'wavesurfer.js',
-                   RecordRTC: 'recordrtc'
+            //    alias: {
+            //        videojs: 'video.js',
+            //        WaveSurfer: 'wavesurfer.js',
+            //        RecordRTC: 'recordrtc'
+            //    },
+               fallback: {
+                   fs: false
                }
            },
+            output: {
+                publicPath: '/' + appPath
+            },
            plugins: [
                new webpack.ProvidePlugin({
-                   videojs: 'video.js/dist/video.cjs.js',
-                   RecordRTC: 'recordrtc',
-                   MediaStreamRecorder: ['recordrtc', 'MediaStreamRecorder']
-               })
+                    process : 'process/browser',
+                    Buffer  : ['buffer', 'Buffer']
+                })
+        //        new webpack.ProvidePlugin({
+        //            videojs: 'video.js/dist/video.cjs.js',
+        //            RecordRTC: 'recordrtc',
+        //            MediaStreamRecorder: ['recordrtc', 'MediaStreamRecorder']
+        //        })
            ]
        }
    })
-   .autoload({
-       jquery: ['$'],
-       axios: ['$http']
-   });
-   // TODO wait for webpack 5, since css extraction does not work with v4 and extract()
-   // .extract();
+   .extract();
 if(`public/${appPath}fonts` !== 'public/fonts') {
     mix.copyDirectory(`public/${appPath}fonts`, 'public/fonts');
 }
+mix.alias({
+    '@': path.join(__dirname, 'resources/js'),
+    vue$: path.join(__dirname, 'node_modules/vue/dist/vue.esm-bundler.js')
+})

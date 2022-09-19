@@ -4,15 +4,11 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class ThLanguage extends Model
 {
     use LogsActivity;
-
-    protected static $logOnlyDirty = true;
-    protected static $logFillable = true;
-    protected static $logAttributes = ['id'];
-    protected static $ignoreChangedAttributes = ['user_id'];
 
     protected $table = 'th_language';
     /**
@@ -25,6 +21,16 @@ class ThLanguage extends Model
         'display_name',
         'short_name',
     ];
+
+    public function getActivitylogOptions() : LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['id'])
+            ->logFillable()
+            ->dontLogIfAttributesChangedOnly(['user_id'])
+            ->logOnlyDirty();
+    }
+
     public function user() {
         return $this->belongsTo('App\User');
     }

@@ -1,23 +1,7 @@
 const en = {
     plugins: {
         files: {
-            title: 'Files',
             header: {
-                linked: 'Linked Files',
-                unlinked: 'Unlinked Files',
-                all: 'All Files',
-                upload: 'Upload FIles',
-                rules: {
-                    title: 'Filter Rules',
-                    types: {
-                        file: 'File Type',
-                        camera: 'Camera Model',
-                        date: 'Date',
-                        name: 'File Name',
-                    },
-                    apply: 'Apply Filters',
-                    active: 'no filter active | one filter active | {cnt} filters active'
-                },
                 export: {
                     selected: 'export selected files <span class="badge badge-secondary">{cnt}</span>'
                 }
@@ -66,13 +50,6 @@ const en = {
             modal: {
                 detail: {
                     title: '{name} - Details',
-                    properties: 'Properties',
-                    links: 'Links',
-                    exif: 'Exif-Data',
-                    'toggle-edit': 'Toggle Edit-Mode',
-                    'toggle-highlight': 'Toggle Highlighting',
-                    'toggle-csv': 'Toggle CSV-Rendering',
-                    'toggle-md': 'Toggle Markdown-Rendering',
                     'toggle-html': 'Toggle HTML-Rendering',
                     'no-links': 'No links. Select a entity first or use the search below to link to entities.',
                     'link-further-entities': 'Link to further entities',
@@ -84,11 +61,6 @@ const en = {
                     },
                     previous: 'Previous File',
                     next: 'Next File',
-                    csv: {
-                        delimiter: 'Delimiter',
-                        header: 'Header Row?',
-                        rows: 'Number of displayed rows'
-                    },
                     threed: {
                         'load-sub-models': 'Load models of Sub-Entities'
                     },
@@ -111,7 +83,7 @@ const en = {
                     },
                     archive: {
                         info: 'Click on files to download them. Downloading folders is currently not supported.',
-                        files_in_folder: 'Contains <span class="font-weight-medium">no</span> files | Contains <span class="font-weight-medium">one</span> file | Contains <span class="font-weight-medium">{cnt}</span> files'
+                        files_in_folder: 'Contains <span class="fw-medium">no</span> files | Contains <span class="fw-medium">one</span> file | Contains <span class="fw-medium">{cnt}</span> files'
                     },
                     undef: {
                         info: `The mime-type <code>{mime}</code> of <span class="font-italic">{name}</span> is currently not supported in Spacialist.
@@ -135,7 +107,7 @@ const en = {
                     replace: {
                         button: 'Replace file',
                         confirm: 'Do you want to replace the file ({size}) with {name} ({size2})?',
-                        different_mime: 'These files have a different mime-type. If you proceed, type is changed from <span class="font-weight-medium">{mime_old}</span> to <span class="font-weight-medium">{mime_new}</span>. You should adjust the filename.'
+                        different_mime: 'These files have a different mime-type. If you proceed, type is changed from <span class="fw-medium">{mime_old}</span> to <span class="fw-medium">{mime_new}</span>. You should adjust the filename.'
                     }
                 },
                 delete: {
@@ -148,10 +120,6 @@ const en = {
                     no_preview: 'No preview available for this file type.'
                 }
             },
-            list: {
-                display: 'Displaying {from}-{to} of {total} files',
-                none: 'No files'
-            }
         }
     }
 }

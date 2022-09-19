@@ -8,6 +8,7 @@ use App\Role;
 use App\Permission;
 
 use App\User;
+use Illuminate\Support\Facades\DB;
 
 class CreatePermissionTables extends Migration
 {
@@ -20,10 +21,10 @@ class CreatePermissionTables extends Migration
     {
         activity()->disableLogging();
 
-        $old_roles = \DB::table('roles')->get();
-        $old_perms = \DB::table('permissions')->get();
-        $old_role_perms = \DB::table('permission_role')->get();
-        $old_user_roles = \DB::table('role_user')->get();
+        $old_roles = DB::table('roles')->get();
+        $old_perms = DB::table('permissions')->get();
+        $old_role_perms = DB::table('permission_role')->get();
+        $old_user_roles = DB::table('role_user')->get();
 
         $role_map = [];
         $perm_map = [];

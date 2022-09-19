@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class ThBroader extends Model
 {
@@ -20,8 +21,12 @@ class ThBroader extends Model
         'narrower_id',
     ];
 
-    protected static $logOnlyDirty = true;
-    protected static $logFillable = true;
-    protected static $logAttributes = ['id'];
+    public function getActivitylogOptions() : LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['id'])
+            ->logFillable()
+            ->logOnlyDirty();
+    }
 
 }

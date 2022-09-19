@@ -13,9 +13,6 @@ class AddUserProfile extends Migration
         'attribute_values',
         'bibliography',
         'entities',
-        'entity_files',
-        'files',
-        'geodata',
         'references',
         'th_concept',
         'th_concept_label',
@@ -29,6 +26,8 @@ class AddUserProfile extends Migration
      */
     public function up()
     {
+        activity()->disableLogging();
+
         Schema::table('users', function (Blueprint $table) {
             $table->text('avatar')->nullable();
             $table->jsonb('metadata')->nullable();
@@ -50,7 +49,7 @@ class AddUserProfile extends Migration
                     $user = User::orderBy('id')->first();
                 }
                 $e->user_id = $user->id;
-                $e->save();
+                $e->saveQuietly();
             }
 
             Schema::table($le, function (Blueprint $table) {
@@ -62,6 +61,8 @@ class AddUserProfile extends Migration
         }
 
         Storage::makeDirectory('avatars');
+
+        activity()->enableLogging();
     }
 
     /**
@@ -71,6 +72,8 @@ class AddUserProfile extends Migration
      */
     public function down()
     {
+        activity()->disableLogging();
+
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('avatar');
             $table->dropColumn('metadata');
@@ -92,7 +95,7 @@ class AddUserProfile extends Migration
                     $user = User::orderBy('id')->first();
                 }
                 $e->lasteditor = $user->name;
-                $e->save();
+                $e->saveQuietly();
             }
 
             Schema::table($le, function (Blueprint $table) {
@@ -101,6 +104,8 @@ class AddUserProfile extends Migration
         }
 
         Storage::deleteDirectory('avatars');
+
+        activity()->enableLogging();
     }
 
     private function getElements($tableName) {
@@ -113,10 +118,6 @@ class AddUserProfile extends Migration
                 return \App\Entity::all();
             case 'entity_files':
                 return \App\EntityFile::all();
-            case 'files':
-                return \App\File::all();
-            case 'geodata':
-                return \App\Geodata::all();
             case 'references':
                 return \App\Reference::all();
             case 'th_concept':

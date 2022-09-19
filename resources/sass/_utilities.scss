@@ -1,29 +1,100 @@
-.font-weight-medium {
+.fw-medium {
     font-weight: $font-weight-medium !important;
 }
 
-.top-0 {
-    top: 0px;
+.font-size-50 {
+    font-size: 50%;
 }
 
-.bottom-0 {
-    bottom: 0px;
+.fs-50 {
+    font-size: 0.5em !important;
 }
 
-.left-0 {
-    left: 0px;
+.fs-1 {
+    font-size: 1rem !important;
 }
 
-.right-0 {
-    right: 0px;
+.fs-06 {
+    font-size: 0.6rem !important;
 }
 
-.h-32p {
-    height: 32px !important;
+.fs-09 {
+    font-size: 0.9rem !important;
 }
 
-.w-32p {
-    width: 32px !important;
+.p-05 {
+    padding: 0.125rem !important;
+}
+
+.pt-05 {
+    padding-top: 0.125rem !important;
+}
+
+.pb-05 {
+    padding-bottom: 0.125rem !important;
+}
+
+.ps-05 {
+    padding-left: 0.125rem !important;
+}
+
+.pe-05 {
+    padding-right: 0.125rem !important;
+}
+
+.py-05 {
+    padding-top: 0.125rem !important;
+    padding-bottom: 0.125rem !important;
+}
+
+.px-05 {
+    padding-left: 0.125rem !important;
+    padding-right: 0.125rem !important;
+}
+
+.prow {
+    padding-left: calc(var(--bs-gutter-x) / 2);
+    padding-right: calc(var(--bs-gutter-x) / 2);
+}
+
+.prows {
+    padding-left: calc(var(--bs-gutter-x) / 2);
+}
+
+.prowe {
+    padding-right: calc(var(--bs-gutter-x) / 2);
+}
+
+.ms--4 {
+    margin-left: -1.5rem;
+}
+
+.ms--4-5 {
+    margin-left: -2rem;
+}
+
+.ms--50 {
+    margin-left: -50%;
+}
+
+.is-invalid + .ms--4-5 {
+    margin-left: -3.25rem;
+}
+
+.h-15r {
+    height: 1.5rem !important;
+}
+
+.w-15r {
+    width: 1.5rem !important;
+}
+
+.w-1 {
+    width: 1% !important;
+}
+
+.w-90 {
+    width: 90% !important;
 }
 
 .mh-300p {
@@ -71,6 +142,15 @@
     cursor: not-allowed;
 }
 
+.list-group-item-hover:hover {
+    background-color: $primary;
+    color: $light;
+}
+
+.list-group-item-hover:hover .text-muted {
+    color: $light !important;
+}
+
 .breadcrumb-item-slash {
     + .breadcrumb-item-slash {
     &::before {
@@ -85,6 +165,10 @@
 
 .bg-light-dark {
     background-color: lighten($text-color, 50%);
+}
+
+.border-dashed {
+    border-style: dashed !important;
 }
 
 .opacity-0 {
@@ -138,7 +222,6 @@
 .object-fit-cover {
     object-fit: cover;
 }
-
 
 .resize-none {
     resize: none;

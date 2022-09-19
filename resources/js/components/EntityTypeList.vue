@@ -1,93 +1,132 @@
 <template>
-    <ul class="ml-3 list-unstyled mb-0">
-        <li v-for="(d, i) in entries" class="py-1 pr-1 d-flex align-items-center justify-content-between hover-item" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)">
-            <div>
-                <i class="fas fa-fw fa-monument"></i>
-                <a class="p-1" href="#" :class="{ 'font-weight-bold': d.id == selectedElement.id }" @click.prevent="select(d)">
-                    {{ $translateConcept(d.thesaurus_url) }}
-                </a>
-            </div>
-            <div class="ml-auto" v-show="hoverState[i]">
-                <button class="btn btn-info btn-fab rounded-circle" v-if=" hasEditListener" @click="$emit('edit', {type: d})" data-toggle="popover" :data-content="$t('global.edit')" data-trigger="hover" data-placement="bottom">
-                    <i class="fas fa-fw fa-xs fa-edit" style="vertical-align: 0;"></i>
-                </button>
-                <button class="btn btn-primary btn-fab rounded-circle" v-if=" hasDuplicateListener" @click="$emit('duplicate', {id: d.id})" data-toggle="popover" :data-content="$t('global.duplicate')" data-trigger="hover" data-placement="bottom">
-                    <i class="fas fa-fw fa-xs fa-clone" style="vertical-align: 0;"></i>
-                </button>
-                <button class="btn btn-danger btn-fab rounded-circle" v-if=" hasDeleteListener" @click="$emit('delete', {type: d})" data-toggle="popover" :data-content="$t('global.delete')" data-trigger="hover" data-placement="bottom">
-                    <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
-                </button>
-            </div>
-        </li>
-        <li v-if="hasAddListener">
-            <i class="fas fa-fw fa-plus"></i>
-            <a href="#" @click.prevent="$emit('add')" class="text-secondary">
-                {{ $t('main.datamodel.entity.add-button') }}
+    <div>
+        <div class="list-group scroll-y-auto px-2">
+            <a href="#" @click.prevent="selectEntry(entry)" v-for="(entry, i) in state.entries" class="list-group-item list-group-item-action d-flex flex-row align-items-center" :class="{ 'active': entry.id == selectedId }" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)" :key="i">
+                <div>
+                    <i class="fas fa-fw fa-monument"></i>
+                    <span class="p-1">
+                        {{ translateConcept(entry.thesaurus_url) }}
+                    </span>
+                </div>
+                <div class="ms-auto btn-fab-list" v-if="state.hasOnHoverListener" v-show="state.hoverStates[i]" :class="activeClasses(entry)">
+                    <button class="btn btn-outline-info btn-fab-sm rounded-circle" v-if="state.hasEditListener" @click="onEdit(entry)" data-bs-toggle="popover" :data-content="t('global.edit')" data-trigger="hover" data-placement="bottom">
+                        <i class="fas fa-fw fa-xs fa-edit" style="vertical-align: 0;"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-fab-sm rounded-circle" v-if="state.hasDuplicateListener" @click="onDuplicate(entry)" data-bs-toggle="popover" :data-content="t('global.duplicate')" data-trigger="hover" data-placement="bottom">
+                        <i class="fas fa-fw fa-xs fa-clone" style="vertical-align: 0;"></i>
+                    </button>
+                    <button class="btn btn-outline-danger btn-fab-sm rounded-circle" v-if="state.hasDeleteListener" @click="onDelete(entry)" data-bs-toggle="popover" :data-content="t('global.delete')" data-trigger="hover" data-placement="bottom">
+                        <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
+                    </button>
+                </div>
             </a>
-        </li>
-    </ul>
+        </div>
+        <button v-if="state.hasAddListener" class="btn btn-outline-success btn-sm mt-2" @click.prevent="onAdd()">
+            <i class="fas fa-fw fa-plus"></i>
+            <span>
+                {{ t('main.datamodel.entity.add_button') }}
+            </span>
+        </button>
+    </div>
 </template>
 
 <script>
+    import {
+        computed,
+        onMounted,
+        reactive,
+        toRefs,
+    } from 'vue';
+
+    import { useI18n } from 'vue-i18n';
+
+    import {
+        translateConcept,
+    } from '@/helpers/helpers.js';
+
     export default {
         props: {
             data: {
                 type: Array,
                 required: true
+            },
+            selectedId: {
+                type: Number,
+                required: false,
+                default: -1,
             }
         },
-        beforeMount() {
-            // Enable popovers
-            $(function () {
-                $('[data-toggle="popover"]').popover()
+        setup(props, context) {
+            const { t } = useI18n();
+            const {
+                data,
+                selectedId,
+            } = toRefs(props);
+            // FETCH
+
+            // FUNCTIONS
+            const onEnter = i => {
+                state.hoverStates[i] = true;
+            };
+            const onLeave = i => {
+                state.hoverStates[i] = false;
+            };
+            const activeClasses = entry => {
+                if(entry.id != selectedId.value) return [];
+
+                return ['badge', 'rounded-pill', 'bg-light'];
+            };
+            const selectEntry = entityType => {
+                context.emit('select-element', {type: entityType});
+            };
+            const onEdit = entityType => {
+                context.emit('edit-element', {type: entityType});
+            }
+            const onDuplicate = entityType => {
+                context.emit('duplicate-element', {id: entityType.id});
+            }
+            const onDelete = entityType => {
+                context.emit('delete-element', {type: entityType});
+            }
+            const onAdd = _ => {
+                context.emit('add-element');
+            }
+
+            // DATA
+            const state = reactive({
+                hoverStates: new Array(data.value.length).fill(false),
+                entries: computed(_ => data.value.slice()),
+                hasAddListener: !!context.attrs.onAddElement,
+                hasDeleteListener: !!context.attrs.onDeleteElement,
+                hasDuplicateListener: !!context.attrs.onDuplicateElement,
+                hasEditListener: !!context.attrs.onEditElement,
+                hasOnHoverListener: computed(_ => state.hasDeleteListener || state.hasDuplicateListener || state.hasEditListener),
             });
-        },
-        mounted() {},
-        methods: {
-            onEnter(i) {
-                Vue.set(this.hovered, i, true);
-            },
-            onLeave(i) {
-                Vue.set(this.hovered, i, false);
-            },
-            select(entityType) {
-                this.selectedElement = Object.assign({}, entityType);
-                this.$emit('select', {type: entityType})
-            }
-        },
-        data() {
+
+            // ON MOUNTED
+            onMounted(_ => {
+
+            });
+
+            // RETURN
             return {
-                hovered: [],
-                selectedElement: {}
+                t,
+                // HELPERS
+                translateConcept,
+                // LOCAL
+                onEnter,
+                onLeave,
+                activeClasses,
+                selectEntry,
+                onEdit,
+                onDuplicate,
+                onDelete,
+                onAdd,
+                // PROPS
+                selectedId,
+                // STATE
+                state,
             }
         },
-        created() {
-            for(let i=0; i<this.data.length; i++) {
-                this.hovered.push(false);
-            }
-        },
-        computed: {
-            hoverState: function() {
-                return this.hovered;
-            },
-            entries: function() {
-                return this.data.slice();
-            },
-            hasListeners: function() {
-                return !!this.$listeners;
-            },
-            hasAddListener() {
-                return this.hasListeners && this.$listeners.add;
-            },
-            hasDeleteListener() {
-                return this.hasListeners && this.$listeners.delete;
-            },
-            hasDuplicateListener() {
-                return this.hasListeners && this.$listeners.duplicate;
-            },
-            hasEditListener() {
-                return this.hasListeners && this.$listeners.edit;
-            }
-        }
     }
 </script>

@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class AvailableLayer extends Model
 {
@@ -35,10 +36,6 @@ class AvailableLayer extends Model
         'color',
     ];
 
-    protected static $logOnlyDirty = true;
-    protected static $logFillable = true;
-    protected static $logAttributes = ['id'];
-
     const patchRules = [
         'name' => 'string',
         'type' => 'string',
@@ -56,6 +53,14 @@ class AvailableLayer extends Model
         'layer_type' => 'nullable|string',
         'color' => 'color',
     ];
+
+    public function getActivitylogOptions() : LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['id'])
+            ->logFillable()
+            ->logOnlyDirty();
+    }
 
     public function patch($props) {
         // If updated baselayer's visibility is set to true, set all other base layer's visibility to false

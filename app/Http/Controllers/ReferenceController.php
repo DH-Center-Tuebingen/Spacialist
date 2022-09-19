@@ -22,7 +22,7 @@ class ReferenceController extends Controller {
 
     public function getByEntity($id) {
         $user = auth()->user();
-        if(!$user->can('view_concept_props')) {
+        if(!$user->can('entity_read') || !$user->can('entity_data_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view references')
             ], 403);
@@ -55,7 +55,7 @@ class ReferenceController extends Controller {
 
     public function addReference(Request $request, $id, $aid) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_data_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to add references')
             ], 403);
@@ -89,7 +89,7 @@ class ReferenceController extends Controller {
 
     public function patchReference(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_data_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to edit references')
             ], 403);
@@ -114,7 +114,7 @@ class ReferenceController extends Controller {
 
     public function delete($id) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('entity_data_delete')) {
             return response()->json([
                 'error' => __('You do not have the permission to delete references')
             ], 403);

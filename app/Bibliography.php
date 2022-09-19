@@ -4,12 +4,13 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
-use Nicolaslopezj\Searchable\SearchableTrait;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Searchable\Searchable;
+use Spatie\Searchable\SearchResult;
 
-class Bibliography extends Model
+class Bibliography extends Model implements Searchable
 {
-    use SearchableTrait;
     use LogsActivity;
 
     protected $table = 'bibliography';
@@ -48,41 +49,34 @@ class Bibliography extends Model
         'user_id'
     ];
 
-    protected $searchable = [
-        'columns' => [
-            'author' => 10,
-            'editor' => 10,
-            'title' => 10,
-            'journal' => 10,
-            'year' => 10,
-            'pages' => 5,
-            'volume' => 5,
-            'number' => 5,
-            'booktitle' => 10,
-            'publisher' => 10,
-            'address' => 5,
-            'misc' => 8,
-            'howpublished' => 5,
-            'type' => 5,
-            'annote' => 5,
-            'chapter' => 5,
-            'crossref' => 5,
-            'edition' => 5,
-            'institution' => 5,
-            'key' => 5,
-            'month' => 5,
-            'note' => 5,
-            'organization' => 5,
-            'school' => 5,
-            'series' => 5,
-            'citekey' => 5
-        ]
+    protected const searchCols = [
+        'author' => 10,
+        'editor' => 10,
+        'title' => 10,
+        'journal' => 10,
+        'year' => 10,
+        'pages' => 5,
+        'volume' => 5,
+        'number' => 5,
+        'booktitle' => 10,
+        'publisher' => 10,
+        'address' => 5,
+        'misc' => 8,
+        'howpublished' => 5,
+        'type' => 5,
+        'annote' => 5,
+        'chapter' => 5,
+        'crossref' => 5,
+        'edition' => 5,
+        'institution' => 5,
+        'key' => 5,
+        'month' => 5,
+        'note' => 5,
+        'organization' => 5,
+        'school' => 5,
+        'series' => 5,
+        'citekey' => 5
     ];
-
-    protected static $logOnlyDirty = true;
-    protected static $logFillable = true;
-    protected static $logAttributes = ['id'];
-    protected static $ignoreChangedAttributes = ['user_id'];
 
     const patchRules = [
         'author'    => 'string',
@@ -111,6 +105,26 @@ class Bibliography extends Model
         'school'    => 'string',
         'series'    => 'string'
     ];
+
+    public function getActivitylogOptions() : LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['id'])
+            ->logFillable()
+            ->dontLogIfAttributesChangedOnly(['user_id'])
+            ->logOnlyDirty();
+    }
+
+    public function getSearchResult(): SearchResult {
+        return new SearchResult(
+            $this,
+            $this->title,
+        );
+    }
+
+    public static function getSearchCols(): array {
+        return array_keys(self::searchCols);
+    }
 
     public function fieldsFromRequest($request, $user) {
         $fields = $request->toArray();

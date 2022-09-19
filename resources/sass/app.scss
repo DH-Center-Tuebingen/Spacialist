@@ -3,6 +3,7 @@
 
 // Bootstrap
 @import "~bootstrap/scss/bootstrap";
+@import "bootstrap";
 
 // tree-component
 @import "~tree-component/dist/tree.min.css";
@@ -12,11 +13,11 @@
 @import "upload";
 
 // multiselect
+@import "~@vueform/multiselect/themes/default";
 @import "multiselect";
 
-// entity menu
-@import '~vue-context/src/sass/vue-context';
-@import 'contextmenu';
+// code highlighting
+@import "highlight.js/styles/atom-one-dark.css";
 
 // map
 @import "map";
@@ -34,11 +35,20 @@
 @import "search";
 
 // Datepicker
-@import "~vue2-datepicker/scss/index";
+@import "~vue-datepicker-next/scss/index";
 @import "datepicker";
+
+// Popover
+@import "popover";
+
+// Markdown Editor (based on Milkdown)
+@import "markdown";
 
 // Spacialist utility classes
 @import "utilities";
 
 // Spacialist specific
 @import "style";
+
+// Spacialist specific
+@import "animations";
