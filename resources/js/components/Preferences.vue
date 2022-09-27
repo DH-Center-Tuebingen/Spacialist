@@ -37,6 +37,24 @@
                     </tr>
                     <tr>
                         <td>
+                            <strong>
+                                {{ t('main.preference.key.color.title') }}
+                            </strong>
+                        </td>
+                        <td>
+                            <color-preference
+                                :data="state.preferences['prefs.color'].value"
+                                @changed="e => trackChanges('prefs.color', e)">
+                            </color-preference>
+                        </td>
+                        <td>
+                            <div class="form-check form-switch d-flex justify-content-center">
+                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.gui-language'].allow_override" />
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
                             <strong>{{ t('main.preference.key.password_reset_link') }}</strong>
                         </td>
                         <td>
@@ -188,6 +206,7 @@
     } from '@/helpers/helpers.js';
 
     import GuiLanguage from '@/components/preferences/GuiLanguage.vue';
+    import Color from '@/components/preferences/Color.vue';
     import ResetEmail from '@/components/preferences/ResetEmail.vue';
     import Columns from '@/components/preferences/Columns.vue';
     import ShowTooltips from '@/components/preferences/ShowTooltips.vue';
@@ -200,6 +219,7 @@
     export default {
         components: {
             'gui-language-preference': GuiLanguage,
+            'color-preference': Color,
             'reset-email-preference': ResetEmail,
             'columns-preference': Columns,
             'tooltips-preference': ShowTooltips,
@@ -215,6 +235,7 @@
 
             // FUNCTIONS
             const trackChanges = (label, data) => {
+                console.log(label, data);
                 state.dirtyData[label] = {
                     value: data.value,
                 };

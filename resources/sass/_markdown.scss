@@ -11,7 +11,9 @@ p.paragraph {
 .milkdown {
     flex-grow: 1;
     background: #EBF2FD;
-    border-radius: $border-radius-lg;
+    @if $enable-rounded {
+        border-radius: $border-radius-lg;
+    }
     padding: map-get($spacers, 3);
     margin-top: map-get($spacers, 1);
     overflow-y: auto;

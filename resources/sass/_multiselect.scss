@@ -13,3 +13,7 @@
 .multiselect-wide > .multiselect-dropdown {
   width: 20vw;
 }
+
+.multiselect-option {
+  --ms-option-bg-selected: #{$green};
+}

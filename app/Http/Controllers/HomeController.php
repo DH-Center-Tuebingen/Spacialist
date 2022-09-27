@@ -52,6 +52,7 @@ class HomeController extends Controller
             'preferences' => $preferenceValues,
             'concepts' => $concepts,
             'entityTypes' => $entityTypeMap,
+            'colorsets' => sp_get_themes(),
         ]);
     }
 

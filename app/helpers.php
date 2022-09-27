@@ -41,6 +41,30 @@ if(!function_exists('sp_get_permission_groups')) {
     }
 }
 
+if(!function_exists('sp_get_themes')) {
+    function sp_get_themes() {
+        $themeDir = base_path("resources/sass/");
+        $fileList = glob("${themeDir}app*.scss");
+        $themes = [];
+        foreach($fileList as $file) {
+            $theme = [];
+            // cut off base path and .scss extension
+            $fileName = substr($file, strlen($themeDir), -5);
+            // default stylesheet needs special treatment
+            if($fileName == 'app') {
+                $theme['id'] = 'default';
+                $theme['key'] = '';
+            } else {
+                $extName = substr($fileName, 3);
+                $theme['id'] = substr($extName, 1);
+                $theme['key'] = $extName;
+            }
+            $themes[] = $theme;
+        }
+        return $themes;
+    }
+}
+
 if(!function_exists('sp_loggable_models')) {
     function sp_loggable_models() {
         $loggableModels = [];

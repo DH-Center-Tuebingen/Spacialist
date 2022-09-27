@@ -58,6 +58,8 @@ class Preference extends Model
         switch($label) {
             case 'prefs.gui-language':
                 return $value->language_key;
+            case 'prefs.color':
+                return $value->color_key;
             case 'prefs.enable-password-reset-link':
                 return $value->use;
             case 'prefs.columns':
@@ -89,6 +91,9 @@ class Preference extends Model
         switch($label) {
             case 'prefs.gui-language':
                 $value = json_encode(['language_key' => $decodedValue]);
+                break;
+            case 'prefs.color':
+                $value = json_encode(['color_key' => $decodedValue]);
                 break;
             case 'prefs.enable-password-reset-link':
                 $value = json_encode(['use' => $decodedValue]);

@@ -248,6 +248,9 @@
                 "reply_to_user": "Reply to <span class=\"fw-bold\">{name}</span>",
                 "reply_to_chat": "Reply to comment section"
             }
+        },
+        "markdown_editor": {
+            "title": "Markdown Editor"
         }
     },
     "main": {
@@ -534,6 +537,13 @@
             "key": {
                 "language": "Language",
                 "password_reset_link": "Enable Reset Password Link",
+                "color": {
+                    "title": "Theme",
+                    "style": {
+                        "default": "Default",
+                        "dark_unrounded": "Dark (Unrounded corners)"
+                    }
+                },
                 "columns": {
                     "title": "Columns in Main View",
                     "left": "Left Column",

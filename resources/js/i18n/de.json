@@ -537,6 +537,13 @@
             "key": {
                 "language": "Sprache",
                 "password_reset_link": "Passwort per Link zurücksetzen",
+                "color": {
+                    "title": "Design",
+                    "style": {
+                        "default": "Standard",
+                        "dark_unrounded": "Dunkel (Harte Kanten)"
+                    }
+                },
                 "columns": {
                     "title": "Spalten Hauptansicht",
                     "left": "Linke Spalte",

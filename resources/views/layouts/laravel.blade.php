@@ -13,7 +13,7 @@
 
     <!-- Styles -->
     <link href="/css/vue-multiselect.min.css" rel="stylesheet">
-    <link href="/css/app.css" rel="stylesheet">
+    <link href="/css/app{{$p['prefs.color']}}.css" rel="stylesheet">
 </head>
 <body>
     <div id="app" class="d-flex flex-column">

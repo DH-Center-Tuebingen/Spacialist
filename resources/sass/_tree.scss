@@ -15,8 +15,9 @@
     font-weight: $font-weight-normal;
     // color: $white !important;
     background-color: rgba(red($yellow), green($yellow), blue($yellow), 0.5) !important;
-
-    border-radius: $border-radius;
+    @if $enable-rounded {
+        border-radius: $border-radius;
+    }
 }
 
 

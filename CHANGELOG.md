@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.9.2
+### Added
+- Support for color schemas (Dark Mode with unrounded corners included)
+### Fixed
+- Login of deactivated users
+- Remove references to removed `extensions` preference
+
+## 0.9.1
+### Fixed
+- Incompatible version of `ol-ext` to match updated `ol`
+
 ## 0.9 - Isfahan
 ### Added
 - Global State for shared information (Vuex)

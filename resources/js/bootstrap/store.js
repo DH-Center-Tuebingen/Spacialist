@@ -51,6 +51,7 @@ export const store = createStore({
                     users: [],
                     version: {},
                     plugins: [],
+                    colorsets: [],
                     registeredPluginSlots: {
                         tab: [],
                         tools: [],
@@ -426,6 +427,9 @@ export const store = createStore({
                 registerPluginInSlot(state, data) {
                     state.registeredPluginSlots[data.slot].push(data);
                 },
+                setColorSets(state, data) {
+                    state.colorSets = data;
+                },
             },
             actions: {
                 setAppState({commit}, data) {
@@ -631,6 +635,9 @@ export const store = createStore({
                 registerPluginInSlot({commit}, data) {
                     commit('registerPluginInSlot', data);
                 },
+                setColorSets({commit}, data) {
+                    commit('setColorSets', data);
+                },
             },
             getters: {
                 appInitialized: state => state.appInitialized,
@@ -678,6 +685,7 @@ export const store = createStore({
                     const p = state.registeredPluginSlots;
                     return slot ? p[slot] : p;
                 },
+                colorSets: state => state.colorSets,
                 vfm: state => state.vfm,
             }
         },

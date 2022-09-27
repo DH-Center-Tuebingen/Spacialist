@@ -5,8 +5,10 @@
   color: $text-color;
   background-color: $body-bg;
   border: 1px solid;
-  border-color: $input-border-color !important;
-  border-radius: $input-border-radius !important;
+  @if $enable-rounded {
+    border-color: $input-border-color !important;
+    border-radius: $input-border-radius !important;
+  }
 }
 
 .#{$namespace}-datepicker-col-5 {
