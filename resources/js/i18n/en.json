@@ -297,8 +297,8 @@
                     "msg": "Data of {name} successfully updated."
                 },
                 "deleted": {
-                    "title": "Entität gelöscht",
-                    "msg": "{name} wurde erfolgreich gelöscht."
+                    "title": "Entity deleted",
+                    "msg": "{name} successful deleted."
                 }
             },
             "tree": {
