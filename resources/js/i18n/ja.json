@@ -381,6 +381,9 @@
             },
             "build_info": "<i class=\"fab fa-fw fa-laravel\"></i> & <i class=\"fab fa-fw fa-vuejs\"></i>で構築!",
             "contributor": "寄稿者 | 寄稿者"
+        },
+        "plugins": {
+            "remove": "削除"
         }
     },
     "global": {
