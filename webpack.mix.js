@@ -45,6 +45,16 @@ mix.js('resources/js/app.js', 'public/js').vue()
    })
    .webpackConfig(webpack => {
        return {
+            module: {
+                rules: [{
+                    test: /\.m?js$/,
+                    resolve: {
+                        fullySpecified: false
+                    },
+                    include: /node_modules/,
+                    type: 'javascript/auto',
+                }]
+            },
            resolve: {
             //    alias: {
             //        videojs: 'video.js',
