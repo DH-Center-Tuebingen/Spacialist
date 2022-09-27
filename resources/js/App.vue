@@ -104,7 +104,7 @@
                                     <i class="fas fa-fw" :class="plugin.icon"></i>
                                     {{ t(plugin.label) }}
                                 </router-link>
-                                <template v-if="hasPreference('prefs.load-extensions', 'data-analysis') || hasPreference('prefs.link-to-thesaurex')">
+                                <template v-if="hasPreference('prefs.link-to-thesaurex')">
                                     <div class="dropdown-divider"></div>
                                     <h6 class="dropdown-header">
                                         {{ t('global.tools.external') }} <sup class="fas fa-fw fa-sm fa-fw fa-external-link-alt"></sup>
@@ -116,7 +116,7 @@
                                         {{ t('global.tools.thesaurex') }}
                                     </a>
                                 </template>
-                                <template v-if="hasPreference('prefs.load-extensions', 'data-analysis')">
+                                <template>
                                     <a class="dropdown-item" href="../db" target="_blank">
                                         <i class="fas fa-fw fa-chart-bar"></i>
                                         {{ t('global.tools.dbwebgen') }}

@@ -66,8 +66,6 @@ class Preference extends Model
                 return $value->show;
             case 'prefs.tag-root':
                 return $value->uri;
-            case 'prefs.load-extensions':
-                return $value;
             case 'prefs.link-to-thesaurex':
                 return $value->url;
             case 'prefs.project-name':
@@ -103,9 +101,6 @@ class Preference extends Model
                 break;
             case 'prefs.tag-root':
                 $value = json_encode(['uri' => $decodedValue]);
-                break;
-            case 'prefs.load-extensions':
-                $value = $decodedValue;
                 break;
             case 'prefs.link-to-thesaurex':
                 $value = json_encode(['url' => $decodedValue]);

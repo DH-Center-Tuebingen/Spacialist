@@ -147,7 +147,7 @@
                             </div>
                         </td>
                     </tr>
-                    <tr v-if="state.preferences['prefs.load-extensions'].value.map">
+                    <tr>
                         <td>
                             <strong>{{ t('main.preference.key.map.projection') }}</strong>
                         </td>
