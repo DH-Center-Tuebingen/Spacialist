@@ -53,7 +53,7 @@
             "loading_screen_msg": "<span class=\"fw-light\">読み込み中</span> {appname}<span class=\"fw-light\">&hellip;</span>",
             "not_found": {
                 "title": "サイトが見つかりません!",
-                "msg": "サイト<code>{site}</code>は見つかりませんでした。スペルを確認するか、管理者にお問い合わせください",
+                "msg": "サイト<code>{site}</code>は見つかりませんでした。スペルを確認するか、管理者にお問い合わせください.",
                 "go_to": "スタートページへ"
             },
             "screencast": {
@@ -373,14 +373,17 @@
         },
         "about": {
             "title": "Spacialistについて",
-            "desc": "Spacialistの開発は、\"E-Science\"資金提供プログラムにおいて、科学研究芸術省のバーデン・ヴュルテンベルクによって共同出資されています。",
+            "desc": "Spacialistの開発は、\"E-Science\"資金提供プログラムにおいて、科学研究芸術省のバーデン・ヴュルテンベルクによって共同出資されています。.",
             "release": {
                 "name": "発売名",
                 "time": "発売日",
                 "full_name": "フルネーム"
             },
-            "build_info": "<i class=\"fab fa-fw fa-laravel\"></i> & <i class=\"fab fa-fw fa-vuejs\"></i>で構築",
+            "build_info": "<i class=\"fab fa-fw fa-laravel\"></i> & <i class=\"fab fa-fw fa-vuejs\"></i>で構築!",
             "contributor": "寄稿者 | 寄稿者"
+        },
+        "plugins": {
+            "remove": "削除"
         }
     },
     "global": {
