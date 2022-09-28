@@ -287,7 +287,7 @@
                 "nr_of_skipped_rows": "Anzahl der übersprungenen Zeilen"
             },
             "picker": {
-                "title": "CSV-Picker"
+                "title": "CSV-Auswahl"
             }
         },
         "entity": {
@@ -632,7 +632,7 @@
                 "volume": "Band",
                 "number": "Ausgabe",
                 "chapter": "Kapitel",
-                "edition": "Edition",
+                "edition": "Auflage",
                 "series": "Reihe",
                 "booktitle": "Buchtitel",
                 "publisher": "Verlag",
@@ -640,7 +640,7 @@
                 "note": "Notiz",
                 "misc": "Diverse",
                 "howpublished": "Verweis",
-                "institution": "Institution",
+                "institution": "Einrichtung",
                 "organization": "Organisation",
                 "school": "Schule"
             }
