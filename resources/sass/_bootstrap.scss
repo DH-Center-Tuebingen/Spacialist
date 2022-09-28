@@ -1,6 +1,8 @@
 .breadcrumb {
     background-color: $gray-200;
-    border-radius: $border-radius;
+    @if $enable-rounded {
+        border-radius: $border-radius;
+    }
 }
 
 .dropdown-menu {

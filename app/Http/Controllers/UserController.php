@@ -159,8 +159,18 @@ class UserController extends Controller
         $creds = ['password'];
         if($request->has('nickname')) {
             $creds[] = 'nickname';
+            if(!User::where('nickname', $request->get('nickname'))->withoutTrashed()->exists()) {
+                return response()->json([
+                    'error' => __('Invalid Credentials')
+                ], 400);
+            }
         } else {
             $creds[] = 'email';
+            if(!User::where('email', $request->get('email'))->withoutTrashed()->exists()) {
+                return response()->json([
+                    'error' => __('Invalid Credentials')
+                ], 400);
+            }
         }
         $credentials = request($creds);
 

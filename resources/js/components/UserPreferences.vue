@@ -11,7 +11,7 @@
             </button>
         </h3>
         <div class="table-responsive scroll-x-hidden">
-            <table class="table table-light table-striped table-hover mb-0" v-if="state.prefsLoaded" v-dcan="'preferences_view'">
+            <table class="table table-light table-striped table-hover mb-0" v-if="state.prefsLoaded" v-dcan="'preferences_read'">
                 <thead class="sticky-top">
                     <tr class="text-nowrap">
                         <th>{{ t('global.preference') }}</th>
@@ -84,18 +84,6 @@
                     </tr>
                     <tr>
                         <td>
-                            <strong>{{ t('main.preference.key.extensions') }}</strong>
-                        </td>
-                        <td>
-                            <extensions-preference
-                                :data="state.preferences['prefs.load-extensions']"
-                                :readonly="!state.overrides['prefs.load-extensions']"
-                                @changed="e => trackChanges('prefs.load-extensions', e)">
-                            </extensions-preference>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
                             <strong>{{ t('main.preference.key.link_thesaurex') }}</strong>
                         </td>
                         <td>
@@ -130,7 +118,7 @@
                             </project-maintainer-preference>
                         </td>
                     </tr>
-                    <tr v-if="state.preferences['prefs.load-extensions'].map">
+                    <tr>
                         <td>
                             <strong>{{ t('main.preference.key.map.projection') }}</strong>
                         </td>

@@ -142,6 +142,7 @@ export async function fetchPreData(locale) {
         store.dispatch('setEntityTypes', response.data.entityTypes);
         store.commit('setPreferences', response.data.preferences);
         store.commit('setSystemPreferences', response.data.system_preferences);
+        store.dispatch('setColorSets', response.data.colorsets);
         
         if(auth.ready()) {
             auth.load().then(_ => {

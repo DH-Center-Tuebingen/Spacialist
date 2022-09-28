@@ -34,6 +34,7 @@ const appPath = process.env.MIX_APP_PATH;
 
 mix.js('resources/js/app.js', 'public/js').vue()
    .sass('resources/sass/app.scss', 'public/css')
+   .sass('resources/sass/app-dark_unrounded.scss', 'public/css')
 //    .copy(
 //        'node_modules/vue-multiselect/dist/vue-multiselect.min.css',
 //        'public/css'
@@ -45,6 +46,16 @@ mix.js('resources/js/app.js', 'public/js').vue()
    })
    .webpackConfig(webpack => {
        return {
+            module: {
+                rules: [{
+                    test: /\.m?js$/,
+                    resolve: {
+                        fullySpecified: false
+                    },
+                    include: /node_modules/,
+                    type: 'javascript/auto',
+                }]
+            },
            resolve: {
             //    alias: {
             //        videojs: 'video.js',

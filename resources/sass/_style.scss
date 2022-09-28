@@ -41,7 +41,9 @@ code.normal {
     height: 100%;
     width: 100%;
     border: 2px dashed lightgray;
-    border-radius: 3px;
+    @if $enable-rounded {
+        border-radius: 3px;
+    }
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -123,7 +125,9 @@ code.normal {
 }
 
 .card-hover-overlay {
-    border-radius: $card-border-radius !important;
+    @if $enable-rounded {
+        border-radius: $card-border-radius !important;
+    }
     display: flex;
     justify-content: center;
     align-items: center;
@@ -170,7 +174,9 @@ code.normal {
 
 .hover-item:hover {
     background-color: $gray-200 !important;
-    border-radius: $input-border-radius !important;
+    @if $enable-rounded {
+        border-radius: $input-border-radius !important;
+    }
 }
 
 .rendered-markdown li > p {
