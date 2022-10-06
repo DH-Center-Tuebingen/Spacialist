@@ -1,5 +1,6 @@
 <template>
     <div @dragenter="onDragEnter" @dragleave="onDragLeave" :id="`tree-node-${data.id}`">
+        <input class="mx-1 form-check-input" type="checkbox" :disabled="state.isSelectionDisabled" :id="`tree-node-mes-${data.id}`" v-model="state.multieditSelected" v-show="state.isSelectionMode" @click.stop="addToMSList()" />
         <a href="" :id="`tree-node-cm-toggle-${data.id}`" @click.prevent @contextmenu.stop.prevent="togglePopup()" class="text-body text-decoration-none disabled" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false">
             <span style="display: inline-block; text-align: center;" class="px-1">
                 <span v-if="data.children_count" class="badge rounded-pill" style="font-size: 9px;" :style="state.colorStyles" :title="data.children_count">
@@ -62,6 +63,7 @@
         onMounted,
         reactive,
         toRefs,
+        watch,
     } from 'vue';
 
     import {
@@ -73,7 +75,7 @@
     import store from '@/bootstrap/store.js';
 
     import {
-        ShowAddEntity,
+        showAddEntity,
         showDeleteEntity,
         ShowMoveEntity,
     } from '@/helpers/modal.js';
@@ -82,7 +84,8 @@
     } from '@/api.js';
     import {
         can,
-        getEntityColors
+        getEntityColors,
+        hasIntersectionWithEntityAttributes,
     } from '@/helpers/helpers.js';
     import {
         numPlus
@@ -131,7 +134,7 @@
                 }
             };
             const addNewEntity = _ => {
-                ShowAddEntity(data.value);
+                showAddEntity(data.value);
             };
             const duplicateEntity = _ => {
                 duplicateEntityApi(data.value).then(data => {
@@ -152,14 +155,37 @@
             const onDragLeave = _ => {
 
             };
+            const addToMSList = _ => {
+                state.multieditSelected = !state.multieditSelected;
+                if(state.multieditSelected) {
+                    store.dispatch('addToTreeSelection', {
+                        id: data.value.id,
+                        value: {
+                            entity_type_id: data.value.entity_type_id,
+                        },
+                    });
+                } else {
+                    store.dispatch('removeFromTreeSelection', {
+                        id: data.value.id,
+                    });
+                }
+            };
 
             // DATA
             const state = reactive({
                 ddDomElem: null,
                 bsElem: null,
                 ddVisible: false,
+                multieditSelected: false,
                 colorStyles: computed(_ => getEntityColors(data.value.entity_type_id)),
                 isSelected: computed(_ => store.getters.entity.id === data.value.id),
+                isSelectionMode: computed(_ => store.getters.treeSelectionMode),
+                isSelectionDisabled: computed(_ => {
+                    if(store.getters.treeSelectionTypeIds.length == 0 || state.multieditSelected) {
+                        return false;
+                    }
+                    return !hasIntersectionWithEntityAttributes(data.value.entity_type_id, store.getters.treeSelectionTypeIds);
+                }),
             });
 
             // ON MOUNTED
@@ -169,6 +195,14 @@
                 state.ddDomElem.addEventListener('hidden.bs.dropdown', _ => {
                     hidePopup();
                 });
+            });
+
+            // WATCHER
+            watch(_ => state.isSelectionMode, (newValue, oldValue) => {
+                // if selection mode got disabled (checkbox not visible)
+                if(!newValue && oldValue) {
+                    state.multieditSelected = false;
+                }
             });
 
             // RETURN
@@ -184,6 +218,7 @@
                 deleteEntity,
                 onDragEnter,
                 onDragLeave,
+                addToMSList,
                 // PROPS
                 data,
                 // STATE

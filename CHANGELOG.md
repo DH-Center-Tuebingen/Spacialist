@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.10 - Jelling
+### Added
+- Support Multiediting attributes across multiple entities (through ...-menu in entity tree)
+### Changed
+- Entity tree sorting is now accessible through ...-menu
+
 ## 0.9.2
 ### Added
 - Support for color schemas (Dark Mode with unrounded corners included)
