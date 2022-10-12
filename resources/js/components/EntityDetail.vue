@@ -188,6 +188,7 @@
     } from '@/api.js';
     import {
         can,
+        isModerated,
         getAttribute,
         getEntityColors,
         getEntityType,
@@ -493,7 +494,8 @@
             const saveEntity = _ => {
                 if(!can('entity_data_write')) return;
                 const dirtyValues = attrRef.value.getDirtyValues();
-                var patches = [];
+                const patches = [];
+                const moderations = [];
 
                 for(let v in dirtyValues) {
                     const aid = v;
@@ -528,6 +530,7 @@
                         }
                     }
                     patches.push(patch);
+                    moderations.push(aid);
                 }
                 return patchAttributes(state.entity.id, patches).then(data => {
                     state.formDirty = false;
@@ -537,6 +540,13 @@
                         data: dirtyValues,
                         eid: state.entity.id,
                     });
+                    if(isModerated()) {
+                        store.dispatch('updateEntityDataModerations', {
+                            entity_id: state.entity.id,
+                            attribute_ids: moderations,
+                            state: 'pending',
+                        });
+                    }
 
                     toast.$toast(
                         t('main.entity.toasts.updated.msg', {

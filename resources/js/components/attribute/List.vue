@@ -13,14 +13,14 @@
                 </div>
             </button>
             <input type="text" class="form-control" :disabled="disabled" v-model="state.input" />
-            <button type="button" class="btn btn-outline-success" @click="addListEntry()">
+            <button type="button" class="btn btn-outline-success" v-if="!disabled" @click="addListEntry()">
                 <i class="fas fa-fw fa-plus"></i>
             </button>
         </div>
         <ol class="mt-2 mb-0" v-if="state.expanded && v.value.length">
             <li v-for="(l, i) in v.value" :key="i">
                 <span v-html="createAnchorFromUrl(l)"></span>
-                <a href="#" class="text-danger" @click.prevent="removeListEntry(i)">
+                <a href="#" class="text-danger" v-if="!disabled" @click.prevent="removeListEntry(i)">
                     <i class="fas fa-fw fa-trash"></i>
                 </a>
             </li>
@@ -109,6 +109,7 @@
             });
             watch(entries, (newValue, oldValue) => {
                 state.initialValue = newValue.slice();
+                resetFieldState();
             });
 
             // RETURN

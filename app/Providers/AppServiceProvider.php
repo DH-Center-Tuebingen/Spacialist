@@ -8,6 +8,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\DB;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -18,8 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        \DB::getDoctrineSchemaManager()->getDatabasePlatform()->registerDoctrineTypeMapping('geography', 'string');
-        \DB::getDoctrineSchemaManager()->getDatabasePlatform()->registerDoctrineTypeMapping('geometry', 'string');
+        DB::getDoctrineSchemaManager()->getDatabasePlatform()->registerDoctrineTypeMapping('geography', 'string');
+        DB::getDoctrineSchemaManager()->getDatabasePlatform()->registerDoctrineTypeMapping('geometry', 'string');
 
         Paginator::useBootstrap();
         
@@ -72,6 +73,10 @@ class AppServiceProvider extends ServiceProvider
                 return $value == 'Any';
             }
             return true;
+        });
+        Validator::extend('mod_action', function($attribute, $value, $parameters, $validator) {
+            $lowVal = strtolower($value);
+            return $lowVal == 'accept' || $lowVal == 'deny';
         });
     }
 

@@ -330,12 +330,14 @@ export function showAccessControlModal(roleId) {
         on: {
             save(e) {
                 const data = {
-                    permissions: e,
+                    permissions: e.permissions,
+                    is_moderated: e.is_moderated,
                 };
                 patchRoleData(roleId, data).then(data => {
                     store.dispatch('updateRole', {
                         id: roleId,
                         permissions: data.permissions,
+                        is_moderated: data.is_moderated,
                     });
                     const role = getRoleBy(roleId);
                     const msg = t('main.role.toasts.updated.msg', {

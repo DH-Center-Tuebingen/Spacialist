@@ -391,6 +391,22 @@
                         "use_difference": "Differenz verwenden",
                         "use_as_label": "Als Beschriftung verwenden"
                     }
+                },
+                "moderation": {
+                    "locked_state_info": "Dieses Attribute ist gesperrt, da die Änderungen moderiert werden müssen und noch nicht angenommen wurden.",
+                    "view_modified_data": "Geänderte Daten anzeigen",
+                    "view_original_data": "Originaldaten anzeigen",
+                    "accept_changes": "Änderungen annehmen",
+                    "deny_changes": "Änderungen ablehnen",
+                    "deleted_by": "<i class=\"fas fa-fw fa-trash\"></i> gelöscht {ts}",
+                    "modified_by": "<i class=\"fas fa-fw fa-edit\"></i> geändert {ts}",
+                    "edit_moderated_value": {
+                        "title": "Änderung bearbeiten",
+                        "accept": "Bearbeitete Änderung annehmen",
+                        "enable": "Bearbeitungsmodus aktivieren",
+                        "reset": "Bearbeitete Änderung zurücksetzen",
+                        "cancel": "Bearbeitung verwerfen"
+                    }
                 }
             }
         },
@@ -437,6 +453,9 @@
                     "preferences": "Einstellungen",
                     "thesaurus": "Thesaurus",
                     "is_plugin": "Erweiterung"
+                },
+                "moderation": {
+                    "required": "Moderation notwendig"
                 }
             },
             "preset": {

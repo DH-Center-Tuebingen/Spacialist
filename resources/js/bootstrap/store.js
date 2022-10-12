@@ -155,6 +155,13 @@ export const store = createStore({
                         entity.data[k].value = data.data[k];
                     }
                 },
+                updateEntityDataModerations(state, data) {
+                    const entity = state.entities[data.entity_id];
+                    for(let i=0; i<data.attribute_ids.length; i++) {
+                        const curr = data.attribute_ids[i];
+                        entity.data[curr].moderation_state = data.state;
+                    }
+                },
                 addEntityTypeAttribute(state, data) {
                     const attrs = state.entityTypeAttributes[data.entity_type_id];
                     attrs.splice(data.position-1, 0, data);
@@ -270,7 +277,7 @@ export const store = createStore({
                 updateRole(state, data) {
                     const index = state.roles.findIndex(r => r.id == data.id);
                     if(index > -1) {
-                        const cleanData = only(data, ['display_name', 'description', 'permissions', 'updated_at', 'deleted_at',]);
+                        const cleanData = only(data, ['display_name', 'description', 'permissions', 'is_moderated', 'updated_at', 'deleted_at',]);
                         const currentData = state.roles[index];
                         state.roles[index] = {
                             ...currentData,
@@ -548,6 +555,9 @@ export const store = createStore({
                 updateEntityData({commit}, data) {
                     commit('updateEntityData', data);
                 },
+                updateEntityDataModerations({commit}, data) {
+                    commit("updateEntityDataModerations", data);
+                },
                 addEntityTypeAttribute({commit}, data) {
                     commit('addEntityTypeAttribute', data);
                 },
@@ -677,6 +687,7 @@ export const store = createStore({
                 deletedUsers: state => state.deletedUsers,
                 user: state => state.user,
                 isLoggedIn: state => !!state.user,
+                isModerated: state => state.user.roles.some(r => r.is_moderated),
                 entity: state => state.entity,
                 file: state => state.file,
                 version: state => state.version,
