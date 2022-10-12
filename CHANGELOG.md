@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.10 - Jelling
+### Added
+- Support Multiediting attributes across multiple entities (through ...-menu in entity tree)
+- Support moderated roles/users that require a privileged user to accept/deny their changes in entity forms
+### Changed
+- Entity tree sorting is now accessible through ...-menu
+
 ## 0.9.3
 ### Fixed
 - Wrong translated concepts for languages with lang code mismatch

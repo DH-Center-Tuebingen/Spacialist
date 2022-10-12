@@ -14,6 +14,7 @@
         "edit": "Editieren",
         "edited": "editiert",
         "duplicate": "Duplizieren",
+        "sort": "Sortieren",
         "resort": "Umsortieren",
         "update": "Aktualisieren",
         "replace": "Ersetzen",
@@ -325,6 +326,16 @@
                         "children": "Anzahl Unter-Entitäten - Absteigend",
                         "type": "Entitätstyp - Absteigend"
                     }
+                },
+                "multiedit": {
+                    "title": "Mehrfachauswahl umschalten",
+                    "open": "Mehrfach-Bearbeitungs-Werkzeug öffnen",
+                    "toast": {
+                        "saved": {
+                            "title": "Mehrfach-Bearbeitung erfolgreich",
+                            "msg": "Die Werte von {attr_cnt} Attributen in {ent_cnt} Entitäten erfolgreich bearbeitet."
+                        }
+                    }
                 }
             },
             "tabs": {
@@ -342,6 +353,9 @@
                 "edit": {
                     "title_type": "Entitätstyp editieren - {name}",
                     "title_attribute": "Attribut editieren - {name}"
+                },
+                "multiedit": {
+                    "title": "Mehrfach-Attribut-Bearbeitung"
                 },
                 "delete": {
                     "alert": "Wenn du <span class=\"fw-bold\">{name}</span> löschst, wird mindestens eine Entität ebenfalls gelöscht. | Wenn du <span class=\"fw-bold\">{name}</span> löschst, werden mindestens {cnt} Entitäten ebenfalls gelöscht."

@@ -622,6 +622,20 @@ export async function handleModeration(modAction, entity_id, attribute_id, overw
     );
 };
 
+export async function multieditAttributes(entityIds, entries) {
+    const data = {
+        entity_ids: entityIds,
+        entries: entries,
+    };
+    return $httpQueue.add(
+        () => http.patch(`/entity/multiedit`, data).then(response => {
+            return response.data;
+        }).catch(error => {
+            throw error;
+        })
+    );
+};
+
 export async function moveEntity(entityId, parentId = null, rank = null) {
     const data = {
         parent_id: parentId,

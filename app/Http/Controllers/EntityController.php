@@ -494,7 +494,7 @@ class EntityController extends Controller {
                     $attrVal->certainty = 100;
                     $attrVal->user_id = $user->id;
                     try {
-                        $setValue = $attrVal->setValue($row[$val], $type);
+                        $setValue = $attrVal->setValueFromRaw($row[$val], $type);
                         if($setValue === null) {
                             continue;
                         }
@@ -619,83 +619,14 @@ class EntityController extends Controller {
             if($op == 'remove') continue;
             
             $attr = Attribute::find($aid);
-            switch($attr->datatype) {
-                // for primitive types: just save them to the db
-                case 'stringf':
-                case 'string':
-                case 'iconclass':
-                case 'rism':
-                    $attrval->str_val = $value;
-                    break;
-                case 'double':
-                    $attrval->dbl_val = $value;
-                    break;
-                case 'boolean':
-                case 'percentage':
-                case 'integer':
-                    $attrval->int_val = $value;
-                    break;
-                case 'date':
-                    $attrval->dt_val = $value;
-                    break;
-                case 'string-sc':
-                    $thesaurus_url = $value['concept_url'];
-                    $attrval->thesaurus_val = $thesaurus_url;
-                    break;
-                case 'string-mc':
-                    $thesaurus_urls = [];
-                    foreach($value as $val) {
-                        $thesaurus_urls[] = [
-                            "concept_url" => $val['concept_url'],
-                            "id" => $val['id']
-                        ];
-                    }
-                    $attrval->json_val = json_encode($thesaurus_urls);
-                    break;
-                case 'epoch':
-                case 'timeperiod':
-                case 'dimension':
-                case 'list':
-                case 'table':
-                    // check for invalid time spans
-                    if($attr->datatype == 'epoch' || $attr->datatype == 'timeperiod') {
-                        $sl = isset($value['startLabel']) ? strtoupper($value['startLabel']) : null;
-                        $el = isset($value['endLabel']) ? strtoupper($value['endLabel']) : null;
-                        $s = $value['start'];
-                        $e = $value['end'];
-                        if(
-                            (isset($s) && !isset($sl))
-                            ||
-                            (isset($e) && !isset($el))
-                        ) {
-                            return response()->json([
-                                'error' => __('You have to specify if your date is BC or AD.')
-                            ], 422);
-                        }
-                        if(
-                            ($sl == 'AD' && $el == 'BC')
-                            ||
-                            ($sl == 'BC' && $el == 'BC' && $s < $e)
-                            ||
-                            ($sl == 'AD' && $el == 'AD' && $s > $e)
-                        ) {
-                            return response()->json([
-                                'error' => __('Start date of a time period must not be after it\'s end date')
-                            ], 422);
-                        }
-                    }
-                    $attrval->json_val = json_encode($value);
-                    break;
-                case 'entity':
-                    $attrval->entity_val = $value;
-                    break;
-                case 'entity-mc':
-                    $attrval->json_val = json_encode($value);
-                    break;
-                case 'geography':
-                    $attrval->geography_val = Geodata::parseWkt($value);
-                    break;
+            try {
+                $formKeyValue = AttributeValue::getFormattedKeyValue($attr->datatype, $value);
+            } catch(InvalidDataException $ide) {
+                return response()->json([
+                    'error' => $ide->getMessage(),
+                ], 422);
             }
+            $attrval->{$formKeyValue->col} = $formKeyValue->val;
             $attrval->user_id = $user->id;
             $attrval->save();
         }
@@ -758,6 +689,57 @@ class EntityController extends Controller {
         $attrValue->patch($values);
 
         return response()->json($attrValue, 201);
+    }
+
+    public function multieditAttributes(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('entity_data_write')) {
+            return response()->json([
+                'error' => __('You do not have the permission to modify an entity\'s data')
+            ], 403);
+        }
+
+        $this->validate($request, [
+            'entity_ids' => 'required|array',
+            'entries' => 'required|array',
+        ]);
+
+        $entities = $request->get('entity_ids');
+        $attrValues = $request->get('entries');
+
+        DB::beginTransaction();
+
+        foreach($attrValues as $av) {
+            try {
+                $attr = Attribute::findOrFail($av['attribute_id']);
+            } catch(ModelNotFoundException $e) {
+                DB::rollBack();
+                return response()->json([
+                    'error' => __('This attribute does not exist'),
+                ], 400);
+            }
+            try {
+                $formKeyValue = AttributeValue::getFormattedKeyValue($attr->datatype, $av['value']);
+            } catch(InvalidDataException $ide) {
+                DB::rollBack();
+                return response()->json([
+                    'error' => $ide->getMessage(),
+                ], 422);
+            }
+            foreach($entities as $eid) {
+                AttributeValue::updateOrCreate(
+                    ['entity_id' => $eid, 'attribute_id' => $av['attribute_id']],
+                    [
+                        $formKeyValue->key => $formKeyValue->val,
+                        'user_id' => $user->id,
+                    ]
+                );
+            }
+        }
+
+        DB::commit();
+
+        return response()->json(null, 204);
     }
 
     public function handleModeration($id, $aid, Request $request) {

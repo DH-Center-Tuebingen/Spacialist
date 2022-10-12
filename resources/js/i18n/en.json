@@ -14,6 +14,7 @@
         "edit": "Edit",
         "edited": "edited",
         "duplicate": "Duplicate",
+        "sort": "Sort",
         "resort": "Re-sort",
         "update": "Update",
         "replace": "Replace",
@@ -325,6 +326,16 @@
                         "children": "Count Sub-Entities - Descending",
                         "type": "Entity-Type - Descending"
                     }
+                },
+                "multiedit": {
+                    "title": "Toggle Multiedit",
+                    "open": "Open Multiedit Tool",
+                    "toast": {
+                        "saved": {
+                            "title": "Multiedit successful",
+                            "msg": "Successfully edited content of {attr_cnt} attributes for {ent_cnt} entities."
+                        }
+                    }
                 }
             },
             "tabs": {
@@ -342,6 +353,9 @@
                 "edit": {
                     "title_type": "Edit Entity-Type - {name}",
                     "title_attribute": "Edit Attribute - {name}"
+                },
+                "multiedit": {
+                    "title": "Multi-Edit Attributes"
                 },
                 "delete": {
                     "alert": "If you delete <span class=\"fw-bold\">{name}</span>, at least one entity is deleted, too. | If you delete <span class=\"fw-bold\">{name}</span>, at least {cnt} entities are deleted, too."

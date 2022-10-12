@@ -16,6 +16,7 @@ import {
     removeEntityTypeAttribute,
     patchEntityType,
     updateAttributeDependency,
+    multieditAttributes,
     addRole,
     patchRoleData,
     deleteRole,
@@ -56,6 +57,7 @@ import DeleteEntityType from '@/components/modals/entitytype/Delete.vue';
 import RemoveAttribute from '@/components/modals/entitytype/RemoveAttribute.vue';
 import AddAttribute from '@/components/modals/attribute/Add.vue';
 import EditAttribute from '@/components/modals/attribute/Edit.vue';
+import MultiEditAttribute from '@/components/modals/attribute/MultiEdit.vue';
 import DeleteAttribute from '@/components/modals/attribute/Delete.vue';
 
 export function showAbout() {
@@ -347,7 +349,7 @@ export function showAccessControlModal(roleId) {
                     addToast(msg, title, {
                         channel: 'success',
                     });
-                })
+                });
             },
             cancel(e) {
                 store.getters.vfm.hide(uid);
@@ -451,7 +453,7 @@ export function showDeleteBibliographyEntry(entry, onDeleted) {
     });
 }
 
-export function ShowAddEntity(parent = null, onAdded) {
+export function showAddEntity(parent = null, onAdded) {
     const uid = `AddEntity-${getTs()}`;
     store.getters.vfm.show({
         component: AddEntity,
@@ -644,6 +646,47 @@ export function showEditAttribute(aid, etid) {
             confirm(e) {
                 updateAttributeDependency(etid, aid, e).then(_ => {
                     store.getters.vfm.hide(uid);
+                });
+            }
+        }
+    });
+}
+
+export function showMultiEditAttribute(entityIds, attributes) {
+    const uid = `MultiEditAttribute-${getTs()}`;
+    store.getters.vfm.show({
+        component: MultiEditAttribute,
+        bind: {
+            name: uid,
+            entityIds: entityIds,
+            attributes: attributes,
+        },
+        on: {
+            closing(e) {
+                store.getters.vfm.hide(uid);
+            },
+            confirm(e) {
+                const values = e.values;
+                const entries = [];
+                for(let v in values) {
+                    const aid = v;
+                    const entry = {
+                        value: values[aid],
+                        attribute_id: aid,
+                    };
+                    entries.push(entry);
+                }
+                multieditAttributes(entityIds, entries).then(_ => {
+                    store.dispatch("unsetTreeSelectionMode");
+                    store.getters.vfm.hide(uid);
+                    const title = t('main.entity.tree.multiedit.toast.saved.title');
+                    const msg = t('main.entity.tree.multiedit.toast.saved.msg', {
+                        attr_cnt: entries.length,
+                        ent_cnt: entityIds.length,
+                    });
+                    addToast(msg, title, {
+                        channel: 'success',
+                    });
                 });
             }
         }
