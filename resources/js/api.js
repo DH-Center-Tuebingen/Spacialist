@@ -613,7 +613,7 @@ export async function handleModeration(modAction, entity_id, attribute_id, overw
                 store.dispatch('updateEntityData', {
                     eid: entity_id,
                     data: {
-                        attribute_id: overwrite_value,
+                        [attribute_id]: overwrite_value,
                     },
                 });
             }

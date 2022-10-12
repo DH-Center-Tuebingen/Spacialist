@@ -626,7 +626,7 @@ class EntityController extends Controller {
                     'error' => $ide->getMessage(),
                 ], 422);
             }
-            $attrval->{$formKeyValue->col} = $formKeyValue->val;
+            $attrval->{$formKeyValue->key} = $formKeyValue->val;
             $attrval->user_id = $user->id;
             $attrval->save();
         }
@@ -793,7 +793,7 @@ class EntityController extends Controller {
                     'error' => $ide->getMessage(),
                 ], 422);
             }
-            $attrValue->{$formKeyValue->col} = $formKeyValue->val;
+            $attrValue->{$formKeyValue->key} = $formKeyValue->val;
             $attrValue->user_id = $user->id;
             $attrValue->save();
         }
