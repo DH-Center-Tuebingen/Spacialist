@@ -405,6 +405,22 @@
                         "use_difference": "Use difference",
                         "use_as_label": "Use as label"
                     }
+                },
+                "moderation": {
+                    "locked_state_info": "This attribute is locked, because it is moderated and has to be accepted or denied by a privileged user.",
+                    "view_modified_data": "Show modified data",
+                    "view_original_data": "Show original data",
+                    "accept_changes": "Accept changes",
+                    "deny_changes": "Deny changes",
+                    "deleted_by": "<i class=\"fas fa-fw fa-trash\"></i> deleted {ts}",
+                    "modified_by": "<i class=\"fas fa-fw fa-edit\"></i> modified {ts}",
+                    "edit_moderated_value": {
+                        "title": "Edit changes",
+                        "accept": "Accept edited changes",
+                        "enable": "Enable Edit Mode",
+                        "reset": "Reset edited changes",
+                        "cancel": "Cancel editing"
+                    }
                 }
             }
         },
@@ -451,6 +467,9 @@
                     "preferences": "Preferences",
                     "thesaurus": "Thesaurus",
                     "is_plugin": "Plugin"
+                },
+                "moderation": {
+                    "required": "Requires Moderation"
                 }
             },
             "preset": {
