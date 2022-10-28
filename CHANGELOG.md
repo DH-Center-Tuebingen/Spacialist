@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.9.4
+### Fixed
+- Error on deleting plugin (Plugin not found)
+- Allow `geography` as column type in plugin migrations
+- Importing values for integer/percentage datatype in data importer
+
 ## 0.9.3
 ### Fixed
 - Wrong translated concepts for languages with lang code mismatch
