@@ -84,6 +84,9 @@ class MigrationHelper
                     $addedColumn = $table->timestamp($columnName);
                 }
                 break;
+            case 'geography':
+                $addedColumn = $table->geography($columnName);
+                break;
         }
 
         return $addedColumn;
