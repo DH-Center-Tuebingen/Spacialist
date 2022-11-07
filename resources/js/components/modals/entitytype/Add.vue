@@ -37,6 +37,7 @@
                     <div class="col-md-9">
                         <multiselect
                             v-model="state.entityType.geometryType"
+                            :classes="multiselectResetClasslist"
                             :name="'geometry-type-selection'"
                             :object="true"
                             :label="'label'"
@@ -77,6 +78,7 @@
 
     import {
         getConceptLabel,
+        multiselectResetClasslist,
     } from '@/helpers/helpers.js';
 
     export default {
@@ -134,6 +136,7 @@
                 // HELPERS
                 searchLabel,
                 getConceptLabel,
+                multiselectResetClasslist,
                 // PROPS
                 // LOCAL
                 add,

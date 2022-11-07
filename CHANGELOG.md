@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.9.5
+### Fixed
+- Display option to access analysis tool in _Tools_ (if available)
+- height of notification panel if larger than screen
+- Missing styling in _Add Entitytype_ component
+
 ## 0.9.4
 ### Fixed
 - Error on deleting plugin (Plugin not found)
