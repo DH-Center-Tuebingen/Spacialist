@@ -40,7 +40,7 @@
                                     {{ state.unreadNotifications.length }}
                                 </span>
                             </a>
-                            <div class="dropdown-menu dropdown-menu-end stays-open row bg-dark text-light py-1" aria-labelledby="notifications-navbar" style="min-width: 30rem; right: 0 !important;">
+                            <div class="dropdown-menu dropdown-menu-end stays-open row bg-dark text-light py-1 end-0 minw-30" aria-labelledby="notifications-navbar">
                                 <div class="col-12 d-flex flex-row justify-content-between pb-1">
                                     <span>
                                         {{ t('global.notifications.count', {cnt: state.notifications.length}) }}
@@ -49,7 +49,7 @@
                                         {{ t('global.notifications.mark_all_as_read') }}
                                     </a>
                                 </div>
-                                <div class="col-12 bg-light text-dark px-0">
+                                <div class="col-12 bg-light text-dark px-0 mh-75v scroll-y-auto">
                                     <notification-body
                                         v-for="(n, idx) in state.notifications"
                                         :key="n.id"
@@ -65,10 +65,7 @@
                                     </p>
                                 </div>
                                 <div class="text-center pt-1">
-                                    <!-- <router-link :to="{name: 'notifications', params: { id: $auth.user().id }}" class="text-light">
-                                        {{ t('global.notifications.view_all') }}
-                                    </router-link> -->
-                                    <router-link :to="{name: 'notifications', params: { id: 1 }}" class="text-light">
+                                    <router-link :to="{name: 'notifications', params: { id: state.authUser.id || -1 }}" class="text-light">
                                         {{ t('global.notifications.view_all') }}
                                     </router-link>
                                 </div>
@@ -104,28 +101,18 @@
                                     <i class="fas fa-fw" :class="plugin.icon"></i>
                                     {{ t(plugin.label) }}
                                 </router-link>
-                                <template v-if="hasPreference('prefs.link-to-thesaurex')">
-                                    <div class="dropdown-divider"></div>
-                                    <h6 class="dropdown-header">
-                                        {{ t('global.tools.external') }} <sup class="fas fa-fw fa-sm fa-fw fa-external-link-alt"></sup>
-                                    </h6>
-                                </template>
-                                <template v-if="hasPreference('prefs.link-to-thesaurex')">
-                                    <a class="dropdown-item" :href="getPreference('prefs.link-to-thesaurex')" target="_blank">
-                                        <i class="fas fa-fw fa-paw"></i>
-                                        {{ t('global.tools.thesaurex') }}
-                                    </a>
-                                </template>
-                                <template>
-                                    <a class="dropdown-item" href="../db" target="_blank">
-                                        <i class="fas fa-fw fa-chart-bar"></i>
-                                        {{ t('global.tools.dbwebgen') }}
-                                    </a>
-                                    <a class="dropdown-item" href="../analysis" target="_blank">
-                                        <i class="fas fa-fw fa-chart-bar"></i>
-                                        {{ t('global.tools.analysis') }}
-                                    </a>
-                                </template>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header">
+                                    {{ t('global.tools.external') }} <sup class="fas fa-fw fa-sm fa-fw fa-external-link-alt"></sup>
+                                </h6>
+                                <a class="dropdown-item" :href="getPreference('prefs.link-to-thesaurex')" target="_blank" v-if="hasPreference('prefs.link-to-thesaurex')">
+                                    <i class="fas fa-fw fa-paw"></i>
+                                    {{ t('global.tools.thesaurex') }}
+                                </a>
+                                <a class="dropdown-item" href="../analysis" target="_blank" v-if="state.hasAnalysis">
+                                    <i class="fas fa-fw fa-chart-bar"></i>
+                                    {{ t('global.tools.analysis') }}
+                                </a>
                             </div>
                         </li>
                         <li class="nav-item dropdown" v-if="state.loggedIn">
@@ -158,9 +145,6 @@
                                     <i class="fas fa-fw" :class="plugin.icon"></i>
                                     {{ t(plugin.label) }}
                                 </router-link>
-                                <!-- <router-link class="dropdown-item" v-for="plugin in state.plugins.settings" :to="plugin.href" :key="plugin.key">
-                                    <i class="fas fa-fw" :class="plugin.icon"></i> {{ t(plugin.label) }}
-                                </router-link> -->
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#" @click.prevent="showAboutModal">
                                     <i class="fas fa-fw fa-info-circle"></i>
@@ -309,6 +293,7 @@
                 recordingTimeout: 0,
                 isRecording: false,
                 plugins: computed(_ => store.getters.slotPlugins()),
+                hasAnalysis: computed(_ => store.getters.hasAnalysis),
                 auth: auth,
                 appName: computed(_ => getProjectName()),
                 init: computed(_ => store.getters.appInitialized),

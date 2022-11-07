@@ -58,6 +58,7 @@ export const store = createStore({
                         settings: [],
                     },
                     vfm: {},
+                    hasAnalysis: false,
                 }
             },
             mutations: {
@@ -430,6 +431,9 @@ export const store = createStore({
                 setColorSets(state, data) {
                     state.colorSets = data;
                 },
+                setAnalysis(state, data) {
+                    state.hasAnalysis = data;
+                },
             },
             actions: {
                 setAppState({commit}, data) {
@@ -638,6 +642,9 @@ export const store = createStore({
                 setColorSets({commit}, data) {
                     commit('setColorSets', data);
                 },
+                setAnalysis({commit}, data) {
+                    commit('setAnalysis', data);
+                },
             },
             getters: {
                 appInitialized: state => state.appInitialized,
@@ -686,6 +693,7 @@ export const store = createStore({
                     return slot ? p[slot] : p;
                 },
                 colorSets: state => state.colorSets,
+                hasAnalysis: state => state.hasAnalysis,
                 vfm: state => state.vfm,
             }
         },

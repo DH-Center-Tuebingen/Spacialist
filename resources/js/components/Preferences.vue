@@ -235,7 +235,6 @@
 
             // FUNCTIONS
             const trackChanges = (label, data) => {
-                console.log(label, data);
                 state.dirtyData[label] = {
                     value: data.value,
                 };
