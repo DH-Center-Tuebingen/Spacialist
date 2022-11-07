@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 - height of notification panel if larger than screen
 - Missing styling in _Add Entitytype_ component
 - Several geodata related bugs
+- Node dropdown not closed on outside click
 
 ## 0.9.4
 ### Fixed
