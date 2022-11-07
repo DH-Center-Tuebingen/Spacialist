@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 - Display option to access analysis tool in _Tools_ (if available)
 - height of notification panel if larger than screen
 - Missing styling in _Add Entitytype_ component
+- Several geodata related bugs
 
 ## 0.9.4
 ### Fixed

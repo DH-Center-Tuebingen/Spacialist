@@ -327,6 +327,8 @@ class SetupTables extends Migration
     }
 
     private function migrateFromScratch() {
+        // enable the postgis extension
+        Schema::getConnection()->statement('CREATE EXTENSION IF NOT EXISTS postgis');
         // Create Bibliography
         Schema::create('bibliography', function (Blueprint $table) {
             $table->increments('id');
