@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.9.6
+### Fixed
+- Only delete avatar if is set and exists on disk
+
 ## 0.9.5
 ### Fixed
 - Display option to access analysis tool in _Tools_ (if available)
