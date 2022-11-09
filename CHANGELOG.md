@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## 0.9.6
 ### Fixed
 - Only delete avatar if is set and exists on disk
+- Display image in About modal
 
 ## 0.9.5
 ### Fixed
