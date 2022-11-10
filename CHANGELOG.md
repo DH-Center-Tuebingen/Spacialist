@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Only delete avatar if is set and exists on disk
 - Display image in About modal
+- Closing modal after user is (successfully) added
 
 ## 0.9.5
 ### Fixed
