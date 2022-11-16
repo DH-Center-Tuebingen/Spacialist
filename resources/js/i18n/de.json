@@ -133,7 +133,7 @@
             "boolean": "Kontrollkästchen",
             "percentage": "Prozentangabe",
             "entity": "Entität",
-            "entity-mc": "Entität (Mehrfachauswal)",
+            "entity-mc": "Entität (Mehrfachauswahl)",
             "epoch": "Zeitspanne & Epoche",
             "timeperiod": "Zeitspanne",
             "date": "Datum",
