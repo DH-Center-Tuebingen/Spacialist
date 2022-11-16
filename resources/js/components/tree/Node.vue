@@ -82,10 +82,10 @@
     } from '@/api.js';
     import {
         can,
-        getEntityColors
+        getEntityColors,
     } from '@/helpers/helpers.js';
     import {
-        numPlus
+        numPlus,
     } from '@/helpers/filters.js';
 
     export default {

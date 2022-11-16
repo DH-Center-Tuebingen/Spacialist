@@ -206,6 +206,12 @@ export function getEntityType(id) {
     return getEntityTypes()[id];
 }
 
+export function getEntityTypeName(id) {
+    const entityType = getEntityType(id);
+    if(!entityType) return '';
+    return translateConcept(entityType.thesaurus_url);
+}
+
 export function getEntityTypes() {
     return store.getters.entityTypes || [];
 }

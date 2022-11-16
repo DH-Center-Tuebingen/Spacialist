@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Info modal in references tab to view all information from an literature reference
 - Copy BibTeX-Code of literature item to clipboard
+- Entity type color dot to entity detail's link list (entity type name is shown on hover)
 ### Fixed
 - Only delete avatar if is set and exists on disk
 - Display image in About modal
