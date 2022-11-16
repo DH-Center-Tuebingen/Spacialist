@@ -605,6 +605,9 @@
                 "edit": {
                     "title": "Edit entry"
                 },
+                "details": {
+                    "title": "Entry details"
+                },
                 "delete": {
                     "title": "Delete entry",
                     "alert": "If you delete <span class=\"fw-bold\">{name}</span>, one reference is deleted, too. | If you delete <span class=\"fw-bold\">{name}</span>, {cnt} references are deleted, too."
@@ -643,6 +646,22 @@
                 "institution": "Institution",
                 "organization": "Organization",
                 "school": "School"
+            },
+            "types": {
+                "article": "Article",
+                "book": "Book",
+                "incollection": "In Collection",
+                "misc": "Misc",
+                "booklet": "Booklet",
+                "conference": "Conference",
+                "inbook": "Inbook",
+                "inproceedings": "Inproceedings",
+                "manual": "Manual",
+                "mastersthesis": "Master's Thesis",
+                "phdthesis": "Ph.D. Thesis",
+                "proceedings": "Proceedings",
+                "techreport": "Techreport",
+                "unpublished": "Unpublished"
             }
         },
         "importer": {

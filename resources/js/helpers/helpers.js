@@ -428,6 +428,8 @@ export function getRoles(withPermissions = false) {
 };
 
 export function getUserBy(value, attr = 'id') {
+    if(!value) return null;
+
     if(isLoggedIn()) {
         const isNum = !isNaN(value);
         const lValue = isNum ? value : value.toLowerCase();
@@ -566,6 +568,8 @@ export function getClassByValidation(errorList) {
 };
 
 export function createAnchorFromUrl(url) {
+    if(!url) return url;
+    if(typeof url != 'string' || !url.replace) return url;
     const urlRegex = /(\b(https?):\/\/[-A-Z0-9+#&=?@%_.]*[-A-Z0-9+#&=?@%_\/])/ig;
     return url.replace(urlRegex, match => `<a href="${match}" target="_blank">${match}</a>`);
 };
@@ -749,6 +753,21 @@ export function createDownloadLink(content, filename, base64 = false, contentTyp
     document.body.appendChild(link);
     link.click();
 }
+
+export function copyToClipboard(elemId) {
+    const range = document.createRange();
+    const selection = window.getSelection();
+    const elem = document.getElementById(elemId);
+    range.selectNodeContents(elem);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    try {
+        document.execCommand("copy");
+        selection.removeAllRanges();
+    } catch(err) {
+        console.log(err);
+    }
+};
 
 export function setPreference(prefKey, value) {
     this.state.preferences[prefKey] = value;

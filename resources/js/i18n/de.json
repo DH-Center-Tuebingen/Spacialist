@@ -605,6 +605,9 @@
                 "edit": {
                     "title": "Eintrag editieren"
                 },
+                "details": {
+                    "title": "Eintragdetails"
+                },
                 "delete": {
                     "title": "Eintrag löschen",
                     "alert": "Wenn du <span class=\"fw-bold\">{name}</span> löschst, wird eine Quellenangabe ebenfalls gelöscht. | Wenn du <span class=\"fw-bold\">{name}</span> löschst, werden {cnt} Quellenangaben ebenfalls gelöscht."
@@ -643,6 +646,22 @@
                 "institution": "Einrichtung",
                 "organization": "Organisation",
                 "school": "Schule"
+            },
+            "types": {
+                "article": "Artikel",
+                "book": "Buch",
+                "incollection": "Teil eines Buches (mit eigenem Titel)",
+                "misc": "Verschiedenes",
+                "booklet": "Heft",
+                "conference": "Konferenz",
+                "inbook": "Teil eines Buches",
+                "inproceedings": "Artikel eines Konferenzberichts",
+                "manual": "Dokumentation",
+                "mastersthesis": "Abschlussarbeit (außer Promotion)",
+                "phdthesis": "Doktor- oder Promotionsarbeit",
+                "proceedings": "Konferenzbericht",
+                "techreport": "Bericht einer Hochschule oder anderen Institution",
+                "unpublished": "Nicht veröffentlicht"
             }
         },
         "importer": {

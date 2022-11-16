@@ -2,10 +2,18 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.9.6
+### Added
+- Info modal in references tab to view all information from an literature reference
+- Copy BibTeX-Code of literature item to clipboard
 ### Fixed
 - Only delete avatar if is set and exists on disk
 - Display image in About modal
 - Closing modal after user is (successfully) added
+- Display errors from server if user can not be added (e.g. due to already existing nickname or email address)
+### Changed
+- Updated Modal Library to Version 4
+- Better handling of `"`, `{` and `{{` in BibTeX
+- Show translated BibTeX-Type in literature entry add/edit modal's type selection
 
 ## 0.9.5
 ### Fixed

@@ -38,7 +38,6 @@ import VueUploadComponent from 'vue-upload-component';
 import DatePicker from 'vue-datepicker-next';
 import draggable from 'vuedraggable';
 import { Tree, Node, } from "tree-vue-component";
-import VueFinalModal from 'vue-final-modal';
 import Markdown from 'vue3-markdown-it';
 
 // Components
@@ -55,6 +54,8 @@ import '@/bootstrap/http.js';
 import vueAuth from '@/bootstrap/auth.js';
 // vue-i18n
 import i18n from '@/bootstrap/i18n.js';
+// vue-final-modal
+import { vfm } from '@/bootstrap/vfm.js';
 // Font Awesome
 import '@/bootstrap/font.js';
 
@@ -71,7 +72,7 @@ app.use(i18n);
 app.use(router);
 app.use(store);
 app.use(vueAuth);
-app.use(VueFinalModal());
+app.use(vfm);
 app.use(Markdown);
 
 // Directives

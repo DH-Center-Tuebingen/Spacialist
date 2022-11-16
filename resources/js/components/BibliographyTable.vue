@@ -30,13 +30,13 @@
                         </div>
                     </li>
                     <li class="list-inline-item">
-                        <button type="button" class="btn btn-outline-success" id="bibliography-add-button" @click="showNewItemModal()" :disabled="!can('bibliography_create')">
+                        <button type="button" class="btn btn-sm btn-outline-success" id="bibliography-add-button" @click="showNewItemModal()" :disabled="!can('bibliography_create')">
                             <i class="fas fa-fw fa-plus"></i> {{ t('main.bibliography.add') }}
                         </button>
                     </li>
                     <li class="list-inline-item">
                         <file-upload
-                            class="btn btn-outline-primary clickable"
+                            class="btn btn-sm btn-outline-primary clickable"
                             accept="application/x-bibtex,text/x-bibtex,text/plain"
                             extensions="bib,bibtex"
                             ref="upload"
@@ -53,7 +53,7 @@
                         </file-upload>
                     </li>
                     <li class="list-inline-item">
-                        <button type="button" class="btn btn-outline-primary" @click="exportFile()">
+                        <button type="button" class="btn btn-sm btn-outline-primary" @click="exportFile()">
                             <i class="fas fa-fw fa-file-export"></i> {{ t('main.bibliography.export') }}
                         </button>
                     </li>
@@ -329,8 +329,7 @@
                         <td>
                             {{ entry.misc }}
                         </td>
-                        <td>
-                            {{ entry.howpublished }}
+                        <td v-html="createAnchorFromUrl(entry.howpublished)">
                         </td>
                         <td v-if="state.showAllFields">
                             {{ entry.institution }}
@@ -413,6 +412,7 @@
     import {
         can,
         createDownloadLink,
+        createAnchorFromUrl,
         getProjectName,
         _debounce,
         _orderBy,
@@ -598,6 +598,7 @@
                 t,
                 // HELPERS
                 can,
+                createAnchorFromUrl,
                 // LOCAL
                 debouncedSearch,
                 setOrderColumn,

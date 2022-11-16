@@ -1,43 +1,44 @@
 <template>
     <vue-final-modal
-        classes="modal-container modal"
+        class="modal-container modal"
         content-class="sp-modal-content sp-modal-content-sm"
-        v-model="state.show"
         name="edit-entity-type-modal">
-        <div class="modal-header">
-            <h5 class="modal-title">
-                {{
-                    t('main.entity.modals.edit.title_type', {
-                        name: translateConcept(entityType.thesaurus_url)
-                    })
-                }}
-            </h5>
-            <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-            </button>
-        </div>
-        <div class="modal-body nonscrollable">
-            <form id="edit-entity-type-form" name="edit-entity-type-form" role="form" @submit.prevent="confirmEdit()">
-                <div class="row">
-                    <label class="col-form-label col-3" for="label">
-                        {{ t('global.label') }}:
-                    </label>
-                    <div class="col-9">
-                        <simple-search
-                            :endpoint="searchLabel"
-                            :key-fn="getConceptLabel"
-                            :default-value="state.defaultConcept"
-                            @selected="labelSelected" />
+        <div class="sp-modal-content sp-modal-content-sm">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {{
+                        t('main.entity.modals.edit.title_type', {
+                            name: translateConcept(entityType.thesaurus_url)
+                        })
+                    }}
+                </h5>
+                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
+                </button>
+            </div>
+            <div class="modal-body nonscrollable">
+                <form id="edit-entity-type-form" name="edit-entity-type-form" role="form" @submit.prevent="confirmEdit()">
+                    <div class="row">
+                        <label class="col-form-label col-3" for="label">
+                            {{ t('global.label') }}:
+                        </label>
+                        <div class="col-9">
+                            <simple-search
+                                :endpoint="searchLabel"
+                                :key-fn="getConceptLabel"
+                                :default-value="state.defaultConcept"
+                                @selected="labelSelected" />
+                        </div>
                     </div>
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button type="submit" class="btn btn-outline-success" form="edit-entity-type-form" :disabled="!state.isValid">
-                <i class="fas fa-fw fa-plus"></i> {{ t('global.save') }}
-            </button>
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
-            </button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-outline-success" form="edit-entity-type-form" :disabled="!state.isValid">
+                    <i class="fas fa-fw fa-plus"></i> {{ t('global.save') }}
+                </button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
+                    <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
+                </button>
+            </div>
         </div>
     </vue-final-modal>
 </template>
@@ -45,7 +46,6 @@
 <script>
     import {
         computed,
-        onMounted,
         reactive,
         toRefs,
         watch,
@@ -79,11 +79,9 @@
             // FUNCTIONS
             const confirmEdit = _ => {
                 if(!state.isValid) return;
-                state.show = false;
                 context.emit('confirm', state.editedProps);
             };
             const closeModal = _ => {
-                state.show = false;
                 context.emit('closing', false);
             };
             const labelSelected = e => {
@@ -114,7 +112,6 @@
 
             // DATA
             const state = reactive({
-                show: false,
                 defaultConcept: getDefaultConcept(entityType.value.thesaurus_url),
                 editedProps: {
                     thesaurus_url: null,
@@ -127,11 +124,6 @@
                     }
                     return true;
                 }),
-            });
-
-            // ON MOUNTED
-            onMounted(_ => {
-                state.show = true;
             });
 
             // WATCHER

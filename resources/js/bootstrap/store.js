@@ -57,16 +57,12 @@ export const store = createStore({
                         tools: [],
                         settings: [],
                     },
-                    vfm: {},
                     hasAnalysis: false,
                 }
             },
             mutations: {
                 setAppInitialized(state, data) {
                     state.appInitialized = data;
-                },
-                setModalInstance(state, data) {
-                    state.vfm = data;
                 },
                 setAttributes(state, data) {
                     state.attributes = data;
@@ -439,9 +435,6 @@ export const store = createStore({
                 setAppState({commit}, data) {
                     commit('setAppInitialized', data);
                 },
-                setModalInstance({commit}, data) {
-                    commit('setModalInstance', data);
-                },
                 setBibliography({commit}, data) {
                     commit('setBibliography', data);
                 },
@@ -694,7 +687,6 @@ export const store = createStore({
                 },
                 colorSets: state => state.colorSets,
                 hasAnalysis: state => state.hasAnalysis,
-                vfm: state => state.vfm,
             }
         },
         pluginstore: {

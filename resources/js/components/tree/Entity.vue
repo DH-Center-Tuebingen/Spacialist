@@ -106,7 +106,6 @@
                 <i class="fas fa-fw fa-plus"></i> {{ t('main.entity.tree.add') }}
             </button>
         </div>
-        <!-- <modals-container class="visible-overflow" /> -->
     </div>
 </template>
 

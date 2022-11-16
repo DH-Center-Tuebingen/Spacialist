@@ -205,7 +205,7 @@
             </div>
             <video id="rtc-sharing-container" class="video-js d-none"></video>
         </div>
-        <modals-container></modals-container>
+        <modals-container/>
         <div class="toast-container ps-3 pb-3" id="toast-container"></div>
     </div>
 </template>
@@ -214,10 +214,13 @@
     import {
         reactive,
         computed,
-        inject,
         onMounted,
         watch,
     } from 'vue';
+
+    import {
+        ModalsContainer,
+    } from 'vue-final-modal';
 
     import {
         router,
@@ -255,9 +258,11 @@
     } from '@/helpers/routing.js';
 
     export default {
+        components: {
+            'modals-container': ModalsContainer,
+        },
         setup(props) {
             const { t, locale } = useI18n();
-            store.dispatch('setModalInstance', inject('$vfm'));
 
             // FETCH
             initApp(locale).then(_ => {

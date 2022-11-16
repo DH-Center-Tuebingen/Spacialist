@@ -171,6 +171,17 @@ export function join(arr, separator = ', ') {
 
     return arr.join(separator);
 };
+export function bibtexEntryToText(value, key = null) {
+    let text = value;
+    if(value.startsWith('{{') && value.endsWith('}}')) {
+        text = value.substring(2, value.length-2);
+    } else if(value.startsWith('{') && value.endsWith('}')) {
+        text = value.substring(1, value.length-1);
+    } else if(key && key == 'pages') {
+        text = value.replace('--', ' - ');
+    }
+    return text;
+};
 export function bibtexify(value, type) {
     let rendered = "<pre class='mb-0'><code>";
     if(type) {
@@ -178,8 +189,13 @@ export function bibtexify(value, type) {
         if(value['citekey']) rendered += value['citekey'] + ",";
         for(let k in value) {
             if(value[k] == null || value[k] == '' || k == 'citekey') continue;
+            let cv = escapehtml(value[k]);
+            if(!((cv.startsWith('{{') && cv.endsWith('}}')) ||
+                (cv.startsWith('{') && cv.endsWith('}')))) {
+                cv = "\"" + cv + "\"";
+            }
             rendered += "    <br />";
-            rendered += "    " + k + " = \"" + escapehtml(value[k]) + "\"";
+            rendered += "    " + k + " = " + cv;
         }
         rendered += "<br />";
         rendered += "}";
