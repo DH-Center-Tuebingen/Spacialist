@@ -39,7 +39,7 @@
             </div>
             <div class="modal-footer">
                 <button type="submit" class="btn btn-outline-success" form="moveEntityForm" :disabled="state.dataMissing">
-                    <i class="fas fa-fw fa-plus"></i> {{ t('global.move') }}
+                    <i class="fas fa-fw fa-long-arrow-alt-right"></i> {{ t('global.move') }}
                 </button>
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
                     <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}

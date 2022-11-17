@@ -504,27 +504,6 @@ export function ShowMoveEntity(entity, onMoved) {
             },
             onConfirm(parentId) {
                 moveEntity(entity.id, parentId).then(data => {
-                    let oldSiblings;
-                    if(!!entity.root_entity_id) {
-                        oldSiblings = store.getters.entities[entity.root_entity_id].children;
-                    } else {
-                        oldSiblings = store.getters.tree;
-                    }
-                    const idx = oldSiblings.findIndex(n => n.id == entity.id);
-                    if(idx > -1) {
-                        oldSiblings.splice(idx, 1);
-                    }
-                    if(!parentId) {
-                        store.getters.tree.push(entity);
-                    } else {
-                        const parent = store.getters.entities[parentId];
-                        if(!!parent) {
-                            if(parent.childrenLoaded) {
-                                parent.children.push(entity);
-                            }
-                            parent.children_count++;
-                        }
-                    }
                     if(!!onMoved) {
                         onMoved(entity.id, parentId, data);
                     }

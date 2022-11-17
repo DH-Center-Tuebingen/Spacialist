@@ -126,6 +126,53 @@ export const store = createStore({
                     entityType.updated_at = data.updated_at;
                     entityType.thesaurus_url = data.thesaurus_url;
                 },
+                moveEntity(state, data) {
+                    const entity = state.entities[data.entity_id];
+                    let oldSiblings;
+                    if(!!entity.root_entity_id) {
+                        oldSiblings = state.entities[entity.root_entity_id].children;
+                    } else {
+                        oldSiblings = state.tree;
+                    }
+                    const idx = oldSiblings.findIndex(n => n.id == entity.id);
+                    if(idx > -1) {
+                        oldSiblings.splice(idx, 1);
+                    }
+                    if(!data.parent_id) {
+                        // Update children state of old parent
+                        if(!!entity.root_entity_id) {
+                            const oldParent = state.entities[entity.root_entity_id];
+                            oldParent.children_count--;
+                            if(oldParent.children_count == 0) {
+                                oldParent.state.openable = false;
+                                oldParent.state.opened = false;
+                            }
+                        }
+                        entity.root_entity_id = null;
+                        state.tree.push(entity);
+                    } else {
+                        // Update children state of new parent
+                        const parent = state.entities[data.parent_id];
+                        if(!!parent) {
+                            if(parent.childrenLoaded) {
+                                parent.children.push(entity);
+                            }
+                            parent.children_count++;
+                            parent.state.openable = true;
+                        }
+                        // Also update children state of old parent
+                        if(!!entity.root_entity_id) {
+                            const oldParent = state.entities[entity.root_entity_id];
+                            oldParent.children_count--;
+                            if(oldParent.children_count == 0) {
+                                oldParent.state.openable = false;
+                                oldParent.state.opened = false;
+                            }
+                        }
+                        // Set new parent after updating states
+                        entity.root_entity_id = data.parent_id;
+                    }
+                },
                 deleteEntity(state, data) {
                     const entity = state.entities[data.id];
                     if(entity.root_entity_id) {
@@ -547,6 +594,9 @@ export const store = createStore({
                 },
                 updateEntityType({commit}, data) {
                     commit('updateEntityType', data);
+                },
+                moveEntity({commit}, data) {
+                    commit('moveEntity', data);
                 },
                 deleteEntity({commit}, data) {
                     commit('deleteEntity', data);

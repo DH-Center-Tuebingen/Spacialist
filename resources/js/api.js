@@ -606,7 +606,15 @@ export async function moveEntity(entityId, parentId = null, rank = null) {
     }
 
     return $httpQueue.add(
-        () => http.patch(`/entity/${entityId}/rank`, data).then(response => response.data)
+        () => http.patch(`/entity/${entityId}/rank`, data).then(response => {
+            store.dispatch('moveEntity', {
+                entity_id: entityId,
+                parent_id: parentId,
+                rank: data.rank,
+                to_end: data.to_end,
+            });
+            return response.data;
+        })
     );
 };
 
