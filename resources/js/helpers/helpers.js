@@ -213,7 +213,7 @@ export function getEntityTypeName(id) {
 }
 
 export function getEntityTypes() {
-    return store.getters.entityTypes || [];
+    return store.getters.entityTypes || {};
 }
 
 export function getEntityTypeAttributes(id) {

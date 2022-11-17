@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 - Closing modal after user is (successfully) added
 - Display errors from server if user can not be added (e.g. due to already existing nickname or email address)
 - References list not visible after added a new one if it's the first literature reference added to that attribute
+- Newly created entity types only selectable as sub-entity types after reload
 ### Changed
 - Updated Modal Library to Version 4
 - Better handling of `"`, `{` and `{{` in BibTeX
