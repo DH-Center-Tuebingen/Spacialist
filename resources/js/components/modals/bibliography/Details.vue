@@ -68,7 +68,7 @@
                     </a>
                 </div>
                 <h5 class="mt-3 d-flex gap-1">
-                    {{ t('main.bibliography.modal.new.bibtex_code') }}
+                    {{ t('main.bibliography.modal.bibtex_code') }}
                     <small class="clickable" @click="toggleShowBibtexCode()">
                         <span v-show="state.bibtexCodeShown">
                             <i class="fas fa-fw fa-caret-up"></i>
@@ -175,7 +175,6 @@
                 }),
             });
 
-
             const item = store.getters.bibliography.find(item => item.id == id.value);
             if(item) {
                 const {
@@ -186,7 +185,7 @@
                     type,
                     updated_at,
                     ...data
-                } = except(item, ['id', 'created_at']);
+                } = except(item, ['id', 'created_at', 'file', 'file_url']);
 
                 state.data.id = id.value;
                 state.data.citekey = citekey;

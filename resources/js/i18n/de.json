@@ -23,7 +23,9 @@
         "create": "Anlegen",
         "move": "Verschieben",
         "parse": "Parsen",
+        "file": "Datei",
         "remove_file": "Datei entfernen",
+        "no_file": "Keine Datei vorhanden",
         "list": {
             "nr_of_entries": "Keine Einträge | 1 Eintrag | {cnt} Einträge",
             "no_entries": "Keine Einträge gefunden.",
@@ -598,9 +600,10 @@
             "title": "Literatur",
             "modal": {
                 "paste_info": "Du kannst die Felder mit der Tastenkombination <kbd><kbd>Strg</kbd> + <kbd>v</kbd></kbd> mit einem BibTeX-Eintrag aus deiner Zwischenablage ausfüllen.",
+                "bibtex_code": "BibTeX-Code",
+                "attach_file": "Datei anhängen",
                 "new": {
-                    "title": "Neuer Eintrag",
-                    "bibtex_code": "BibTeX-Code"
+                    "title": "Neuer Eintrag"
                 },
                 "edit": {
                     "title": "Eintrag editieren"
@@ -645,7 +648,11 @@
                 "howpublished": "Verweis",
                 "institution": "Einrichtung",
                 "organization": "Organisation",
-                "school": "Schule"
+                "school": "Schule",
+                "doi": "DOI",
+                "url": "URL",
+                "email": "@:global.email",
+                "subtype": "Typ (Spezifisch)"
             },
             "types": {
                 "article": "Artikel",
@@ -661,7 +668,11 @@
                 "phdthesis": "Doktor- oder Promotionsarbeit",
                 "proceedings": "Konferenzbericht",
                 "techreport": "Bericht einer Hochschule oder anderen Institution",
-                "unpublished": "Nicht veröffentlicht"
+                "unpublished": "Nicht veröffentlicht",
+                "validation": {
+                    "required": "@:main.bibliography.column.{col} ist ein Pflichtfeld",
+                    "required_one_of": "Entweder @:main.bibliography.column.{col} oder @:main.bibliography.column.{ref} muss gesetzt sein"
+                }
             }
         },
         "importer": {

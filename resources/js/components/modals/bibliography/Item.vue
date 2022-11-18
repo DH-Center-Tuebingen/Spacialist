@@ -22,9 +22,9 @@
                 :type="'note'"
                 :noicon="false"
                 :icontext="t('global.note')" />
-            <form role="form" id="addBibliographyItemForm" class="col px-0 scroll-y-auto" name="addBibliographyItemForm" @submit.prevent="submitItem()">
-                <div class="mb-3">
-                    <label class="col-form-label col-md-3" for="type">{{ t('global.type') }}:</label>
+            <form role="form" id="addBibliographyItemForm" class="col px-0 scroll-y-auto scroll-x-hidden" name="addBibliographyItemForm" @submit.prevent="submitItem()">
+                <div class="row mb-3">
+                    <label class="col-form-label col-md-3 text-end" for="type">{{ t('global.type') }}:</label>
                     <div class="col-md-9">
                         <multiselect
                             v-model="state.data.type"
@@ -48,23 +48,42 @@
                         </multiselect>
                     </div>
                 </div>
-                <div v-for="field in state.typeFields" :key="field.id">
-                    <label class="col-form-label col-md-3">
-                        {{ t(`main.bibliography.column.${field}`) }}:
-                    </label>
-                    <div class="col-md-9">
-                        <input type="text" class="form-control" :class="getValidClass(state.error, field)" v-model="state.data.fields[field]"/>
-    
-                        <div class="invalid-feedback">
-                            <span v-for="(msg, i) in state.error[field]" :key="i">
-                                {{ msg }}
+                <template v-for="bibType in state.typeList" :key="bibType">
+                    <bibtex-fieldset v-if="state.typeName == bibType" :data="state.fieldData" :type="bibType" :ref="el => fieldsetRefs[bibType] = el" @change="fieldsetStateUpdated" />
+                </template>
+                <div class="" v-if="state.data.file">
+                    <a :href="state.data.file_url" target="_blank">
+                        {{ state.data.file.split('/')[1] }}
+                    </a>
+                    <a href="#" class="text-danger text-decoration-none" @click.prevent="removeFile()">
+                        <i class="fas fa-fw fa-trash"></i>
+                    </a>
+                </div>
+                <div class="d-flex gap-2" v-else>
+                    <file-upload
+                        class="btn btn-sm btn-outline-primary clickable"
+                        ref="upload"
+                        v-model="state.fileContainer"
+                        :disabled="!can('bibliography_write|bibliography_create')"
+                        :custom-action="importFile"
+                        :directory="false"
+                        :multiple="false"
+                        :drop="true"
+                        @input-file="inputFile">
+                            <span>
+                                <i class="fas fa-fw fa-file-import"></i> {{ t('main.bibliography.modal.attach_file') }}
                             </span>
-                        </div>
-                    </div>
+                    </file-upload>
+                    <span v-if="state.file">
+                        {{ state.file.name }}
+                        <a href="#" class="text-reset text-decoration-none" @click.prevent="removeQueuedFile()">
+                            <i class="fas fa-fw fa-times"></i>
+                        </a>
+                    </span>
                 </div>
             </form>
             <h5 class="mt-3 d-flex gap-1">
-                {{ t('main.bibliography.modal.new.bibtex_code') }}
+                {{ t('main.bibliography.modal.bibtex_code') }}
                 <small class="clickable" @click="toggleShowBibtexCode()">
                     <span v-show="state.bibtexCodeShown">
                         <i class="fas fa-fw fa-caret-up"></i>
@@ -80,10 +99,10 @@
             <span v-show="state.bibtexCodeShown" :id="state.id" v-html="bibtexify(state.data.fields, state.typeName)"></span>
         </div>
         <div class="modal-footer">
-            <button type="submit" class="btn btn-outline-success" form="addBibliographyItemForm" v-if="state.data.id">
+            <button type="submit" class="btn btn-outline-success" :disabled="state.disabled" form="addBibliographyItemForm" v-if="state.data.id">
                 <i class="fas fa-fw fa-save"></i> {{ t('global.update') }}
             </button>
-            <button type="submit" class="btn btn-outline-success" form="addBibliographyItemForm" v-else>
+            <button type="submit" class="btn btn-outline-success" :disabled="state.disabled" form="addBibliographyItemForm" v-else>
                 <i class="fas fa-fw fa-plus"></i> {{ t('global.add') }}
             </button>
             <button type="button" class="btn btn-outline-secondary" @click="closeModal()">
@@ -100,12 +119,14 @@
     import {
         computed,
         reactive,
+        ref,
+        toRefs,
     } from 'vue';
+
     import { useI18n } from 'vue-i18n';
 
     import {
-        getErrorMessages,
-        getValidClass,
+        can,
         getTs,
         copyToClipboard,
     } from '@/helpers/helpers.js';
@@ -116,23 +137,23 @@
         bibliographyTypes,
     } from '@/helpers/bibliography.js';
 
+    import FieldSet from '@/components/modals/bibliography/FieldSet.vue';
+
     export default {
         props: {
             data: {
                 required: true,
                 type: Object
             },
-            onSuccess: {
-                required: false,
-                type: Function
-            },
-            onClose: {
-                required: false,
-                type: Function
-            }
         },
-        emits: ['closing'],
+        components: {
+            'bibtex-fieldset': FieldSet,
+        },
+        emits: ['save', 'closing'],
         setup(props, context) {
+            const {
+                data,
+            } = toRefs(props);
             const { t } = useI18n();
 
             // FUNCTIONS
@@ -163,58 +184,89 @@
                     }
                 }
             };
+            const importFile = (file, component) => {
+            };
+            const inputFile = (newFile, oldFile) => {
+                if(!can('bibliography_write|bibliography_create')) return;
+
+                state.fileRemoved = false;
+            };
+            const removeQueuedFile = _ => {
+                state.fileRemoved = true;
+                state.fileContainer = [];
+            }
+            const removeFile = _ => {
+                state.fileRemoved = true;
+                state.data.file = '';
+                state.data.file_url = '';
+            };
             const toggleShowBibtexCode = _ => {
                 state.bibtexCodeShown = !state.bibtexCodeShown;
             };
+            const fieldsetStateUpdated = event => {
+                state.disabled = !event.dirty || !event.valid;
+                state.data.fields = {
+                    ...state.data.fields,
+                    ...event.values,
+                };
+            };
             const submitItem = _ => {
-                if(props.onSuccess) {
-                    props.onSuccess(state.data).then(response => {
-                        context.emit('closing', false);
-                    }).catch(e => {
-                        state.error = getErrorMessages(e);
-                    });
-                } else {
-                    context.emit('closing', false);
-                }
+                const fsRef = fieldsetRefs.value[state.typeName];
+                const updFields = fsRef.getData();
+                const data = {
+                    fields: updFields,
+                    type: state.data.type,
+                    id: state.data.id,
+                };
+                const file = state.fileRemoved ? 'delete' : (state.file ? state.file.file : null);
+                context.emit('save', {
+                    data: data,
+                    file: file,
+                });
             };
             const closeModal = _ => {
-                if(props.onClose) {
-                    props.onClose(state.data);
-                }
                 context.emit('closing', false);
             };
 
             // DATA
+            const fieldsetRefs = ref({});
             const state = reactive({
                 id: `bibliography-item-modal-bibtex-code-${getTs()}`,
-                data: props.data,
+                data: data.value,
+                fieldData: {...data.value},
                 bibtexCodeShown: true,
                 error: {},
+                fileContainer: [],
+                formMetas: {},
+                file: computed(_ => state.fileContainer.length > 0 ? state.fileContainer[0] : null),
+                fileRemoved: false,
+                disabled: true,
                 typeName: computed(_ => state.data.type ? state.data.type.name : null),
-                typeFields: computed(_ => {
-                    if(state.data.type) {
-                        return state.data.type.fields;
-                    }
-                    return bibliographyTypes[0].fields;
-                }),
+                typeList: bibliographyTypes.map(t => t.name),
             });
 
             // RETURN
             return {
                 t,
                 // HELPERS
-                getValidClass,
+                can,
                 copyToClipboard,
                 bibtexify,
                 bibliographyTypes,
                 // PROPS
                 // LOCAL
                 handlePasteFromClipboard,
+                importFile,
+                inputFile,
+                removeQueuedFile,
+                removeFile,
                 toggleShowBibtexCode,
+                fieldsetStateUpdated,
                 submitItem,
                 closeModal,
                 //STATE
                 state,
+                fieldsetRefs,
             }
         },
     }

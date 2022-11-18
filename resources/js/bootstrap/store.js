@@ -80,7 +80,8 @@ export const store = createStore({
                     state.bibliography.push(data);
                 },
                 updateBibliographyItem(state, data) {
-                    let entry = state.bibliography.find(e => e.id == data.id);
+                    const entry = state.bibliography.find(e => e.id == data.id);
+                    entry.type = data.type;
                     for(let k in data.fields) {
                         entry[k] = data.fields[k];
                     }

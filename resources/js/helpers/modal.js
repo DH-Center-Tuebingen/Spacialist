@@ -10,6 +10,7 @@ import {
 import {
     addUser,
     deactivateUser,
+    addOrUpdateBibliographyItem,
     deleteBibliographyItem,
     addEntity,
     addEntityType,
@@ -407,15 +408,42 @@ export function showDeleteRole(role, onDeleted) {
     modal.open();
 }
 
-export function showBibliographyEntry(data, onSuccess, onClose) {
+export function showBibliographyEntry(data, onSave) {
     const uid = `AddBibliographyEntry-${getTs()}`;
     const modal = useModal({
         component: BibliographyItem,
         attrs: {
             name: uid,
             data: data,
-            onSuccess: onSuccess,
-            onClose: onClose,
+            onSave(e) {
+                if(e.data.id && !can('bibliography_write')) return;
+                if(!e.data.id && !can('bibliography_create')) return;
+
+                const formData = e.data;
+                const file = e.file;
+                addOrUpdateBibliographyItem(formData, file).then(reData => {
+                    // if id exists, it is an existing item
+                    if(e.data.id) {
+                        store.dispatch("updateBibliographyItem", {
+                            id: e.data.id,
+                            type: e.data.type.name,
+                            fields: {
+                                ...e.data.fields,
+                                file: reData.file,
+                                file_url: reData.file_url,
+                            },
+                        });
+                    } else {
+                        store.dispatch("addBibliographyItem", reData);
+                    }
+
+                    if(onSave) {
+                        onSave(reData);
+                    }
+
+                    modal.destroy();
+                });
+            },
             onClosing(e) {
                 modal.destroy();
             },
@@ -448,13 +476,14 @@ export function showDeleteBibliographyEntry(entry, onDeleted) {
     modal.open();
 }
 
-export function showLiteratureInfo(id) {
+export function showLiteratureInfo(id, options) {
     const uid = `BibliographyItemDetails-${getTs()}`;
     const modal = useModal({
         component: BibliographyItemDetails,
         attrs: {
             name: uid,
             id: id,
+            options: options,
             onClosing(e) {
                 modal.destroy();
             },

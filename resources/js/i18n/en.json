@@ -23,7 +23,9 @@
         "apply": "Apply",
         "move": "Move",
         "parse": "Parse",
+        "file": "File",
         "remove_file": "Remove file",
+        "no_file": "No file",
         "list": {
             "nr_of_entries": "No Entries | 1 Entry | {cnt} Entries",
             "no_entries": "No entries found.",
@@ -136,9 +138,7 @@
             "entity-mc": "Entity (Multiple Choice)",
             "epoch": "Time Period and Epoch",
             "timeperiod": "Time Period",
-            "date": "Date",
-            "dimension": "Dimensions (BxHxT)",
-            "list": "List",
+        "no_file": "Keine Datei vorhanden",
             "geography": "WKT (Well-Known-Binary)",
             "table": "Table",
             "sql": "SQL-Query",
@@ -598,9 +598,10 @@
             "title": "Literature",
             "modal": {
                 "paste_info": "You can use <kbd><kbd>ctrl</kbd> + <kbd>v</kbd></kbd> to fill out the fields with a BibTeX entry from your clipboard.",
+                "bibtex_code": "BibTeX-Code",
+                "attach_file": "Attach File",
                 "new": {
-                    "title": "New Entry",
-                    "bibtex_code": "BibTeX-Code"
+                    "title": "New Entry"
                 },
                 "edit": {
                     "title": "Edit entry"
@@ -645,7 +646,11 @@
                 "howpublished": "How Published",
                 "institution": "Institution",
                 "organization": "Organization",
-                "school": "School"
+                "school": "School",
+                "doi": "DOI",
+                "url": "URL",
+                "email": "@:global.email",
+                "subtype": "Type (specified)"
             },
             "types": {
                 "article": "Article",
@@ -661,7 +666,11 @@
                 "phdthesis": "Ph.D. Thesis",
                 "proceedings": "Proceedings",
                 "techreport": "Techreport",
-                "unpublished": "Unpublished"
+                "unpublished": "Unpublished",
+                "validation": {
+                    "required": "@:main.bibliography.column.{col} is a required field",
+                    "required_one_of": "Either @:main.bibliography.column.{col} or @:main.bibliography.column.{ref} must be set"
+                }
             }
         },
         "importer": {

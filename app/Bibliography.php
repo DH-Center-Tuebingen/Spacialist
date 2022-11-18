@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
@@ -14,6 +15,11 @@ class Bibliography extends Model implements Searchable
     use LogsActivity;
 
     protected $table = 'bibliography';
+
+    protected $appends = [
+        'file_url',
+    ];
+
     /**
      * The attributes that are assignable.
      *
@@ -46,7 +52,8 @@ class Bibliography extends Model implements Searchable
         'school',
         'series',
         'citekey',
-        'user_id'
+        'user_id',
+        'file',
     ];
 
     protected const searchCols = [
@@ -79,31 +86,181 @@ class Bibliography extends Model implements Searchable
     ];
 
     const patchRules = [
-        'author'    => 'string',
-        'editor'    => 'string',
-        'title'     => 'string',
-        'journal'   => 'string',
-        'year'      => 'string',
-        'pages'     => 'string',
-        'volume'    => 'string',
-        'number'    => 'string',
-        'booktitle' => 'string',
-        'publisher' => 'string',
-        'address'   => 'string',
-        'misc'      => 'string',
-        'howpublished'=> 'string',
-        'type'      => 'string',
-        'annote'    => 'string',
-        'chapter'   => 'string',
-        'crossref'  => 'string',
-        'edition'   => 'string',
-        'institution'=> 'string',
-        'key'       => 'string',
-        'month'     => 'string',
-        'note'      => 'string',
-        'organization'=> 'string',
-        'school'    => 'string',
-        'series'    => 'string'
+        'author'       => 'string',
+        'editor'       => 'string',
+        'title'        => 'string',
+        'journal'      => 'string',
+        'year'         => 'string',
+        'pages'        => 'string',
+        'volume'       => 'string',
+        'number'       => 'string',
+        'booktitle'    => 'string',
+        'publisher'    => 'string',
+        'address'      => 'string',
+        'misc'         => 'string',
+        'howpublished' => 'string',
+        'type'         => 'string',
+        'annote'       => 'string',
+        'chapter'      => 'string',
+        'crossref'     => 'string',
+        'edition'      => 'string',
+        'institution'  => 'string',
+        'key'          => 'string',
+        'month'        => 'string',
+        'note'         => 'string',
+        'organization' => 'string',
+        'school'       => 'string',
+        'series'       => 'string',
+        'doi'          => 'string',
+        'subtype'      => 'string',
+        'file'         => 'file',
+    ];
+
+    public const bibtexTypes = [
+        "article" => [
+            "fields" => [
+                'author', 'title', 'journal', 'year', 'volume', 'number', 'pages', 'month', 'note', 'doi', 'email', 'url'
+            ],
+            "mandatory" => [
+                "author" => true,
+                "title" => true,
+                "journal" => true,
+                "year" => true,
+            ],
+        ],
+        "book" => [
+            "fields" => [
+                'title', 'publisher', 'year', 'author', 'editor', 'volume', 'number', 'address', 'series', 'edition', 'month', 'note', 'email', 'url'
+            ],
+            "mandatory" => [
+                "author" => 'editor',
+                "editor" => 'author',
+                "title" => true,
+                "publisher" => true,
+                "year" => true,
+            ],
+        ],
+        "incollection" => [
+            "fields" => [
+                'author', 'title', 'booktitle', 'publisher', 'year', 'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note', 'subtype', 'email', 'url'
+            ],
+            "mandatory" => [
+                "author" => true,
+                "title" => true,
+                "booktitle" => true,
+                "publisher" => true,
+                "year" => true,
+            ],
+        ],
+        "misc" => [
+            "fields" => [
+                'author', 'title', 'howpublished', 'month', 'year', 'note', 'email', 'url'
+            ],
+        ],
+        "booklet" => [
+            "fields" => [
+                'title', 'author', 'howpublished', 'address', 'month', 'year', 'note', 'email', 'url'
+            ],
+            "mandatory" => [
+                "title" => true,
+            ],
+        ],
+        "conference" => [
+            "fields" => [
+                'author', 'title', 'booktitle', 'year', 'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note', 'email', 'url'
+            ],
+            "mandatory" => [
+                "author" => true,
+                "title" => true,
+                "booktitle" => true,
+                "year" => true,
+            ],
+        ],
+        "inbook" => [
+            "fields" => [
+                'title', 'publisher', 'year', 'author', 'editor', 'chapter', 'pages', 'volume', 'number', 'series', 'address', 'edition', 'month', 'note', 'subtype', 'email', 'url'
+            ],
+            "mandatory" => [
+                "author" => "editor",
+                "editor" => "author",
+                "title" => true,
+                "chapter" => "pages",
+                "pages" => "chapter",
+                "publisher" => true,
+                "year" => true,
+            ],
+        ],
+        "inproceedings" => [
+            "fields" => [
+                'author', 'title', 'booktitle', 'year', 'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note', 'email', 'url'
+            ],
+            "mandatory" => [
+                "author" => true,
+                "title" => true,
+                "booktitle" => true,
+                "year" => true,
+            ],
+        ],
+        "manual" => [
+            "fields" => [
+                'title', 'author', 'organization', 'address', 'edition', 'month', 'year', 'note', 'email', 'url'
+            ],
+            "mandatory" => [
+                "title" => true,
+            ],
+        ],
+        "mastersthesis" => [
+            "fields" => [
+                'author', 'title', 'school', 'year', 'address', 'month', 'note', 'subtype', 'email', 'url'
+            ],
+            "mandatory" => [
+                "author" => true,
+                "title" => true,
+                "school" => true,
+                "year" => true,
+            ],
+        ],
+        "phdthesis" => [
+            "fields" => [
+                'author', 'title', 'school', 'year', 'address', 'month', 'note', 'subtype', 'email', 'url'
+            ],
+            "mandatory" => [
+                "author" => true,
+                "title" => true,
+                "school" => true,
+                "year" => true,
+            ],
+        ],
+        "proceedings" => [
+            "fields" => [
+                'title', 'year', 'editor', 'volume', 'number', 'series', 'address', 'month', 'organization', 'publisher', 'note', 'email', 'url'
+            ],
+            "mandatory" => [
+                "title" => true,
+                "year" => true,
+            ],
+        ],
+        "techreport" => [
+            "fields" => [
+                'author', 'title', 'institution', 'year', 'number', 'address', 'month', 'note', 'subtype', 'email', 'url'
+            ],
+            "mandatory" => [
+                "author" => true,
+                "title" => true,
+                "institution" => true,
+                "year" => true,
+            ],
+        ],
+        "unpublished" => [
+            "fields" => [
+                'author', 'title', 'note', 'month', 'year', 'email', 'url'
+            ],
+            "mandatory" => [
+                "author" => true,
+                "title" => true,
+                "note" => true,
+            ],
+        ],
     ];
 
     public function getActivitylogOptions() : LogOptions
@@ -127,17 +284,39 @@ class Bibliography extends Model implements Searchable
     }
 
     public function fieldsFromRequest($request, $user) {
-        $fields = $request->toArray();
-        if(!isset($fields['title'])) {
-            $fields['title'] = 'No Title';
-        }
+        $fields = is_array($request) ? $request : $request->toArray();
         foreach($fields as $key => $value){
             $this->{$key} = $value;
+        }
+
+        $type = self::bibtexTypes[$this->type];
+        // Check if all mandatory fields are set
+        foreach($type['mandatory'] as $man => $manType) {
+            // if is simple mandatory field, check if present
+            // otherwise return false
+            if($manType === true) {
+                if(!isset($this->{$man}) || empty($this->{$man})) {
+                    return false;
+                }
+            } else {
+                if(
+                    (!isset($this->{$man}) || empty($this->{$man})) ||
+                    (!isset($this->{$manType}) || empty($this->{$manType}))
+                ) {
+                    return false;
+                }
+            }
+        }
+        // Unset all fields that are not allowed for the current type
+        $disallowedFields = array_diff(array_keys(self::patchRules), $type['fields'], ['type', 'file']);
+        foreach($disallowedFields as $toDel) {
+            $this->{$toDel} = null;
         }
 
         $this->citekey = self::computeCitationKey($this->toArray());
         $this->user_id = $user->id;
         $this->save();
+        return true;
     }
 
     public function referenceCount() {
@@ -176,11 +355,27 @@ class Bibliography extends Model implements Searchable
         return $key;
     }
 
+    public function uploadFile($file) {
+        if(isset($this->file) && Storage::exists($this->file)) {
+            Storage::delete($this->file);
+        }
+
+        $filename = $this->id . "_" . $file->getClientOriginalName();
+        return $file->storeAs(
+            'bibliography',
+            $filename
+        );
+    }
+
     public function user() {
         return $this->belongsTo('App\User');
     }
 
     public function entities() {
         return $this->belongsToMany('App\Entity', 'references')->withPivot('description', 'attribute_id');
+    }
+
+    public function getFileUrlAttribute() {
+        return isset($this->file) ? sp_get_public_url($this->file) : null;
     }
 }
