@@ -19,10 +19,12 @@ All notable changes to this project will be documented in this file.
 - Column ordering in bibliography
 - Saving changed type of bibtex entry
 - Do not show _Delete Entity_ action in entity's dropdown if user does not have the permission
+- Translations for read notifications
 ### Changed
 - Updated Modal Library to Version 4
 - Better handling of `"`, `{` and `{{` in BibTeX
 - Show translated BibTeX-Type in literature entry add/edit modal's type selection
+- Make new modal library useable by plugins
 
 ## 0.9.5
 ### Fixed

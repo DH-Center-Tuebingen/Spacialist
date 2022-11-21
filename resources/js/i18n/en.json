@@ -234,7 +234,7 @@
             "tab_system_empty_list": "No system notifications. No action to take for you!",
             "body": {
                 "title_new": "New Notification",
-                "title_read": "Notification",
+                "title_read": "Read Notification",
                 "type": {
                     "system": "system-message"
                 },

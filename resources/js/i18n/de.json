@@ -236,7 +236,7 @@
             "tab_system_empty_list": "Keine System-Benachrichtigungen. Du musst nichts unternehmen!",
             "body": {
                 "title_new": "Neue Benachrichtigung",
-                "title_read": "Benachrichtigung",
+                "title_read": "Gelesene Benachrichtigung",
                 "type": {
                     "system": "System-Nachricht"
                 },
