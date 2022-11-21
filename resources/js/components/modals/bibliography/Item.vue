@@ -82,21 +82,7 @@
                     </span>
                 </div>
             </form>
-            <h5 class="mt-3 d-flex gap-1">
-                {{ t('main.bibliography.modal.bibtex_code') }}
-                <small class="clickable" @click="toggleShowBibtexCode()">
-                    <span v-show="state.bibtexCodeShown">
-                        <i class="fas fa-fw fa-caret-up"></i>
-                    </span>
-                    <span v-show="!state.bibtexCodeShown">
-                        <i class="fas fa-fw fa-caret-down"></i>
-                    </span>
-                </small>
-                <small class="clickable text-primary" @click="copyToClipboard(state.id)">
-                    <i class="fas fa-fw fa-copy"></i>
-                </small>
-            </h5>
-            <span v-show="state.bibtexCodeShown" :id="state.id" v-html="bibtexify(state.data.fields, state.typeName)"></span>
+            <bibtex-code :code="state.data.fields" :type="state.typeName" :show="true" />
         </div>
         <div class="modal-footer">
             <button type="submit" class="btn btn-outline-success" :disabled="state.disabled" form="addBibliographyItemForm" v-if="state.data.id">
@@ -128,11 +114,7 @@
     import {
         can,
         getTs,
-        copyToClipboard,
     } from '@/helpers/helpers.js';
-    import {
-        bibtexify,
-    } from '@/helpers/filters.js';
     import {
         bibliographyTypes,
     } from '@/helpers/bibliography.js';
@@ -200,9 +182,6 @@
                 state.data.file = '';
                 state.data.file_url = '';
             };
-            const toggleShowBibtexCode = _ => {
-                state.bibtexCodeShown = !state.bibtexCodeShown;
-            };
             const fieldsetStateUpdated = event => {
                 state.disabled = !event.dirty || !event.valid;
                 state.data.fields = {
@@ -234,7 +213,6 @@
                 id: `bibliography-item-modal-bibtex-code-${getTs()}`,
                 data: data.value,
                 fieldData: {...data.value},
-                bibtexCodeShown: true,
                 error: {},
                 fileContainer: [],
                 formMetas: {},
@@ -250,8 +228,6 @@
                 t,
                 // HELPERS
                 can,
-                copyToClipboard,
-                bibtexify,
                 bibliographyTypes,
                 // PROPS
                 // LOCAL
@@ -260,7 +236,6 @@
                 inputFile,
                 removeQueuedFile,
                 removeFile,
-                toggleShowBibtexCode,
                 fieldsetStateUpdated,
                 submitItem,
                 closeModal,

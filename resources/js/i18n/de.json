@@ -620,6 +620,9 @@
                 "delete": {
                     "title": "Eintrag erfolgreich gelöscht",
                     "msg": "Der Eintrag {name} wurde gelöscht"
+                },
+                "bibtex_code_to_clipboard": {
+                    "title": "BibTeX-Code in Zwischenablage kopiert"
                 }
             },
             "add": "Neuen Literatur-Eintrag anlegen",

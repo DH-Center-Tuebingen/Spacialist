@@ -26,6 +26,7 @@ import NotificationBody from '@/components/notification/NotificationBody.vue';
 import CsvTable from '@/components/CsvTable.vue';
 import Gradient from '@/components/Gradient.vue';
 import MarkdownEditor from '@/components/mde/Main.vue';
+import BibtexCode from '@/components/bibliography/BibtexCode.vue';
 
 // Init Libs
 // PQueue, httpQueue
@@ -230,6 +231,7 @@ app.component('notification-body', NotificationBody);
 app.component('csv-table', CsvTable);
 app.component('color-gradient', Gradient);
 app.component('md-editor', MarkdownEditor);
+app.component("bibtex-code", BibtexCode);
 // Third-Party components
 app.component('multiselect', Multiselect);
 app.component('file-upload', VueUploadComponent);

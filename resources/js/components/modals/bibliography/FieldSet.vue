@@ -97,10 +97,11 @@
                     undirtyField(f);
                 });
             };
-            const getData = _ => {
+            const getData = onlyOnValid => {
                 const values = {};
 
-                if(!state.formMeta.dirty || !state.formMeta.valid) return values;
+                if(!state.formMeta.dirty) return values;
+                if(onlyOnValid && !state.formMeta.valid) return values;
 
                 for(let k in v.fields) {
                     const field = v.fields[k];

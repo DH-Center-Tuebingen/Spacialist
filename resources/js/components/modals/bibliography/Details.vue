@@ -17,7 +17,18 @@
                 </button>
             </div>
             <div class="modal-body">
-                <dl class="row">
+                <div class="d-flex justify-content-end mb-2">
+                    <i class="fas fa-fw fa-user-edit"></i>
+                    <span class="ms-1">
+                        {{ date(state.data.last_updated, undefined, true, true) }}
+                    </span>
+                    -
+                    <a href="#" @click.prevent="showUserInfo(state.user)" class="fw-medium" v-if="state.user">
+                        {{ state.user.name }}
+                        <user-avatar :user="state.user" :size="20" class="align-middle"></user-avatar>
+                    </a>
+                </div>
+                <dl class="row bg-primary bg-opacity-25 mx-0 py-2 rounded dl-0-mb">
                     <dt class="col-md-3 text-end">
                         {{ t(`global.type`) }}
                     </dt>
@@ -56,32 +67,7 @@
                         </dd>
                     </template>
                 </dl>
-                <div class="d-flex justify-content-end">
-                    <i class="fas fa-fw fa-user-edit"></i>
-                    <span class="ms-1">
-                        {{ date(state.data.last_updated, undefined, true, true) }}
-                    </span>
-                    -
-                    <a href="#" @click.prevent="showUserInfo(state.user)" class="fw-medium" v-if="state.user">
-                        {{ state.user.name }}
-                        <user-avatar :user="state.user" :size="20" class="align-middle"></user-avatar>
-                    </a>
-                </div>
-                <h5 class="mt-3 d-flex gap-1">
-                    {{ t('main.bibliography.modal.bibtex_code') }}
-                    <small class="clickable" @click="toggleShowBibtexCode()">
-                        <span v-show="state.bibtexCodeShown">
-                            <i class="fas fa-fw fa-caret-up"></i>
-                        </span>
-                        <span v-show="!state.bibtexCodeShown">
-                            <i class="fas fa-fw fa-caret-down"></i>
-                        </span>
-                    </small>
-                    <small class="clickable text-primary" @click="copyToClipboard(state.id)">
-                        <i class="fas fa-fw fa-copy"></i>
-                    </small>
-                </h5>
-                <span v-show="state.bibtexCodeShown" :id="state.id" v-html="bibtexify(state.toBibtexify, state.data.type)"></span>
+                <bibtex-code :code="state.toBibtexify" :type="state.data.type" />
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" @click="closeModal()">
@@ -103,12 +89,13 @@
 
     import store from '@/bootstrap/store.js';
 
+    import { useToast } from '@/plugins/toast.js';
+
     import {
         createAnchorFromUrl,
         except,
         getUserBy,
         getTs,
-        copyToClipboard,
     } from '@/helpers/helpers.js';
     import {
         bibtexEntryToText,
@@ -132,11 +119,9 @@
                 id,
             } = toRefs(props);
             const { t } = useI18n();
+            const toast = useToast();
 
             // FUNCTIONS
-            const toggleShowBibtexCode = _ => {
-                state.bibtexCodeShown = !state.bibtexCodeShown;
-            };
             const closeModal = _ => {
                 context.emit('closing', false);
             };
@@ -154,7 +139,6 @@
                     type: '',
                     data: {},
                 },
-                bibtexCodeShown: false,
                 user: computed(_ => getUserBy(state.data.user)),
                 filteredFields: computed(_ => {
                     const filtered = {};
@@ -203,14 +187,12 @@
                 // HELPERS
                 createAnchorFromUrl,
                 getUserBy,
-                copyToClipboard,
                 bibtexEntryToText,
                 bibtexify,
                 date,
                 showUserInfo,
                 // PROPS
                 // LOCAL
-                toggleShowBibtexCode,
                 closeModal,
                 //STATE
                 state,

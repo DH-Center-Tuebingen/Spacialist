@@ -186,8 +186,6 @@ class BibliographyController extends Controller
         }
         $file = $request->file('file');
 
-        info($request);
-
         $success = $bib->fieldsFromRequest($request->except('file'), $user);
         if(!$success) {
             return response()->json([
