@@ -44,7 +44,7 @@
                 </a>
             </li>
             <li>
-                <a class="dropdown-item" href="#" @click.stop.prevent="deleteEntity()" @dblclick.stop.prevent="">
+                <a class="dropdown-item" href="#" @click.stop.prevent="deleteEntity()" @dblclick.stop.prevent="" v-if="can('entity_delete')">
                     <i class="fas fa-fw fa-trash text-danger"></i>
                     <span class="ms-2">
                         {{ t('main.entity.tree.contextmenu.delete') }}
@@ -173,6 +173,7 @@
             return {
                 t,
                 // HELPERS
+                can,
                 numPlus,
                 // LOCAL
                 togglePopup,

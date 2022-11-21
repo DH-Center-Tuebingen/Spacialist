@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 - Newly created entity types only selectable as sub-entity types after reload
 - Column ordering in bibliography
 - Saving changed type of bibtex entry
+- Do not show _Delete Entity_ action in entity's dropdown if user does not have the permission
 ### Changed
 - Updated Modal Library to Version 4
 - Better handling of `"`, `{` and `{{` in BibTeX
