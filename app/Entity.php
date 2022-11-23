@@ -292,6 +292,7 @@ class Entity extends Model implements Searchable
             $entities[] = [
                 'id' => $entity->id,
                 'name' => $entity->name,
+                'entity_type_id' => $entity->entity_type_id,
             ];
         }
         return $entities;

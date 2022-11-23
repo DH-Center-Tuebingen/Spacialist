@@ -7,6 +7,49 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Entity tree sorting is now accessible through ...-menu
 
+## 0.9.6
+### Added
+- Info modal in references tab to view all information from an literature reference
+- Copy BibTeX-Code of literature item to clipboard
+- Entity type color dot to entity detail's link list (entity type name is shown on hover)
+- Attach files to bibliography entries
+- Validation to bibliography add/edit form
+- More (optional) bibtex fields (doi, email, url, type)
+### Fixed
+- Only delete avatar if is set and exists on disk
+- Display image in About modal
+- Closing modal after user is (successfully) added
+- Display errors from server if user can not be added (e.g. due to already existing nickname or email address)
+- References list not visible after added a new one if it's the first literature reference added to that attribute
+- Newly created entity types only selectable as sub-entity types after reload
+- Column ordering in bibliography
+- Saving changed type of bibtex entry
+- Do not show _Delete Entity_ action in entity's dropdown if user does not have the permission
+- Translations for read notifications
+### Changed
+- Updated Modal Library to Version 4
+- Better handling of `"`, `{` and `{{` in BibTeX
+- Show translated BibTeX-Type in literature entry add/edit modal's type selection
+- Make new modal library useable by plugins
+
+## 0.9.5
+### Fixed
+- Display option to access analysis tool in _Tools_ (if available)
+- height of notification panel if larger than screen
+- Missing styling in _Add Entitytype_ component
+- Several geodata related bugs
+- Node dropdown not closed on outside click
+
+## 0.9.4
+### Fixed
+- Error on deleting plugin (Plugin not found)
+- Allow `geography` as column type in plugin migrations
+- Importing values for integer/percentage datatype in data importer
+
+## 0.9.3
+### Fixed
+- Wrong translated concepts for languages with lang code mismatch
+
 ## 0.9.2
 ### Added
 - Support for color schemas (Dark Mode with unrounded corners included)

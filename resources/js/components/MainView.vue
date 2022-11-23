@@ -52,10 +52,15 @@
                                             {{ reference.description }}
                                         </p>
                                     </blockquote>
-                                    <figcaption class="blockquote-footer fw-medium mb-0">
-                                        {{ reference.bibliography.author }} in <cite :title="reference.bibliography.title">
-                                            {{ reference.bibliography.title }} ,{{ reference.bibliography.year }}
-                                        </cite>
+                                    <figcaption class="blockquote-footer fw-medium mb-0 d-flex gap-1">
+                                        <span>
+                                            {{ reference.bibliography.author }} in <cite :title="reference.bibliography.title">
+                                                {{ reference.bibliography.title }} ,{{ reference.bibliography.year }}
+                                            </cite>
+                                        </span>
+                                        <a href="#" @click.prevent="openLiteratureInfo(reference)">
+                                            <i class="fas fa-fw fa-info-circle"></i>
+                                        </a>
                                     </figcaption>
                                 </div>
                                 <div>
@@ -103,6 +108,7 @@
     } from '@/helpers/filters.js';
     import {
         canShowReferenceModal,
+        showLiteratureInfo,
     } from '@/helpers/modal.js';
 
     export default {
@@ -148,6 +154,9 @@
                         simple: true,
                     });
                 }
+            };
+            const openLiteratureInfo = reference => {
+                showLiteratureInfo(reference.bibliography.id);
             };
 
             // DATA
@@ -195,6 +204,7 @@
                 setTab,
                 isTab,
                 showMetadataForReferenceGroup,
+                openLiteratureInfo,
                 // STATE
                 state,
             };

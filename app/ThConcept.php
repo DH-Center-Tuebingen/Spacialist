@@ -47,6 +47,10 @@ class ThConcept extends Model
     }
 
     public static function getMap($lang = 'en') {
+        // Some languages use different lang codes (e.g. from weblate) in Spacialist and ThesauRex
+        if($lang == 'ja') {
+            $lang = 'jp';
+        }
         $concepts = DB::select(DB::raw("
             WITH summary AS
             (

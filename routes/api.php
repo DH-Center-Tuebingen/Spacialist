@@ -169,10 +169,11 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 
     Route::post('/', 'BibliographyController@addItem');
     Route::post('/import', 'BibliographyController@importBibtex');
-
-    Route::patch('/{id}', 'BibliographyController@updateItem')->where('id', '[0-9]+');
+    // form data params are not recognized using patch, thus using post
+    Route::post('/{id}', 'BibliographyController@updateItem')->where('id', '[0-9]+');
 
     Route::delete('/{id}', 'BibliographyController@deleteItem')->where('id', '[0-9]+');
+    Route::delete('/{id}/file', 'BibliographyController@deleteItemFile')->where('id', '[0-9]+');
 });
 
 // ACTIVITY LOG

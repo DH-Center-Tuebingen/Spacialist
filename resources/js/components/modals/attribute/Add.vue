@@ -1,62 +1,63 @@
 <template>
     <vue-final-modal
-        classes="modal-container modal"
+        class="modal-container modal"
         content-class="sp-modal-content sp-modal-content-sm"
-        v-model="state.show"
         name="add-attribute-modal">
-        <div class="modal-header">
-            <h5 class="modal-title">
-                {{ t('main.datamodel.attribute.modal.new.title') }}
-            </h5>
-            <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-            </button>
-        </div>
-        <div class="modal-body nonscrollable">
-            <attribute-template
-                :type="'default'"
-                :external="state.formId"
-                @created="add"
-                @updated="updateAttribute"
-                @validation="checkValidation" />
-            <div v-if="state.hasColumns">
-                <h5 class="d-flex flex-row justify-content-between">
-                    <div>
-                        {{ t('global.column', 2) }}
-                        <span class="badge bg-primary">
-                            {{ state.columns.length }}
-                        </span>
-                    </div>
-                    <div>
-                        <button type="submit" class="btn btn-sm btn-outline-success" :form="state.tableFormId" :disabled="!state.tableColumnValidated">
-                            <i class="fas fa-fw fa-plus"></i> {{ t('global.add_column') }}
-                        </button>
-                    </div>
+        <div class="sp-modal-content sp-modal-content-sm">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {{ t('main.datamodel.attribute.modal.new.title') }}
                 </h5>
+                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
+                </button>
+            </div>
+            <div class="modal-body nonscrollable">
                 <attribute-template
-                    :type="'table'"
-                    :external="state.tableFormId"
-                    @created="addColumn"
-                    @validation="checkTableValidation"  />
+                    :type="'default'"
+                    :external="state.formId"
+                    @created="add"
+                    @updated="updateAttribute"
+                    @validation="checkValidation" />
+                <div v-if="state.hasColumns">
+                    <h5 class="d-flex flex-row justify-content-between">
+                        <div>
+                            {{ t('global.column', 2) }}
+                            <span class="badge bg-primary">
+                                {{ state.columns.length }}
+                            </span>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-sm btn-outline-success" :form="state.tableFormId" :disabled="!state.tableColumnValidated">
+                                <i class="fas fa-fw fa-plus"></i> {{ t('global.add_column') }}
+                            </button>
+                        </div>
+                    </h5>
+                    <attribute-template
+                        :type="'table'"
+                        :external="state.tableFormId"
+                        @created="addColumn"
+                        @validation="checkTableValidation"  />
+                </div>
+                <div v-if="state.previewAttribute">
+                    <hr>
+                    <h5>
+                        {{ t('global.preview') }}:
+                    </h5>
+                    <attribute-list
+                        :attributes="state.previewAttribute.attribute"
+                        :options="{'hide_labels': true}"
+                        :values="state.previewAttribute.values"
+                        :selections="{}" />
+                </div>
             </div>
-            <div v-if="state.previewAttribute">
-                <hr>
-                <h5>
-                    {{ t('global.preview') }}:
-                </h5>
-                <attribute-list
-                    :attributes="state.previewAttribute.attribute"
-                    :nolabels="true"
-                    :values="state.previewAttribute.values"
-                    :selections="{}" />
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-outline-success" :form="state.formId" :disabled="!state.validated">
+                    <i class="fas fa-fw fa-plus"></i> {{ t('global.add') }}
+                </button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
+                    <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
+                </button>
             </div>
-        </div>
-        <div class="modal-footer">
-            <button type="submit" class="btn btn-outline-success" :form="state.formId" :disabled="!state.validated">
-                <i class="fas fa-fw fa-plus"></i> {{ t('global.add') }}
-            </button>
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
-            </button>
         </div>
     </vue-final-modal>
 </template>
@@ -64,7 +65,6 @@
 <script>
     import {
         computed,
-        onMounted,
         reactive,
     } from 'vue';
 
@@ -92,14 +92,12 @@
                 if(state.hasColumns && state.columns.length > 0) {
                     attribute.columns = state.columns.slice();
                 }
-                state.show = false;
                 context.emit('confirm', attribute);
             };
             const addColumn = e => {
                 state.columns.push(e);
             };
             const closeModal = _ => {
-                state.show = false;
                 context.emit('closing', false);
             };
             const updateAttribute = e => {
@@ -118,7 +116,6 @@
                 columns: [],
                 validated: false,
                 tableColumnValidated: false,
-                show: false,
                 formId: 'new-attribute-form-external-submit',
                 tableFormId: 'new-attribute-form-table-type-external-submit',
                 hasColumns: computed(_ => {
@@ -143,11 +140,6 @@
                         },
                     };
                 }),
-            });
-
-            // ON MOUNTED
-            onMounted(_ => {
-                state.show = true;
             });
 
             // RETURN

@@ -289,7 +289,7 @@ class AttributeValue extends Model implements Searchable
                 break;
             case 'integer':
             case 'percentage':
-                if(!is_int($trimmedVal)) {
+                if(!is_int($trimmedVal) && !ctype_digit($trimmedVal)) {
                     throw new InvalidDataException("Given data is not an integer");
                 }
                 $value = intval($trimmedVal);

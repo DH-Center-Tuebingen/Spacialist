@@ -1,39 +1,40 @@
 <template>
     <vue-final-modal
-        classes="modal-container modal"
+        class="modal-container modal"
         content-class="sp-modal-content sp-modal-content-sm"
-        v-model="state.show"
         name="remove-attribute-from-entity-type-modal">
-        <div class="modal-header">
-            <h5 class="modal-title">
-                {{ t('global.remove_name.title', {name: translateConcept(state.attribute.thesaurus_url)}) }}
-            </h5>
-            <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-            </button>
-        </div>
-        <div class="modal-body">
-            <alert
-                :class="{'mb-0': !state.needsAlert}"
-                :message="t('global.remove_name.desc', {name: translateConcept(state.attribute.thesaurus_url)})"
-                :type="'info'"
-                :noicon="true" />
-            <alert
-                v-if="state.needsAlert"
-                :message="t('main.datamodel.attribute.modal.delete.alert', {
-                        name: translateConcept(state.attribute.thesaurus_url),
-                        cnt: state.count
-                    }, state.count)"
-                :type="'warning'"
-                :noicon="false"
-                :icontext="t('global.note')" />
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-outline-danger" @click="confirmRemove()">
-                <i class="fas fa-fw fa-check"></i> {{ t('global.remove') }}
-            </button>
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
-            </button>
+        <div class="sp-modal-content sp-modal-content-sm">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {{ t('global.remove_name.title', {name: translateConcept(state.attribute.thesaurus_url)}) }}
+                </h5>
+                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
+                </button>
+            </div>
+            <div class="modal-body">
+                <alert
+                    :class="{'mb-0': !state.needsAlert}"
+                    :message="t('global.remove_name.desc', {name: translateConcept(state.attribute.thesaurus_url)})"
+                    :type="'info'"
+                    :noicon="true" />
+                <alert
+                    v-if="state.needsAlert"
+                    :message="t('main.datamodel.attribute.modal.delete.alert', {
+                            name: translateConcept(state.attribute.thesaurus_url),
+                            cnt: state.count
+                        }, state.count)"
+                    :type="'warning'"
+                    :noicon="false"
+                    :icontext="t('global.note')" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger" @click="confirmRemove()">
+                    <i class="fas fa-fw fa-check"></i> {{ t('global.remove') }}
+                </button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
+                    <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
+                </button>
+            </div>
         </div>
     </vue-final-modal>
 </template>
@@ -41,7 +42,6 @@
 <script>
     import {
         computed,
-        onMounted,
         reactive,
         toRefs,
     } from 'vue';
@@ -73,25 +73,17 @@
 
             // FUNCTIONS
             const confirmRemove = _ => {
-                state.show = false;
                 context.emit('confirm', false);
             };
             const closeModal = _ => {
-                state.show = false;
                 context.emit('closing', false);
             };
 
             // DATA
             const state = reactive({
-                show: false,
                 attribute: computed(_ => getAttribute(attributeId.value)),
                 count: computed(_ => metadata.value.entityCount),
                 needsAlert: computed(_ => state.count > 0),
-            });
-
-            // ON MOUNTED
-            onMounted(_ => {
-                state.show = true;
             });
 
             // RETURN
