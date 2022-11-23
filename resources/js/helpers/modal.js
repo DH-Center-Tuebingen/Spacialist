@@ -4,8 +4,13 @@ import router from '@/bootstrap/router.js';
 import { addToast } from '@/plugins/toast.js';
 
 import {
+    useModal,
+} from '@/bootstrap/vfm.js';
+
+import {
     addUser,
     deactivateUser,
+    addOrUpdateBibliographyItem,
     deleteBibliographyItem,
     addEntity,
     addEntityType,
@@ -47,6 +52,7 @@ import AddRole from '@/components/modals/role/Add.vue';
 import DeleteRole from '@/components/modals/role/Delete.vue';
 import BibliographyItem from '@/components/modals/bibliography/Item.vue';
 import DeleteBibliographyItem from '@/components/modals/bibliography/Delete.vue';
+import BibliographyItemDetails from '@/components/modals/bibliography/Details.vue';
 import AddEntity from '@/components/modals/entity/Add.vue';
 import MoveEntity from '@/components/modals/entity/Move.vue';
 import DeleteEntity from '@/components/modals/entity/Delete.vue';
@@ -60,248 +66,246 @@ import DeleteAttribute from '@/components/modals/attribute/Delete.vue';
 
 export function showAbout() {
     const uid = `AboutModal-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: About,
-        bind: {
+        attrs: {
             name: uid,
+            onClosing(e) {
+                modal.destroy();
+            },
         },
-        on: {
-            closing(e) {
-                store.getters.vfm.hide(uid);
-            }
-        }
     });
+    modal.open();
 }
 
 export function showDiscard(target, resetData, onBeforeConfirm) {
     const pushRoute = _ => {
-        store.getters.vfm.hide(uid);
+        modal.destroy();
         resetData();
         router.push(target);
     };
     const uid = `Discard-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: Discard,
-        bind: {
+        attrs: {
             name: uid,
-        },
-        on: {
-            cancel(e) {
-                store.getters.vfm.hide(uid);
+            onCancel(e) {
+                modal.destroy();
             },
-            confirm(e) {
+            onConfirm(e) {
+                modal.destroy();
                 pushRoute();
             },
-            saveConfirm(e) {
+            onSaveConfirm(e) {
                 if (!!onBeforeConfirm) {
                     onBeforeConfirm().then(_ => {
+                        modal.destroy();
                         pushRoute();
                     }).catch(e => {
-                        store.getters.vfm.hide(uid);
+                        modal.destroy();
                         return false;
                     });
                 } else {
+                    modal.destroy();
                     pushRoute();
                 }
             },
-        }
+        },
     });
+    modal.open();
 }
 
 export function showError(data) {
     const uid = `ErrorModal-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: Error,
-        bind: {
+        attrs: {
             data: data,
             name: uid,
-        },
-        on: {
-            closing(e) {
-                store.getters.vfm.hide(uid);
+            onClosing(e) {
+                modal.destroy();
             }
-        }
+        },
     });
+    modal.open();
 }
 
 export function showSaveScreencast(data) {
     const uid = `SaveScreencastModal-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: SaveScreencast,
-        bind: {
+        attrs: {
             data: data,
             name: uid,
+            onClosing(e) {
+                modal.destroy();
+            },
+            onConfirm(e) {
+                modal.destroy();
+            },
         },
-        on: {
-            closing(e) {
-                store.getters.vfm.hide(uid);
-            },
-            confirm(e) {
-                store.getters.vfm.hide(uid);
-            },
-        }
     });
+    modal.open();
 }
 
 export function showImportError(data) {
     const uid = `ImportErrorModa-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: ImportError,
-        bind: {
+        attrs: {
             data: data,
             name: uid,
+            onClosing() {
+                modal.destroy();
+            },
         },
-        on: {
-            closing() {
-                store.getters.vfm.hide(uid);
-            }
-        }
     });
+    modal.open();
 }
 
 export function showCsvPreviewer(data, onConfirm) {
     const uid = `CsvPreviewerModal-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: CsvPreviewer,
-        bind: {
+        attrs: {
             data: data,
             name: uid,
-        },
-        on: {
-            confirm(e) {
-                store.getters.vfm.hide(uid);
+            onConfirm(e) {
+                modal.destroy();
                 if(!!onConfirm) {
                     onConfirm(e);
                 }
             },
-            closing(e) {
-                store.getters.vfm.hide(uid);
+            onClosing(e) {
+                modal.destroy();
             },
-        }
+        },
     });
+    modal.open();
 }
 
 export function showCsvColumnPicker(data, onConfirm) {
     const uid = `CsvPickerModal-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: CsvPicker,
-        bind: {
+        attrs: {
             max: data.max,
             force_max: data.force_max,
             selection: data.selection,
             name: uid,
-        },
-        on: {
-            confirm(e) {
-                store.getters.vfm.hide(uid);
+            onConfirm(e) {
+                modal.destroy();
                 if(!!onConfirm) {
                     onConfirm(e);
                 }
             },
-            closing(e) {
-                store.getters.vfm.hide(uid);
+            onClosing(e) {
+                modal.destroy();
             },
-        }
+        },
     });
+    modal.open();
 }
 
 export function showMapPicker(data, onConfirm) {
     const uid = `MapPicker-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: MapPicker,
-        bind: {
+        attrs: {
             name: uid,
             data: data,
-        },
-        on: {
-            closing(e) {
-                store.getters.vfm.hide(uid);
+            onClosing(e) {
+                modal.destroy();
             },
-            confirm(e) {
+            onConfirm(e) {
                 if(!!onConfirm) {
                     onConfirm(e);
                 }
-                store.getters.vfm.hide(uid);
-            }
-        }
+                modal.destroy();
+            },
+        },
     });
+    modal.open();
 }
 
 export function showMarkdownEditor(data, onConfirm) {
     const uid = `MdEditorModal-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: MarkdownEditor,
-        bind: {
+        attrs: {
             name: uid,
             data: data,
-        },
-        on: {
-            confirm(e) {
+            onConfirm(e) {
                 if(!!onConfirm) {
                     onConfirm(e);
                 }
-                store.getters.vfm.hide(uid);
+                modal.destroy();
             },
-            closing(e) {
-                store.getters.vfm.hide(uid);
-            }
-        }
+            onClosing(e) {
+                modal.destroy();
+            },
+        },
     });
+    modal.open();
 }
 
 export function showUserInfo(user) {
     const uid = `UserInfoModal-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: UserInfo,
-        bind: {
+        attrs: {
             name: uid,
             user: user,
-        },
-        on: {
-            closing(e) {
-                store.getters.vfm.hide(uid);
+            onClosing(e) {
+                modal.destroy();
             }
-        }
+        },
     });
+    modal.open();
 }
 
 export function showAddUser(onAdded) {
     const uid = `AddUser-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: AddUser,
-        bind: {
+        attrs: {
             name: uid,
-        },
-        on: {
-            add(e) {
+            modalId: uid,
+            errors: {},
+            onAdd(e) {
                 if(!can('users_roles_create')) return;
                 addUser(e).then(user => {
                     if(!!onAdded) {
                         onAdded();
                     }
                     store.dispatch('addUser', user);
-                    store.getters.vfm.hide(uid);
+                    modal.destroy();
+                }).catch(e => {
+                    modal.patchOptions({
+                        attrs: {
+                            errors: e.response.data.errors,
+                        },
+                    });
                 });
             },
-            cancel(e) {
-                store.getters.vfm.hide(uid);
+            onCancel(e) {
+                modal.destroy();
             }
-        }
+        },
     });
+    modal.open();
 }
 
 export function showDeactivateUser(user, onDeactivated) {
     const uid = `DeactiveUser-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: DeactiveUser,
-        bind: {
+        attrs: {
             name: uid,
             user: user,
-        },
-        on: {
-            deactivate(e) {
+            onDeactivate(e) {
                 if(!can('users_roles_delete')) {
-                    store.getters.vfm.hide(uid);
+                    modal.destroy();
                     return;
                 }
                 deactivateUser(user.id).then(data => {
@@ -309,26 +313,25 @@ export function showDeactivateUser(user, onDeactivated) {
                         onDeactivated();
                     }
                     store.dispatch('deactivateUser', data);
-                    store.getters.vfm.hide(uid);
+                    modal.destroy();
                 })
             },
-            cancel(e) {
-                store.getters.vfm.hide(uid);
-            }
-        }
+            onCancel(e) {
+                modal.destroy();
+            },
+        },
     });
+    modal.open();
 }
 
 export function showAccessControlModal(roleId) {
     const uid = `AccessControl-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: AccessControl,
-        bind: {
+        attrs: {
             name: uid,
             roleId: roleId,
-        },
-        on: {
-            save(e) {
+            onSave(e) {
                 const data = {
                     permissions: e,
                 };
@@ -345,123 +348,161 @@ export function showAccessControlModal(roleId) {
                     addToast(msg, title, {
                         channel: 'success',
                     });
-                })
+                });
             },
-            cancel(e) {
-                store.getters.vfm.hide(uid);
+            onCancel(e) {
+                modal.destroy();
             }
-        }
+        },
     });
+    modal.open();
 }
 
 export function showAddRole(onAdded) {
     const uid = `AddRole-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: AddRole,
-        bind: {
+        attrs: {
             name: uid,
-        },
-        on: {
-            add(e) {
+            onAdd(e) {
                 if(!can('users_roles_create')) return;
                 addRole(e).then(role => {
                     if(!!onAdded) {
                         onAdded();
                     }
                     store.dispatch('addRole', role);
-                    store.getters.vfm.hide(uid);
+                    modal.destroy();
                 });
             },
-            cancel(e) {
-                store.getters.vfm.hide(uid);
-            }
-        }
+            onCancel(e) {
+                modal.destroy();
+            },
+        },
     });
+    modal.open();
 }
 
 export function showDeleteRole(role, onDeleted) {
     const uid = `DeleteRole-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: DeleteRole,
-        bind: {
+        attrs: {
             name: uid,
             role: role,
-        },
-        on: {
-            confirm(e) {
+            onConfirm(e) {
                 if(!can('users_roles_delete')) return;
-
+    
                 deleteRole(role.id).then(_ => {
                     if(!!onDeleted) {
                         onDeleted();
                     }
                     store.dispatch('deleteRole', role);
-                    store.getters.vfm.hide(uid);
+                    modal.destroy();
                 });
             },
-            cancel(e) {
-                store.getters.vfm.hide(uid);
-            }
-        }
+            onCancel(e) {
+                modal.destroy();
+            },
+        },
     });
+    modal.open();
 }
 
-export function showBibliographyEntry(data, onSuccess, onClose) {
+export function showBibliographyEntry(data, onSave) {
     const uid = `AddBibliographyEntry-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: BibliographyItem,
-        bind: {
+        attrs: {
             name: uid,
             data: data,
-            onSuccess: onSuccess,
-            onClose: onClose,
+            onSave(e) {
+                if(e.data.id && !can('bibliography_write')) return;
+                if(!e.data.id && !can('bibliography_create')) return;
+
+                const formData = e.data;
+                const file = e.file;
+                addOrUpdateBibliographyItem(formData, file).then(reData => {
+                    // if id exists, it is an existing item
+                    if(e.data.id) {
+                        store.dispatch("updateBibliographyItem", {
+                            id: e.data.id,
+                            type: e.data.type.name,
+                            fields: {
+                                ...e.data.fields,
+                                file: reData.file,
+                                file_url: reData.file_url,
+                            },
+                        });
+                    } else {
+                        store.dispatch("addBibliographyItem", reData);
+                    }
+
+                    if(onSave) {
+                        onSave(reData);
+                    }
+
+                    modal.destroy();
+                });
+            },
+            onClosing(e) {
+                modal.destroy();
+            },
         },
-        on: {
-            closing(e) {
-                store.getters.vfm.hide(uid);
-            }
-        }
     });
+    modal.open();
 }
 
 export function showDeleteBibliographyEntry(entry, onDeleted) {
     const uid = `DeleteBibliographyEntry-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: DeleteBibliographyItem,
-        bind: {
+        attrs: {
             name: uid,
             data: entry,
-        },
-        on: {
-            delete(e) {
+            onDelete(e) {
                 deleteBibliographyItem(entry.id).then(_ => {
                     if(!!onDeleted) {
                         onDeleted();
                     }
                     store.dispatch('deleteBibliographyItem', entry);
-                    store.getters.vfm.hide(uid);
+                    modal.destroy();
                 });
             },
-            closing(e) {
-                store.getters.vfm.hide(uid);
+            onClosing(e) {
+                modal.destroy();
             },
-        }
+        },
     });
+    modal.open();
+}
+
+export function showLiteratureInfo(id, options) {
+    const uid = `BibliographyItemDetails-${getTs()}`;
+    const modal = useModal({
+        component: BibliographyItemDetails,
+        attrs: {
+            name: uid,
+            id: id,
+            options: options,
+            onClosing(e) {
+                modal.destroy();
+            },
+        },
+    });
+    modal.open();
 }
 
 export function ShowAddEntity(parent = null, onAdded) {
     const uid = `AddEntity-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: AddEntity,
-        bind: {
+        attrs: {
             name: uid,
             parent: parent,
-        },
-        on: {
-            closing(e) {
-                store.getters.vfm.hide(uid);
+            onClosing(e) {
+                modal.destroy();
             },
-            confirm(entity) {
+            onConfirm(entity) {
                 const entityData = {
                     type_id: entity.type.id,
                     parent_id: entity.parent_id,
@@ -472,74 +513,51 @@ export function ShowAddEntity(parent = null, onAdded) {
                     if(!!onAdded) {
                         onAdded(node);
                     }
-                    store.getters.vfm.hide(uid);
+                    modal.destroy();
                 });
-            }
-        }
+            },
+        },
     });
+    modal.open();
 }
 
 export function ShowMoveEntity(entity, onMoved) {
     const uid = `MoveEntity-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: MoveEntity,
-        bind: {
+        attrs: {
             name: uid,
             entity: entity,
-        },
-        on: {
-            cancel(e) {
-                store.getters.vfm.hide(uid);
+            onCancel(e) {
+                modal.destroy();
             },
-            confirm(parentId) {
+            onConfirm(parentId) {
                 moveEntity(entity.id, parentId).then(data => {
-                    let oldSiblings;
-                    if(!!entity.root_entity_id) {
-                        oldSiblings = store.getters.entities[entity.root_entity_id].children;
-                    } else {
-                        oldSiblings = store.getters.tree;
-                    }
-                    const idx = oldSiblings.findIndex(n => n.id == entity.id);
-                    if(idx > -1) {
-                        oldSiblings.splice(idx, 1);
-                    }
-                    if(!parentId) {
-                        store.getters.tree.push(entity);
-                    } else {
-                        const parent = store.getters.entities[parentId];
-                        if(!!parent) {
-                            if(parent.childrenLoaded) {
-                                parent.children.push(entity);
-                            }
-                            parent.children_count++;
-                        }
-                    }
                     if(!!onMoved) {
                         onMoved(entity.id, parentId, data);
                     }
-                    store.getters.vfm.hide(uid);
+                    modal.destroy();
                 });
-            }
-        }
+            },
+        },
     });
+    modal.open();
 }
 
 export function showDeleteEntity(entityId, onDeleted) {
     const uid = `DeleteEntity-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: DeleteEntity,
-        bind: {
+        attrs: {
             name: uid,
             entityId: entityId,
-        },
-        on: {
-            closing(e) {
-                store.getters.vfm.hide(uid);
+            onClosing(e) {
+                modal.destroy();
             },
-            confirm() {
+            onConfirm() {
                 const entity = store.getters.entities[entityId];
                 deleteEntity(entityId).then(_ => {
-                    store.getters.vfm.hide(uid);
+                    modal.destroy();
                     store.dispatch('deleteEntity', {
                         id: entityId,
                     });
@@ -549,119 +567,114 @@ export function showDeleteEntity(entityId, onDeleted) {
                         }
                     });
                 });
-            }
-        }
+            },
+        },
     });
+    modal.open();
 }
 
 export function showAddEntityType(onAdded) {
     const uid = `AddEntityType-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: AddEntityType,
-        bind: {
+        attrs: {
             name: uid,
-        },
-        on: {
-            closing(e) {
-                store.getters.vfm.hide(uid);
+            onClosing(e) {
+                modal.destroy();
             },
-            confirm(entityType) {
+            onConfirm(entityType) {
                 addEntityType(entityType).then(data => {
                     if(!!onAdded) {
                         onAdded();
                     }
                     store.dispatch('addEntityType', data);
-                    store.getters.vfm.hide(uid);
+                    modal.destroy();
                 });
-            }
-        }
+            },
+        },
     });
+    modal.open();
 }
 
 export function showEditEntityType(entityType) {
     const uid = `EditEntityType-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: EditEntityType,
-        bind: {
+        attrs: {
             name: uid,
             entityType: entityType,
-        },
-        on: {
-            closing(e) {
-                store.getters.vfm.hide(uid);
+            onClosing(e) {
+                modal.destroy();
             },
-            confirm(editedProps) {
+            onConfirm(editedProps) {
                 patchEntityType(entityType.id, editedProps).then(_ => {
-                    store.getters.vfm.hide(uid);
+                    modal.destroy();
                 });
-            }
-        }
+            },
+        },
     });
+    modal.open();
 }
 
 export function showDeleteEntityType(entityType, metadata, onDeleted) {
     const uid = `DeleteEntityType-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: DeleteEntityType,
-        bind: {
+        attrs: {
             name: uid,
             entityType: entityType,
             metadata: metadata,
-        },
-        on: {
-            closing(e) {
-                store.getters.vfm.hide(uid);
+            onClosing(e) {
+                modal.destroy();
             },
-            confirm(e) {
+            onConfirm(e) {
                 deleteEntityType(entityType.id).then(_ => {
                     if(!!onDeleted) {
                         onDeleted();
                     }
                     store.dispatch('deleteEntityType', entityType);
-                    store.getters.vfm.hide(uid);
+                    modal.destroy();
                 });
-            }
-        }
+            },
+        },
     });
+    modal.open();
 }
 
 export function showEditAttribute(aid, etid) {
     const uid = `EditAttribute-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: EditAttribute,
-        bind: {
+        attrs: {
             name: uid,
             attributeId: aid,
             entityTypeId: etid,
             attributeSelection: getEntityTypeAttributes(etid),
-        },
-        on: {
-            closing(e) {
-                store.getters.vfm.hide(uid);
+            onClosing(e) {
+                modal.destroy();
             },
-            confirm(e) {
+            onConfirm(e) {
                 updateAttributeDependency(etid, aid, e).then(_ => {
-                    store.getters.vfm.hide(uid);
+                    modal.destroy();
                 });
-            }
-        }
+            },
+        },
     });
+    modal.open();
 }
 
 export function showRemoveAttribute(etid, aid, metadata, onDeleted) {
     const uid = `RemoveAttribute-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: RemoveAttribute,
-        bind: {
+        attrs: {
             name: uid,
             attributeId: aid,
             metadata: metadata,
-        },
-        on: {
-            closing(e) {
-                store.getters.vfm.hide(uid);
+            onClosing(e) {
+                modal.destroy();
             },
-            confirm(e) {
+            onConfirm(e) {
                 removeEntityTypeAttribute(etid, aid).then(_ => {
                     if(!!onDeleted) {
                         onDeleted();
@@ -670,61 +683,60 @@ export function showRemoveAttribute(etid, aid, metadata, onDeleted) {
                         entity_type_id: etid,
                         attribute_id: aid,
                     });
-                    store.getters.vfm.hide(uid);
+                    modal.destroy();
                 });
-            }
-        }
+            },
+        },
     });
+    modal.open();
 }
 
 export function showAddAttribute(onAdded) {
     const uid = `AddAttribute-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: AddAttribute,
-        bind: {
+        attrs: {
             name: uid,
-        },
-        on: {
-            closing(e) {
-                store.getters.vfm.hide(uid);
+            onClosing(e) {
+                modal.destroy();
             },
-            confirm(attribute) {
+            onConfirm(attribute) {
                 addAttribute(attribute).then(data => {
                     if(!!onAdded) {
                         onAdded();
                     }
                     store.dispatch('addAttribute', data);
-                    store.getters.vfm.hide(uid);
+                    modal.destroy();
                 });
-            }
-        }
+            },
+        },
     });
+    modal.open();
 }
 
 export function showDeleteAttribute(attribute, metadata, onDeleted) {
     const uid = `DeleteAttribute-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: DeleteAttribute,
-        bind: {
+        attrs: {
             name: uid,
             attribute: attribute,
             metadata: metadata,
-        },
-        on: {
-            closing(e) {
-                store.getters.vfm.hide(uid);
+            onClosing(e) {
+                modal.destroy();
             },
-            confirm(e) {
+            onConfirm(e) {
                 deleteAttribute(attribute.id).then(_ => {
                     if(!!onDeleted) {
                         onDeleted();
                     }
                     store.dispatch('deleteAttribute', attribute);
-                    store.getters.vfm.hide(uid);
+                    modal.destroy();
                 });
-            }
-        }
+            },
+        },
     });
+    modal.open();
 }
 
 export function canShowReferenceModal(aid) {

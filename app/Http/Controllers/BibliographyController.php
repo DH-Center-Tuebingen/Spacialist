@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Bibliography;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Storage;
 use RenanBr\BibTexParser\Listener;
 use RenanBr\BibTexParser\Exception\ParserException;
 use RenanBr\BibTexParser\Parser;
@@ -95,11 +96,24 @@ class BibliographyController extends Controller
         }
         $this->validate($request, [
             'type' => 'required|alpha',
-            'title' => 'required|string'
+            'title' => 'required|string',
+            'file' => 'file',
         ]);
 
+        $file = $request->file('file');
         $bib = new Bibliography();
-        $bib->fieldsFromRequest($request, $user);
+        $success = $bib->fieldsFromRequest($request->except('file'), $user);
+        if(!$success) {
+            return response()->json([
+                'error' => __('At least one required field is not set')
+            ], 422);
+        }
+
+        if(isset($file)) {
+            $bib->file = $bib->uploadFile($file);
+            $bib->user_id = $user->id;
+            $bib->save();
+        }
         $bib = Bibliography::find($bib->id);
 
         return response()->json($bib, 201);
@@ -159,8 +173,8 @@ class BibliographyController extends Controller
             ], 403);
         }
         $this->validate($request, [
-            'type' => 'required|alpha',
-            'title' => 'required|string'
+            'type' => 'alpha|bibtex_type',
+            'file' => 'file',
         ]);
 
         try {
@@ -170,8 +184,19 @@ class BibliographyController extends Controller
                 'error' => __('This bibliography item does not exist')
             ], 400);
         }
+        $file = $request->file('file');
 
-        $bib->fieldsFromRequest($request, $user);
+        $success = $bib->fieldsFromRequest($request->except('file'), $user);
+        if(!$success) {
+            return response()->json([
+                'error' => __('At least one required field is not set')
+            ], 422);
+        }
+        if(isset($file)) {
+            $bib->file = $bib->uploadFile($file);
+            $bib->user_id = $user->id;
+            $bib->save();
+        }
         $bib = Bibliography::find($bib->id);
 
         return response()->json($bib);
@@ -196,6 +221,28 @@ class BibliographyController extends Controller
 
         $bib->delete();
 
+        return response()->json(null, 204);
+    }
+
+    public function deleteItemFile($id) {
+        $user = auth()->user();
+        if(!$user->can('bibliography_delete')) {
+            return response()->json([
+                'error' => __('You do not have the permission to remove bibliography entries')
+            ], 403);
+        }
+
+        try {
+            $item = Bibliography::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This bibliography item does not exist')
+            ], 400);
+        }
+
+        Storage::delete($item->file);
+        $item->file = null;
+        $item->save();
         return response()->json(null, 204);
     }
 }

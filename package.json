@@ -83,7 +83,7 @@
         "video.js": "^7.20.2",
         "videojs-record": "^4.5.0",
         "vue-datepicker-next": "^1.0.2",
-        "vue-final-modal": "^v3.4.4",
+        "vue-final-modal": "v4.0.0-rc.2",
         "vue-i18n": "^9.2.2",
         "vue-upload-component": "^3.1.2",
         "vue3-markdown-it": "^1.0.10",

@@ -19,7 +19,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="user in state.userList" :key="user.id">
+                    <tr v-for="user in state.validatedUserList" :key="user.id">
                         <td>
                             <a href="#" @click.prevent="showUserInfo(user)" class="text-nowrap text-reset text-decoration-none">
                                 <user-avatar class="align-middle" :user="user" :size="20"></user-avatar>
@@ -231,7 +231,7 @@
                 const oldIds = Object.keys(v.fields);
 
                 for(let i=0; i<oldIds.length; i++) {
-                    const oid = oldIds[i];
+                    const oid = Number.parseInt(oldIds[i]);
 
                     // Delete validation rules if user is deactivated
                     if(!currentIds.includes(oid) && !!v.fields[oid]) {
@@ -415,6 +415,11 @@
             const state = reactive({
                 setupFinished: false,
                 userList: computed(_ => store.getters.users),
+                validatedUserList: computed(_ => {
+                    return state.userList.filter(u => {
+                        return v.fields[u.id] && Object.keys(v.fields[u.id]).length > 0;
+                    });
+                }),
                 deletedUserList: computed(_ => store.getters.deletedUsers),
                 roles: computed(_ => store.getters.roles(true)),
                 dataInitialized: computed(_ => state.userList.length > 0 && state.roles.length > 0),
@@ -431,7 +436,7 @@
             })
 
             // WATCHER
-            watch(_ => state.userList, (newValue) => {
+            watch(state.userList, (newValue) => {
                 updateValidationState(newValue);
             });
 

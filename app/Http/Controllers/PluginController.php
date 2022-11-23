@@ -174,7 +174,7 @@ class PluginController extends Controller
 
     public function removePlugin(Request $request, $id) {
         try {
-            $plugin = Plugin::firstOrFail($id);
+            $plugin = Plugin::findOrFail($id);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This plugin does not exist.')

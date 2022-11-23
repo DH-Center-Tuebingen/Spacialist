@@ -34,6 +34,9 @@ import {
 import {
     iconList,
 } from '@/bootstrap/font.js';
+import {
+    useModal,
+} from '@/bootstrap/vfm.js';
 
 import RouteRootDummy from '@/components/plugins/RouteRootDummy.vue';
 import * as buffer from 'buffer';
@@ -94,6 +97,9 @@ export const SpPS = {
         endpoint: api_base,
         tree: {
             Node: Node,
+        },
+        modal: {
+            useModal: useModal,
         },
     },
     data: {
