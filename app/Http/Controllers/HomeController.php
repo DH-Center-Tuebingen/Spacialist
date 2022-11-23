@@ -20,7 +20,7 @@ class HomeController extends Controller
     {
         parent::__construct();
         if(!Preference::hasPublicAccess()) {
-            $this->middleware('auth')->except(['welcome', 'index']);
+            $this->middleware('auth')->except(['welcome', 'index', 'external']);
         }
         $this->middleware('guest')->only('welcome');
     }
@@ -53,14 +53,10 @@ class HomeController extends Controller
             'concepts' => $concepts,
             'entityTypes' => $entityTypeMap,
             'colorsets' => sp_get_themes(),
+            'analysis' => sp_has_analysis(),
         ]);
     }
 
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function welcome(Request $request) {
         $activeSite = 'start';
         $siteFromReq = $request->get('s', 'start');
@@ -74,6 +70,12 @@ class HomeController extends Controller
         }
         return view('welcome', [
             'site' => $activeSite,
+        ]);
+    }
+
+    public function external(Request $request) {
+        return view('external', [
+            'access' => Preference::hasPublicAccess(),
         ]);
     }
 

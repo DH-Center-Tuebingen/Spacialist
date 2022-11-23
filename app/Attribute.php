@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use MStaack\LaravelPostgis\Geometries\Geometry;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
@@ -30,6 +31,41 @@ class Attribute extends Model
             ->logOnly(['id'])
             ->logFillable()
             ->logOnlyDirty();
+    }
+
+    public function getEntityAttributeValueName() {
+        $name = null;
+        switch($this->datatype) {
+            case 'entity':
+                $name = Entity::find($this->pivot->entity_val)->name;
+                break;
+            case 'entity-mc':
+                $value = [];
+                foreach(json_decode($this->pivot->json_val) as $dec) {
+                    $value[] = Entity::find($dec)->name;
+                }
+                $name = $value;
+                break;
+        }
+        return $name;
+    }
+
+    public function getAttributeValueFromEntityPivot() {
+        switch($this->datatype) {
+            case 'string-sc':
+                $this->pivot->thesaurus_val = ThConcept::where('concept_url', $this->pivot->thesaurus_val)->first();
+                break;
+            default:
+                break;
+        }
+        return $this->pivot->str_val ??
+               $this->pivot->int_val ??
+               $this->pivot->dbl_val ??
+               $this->pivot->entity_val ??
+               $this->pivot->thesaurus_val ??
+               json_decode($this->pivot->json_val) ??
+               $this->pivot->dt_val ??
+               Geometry::fromWKB($this->pivot->geography_val)->toWKT();
     }
 
     public function children() {
