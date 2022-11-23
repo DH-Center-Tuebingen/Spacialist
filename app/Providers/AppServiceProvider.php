@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Bibliography;
+use App\Geodata;
 use App\Preference;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
@@ -68,7 +70,7 @@ class AppServiceProvider extends ServiceProvider
         // (*Point, *LineString and *Polygon)
         // or 'any'
         Validator::extend('geometry', function ($attribute, $value, $parameters, $validator) {
-            $isActualGeometry = in_array($value, \App\Geodata::getAvailableGeometryTypes());
+            $isActualGeometry = in_array($value, Geodata::getAvailableGeometryTypes());
             if(!$isActualGeometry) {
                 return $value == 'Any';
             }
@@ -77,6 +79,9 @@ class AppServiceProvider extends ServiceProvider
         Validator::extend('mod_action', function($attribute, $value, $parameters, $validator) {
             $lowVal = strtolower($value);
             return $lowVal == 'accept' || $lowVal == 'deny';
+        });
+        Validator::extend('bibtex_type', function ($attribute, $value, $parameters, $validator) {
+            return in_array($value, array_keys(Bibliography::bibtexTypes));
         });
     }
 

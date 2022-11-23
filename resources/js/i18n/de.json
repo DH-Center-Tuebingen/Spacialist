@@ -24,7 +24,9 @@
         "create": "Anlegen",
         "move": "Verschieben",
         "parse": "Parsen",
+        "file": "Datei",
         "remove_file": "Datei entfernen",
+        "no_file": "Keine Datei vorhanden",
         "list": {
             "nr_of_entries": "Keine Einträge | 1 Eintrag | {cnt} Einträge",
             "no_entries": "Keine Einträge gefunden.",
@@ -134,7 +136,7 @@
             "boolean": "Kontrollkästchen",
             "percentage": "Prozentangabe",
             "entity": "Entität",
-            "entity-mc": "Entität (Mehrfachauswal)",
+            "entity-mc": "Entität (Mehrfachauswahl)",
             "epoch": "Zeitspanne & Epoche",
             "timeperiod": "Zeitspanne",
             "date": "Datum",
@@ -235,7 +237,7 @@
             "tab_system_empty_list": "Keine System-Benachrichtigungen. Du musst nichts unternehmen!",
             "body": {
                 "title_new": "Neue Benachrichtigung",
-                "title_read": "Benachrichtigung",
+                "title_read": "Gelesene Benachrichtigung",
                 "type": {
                     "system": "System-Nachricht"
                 },
@@ -631,12 +633,16 @@
             "title": "Literatur",
             "modal": {
                 "paste_info": "Du kannst die Felder mit der Tastenkombination <kbd><kbd>Strg</kbd> + <kbd>v</kbd></kbd> mit einem BibTeX-Eintrag aus deiner Zwischenablage ausfüllen.",
+                "bibtex_code": "BibTeX-Code",
+                "attach_file": "Datei anhängen",
                 "new": {
-                    "title": "Neuer Eintrag",
-                    "bibtex_code": "BibTeX-Code"
+                    "title": "Neuer Eintrag"
                 },
                 "edit": {
                     "title": "Eintrag editieren"
+                },
+                "details": {
+                    "title": "Eintragdetails"
                 },
                 "delete": {
                     "title": "Eintrag löschen",
@@ -647,6 +653,9 @@
                 "delete": {
                     "title": "Eintrag erfolgreich gelöscht",
                     "msg": "Der Eintrag {name} wurde gelöscht"
+                },
+                "bibtex_code_to_clipboard": {
+                    "title": "BibTeX-Code in Zwischenablage kopiert"
                 }
             },
             "add": "Neuen Literatur-Eintrag anlegen",
@@ -675,7 +684,31 @@
                 "howpublished": "Verweis",
                 "institution": "Einrichtung",
                 "organization": "Organisation",
-                "school": "Schule"
+                "school": "Schule",
+                "doi": "DOI",
+                "url": "URL",
+                "email": "@:global.email",
+                "subtype": "Typ (Spezifisch)"
+            },
+            "types": {
+                "article": "Artikel",
+                "book": "Buch",
+                "incollection": "Teil eines Buches (mit eigenem Titel)",
+                "misc": "Verschiedenes",
+                "booklet": "Heft",
+                "conference": "Konferenz",
+                "inbook": "Teil eines Buches",
+                "inproceedings": "Artikel eines Konferenzberichts",
+                "manual": "Dokumentation",
+                "mastersthesis": "Abschlussarbeit (außer Promotion)",
+                "phdthesis": "Doktor- oder Promotionsarbeit",
+                "proceedings": "Konferenzbericht",
+                "techreport": "Bericht einer Hochschule oder anderen Institution",
+                "unpublished": "Nicht veröffentlicht",
+                "validation": {
+                    "required": "@:main.bibliography.column.{col} ist ein Pflichtfeld",
+                    "required_one_of": "Entweder @:main.bibliography.column.{col} oder @:main.bibliography.column.{ref} muss gesetzt sein"
+                }
             }
         },
         "importer": {

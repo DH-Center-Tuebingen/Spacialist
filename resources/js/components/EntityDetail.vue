@@ -33,7 +33,10 @@
                             </span>
                             <ul class="dropdown-menu">
                                 <li v-for="link in state.entity.attributeLinks" :key="link.id">
-                                    <router-link :to="{name: 'entitydetail', params: {id: link.id}, query: state.routeQuery}" class="dropdown-item">
+                                    <router-link :to="{name: 'entitydetail', params: {id: link.id}, query: state.routeQuery}" class="dropdown-item d-flex align-items-center gap-1">
+                                        <span class="badge rounded-pill" style="font-size: 8px;" :style="getEntityColors(link.entity_type_id)" :title="getEntityTypeName(link.entity_type_id)">
+                                            &nbsp;&nbsp;
+                                        </span>
                                         {{ link.name }}
                                     </router-link>
                                 </li>
@@ -191,10 +194,10 @@
         isModerated,
         getAttribute,
         getEntityColors,
-        getEntityType,
+        getEntityTypeName,
         getEntityTypeAttributeSelections,
         getEntityTypeDependencies,
-        translateConcept
+        translateConcept,
     } from '@/helpers/helpers.js';
     import {
         showDiscard,
@@ -232,7 +235,7 @@
             const attrRef = ref({});
             const state = reactive({
                 colorStyles: computed(_ => {
-                    const colors = getEntityColors(state.entity.entity_type_id, 0.75);
+                    const colors = getEntityColors(state.entity.entity_type_id);
                     return {
                         color: colors.backgroundColor
                     };
@@ -253,10 +256,7 @@
                 hasAttributeLinks: computed(_ => state.entity.attributeLinks && state.entity.attributeLinks.length > 0),
                 attributesFetched: computed(_ => state.initFinished && state.entity.data && !!state.entityAttributes && state.entityAttributes.length > 0),
                 entityTypeLabel: computed(_ => {
-                    // if(!state.entity) return;
-                    const entityType = getEntityType(state.entity.entity_type_id);
-                    if(!entityType) return;
-                    return translateConcept(entityType.thesaurus_url);
+                    return getEntityTypeName(state.entity.entity_type_id);
                 }),
                 hiddenAttributeList: computed(_ => {
                     const keys = Object.keys(state.hiddenAttributes);
@@ -669,6 +669,8 @@
                 can,
                 date,
                 showUserInfo,
+                getEntityTypeName,
+                getEntityColors,
                 // LOCAL
                 hasReferenceGroup,
                 showMetadata,

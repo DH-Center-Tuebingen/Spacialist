@@ -1,29 +1,30 @@
 <template>
     <vue-final-modal
-        classes="modal-container modal"
+        class="modal-container modal"
         content-class="sp-modal-content sp-modal-content-sm"
-        v-model="state.show"
         name="error-modal">
-        <div class="modal-header">
-            <h5 class="modal-title">
-                {{
-                    t('global.error.occur')
-                }}
-            </h5>
-            <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-            </button>
-        </div>
-        <div class="modal-body my-3">
-            <alert
-                :message="state.htmlMessage"
-                :type="'error'"
-                :noicon="false"
-                :icontext="'Error Message'" />
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                <i class="fas fa-fw fa-times"></i> {{ t('global.close') }}
-            </button>
+        <div class="sp-modal-content sp-modal-content-sm">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {{
+                        t('global.error.occur')
+                    }}
+                </h5>
+                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
+                </button>
+            </div>
+            <div class="modal-body my-3">
+                <alert
+                    :message="state.htmlMessage"
+                    :type="'error'"
+                    :noicon="false"
+                    :icontext="'Error Message'" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
+                    <i class="fas fa-fw fa-times"></i> {{ t('global.close') }}
+                </button>
+            </div>
         </div>
     </vue-final-modal>
 </template>
@@ -55,13 +56,11 @@
 
             // FUNCTIONS
             const closeModal = _ => {
-                state.show = false;
                 context.emit('closing', false);
             };
 
             // DATA
             const state = reactive({
-                show: false,
                 htmlMessage: computed(_ => {
                     let msg = `<div class='lead'>
                         ${data.value.message}
@@ -78,11 +77,6 @@
                     }
                     return msg;
                 })
-            });
-
-            // ON MOUNTED
-            onMounted(_ => {
-                state.show = true;
             });
 
             // RETURN

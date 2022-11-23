@@ -14,7 +14,7 @@
                 {{ data.name }}
             </span>
         </a>
-        <ul class="dropdown-menu" :id="`tree-node-${data.id}-contextmenu`" v-if="state.ddVisible">
+        <ul class="dropdown-menu" :id="`tree-node-${data.id}-contextmenu`">
             <li>
                 <h6 class="dropdown-header" @click.stop.prevent="" @dblclick.stop.prevent="">
                     {{ data.name }}
@@ -45,7 +45,7 @@
                 </a>
             </li>
             <li>
-                <a class="dropdown-item" href="#" @click.stop.prevent="deleteEntity()" @dblclick.stop.prevent="">
+                <a class="dropdown-item" href="#" @click.stop.prevent="deleteEntity()" @dblclick.stop.prevent="" v-if="can('entity_delete')">
                     <i class="fas fa-fw fa-trash text-danger"></i>
                     <span class="ms-2">
                         {{ t('main.entity.tree.contextmenu.delete') }}
@@ -88,7 +88,7 @@
         hasIntersectionWithEntityAttributes,
     } from '@/helpers/helpers.js';
     import {
-        numPlus
+        numPlus,
     } from '@/helpers/filters.js';
 
     export default {
@@ -109,9 +109,8 @@
             // FUNCTIONS
             const hidePopup = _ => {
                 state.bsElem.hide();
-                state.bsElem.dispose();
-                state.bsElem = null;
                 state.ddVisible = false;
+                state.ddDomElem.classList.add('disabled');
             };
             const showPopup = _ => {
                 state.ddVisible = true;
@@ -119,11 +118,9 @@
                     // To prevent opening the dropdown on normal click on Node,
                     // the DD toggle must have class 'disabled'
                     // This also prevents BS API call .show() to work...
-                    // Thus we remove the 'disabled' class before the API call and add it back afterwards
-                    state.bsElem = new Dropdown(state.ddDomElem);
+                    // Thus we remove the 'disabled' class before the API call and add it back on hide
                     state.ddDomElem.classList.remove('disabled');
                     state.bsElem.show();
-                    state.ddDomElem.classList.add('disabled');
                 })
             };
             const togglePopup = _ => {
@@ -195,6 +192,7 @@
                 state.ddDomElem.addEventListener('hidden.bs.dropdown', _ => {
                     hidePopup();
                 });
+                state.bsElem = new Dropdown(state.ddDomElem);
             });
 
             // WATCHER
@@ -209,6 +207,7 @@
             return {
                 t,
                 // HELPERS
+                can,
                 numPlus,
                 // LOCAL
                 togglePopup,

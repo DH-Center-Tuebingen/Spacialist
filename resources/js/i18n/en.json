@@ -24,7 +24,9 @@
         "apply": "Apply",
         "move": "Move",
         "parse": "Parse",
+        "file": "File",
         "remove_file": "Remove file",
+        "no_file": "No file",
         "list": {
             "nr_of_entries": "No Entries | 1 Entry | {cnt} Entries",
             "no_entries": "No entries found.",
@@ -137,9 +139,7 @@
             "entity-mc": "Entity (Multiple Choice)",
             "epoch": "Time Period and Epoch",
             "timeperiod": "Time Period",
-            "date": "Date",
-            "dimension": "Dimensions (BxHxT)",
-            "list": "List",
+        "no_file": "Keine Datei vorhanden",
             "geography": "WKT (Well-Known-Binary)",
             "table": "Table",
             "sql": "SQL-Query",
@@ -235,7 +235,7 @@
             "tab_system_empty_list": "No system notifications. No action to take for you!",
             "body": {
                 "title_new": "New Notification",
-                "title_read": "Notification",
+                "title_read": "Read Notification",
                 "type": {
                     "system": "system-message"
                 },
@@ -631,12 +631,16 @@
             "title": "Literature",
             "modal": {
                 "paste_info": "You can use <kbd><kbd>ctrl</kbd> + <kbd>v</kbd></kbd> to fill out the fields with a BibTeX entry from your clipboard.",
+                "bibtex_code": "BibTeX-Code",
+                "attach_file": "Attach File",
                 "new": {
-                    "title": "New Entry",
-                    "bibtex_code": "BibTeX-Code"
+                    "title": "New Entry"
                 },
                 "edit": {
                     "title": "Edit entry"
+                },
+                "details": {
+                    "title": "Entry details"
                 },
                 "delete": {
                     "title": "Delete entry",
@@ -647,6 +651,9 @@
                 "delete": {
                     "title": "Entry deleted successfully",
                     "msg": "Entry {name} is deleted"
+                },
+                "bibtex_code_to_clipboard": {
+                    "title": "BibTeX-Code copied to clipboard"
                 }
             },
             "add": "Add new Bibliography-Entry",
@@ -675,7 +682,31 @@
                 "howpublished": "How Published",
                 "institution": "Institution",
                 "organization": "Organization",
-                "school": "School"
+                "school": "School",
+                "doi": "DOI",
+                "url": "URL",
+                "email": "@:global.email",
+                "subtype": "Type (specified)"
+            },
+            "types": {
+                "article": "Article",
+                "book": "Book",
+                "incollection": "In Collection",
+                "misc": "Misc",
+                "booklet": "Booklet",
+                "conference": "Conference",
+                "inbook": "Inbook",
+                "inproceedings": "Inproceedings",
+                "manual": "Manual",
+                "mastersthesis": "Master's Thesis",
+                "phdthesis": "Ph.D. Thesis",
+                "proceedings": "Proceedings",
+                "techreport": "Techreport",
+                "unpublished": "Unpublished",
+                "validation": {
+                    "required": "@:main.bibliography.column.{col} is a required field",
+                    "required_one_of": "Either @:main.bibliography.column.{col} or @:main.bibliography.column.{ref} must be set"
+                }
             }
         },
         "importer": {

@@ -143,6 +143,7 @@ export async function fetchPreData(locale) {
         store.commit('setPreferences', response.data.preferences);
         store.commit('setSystemPreferences', response.data.system_preferences);
         store.dispatch('setColorSets', response.data.colorsets);
+        store.dispatch('setAnalysis', response.data.analysis);
         
         if(auth.ready()) {
             auth.load().then(_ => {
@@ -390,16 +391,23 @@ export async function editComment(cid, content, endpoint = '/comment/{cid}') {
     );
 };
 
-export async function addOrUpdateBibliographyItem(item) {
-    let data = {};
+export async function addOrUpdateBibliographyItem(item, file) {
+    const data = new FormData();
     for(let k in item.fields) {
-        data[k] = item.fields[k];
+        data.append(k, item.fields[k]);
     }
-    data.type = item.type.name;
+    data.append('type', item.type.name);
+    if(file) {
+        if(file == 'delete') {
+            data.append('delete_file', true);
+        } else {
+            data.append('file', file);
+        }
+    }
 
     if(item.id) {
         return $httpQueue.add(
-            () => http.patch(`bibliography/${item.id}`, data).then(response => response.data)
+            () => http.post(`bibliography/${item.id}`, data).then(response => response.data)
         );
     } else {
         return $httpQueue.add(
@@ -648,7 +656,15 @@ export async function moveEntity(entityId, parentId = null, rank = null) {
     }
 
     return $httpQueue.add(
-        () => http.patch(`/entity/${entityId}/rank`, data).then(response => response.data)
+        () => http.patch(`/entity/${entityId}/rank`, data).then(response => {
+            store.dispatch('moveEntity', {
+                entity_id: entityId,
+                parent_id: parentId,
+                rank: data.rank,
+                to_end: data.to_end,
+            });
+            return response.data;
+        })
     );
 };
 
@@ -813,6 +829,12 @@ export async function removeEntityTypeAttribute(etid, aid) {
 export async function deleteAttribute(aid) {
     return $httpQueue.add(
         () => http.delete(`editor/dm/attribute/${aid}`).then(response => response.data)
+    );
+};
+
+export async function deleteBibliographyItemFile(id) {
+    return await $httpQueue.add(
+        () => http.delete(`bibliography/${id}/file`).then(response => response.data)
     );
 };
 

@@ -173,3 +173,10 @@ if(!function_exists('th_tree_builder')) {
         }
     }
 }
+
+if(!function_exists('sp_has_analysis')) {
+    function sp_has_analysis() {
+        $analysisDir = base_path("../analysis");
+        return is_dir($analysisDir);
+    }
+}
