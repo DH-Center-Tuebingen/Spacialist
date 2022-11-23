@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Bibliography;
 use App\Geodata;
 use App\Preference;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -73,6 +74,9 @@ class AppServiceProvider extends ServiceProvider
                 return $value == 'Any';
             }
             return true;
+        });
+        Validator::extend('bibtex_type', function ($attribute, $value, $parameters, $validator) {
+            return in_array($value, array_keys(Bibliography::bibtexTypes));
         });
     }
 

@@ -57,16 +57,12 @@ export const store = createStore({
                         tools: [],
                         settings: [],
                     },
-                    vfm: {},
                     hasAnalysis: false,
                 }
             },
             mutations: {
                 setAppInitialized(state, data) {
                     state.appInitialized = data;
-                },
-                setModalInstance(state, data) {
-                    state.vfm = data;
                 },
                 setAttributes(state, data) {
                     state.attributes = data;
@@ -84,7 +80,8 @@ export const store = createStore({
                     state.bibliography.push(data);
                 },
                 updateBibliographyItem(state, data) {
-                    let entry = state.bibliography.find(e => e.id == data.id);
+                    const entry = state.bibliography.find(e => e.id == data.id);
+                    entry.type = data.type;
                     for(let k in data.fields) {
                         entry[k] = data.fields[k];
                     }
@@ -129,6 +126,53 @@ export const store = createStore({
                     const entityType = state.entityTypes[data.id];
                     entityType.updated_at = data.updated_at;
                     entityType.thesaurus_url = data.thesaurus_url;
+                },
+                moveEntity(state, data) {
+                    const entity = state.entities[data.entity_id];
+                    let oldSiblings;
+                    if(!!entity.root_entity_id) {
+                        oldSiblings = state.entities[entity.root_entity_id].children;
+                    } else {
+                        oldSiblings = state.tree;
+                    }
+                    const idx = oldSiblings.findIndex(n => n.id == entity.id);
+                    if(idx > -1) {
+                        oldSiblings.splice(idx, 1);
+                    }
+                    if(!data.parent_id) {
+                        // Update children state of old parent
+                        if(!!entity.root_entity_id) {
+                            const oldParent = state.entities[entity.root_entity_id];
+                            oldParent.children_count--;
+                            if(oldParent.children_count == 0) {
+                                oldParent.state.openable = false;
+                                oldParent.state.opened = false;
+                            }
+                        }
+                        entity.root_entity_id = null;
+                        state.tree.push(entity);
+                    } else {
+                        // Update children state of new parent
+                        const parent = state.entities[data.parent_id];
+                        if(!!parent) {
+                            if(parent.childrenLoaded) {
+                                parent.children.push(entity);
+                            }
+                            parent.children_count++;
+                            parent.state.openable = true;
+                        }
+                        // Also update children state of old parent
+                        if(!!entity.root_entity_id) {
+                            const oldParent = state.entities[entity.root_entity_id];
+                            oldParent.children_count--;
+                            if(oldParent.children_count == 0) {
+                                oldParent.state.openable = false;
+                                oldParent.state.opened = false;
+                            }
+                        }
+                        // Set new parent after updating states
+                        entity.root_entity_id = data.parent_id;
+                    }
                 },
                 deleteEntity(state, data) {
                     const entity = state.entities[data.id];
@@ -439,9 +483,6 @@ export const store = createStore({
                 setAppState({commit}, data) {
                     commit('setAppInitialized', data);
                 },
-                setModalInstance({commit}, data) {
-                    commit('setModalInstance', data);
-                },
                 setBibliography({commit}, data) {
                     commit('setBibliography', data);
                 },
@@ -496,7 +537,7 @@ export const store = createStore({
                     } else {
                         entity.data = await getEntityData(entityId);
                         fillEntityData(entity.data, entity.entity_type_id);
-                        entity.references = await getEntityReferences(entityId);
+                        entity.references = await getEntityReferences(entityId) || {};
                         commit('setEntity', entity);
                         return;
                     }
@@ -545,6 +586,9 @@ export const store = createStore({
                 },
                 updateEntityType({commit}, data) {
                     commit('updateEntityType', data);
+                },
+                moveEntity({commit}, data) {
+                    commit('moveEntity', data);
                 },
                 deleteEntity({commit}, data) {
                     commit('deleteEntity', data);
@@ -694,7 +738,6 @@ export const store = createStore({
                 },
                 colorSets: state => state.colorSets,
                 hasAnalysis: state => state.hasAnalysis,
-                vfm: state => state.vfm,
             }
         },
         pluginstore: {

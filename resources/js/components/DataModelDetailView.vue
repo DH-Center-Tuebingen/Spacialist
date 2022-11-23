@@ -111,7 +111,6 @@
         defaultAttributeValue,
         getEntityType,
         getEntityTypeAttributes,
-        getEntityTypes,
         translateConcept,
     } from '@/helpers/helpers.js';
 
@@ -212,10 +211,12 @@
                     attributes: [],
                     values: []
                 },
-                minimalEntityTypes: Object.values(getEntityTypes()).map(et => ({
+                minimalEntityTypes: computed(_ => {
+                    return Object.values(store.getters.entityTypes).map(et => ({
                         id: et.id,
                         thesaurus_url: et.thesaurus_url
-                })),
+                    }));
+                }),
                 openedModal: '',
                 modalSelectedAttribute: {},
                 modalSelectedEntityType: {},

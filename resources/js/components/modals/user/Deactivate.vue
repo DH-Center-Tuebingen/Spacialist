@@ -1,41 +1,40 @@
 <template>
   <vue-final-modal
-    classes="modal-container modal"
+    class="modal-container modal"
     content-class="sp-modal-content sp-modal-content-xs"
-    v-model="state.show"
     name="deactivate-user-modal">
-    <div class="modal-header">
-        <h5 class="modal-title">
-            {{
-                t('global.deactivate_name.title', {name: user.name})
-            }}
-        </h5>
-        <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-        </button>
-    </div>
-    <div class="modal-body">
-        <div class="alert alert-info" role="alert">
-            {{ t('global.deactivate_name.info') }}
+    <div class="sp-modal-content sp-modal-content-xs">
+        <div class="modal-header">
+            <h5 class="modal-title">
+                {{
+                    t('global.deactivate_name.title', {name: user.name})
+                }}
+            </h5>
+            <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
+            </button>
         </div>
-        <div class="alert alert-danger" role="alert">
-            {{ t('global.deactivate_name.desc', {name: user.name}) }}
+        <div class="modal-body">
+            <div class="alert alert-info" role="alert">
+                {{ t('global.deactivate_name.info') }}
+            </div>
+            <div class="alert alert-danger" role="alert">
+                {{ t('global.deactivate_name.desc', {name: user.name}) }}
+            </div>
         </div>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-outline-success" @click="confirmDeactivate()">
-            <i class="fas fa-fw fa-check"></i> {{ t('global.deactivate') }}
-        </button>
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-            <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
-        </button>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline-success" @click="confirmDeactivate()">
+                <i class="fas fa-fw fa-check"></i> {{ t('global.deactivate') }}
+            </button>
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
+                <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
+            </button>
+        </div>
     </div>
   </vue-final-modal>
 </template>
 
 <script>
     import {
-        computed,
-        onMounted,
         reactive,
         toRefs,
     } from 'vue';
@@ -59,22 +58,14 @@
 
             // FUNCTIONS
             const closeModal = _ => {
-                state.show = false;
                 context.emit('cancel', false);
             };
             const confirmDeactivate = _ => {
-                state.show = false;
                 context.emit('deactivate', false);
             };
 
             // DATA
             const state = reactive({
-                show: false,
-            });
-
-            // ON MOUNTED
-            onMounted(_ => {
-                state.show = true;
             });
 
             // RETURN

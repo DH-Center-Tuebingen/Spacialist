@@ -58,6 +58,10 @@ code.normal {
     margin-bottom: 0rem !important;
 }
 
+dl.dl-0-mb > dd:last-child {
+    margin-bottom: 0rem !important;
+}
+
 .logo {
     height: $logo-size;
     width: $logo-size;
