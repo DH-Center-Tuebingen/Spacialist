@@ -7,7 +7,7 @@
         "reactivate": "Reaktivieren",
         "remove": "Entfernen",
         "reset": "Zurücksetzen",
-        "send_reset_mail": "E-Mail zum Zurücksetzen des Passworts senden",
+        "reset_password": "Passwort zurücksetzen",
         "cancel": "Abbrechen",
         "close": "Schließen",
         "add": "Hinzufügen",
@@ -405,11 +405,22 @@
                 "updated": {
                     "title": "Benutzer aktualisiert",
                     "msg": "{name} wurde erfolgreich aktualisiert."
+                },
+                "reset_password": {
+                    "title": "Passwort aktualisiert",
+                    "message": "Passwort für Benutzer {name} ({nickname}) wurde erfolgreich aktualisiert."
                 }
             },
             "modal": {
                 "new": {
                     "title": "Neuer Benutzer"
+                },
+                "reset_password": {
+                    "title": "Passwort zurücksetzen"
+                },
+                "confirm_password": {
+                    "title": "Passwort bestätigen",
+                    "message": "Dein Passwort wurde geändert. Du musst entweder dieses neue Passwort akzeptieren oder selbst ein neues vergeben. Dafür hast du nur noch einen weiteren Login übrig! | Dein Passwort wurde geändert. Du musst entweder dieses neue Passwort akzeptieren oder selbst ein neues vergeben. Dafür hast du noch {attempts} weitere Logins übrig."
                 }
             },
             "add_role_placeholder": "Rollen hinzufügen"

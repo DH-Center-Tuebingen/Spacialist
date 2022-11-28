@@ -9,6 +9,8 @@ import {
 
 import {
     addUser,
+    resetUserPassword,
+    confirmUserPassword,
     deactivateUser,
     addOrUpdateBibliographyItem,
     deleteBibliographyItem,
@@ -29,6 +31,8 @@ import {
 
 import {
     can,
+    userId,
+    getUserBy,
     getEntityTypeAttributes,
     getTs,
     getRoleBy,
@@ -46,6 +50,8 @@ import MapPicker from '@/components/modals/map/Picker.vue';
 import MarkdownEditor from '@/components/modals/system/MarkdownEditor.vue';
 import UserInfo from '@/components/modals/user/UserInfo.vue';
 import AddUser from '@/components/modals/user/Add.vue';
+import ResetPassword from '@/components/modals/user/ResetPassword.vue';
+import ConfirmPassword from '@/components/modals/user/ConfirmPassword.vue';
 import DeactiveUser from '@/components/modals/user/Deactivate.vue';
 import AccessControl from '@/components/modals/role/AccessControl.vue';
 import AddRole from '@/components/modals/role/Add.vue';
@@ -287,6 +293,63 @@ export function showAddUser(onAdded) {
                         },
                     });
                 });
+            },
+            onCancel(e) {
+                modal.destroy();
+            }
+        },
+    });
+    modal.open();
+}
+
+export function showResetPassword(id) {
+    const uid = `ResetPassword-${getTs()}`;
+    const modal = useModal({
+        component: ResetPassword,
+        attrs: {
+            name: uid,
+            modalId: uid,
+            userId: id,
+            onReset(e) {
+                if(userId() != id && !can('users_roles_write')) return;
+
+                resetUserPassword(id, e.password).then(_ => {
+                    modal.destroy();
+                    const user = getUserBy(id);
+                    const msg = t('main.user.toasts.reset_password.message', {
+                        name: user.name,
+                        nickname: user.nickname,
+                    });
+                    const title = t('main.user.toasts.reset_password.title');
+                    addToast(msg, title, {
+                        channel: 'success',
+                    });
+                })
+            },
+            onCancel(e) {
+                modal.destroy();
+            }
+        },
+    });
+    modal.open();
+}
+
+export function showConfirmPassword(id) {
+    const uid = `ConfirmPassword-${getTs()}`;
+    const modal = useModal({
+        component: ConfirmPassword,
+        attrs: {
+            name: uid,
+            modalId: uid,
+            userId: id,
+            onConfirm(e) {
+                confirmUserPassword(id, e.password).then(_ => {
+                    store.dispatch('updateUser', {
+                        id: id,
+                        login_attempts: null,
+                    });
+                    modal.destroy();
+                })
             },
             onCancel(e) {
                 modal.destroy();

@@ -7,7 +7,7 @@
         "reactivate": "Reactivate",
         "remove": "Remove",
         "reset": "Reset",
-        "send_reset_mail": "Send mail to reset password",
+        "reset_password": "Reset Password",
         "cancel": "Cancel",
         "close": "Close",
         "add": "Add",
@@ -403,11 +403,22 @@
                 "updated": {
                     "title": "User updated",
                     "msg": "{name} successfully updated."
+                },
+                "reset_password": {
+                    "title": "Password updated",
+                    "message": "Password for User {name} ({nickname}) successfully updated."
                 }
             },
             "modal": {
                 "new": {
                     "title": "New User"
+                },
+                "reset_password": {
+                    "title": "Reset Password"
+                },
+                "confirm_password": {
+                    "title": "Confirm Password",
+                    "message": "Your password has been changed recently. You either have to accept that new password or set one yourself. To do so you have only one additional login left! | Your password has been changed recently. You either have to accept that new password or set one yourself. To do so you have {attempts} additional logins left."
                 }
             },
             "add_role_placeholder": "Add roles"
