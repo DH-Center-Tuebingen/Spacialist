@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.9.7
+### Fixed
+- Dropdown overflow in Add/Edit Bibliography Item modal
+
 ## 0.9.6
 ### Added
 - Info modal in references tab to view all information from an literature reference
