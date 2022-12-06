@@ -33,11 +33,12 @@
                             </span>
                             <ul class="dropdown-menu">
                                 <li v-for="link in state.entity.attributeLinks" :key="link.id">
-                                    <router-link :to="{name: 'entitydetail', params: {id: link.id}, query: state.routeQuery}" class="dropdown-item d-flex align-items-center gap-1">
+                                    <router-link :to="{name: 'entitydetail', params: {id: link.id}, query: state.routeQuery}" class="dropdown-item d-flex align-items-center gap-1" :title="link.path.join(' / ')">
                                         <span class="badge rounded-pill" style="font-size: 8px;" :style="getEntityColors(link.entity_type_id)" :title="getEntityTypeName(link.entity_type_id)">
                                             &nbsp;&nbsp;
                                         </span>
                                         {{ link.name }}
+                                        <span class="text-muted small">{{ translateConcept(link.attribute_url) }}</span>
                                     </router-link>
                                 </li>
                             </ul>
@@ -661,6 +662,7 @@
                 showUserInfo,
                 getEntityTypeName,
                 getEntityColors,
+                translateConcept,
                 // LOCAL
                 hasReferenceGroup,
                 showMetadata,
