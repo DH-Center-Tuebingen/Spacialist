@@ -538,6 +538,15 @@ export const store = createStore({
                         entity.data = await getEntityData(entityId);
                         fillEntityData(entity.data, entity.entity_type_id);
                         entity.references = await getEntityReferences(entityId) || {};
+                        for(let k in entity.data) {
+                            const curr = entity.data[k];
+                            if(curr.attribute) {
+                                const key = curr.attribute.thesaurus_url;
+                                if(!entity.references[key]) {
+                                    entity.references[key] = [];
+                                }
+                            }
+                        }
                         commit('setEntity', entity);
                         return;
                     }

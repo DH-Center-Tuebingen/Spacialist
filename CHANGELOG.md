@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - Dropdown overflow in Add/Edit Bibliography Item modal
 - Attribute Dependencies could not be added/updated
 - Modal footer buttons on small screens
+- Again: References list not visible after added a new one if it's the first literature reference added to that attribute
 
 ## 0.9.6
 ### Added
