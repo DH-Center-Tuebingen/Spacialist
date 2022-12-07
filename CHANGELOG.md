@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Dropdown overflow in Add/Edit Bibliography Item modal
 - Attribute Dependencies could not be added/updated
+- Modal footer buttons on small screens
 
 ## 0.9.6
 ### Added
