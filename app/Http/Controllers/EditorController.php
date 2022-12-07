@@ -636,7 +636,7 @@ class EditorController extends Controller {
         $this->validate($request, [
             'attribute' => 'integer|exists:entity_attributes,attribute_id',
             'operator' => 'string|in:<,>,=,!=',
-            'value' => 'string'
+            'value' => ''
         ]);
 
         $entityAttribute = EntityAttribute::where([

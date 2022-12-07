@@ -382,14 +382,27 @@
             const updateDependencyState = (aid, value) => {
                 const attrDeps = state.entityTypeDependencies[aid];
                 if(!attrDeps) return;
+                const type = getAttribute(aid).datatype;
                 attrDeps.forEach(ad => {
                     let matches = false;
                     switch(ad.operator) {
                         case '=':
-                            matches = value == ad.value;
+                            if(type == 'string-sc') {
+                                matches = value.id == ad.value;
+                            } else if(type == 'string-mc') {
+                                matches = value && value.some(mc => mc.id == ad.value);
+                            } else {
+                                matches = value == ad.value;
+                            }
                             break;
                         case '!=':
-                            matches = value != ad.value;
+                            if(type == 'string-sc') {
+                                matches = value.id != ad.value;
+                            } else if(type == 'string-mc') {
+                                matches = value && value.every(mc => mc.id != ad.value);
+                            } else {
+                                matches = value != ad.value;
+                            }
                             break;
                         case '<':
                             matches = value < ad.value;

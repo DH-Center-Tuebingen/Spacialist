@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 - Attribute Name and path to entity detail's link list (path is shown on hover; entity type name is shown on dot hover!)
 ### Fixed
 - Dropdown overflow in Add/Edit Bibliography Item modal
+- Attribute Dependencies could not be added/updated
 
 ## 0.9.6
 ### Added
