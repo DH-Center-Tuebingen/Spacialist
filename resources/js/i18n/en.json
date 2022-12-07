@@ -259,7 +259,8 @@
             "not_found": {
                 "title": "Site not found!",
                 "msg": "Site <code>{site}</code> was not found. Check the spelling or contact the administrator.",
-                "go_to": "To start page"
+                "go_to": "Back to start page",
+                "retry": "Retry to load"
             },
             "screencast": {
                 "recording_begins_in_s": "Screencast recording begins in: a second | Screencast recording begins in: {t} seconds",

@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## 0.9.7
 ### Added
 - Attribute Name and path to entity detail's link list (path is shown on hover; entity type name is shown on dot hover!)
+- Reload button to _Not Found_ page
 ### Fixed
 - Dropdown overflow in Add/Edit Bibliography Item modal
 - Attribute Dependencies could not be added/updated

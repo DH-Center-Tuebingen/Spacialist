@@ -261,7 +261,8 @@
             "not_found": {
                 "title": "Seite nicht gefunden!",
                 "msg": "Die Seite <code>{site}</code> konnte nicht gefunden werden. Überprüfe die Schreibweise oder wende dich an den Administrator.",
-                "go_to": "Zur Startseite"
+                "go_to": "Zurück zur Startseite",
+                "retry": "Nochmal versuchen"
             },
             "screencast": {
                 "recording_begins_in_s": "Screencast-Aufnahme beginnt in: einer Sekunde | Screencast-Aufnahme beginnt in: {t} Sekunden",
