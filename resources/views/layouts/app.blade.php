@@ -13,6 +13,7 @@
 
     <!-- Styles -->
     <link href="css/vue-multiselect.min.css" rel="stylesheet">
+    <link href="css/modal.css" rel="stylesheet">
     <link href="css/app{{$p['prefs.color']}}.css" rel="stylesheet">
 </head>
 <body>
