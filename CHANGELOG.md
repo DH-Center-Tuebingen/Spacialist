@@ -5,11 +5,13 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Attribute Name and path to entity detail's link list (path is shown on hover; entity type name is shown on dot hover!)
 - Reload button to _Not Found_ page
+- Highlight matching strings in bibliography search
 ### Fixed
 - Dropdown overflow in Add/Edit Bibliography Item modal
 - Attribute Dependencies could not be added/updated
 - Modal footer buttons on small screens
 - Again: References list not visible after added a new one if it's the first literature reference added to that attribute
+- Add new bibliography items from file import to list
 
 ## 0.9.6
 ### Added

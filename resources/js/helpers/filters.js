@@ -151,6 +151,12 @@ export function truncate(str, length = 80, ellipses = '…') {
     }
     return str;
 };
+export function highlight(str, hl) {
+    if(!str) return str;
+    if(!hl) return str;
+    const regex = new RegExp(`(${hl})`, 'gi');
+    return str.replaceAll(regex, `<mark class="p-0">$1</mark>`);
+}
 export function ucfirst(str) {
     if(!str) return str;
     return str[0].toUpperCase() + str.substring(1);

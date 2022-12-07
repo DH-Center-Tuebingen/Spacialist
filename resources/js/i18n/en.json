@@ -620,6 +620,10 @@
                     "title": "Entry deleted successfully",
                     "msg": "Entry {name} is deleted"
                 },
+                "import": {
+                    "title": "File imported successfully",
+                    "msg": "Added {cnt} new entries; updated {cnt_upd} entries."
+                },
                 "bibtex_code_to_clipboard": {
                     "title": "BibTeX-Code copied to clipboard"
                 }

@@ -290,36 +290,18 @@
                         <td>
                             {{ entry.type }}
                         </td>
-                        <td>
-                            {{ entry.citekey }}
-                        </td>
-                        <td>
-                            {{ entry.author }}
-                        </td>
-                        <td v-if="state.showAllFields">
-                            {{ entry.email }}
-                        </td>
-                        <td>
-                            {{ entry.year }}
-                        </td>
-                        <td>
-                            {{ entry.title }}
-                        </td>
-                        <td>
-                            {{ entry.booktitle }}
-                        </td>
-                        <td>
-                            {{ entry.publisher }}
-                        </td>
+                        <td v-html="highlight(entry.citekey, state.query)" />
+                        <td v-html="highlight(entry.author, state.query)" />
+                        <td v-if="state.showAllFields" v-html="highlight(entry.email, state.query)" />
+                        <td v-html="highlight(entry.year, state.query)" />
+                        <td v-html="highlight(entry.title, state.query)" />
+                        <td v-html="highlight(entry.booktitle, state.query)" />
+                        <td v-html="highlight(entry.publisher, state.query)" />
                         <td>
                             {{ entry.pages }}
                         </td>
-                        <td>
-                            {{ entry.editor }}
-                        </td>
-                        <td>
-                            {{ entry.journal }}
-                        </td>
+                        <td v-html="highlight(entry.editor, state.query)" />
+                        <td v-html="highlight(entry.journal, state.query)" />
                         <td v-if="state.showAllFields">
                             {{ entry.month }}
                         </td>
@@ -344,12 +326,8 @@
                         <td v-if="state.showAllFields">
                             {{ entry.note }}
                         </td>
-                        <td v-if="state.showAllFields">
-                            {{ entry.doi }}
-                        </td>
-                        <td v-if="state.showAllFields">
-                            {{ entry.url }}
-                        </td>
+                        <td v-if="state.showAllFields" v-html="highlight(entry.doi, state.query)" />
+                        <td v-if="state.showAllFields" v-html="highlight(entry.url, state.query)" />
                         <td v-if="state.showAllFields">
                             {{ entry.subtype }}
                         </td>
@@ -358,15 +336,9 @@
                         </td>
                         <td v-html="createAnchorFromUrl(entry.howpublished)">
                         </td>
-                        <td v-if="state.showAllFields">
-                            {{ entry.institution }}
-                        </td>
-                        <td v-if="state.showAllFields">
-                            {{ entry.organization }}
-                        </td>
-                        <td v-if="state.showAllFields">
-                            {{ entry.school }}
-                        </td>
+                        <td v-if="state.showAllFields" v-html="highlight(entry.institution, state.query)" />
+                        <td v-if="state.showAllFields" v-html="highlight(entry.organization, state.query)" />
+                        <td v-if="state.showAllFields" v-html="highlight(entry.school, state.query)" />
                         <td v-if="state.showAllFields">
                             {{ entry.created_at }}
                         </td>
@@ -448,6 +420,9 @@
         _orderBy,
     } from '@/helpers/helpers.js';
     import {
+        highlight,
+    } from '@/helpers/filters.js';
+    import {
         showBibliographyEntry,
         showDeleteBibliographyEntry,
     } from '@/helpers/modal.js';
@@ -492,11 +467,6 @@
                     channel: 'success',
                 });
             };
-            const addEntries = list => {
-                for(let i=0; i<list.length; i++) {
-                    addEntry(list[i]);
-                }
-            };
             const inputFile = (newFile, oldFile) => {
                 if(!can('bibliography_write|bibliography_create')) return;
 
@@ -509,7 +479,16 @@
             };
             const importFile = (file, component) => {
                 return updateBibliography(file.file).then(data => {
-                    addEntries(data);
+                    store.dispatch('updateBibliography', data);
+                    const lng = data.length;
+                    const lngAdd = data.filter(item => item.added).length;
+                    const lngUpd = lng - lngAdd;
+                    const label = t('main.bibliography.toast.import.msg', {cnt: lngAdd, cnt_upd: lngUpd});
+                    const title = t('main.bibliography.toast.import.title');
+                    toast.$toast(label, title, {
+                        channel: 'success',
+                        duration: 10000,
+                    });
                 });
             };
             const exportFile = _ => {
@@ -606,6 +585,7 @@
                 // HELPERS
                 can,
                 createAnchorFromUrl,
+                highlight,
                 // LOCAL
                 debouncedSearch,
                 setOrderColumn,

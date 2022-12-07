@@ -622,6 +622,10 @@
                     "title": "Eintrag erfolgreich gelöscht",
                     "msg": "Der Eintrag {name} wurde gelöscht"
                 },
+                "import": {
+                    "title": "Datei erfolgreich importiert",
+                    "msg": "{cnt} neue Einträge wurden hinzugefügt; {cnt_upd} Einträge wurden aktualisiert."
+                },
                 "bibtex_code_to_clipboard": {
                     "title": "BibTeX-Code in Zwischenablage kopiert"
                 }
