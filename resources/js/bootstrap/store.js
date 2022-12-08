@@ -70,6 +70,9 @@ export const store = createStore({
                 setAttributeTypes(state, data) {
                     state.attributeTypes = data;
                 },
+                setAttributeSelection(state, data) {
+                    state.attributeSelections[data.id] = data.selection;
+                },
                 setAttributeSelections(state, data) {
                     state.attributeSelections = data;
                 },
@@ -680,7 +683,13 @@ export const store = createStore({
                     commit('setAttributeSelections', data.selections);
                 },
                 addAttribute({commit}, data) {
-                    commit('addAttribute', data);
+                    commit('addAttribute', data.attribute);
+                    if(data.selection) {
+                        commit('setAttributeSelection', {
+                            id: data.attribute.id,
+                            selection: data.selection,
+                        });
+                    }
                 },
                 setAttributeTypes({commit, state}, data) {
                     state.attributeTypes = [];

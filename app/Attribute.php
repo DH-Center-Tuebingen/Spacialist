@@ -32,6 +32,27 @@ class Attribute extends Model
             ->logOnlyDirty();
     }
 
+    public function getSelection() {
+        switch ($this->datatype) {
+            case 'string-sc':
+            case 'string-mc':
+            case 'epoch':
+                return ThConcept::getChildren($this->thesaurus_root_url, $this->recursive);
+            case 'table':
+                // Only string-sc is allowed in tables
+                $columns = Attribute::where('parent_id', $this->id)
+                    ->where('datatype', 'string-sc')
+                    ->get();
+                $selection = [];
+                foreach ($columns as $c) {
+                    $selection[$c->id] = ThConcept::getChildren($c->thesaurus_root_url, $c->recursive);
+                }
+                return $selection;
+            default:
+                return null;
+        }
+    }
+
     public function children() {
         return $this->hasMany('App\Attribute', 'parent_id');
     }

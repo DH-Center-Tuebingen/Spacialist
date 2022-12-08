@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 - Add new bibliography items from file import to list
 - Prevent to add already added attributes to entity types
 - Non-translated toast text shown when references tab in _Entity Detail_ panel can not be opened
+- Empty dropdowns for newly created and added attributes in _Entity Detail_ panel
 
 ## 0.9.6
 ### Added

@@ -179,24 +179,21 @@ class EditorController extends Controller {
         $attributes = Attribute::whereNull('parent_id')->orderBy('id')->get();
         $selections = [];
         foreach ($attributes as $a) {
-            switch ($a->datatype) {
-                case 'string-sc':
-                case 'string-mc':
-                case 'epoch':
-                    $selections[$a->id] = ThConcept::getChildren($a->thesaurus_root_url, $a->recursive);
-                    break;
-                case 'table':
-                    $a->columns = Attribute::where('parent_id', $a->id)->get()->keyBy('id');
-                    // Only string-sc is allowed in tables
-                    $columns = Attribute::where('parent_id', $a->id)
-                        ->where('datatype', 'string-sc')
-                        ->get();
-                    foreach ($columns as $c) {
-                        $selections[$c->id] = ThConcept::getChildren($c->thesaurus_root_url, $c->recursive);
+            $selection = $a->getSelection();
+            if(isset($selection)) {
+                // Workaround to check if it is a plain array or a assoc array (table columns)
+                // if assoc array, add each entry to their corresponding id
+                if(!isset($selection[0])) {
+                    foreach($selection as $id => $sel) {
+                        $selections[$id] = $sel;
                     }
-                    break;
-                default:
-                    break;
+                } else {
+                    $selections[$a->id] = $selection;
+                }
+            }
+
+            if($a->datatype == 'table') {
+                $a->columns = Attribute::where('parent_id', $a->id)->get()->keyBy('id');
             }
         }
         return response()->json([
@@ -411,7 +408,6 @@ class EditorController extends Controller {
 
         if($datatype == 'table') {
             $cols = $request->input('columns');
-            info($cols);
             foreach($cols as $col) {
                 if(!isset($col['label_id']) && !isset($col['datatype'])) continue;
                 $curl = ThConcept::find($col['label_id'])->concept_url;
@@ -428,10 +424,17 @@ class EditorController extends Controller {
                 $childAttr->save();
             }
         }
-        $attr->columns = Attribute::where('parent_id', $attr->id)->get();
-
         $attr = Attribute::find($attr->id);
-        return response()->json($attr, 201);
+        $attr->columns = Attribute::where('parent_id', $attr->id)->get();
+        $sel = $attr->getSelection();
+
+        $ret = [
+            'attribute' => $attr,
+        ];
+        if(isset($sel)) {
+            $ret['selection'] = $sel;
+        }
+        return response()->json($ret, 201);
     }
 
     public function addAttributeToEntityType(Request $request, $etid) {
