@@ -494,7 +494,7 @@
                     return actValue.value.map((v, i) => {
                         return {
                             id: v,
-                            name: actValue.name[i],
+                            name: actValue.name ? actValue.name[i] : '',
                         };
                     });
                 } else {
