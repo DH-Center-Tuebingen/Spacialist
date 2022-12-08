@@ -113,6 +113,12 @@ dl.dl-0-mb > dd:last-child {
     height: 500px;
 }
 
+@media screen and (max-height: 450px) {
+   .modal-body.nonscrollable {
+        overflow-y: auto !important;
+   }
+}
+
 .shadowed {
     text-shadow:  1px  1px rgba(255, 255, 255, 0.75),
                   1px -1px rgba(255, 255, 255, 0.75),

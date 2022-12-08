@@ -33,11 +33,12 @@
                             </span>
                             <ul class="dropdown-menu">
                                 <li v-for="link in state.entity.attributeLinks" :key="link.id">
-                                    <router-link :to="{name: 'entitydetail', params: {id: link.id}, query: state.routeQuery}" class="dropdown-item d-flex align-items-center gap-1">
+                                    <router-link :to="{name: 'entitydetail', params: {id: link.id}, query: state.routeQuery}" class="dropdown-item d-flex align-items-center gap-1" :title="link.path.join(' / ')">
                                         <span class="badge rounded-pill" style="font-size: 8px;" :style="getEntityColors(link.entity_type_id)" :title="getEntityTypeName(link.entity_type_id)">
                                             &nbsp;&nbsp;
                                         </span>
                                         {{ link.name }}
+                                        <span class="text-muted small">{{ translateConcept(link.attribute_url) }}</span>
                                     </router-link>
                                 </li>
                             </ul>
@@ -345,7 +346,8 @@
                         },
                     });
                 } else {
-                    toast.$toast('You have to enter data first, before you can edit metadata.', '', {
+                    const msg = t('main.entity.references.toasts.cannot_edit_metadata.msg');
+                    toast.$toast(msg, '', {
                         duration: 2500,
                         autohide: true,
                         channel: 'warning',
@@ -381,14 +383,27 @@
             const updateDependencyState = (aid, value) => {
                 const attrDeps = state.entityTypeDependencies[aid];
                 if(!attrDeps) return;
+                const type = getAttribute(aid).datatype;
                 attrDeps.forEach(ad => {
                     let matches = false;
                     switch(ad.operator) {
                         case '=':
-                            matches = value == ad.value;
+                            if(type == 'string-sc') {
+                                matches = value.id == ad.value;
+                            } else if(type == 'string-mc') {
+                                matches = value && value.some(mc => mc.id == ad.value);
+                            } else {
+                                matches = value == ad.value;
+                            }
                             break;
                         case '!=':
-                            matches = value != ad.value;
+                            if(type == 'string-sc') {
+                                matches = value.id != ad.value;
+                            } else if(type == 'string-mc') {
+                                matches = value && value.every(mc => mc.id != ad.value);
+                            } else {
+                                matches = value != ad.value;
+                            }
                             break;
                         case '<':
                             matches = value < ad.value;
@@ -661,6 +676,7 @@
                 showUserInfo,
                 getEntityTypeName,
                 getEntityColors,
+                translateConcept,
                 // LOCAL
                 hasReferenceGroup,
                 showMetadata,

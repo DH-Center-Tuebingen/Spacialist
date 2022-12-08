@@ -138,7 +138,9 @@
             "entity-mc": "Entity (Multiple Choice)",
             "epoch": "Time Period and Epoch",
             "timeperiod": "Time Period",
-        "no_file": "Keine Datei vorhanden",
+            "date": "Date",
+            "dimension": "Dimensions (WxHxD)",
+            "list": "List",
             "geography": "WKT (Well-Known-Binary)",
             "table": "Table",
             "sql": "SQL-Query",
@@ -259,7 +261,8 @@
             "not_found": {
                 "title": "Site not found!",
                 "msg": "Site <code>{site}</code> was not found. Check the spelling or contact the administrator.",
-                "go_to": "To start page"
+                "go_to": "Back to start page",
+                "retry": "Retry to load"
             },
             "screencast": {
                 "recording_begins_in_s": "Screencast recording begins in: a second | Screencast recording begins in: {t} seconds",
@@ -358,9 +361,8 @@
                     "add_button": "Add Reference"
                 },
                 "toasts": {
-                    "updated_certainty": {
-                        "title": "Certainty updated",
-                        "msg": "Certainty of {name} successfully set to {i}%."
+                    "cannot_edit_metadata": {
+                        "msg": "You have to enter data first, before you can edit metadata."
                     }
                 }
             },
@@ -618,6 +620,10 @@
                 "delete": {
                     "title": "Entry deleted successfully",
                     "msg": "Entry {name} is deleted"
+                },
+                "import": {
+                    "title": "File imported successfully",
+                    "msg": "Added {cnt} new entries; updated {cnt_upd} entries."
                 },
                 "bibtex_code_to_clipboard": {
                     "title": "BibTeX-Code copied to clipboard"

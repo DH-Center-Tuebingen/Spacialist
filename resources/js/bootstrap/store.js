@@ -70,6 +70,9 @@ export const store = createStore({
                 setAttributeTypes(state, data) {
                     state.attributeTypes = data;
                 },
+                setAttributeSelection(state, data) {
+                    state.attributeSelections[data.id] = data.selection;
+                },
                 setAttributeSelections(state, data) {
                     state.attributeSelections = data;
                 },
@@ -486,6 +489,15 @@ export const store = createStore({
                 setBibliography({commit}, data) {
                     commit('setBibliography', data);
                 },
+                updateBibliography({commit}, data) {
+                    data.forEach(itemWrap => {
+                        if(itemWrap.added) {
+                            commit("addBibliographyItem", itemWrap.entry);
+                        } else {
+                            commit("updateBibliographyItem", itemWrap.entry);
+                        }
+                    });
+                },
                 addBibliographyItem({commit}, data) {
                     commit('addBibliographyItem', data);
                 },
@@ -538,6 +550,15 @@ export const store = createStore({
                         entity.data = await getEntityData(entityId);
                         fillEntityData(entity.data, entity.entity_type_id);
                         entity.references = await getEntityReferences(entityId) || {};
+                        for(let k in entity.data) {
+                            const curr = entity.data[k];
+                            if(curr.attribute) {
+                                const key = curr.attribute.thesaurus_url;
+                                if(!entity.references[key]) {
+                                    entity.references[key] = [];
+                                }
+                            }
+                        }
                         commit('setEntity', entity);
                         return;
                     }
@@ -662,7 +683,13 @@ export const store = createStore({
                     commit('setAttributeSelections', data.selections);
                 },
                 addAttribute({commit}, data) {
-                    commit('addAttribute', data);
+                    commit('addAttribute', data.attribute);
+                    if(data.selection) {
+                        commit('setAttributeSelection', {
+                            id: data.attribute.id,
+                            selection: data.selection,
+                        });
+                    }
                 },
                 setAttributeTypes({commit, state}, data) {
                     state.attributeTypes = [];

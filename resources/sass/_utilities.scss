@@ -223,6 +223,18 @@
     overflow-y: scroll;
 }
 
+.scroll-visible {
+    overflow: visible;
+}
+
+.scroll-x-visible {
+    overflow-x: visible;
+}
+
+.scroll-y-visible {
+    overflow-y: visible;
+}
+
 .bg-none {
     background: none !important;
 }

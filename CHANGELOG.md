@@ -1,6 +1,22 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.9.7
+### Added
+- Attribute Name and path to entity detail's link list (path is shown on hover; entity type name is shown on dot hover!)
+- Reload button to _Not Found_ page
+- Highlight matching strings in bibliography search
+### Fixed
+- Dropdown overflow in Add/Edit Bibliography Item modal
+- Attribute Dependencies could not be added/updated
+- Modal footer buttons on small screens
+- Again: References list not visible after added a new one if it's the first literature reference added to that attribute
+- Add new bibliography items from file import to list
+- Prevent to add already added attributes to entity types
+- Non-translated toast text shown when references tab in _Entity Detail_ panel can not be opened
+- Empty dropdowns for newly created and added attributes in _Entity Detail_ panel
+- Save entity with values set for a former empty _Entity (Multiple Choice)_ attribute
+
 ## 0.9.6
 ### Added
 - Info modal in references tab to view all information from an literature reference

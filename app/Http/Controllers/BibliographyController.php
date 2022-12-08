@@ -142,7 +142,7 @@ class BibliographyController extends Controller
             ], 400);
         }
         $entries = $listener->export();
-        $newEntries = [];
+        $newChangedEntries = [];
         foreach($entries as $entry) {
             $insArray = array_intersect_key($entry, Bibliography::patchRules);
             // set citation key if none is present
@@ -157,10 +157,18 @@ class BibliographyController extends Controller
                 $insArray
             );
             if($bibliography->wasRecentlyCreated) {
-                $newEntries[] = Bibliography::find($bibliography->id);
+                $newChangedEntries[] = [
+                    'entry' => Bibliography::find($bibliography->id),
+                    'added' => true,
+                ];
+            } else if($bibliography->wasChanged()) {
+                $newChangedEntries[] = [
+                    'entry' => Bibliography::find($bibliography->id),
+                    'added' => false,
+                ];
             }
         }
-        return response()->json($newEntries, 201);
+        return response()->json($newChangedEntries, 201);
     }
 
     // PATCH
