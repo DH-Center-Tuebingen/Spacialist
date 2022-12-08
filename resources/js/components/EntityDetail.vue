@@ -346,7 +346,8 @@
                         },
                     });
                 } else {
-                    toast.$toast('You have to enter data first, before you can edit metadata.', '', {
+                    const msg = t('main.entity.references.toasts.cannot_edit_metadata.msg');
+                    toast.$toast(msg, '', {
                         duration: 2500,
                         autohide: true,
                         channel: 'warning',

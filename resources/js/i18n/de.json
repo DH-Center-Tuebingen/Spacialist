@@ -361,9 +361,8 @@
                     "add_button": "Quelle hinzufügen"
                 },
                 "toasts": {
-                    "updated_certainty": {
-                        "title": "Sicherheit aktualisiert",
-                        "msg": "Sicherheit von {name} erfolgreich auf {i}% gesetzt."
+                    "cannot_edit_metadata": {
+                        "msg": "Es müssen zuerst Daten eingegeben werden, bevor Metadaten editiert werden können."
                     }
                 }
             },

@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 - Again: References list not visible after added a new one if it's the first literature reference added to that attribute
 - Add new bibliography items from file import to list
 - Prevent to add already added attributes to entity types
+- Non-translated toast text shown when references tab in _Entity Detail_ panel can not be opened
 
 ## 0.9.6
 ### Added

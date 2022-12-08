@@ -359,9 +359,8 @@
                     "add_button": "Add Reference"
                 },
                 "toasts": {
-                    "updated_certainty": {
-                        "title": "Certainty updated",
-                        "msg": "Certainty of {name} successfully set to {i}%."
+                    "cannot_edit_metadata": {
+                        "msg": "You have to enter data first, before you can edit metadata."
                     }
                 }
             },
