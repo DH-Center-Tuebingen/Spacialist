@@ -173,6 +173,12 @@ class Plugin extends Model
     public function handleUpdate() {
         // TODO is it really the same as install?
         $this->handleInstallation();
+
+
+        $info = self::getInfo(base_path("app/Plugins/$this->name"));
+        $this->update_available = null;
+        $this->version = $info['version'];
+        $this->save();
     }
 
     public function handleUninstall() {

@@ -575,7 +575,13 @@
             "activate": "Aktivieren",
             "remove": "Löschen",
             "update_to": "Auf <span class=\"fw-bold\">{ version }</span> aktualisieren",
-            "not_found": "Keine Erweiterungen gefunden."
+            "not_found": "Keine Erweiterungen gefunden.",
+            "toasts": {
+                "update": {
+                    "title": "Erweiterung aktualisiert",
+                    "message": "Die Erweiterung {name} wurde erfolgreich auf Version {v} aktualisiert (von Version {vo})."
+                }
+            }
         },
         "about": {
             "title": "Über Spacialist",
