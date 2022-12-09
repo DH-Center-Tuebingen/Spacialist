@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.9.9
+### Fixed
+- Plugin updates
+
+## 0.9.8
+No notable changes in this release
+
 ## 0.9.7
 ### Added
 - Attribute Name and path to entity detail's link list (path is shown on hover; entity type name is shown on dot hover!)

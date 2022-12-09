@@ -145,15 +145,15 @@ class PluginController extends Controller
 
     public function updatePlugin(Request $request, $id) {
         try {
-            $plugin = Plugin::firstOrFail($id);
+            $plugin = Plugin::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => __('Error while installing plugin. Preset does not exist.')
+                'error' => __('This plugin does not exist.')
             ], 403);
         }
 
         $plugin->handleUpdate();
-        return response()->json([], 204);
+        return response()->json($plugin);
     }
 
     public function uninstallPlugin(Request $request, $id) {

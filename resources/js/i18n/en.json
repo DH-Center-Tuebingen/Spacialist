@@ -575,7 +575,13 @@
             "activate": "Activate",
             "remove": "Remove",
             "update_to": "Update to <span class=\"fw-bold\">{ version }</span>",
-            "not_found": "No plugins found."
+            "not_found": "No plugins found.",
+            "toasts": {
+                "update": {
+                    "title": "Plugin updated",
+                    "message": "Plugin {name} successfully updated to version {v} (from version {vo})."
+                }
+            }
         },
         "about": {
             "title": "About Spacialist",

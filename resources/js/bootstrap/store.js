@@ -448,22 +448,26 @@ export const store = createStore({
                     if(idx == -1) return;
 
                     let plugin = null;
+                    let remove = false;
 
                     if(data.deleted) {
                         const delPlugins = state.plugins.splice(idx, 1);
                         plugin = delPlugins[0];
+                        remove = true;
                     } else {
-                        const props = only(data.properties, ['installed_at', 'updated_at']);
+                        const props = only(data.properties, ['installed_at', 'updated_at', 'update_available', 'version']);
                         const updPlugin = state.plugins[idx];
                         for(let k in props) {
                             updPlugin[k] = props[k];
                         }
+                        
                         if(data.uninstalled) {
                             plugin = updPlugin;
+                            remove = true;
                         }
                     }
 
-                    if(plugin) {
+                    if(plugin && remove) {
                         const slots = state.registeredPluginSlots;
                         const pluginId = slugify(plugin.name);
                         for(let k in slots) {

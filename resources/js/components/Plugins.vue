@@ -90,6 +90,8 @@
     import { useI18n } from 'vue-i18n';
     import store from '@/bootstrap/store.js';
 
+    import { useToast } from '@/plugins/toast.js';
+
     import {
         uploadPlugin,
         installPlugin,
@@ -110,6 +112,7 @@
     export default {
         setup(props) {
             const { t } = useI18n();
+            const toast = useToast();
 
             // FUNCTIONS
             const isInstalled = plugin => {
@@ -129,7 +132,19 @@
                 });
             };
             const update = plugin => {
-                updatePlugin(plugin.id);
+                const vo = plugin.version;
+                updatePlugin(plugin.id).then(_ => {
+                    const label = t('main.plugins.toasts.update.message', {
+                        name: plugin.metadata.title,
+                        vo: vo,
+                        v: plugin.version,
+                    });
+                    const title = t('main.plugins.toasts.update.title');
+                    toast.$toast(label, title, {
+                        channel: 'success',
+                        duration: 10000,
+                    });
+                });
             };
             const remove = plugin => {
                 removePlugin(plugin.id).then(data => {
