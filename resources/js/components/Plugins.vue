@@ -72,6 +72,11 @@
                     </div>
                 </div>
             </div>
+            <alert v-if="(!state.sortedPlugins || state.sortedPlugins.length == 0)"
+                :message="t('main.plugins.not_found')"
+                :type="'info'"
+                :noicon="false"
+            />
         </div>
     </div>
 </template>

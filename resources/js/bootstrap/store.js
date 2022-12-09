@@ -436,7 +436,12 @@ export const store = createStore({
                     state.plugins = data;
                 },
                 addPlugin(state, data) {
-                    state.plugins.push(data);
+                    const idx = state.plugins.findIndex(p => p.id == data.id);
+                    if(idx > -1) {
+                        state.plugins[idx] = data;
+                    } else {
+                        state.plugins.push(data);
+                    }
                 },
                 updatePlugin(state, data) {
                     const idx = state.plugins.findIndex(p => p.id == data.plugin_id);

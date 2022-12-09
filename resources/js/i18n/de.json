@@ -574,7 +574,8 @@
             "deactivate": "Deaktivieren",
             "activate": "Aktivieren",
             "remove": "Löschen",
-            "update_to": "Auf <span class=\"fw-bold\">{ version }</span> aktualisieren"
+            "update_to": "Auf <span class=\"fw-bold\">{ version }</span> aktualisieren",
+            "not_found": "Keine Erweiterungen gefunden."
         },
         "about": {
             "title": "Über Spacialist",

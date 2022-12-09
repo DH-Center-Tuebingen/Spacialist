@@ -48,11 +48,15 @@ class Plugin extends Model
         return $name;
     }
 
-    public static function getInfo($path) {
-        $infoPath = Str::finish($path, '/') . 'App/info.xml';
-        if(!File::isFile($infoPath)) return false;
+    public static function getInfo($path, $isString = false) {
+        if(!$isString) {
+            $infoPath = Str::finish($path, '/') . 'App/info.xml';
+            if(!File::isFile($infoPath)) return false;
+            $xmlString = file_get_contents($infoPath);
+        } else {
+            $xmlString = $path;
+        }
 
-        $xmlString = file_get_contents($infoPath);
         $xmlObject = simplexml_load_string($xmlString);
         
         return json_decode(json_encode($xmlObject), true);
