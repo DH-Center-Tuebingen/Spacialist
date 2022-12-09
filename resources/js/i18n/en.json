@@ -574,7 +574,8 @@
             "deactivate": "Deactivate",
             "activate": "Activate",
             "remove": "Remove",
-            "update_to": "Update to <span class=\"fw-bold\">{ version }</span>"
+            "update_to": "Update to <span class=\"fw-bold\">{ version }</span>",
+            "not_found": "No plugins found."
         },
         "about": {
             "title": "About Spacialist",
