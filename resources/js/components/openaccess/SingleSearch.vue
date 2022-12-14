@@ -1,6 +1,9 @@
 <template>
     <div class="row">
         <h3>
+            <a href="#" class="text-decoration-none text-muted" @click.prevent="state.selectedEntityTypeId = null" v-show="state.selectedEntityType">
+                <i class="fa fa-fw fa-arrow-turn-up fa-flip-horizontal fa-xs"></i>
+            </a>
             Single Search
             <small v-if="state.selectedEntityType">
                 -

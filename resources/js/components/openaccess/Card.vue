@@ -49,7 +49,7 @@
                         </button>
                         <hr class="text-muted flex-grow-1"/>
                     </div>
-                    <div v-show="state.showData">
+                    <div class="bg-white rounded-2 p-3 mt-2" v-show="state.showData">
                         <h6 class="card-text fw-bold">
                             Entity Data
                         </h6>

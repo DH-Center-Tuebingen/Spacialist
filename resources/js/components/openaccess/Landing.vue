@@ -1,7 +1,7 @@
 <template>
-    <div class="d-flex flex-column h-100 scroll-y-auto">
+    <div class="d-flex flex-column h-100 scroll-y-auto scroll-x-hidden">
         <h2>Welcome to the Open Access Panel!</h2>
-        <p class="lead" v-if="state.prefLoaded">
+        <p class="lead bg-primary bg-opacity-10 p-4 rounded-4" v-if="state.prefLoaded">
             This page allows open access to the Spacialist Project <span class="fst-italic">{{ state.project }}</span> by <a :href="`mailto:${state.maintainer.email}`" class="fst-italic">{{ state.maintainer.name }}</a>.
         </p>
         <h4>
@@ -15,7 +15,7 @@
                 </a>
             </small>
         </h4>
-        <p class="p-3 bg-primary bg-opacity-10 rounded-3 text-start rendered-markdown" v-if="state.prefLoaded" v-show="state.showDescription">
+        <p class="p-4 bg-primary bg-opacity-10 rounded-4 text-start rendered-markdown" v-if="state.prefLoaded" v-show="state.showDescription">
             <vue3-markdown-it :source="state.maintainer.description" />
         </p>
 
@@ -27,9 +27,9 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Free Search</h5>
-                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                        <p class="card-text">Let's you search through the complete data with any filter combination of entity types and attributes.</p>
                         <router-link class="btn btn-primary" :to="{name: 'freesearch'}">
-                            Open Model
+                            Start Free Search
                         </router-link>
                     </div>
                 </div>
@@ -38,9 +38,9 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Single Search</h5>
-                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                        <p class="card-text">Let's you search through all entities of a specific entity type.</p>
                         <router-link class="btn btn-primary" :to="{ name: 'singlesearch'}">
-                            Open Model
+                            Start Single Search
                         </router-link>
                     </div>
                 </div>
