@@ -32,13 +32,13 @@
                                 </span>
                             </span>
                             <ul class="dropdown-menu">
-                                <li v-for="link in state.entity.attributeLinks" :key="link.id">
+                                <li v-for="link in state.groupedAttributeLinks" :key="link.id">
                                     <router-link :to="{name: 'entitydetail', params: {id: link.id}, query: state.routeQuery}" class="dropdown-item d-flex align-items-center gap-1" :title="link.path.join(' / ')">
                                         <span class="badge rounded-pill" style="font-size: 8px;" :style="getEntityColors(link.entity_type_id)" :title="getEntityTypeName(link.entity_type_id)">
                                             &nbsp;&nbsp;
                                         </span>
                                         {{ link.name }}
-                                        <span class="text-muted small">{{ translateConcept(link.attribute_url) }}</span>
+                                        <span class="text-muted small">{{ link.attribute_urls.join(', ') }}</span>
                                     </router-link>
                                 </li>
                             </ul>
@@ -254,6 +254,22 @@
                 entityTypeSelections: computed(_ => getEntityTypeAttributeSelections(state.entity.entity_type_id)),
                 entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
                 hasAttributeLinks: computed(_ => state.entity.attributeLinks && state.entity.attributeLinks.length > 0),
+                groupedAttributeLinks: computed(_ => {
+                    if(!state.hasAttributeLinks) return {};
+
+                    const groups = {};
+                    state.entity.attributeLinks.forEach(l => {
+                        if(!groups[l.id]) {
+                            groups[l.id] = {
+                                ...l,
+                                attribute_urls: [translateConcept(l.attribute_url)],
+                            };
+                        } else {
+                            groups[l.id].attribute_urls.push(translateConcept(l.attribute_url));
+                        }
+                    });
+                    return groups;
+                }),
                 attributesFetched: computed(_ => state.initFinished && state.entity.data && !!state.entityAttributes && state.entityAttributes.length > 0),
                 entityTypeLabel: computed(_ => {
                     return getEntityTypeName(state.entity.entity_type_id);
