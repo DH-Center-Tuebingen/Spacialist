@@ -170,6 +170,40 @@
             };
             const operatorSelected = e => {
             };
+            const getInputTypeClass = datatype => {
+                switch(datatype) {
+                        case 'string':
+                        case 'stringf':
+                        case 'geography':
+                        case 'iconclass':
+                        case 'rism':
+                        case 'serial':
+                            return 'text';
+                        case 'double':
+                        case 'integer':
+                        case 'percentage':
+                            return 'number';
+                        case 'boolean':
+                            return 'boolean';
+                        case 'date':
+                            return 'date';
+                        case 'string-sc':
+                        case 'string-mc':
+                            return 'select';
+                        // TODO handle entity attributes
+                        case 'entity':
+                        case 'entity-mc':
+                            // return 'entity';
+                        case 'epoch':
+                        case 'timeperiod':
+                        case 'dimension':
+                        case 'list':
+                        case 'table':
+                        case 'sql':
+                        default:
+                            return 'unsupported';
+                    }
+            };
 
             // DATA
             const operators = [
@@ -214,21 +248,24 @@
                     if(!state.attributeSelected) return [];
 
                     switch(state.dependency.attribute.datatype) {
-                        case 'string':
-                        case 'stringf':
-                        case 'string-sc':
-                        case 'string-mc':
-                        case 'geography':
-                        case 'entity':
-                        case 'entity-mc':
-                        case 'iconclass':
-                        case 'rism':
                         case 'epoch':
                         case 'timeperiod':
                         case 'dimension':
                         case 'list':
                         case 'table':
                         case 'sql':
+                            return [];
+                        // TODO handle entity attributes
+                        case 'entity':
+                        case 'entity-mc':
+                            return [];
+                        case 'string':
+                        case 'stringf':
+                        case 'string-sc':
+                        case 'string-mc':
+                        case 'geography':
+                        case 'iconclass':
+                        case 'rism':
                         case 'serial':
                             return operators.filter(o => {
                                 switch(o.id) {
@@ -268,42 +305,13 @@
                 inputType: computed(_ => {
                     if(!state.attributeSelected || !state.operatorSelected) return 'unsupported';
 
-                    switch(state.dependency.attribute.datatype) {
-                        case 'string':
-                        case 'stringf':
-                        case 'geography':
-                        case 'iconclass':
-                        case 'rism':
-                        case 'serial':
-                            return 'text';
-                        case 'double':
-                        case 'integer':
-                        case 'percentage':
-                            return 'number';
-                        case 'boolean':
-                            return 'boolean';
-                        case 'date':
-                            return 'date';
-                        case 'string-sc':
-                        case 'string-mc':
-                        case 'entity':
-                        case 'entity-mc':
-                            return 'select';
-                        case 'epoch':
-                        case 'timeperiod':
-                        case 'dimension':
-                        case 'list':
-                        case 'table':
-                        case 'sql':
-                        default:
-                            return 'unsupported';
-                    }
+                    return getInputTypeClass(state.dependency.attribute.datatype);
                 }),
                 attribute: computed(_ => getAttribute(attributeId.value)),
                 activeDependency: computed(_ => getEntityTypeDependencies(entityTypeId.value, attributeId.value)),
                 selection: computed(_ => {
                     return attributeSelection.value.filter(a => {
-                        return a.id != attributeId.value;
+                        return a.id != attributeId.value && getInputTypeClass(a.datatype) != 'unsupported';
                     });
                 }),
                 attributeSelected: computed(_ => state.dependency.attribute && state.dependency.attribute.id),

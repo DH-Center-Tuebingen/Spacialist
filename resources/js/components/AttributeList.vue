@@ -373,7 +373,8 @@
                 state.hoverStates[i] = false;
             };
             const handleMove = (e, orgE) => {
-                return !disableDrag.value;
+                const draggedAid = e.draggedContext.element.id;
+                return !(showHidden.value && Object.keys(state.hiddenAttributeList).some(aid => aid == draggedAid)) && !disableDrag.value;
             };
             const handleUpdate = (e) => {
                 if(!!e.moved) {
@@ -494,7 +495,7 @@
                     return actValue.value.map((v, i) => {
                         return {
                             id: v,
-                            name: actValue.name[i],
+                            name: actValue.name ? actValue.name[i] : '',
                         };
                     });
                 } else {

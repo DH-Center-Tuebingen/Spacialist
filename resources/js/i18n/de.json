@@ -261,7 +261,8 @@
             "not_found": {
                 "title": "Seite nicht gefunden!",
                 "msg": "Die Seite <code>{site}</code> konnte nicht gefunden werden. Überprüfe die Schreibweise oder wende dich an den Administrator.",
-                "go_to": "Zur Startseite"
+                "go_to": "Zurück zur Startseite",
+                "retry": "Nochmal versuchen"
             },
             "screencast": {
                 "recording_begins_in_s": "Screencast-Aufnahme beginnt in: einer Sekunde | Screencast-Aufnahme beginnt in: {t} Sekunden",
@@ -360,9 +361,8 @@
                     "add_button": "Quelle hinzufügen"
                 },
                 "toasts": {
-                    "updated_certainty": {
-                        "title": "Sicherheit aktualisiert",
-                        "msg": "Sicherheit von {name} erfolgreich auf {i}% gesetzt."
+                    "cannot_edit_metadata": {
+                        "msg": "Es müssen zuerst Daten eingegeben werden, bevor Metadaten editiert werden können."
                     }
                 }
             },
@@ -574,7 +574,14 @@
             "deactivate": "Deaktivieren",
             "activate": "Aktivieren",
             "remove": "Löschen",
-            "update_to": "Auf <span class=\"fw-bold\">{ version }</span> aktualisieren"
+            "update_to": "Auf <span class=\"fw-bold\">{ version }</span> aktualisieren",
+            "not_found": "Keine Erweiterungen gefunden.",
+            "toasts": {
+                "update": {
+                    "title": "Erweiterung aktualisiert",
+                    "message": "Die Erweiterung {name} wurde erfolgreich auf Version {v} aktualisiert (von Version {vo})."
+                }
+            }
         },
         "about": {
             "title": "Über Spacialist",
@@ -620,6 +627,10 @@
                 "delete": {
                     "title": "Eintrag erfolgreich gelöscht",
                     "msg": "Der Eintrag {name} wurde gelöscht"
+                },
+                "import": {
+                    "title": "Datei erfolgreich importiert",
+                    "msg": "{cnt} neue Einträge wurden hinzugefügt; {cnt_upd} Einträge wurden aktualisiert."
                 },
                 "bibtex_code_to_clipboard": {
                     "title": "BibTeX-Code in Zwischenablage kopiert"

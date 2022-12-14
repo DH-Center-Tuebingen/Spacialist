@@ -8,9 +8,14 @@
         </h2>
         <p class="lead" v-html="t('main.app.not_found.msg', {site: currentRoute.path})">
         </p>
-        <div class="mt-2">
+        <div class="mt-2 d-flex flex-row gap-4">
             <router-link class="btn btn-outline-primary" :to="{name: 'home'}">
+                <i class="fas fa-fw fa-house"></i>
                 {{ t('main.app.not_found.go_to') }}
+            </router-link>
+            <router-link class="btn btn-outline-warning" :to="{path: currentRoute.path, params: currentRoute.params, query: currentRoute.query, force: true}">
+                <i class="fas fa-fw fa-redo"></i>
+                {{ t('main.app.not_found.retry') }}
             </router-link>
         </div>
     </div>

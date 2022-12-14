@@ -2,7 +2,6 @@
   <vue-final-modal
     class="modal-container modal"
     content-class="sp-modal-content sp-modal-content-sm"
-    :lock-scroll="false"
     name="bibliograpy-item-modal">
     <div class="sp-modal-content sp-modal-content-sm">
         <div class="modal-header">
@@ -15,18 +14,18 @@
             <button type="button" class="btn-close" aria-label="Close" @click="closeModal()">
             </button>
         </div>
-        <div class="modal-body"
-        @paste="handlePasteFromClipboard($event)">
+        <div class="modal-body" :class="state.scrollStateBodyClasses" @paste="handlePasteFromClipboard($event)">
             <alert
                 :message="t('main.bibliography.modal.paste_info')"
                 :type="'note'"
                 :noicon="false"
                 :icontext="t('global.note')" />
-            <form role="form" id="addBibliographyItemForm" class="col px-0 scroll-y-auto scroll-x-hidden" name="addBibliographyItemForm" @submit.prevent="submitItem()">
+            <form role="form" id="addBibliographyItemForm" class="col px-0" :class="state.scrollStateClasses" name="addBibliographyItemForm" @submit.prevent="submitItem()">
                 <div class="row mb-3">
                     <label class="col-form-label col-md-3 text-end" for="type">{{ t('global.type') }}:</label>
                     <div class="col-md-9">
                         <multiselect
+                            :classes="multiselectResetClasslist"
                             v-model="state.data.type"
                             :label="'name'"
                             :track-by="'name'"
@@ -114,6 +113,7 @@
     import {
         can,
         getTs,
+        multiselectResetClasslist,
     } from '@/helpers/helpers.js';
     import {
         bibliographyTypes,
@@ -216,6 +216,20 @@
                 error: {},
                 fileContainer: [],
                 formMetas: {},
+                scrollStateClasses: computed(_ => {
+                    if(state.data.type) {
+                        return ['scroll-y-auto', 'scroll-x-hidden'];
+                    } else {
+                        return ['scroll-visible'];
+                    }
+                }),
+                scrollStateBodyClasses: computed(_ => {
+                    if(state.data.type) {
+                        return [];
+                    } else {
+                        return ['nonscrollable'];
+                    }
+                }),
                 file: computed(_ => state.fileContainer.length > 0 ? state.fileContainer[0] : null),
                 fileRemoved: false,
                 disabled: true,
@@ -229,6 +243,7 @@
                 // HELPERS
                 can,
                 bibliographyTypes,
+                multiselectResetClasslist,
                 // PROPS
                 // LOCAL
                 handlePasteFromClipboard,

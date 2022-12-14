@@ -79,12 +79,6 @@ class PluginController extends Controller
             ], 403);
         }
         $pluginName = substr($rootFolder, 0, -1);
-        $modelName = "$pluginName.php";
-        if($zipFile->locateName("{$rootFolder}App/{$modelName}") === false) {
-            return response()->json([
-                'error' => __('Format mismatch. You need a model file matching your root folder\'s name.')
-            ], 403);
-        }
         foreach($mandatoryFiles as $filepath) {
             if($zipFile->locateName("{$rootFolder}{$filepath}") === false) {
                 return response()->json([
@@ -95,15 +89,19 @@ class PluginController extends Controller
 
         $pluginPath = base_path("app/Plugins/$pluginName");
         if(file_exists($pluginPath)) {
-            return response()->json([
-                'error' => __("A plugin with the name '$pluginName' already exists. Aborting.")
-            ], 403);
+            $installedPlugin = Plugin::where('name', $pluginName)->first();
+            $infoContent = Plugin::getInfO($zipFile->getFromName("{$rootFolder}App/info.xml"), true);
+
+            if($installedPlugin->version >= $infoContent['version']) {
+                return response()->json([
+                    'error' => __("A plugin with the name '$pluginName' and the same or later version ({$infoContent['version']} and {$installedPlugin->version}) already exists. Aborting.")
+                ], 403);
+            }
         }
 
         $extractPath = base_path('app/Plugins/');
         $extracted = $zipFile->extractTo($extractPath);
         $zipFile->close();
-        // usleep(5000000);
 
         if(!$extracted) {
             return response()->json([
@@ -147,15 +145,15 @@ class PluginController extends Controller
 
     public function updatePlugin(Request $request, $id) {
         try {
-            $plugin = Plugin::firstOrFail($id);
+            $plugin = Plugin::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => __('Error while installing plugin. Preset does not exist.')
+                'error' => __('This plugin does not exist.')
             ], 403);
         }
 
         $plugin->handleUpdate();
-        return response()->json([], 204);
+        return response()->json($plugin);
     }
 
     public function uninstallPlugin(Request $request, $id) {

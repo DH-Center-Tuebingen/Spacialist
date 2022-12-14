@@ -70,6 +70,9 @@ export const store = createStore({
                 setAttributeTypes(state, data) {
                     state.attributeTypes = data;
                 },
+                setAttributeSelection(state, data) {
+                    state.attributeSelections[data.id] = data.selection;
+                },
                 setAttributeSelections(state, data) {
                     state.attributeSelections = data;
                 },
@@ -433,29 +436,38 @@ export const store = createStore({
                     state.plugins = data;
                 },
                 addPlugin(state, data) {
-                    state.plugins.push(data);
+                    const idx = state.plugins.findIndex(p => p.id == data.id);
+                    if(idx > -1) {
+                        state.plugins[idx] = data;
+                    } else {
+                        state.plugins.push(data);
+                    }
                 },
                 updatePlugin(state, data) {
                     const idx = state.plugins.findIndex(p => p.id == data.plugin_id);
                     if(idx == -1) return;
 
                     let plugin = null;
+                    let remove = false;
 
                     if(data.deleted) {
                         const delPlugins = state.plugins.splice(idx, 1);
                         plugin = delPlugins[0];
+                        remove = true;
                     } else {
-                        const props = only(data.properties, ['installed_at', 'updated_at']);
+                        const props = only(data.properties, ['installed_at', 'updated_at', 'update_available', 'version']);
                         const updPlugin = state.plugins[idx];
                         for(let k in props) {
                             updPlugin[k] = props[k];
                         }
+                        
                         if(data.uninstalled) {
                             plugin = updPlugin;
+                            remove = true;
                         }
                     }
 
-                    if(plugin) {
+                    if(plugin && remove) {
                         const slots = state.registeredPluginSlots;
                         const pluginId = slugify(plugin.name);
                         for(let k in slots) {
@@ -485,6 +497,15 @@ export const store = createStore({
                 },
                 setBibliography({commit}, data) {
                     commit('setBibliography', data);
+                },
+                updateBibliography({commit}, data) {
+                    data.forEach(itemWrap => {
+                        if(itemWrap.added) {
+                            commit("addBibliographyItem", itemWrap.entry);
+                        } else {
+                            commit("updateBibliographyItem", itemWrap.entry);
+                        }
+                    });
                 },
                 addBibliographyItem({commit}, data) {
                     commit('addBibliographyItem', data);
@@ -538,6 +559,15 @@ export const store = createStore({
                         entity.data = await getEntityData(entityId);
                         fillEntityData(entity.data, entity.entity_type_id);
                         entity.references = await getEntityReferences(entityId) || {};
+                        for(let k in entity.data) {
+                            const curr = entity.data[k];
+                            if(curr.attribute) {
+                                const key = curr.attribute.thesaurus_url;
+                                if(!entity.references[key]) {
+                                    entity.references[key] = [];
+                                }
+                            }
+                        }
                         commit('setEntity', entity);
                         return;
                     }
@@ -662,7 +692,13 @@ export const store = createStore({
                     commit('setAttributeSelections', data.selections);
                 },
                 addAttribute({commit}, data) {
-                    commit('addAttribute', data);
+                    commit('addAttribute', data.attribute);
+                    if(data.selection) {
+                        commit('setAttributeSelection', {
+                            id: data.attribute.id,
+                            selection: data.selection,
+                        });
+                    }
                 },
                 setAttributeTypes({commit, state}, data) {
                     state.attributeTypes = [];

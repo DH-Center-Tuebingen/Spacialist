@@ -54,13 +54,14 @@ export async function installPlugin(id) {
 
 export async function updatePlugin(id) {
     return $httpQueue.add(
-        () => http.delete(`/plugin/${id}`).then(response => {
+        () => http.patch(`/plugin/${id}`).then(response => {
             store.dispatch('updatePlugin', {
                 plugin_id: id,
-                uninstalled: true,
                 properties: {
                     installed_at: response.data.installed_at,
                     updated_at: response.data.updated_at,
+                    version: response.data.version,
+                    update_available: false,
                 },
             });
         })
@@ -74,8 +75,8 @@ export async function uninstallPlugin(id) {
                 plugin_id: id,
                 uninstalled: true,
                 properties: {
-                    installed_at: response.data.installed_at,
-                    updated_at: response.data.updated_at,
+                    installed_at: null,
+                    updated_at: response.data.plugin.updated_at,
                 },
             });
             return response.data;
