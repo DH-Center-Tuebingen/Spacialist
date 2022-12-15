@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.9.11
+### Fixed
+- Error on page access with no installed plugins (because Plugin directory is missing)
+
 ## 0.9.10
 ### Changed
 - Attributes in entity detail's link list are now grouped by linked entity
