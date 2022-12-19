@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.9.12
+### Fixed
+- App not useable when a notifications with a reference to a deleted entity exists
+
 ## 0.9.11
 ### Fixed
 - Error on page access with no installed plugins (because Plugin directory is missing)
