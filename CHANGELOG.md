@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 - Background to column section in _Add Attribute_ modal to better distinguish it from the main section
 ### Fixed
 - Reset label search after column added to table datatype in _Add Attribute_ modal
+- Reset column values after new row is added in _Entity Detail_ form
 ### Changed
 - Attributes in entity detail's link list are now grouped by linked entity
 
