@@ -223,7 +223,7 @@
             });
 
             watch(_ => defaultValue.value, (newValue, oldValue) => {
-                if(newValue.reset) {
+                if(!newValue || newValue.reset) {
                     state.entry = null;
                 } else {
                     state.entry = newValue;
