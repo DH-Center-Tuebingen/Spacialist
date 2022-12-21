@@ -596,6 +596,7 @@
                     const reference = newRowRefs.value[k];
                     if(!!reference.v.value) {
                         rowValue[k] = reference.v.value;
+                        state.newRowColumns[k] = null;
                         if(!!reference.resetFieldState) {
                             reference.resetFieldState();
                         }
