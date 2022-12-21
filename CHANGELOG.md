@@ -37,6 +37,8 @@ All notable changes to this project will be documented in this file.
 ## 0.9.10
 ### Added
 - Background to column section in _Add Attribute_ modal to better distinguish it from the main section
+### Fixed
+- Reset label search after column added to table datatype in _Add Attribute_ modal
 ### Changed
 - Attributes in entity detail's link list are now grouped by linked entity
 

@@ -90,6 +90,7 @@
         computed,
         reactive,
         toRefs,
+        watch,
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
@@ -219,6 +220,14 @@
                 entry: defaultValue,
                 query: '',
                 enableChain: computed(_ => chain.value && chain.value.length > 0),
+            });
+
+            watch(_ => defaultValue.value, (newValue, oldValue) => {
+                if(newValue.reset) {
+                    state.entry = null;
+                } else {
+                    state.entry = newValue;
+                }
             });
 
             // RETURN
