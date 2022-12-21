@@ -35,6 +35,8 @@ All notable changes to this project will be documented in this file.
 - Error on page access with no installed plugins (because Plugin directory is missing)
 
 ## 0.9.10
+### Added
+- Background to column section in _Add Attribute_ modal to better distinguish it from the main section
 ### Changed
 - Attributes in entity detail's link list are now grouped by linked entity
 
