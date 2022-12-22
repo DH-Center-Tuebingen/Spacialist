@@ -3,7 +3,7 @@
         class="h-100 pe-1"
         v-model="state.attributeList"
         item-key="id"
-        :disabled="disableDrag"
+        :disabled="disableDrag || preview"
         :group="group"
         :move="handleMove"
         @change="handleUpdate">
@@ -135,6 +135,7 @@
                             :value="state.attributeValues[element.id].value"
                             :attribute="element"
                             :selections="selections"
+                            :preview-columns="preview ? previewData[element.id] : null"
                             @expanded="e => onAttributeExpand(e, index)"
                             @change="e => updateDirtyState(e, element.id)" />
 
@@ -305,6 +306,16 @@
                 type: Boolean,
                 default: false,
             },
+            preview: {
+                required: false,
+                type: Boolean,
+                default: false,
+            },
+            previewData: {
+                required: false,
+                type: Object,
+                default: {},
+            },
         },
         components: {
             'string-attribute': StringAttr,
@@ -341,6 +352,8 @@
                 selections,
                 values,
                 nolabels,
+                preview,
+                previewData,
             } = toRefs(props);
             // FETCH
 
@@ -372,6 +385,9 @@
                 state.hoverStates[i] = false;
             };
             const handleMove = (e, orgE) => {
+                // Preview does not allow dragging
+                if(preview.value) return false;
+
                 const draggedAid = e.draggedContext.element.id;
                 return !(showHidden.value && Object.keys(state.hiddenAttributeList).some(aid => aid == draggedAid)) && !disableDrag.value;
             };
@@ -570,6 +586,8 @@
                 metadataAddon,
                 nolabels,
                 selections,
+                preview,
+                previewData,
                 // STATE
                 attrRefs,
                 state,

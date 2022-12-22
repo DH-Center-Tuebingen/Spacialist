@@ -180,7 +180,7 @@
                         </button>
                     </td>
                 </tr>
-                <tr class="border-0">
+                <tr class="border-0" v-if="!state.isPreview">
                     <td v-for="(column, i) in state.columns" :key="i">
                         <form class="d-flex flex-column" v-if="state.chartShown">
                             <div class="form-check" v-show="column.datatype == 'integer'">
@@ -292,6 +292,11 @@
             attribute: {
                 type: Object,
             },
+            previewColumns: {
+                required: false,
+                type: Object,
+                default: null,
+            },
         },
         components: {
             'string-attribute': StringAttr,
@@ -316,6 +321,7 @@
                 value,
                 selections,
                 attribute,
+                previewColumns,
             } = toRefs(props);
 
             // FETCH
@@ -506,7 +512,8 @@
                 initialValue: value.value,
             });
             const state = reactive({
-                columns: computed(_ => getAttribute(attribute.value.id).columns),
+                isPreview: computed(_ => previewColumns.value && Object.keys(previewColumns.value).length > 0),
+                columns: computed(_ => state.isPreview ? previewColumns.value : getAttribute(attribute.value.id).columns),
                 selections: computed(_ => {
                     const list = {};
                     if(!state.columns) return list;
