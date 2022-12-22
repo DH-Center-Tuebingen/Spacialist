@@ -209,6 +209,7 @@
                             :value="state.attributeValues[element.id].value"
                             :attribute="element"
                             :selections="selections"
+                            :preview-columns="preview ? previewData[element.id] : null"
                             @expanded="e => onAttributeExpand(e, index)"
                             @change="e => updateDirtyState(e, element.id)"
                         />
@@ -427,6 +428,16 @@
                 type: Boolean,
                 default: false,
             },
+            preview: {
+                required: false,
+                type: Boolean,
+                default: false,
+            },
+            previewData: {
+                required: false,
+                type: Object,
+                default: ()=>({}),
+            },
         },
         emits: [
             'add-element',
@@ -450,6 +461,8 @@
                 selections,
                 values,
                 nolabels,
+                preview,
+                previewData,
             } = toRefs(props);
             // FETCH
 
@@ -500,6 +513,9 @@
                 state.hoverStates[i] = false;
             };
             const handleMove = (e, orgE) => {
+                // Preview does not allow dragging
+                if(preview.value) return false;
+
                 const draggedAid = e.draggedContext.element.id;
                 return !(showHidden.value && Object.keys(state.hiddenAttributeList).some(aid => aid == draggedAid)) && !disableDrag.value;
             };

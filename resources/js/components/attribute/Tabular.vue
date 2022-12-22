@@ -438,6 +438,11 @@
                 type: Object,
                 default: null
             },
+            previewColumns: {
+                required: false,
+                type: Object,
+                default: null,
+            },
         },
         emits: ['change', 'expanded'],
         setup(props, context) {
@@ -459,6 +464,7 @@
                 value,
                 selections,
                 attribute,
+                previewColumns,
             } = toRefs(props);
 
             // FETCH
@@ -649,7 +655,8 @@
                 initialValue: value.value,
             });
             const state = reactive({
-                columns: computed(_ => getAttribute(attribute.value.id).columns),
+                isPreview: computed(_ => previewColumns.value && Object.keys(previewColumns.value).length > 0),
+                columns: computed(_ => state.isPreview ? previewColumns.value : getAttribute(attribute.value.id).columns),
                 selections: computed(_ => {
                     const list = {};
                     if(!state.columns) return list;
