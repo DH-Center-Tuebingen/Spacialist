@@ -5,7 +5,7 @@
         item-key="id"
         class="attribute-list-container row align-content-start"
         :class="classes"
-        :disabled="disableDrag"
+        :disabled="disableDrag || preview"
         :group="group"
         :move="handleMove"
         @change="handleUpdate"
@@ -457,15 +457,7 @@
                 default: ()=>({}),
             },
         },
-        emits: [
-            'add-element',
-            'delete-element',
-            'dirty',
-            'edit-element',
-            'metadata',
-            'remove-element',
-            'reorder-list',
-        ],
+        emits: ['dirty'],
         setup(props, context) {
             const { t } = useI18n();
             const {

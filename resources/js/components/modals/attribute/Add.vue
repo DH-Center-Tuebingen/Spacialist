@@ -66,8 +66,7 @@
                         :values="state.previewAttribute.values"
                         :selections="{}"
                         :preview="true"
-                        :preview-data="state.previewData"
-                    />
+                        :preview-data="state.previewData" />
                 </div>
             </div>
             <div class="modal-footer">
