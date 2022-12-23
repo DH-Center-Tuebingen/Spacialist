@@ -40,7 +40,8 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Reset label search after column added to table datatype in _Add Attribute_ modal
 - Reset column values after new row is added in _Entity Detail_ form
-- Preview for Tabular attribute
+- Preview for _table_ datatype
+- Dropdowns for columns of newly added _table_ attribute only visible after page reload
 ### Changed
 - Attributes in entity detail's link list are now grouped by linked entity
 
