@@ -516,7 +516,7 @@
                 columns: computed(_ => state.isPreview ? previewColumns.value : getAttribute(attribute.value.id).columns),
                 selections: computed(_ => {
                     const list = {};
-                    if(!state.columns) return list;
+                    if(!state.columns || state.isPreview) return list;
 
                     for(let k in state.columns) {
                         const curr = state.columns[k];

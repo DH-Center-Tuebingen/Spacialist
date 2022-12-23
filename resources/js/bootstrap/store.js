@@ -71,7 +71,13 @@ export const store = createStore({
                     state.attributeTypes = data;
                 },
                 setAttributeSelection(state, data) {
-                    state.attributeSelections[data.id] = data.selection;
+                    if(data.nested) {
+                        for(let k in data.selection) {
+                            state.attributeSelections[k] = data.selection[k];
+                        }
+                    } else {
+                        state.attributeSelections[data.id] = data.selection;
+                    }
                 },
                 setAttributeSelections(state, data) {
                     state.attributeSelections = data;
@@ -696,6 +702,7 @@ export const store = createStore({
                     if(data.selection) {
                         commit('setAttributeSelection', {
                             id: data.attribute.id,
+                            nested: data.attribute.datatype == 'table',
                             selection: data.selection,
                         });
                     }
