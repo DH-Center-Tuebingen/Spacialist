@@ -300,7 +300,7 @@ class Bibliography extends Model implements Searchable
                 }
             } else {
                 if(
-                    (!isset($this->{$man}) || empty($this->{$man})) ||
+                    (!isset($this->{$man}) || empty($this->{$man})) &&
                     (!isset($this->{$manType}) || empty($this->{$manType}))
                 ) {
                     return false;

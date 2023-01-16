@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.9.13
+### Fixed
+- Adding/Editing bibliography entries of a type where a field is only mandatory if another field is not set
+
 ## 0.9.12
 ### Fixed
 - App not useable when a notifications with a reference to a deleted entity exists
