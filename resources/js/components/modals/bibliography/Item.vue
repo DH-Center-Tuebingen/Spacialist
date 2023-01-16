@@ -61,11 +61,14 @@
                 <div class="d-flex gap-2" v-else>
                     <file-upload
                         class="btn btn-sm btn-outline-primary clickable"
-                        ref="upload"
+                        ref="upload_bib_item_attachment"
                         v-model="state.fileContainer"
+                        :input-id="'upload_bib_item_attachment'"
                         :disabled="!can('bibliography_write|bibliography_create')"
                         :custom-action="importFile"
                         :directory="false"
+                        :accept="'image/*,application/pdf,text/plain'"
+                        :extensions="'jpg,jpeg,gif,png,txt,pdf'"
                         :multiple="false"
                         :drop="true"
                         @input-file="inputFile">
