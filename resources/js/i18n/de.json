@@ -608,7 +608,7 @@
             "modal": {
                 "paste_info": "Du kannst die Felder mit der Tastenkombination <kbd><kbd>Strg</kbd> + <kbd>v</kbd></kbd> mit einem BibTeX-Eintrag aus deiner Zwischenablage ausfüllen.",
                 "bibtex_code": "BibTeX-Code",
-                "attach_file": "Datei anhängen",
+                "attach_file": "Datei auswählen oder draufziehen",
                 "new": {
                     "title": "Neuer Eintrag"
                 },

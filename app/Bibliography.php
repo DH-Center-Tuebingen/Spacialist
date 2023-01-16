@@ -367,6 +367,15 @@ class Bibliography extends Model implements Searchable
         );
     }
 
+    public function deleteFile() {
+        if(isset($this->file) && Storage::exists($this->file)) {
+            Storage::delete($this->file);
+        }
+
+        $this->file = null;
+        $this->save();
+    }
+
     public function user() {
         return $this->belongsTo('App\User');
     }

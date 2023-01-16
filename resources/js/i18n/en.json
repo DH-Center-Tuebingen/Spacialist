@@ -608,7 +608,7 @@
             "modal": {
                 "paste_info": "You can use <kbd><kbd>ctrl</kbd> + <kbd>v</kbd></kbd> to fill out the fields with a BibTeX entry from your clipboard.",
                 "bibtex_code": "BibTeX-Code",
-                "attach_file": "Attach File",
+                "attach_file": "Select File or drop here",
                 "new": {
                     "title": "New Entry"
                 },
