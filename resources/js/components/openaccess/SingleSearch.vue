@@ -1,7 +1,7 @@
 <template>
     <div class="row">
         <h3>
-            <a href="#" class="text-decoration-none text-muted" @click.prevent="state.selectedEntityTypeId = null" v-show="state.selectedEntityType">
+            <a href="#" class="text-decoration-none text-muted" @click.prevent="unsetEntityType()" v-show="state.selectedEntityType">
                 <i class="fa fa-fw fa-arrow-turn-up fa-flip-horizontal fa-xs"></i>
             </a>
             Single Search
@@ -11,7 +11,7 @@
             </small>
         </h3>
     </div>
-    <div class="row overflow-hidden">
+    <div class="row flex-grow-1 overflow-hidden">
         <div class="col-12 h-100 overflow-hidden" v-if="!state.selectedEntityType">
             <p class="lead">
                 Please select an entity type first to search through the database
@@ -75,7 +75,7 @@
         </div>
         <div class="col-4 h-100 overflow-hidden d-flex flex-column" v-if="state.selectedEntityType">
             <h4>Filters</h4>
-            <div class="d-flex flex-column scroll-y-auto">
+            <div class="d-flex flex-column scroll-y-auto flex-grow-1">
                 <div v-for="attribute in state.filterableAttributes.attributes" :key="attribute.id" class="mb-3">
                     <h5>
                         {{ translateConcept(attribute.attribute.thesaurus_url) }}
@@ -219,6 +219,10 @@
             const selectEntityType = entityType => {
                 state.selectedEntityTypeId = entityType.id;
             };
+            const unsetEntityType = _ => {
+                state.selectedEntityTypeId = null;
+                state.pages = {};
+            };
             const setResultData = (pagData, initial = false) => {
                 const {
                     data,
@@ -231,7 +235,6 @@
                     // TODO
                     for(let k in state.allAttributesData) {
                         if(state.filters[k]) {
-                            console.log("filter for attribute exists", k, "setting Filters to", state.allAttributesData[k]);
                             state.availableAttributes.data[k] = state.allAttributesData[k];
                         } else {
                             state.availableAttributes.data[k] = pagData.data[k] || [];
@@ -329,6 +332,7 @@
                 translateConcept,
                 // LOCAL
                 selectEntityType,
+                unsetEntityType,
                 resetFilter,
                 handleFilterChange,
                 gotoPage,

@@ -41,10 +41,10 @@
                         <hr class="text-muted flex-grow-1"/>
                         <button class="btn btn-fab btn-primary" @click="toggleShowData()">
                             <span v-show="state.showData">
-                                <i class="fas fa-fw fa-minus"></i>
+                                <i class="fas fa-fw fa-minus roll-in"></i>
                             </span>
                             <span v-show="!state.showData">
-                                <i class="fas fa-fw fa-plus"></i>
+                                <i class="fas fa-fw fa-plus roll-in"></i>
                             </span>
                         </button>
                         <hr class="text-muted flex-grow-1"/>
@@ -54,6 +54,7 @@
                             Entity Data
                         </h6>
                         <attribute-list
+                            class="fade-in-fast"
                             v-if="state.attributes.length > 0"
                             :attributes="state.attributes"
                             :selections="{}"
