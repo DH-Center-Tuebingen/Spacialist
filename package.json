@@ -1,7 +1,7 @@
 {
     "private": true,
     "name": "spacialist",
-    "version": "0.9.12",
+    "version": "0.9.14",
     "description": "A Virtual Research Environment for the Spatial Humanities",
     "repository": {
         "type": "git",
