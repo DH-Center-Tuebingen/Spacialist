@@ -5,7 +5,7 @@ import { addToast } from '@/plugins/toast.js';
 
 import {
     useModal,
-} from '@/bootstrap/vfm.js';
+} from 'vue-final-modal';
 
 import {
     addUser,
@@ -44,6 +44,7 @@ import CsvPreviewer from '@/components/modals/csv/Preview.vue';
 import CsvPicker from '@/components/modals/csv/Picker.vue';
 import MapPicker from '@/components/modals/map/Picker.vue';
 import MarkdownEditor from '@/components/modals/system/MarkdownEditor.vue';
+import Changelog from '@/components/modals/system/Changelog.vue';
 import UserInfo from '@/components/modals/user/UserInfo.vue';
 import AddUser from '@/components/modals/user/Add.vue';
 import DeactiveUser from '@/components/modals/user/Deactivate.vue';
@@ -244,6 +245,21 @@ export function showMarkdownEditor(data, onConfirm) {
             onClosing(e) {
                 modal.destroy();
             },
+        },
+    });
+    modal.open();
+}
+
+export function showChangelogModal(plugin) {
+    const uid = `ChangelogModal-${getTs()}`;
+    const modal = useModal({
+        component: Changelog,
+        attrs: {
+            name: uid,
+            plugin: plugin,
+            onClosing(e) {
+                modal.destroy();
+            }
         },
     });
     modal.open();

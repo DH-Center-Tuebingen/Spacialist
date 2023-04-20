@@ -575,7 +575,11 @@
             "activate": "Aktivieren",
             "remove": "Löschen",
             "update_to": "Auf <span class=\"fw-bold\">{ version }</span> aktualisieren",
+            "changelog_info": "Änderungen anzeigen",
             "not_found": "Keine Erweiterungen gefunden.",
+            "modal": {
+                "changelog_title": "Erweiterung"
+            },
             "toasts": {
                 "update": {
                     "title": "Erweiterung aktualisiert",

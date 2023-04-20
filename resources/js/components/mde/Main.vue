@@ -1,5 +1,5 @@
 <template>
-    <VueEditor :editor="editor"/>
+    <Milkdown :editor="editor"/>
 </template>
 
 <script>
@@ -13,22 +13,22 @@
         Editor,
         rootCtx,
         defaultValueCtx,
+        rootAttrsCtx,
     } from '@milkdown/core';
     import {
-        VueEditor,
+        Milkdown,
         useEditor
     } from '@milkdown/vue';
-    import {
-        gfm,
-    } from '@milkdown/preset-gfm';
-    import { spac } from '@/components/mde/theme.js';
+    import { commonmark } from '@milkdown/preset-commonmark';
+    import { gfm } from '@milkdown/preset-gfm';
+    // import { spac } from '@/components/mde/theme.js';
     import { listener, listenerCtx } from '@milkdown/plugin-listener';
-    import { menu } from '@milkdown/plugin-menu';
+    // import { menu } from '@milkdown/plugin-menu';
     import { history } from '@milkdown/plugin-history';
     import { clipboard } from '@milkdown/plugin-clipboard';
     import { prism } from '@milkdown/plugin-prism';
     import { math } from '@milkdown/plugin-math';
-    import { tooltip } from '@milkdown/plugin-tooltip';
+    // import { tooltip } from '@milkdown/plugin-tooltip';
     import { emoji } from '@milkdown/plugin-emoji';
     import { diagram } from '@milkdown/plugin-diagram';
     import { indent } from '@milkdown/plugin-indent';
@@ -36,7 +36,7 @@
 
     export default {
         components: {
-            VueEditor,
+            Milkdown,
         },
         props: {
             data: {
@@ -62,23 +62,25 @@
                     .config((ctx) => {
                         ctx.set(rootCtx, root);
                         ctx.set(defaultValueCtx, data.value);
+                        ctx.update(rootAttrsCtx, (prev) => ({
+                            ...prev,
+                            class: `milkdown h-100`,
+                        }));
                         ctx.get(listenerCtx).markdownUpdated((ctx, markdown, prevMarkdown) => {
                             state.markdownString = markdown;
                         });
                     })
-                    .use(spac)
+                    .use(commonmark)
                     .use(gfm)
                     .use(listener)
                     .use(history)
                     .use(clipboard)
                     .use(prism)
                     .use(math)
-                    .use(tooltip)
                     .use(emoji)
                     .use(diagram)
                     .use(indent)
                     .use(upload)
-                    .use(menu)
             );
             const state = reactive({
                 show: false,
@@ -97,7 +99,7 @@
                 // STATE
                 editor,
                 state,
-            }
+            };
         },
     }
 </script>

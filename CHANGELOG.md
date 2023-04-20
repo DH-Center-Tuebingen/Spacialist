@@ -2,12 +2,19 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.9.14
+### Added
+- Changelog Viewer
+  - Added to _Plugins_ Settings (if an update is available)
 ### Fixed
 - File types to attach to bibliography items
 - Deleting files attached to bibliography items
 - Enable button if only file is added/removed from bibliography item
+- Modal Backdrop
 ### Changed
 - _Attach file_ button text in _Bibliography Item_ modal to make clear that _Drag & Drop_ is also possible
+- Update Laravel to v10
+- Update several dependencies
+- Replaced markdown renderer dependency
 
 ## 0.9.13
 ### Fixed

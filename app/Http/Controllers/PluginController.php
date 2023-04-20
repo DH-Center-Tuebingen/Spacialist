@@ -39,6 +39,7 @@ class PluginController extends Controller
 
         foreach($plugins as $plugin) {
             $plugin->metadata = $plugin->getMetadata();
+            $plugin->changelog = $plugin->getChangelog();
         }
 
         return response()->json($plugins);
