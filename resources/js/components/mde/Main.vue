@@ -21,15 +21,17 @@
     } from '@milkdown/vue';
     import { commonmark } from '@milkdown/preset-commonmark';
     import { gfm } from '@milkdown/preset-gfm';
-    // import { spac } from '@/components/mde/theme.js';
     import { listener, listenerCtx } from '@milkdown/plugin-listener';
-    // import { menu } from '@milkdown/plugin-menu';
     import { history } from '@milkdown/plugin-history';
     import { clipboard } from '@milkdown/plugin-clipboard';
     import { prism } from '@milkdown/plugin-prism';
     import { math } from '@milkdown/plugin-math';
-    // import { tooltip } from '@milkdown/plugin-tooltip';
-    import { emoji } from '@milkdown/plugin-emoji';
+    import {
+        emojiAttr,
+        emojiConfig,
+        remarkEmojiPlugin,
+        emojiSchema,
+    } from '@milkdown/plugin-emoji';
     import { diagram } from '@milkdown/plugin-diagram';
     import { indent } from '@milkdown/plugin-indent';
     import { upload } from '@milkdown/plugin-upload';
@@ -57,6 +59,12 @@
             };
 
             // DATA
+            const emojiPlugin = [
+                emojiAttr,
+                emojiConfig,
+                remarkEmojiPlugin,
+                emojiSchema,
+            ].flat()
             const editor = useEditor((root) =>
                 Editor.make()
                     .config((ctx) => {
@@ -77,7 +85,7 @@
                     .use(clipboard)
                     .use(prism)
                     .use(math)
-                    .use(emoji)
+                    .use(emojiPlugin)
                     .use(diagram)
                     .use(indent)
                     .use(upload)
