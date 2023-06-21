@@ -21,6 +21,7 @@ import {
     removeEntityTypeAttribute,
     patchEntityType,
     updateAttributeDependency,
+    updateAttributeMetadata,
     addRole,
     patchRoleData,
     deleteRole,
@@ -63,6 +64,7 @@ import DeleteEntityType from '@/components/modals/entitytype/Delete.vue';
 import RemoveAttribute from '@/components/modals/entitytype/RemoveAttribute.vue';
 import AddAttribute from '@/components/modals/attribute/Add.vue';
 import EditAttribute from '@/components/modals/attribute/Edit.vue';
+import EditSystemAttribute from '@/components/modals/attribute/EditSystem.vue';
 import DeleteAttribute from '@/components/modals/attribute/Delete.vue';
 
 export function showAbout() {
@@ -657,29 +659,40 @@ export function showDeleteEntityType(entityType, metadata, onDeleted) {
     modal.open();
 }
 
-export function showEditAttribute(aid, etid) {
+export function showEditAttribute(aid, etid, metadata) {
+    const isSystem = metadata && metadata.is_system;
+    const component = isSystem ? EditSystemAttribute : EditAttribute
     const uid = `EditAttribute-${getTs()}`;
     const modal = useModal({
-        component: EditAttribute,
+        component: component,
         attrs: {
             name: uid,
             attributeId: aid,
             entityTypeId: etid,
+            metadata: metadata,
             attributeSelection: getEntityTypeAttributes(etid),
             onClosing(e) {
                 modal.destroy();
             },
-            onConfirm(e) {
-                updateAttributeDependency(etid, aid, e).then(_ => {
+            async onConfirm(e) {
+                if(isSystem) {
+                    await updateAttributeMetadata(etid, aid, metadata.pivot.id, e);
+                } else {
+                    if(e.metadata) {
+                        await updateAttributeMetadata(etid, aid, metadata.pivot.id, e.metadata);
+                    }
+                    if(e.dependency) {
+                        await updateAttributeDependency(etid, aid, e.dependency);
+                    }
                     modal.destroy();
-                });
+                }
             },
         },
     });
     modal.open();
 }
 
-export function showRemoveAttribute(etid, aid, metadata, onDeleted) {
+export function showRemoveAttribute(etid, aid, id, metadata, onDeleted) {
     const uid = `RemoveAttribute-${getTs()}`;
     const modal = useModal({
         component: RemoveAttribute,
@@ -691,13 +704,13 @@ export function showRemoveAttribute(etid, aid, metadata, onDeleted) {
                 modal.destroy();
             },
             onConfirm(e) {
-                removeEntityTypeAttribute(etid, aid).then(_ => {
+                removeEntityTypeAttribute(id).then(_ => {
                     if(!!onDeleted) {
                         onDeleted();
                     }
                     store.dispatch('removeEntityTypeAttribute', {
                         entity_type_id: etid,
-                        attribute_id: aid,
+                        attribute_id: id,
                     });
                     modal.destroy();
                 });

@@ -683,6 +683,43 @@ class EditorController extends Controller {
         return response()->json($entityAttribute->depends_on, 200);
     }
 
+    public function patchSystemAttribute(Request $request, $id) {
+        $user = auth()->user();
+        if(!$user->can('entity_type_write')) {
+            return response()->json([
+                'error' => __('You do not have the permission to edit attribute names')
+            ], 403);
+        }
+        $this->validate($request, [
+            'title' => 'string|required_without:width',
+            'width' => 'integer|required_without:title',
+        ]);
+
+        try {
+            $entityAttribute = EntityAttribute::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('Entity Attribute not found')
+            ], 400);
+        }
+
+        $metadata = json_decode($entityAttribute->metadata) ?? new \stdClass();
+
+        if($request->has('title')) {
+            $title = $request->get('title');
+            $metadata->title = $title;
+        }
+        if($request->has('width')) {
+            $width = $request->get('width');
+            $metadata->width = $width;
+        }
+
+        $entityAttribute->metadata = json_encode($metadata);
+        $entityAttribute->save();
+
+        return response()->json($metadata, 200);
+    }
+
     // DELETE
 
     public function deleteEntityType($id) {
@@ -724,26 +761,25 @@ class EditorController extends Controller {
         return response()->json(null, 204);
     }
 
-    public function removeAttributeFromEntityType($etid, $aid) {
+    public function removeAttributeFromEntityType($id) {
         $user = auth()->user();
         if(!$user->can('entity_type_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to remove attributes from entity types')
             ], 403);
         }
-        $ca = EntityAttribute::where([
-            ['attribute_id', '=', $aid],
-            ['entity_type_id', '=', $etid]
-        ])->first();
-
-        if($ca === null){
+        try {
+            $ea = EntityAttribute::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('Entity Attribute not found')
             ], 400);
         }
 
-        $pos = $ca->position;
-        $ca->delete();
+        $pos = $ea->position;
+        $aid = $ea->attribute_id;
+        $etid = $ea->entity_type_id;
+        $ea->delete();
 
         $successors = EntityAttribute::where([
                 ['position', '>', $pos],
