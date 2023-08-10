@@ -25,7 +25,8 @@ import Alert from '@/components/Alert.vue';
 import NotificationBody from '@/components/notification/NotificationBody.vue';
 import CsvTable from '@/components/CsvTable.vue';
 import Gradient from '@/components/Gradient.vue';
-import MarkdownEditor from '@/components/mde/Main.vue';
+import MarkdownViewer from '@/components/mde/Viewer.vue';
+import MarkdownEditor from '@/components/mde/Wrapper.vue';
 import BibtexCode from '@/components/bibliography/BibtexCode.vue';
 
 // Init Libs
@@ -39,7 +40,7 @@ import VueUploadComponent from 'vue-upload-component';
 import DatePicker from 'vue-datepicker-next';
 import draggable from 'vuedraggable';
 import { Tree, Node, } from "tree-vue-component";
-import Markdown from 'vue3-markdown-it';
+import VueMarkdown from 'markdown-vue';
 
 // Components
 import App from '@/App.vue';
@@ -56,7 +57,7 @@ import vueAuth from '@/bootstrap/auth.js';
 // vue-i18n
 import i18n from '@/bootstrap/i18n.js';
 // vue-final-modal
-import { vfm } from '@/bootstrap/vfm.js';
+import { createVfm } from 'vue-final-modal';
 // Font Awesome
 import '@/bootstrap/font.js';
 
@@ -73,8 +74,7 @@ app.use(i18n);
 app.use(router);
 app.use(store);
 app.use(vueAuth);
-app.use(vfm);
-app.use(Markdown);
+app.use(createVfm());
 
 // Directives
 app.directive('dcan', {
@@ -230,6 +230,8 @@ app.component('alert', Alert);
 app.component('notification-body', NotificationBody);
 app.component('csv-table', CsvTable);
 app.component('color-gradient', Gradient);
+app.component('vue-markdown', VueMarkdown);
+app.component('md-viewer', MarkdownViewer);
 app.component('md-editor', MarkdownEditor);
 app.component("bibtex-code", BibtexCode);
 // Third-Party components

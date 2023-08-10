@@ -8,7 +8,15 @@ p.paragraph {
     height: 100%;
 }
 
+img.emoji {
+    width: 1rem;
+}
+
 .milkdown {
+    overflow: auto;
+}
+
+.milkdown-wrapper {
     flex-grow: 1;
     background: #EBF2FD;
     @if $enable-rounded {
@@ -16,5 +24,5 @@ p.paragraph {
     }
     padding: map-get($spacers, 3);
     margin-top: map-get($spacers, 1);
-    overflow-y: auto;
+    overflow: hidden;
 }

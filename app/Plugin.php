@@ -80,6 +80,16 @@ class Plugin extends Model
         }
     }
 
+    public function getChangelog($since = null) {
+        $changelog = Str::finish(base_path("app/Plugins/$this->name"), '/') . 'CHANGELOG.md';
+        if(!File::isFile($changelog)) return '';
+        $changes = file_get_contents($changelog);
+        // if(isset($since)) {
+
+        // }
+        return $changes;
+    }
+
     public static function updateOrCreateFromInfo(array $info) : Plugin {
         $id = $info['name'];
         $plugin = self::where('name', $id)->first();

@@ -216,6 +216,12 @@ export function getEntityTypes() {
     return store.getters.entityTypes || {};
 }
 
+export function getEntityTypeAttribute(etid, aid) {
+    if(!etid || !aid) return null;
+    const attributes = store.getters.entityTypeAttributes(etid);
+    return attributes ? attributes.find(a => a.id == aid) : null;
+}
+
 export function getEntityTypeAttributes(id) {
     if(!id) return [];
     return store.getters.entityTypeAttributes(id) || [];

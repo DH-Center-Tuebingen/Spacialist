@@ -158,25 +158,46 @@
                 state.entityType.sub_entity_types = [];
             };
             const addAttributeToEntityType = e => {
-                addEntityTypeAttribute(currentRoute.params.id, e.element.id, e.to);
+                addEntityTypeAttribute(currentRoute.params.id, e.element.id, e.to).then(data => {
+                    if(e.element.is_system && e.element.datatype == 'system-separator') {
+                        showEditAttribute(data.id, currentRoute.params.id, {
+                            is_system: e.element.is_system,
+                            datatype: data.datatype,
+                            pivot: data.pivot,
+                        });
+                    }
+                });
             };
             const onEditEntityAttribute = e => {
-                showEditAttribute(e.element.id, currentRoute.params.id);
+                showEditAttribute(e.element.id, currentRoute.params.id, {
+                    is_system: e.element.is_system,
+                    datatype: e.element.datatype,
+                    pivot: e.element.pivot,
+                });
             };
             const onRemoveAttributeFromEntityType = e => {
                 const etid = currentRoute.params.id;
                 const aid = e.element.id;
+                const id = e.element.pivot.id;
                 if(e.modal) {
-                    getAttributeOccurrenceCount(aid, etid).then(cnt => {
-                        showRemoveAttribute(etid, aid, {
-                            count: cnt,
+                    if(e.element.is_system && e.element.datatype == 'system-separator') {
+                        showRemoveAttribute(etid, aid, id, {
+                            is_system: e.element.is_system,
+                            datatype: e.element.datatype,
+                            pivot: e.element.pivot,
                         });
-                    });
+                    } else {
+                        getAttributeOccurrenceCount(aid, etid).then(cnt => {
+                            showRemoveAttribute(etid, aid, id, {
+                                cnt: cnt
+                            });
+                        });
+                    }
                 } else {
-                    removeEntityTypeAttribute(etid, aid).then(_ => {
+                    removeEntityTypeAttribute(id).then(_ => {
                         store.dispatch('removeEntityTypeAttribute', {
                             entity_type_id: etid,
-                            attribute_id: aid,
+                            attribute_id: id,
                         });
                     });
                 }

@@ -66,7 +66,7 @@ class ThConcept extends Model
             )
             SELECT id, concept_url, is_top_concept, label, language_id, short_name
             FROM summary s
-            WHERE s.rk = 1"));
+            WHERE s.rk = 1")->getValue(DB::connection()->getQueryGrammar()));
 
         $conceptMap = [];
 

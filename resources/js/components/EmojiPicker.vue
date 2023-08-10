@@ -10,6 +10,9 @@
         onMounted,
     } from 'vue';
 
+    import emojiData from 'emojibase-data/en/data.json';
+    import messages from 'emojibase-data/en/messages.json';
+
     import { createPopup } from '@picmo/popup-picker';
 
     export default {
@@ -24,7 +27,10 @@
             onMounted(_ => {
                 const emojiButton = document.getElementById(state.pickId);
 
-                const picker = createPopup({}, {
+                const picker = createPopup({
+                    emojiData,
+                    messages,
+                }, {
                     triggerElement: emojiButton,
                     referenceElement: emojiButton,
                     position: 'bottom-end',

@@ -17,7 +17,7 @@
             </button>
         </div>
         <div class="modal-body overflow-hidden">
-            <md-editor class="h-100" :ref="el => editorRef = el" :data="data" />
+            <md-editor class="h-100" :ref="el => wrapperRef = el" :data="data" />
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-outline-success" data-bs-dismiss="modal" @click="updateContent()">
@@ -55,7 +55,7 @@
 
             // FUNCTIONS
             const updateContent = _ => {
-                const md = editorRef.value.getMarkdown();
+                const md = wrapperRef.value.getEditorMarkdown();
                 context.emit('confirm', md);
             };
             const closeModal = _ => {
@@ -63,7 +63,7 @@
             };
 
             // DATA
-            const editorRef = ref({});
+            const wrapperRef = ref({});
             const state = reactive({
             });
 
@@ -78,7 +78,7 @@
                 closeModal,
                 // STATE
                 state,
-                editorRef,
+                wrapperRef,
             }
         },
     }

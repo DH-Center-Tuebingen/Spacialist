@@ -356,15 +356,24 @@ class Bibliography extends Model implements Searchable
     }
 
     public function uploadFile($file) {
-        if(isset($this->file) && Storage::exists($this->file)) {
-            Storage::delete($this->file);
-        }
+        $this->deleteFile(true);
 
         $filename = $this->id . "_" . $file->getClientOriginalName();
         return $file->storeAs(
             'bibliography',
             $filename
         );
+    }
+
+    public function deleteFile(bool $fromStorageOnly = false) {
+        if(isset($this->file) && Storage::exists($this->file)) {
+            Storage::delete($this->file);
+        }
+
+        if(!$fromStorageOnly) {
+            $this->file = null;
+            $this->save();
+        }
     }
 
     public function user() {
