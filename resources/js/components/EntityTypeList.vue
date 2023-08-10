@@ -1,32 +1,24 @@
 <template>
-    <div>
-        <div class="list-group scroll-y-auto px-2">
-            <a href="#" @click.prevent="selectEntry(entry)" v-for="(entry, i) in state.entries" class="list-group-item list-group-item-action d-flex flex-row align-items-center" :class="{ 'active': entry.id == selectedId }" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)" :key="i">
-                <div>
-                    <i class="fas fa-fw fa-monument"></i>
-                    <span class="p-1">
-                        {{ translateConcept(entry.thesaurus_url) }}
-                    </span>
-                </div>
-                <div class="ms-auto btn-fab-list" v-if="state.hasOnHoverListener" v-show="state.hoverStates[i]" :class="activeClasses(entry)">
-                    <button class="btn btn-outline-info btn-fab-sm rounded-circle" v-if="state.hasEditListener" @click="onEdit(entry)" data-bs-toggle="popover" :data-content="t('global.edit')" data-trigger="hover" data-placement="bottom">
-                        <i class="fas fa-fw fa-xs fa-edit" style="vertical-align: 0;"></i>
-                    </button>
-                    <button class="btn btn-outline-primary btn-fab-sm rounded-circle" v-if="state.hasDuplicateListener" @click="onDuplicate(entry)" data-bs-toggle="popover" :data-content="t('global.duplicate')" data-trigger="hover" data-placement="bottom">
-                        <i class="fas fa-fw fa-xs fa-clone" style="vertical-align: 0;"></i>
-                    </button>
-                    <button class="btn btn-outline-danger btn-fab-sm rounded-circle" v-if="state.hasDeleteListener" @click="onDelete(entry)" data-bs-toggle="popover" :data-content="t('global.delete')" data-trigger="hover" data-placement="bottom">
-                        <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
-                    </button>
-                </div>
-            </a>
-        </div>
-        <button v-if="state.hasAddListener" class="btn btn-outline-success btn-sm mt-2" @click.prevent="onAdd()">
-            <i class="fas fa-fw fa-plus"></i>
-            <span>
-                {{ t('main.datamodel.entity.add_button') }}
-            </span>
-        </button>
+    <div class="list-group scroll-y-auto px-2">
+        <a href="#" @click.prevent="selectEntry(entry)" v-for="(entry, i) in state.entries" class="list-group-item list-group-item-action d-flex flex-row align-items-center" :class="{ 'active': entry.id == selectedId }" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)" :key="i">
+            <div>
+                <i class="fas fa-fw fa-monument"></i>
+                <span class="p-1">
+                    {{ translateConcept(entry.thesaurus_url) }}
+                </span>
+            </div>
+            <div class="ms-auto btn-fab-list" v-if="state.hasOnHoverListener" v-show="state.hoverStates[i]" :class="activeClasses(entry)">
+                <button class="btn btn-outline-info btn-fab-sm rounded-circle" v-if="state.hasEditListener" @click="onEdit(entry)" data-bs-toggle="popover" :data-content="t('global.edit')" data-trigger="hover" data-placement="bottom">
+                    <i class="fas fa-fw fa-xs fa-edit" style="vertical-align: 0;"></i>
+                </button>
+                <button class="btn btn-outline-primary btn-fab-sm rounded-circle" v-if="state.hasDuplicateListener" @click="onDuplicate(entry)" data-bs-toggle="popover" :data-content="t('global.duplicate')" data-trigger="hover" data-placement="bottom">
+                    <i class="fas fa-fw fa-xs fa-clone" style="vertical-align: 0;"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-fab-sm rounded-circle" v-if="state.hasDeleteListener" @click="onDelete(entry)" data-bs-toggle="popover" :data-content="t('global.delete')" data-trigger="hover" data-placement="bottom">
+                    <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
+                </button>
+            </div>
+        </a>
     </div>
 </template>
 
@@ -88,15 +80,11 @@
             const onDelete = entityType => {
                 context.emit('delete-element', {type: entityType});
             }
-            const onAdd = _ => {
-                context.emit('add-element');
-            }
 
             // DATA
             const state = reactive({
                 hoverStates: new Array(data.value.length).fill(false),
                 entries: computed(_ => data.value.slice()),
-                hasAddListener: !!context.attrs.onAddElement,
                 hasDeleteListener: !!context.attrs.onDeleteElement,
                 hasDuplicateListener: !!context.attrs.onDuplicateElement,
                 hasEditListener: !!context.attrs.onEditElement,
@@ -121,7 +109,6 @@
                 onEdit,
                 onDuplicate,
                 onDelete,
-                onAdd,
                 // PROPS
                 selectedId,
                 // STATE

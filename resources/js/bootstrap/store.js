@@ -222,7 +222,7 @@ export const store = createStore({
                 },
                 removeEntityTypeAttribute(state, data) {
                     const attrs = state.entityTypeAttributes[data.entity_type_id];
-                    const idx = attrs.findIndex(a => a.id == data.attribute_id);
+                    const idx = attrs.findIndex(a => a.pivot.id == data.attribute_id);
                     if(idx > -1) {
                         attrs.splice(idx, 1);
                     }
@@ -346,6 +346,11 @@ export const store = createStore({
                     const attrs = state.entityTypeAttributes[data.entity_type_id];
                     const attr = attrs.find(a => a.id == data.attribute_id);
                     attr.pivot.depends_on = data.data;
+                },
+                updateAttributeMetadata(state, data) {
+                    const attrs = state.entityTypeAttributes[data.entity_type_id];
+                    const attr = attrs.find(a => a.id == data.attribute_id && a.pivot.id == data.id);
+                    attr.pivot.metadata = data.data;
                 },
                 addReference(state, data) {
                     let entity = state.entities[data.entity_id];
@@ -681,6 +686,9 @@ export const store = createStore({
                 },
                 updateDependency({commit}, data) {
                     commit('updateDependency', data);
+                },
+                updateAttributeMetadata({commit}, data) {
+                    commit('updateAttributeMetadata', data);
                 },
                 addReference({commit}, data) {
                     commit('addReference', data);

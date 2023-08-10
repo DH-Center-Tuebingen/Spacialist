@@ -98,10 +98,11 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::patch('/dm/entity_type/{etid}', 'EditorController@patchEntityType')->where('etid', '[0-9]+');
     Route::patch('/dm/entity_type/{ctid}/attribute/{aid}/position', 'EditorController@reorderAttribute')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
     Route::patch('/dm/entity_type/{etid}/attribute/{aid}/dependency', 'EditorController@patchDependency')->where('etid', '[0-9]+')->where('aid', '[0-9]+');
+    Route::patch('/dm/entity_type/attribute/system/{id}', 'EditorController@patchSystemAttribute')->where('id', '[0-9]+');
 
     Route::delete('/dm/entity_type/{id}', 'EditorController@deleteEntityType')->where('id', '[0-9]+');
     Route::delete('/dm/attribute/{id}', 'EditorController@deleteAttribute')->where('id', '[0-9]+');
-    Route::delete('/dm/entity_type/{etid}/attribute/{aid}', 'EditorController@removeAttributeFromEntityType')->where('etid', '[0-9]+')->where('aid', '[0-9]+');
+    Route::delete('/dm/entity_type/attribute/{id}', 'EditorController@removeAttributeFromEntityType')->where('id', '[0-9]+');
 });
 
 // USER

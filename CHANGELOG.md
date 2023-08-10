@@ -1,6 +1,39 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.9.14
+### Added
+- Changelog Viewer
+  - Added to _Plugins_ Settings (if an update is available)
+- System attributes
+  - Attribute Group Separator
+    - attributes can now be sorted into self-defined groups, shown as tabs in _Main View_
+- Option to set the width of entity attributes (50% or 100% (default))
+### Fixed
+- File types to attach to bibliography items
+- Deleting files attached to bibliography items
+- Enable button if only file is added/removed from bibliography item
+- Modal Backdrop
+### Changed
+- _Attach file_ button text in _Bibliography Item_ modal to make clear that _Drag & Drop_ is also possible
+- Update Laravel to v10
+- Update several dependencies
+- Replaced markdown renderer dependency
+- Moved _Add Entitytype_ button to the header
+- Several UI- and Bug-Fixes
+
+## 0.9.13
+### Fixed
+- Adding/Editing bibliography entries of a type where a field is only mandatory if another field is not set
+
+## 0.9.12
+### Fixed
+- App not useable when a notifications with a reference to a deleted entity exists
+
+## 0.9.11
+### Fixed
+- Error on page access with no installed plugins (because Plugin directory is missing)
+
 ## 0.9.10
 ### Added
 - Background to column section in _Add Attribute_ modal to better distinguish it from the main section

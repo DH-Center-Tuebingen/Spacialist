@@ -37,7 +37,7 @@
                                     </span>
                                 </h6>
                                 <p class="card-text border-start border-warning border-4 ps-2">
-                                    <vue3-markdown-it :source="plugin.metadata.description" />
+                                    <md-viewer :source="plugin.metadata.description" />
                                 </p>
                             </div>
                             <div class="border-start ps-2">
@@ -60,10 +60,15 @@
                                 <i class="fas fa-fw fa-plus"></i>
                                 {{ t('main.plugins.activate') }}
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-primary ms-2" v-if="updateAvailable(plugin)" @click="update(plugin)">
-                                <i class="fas fa-fw fa-download"></i>
-                                <span v-html="t('main.plugins.update_to', {version: plugin.update_available})"/>
-                            </button>
+                            <div class="btn-group" role="group" v-if="updateAvailable(plugin)">
+                                <button type="button" class="btn btn-sm btn-outline-primary ms-2" @click="update(plugin)">
+                                    <i class="fas fa-fw fa-download"></i>
+                                    <span v-html="t('main.plugins.update_to', {version: plugin.update_available})"/>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" :title="t('main.plugins.changelog_info')" @click="showChangelog(plugin)">
+                                    <i class="fas fa-fw fa-file-pen"></i>
+                                </button>
+                            </div>
                             <button type="button" class="btn btn-sm btn-outline-danger ms-2" @click="remove(plugin)">
                                 <i class="fas fa-fw fa-trash"></i>
                                 {{ t('main.plugins.remove') }}
@@ -105,6 +110,10 @@
     } from '@/helpers/helpers.js';
 
     import {
+        showChangelogModal,
+    } from '@/helpers/modal.js';
+
+    import {
         appendScript,
         removeScript,
     } from '@/helpers/plugins.js';
@@ -120,6 +129,9 @@
             };
             const updateAvailable = plugin => {
                 return !!plugin.update_available;
+            };
+            const showChangelog = plugin => {
+                showChangelogModal(plugin);
             };
             const install = plugin => {
                 installPlugin(plugin.id).then(data => {
@@ -183,6 +195,7 @@
                 // LOCAL
                 isInstalled,
                 updateAvailable,
+                showChangelog,
                 install,
                 uninstall,
                 update,
