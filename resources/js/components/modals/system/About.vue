@@ -1,7 +1,6 @@
 <template>
     <vue-final-modal
         class="modal-container modal"
-        content-class="sp-modal-content sp-modal-content-sm"
         name="about-modal">
         <div class="sp-modal-content sp-modal-content-sm">
             <div class="modal-header">

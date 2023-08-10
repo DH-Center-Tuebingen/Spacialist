@@ -1,12 +1,16 @@
 <template>
     <div class="row d-flex flex-row overflow-hidden h-100" v-dcan="'entity_data_write|entity_data_read'">
         <div class="col-md-2 py-2 h-100 d-flex flex-column bg-light-dark">
-            <h4>{{ t('main.datamodel.entity.title') }}</h4>
+            <h4 class="d-flex flex-row gap-2 align-items-center">
+                {{ t('main.datamodel.entity.title') }}
+                <button type="button" class="btn btn-outline-success btn-sm" @click="addEntityType()">
+                    <i class="fas fa-fw fa-plus"></i> {{ t('main.datamodel.entity.add_button') }}
+                </button>
+            </h4>
             <entity-type-list
                 class="col px-0 h-100 d-flex flex-column overflow-hidden"
                 :data="state.entityTypes"
                 :selected-id="state.selectedEntityType"
-                @add-element="addEntityType"
                 @delete-element="requestDeleteEntityType"
                 @duplicate-element="duplicateEntityType"
                 @edit-element="editEntityType"
@@ -32,10 +36,20 @@
                     </label>
                 </div>
             </div>
-            <div class="col overflow-hidden mt-2">
+            <div class="col overflow-hidden mt-2 d-flex flex-column">
                 <attribute-list
-                    class="h-100 scroll-y-auto scroll-x-hidden"
-                    group="attribute-selection"
+                    :group="{name: 'attribute-selection', pull: true, put: false}"
+                    :classes="'mx-2 py-3 rounded-3 bg-secondary bg-opacity-10'"
+                    :attributes="state.systemAttributeList"
+                    :values="[]"
+                    :nolabels="true"
+                    :selections="{}"
+                    :is-source="true">
+                </attribute-list>
+                <hr/>
+                <attribute-list
+                    :classes="'pe-2 col scroll-y-auto scroll-x-hidden'"
+                    :group="{name: 'attribute-selection', pull: true, put: false}"
                     :attributes="state.attributeList"
                     :hidden-attributes="state.selectedEntityTypeAttributeIds"
                     :show-hidden="state.showHiddenAttributes"
@@ -141,7 +155,8 @@
 
             // DATA
             const state = reactive({
-                attributeList: computed(_ => store.getters.attributes),
+                systemAttributeList: computed(_ => store.getters.attributes.filter(a => a.is_system)),
+                attributeList: computed(_ => store.getters.attributes.filter(a => !a.is_system)),
                 // set values for all attributes to '', so values in <attribute-list> are existant
                 attributeListValues: computed(_ => {
                     if(!state.attributeList) return;

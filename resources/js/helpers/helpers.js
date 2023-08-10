@@ -135,6 +135,12 @@ export function getOrderedDate(short = false, withTime = false) {
     }
 }
 
+export function randomId(min = 0, max = 100) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min);
+}
+
 export function getConcept(url) {
     if(!url || !hasConcept(url)) {
         return {};
@@ -214,6 +220,12 @@ export function getEntityTypeName(id) {
 
 export function getEntityTypes() {
     return store.getters.entityTypes || {};
+}
+
+export function getEntityTypeAttribute(etid, aid) {
+    if(!etid || !aid) return null;
+    const attributes = store.getters.entityTypeAttributes(etid);
+    return attributes ? attributes.find(a => a.id == aid) : null;
 }
 
 export function getEntityTypeAttributes(id) {

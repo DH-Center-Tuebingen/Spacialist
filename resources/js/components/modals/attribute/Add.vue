@@ -19,24 +19,27 @@
                     @updated="updateAttribute"
                     @validation="checkValidation" />
                 <div v-if="state.hasColumns">
-                    <h5 class="d-flex flex-row justify-content-between">
-                        <div>
-                            {{ t('global.column', 2) }}
-                            <span class="badge bg-primary">
-                                {{ state.columns.length }}
-                            </span>
-                        </div>
-                        <div>
-                            <button type="submit" class="btn btn-sm btn-outline-success" :form="state.tableFormId" :disabled="!state.tableColumnValidated">
-                                <i class="fas fa-fw fa-plus"></i> {{ t('global.add_column') }}
-                            </button>
-                        </div>
-                    </h5>
-                    <attribute-template
-                        :type="'table'"
-                        :external="state.tableFormId"
-                        @created="addColumn"
-                        @validation="checkTableValidation"  />
+                    <hr/>
+                    <div class="bg-secondary bg-opacity-25 p-2 rounded">
+                        <h5 class="d-flex flex-row justify-content-between">
+                            <div>
+                                {{ t('global.column', 2) }}
+                                <span class="badge bg-primary">
+                                    {{ state.columns.length }}
+                                </span>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-sm btn-outline-success" :form="state.tableFormId" :disabled="!state.tableColumnValidated">
+                                    <i class="fas fa-fw fa-plus"></i> {{ t('global.add_column') }}
+                                </button>
+                            </div>
+                        </h5>
+                        <attribute-template
+                            :type="'table'"
+                            :external="state.tableFormId"
+                            @created="addColumn"
+                            @validation="checkTableValidation"  />
+                    </div>
                 </div>
                 <div v-if="state.previewAttribute">
                     <hr>
@@ -45,9 +48,13 @@
                     </h5>
                     <attribute-list
                         :attributes="state.previewAttribute.attribute"
+                        :disable-drag="true"
                         :options="{'hide_labels': true}"
+                        :nolabels="true"
                         :values="state.previewAttribute.values"
-                        :selections="{}" />
+                        :selections="{}"
+                        :preview="true"
+                        :preview-data="state.previewData" />
                 </div>
             </div>
             <div class="modal-footer">
@@ -68,6 +75,10 @@
         reactive,
     } from 'vue';
     import { useI18n } from 'vue-i18n';
+
+    import {
+        randomId,
+    } from '@/helpers/helpers.js';
 
     import AttributeTemplate from '@/components/AttributeTemplate.vue';
 
@@ -163,6 +174,7 @@
             };
 
             // DATA
+            const fakeId = randomId();
             const state = reactive({
                 attribute: {},
                 columns: [],
@@ -176,8 +188,6 @@
                 previewAttribute: computed(_ => {
                     if(!state.attribute.type) return null;
 
-                    const fakeId = Number.MAX_VALUE;
-
                     return {
                         attribute: [{
                             ...state.attribute,
@@ -190,6 +200,30 @@
                                 value: getInitialValue(state.attribute),
                             },
                         },
+                    };
+                }),
+                previewData: computed(_ => {
+                    if(!state.attribute.type) return null;
+                    // Currently only table type supports additional data
+                    if(state.attribute.type != 'table') return null;
+
+                    const columns = {};
+                    if(state.columns.length == 0) {
+                        columns.is_preview = true;
+                    } else {
+                        state.columns.forEach((c, i) => {
+                            const colId = fakeId + (i+1);
+                            columns[colId] = {
+                                id: colId,
+                                parent_id: fakeId,
+                                recursive: c.recursive,
+                                datatype: c.type,
+                                thesaurus_url: c.label.concept_url
+                            };
+                        });
+                    }
+                    return {
+                        [fakeId]: columns,
                     };
                 }),
             });

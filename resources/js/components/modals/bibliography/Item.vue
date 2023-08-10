@@ -61,11 +61,14 @@
                 <div class="d-flex gap-2" v-else>
                     <file-upload
                         class="btn btn-sm btn-outline-primary clickable"
-                        ref="upload"
+                        ref="upload_bib_item_attachment"
                         v-model="state.fileContainer"
+                        :input-id="'upload_bib_item_attachment'"
                         :disabled="!can('bibliography_write|bibliography_create')"
                         :custom-action="importFile"
                         :directory="false"
+                        :accept="'image/*,application/pdf,text/plain'"
+                        :extensions="'jpg,jpeg,gif,png,txt,pdf'"
                         :multiple="false"
                         :drop="true"
                         @input-file="inputFile">
@@ -183,7 +186,8 @@
                 state.data.file_url = '';
             };
             const fieldsetStateUpdated = event => {
-                state.disabled = !event.dirty || !event.valid;
+                state.formState.dirty = event.dirty;
+                state.formState.valid = event.valid;
                 state.data.fields = {
                     ...state.data.fields,
                     ...event.values,
@@ -215,7 +219,6 @@
                 fieldData: {...data.value},
                 error: {},
                 fileContainer: [],
-                formMetas: {},
                 scrollStateClasses: computed(_ => {
                     if(state.data.type) {
                         return ['scroll-y-auto', 'scroll-x-hidden'];
@@ -232,7 +235,11 @@
                 }),
                 file: computed(_ => state.fileContainer.length > 0 ? state.fileContainer[0] : null),
                 fileRemoved: false,
-                disabled: true,
+                formState: {
+                    dirty: false,
+                    valid: false,
+                },
+                disabled: computed(_ => !(!state.file && state.fileRemoved) && !(state.file && !state.fileRemoved) && !(state.formState.dirty && state.formState.valid)),
                 typeName: computed(_ => state.data.type ? state.data.type.name : null),
                 typeList: bibliographyTypes.map(t => t.name),
             });

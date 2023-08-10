@@ -92,27 +92,43 @@
             </div>
         </div>
         <ul class="nav nav-tabs" id="myTab" role="tablist" v-show="can('comments_read')">
-            <li class="nav-item" role="presentation">
-                <a class="nav-link active" id="active-entity-attributes-tab" href="#" @click.prevent="setDetailPanel('attributes')">
-                    {{ t('main.entity.tabs.attributes') }}
+            <li class="nav-item" role="presentation" v-for="(tg, key) in state.entityGroups" :key="`attribute-group-${tg.id}-tab`">
+                <a class="nav-link active-entity-attributes-tab active-entity-detail-tab d-flex gap-2 align-items-center" :id="`active-entity-attributes-group-${tg.id}-tab`" href="#" @click.prevent="setDetailPanel(`attributes-${tg.id}`)">
+                    <span class="fa-layers fa-fw">
+                        <i class="fas fa-fw fa-layer-group"></i>
+                        <span class="fa-layers-counter fa-counter-lg bg-secondary-subtle text-reset">
+                            {{ tg.data.length }}
+                        </span>
+                    </span>
+                    <span v-if="key == 'default'">
+                        {{ t('main.entity.tabs.default') }}
+                    </span>
+                    <span v-else>
+                        {{ translateConcept(key) }}
+                    </span>
                 </a>
             </li>
             <li class="nav-item" role="presentation">
-                <a class="nav-link" id="active-entity-comments-tab" href="#" @click.prevent="setDetailPanel('comments')">
+                <a class="nav-link active-entity-detail-tab d-flex gap-2 align-items-center" id="active-entity-comments-tab" href="#" @click.prevent="setDetailPanel('comments')">
+                    <span class="fa-layers fa-fw">
+                        <i class="fas fa-fw fa-comments"></i>
+                        <span class="fa-layers-counter fa-counter-lg bg-secondary-subtle text-reset">
+                            {{ state.entity.comments_count }}
+                        </span>
+                    </span>
                     {{ t('main.entity.tabs.comments') }}
-                    <span class="badge bg-primary">{{ state.entity.comments_count }}</span>
                 </a>
             </li>
         </ul>
         <div class="tab-content col ps-0 pe-0 overflow-hidden" id="entity-detail-tab-content">
-            <div class="tab-pane fade h-100 show active" id="active-entity-attributes-panel" role="tabpanel">
-                <form id="entity-attribute-form" name="entity-attribute-form" class="h-100">
+            <div class="tab-pane fade h-100 active-entity-detail-panel active-entity-attributes-panel show active" :id="`active-entity-attributes-panel-${tg.id}`" role="tabpanel" v-for="tg in state.entityGroups" :key="`attribute-group-${tg.id}-panel`">
+                <form :id="`entity-attribute-form-${tg.id}`" :name="`entity-attribute-form-${tg.id}`" class="h-100">
                     <attribute-list
                         class="pt-2 h-100 scroll-y-auto scroll-x-hidden"
                         v-if="state.attributesFetched"
                         v-dcan="'entity_data_read'"
                         :ref="el => setAttrRef(el)"
-                        :attributes="state.entityAttributes"
+                        :attributes="tg.data"
                         :hidden-attributes="state.hiddenAttributeList"
                         :show-hidden="state.hiddenAttributeState"
                         :disable-drag="true"
@@ -124,7 +140,7 @@
                     </attribute-list>
                 </form>
             </div>
-            <div class="tab-pane fade h-100 d-flex flex-column" id="active-entity-comments-panel" role="tabpanel" v-show="can('comments_read')">
+            <div class="tab-pane fade h-100 active-entity-detail-panel d-flex flex-column" id="active-entity-comments-panel" role="tabpanel" v-show="can('comments_read')">
                 <div class="mb-auto scroll-y-auto h-100" v-if="state.entity.comments">
                     <div v-if="state.commentsFetching" class="mt-2">
                         <p class="alert alert-info mb-0" v-html="t('global.comments.fetching')">
@@ -160,6 +176,7 @@
 <script>
     import {
         computed,
+        nextTick,
         onBeforeUpdate,
         onMounted,
         reactive,
@@ -247,10 +264,51 @@
                 initFinished: false,
                 commentLoadingState: 'not',
                 hiddenAttributeState: false,
+                attributesInTabs: true,
                 routeQuery: computed(_ => route.query),
                 entity: computed(_ => store.getters.entity),
                 entityUser: computed(_ => state.entity.user),
                 entityAttributes: computed(_ => store.getters.entityTypeAttributes(state.entity.entity_type_id)),
+                entityGroups: computed(_ => {
+                    if(!state.entityAttributes) {
+                        return state.entityAttributes;
+                    }
+
+                    if(state.attributesInTabs) {
+                        const tabGroups = {};
+                        let currentGroup = 'default';
+                        let currentGroupId = 'default';
+                        let currentUnnamedGroupCntr = 1;
+                        state.entityAttributes.forEach(a => {
+                            if(a.is_system && a.datatype == 'system-separator') {
+                                if(!a.pivot.metadata || !a.pivot.metadata.title) {
+                                    currentGroup = t(`main.entity.tabs.untitled_group`, {cnt: currentUnnamedGroupCntr});
+                                    currentUnnamedGroupCntr++;
+                                } else {
+                                    currentGroup = translateConcept(a.pivot.metadata.title);
+                                }
+                                currentGroupId = a.pivot.id;
+                                return;
+                            }
+                            if(!tabGroups[currentGroup]) {
+                                tabGroups[currentGroup] = {
+                                    id: currentGroupId,
+                                    data: []
+                                };
+                            }
+                            tabGroups[currentGroup].data.push(a);
+                        });
+
+                        return tabGroups;
+                    } else {
+                        return {
+                            default: {
+                                id: 'default',
+                                data: state.entityAttributes,
+                            },
+                        };
+                    }
+                }),
                 entityTypeSelections: computed(_ => getEntityTypeAttributeSelections(state.entity.entity_type_id)),
                 entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
                 hasAttributeLinks: computed(_ => state.entity.attributeLinks && state.entity.attributeLinks.length > 0),
@@ -464,26 +522,27 @@
                     }
                 });
             };
-            const setDetailPanelView = (tab = 'attributes') => {
-                let newTab, oldTab, newPanel, oldPanel;
+            const setDetailPanelView = (tab = 'attributes-default') => {
+                const tabId = tab.substring(tab.indexOf('-') + 1);
+                let newTab, oldTabs, newPanel, oldPanels;
                 if(tab === 'comments') {
                     newTab = document.getElementById('active-entity-comments-tab');
                     newPanel = document.getElementById('active-entity-comments-panel');
-                    oldTab = document.getElementById('active-entity-attributes-tab');
-                    oldPanel = document.getElementById('active-entity-attributes-panel');
+                    oldTabs = document.getElementsByClassName('active-entity-attributes-tab');
+                    oldPanels = document.getElementsByClassName('active-entity-attributes-panel');
                     if(!state.commentsFetched) {
                         fetchComments();
                     }
                 } else {
-                    newTab = document.getElementById('active-entity-attributes-tab');
-                    newPanel = document.getElementById('active-entity-attributes-panel');
-                    oldTab = document.getElementById('active-entity-comments-tab');
-                    oldPanel = document.getElementById('active-entity-comments-panel');
+                    newTab = document.getElementById(`active-entity-attributes-group-${tabId}-tab`);
+                    newPanel = document.getElementById(`active-entity-attributes-panel-${tabId}`);
+                    oldTabs = document.getElementsByClassName('active-entity-detail-tab');
+                    oldPanels = document.getElementsByClassName('active-entity-detail-panel');
                 }
 
-                oldTab.classList.remove('active');
+                oldTabs.forEach(t => t.classList.remove('active'));
                 newTab.classList.add('active');
-                oldPanel.classList.remove('show', 'active');
+                oldPanels.forEach(p => p.classList.remove('show', 'active'));
                 newPanel.classList.add('show', 'active');
             };
             const onEntityHeaderHover = hoverState => {
@@ -644,16 +703,22 @@
 
             watch(_ => state.entity,
                 async (newValue, oldValue) => {
-                    if(!newValue && !newValue.id) return;
-                    setDetailPanelView(route.query.view);
+                    if(!newValue || !newValue.id) return;
+
+                    nextTick(_ => {
+                        setDetailPanelView(route.query.view);
+                    });
                 }
             );
 
             watch(_ => route.query.view,
                 async (newValue, oldValue) => {
+                    if(route.name != 'entitydetail') return;
                     if(newValue == oldValue) return;
 
-                    setDetailPanelView(newValue);
+                    nextTick(_ => {
+                        setDetailPanelView(newValue);
+                    });
                 }
             );
 
