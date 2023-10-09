@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Entity;
+use App\Notification;
 use App\Notifications\EntityUpdated;
 use App\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -37,5 +38,7 @@ class EntityObserver
     public function deleted(Entity $entity)
     {
         Entity::where('root_entity_id', $entity->root_entity_id)->where('rank', '>', $entity->rank)->decrement('rank');
+        // Delete notifications where the deleted entity is referenced
+        Notification::whereRaw("(data::json->>'resource')::json->>'id' = ?", [$entity->id])->delete();
     }
 }

@@ -6,6 +6,7 @@ node_modules
 ### Plugins ###
 thesaurex
 /db
+/app/Plugins/
 
 ## Created by PHPUnit/Coveralls
 /build

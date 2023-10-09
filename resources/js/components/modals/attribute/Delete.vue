@@ -46,6 +46,7 @@
         reactive,
         toRefs,
     } from 'vue';
+
     import { useI18n } from 'vue-i18n';
 
     import {
@@ -82,6 +83,7 @@
             // DATA
             const state = reactive({
                 count: computed(_ => metadata.value.attributeCount),
+                systemAttribute: computed(_ => metadata.value && metadata.value.is_system),
                 needsAlert: computed(_ => state.count > 0),
             });
 

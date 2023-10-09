@@ -7,7 +7,7 @@
         "reactivate": "Reactivate",
         "remove": "Remove",
         "reset": "Reset",
-        "send_reset_mail": "Send mail to reset password",
+        "reset_password": "Reset Password",
         "cancel": "Cancel",
         "close": "Close",
         "add": "Add",
@@ -139,10 +139,13 @@
             "entity-mc": "Entity (Multiple Choice)",
             "epoch": "Time Period and Epoch",
             "timeperiod": "Time Period",
-        "no_file": "Keine Datei vorhanden",
+            "date": "Date",
+            "dimension": "Dimensions (WxHxD)",
+            "list": "List",
             "geography": "WKT (Well-Known-Binary)",
             "table": "Table",
             "sql": "SQL-Query",
+            "separator": "Group Separator",
             "serial": "Serial (Auto-incrementing ID)",
             "serial_info": "<i class=\"fas fa-lightbulb me-1\"></i><br />All instances share this identifier as attribute. Add <code class=\"normal\">%d</code> as counter.<br /><span class=\"fw-medium mt-2\">Example:</span><br /><code class=\"normal\">Find_%d_Stone</code> would create Find_1_Stone, Find_2_Stone, &hellip;<br />To add a fixed width (e.g. 3 for 002 instead of 2), you can use <code class=\"normal\">%03d</code>.",
             "sql_info": "You can use <code class=\"normal\">:entity_id</code> in your SQL-Query to reference the entity this attribute is assigned to.",
@@ -161,6 +164,7 @@
         "font": "Font",
         "mode": "Mode",
         "size": "Size",
+        "width": "Width",
         "duration": "Duration",
         "color": "Color",
         "format": "Format",
@@ -198,6 +202,7 @@
         "column": "Column | Columns",
         "add_column": "Add column",
         "geometry_type": "Geometry-Type",
+        "dependency": "Dependency",
         "depends_on": "Depends on",
         "preference": "Preference | Preferences",
         "value": "Value",
@@ -260,7 +265,8 @@
             "not_found": {
                 "title": "Site not found!",
                 "msg": "Site <code>{site}</code> was not found. Check the spelling or contact the administrator.",
-                "go_to": "To start page"
+                "go_to": "Back to start page",
+                "retry": "Retry to load"
             },
             "screencast": {
                 "recording_begins_in_s": "Screencast recording begins in: a second | Screencast recording begins in: {t} seconds",
@@ -339,8 +345,9 @@
                 }
             },
             "tabs": {
-                "attributes": "Attributes",
-                "comments": "Comments"
+                "default": "Default",
+                "comments": "Comments",
+                "untitled_group": "Untitled ({cnt})"
             },
             "modals": {
                 "add": {
@@ -372,9 +379,8 @@
                     "add_button": "Add Reference"
                 },
                 "toasts": {
-                    "updated_certainty": {
-                        "title": "Certainty updated",
-                        "msg": "Certainty of {name} successfully set to {i}%."
+                    "cannot_edit_metadata": {
+                        "msg": "You have to enter data first, before you can edit metadata."
                     }
                 }
             },
@@ -417,11 +423,22 @@
                 "updated": {
                     "title": "User updated",
                     "msg": "{name} successfully updated."
+                },
+                "reset_password": {
+                    "title": "Password updated",
+                    "message": "Password for User {name} ({nickname}) successfully updated."
                 }
             },
             "modal": {
                 "new": {
                     "title": "New User"
+                },
+                "reset_password": {
+                    "title": "Reset Password"
+                },
+                "confirm_password": {
+                    "title": "Confirm Password",
+                    "message": "Your password has been changed recently. You either have to accept that new password or set one yourself. To do so you have only one additional login left! | Your password has been changed recently. You either have to accept that new password or set one yourself. To do so you have {attempts} additional logins left."
                 }
             },
             "add_role_placeholder": "Add roles"
@@ -586,7 +603,18 @@
             "deactivate": "Deactivate",
             "activate": "Activate",
             "remove": "Remove",
-            "update_to": "Update to <span class=\"fw-bold\">{ version }</span>"
+            "update_to": "Update to <span class=\"fw-bold\">{ version }</span>",
+            "changelog_info": "Show Changelog",
+            "not_found": "No plugins found.",
+            "modal": {
+                "changelog_title": "Plugin"
+            },
+            "toasts": {
+                "update": {
+                    "title": "Plugin updated",
+                    "message": "Plugin {name} successfully updated to version {v} (from version {vo})."
+                }
+            }
         },
         "about": {
             "title": "About Spacialist",
@@ -613,7 +641,7 @@
             "modal": {
                 "paste_info": "You can use <kbd><kbd>ctrl</kbd> + <kbd>v</kbd></kbd> to fill out the fields with a BibTeX entry from your clipboard.",
                 "bibtex_code": "BibTeX-Code",
-                "attach_file": "Attach File",
+                "attach_file": "Select File or drop here",
                 "new": {
                     "title": "New Entry"
                 },
@@ -632,6 +660,10 @@
                 "delete": {
                     "title": "Entry deleted successfully",
                     "msg": "Entry {name} is deleted"
+                },
+                "import": {
+                    "title": "File imported successfully",
+                    "msg": "Added {cnt} new entries; updated {cnt_upd} entries."
                 },
                 "bibtex_code_to_clipboard": {
                     "title": "BibTeX-Code copied to clipboard"

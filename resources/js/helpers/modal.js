@@ -5,10 +5,12 @@ import { addToast } from '@/plugins/toast.js';
 
 import {
     useModal,
-} from '@/bootstrap/vfm.js';
+} from 'vue-final-modal';
 
 import {
     addUser,
+    resetUserPassword,
+    confirmUserPassword,
     deactivateUser,
     addOrUpdateBibliographyItem,
     deleteBibliographyItem,
@@ -22,6 +24,7 @@ import {
     patchEntityType,
     updateAttributeDependency,
     multieditAttributes,
+    updateAttributeMetadata,
     addRole,
     patchRoleData,
     deleteRole,
@@ -30,6 +33,8 @@ import {
 
 import {
     can,
+    userId,
+    getUserBy,
     getEntityTypeAttributes,
     getTs,
     getRoleBy,
@@ -45,8 +50,11 @@ import CsvPreviewer from '@/components/modals/csv/Preview.vue';
 import CsvPicker from '@/components/modals/csv/Picker.vue';
 import MapPicker from '@/components/modals/map/Picker.vue';
 import MarkdownEditor from '@/components/modals/system/MarkdownEditor.vue';
+import Changelog from '@/components/modals/system/Changelog.vue';
 import UserInfo from '@/components/modals/user/UserInfo.vue';
 import AddUser from '@/components/modals/user/Add.vue';
+import ResetPassword from '@/components/modals/user/ResetPassword.vue';
+import ConfirmPassword from '@/components/modals/user/ConfirmPassword.vue';
 import DeactiveUser from '@/components/modals/user/Deactivate.vue';
 import AccessControl from '@/components/modals/role/AccessControl.vue';
 import AddRole from '@/components/modals/role/Add.vue';
@@ -64,6 +72,7 @@ import RemoveAttribute from '@/components/modals/entitytype/RemoveAttribute.vue'
 import AddAttribute from '@/components/modals/attribute/Add.vue';
 import EditAttribute from '@/components/modals/attribute/Edit.vue';
 import MultiEditAttribute from '@/components/modals/attribute/MultiEdit.vue';
+import EditSystemAttribute from '@/components/modals/attribute/EditSystem.vue';
 import DeleteAttribute from '@/components/modals/attribute/Delete.vue';
 
 export function showAbout() {
@@ -251,6 +260,21 @@ export function showMarkdownEditor(data, onConfirm) {
     modal.open();
 }
 
+export function showChangelogModal(plugin) {
+    const uid = `ChangelogModal-${getTs()}`;
+    const modal = useModal({
+        component: Changelog,
+        attrs: {
+            name: uid,
+            plugin: plugin,
+            onClosing(e) {
+                modal.destroy();
+            }
+        },
+    });
+    modal.open();
+}
+
 export function showUserInfo(user) {
     const uid = `UserInfoModal-${getTs()}`;
     const modal = useModal({
@@ -289,6 +313,63 @@ export function showAddUser(onAdded) {
                         },
                     });
                 });
+            },
+            onCancel(e) {
+                modal.destroy();
+            }
+        },
+    });
+    modal.open();
+}
+
+export function showResetPassword(id) {
+    const uid = `ResetPassword-${getTs()}`;
+    const modal = useModal({
+        component: ResetPassword,
+        attrs: {
+            name: uid,
+            modalId: uid,
+            userId: id,
+            onReset(e) {
+                if(userId() != id && !can('users_roles_write')) return;
+
+                resetUserPassword(id, e.password).then(_ => {
+                    modal.destroy();
+                    const user = getUserBy(id);
+                    const msg = t('main.user.toasts.reset_password.message', {
+                        name: user.name,
+                        nickname: user.nickname,
+                    });
+                    const title = t('main.user.toasts.reset_password.title');
+                    addToast(msg, title, {
+                        channel: 'success',
+                    });
+                })
+            },
+            onCancel(e) {
+                modal.destroy();
+            }
+        },
+    });
+    modal.open();
+}
+
+export function showConfirmPassword(id) {
+    const uid = `ConfirmPassword-${getTs()}`;
+    const modal = useModal({
+        component: ConfirmPassword,
+        attrs: {
+            name: uid,
+            modalId: uid,
+            userId: id,
+            onConfirm(e) {
+                confirmUserPassword(id, e.password).then(_ => {
+                    store.dispatch('updateUser', {
+                        id: id,
+                        login_attempts: null,
+                    });
+                    modal.destroy();
+                })
             },
             onCancel(e) {
                 modal.destroy();
@@ -643,22 +724,33 @@ export function showDeleteEntityType(entityType, metadata, onDeleted) {
     modal.open();
 }
 
-export function showEditAttribute(aid, etid) {
+export function showEditAttribute(aid, etid, metadata) {
+    const isSystem = metadata && metadata.is_system;
+    const component = isSystem ? EditSystemAttribute : EditAttribute
     const uid = `EditAttribute-${getTs()}`;
     const modal = useModal({
-        component: EditAttribute,
+        component: component,
         attrs: {
             name: uid,
             attributeId: aid,
             entityTypeId: etid,
+            metadata: metadata,
             attributeSelection: getEntityTypeAttributes(etid),
             onClosing(e) {
                 modal.destroy();
             },
-            onConfirm(e) {
-                updateAttributeDependency(etid, aid, e).then(_ => {
+            async onConfirm(e) {
+                if(isSystem) {
+                    await updateAttributeMetadata(etid, aid, metadata.pivot.id, e);
+                } else {
+                    if(e.metadata) {
+                        await updateAttributeMetadata(etid, aid, metadata.pivot.id, e.metadata);
+                    }
+                    if(e.dependency) {
+                        await updateAttributeDependency(etid, aid, e.dependency);
+                    }
                     modal.destroy();
-                });
+                }
             },
         },
     });
@@ -706,7 +798,7 @@ export function showMultiEditAttribute(entityIds, attributes) {
     });
 }
 
-export function showRemoveAttribute(etid, aid, metadata, onDeleted) {
+export function showRemoveAttribute(etid, aid, id, metadata, onDeleted) {
     const uid = `RemoveAttribute-${getTs()}`;
     const modal = useModal({
         component: RemoveAttribute,
@@ -718,13 +810,13 @@ export function showRemoveAttribute(etid, aid, metadata, onDeleted) {
                 modal.destroy();
             },
             onConfirm(e) {
-                removeEntityTypeAttribute(etid, aid).then(_ => {
+                removeEntityTypeAttribute(id).then(_ => {
                     if(!!onDeleted) {
                         onDeleted();
                     }
                     store.dispatch('removeEntityTypeAttribute', {
                         entity_type_id: etid,
-                        attribute_id: aid,
+                        attribute_id: id,
                     });
                     modal.destroy();
                 });
@@ -768,7 +860,7 @@ export function showDeleteAttribute(attribute, metadata, onDeleted) {
             onClosing(e) {
                 modal.destroy();
             },
-            onConfirm(e) {
+            onConfirm(e) {vapor
                 deleteAttribute(attribute.id).then(_ => {
                     if(!!onDeleted) {
                         onDeleted();

@@ -24,6 +24,10 @@ code.normal {
     font-weight: 400 !important;
 }
 
+.form-range::-moz-range-track, .form-range::-webkit-slider-runnable-track {
+    background-color: var(--bs-secondary-bg);
+}
+
 .form-mb-0 > div.form-group:last-child {
     margin-bottom: 0;
 }
@@ -55,6 +59,10 @@ code.normal {
 }
 
 .reference-group:last-child {
+    margin-bottom: 0rem !important;
+}
+
+.attribute-list-container > :last-child {
     margin-bottom: 0rem !important;
 }
 
@@ -111,6 +119,12 @@ dl.dl-0-mb > dd:last-child {
 
 .modal-map {
     height: 500px;
+}
+
+@media screen and (max-height: 450px) {
+   .modal-body.nonscrollable {
+        overflow-y: auto !important;
+   }
 }
 
 .shadowed {

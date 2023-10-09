@@ -36,7 +36,7 @@ import {
 } from '@/bootstrap/font.js';
 import {
     useModal,
-} from '@/bootstrap/vfm.js';
+} from 'vue-final-modal';
 
 import RouteRootDummy from '@/components/plugins/RouteRootDummy.vue';
 import * as buffer from 'buffer';

@@ -151,10 +151,6 @@
                     "add_button": "参考文献を追加する"
                 },
                 "toasts": {
-                    "updated_certainty": {
-                        "title": "確実性が更新されました",
-                        "msg": "{name}の確実性は正常に{i}%％に設定されました"
-                    }
                 }
             },
             "attributes": {

@@ -6,26 +6,40 @@
         <div class="sp-modal-content sp-modal-content-sm">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    {{ t('global.remove_name.title', {name: translateConcept(state.attribute.thesaurus_url)}) }}
+                    <span v-if="state.attribute.is_system">
+                        {{ t('global.remove_name.title', {name: t(`global.attributes.${state.attribute.datatype}`)}) }}
+                    </span>
+                    <span v-else>
+                        {{ t('global.remove_name.title', {name: translateConcept(state.attribute.thesaurus_url)}) }}
+                    </span>
                 </h5>
                 <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
                 </button>
             </div>
             <div class="modal-body">
-                <alert
-                    :class="{'mb-0': !state.needsAlert}"
-                    :message="t('global.remove_name.desc', {name: translateConcept(state.attribute.thesaurus_url)})"
-                    :type="'info'"
-                    :noicon="true" />
-                <alert
-                    v-if="state.needsAlert"
-                    :message="t('main.datamodel.attribute.modal.delete.alert', {
-                            name: translateConcept(state.attribute.thesaurus_url),
-                            cnt: state.count
-                        }, state.count)"
-                    :type="'warning'"
-                    :noicon="false"
-                    :icontext="t('global.note')" />
+                <template v-if="state.attribute.is_system">
+                    <alert
+                        class="mb-0"
+                        :message="t('global.remove_name.desc', {name: t(`global.attributes.${state.attribute.datatype}`)})"
+                        :type="'info'"
+                        :noicon="true" />
+                </template>
+                <template v-else>
+                    <alert
+                        :class="{'mb-0': !state.needsAlert}"
+                        :message="t('global.remove_name.desc', {name: translateConcept(state.attribute.thesaurus_url)})"
+                        :type="'info'"
+                        :noicon="true" />
+                    <alert
+                        v-if="state.needsAlert"
+                        :message="t('main.datamodel.attribute.modal.delete.alert', {
+                                name: translateConcept(state.attribute.thesaurus_url),
+                                cnt: state.count
+                            }, state.count)"
+                        :type="'warning'"
+                        :noicon="false"
+                        :icontext="t('global.note')" />
+                </template>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-danger" @click="confirmRemove()">

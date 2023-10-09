@@ -7,6 +7,73 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Entity tree sorting is now accessible through ...-menu
 
+## 0.9.14
+### Added
+- Changelog Viewer
+  - Added to _Plugins_ Settings (if an update is available)
+- System attributes
+  - Attribute Group Separator
+    - attributes can now be sorted into self-defined groups, shown as tabs in _Main View_
+- Option to set the width of entity attributes (50% or 100% (default))
+### Fixed
+- File types to attach to bibliography items
+- Deleting files attached to bibliography items
+- Enable button if only file is added/removed from bibliography item
+- Modal Backdrop
+### Changed
+- _Attach file_ button text in _Bibliography Item_ modal to make clear that _Drag & Drop_ is also possible
+- Update Laravel to v10
+- Update several dependencies
+- Replaced markdown renderer dependency
+- Moved _Add Entitytype_ button to the header
+- Several UI- and Bug-Fixes
+
+## 0.9.13
+### Fixed
+- Adding/Editing bibliography entries of a type where a field is only mandatory if another field is not set
+
+## 0.9.12
+### Fixed
+- App not useable when a notifications with a reference to a deleted entity exists
+
+## 0.9.11
+### Fixed
+- Error on page access with no installed plugins (because Plugin directory is missing)
+
+## 0.9.10
+### Added
+- Background to column section in _Add Attribute_ modal to better distinguish it from the main section
+### Fixed
+- Reset label search after column added to table datatype in _Add Attribute_ modal
+- Reset column values after new row is added in _Entity Detail_ form
+- Preview for _table_ datatype
+- Dropdowns for columns of newly added _table_ attribute only visible after page reload
+### Changed
+- Attributes in entity detail's link list are now grouped by linked entity
+
+## 0.9.9
+### Fixed
+- Plugin updates
+
+## 0.9.8
+No notable changes in this release
+
+## 0.9.7
+### Added
+- Attribute Name and path to entity detail's link list (path is shown on hover; entity type name is shown on dot hover!)
+- Reload button to _Not Found_ page
+- Highlight matching strings in bibliography search
+### Fixed
+- Dropdown overflow in Add/Edit Bibliography Item modal
+- Attribute Dependencies could not be added/updated
+- Modal footer buttons on small screens
+- Again: References list not visible after added a new one if it's the first literature reference added to that attribute
+- Add new bibliography items from file import to list
+- Prevent to add already added attributes to entity types
+- Non-translated toast text shown when references tab in _Entity Detail_ panel can not be opened
+- Empty dropdowns for newly created and added attributes in _Entity Detail_ panel
+- Save entity with values set for a former empty _Entity (Multiple Choice)_ attribute
+
 ## 0.9.6
 ### Added
 - Info modal in references tab to view all information from an literature reference
