@@ -2,7 +2,26 @@
     animation: fadeIn linear 0.5s;
 }
 
+.fade-in-fast {
+    animation: fadeIn linear 0.25s;
+}
+
 @keyframes fadeIn {
     0% {opacity: 0;}
     100% {opacity: 1;}
+}
+
+.roll-in {
+    animation: rollIn linear 0.25s;
+}
+
+@keyframes rollIn {
+    0% {
+        opacity: 0.5;
+        transform: rotate(-90deg);
+    }
+    100% {
+        opacity: 1;
+        transform: rotate(0deg);
+    }
 }
