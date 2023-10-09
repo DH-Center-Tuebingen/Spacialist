@@ -306,6 +306,10 @@
                 },
             });
 
+
+            watch(value, (newValue, oldValue) => {
+                resetFieldState();
+            });
             watch(_ => v.meta, (newValue, oldValue) => {
                 context.emit('change', {
                     dirty: v.meta.dirty,

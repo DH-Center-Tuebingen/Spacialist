@@ -40,6 +40,10 @@ class Role extends \Spatie\Permission\Models\Role
             ->logOnlyDirty();
     }
 
+    public function isModerated() : bool {
+        return !empty($this->is_moderated);
+    }
+
     public function derived() {
         return $this->hasOne('App\RolePreset', 'id', 'derived_from');
     }

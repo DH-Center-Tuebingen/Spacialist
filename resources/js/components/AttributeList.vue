@@ -8,122 +8,60 @@
         :disabled="disableDrag"
         :group="group"
         :move="handleMove"
-        @change="handleUpdate"
-    >
-        <template #item="{element, index}">
-            <div
-                v-if="!state.hiddenAttributeList[element.id] || showHidden"
-                class="mb-3"
-                :class="clFromMetadata(element)"
-                @mouseenter="onEnter(index)"
-                @mouseleave="onLeave(index)"
-            >
-                <div class="row">
-                    <label
-                        v-if="!nolabels"
-                        class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break"
-                        :for="`attr-${element.id}`"
-                        :class="attributeClasses(element)"
-                    >
-                        <div
-                            v-show="!!state.hoverStates[index]"
-                            class="btn-fab-list"
-                        >
-                            <button
-                                v-show="hasEmitter('onReorderList')"
-                                class="reorder-handle btn btn-outline-secondary btn-fab rounded-circle"
-                                data-bs-toggle="popover"
-                                :data-content="t('global.resort')"
-                                data-trigger="hover"
-                                data-placement="bottom"
-                            >
-                                <i class="fas fa-fw fa-sort" />
-                            </button>
-                            <button
-                                v-show="hasEmitter('onEditElement')"
-                                class="btn btn-outline-info btn-fab rounded-circle"
-                                data-bs-toggle="popover"
-                                :data-content="t('global.edit')"
-                                data-trigger="hover"
-                                data-placement="bottom"
-                                @click="onEditHandler(element)"
-                            >
-                                <i
-                                    class="fas fa-fw fa-xs fa-edit"
-                                    style="vertical-align: 0;"
-                                />
-                            </button>
-                            <button
-                                v-show="hasEmitter('onRemoveElement')"
-                                class="btn btn-outline-danger btn-fab rounded-circle"
-                                data-bs-toggle="popover"
-                                :data-content="t('global.remove')"
-                                data-trigger="hover"
-                                data-placement="bottom"
-                                @click="onRemoveHandler(element)"
-                            >
-                                <i
-                                    class="fas fa-fw fa-xs fa-times"
-                                    style="vertical-align: 0;"
-                                />
-                            </button>
-                            <button
-                                v-show="hasEmitter('onDeleteElement')"
-                                class="btn btn-outline-danger btn-fab rounded-circle"
-                                data-bs-toggle="popover"
-                                :data-content="t('global.delete')"
-                                data-trigger="hover"
-                                data-placement="bottom"
-                                @click="onDeleteHandler(element)"
-                            >
-                                <i
-                                    class="fas fa-fw fa-xs fa-trash"
-                                    style="vertical-align: 0;"
-                                />
-                            </button>
-                        </div>
-                        <span
-                            v-if="!element.is_system"
-                            class="text-end col"
-                        >
-                            {{ translateConcept(element.thesaurus_url) }}:
-                        </span>
-                        <sup
-                            v-if="hasEmitter('onMetadata')"
-                            class="clickable"
-                            @click="onMetadataHandler(element)"
-                        >
-                            <span :class="getCertaintyClass(state.attributeValues[element.id].certainty, 'text')">
-                                <i class="fas fa-fw fa-exclamation" />
+        @change="handleUpdate">
+            <template #item="{element, index}">
+                <div class="mb-3" :class="clFromMetadata(element)" @mouseenter="onEnter(index)" @mouseleave="onLeave(index)" v-if="!state.hiddenAttributeList[element.id] || showHidden">
+                    <div class="row" :class="addModerationStateClasses(element.id)">
+                        <label
+                            class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break"
+                            v-if="!nolabels"
+                            :for="`attr-${element.id}`"
+                            :class="attributeClasses(element)">
+                            <div v-show="!!state.hoverStates[index]" class="btn-fab-list">
+                                <button v-show="hasEmitter('onReorderList')" class="reorder-handle btn btn-outline-secondary btn-fab rounded-circle" data-bs-toggle="popover" :data-content="t('global.resort')" data-trigger="hover" data-placement="bottom">
+                                    <i class="fas fa-fw fa-sort"></i>
+                                </button>
+                                <button v-show="hasEmitter('onEditElement')" class="btn btn-outline-info btn-fab rounded-circle" @click="onEditHandler(element)" data-bs-toggle="popover" :data-content="t('global.edit')" data-trigger="hover" data-placement="bottom">
+                                    <i class="fas fa-fw fa-xs fa-edit" style="vertical-align: 0;"></i>
+                                </button>
+                                <button v-show="hasEmitter('onRemoveElement')" class="btn btn-outline-danger btn-fab rounded-circle" @click="onRemoveHandler(element)" data-bs-toggle="popover" :data-content="t('global.remove')" data-trigger="hover" data-placement="bottom">
+                                    <i class="fas fa-fw fa-xs fa-times" style="vertical-align: 0;"></i>
+                                </button>
+                                <button v-show="hasEmitter('onDeleteElement')" class="btn btn-outline-danger btn-fab rounded-circle" @click="onDeleteHandler(element)" data-bs-toggle="popover" :data-content="t('global.delete')" data-trigger="hover" data-placement="bottom">
+                                    <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
+                                </button>
+                            </div>
+                            <span class="text-end col" v-if="!element.is_system">
+                                {{ translateConcept(element.thesaurus_url) }}:
                             </span>
-                            <span v-if="state.attributeValues[element.id].comments_count > 0">
-                                <i class="fas fa-fw fa-comment" />
-                            </span>
-                            <span v-if="metadataAddon(element.thesaurus_url)">
-                                <i class="fas fa-fw fa-bookmark" />
-                            </span>
-                        </sup>
-                        <sup
-                            v-if="hasEmitter('onEditElement') && !!element.pivot.depends_on"
-                            class="font-size-50"
-                        >
-                            <i class="fas fa-fw fa-circle text-warning" />
-                        </sup>
-                    </label>
-                    <div :class="expandedClasses(index)">
-                        <string-attribute
-                            v-if="element.datatype == 'string'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
+                            <sup class="clickable" v-if="hasEmitter('onMetadata')" @click="onMetadataHandler(element)">
+                                <span :class="getCertaintyClass(state.attributeValues[element.id].certainty, 'text')">
+                                    <i class="fas fa-fw fa-exclamation"></i>
+                                </span>
+                                <span v-if="state.attributeValues[element.id].comments_count > 0">
+                                    <i class="fas fa-fw fa-comment"></i>
+                                </span>
+                                <span v-if="metadataAddon(element.thesaurus_url)">
+                                    <i class="fas fa-fw fa-bookmark"></i>
+                                </span>
+                            </sup>
+                            <sup v-if="hasEmitter('onEditElement') && !!element.pivot.depends_on" class="font-size-50">
+                                <i class="fas fa-fw fa-circle text-warning"></i>
+                            </sup>
+                        </label>
+                        <div :class="expandedClasses(index)">
+                            <string-attribute
+                                v-if="element.datatype == 'string'"
+                                :ref="el => setRef(el, element.id)"
+                                :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                                :name="`attr-${element.id}`"
+                                :value="state.attributeValues[element.id].value"
+                                @change="e => updateDirtyState(e, element.id)" />
 
                         <stringfield-attribute
                             v-else-if="element.datatype == 'stringf'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="e => updateDirtyState(e, element.id)"
@@ -132,7 +70,7 @@
                         <integer-attribute
                             v-else-if="element.datatype == 'integer'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="e => updateDirtyState(e, element.id)"
@@ -141,7 +79,7 @@
                         <float-attribute
                             v-else-if="element.datatype == 'double'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="e => updateDirtyState(e, element.id)"
@@ -150,7 +88,7 @@
                         <bool-attribute
                             v-else-if="element.datatype == 'boolean'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="e => updateDirtyState(e, element.id)"
@@ -159,7 +97,7 @@
                         <percentage-attribute
                             v-else-if="element.datatype == 'percentage'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="e => updateDirtyState(e, element.id)"
@@ -167,7 +105,7 @@
                                 
                         <serial-attribute
                             v-else-if="element.datatype == 'serial'"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                         />
@@ -175,7 +113,7 @@
                         <list-attribute
                             v-else-if="element.datatype == 'list'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :entries="state.attributeValues[element.id].value"
                             @change="e => updateDirtyState(e, element.id)"
@@ -184,7 +122,7 @@
                         <epoch-attribute
                             v-else-if="element.datatype == 'epoch' || element.datatype == 'timeperiod'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :epochs="selections[element.id]"
@@ -195,7 +133,7 @@
                         <dimension-attribute
                             v-else-if="element.datatype == 'dimension'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="e => updateDirtyState(e, element.id)"
@@ -204,7 +142,7 @@
                         <tabular-attribute
                             v-else-if="element.datatype == 'table'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :attribute="element"
@@ -217,7 +155,7 @@
                         <iconclass-attribute
                             v-else-if="element.datatype == 'iconclass'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :attribute="element"
@@ -227,7 +165,7 @@
                         <rism-attribute
                             v-else-if="element.datatype == 'rism'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :attribute="element"
@@ -237,7 +175,7 @@
                         <geography-attribute
                             v-else-if="element.datatype == 'geography'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :attribute="element"
@@ -247,7 +185,7 @@
                         <entity-attribute
                             v-else-if="element.datatype == 'entity' || element.datatype == 'entity-mc'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :multiple="element.datatype == 'entity-mc'"
                             :value="convertEntityValue(state.attributeValues[element.id], element.datatype == 'entity-mc')"
@@ -257,7 +195,7 @@
                         <date-attribute
                             v-else-if="element.datatype == 'date'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             @change="e => updateDirtyState(e, element.id)"
@@ -266,7 +204,7 @@
                         <singlechoice-attribute
                             v-else-if="element.datatype == 'string-sc'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :selections="selections[element.id]"
@@ -276,7 +214,7 @@
                         <multichoice-attribute
                             v-else-if="element.datatype == 'string-mc'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :selections="selections[element.id]"
@@ -285,7 +223,7 @@
 
                         <sql-attribute
                             v-else-if="element.datatype == 'sql'"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                         />
@@ -296,18 +234,25 @@
                             :title="getSeparatorTitle(element)"
                         />
 
-                        <default-attribute
-                            v-else
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id]"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
+                            <default-attribute
+                                v-else
+                                :ref="el => setRef(el, element.id)"
+                                :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                                :name="`attr-${element.id}`"
+                                :value="state.attributeValues[element.id].value"
+                                @change="e => updateDirtyState(e, element.id)" />
+
+                            <attribute-moderation-panel v-if="isInModeration(element.id)"
+                                :element="element"
+                                :value="state.attributeValues[element.id]"
+                                @toggle-data="e => toggleAttributeValue(element.id)"
+                                @moderate="e => handleModeration(element.id, e)"
+                                @edit="e => handleEditModeration(element.id, e)"
+                            />
+                        </div>
                     </div>
                 </div>
-            </div>
-        </template>
+            </template>
     </draggable>
 </template>
 
@@ -328,6 +273,10 @@
         getCertaintyClass,
         translateConcept,
     } from '@/helpers/helpers.js';
+
+    import {
+        handleModeration as handleModerationApi,
+    } from '@/api.js';
 
     import StringAttr from '@/components/attribute/String.vue';
     import Stringfield from '@/components/attribute/Stringfield.vue';
@@ -350,6 +299,7 @@
     import SqlAttr from '@/components/attribute/Sql.vue';
     import SystemSeparator from '@/components/attribute/SystemSeparator.vue';
     import DefaultAttr from '@/components/attribute/Default.vue';
+    import ModerationPanel from '@/components/moderation/Panel.vue';
 
     export default {
         components: {
@@ -499,6 +449,62 @@
             const onAttributeExpand = (e, i) => {
                 state.expansionStates[i] = !state.expansionStates[i];
             };
+            const isInModeration = aid => {
+                const attr = state.attributeValues[aid];
+                return attr.moderation_state && attr.moderation_state.startsWith('pending');
+            };
+            const isDisabledInModeration = aid => {
+                const attr = state.attributeValues[aid];
+                return isInModeration(aid) && attr.moderation_edit_state != 'active';
+            };
+            const addModerationStateClasses = aid => {
+                const classes = [];
+
+                if(isInModeration(aid)) {
+                    classes.push('bg-danger');
+                    classes.push('py-2');
+                }
+
+                return classes;
+            };
+            const toggleAttributeValue = aid => {
+                const tmpVal = state.attributeValues[aid].value;
+                state.attributeValues[aid].value = state.attributeValues[aid].original_value;
+                state.attributeValues[aid].original_value = tmpVal;
+            };
+            const handleModeration = (aid, e, overwrite_value = null) => {
+                const action = e.action;
+                const entity_id = e.entity_id;
+                const active = e.active;
+                if(
+                    (action == 'accept' && active == 'original') ||
+                    (action == 'deny' && active == 'moderation')
+                ) {
+                    toggleAttributeValue(aid);
+                }
+                handleModerationApi(action, entity_id, aid, overwrite_value);
+            };
+            const handleEditModeration = (aid, e) => {
+                const attr = state.attributeValues[aid];
+                const action = e.action;
+                if(action == 'enable') {
+                    attr.moderation_edit_state = 'active';
+                } else if(action == 'reset') {
+                    attrRefs.value[aid].resetFieldState();
+                } else if(action == 'cancel') {
+                    delete attr.moderation_edit_state;
+                    attrRefs.value[aid].resetFieldState();
+                } else if(action == 'accept') {
+                    attrRefs.value[aid].undirtyField();
+                    const editValue = attrRefs.value[aid].v.value;
+                    const data = {
+                        action: action,
+                        entity_id: e.entity_id,
+                    };
+                    handleModeration(aid, data, editValue);
+                }
+            };
+
             const getSeparatorTitle = element => {
                 if(element.pivot && element.pivot.metadata) {
                     return element.pivot.metadata.title;
@@ -542,9 +548,6 @@
                     });
                 }
             };
-            const updateValue = (eventValue, aid) => {
-                state.attributeValues[aid].value = eventValue;
-            };
             const getDirtyValues = _ => {
                 const values = {};
                 for(let k in attrRefs.value) {
@@ -565,6 +568,10 @@
                 return values;
             };
             const updateDirtyState = (e, aid) => {
+                // Do not update dirty state if attribute is currently in moderation edit mode
+                if(state.attributeValues[aid].moderation_edit_state == 'active') {
+                    return;
+                }
                 context.emit('dirty', {
                     ...e,
                     attribute_id: aid,
@@ -572,6 +579,10 @@
             };
             const resetListValues = _ => {
                 for(let k in attrRefs.value) {
+                    // skip all attributes currently in moderation edit mode
+                    if(state.attributeValues[k].moderation_edit_state == 'active') {
+                        continue;
+                    }
                     const curr = attrRefs.value[k];
                     if(!!curr && !!curr.resetFieldState) {
                         curr.resetFieldState();
@@ -580,6 +591,10 @@
             };
             const undirtyList = _ => {
                 for(let k in attrRefs.value) {
+                    // skip all attributes currently in moderation edit mode
+                    if(state.attributeValues[k].moderation_edit_state == 'active') {
+                        continue;
+                    }
                     const curr = attrRefs.value[k];
                     if(!!curr && !!curr.undirtyField) {
                         curr.undirtyField();
@@ -655,6 +670,7 @@
             const state = reactive({
                 attributeList: attributes,
                 attributeValues: values,
+                entity: computed(_ => store.getters.entity),
                 hoverStates: new Array(attributes.value.length).fill(false),
                 expansionStates: new Array(attributes.value.length).fill(false),
                 componentLoaded: computed(_ => state.attributeValues),
@@ -691,12 +707,17 @@
                 attributeClasses,
                 expandedClasses,
                 onAttributeExpand,
+                isInModeration,
+                isDisabledInModeration,
+                addModerationStateClasses,
+                toggleAttributeValue,
+                handleModeration,
+                handleEditModeration,
                 getSeparatorTitle,
                 onEnter,
                 onLeave,
                 handleMove,
                 handleUpdate,
-                updateValue,
                 getDirtyValues,
                 updateDirtyState,
                 resetListValues,

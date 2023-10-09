@@ -352,27 +352,28 @@ import router from '@/bootstrap/router.js';
 
 import { useToast } from '@/plugins/toast.js';
 
-import { date } from '@/helpers/filters.js';
-import {
-    getEntityComments,
-    patchAttributes,
-    patchEntityName,
-} from '@/api.js';
-import {
-    can,
-    getAttribute,
-    getEntityColors,
-    getEntityTypeName,
-    getEntityTypeAttributeSelections,
-    getEntityTypeDependencies,
-    translateConcept,
-} from '@/helpers/helpers.js';
-import {
-    showDiscard,
-    showDeleteEntity,
-    showUserInfo,
-    canShowReferenceModal,
-} from '@/helpers/modal.js';
+    import { date } from '@/helpers/filters.js';
+    import {
+        getEntityComments,
+        patchAttributes,
+        patchEntityName,
+    } from '@/api.js';
+    import {
+        can,
+        isModerated,
+        getAttribute,
+        getEntityColors,
+        getEntityTypeName,
+        getEntityTypeAttributeSelections,
+        getEntityTypeDependencies,
+        translateConcept,
+    } from '@/helpers/helpers.js';
+    import {
+        showDiscard,
+        showDeleteEntity,
+        showUserInfo,
+        canShowReferenceModal,
+    } from '@/helpers/modal.js';
 
 export default {
     props: {
@@ -706,78 +707,87 @@ export default {
         const fetchComments = _ => {
             if(!can('comments_read')) return;
 
-            state.commentLoadingState = 'fetching';
-            getEntityComments(state.entity.id).then(comments => {
-                store.dispatch('setEntityComments', comments);
-                state.commentLoadingState = 'fetched';
-            }).catch(e => {
-                state.commentLoadingState = 'failed';
-            });
-        };
-        const addComment = event => {
-            const comment = event.comment;
-            const replyTo = event.replyTo;
-            if(replyTo) {
-                const op = state.entity.comments.find(c => c.id == replyTo);
-                if(op.replies) {
-                    op.replies.push(comment);
-                }
-                op.replies_count++;
-            } else {
-                if(!state.entity.comments) {
-                    state.entity.comments = [];
-                }
-                state.entity.comments.push(comment);
-                state.entity.comments_count++;
-            }
-        };
-        const saveEntity = _ => {
-            if(!can('entity_data_write')) return;
-            const dirtyValues = attrRef.value.getDirtyValues();
-            var patches = [];
-
-            for(let v in dirtyValues) {
-                const aid = v;
-                const data = state.entity.data[aid];
-                const patch = {
-                    op: null,
-                    value: null,
-                    params: {
-                        aid: aid,
-                    },
-                };
-                if(data.id) {
-                    // if data.id exists, there has been an entry in the database, therefore it is a replace/remove operation
-                    if(dirtyValues[v] && dirtyValues[v] != '') {
-                        // value is set, therefore it is a replace
-                        patch.op = 'replace';
-                        patch.value = dirtyValues[v];
-                        // patch.value = getCleanValue(patch.value, entity.attributes);
-                    } else {
-                        // value is empty, therefore it is a remove
-                        patch.op = 'remove';
-                    }
-                } else {
-                    // there has been no entry in the database before, therefore it is an add operation
-                    if(dirtyValues[v] && dirtyValues[v] != '') {
-                        patch.op = 'add';
-                        patch.value = dirtyValues[v];
-                        // patch.value = getCleanValue(patch.value, entity.attributes);
-                    } else {
-                        // there has be no entry in the database before and values are not different (should not happen ;))
-                        continue;
-                    }
-                }
-                patches.push(patch);
-            }
-            return patchAttributes(state.entity.id, patches).then(data => {
-                state.formDirty = false;
-                attrRef.value.undirtyList();
-                store.dispatch('updateEntity', data);
-                store.dispatch('updateEntityData', {
-                    data: dirtyValues,
-                    eid: state.entity.id,
+                state.commentLoadingState = 'fetching';
+                getEntityComments(state.entity.id).then(comments => {
+                    store.dispatch('setEntityComments', comments);
+                    state.commentLoadingState = 'fetched';
+                }).catch(e => {
+                    state.commentLoadingState = 'failed';
                 });
+            };
+            const addComment = event => {
+                const comment = event.comment;
+                const replyTo = event.replyTo;
+                if(replyTo) {
+                    const op = state.entity.comments.find(c => c.id == replyTo);
+                    if(op.replies) {
+                        op.replies.push(comment);
+                    }
+                    op.replies_count++;
+                } else {
+                    if(!state.entity.comments) {
+                        state.entity.comments = [];
+                    }
+                    state.entity.comments.push(comment);
+                    state.entity.comments_count++;
+                }
+            };
+            const saveEntity = _ => {
+                if(!can('entity_data_write')) return;
+                const dirtyValues = attrRef.value.getDirtyValues();
+                const patches = [];
+                const moderations = [];
+
+                for(let v in dirtyValues) {
+                    const aid = v;
+                    const data = state.entity.data[aid];
+                    const patch = {
+                        op: null,
+                        value: null,
+                        params: {
+                            aid: aid,
+                        },
+                    };
+                    if(data.id) {
+                        // if data.id exists, there has been an entry in the database, therefore it is a replace/remove operation
+                        if(dirtyValues[v] && dirtyValues[v] != '') {
+                            // value is set, therefore it is a replace
+                            patch.op = 'replace';
+                            patch.value = dirtyValues[v];
+                            // patch.value = getCleanValue(patch.value, entity.attributes);
+                        } else {
+                            // value is empty, therefore it is a remove
+                            patch.op = 'remove';
+                        }
+                    } else {
+                        // there has been no entry in the database before, therefore it is an add operation
+                        if(dirtyValues[v] && dirtyValues[v] != '') {
+                            patch.op = 'add';
+                            patch.value = dirtyValues[v];
+                            // patch.value = getCleanValue(patch.value, entity.attributes);
+                        } else {
+                            // there has be no entry in the database before and values are not different (should not happen ;))
+                            continue;
+                        }
+                    }
+                    patches.push(patch);
+                    moderations.push(aid);
+                }
+                return patchAttributes(state.entity.id, patches).then(data => {
+                    state.formDirty = false;
+                    attrRef.value.undirtyList();
+                    store.dispatch('updateEntity', data);
+                    store.dispatch('updateEntityData', {
+                        data: dirtyValues,
+                        eid: state.entity.id,
+                    });
+                    if(isModerated()) {
+                        store.dispatch('updateEntityDataModerations', {
+                            entity_id: state.entity.id,
+                            attribute_ids: moderations,
+                            state: 'pending',
+                        });
+                    }
 
                 toast.$toast(
                     t('main.entity.toasts.updated.msg', {

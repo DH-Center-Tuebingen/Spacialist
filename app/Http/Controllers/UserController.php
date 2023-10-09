@@ -384,6 +384,7 @@ class UserController extends Controller
         }
         $this->validate($request, [
             'permissions' => 'array',
+            'is_moderated' => 'boolean',
             'display_name' => 'string',
             'description' => 'string'
         ]);
@@ -407,6 +408,9 @@ class UserController extends Controller
 
             // Update updated_at column
             $role->touch();
+        }
+        if($request->has('is_moderated')) {
+            $role->is_moderated = $request->get('is_moderated');
         }
         if($request->has('display_name')) {
             $role->display_name = $request->get('display_name');

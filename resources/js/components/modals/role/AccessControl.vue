@@ -21,11 +21,28 @@
                 />
             </div>
             <div class="modal-body">
-                <div
-                    v-if="state.isDerived"
-                    class="d-flex flex-column gap-2 align-items-start"
-                >
-                    <div class="d-flex flex-row align-items-center gap-2">
+                <div class="d-flex flex-row-reverse justify-content-between gap-2">
+                    <div>
+                        <div class="form-check form-switch mb-0">
+                            <input
+                                :id="`role-${state.role.id}-moderation`"
+                                v-model="state.moderated"
+                                class="form-check-input"
+                                type="checkbox"
+                                role="switch"
+                            >
+                            <label
+                                class="form-check-label"
+                                :for="`role-${state.role.id}-moderation`"
+                            >
+                                {{ t('main.role.permissions.moderation.required') }}
+                            </label>
+                        </div>
+                    </div>
+                    <div
+                        v-if="state.isDerived"
+                        class="d-flex flex-row align-items-center gap-2"
+                    >
                         <span class="text-muted">
                             {{ t('main.role.preset.derived_from') }}
                         </span>
@@ -367,7 +384,10 @@
                         }
                     }
                 }
-                context.emit('save', permissions);
+                context.emit('save', {
+                    permissions: permissions,
+                    is_moderated: state.moderated,
+                });
             };
 
             // DATA
@@ -376,6 +396,7 @@
                 role: computed(_ => getRoleBy(roleId.value, 'id', true) || {}),
                 permissionStates: {},
                 permissionGroups: null,
+                moderated: false,
                 isDerived: computed(_ => state.role.derived),
                 differsFromPreset: computed(_ => {
                     if(!state.isDerived) return false;
@@ -395,6 +416,7 @@
 
             // ON MOUNTED
             onMounted(async _ => {
+                state.moderated = state.role.is_moderated;
                 state.permissionGroups = await getAccessGroups();
                 loadRolePermissions(state.role.permissions);
                 state.permissionsLoaded = true;

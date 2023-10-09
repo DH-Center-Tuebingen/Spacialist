@@ -7,6 +7,7 @@ use App\Plugins\Map\App\Geodata;
 use Illuminate\Database\Eloquent\Model;
 use MStaack\LaravelPostgis\Eloquent\PostgisTrait;
 use App\Traits\CommentTrait;
+use App\Traits\ModerationTrait;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Searchable\Searchable;
@@ -17,6 +18,7 @@ class AttributeValue extends Model implements Searchable
 {
     use PostgisTrait;
     use CommentTrait;
+    use ModerationTrait;
     use LogsActivity;
 
     protected $table = 'attribute_values';
@@ -55,6 +57,11 @@ class AttributeValue extends Model implements Searchable
 
     protected $postgisFields = [
         'geography_val',
+    ];
+
+    protected $copyOn = [
+        'entity_id',
+        'attribute_id',
     ];
 
     const patchRules = [

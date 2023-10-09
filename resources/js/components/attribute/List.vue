@@ -24,6 +24,7 @@
                 :disabled="disabled"
             >
             <button
+                v-if="!disabled"
                 type="button"
                 class="btn btn-outline-success"
                 @click="addListEntry()"
@@ -39,9 +40,9 @@
                 v-for="(l, i) in v.value"
                 :key="i"
             >
-                <!-- eslint-disable-next-line vue/no-v-html -->
                 <span v-html="createAnchorFromUrl(l)" />
                 <a
+                    v-if="!disabled"
                     href="#"
                     class="text-danger"
                     @click.prevent="removeListEntry(i)"
@@ -136,6 +137,7 @@
             });
             watch(entries, (newValue, oldValue) => {
                 state.initialValue = newValue.slice();
+                resetFieldState();
             });
 
             // RETURN

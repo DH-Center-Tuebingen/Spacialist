@@ -614,6 +614,35 @@ export async function patchAttributes(entityId, data) {
     );
 }
 
+export async function handleModeration(modAction, entity_id, attribute_id, overwrite_value = null) {
+    const data = {
+        action: modAction,
+    };
+
+    if(overwrite_value) {
+        data.value = overwrite_value;
+    }
+
+    return $httpQueue.add(
+        () => http.patch(`/entity/${entity_id}/attribute/${attribute_id}/moderate`, data).then(response => {
+            store.dispatch('updateEntityDataModerations', {
+                entity_id: entity_id,
+                attribute_ids: [attribute_id],
+                state: null,
+            });
+            if(overwrite_value) {
+                store.dispatch('updateEntityData', {
+                    eid: entity_id,
+                    data: {
+                        [attribute_id]: overwrite_value,
+                    },
+                });
+            }
+            return response.data;
+        }).catch(error => { throw error; })
+    );
+};
+
 export async function multieditAttributes(entityIds, entries) {
     const data = {
         entity_ids: entityIds,
