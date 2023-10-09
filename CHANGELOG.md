@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 - Support moderated roles/users that require a privileged user to accept/deny their changes in entity forms
 ### Changed
 - Entity tree sorting is now accessible through ...-menu
+- Reset Password Workflow
 
 ## 0.9.14
 ### Added
