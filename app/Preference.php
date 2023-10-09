@@ -16,9 +16,9 @@ class Preference extends Model
     ];
 
 
-    public static function getPreferences() {
+    public static function getPreferences($simple = false) {
         $prefs = self::orderBy('id')->get();
-        $prefObj = self::decodePreferences($prefs);
+        $prefObj = self::decodePreferences($prefs, $simple);
         return $prefObj;
     }
 
@@ -123,13 +123,18 @@ class Preference extends Model
         return $value;
     }
 
-    private static function decodePreferences($prefs) {
+    private static function decodePreferences($prefs, $simple = false) {
         $prefObj = [];
         foreach($prefs as $p) {
             $decoded = json_decode($p->default_value);
             unset($p->default_value);
             $p->value = self::decodePreference($p->label, $decoded);
-            $prefObj[$p->label] = $p;
+            if($simple) {
+                $data = $p->value;
+            } else {
+                $data = $p;
+            }
+            $prefObj[$p->label] = $data;
         }
         return $prefObj;
     }

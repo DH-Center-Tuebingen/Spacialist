@@ -13,7 +13,7 @@
                     <div class="row" :class="addModerationStateClasses(element.id)">
                         <label
                             class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break"
-                            v-if="!nolabels"
+                            v-if="!state.hideLabels"
                             :for="`attr-${element.id}`"
                             :class="attributeClasses(element)">
                             <div v-show="!!state.hoverStates[index]" class="btn-fab-list">
@@ -173,6 +173,7 @@
                                 :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                                 :name="`attr-${element.id}`"
                                 :multiple="element.datatype == 'entity-mc'"
+                                :hide-link="state.hideEntityLink"
                                 :value="convertEntityValue(state.attributeValues[element.id], element.datatype == 'entity-mc')"
                                 @change="e => updateDirtyState(e, element.id)" />
 
@@ -328,10 +329,10 @@
                 required: true,
                 type: Object
             },
-            nolabels: {
+            options: {
                 required: false,
-                type: Boolean,
-                default: false,
+                type: Object,
+                default: {},
             },
             preview: {
                 required: false,
@@ -381,7 +382,7 @@
                 metadataAddon,
                 selections,
                 values,
-                nolabels,
+                options,
                 preview,
                 previewData,
             } = toRefs(props);
@@ -409,7 +410,7 @@
             const expandedClasses = i => {
                 let expClasses = {};
 
-                if(nolabels.value || state.expansionStates[i]) {
+                if(state.hideLabels || state.expansionStates[i]) {
                     expClasses['col-md-12'] = true;
                 } else {
                     expClasses['col-md-9'] = true;
@@ -658,6 +659,8 @@
                     }
                     return list;
                 }),
+                hideLabels: computed(_ => options.value.hide_labels),
+                hideEntityLink: computed(_ => options.value.hide_entity_link),
             });
 
             // ON MOUNTED
@@ -707,7 +710,6 @@
                 disableDrag,
                 group,
                 metadataAddon,
-                nolabels,
                 selections,
                 preview,
                 previewData,

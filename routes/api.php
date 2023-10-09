@@ -224,3 +224,13 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::post('export/{type}', 'AnalysisController@export');
     Route::post('filter', 'AnalysisController@applyFilterQuery');
 });
+
+// Open Access
+Route::prefix('v1/open')->group(function() {
+    Route::get('global', 'OpenAccessController@getGlobals');
+    Route::get('attributes', 'OpenAccessController@getAttributes');
+    Route::get('types', 'OpenAccessController@getEntityTypes');
+
+    Route::post('result', 'OpenAccessController@getFilterResults');
+    Route::post('result/by_type/{id}', 'OpenAccessController@getFilterResultsForType')->where('id', '[0-9]+');
+});
