@@ -336,12 +336,19 @@ export async function addRole(role) {
     );
 };
 
-export async function sendResetPasswordMail(email) {
+export async function resetUserPassword(uid, password) {
     const data = {
-        email: email,
+        password: password,
     };
     return $httpQueue.add(
-        () => http.post(`user/reset/password`, data).then(response => response.data)
+        () => http.patch(`user/${uid}/password/reset`, data).then(response => response.data)
+    );
+};
+
+export async function confirmUserPassword(uid, password = null) {
+    const data = !!password ? {password: password} : {};
+    return $httpQueue.add(
+        () => http.patch(`user/${uid}/password/confirm`, data).then(response => response.data)
     );
 };
 
