@@ -95,9 +95,11 @@
         computed,
         reactive,
     } from 'vue';
+
     import { useI18n } from 'vue-i18n';
 
     import {
+        getInitialAttributeValue,
         randomId,
     } from '@/helpers/helpers.js';
 
@@ -136,63 +138,6 @@
             const checkTableValidation = e => {
                 state.tableColumnValidated = e;
             };
-            const getInitialValue = attribute => {
-                switch(attribute.type) {
-                    case 'string':
-                    case 'stringf':
-                    case 'iconclass':
-                    case 'rism':
-                    case 'geography':
-                        return '';
-                    case 'integer':
-                    case 'double':
-                        return 0;
-                    case 'boolean':
-                        return 0;
-                    case 'percentage':
-                        return 50;
-                    case 'serial':
-                        let str = attribute.textContent;
-                        let toRepl = '%d';
-                        let ctr = '1954';
-                        if(!str) {
-                            str = 'Find_%05d_Placeholder';
-                        }
-                        let hasIdentifier = false;
-                        let isSimple = true;
-                        let matches = str.match(/.*(%d).*/);
-                        if(matches && matches[1]) {
-                            hasIdentifier = true;
-                            isSimple = true;
-                        } else {
-                            matches = str.match(/.*(%\d*d).*/);
-                            if(matches && matches[1]) {
-                                hasIdentifier = true;
-                                isSimple = false;
-                            }
-                        }
-                        if(hasIdentifier && !isSimple) {
-                            toRepl = matches[1];
-                            let pad = parseInt(toRepl.substring(1, toRepl.length-1));
-                            ctr = ctr.padStart(pad, '0');
-                        }
-                        return str.replaceAll(toRepl, ctr);
-                    case 'list':
-                    case 'string-mc':
-                    case 'entity-mc':
-                        return [];
-                    case 'date':
-                        return new Date();
-                    case 'sql':
-                        return t('global.preview_not_available');
-                    case 'epoch':
-                    case 'dimension':
-                    case 'entity':
-                    case 'string-sc':
-                    case 'table':
-                        return {};
-                }
-            };
 
             // DATA
             const fakeId = randomId();
@@ -218,7 +163,7 @@
                         }],
                         values: {
                             [fakeId]: {
-                                value: getInitialValue(state.attribute),
+                                value: getInitialAttributeValue(state.attribute),
                             },
                         },
                     };

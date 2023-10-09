@@ -10,12 +10,25 @@ import {
     fillEntityData,
     only,
     slugify,
+    getIntersectedEntityAttributes,
+    hasIntersectionWithEntityAttributes,
 } from '@/helpers/helpers.js';
 import {
     getEntityData,
     getEntityParentIds,
     getEntityReferences,
 } from '@/api.js';
+
+function updateSelectionTypeIdList(selection) {
+    const tmpDict = {};
+    for(let k in selection) {
+        const curr = selection[k];
+        if(!tmpDict[curr.entity_type_id]) {
+            tmpDict[curr.entity_type_id] = 1;
+        }
+    }
+    return Object.keys(tmpDict).map(tdk => parseInt(tdk));
+}
 
 export const store = createStore({
     modules: {
@@ -47,6 +60,9 @@ export const store = createStore({
                     roles: [],
                     rolePresets: [],
                     tree: [],
+                    treeSelectionMode: false,
+                    treeSelection: {},
+                    treeSelectionTypeIds: [],
                     user: {},
                     users: [],
                     version: {},
@@ -402,6 +418,37 @@ export const store = createStore({
                 sortTree(state, sort) {
                     sortTree(sort.by, sort.dir, state.tree);
                 },
+                addToTreeSelection(state, data) {
+                    const addPossible = hasIntersectionWithEntityAttributes(data.value.entity_type_id, state.treeSelectionTypeIds);
+                    if(addPossible || state.treeSelectionTypeIds.length == 0) {
+                        state.treeSelection[data.id] = data.value;
+
+                        state.treeSelectionTypeIds = [];
+                        state.treeSelectionTypeIds = updateSelectionTypeIdList(state.treeSelection);
+                    }
+                },
+                removeFromTreeSelection(state, data) {
+                    delete state.treeSelection[data.id];
+
+                    state.treeSelectionTypeIds = [];
+                    state.treeSelectionTypeIds = updateSelectionTypeIdList(state.treeSelection);
+                },
+                toggleTreeSelectionMode(state) {
+                    state.treeSelectionMode = !state.treeSelectionMode;
+
+                    if(!state.treeSelectionMode) {
+                        state.treeSelection = {};
+                        state.treeSelectionTypeIds = [];
+                    }
+                },
+                setTreeSelectionMode(state, data) {
+                    state.treeSelectionMode = data;
+
+                    if(!state.treeSelectionMode) {
+                        state.treeSelection = {};
+                        state.treeSelectionTypeIds = [];
+                    }
+                },
                 setPreferences(state, data) {
                     state.preferences = data;
                 },
@@ -543,6 +590,21 @@ export const store = createStore({
                 },
                 sortTree({commit}, sort) {
                     commit('sortTree', sort)
+                },
+                addToTreeSelection({commit}, data) {
+                    commit('addToTreeSelection', data);
+                },
+                removeFromTreeSelection({commit}, data) {
+                    commit('removeFromTreeSelection', data);
+                },
+                toggleTreeSelectionMode({commit}) {
+                    commit('toggleTreeSelectionMode');
+                },
+                setTreeSelectionMode({commit}) {
+                    commit('setTreeSelectionMode', true);
+                },
+                unsetTreeSelectionMode({commit}) {
+                    commit('setTreeSelectionMode', false);
                 },
                 setMainViewTab({commit}, data) {
                     commit('setMainViewTab', data);
@@ -756,6 +818,11 @@ export const store = createStore({
                 geometryTypes: state => state.geometryTypes,
                 mainView: state => state.mainView,
                 tree: state => state.tree,
+                treeSelectionMode: state => state.treeSelectionMode,
+                treeSelection: state => state.treeSelection,
+                treeSelectionCount: state => Object.keys(state.treeSelection).length,
+                treeSelectionTypeIds: state => state.treeSelectionTypeIds,
+                treeSelectionIntersection: state => getIntersectedEntityAttributes(state.treeSelectionTypeIds),
                 preferenceByKey: state => key => state.preferences[key],
                 preferences: state => state.preferences,
                 systemPreferences: state => state.systemPreferences,

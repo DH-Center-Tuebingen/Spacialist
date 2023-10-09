@@ -4,6 +4,15 @@
         @dragenter="onDragEnter"
         @dragleave="onDragLeave"
     >
+        <input
+            v-show="state.isSelectionMode"
+            :id="`tree-node-mes-${data.id}`"
+            v-model="state.multieditSelected"
+            class="mx-1 form-check-input"
+            type="checkbox"
+            :disabled="state.isSelectionDisabled"
+            @click.stop="addToMSList()"
+        >
         <a
             :id="`tree-node-cm-toggle-${data.id}`"
             href=""
@@ -111,13 +120,14 @@
 </template>
 
 <script>
-import {
-    computed,
-    nextTick,
-    onMounted,
-    reactive,
-    toRefs,
-} from 'vue';
+    import {
+        computed,
+        nextTick,
+        onMounted,
+        reactive,
+        toRefs,
+        watch,
+    } from 'vue';
 
 import {
     Dropdown,
@@ -127,21 +137,22 @@ import { useI18n } from 'vue-i18n';
 
 import store from '@/bootstrap/store.js';
 
-import {
-    ShowAddEntity,
-    showDeleteEntity,
-    ShowMoveEntity,
-} from '@/helpers/modal.js';
-import {
-    duplicateEntity as duplicateEntityApi,
-} from '@/api.js';
-import {
-    can,
-    getEntityColors,
-} from '@/helpers/helpers.js';
-import {
-    numPlus,
-} from '@/helpers/filters.js';
+    import {
+        showAddEntity,
+        showDeleteEntity,
+        ShowMoveEntity,
+    } from '@/helpers/modal.js';
+    import {
+        duplicateEntity as duplicateEntityApi,
+    } from '@/api.js';
+    import {
+        can,
+        getEntityColors,
+        hasIntersectionWithEntityAttributes,
+    } from '@/helpers/helpers.js';
+    import {
+        numPlus,
+    } from '@/helpers/filters.js';
 
 export default {
     props: {
@@ -158,43 +169,43 @@ export default {
 
         // FETCH
 
-        // FUNCTIONS
-        const hidePopup = _ => {
-            state.bsElem.hide();
-            state.ddVisible = false;
-            state.ddDomElem.classList.add('disabled');
-        };
-        const showPopup = _ => {
-            state.ddVisible = true;
-            nextTick(_ => {
-                // To prevent opening the dropdown on normal click on Node,
-                // the DD toggle must have class 'disabled'
-                // This also prevents BS API call .show() to work...
-                // Thus we remove the 'disabled' class before the API call and add it back on hide
-                state.ddDomElem.classList.remove('disabled');
-                state.bsElem.show();
-            })
-        };
-        const togglePopup = _ => {
-            if(state.ddVisible) {
-                hidePopup();
-            } else {
-                showPopup();
-            }
-        };
-        const addNewEntity = _ => {
-            ShowAddEntity(data.value);
-        };
-        const duplicateEntity = _ => {
-            duplicateEntityApi(data.value).then(data => {
-                store.dispatch('addEntity', data);
-            });
-        };
-        const moveEntity = _ => {
-            ShowMoveEntity(data.value);
-        };
-        const deleteEntity = _ => {
-            if(!can('entity_delete')) return;
+            // FUNCTIONS
+            const hidePopup = _ => {
+                state.bsElem.hide();
+                state.ddVisible = false;
+                state.ddDomElem.classList.add('disabled');
+            };
+            const showPopup = _ => {
+                state.ddVisible = true;
+                nextTick(_ => {
+                    // To prevent opening the dropdown on normal click on Node,
+                    // the DD toggle must have class 'disabled'
+                    // This also prevents BS API call .show() to work...
+                    // Thus we remove the 'disabled' class before the API call and add it back on hide
+                    state.ddDomElem.classList.remove('disabled');
+                    state.bsElem.show();
+                })
+            };
+            const togglePopup = _ => {
+                if(state.ddVisible) {
+                    hidePopup();
+                } else {
+                    showPopup();
+                }
+            };
+            const addNewEntity = _ => {
+                showAddEntity(data.value);
+            };
+            const duplicateEntity = _ => {
+                duplicateEntityApi(data.value).then(data => {
+                    store.dispatch('addEntity', data);
+                });
+            };
+            const moveEntity = _ => {
+                ShowMoveEntity(data.value);
+            };
+            const deleteEntity = _ => {
+                if(!can('entity_delete')) return;
 
             showDeleteEntity(data.value.id);
         };
@@ -203,78 +214,110 @@ export default {
         };
         const onDragLeave = _ => {
 
-        };
+            };
+            const addToMSList = _ => {
+                state.multieditSelected = !state.multieditSelected;
+                if(state.multieditSelected) {
+                    store.dispatch('addToTreeSelection', {
+                        id: data.value.id,
+                        value: {
+                            entity_type_id: data.value.entity_type_id,
+                        },
+                    });
+                } else {
+                    store.dispatch('removeFromTreeSelection', {
+                        id: data.value.id,
+                    });
+                }
+            };
 
-        // DATA
-        const state = reactive({
-            ddDomElem: null,
-            bsElem: null,
-            ddVisible: false,
-            colorStyles: computed(_ => getEntityColors(data.value.entity_type_id)),
-            isSelected: computed(_ => store.getters.entity.id === data.value.id),
-        });
-
-        // ON MOUNTED
-        onMounted(_ => {
-            console.log('tree node component mounted');
-            state.ddDomElem = document.getElementById(`tree-node-cm-toggle-${data.value.id}`);
-            state.ddDomElem.addEventListener('hidden.bs.dropdown', _ => {
-                hidePopup();
+            // DATA
+            const state = reactive({
+                ddDomElem: null,
+                bsElem: null,
+                ddVisible: false,
+                multieditSelected: false,
+                colorStyles: computed(_ => getEntityColors(data.value.entity_type_id)),
+                isSelected: computed(_ => store.getters.entity.id === data.value.id),
+                isSelectionMode: computed(_ => store.getters.treeSelectionMode),
+                isSelectionDisabled: computed(_ => {
+                    if(store.getters.treeSelectionTypeIds.length == 0 || state.multieditSelected) {
+                        return false;
+                    }
+                    return !hasIntersectionWithEntityAttributes(data.value.entity_type_id, store.getters.treeSelectionTypeIds);
+                }),
             });
-            state.bsElem = new Dropdown(state.ddDomElem);
-        });
 
-        // RETURN
-        return {
-            t,
-            // HELPERS
-            can,
-            numPlus,
-            // LOCAL
-            togglePopup,
-            addNewEntity,
-            duplicateEntity,
-            moveEntity,
-            deleteEntity,
-            onDragEnter,
-            onDragLeave,
-            // STATE
-            state,
-        };
+            // ON MOUNTED
+            onMounted(_ => {
+                console.log('tree node component mounted');
+                state.ddDomElem = document.getElementById(`tree-node-cm-toggle-${data.value.id}`);
+                state.ddDomElem.addEventListener('hidden.bs.dropdown', _ => {
+                    hidePopup();
+                });
+                state.bsElem = new Dropdown(state.ddDomElem);
+            });
+
+            // WATCHER
+            watch(_ => state.isSelectionMode, (newValue, oldValue) => {
+                // if selection mode got disabled (checkbox not visible)
+                if(!newValue && oldValue) {
+                    state.multieditSelected = false;
+                }
+            });
+
+            // RETURN
+            return {
+                t,
+                // HELPERS
+                can,
+                numPlus,
+                // LOCAL
+                togglePopup,
+                addNewEntity,
+                duplicateEntity,
+                moveEntity,
+                deleteEntity,
+                onDragEnter,
+                onDragLeave,
+                addToMSList,
+                // STATE
+                state,
+            };
+        }
+        // methods: {
+        //     onDragEnter() {
+        //         if(!this.data.dragAllowed()) return;
+        //         this.asyncToggle.cancel();
+        //         this.asyncToggle();
+        //     },
+        //     onDragLeave(item) {
+        //         this.asyncToggle.cancel();
+        //     },
+        //     doToggle() {
+        //         if(!this.data.state.opened && this.data.state.openable) {
+        //             this.data.onToggle({data: this.data});
+        //         }
+        //     }
+        // },
+        // data() {
+        //     return {
+        //     }
+        // },
+        // computed: {
+        //     asyncToggle() {
+        //         return _debounce(this.doToggle, this.data.dragDelay || 500);
+        //     },
+        //     colorStyles() {
+        //         const colors = this.$getEntityColors(this.data.entity_type_id);
+        //         if(this.data.children_count) {
+        //             return colors;
+        //         } else {
+        //             return {
+        //                 color: colors.backgroundColor
+        //             };
+        //         }
+        //     }
+        // }
     }
-    // methods: {
-    //     onDragEnter() {
-    //         if(!this.data.dragAllowed()) return;
-    //         this.asyncToggle.cancel();
-    //         this.asyncToggle();
-    //     },
-    //     onDragLeave(item) {
-    //         this.asyncToggle.cancel();
-    //     },
-    //     doToggle() {
-    //         if(!this.data.state.opened && this.data.state.openable) {
-    //             this.data.onToggle({data: this.data});
-    //         }
-    //     }
-    // },
-    // data() {
-    //     return {
-    //     }
-    // },
-    // computed: {
-    //     asyncToggle() {
-    //         return _debounce(this.doToggle, this.data.dragDelay || 500);
-    //     },
-    //     colorStyles() {
-    //         const colors = this.$getEntityColors(this.data.entity_type_id);
-    //         if(this.data.children_count) {
-    //             return colors;
-    //         } else {
-    //             return {
-    //                 color: colors.backgroundColor
-    //             };
-    //         }
-    //     }
-    // }
-}
 </script>

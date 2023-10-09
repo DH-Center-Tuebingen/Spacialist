@@ -262,18 +262,53 @@ export function getEntityTypeDependencies(id, aid) {
 
 }
 
-export function getEntityTypeAttributeSelections(id) {
-    const attrs = getEntityTypeAttributes(id);
-    if(!attrs) return {};
-    const attrIds = attrs.map(a => a.id);
+export function getAttributeSelections(attributes) {
     const sel = store.getters.attributeSelections;
     let filteredSel = {};
     for(let k in sel) {
-        if(attrIds.findIndex(aid => aid == k) > -1) {
+        if(attributes.findIndex(a => a.id == k) > -1) {
             filteredSel[k] = sel[k];
         }
     }
     return filteredSel;
+}
+
+export function getEntityTypeAttributeSelections(id) {
+    const attrs = getEntityTypeAttributes(id);
+    if(!attrs) return {};
+    return getAttributeSelections(attrs);
+}
+
+export function getIntersectedEntityAttributes(entityTypeLists) {
+    if(entityTypeLists.length == 0) return [];
+
+    let compArr = getEntityTypeAttributes(entityTypeLists[0]);
+
+    if(entityTypeLists.length == 1) {
+        return compArr;
+    }
+
+    let intersections = [];
+    for(let i=1; i<entityTypeLists.length; i++) {
+        intersections = [];
+        const attrN = getEntityTypeAttributes(entityTypeLists[i]);
+        for(let j=0; j<compArr.length; j++) {
+            for(let k=0; k<attrN.length; k++) {
+                const a1 = compArr[j];
+                const a2 = attrN[k];
+                if(a1.id == a2.id) {
+                    intersections.push(a1);
+                }
+            }
+        }
+        compArr = intersections;
+    }
+
+    return intersections;
+}
+
+export function hasIntersectionWithEntityAttributes(etid, entityTypeList) {
+    return getIntersectedEntityAttributes([etid, ...entityTypeList]).length > 0;
 }
 
 export function isAllowedSubEntityType(parentId, id) {
@@ -282,25 +317,62 @@ export function isAllowedSubEntityType(parentId, id) {
     return parent.sub_entity_types.some(et => et.id == id);
 }
 
-export function defaultAttributeValue(datatype) {
-    const val = {};
-    switch(datatype) {
-        case 'dimension':
-        case 'epoch':
-        case 'timeperiod':
-            val.value = {};
-            break;
+export function getInitialAttributeValue(attribute) {
+    switch(attribute.type) {
+        case 'string':
+        case 'stringf':
+        case 'iconclass':
+        case 'rism':
+        case 'geography':
+            return '';
+        case 'integer':
+        case 'double':
+            return 0;
+        case 'boolean':
+            return 0;
+        case 'percentage':
+            return 50;
+        case 'serial':
+            let str = attribute.textContent;
+            let toRepl = '%d';
+            let ctr = "1954";
+            if(!str) {
+                str = 'Find_%05d_Placeholder';
+            }
+            let hasIdentifier = false;
+            let isSimple = true;
+            let matches = str.match(/.*(%d).*/);
+            if(matches && matches[1]) {
+                hasIdentifier = true;
+                isSimple = true;
+            } else {
+                matches = str.match(/.*(%\d*d).*/);
+                if(matches && matches[1]) {
+                    hasIdentifier = true;
+                    isSimple = false;
+                }
+            }
+            if(hasIdentifier && !isSimple) {
+                toRepl = matches[1];
+                let pad = parseInt(toRepl.substring(1, toRepl.length-1));
+                ctr = ctr.padStart(pad, '0');
+            }
+            return str.replaceAll(toRepl, ctr);
+        case 'list':
         case 'string-mc':
         case 'entity-mc':
+            return [];
+        case 'date':
+            return new Date();
+        case 'sql':
+            return t('global.preview_not_available');
+        case 'epoch':
+        case 'dimension':
+        case 'entity':
+        case 'string-sc':
         case 'table':
-        case 'list':
-            val.value = [];
-            break;
-        default:
-            val.value = '';
-            break;
+            return {};
     }
-    return val;
 }
 
 export function getAttributeValueAsString(rawValue, datatype) {
@@ -356,7 +428,9 @@ export function fillEntityData(data, etid) {
     for(let i=0; i<attrs.length; i++) {
         const currAttr = attrs[i];
         if(!data[currAttr.id]) {
-            data[currAttr.id] = defaultAttributeValue(currAttr.datatype);
+            data[currAttr.id] = {
+                value: getInitialAttributeValue(currAttr),
+            };
         }
     }
     return data;

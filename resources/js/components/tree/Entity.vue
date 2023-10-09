@@ -12,16 +12,11 @@
                     id="tree-options-dropdown"
                     class="clickable align-middle btn btn-outline-primary btn-sm"
                     data-bs-toggle="dropdown"
+                    role="button"
                     aria-haspopup="true"
                     aria-expanded="false"
                 >
-                    <span class="fa-stack h-auto">
-                        <i class="fas fa-filter" />
-                        <i
-                            class="fas fa-ellipsis-h"
-                            data-fa-transform="start-4"
-                        />
-                    </span>
+                    <i class="fas fa-fw fa-ellipsis-h" />
                 </span>
                 <div
                     class="dropdown-menu"
@@ -197,7 +192,10 @@
         openPath,
     } from '@/helpers/tree.js';
 
-    import { ShowAddEntity } from '@/helpers/modal.js';
+    import {
+        showAddEntity,
+        showMultiEditAttribute,
+    } from '@/helpers/modal.js';
 
     export default {
         components: {
@@ -211,6 +209,10 @@
 
             // FUNCTIONS
             const itemClick = (item) => {
+                // if treeSelectionMode is active, itemClick is (wrongly) triggered, but has no data.
+                // Preventing itemClick to trigger would result in not checked checkboxes in node component
+                if(!item.data) return;
+
                 if(state.entity.id == item.data.id) {
                     router.push({
                         append: true,
@@ -239,6 +241,14 @@
                 }
                 item.state.opened = !item.state.opened;
             };
+            const toggleSelectMode = _ => {
+                store.dispatch('toggleTreeSelectionMode');
+            };
+            const openMultieditModal = _ => {
+                const entityIds = Object.keys(store.getters.treeSelection).map(id => parseInt(id));
+                const attributes = store.getters.treeSelectionIntersection;
+                showMultiEditAttribute(entityIds, attributes);
+            };
             const getSortingStateClass = (attr, dir) => {
                 if(state.sort.by == attr && state.sort.dir == dir) {
                     return [
@@ -257,7 +267,7 @@
                 });
             };
             const openAddEntityDialog = _ => {
-                ShowAddEntity(null);
+                showAddEntity(null);
             };
             const resetHighlighting = _ => {
                 state.highlightedItems.forEach(i => i.state.highlighted = false);
@@ -290,6 +300,8 @@
 
             // DATA
             const state = reactive({
+                selectMode: computed(_ => store.getters.treeSelectionMode),
+                canOpenMultiEditModal: computed(_ => store.getters.treeSelectionCount >= 2),
                 highlightedItems: [],
                 tree: computed(_ => store.getters.tree),
                 entity: computed(_ => store.getters.entity),
@@ -315,6 +327,8 @@
                 // LOCAL
                 itemClick,
                 itemToggle,
+                toggleSelectMode,
+                openMultieditModal,
                 getSortingStateClass,
                 setSort,
                 openAddEntityDialog,

@@ -148,7 +148,7 @@
     import { useToast } from '@/plugins/toast.js';
 
     import {
-        defaultAttributeValue,
+        getInitialAttributeValue,
         getEntityType,
         getEntityTypeAttributes,
         translateConcept,
@@ -256,7 +256,9 @@
                     for(let i=0; i<state.entityAttributes.length; i++) {
                         const curr = state.entityAttributes[i];
                         // several datatypes require a "valid"/non-string v-model
-                        data[curr.id] = defaultAttributeValue(curr.datatype);
+                        data[curr.id] = {
+                            value: getInitialAttributeValue(curr),
+                        };
                     }
                     return data;
                 }),
