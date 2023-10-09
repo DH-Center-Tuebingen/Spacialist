@@ -759,18 +759,16 @@ export function showEditAttribute(aid, etid, metadata) {
 
 export function showMultiEditAttribute(entityIds, attributes) {
     const uid = `MultiEditAttribute-${getTs()}`;
-    store.getters.vfm.show({
+    const modal = useModal({
         component: MultiEditAttribute,
-        bind: {
+        attrs: {
             name: uid,
             entityIds: entityIds,
             attributes: attributes,
-        },
-        on: {
-            closing(e) {
-                store.getters.vfm.hide(uid);
+            onClosing(e) {
+                modal.destroy();
             },
-            confirm(e) {
+            onConfirm(e) {
                 const values = e.values;
                 const entries = [];
                 for(let v in values) {
@@ -783,7 +781,7 @@ export function showMultiEditAttribute(entityIds, attributes) {
                 }
                 multieditAttributes(entityIds, entries).then(_ => {
                     store.dispatch("unsetTreeSelectionMode");
-                    store.getters.vfm.hide(uid);
+                    modal.destroy();
                     const title = t('main.entity.tree.multiedit.toast.saved.title');
                     const msg = t('main.entity.tree.multiedit.toast.saved.msg', {
                         attr_cnt: entries.length,
@@ -794,8 +792,9 @@ export function showMultiEditAttribute(entityIds, attributes) {
                     });
                 });
             }
-        }
+        },
     });
+    modal.open();
 }
 
 export function showRemoveAttribute(etid, aid, id, metadata, onDeleted) {
