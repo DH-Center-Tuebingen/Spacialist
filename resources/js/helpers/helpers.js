@@ -482,6 +482,10 @@ export function getUser() {
     return isLoggedIn() ? auth.user() : {};
 }
 
+export function isModerated() {
+    return isLoggedIn() ? store.getters.isModerated : true;
+}
+
 export function userId() {
     return getUser().id || -1;
 };

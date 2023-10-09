@@ -416,12 +416,14 @@ export function showAccessControlModal(roleId) {
             roleId: roleId,
             onSave(e) {
                 const data = {
-                    permissions: e,
+                    permissions: e.permissions,
+                    is_moderated: e.is_moderated,
                 };
                 patchRoleData(roleId, data).then(data => {
                     store.dispatch('updateRole', {
                         id: roleId,
                         permissions: data.permissions,
+                        is_moderated: data.is_moderated,
                     });
                     const role = getRoleBy(roleId);
                     const msg = t('main.role.toasts.updated.msg', {
@@ -795,6 +797,47 @@ export function showMultiEditAttribute(entityIds, attributes) {
         },
     });
     modal.open();
+}
+
+export function showMultiEditAttribute(entityIds, attributes) {
+    const uid = `MultiEditAttribute-${getTs()}`;
+    store.getters.vfm.show({
+        component: MultiEditAttribute,
+        bind: {
+            name: uid,
+            entityIds: entityIds,
+            attributes: attributes,
+        },
+        on: {
+            closing(e) {
+                store.getters.vfm.hide(uid);
+            },
+            confirm(e) {
+                const values = e.values;
+                const entries = [];
+                for(let v in values) {
+                    const aid = v;
+                    const entry = {
+                        value: values[aid],
+                        attribute_id: aid,
+                    };
+                    entries.push(entry);
+                }
+                multieditAttributes(entityIds, entries).then(_ => {
+                    store.dispatch("unsetTreeSelectionMode");
+                    store.getters.vfm.hide(uid);
+                    const title = t('main.entity.tree.multiedit.toast.saved.title');
+                    const msg = t('main.entity.tree.multiedit.toast.saved.msg', {
+                        attr_cnt: entries.length,
+                        ent_cnt: entityIds.length,
+                    });
+                    addToast(msg, title, {
+                        channel: 'success',
+                    });
+                });
+            }
+        }
+    });
 }
 
 export function showRemoveAttribute(etid, aid, id, metadata, onDeleted) {

@@ -100,6 +100,19 @@ class User extends Authenticatable implements JWTSubject
         $this->save();
     }
 
+    public function isModerated() : bool {
+         $moderated = false;
+
+        foreach($this->roles as $r) {
+            if($r->isModerated()) {
+                $moderated = true;
+                break;
+            }
+        }
+
+        return $moderated;
+    }
+
     public function getAvatarUrlAttribute() {
         return isset($this->avatar) ? sp_get_public_url($this->avatar) : null;
     }

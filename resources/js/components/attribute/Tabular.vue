@@ -602,6 +602,10 @@
                 resetField,
             });
 
+
+            watch(value, (newValue, oldValue) => {
+                resetFieldState();
+            });
             watch(v.meta, (newValue, oldValue) => {
                 context.emit('change', {
                     dirty: v.meta.dirty,

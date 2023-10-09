@@ -12,8 +12,14 @@
 .submenu {
     display: none;
     position: absolute;
-    left:100%;
-    top:-7px;
+    left: 100%;
+    top: -7px;
+}
+
+.submenu-end {
+    left: -100%;
+    top: 0;
+    margin-left: -(map-get($spacers, 4));
 }
 
 .dropdown-item:hover > .submenu {

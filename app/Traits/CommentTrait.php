@@ -51,6 +51,6 @@ trait CommentTrait
     }
 
     public function comments() {
-        return $this->morphMany('App\Comment', 'commentable')->orderBy('id');
+        return $this->morphMany(Comment::class, 'commentable')->orderBy('id');
     }
 }
