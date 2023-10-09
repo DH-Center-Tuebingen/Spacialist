@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Exceptions\InvalidDataException;
+use App\Plugins\Map\App\Geodata;
 use Illuminate\Database\Eloquent\Model;
 use MStaack\LaravelPostgis\Eloquent\PostgisTrait;
 use App\Traits\CommentTrait;
@@ -10,6 +11,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
+use stdClass;
 
 class AttributeValue extends Model implements Searchable
 {
@@ -102,10 +104,102 @@ class AttributeValue extends Model implements Searchable
         $this->save();
     }
 
+    public static function getFormattedKeyValue($datatype, $rawValue) : stdClass {
+        $keyValue = new stdClass();
+
+        switch($datatype) {
+            // for primitive types: just save them to the db
+            case 'stringf':
+            case 'string':
+            case 'iconclass':
+            case 'rism':
+                $key = 'str_val';
+                $val = $rawValue;
+                break;
+            case 'double':
+                $key = 'dbl_val';
+                $val = $rawValue;
+                break;
+            case 'boolean':
+            case 'percentage':
+            case 'integer':
+                $key = 'int_val';
+                $val = $rawValue;
+                break;
+            case 'date':
+                $key = 'dt_val';
+                $val = $rawValue;
+                break;
+            case 'string-sc':
+                $key = 'thesaurus_val';
+                $val = $rawValue['concept_url'];
+                break;
+            case 'string-mc':
+                $key = 'json_val';
+                $thesaurus_urls = [];
+                foreach($rawValue as $val) {
+                    $thesaurus_urls[] = [
+                        "concept_url" => $val['concept_url'],
+                        "id" => $val['id']
+                    ];
+                }
+                $val = json_encode($thesaurus_urls);
+                break;
+            case 'epoch':
+            case 'timeperiod':
+            case 'dimension':
+            case 'list':
+            case 'table':
+                $key = 'json_val';
+                // check for invalid time spans
+                if($datatype == 'epoch' || $datatype == 'timeperiod') {
+                    $sl = isset($rawValue['startLabel']) ? strtoupper($rawValue['startLabel']) : null;
+                    $el = isset($rawValue['endLabel']) ? strtoupper($rawValue['endLabel']) : null;
+                    $s = $rawValue['start'];
+                    $e = $rawValue['end'];
+                    if(
+                        (isset($s) && !isset($sl))
+                        ||
+                        (isset($e) && !isset($el))
+                    ) {
+                        throw new InvalidDataException(__('You have to specify if your date is BC or AD.'));
+                    }
+                    if(
+                        ($sl == 'AD' && $el == 'BC')
+                        ||
+                        ($sl == 'BC' && $el == 'BC' && $s < $e)
+                        ||
+                        ($sl == 'AD' && $el == 'AD' && $s > $e)
+                    ) {
+                        throw new InvalidDataException(__('Start date of a time period must not be after it\'s end date'));
+                    }
+                }
+                $val = json_encode($rawValue);
+                break;
+            case 'entity':
+                $key = 'entity_val';
+                $val = $rawValue;
+                break;
+            case 'entity-mc':
+                $key = 'json_val';
+                $val = json_encode($rawValue);
+                break;
+            case 'geography':
+                $key = 'geography_val';
+                $val = Geodata::parseWkt($rawValue);
+                break;
+        }
+
+        $keyValue->key = $key;
+        $keyValue->val = $val;
+
+        return $keyValue;
+    }
+
     // Does not handle InvalidDataException and AmbiguousValueException in stringToValue method here!
     // Throws InvalidDataException
     // Throws AmbiguousValueException
-    public function setValue($strValue, $type = null, $save = false) {
+    public function setValueFromRaw($strValue, $type = null, $save = false) {
         if(!isset($type)) {
             $type = Attribute::first($this->attribute_id)->datatype;
         }

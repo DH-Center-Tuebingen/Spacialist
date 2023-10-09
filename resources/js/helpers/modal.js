@@ -23,6 +23,7 @@ import {
     removeEntityTypeAttribute,
     patchEntityType,
     updateAttributeDependency,
+    multieditAttributes,
     updateAttributeMetadata,
     addRole,
     patchRoleData,
@@ -70,6 +71,7 @@ import DeleteEntityType from '@/components/modals/entitytype/Delete.vue';
 import RemoveAttribute from '@/components/modals/entitytype/RemoveAttribute.vue';
 import AddAttribute from '@/components/modals/attribute/Add.vue';
 import EditAttribute from '@/components/modals/attribute/Edit.vue';
+import MultiEditAttribute from '@/components/modals/attribute/MultiEdit.vue';
 import EditSystemAttribute from '@/components/modals/attribute/EditSystem.vue';
 import DeleteAttribute from '@/components/modals/attribute/Delete.vue';
 
@@ -573,7 +575,7 @@ export function showLiteratureInfo(id, options) {
     modal.open();
 }
 
-export function ShowAddEntity(parent = null, onAdded) {
+export function showAddEntity(parent = null, onAdded) {
     const uid = `AddEntity-${getTs()}`;
     const modal = useModal({
         component: AddEntity,
@@ -755,6 +757,46 @@ export function showEditAttribute(aid, etid, metadata) {
     modal.open();
 }
 
+export function showMultiEditAttribute(entityIds, attributes) {
+    const uid = `MultiEditAttribute-${getTs()}`;
+    const modal = useModal({
+        component: MultiEditAttribute,
+        attrs: {
+            name: uid,
+            entityIds: entityIds,
+            attributes: attributes,
+            onClosing(e) {
+                modal.destroy();
+            },
+            onConfirm(e) {
+                const values = e.values;
+                const entries = [];
+                for(let v in values) {
+                    const aid = v;
+                    const entry = {
+                        value: values[aid],
+                        attribute_id: aid,
+                    };
+                    entries.push(entry);
+                }
+                multieditAttributes(entityIds, entries).then(_ => {
+                    store.dispatch("unsetTreeSelectionMode");
+                    modal.destroy();
+                    const title = t('main.entity.tree.multiedit.toast.saved.title');
+                    const msg = t('main.entity.tree.multiedit.toast.saved.msg', {
+                        attr_cnt: entries.length,
+                        ent_cnt: entityIds.length,
+                    });
+                    addToast(msg, title, {
+                        channel: 'success',
+                    });
+                });
+            }
+        },
+    });
+    modal.open();
+}
+
 export function showRemoveAttribute(etid, aid, id, metadata, onDeleted) {
     const uid = `RemoveAttribute-${getTs()}`;
     const modal = useModal({
@@ -817,7 +859,7 @@ export function showDeleteAttribute(attribute, metadata, onDeleted) {
             onClosing(e) {
                 modal.destroy();
             },
-            onConfirm(e) {
+            onConfirm(e) {vapor
                 deleteAttribute(attribute.id).then(_ => {
                     if(!!onDeleted) {
                         onDeleted();
