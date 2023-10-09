@@ -295,7 +295,7 @@ export const store = createStore({
                 updateUser(state, data) {
                     const index = state.users.findIndex(u => u.id == data.id);
                     if(index > -1) {
-                        const cleanData = only(data, ['email', 'roles', 'updated_at', 'deleted_at',]);
+                        const cleanData = only(data, ['email', 'roles', 'updated_at', 'deleted_at', 'login_attempts',]);
                         const currentData = state.users[index];
                         state.users[index] = {
                             ...currentData,

@@ -115,8 +115,13 @@
     import {
         initApp,
         getErrorMessages,
-        getValidClass
+        getValidClass,
+        getUser,
     } from '@/helpers/helpers.js';
+
+    import {
+        showConfirmPassword,
+    } from '@/helpers/modal.js';
 
     export default {
         setup() {
@@ -155,6 +160,10 @@
                 })
                 .then(_ => {
                     state.error = {};
+                    const currUser = getUser();
+                    if(currUser.login_attempts > 0 || currUser.login_attempts === 0) {
+                        showConfirmPassword(currUser.id);
+                    }
                 });
             };
 

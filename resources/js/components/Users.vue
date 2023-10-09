@@ -296,13 +296,13 @@
 
     import {
         reactivateUser as reactivateUserApi,
-        sendResetPasswordMail,
         patchUserData,
     } from '@/api.js';
 
     import {
         showDiscard,
         showAddUser,
+        showResetPassword,
         showDeactivateUser,
         showUserInfo,
     } from '@/helpers/modal.js';
@@ -313,6 +313,7 @@
         getErrorMessages,
         getUserBy,
         hasPreference,
+        userId,
     } from '@/helpers/helpers.js';
     
     import {
@@ -464,9 +465,10 @@
                     store.dispatch('reactivateUser', id);
                 });
             };
-            const updatePassword = email => {
-                if(!can('users_roles_write')) return;
-                sendResetPasswordMail(email);
+            const updatePassword = uid => {
+                if(state.currentUserId != uid && !can('users_roles_write')) return;
+
+                showResetPassword(uid);
             };
             const anyUserDirty = _ => {
                 let isDirty = false;
@@ -513,6 +515,7 @@
             // DATA
             const state = reactive({
                 setupFinished: false,
+                currentUserId: userId(),
                 userList: computed(_ => store.getters.users),
                 validatedUserList: computed(_ => {
                     return state.userList.filter(u => {
