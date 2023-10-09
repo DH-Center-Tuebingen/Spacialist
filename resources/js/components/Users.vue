@@ -140,14 +140,8 @@
                                     >
                                         <i class="fas fa-fw fa-undo text-warning" /> {{ t('global.reset') }}
                                     </a>
-                                    <a
-                                        v-if="hasPreference('prefs.enable-password-reset-link')"
-                                        class="dropdown-item"
-                                        href="#"
-                                        :disabled="state.currentUserId != user.id && !can('users_roles_write')"
-                                        @click.prevent="updatePassword(user.email)"
-                                    >
-                                        <i class="fas fa-fw fa-paper-plane text-info" /> {{ t('global.send_reset_mail') }}
+                                    <a class="dropdown-item" href="#" :disabled="state.currentUserId != user.id && !can('users_roles_write')" @click.prevent="updatePassword(user.id)">
+                                        <i class="fas fa-fw fa-paper-plane text-info"></i> {{ t('global.reset_password') }}
                                     </a>
                                     <a
                                         class="dropdown-item"
