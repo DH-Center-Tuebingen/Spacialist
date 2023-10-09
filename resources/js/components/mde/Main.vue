@@ -28,7 +28,6 @@
     import { math } from '@milkdown/plugin-math';
     import {
         emojiAttr,
-        emojiConfig,
         remarkEmojiPlugin,
         emojiSchema,
     } from '@milkdown/plugin-emoji';
@@ -61,7 +60,6 @@
             // DATA
             const emojiPlugin = [
                 emojiAttr,
-                emojiConfig,
                 remarkEmojiPlugin,
                 emojiSchema,
             ].flat()
