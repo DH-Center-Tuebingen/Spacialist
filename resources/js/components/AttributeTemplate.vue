@@ -8,6 +8,7 @@
                 <simple-search
                     :endpoint="searchLabel"
                     :key-fn="getConceptLabel"
+                    :default-value="state.searchResetValue"
                     @selected="e => labelSelected(e, 'label')" />
             </div>
         </div>
@@ -124,6 +125,7 @@
     import {
         translateConcept,
         getConceptLabel,
+        getTs,
     } from '@/helpers/helpers.js';
 
     export default {
@@ -162,6 +164,10 @@
                 state.attribute.rootAttributeLabel = null;
                 state.attribute.differRoot = false;
                 state.attribute.textContent = '';
+                state.searchResetValue = {
+                    reset: true,
+                    ts: getTs(),
+                };
             };
             const create = _ => {
                 if(!state.attribute.differRoot) {
@@ -223,6 +229,7 @@
                     differRoot: false,
                     textContent: '',
                 },
+                searchResetValue: null,
                 formId: external.value || 'create-attribute-form',
                 attributeTypes: types,
                 label: computed(_ => {

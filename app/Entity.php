@@ -285,6 +285,7 @@ class Entity extends Model implements Searchable
                 $query->whereJsonContains('json_val', $this->id)
                     ->whereIn('attribute_id', $entityMcAttributes);
             })
+            ->with('attribute')
             ->get();
         $entities = [];
         foreach($links as $link) {
@@ -293,6 +294,8 @@ class Entity extends Model implements Searchable
                 'id' => $entity->id,
                 'name' => $entity->name,
                 'entity_type_id' => $entity->entity_type_id,
+                'attribute_url' => $link->attribute->thesaurus_url,
+                'path' => array_reverse($entity->parentNames),
             ];
         }
         return $entities;

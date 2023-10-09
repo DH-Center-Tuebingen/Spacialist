@@ -8,6 +8,7 @@
         :disabled="disabled"
         :options="selections"
         :name="name"
+        :closeOnSelect="false"
         :placeholder="t('global.select.placeholder')"
         v-model="v.value"
         @change="value => v.handleChange(value)">

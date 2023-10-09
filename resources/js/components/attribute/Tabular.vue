@@ -180,16 +180,16 @@
                         </button>
                     </td>
                 </tr>
-                <tr class="border-0">
+                <tr class="border-0" v-if="!state.isPreview">
                     <td v-for="(column, i) in state.columns" :key="i">
                         <form class="d-flex flex-column" v-if="state.chartShown">
-                            <div class="form-check" v-show="column.datatype == 'integer'">
+                            <div class="form-check" v-show="['integer', 'double'].includes(column.datatype)">
                                 <input class="form-check-input" type="checkbox" :id="`include-cb-${column.id}`" v-model="state.chartSet[column.id]" @change="updateChart()" />
                                 <label class="form-check-label" :for="`include-cb-${column.id}`">
                                     {{ t('main.entity.attributes.table.chart.include_in') }}
                                 </label>
                             </div>
-                            <div class="form-check" v-show="column.datatype == 'integer'">
+                            <div class="form-check" v-show="['integer', 'double'].includes(column.datatype)">
                                 <input class="form-check-input" type="checkbox" :id="`difference-cb-${column.id}`" v-model="state.chartAcc[column.id]" @change="updateChart()" />
                                 <label class="form-check-label" :for="`difference-cb-${column.id}`">
                                     {{ t('main.entity.attributes.table.chart.use_difference') }}
@@ -212,7 +212,7 @@
             </tbody>
         </table>
         <div v-show="state.chartShown">
-            <div class="d-flex flex-row">
+            <div class="d-flex flex-row gap-2">
                 <input type="range" class="form-range" min="1" :max="value.length" step="1" v-model.number="state.chartSetLength" @change="updateChart()" />
                 <span>
                     {{ t('main.entity.attributes.table.chart.number_sets', {cnt: state.chartSetLength}) }}
@@ -239,14 +239,21 @@
 
     import {
         Chart,
+        Colors,
+        BarController,
+        CategoryScale,
         LinearScale,
-    } from 'chart.js';
+        BarElement,
+        Legend,
+        Tooltip,
+    } from 'chart.js'
 
     import { useI18n } from 'vue-i18n';
     import store from '@/bootstrap/store.js';
 
     import {
-      createDownloadLink,
+        createDownloadLink,
+        getTs,
         getAttribute,
         slugify,
         translateConcept,
@@ -292,6 +299,11 @@
             attribute: {
                 type: Object,
             },
+            previewColumns: {
+                required: false,
+                type: Object,
+                default: null,
+            },
         },
         components: {
             'string-attribute': StringAttr,
@@ -308,7 +320,15 @@
         setup(props, context) {
             const { t } = useI18n();
 
-            Chart.register(LinearScale);
+            Chart.register(
+                Colors,
+                BarController,
+                BarElement,
+                CategoryScale,
+                LinearScale,
+                Legend,
+                Tooltip,
+            );
 
             const {
                 name,
@@ -316,6 +336,7 @@
                 value,
                 selections,
                 attribute,
+                previewColumns,
             } = toRefs(props);
 
             // FETCH
@@ -453,6 +474,7 @@
                     const reference = newRowRefs.value[k];
                     if(!!reference.v.value) {
                         rowValue[k] = reference.v.value;
+                        state.newRowColumns[k] = null;
                         if(!!reference.resetFieldState) {
                             reference.resetFieldState();
                         }
@@ -505,10 +527,11 @@
                 initialValue: value.value,
             });
             const state = reactive({
-                columns: computed(_ => getAttribute(attribute.value.id).columns),
+                isPreview: computed(_ => previewColumns.value && Object.keys(previewColumns.value).length > 0),
+                columns: computed(_ => state.isPreview ? previewColumns.value : getAttribute(attribute.value.id).columns),
                 selections: computed(_ => {
                     const list = {};
-                    if(!state.columns) return list;
+                    if(!state.columns || state.isPreview) return list;
 
                     for(let k in state.columns) {
                         const curr = state.columns[k];
@@ -522,22 +545,22 @@
                 deletedRows: {},
                 expanded: false,
                 chartShown: false,
-                chartId: 'chart-container',
+                chartId: `chart-container-${attribute.value.id}-${getTs()}`,
                 chartCtx: null,
                 chartLabel: -1,
                 chartSet: {},
                 chartAcc: {},
                 chartSetLength: Math.min(7, value.value.length),
                 chartData: computed(_ => {
-                    if(!state.chartShown) return;
-                    if(state.chartLabel === -1) return;
-                    let lastValues = value.value.slice(-(state.chartSetLength+1));
-                    let datasets = [];
-                    for(let i=1; i<lastValues.length; i++) {
+                    if(!state.chartShown) return {labels: [], datasets: []};
+                    if(state.chartLabel === -1) return {labels: [], datasets: []};
+                    const lastValues = value.value.slice(-state.chartSetLength);
+                    const datasets = [];
+                    for(let i=0; i<lastValues.length; i++) {
                         let j = 0;
                         for(let k in state.chartSet) {
                             if(!state.chartSet[k]) continue;
-                            const label = attribute.value.columns[k];
+                            const label = state.columns[k];
                             if(!datasets[j]) {
                                 datasets[j] = {
                                     data: [],
@@ -547,7 +570,7 @@
                             }
                             let value;
                             if(state.chartAcc[k]) {
-                                value = lastValues[i][k] - lastValues[i-1][k];
+                                value = i > 0 ? lastValues[i][k] - lastValues[i-1][k] : lastValues[i][k];
                             } else {
                                 value = lastValues[i][k];
                             }
@@ -555,7 +578,17 @@
                             j++;
                         }
                     }
-                    const labels = lastValues.slice(1).map(v => v[state.chartLabel]);
+                    const labels = lastValues.map(v => {
+                        let lbl = v[state.chartLabel];
+                        if(typeof lbl == 'object') {
+                            if(!!lbl.concept_url) {
+                                lbl = translateConcept(lbl.concept_url);
+                            } else {
+                                lbl = 'TODO: Handle Object in Label!';
+                            }
+                        }
+                        return lbl;
+                    });
                     return {
                         labels: labels,
                         datasets: datasets

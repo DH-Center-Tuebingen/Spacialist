@@ -37,7 +37,7 @@
                                     </span>
                                 </h6>
                                 <p class="card-text border-start border-warning border-4 ps-2">
-                                    <vue3-markdown-it :source="plugin.metadata.description" />
+                                    <md-viewer :source="plugin.metadata.description" />
                                 </p>
                             </div>
                             <div class="border-start ps-2">
@@ -60,10 +60,15 @@
                                 <i class="fas fa-fw fa-plus"></i>
                                 {{ t('main.plugins.activate') }}
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-primary ms-2" v-if="updateAvailable(plugin)" @click="update(plugin)">
-                                <i class="fas fa-fw fa-download"></i>
-                                <span v-html="t('main.plugins.update_to', {version: plugin.update_available})"/>
-                            </button>
+                            <div class="btn-group" role="group" v-if="updateAvailable(plugin)">
+                                <button type="button" class="btn btn-sm btn-outline-primary ms-2" @click="update(plugin)">
+                                    <i class="fas fa-fw fa-download"></i>
+                                    <span v-html="t('main.plugins.update_to', {version: plugin.update_available})"/>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" :title="t('main.plugins.changelog_info')" @click="showChangelog(plugin)">
+                                    <i class="fas fa-fw fa-file-pen"></i>
+                                </button>
+                            </div>
                             <button type="button" class="btn btn-sm btn-outline-danger ms-2" @click="remove(plugin)">
                                 <i class="fas fa-fw fa-trash"></i>
                                 {{ t('main.plugins.remove') }}
@@ -72,6 +77,11 @@
                     </div>
                 </div>
             </div>
+            <alert v-if="(!state.sortedPlugins || state.sortedPlugins.length == 0)"
+                :message="t('main.plugins.not_found')"
+                :type="'info'"
+                :noicon="false"
+            />
         </div>
     </div>
 </template>
@@ -84,6 +94,8 @@
 
     import { useI18n } from 'vue-i18n';
     import store from '@/bootstrap/store.js';
+
+    import { useToast } from '@/plugins/toast.js';
 
     import {
         uploadPlugin,
@@ -98,6 +110,10 @@
     } from '@/helpers/helpers.js';
 
     import {
+        showChangelogModal,
+    } from '@/helpers/modal.js';
+
+    import {
         appendScript,
         removeScript,
     } from '@/helpers/plugins.js';
@@ -105,6 +121,7 @@
     export default {
         setup(props) {
             const { t } = useI18n();
+            const toast = useToast();
 
             // FUNCTIONS
             const isInstalled = plugin => {
@@ -112,6 +129,9 @@
             };
             const updateAvailable = plugin => {
                 return !!plugin.update_available;
+            };
+            const showChangelog = plugin => {
+                showChangelogModal(plugin);
             };
             const install = plugin => {
                 installPlugin(plugin.id).then(data => {
@@ -124,7 +144,19 @@
                 });
             };
             const update = plugin => {
-                updatePlugin(plugin.id);
+                const vo = plugin.version;
+                updatePlugin(plugin.id).then(_ => {
+                    const label = t('main.plugins.toasts.update.message', {
+                        name: plugin.metadata.title,
+                        vo: vo,
+                        v: plugin.version,
+                    });
+                    const title = t('main.plugins.toasts.update.title');
+                    toast.$toast(label, title, {
+                        channel: 'success',
+                        duration: 10000,
+                    });
+                });
             };
             const remove = plugin => {
                 removePlugin(plugin.id).then(data => {
@@ -163,6 +195,7 @@
                 // LOCAL
                 isInstalled,
                 updateAvailable,
+                showChangelog,
                 install,
                 uninstall,
                 update,

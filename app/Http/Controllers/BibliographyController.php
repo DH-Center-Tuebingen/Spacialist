@@ -142,7 +142,7 @@ class BibliographyController extends Controller
             ], 400);
         }
         $entries = $listener->export();
-        $newEntries = [];
+        $newChangedEntries = [];
         foreach($entries as $entry) {
             $insArray = array_intersect_key($entry, Bibliography::patchRules);
             // set citation key if none is present
@@ -157,10 +157,18 @@ class BibliographyController extends Controller
                 $insArray
             );
             if($bibliography->wasRecentlyCreated) {
-                $newEntries[] = Bibliography::find($bibliography->id);
+                $newChangedEntries[] = [
+                    'entry' => Bibliography::find($bibliography->id),
+                    'added' => true,
+                ];
+            } else if($bibliography->wasChanged()) {
+                $newChangedEntries[] = [
+                    'entry' => Bibliography::find($bibliography->id),
+                    'added' => false,
+                ];
             }
         }
-        return response()->json($newEntries, 201);
+        return response()->json($newChangedEntries, 201);
     }
 
     // PATCH
@@ -175,6 +183,7 @@ class BibliographyController extends Controller
         $this->validate($request, [
             'type' => 'alpha|bibtex_type',
             'file' => 'file',
+            'delete_file' => 'boolean_string',
         ]);
 
         try {
@@ -186,7 +195,7 @@ class BibliographyController extends Controller
         }
         $file = $request->file('file');
 
-        $success = $bib->fieldsFromRequest($request->except('file'), $user);
+        $success = $bib->fieldsFromRequest($request->except(['file', 'delete_file']), $user);
         if(!$success) {
             return response()->json([
                 'error' => __('At least one required field is not set')
@@ -196,6 +205,8 @@ class BibliographyController extends Controller
             $bib->file = $bib->uploadFile($file);
             $bib->user_id = $user->id;
             $bib->save();
+        } else if($request->has('delete_file') && sp_parse_boolean($request->get('delete_file'))) {
+            $bib->deleteFile();
         }
         $bib = Bibliography::find($bib->id);
 
@@ -219,6 +230,7 @@ class BibliographyController extends Controller
             ], 400);
         }
 
+        $bib->deleteFile();
         $bib->delete();
 
         return response()->json(null, 204);
@@ -240,9 +252,7 @@ class BibliographyController extends Controller
             ], 400);
         }
 
-        Storage::delete($item->file);
-        $item->file = null;
-        $item->save();
+        $item->deleteFile();
         return response()->json(null, 204);
     }
 }

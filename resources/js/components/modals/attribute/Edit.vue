@@ -16,6 +16,9 @@
                 </button>
             </div>
             <div class="modal-body nonscrollable">
+                <h5 class="text-center">
+                    {{ t('global.dependency') }}
+                </h5>
                 <div class="mb-3 row">
                     <label class="col-form-label text-end col-md-2">
                         {{ t('global.label') }}:
@@ -32,7 +35,7 @@
                         <input type="text" class="form-control" :value="t(`global.attributes.${state.attribute.datatype}`)" disabled />
                     </div>
                 </div>
-                <div class="row">
+                <div class="mb-3 row">
                     <label class="col-form-label col-md-2">
                         {{ t('global.depends_on') }}:
                     </label>
@@ -104,6 +107,17 @@
                         </div>
                     </div>
                 </div>
+                <hr/>
+                <div class="row">
+                    <h5 class="text-center">
+                        {{ t('global.width') }}
+                    </h5>
+                    <div class="d-flex justify-content-between">
+                        <span>50%</span>
+                        <span>100%</span>
+                    </div>
+                    <input type="range" class="form-range px-3" id="attribute-width-slider" v-model.number="state.width" min="50" max="100" step="50" />
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="submit" class="btn btn-outline-success" :disabled="!state.isValid" @click="confirmEdit()">
@@ -130,6 +144,7 @@
 
     import {
         getAttribute,
+        getEntityTypeAttribute,
         getEntityTypeDependencies,
         translateConcept,
         multiselectResetClasslist,
@@ -160,8 +175,55 @@
             } = toRefs(props);
 
             // FUNCTIONS
+            const convertDependencyObject = dep => {
+                const converted = {
+                    attribute: null,
+                    operator: null,
+                    value: null,
+                };
+                const keys = Object.keys(dep);
+                if(keys.length != 1) {
+                    return converted;
+                }
+                const depId = keys[0];
+                const data = dep[depId];
+                converted.attribute = getAttribute(depId);
+                converted.operator = operators.find(o => o.label == data.operator);
+                converted.value = data.value;
+                return converted;
+            };
             const confirmEdit = _ => {
-                context.emit('confirm', state.dependency);
+                const data = {};
+
+                const oldDep = convertDependencyObject(state.activeDependency);
+                const currDep = state.dependency;
+                // simple check if there was a change from no dep -> dep or vice versa
+                if(
+                    (oldDep.attribute && !currDep.attribute) ||
+                    (!oldDep.attribute && currDep.attribute)
+                ) {
+                    data.dependency = state.dependency;
+                } else if(oldDep.attribute && currDep.dependency) {
+                    // or else check if dep is set, but has different values
+                    if(
+                        oldDep.attribute.id != currDep.attribute.id ||
+                        oldDep.operator.id != currDep.operator.id ||
+                        oldDep.value != currDep.value
+                    ) {
+                        data.dependency = state.dependency;
+                    }
+                }
+
+                // Check for changes in width metadata
+                if(state.attribute.pivot &&
+                    (!state.attribute.pivot.metadata || state.width != state.attribute.pivot.metadata.width)
+                ) {
+                    data.metadata = {
+                        width: state.width,
+                    };
+                }
+
+                context.emit('confirm', data);
             };
             const closeModal = _ => {
                 context.emit('closing', false);
@@ -169,6 +231,40 @@
             const dependantSelected = e => {
             };
             const operatorSelected = e => {
+            };
+            const getInputTypeClass = datatype => {
+                switch(datatype) {
+                        case 'string':
+                        case 'stringf':
+                        case 'geography':
+                        case 'iconclass':
+                        case 'rism':
+                        case 'serial':
+                            return 'text';
+                        case 'double':
+                        case 'integer':
+                        case 'percentage':
+                            return 'number';
+                        case 'boolean':
+                            return 'boolean';
+                        case 'date':
+                            return 'date';
+                        case 'string-sc':
+                        case 'string-mc':
+                            return 'select';
+                        // TODO handle entity attributes
+                        case 'entity':
+                        case 'entity-mc':
+                            // return 'entity';
+                        case 'epoch':
+                        case 'timeperiod':
+                        case 'dimension':
+                        case 'list':
+                        case 'table':
+                        case 'sql':
+                        default:
+                            return 'unsupported';
+                    }
             };
 
             // DATA
@@ -196,6 +292,7 @@
                     operator: null,
                     value: null,
                 },
+                width: 100,
                 dependantOptions: computed(_ => {
                     if(state.attributeSelected && state.operatorSelected && state.inputType == 'select') {
                         return store.getters.attributeSelections[state.dependency.attribute.id];
@@ -214,21 +311,24 @@
                     if(!state.attributeSelected) return [];
 
                     switch(state.dependency.attribute.datatype) {
-                        case 'string':
-                        case 'stringf':
-                        case 'string-sc':
-                        case 'string-mc':
-                        case 'geography':
-                        case 'entity':
-                        case 'entity-mc':
-                        case 'iconclass':
-                        case 'rism':
                         case 'epoch':
                         case 'timeperiod':
                         case 'dimension':
                         case 'list':
                         case 'table':
                         case 'sql':
+                            return [];
+                        // TODO handle entity attributes
+                        case 'entity':
+                        case 'entity-mc':
+                            return [];
+                        case 'string':
+                        case 'stringf':
+                        case 'string-sc':
+                        case 'string-mc':
+                        case 'geography':
+                        case 'iconclass':
+                        case 'rism':
                         case 'serial':
                             return operators.filter(o => {
                                 switch(o.id) {
@@ -268,42 +368,13 @@
                 inputType: computed(_ => {
                     if(!state.attributeSelected || !state.operatorSelected) return 'unsupported';
 
-                    switch(state.dependency.attribute.datatype) {
-                        case 'string':
-                        case 'stringf':
-                        case 'geography':
-                        case 'iconclass':
-                        case 'rism':
-                        case 'serial':
-                            return 'text';
-                        case 'double':
-                        case 'integer':
-                        case 'percentage':
-                            return 'number';
-                        case 'boolean':
-                            return 'boolean';
-                        case 'date':
-                            return 'date';
-                        case 'string-sc':
-                        case 'string-mc':
-                        case 'entity':
-                        case 'entity-mc':
-                            return 'select';
-                        case 'epoch':
-                        case 'timeperiod':
-                        case 'dimension':
-                        case 'list':
-                        case 'table':
-                        case 'sql':
-                        default:
-                            return 'unsupported';
-                    }
+                    return getInputTypeClass(state.dependency.attribute.datatype);
                 }),
-                attribute: computed(_ => getAttribute(attributeId.value)),
+                attribute: computed(_ => getEntityTypeAttribute(entityTypeId.value, attributeId.value)),
                 activeDependency: computed(_ => getEntityTypeDependencies(entityTypeId.value, attributeId.value)),
                 selection: computed(_ => {
                     return attributeSelection.value.filter(a => {
-                        return a.id != attributeId.value;
+                        return a.id != attributeId.value && getInputTypeClass(a.datatype) != 'unsupported';
                     });
                 }),
                 attributeSelected: computed(_ => state.dependency.attribute && state.dependency.attribute.id),
@@ -313,12 +384,10 @@
             // ON MOUNTED
             onMounted(_ => {
                 if(!!state.activeDependency) {
-                    for(let k in state.activeDependency) {
-                        const dep = state.activeDependency[k];
-                        state.dependency.attribute = getAttribute(k);
-                        state.dependency.operator = operators.find(o => o.label == dep.operator);
-                        state.dependency.value = dep.value;
-                    }
+                    state.dependency = convertDependencyObject(state.activeDependency);
+                }
+                if(state.attribute.pivot && state.attribute.pivot.metadata) {
+                    state.width = state.attribute.pivot.metadata.width || 100;
                 }
             });
 

@@ -48,11 +48,15 @@ class Plugin extends Model
         return $name;
     }
 
-    public static function getInfo($path) {
-        $infoPath = Str::finish($path, '/') . 'App/info.xml';
-        if(!File::isFile($infoPath)) return false;
+    public static function getInfo($path, $isString = false) {
+        if(!$isString) {
+            $infoPath = Str::finish($path, '/') . 'App/info.xml';
+            if(!File::isFile($infoPath)) return false;
+            $xmlString = file_get_contents($infoPath);
+        } else {
+            $xmlString = $path;
+        }
 
-        $xmlString = file_get_contents($infoPath);
         $xmlObject = simplexml_load_string($xmlString);
         
         return json_decode(json_encode($xmlObject), true);
@@ -74,6 +78,16 @@ class Plugin extends Model
         } else {
             return [];
         }
+    }
+
+    public function getChangelog($since = null) {
+        $changelog = Str::finish(base_path("app/Plugins/$this->name"), '/') . 'CHANGELOG.md';
+        if(!File::isFile($changelog)) return '';
+        $changes = file_get_contents($changelog);
+        // if(isset($since)) {
+
+        // }
+        return $changes;
     }
 
     public static function updateOrCreateFromInfo(array $info) : Plugin {
@@ -169,6 +183,12 @@ class Plugin extends Model
     public function handleUpdate() {
         // TODO is it really the same as install?
         $this->handleInstallation();
+
+
+        $info = self::getInfo(base_path("app/Plugins/$this->name"));
+        $this->update_available = null;
+        $this->version = $info['version'];
+        $this->save();
     }
 
     public function handleUninstall() {

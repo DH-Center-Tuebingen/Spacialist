@@ -101,10 +101,11 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::patch('/dm/entity_type/{etid}', 'EditorController@patchEntityType')->where('etid', '[0-9]+');
     Route::patch('/dm/entity_type/{ctid}/attribute/{aid}/position', 'EditorController@reorderAttribute')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
     Route::patch('/dm/entity_type/{etid}/attribute/{aid}/dependency', 'EditorController@patchDependency')->where('etid', '[0-9]+')->where('aid', '[0-9]+');
+    Route::patch('/dm/entity_type/attribute/system/{id}', 'EditorController@patchSystemAttribute')->where('id', '[0-9]+');
 
     Route::delete('/dm/entity_type/{id}', 'EditorController@deleteEntityType')->where('id', '[0-9]+');
     Route::delete('/dm/attribute/{id}', 'EditorController@deleteAttribute')->where('id', '[0-9]+');
-    Route::delete('/dm/entity_type/{etid}/attribute/{aid}', 'EditorController@removeAttributeFromEntityType')->where('etid', '[0-9]+')->where('aid', '[0-9]+');
+    Route::delete('/dm/entity_type/attribute/{id}', 'EditorController@removeAttributeFromEntityType')->where('id', '[0-9]+');
 });
 
 // USER
@@ -119,13 +120,14 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 
     Route::post('/user', 'UserController@addUser');
     Route::post('/user/avatar', 'UserController@addAvatar')->where('id', '[0-9]+');
-    Route::post('/user/reset/password', 'Auth\\ForgotPasswordController@sendResetLinkEmail');
     Route::post('/role', 'UserController@addRole');
     Route::post('/auth/logout', 'UserController@logout');
 
     Route::patch('/user/{id}', 'UserController@patchUser');
     Route::patch('/user/restore/{id}', 'UserController@restoreUser');
     Route::patch('/role/{id}', 'UserController@patchRole');
+    Route::patch('/user/{id}/password/reset', 'UserController@resetPassword')->where('id', '[0-9]+');
+    Route::patch('/user/{id}/password/confirm', 'UserController@confirmPassword')->where('id', '[0-9]+');
 
     Route::delete('/user/{id}', 'UserController@deleteUser')->where('id', '[0-9]+');
     Route::delete('/role/{id}', 'UserController@deleteRole')->where('id', '[0-9]+');

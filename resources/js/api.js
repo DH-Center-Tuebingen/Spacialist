@@ -54,13 +54,14 @@ export async function installPlugin(id) {
 
 export async function updatePlugin(id) {
     return $httpQueue.add(
-        () => http.delete(`/plugin/${id}`).then(response => {
+        () => http.patch(`/plugin/${id}`).then(response => {
             store.dispatch('updatePlugin', {
                 plugin_id: id,
-                uninstalled: true,
                 properties: {
                     installed_at: response.data.installed_at,
                     updated_at: response.data.updated_at,
+                    version: response.data.version,
+                    update_available: false,
                 },
             });
         })
@@ -74,8 +75,8 @@ export async function uninstallPlugin(id) {
                 plugin_id: id,
                 uninstalled: true,
                 properties: {
-                    installed_at: response.data.installed_at,
-                    updated_at: response.data.updated_at,
+                    installed_at: null,
+                    updated_at: response.data.plugin.updated_at,
                 },
             });
             return response.data;
@@ -335,12 +336,19 @@ export async function addRole(role) {
     );
 };
 
-export async function sendResetPasswordMail(email) {
+export async function resetUserPassword(uid, password) {
     const data = {
-        email: email,
+        password: password,
     };
     return $httpQueue.add(
-        () => http.post(`user/reset/password`, data).then(response => response.data)
+        () => http.patch(`user/${uid}/password/reset`, data).then(response => response.data)
+    );
+};
+
+export async function confirmUserPassword(uid, password = null) {
+    const data = !!password ? {password: password} : {};
+    return $httpQueue.add(
+        () => http.patch(`user/${uid}/password/confirm`, data).then(response => response.data)
     );
 };
 
@@ -530,7 +538,7 @@ export async function addEntityTypeAttribute(etid, aid, to) {
             const relation = response.data.attribute;
             delete response.data.attribute;
 
-            store.dispatch('addEntityTypeAttribute', {
+            const data = {
                 ...response.data,
                 id: relation.id,
                 entity_attribute_id: response.data.id,
@@ -542,12 +550,17 @@ export async function addEntityTypeAttribute(etid, aid, to) {
                 root_attribute_id: relation.root_attribute_id,
                 recursive: relation.recursive,
                 pivot: {
+                    id: response.data.id,
                     entity_type_id: response.data.entity_type_id,
                     attribute_id: response.data.attribute_id,
                     position: response.data.position,
                     depends_on: response.data.depends_on,
+                    metadata: response.data.metadata,
                 },
-            });
+            };
+
+            store.dispatch('addEntityTypeAttribute', data);
+            return new Promise(r => r(data));
         })
     );
 };
@@ -741,6 +754,20 @@ export async function updateAttributeDependency(etid, aid, dependency) {
     );
 };
 
+export async function updateAttributeMetadata(etid, aid, pivid, data) {
+    return $httpQueue.add(
+        () => http.patch(`/editor/dm/entity_type/attribute/system/${pivid}`, data).then(response => {
+            store.dispatch('updateAttributeMetadata', {
+                entity_type_id: etid,
+                attribute_id: aid,
+                id: pivid,
+                data: response.data,
+            });
+            return response.data;
+        })
+    );
+};
+
 export async function patchPreferences(data, uid) {
     const endpoint = !!uid ? `preference/${uid}` : 'preference';
     return await http.patch(endpoint, data).then(response => response.data);
@@ -820,9 +847,9 @@ export async function deleteEntityType(etid) {
     );
 };
 
-export async function removeEntityTypeAttribute(etid, aid) {
+export async function removeEntityTypeAttribute(id) {
     return $httpQueue.add(
-        () => http.delete(`/editor/dm/entity_type/${etid}/attribute/${aid}`).then(response => response.data)
+        () => http.delete(`/editor/dm/entity_type/attribute/${id}`).then(response => response.data)
     );
 };
 
