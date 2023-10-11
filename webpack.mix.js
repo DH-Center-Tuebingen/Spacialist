@@ -20,6 +20,7 @@ const path = require('path');
  */
 
 const appPath = process.env.MIX_APP_PATH;
+const appName = process.env.APP_NAME;
 
 /*
  |--------------------------------------------------------------------------
@@ -73,21 +74,23 @@ mix.js('resources/js/app.js', 'public/js').vue()
             output: {
                 publicPath: '/' + appPath
             },
-            plugins: [
-                new webpack.ProvidePlugin({
-                    process: 'process/browser',
-                    Buffer: ['buffer', 'Buffer']
-                })
-                //        new webpack.ProvidePlugin({
-                //            videojs: 'video.js/dist/video.cjs.js',
-                //            RecordRTC: 'recordrtc',
-                //            MediaStreamRecorder: ['recordrtc', 'MediaStreamRecorder']
-                //        })
-            ]
-        }
-    })
-    .extract();
-if (`public/${appPath}fonts` !== 'public/fonts') {
+           plugins: [
+               new webpack.ProvidePlugin({
+                    process : 'process/browser',
+                }),
+                new webpack.DefinePlugin({
+                    __APPNAME__: `'${appName}'`,
+                }),
+        //        new webpack.ProvidePlugin({
+        //            videojs: 'video.js/dist/video.cjs.js',
+        //            RecordRTC: 'recordrtc',
+        //            MediaStreamRecorder: ['recordrtc', 'MediaStreamRecorder']
+        //        })
+           ]
+       }
+   })
+   .extract();
+if(`public/${appPath}fonts` !== 'public/fonts') {
     mix.copyDirectory(`public/${appPath}fonts`, 'public/fonts');
 }
 mix.alias({
