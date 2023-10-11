@@ -20,6 +20,7 @@ const path = require('path');
  */
 
 const appPath = process.env.MIX_APP_PATH;
+const appName = process.env.APP_NAME;
 
 /*
  |--------------------------------------------------------------------------
@@ -76,8 +77,10 @@ mix.js('resources/js/app.js', 'public/js').vue()
            plugins: [
                new webpack.ProvidePlugin({
                     process : 'process/browser',
-                    Buffer  : ['buffer', 'Buffer']
-                })
+                }),
+                new webpack.DefinePlugin({
+                    __APPNAME__: `'${appName}'`,
+                }),
         //        new webpack.ProvidePlugin({
         //            videojs: 'video.js/dist/video.cjs.js',
         //            RecordRTC: 'recordrtc',
