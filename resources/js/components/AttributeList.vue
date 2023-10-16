@@ -450,6 +450,10 @@
             };
             const isInModeration = aid => {
                 const attr = state.attributeValues[aid];
+                // system attributes have no attribute value and are not (yet) moderated
+                if(!attr) {
+                    return false;
+                }
                 return attr.moderation_state && attr.moderation_state.startsWith('pending');
             };
             const isDisabledInModeration = aid => {
