@@ -639,7 +639,7 @@
             };
             const convertEntityValue = (value, isMultiple) => {
                 let actValue = null;
-                if(value == '') {
+                if(value == '' || !value.value) {
                     if(isMultiple) {
                         actValue = {
                             value: [],
