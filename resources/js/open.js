@@ -20,7 +20,6 @@ window.$httpQueue = queue;
 import Multiselect from "@vueform/multiselect";
 import DatePicker from "vue-datepicker-next";
 import draggable from "vuedraggable";
-import Markdown from "vue3-markdown-it";
 
 // Components
 import App from '@/components/openaccess/App.vue';

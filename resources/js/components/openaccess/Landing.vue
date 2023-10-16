@@ -53,7 +53,7 @@
             </small>
         </h4>
         <p class="p-4 bg-primary bg-opacity-10 rounded-4 text-start rendered-markdown" v-if="state.prefLoaded" v-show="state.showDescription">
-            <vue3-markdown-it :source="state.maintainer.description" />
+            <md-viewer :source="state.maintainer.description" />
         </p>
     </div>
 </template>
