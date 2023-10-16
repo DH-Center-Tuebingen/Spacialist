@@ -21,6 +21,7 @@ const path = require('path');
  */
 
 const appPath = process.env.MIX_APP_PATH;
+const appName = process.env.APP_NAME;
 
 /*
  |--------------------------------------------------------------------------
@@ -34,8 +35,17 @@ const appPath = process.env.MIX_APP_PATH;
  */
 mix.js('resources/js/open.js', 'public/js/open').vue()
     .options({ runtimeChunkPath: 'js/open' })
-   .sourceMaps()
-   .extract();
+    .sourceMaps()
+    .webpackConfig(webpack => {
+        return {
+            plugins: [
+                new webpack.DefinePlugin({
+                    __APPNAME__: `'${appName}'`,
+                }),
+            ],
+        }
+    })
+    .extract();
 mix.alias({
     '@': path.join(__dirname, 'resources/js'),
     vue$: path.join(__dirname, 'node_modules/vue/dist/vue.esm-bundler.js')
