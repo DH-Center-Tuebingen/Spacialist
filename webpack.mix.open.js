@@ -34,10 +34,18 @@ const appName = process.env.APP_NAME;
  |
  */
 mix.js('resources/js/open.js', 'public/js/open').vue()
-    .options({ runtimeChunkPath: 'js/open' })
+    .options({
+        runtimeChunkPath: 'js/open',
+        fileLoaderDirs: {
+            fonts: appPath + 'fonts'
+        },
+    })
     .sourceMaps()
     .webpackConfig(webpack => {
         return {
+            output: {
+                publicPath: '/' + appPath
+            },
             plugins: [
                 new webpack.DefinePlugin({
                     __APPNAME__: `'${appName}'`,
@@ -46,6 +54,10 @@ mix.js('resources/js/open.js', 'public/js/open').vue()
         }
     })
     .extract();
+
+if(`public/${appPath}fonts` !== 'public/fonts') {
+    mix.copyDirectory(`public/${appPath}fonts`, 'public/fonts');
+}
 mix.alias({
     '@': path.join(__dirname, 'resources/js'),
     vue$: path.join(__dirname, 'node_modules/vue/dist/vue.esm-bundler.js')
