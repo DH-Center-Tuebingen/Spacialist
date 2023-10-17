@@ -106,8 +106,6 @@
                 t,
                 // HELPERS
                 translateConcept,
-                // PROPS
-                entityType,
                 // LOCAL
                 confirmDelete,
                 closeModal,
