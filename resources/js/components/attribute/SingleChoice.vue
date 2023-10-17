@@ -16,9 +16,9 @@
         <template #option="{ option }">
             {{ translateConcept(option.concept_url) }}
         </template>
-        <template #singlelabel="{ value }">
+        <template #singlelabel="{ value: singlelabelValue }">
             <div class="multiselect-single-label">
-                {{ translateConcept(value.concept_url) }}
+                {{ translateConcept(singlelabelValue.concept_url) }}
             </div>
         </template>
     </multiselect>

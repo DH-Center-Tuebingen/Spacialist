@@ -1,7 +1,7 @@
 <template>
     <div>
         <div
-            v-for="(data, field) in v.fields"
+            v-for="(fieldData, field) in v.fields"
             :key="field"
             class="row mb-3"
         >
@@ -17,15 +17,15 @@
             </label>
             <div class="col-md-9">
                 <input
-                    v-model="data.value"
+                    v-model="fieldData.value"
                     type="text"
                     class="form-control d-inline"
                     :name="`${field}`"
-                    :class="getClassByValidation(data.errors)"
-                    @input="data.handleChange"
+                    :class="getClassByValidation(fieldData.errors)"
+                    @input="fieldData.handleChange"
                 >
                 <a
-                    v-show="data.meta.dirty"
+                    v-show="fieldData.meta.dirty"
                     href="#"
                     class="text-muted ms--4-5"
                     tabindex="-1"
@@ -38,7 +38,7 @@
 
                 <div class="invalid-feedback">
                     <span
-                        v-for="(msg, i) in data.errors"
+                        v-for="(msg, i) in fieldData.errors"
                         :key="i"
                     >
                         {{ msg }}
