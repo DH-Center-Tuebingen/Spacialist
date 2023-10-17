@@ -14,6 +14,9 @@
         @change="value => v.handleChange(value)"
     >
         <template #option="{ option }">
+        @change="value => v.handleChange(value)"
+    >
+        <template #option="{ option }">
             {{ translateConcept(option.concept_url) }}
         </template>
         <template #tag="{ option, handleTagRemove, disabled }">

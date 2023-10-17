@@ -1,7 +1,9 @@
 <template>
     <multiselect
         v-model="v.value"
+        v-model="v.value"
         :classes="multiselectResetClasslist"
+        :value-prop="'id'"
         :value-prop="'id'"
         :label="'concept_url'"
         :track-by="'concept_url'"
@@ -11,6 +13,9 @@
         :options="selections"
         :name="name"
         :placeholder="t('global.select.placeholder')"
+        @change="value => v.handleChange(value)"
+    >
+        <template #option="{ option }">
         @change="value => v.handleChange(value)"
     >
         <template #option="{ option }">
