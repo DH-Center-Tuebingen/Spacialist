@@ -1,6 +1,13 @@
 <template>
-    <div @dragenter="onDragEnter" @dragleave="onDragLeave" :id="`tree-node-${data.id}`">
-        <input class="mx-1 form-check-input" type="checkbox" :disabled="state.isSelectionDisabled" :id="`tree-node-mes-${data.id}`" v-model="state.multieditSelected" v-show="state.isSelectionMode" @click.stop="addToMSList()" />
+    <div @dragenter="onDragEnter" @dragleave="onDragLeave" :id="`tree-node-${data.id}`" @click="e => addToMSList(e)">
+        <span v-show="state.isSelectionMode" class="mx-1">
+            <span v-show="state.multieditSelected" class="text-success">
+                <i class="fas fa-fw fa-circle-check"></i>
+            </span>
+            <span v-show="!state.multieditSelected">
+                <i class="far fa-fw fa-circle"></i>
+            </span>
+        </span>
         <a href="" :id="`tree-node-cm-toggle-${data.id}`" @click.prevent @contextmenu.stop.prevent="togglePopup()" class="text-body text-decoration-none disabled" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false">
             <span style="display: inline-block; text-align: center;" class="px-1">
                 <span v-if="data.children_count" class="badge rounded-pill" style="font-size: 9px;" :style="state.colorStyles" :title="data.children_count">
@@ -152,7 +159,11 @@
             const onDragLeave = _ => {
 
             };
-            const addToMSList = _ => {
+            const addToMSList = event => {
+                if(!state.isSelectionMode) return;
+
+                event.stopPropagation();
+                event.preventDefault();
                 state.multieditSelected = !state.multieditSelected;
                 if(state.multieditSelected) {
                     store.dispatch('addToTreeSelection', {
