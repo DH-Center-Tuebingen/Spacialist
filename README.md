@@ -17,12 +17,15 @@ Spacialist is a customizable Web-based platform for collecting, managing, analyz
 
 ## Installation
 
-Installation procedures and system requirements are described [here](INSTALL.md).
+Installation procedures and system requirements are described [here](docs/INSTALL.md).
 **Important!** Please read the installation file before any update for breaking changes or any other important steps that may **break the update**!
+
+For migrating an older version of spacialist, have a look at the [migration guide](docs/MIGRATION.md) .
+
 
 ## Plugins (Beta)
 
-Since Release _Isfahan_ Spacialist is extensible by plugins. If you are a developer and want to create your own plugin, please refer to this [HowTo Guide](PLUGINS.md).
+Since Release _Isfahan_ Spacialist is extensible by plugins. If you are a developer and want to create your own plugin, please refer to this [HowTo Guide](docs/PLUGINS.md).
 
 A list with all available plugins is **coming soon**.
 

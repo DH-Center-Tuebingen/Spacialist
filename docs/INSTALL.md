@@ -1,5 +1,9 @@
 # Installation
-We recommend a recent unix/linux-based OS. Please check if your desired OS meets the following requirements. If not, we recommend debian (9.5 aka _Stretch_ or later) or Ubuntu (18.04 LTS aka _Bionic Beaver_ or later). For Giza and later at least PHP 7.1.3 is required. Note: Installation on Windows 10 with PHP 5.6 was also successfully tested, but you will need to adjust the commands in these instructions by yourself to your local Windows version equivalents.
+We recommend a recent unix/linux-based OS. Please check if your desired OS meets the following requirements. If not, we recommend debian (9.5 aka _Stretch_ or later) or Ubuntu (18.04 LTS aka _Bionic Beaver_ or later). For Giza and later at least PHP 7.1.3 is required. Note: Installation on Windows 10 with PHP 5.6 was also successfully tested, but you will need to adjust the commands in these instructions by yourself to your local Windows version equivalents. 
+
+If you want to migrate from an older spacialist version, check out our [migration guide](./MIGRATION.md).
+
+
 
 ## Requirements
 The following packages you should be able to install from your package manager:
@@ -29,19 +33,6 @@ Beside these packages we use a couple of packages you have to install on your ow
 - Laravel (PHP-Framework), currently included in the Spacialist repository, so no need to install.
 - [GeoServer](http://geoserver.org/) for hosting your own geo maps
 
-## Migration from < 0.6 (Lumen- and Angular-based releases)
-There are no additional database migrations steps required. Laravel's migration command should take care of database changes. **But you must** update to the latest pre-0.6 release before switching to 0.6+.
-However, since we switched to a different code base, you have to get the new dependencies (see _Download Dependencies_ in [Package Installation](INSTALL.md#package-installation)).
-You should also check for changes in [Proxy Setup](INSTALL.md#proxy-setup) and [Configure Laravel](INSTALL.md#configure-laravel).
-After switching to the new branch/release, you should get rid of the old dependencies.
-**Before** downloading the new dependencies, you should do the following steps:
-1. Copy `.env` file from `lumen` folder to the root folder (`mv lumen/.env .env`)
-2. Remove entire `lumen` folder (`rm -rf lumen`)
-3. Remove `bower_components` (if coming from a very old version) and `node_modules` (`rm -rf bower_components node_modules`)
-
-## Migration from >= 0.6 and < 0.9 (Federsee, Giza, Helgö)
-Some parts of Spacialist (Map, Files) have been released as separate Plugin. Thus, migrations have changed and only migrating from scratch or from the latest pre-0.9-Release (Helgö) is supported.
-However, since we switched to a different code base, you have to get the new dependencies (see _Download Dependencies_ in [Package Installation](INSTALL.md#package-installation)).
 
 ## Setup
 ### Package Installation
@@ -72,61 +63,6 @@ However, since we switched to a different code base, you have to get the new dep
     cd Spacialist
     npm install
     composer install
-    ```
-
-### Proxy Setup
-Since Laravel has a sub-folder as document root `Spacialist/public`, it won't work to simply copy Laravel to your webserver's root directory.
-One solution is to setup a proxy on the same machine and re-route all requests from `/Spacialist` to Laravel's public folder (e.g. `/var/www/html/Spacialist/public`).
-
-1. Enable the webserver's proxy packages and the rewrite engine
-
-    ```bash
-    sudo a2enmod proxy proxy_http rewrite
-    ```
-
-2. Add a new entry to your hosts file, because your proxy needs a (imaginary) domain.
-
-    ```bash
-    sudo nano /etc/hosts
-    # Add an entry to "redirect" a domain to your local machine (localhost)
-    127.0.0.1 spacialist-laravel.tld # or anything you want
-    ```
-
-3. Add a new vHost file to your apache
-
-    ```bash
-    cd /etc/apache2/sites-available
-    sudo nano spacialist-laravel.conf
-    ```
-
-    Paste the following snippet into the file:
-    ```apache
-    <VirtualHost *:80>
-      ServerName spacialist-laravel.tld
-      ServerAdmin webmaster@localhost
-      DocumentRoot /var/www/html/Spacialist/public
-
-      DirectoryIndex index.php
-
-      <Directory "/var/www/html/Spacialist/public">
-        AllowOverride All
-        Require all granted
-      </Directory>
-    </VirtualHost>
-    ```
-
-4. Add the proxy route to your default vHost file (e.g. `/etc/apache2/sites-available/000-default.conf`)
-
-    ```apache
-    ProxyPass "/Spacialist" "http://spacialist-laravel.tld"
-    ProxyPassReverse "/Spacialist" "http://spacialist-laravel.tld"
-    ```
-
-5. Enable the new vHost file and restart the webserver
-
-    ```bash
-    sudo a2ensite spacialist-laravel.conf
-    sudo service apache2 restart
     ```
 
 ### Configure Laravel
@@ -218,7 +154,7 @@ php artisan db:seed --class=DemoSeeder
 ```
 
 Now you can login with:
-- **Email**: `admin@admin.com`
+- **Email**: `admin` or `admin@localhost` 
 - **Password**: `admin`
 
 **Important**: Since this is the same default password for all instances, we **strongly recommend** to change your password to something more secure. Even better is to create a new admin account with your actual email address and **delete** this default account.
@@ -291,3 +227,59 @@ Your server should now be ready. To check if it's running visit http://localhost
 2. Unzip the extension to the GeoServer's webapps lib folder `
 unzip ~/Downloads/geoserver-2.9.1-importer-plugin.zip -d /usr/share/geoserver/geoserver-2.9.1/webapps/geoserver/WEB-INF/lib
 ` (Overwrite the `commons-fileupload-1.2.1.jar` file)
+
+
+### Proxy Setup
+Since Laravel has a sub-folder as document root `Spacialist/public`, it won't work to simply copy Laravel to your webserver's root directory.
+One solution is to setup a proxy on the same machine and re-route all requests from `/Spacialist` to Laravel's public folder (e.g. `/var/www/html/Spacialist/public`).
+
+1. Enable the webserver's proxy packages and the rewrite engine
+
+    ```bash
+    sudo a2enmod proxy proxy_http rewrite
+    ```
+
+2. Add a new entry to your hosts file, because your proxy needs a (imaginary) domain.
+
+    ```bash
+    sudo nano /etc/hosts
+    # Add an entry to "redirect" a domain to your local machine (localhost)
+    127.0.0.1 spacialist-laravel.tld # or anything you want
+    ```
+
+3. Add a new vHost file to your apache
+
+    ```bash
+    cd /etc/apache2/sites-available
+    sudo nano spacialist-laravel.conf
+    ```
+
+    Paste the following snippet into the file:
+    ```apache
+    <VirtualHost *:80>
+      ServerName spacialist-laravel.tld
+      ServerAdmin webmaster@localhost
+      DocumentRoot /var/www/html/Spacialist/public
+
+      DirectoryIndex index.php
+
+      <Directory "/var/www/html/Spacialist/public">
+        AllowOverride All
+        Require all granted
+      </Directory>
+    </VirtualHost>
+    ```
+
+4. Add the proxy route to your default vHost file (e.g. `/etc/apache2/sites-available/000-default.conf`)
+
+    ```apache
+    ProxyPass "/Spacialist" "http://spacialist-laravel.tld"
+    ProxyPassReverse "/Spacialist" "http://spacialist-laravel.tld"
+    ```
+
+5. Enable the new vHost file and restart the webserver
+
+    ```bash
+    sudo a2ensite spacialist-laravel.conf
+    sudo service apache2 restart
+    ```
