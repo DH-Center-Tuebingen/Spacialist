@@ -458,7 +458,15 @@
                 default: ()=>({}),
             },
         },
-        emits: ['dirty'],
+        emits: [
+            'add-element',
+            'delete-element',
+            'dirty',
+            'edit-element',
+            'metadata',
+            'remove-element',
+            'reorder-list',
+        ],
         setup(props, context) {
             const { t } = useI18n();
             const {
