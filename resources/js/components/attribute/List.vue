@@ -49,7 +49,11 @@
 
     export default {
         props: {
-            name: String,
+            name:{ 
+                type: String, 
+                required: false, 
+                default: null
+            },
             entries: {
                 type: Array,
                 default: _ => new Array(),
@@ -62,9 +66,7 @@
         setup(props, context) {
             const { t } = useI18n();
             const {
-                name,
                 entries,
-                disabled,
             } = toRefs(props);
             // FETCH
 

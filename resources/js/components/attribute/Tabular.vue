@@ -414,9 +414,11 @@
             },
             selections: {
                 type: Object,
+                default: null
             },
             attribute: {
                 type: Object,
+                default: null
             },
             previewColumns: {
                 required: false,

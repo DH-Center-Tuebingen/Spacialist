@@ -230,6 +230,7 @@
             errors: {
                 required: false,
                 type: Object,
+                default: _ => ({}),
             },
         },
         emits: ['add', 'cancel'],

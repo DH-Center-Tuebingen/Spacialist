@@ -297,7 +297,7 @@
             hiddenAttributes: {
                 required: false,
                 type: Array,
-                default: [],
+                default: ()=>([]),
             },
             showHidden: {
                 required: false,
@@ -311,7 +311,8 @@
             },
             group: { // required if onReorder is set // TODO
                 required: false,
-                type: String
+                type: String,
+                default: null,
             },
             isSource: {
                 required: false,

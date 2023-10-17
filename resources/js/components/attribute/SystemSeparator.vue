@@ -32,6 +32,7 @@
             title: {
                 type: String,
                 required: false,
+                default: null,
             },
         },
         setup(props, context) {

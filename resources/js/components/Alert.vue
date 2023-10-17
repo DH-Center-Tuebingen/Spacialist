@@ -48,6 +48,7 @@
             icontext: {
                 required: false,
                 type: String,
+                default: null
             }
         },
         setup(props, context) {

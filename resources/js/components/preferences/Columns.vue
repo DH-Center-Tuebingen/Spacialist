@@ -122,9 +122,6 @@
                 t,
                 // LOCAL
                 onChange,
-                // PROPS
-                data,
-                readonly,
                 // STATE
                 state,
             };

@@ -133,8 +133,6 @@
             return {
                 t,
                 // HELPERS
-                // PROPS
-                data,
                 // LOCAL
                 updateData,
                 confirmLocation,

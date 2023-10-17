@@ -371,7 +371,7 @@
             metadata: {
                 required: false,
                 type: Object,
-                default: {},
+                default: ()=>({}),
             },
             postUrl: {
                 required: false,
