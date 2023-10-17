@@ -77,6 +77,7 @@ mix.js('resources/js/app.js', 'public/js').vue()
            plugins: [
                new webpack.ProvidePlugin({
                     process : 'process/browser',
+                    Buffer: ['buffer', 'Buffer']
                 }),
                 new webpack.DefinePlugin({
                     __APPNAME__: `'${appName}'`,

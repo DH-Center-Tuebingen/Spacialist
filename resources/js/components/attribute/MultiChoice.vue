@@ -10,17 +10,21 @@
         :options="selections"
         :name="name"
         :close-on-select="false"
+        :close-on-select="false"
         :placeholder="t('global.select.placeholder')"
+        @change="value => v.handleChange(value)"
+    >
+        <template #option="{ option }">
         @change="value => v.handleChange(value)"
     >
         <template #option="{ option }">
             {{ translateConcept(option.concept_url) }}
         </template>
-        <template #tag="{ option, handleTagRemove, disabled: tagDisabled }">
+        <template #tag="{ option, handleTagRemove, disabled }">
             <div class="multiselect-tag">
                 {{ translateConcept(option.concept_url) }}
                 <span
-                    v-if="!tagDisabled"
+                    v-if="!disabled"
                     class="multiselect-tag-remove"
                     @click.prevent
                     @mousedown.prevent.stop="handleTagRemove(option, $event)"

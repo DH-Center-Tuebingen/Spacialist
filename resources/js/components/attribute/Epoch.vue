@@ -99,7 +99,7 @@
             <template #option="{ option }">
                 {{ translateConcept(option.concept_url) }}
             </template>
-            <template #singlelabel="{ value: singlelabelValue }">
+            <template #singlelabel="{ value }">
                 <div class="multiselect-single-label">
                     {{ translateConcept(singlelabelValue.concept_url) }}
                 </div>

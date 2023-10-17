@@ -62,202 +62,228 @@
                         </span>
                     </div>
                 </div>
-                <table
-                    v-if="state.permissionsLoaded"
-                    class="table table-small table-hover table-striped text-center"
-                >
-                    <thead class="text-muted">
-                        <tr>
-                            <th />
-                            <th class="fw-normal">
-                                {{ t('main.role.permissions.types.read') }}
-                            </th>
-                            <th
-                                class="fw-normal"
-                                :title="`* ${t('main.role.permissions.types.write_info')}`"
-                            >
-                                {{ t('main.role.permissions.types.write') }}
-                                <span class="text-danger">*</span>
-                            </th>
-                            <th
-                                class="fw-normal"
-                                :title="`* ${t('main.role.permissions.types.create_info')}`"
-                            >
-                                {{ t('main.role.permissions.types.create') }}
-                                <span class="text-danger">*</span>
-                            </th>
-                            <th class="fw-normal">
-                                {{ t('main.role.permissions.types.delete') }}
-                            </th>
-                            <th
-                                class="fw-normal"
-                                :title="`* ${t('main.role.permissions.types.share_info')}`"
-                            >
-                                {{ t('main.role.permissions.types.share') }}
-                                <span class="text-danger">*</span>
-                            </th>
-                            <th class="fw-normal">
-                                {{ t('global.select_all') }}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr
-                            v-for="(pg, i) in state.permissionGroups.core"
-                            :key="i"
-                        >
-                            <td class="text-start">
-                                {{ t(`main.role.permissions.groups.${pg}`) }}
-                            </td>
-                            <td>
+                <div class="modal-body">
+                    <div
+                        v-if="state.isDerived"
+                        class="d-flex flex-column gap-2 align-items-start"
+                    >
+                        <div class="d-flex flex-row align-items-center gap-2">
+                            <span class="text-muted">
+                                {{ t('main.role.preset.derived_from') }}
+                            </span>
+                            <span class="badge bg-primary">
+                                <i class="fas fa-fw fa-shield-alt" />
+                                {{ t(`main.role.preset.${state.role.derived.name}`) }}
                                 <a
+                                    v-if="state.differsFromPreset"
                                     href="#"
-                                    class="text-reset text-decoration-none"
-                                    @click.prevent="changePermissionState(pg, 'read')"
+                                    class="text-decoration-none text-reset"
+                                    :title="`Reset role to preset`"
+                                    @click.prevent="resetToPreset()"
                                 >
-                                    <acl-state :status="state.permissionStates[pg].read" />
+                                    |
+                                    <i class="fas fa-fw fa-undo" />
                                 </a>
-                            </td>
-                            <td>
-                                <a
-                                    href="#"
-                                    class="text-reset text-decoration-none"
-                                    @click.prevent="changePermissionState(pg, 'write')"
-                                >
-                                    <acl-state :status="state.permissionStates[pg].write" />
-                                </a>
-                            </td>
-                            <td>
-                                <a
-                                    href="#"
-                                    class="text-reset text-decoration-none"
-                                    @click.prevent="changePermissionState(pg, 'create')"
-                                >
-                                    <acl-state :status="state.permissionStates[pg].create" />
-                                </a>
-                            </td>
-                            <td>
-                                <a
-                                    href="#"
-                                    class="text-reset text-decoration-none"
-                                    @click.prevent="changePermissionState(pg, 'delete')"
-                                >
-                                    <acl-state :status="state.permissionStates[pg].delete" />
-                                </a>
-                            </td>
-                            <td>
-                                <a
-                                    href="#"
-                                    class="text-reset text-decoration-none"
-                                    @click.prevent="changePermissionState(pg, 'share')"
-                                >
-                                    <acl-state :status="state.permissionStates[pg].share" />
-                                </a>
-                            </td>
-                            <td>
-                                <a
-                                    href="#"
-                                    class="text-reset text-decoration-none"
-                                    @click.prevent="changePermissionState(pg, 'all')"
-                                >
-                                    <acl-state :status="allState(pg)" />
-                                </a>
-                            </td>
-                        </tr>
-                        <template
-                            v-for="(pg, i) in state.permissionGroups.plugins"
-                            :key="i"
-                        >
+                            </span>
+                        </div>
+                    </div>
+                    <table
+                        v-if="state.permissionsLoaded"
+                        class="table table-small table-hover table-striped text-center"
+                    >
+                        <thead class="text-muted">
                             <tr>
-                                <td
-                                    colspan="7"
-                                    class="fw-bold text-start"
+                                <th />
+                                <th class="fw-normal">
+                                    {{ t('main.role.permissions.types.read') }}
+                                </th>
+                                <th
+                                    class="fw-normal"
+                                    :title="`* ${t('main.role.permissions.types.write_info')}`"
                                 >
-                                    {{ t(`plugin.${i}.title`) }} ({{ t(`main.role.permissions.groups.is_plugin`) }})
-                                </td>
+                                    {{ t('main.role.permissions.types.write') }}
+                                    <span class="text-danger">*</span>
+                                </th>
+                                <th
+                                    class="fw-normal"
+                                    :title="`* ${t('main.role.permissions.types.create_info')}`"
+                                >
+                                    {{ t('main.role.permissions.types.create') }}
+                                    <span class="text-danger">*</span>
+                                </th>
+                                <th class="fw-normal">
+                                    {{ t('main.role.permissions.types.delete') }}
+                                </th>
+                                <th
+                                    class="fw-normal"
+                                    :title="`* ${t('main.role.permissions.types.share_info')}`"
+                                >
+                                    {{ t('main.role.permissions.types.share') }}
+                                    <span class="text-danger">*</span>
+                                </th>
+                                <th class="fw-normal">
+                                    {{ t('global.select_all') }}
+                                </th>
                             </tr>
+                        </thead>
+                        <tbody>
                             <tr
-                                v-for="(pluginSet, j) in pg"
-                                :key="j"
+                                v-for="(pg, i) in state.permissionGroups.core"
+                                :key="i"
                             >
                                 <td class="text-start">
-                                    {{ t(`plugin.${i}.permissions.groups.${pluginSet}`) }}
+                                    {{ t(`main.role.permissions.groups.${pg}`) }}
                                 </td>
                                 <td>
                                     <a
                                         href="#"
                                         class="text-reset text-decoration-none"
-                                        @click.prevent="changePermissionState(pluginSet, 'read')"
+                                        @click.prevent="changePermissionState(pg, 'read')"
                                     >
-                                        <acl-state :status="state.permissionStates[pluginSet].read" />
+                                        <acl-state :status="state.permissionStates[pg].read" />
                                     </a>
                                 </td>
                                 <td>
                                     <a
                                         href="#"
                                         class="text-reset text-decoration-none"
-                                        @click.prevent="changePermissionState(pluginSet, 'write')"
+                                        @click.prevent="changePermissionState(pg, 'write')"
                                     >
-                                        <acl-state :status="state.permissionStates[pluginSet].write" />
+                                        <acl-state :status="state.permissionStates[pg].write" />
                                     </a>
                                 </td>
                                 <td>
                                     <a
                                         href="#"
                                         class="text-reset text-decoration-none"
-                                        @click.prevent="changePermissionState(pluginSet, 'create')"
+                                        @click.prevent="changePermissionState(pg, 'create')"
                                     >
-                                        <acl-state :status="state.permissionStates[pluginSet].create" />
+                                        <acl-state :status="state.permissionStates[pg].create" />
                                     </a>
                                 </td>
                                 <td>
                                     <a
                                         href="#"
                                         class="text-reset text-decoration-none"
-                                        @click.prevent="changePermissionState(pluginSet, 'delete')"
+                                        @click.prevent="changePermissionState(pg, 'delete')"
                                     >
-                                        <acl-state :status="state.permissionStates[pluginSet].delete" />
+                                        <acl-state :status="state.permissionStates[pg].delete" />
                                     </a>
                                 </td>
                                 <td>
                                     <a
                                         href="#"
                                         class="text-reset text-decoration-none"
-                                        @click.prevent="changePermissionState(pluginSet, 'share')"
+                                        @click.prevent="changePermissionState(pg, 'share')"
                                     >
-                                        <acl-state :status="state.permissionStates[pluginSet].share" />
+                                        <acl-state :status="state.permissionStates[pg].share" />
                                     </a>
                                 </td>
                                 <td>
                                     <a
                                         href="#"
                                         class="text-reset text-decoration-none"
-                                        @click.prevent="changePermissionState(pluginSet, 'all')"
+                                        @click.prevent="changePermissionState(pg, 'all')"
                                     >
-                                        <acl-state :status="allState(pluginSet)" />
+                                        <acl-state :status="allState(pg)" />
                                     </a>
                                 </td>
                             </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <button
-                    type="submit"
-                    class="btn btn-outline-success"
-                    @click="savePermissions()"
-                >
-                    <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
-                </button>
-                <button
-                    type="button"
-                    class="btn btn-outline-secondary"
-                    data-bs-dismiss="modal"
-                    @click="closeModal()"
-                >
-                    <i class="fas fa-fw fa-times" /> {{ t('global.close') }}
-                </button>
+                            <template
+                                v-for="(pg, i) in state.permissionGroups.plugins"
+                                :key="i"
+                            >
+                                <tr>
+                                    <td
+                                        colspan="7"
+                                        class="fw-bold text-start"
+                                    >
+                                        {{ t(`plugin.${i}.title`) }} ({{ t(`main.role.permissions.groups.is_plugin`) }})
+                                    </td>
+                                </tr>
+                                <tr
+                                    v-for="(pluginSet, j) in pg"
+                                    :key="j"
+                                >
+                                    <td class="text-start">
+                                        {{ t(`plugin.${i}.permissions.groups.${pluginSet}`) }}
+                                    </td>
+                                    <td>
+                                        <a
+                                            href="#"
+                                            class="text-reset text-decoration-none"
+                                            @click.prevent="changePermissionState(pluginSet, 'read')"
+                                        >
+                                            <acl-state :status="state.permissionStates[pluginSet].read" />
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a
+                                            href="#"
+                                            class="text-reset text-decoration-none"
+                                            @click.prevent="changePermissionState(pluginSet, 'write')"
+                                        >
+                                            <acl-state :status="state.permissionStates[pluginSet].write" />
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a
+                                            href="#"
+                                            class="text-reset text-decoration-none"
+                                            @click.prevent="changePermissionState(pluginSet, 'create')"
+                                        >
+                                            <acl-state :status="state.permissionStates[pluginSet].create" />
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a
+                                            href="#"
+                                            class="text-reset text-decoration-none"
+                                            @click.prevent="changePermissionState(pluginSet, 'delete')"
+                                        >
+                                            <acl-state :status="state.permissionStates[pluginSet].delete" />
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a
+                                            href="#"
+                                            class="text-reset text-decoration-none"
+                                            @click.prevent="changePermissionState(pluginSet, 'share')"
+                                        >
+                                            <acl-state :status="state.permissionStates[pluginSet].share" />
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a
+                                            href="#"
+                                            class="text-reset text-decoration-none"
+                                            @click.prevent="changePermissionState(pluginSet, 'all')"
+                                        >
+                                            <acl-state :status="allState(pluginSet)" />
+                                        </a>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button
+                        type="submit"
+                        class="btn btn-outline-success"
+                        @click="savePermissions()"
+                    >
+                        <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal"
+                        @click="closeModal()"
+                    >
+                        <i class="fas fa-fw fa-times" /> {{ t('global.close') }}
+                    </button>
+                </div>
             </div>
         </div>
     </vue-final-modal>

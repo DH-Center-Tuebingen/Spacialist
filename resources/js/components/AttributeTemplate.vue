@@ -13,7 +13,8 @@
                 <simple-search
                     :endpoint="searchLabel"
                     :key-fn="getConceptLabel"
-                    @selected="e => labelSelected(e, 'label')"
+                    :default-value="state.searchResetValue"
+                    @selected="e => labelSelected(e, 'label')" 
                 />
             </div>
         </div>

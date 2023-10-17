@@ -7,9 +7,19 @@
                         v-for="(column, i) in state.columns"
                         :key="i"
                     >
+                    <th
+                        v-for="(column, i) in state.columns"
+                        :key="i"
+                    >
                         {{ translateConcept(column.thesaurus_url) }}
                     </th>
                     <th>
+                        <a
+                            class="text-body"
+                            href="#"
+                            @click.prevent="emitExpandToggle()"
+                        >
+                            <i class="fas fa-fw fa-expand" />
                         <a
                             class="text-body"
                             href="#"
@@ -23,7 +33,19 @@
                             @click.prevent="openCsvUpload()"
                         >
                             <i class="fas fa-fw fa-file-upload" />
+                        <a
+                            class="text-body"
+                            href="#"
+                            @click.prevent="openCsvUpload()"
+                        >
+                            <i class="fas fa-fw fa-file-upload" />
                         </a>
+                        <a
+                            class="text-body"
+                            href="#"
+                            @click.prevent="downloadAs('csv')"
+                        >
+                            <i class="fas fa-fw fa-file-download" />
                         <a
                             class="text-body"
                             href="#"
@@ -35,6 +57,14 @@
                 </tr>
             </thead>
             <tbody>
+                <tr
+                    v-for="(row, $index) in v.value"
+                    :key="$index"
+                >
+                    <td
+                        v-for="(column, i) in state.columns"
+                        :key="i"
+                    >
                 <tr
                     v-for="(row, $index) in v.value"
                     :key="$index"
@@ -254,7 +284,10 @@
                         </button>
                     </td>
                 </tr>
-                <tr class="border-0">
+                <tr
+                    v-if="!state.isPreview"
+                    class="border-0"
+                >
                     <td
                         v-for="(column, i) in state.columns"
                         :key="i"

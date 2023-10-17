@@ -67,7 +67,7 @@
 
 <script>
     import {
-reactive,
+        reactive,
         toRefs,
     } from 'vue';
 
@@ -101,7 +101,7 @@ reactive,
                 readonly,
             } = toRefs(props);
 
-            const localData = reactive(_cloneDeep(data.value));
+            const localData =       (_cloneDeep(data.value));
 
             // FUNCTIONS
             const onChange = _debounce(e => {

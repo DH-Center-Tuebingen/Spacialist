@@ -11,6 +11,12 @@
                 @click="savePreferences()"
             >
                 <i class="fas fa-fw fa-save" />
+            <button
+                type="button"
+                class="btn btn-outline-success btn-sm"
+                @click="savePreferences()"
+            >
+                <i class="fas fa-fw fa-save" />
                 {{ t('global.save') }}
             </button>
         </h3>
@@ -20,9 +26,20 @@
                 v-dcan="'preferences_read'"
                 class="table table-light table-striped table-hover mb-0"
             >
+            <table
+                v-if="state.prefsLoaded"
+                v-dcan="'preferences_read'"
+                class="table table-light table-striped table-hover mb-0"
+            >
                 <thead class="sticky-top">
                     <tr class="text-nowrap">
                         <th>{{ t('global.preference') }}</th>
+                        <th
+                            style="width: 99%;"
+                            class="text-end"
+                        >
+                            {{ t('global.value') }}
+                        </th>
                         <th
                             style="width: 99%;"
                             class="text-end"

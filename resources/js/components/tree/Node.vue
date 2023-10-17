@@ -266,39 +266,40 @@ export default {
                 state,
             };
         }
-        // methods: {
-        //     onDragEnter() {
-        //         if(!this.data.dragAllowed()) return;
-        //         this.asyncToggle.cancel();
-        //         this.asyncToggle();
-        //     },
-        //     onDragLeave(item) {
-        //         this.asyncToggle.cancel();
-        //     },
-        //     doToggle() {
-        //         if(!this.data.state.opened && this.data.state.openable) {
-        //             this.data.onToggle({data: this.data});
-        //         }
-        //     }
-        // },
-        // data() {
-        //     return {
-        //     }
-        // },
-        // computed: {
-        //     asyncToggle() {
-        //         return _debounce(this.doToggle, this.data.dragDelay || 500);
-        //     },
-        //     colorStyles() {
-        //         const colors = this.$getEntityColors(this.data.entity_type_id);
-        //         if(this.data.children_count) {
-        //             return colors;
-        //         } else {
-        //             return {
-        //                 color: colors.backgroundColor
-        //             };
-        //         }
-        //     }
-        // }
-    }
+    
+    // methods: {
+    //     onDragEnter() {
+    //         if(!this.data.dragAllowed()) return;
+    //         this.asyncToggle.cancel();
+    //         this.asyncToggle();
+    //     },
+    //     onDragLeave(item) {
+    //         this.asyncToggle.cancel();
+    //     },
+    //     doToggle() {
+    //         if(!this.data.state.opened && this.data.state.openable) {
+    //             this.data.onToggle({data: this.data});
+    //         }
+    //     }
+    // },
+    // data() {
+    //     return {
+    //     }
+    // },
+    // computed: {
+    //     asyncToggle() {
+    //         return _debounce(this.doToggle, this.data.dragDelay || 500);
+    //     },
+    //     colorStyles() {
+    //         const colors = this.$getEntityColors(this.data.entity_type_id);
+    //         if(this.data.children_count) {
+    //             return colors;
+    //         } else {
+    //             return {
+    //                 color: colors.backgroundColor
+    //             };
+    //         }
+    //     }
+    // }
+}
 </script>

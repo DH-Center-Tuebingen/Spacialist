@@ -37,7 +37,6 @@
         emits: ['changed', 'update:modelValue'],
         setup(props, context) {
             const {
-                data,
                 readonly,
             } = toRefs(props);
 

@@ -144,7 +144,7 @@
                                         v-if="hasPreference('prefs.enable-password-reset-link')"
                                         class="dropdown-item"
                                         href="#"
-                                        :disabled="!can('users_roles_write')"
+                                        :disabled="state.currentUserId != user.id && !can('users_roles_write')"
                                         @click.prevent="updatePassword(user.email)"
                                     >
                                         <i class="fas fa-fw fa-paper-plane text-info" /> {{ t('global.send_reset_mail') }}

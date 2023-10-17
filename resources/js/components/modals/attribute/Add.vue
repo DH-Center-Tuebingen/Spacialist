@@ -25,31 +25,36 @@
                     @updated="updateAttribute"
                     @validation="checkValidation"
                 />
+                    @validation="checkValidation"
+                />
                 <div v-if="state.hasColumns">
-                    <h5 class="d-flex flex-row justify-content-between">
-                        <div>
-                            {{ t('global.column', 2) }}
-                            <span class="badge bg-primary">
-                                {{ state.columns.length }}
-                            </span>
-                        </div>
-                        <div>
-                            <button
-                                type="submit"
-                                class="btn btn-sm btn-outline-success"
-                                :form="state.tableFormId"
-                                :disabled="!state.tableColumnValidated"
-                            >
-                                <i class="fas fa-fw fa-plus" /> {{ t('global.add_column') }}
-                            </button>
-                        </div>
-                    </h5>
-                    <attribute-template
-                        :type="'table'"
-                        :external="state.tableFormId"
-                        @created="addColumn"
-                        @validation="checkTableValidation"
-                    />
+                    <hr>
+                    <div class="bg-secondary bg-opacity-25 p-2 rounded">
+                        <h5 class="d-flex flex-row justify-content-between">
+                            <div>
+                                {{ t('global.column', 2) }}
+                                <span class="badge bg-primary">
+                                    {{ state.columns.length }}
+                                </span>
+                            </div>
+                            <div>
+                                <button
+                                    type="submit"
+                                    class="btn btn-sm btn-outline-success"
+                                    :form="state.tableFormId"
+                                    :disabled="!state.tableColumnValidated"
+                                >
+                                    <i class="fas fa-fw fa-plus" /> {{ t('global.add_column') }}
+                                </button>
+                            </div>
+                        </h5>
+                        <attribute-template
+                            :type="'table'"
+                            :external="state.tableFormId"
+                            @created="addColumn"
+                            @validation="checkTableValidation"
+                        />
+                    </div>
                 </div>
                 <div v-if="state.previewAttribute">
                     <hr>

@@ -17,6 +17,15 @@
                     aria-expanded="false"
                 >
                     <i class="fas fa-fw fa-ellipsis-h" />
+                <span
+                    id="tree-options-dropdown"
+                    class="clickable align-middle btn btn-outline-primary btn-sm"
+                    data-bs-toggle="dropdown"
+                    role="button"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                >
+                    <i class="fas fa-fw fa-ellipsis-h" />
                 </span>
                 <div
                     class="dropdown-menu"
@@ -25,101 +34,139 @@
                     <a
                         class="dropdown-item"
                         href="#"
-                        :class="getSortingStateClass('rank', 'asc')"
-                        @click.prevent="setSort('rank', 'asc')"
+                        @click.prevent
                     >
-                        <i class="fas fa-fw fa-sort-numeric-down" />
-                        <span class="ms-2">
-                            {{ t('main.entity.tree.sorts.asc.rank') }}
-                        </span>
+                        <i class="fas fa-fw fa-sort" />
+                        {{ t('global.sort') }}
+                        <div class="submenu dropdown-menu">
+                            <a
+                                class="dropdown-item"
+                                href="#"
+                                :class="getSortingStateClass('rank', 'asc')"
+                                @click.prevent="setSort('rank', 'asc')"
+                            >
+                                <i class="fas fa-fw fa-sort-numeric-down" />
+                                <span class="ms-2">
+                                    {{ t('main.entity.tree.sorts.asc.rank') }}
+                                </span>
+                            </a>
+                            <a
+                                class="dropdown-item"
+                                href="#"
+                                :class="getSortingStateClass('rank', 'desc')"
+                                @click.prevent="setSort('rank', 'desc')"
+                            >
+                                <i class="fas fa-fw fa-sort-numeric-up" />
+                                <span class="ms-2">
+                                    {{ t('main.entity.tree.sorts.desc.rank') }}
+                                </span>
+                            </a>
+                            <a
+                                class="dropdown-item"
+                                href="#"
+                                :class="getSortingStateClass('alpha', 'asc')"
+                                @click.prevent="setSort('alpha', 'asc')"
+                            >
+                                <i class="fas fa-fw fa-sort-alpha-down" />
+                                <span class="ms-2">
+                                    {{ t('main.entity.tree.sorts.asc.name') }}
+                                </span>
+                            </a>
+                            <a
+                                class="dropdown-item"
+                                href="#"
+                                :class="getSortingStateClass('alpha', 'desc')"
+                                @click.prevent="setSort('alpha', 'desc')"
+                            >
+                                <i class="fas fa-fw fa-sort-alpha-up" />
+                                <span class="ms-2">
+                                    {{ t('main.entity.tree.sorts.desc.name') }}
+                                </span>
+                            </a>
+                            <a
+                                class="dropdown-item"
+                                href="#"
+                                :class="getSortingStateClass('children', 'asc')"
+                                @click.prevent="setSort('children', 'asc')"
+                            >
+                                <i class="fas fa-fw fa-sort-amount-down" />
+                                <span class="ms-2">
+                                    {{ t('main.entity.tree.sorts.asc.children') }}
+                                </span>
+                            </a>
+                            <a
+                                class="dropdown-item"
+                                href="#"
+                                :class="getSortingStateClass('children', 'desc')"
+                                @click.prevent="setSort('children', 'desc')"
+                            >
+                                <i class="fas fa-fw fa-sort-amount-up" />
+                                <span class="ms-2">
+                                    {{ t('main.entity.tree.sorts.desc.children') }}
+                                </span>
+                            </a>
+                            <a
+                                class="dropdown-item"
+                                href="#"
+                                :class="getSortingStateClass('type', 'asc')"
+                                @click.prevent="setSort('type', 'asc')"
+                            >
+                                <span class="fa-stack d-inline">
+                                    <i class="fas fa-long-arrow-alt-down" />
+                                    <i
+                                        class="fas fa-monument"
+                                        data-fa-transform="start-4"
+                                    />
+                                </span>
+                                <span class="ms-2">
+                                    {{ t('main.entity.tree.sorts.asc.type') }}
+                                </span>
+                            </a>
+                            <a
+                                class="dropdown-item"
+                                href="#"
+                                :class="getSortingStateClass('type', 'desc')"
+                                @click.prevent="setSort('type', 'desc')"
+                            >
+                                <span class="fa-stack d-inline">
+                                    <i class="fas fa-long-arrow-alt-up" />
+                                    <i
+                                        class="fas fa-monument"
+                                        data-fa-transform="start-4"
+                                    />
+                                </span>
+                                <span class="ms-2">
+                                    {{ t('main.entity.tree.sorts.desc.type') }}
+                                </span>
+                            </a>
+                        </div>
                     </a>
+                    <hr class="dropdown-divider">
                     <a
                         class="dropdown-item"
                         href="#"
-                        :class="getSortingStateClass('rank', 'desc')"
-                        @click.prevent="setSort('rank', 'desc')"
+                        @click.prevent="toggleSelectMode()"
                     >
-                        <i class="fas fa-fw fa-sort-numeric-up" />
-                        <span class="ms-2">
-                            {{ t('main.entity.tree.sorts.desc.rank') }}
+                        <span>
+                            <span v-if="state.selectMode">
+                                <i class="fas fa-fw fa-list-ol" />
+                            </span>
+                            <span v-else>
+                                <i class="fas fa-fw fa-list-check" />
+                            </span>
+                            {{ t('main.entity.tree.multiedit.title') }}
                         </span>
                     </a>
                     <a
+                        v-show="state.selectMode"
                         class="dropdown-item"
                         href="#"
-                        :class="getSortingStateClass('alpha', 'asc')"
-                        @click.prevent="setSort('alpha', 'asc')"
+                        :class="{'disabled': !state.canOpenMultiEditModal}"
+                        @click.prevent="openMultieditModal()"
                     >
-                        <i class="fas fa-fw fa-sort-alpha-down" />
-                        <span class="ms-2">
-                            {{ t('main.entity.tree.sorts.asc.name') }}
-                        </span>
-                    </a>
-                    <a
-                        class="dropdown-item"
-                        href="#"
-                        :class="getSortingStateClass('alpha', 'desc')"
-                        @click.prevent="setSort('alpha', 'desc')"
-                    >
-                        <i class="fas fa-fw fa-sort-alpha-up" />
-                        <span class="ms-2">
-                            {{ t('main.entity.tree.sorts.desc.name') }}
-                        </span>
-                    </a>
-                    <a
-                        class="dropdown-item"
-                        href="#"
-                        :class="getSortingStateClass('children', 'asc')"
-                        @click.prevent="setSort('children', 'asc')"
-                    >
-                        <i class="fas fa-fw fa-sort-amount-down" />
-                        <span class="ms-2">
-                            {{ t('main.entity.tree.sorts.asc.children') }}
-                        </span>
-                    </a>
-                    <a
-                        class="dropdown-item"
-                        href="#"
-                        :class="getSortingStateClass('children', 'desc')"
-                        @click.prevent="setSort('children', 'desc')"
-                    >
-                        <i class="fas fa-fw fa-sort-amount-up" />
-                        <span class="ms-2">
-                            {{ t('main.entity.tree.sorts.desc.children') }}
-                        </span>
-                    </a>
-                    <a
-                        class="dropdown-item"
-                        href="#"
-                        :class="getSortingStateClass('type', 'asc')"
-                        @click.prevent="setSort('type', 'asc')"
-                    >
-                        <span class="fa-stack d-inline">
-                            <i class="fas fa-long-arrow-alt-down" />
-                            <i
-                                class="fas fa-monument"
-                                data-fa-transform="start-4"
-                            />
-                        </span>
-                        <span class="ms-2">
-                            {{ t('main.entity.tree.sorts.asc.type') }}
-                        </span>
-                    </a>
-                    <a
-                        class="dropdown-item"
-                        href="#"
-                        :class="getSortingStateClass('type', 'desc')"
-                        @click.prevent="setSort('type', 'desc')"
-                    >
-                        <span class="fa-stack d-inline">
-                            <i class="fas fa-long-arrow-alt-up" />
-                            <i
-                                class="fas fa-monument"
-                                data-fa-transform="start-4"
-                            />
-                        </span>
-                        <span class="ms-2">
-                            {{ t('main.entity.tree.sorts.desc.type') }}
+                        <i class="fas fa-fw fa-edit" />
+                        <span>
+                            {{ t('main.entity.tree.multiedit.open') }}
                         </span>
                     </a>
                 </div>
