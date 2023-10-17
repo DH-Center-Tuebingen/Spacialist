@@ -150,10 +150,12 @@
                                         v-if="comment.content"
                                         class="card-body px-3 py-2"
                                     >
+                                        <!-- eslint-disable -->
                                         <p
                                             class="card-text"
                                             v-html="mentionify(comment.content)"
                                         />
+                                        <!-- eslint-enable -->
                                     </div>
                                 </slot>
                                 <slot
@@ -182,10 +184,12 @@
                                 @click.prevent="toggleReplies(comment)"
                             >
                                 <div v-show="state.repliesOpen[comment.id]">
+                                    <!-- eslint-disable-next-line vue/no-v-html -->
                                     <span v-html="t('global.comments.hide_reply', comment.replies_count, {cnt: comment.replies_count})" />
                                     <i class="fas fa-fw fa-caret-up" />
                                 </div>
                                 <div v-show="!state.repliesOpen[comment.id]">
+                                    <!-- eslint-disable-next-line vue/no-v-html -->
                                     <span v-html="t('global.comments.show_reply', comment.replies_count, {cnt: comment.replies_count})" />
                                     <i class="fas fa-fw fa-caret-down" />
                                 </div>

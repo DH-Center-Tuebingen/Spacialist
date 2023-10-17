@@ -90,6 +90,7 @@
                                     @click="update(plugin)"
                                 >
                                     <i class="fas fa-fw fa-download" />
+                                    <!-- eslint-disable-next-line vue/no-v-html -->
                                     <span v-html="t('main.plugins.update_to', {version: plugin.update_available})" />
                                 </button>
                                 <button

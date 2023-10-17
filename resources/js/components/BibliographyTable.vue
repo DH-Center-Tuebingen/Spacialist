@@ -359,6 +359,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- eslint-disable vue/no-v-html -->
                     <tr
                         v-for="(entry, i) in state.orderedBibliography"
                         :key="entry.id"
@@ -487,6 +488,8 @@
                             </div>
                         </td>
                     </tr>
+                    <!-- eslint-enable vue/no-v-html -->
+
                     <tr>
                         <td :colspan="state.maxTableCols">
                             <button

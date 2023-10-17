@@ -24,6 +24,7 @@
         </div>
         <ol class="mt-2 mb-0" v-if="state.expanded && v.value.length">
             <li v-for="(l, i) in v.value" :key="i">
+                <!-- eslint-disable-next-line vue/no-v-html -->
                 <span v-html="createAnchorFromUrl(l)"></span>
                 <a href="#" class="text-danger" v-if="!disabled" @click.prevent="removeListEntry(i)">
                     <i class="fas fa-fw fa-trash"></i>

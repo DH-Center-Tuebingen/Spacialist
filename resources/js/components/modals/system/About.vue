@@ -80,6 +80,7 @@
                 </div>
                 <hr>
                 <div class="d-flex flex-row justify-content-between">
+                    <!-- eslint-disable-next-line vue/no-v-html -->
                     <span v-html="t('main.about.build_info')" />
                     <div>
                         <a

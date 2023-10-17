@@ -14,6 +14,7 @@
                 :placeholder="t('global.select.placeholder')"
                 @change="onChange"
             />
+            <!-- eslint-disable -->
             <button
                 v-if="state.showSetButton"
                 type="button"
@@ -22,6 +23,7 @@
                 @click="setBrowserLanguage()"
                 v-html="t('main.preference.info.set_to_language', {lang: state.browserLanguage})"
             />
+            <!-- eslint-enable -->
         </div>
     </div>
 </template>

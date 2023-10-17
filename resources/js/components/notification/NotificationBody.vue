@@ -65,11 +65,13 @@
                     >
                         <span>{{ state.sender.nickname }}</span>
                     </a>
+                    <!-- eslint-disable-->
                     <span
                         v-html="t('global.notifications.body.user_left_comment_on', {
                             name: getCommentedObjectName(notf),
                         })"
                     />
+                    <!-- eslint-enable-->
                     <div>
                         <router-link :to="getNotificationSourceLink(notf)">
                             {{ t('global.notifications.body.goto_comments') }}
@@ -116,11 +118,13 @@
                     >
                         <span>{{ state.sender.nickname }}</span>
                     </a>
+                    <!-- eslint-disable-->
                     <span
                         v-html="t('global.notifications.body.user_edited_entity', {
                             name: `${notf.info.name}`
                         })"
                     />
+                    <!-- eslint-enable-->
                     <div
                         class="text-info d-flex flex-row justify-content-between"
                         :class="state.smallClass"
@@ -176,6 +180,8 @@
                             @click.prevent="postReply()"
                         >
                             <i class="fas fa-fw fa-reply" />
+                            
+                            <!-- eslint-disable-next-line vue/no-v-html -->
                             <span v-html="t('global.notifications.body.reply_to_user', {name: state.sender.nickname})" />
                         </button>
                         <button

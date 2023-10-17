@@ -68,11 +68,13 @@
             </div>
         </template>
         <template #nooptions="">
+            <!-- eslint-disable -->
             <div
                 v-if="!!state.query"
                 class="p-2"
                 v-html="t('global.search_no_results_for', {term: state.query})"
             />
+            <!-- eslint-enable -->
             <div
                 v-else
                 class="p-1 text-muted"
@@ -116,18 +118,22 @@
             filterFn: {
                 type: Function,
                 required: false,
+                default: (val) => val,
             },
             keyText: {
                 type: String,
                 required: false,
+                default: null,
             },
             keyFn: {
                 type: Function,
                 required: false,
+                default: null,
             },
             chain: {
                 type: String,
                 required: false,
+                default: null,
             },
             mode: {
                 type: String,
@@ -143,6 +149,7 @@
         emits: ['selected', 'entry-click'],
         setup(props, context) {
             const { t } = useI18n();
+
             const {
                 delay,
                 limit,
@@ -154,6 +161,7 @@
                 mode,
                 defaultValue,
             } = toRefs(props);
+            
             if(!keyText.value && !keyFn.value) {
                 throw new Error('You have to either provide a key or key function for your search component!');
             }

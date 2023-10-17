@@ -20,11 +20,13 @@
                 <i class="fas fa-fw fa-copy" />
             </small>
         </h5>
+        <!-- eslint-disable vue/no-v-html -->
         <span
             v-show="state.show"
             :id="state.id"
             v-html="bibtexify(code, type)"
         />
+        <!-- eslint-enable vue/no-v-html -->
     </div>
 </template>
 

@@ -75,11 +75,13 @@
             </div>
         </template>
         <template #nooptions="">
+            <!-- eslint-disable -->
             <div
                 v-if="!!state.query"
                 class="p-2"
                 v-html="t('global.search_no_results_for', {term: state.query})"
             />
+            <!-- eslint-enable -->
             <div
                 v-else
                 class="p-1 text-muted"

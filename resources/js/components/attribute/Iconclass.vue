@@ -37,6 +37,7 @@
                 <span>{{ state.keywords.join(' &bull; ') }}</span>
             </div>
             <footer class="blockquote-footer mt-2">
+                <!-- eslint-disable-next-line vue/no-v-html -->
                 <span v-html="t('main.entity.attributes.iconclass.cite_info', {class: v.value})" />
             </footer>
         </div>
