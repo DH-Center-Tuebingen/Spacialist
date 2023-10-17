@@ -70,7 +70,10 @@
 
     export default {
         props: {
-            name: String,
+            name: {
+                type: String,
+                required: true,
+            },
             value: {
                 type: Object,
                 default: _ => new Object(),

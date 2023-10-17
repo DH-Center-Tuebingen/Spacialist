@@ -432,9 +432,11 @@
             },
             selections: {
                 type: Object,
+                default: null
             },
             attribute: {
                 type: Object,
+                default: null
             },
         },
         emits: ['change', 'expanded'],

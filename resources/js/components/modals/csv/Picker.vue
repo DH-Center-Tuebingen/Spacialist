@@ -167,8 +167,6 @@
                 t,
                 // HELPERS
                 ucfirst,
-                // PROPS
-                selection,
                 // LOCAL
                 confirmModal,
                 closeModal,

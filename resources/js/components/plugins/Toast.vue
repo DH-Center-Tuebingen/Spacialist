@@ -63,6 +63,7 @@
             id: {
                 type: String,
                 required: false,
+                default: null,
             },
             icon: {
                 type: Boolean,
@@ -93,6 +94,7 @@
             channel: {
                 type: String,
                 required: false,
+                default: null
             },
         },
         setup(props, context) {

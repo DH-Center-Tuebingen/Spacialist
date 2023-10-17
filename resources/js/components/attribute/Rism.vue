@@ -70,10 +70,14 @@
 
     export default {
         props: {
-            name: String,
+            name: {
+                type: String,
+                 required: true,
+            },
             value: {
                 type: String,
                 required: false,
+                default: '',
             },
             disabled: {
                 type: Boolean,
@@ -88,7 +92,6 @@
             const {
                 name,
                 value,
-                disabled,
             } = toRefs(props);
 
             // FETCH

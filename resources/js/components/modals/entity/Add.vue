@@ -120,6 +120,7 @@
             parent: {
                 required: false,
                 type: Object,
+                default: null,
             },
         },
         emits: ['closing', 'confirm'],
@@ -173,8 +174,6 @@
                 // HELPERS
                 translateConcept,
                 multiselectResetClasslist,
-                // PROPS
-                parent,
                 // LOCAL
                 add,
                 closeModal,

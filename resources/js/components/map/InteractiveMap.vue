@@ -366,6 +366,7 @@
             selection: {
                 type: Number,
                 required: false,
+                default: null,
             },
             layers: {
                 type: Object,
@@ -379,7 +380,7 @@
             data: {
                 type: Object,
                 required: false,
-                default: {},
+                default: ()=> {},
             },
             projection: {
                 type: Number,
@@ -404,7 +405,7 @@
             extent: {
                 type: Object,
                 required: false,
-                default: {}
+                default: ()=>{}
             },
             provider: {
                 type: String,
@@ -414,6 +415,7 @@
             triggerDataRescan: {
                 type: String,
                 required: false,
+                default: null,
             },
         },
         emits: ['added', 'select'],
@@ -1514,8 +1516,6 @@
                 t,
                 // HELPERS
                 toFixed,
-                // PROPS
-                drawing,
                 // LOCAL
                 confirmOverlayCoordinateEditing,
                 enableOverlayCoordinateEditing,

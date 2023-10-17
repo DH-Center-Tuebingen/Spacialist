@@ -129,7 +129,10 @@
 
     export default {
         props: {
-            name: String,
+            name: {
+                type: String,
+                required: true,
+            },
             value: {
                 required: false,
                 type: Object,

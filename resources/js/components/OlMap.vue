@@ -345,7 +345,8 @@
             },
             initCollection: {
                 required: false,
-                type: Object
+                type: Object,
+                default: null
             },
             initProjection: {
                 required: false,
@@ -354,7 +355,8 @@
             },
             epsg: {
                 required: false,
-                type: Object
+                type: Object,
+                default: null
             },
             layers: {
                 required: true,
@@ -362,15 +364,18 @@
             },
             layerStyles: {
                 required: false,
-                type: Object
+                type: Object,
+                default: null
             },
             layerLabels: {
                 required: false,
-                type: Object
+                type: Object,
+                default: null
             },
             layerCharts: {
                 required: false,
-                type: Object
+                type: Object,
+                default: null
             },
             drawDisabled: {
                 required: false,
@@ -399,7 +404,8 @@
             },
             zoomTo: {
                 type: Number,
-                required: false
+                required: false,
+                default: null
             }
         },
         data() {

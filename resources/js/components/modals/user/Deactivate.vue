@@ -93,8 +93,6 @@
             return {
                 t,
                 // HELPERS
-                // PROPS
-                user,
                 // LOCAL
                 closeModal,
                 confirmDeactivate,
