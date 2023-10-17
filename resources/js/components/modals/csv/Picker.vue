@@ -2,7 +2,8 @@
     <vue-final-modal
         class="modal-container modal"
         content-class="sp-modal-content"
-        name="csv-uploader-modal">
+        name="csv-uploader-modal"
+    >
         <div class="sp-modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
@@ -10,45 +11,87 @@
                         t('main.csv.picker.title')
                     }}
                 </h5>
-                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-                </button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                />
             </div>
             <div class="modal-body">
                 <alert
                     :message="'Selet all the columns you want to import data from.'"
                     :type="'info'"
-                    :noicon="false" />
+                    :noicon="false"
+                />
                 <alert
                     :message="'The order in which you pick the columns will be the order for the import. It is not possible skip columns.'"
                     :type="'warning'"
                     :noicon="false"
-                    :icontext="t('global.note')" />
+                    :icontext="t('global.note')"
+                />
                 <form>
-                    <div class="form-check" v-for="(sel, i) in selection" :key="i">
-                        <input class="form-check-input" type="checkbox" :id="`picker-selection-${i}`" :value="sel" v-model="state.pickedColumns">
-                        <label class="form-check-label" :for="`picker-selection-${i}`">
+                    <div
+                        v-for="(sel, i) in selection"
+                        :key="i"
+                        class="form-check"
+                    >
+                        <input
+                            :id="`picker-selection-${i}`"
+                            v-model="state.pickedColumns"
+                            class="form-check-input"
+                            type="checkbox"
+                            :value="sel"
+                        >
+                        <label
+                            class="form-check-label"
+                            :for="`picker-selection-${i}`"
+                        >
                             {{ ucfirst(sel) }}
                         </label>
                     </div>
                     <div class="row">
-                        <label for="picker-selection-result" class="col-2 col-form-label" :class="state.warningClasses">
+                        <label
+                            for="picker-selection-result"
+                            class="col-2 col-form-label"
+                            :class="state.warningClasses"
+                        >
                             Picked Columns
                             <span v-show="!state.hasPickedEnough">
-                                <i class="fas fa-fw fa-exclamation-triangle"></i>
+                                <i class="fas fa-fw fa-exclamation-triangle" />
                             </span>
                         </label>
                         <div class="col-10">
-                            <input type="text" readonly class="form-control-plaintext" :class="state.warningClasses" id="picker-selection-result" :value="state.joinedPick">
+                            <input
+                                id="picker-selection-result"
+                                type="text"
+                                readonly
+                                class="form-control-plaintext"
+                                :class="state.warningClasses"
+                                :value="state.joinedPick"
+                            >
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-success" data-bs-dismiss="modal" :disabled="!state.hasPickedEnough" @click="confirmModal()">
-                    <i class="fas fa-fw fa-check"></i> {{ t('global.create') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-success"
+                    data-bs-dismiss="modal"
+                    :disabled="!state.hasPickedEnough"
+                    @click="confirmModal()"
+                >
+                    <i class="fas fa-fw fa-check" /> {{ t('global.create') }}
                 </button>
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                    <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                >
+                    <i class="fas fa-fw fa-times" /> {{ t('global.cancel') }}
                 </button>
             </div>
         </div>

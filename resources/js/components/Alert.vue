@@ -1,12 +1,24 @@
 <template>
-    <div class="alert" :class="state.classes" role="alert">
-        <div v-if="state.hasIcon" :class="state.iconWrapperClasses">
-            <i class="fas" :class="state.iconClasses"></i>
+    <div
+        class="alert"
+        :class="state.classes"
+        role="alert"
+    >
+        <div
+            v-if="state.hasIcon"
+            :class="state.iconWrapperClasses"
+        >
+            <i
+                class="fas"
+                :class="state.iconClasses"
+            />
             <span class="fw-medium">
                 {{ icontext }}
             </span>
         </div>
-        <div v-html="message"></div>
+        <!-- We disable the v-html as there is no user data that get's inserted into the alerts. -->
+        <!-- eslint-disable-next-line vue/no-v-html -->
+        <div v-html="message" />
     </div>
 </template>
 
@@ -54,7 +66,7 @@
                     return !noicon.value && state.supportsIcon;
                 }),
                 hasIconText: computed(_ => {
-                    return state.hasIcon && (!!icontext && !!icontext.value);
+                    return state.hasIcon && (!!icontext.value && !!icontext.value);
                 }),
                 supportsIcon: computed(_ => {
                     switch(type.value) {
@@ -142,9 +154,6 @@
             // RETURN
             return {
                 // HELPERS
-                // PROPS
-                message,
-                icontext,
                 // LOCAL
                 // STATE
                 state,

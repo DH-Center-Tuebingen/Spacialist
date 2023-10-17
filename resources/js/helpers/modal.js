@@ -442,7 +442,7 @@ export function showBibliographyEntry(data, onSave) {
                 addOrUpdateBibliographyItem(formData, file).then(reData => {
                     // if id exists, it is an existing item
                     if(e.data.id) {
-                        store.dispatch("updateBibliographyItem", {
+                        store.dispatch('updateBibliographyItem', {
                             id: e.data.id,
                             type: e.data.type.name,
                             fields: {
@@ -452,7 +452,7 @@ export function showBibliographyEntry(data, onSave) {
                             },
                         });
                     } else {
-                        store.dispatch("addBibliographyItem", reData);
+                        store.dispatch('addBibliographyItem', reData);
                     }
 
                     if(onSave) {

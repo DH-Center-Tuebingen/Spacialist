@@ -1,11 +1,11 @@
-import { only } from "@/helpers/helpers";
-import store from "./store.js";
-import i18n from "./i18n.js";
+import { only } from '@/helpers/helpers';
+import store from './store.js';
+import i18n from './i18n.js';
 import {
     router,
     onBeforeRouteLeave,
     onBeforeRouteUpdate,
-} from "./router.js";
+} from './router.js';
 import {
     global_api,
     api_base,

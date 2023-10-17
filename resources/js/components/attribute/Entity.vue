@@ -6,8 +6,13 @@
         :mode="state.mode"
         :default-value="v.fieldValue"
         @selected="e => entitySelected(e)"
-        @entry-click="e => entryClicked(e)" />
-    <router-link v-if="!multiple && v.value" :to="{name: 'entitydetail', params: {id: v.fieldValue.id}, query: state.query}" class="btn btn-outline-secondary btn-sm mt-2">
+        @entry-click="e => entryClicked(e)"
+    />
+    <router-link
+        v-if="!multiple && v.value"
+        :to="{name: 'entitydetail', params: {id: v.fieldValue.id}, query: state.query}"
+        class="btn btn-outline-secondary btn-sm mt-2"
+    >
         {{ t('main.entity.attributes.entity.go_to', {name: v.fieldValue.name}) }}
     </router-link>
 </template>
@@ -161,11 +166,6 @@
                 entryClicked,
                 resetFieldState,
                 undirtyField,
-                // PROPS
-                name,
-                multiple,
-                disabled,
-                value,
                 // STATE
                 state,
                 v,

@@ -1,67 +1,85 @@
 <template>
     <multiselect
+        :id="state.id"
         v-model="state.entry"
         class="multiselect"
         :name="state.id"
-        :id="state.id"
         :object="true"
         :label="'id'"
         :track-by="'id'"
-        :valueProp="'id'"
+        :value-prop="'id'"
         :mode="mode"
         :options="query => search(query)"
-        :hideSelected="false"
+        :hide-selected="false"
         :filterResults="false"
-        :resolveOnLoad="false"
-        :clearOnSearch="true"
-        :clearOnSelect="true"
+        :resolve-on-load="false"
+        :clear-on-search="true"
+        :clear-on-select="true"
         :caret="false"
-        :minChars="0"
+        :min-chars="0"
         :searchable="true"
         :delay="delay"
         :limit="limit"
         :placeholder="t('global.search')"
-        @change="handleSelection">
-            <template v-slot:singlelabel="{ value }">
-                <div class="multiselect-single-label">
-                    {{ displayResult(value) }}
-                </div>
-            </template>
-            <template v-slot:tag="{ option, handleTagRemove, disabled }">
-                <div class="multiselect-tag">
-                    <span @click.prevent="handleTagClick(option)">
-                        {{ displayResult(option) }}
-                    </span>
-                    <span v-if="!disabled" class="multiselect-tag-remove" @click.prevent @mousedown.prevent.stop="handleTagRemove(option, $event)">
-                        <span class="multiselect-tag-remove-icon"></span>
-                    </span>
-                </div>
-            </template>
-            <template v-slot:option="{ option }">
-                <span v-if="!state.enableChain">
+        @change="handleSelection"
+    >
+        <template #singlelabel="{ value }">
+            <div class="multiselect-single-label">
+                {{ displayResult(value) }}
+            </div>
+        </template>
+        <template #tag="{ option, handleTagRemove, disabled }">
+            <div class="multiselect-tag">
+                <span @click.prevent="handleTagClick(option)">
                     {{ displayResult(option) }}
                 </span>
-                <div class="d-flex flex-column" v-else>
-                    <span>
-                        {{ displayResult(option) }}
-                    </span>
-                    <ol class="breadcrumb m-0 p-0 bg-none small">
-                        <li class="breadcrumb-item text-muted small" v-for="anc in option[chain]"
-                            :key="`search-result-multiselect-${state.id}-${anc}`">
-                            <span>
-                                {{ anc }}
-                            </span>
-                        </li>
-                    </ol>
-                </div>
-            </template>
-            <template v-slot:nooptions="">
-                <div class="p-2" v-if="!!state.query" v-html="t('global.search_no_results_for', {term: state.query})">
-                </div>
-                <div class="p-1 text-muted" v-else>
-                    {{ t('global.search_no_term_info') }}
-                </div>
-            </template>
+                <span
+                    v-if="!disabled"
+                    class="multiselect-tag-remove"
+                    @click.prevent
+                    @mousedown.prevent.stop="handleTagRemove(option, $event)"
+                >
+                    <span class="multiselect-tag-remove-icon" />
+                </span>
+            </div>
+        </template>
+        <template #option="{ option }">
+            <span v-if="!state.enableChain">
+                {{ displayResult(option) }}
+            </span>
+            <div
+                v-else
+                class="d-flex flex-column"
+            >
+                <span>
+                    {{ displayResult(option) }}
+                </span>
+                <ol class="breadcrumb m-0 p-0 bg-none small">
+                    <li
+                        v-for="anc in option[chain]"
+                        :key="`search-result-multiselect-${state.id}-${anc}`"
+                        class="breadcrumb-item text-muted small"
+                    >
+                        <span>
+                            {{ anc }}
+                        </span>
+                    </li>
+                </ol>
+            </div>
+        </template>
+        <template #nooptions="">
+            <div
+                v-if="!!state.query"
+                class="p-2"
+                v-html="t('global.search_no_results_for', {term: state.query})"
+            />
+            <div
+                v-else
+                class="p-1 text-muted"
+            >
+                {{ t('global.search_no_term_info') }}
+            </div>
+        </template>
     </multiselect>
 </template>
 
@@ -135,7 +153,7 @@
                 mode,
                 defaultValue,
             } = toRefs(props);
-            if(!keyText && !keyFn) {
+            if(!keyText.value && !keyFn.value) {
                 throw new Error('You have to either provide a key or key function for your search component!');
             }
             // FETCH
@@ -147,16 +165,16 @@
                     return await new Promise(r => r([]));
                 }
                 const results = await endpoint.value(query);
-                if(!!filterFn && !!filterFn.value) {
+                if(!!filterFn.value && !!filterFn.value) {
                     return filterFn.value(results, query);
                 } else {
                     return results;
                 }
             };
             const displayResult = result => {
-                if(!!keyText && !!keyText.value) {
+                if(!!keyText.value && !!keyText.value) {
                     return result[keyText.value];
-                } else if(!!keyFn && !!keyFn.value) {
+                } else if(!!keyFn.value && !!keyFn.value) {
                     return keyFn.value(result);
                 } else {
                     // Should never happen ;) :P
@@ -204,11 +222,6 @@
                 displayResult,
                 handleSelection,
                 handleTagClick,
-                // PROPS
-                delay,
-                limit,
-                chain,
-                mode,
                 // STATE
                 state,
             };

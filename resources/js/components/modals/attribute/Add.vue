@@ -2,14 +2,20 @@
     <vue-final-modal
         class="modal-container modal"
         content-class="sp-modal-content sp-modal-content-sm"
-        name="add-attribute-modal">
+        name="add-attribute-modal"
+    >
         <div class="sp-modal-content sp-modal-content-sm">
             <div class="modal-header">
                 <h5 class="modal-title">
                     {{ t('main.datamodel.attribute.modal.new.title') }}
                 </h5>
-                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-                </button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                />
             </div>
             <div class="modal-body nonscrollable">
                 <attribute-template
@@ -17,7 +23,8 @@
                     :external="state.formId"
                     @created="add"
                     @updated="updateAttribute"
-                    @validation="checkValidation" />
+                    @validation="checkValidation"
+                />
                 <div v-if="state.hasColumns">
                     <h5 class="d-flex flex-row justify-content-between">
                         <div>
@@ -27,8 +34,13 @@
                             </span>
                         </div>
                         <div>
-                            <button type="submit" class="btn btn-sm btn-outline-success" :form="state.tableFormId" :disabled="!state.tableColumnValidated">
-                                <i class="fas fa-fw fa-plus"></i> {{ t('global.add_column') }}
+                            <button
+                                type="submit"
+                                class="btn btn-sm btn-outline-success"
+                                :form="state.tableFormId"
+                                :disabled="!state.tableColumnValidated"
+                            >
+                                <i class="fas fa-fw fa-plus" /> {{ t('global.add_column') }}
                             </button>
                         </div>
                     </h5>
@@ -36,7 +48,8 @@
                         :type="'table'"
                         :external="state.tableFormId"
                         @created="addColumn"
-                        @validation="checkTableValidation"  />
+                        @validation="checkTableValidation"
+                    />
                 </div>
                 <div v-if="state.previewAttribute">
                     <hr>
@@ -47,15 +60,26 @@
                         :attributes="state.previewAttribute.attribute"
                         :options="{'hide_labels': true}"
                         :values="state.previewAttribute.values"
-                        :selections="{}" />
+                        :selections="{}"
+                    />
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-outline-success" :form="state.formId" :disabled="!state.validated">
-                    <i class="fas fa-fw fa-plus"></i> {{ t('global.add') }}
+                <button
+                    type="submit"
+                    class="btn btn-outline-success"
+                    :form="state.formId"
+                    :disabled="!state.validated"
+                >
+                    <i class="fas fa-fw fa-plus" /> {{ t('global.add') }}
                 </button>
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                    <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                >
+                    <i class="fas fa-fw fa-times" /> {{ t('global.cancel') }}
                 </button>
             </div>
         </div>
@@ -122,7 +146,7 @@
                     case 'serial':
                         let str = attribute.textContent;
                         let toRepl = '%d';
-                        let ctr = "1954";
+                        let ctr = '1954';
                         if(!str) {
                             str = 'Find_%05d_Placeholder';
                         }

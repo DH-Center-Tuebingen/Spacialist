@@ -1,53 +1,161 @@
 <template>
     <div class="h-100">
         <div class="h-100 px-0">
-            <div :id="id" class="map w-100 h-100">
+            <div
+                :id="id"
+                class="map w-100 h-100"
+            >
                 <div class="d-flex flex-column ol-bar ol-right ol-bottom">
-                    <div v-if="!drawDisabled" class="d-flex flex-column align-items-end">
-                        <button type="button" class="btn btn-sm p-1" :class="{'btn-primary': drawType == 'Point', 'btn-outline-primary': drawType != 'Point'}" data-bs-toggle="popover" :data-content="$t('main.map.draw.point.desc')" data-trigger="hover" data-placement="bottom" @click="toggleDrawType('Point')">
-                            <i class="fas fa-fw fa-map-marker-alt"></i>
+                    <div
+                        v-if="!drawDisabled"
+                        class="d-flex flex-column align-items-end"
+                    >
+                        <button
+                            type="button"
+                            class="btn btn-sm p-1"
+                            :class="{'btn-primary': drawType == 'Point', 'btn-outline-primary': drawType != 'Point'}"
+                            data-bs-toggle="popover"
+                            :data-content="$t('main.map.draw.point.desc')"
+                            data-trigger="hover"
+                            data-placement="bottom"
+                            @click="toggleDrawType('Point')"
+                        >
+                            <i class="fas fa-fw fa-map-marker-alt" />
                         </button>
-                        <button type="button" class="btn btn-sm p-1" :class="{'btn-primary': drawType == 'LineString', 'btn-outline-primary': drawType != 'LineString'}" data-bs-toggle="popover" :data-content="$t('main.map.draw.linestring.desc')" data-trigger="hover" data-placement="bottom" @click="toggleDrawType('LineString')">
-                            <i class="fas fa-fw fa-road"></i>
+                        <button
+                            type="button"
+                            class="btn btn-sm p-1"
+                            :class="{'btn-primary': drawType == 'LineString', 'btn-outline-primary': drawType != 'LineString'}"
+                            data-bs-toggle="popover"
+                            :data-content="$t('main.map.draw.linestring.desc')"
+                            data-trigger="hover"
+                            data-placement="bottom"
+                            @click="toggleDrawType('LineString')"
+                        >
+                            <i class="fas fa-fw fa-road" />
                         </button>
-                        <button type="button" class="btn btn-sm p-1" :class="{'btn-primary': drawType == 'Polygon', 'btn-outline-primary': drawType != 'Polygon'}" data-bs-toggle="popover" :data-content="$t('main.map.draw.polygon.desc')" data-trigger="hover" data-placement="bottom" @click="toggleDrawType('Polygon')">
-                            <i class="fas fa-fw fa-draw-polygon"></i>
+                        <button
+                            type="button"
+                            class="btn btn-sm p-1"
+                            :class="{'btn-primary': drawType == 'Polygon', 'btn-outline-primary': drawType != 'Polygon'}"
+                            data-bs-toggle="popover"
+                            :data-content="$t('main.map.draw.polygon.desc')"
+                            data-trigger="hover"
+                            data-placement="bottom"
+                            @click="toggleDrawType('Polygon')"
+                        >
+                            <i class="fas fa-fw fa-draw-polygon" />
                         </button>
-                        <button type="button" class="btn btn-sm p-1 btn-outline-info" v-show="interactionMode != 'modify'" data-bs-toggle="popover" :data-content="$t('main.map.draw.modify.desc')" data-trigger="hover" data-placement="bottom" @click="setInteractionMode('modify')">
-                            <i class="fas fa-fw fa-edit"></i>
+                        <button
+                            v-show="interactionMode != 'modify'"
+                            type="button"
+                            class="btn btn-sm p-1 btn-outline-info"
+                            data-bs-toggle="popover"
+                            :data-content="$t('main.map.draw.modify.desc')"
+                            data-trigger="hover"
+                            data-placement="bottom"
+                            @click="setInteractionMode('modify')"
+                        >
+                            <i class="fas fa-fw fa-edit" />
                         </button>
-                        <button type="button" class="btn btn-sm p-1 btn-outline-success" v-show="interactionMode == 'modify'" data-bs-toggle="popover" :data-content="$t('main.map.draw.modify.pos_desc')" data-trigger="hover" data-placement="bottom" @click="updateFeatures">
-                            <i class="fas fa-fw fa-check"></i>
+                        <button
+                            v-show="interactionMode == 'modify'"
+                            type="button"
+                            class="btn btn-sm p-1 btn-outline-success"
+                            data-bs-toggle="popover"
+                            :data-content="$t('main.map.draw.modify.pos_desc')"
+                            data-trigger="hover"
+                            data-placement="bottom"
+                            @click="updateFeatures"
+                        >
+                            <i class="fas fa-fw fa-check" />
                         </button>
-                        <button type="button" class="btn btn-sm p-1 btn-outline-danger" v-show="interactionMode == 'modify'" data-bs-toggle="popover" :data-content="$t('main.map.draw.modify.neg_desc')" data-trigger="hover" data-placement="bottom" @click="cancelUpdateFeatures">
-                            <i class="fas fa-fw fa-times"></i>
+                        <button
+                            v-show="interactionMode == 'modify'"
+                            type="button"
+                            class="btn btn-sm p-1 btn-outline-danger"
+                            data-bs-toggle="popover"
+                            :data-content="$t('main.map.draw.modify.neg_desc')"
+                            data-trigger="hover"
+                            data-placement="bottom"
+                            @click="cancelUpdateFeatures"
+                        >
+                            <i class="fas fa-fw fa-times" />
                         </button>
-                        <button type="button" class="btn btn-sm p-1 btn-outline-danger" v-show="interactionMode != 'delete'" data-bs-toggle="popover" :data-content="$t('main.map.draw.delete.desc')" data-trigger="hover" data-placement="bottom" @click="setInteractionMode('delete')">
-                            <i class="fas fa-fw fa-trash"></i>
+                        <button
+                            v-show="interactionMode != 'delete'"
+                            type="button"
+                            class="btn btn-sm p-1 btn-outline-danger"
+                            data-bs-toggle="popover"
+                            :data-content="$t('main.map.draw.delete.desc')"
+                            data-trigger="hover"
+                            data-placement="bottom"
+                            @click="setInteractionMode('delete')"
+                        >
+                            <i class="fas fa-fw fa-trash" />
                         </button>
-                        <button type="button" class="btn btn-sm p-1 btn-outline-success" v-show="interactionMode == 'delete'" data-bs-toggle="popover" :data-content="$t('main.map.draw.delete.pos_desc')" data-trigger="hover" data-placement="bottom" @click="deleteFeatures">
-                            <i class="fas fa-fw fa-check"></i>
+                        <button
+                            v-show="interactionMode == 'delete'"
+                            type="button"
+                            class="btn btn-sm p-1 btn-outline-success"
+                            data-bs-toggle="popover"
+                            :data-content="$t('main.map.draw.delete.pos_desc')"
+                            data-trigger="hover"
+                            data-placement="bottom"
+                            @click="deleteFeatures"
+                        >
+                            <i class="fas fa-fw fa-check" />
                         </button>
-                        <button type="button" class="btn btn-sm p-1 btn-outline-danger" v-show="interactionMode == 'delete'" data-bs-toggle="popover" :data-content="$t('main.map.draw.delete.neg_desc')" data-trigger="hover" data-placement="bottom" @click="cancelDeleteFeatures">
-                            <i class="fas fa-fw fa-times"></i>
+                        <button
+                            v-show="interactionMode == 'delete'"
+                            type="button"
+                            class="btn btn-sm p-1 btn-outline-danger"
+                            data-bs-toggle="popover"
+                            :data-content="$t('main.map.draw.delete.neg_desc')"
+                            data-trigger="hover"
+                            data-placement="bottom"
+                            @click="cancelDeleteFeatures"
+                        >
+                            <i class="fas fa-fw fa-times" />
                         </button>
-                        <button type="button" class="btn btn-sm p-1 btn-outline-primary" data-bs-toggle="popover" :data-content="$t('main.map.draw.measure.desc')" data-trigger="hover" data-placement="bottom" @click="toggleMeasurements">
-                            <i class="fas fa-fw fa-ruler-combined"></i>
+                        <button
+                            type="button"
+                            class="btn btn-sm p-1 btn-outline-primary"
+                            data-bs-toggle="popover"
+                            :data-content="$t('main.map.draw.measure.desc')"
+                            data-trigger="hover"
+                            data-placement="bottom"
+                            @click="toggleMeasurements"
+                        >
+                            <i class="fas fa-fw fa-ruler-combined" />
                         </button>
                     </div>
                     <div>
-                        <button type="button" class="btn btn-sm p-1 btn-outline-primary" v-show="linkPossible" @click="link(selectedFeature, selectedEntity)">
-                            <i class="fas fa-fw fa-link"></i> {{ $t('global.link_to', {name: selectedEntity.name}) }}
+                        <button
+                            v-show="linkPossible"
+                            type="button"
+                            class="btn btn-sm p-1 btn-outline-primary"
+                            @click="link(selectedFeature, selectedEntity)"
+                        >
+                            <i class="fas fa-fw fa-link" /> {{ $t('global.link_to', {name: selectedEntity.name}) }}
                         </button>
-                        <button type="button" class="btn btn-sm p-1 btn-outline-primary" v-show="unlinkPossible" @click="unlink(selectedFeature, linkedEntity)">
-                            <i class="fas fa-fw fa-unlink"></i> <span v-if="linkedEntity">
+                        <button
+                            v-show="unlinkPossible"
+                            type="button"
+                            class="btn btn-sm p-1 btn-outline-primary"
+                            @click="unlink(selectedFeature, linkedEntity)"
+                        >
+                            <i class="fas fa-fw fa-unlink" /> <span v-if="linkedEntity">
                                 {{ $t('global.unlink_from', {name: linkedEntity.name}) }}
                             </span>
                         </button>
                     </div>
                 </div>
             </div>
-            <div :id="id+'-popup'" class="popup popover ol-popover bs-popover-top">
+            <div
+                :id="id+'-popup'"
+                class="popup popover ol-popover bs-popover-top"
+            >
                 <h4 class="popover-header">
                     <span class="fw-medium">
                         {{ overlayInfo.name }}
@@ -74,12 +182,18 @@
                                 </span>
                             </dt>
                             <dd>
-                                <span data-bs-toggle="tooltip" :title="`${overlayInfo.size_in_m}${overlayInfo.size_unit}`">
+                                <span
+                                    data-bs-toggle="tooltip"
+                                    :title="`${overlayInfo.size_in_m}${overlayInfo.size_unit}`"
+                                >
                                     {{ overlayInfo.size }}
                                 </span>
                             </dd>
                         </template>
-                        <dt class="clickable" @click="overlayInfo.showCoordinates = !overlayInfo.showCoordinates">
+                        <dt
+                            class="clickable"
+                            @click="overlayInfo.showCoordinates = !overlayInfo.showCoordinates"
+                        >
                             {{
                                 $t('main.map.coords_in_epsg', {
                                     epsg: epsg.epsg
@@ -89,10 +203,10 @@
                                 ({{ coordinateList.length }})
                             </span>
                             <span v-show="overlayInfo.showCoordinates">
-                                <i class="fas fa-fw fa-caret-up"></i>
+                                <i class="fas fa-fw fa-caret-up" />
                             </span>
                             <span v-show="!overlayInfo.showCoordinates">
-                                <i class="fas fa-fw fa-caret-down"></i>
+                                <i class="fas fa-fw fa-caret-down" />
                             </span>
                         </dt>
                         <dd class="mb-0 mh-300p scroll-y-auto">
@@ -101,28 +215,53 @@
                                     <tbody>
                                         <tr v-for="c in coordinateList">
                                             <td class="text-start">
-                                                <input type="number" class="form-control form-control-sm" step="0.000001" v-model.number="overlayInfo.editCoordinates[0]" v-if="overlayInfo.pointEditEnabled" />
+                                                <input
+                                                    v-if="overlayInfo.pointEditEnabled"
+                                                    v-model.number="overlayInfo.editCoordinates[0]"
+                                                    type="number"
+                                                    class="form-control form-control-sm"
+                                                    step="0.000001"
+                                                >
                                                 <span v-else>
                                                     {{ c.x | toFixed(4) }}
                                                 </span>
                                             </td>
                                             <td class="text-end">
-                                                <input type="number" class="form-control form-control-sm" step="0.000001" v-model.number="overlayInfo.editCoordinates[1]" v-if="overlayInfo.pointEditEnabled" />
+                                                <input
+                                                    v-if="overlayInfo.pointEditEnabled"
+                                                    v-model.number="overlayInfo.editCoordinates[1]"
+                                                    type="number"
+                                                    class="form-control form-control-sm"
+                                                    step="0.000001"
+                                                >
                                                 <span v-else>
                                                     {{ c.y | toFixed(4) }}
                                                 </span>
                                             </td>
-                                            <td class="text-end clickable" v-if="isPointOverlay">
+                                            <td
+                                                v-if="isPointOverlay"
+                                                class="text-end clickable"
+                                            >
                                                 <div v-show="overlayInfo.pointEditEnabled">
-                                                    <a href="" @click.prevent="confirmPointCoordEdit">
-                                                        <i class="fas fa-fw fa-check" ></i>
+                                                    <a
+                                                        href=""
+                                                        @click.prevent="confirmPointCoordEdit"
+                                                    >
+                                                        <i class="fas fa-fw fa-check" />
                                                     </a>
-                                                    <a href="" @click.prevent="cancelPointCoordEdit">
-                                                        <i class="fas fa-fw fa-times" ></i>
+                                                    <a
+                                                        href=""
+                                                        @click.prevent="cancelPointCoordEdit"
+                                                    >
+                                                        <i class="fas fa-fw fa-times" />
                                                     </a>
                                                 </div>
-                                                <a href="" @click.prevent="enablePointCoordEdit" v-show="!overlayInfo.pointEditEnabled">
-                                                    <i class="fas fa-fw fa-edit" ></i>
+                                                <a
+                                                    v-show="!overlayInfo.pointEditEnabled"
+                                                    href=""
+                                                    @click.prevent="enablePointCoordEdit"
+                                                >
+                                                    <i class="fas fa-fw fa-edit" />
                                                 </a>
                                             </td>
                                         </tr>
@@ -132,10 +271,16 @@
                         </dd>
                     </dl>
                 </div>
-                <div class="arrow ol-arrow"></div>
+                <div class="arrow ol-arrow" />
             </div>
-            <div :id="id+'-hover-popup'" class="tooltip"></div>
-            <div :id="id+'-measure-popup'" class="tooltip tooltip-measure"></div>
+            <div
+                :id="id+'-hover-popup'"
+                class="tooltip"
+            />
+            <div
+                :id="id+'-measure-popup'"
+                class="tooltip tooltip-measure"
+            />
         </div>
     </div>
 </template>
@@ -255,6 +400,202 @@
             zoomTo: {
                 type: Number,
                 required: false
+            }
+        },
+        data() {
+            return {
+                id: `map-${Date.now()}`,
+                drawType: '',
+                interactionMode: '',
+                map: {},
+                mapRendered: false,
+                baselayers: {},
+                overlays: {},
+                overlayLayers: [],
+                baselayerLayers: [],
+                baselayersGroup: {},
+                overlaysGroup: {},
+                entityLayersGroup: {},
+                entityLayers: [],
+                features: {},
+                cachedStyles: {},
+                vector: {}, // TODO replace
+                overlay: {},
+                overlayInfo: {
+                    name: '',
+                    subname: '',
+                    type: '',
+                    size: '',
+                    size_in_m: '',
+                    size_unit: '',
+                    coordinates: [],
+                    feature: null,
+                    showCoordinates: false,
+                    pointEditEnabled: false,
+                    editCoordinates: null
+                },
+                hoverPopup: {},
+                lastHoveredFeature: {},
+                modify: {},
+                draw: {},
+                measurementActive: false,
+                measureDraw: {},
+                measureFeature: {},
+                measureSource: {},
+                measureLayer: {},
+                measureTooltip: {},
+                measureTooltipElement: {},
+                delete: {},
+                snap: {},
+                options: {},
+                extent: [],
+                featureStyles: {},
+                selectedFeature: {},
+                wktFormat: new WKT(),
+                geoJsonFormat: new GeoJSON(),
+            }
+        },
+        computed: {
+            viewport: function() {
+                if(!this.map) return;
+                const target = this.map.getTarget();
+                if(!target) return;
+                const container = document.getElementById(target);
+                if(!container) return;
+                const viewports = container.getElementsByClassName('ol-viewport');
+                if(!viewports) return;
+                if(!viewports.length) return;
+                return viewports[0];
+            },
+            unlinkPossible: function() {
+                const vm = this;
+                if(!vm.selectedFeature.getProperties) {
+                    return false;
+                }
+                const props = vm.selectedFeature.getProperties();
+                return props.entity && !!props.entity.id;
+            },
+            linkPossible: function() {
+                const vm = this;
+                if(!vm.selectedFeature.getProperties) return false;
+                const props = vm.selectedFeature.getProperties();
+                if(props.entity && !!props.entity.id) return false;
+                if(vm.selectedEntity.id) {
+                    if(vm.selectedEntity.geodata_id) {
+                        // already linked
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            linkedEntity: function() {
+                const vm = this;
+                if(!vm.selectedFeature) return;
+                if(!vm.selectedFeature.getProperties) return;
+                const props = vm.selectedFeature.getProperties();
+                return props.entity;
+            },
+            coordinateList() {
+                const cs = this.overlayInfo.coordinates;
+                let coordList = [];
+                switch(this.overlayInfo.type) {
+                    case 'Point':
+                        this.transformCoordinates(cs, coordList);
+                        break;
+                    case 'LineString':
+                    case 'MultiPoint':
+                        cs.forEach(c => {
+                            this.transformCoordinates(c, coordList);
+                        });
+                        break;
+                    case 'Polygon':
+                    case 'MultiLineString':
+                        cs.forEach(cg => {
+                            cg.forEach(c => {
+                                this.transformCoordinates(c, coordList);
+                            });
+                        });
+                        break;
+                    case 'MultiPolygon':
+                        cs.forEach(cg => {
+                            cg.forEach(innerCg => {
+                                innerCg.forEach(c => {
+                                    this.transformCoordinates(c, coordList);
+                                });
+                            });
+                        });
+                        break;
+                }
+                return coordList;
+            },
+            isPointOverlay() {
+                return this.overlayInfo.type == 'Point' || this.overlayInfo.type == 'MultiPoint'
+            },
+            isLineOverlay() {
+                return this.overlayInfo.type == 'LineString' || this.overlayInfo.type == 'MultiLineString'
+            },
+            isPolygonOverlay() {
+                return this.overlayInfo.type == 'Polygon' || this.overlayInfo.type == 'MultiPolygon'
+            }
+        },
+        watch: {
+            selectedFeature: function(newFeature, oldFeature) {
+                this.onMapReady(_ => {
+                    this.updatePopup(this.selectedFeature);
+                });
+            },
+            selectedEntity: function(newEntity, oldEntity) {
+                    if (newEntity.geodata_id) {
+                        this.selectedFeature = this.features[newEntity.geodata_id];
+                    } else {
+                        // new entity is not linked to any geodata
+                        if (oldEntity.geodata_id) {
+                            // old entity was linked to geodata
+                            // therefore we want to deselect the (linked) feature
+                            this.selectedFeature = {};
+                        }
+                    }
+            },
+            'selectedEntity.geodata_id': function(newId, oldId) {
+                this.updatePopup(this.selectedFeature);
+            },
+            layers: function(newLayers, oldLayers) {
+                this.resetLayers();
+                this.initLayers();
+            },
+            initWkt: function(newWkt, oldWkt) {
+                this.resetLayerData();
+                this.initLayerData();
+                this.updateLayerGroups();
+            },
+            initGeojson: function(newGeojson, oldGeojson) {
+                this.resetLayerData();
+                this.initLayerData();
+                this.updateLayerGroups();
+            },
+            initCollection: function(newCollection, oldCollection) {
+                this.resetLayerData();
+                this.initLayerData();
+                this.updateLayerGroups();
+            },
+            layerLabels: function(newLabels, oldLabels) {
+                this.applyLabels();
+            },
+            layerStyles: function(newStyles, oldStyles) {
+                this.applyStyles();
+            },
+            layerCharts: function(newCharts, oldCharts) {
+                this.applyCharts();
+            },
+            zoomTo: function(newZoomLayerId, oldZoomLayerId) {
+                if(!newZoomLayerId) return;
+                const zoomLayer = this.getEntityLayerById(newZoomLayerId);
+                if(!zoomLayer) return;
+                const zoomLayerSource = zoomLayer.getSource();
+                if(!zoomLayerSource) return;
+                this.setExtent(zoomLayerSource.getExtent());
             }
         },
         beforeMount() {
@@ -494,7 +835,7 @@
                     if(!l.entity_type_id && l.type != 'unlinked') {
                         vm.overlayLayers.push(vm.createNewLayer(l));
                         continue;
-                    };
+                    }
                     const layerId = l.id;
                     let layerName;
                     if(l.entity_type_id) {
@@ -1457,7 +1798,7 @@
             transformCoordinates(c, clist, rev = false) {
                 if(!c[0] || !c[1]) {
                     return null;
-                };
+                }
                 let fromEpsg = rev ? `EPSG:${this.epsg.epsg}` : 'EPSG:3857';
                 let toEpsg = rev ? 'EPSG:3857' : `EPSG:${this.epsg.epsg}`;
                 const transCoord = transformProj(c, fromEpsg, toEpsg);
@@ -1476,7 +1817,7 @@
                     $(element).popover('dispose');
                     this.overlay.setPosition(undefined);
                     return;
-                };
+                }
                 const props = f.getProperties();
                 const geometry = f.getGeometry();
                 const geomName = this.$t('main.map.geometry_name', {id: props.id});
@@ -1546,202 +1887,6 @@
                     default:
                         vm.$throwError({message: `Unknown event type ${e.type} received.`});
                 }
-            }
-        },
-        data() {
-            return {
-                id: `map-${Date.now()}`,
-                drawType: '',
-                interactionMode: '',
-                map: {},
-                mapRendered: false,
-                baselayers: {},
-                overlays: {},
-                overlayLayers: [],
-                baselayerLayers: [],
-                baselayersGroup: {},
-                overlaysGroup: {},
-                entityLayersGroup: {},
-                entityLayers: [],
-                features: {},
-                cachedStyles: {},
-                vector: {}, // TODO replace
-                overlay: {},
-                overlayInfo: {
-                    name: '',
-                    subname: '',
-                    type: '',
-                    size: '',
-                    size_in_m: '',
-                    size_unit: '',
-                    coordinates: [],
-                    feature: null,
-                    showCoordinates: false,
-                    pointEditEnabled: false,
-                    editCoordinates: null
-                },
-                hoverPopup: {},
-                lastHoveredFeature: {},
-                modify: {},
-                draw: {},
-                measurementActive: false,
-                measureDraw: {},
-                measureFeature: {},
-                measureSource: {},
-                measureLayer: {},
-                measureTooltip: {},
-                measureTooltipElement: {},
-                delete: {},
-                snap: {},
-                options: {},
-                extent: [],
-                featureStyles: {},
-                selectedFeature: {},
-                wktFormat: new WKT(),
-                geoJsonFormat: new GeoJSON(),
-            }
-        },
-        computed: {
-            viewport: function() {
-                if(!this.map) return;
-                const target = this.map.getTarget();
-                if(!target) return;
-                const container = document.getElementById(target);
-                if(!container) return;
-                const viewports = container.getElementsByClassName('ol-viewport');
-                if(!viewports) return;
-                if(!viewports.length) return;
-                return viewports[0];
-            },
-            unlinkPossible: function() {
-                const vm = this;
-                if(!vm.selectedFeature.getProperties) {
-                    return false;
-                }
-                const props = vm.selectedFeature.getProperties();
-                return props.entity && !!props.entity.id;
-            },
-            linkPossible: function() {
-                const vm = this;
-                if(!vm.selectedFeature.getProperties) return false;
-                const props = vm.selectedFeature.getProperties();
-                if(props.entity && !!props.entity.id) return false;
-                if(vm.selectedEntity.id) {
-                    if(vm.selectedEntity.geodata_id) {
-                        // already linked
-                        return false;
-                    } else {
-                        return true;
-                    }
-                }
-                return false;
-            },
-            linkedEntity: function() {
-                const vm = this;
-                if(!vm.selectedFeature) return;
-                if(!vm.selectedFeature.getProperties) return;
-                const props = vm.selectedFeature.getProperties();
-                return props.entity;
-            },
-            coordinateList() {
-                const cs = this.overlayInfo.coordinates;
-                let coordList = [];
-                switch(this.overlayInfo.type) {
-                    case 'Point':
-                        this.transformCoordinates(cs, coordList);
-                        break;
-                    case 'LineString':
-                    case 'MultiPoint':
-                        cs.forEach(c => {
-                            this.transformCoordinates(c, coordList);
-                        });
-                        break;
-                    case 'Polygon':
-                    case 'MultiLineString':
-                        cs.forEach(cg => {
-                            cg.forEach(c => {
-                                this.transformCoordinates(c, coordList);
-                            });
-                        });
-                        break;
-                    case 'MultiPolygon':
-                        cs.forEach(cg => {
-                            cg.forEach(innerCg => {
-                                innerCg.forEach(c => {
-                                    this.transformCoordinates(c, coordList);
-                                });
-                            });
-                        });
-                        break;
-                }
-                return coordList;
-            },
-            isPointOverlay() {
-                return this.overlayInfo.type == 'Point' || this.overlayInfo.type == 'MultiPoint'
-            },
-            isLineOverlay() {
-                return this.overlayInfo.type == 'LineString' || this.overlayInfo.type == 'MultiLineString'
-            },
-            isPolygonOverlay() {
-                return this.overlayInfo.type == 'Polygon' || this.overlayInfo.type == 'MultiPolygon'
-            }
-        },
-        watch: {
-            selectedFeature: function(newFeature, oldFeature) {
-                this.onMapReady(_ => {
-                    this.updatePopup(this.selectedFeature);
-                });
-            },
-            selectedEntity: function(newEntity, oldEntity) {
-                    if (newEntity.geodata_id) {
-                        this.selectedFeature = this.features[newEntity.geodata_id];
-                    } else {
-                        // new entity is not linked to any geodata
-                        if (oldEntity.geodata_id) {
-                            // old entity was linked to geodata
-                            // therefore we want to deselect the (linked) feature
-                            this.selectedFeature = {};
-                        }
-                    }
-            },
-            'selectedEntity.geodata_id': function(newId, oldId) {
-                this.updatePopup(this.selectedFeature);
-            },
-            layers: function(newLayers, oldLayers) {
-                this.resetLayers();
-                this.initLayers();
-            },
-            initWkt: function(newWkt, oldWkt) {
-                this.resetLayerData();
-                this.initLayerData();
-                this.updateLayerGroups();
-            },
-            initGeojson: function(newGeojson, oldGeojson) {
-                this.resetLayerData();
-                this.initLayerData();
-                this.updateLayerGroups();
-            },
-            initCollection: function(newCollection, oldCollection) {
-                this.resetLayerData();
-                this.initLayerData();
-                this.updateLayerGroups();
-            },
-            layerLabels: function(newLabels, oldLabels) {
-                this.applyLabels();
-            },
-            layerStyles: function(newStyles, oldStyles) {
-                this.applyStyles();
-            },
-            layerCharts: function(newCharts, oldCharts) {
-                this.applyCharts();
-            },
-            zoomTo: function(newZoomLayerId, oldZoomLayerId) {
-                if(!newZoomLayerId) return;
-                const zoomLayer = this.getEntityLayerById(newZoomLayerId);
-                if(!zoomLayer) return;
-                const zoomLayerSource = zoomLayer.getSource();
-                if(!zoomLayerSource) return;
-                this.setExtent(zoomLayerSource.getExtent());
             }
         }
     }

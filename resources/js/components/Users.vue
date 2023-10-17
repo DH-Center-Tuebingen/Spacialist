@@ -1,13 +1,25 @@
 <template>
-    <div class="d-flex flex-column h-100" v-if="state.setupFinished">
+    <div
+        v-if="state.setupFinished"
+        class="d-flex flex-column h-100"
+    >
         <h4 class="d-flex flex-row gap-2 align-items-center">
             {{ t('main.user.active_users') }}
-            <button type="button" class="btn btn-outline-success btn-sm" @click="showNewUserModal()" :disabled="!can('users_roles_create')">
-                <i class="fas fa-fw fa-plus"></i> {{ t('main.user.add_button') }}
+            <button
+                type="button"
+                class="btn btn-outline-success btn-sm"
+                :disabled="!can('users_roles_create')"
+                @click="showNewUserModal()"
+            >
+                <i class="fas fa-fw fa-plus" /> {{ t('main.user.add_button') }}
             </button>
         </h4>
         <div class="table-responsive flex-grow-1">
-            <table class="table table-striped table-hover table-light" v-dcan="'users_roles_read'" v-if="state.dataInitialized">
+            <table
+                v-if="state.dataInitialized"
+                v-dcan="'users_roles_read'"
+                class="table table-striped table-hover table-light"
+            >
                 <thead class="sticky-top">
                     <tr>
                         <th>{{ t('global.name') }}</th>
@@ -19,10 +31,21 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="user in state.validatedUserList" :key="user.id">
+                    <tr
+                        v-for="user in state.validatedUserList"
+                        :key="user.id"
+                    >
                         <td>
-                            <a href="#" @click.prevent="showUserInfo(user)" class="text-nowrap text-reset text-decoration-none">
-                                <user-avatar class="align-middle" :user="user" :size="20"></user-avatar>
+                            <a
+                                href="#"
+                                class="text-nowrap text-reset text-decoration-none"
+                                @click.prevent="showUserInfo(user)"
+                            >
+                                <user-avatar
+                                    class="align-middle"
+                                    :user="user"
+                                    :size="20"
+                                />
                                 <span class="align-middle ms-2">
                                     {{ user.name }} <span class="text-muted">{{ user.nickname }}</span>
                                 </span>
@@ -30,16 +53,20 @@
                         </td>
                         <td>
                             <input
+                                v-model="v.fields[user.id].email.value"
                                 type="email"
                                 class="form-control"
                                 required
                                 :class="getClassByValidation(getErrors(user.id, 'email'))"
                                 :name="`email_${user.id}`"
-                                v-model="v.fields[user.id].email.value"
-                                @input="e => handleUserMailInput(e, user.id)" />
+                                @input="e => handleUserMailInput(e, user.id)"
+                            >
 
                             <div class="invalid-feedback">
-                                <span v-for="(msg, i) in getErrors(user.id, 'email')" :key="i">
+                                <span
+                                    v-for="(msg, i) in getErrors(user.id, 'email')"
+                                    :key="i"
+                                >
                                     {{ msg }}
                                 </span>
                             </div>
@@ -52,16 +79,19 @@
                                 :object="true"
                                 :label="'display_name'"
                                 :track-by="'display_name'"
-                                :valueProp="'id'"
+                                :value-prop="'id'"
                                 :mode="'tags'"
                                 :disabled="!can('users_roles_write')"
                                 :options="state.roles"
                                 :placeholder="t('main.user.add_role_placeholder')"
-                                @input="v.fields[user.id].roles.handleChange">
-                            </multiselect>
+                                @input="v.fields[user.id].roles.handleChange"
+                            />
 
                             <div class="invalid-feedback">
-                                <span v-for="(msg, i) in getErrors(user.id, 'roles')" :key="i">
+                                <span
+                                    v-for="(msg, i) in getErrors(user.id, 'roles')"
+                                    :key="i"
+                                >
                                     {{ msg }}
                                 </span>
                             </div>
@@ -74,24 +104,58 @@
                         </td>
                         <td>
                             <div class="dropdown">
-                                <span :id="`user-options-dropdown-${user.id}`" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fas fa-fw fa-ellipsis-h"></i>
-                                    <sup class="notification-info" v-if="userDirty(user.id)">
-                                        <i class="fas fa-fw fa-xs fa-circle text-warning"></i>
+                                <span
+                                    :id="`user-options-dropdown-${user.id}`"
+                                    class="clickable"
+                                    data-bs-toggle="dropdown"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                >
+                                    <i class="fas fa-fw fa-ellipsis-h" />
+                                    <sup
+                                        v-if="userDirty(user.id)"
+                                        class="notification-info"
+                                    >
+                                        <i class="fas fa-fw fa-xs fa-circle text-warning" />
                                     </sup>
                                 </span>
-                                <div class="dropdown-menu" :aria-labelledby="`user-options-dropdown-${user.id}`">
-                                    <a class="dropdown-item" href="#" v-if="userDirty(user.id)" :disabled="!userValid(user.id) || !can('users_roles_write')" @click.prevent="patchUser(user.id)">
-                                        <i class="fas fa-fw fa-check text-success"></i> {{ t('global.save') }}
+                                <div
+                                    class="dropdown-menu"
+                                    :aria-labelledby="`user-options-dropdown-${user.id}`"
+                                >
+                                    <a
+                                        v-if="userDirty(user.id)"
+                                        class="dropdown-item"
+                                        href="#"
+                                        :disabled="!userValid(user.id) || !can('users_roles_write')"
+                                        @click.prevent="patchUser(user.id)"
+                                    >
+                                        <i class="fas fa-fw fa-check text-success" /> {{ t('global.save') }}
                                     </a>
-                                    <a class="dropdown-item" href="#" v-if="userDirty(user.id)" @click.prevent="resetUser(user.id)">
-                                        <i class="fas fa-fw fa-undo text-warning"></i> {{ t('global.reset') }}
+                                    <a
+                                        v-if="userDirty(user.id)"
+                                        class="dropdown-item"
+                                        href="#"
+                                        @click.prevent="resetUser(user.id)"
+                                    >
+                                        <i class="fas fa-fw fa-undo text-warning" /> {{ t('global.reset') }}
                                     </a>
-                                    <a class="dropdown-item" href="#" v-if="hasPreference('prefs.enable-password-reset-link')" :disabled="!can('users_roles_write')" @click.prevent="updatePassword(user.email)">
-                                        <i class="fas fa-fw fa-paper-plane text-info"></i> {{ t('global.send_reset_mail') }}
+                                    <a
+                                        v-if="hasPreference('prefs.enable-password-reset-link')"
+                                        class="dropdown-item"
+                                        href="#"
+                                        :disabled="!can('users_roles_write')"
+                                        @click.prevent="updatePassword(user.email)"
+                                    >
+                                        <i class="fas fa-fw fa-paper-plane text-info" /> {{ t('global.send_reset_mail') }}
                                     </a>
-                                    <a class="dropdown-item" href="#" :disabled="!can('users_roles_delete')" @click.prevent="deactivateUser(user.id)">
-                                        <i class="fas fa-fw fa-user-times text-danger"></i> {{ t('global.deactivate') }}
+                                    <a
+                                        class="dropdown-item"
+                                        href="#"
+                                        :disabled="!can('users_roles_delete')"
+                                        @click.prevent="deactivateUser(user.id)"
+                                    >
+                                        <i class="fas fa-fw fa-user-times text-danger" /> {{ t('global.deactivate') }}
                                     </a>
                                 </div>
                             </div>
@@ -106,8 +170,14 @@
         <h4>
             {{ t('main.user.deactivated_users') }}
         </h4>
-        <div class="table-responsive flex-grow-1" v-if="state.deletedUserList.length > 0">
-            <table class="table table-striped table-hover table-light" v-dcan="'users_roles_read'">
+        <div
+            v-if="state.deletedUserList.length > 0"
+            class="table-responsive flex-grow-1"
+        >
+            <table
+                v-dcan="'users_roles_read'"
+                class="table table-striped table-hover table-light"
+            >
                 <thead class="sticky-top">
                     <tr>
                         <th>{{ t('global.name') }}</th>
@@ -120,10 +190,21 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="dUser in state.deletedUserList" :key="dUser.id">
+                    <tr
+                        v-for="dUser in state.deletedUserList"
+                        :key="dUser.id"
+                    >
                         <td>
-                            <a href="#" @click.prevent="showUserInfo(dUser)" class="text-nowrap text-reset text-decoration-none">
-                                <user-avatar class="align-middle" :user="dUser" :size="20"></user-avatar>
+                            <a
+                                href="#"
+                                class="text-nowrap text-reset text-decoration-none"
+                                @click.prevent="showUserInfo(dUser)"
+                            >
+                                <user-avatar
+                                    class="align-middle"
+                                    :user="dUser"
+                                    :size="20"
+                                />
                                 <span class="align-middle ms-2">
                                     {{ dUser.name }} <span class="text-muted">{{ dUser.nickname }}</span>
                                 </span>
@@ -139,12 +220,12 @@
                                 :object="true"
                                 :label="'display_name'"
                                 :track-by="'display_name'"
-                                :valueProp="'id'"
+                                :value-prop="'id'"
                                 :mode="'tags'"
                                 :disabled="true"
                                 :options="[]"
-                                :placeholder="t('main.user.add_role_placeholder')">
-                            </multiselect>
+                                :placeholder="t('main.user.add_role_placeholder')"
+                            />
                         </td>
                         <td>
                             {{ date(dUser.created_at) }}
@@ -157,12 +238,26 @@
                         </td>
                         <td>
                             <div class="dropdown">
-                                <span :id="`deactive-user-dropdown-${dUser.id}`" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fas fa-fw fa-ellipsis-h"></i>
+                                <span
+                                    :id="`deactive-user-dropdown-${dUser.id}`"
+                                    class="clickable"
+                                    data-bs-toggle="dropdown"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                >
+                                    <i class="fas fa-fw fa-ellipsis-h" />
                                 </span>
-                                <div class="dropdown-menu" :aria-labelledby="`deactive-user-dropdown-${dUser.id}`">
-                                    <a class="dropdown-item" href="#" :disabled="!can('users_roles_delete')" @click.prevent="reactivateUser(dUser.id)">
-                                        <i class="fas fa-fw fa-user-check text-success"></i> {{ t('global.reactivate') }}
+                                <div
+                                    class="dropdown-menu"
+                                    :aria-labelledby="`deactive-user-dropdown-${dUser.id}`"
+                                >
+                                    <a
+                                        class="dropdown-item"
+                                        href="#"
+                                        :disabled="!can('users_roles_delete')"
+                                        @click.prevent="reactivateUser(dUser.id)"
+                                    >
+                                        <i class="fas fa-fw fa-user-check text-success" /> {{ t('global.reactivate') }}
                                     </a>
                                 </div>
                             </div>
@@ -171,7 +266,11 @@
                 </tbody>
             </table>
         </div>
-        <div class="alert alert-info" role="alert" v-else>
+        <div
+            v-else
+            class="alert alert-info"
+            role="alert"
+        >
             {{ t('main.user.empty_list') }}
         </div>
     </div>

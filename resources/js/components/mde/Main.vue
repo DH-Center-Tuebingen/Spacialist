@@ -1,5 +1,5 @@
 <template>
-    <Milkdown :editor="editor"/>
+    <Milkdown :editor="editor" />
 </template>
 
 <script>

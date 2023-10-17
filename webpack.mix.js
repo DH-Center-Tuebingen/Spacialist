@@ -33,23 +33,23 @@ const appPath = process.env.MIX_APP_PATH;
  */
 
 mix.js('resources/js/app.js', 'public/js').vue()
-   .sass('resources/sass/app.scss', 'public/css')
-   .sass('resources/sass/app-dark_unrounded.scss', 'public/css')
-   .copy(
-       'node_modules/vue-final-modal/dist/style.css',
-       'public/css/modal.css'
-   )
-//    .copy(
-//        'node_modules/vue-multiselect/dist/vue-multiselect.min.css',
-//        'public/css'
-//    )
-   .options({
-       fileLoaderDirs: {
-           fonts: appPath + 'fonts'
-       }
-   })
-   .webpackConfig(webpack => {
-       return {
+    .sass('resources/sass/app.scss', 'public/css')
+    .sass('resources/sass/app-dark_unrounded.scss', 'public/css')
+    .copy(
+        'node_modules/vue-final-modal/dist/style.css',
+        'public/css/modal.css'
+    )
+    //    .copy(
+    //        'node_modules/vue-multiselect/dist/vue-multiselect.min.css',
+    //        'public/css'
+    //    )
+    .options({
+        fileLoaderDirs: {
+            fonts: appPath + 'fonts'
+        }
+    })
+    .webpackConfig(webpack => {
+        return {
             module: {
                 rules: [{
                     test: /\.m?js$/,
@@ -60,37 +60,42 @@ mix.js('resources/js/app.js', 'public/js').vue()
                     type: 'javascript/auto',
                 }]
             },
-           resolve: {
-            //    alias: {
-            //        videojs: 'video.js',
-            //        WaveSurfer: 'wavesurfer.js',
-            //        RecordRTC: 'recordrtc'
-            //    },
-               fallback: {
-                   fs: false
-               }
-           },
+            resolve: {
+                //    alias: {
+                //        videojs: 'video.js',
+                //        WaveSurfer: 'wavesurfer.js',
+                //        RecordRTC: 'recordrtc'
+                //    },
+                fallback: {
+                    fs: false
+                }
+            },
             output: {
                 publicPath: '/' + appPath
             },
-           plugins: [
-               new webpack.ProvidePlugin({
-                    process : 'process/browser',
-                    Buffer  : ['buffer', 'Buffer']
+            plugins: [
+                new webpack.ProvidePlugin({
+                    process: 'process/browser',
+                    Buffer: ['buffer', 'Buffer']
                 })
-        //        new webpack.ProvidePlugin({
-        //            videojs: 'video.js/dist/video.cjs.js',
-        //            RecordRTC: 'recordrtc',
-        //            MediaStreamRecorder: ['recordrtc', 'MediaStreamRecorder']
-        //        })
-           ]
-       }
-   })
-   .extract();
-if(`public/${appPath}fonts` !== 'public/fonts') {
+                //        new webpack.ProvidePlugin({
+                //            videojs: 'video.js/dist/video.cjs.js',
+                //            RecordRTC: 'recordrtc',
+                //            MediaStreamRecorder: ['recordrtc', 'MediaStreamRecorder']
+                //        })
+            ]
+        }
+    })
+    .extract();
+if (`public/${appPath}fonts` !== 'public/fonts') {
     mix.copyDirectory(`public/${appPath}fonts`, 'public/fonts');
 }
 mix.alias({
     '@': path.join(__dirname, 'resources/js'),
     vue$: path.join(__dirname, 'node_modules/vue/dist/vue.esm-bundler.js')
 })
+
+mix.browserSync({
+    proxy: 'http://localhost:8000',
+    files: 'resources/**/*',
+});

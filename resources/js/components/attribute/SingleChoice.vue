@@ -1,7 +1,8 @@
 <template>
     <multiselect
+        v-model="v.value"
         :classes="multiselectResetClasslist"
-        :valueProp="'id'"
+        :value-prop="'id'"
         :label="'concept_url'"
         :track-by="'concept_url'"
         :object="true"
@@ -10,12 +11,12 @@
         :options="selections"
         :name="name"
         :placeholder="t('global.select.placeholder')"
-        v-model="v.value"
-        @change="value => v.handleChange(value)">
-        <template v-slot:option="{ option }">
+        @change="value => v.handleChange(value)"
+    >
+        <template #option="{ option }">
             {{ translateConcept(option.concept_url) }}
         </template>
-        <template v-slot:singlelabel="{ value }">
+        <template #singlelabel="{ value }">
             <div class="multiselect-single-label">
                 {{ translateConcept(value.concept_url) }}
             </div>
@@ -120,10 +121,6 @@
                 // LOCAL
                 resetFieldState,
                 undirtyField,
-                // PROPS
-                name,
-                disabled,
-                selections,
                 // STATE
                 state,
                 v,

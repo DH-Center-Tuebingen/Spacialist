@@ -1,19 +1,25 @@
 <template>
     <div>
         <input
+            :id="name"
+            v-model="v.value"
             class="form-control"
             :disabled="disabled"
             type="text"
-            :id="name"
             :name="name"
             :placeholder="t('main.entity.attributes.add_wkt')"
-            v-model="v.value"
-            @input="v.handleInput" />
+            @input="v.handleInput"
+        >
 
-            <button type="button" class="btn btn-outline-secondary mt-2" :disabled="disabled" @click="openGeographyModal()">
-                <i class="fas fa-fw fa-map-marker-alt"></i>
-                {{ t('main.entity.attributes.open_map') }}
-            </button>
+        <button
+            type="button"
+            class="btn btn-outline-secondary mt-2"
+            :disabled="disabled"
+            @click="openGeographyModal()"
+        >
+            <i class="fas fa-fw fa-map-marker-alt" />
+            {{ t('main.entity.attributes.open_map') }}
+        </button>
     </div>
 </template>
 
@@ -122,11 +128,6 @@
                 openGeographyModal,
                 resetFieldState,
                 undirtyField,
-                // PROPS
-                name,
-                disabled,
-                value,
-                attribute,
                 // STATE
                 state,
                 v,

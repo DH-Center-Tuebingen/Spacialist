@@ -506,9 +506,9 @@ export const store = createStore({
                 updateBibliography({commit}, data) {
                     data.forEach(itemWrap => {
                         if(itemWrap.added) {
-                            commit("addBibliographyItem", itemWrap.entry);
+                            commit('addBibliographyItem', itemWrap.entry);
                         } else {
-                            commit("updateBibliographyItem", itemWrap.entry);
+                            commit('updateBibliographyItem', itemWrap.entry);
                         }
                     });
                 },

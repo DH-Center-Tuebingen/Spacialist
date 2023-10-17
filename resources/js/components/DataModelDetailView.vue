@@ -1,23 +1,43 @@
 <template>
-    <div class="h-100 d-flex flex-column" v-if="state.entityAvailable">
+    <div
+        v-if="state.entityAvailable"
+        class="h-100 d-flex flex-column"
+    >
         <h4>
             {{ t('main.datamodel.detail.properties.title') }}
             <small>
                 {{ translateConcept(state.entityType.thesaurus_url) }}
             </small>
         </h4>
-        <div v-if="state.entityType.id" class="col d-flex flex-column">
-            <form role="form" @submit.prevent="updateEntityType">
+        <div
+            v-if="state.entityType.id"
+            class="col d-flex flex-column"
+        >
+            <form
+                role="form"
+                @submit.prevent="updateEntityType"
+            >
                 <div class="mb-3 offset-3 ps-2">
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="entity-type-root-toggle" v-model="state.entityType.is_root">
-                        <label class="form-check-label" for="entity-type-root-toggle">
+                        <input
+                            id="entity-type-root-toggle"
+                            v-model="state.entityType.is_root"
+                            class="form-check-input"
+                            type="checkbox"
+                        >
+                        <label
+                            class="form-check-label"
+                            for="entity-type-root-toggle"
+                        >
                             {{ t('main.datamodel.detail.properties.top_level') }}
                         </label>
                     </div>
                 </div>
                 <div class="mb-3 row">
-                    <label for="entity-geometrytype-ro" class="col-form-label col-md-3 text-end">{{ t('global.geometry_type') }}</label>
+                    <label
+                        for="entity-geometrytype-ro"
+                        class="col-form-label col-md-3 text-end"
+                    >{{ t('global.geometry_type') }}</label>
                     <div class="col-md-9 d-flex align-items-center">
                         <span>
                             {{ state.entityType.layer.type }}
@@ -36,41 +56,61 @@
                             :mode="'tags'"
                             :label="'thesaurus_url'"
                             :track-by="'thesaurus_url'"
-                            :valueProp="'id'"
+                            :value-prop="'id'"
                             :options="state.minimalEntityTypes"
-                            :placeholder="t('global.select.placeholder')">
-                                <template v-slot:option="{ option }">
+                            :placeholder="t('global.select.placeholder')"
+                        >
+                            <template #option="{ option }">
+                                {{ translateConcept(option.thesaurus_url) }}
+                            </template>
+                            <template #tag="{ option, handleTagRemove, disabled }">
+                                <div class="multiselect-tag">
                                     {{ translateConcept(option.thesaurus_url) }}
-                                </template>
-                                <template v-slot:tag="{ option, handleTagRemove, disabled }">
-                                    <div class="multiselect-tag">
-                                        {{ translateConcept(option.thesaurus_url) }}
-                                        <span v-if="!disabled" class="multiselect-tag-remove" @click.prevent @mousedown.prevent.stop="handleTagRemove(option, $event)">
-                                            <span class="multiselect-tag-remove-icon"></span>
-                                        </span>
-                                    </div>
-                                </template>
+                                    <span
+                                        v-if="!disabled"
+                                        class="multiselect-tag-remove"
+                                        @click.prevent
+                                        @mousedown.prevent.stop="handleTagRemove(option, $event)"
+                                    >
+                                        <span class="multiselect-tag-remove-icon" />
+                                    </span>
+                                </div>
+                            </template>
                         </multiselect>
                         <div class="mt-2 d-flex flex-row gap-2">
-                            <button type="button" class="btn btn-outline-success btn-sm" @click="addAllEntityTypes">
-                                <i class="fas fa-fw fa-tasks"></i> {{ t('global.select_all') }}
+                            <button
+                                type="button"
+                                class="btn btn-outline-success btn-sm"
+                                @click="addAllEntityTypes"
+                            >
+                                <i class="fas fa-fw fa-tasks" /> {{ t('global.select_all') }}
                             </button>
-                            <button type="button" class="btn btn-outline-danger btn-sm" @click="removeAllEntityTypes">
-                                <i class="fas fa-fw fa-times"></i> {{ t('global.select_none') }}
+                            <button
+                                type="button"
+                                class="btn btn-outline-danger btn-sm"
+                                @click="removeAllEntityTypes"
+                            >
+                                <i class="fas fa-fw fa-times" /> {{ t('global.select_none') }}
                             </button>
                         </div>
                     </div>
                 </div>
                 <div class="offset-3 ps-2">
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-fw fa-save"></i> {{ t('global.save') }}
+                    <button
+                        type="submit"
+                        class="btn btn-success"
+                    >
+                        <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
                     </button>
                 </div>
-                <hr />
+                <hr>
             </form>
             <h4>{{ t('main.datamodel.detail.attribute.title') }}</h4>
             <div class="col overflow-hidden flex-grow-1 position-relative">
-                <div v-if="state.entityAttributes.length == 0" class="position-absolute d-flex justify-content-center align-items-center h-100 w-100 rounded text-muted bg-light-dark border border-3 border-secondary border-dashed">
+                <div
+                    v-if="state.entityAttributes.length == 0"
+                    class="position-absolute d-flex justify-content-center align-items-center h-100 w-100 rounded text-muted bg-light-dark border border-3 border-secondary border-dashed"
+                >
                     <h4>Drag attributes here</h4>
                 </div>
                 <attribute-list
@@ -84,8 +124,8 @@
                     @add-element="addAttributeToEntityType"
                     @edit-element="onEditEntityAttribute"
                     @remove-element="onRemoveAttributeFromEntityType"
-                    @reorder-list="reorderEntityAttribute">
-                </attribute-list>
+                    @reorder-list="reorderEntityAttribute"
+                />
             </div>
         </div>
     </div>

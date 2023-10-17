@@ -8,62 +8,120 @@
                 </small>
             </h3>
             <div class="dropdown">
-                <span id="tree-options-dropdown" class="clickable align-middle btn btn-outline-primary btn-sm" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span
+                    id="tree-options-dropdown"
+                    class="clickable align-middle btn btn-outline-primary btn-sm"
+                    data-bs-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                >
                     <span class="fa-stack h-auto">
-                        <i class="fas fa-filter"></i>
-                        <i class="fas fa-ellipsis-h" data-fa-transform="start-4"></i>
+                        <i class="fas fa-filter" />
+                        <i
+                            class="fas fa-ellipsis-h"
+                            data-fa-transform="start-4"
+                        />
                     </span>
                 </span>
-                <div class="dropdown-menu" aria-labelledby="tree-options-dropdown">
-                    <a class="dropdown-item" href="#" :class="getSortingStateClass('rank', 'asc')" @click.prevent="setSort('rank', 'asc')">
-                        <i class="fas fa-fw fa-sort-numeric-down"></i>
+                <div
+                    class="dropdown-menu"
+                    aria-labelledby="tree-options-dropdown"
+                >
+                    <a
+                        class="dropdown-item"
+                        href="#"
+                        :class="getSortingStateClass('rank', 'asc')"
+                        @click.prevent="setSort('rank', 'asc')"
+                    >
+                        <i class="fas fa-fw fa-sort-numeric-down" />
                         <span class="ms-2">
                             {{ t('main.entity.tree.sorts.asc.rank') }}
                         </span>
                     </a>
-                    <a class="dropdown-item" href="#" :class="getSortingStateClass('rank', 'desc')" @click.prevent="setSort('rank', 'desc')">
-                        <i class="fas fa-fw fa-sort-numeric-up"></i>
+                    <a
+                        class="dropdown-item"
+                        href="#"
+                        :class="getSortingStateClass('rank', 'desc')"
+                        @click.prevent="setSort('rank', 'desc')"
+                    >
+                        <i class="fas fa-fw fa-sort-numeric-up" />
                         <span class="ms-2">
                             {{ t('main.entity.tree.sorts.desc.rank') }}
                         </span>
                     </a>
-                    <a class="dropdown-item" href="#" :class="getSortingStateClass('alpha', 'asc')" @click.prevent="setSort('alpha', 'asc')">
-                        <i class="fas fa-fw fa-sort-alpha-down"></i>
+                    <a
+                        class="dropdown-item"
+                        href="#"
+                        :class="getSortingStateClass('alpha', 'asc')"
+                        @click.prevent="setSort('alpha', 'asc')"
+                    >
+                        <i class="fas fa-fw fa-sort-alpha-down" />
                         <span class="ms-2">
                             {{ t('main.entity.tree.sorts.asc.name') }}
                         </span>
                     </a>
-                    <a class="dropdown-item" href="#" :class="getSortingStateClass('alpha', 'desc')" @click.prevent="setSort('alpha', 'desc')">
-                        <i class="fas fa-fw fa-sort-alpha-up"></i>
+                    <a
+                        class="dropdown-item"
+                        href="#"
+                        :class="getSortingStateClass('alpha', 'desc')"
+                        @click.prevent="setSort('alpha', 'desc')"
+                    >
+                        <i class="fas fa-fw fa-sort-alpha-up" />
                         <span class="ms-2">
                             {{ t('main.entity.tree.sorts.desc.name') }}
                         </span>
                     </a>
-                    <a class="dropdown-item" href="#" :class="getSortingStateClass('children', 'asc')" @click.prevent="setSort('children', 'asc')">
-                        <i class="fas fa-fw fa-sort-amount-down"></i>
+                    <a
+                        class="dropdown-item"
+                        href="#"
+                        :class="getSortingStateClass('children', 'asc')"
+                        @click.prevent="setSort('children', 'asc')"
+                    >
+                        <i class="fas fa-fw fa-sort-amount-down" />
                         <span class="ms-2">
                             {{ t('main.entity.tree.sorts.asc.children') }}
                         </span>
                     </a>
-                    <a class="dropdown-item" href="#" :class="getSortingStateClass('children', 'desc')" @click.prevent="setSort('children', 'desc')">
-                        <i class="fas fa-fw fa-sort-amount-up"></i>
+                    <a
+                        class="dropdown-item"
+                        href="#"
+                        :class="getSortingStateClass('children', 'desc')"
+                        @click.prevent="setSort('children', 'desc')"
+                    >
+                        <i class="fas fa-fw fa-sort-amount-up" />
                         <span class="ms-2">
                             {{ t('main.entity.tree.sorts.desc.children') }}
                         </span>
                     </a>
-                    <a class="dropdown-item" href="#" :class="getSortingStateClass('type', 'asc')" @click.prevent="setSort('type', 'asc')">
+                    <a
+                        class="dropdown-item"
+                        href="#"
+                        :class="getSortingStateClass('type', 'asc')"
+                        @click.prevent="setSort('type', 'asc')"
+                    >
                         <span class="fa-stack d-inline">
-                            <i class="fas fa-long-arrow-alt-down"></i>
-                            <i class="fas fa-monument" data-fa-transform="start-4"></i>
+                            <i class="fas fa-long-arrow-alt-down" />
+                            <i
+                                class="fas fa-monument"
+                                data-fa-transform="start-4"
+                            />
                         </span>
                         <span class="ms-2">
                             {{ t('main.entity.tree.sorts.asc.type') }}
                         </span>
                     </a>
-                    <a class="dropdown-item" href="#" :class="getSortingStateClass('type', 'desc')" @click.prevent="setSort('type', 'desc')">
+                    <a
+                        class="dropdown-item"
+                        href="#"
+                        :class="getSortingStateClass('type', 'desc')"
+                        @click.prevent="setSort('type', 'desc')"
+                    >
                         <span class="fa-stack d-inline">
-                            <i class="fas fa-long-arrow-alt-up"></i>
-                            <i class="fas fa-monument" data-fa-transform="start-4"></i>
+                            <i class="fas fa-long-arrow-alt-up" />
+                            <i
+                                class="fas fa-monument"
+                                data-fa-transform="start-4"
+                            />
                         </span>
                         <span class="ms-2">
                             {{ t('main.entity.tree.sorts.desc.type') }}
@@ -74,13 +132,17 @@
         </div>
         <tree-search
             class="mb-2"
-            @selected="searchResultSelected"
             :on-multiselect="onSearchMultiSelect"
-            :on-clear="resetHighlighting">
-        </tree-search>
+            :on-clear="resetHighlighting"
+            @selected="searchResultSelected"
+        />
         <div class="d-flex flex-column col px-0 overflow-hidden">
-            <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="openAddEntityDialog()">
-                <i class="fas fa-fw fa-plus"></i> {{ t('main.entity.tree.add') }}
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-success mb-2"
+                @click="openAddEntityDialog()"
+            >
+                <i class="fas fa-fw fa-plus" /> {{ t('main.entity.tree.add') }}
             </button>
             <tree
                 id="entity-tree"
@@ -88,7 +150,8 @@
                 :data="state.tree"
                 size="small"
                 @change="itemClick"
-                @toggle="itemToggle">
+                @toggle="itemToggle"
+            >
                 <!-- <treenode v-for="(child, i) in state.tree" :key="i" :data="child"></treenode> -->
             </tree>
             <!-- <tree
@@ -102,8 +165,12 @@
                 @drop="itemDrop"
                 @toggle="itemToggle">
             </tree> -->
-            <button type="button" class="btn btn-sm btn-outline-success mt-2" @click="openAddEntityDialog()">
-                <i class="fas fa-fw fa-plus"></i> {{ t('main.entity.tree.add') }}
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-success mt-2"
+                @click="openAddEntityDialog()"
+            >
+                <i class="fas fa-fw fa-plus" /> {{ t('main.entity.tree.add') }}
             </button>
         </div>
     </div>
@@ -236,7 +303,7 @@
 
             // ON MOUNTED
             onMounted(_ => {
-                console.log("entity tree component mounted");
+                console.log('entity tree component mounted');
                 // document.addEventListener('click', check)
             });
             onUnmounted(_ => {

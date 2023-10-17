@@ -1,16 +1,17 @@
 <template>
     <div class="d-flex">
         <input
+            :id="name"
+            v-model="v.value"
             class="form-range"
             type="range"
             step="1"
             min="0"
             max="100"
             :disabled="disabled"
-            :id="name"
             :name="name"
-            v-model="v.value"
-            @input="v.handleInput" />
+            @input="v.handleInput"
+        >
         <span class="ms-3">
             {{ v.value }}%
         </span>
@@ -98,10 +99,6 @@
                 // LOCAL
                 resetFieldState,
                 undirtyField,
-                // PROPS
-                name,
-                disabled,
-                value,
                 // STATE
                 state,
                 v,

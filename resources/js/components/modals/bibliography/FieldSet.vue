@@ -1,23 +1,46 @@
 <template>
     <div>
-        <div v-for="(data, field) in v.fields" :key="field" class="row mb-3">
+        <div
+            v-for="(data, field) in v.fields"
+            :key="field"
+            class="row mb-3"
+        >
             <label class="col-form-label col-md-3 text-end">
                 {{ t(`main.bibliography.column.${field}`) }}
-                <span v-if="isMandatoryField(field)" class="text-danger">
+                <span
+                    v-if="isMandatoryField(field)"
+                    class="text-danger"
+                >
                     *
                 </span>
                 :
             </label>
             <div class="col-md-9">
-                <input type="text" class="form-control d-inline" :name="`${field}`" :class="getClassByValidation(data.errors)" v-model="data.value" @input="data.handleChange" />
-                <a href="#" class="text-muted ms--4-5" v-show="data.meta.dirty" @click.prevent="resetField(field)" tabindex="-1">
+                <input
+                    v-model="data.value"
+                    type="text"
+                    class="form-control d-inline"
+                    :name="`${field}`"
+                    :class="getClassByValidation(data.errors)"
+                    @input="data.handleChange"
+                >
+                <a
+                    v-show="data.meta.dirty"
+                    href="#"
+                    class="text-muted ms--4-5"
+                    tabindex="-1"
+                    @click.prevent="resetField(field)"
+                >
                     <span>
-                        <i class="fas fa-fw fa-undo"></i>
+                        <i class="fas fa-fw fa-undo" />
                     </span>
                 </a>
 
                 <div class="invalid-feedback">
-                    <span v-for="(msg, i) in data.errors" :key="i">
+                    <span
+                        v-for="(msg, i) in data.errors"
+                        :key="i"
+                    >
                         {{ msg }}
                     </span>
                 </div>

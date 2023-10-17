@@ -1,5 +1,9 @@
 <template>
-    <vue-markdown class="markdown-viewer" :rehypePlugins="state.plugins" :source="source" />
+    <vue-markdown
+        class="markdown-viewer"
+        :rehype-plugins="state.plugins"
+        :source="source"
+    />
 </template>
 
 <script>
@@ -56,8 +60,6 @@
             // RETURN
             return {
                 // HELPERS
-                // PROPS
-                source,
                 // LOCAL
                 // STATE
                 state,

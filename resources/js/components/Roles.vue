@@ -1,13 +1,24 @@
 <template>
-    <div class="d-flex flex-column h-100" v-if="state.setupFinished">
+    <div
+        v-if="state.setupFinished"
+        class="d-flex flex-column h-100"
+    >
         <h4 class="d-flex flex-row gap-2 align-items-center">
             {{ t('global.roles') }}
-            <button type="button" class="btn btn-outline-success btn-sm" @click="showAddRoleModal()" :disabled="!can('users_roles_create')">
-                <i class="fas fa-fw fa-plus"></i> {{ t('main.role.add_button') }}
+            <button
+                type="button"
+                class="btn btn-outline-success btn-sm"
+                :disabled="!can('users_roles_create')"
+                @click="showAddRoleModal()"
+            >
+                <i class="fas fa-fw fa-plus" /> {{ t('main.role.add_button') }}
             </button>
         </h4>
         <div class="table-responsive flex-grow-1">
-            <table class="table table-striped table-hover table-light mb-0" v-if="state.dataInitialized">
+            <table
+                v-if="state.dataInitialized"
+                class="table table-striped table-hover table-light mb-0"
+            >
                 <thead class="sticky-top">
                     <tr>
                         <th>{{ t('global.name') }}</th>
@@ -20,55 +31,75 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="role in state.roleList" :key="role.id">
+                    <tr
+                        v-for="role in state.roleList"
+                        :key="role.id"
+                    >
                         <td>
                             {{ role.name }}
                         </td>
                         <td v-if="v.fields[role.id]">
                             <input
+                                v-model="v.fields[role.id].display_name.value"
                                 type="text"
                                 class="form-control"
                                 required
                                 :class="getClassByValidation(getErrors(role.id, 'display_name'))"
                                 :name="`displayname_${role.id}`"
-                                v-model="v.fields[role.id].display_name.value"
-                                @input="e => v.fields[role.id].display_name.handleChange(e)" />
+                                @input="e => v.fields[role.id].display_name.handleChange(e)"
+                            >
 
                             <div class="invalid-feedback">
-                                <span v-for="(msg, i) in getErrors(role.id, 'display_name')" :key="i">
+                                <span
+                                    v-for="(msg, i) in getErrors(role.id, 'display_name')"
+                                    :key="i"
+                                >
                                     {{ msg }}
                                 </span>
                             </div>
                         </td>
                         <td v-if="v.fields[role.id]">
                             <input
+                                v-model="v.fields[role.id].description.value"
                                 type="text"
                                 class="form-control"
                                 required
                                 :class="getClassByValidation(getErrors(role.id, 'description'))"
                                 :name="`description_${role.id}`"
-                                v-model="v.fields[role.id].description.value"
-                                @input="e => v.fields[role.id].description.handleChange(e)" />
+                                @input="e => v.fields[role.id].description.handleChange(e)"
+                            >
 
                             <div class="invalid-feedback">
-                                <span v-for="(msg, i) in getErrors(role.id, 'description')" :key="i">
+                                <span
+                                    v-for="(msg, i) in getErrors(role.id, 'description')"
+                                    :key="i"
+                                >
                                     {{ msg }}
                                 </span>
                             </div>
                         </td>
                         <td v-if="v.fields[role.id]">
                             <div class="d-flex flex-row gap-2">
-                                <div class="d-flex flex-row gap-2 align-items-center" v-if="role.derived">
+                                <div
+                                    v-if="role.derived"
+                                    class="d-flex flex-row gap-2 align-items-center"
+                                >
                                     <span class="text-muted">
                                         {{ t('main.role.preset.derived_from') }}
                                     </span>
                                     <span class="badge bg-primary">
-                                        <i class="fas fa-fw fa-shield-alt"></i>
+                                        <i class="fas fa-fw fa-shield-alt" />
                                         {{ t(`main.role.preset.${role.derived.name}`) }}
                                     </span>
                                 </div>
-                                <a href="#" v-if="can('users_roles_write')" class="text-decoration-none text-info" @click.prevent="openAccessControlModal(role.id)" :title="t('global.edit')">
-                                    <i class="fas fa-fw fa-edit"></i>
+                                <a
+                                    v-if="can('users_roles_write')"
+                                    href="#"
+                                    class="text-decoration-none text-info"
+                                    :title="t('global.edit')"
+                                    @click.prevent="openAccessControlModal(role.id)"
+                                >
+                                    <i class="fas fa-fw fa-edit" />
                                 </a>
                             </div>
                         </td>
@@ -80,18 +111,41 @@
                         </td>
                         <td>
                             <div class="dropdown">
-                                <span :id="`role-options-dropdown-${role.id}`" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fas fa-fw fa-ellipsis-h"></i>
-                                    <sup class="notification-info" v-if="roleDirty(role.id)">
-                                        <i class="fas fa-fw fa-xs fa-circle text-warning"></i>
+                                <span
+                                    :id="`role-options-dropdown-${role.id}`"
+                                    class="clickable"
+                                    data-bs-toggle="dropdown"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                >
+                                    <i class="fas fa-fw fa-ellipsis-h" />
+                                    <sup
+                                        v-if="roleDirty(role.id)"
+                                        class="notification-info"
+                                    >
+                                        <i class="fas fa-fw fa-xs fa-circle text-warning" />
                                     </sup>
                                 </span>
-                                <div class="dropdown-menu" :aria-labelledby="`role-options-dropdown-${role.id}`">
-                                    <a class="dropdown-item" href="#" v-if="roleDirty(role.id)" :disabled="!can('users_roles_write')" @click.prevent="patchRole(role.id)">
-                                        <i class="fas fa-fw fa-check text-success"></i> {{ t('global.save') }}
+                                <div
+                                    class="dropdown-menu"
+                                    :aria-labelledby="`role-options-dropdown-${role.id}`"
+                                >
+                                    <a
+                                        v-if="roleDirty(role.id)"
+                                        class="dropdown-item"
+                                        href="#"
+                                        :disabled="!can('users_roles_write')"
+                                        @click.prevent="patchRole(role.id)"
+                                    >
+                                        <i class="fas fa-fw fa-check text-success" /> {{ t('global.save') }}
                                     </a>
-                                    <a class="dropdown-item" href="#" @click.prevent="deleteRole(role.id)" :disabled="!can('users_roles_delete')">
-                                        <i class="fas fa-fw fa-trash text-danger"></i> {{ t('global.delete') }}
+                                    <a
+                                        class="dropdown-item"
+                                        href="#"
+                                        :disabled="!can('users_roles_delete')"
+                                        @click.prevent="deleteRole(role.id)"
+                                    >
+                                        <i class="fas fa-fw fa-trash text-danger" /> {{ t('global.delete') }}
                                     </a>
                                 </div>
                             </div>

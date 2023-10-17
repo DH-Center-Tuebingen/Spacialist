@@ -1,6 +1,10 @@
 <template>
-    <button type="button" class="btn btn-outline-secondary btn-sm px-1 py-05" :id="state.pickId">
-        <span class="far fa-fw fa-laugh"></span>
+    <button
+        :id="state.pickId"
+        type="button"
+        class="btn btn-outline-secondary btn-sm px-1 py-05"
+    >
+        <span class="far fa-fw fa-laugh" />
     </button>
 </template>
 

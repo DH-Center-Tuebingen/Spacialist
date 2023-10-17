@@ -1,46 +1,52 @@
 <template>
     <multiselect
+        :id="state.id"
         v-model="state.entry"
         name="global-search"
         class="multiselect-wide"
-        :id="state.id"
         :object="true"
         :label="'idx'"
         :track-by="'idx'"
-        :valueProp="'idx'"
+        :value-prop="'idx'"
         :mode="'single'"
         :options="query => search(query)"
-        :hideSelected="false"
+        :hide-selected="false"
         :filterResults="false"
-        :resolveOnLoad="false"
-        :clearOnSearch="true"
-        :clearOnSelect="true"
+        :resolve-on-load="false"
+        :clear-on-search="true"
+        :clear-on-select="true"
         :caret="false"
-        :minChars="0"
+        :min-chars="0"
         :searchable="true"
         :delay="delay"
         :limit="limit"
         :placeholder="t('global.search')"
-        @select="optionSelected">
-        <template v-slot:singlelabel="{ value }">
+        @select="optionSelected"
+    >
+        <template #singlelabel="{ value }">
             <div class="multiselect-single-label">
                 {{ value.title }}
             </div>
         </template>
-        <template v-slot:option="{ option }">
+        <template #option="{ option }">
             <div class="col-3 text-center">
-                <img :src="option.thumb_url" :alt="option.title" class="w-100" v-if="isImage(option)" />
+                <img
+                    v-if="isImage(option)"
+                    :src="option.thumb_url"
+                    :alt="option.title"
+                    class="w-100"
+                >
                 <span v-else-if="isFile(option, true)">
-                    <i class="fas fa-fw fa-file"></i>
+                    <i class="fas fa-fw fa-file" />
                 </span>
                 <span v-else-if="isEntity(option) || isEntityAttribute(option)">
-                    <i class="fas fa-fw fa-monument"></i>
+                    <i class="fas fa-fw fa-monument" />
                 </span>
                 <span v-else-if="isBibliography(option)">
-                    <i class="fas fa-fw fa-book"></i>
+                    <i class="fas fa-fw fa-book" />
                 </span>
                 <span v-else-if="isGeodata(option)">
-                    <i class="fas fa-fw fa-map-marked-alt"></i>
+                    <i class="fas fa-fw fa-map-marked-alt" />
                 </span>
             </div>
             <div class="col-9 ps-2">
@@ -68,10 +74,16 @@
                 </span>
             </div>
         </template>
-        <template v-slot:nooptions="">
-            <div class="p-2" v-if="!!state.query" v-html="t('global.search_no_results_for', {term: state.query})">
-            </div>
-            <div class="p-1 text-muted" v-else>
+        <template #nooptions="">
+            <div
+                v-if="!!state.query"
+                class="p-2"
+                v-html="t('global.search_no_results_for', {term: state.query})"
+            />
+            <div
+                v-else
+                class="p-1 text-muted"
+            >
                 {{ t('global.search_no_term_info_global') }}
             </div>
         </template>
@@ -200,9 +212,6 @@
                 isBibliography,
                 isGeodata,
                 optionSelected,
-                // PROPS
-                delay,
-                limit,
                 // STATE
                 state,
             };

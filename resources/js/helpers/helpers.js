@@ -190,7 +190,7 @@ export async function handleDeletedEntity(entity) {
         }
     }
     return new Promise(r => r(null));
-};
+}
 
 export function getAttribute(id) {
     if(!id) return {};
@@ -404,7 +404,7 @@ export function getUser() {
 
 export function userId() {
     return getUser().id || -1;
-};
+}
 
 export function getUsers() {
     const fallback = [];
@@ -413,7 +413,7 @@ export function getUsers() {
     } else {
         return fallback;
     }
-};
+}
 
 // where can be any of 'start', 'end', 'whole' (default)
 export function filterUsers(term, ci=true, where='whole') {
@@ -428,7 +428,7 @@ export function filterUsers(term, ci=true, where='whole') {
     return getUsers().filter(u => {
         return regex.test(u.name) || regex.test(u.nickname);
     });
-};
+}
 
 export function getRoles(withPermissions = false) {
     const fallback = [];
@@ -437,7 +437,7 @@ export function getRoles(withPermissions = false) {
     } else {
         return fallback;
     }
-};
+}
 
 export function getUserBy(value, attr = 'id') {
     if(!value) return null;
@@ -453,7 +453,7 @@ export function getUserBy(value, attr = 'id') {
     } else {
         return null;
     }
-};
+}
 
 export function getRoleBy(value, attr = 'id', withPermissions = false) {
     if(isLoggedIn()) {
@@ -463,7 +463,7 @@ export function getRoleBy(value, attr = 'id', withPermissions = false) {
     } else {
         return null;
     }
-};
+}
 
 export function throwError(error) {
     if (error.response) {
@@ -479,7 +479,7 @@ export function throwError(error) {
     } else {
         showErrorModal(error.message || error);
     }
-};
+}
 
 export function simpleResourceType(resource) {
     switch(resource) {
@@ -493,7 +493,7 @@ export function simpleResourceType(resource) {
         default:
             return resource;
     }
-};
+}
 
 export function findInList(list, searchValue, searchKey = 'id', recKey = 'children') {
     if(!list || list.length == 0) return;
@@ -505,7 +505,7 @@ export function findInList(list, searchValue, searchKey = 'id', recKey = 'childr
         const gotIt = findInList(list[i][recKey], searchValue, searchKey, recKey);
         if(gotIt) return gotIt;
     }
-};
+}
 
 export function only(object, allows = []) {
     return Object.keys(object)
@@ -516,7 +516,7 @@ export function only(object, allows = []) {
             [key]: object[key]
             };
         }, {});
-};
+}
 
 export function except(object, excepts = []) {
     return Object.keys(object)
@@ -527,7 +527,7 @@ export function except(object, excepts = []) {
             [key]: object[key]
             };
         }, {});
-};
+}
 
 export function getElementAttribute(el, attribute, defaultValue, type = 'string') {
     let value = el.getAttribute(attribute);
@@ -543,7 +543,7 @@ export function getElementAttribute(el, attribute, defaultValue, type = 'string'
 
 export function isArray(arr) {
     return Array.isArray(arr);
-};
+}
 
 export const _cloneDeep = require('lodash/cloneDeep');
 export const _debounce = require('lodash/debounce');
@@ -556,7 +556,7 @@ export function showErrorModal(errorMsg, headers, request) {
         headers: headers,
         request: request,
     });
-};
+}
 
 export function getValidClass(msgObject, field) {
     let isInvalid = false;
@@ -570,37 +570,37 @@ export function getValidClass(msgObject, field) {
         // 'is-valid': !msgObject[field],
         'is-invalid': isInvalid
     };
-};
+}
 
 export function getClassByValidation(errorList) {
     return {
         // 'is-valid': !msgObject[field],
         'is-invalid': !!errorList && errorList.length > 0,
     };
-};
+}
 
 export function createAnchorFromUrl(url) {
     if(!url) return url;
     if(typeof url != 'string' || !url.replace) return url;
     const urlRegex = /(\b(https?):\/\/[-A-Z0-9+#&=?@%_.]*[-A-Z0-9+#&=?@%_\/])/ig;
     return url.replace(urlRegex, match => `<a href="${match}" target="_blank">${match}</a>`);
-};
+}
 
 export function hasPreference(prefKey, prop) {
     const ps = store.getters.preferenceByKey(prefKey);
     if (ps) {
         return ps[prop] || ps;
     }
-};
+}
 
 export function getPreference(prefKey) {
     return store.getters.preferenceByKey(prefKey);
-};
+}
 
 export function getProjectName(slug = false) {
     const name = getPreference('prefs.project-name');
     return slug ? slugify(name) : name;
-};
+}
 
 export function slugify(s, delimiter = '-') {
     var char_map = {
@@ -739,29 +739,29 @@ export function getNotificationSourceLink(notification) {
             }
         };
     }
-};
+}
 
 export function userNotifications() {
     return getUser().notifications || [];
-};
+}
 
 export async function asyncFor(arr, callback) {
     for(let i=0; i<arr.length; i++) {
         await callback(arr[i]);
     }
-};
+}
 
 export function createDownloadLink(content, filename, base64 = false, contentType = 'text/plain') {
-    var link = document.createElement("a");
+    var link = document.createElement('a');
     let url;
     if(base64) {
         url = `data:${contentType};base64,${content}`;
     } else {
         url = window.URL.createObjectURL(new Blob([content]));
     }
-    link.setAttribute("href", url);
-    link.setAttribute("type", contentType);
-    link.setAttribute("download", filename);
+    link.setAttribute('href', url);
+    link.setAttribute('type', contentType);
+    link.setAttribute('download', filename);
     document.body.appendChild(link);
     link.click();
 }
@@ -774,12 +774,12 @@ export function copyToClipboard(elemId) {
     selection.removeAllRanges();
     selection.addRange(range);
     try {
-        document.execCommand("copy");
+        document.execCommand('copy');
         selection.removeAllRanges();
     } catch(err) {
         console.log(err);
     }
-};
+}
 
 export function setPreference(prefKey, value) {
     this.state.preferences[prefKey] = value;

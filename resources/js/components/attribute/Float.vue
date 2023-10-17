@@ -1,14 +1,15 @@
 <template>
     <input
+        :id="name"
+        v-model.number="v.value"
         class="form-control"
         type="number"
         step="0.01"
         placeholder="0.0"
         :disabled="disabled"
-        :id="name"
         :name="name"
-        v-model.number="v.value"
-        @input="v.handleInput"  />
+        @input="v.handleInput"
+    >
 </template>
 
 <script>
@@ -92,10 +93,6 @@
                 // LOCAL
                 resetFieldState,
                 undirtyField,
-                // PROPS
-                name,
-                disabled,
-                value,
                 // STATE
                 state,
                 v,
