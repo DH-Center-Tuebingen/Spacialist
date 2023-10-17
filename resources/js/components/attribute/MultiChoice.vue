@@ -16,11 +16,11 @@
         <template #option="{ option }">
             {{ translateConcept(option.concept_url) }}
         </template>
-        <template #tag="{ option, handleTagRemove, disabled }">
+        <template #tag="{ option, handleTagRemove, disabled: tagDisabled }">
             <div class="multiselect-tag">
                 {{ translateConcept(option.concept_url) }}
                 <span
-                    v-if="!disabled"
+                    v-if="!tagDisabled"
                     class="multiselect-tag-remove"
                     @click.prevent
                     @mousedown.prevent.stop="handleTagRemove(option, $event)"
