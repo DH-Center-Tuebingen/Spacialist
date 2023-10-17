@@ -95,6 +95,12 @@
                 default: -1,
             }
         },
+        emits: [
+            'delete-element',
+            'duplicate-element',
+            'edit-element',
+            'select-element',
+        ],
         setup(props, context) {
             const { t } = useI18n();
             const {

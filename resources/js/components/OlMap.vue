@@ -408,6 +408,10 @@
                 default: null
             }
         },
+        emits:[
+            'feature-selected',
+            'update:link',
+        ],
         data() {
             return {
                 id: `map-${Date.now()}`,
