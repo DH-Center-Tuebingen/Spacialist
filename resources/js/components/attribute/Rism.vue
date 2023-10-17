@@ -173,6 +173,7 @@
                         }
                         return t('main.entity.attributes.rism.doesnt_exist');
                     }
+                    return ''
                 }),
             });
             const v = reactive({

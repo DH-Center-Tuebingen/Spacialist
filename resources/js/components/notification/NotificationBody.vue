@@ -288,6 +288,8 @@
                             return 'comment';
                         case 'App\\Notifications\\EntityUpdated':
                             return 'entity';
+                        default:
+                            throw new Error(`Unknown notification type: ${type}`)
                     }
                 }),
                 canReply: computed(_ => {

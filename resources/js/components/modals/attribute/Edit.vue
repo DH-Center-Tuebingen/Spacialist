@@ -365,8 +365,8 @@
                 }),
                 operatorList: computed(_ => {
                     if(!state.attributeSelected) return [];
-
-                    switch(state.dependency.attribute.datatype) {
+                    const datatype = state.dependency.attribute.datatype
+                    switch(datatype) {
                         case 'epoch':
                         case 'timeperiod':
                         case 'dimension':
@@ -419,6 +419,8 @@
                                         return false;
                                 }
                             });
+                        default:
+                            throw new Error(`Unsupported datatype ${datatype}`);
                     }
                 }),
                 inputType: computed(_ => {
