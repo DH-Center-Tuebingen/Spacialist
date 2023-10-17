@@ -213,7 +213,10 @@
                             <div v-if="overlayInfo.showCoordinates">
                                 <table class="table table-striped table-borderless table-sm mb-0">
                                     <tbody>
-                                        <tr v-for="c in coordinateList">
+                                        <tr
+                                            v-for="(c, index) in coordinateList" 
+                                            :key="index"
+                                        >
                                             <td class="text-start">
                                                 <input
                                                     v-if="overlayInfo.pointEditEnabled"
