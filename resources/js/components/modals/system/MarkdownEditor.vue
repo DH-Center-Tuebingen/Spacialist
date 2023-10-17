@@ -91,8 +91,6 @@
             return {
                 t,
                 // HELPERS
-                // PROPS
-                data,
                 // LOCAL
                 updateContent,
                 closeModal,
