@@ -557,6 +557,8 @@
             const toast = useToast();
             // FETCH
 
+            const chunkSize = 20
+
             // FUNCTIONS
             const setOrderColumn = column => {
                 if(state.orderColumn == column) {
@@ -573,13 +575,13 @@
             const getNextEntries = _ => {
                 if(state.entriesLoaded === state.allEntries.length) return;
 
-                state.entriesLoaded = Math.min(state.entriesLoaded + state.chunkSize, state.allEntries.length);
+                state.entriesLoaded = Math.min(state.entriesLoaded + chunkSize, state.allEntries.length);
             };
             const showNewItemModal = _ => {
                 if(!can('bibliography_create')) return;
                 
                 showBibliographyEntry({fields: {}}, _ => {
-                    if(state.allEntries.length < state.chunkSize) {
+                    if(state.allEntries.length < chunkSize) {
                         state.entriesLoaded++;
                     }
                 });
@@ -651,8 +653,7 @@
             // DATA
             const state = reactive({
                 allEntries: computed(_ => store.getters.bibliography),
-                entriesLoaded: 0,
-                chunkSize: 20,
+                entriesLoaded: Math.min(chunkSize, store.getters.bibliography.length),
                 orderColumn: 'author',
                 orderType: 'asc',
                 query: '',
@@ -691,9 +692,7 @@
                             return false;
                         });
                     }
-                    if(state.entriesLoaded === 0) {
-                        state.entriesLoaded = state.chunkSize;
-                    }
+                    
                     const size = Math.min(state.entriesLoaded, filteredEntries.length);
                     return _orderBy(filteredEntries, state.orderColumn, state.orderType).slice(0, size);
                 })
