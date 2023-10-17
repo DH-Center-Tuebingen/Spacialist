@@ -20,10 +20,12 @@
                 />
             </div>
             <div class="modal-body my-3">
+                <!-- eslint-disable vue/no-v-html -->
                 <p
                     v-if="state.hasRequest"
                     v-html="t('global.error.request_failed', {method: data.request.method, url: data.request.url, status: data.request.status})"
                 />
+                <!-- eslint-enable vue/no-v-html -->
                 <alert
                     :message="`<span class='fw-light fst-italic'>${data.msg.error || JSON.stringify(data.msg)}</span>`"
                     :type="'error'"

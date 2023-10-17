@@ -283,10 +283,12 @@
                         v-if="state.commentsFetching"
                         class="mt-2"
                     >
+                        <!-- eslint-disable vue/no-v-html -->
                         <p
                             class="alert alert-info mb-0"
                             v-html="t('global.comments.fetching')"
                         />
+                        <!-- eslint-enable vue/no-v-html -->
                     </div>
                     <div
                         v-else-if="state.commentFetchFailed"

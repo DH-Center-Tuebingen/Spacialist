@@ -6,10 +6,12 @@
         <h2 class="display-2 fw-medium">
             {{ t('main.app.not_found.title') }}
         </h2>
+        <!-- eslint-disable vue/no-v-html -->
         <p
             class="lead"
             v-html="t('main.app.not_found.msg', {site: currentRoute.path})"
         />
+        <!-- eslint-enable vue/no-v-html -->
         <div class="mt-2 d-flex flex-row gap-4">
             <router-link
                 class="btn btn-outline-primary"
