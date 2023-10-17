@@ -1,15 +1,20 @@
 <template>
     <div>
         <div class="input-group">
-            <button type="button" class="btn btn-outline-secondary" :disabled="disabled" @click="toggleList()">
+            <button
+                type="button"
+                class="btn btn-outline-secondary"
+                :disabled="disabled"
+                @click="toggleList()"
+            >
                 <div v-show="!state.expanded">
-                    <i class="fas fa-fw fa-caret-up"></i>
+                    <i class="fas fa-fw fa-caret-up" />
                     <span v-if="v.value.length">
                         ({{ v.value.length }})
                     </span>
                 </div>
                 <div v-show="state.expanded">
-                    <i class="fas fa-fw fa-caret-down"></i>
+                    <i class="fas fa-fw fa-caret-down" />
                 </div>
             </button>
             <input type="text" class="form-control" :disabled="disabled" v-model="state.input" />
@@ -123,9 +128,6 @@
                 toggleList,
                 resetFieldState,
                 undirtyField,
-                // PROPS
-                name,
-                disabled,
                 // STATE
                 state,
                 v,

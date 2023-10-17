@@ -13,13 +13,13 @@ export function date(value, format = 'DD.MM.YYYY HH:mm') {
         }
         return d.format(format);
     }
-};
+}
 export function datestring(value) {
     if(value) {
         const d = isNaN(value) ? dayjs.utc(value) : dayjs.utc(value*1000);
         return d.toDate().toString();
     }
-};
+}
 export function ago(value) {
     if(value) {
         let d;
@@ -30,7 +30,7 @@ export function ago(value) {
         }
         return d.fromNow();
     }
-};
+}
 export function numPlus(value, length = 2) {
     if(value) {
         const v = Math.floor(value);
@@ -40,7 +40,7 @@ export function numPlus(value, length = 2) {
     } else {
         return value;
     }
-};
+}
 export function time(value, withHours) {
     if(value) {
         let hours = 0;
@@ -69,7 +69,7 @@ export function time(value, withHours) {
             return '00:00';
         }
     }
-};
+}
 export function length(value, precision = 2, isArea = false) {
     if(!value) return value;
 
@@ -115,7 +115,7 @@ export function length(value, precision = 2, isArea = false) {
 
     const sizeInUnit = length * factor;
     return sizeInUnit.toFixed(precision) +  ' ' + unit;
-};
+}
 export function bytes(value, precision = 2, hideZeros = false) {
     if(!value) return value;
 
@@ -136,11 +136,11 @@ export function bytes(value, precision = 2, hideZeros = false) {
         finalValue = finalValue.toFixed(precision);
     }
     return `${finalValue} ${unit}`;
-};
+}
 export function toFixed(value, precision = 2) {
     if(precision < 0) precision = 2;
     return value ? value.toFixed(precision) : value;
-};
+}
 export function truncate(str, length = 80, ellipses = '…') {
     if(length < 0) length = 80;
     if(str) {
@@ -150,7 +150,7 @@ export function truncate(str, length = 80, ellipses = '…') {
         return str.slice(0, length) + ellipses;
     }
     return str;
-};
+}
 export function highlight(str, hl) {
     if(!str) return str;
     if(!hl) return str;
@@ -160,23 +160,23 @@ export function highlight(str, hl) {
 export function ucfirst(str) {
     if(!str) return str;
     return str[0].toUpperCase() + str.substring(1);
-};
+}
 export function kebab2pascalcase(str) {
     if(!str) return str;
 
     return str.split('-').map(word => ucfirst(word)).join('');
-};
+}
 export function escapehtml(str) {
     return str
         .replace(/&/g,'&amp;')
         .replace(/</g,'&lt;')
         .replace(/>/g,'&gt;');
-};
+}
 export function join(arr, separator = ', ') {
     if(!arr && !Array.isArray(arr)) return arr;
 
     return arr.join(separator);
-};
+}
 export function bibtexEntryToText(value, key = null) {
     let text = value;
     if(value.startsWith('{{') && value.endsWith('}}')) {
@@ -187,28 +187,28 @@ export function bibtexEntryToText(value, key = null) {
         text = value.replace('--', ' - ');
     }
     return text;
-};
+}
 export function bibtexify(value, type) {
-    let rendered = "<pre class='mb-0'><code>";
+    let rendered = '<pre class=\'mb-0\'><code>';
     if(type) {
-        rendered += "@"+type+" {"
-        if(value['citekey']) rendered += value['citekey'] + ",";
+        rendered += '@'+type+' {'
+        if(value['citekey']) rendered += value['citekey'] + ',';
         for(let k in value) {
             if(value[k] == null || value[k] == '' || k == 'citekey') continue;
             let cv = escapehtml(value[k]);
             if(!((cv.startsWith('{{') && cv.endsWith('}}')) ||
                 (cv.startsWith('{') && cv.endsWith('}')))) {
-                cv = "\"" + cv + "\"";
+                cv = '"' + cv + '"';
             }
-            rendered += "    <br />";
-            rendered += "    " + k + " = " + cv;
+            rendered += '    <br />';
+            rendered += '    ' + k + ' = ' + cv;
         }
-        rendered += "<br />";
-        rendered += "}";
+        rendered += '<br />';
+        rendered += '}';
     }
-    rendered += "</code></pre>";
+    rendered += '</code></pre>';
     return rendered;
-};
+}
 export function mentionify(value) {
     const template = `<span class="badge bg-primary">@{name}</span>`;
     const unknownTemplate = `<span class="fw-bold">@{name}</span>`;
@@ -231,4 +231,4 @@ export function mentionify(value) {
         newValue = newValue.replace(replRegex, tpl.replace('{name}', name));
     }
     return newValue;
-};
+}

@@ -95,13 +95,17 @@
         </div>
         <tree-search
             class="mb-2"
-            @selected="searchResultSelected"
             :on-multiselect="onSearchMultiSelect"
-            :on-clear="resetHighlighting">
-        </tree-search>
+            :on-clear="resetHighlighting"
+            @selected="searchResultSelected"
+        />
         <div class="d-flex flex-column col px-0 overflow-hidden">
-            <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="openAddEntityDialog()">
-                <i class="fas fa-fw fa-plus"></i> {{ t('main.entity.tree.add') }}
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-success mb-2"
+                @click="openAddEntityDialog()"
+            >
+                <i class="fas fa-fw fa-plus" /> {{ t('main.entity.tree.add') }}
             </button>
             <tree
                 id="entity-tree"
@@ -109,7 +113,8 @@
                 :data="state.tree"
                 size="small"
                 @change="itemClick"
-                @toggle="itemToggle">
+                @toggle="itemToggle"
+            >
                 <!-- <treenode v-for="(child, i) in state.tree" :key="i" :data="child"></treenode> -->
             </tree>
             <!-- <tree
@@ -123,8 +128,12 @@
                 @drop="itemDrop"
                 @toggle="itemToggle">
             </tree> -->
-            <button type="button" class="btn btn-sm btn-outline-success mt-2" @click="openAddEntityDialog()">
-                <i class="fas fa-fw fa-plus"></i> {{ t('main.entity.tree.add') }}
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-success mt-2"
+                @click="openAddEntityDialog()"
+            >
+                <i class="fas fa-fw fa-plus" /> {{ t('main.entity.tree.add') }}
             </button>
         </div>
     </div>
@@ -274,7 +283,7 @@
 
             // ON MOUNTED
             onMounted(_ => {
-                console.log("entity tree component mounted");
+                console.log('entity tree component mounted');
                 // document.addEventListener('click', check)
             });
             onUnmounted(_ => {

@@ -2,7 +2,8 @@
     <vue-final-modal
         class="modal-container modal"
         content-class="sp-modal-content sp-modal-content-sm"
-        name="add-entity-modal">
+        name="add-entity-modal"
+    >
         <div class="sp-modal-content sp-modal-content-sm">
             <div class="modal-header">
                 <h5 class="modal-title">
@@ -11,55 +12,88 @@
                         {{ parent.name }}
                     </small>
                 </h5>
-                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-                </button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                />
             </div>
             <div class="modal-body nonscrollable">
-                <form name="newEntityForm" id="newEntityForm" role="form" @submit.prevent="add()">
+                <form
+                    id="newEntityForm"
+                    name="newEntityForm"
+                    role="form"
+                    @submit.prevent="add()"
+                >
                     <div class="mb-3">
-                        <label class="col-form-label col-md-3" for="name">
+                        <label
+                            class="col-form-label col-md-3"
+                            for="name"
+                        >
                             {{ t('global.name') }}:
                         </label>
                         <div class="col-md-9">
-                            <input type="text" id="name" class="form-control" required v-model="state.entity.name" />
+                            <input
+                                id="name"
+                                v-model="state.entity.name"
+                                type="text"
+                                class="form-control"
+                                required
+                            >
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="col-form-label col-md-3" for="type">
+                        <label
+                            class="col-form-label col-md-3"
+                            for="type"
+                        >
                             {{ t('global.type') }}:
                         </label>
                         <div class="col-md-9">
                             <multiselect
-                                name="type"
                                 id="type"
                                 v-model="state.entity.type"
+                                name="type"
                                 :classes="multiselectResetClasslist"
                                 :object="true"
                                 :label="'thesaurus_url'"
                                 :track-by="'id'"
-                                :valueProp="'id'"
+                                :value-prop="'id'"
                                 :mode="'single'"
                                 :options="state.entityTypes"
-                                :placeholder="t('global.select.placeholder')">
-                                <template v-slot:option="{ option }">
-                                        {{ translateConcept(option.thesaurus_url) }}
-                                    </template>
-                                    <template v-slot:singlelabel="{ value }">
-                                        <div class="multiselect-single-label">
-                                            {{ translateConcept(value.thesaurus_url) }}
-                                        </div>
-                                    </template>
+                                :placeholder="t('global.select.placeholder')"
+                            >
+                                <template #option="{ option }">
+                                    {{ translateConcept(option.thesaurus_url) }}
+                                </template>
+                                <template #singlelabel="{ value }">
+                                    <div class="multiselect-single-label">
+                                        {{ translateConcept(value.thesaurus_url) }}
+                                    </div>
+                                </template>
                             </multiselect>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-outline-success" form="newEntityForm" :disabled="state.dataMissing">
-                    <i class="fas fa-fw fa-plus"></i> {{ t('global.add') }}
+                <button
+                    type="submit"
+                    class="btn btn-outline-success"
+                    form="newEntityForm"
+                    :disabled="state.dataMissing"
+                >
+                    <i class="fas fa-fw fa-plus" /> {{ t('global.add') }}
                 </button>
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                    <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                >
+                    <i class="fas fa-fw fa-times" /> {{ t('global.cancel') }}
                 </button>
             </div>
         </div>

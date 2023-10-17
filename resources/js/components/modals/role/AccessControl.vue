@@ -183,14 +183,14 @@
     } from '@/helpers/accesscontrol.js';
 
     export default {
+        components: {
+            'acl-state': AccessControlState,
+        },
         props: {
             roleId: {
                 type: Number,
                 required: true,
             }
-        },
-        components: {
-            'acl-state': AccessControlState,
         },
         emits: ['save', 'cancel'],
         setup(props, context) {

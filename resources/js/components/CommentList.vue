@@ -2,18 +2,41 @@
     <div :class="classes">
         <div :class="listClasses">
             <div v-show="!state.commentsHidden">
-                <div v-for="comment in comments" :key="comment.id" class="mt-2 d-flex">
-                    <slot name="avatar" :user="comment.author">
-                        <a href="#" @click.prevent="showUserInfo(comment.author)">
-                            <user-avatar :user="comment.author" :size="avatar"></user-avatar>
+                <div
+                    v-for="comment in comments"
+                    :key="comment.id"
+                    class="mt-2 d-flex"
+                >
+                    <slot
+                        name="avatar"
+                        :user="comment.author"
+                    >
+                        <a
+                            href="#"
+                            @click.prevent="showUserInfo(comment.author)"
+                        >
+                            <user-avatar
+                                :user="comment.author"
+                                :size="avatar"
+                            />
                         </a>
                     </slot>
                     <div class="ms-3 flex-grow-1">
                         <div class="card">
-                            <div class="card-header d-flex flex-row justify-content-between py-2 px-3" :class="{'border-0': !comment.content}">
+                            <div
+                                class="card-header d-flex flex-row justify-content-between py-2 px-3"
+                                :class="{'border-0': !comment.content}"
+                            >
                                 <div>
-                                    <slot name="author" :comment="comment.author">
-                                        <a href="#" @click.prevent="showUserInfo(comment.author)" class="text-body text-decoration-none">
+                                    <slot
+                                        name="author"
+                                        :comment="comment.author"
+                                    >
+                                        <a
+                                            href="#"
+                                            class="text-body text-decoration-none"
+                                            @click.prevent="showUserInfo(comment.author)"
+                                        >
                                             <span class="fw-medium">
                                                 {{ comment.author.name }}
                                             </span>
@@ -25,55 +48,123 @@
                                     </slot>
                                 </div>
                                 <div class="small">
-                                    <slot name="metadata" class="me-2" :comment="comment"></slot>
+                                    <slot
+                                        name="metadata"
+                                        class="me-2"
+                                        :comment="comment"
+                                    />
                                     <template v-if="comment.updated_at != comment.created_at">
                                         <span class="badge bg-light text-dark border">
                                             {{ t('global.edited') }}
                                         </span>
                                         &bull;
                                     </template>
-                                    <span class="text-muted fw-light" :title="datestring(comment.updated_at)">
+                                    <span
+                                        class="text-muted fw-light"
+                                        :title="datestring(comment.updated_at)"
+                                    >
                                         {{ ago(comment.updated_at) }}
                                     </span>
-                                    <span class="dropdown ms-1" v-if="!comment.deleted_at && (showEditButton(comment) || showDeleteButton(comment) || state.showReplyTo)">
-                                        <span :id="`edit-comment-dropdown-${comment.id}`" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <i class="fas fa-fw fa-ellipsis-h"></i>
+                                    <span
+                                        v-if="!comment.deleted_at && (showEditButton(comment) || showDeleteButton(comment) || state.showReplyTo)"
+                                        class="dropdown ms-1"
+                                    >
+                                        <span
+                                            :id="`edit-comment-dropdown-${comment.id}`"
+                                            class="clickable"
+                                            data-bs-toggle="dropdown"
+                                            aria-haspopup="true"
+                                            aria-expanded="false"
+                                        >
+                                            <i class="fas fa-fw fa-ellipsis-h" />
                                         </span>
-                                        <div class="dropdown-menu" :aria-labelledby="`edit-comment-dropdown-${comment.id}`">
-                                            <a class="dropdown-item" href="#" @click.prevent="enableEditing(comment)" v-if="showEditButton(comment)">
-                                                <i class="fas fa-fw fa-edit text-info"></i> {{ t('global.edit') }}
+                                        <div
+                                            class="dropdown-menu"
+                                            :aria-labelledby="`edit-comment-dropdown-${comment.id}`"
+                                        >
+                                            <a
+                                                v-if="showEditButton(comment)"
+                                                class="dropdown-item"
+                                                href="#"
+                                                @click.prevent="enableEditing(comment)"
+                                            >
+                                                <i class="fas fa-fw fa-edit text-info" /> {{ t('global.edit') }}
                                             </a>
-                                            <a class="dropdown-item" href="#" @click.prevent="setReplyTo(comment)" v-if="state.showReplyTo">
-                                                <i class="fas fa-fw fa-reply text-success"></i> {{ t('global.reply_to') }}
+                                            <a
+                                                v-if="state.showReplyTo"
+                                                class="dropdown-item"
+                                                href="#"
+                                                @click.prevent="setReplyTo(comment)"
+                                            >
+                                                <i class="fas fa-fw fa-reply text-success" /> {{ t('global.reply_to') }}
                                             </a>
-                                            <a class="dropdown-item" href="#" @click.prevent="handleDelete(comment)" v-if="showDeleteButton(comment)">
-                                                <i class="fas fa-fw fa-trash text-danger"></i> {{ t('global.delete') }}
+                                            <a
+                                                v-if="showDeleteButton(comment)"
+                                                class="dropdown-item"
+                                                href="#"
+                                                @click.prevent="handleDelete(comment)"
+                                            >
+                                                <i class="fas fa-fw fa-trash text-danger" /> {{ t('global.delete') }}
                                             </a>
                                         </div>
                                     </span>
                                 </div>
                             </div>
                             <div v-if="!emptyMetadata(comment)">
-                                <slot name="body-editing" :comment="comment" :content="state.editing.content" v-if="!isDeleted(comment) && state.editing.id == comment.id">
+                                <slot
+                                    v-if="!isDeleted(comment) && state.editing.id == comment.id"
+                                    name="body-editing"
+                                    :comment="comment"
+                                    :content="state.editing.content"
+                                >
                                     <div class="card-body px-3 py-2">
-                                        <textarea class="form-control" v-model="state.editing.content"></textarea>
+                                        <textarea
+                                            v-model="state.editing.content"
+                                            class="form-control"
+                                        />
                                         <div class="mt-1 d-flex flex-row justify-content-end">
-                                            <button type="button" class="btn btn-success btn-sm me-2" :disabled="state.editing.content == comment.content" @click="handleEdit(comment, state.editing.content)">
-                                                <i class="fas fa-fw fa-save"></i> {{ t('global.save') }}
+                                            <button
+                                                type="button"
+                                                class="btn btn-success btn-sm me-2"
+                                                :disabled="state.editing.content == comment.content"
+                                                @click="handleEdit(comment, state.editing.content)"
+                                            >
+                                                <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
                                             </button>
-                                            <button type="button" class="btn btn-danger btn-sm" @click="disableEditing()">
-                                                <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
+                                            <button
+                                                type="button"
+                                                class="btn btn-danger btn-sm"
+                                                @click="disableEditing()"
+                                            >
+                                                <i class="fas fa-fw fa-times" /> {{ t('global.cancel') }}
                                             </button>
                                         </div>
                                     </div>
                                 </slot>
-                                <slot name="body" :comment="comment" v-else-if="!isDeleted(comment)">
-                                    <div class="card-body px-3 py-2" v-if="comment.content">
-                                        <p class="card-text" v-html="mentionify(comment.content)"></p>
+                                <slot
+                                    v-else-if="!isDeleted(comment)"
+                                    name="body"
+                                    :comment="comment"
+                                >
+                                    <div
+                                        v-if="comment.content"
+                                        class="card-body px-3 py-2"
+                                    >
+                                        <p
+                                            class="card-text"
+                                            v-html="mentionify(comment.content)"
+                                        />
                                     </div>
                                 </slot>
-                                <slot name="body-deleted" :comment="comment" v-else>
-                                    <div class="card-body bg-warning px-3 py-2" style="opacity: 0.75;">
+                                <slot
+                                    v-else
+                                    name="body-deleted"
+                                    :comment="comment"
+                                >
+                                    <div
+                                        class="card-body bg-warning px-3 py-2"
+                                        style="opacity: 0.75;"
+                                    >
                                         <p class="card-text fst-italic">
                                             {{ t('global.comments.deleted_info') }}
                                         </p>
@@ -81,15 +172,22 @@
                                 </slot>
                             </div>
                         </div>
-                        <div v-if="comment.replies_count > 0" class="d-flex flex-row justify-content-end">
-                            <a href="#" class="small text-body" @click.prevent="toggleReplies(comment)">
+                        <div
+                            v-if="comment.replies_count > 0"
+                            class="d-flex flex-row justify-content-end"
+                        >
+                            <a
+                                href="#"
+                                class="small text-body"
+                                @click.prevent="toggleReplies(comment)"
+                            >
                                 <div v-show="state.repliesOpen[comment.id]">
-                                    <span v-html="t('global.comments.hide_reply', comment.replies_count, {cnt: comment.replies_count})"></span>
-                                    <i class="fas fa-fw fa-caret-up"></i>
+                                    <span v-html="t('global.comments.hide_reply', comment.replies_count, {cnt: comment.replies_count})" />
+                                    <i class="fas fa-fw fa-caret-up" />
                                 </div>
                                 <div v-show="!state.repliesOpen[comment.id]">
-                                    <span v-html="t('global.comments.show_reply', comment.replies_count, {cnt: comment.replies_count})"></span>
-                                    <i class="fas fa-fw fa-caret-down"></i>
+                                    <span v-html="t('global.comments.show_reply', comment.replies_count, {cnt: comment.replies_count})" />
+                                    <i class="fas fa-fw fa-caret-down" />
                                 </div>
                             </a>
                         </div>
@@ -101,18 +199,25 @@
                             :disabled="disabled"
                             :avatar="avatar"
                             :resource="resource"
-                            :postUrl="postUrl"
-                            :editUrl="editUrl"
-                            :deleteUrl="deleteUrl"
-                            :replyUrl="replyUrl"
+                            :post-url="postUrl"
+                            :edit-url="editUrl"
+                            :delete-url="deleteUrl"
+                            :reply-url="replyUrl"
                             :classes="classes"
-                            :listClasses="listClasses" />
+                            :list-classes="listClasses"
+                        />
                     </div>
                 </div>
             </div>
-            <div class="text-center mt-2" v-show="state.displayHideButton">
-                <button class="btn btn-sm btn-outline-primary" @click="toggleHideState()">
-                    <i class="fas fa-fw fa-comments me-1"></i>
+            <div
+                v-show="state.displayHideButton"
+                class="text-center mt-2"
+            >
+                <button
+                    class="btn btn-sm btn-outline-primary"
+                    @click="toggleHideState()"
+                >
+                    <i class="fas fa-fw fa-comments me-1" />
                     <span v-if="state.hideComments">
                         {{ t('global.comments.show') }}
                         ({{ comments.length }})
@@ -122,28 +227,59 @@
                     </span>
                 </button>
             </div>
-            <div v-if="!state.hasComments" class="alert alert-info m-0 mt-2" role="alert">
+            <div
+                v-if="!state.hasComments"
+                class="alert alert-info m-0 mt-2"
+                role="alert"
+            >
                 {{ t('global.comments.empty_list') }}
             </div>
         </div>
-        <hr />
+        <hr>
         <div v-if="postForm">
-            <div v-if="state.replyTo.comment_id > 0" class="mb-1">
+            <div
+                v-if="state.replyTo.comment_id > 0"
+                class="mb-1"
+            >
                 <span class="badge bg-info">
                     {{ t('global.replying_to', {name: state.replyTo.author.name}) }}
-                    <a href="#" @click.prevent="cancelReplyTo" class="text-white">
-                        <i class="fas fa-fw fa-times"></i>
+                    <a
+                        href="#"
+                        class="text-white"
+                        @click.prevent="cancelReplyTo"
+                    >
+                        <i class="fas fa-fw fa-times" />
                     </a>
                 </span>
             </div>
-            <form role="form" @submit.prevent="postComment">
+            <form
+                role="form"
+                @submit.prevent="postComment"
+            >
                 <div class="mb-3 d-flex position-relative">
-                    <textarea class="form-control" v-model="state.composedMessage" id="comment-content" ref="messageInput" :placeholder="t('global.comments.text_placeholder')" @input="checkForMentionInput" @keydown.esc="cancelMentionInput()"></textarea>
+                    <textarea
+                        id="comment-content"
+                        ref="messageInput"
+                        v-model="state.composedMessage"
+                        class="form-control"
+                        :placeholder="t('global.comments.text_placeholder')"
+                        @input="checkForMentionInput"
+                        @keydown.esc="cancelMentionInput()"
+                    />
                     <div class="ms-2 mt-auto">
-                        <emoji-picker @selected="addEmoji"></emoji-picker>
+                        <emoji-picker @selected="addEmoji" />
                     </div>
-                    <ul class="list-group position-absolute bg-light m-2" v-if="state.mentionSearch.show" :style="state.mentionSearch.offset">
-                        <li class="list-group-item list-group-item-hover clickable d-flex flex-row gap-2 align-items-center" v-for="user in state.mentionSearch.result" :key="user.id" @click="insertMention(user)">
+                    <ul
+                        v-if="state.mentionSearch.show"
+                        class="list-group position-absolute bg-light m-2"
+                        :style="state.mentionSearch.offset"
+                    >
+                        <li
+                            v-for="user in state.mentionSearch.result"
+                            :key="user.id"
+                            class="list-group-item list-group-item-hover clickable d-flex flex-row gap-2 align-items-center"
+                            @click="insertMention(user)"
+                        >
                             <span class="fw-bold">
                                 {{ user.name }}
                             </span>
@@ -154,8 +290,12 @@
                     </ul>
                 </div>
                 <div class="text-center mt-2">
-                    <button type="submit" class="btn btn-outline-success" :disabled="disabled">
-                        <i class="fas fa-fw fa-save"></i>
+                    <button
+                        type="submit"
+                        class="btn btn-outline-success"
+                        :disabled="disabled"
+                    >
+                        <i class="fas fa-fw fa-save" />
                         {{ t('global.comments.submit') }}
                     </button>
                 </div>
@@ -309,7 +449,7 @@
                 commentsHidden: computed(_ => state.hideComments || !state.hasComments),
                 displayHideButton: computed(_ => hideButton.value && state.hasComments),
                 hasComments: computed(_ => comments.value.length > 0),
-                showReplyTo: computed(_ => postForm && postForm.value),
+                showReplyTo: computed(_ =>  postForm.value),
             });
 
             // FUNCTIONS
@@ -472,18 +612,6 @@
                 insertMention,
                 isDeleted,
                 emptyMetadata,
-                // PROPS
-                disabled,
-                comments,
-                avatar,
-                postForm,
-                classes,
-                listClasses,
-                resource,
-                postUrl,
-                editUrl,
-                deleteUrl,
-                replyUrl,
                 // STATE
                 state,
             };

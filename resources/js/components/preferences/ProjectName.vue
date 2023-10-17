@@ -1,8 +1,14 @@
 <template>
     <div class="row">
-        <label class="col-md-2 form-label"></label>
+        <label class="col-md-2 form-label" />
         <div class="col-md-10">
-            <input class="form-control" type="text" v-model="data" :readonly="readonly" @input="onChange" />
+            <input
+                v-model="data"
+                class="form-control"
+                type="text"
+                :readonly="readonly"
+                @input="onChange"
+            >
         </div>
     </div>
 </template>
@@ -47,9 +53,6 @@
             return {
                 // LOCAL
                 onChange,
-                // PROPS
-                data,
-                readonly,
                 // STATE
             };
         }

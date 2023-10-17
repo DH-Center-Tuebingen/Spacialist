@@ -4,7 +4,16 @@
             {{ t('main.preference.key.map.epsg') }}:
         </label>
         <div class="col-md-10">
-            <input class="form-control" type="number" min="0" max="99999" step="1" v-model="data.epsg" :readonly="readonly" @input="onChange" />
+            <input
+                v-model="data.epsg"
+                class="form-control"
+                type="number"
+                min="0"
+                max="99999"
+                step="1"
+                :readonly="readonly"
+                @input="onChange"
+            >
         </div>
     </div>
 </template>
@@ -53,9 +62,6 @@
                 t,
                 // LOCAL
                 onChange,
-                // PROPS
-                data,
-                readonly,
                 // STATE
             };
         }

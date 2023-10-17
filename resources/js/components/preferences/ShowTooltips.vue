@@ -1,9 +1,16 @@
 <template>
     <div class="row">
-        <label class="col-md-2 form-label"></label>
+        <label class="col-md-2 form-label" />
         <div class="col-md-10">
             <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" v-model="state.enabled" :readonly="readonly" :disabled="readonly" @input="onChange" >
+                <input
+                    v-model="state.enabled"
+                    class="form-check-input"
+                    type="checkbox"
+                    :readonly="readonly"
+                    :disabled="readonly"
+                    @input="onChange"
+                >
             </div>
         </div>
     </div>
@@ -58,8 +65,6 @@
                 t,
                 // LOCAL
                 onChange,
-                // PROPS
-                readonly,
                 // STATE
                 state,
             };

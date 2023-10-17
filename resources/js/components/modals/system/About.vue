@@ -1,7 +1,8 @@
 <template>
     <vue-final-modal
         class="modal-container modal"
-        name="about-modal">
+        name="about-modal"
+    >
         <div class="sp-modal-content sp-modal-content-sm">
             <div class="modal-header">
                 <h5 class="modal-title">
@@ -9,40 +10,66 @@
                         t('main.about.title')
                     }}
                 </h5>
-                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-                </button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                />
             </div>
             <div class="modal-body">
                 <div class="d-flex">
                     <div class="flex-shrink-0">
-                        <img class="me-3" src="img/logo.png" alt="spacialist logo" width="64" />
+                        <img
+                            class="me-3"
+                            src="img/logo.png"
+                            alt="spacialist logo"
+                            width="64"
+                        >
                     </div>
                     <div class="flex-grow-1 ps-3">
                         <h4>Spacialist</h4>
                         {{ t('main.about.desc') }}
                     </div>
                 </div>
-                <hr />
+                <hr>
                 <dl class="row">
-                    <dt class="col-md-6 text-end">{{ t('main.about.release.name') }}</dt>
+                    <dt class="col-md-6 text-end">
+                        {{ t('main.about.release.name') }}
+                    </dt>
                     <dd class="col-md-6">
                         {{ state.version.name }}
                     </dd>
-                    <dt class="col-md-6 text-end">{{ t('main.about.release.time') }}</dt>
+                    <dt class="col-md-6 text-end">
+                        {{ t('main.about.release.time') }}
+                    </dt>
                     <dd class="col-md-6">
-                        <span id="version-time" data-bs-toggle="popover" :data-content="datestring(state.version.time)" data-trigger="hover" data-placement="bottom">
+                        <span
+                            id="version-time"
+                            data-bs-toggle="popover"
+                            :data-content="datestring(state.version.time)"
+                            data-trigger="hover"
+                            data-placement="bottom"
+                        >
                             {{ date(state.version.time) }}
                         </span>
                     </dd>
-                    <dt class="col-md-6 text-end">{{ t('main.about.release.full_name') }}</dt>
+                    <dt class="col-md-6 text-end">
+                        {{ t('main.about.release.full_name') }}
+                    </dt>
                     <dd class="col-md-6">
                         {{ state.version.full }}
                     </dd>
                 </dl>
-                <hr />
+                <hr>
                 <h5>{{ t('main.about.contributor', 2) }}</h5>
                 <div class="row gy-1">
-                    <div v-for="contributor in contributors" class="col-md-6 d-flex flex-column align-items-start" :key="contributor.name">
+                    <div
+                        v-for="contributor in contributors"
+                        :key="contributor.name"
+                        class="col-md-6 d-flex flex-column align-items-start"
+                    >
                         <span>
                             {{ contributor.name }}
                         </span>
@@ -51,23 +78,34 @@
                         </span>
                     </div>
                 </div>
-                <hr />
+                <hr>
                 <div class="d-flex flex-row justify-content-between">
-                    <span v-html="t('main.about.build_info')">
-                    </span>
+                    <span v-html="t('main.about.build_info')" />
                     <div>
-                        <a href="https://www.facebook.com/esciencecenter" target="_blank">
-                            <i class="fab fa-facebook-square fa-2x text-primary"></i>
+                        <a
+                            href="https://www.facebook.com/esciencecenter"
+                            target="_blank"
+                        >
+                            <i class="fab fa-facebook-square fa-2x text-primary" />
                         </a>
-                        <a href="https://github.com/DH-Center-Tuebingen/Spacialist" target="_blank" class="ms-2">
-                            <i class="fab fa-github fa-2x text-dark"></i>
+                        <a
+                            href="https://github.com/DH-Center-Tuebingen/Spacialist"
+                            target="_blank"
+                            class="ms-2"
+                        >
+                            <i class="fab fa-github fa-2x text-dark" />
                         </a>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                    <i class="fas fa-fw fa-times"></i> {{ t('global.close') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                >
+                    <i class="fas fa-fw fa-times" /> {{ t('global.close') }}
                 </button>
             </div>
         </div>

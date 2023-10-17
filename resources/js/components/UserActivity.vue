@@ -1,5 +1,8 @@
 <template>
-    <div class="row d-flex flex-row overflow-hidden h-100" v-dcan="'users_roles_read'">
+    <div
+        v-dcan="'users_roles_read'"
+        class="row d-flex flex-row overflow-hidden h-100"
+    >
         <div class="col-md-12 h-100 d-flex flex-column">
             <h3>
                 {{ t('main.activity.title_user', 2) }}
@@ -19,8 +22,8 @@
                     :hide-user="true"
                     :show-filter="true"
                     :on-filter="applyFilter"
-                    :on-fetch="fetchData">
-                </activity-log>
+                    :on-fetch="fetchData"
+                />
             </div>
         </div>
     </div>

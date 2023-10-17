@@ -1,22 +1,23 @@
  
 <template>
     <date-picker
+        :id="name"
+        v-model:value="v.value"
         class="w-100"
         input-class="form-control"
         value-type="date"
-        :id="name"
         :name="name"
         :disabled="disabled"
         :disabled-date="(date) => date > new Date()"
         :max-date="new Date()"
         :show-week-number="true"
-        v-model:value="v.value"
-        @input="handleInput">
-        <template v-slot:icon-calendar>
-            <i class="fas fa-fw fa-calendar-alt"></i>
+        @input="handleInput"
+    >
+        <template #icon-calendar>
+            <i class="fas fa-fw fa-calendar-alt" />
         </template>
-        <template v-slot:icon-clear>
-            <i class="fas fa-fw fa-times"></i>
+        <template #icon-clear>
+            <i class="fas fa-fw fa-times" />
         </template>
     </date-picker>
 </template>
@@ -112,10 +113,6 @@
                 resetFieldState,
                 undirtyField,
                 handleInput,
-                // PROPS
-                name,
-                disabled,
-                value,
                 // STATE
                 state,
                 v,

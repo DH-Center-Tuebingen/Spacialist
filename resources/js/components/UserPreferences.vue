@@ -5,17 +5,30 @@
             <small class="text-muted">
                 {{ getUser().name }}
             </small>
-            <button type="button" class="btn btn-outline-success btn-sm" @click="savePreferences()">
-                <i class="fas fa-fw fa-save"></i>
+            <button
+                type="button"
+                class="btn btn-outline-success btn-sm"
+                @click="savePreferences()"
+            >
+                <i class="fas fa-fw fa-save" />
                 {{ t('global.save') }}
             </button>
         </h3>
         <div class="table-responsive scroll-x-hidden">
-            <table class="table table-light table-striped table-hover mb-0" v-if="state.prefsLoaded" v-dcan="'preferences_read'">
+            <table
+                v-if="state.prefsLoaded"
+                v-dcan="'preferences_read'"
+                class="table table-light table-striped table-hover mb-0"
+            >
                 <thead class="sticky-top">
                     <tr class="text-nowrap">
                         <th>{{ t('global.preference') }}</th>
-                        <th style="width: 99%;" class="text-end">{{ t('global.value') }}</th>
+                        <th
+                            style="width: 99%;"
+                            class="text-end"
+                        >
+                            {{ t('global.value') }}
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -30,8 +43,8 @@
                                 :data="state.preferences['prefs.gui-language']"
                                 :readonly="!state.overrides['prefs.gui-language']"
                                 :browser-default="true"
-                                @changed="e => trackChanges('prefs.gui-language', e)">
-                            </gui-language-preference>
+                                @changed="e => trackChanges('prefs.gui-language', e)"
+                            />
                         </td>
                     </tr>
                     <tr>
@@ -42,8 +55,8 @@
                             <reset-email-preference
                                 :data="state.preferences['prefs.enable-password-reset-link']"
                                 :readonly="!state.overrides['prefs.enable-password-reset-link']"
-                                @changed="e => trackChanges('prefs.enable-password-reset-link', e)">
-                            </reset-email-preference>
+                                @changed="e => trackChanges('prefs.enable-password-reset-link', e)"
+                            />
                         </td>
                     </tr>
                     <tr>
@@ -54,8 +67,8 @@
                             <columns-preference
                                 :data="state.preferences['prefs.columns']"
                                 :readonly="!state.overrides['prefs.columns']"
-                                @changed="e => trackChanges('prefs.columns', e)">
-                            </columns-preference>
+                                @changed="e => trackChanges('prefs.columns', e)"
+                            />
                         </td>
                     </tr>
                     <tr>
@@ -66,8 +79,8 @@
                             <tooltips-preference
                                 :data="state.preferences['prefs.show-tooltips']"
                                 :readonly="!state.overrides['prefs.show-tooltips']"
-                                @changed="e => trackChanges('prefs.show-tooltips', e)">
-                            </tooltips-preference>
+                                @changed="e => trackChanges('prefs.show-tooltips', e)"
+                            />
                         </td>
                     </tr>
                     <tr>
@@ -78,8 +91,8 @@
                             <tags-preference
                                 :data="state.preferences['prefs.tag-root']"
                                 :readonly="!state.overrides['prefs.tag-root']"
-                                @changed="e => trackChanges('prefs.tag-root', e)">
-                            </tags-preference>
+                                @changed="e => trackChanges('prefs.tag-root', e)"
+                            />
                         </td>
                     </tr>
                     <tr>
@@ -90,8 +103,8 @@
                             <thesaurus-link-preference
                                 :data="state.preferences['prefs.link-to-thesaurex']"
                                 :readonly="!state.overrides['prefs.link-to-thesaurex']"
-                                @changed="e => trackChanges('prefs.link-to-thesaurex', e)">
-                            </thesaurus-link-preference>
+                                @changed="e => trackChanges('prefs.link-to-thesaurex', e)"
+                            />
                         </td>
                     </tr>
                     <tr>
@@ -102,8 +115,8 @@
                             <project-name-preference
                                 :data="state.preferences['prefs.project-name']"
                                 :readonly="!state.overrides['prefs.project-name']"
-                                @changed="e => trackChanges('prefs.project-name', e)">
-                            </project-name-preference>
+                                @changed="e => trackChanges('prefs.project-name', e)"
+                            />
                         </td>
                     </tr>
                     <tr>
@@ -114,8 +127,8 @@
                             <project-maintainer-preference
                                 :data="state.preferences['prefs.project-maintainer']"
                                 :readonly="!state.overrides['prefs.project-maintainer']"
-                                @changed="e => trackChanges('prefs.project-maintainer', e)">
-                            </project-maintainer-preference>
+                                @changed="e => trackChanges('prefs.project-maintainer', e)"
+                            />
                         </td>
                     </tr>
                     <tr>
@@ -126,8 +139,8 @@
                             <map-projection-preference
                                 :data="state.preferences['prefs.map-projection']"
                                 :readonly="!state.overrides['prefs.map-projection']"
-                                @changed="e => trackChanges('prefs.map-projection', e)">
-                            </map-projection-preference>
+                                @changed="e => trackChanges('prefs.map-projection', e)"
+                            />
                         </td>
                     </tr>
                 </tbody>
@@ -164,7 +177,6 @@
     import Columns from '@/components/preferences/Columns.vue';
     import ShowTooltips from '@/components/preferences/ShowTooltips.vue';
     import Tags from '@/components/preferences/Tags.vue';
-    import Extensions from '@/components/preferences/Extensions.vue';
     import ThesaurusLink from '@/components/preferences/ThesaurusLink.vue';
     import ProjectName from '@/components/preferences/ProjectName.vue';
     import ProjectMaintainer from '@/components/preferences/ProjectMaintainer.vue';
@@ -177,7 +189,6 @@
             'columns-preference': Columns,
             'tooltips-preference': ShowTooltips,
             'tags-preference': Tags,
-            'extensions-preference': Extensions,
             'thesaurus-link-preference': ThesaurusLink,
             'project-name-preference': ProjectName,
             'project-maintainer-preference': ProjectMaintainer,

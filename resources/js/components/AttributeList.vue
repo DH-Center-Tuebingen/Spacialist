@@ -1,5 +1,6 @@
 <template>
-    <draggable v-if="state.componentLoaded"
+    <draggable
+        v-if="state.componentLoaded"
         v-model="state.attributeList"
         item-key="id"
         class="attribute-list-container row align-content-start"
@@ -209,10 +210,11 @@
                                 :name="`attr-${element.id}`"
                                 :value="state.attributeValues[element.id].value" />
 
-                            <system-separator-attribute
-                                v-else-if="element.datatype == 'system-separator'"
-                                :name="`attr-${element.id}`"
-                                :title="getSeparatorTitle(element)" />
+                        <system-separator-attribute
+                            v-else-if="element.datatype == 'system-separator'"
+                            :name="`attr-${element.id}`"
+                            :title="getSeparatorTitle(element)"
+                        />
 
                             <default-attribute
                                 v-else
@@ -338,11 +340,6 @@
                 required: false,
                 type: Boolean,
                 default: false,
-            },
-            previewData: {
-                required: false,
-                type: Object,
-                default: {},
             },
         },
         components: {
@@ -709,15 +706,6 @@
                 onMetadataHandler,
                 hasEmitter,
                 convertEntityValue,
-                // PROPS
-                classes,
-                showHidden,
-                disableDrag,
-                group,
-                metadataAddon,
-                selections,
-                preview,
-                previewData,
                 // STATE
                 attrRefs,
                 state,

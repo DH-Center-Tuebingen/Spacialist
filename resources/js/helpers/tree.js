@@ -19,7 +19,7 @@ export async function fetchChildren(id, sort = {by: 'rank', dir: 'asc'}) {
         });
     });
     
-};
+}
 
 export function sortTree(by, dir, tree) {
     dir = dir == 'desc' ? dir : 'asc';

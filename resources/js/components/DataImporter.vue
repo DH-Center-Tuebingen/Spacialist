@@ -2,12 +2,20 @@
     <div class="h-100 d-flex flex-column">
         <h4 class="d-flex flex-row gap-2 align-items-center">
             {{ t('main.importer.title') }}
-            <button v-show="state.contentRead" type="button" class="btn btn-outline-danger btn-sm" @click="removeFile()">
-                <i class="fas fa-fw fa-times"></i>
+            <button
+                v-show="state.contentRead"
+                type="button"
+                class="btn btn-outline-danger btn-sm"
+                @click="removeFile()"
+            >
+                <i class="fas fa-fw fa-times" />
                 {{ t('global.remove_file') }}
             </button>
         </h4>
-        <div class="col d-flex flex-column gap-2" v-if="state.contentRead">
+        <div
+            v-if="state.contentRead"
+            class="col d-flex flex-column gap-2"
+        >
             <csv-table
                 :content="state.content"
                 :small="true"
@@ -15,28 +23,37 @@
                 @parse="e => extractColumns(e)"
             />
             <div class="flex-grow-1 scroll-y-auto scroll-x-hidden">
-                <form class="row g-3" id="import-data-form" name="import-data-form" @submit.prevent="confirmImport()">
+                <form
+                    id="import-data-form"
+                    class="row g-3"
+                    name="import-data-form"
+                    @submit.prevent="confirmImport()"
+                >
                     <div class="col-md-4 col-sm-12">
-                        <label for="import-entity-type" class="form-label">
+                        <label
+                            for="import-entity-type"
+                            class="form-label"
+                        >
                             {{ t('main.importer.selected_entity_type') }}
                         </label>
                         <multiselect
                             id="import-entity-type"
+                            v-model="state.postData.entityType"
                             :classes="multiselectResetClasslist"
-                            :valueProp="'id'"
+                            :value-prop="'id'"
                             :label="'thesaurus_url'"
                             :track-by="'id'"
                             :object="true"
                             :mode="'single'"
                             :options="availableEntityTypes"
                             :placeholder="t('global.select.placeholder')"
-                            :hideSelected="true"
-                            v-model="state.postData.entityType"
-                            @select="onEntityTypeSelected">
-                            <template v-slot:option="{ option }">
+                            :hide-selected="true"
+                            @select="onEntityTypeSelected"
+                        >
+                            <template #option="{ option }">
                                 {{ translateConcept(option.thesaurus_url) }}
                             </template>
-                            <template v-slot:singlelabel="{ value }">
+                            <template #singlelabel="{ value }">
                                 <div class="multiselect-single-label">
                                     {{ translateConcept(value.thesaurus_url) }}
                                 </div>
@@ -44,68 +61,98 @@
                         </multiselect>
                     </div>
                     <div class="col-md-4 col-sm-6">
-                        <label for="import-entity-name" class="form-label">
+                        <label
+                            for="import-entity-name"
+                            class="form-label"
+                        >
                             {{ t('main.importer.column_entity_name') }}
-                            <span v-if="state.stats.entityName.missing > 0" :title="t('main.importer.missing_required_values', {
-                                        miss: state.stats.entityName.missing,
-                                        total: state.stats.entityName.total,
-                                    }, state.stats.entityName.total)">
-                                <i class="fas fa-fw fa-exclamation-circle text-danger"></i>
+                            <span
+                                v-if="state.stats.entityName.missing > 0"
+                                :title="t('main.importer.missing_required_values', {
+                                    miss: state.stats.entityName.missing,
+                                    total: state.stats.entityName.total,
+                                }, state.stats.entityName.total)"
+                            >
+                                <i class="fas fa-fw fa-exclamation-circle text-danger" />
                             </span>
-                            <span v-else-if="state.stats.entityName.missing == 0" :title="t('main.importer.no_missing_values')">
-                                <i class="fas fa-fw fa-check-circle text-success"></i>
+                            <span
+                                v-else-if="state.stats.entityName.missing == 0"
+                                :title="t('main.importer.no_missing_values')"
+                            >
+                                <i class="fas fa-fw fa-check-circle text-success" />
                             </span>
                         </label>
                         <multiselect
                             id="import-entity-name"
+                            v-model="state.postData.entityName"
                             :classes="multiselectResetClasslist"
                             :object="false"
                             :mode="'single'"
                             :options="state.availableColumns"
                             :placeholder="t('global.select.placeholder')"
-                            :hideSelected="true"
-                            v-model="state.postData.entityName"
-                            @select="e => onColumnSelected(e, 'name', true)">
-                        </multiselect>
+                            :hide-selected="true"
+                            @select="e => onColumnSelected(e, 'name', true)"
+                        />
                     </div>
                     <div class="col-md-4 col-sm-6">
-                        <label for="import-entity-parent" class="form-label">
+                        <label
+                            for="import-entity-parent"
+                            class="form-label"
+                        >
                             {{ t('main.importer.column_entity_parent') }}
-                            <span v-if="state.stats.entityParent.missing > 0" :title="t('main.importer.missing_non_required_values', {
-                                        miss: state.stats.entityParent.missing,
-                                        total: state.stats.entityParent.total,
-                                    }, state.stats.entityParent.total)">
-                                <i class="fas fa-fw fa-exclamation-circle text-warning"></i>
+                            <span
+                                v-if="state.stats.entityParent.missing > 0"
+                                :title="t('main.importer.missing_non_required_values', {
+                                    miss: state.stats.entityParent.missing,
+                                    total: state.stats.entityParent.total,
+                                }, state.stats.entityParent.total)"
+                            >
+                                <i class="fas fa-fw fa-exclamation-circle text-warning" />
                             </span>
-                            <span v-else-if="state.stats.entityParent.missing == 0" :title="t('main.importer.no_missing_values')">
-                                <i class="fas fa-fw fa-check-circle text-success"></i>
+                            <span
+                                v-else-if="state.stats.entityParent.missing == 0"
+                                :title="t('main.importer.no_missing_values')"
+                            >
+                                <i class="fas fa-fw fa-check-circle text-success" />
                             </span>
                         </label>
                         <multiselect
                             id="import-entity-parent"
+                            v-model="state.postData.entityParent"
                             :classes="multiselectResetClasslist"
                             :object="false"
                             :mode="'single'"
                             :options="state.availableColumns"
                             :placeholder="t('global.select.placeholder')"
-                            :hideSelected="true"
-                            v-model="state.postData.entityParent"
-                            @select="e => onColumnSelected(e, 'parent', true)">
-                        </multiselect>
+                            :hide-selected="true"
+                            @select="e => onColumnSelected(e, 'parent', true)"
+                        />
                     </div>
                     <hr>
-                    <div class="col-6 col-sm-12"></div>
-                    <div v-if="state.postData.entityType" class="row">
-                        <template v-for="(attr, i) in state.availableAttributes" :key="i">
+                    <div class="col-6 col-sm-12" />
+                    <div
+                        v-if="state.postData.entityType"
+                        class="row"
+                    >
+                        <template
+                            v-for="(attr, i) in state.availableAttributes"
+                            :key="i"
+                        >
                             <div class="col-md-3 col-sm-6 d-flex align-items-center justify-content-end gap-2">
-                                <span v-if="state.stats.attributes[attr.id] && state.stats.attributes[attr.id].missing > 0" :title="t('main.importer.missing_non_required_values', {
+                                <span
+                                    v-if="state.stats.attributes[attr.id] && state.stats.attributes[attr.id].missing > 0"
+                                    :title="t('main.importer.missing_non_required_values', {
                                         miss: state.stats.attributes[attr.id].missing,
                                         total: state.stats.attributes[attr.id].total,
-                                    }, state.stats.attributes[attr.id].total)">
-                                    <i class="fas fa-fw fa-exclamation-circle text-warning"></i>
+                                    }, state.stats.attributes[attr.id].total)"
+                                >
+                                    <i class="fas fa-fw fa-exclamation-circle text-warning" />
                                 </span>
-                                <span v-else-if="state.stats.attributes[attr.id] && state.stats.attributes[attr.id].missing == 0" :title="`You are all set. No missing values for this option.`">
-                                    <i class="fas fa-fw fa-check-circle text-success"></i>
+                                <span
+                                    v-else-if="state.stats.attributes[attr.id] && state.stats.attributes[attr.id].missing == 0"
+                                    :title="`You are all set. No missing values for this option.`"
+                                >
+                                    <i class="fas fa-fw fa-check-circle text-success" />
                                 </span>
                                 <span class="text-body">
                                     {{ translateConcept(attr.thesaurus_url) }}
@@ -117,47 +164,59 @@
                             <div class="col-md-3 col-sm-6">
                                 <multiselect
                                     :id="`input-data-column-${attr.id}`"
+                                    v-model="state.postData.attributes[attr.id]"
                                     :classes="multiselectResetClasslist"
                                     :object="false"
                                     :mode="'single'"
                                     :options="state.availableColumns"
                                     :placeholder="t('global.select.placeholder')"
-                                    :hideSelected="true"
-                                    v-model="state.postData.attributes[attr.id]"
-                                    @select="e => onColumnSelected(e, attr.id)">
-                                </multiselect>
+                                    :hide-selected="true"
+                                    @select="e => onColumnSelected(e, attr.id)"
+                                />
                             </div>
-                            <hr v-if="i % 2 == 1" class="my-3" />
+                            <hr
+                                v-if="i % 2 == 1"
+                                class="my-3"
+                            >
                         </template>
                     </div>
                 </form>
             </div>
             <div>
-                <button type="submit" class="btn btn-outline-primary" form="import-data-form" :disabled="state.dataMissing">
+                <button
+                    type="submit"
+                    class="btn btn-outline-primary"
+                    form="import-data-form"
+                    :disabled="state.dataMissing"
+                >
                     {{ t('main.importer.import_btn') }}
                 </button>
             </div>
         </div>
-        <div class="col d-flex flex-column gap-2" v-else>
+        <div
+            v-else
+            class="col d-flex flex-column gap-2"
+        >
             <alert
                 :message="t('main.importer.upload_csv_info')"
                 :type="'info'"
                 :icontext="t('global.information')"
-                />
+            />
             <file-upload
+                :ref="el => attrRef = el"
+                v-model="state.files"
                 class="rounded border-dashed flex-grow-1 d-flex flex-column gap-2 justify-content-center align-items-center clickable"
                 accept="text/plain,text/csv"
                 extensions="dsv,csv,tsv"
-                v-model="state.files"
                 :directory="false"
                 :multiple="false"
                 :drop="true"
-                :ref="el => attrRef = el"
-                @input-file="addFile">
-                    <i class="fas fa-fw fa-file-upload fa-5x"></i>
-                    <h5>
-                        {{ t('main.importer.drop_csv_file') }}
-                    </h5>
+                @input-file="addFile"
+            >
+                <i class="fas fa-fw fa-file-upload fa-5x" />
+                <h5>
+                    {{ t('main.importer.drop_csv_file') }}
+                </h5>
             </file-upload>
         </div>
     </div>

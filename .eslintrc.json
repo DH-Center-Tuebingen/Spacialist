@@ -1,0 +1,30 @@
+{
+    "extends": "plugin:vue/vue3-recommended",
+    "parserOptions": {
+        "sourceType": "module",
+        "ecmaVersion": "latest"
+    },
+    "env": {
+        "browser": true,
+        "es6": true,
+        "node": true
+    },
+    "rules": {
+        "vue/multi-word-component-names": "off",
+        "vue/html-indent": [
+            "warn",
+            4
+        ],
+        "no-console": "off",
+        "no-unused-vars": "off",
+        "no-extra-boolean-cast": "off",
+        "no-extra-semi": "warn",
+        "quotes": [
+            "warn",
+            "single",
+            {
+                "allowTemplateLiterals": true
+            }
+        ]
+    }
+}

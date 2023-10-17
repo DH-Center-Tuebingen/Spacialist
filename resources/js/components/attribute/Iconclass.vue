@@ -1,28 +1,49 @@
 <template>
     <div>
         <div class="input-group">
-            <input type="text" class="form-control" :disabled="disabled" v-model="v.value" @input="onInput()" />
-            <button type="button" class="btn btn-outline-secondary" :disabled="v.noContent" @click="loadIconclassInfo()">
-                <i class="fas fa-fw fa-eye"></i>
+            <input
+                v-model="v.value"
+                type="text"
+                class="form-control"
+                :disabled="disabled"
+                @input="onInput()"
+            >
+            <button
+                type="button"
+                class="btn btn-outline-secondary"
+                :disabled="v.noContent"
+                @click="loadIconclassInfo()"
+            >
+                <i class="fas fa-fw fa-eye" />
             </button>
         </div>
-        <div class="bg-light mt-2 p-2 border rounded" v-if="state.infoLoaded">
+        <div
+            v-if="state.infoLoaded"
+            class="bg-light mt-2 p-2 border rounded"
+        >
             <div class="d-flex flex-row justify-content-between">
                 <span class="fw-bold">
                     {{ state.text }}
                 </span>
-                <button type="button" class="btn-close" aria-label="Close" @click="closeInfoBox()">
-                </button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    @click="closeInfoBox()"
+                />
             </div>
-            <hr class="my-2" />
+            <hr class="my-2">
             <div>
                 <span>{{ state.keywords.join(' &bull; ') }}</span>
             </div>
             <footer class="blockquote-footer mt-2">
-                <span v-html="t('main.entity.attributes.iconclass.cite_info', {class: v.value})"></span>
+                <span v-html="t('main.entity.attributes.iconclass.cite_info', {class: v.value})" />
             </footer>
         </div>
-        <p class="alert alert-danger my-2" v-if="state.infoErrored">
+        <p
+            v-if="state.infoErrored"
+            class="alert alert-danger my-2"
+        >
             {{ t('main.entity.attributes.iconclass.doesnt_exist') }}
         </p>
     </div>
@@ -171,9 +192,6 @@
                 undirtyField,
                 onInput,
                 loadIconclassInfo,
-                // PROPS
-                disabled,
-                value,
                 // STATE
                 state,
                 v,

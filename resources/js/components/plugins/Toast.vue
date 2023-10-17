@@ -1,19 +1,49 @@
 <template>
-    <div :id="state.id" class="toast" :class="state.toastClasses" role="alert" aria-live="assertive" aria-atomic="true" :data-bs-autohide="state.autohide" :data-bs-delay="state.duration">
-        <div class="toast-header" v-if="!state.simple">
-            <span v-if="state.icon" class="badge rounded-pill me-2" :class="state.badgeClass">
-                <i class="fas fa-fw" :class="state.iconClass"></i>
+    <div
+        :id="state.id"
+        class="toast"
+        :class="state.toastClasses"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+        :data-bs-autohide="state.autohide"
+        :data-bs-delay="state.duration"
+    >
+        <div
+            v-if="!state.simple"
+            class="toast-header"
+        >
+            <span
+                v-if="state.icon"
+                class="badge rounded-pill me-2"
+                :class="state.badgeClass"
+            >
+                <i
+                    class="fas fa-fw"
+                    :class="state.iconClass"
+                />
             </span>
             <strong class="me-auto">
                 {{ state.title }}
             </strong>
             <!-- <small class="text-muted">just now</small> -->
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="toast"
+                aria-label="Close"
+            />
         </div>
         <div class="toast-body">
             {{ state.message }}
         </div>
-        <button v-if="state.simplePersist" type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        <button
+            v-if="state.simplePersist"
+            type="button"
+            class="btn-close btn-close-white me-2 m-auto"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+        />
     </div>
 </template>
 
@@ -79,7 +109,7 @@
 
             // DATA
             const state = reactive({
-                id: id || `toast-${getTs()}`,
+                id: id.value || `toast-${getTs()}`,
                 message: message,
                 title: title,
                 duration: duration,

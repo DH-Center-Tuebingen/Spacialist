@@ -3,7 +3,8 @@
         class="modal-container modal"
         content-class="sp-modal-content sp-modal-content-sm"
         :lock-scroll="false"
-        name="bibliograpy-item-details-modal">
+        name="bibliograpy-item-details-modal"
+    >
         <div class="sp-modal-content sp-modal-content-sm">
             <div class="modal-header">
                 <h5 class="modal-title">
@@ -13,26 +14,42 @@
                         {{ bibtexEntryToText(state.data.title) }}
                     </small>
                 </h5>
-                <button type="button" class="btn-close" aria-label="Close" @click="closeModal()">
-                </button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    @click="closeModal()"
+                />
             </div>
             <div class="modal-body">
                 <div class="d-flex justify-content-end mb-2">
-                    <i class="fas fa-fw fa-user-edit"></i>
+                    <i class="fas fa-fw fa-user-edit" />
                     <span class="ms-1">
                         {{ date(state.data.last_updated, undefined, true, true) }}
                     </span>
                     -
-                    <a href="#" @click.prevent="showUserInfo(state.user)" class="fw-medium" v-if="state.user">
+                    <a
+                        v-if="state.user"
+                        href="#"
+                        class="fw-medium"
+                        @click.prevent="showUserInfo(state.user)"
+                    >
                         {{ state.user.name }}
-                        <user-avatar :user="state.user" :size="20" class="align-middle"></user-avatar>
+                        <user-avatar
+                            :user="state.user"
+                            :size="20"
+                            class="align-middle"
+                        />
                     </a>
                 </div>
                 <dl class="row bg-primary bg-opacity-25 mx-0 py-2 rounded dl-0-mb">
                     <dt class="col-md-3 text-end">
                         {{ t(`global.type`) }}
                     </dt>
-                    <dd class="col-md-9 font-monospace" :title="state.data.type">
+                    <dd
+                        class="col-md-9 font-monospace"
+                        :title="state.data.type"
+                    >
                         {{ t(`main.bibliography.types.${state.data.type}`) }}
                     </dd>
                     <dt class="col-md-3 text-end">
@@ -53,8 +70,14 @@
                     <dd class="col-md-9 font-monospace">
                         {{ bibtexEntryToText(state.data.citekey) }}
                     </dd>
-                    <template v-for="(content, field) in state.filteredFields" :key="`item-detail-field-${field}`">
-                        <dt class="col-md-3 text-end" :title="field">
+                    <template
+                        v-for="(content, field) in state.filteredFields"
+                        :key="`item-detail-field-${field}`"
+                    >
+                        <dt
+                            class="col-md-3 text-end"
+                            :title="field"
+                        >
                             {{ t(`main.bibliography.column.${field}`) }}
                         </dt>
                         <dd class="col-md-9 font-monospace">
@@ -67,11 +90,18 @@
                         </dd>
                     </template>
                 </dl>
-                <bibtex-code :code="state.toBibtexify" :type="state.data.type" />
+                <bibtex-code
+                    :code="state.toBibtexify"
+                    :type="state.data.type"
+                />
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" @click="closeModal()">
-                    <i class="fas fa-fw fa-times"></i> {{ t('global.close') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    @click="closeModal()"
+                >
+                    <i class="fas fa-fw fa-times" /> {{ t('global.close') }}
                 </button>
             </div>
         </div>

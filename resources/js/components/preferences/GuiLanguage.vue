@@ -1,20 +1,27 @@
 <template>
     <div class="row">
-        <label class="col-md-2 form-label"></label>
+        <label class="col-md-2 form-label" />
         <div class="col-md-10">
             <multiselect
-                v-model="data"
                 id="language-search"
-                :hideSelected="true"
+                v-model="data"
+                :hide-selected="true"
                 :mode="'single'"
                 :filterResults="true"
                 :options="state.languageList"
                 :searchable="true"
                 :readonly="readonly"
                 :placeholder="t('global.select.placeholder')"
-                @change="onChange">
-            </multiselect>
-            <button type="button" class="btn btn-outline-primary mt-2" @click="setBrowserLanguage()" :disabled="readonly" v-if="state.showSetButton" v-html="t('main.preference.info.set_to_language', {lang: state.browserLanguage})" />
+                @change="onChange"
+            />
+            <button
+                v-if="state.showSetButton"
+                type="button"
+                class="btn btn-outline-primary mt-2"
+                :disabled="readonly"
+                @click="setBrowserLanguage()"
+                v-html="t('main.preference.info.set_to_language', {lang: state.browserLanguage})"
+            />
         </div>
     </div>
 </template>
@@ -86,9 +93,6 @@
                 // LOCAL
                 onChange,
                 setBrowserLanguage,
-                // PROPS
-                data,
-                readonly,
                 // STATE
                 state,
             };
