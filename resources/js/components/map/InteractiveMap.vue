@@ -418,7 +418,12 @@
                 default: null,
             },
         },
-        emits: ['added', 'select'],
+        emits: [
+            'added', 
+            'deleted',
+            'modified',
+            'select',
+        ],
         setup(props, context) {
             const { t } = useI18n();
 

@@ -69,6 +69,9 @@
                 required: true,
             },
         },
+        emits: [
+            'change',
+        ],
         setup(props, context) {
             const { t } = useI18n();
             const {

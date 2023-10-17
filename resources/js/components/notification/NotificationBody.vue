@@ -246,7 +246,11 @@
                 default: false
             },
         },
-        emits: ['read', 'delete'],
+        emits: [
+            'delete',
+            'posted',
+            'read', 
+        ],
         setup(props, context) {
             const { t } = useI18n();
             const {
