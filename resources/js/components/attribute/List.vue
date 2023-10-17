@@ -40,6 +40,7 @@
                 v-for="(l, i) in v.value"
                 :key="i"
             >
+                <!-- eslint-disable-next-line vue/no-v-html -->
                 <span v-html="createAnchorFromUrl(l)" />
                 <a
                     v-if="!disabled"
