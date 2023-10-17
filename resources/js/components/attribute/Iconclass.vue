@@ -15,26 +15,8 @@
                 @click="loadIconclassInfo()"
             >
                 <i class="fas fa-fw fa-eye" />
-            <input
-                v-model="v.value"
-                type="text"
-                class="form-control"
-                :disabled="disabled"
-                @input="onInput()"
-            >
-            <button
-                type="button"
-                class="btn btn-outline-secondary"
-                :disabled="v.noContent"
-                @click="loadIconclassInfo()"
-            >
-                <i class="fas fa-fw fa-eye" />
             </button>
         </div>
-        <div
-            v-if="state.infoLoaded"
-            class="bg-light mt-2 p-2 border rounded"
-        >
         <div
             v-if="state.infoLoaded"
             class="bg-light mt-2 p-2 border rounded"
@@ -49,14 +31,7 @@
                     aria-label="Close"
                     @click="closeInfoBox()"
                 />
-                <button
-                    type="button"
-                    class="btn-close"
-                    aria-label="Close"
-                    @click="closeInfoBox()"
-                />
             </div>
-            <hr class="my-2">
             <hr class="my-2">
             <div>
                 <span>{{ state.keywords.join(' &bull; ') }}</span>
@@ -66,10 +41,6 @@
                 <span v-html="t('main.entity.attributes.iconclass.cite_info', {class: v.value})" />
             </footer>
         </div>
-        <p
-            v-if="state.infoErrored"
-            class="alert alert-danger my-2"
-        >
         <p
             v-if="state.infoErrored"
             class="alert alert-danger my-2"

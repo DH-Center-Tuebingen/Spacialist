@@ -392,6 +392,7 @@
             'sql-attribute': SqlAttr,
             'system-separator-attribute': SystemSeparator,
             'default-attribute': DefaultAttr,
+            'attribute-moderation-panel': ModerationPanel,
         },
         props: {
             classes: {

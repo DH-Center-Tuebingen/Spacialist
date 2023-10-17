@@ -23,7 +23,8 @@
                     :external="state.formId"
                     @created="add"
                     @updated="updateAttribute"
-                    @validation="checkValidation" />
+                    @validation="checkValidation"
+                />
                 <div v-if="state.hasColumns">
                     <hr>
                     <div class="bg-secondary bg-opacity-25 p-2 rounded">
