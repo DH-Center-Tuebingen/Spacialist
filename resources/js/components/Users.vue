@@ -231,30 +231,9 @@
                             {{ date(dUser.deleted_at) }}
                         </td>
                         <td>
-                            <div class="dropdown">
-                                <span
-                                    :id="`deactive-user-dropdown-${dUser.id}`"
-                                    class="clickable"
-                                    data-bs-toggle="dropdown"
-                                    aria-haspopup="true"
-                                    aria-expanded="false"
-                                >
-                                    <i class="fas fa-fw fa-ellipsis-h" />
-                                </span>
-                                <div
-                                    class="dropdown-menu"
-                                    :aria-labelledby="`deactive-user-dropdown-${dUser.id}`"
-                                >
-                                    <a
-                                        class="dropdown-item"
-                                        href="#"
-                                        :disabled="!can('users_roles_delete')"
-                                        @click.prevent="reactivateUser(dUser.id)"
-                                    >
-                                        <i class="fas fa-fw fa-user-check text-success" /> {{ t('global.reactivate') }}
-                                    </a>
-                                </div>
-                            </div>
+                            <button class="btn btn-outline-success btn-sm" :disabled="!can('users_roles_delete')" @click="reactivateUser(dUser.id)">
+                                <i class="fas fa-fw fa-user-check"></i> {{ t('global.reactivate') }}
+                            </button>
                         </td>
                     </tr>
                 </tbody>
