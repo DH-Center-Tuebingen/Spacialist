@@ -128,7 +128,7 @@
                 state.availableEntityTypes = data;
             });
             fetchAttributes().then(data => {
-                state.availableAttributes = data;
+                state.availableAttributes = data.filter(a => a.attribute.datatype != 'system-separator');
             });
 
             // DATA

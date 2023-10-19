@@ -185,6 +185,9 @@
 
                     for(let i=0; i<state.availableAttributes.attributes.length; i++) {
                         const currAttr = state.availableAttributes.attributes[i];
+
+                        if(currAttr.attribute.datatype == 'system-separator') continue;
+
                         const currData = state.availableAttributes.data[currAttr.attribute_id];
 
                         if(!state.attributeDataModels[currAttr.attribute_id]) {
