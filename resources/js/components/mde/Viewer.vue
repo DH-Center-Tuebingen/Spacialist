@@ -9,6 +9,7 @@
         toRefs,
     } from 'vue';
 
+    import VueMarkdown from 'markdown-vue'; 
     import remarkGfm from 'remark-gfm';
     import remarkGemoji from 'remark-gemoji';
 
@@ -23,6 +24,9 @@
                 type: String,
                 default: 'gfm,emoji',
             },
+        },
+        components: {
+            'vue-markdown': VueMarkdown,
         },
         setup(props) {
             const {

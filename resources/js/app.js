@@ -40,7 +40,6 @@ import VueUploadComponent from 'vue-upload-component';
 import DatePicker from 'vue-datepicker-next';
 import draggable from 'vuedraggable';
 import { Tree, Node, } from "tree-vue-component";
-import VueMarkdown from 'markdown-vue';
 
 // Components
 import App from '@/App.vue';
@@ -230,7 +229,6 @@ app.component('alert', Alert);
 app.component('notification-body', NotificationBody);
 app.component('csv-table', CsvTable);
 app.component('color-gradient', Gradient);
-app.component('vue-markdown', VueMarkdown);
 app.component('md-viewer', MarkdownViewer);
 app.component('md-editor', MarkdownEditor);
 app.component("bibtex-code", BibtexCode);
