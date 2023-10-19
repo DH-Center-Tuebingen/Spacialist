@@ -10,6 +10,7 @@ import PQueue from "p-queue";
 // Reusable Components
 import AttributeList from "@/components/AttributeList.vue";
 import ResultCard from '@/components/openaccess/Card.vue';
+import MarkdownViewer from '@/components/mde/Viewer.vue';
 
 // Init Libs
 // PQueue, httpQueue
@@ -47,6 +48,7 @@ app.component('result-card', ResultCard);
 app.component("multiselect", Multiselect);
 app.component("date-picker", DatePicker);
 app.component("draggable", draggable);
+app.component('md-viewer', MarkdownViewer);
 
 // Mount Vue
 app.mount("#app");
