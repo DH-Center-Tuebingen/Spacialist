@@ -390,7 +390,7 @@
 
             // FUNCTIONS
             const clFromMetadata = elem => {
-                if(elem.pivot && elem.pivot.metadata && elem.pivot.metadata.width) {
+                if(!state.ignoreMetadata && elem.pivot && elem.pivot.metadata && elem.pivot.metadata.width) {
                     const width = elem.pivot.metadata.width;
                     switch(width) {
                         case 50: 
@@ -665,6 +665,7 @@
                 }),
                 hideLabels: computed(_ => options.value.hide_labels),
                 hideEntityLink: computed(_ => options.value.hide_entity_link),
+                ignoreMetadata: computed(_ => options.value.ignore_metadata),
             });
 
             // ON MOUNTED
