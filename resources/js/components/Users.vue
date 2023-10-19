@@ -111,7 +111,7 @@
                                     aria-haspopup="true"
                                     aria-expanded="false"
                                 >
-                                    <i class="fas fa-fw fa-ellipsis-h" />
+                                    <i class="fas fa-fw fa-ellipsis-vertical" />
                                     <sup
                                         v-if="userDirty(user.id)"
                                         class="notification-info"

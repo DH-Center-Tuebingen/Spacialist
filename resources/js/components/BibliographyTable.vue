@@ -461,6 +461,8 @@
                         </td>
                         <td>
                             <div class="dropdown">
+                                <span id="dropdownMenuButton" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-fw fa-ellipsis-vertical"></i>
                                 <span
                                     id="dropdownMenuButton"
                                     class="clickable"
@@ -468,7 +470,7 @@
                                     aria-haspopup="true"
                                     aria-expanded="false"
                                 >
-                                    <i class="fas fa-fw fa-ellipsis-h" />
+                                    <i class="fas fa-fw fa-ellipsis-vertical" />
                                 </span>
                                 <div
                                     class="dropdown-menu overlay-all"
