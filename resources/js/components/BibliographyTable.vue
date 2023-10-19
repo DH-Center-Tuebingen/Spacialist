@@ -358,7 +358,7 @@
                         <td>
                             <div class="dropdown">
                                 <span id="dropdownMenuButton" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fas fa-fw fa-ellipsis-h"></i>
+                                    <i class="fas fa-fw fa-ellipsis-vertical"></i>
                                 </span>
                                 <div class="dropdown-menu overlay-all" aria-labelledby="dropdownMenuButton">
                                     <a class="dropdown-item" href="#" @click.prevent="editItem(entry)" :disabled="!can('bibliography_write')">
