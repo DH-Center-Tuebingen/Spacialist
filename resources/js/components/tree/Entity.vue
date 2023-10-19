@@ -8,8 +8,8 @@
                 </small>
             </h3>
             <div class="dropdown">
-                <span id="tree-options-dropdown" class="clickable align-middle btn btn-outline-primary btn-sm" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-fw fa-ellipsis-h"></i>
+                <span id="tree-options-dropdown" class="clickable text-body align-middle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-fw fa-ellipsis-vertical"></i>
                 </span>
                 <div class="dropdown-menu" aria-labelledby="tree-options-dropdown">
                     <a class="dropdown-item" href="#" @click.prevent>
