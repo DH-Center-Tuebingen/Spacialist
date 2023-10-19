@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex flex-column h-100 scroll-y-auto scroll-x-hidden">
+    <div class="d-flex flex-column h-100 px-3 scroll-y-auto scroll-x-hidden">
         <h2>Spacialist Open Access - Panel</h2>
         <p class="lead bg-primary bg-opacity-10 p-4 rounded-4 mb-3" v-if="state.prefLoaded">
             This page allows open access to the Spacialist Project <span class="fst-italic">{{ state.project }}</span> by <a :href="`mailto:${state.maintainer.email}`" class="fst-italic">{{ state.maintainer.name }}</a>.
@@ -45,10 +45,10 @@
             Project Description
             <small class="small">
                 <a href="#" class="text-reset" v-show="state.showDescription" @click.prevent="toggleShowDescription()">
-                    <i class="fas fa-fw fa-caret-down"></i>
+                    <i class="fas fa-fw fa-eye"></i>
                 </a>
                 <a href="#" class="text-reset" v-show="!state.showDescription" @click.prevent="toggleShowDescription()">
-                    <i class="fas fa-fw fa-caret-up"></i>
+                    <i class="fas fa-fw fa-eye-slash"></i>
                 </a>
             </small>
         </h4>
@@ -60,8 +60,8 @@
 
 <script>
     import {
-        reactive,
         computed,
+        reactive,
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
