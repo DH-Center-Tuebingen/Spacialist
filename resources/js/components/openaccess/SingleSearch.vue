@@ -73,9 +73,9 @@
                 </ul>
             </nav>
         </div>
-        <div class="col-4 h-100 overflow-hidden d-flex flex-column" v-if="state.selectedEntityType">
+        <div class="col-4 h-100 pe-0 overflow-hidden d-flex flex-column" v-if="state.selectedEntityType">
             <h4>Filters</h4>
-            <div class="d-flex flex-column scroll-y-auto flex-grow-1">
+            <div class="d-flex flex-column pe-3 scroll-y-auto flex-grow-1">
                 <div v-for="attribute in state.filterableAttributes.attributes" :key="attribute.id" class="mb-3">
                     <h5>
                         {{ translateConcept(attribute.attribute.thesaurus_url) }}
