@@ -18,6 +18,7 @@
                     v-if="state.attributesInitialized"
                     v-dcan="'entity_data_read'"
                     :ref="el => listRef = el"
+                    :options="{'ignore_metadata': true}"
                     :attributes="state.sortedAttributes"
                     :values="state.defaultValues"
                     :selections="state.attributeSelections"
@@ -92,7 +93,7 @@
             const state = reactive({
                 attributesInitialized: false,
                 isDirty: false,
-                sortedAttributes: attributes.value.sort((a, b) => a.id > b.id),
+                sortedAttributes: attributes.value.filter(a => a.datatype != 'system-separator').sort((a, b) => a.id > b.id),
                 defaultValues: {},
                 attributeSelections: null,
             });
