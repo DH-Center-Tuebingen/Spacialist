@@ -1477,7 +1477,7 @@
                         }
                         break;
                     case 'layer_by_feature':
-                        const found = false;
+                        let found = false;
 
                         for(let i=0; i<layers.length; i++) {
                             const l = layers[i];
