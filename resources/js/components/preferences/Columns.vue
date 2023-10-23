@@ -102,11 +102,9 @@
             const onChange = _debounce(e => {
                 if(readonly.value) return;
                 context.emit('changed', {
-                    value: {
-                        left: data.value['left'],
-                        center: data.value['center'],
-                        right: data.value['right'],
-                    }
+                    left: data.value['left'],
+                    center: data.value['center'],
+                    right: data.value['right'],
                 });
             }, 250);
 

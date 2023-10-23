@@ -4,7 +4,7 @@
         <div class="col-md-10">
             <multiselect
                 id="color-search"
-                v-model="data"
+                :value="data"
                 :track-by="'id'"
                 :label="'id'"
                 :value-prop="'key'"
@@ -66,9 +66,7 @@
             // FUNCTIONS
             const onChange = value => {
                 if(readonly.value) return;
-                context.emit('changed', {
-                    value: value
-                });
+                context.emit('changed', value);
             };
 
             // DATA

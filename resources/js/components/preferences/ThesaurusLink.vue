@@ -44,9 +44,7 @@
             // FUNCTIONS
             const onChange = _debounce(e => {
                 if(readonly.value) return;
-                context.emit('changed', {
-                    value: e.target.value
-                });
+                context.emit('changed', e.target.value);
             }, 250);
 
             // DATA

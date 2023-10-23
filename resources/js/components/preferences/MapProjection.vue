@@ -5,7 +5,7 @@
         </label>
         <div class="col-md-10">
             <input
-                v-model="data.epsg"
+                :value="data.epsg"
                 class="form-control"
                 type="number"
                 min="0"
@@ -33,7 +33,10 @@
         props: {
             data: {
                 required: true,
-                type: Number,
+                type: Object,
+                validator: (value) => {
+                    return typeof value.epsg === 'number';
+                }
             },
             readonly: {
                 required: false,
@@ -52,9 +55,7 @@
             // FUNCTIONS
             const onChange = _debounce(e => {
                 if(readonly.value) return;
-                context.emit('changed', {
-                    value: e.target.value
-                });
+                context.emit('changed', {epsg: e.target.value});
             }, 250);
 
             // RETURN

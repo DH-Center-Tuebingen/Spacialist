@@ -50,9 +50,7 @@
             // FUNCTIONS
             const onChange = _debounce(e => {
                 if(readonly.value) return;
-                context.emit('changed', {
-                    value: e.target.checked,
-                });
+                context.emit('changed',  e.target.checked);
             }, 250);
 
             // DATA
