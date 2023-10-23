@@ -32,115 +32,28 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
+                    <tr
+                        v-for="preferencesBlock of preferencesConfig"
+                        :key="preferencesBlock.label"
+                    >
                         <td>
                             <strong>
-                                {{ t('main.preference.key.language') }}
+                                {{ t(preferencesBlock.title) }}
                             </strong>
                         </td>
                         <td>
-                            <gui-language-preference
-                                :data="state.preferences['prefs.gui-language']"
-                                :readonly="!state.overrides['prefs.gui-language']"
-                                :browser-default="true"
-                                @changed="e => trackChanges('prefs.gui-language', e)"
+                            <component 
+                                :is="preferencesBlock.component"
+                                v-if="preferencesBlock.data === 'v-model'"
+                                v-model="state.preferences[preferencesBlock.label]"
+                                @changed="value => trackChanges(preferencesBlock.label, value)"
                             />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <strong>{{ t('main.preference.key.password_reset_link') }}</strong>
-                        </td>
-                        <td>
-                            <reset-email-preference
-                                :data="state.preferences['prefs.enable-password-reset-link']"
-                                :readonly="!state.overrides['prefs.enable-password-reset-link']"
-                                @changed="e => trackChanges('prefs.enable-password-reset-link', e)"
-                            />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <strong>{{ t('main.preference.key.columns.title') }}</strong>
-                        </td>
-                        <td>
-                            <columns-preference
-                                :data="state.preferences['prefs.columns']"
-                                :readonly="!state.overrides['prefs.columns']"
-                                @changed="e => trackChanges('prefs.columns', e)"
-                            />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <strong>{{ t('main.preference.key.tooltips') }}</strong>
-                        </td>
-                        <td>
-                            <tooltips-preference
-                                :data="state.preferences['prefs.show-tooltips']"
-                                :readonly="!state.overrides['prefs.show-tooltips']"
-                                @changed="e => trackChanges('prefs.show-tooltips', e)"
-                            />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <strong>{{ t('main.preference.key.tag_root') }}</strong>
-                        </td>
-                        <td>
-                            <tags-preference
-                                :data="state.preferences['prefs.tag-root']"
-                                :readonly="!state.overrides['prefs.tag-root']"
-                                @changed="e => trackChanges('prefs.tag-root', e)"
-                            />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <strong>{{ t('main.preference.key.link_thesaurex') }}</strong>
-                        </td>
-                        <td>
-                            <thesaurus-link-preference
-                                :data="state.preferences['prefs.link-to-thesaurex']"
-                                :readonly="!state.overrides['prefs.link-to-thesaurex']"
-                                @changed="e => trackChanges('prefs.link-to-thesaurex', e)"
-                            />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <strong>{{ t('main.preference.key.project.name') }}</strong>
-                        </td>
-                        <td>
-                            <project-name-preference
-                                :data="state.preferences['prefs.project-name']"
-                                :readonly="!state.overrides['prefs.project-name']"
-                                @changed="e => trackChanges('prefs.project-name', e)"
-                            />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <strong>{{ t('main.preference.key.project.maintainer') }}</strong>
-                        </td>
-                        <td>
-                            <project-maintainer-preference
-                                :data="state.preferences['prefs.project-maintainer']"
-                                :readonly="!state.overrides['prefs.project-maintainer']"
-                                @changed="e => trackChanges('prefs.project-maintainer', e)"
-                            />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <strong>{{ t('main.preference.key.map.projection') }}</strong>
-                        </td>
-                        <td>
-                            <map-projection-preference
-                                :data="state.preferences['prefs.map-projection']"
-                                :readonly="!state.overrides['prefs.map-projection']"
-                                @changed="e => trackChanges('prefs.map-projection', e)"
-                            />
+                            <component 
+                                :is="preferencesBlock.component"
+                                v-else
+                                :data="state.preferences[preferencesBlock.label]"
+                                @changed="e => trackChanges(preferencesBlock.label, e)"
+                            /> 
                         </td>
                     </tr>
                 </tbody>
@@ -150,6 +63,7 @@
 </template>
 
 <script>
+    /* eslint-disable vue/no-unused-components */
     import {
         computed,
         reactive,
@@ -173,6 +87,7 @@
     } from '@/helpers/helpers.js';
 
     import GuiLanguage from '@/components/preferences/GuiLanguage.vue';
+    import Color from '@/components/preferences/Color.vue';
     import ResetEmail from '@/components/preferences/ResetEmail.vue';
     import Columns from '@/components/preferences/Columns.vue';
     import ShowTooltips from '@/components/preferences/ShowTooltips.vue';
@@ -185,6 +100,7 @@
     export default {
         components: {
             'gui-language-preference': GuiLanguage,
+            'color-preference': Color,
             'reset-email-preference': ResetEmail,
             'columns-preference': Columns,
             'tooltips-preference': ShowTooltips,
@@ -201,28 +117,40 @@
 
             // FUNCTIONS
             const trackChanges = (label, data) => {
-                state.preferences[label] = data.value;
-                state.dirtyData[label] = {
-                    value: data.value,
-                };
+                if(!state.dirtyData[label]) {
+                    state.dirtyData[label] = {
+                        label: label,
+                        value: data,
+                    };
+                }else{
+                    state.dirtyData[label].value = data;
+                }
             };
             const savePreferences = _ => {
                 if(!state.hasDirtyData) return;
 
-                let entries = [];
                 let updatedLanguage = null;
-                for(let k in state.dirtyData) {
-                    const dd = state.dirtyData[k];
-                    if(k == 'prefs.gui-language') {
-                        updatedLanguage = dd.value;
+
+                //TODO: Can't we just access state.dirtyData['prefs.gui-language'] directly?
+                for(let label in state.dirtyData) {
+                    const dirtyData = state.dirtyData[label];
+                    if(label == 'prefs.gui-language') {
+                        updatedLanguage = dirtyData.value;
                     }
-                    entries.push({
-                        value: dd.value,
-                        label: k,
-                    });
+
+                    /*
+                     * Somehow in the UserPreferences a manual conversion of the
+                     * map projection is required. This is not necessary in the
+                     * Preferences component.
+                     * 
+                     * Otherwise there will be an 'array to text conversion' error -SO
+                     */
+                    if(label == 'prefs.map-projection') {
+                        dirtyData.value = JSON.stringify(dirtyData.value);
+                    }
                 }
                 const data = {
-                    changes: entries,
+                    changes: Object.values(state.dirtyData),
                 };
                 patchPreferences(data, route.params.id).then(data => {
                     // Update language if value has changed
@@ -259,6 +187,61 @@
                 browserLanguage: navigator.language ? navigator.language.split('-')[0] : 'en',
             });
 
+            const preferencesConfig = [
+                {
+                    title: 'main.preference.key.language',
+                    label:  'prefs.gui-language',
+                    component: 'gui-language-preference',
+                    data: 'v-model'
+                },
+                {
+                    title: 'main.preference.key.color.title',
+                    label:  'prefs.color',
+                    component: 'color-preference',
+                },
+                {
+                    title: 'main.preference.key.password_reset_link',
+                    label:  'prefs.enable-password-reset-link',
+                    component: 'reset-email-preference',
+                },
+                {
+                    title: 'main.preference.key.columns.title',
+                    label:  'prefs.columns',
+                    component: 'columns-preference',
+                },
+                {
+                    title: 'main.preference.key.tooltips',
+                    label:  'prefs.show-tooltips',
+                    component: 'tooltips-preference',
+                },
+                {
+                    title: 'main.preference.key.tag_root',
+                    label:  'prefs.tag-root',
+                    component: 'tags-preference',
+                },
+                {
+                    title: 'main.preference.key.link_thesaurex',
+                    label: 'prefs.link-to-thesaurex',
+                    component: 'thesaurus-link-preference',
+                },
+                {
+                    title: 'main.preference.key.project.name',
+                    label: 'prefs.project-name',
+                    component: 'project-name-preference',
+                    data: 'v-model'
+                },
+                {
+                    title: 'main.preference.key.project.maintainer',
+                    label: 'prefs.project-maintainer',
+                    component: 'project-maintainer-preference',
+                },
+                {
+                    title: 'main.preference.key.map.projection',
+                    label: 'prefs.map-projection',
+                    component: 'map-projection-preference',
+                }
+            ]
+
             // RETURN
             return {
                 t,
@@ -271,6 +254,7 @@
                 // PROPS
                 // STATE
                 state,
+                preferencesConfig,
             };
         },
     }

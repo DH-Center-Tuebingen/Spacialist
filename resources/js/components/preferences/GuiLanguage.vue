@@ -4,7 +4,7 @@
         <div class="col-md-10">
             <multiselect
                 id="language-search"
-                v-model="data"
+                :value="modelValue"
                 :hide-selected="true"
                 :mode="'single'"
                 :filterResults="true"
@@ -43,7 +43,7 @@
 
     export default {
         props: {
-            data: {
+            modelValue: {
                 required: true,
                 type: String,
             },
@@ -58,11 +58,10 @@
                 default: false,
             },
         },
-        emits: ['changed'],
+        emits: ['changed', 'upadte:modelValue'],
         setup(props, context) {
             const { t } = useI18n();
             const {
-                data,
                 readonly,
                 browserDefault,
             } = toRefs(props);
@@ -70,10 +69,9 @@
             // FUNCTIONS
             const onChange = value => {
                 if(readonly.value) return;
-                context.emit('changed', {
-                    value: value
-                });
+                context.emit('changed',  value );
             };
+
             const setBrowserLanguage = _ => {
                 if(!browserDefault.value || readonly.value) return;
 
@@ -85,7 +83,7 @@
                 languageList: getSupportedLanguages(),
                 browserLanguage: computed(_ => navigator.language ? navigator.language.split('-')[0] : 'en'),
                 showSetButton: computed(_ => {
-                    return browserDefault.value && state.browserLanguage != data.value && state.languageList.includes(state.browserLanguage);
+                    return browserDefault.value && state.browserLanguage != props.modelValue && state.languageList.includes(state.browserLanguage);
                 }),
             });
 
