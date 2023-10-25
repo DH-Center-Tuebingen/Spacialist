@@ -75,13 +75,13 @@
             </div>
         </template>
         <template #nooptions="">
-            <!-- eslint-disable -->
+            <!-- eslint-disable vue/no-v-html -->
             <div
                 v-if="!!state.query"
                 class="p-2"
                 v-html="t('global.search_no_results_for', {term: state.query})"
             />
-            <!-- eslint-enable -->
+            <!-- eslint-enable vue/no-v-html-->
             <div
                 v-else
                 class="p-1 text-muted"
