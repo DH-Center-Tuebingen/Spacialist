@@ -6,6 +6,7 @@
                 :value="modelValue"
                 class="form-control"
                 type="text"
+                :disabled="readonly"
                 :readonly="readonly"
                 @input="onInput"
             >

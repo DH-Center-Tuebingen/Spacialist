@@ -1,9 +1,7 @@
 <template>
     <multiselect
         v-model="v.value"
-        v-model="v.value"
         :classes="multiselectResetClasslist"
-        :value-prop="'id'"
         :value-prop="'id'"
         :label="'concept_url'"
         :track-by="'concept_url'"
@@ -16,12 +14,9 @@
         @change="value => v.handleChange(value)"
     >
         <template #option="{ option }">
-        @change="value => v.handleChange(value)"
-    >
-        <template #option="{ option }">
             {{ translateConcept(option.concept_url) }}
         </template>
-        <template v-slot:singlelabel="{ value }">
+        <template #singlelabel="{ value: singlelabelValue }">
             <div class="multiselect-single-label">
                 {{ translateConcept(singlelabelValue.concept_url) }}
             </div>

@@ -9,11 +9,8 @@
         :disabled="disabled"
         :options="selections"
         :name="name"
-        :closeOnSelect="false"
+        :close-on-select="false"
         :placeholder="t('global.select.placeholder')"
-        @change="value => v.handleChange(value)"
-    >
-        <template #option="{ option }">
         @change="value => v.handleChange(value)"
     >
         <template #option="{ option }">

@@ -11,6 +11,7 @@
                 min="0"
                 max="99999"
                 step="1"
+                :disabled="readonly"
                 :readonly="readonly"
                 @input="onChange"
             >

@@ -5,6 +5,7 @@
             <input
                 v-model="localData.name"
                 class="form-control"
+                :disabled="readonly"
                 type="text"
                 :readonly="readonly"
                 @input="onChange"
@@ -17,6 +18,7 @@
             <input
                 v-model="localData.email"
                 class="form-control"
+                :disabled="readonly"
                 type="text"
                 :readonly="readonly"
                 @input="onChange"
@@ -29,6 +31,7 @@
             <textarea
                 v-model="localData.description"
                 class="form-control"
+                :disabled="readonly"
                 rows="1"
                 :readonly="readonly"
                 @input="onChange"
@@ -101,7 +104,7 @@
                 readonly,
             } = toRefs(props);
 
-            const localData =       (_cloneDeep(data.value));
+            const localData = (_cloneDeep(data.value));
 
             // FUNCTIONS
             const onChange = _debounce(e => {

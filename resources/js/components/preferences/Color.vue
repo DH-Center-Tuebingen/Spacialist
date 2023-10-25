@@ -13,7 +13,7 @@
                 :filterResults="true"
                 :options="state.colorList"
                 :searchable="true"
-                :readonly="readonly"
+                :disabled="readonly"
                 :placeholder="t('global.select.placeholder')"
                 @change="onChange"
             >
