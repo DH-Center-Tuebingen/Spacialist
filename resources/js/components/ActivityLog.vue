@@ -83,7 +83,7 @@
                                 <i :class="getIconClass(act.description)" />
                             </span>
                             <span v-else-if="state.actionIcons == 'both'">
-                                <i :class="getIconClass(act.description)" />{{ act.description }}
+                                <i :class="getIconClass(act.description)" /> {{ act.description }}
                             </span>
                             <span v-else>
                                 {{ act.description }}

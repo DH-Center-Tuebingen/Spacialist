@@ -67,7 +67,7 @@
                     return !noicon.value && state.supportsIcon;
                 }),
                 hasIconText: computed(_ => {
-                    return state.hasIcon && (!!icontext.value && !!icontext.value);
+                    return state.hasIcon &&  !!icontext.value;
                 }),
                 supportsIcon: computed(_ => {
                     switch(type.value) {
