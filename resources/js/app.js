@@ -214,24 +214,6 @@ app.directive('infinite-scroll', {
 });
 
 // Components
-app.component('attribute-list', AttributeList);
-app.component('entity-type-list', EntityTypeList);
-app.component('entity-tree', EntityTree);
-app.component('entity-breadcrumbs', EntityBreadcrumbs);
-app.component('user-avatar', UserAvatar);
-app.component('activity-log', ActivityLog);
-app.component('comment-list', CommentList);
-app.component('emoji-picker', EmojiPicker);
-app.component('global-search', GlobalSearch);
-app.component('simple-search', SimpleSearch);
-app.component('sp-map', InteractiveMap);
-app.component('alert', Alert);
-app.component('notification-body', NotificationBody);
-app.component('csv-table', CsvTable);
-app.component('color-gradient', Gradient);
-app.component('md-viewer', MarkdownViewer);
-app.component('md-editor', MarkdownEditor);
-app.component("bibtex-code", BibtexCode);
 app.component('AttributeList', AttributeList);
 app.component('EntityTypeList', EntityTypeList);
 app.component('EntityTree', EntityTree);
@@ -247,7 +229,6 @@ app.component('Alert', Alert);
 app.component('NotificationBody', NotificationBody);
 app.component('CsvTable', CsvTable);
 app.component('ColorGradient', Gradient);
-app.component('VueMarkdown', VueMarkdown);
 app.component('MdViewer', MarkdownViewer);
 app.component('MdEditor', MarkdownEditor);
 app.component('BibtexCode', BibtexCode);
