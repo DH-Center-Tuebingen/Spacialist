@@ -7,6 +7,7 @@
                 class="form-control"
                 type="text"
                 :readonly="readonly"
+                :disabled="readonly"
                 @input="onChange"
             >
         </div>

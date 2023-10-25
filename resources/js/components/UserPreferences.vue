@@ -44,14 +44,10 @@
                         <td>
                             <component 
                                 :is="preferencesBlock.component"
-                                v-if="preferencesBlock.data === 'v-model'"
-                                v-model="state.preferences[preferencesBlock.label]"
-                                @changed="value => trackChanges(preferencesBlock.label, value)"
-                            />
-                            <component 
-                                :is="preferencesBlock.component"
-                                v-else
-                                :data="state.preferences[preferencesBlock.label]"
+                                :model-value="(preferencesBlock.data === 'v-model') ? state.preferences[preferencesBlock.label] : null"
+                                :readonly="!state.overrides[preferencesBlock.label]"
+                                :data="(preferencesBlock.data === undefined) ? state.preferences[preferencesBlock.label] : null"
+                                @update:model-value="value => updateValue(preferencesBlock, value)"
                                 @changed="e => trackChanges(preferencesBlock.label, e)"
                             /> 
                         </td>
@@ -126,6 +122,13 @@
                     state.dirtyData[label].value = data;
                 }
             };
+
+            const updateValue = (preferencesBlock, data) => {
+                if(preferencesBlock.data === 'v-model') {
+                    state.preferences[preferencesBlock.label] = data;
+                }
+            };  
+
             const savePreferences = _ => {
                 if(!state.hasDirtyData) return;
 
@@ -145,9 +148,13 @@
                      * 
                      * Otherwise there will be an 'array to text conversion' error -SO
                      */
-                    if(label == 'prefs.map-projection') {
-                        dirtyData.value = JSON.stringify(dirtyData.value);
-                    }
+                    // if(label == 'prefs.map-projection') {
+                    //     dirtyData.value = JSON.stringify(dirtyData.value);
+                    // }
+
+                    // if(label == 'prefs.project-maintainer') {
+                    //     dirtyData.value = JSON.stringify(dirtyData.value);
+                    // }
                 }
                 const data = {
                     changes: Object.values(state.dirtyData),
@@ -251,6 +258,7 @@
                 // LOCAL
                 trackChanges,
                 savePreferences,
+                updateValue,
                 // PROPS
                 // STATE
                 state,

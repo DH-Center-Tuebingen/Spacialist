@@ -461,8 +461,14 @@
                         </td>
                         <td>
                             <div class="dropdown">
-                                <span id="dropdownMenuButton" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fas fa-fw fa-ellipsis-vertical"></i>
+                                <span
+                                    id="dropdownMenuButton"
+                                    class="clickable"
+                                    data-bs-toggle="dropdown"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                >
+                                    <i class="fas fa-fw fa-ellipsis-vertical" />
                                 </span>
                                 <div
                                     class="dropdown-menu overlay-all"
@@ -692,7 +698,6 @@
                             return false;
                         });
                     }
-                    
                     const size = Math.min(state.entriesLoaded, filteredEntries.length);
                     return _orderBy(filteredEntries, state.orderColumn, state.orderType).slice(0, size);
                 })

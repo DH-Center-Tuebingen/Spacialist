@@ -120,7 +120,7 @@
                                 <div
                                     class="dropdown-menu"
                                     :aria-labelledby="`role-options-dropdown-${role.id}`"
-                                >
+                                > 
                                     <a
                                         v-if="roleDirty(role.id)"
                                         class="dropdown-item"

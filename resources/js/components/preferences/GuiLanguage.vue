@@ -10,6 +10,7 @@
                 :filterResults="true"
                 :options="state.languageList"
                 :searchable="true"
+                :disabled="readonly"
                 :readonly="readonly"
                 :placeholder="t('global.select.placeholder')"
                 @change="onChange"

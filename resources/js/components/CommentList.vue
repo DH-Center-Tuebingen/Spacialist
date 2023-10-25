@@ -1,4 +1,5 @@
 <template>
+    <!-- eslint-disable vue/no-v-html-->
     <div :class="classes">
         <div :class="listClasses">
             <div v-show="!state.commentsHidden">
@@ -150,12 +151,13 @@
                                         v-if="comment.content"
                                         class="card-body px-3 py-2"
                                     >
-                                        <!-- eslint-disable -->
+                                        <!-- TODO; Here we insert user input into the comment. This is bad!-->
+                                        <!-- eslint-disable vue/no-v-html -->
                                         <p
                                             class="card-text"
                                             v-html="mentionify(comment.content)"
                                         />
-                                        <!-- eslint-enable -->
+                                        <!-- eslint-enable vue/no-v-html -->
                                     </div>
                                 </slot>
                                 <slot
