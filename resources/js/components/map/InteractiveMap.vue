@@ -380,7 +380,7 @@
             data: {
                 type: Object,
                 required: false,
-                default: ()=> {},
+                default: () => ({}),
             },
             projection: {
                 type: Number,
@@ -405,7 +405,7 @@
             extent: {
                 type: Object,
                 required: false,
-                default: ()=>{}
+                default: () => ({}),
             },
             provider: {
                 type: String,
