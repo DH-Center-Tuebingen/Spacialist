@@ -13,19 +13,6 @@
                 >
             </div>
         </div>
-        <div
-            v-if="state.enabled"
-            class="row mt-3"
-        >
-            <div class="col-md-10 offset-md-2">
-                <!-- eslint-disable vue/no-v-html -->
-                <div
-                    class="alert bg-info mb-0 w-50"
-                    v-html="t('main.preference.info.password_reset_link')"
-                />
-                <!-- eslint-enable vue/no-v-html -->
-            </div>
-        </div>
     </div>
 </template>
 

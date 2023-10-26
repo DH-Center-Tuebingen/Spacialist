@@ -581,12 +581,11 @@
             },
             "info": {
                 "set_to_language": "Auf <span class=\"fw-bold\">{lang}</span> stellen",
-                "password_reset_link": "Damit diese Funktion genutzt werden kann, müssen die <code>MAIL_*</code>-Werte in der <code>.env</code>-Datei gesetzt sein. <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/blob/master/INSTALL.md#send-mails\" target=\"_blank\">Weitere Informationen</a>.",
                 "columns": "Die Summe der Werte der Spalten darf 12 nicht überschreiten."
             },
             "key": {
                 "language": "Sprache",
-                "password_reset_link": "Passwort per Link zurücksetzen",
+                "password_reset": "Passwort zurücksetzen erlauben",
                 "color": {
                     "title": "Design",
                     "style": {

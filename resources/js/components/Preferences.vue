@@ -193,7 +193,7 @@
                     component: 'color-preference',
                 },
                 {
-                    title: 'main.preference.key.password_reset_link',
+                    title: 'main.preference.key.password_reset',
                     label:  'prefs.enable-password-reset-link',
                     component: 'reset-email-preference',
                 },

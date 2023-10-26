@@ -340,12 +340,11 @@
             },
             "info": {
                 "set_to_language": "<span class=\"fw-bold\">{lang}</span>に設定する",
-                "password_reset_link": "この機能を使用するには、<code>.env</code>ファイルで<code>MAIL_*</code>設定を行う必要があります。<a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/blob/master/INSTALL.md#send-mails\" target=\"_blank\">詳細情報</a>.",
                 "columns": "カラムの値の合計は12を超えてはなりません"
             },
             "key": {
                 "language": "言語",
-                "password_reset_link": "パスワードリセットリンクを有効にする",
+                "password_reset": "パスワードリセットリンクを有効にする",
                 "columns": {
                     "title": "メインビューの列",
                     "left": "左のカラム",
