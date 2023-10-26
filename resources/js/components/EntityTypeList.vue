@@ -93,20 +93,34 @@
                 type: Number,
                 required: false,
                 default: -1,
-            }
+            },
+            onDeleteElement: {
+                type: Function,
+                required: false,
+            },
+            onDuplicateElement: {
+                type: Function,
+                required: false,
+            },
+            onEditElement: {
+                type: Function,
+                required: false,
+            },
+            onSelectElement: {
+                type: Function,
+                required: false,
+            },
         },
-        emits: [
-            'delete-element',
-            'duplicate-element',
-            'edit-element',
-            'select-element',
-        ],
         setup(props, context) {
             const { t } = useI18n();
             const {
                 data,
                 selectedId,
+                onDeleteElement,
+                onDuplicateElement,
+                onEditElement,
             } = toRefs(props);
+
             // FETCH
 
             // FUNCTIONS
@@ -138,9 +152,9 @@
             const state = reactive({
                 hoverStates: new Array(data.value.length).fill(false),
                 entries: computed(_ => data.value.slice()),
-                hasDeleteListener: !!context.attrs.onDeleteElement,
-                hasDuplicateListener: !!context.attrs.onDuplicateElement,
-                hasEditListener: !!context.attrs.onEditElement,
+                hasDeleteListener: !!onDeleteElement.value,
+                hasDuplicateListener: !!onDuplicateElement.value,
+                hasEditListener: !!onEditElement.value,
                 hasOnHoverListener: computed(_ => state.hasDeleteListener || state.hasDuplicateListener || state.hasEditListener),
             });
 
