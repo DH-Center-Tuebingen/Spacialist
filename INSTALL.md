@@ -180,7 +180,7 @@ MIX_APP_PATH=
 ```
 
 #### Send Mails
-If you want to send mails to your users (e.g. password reset), you have to adjust the `MAIL_*` settings to match a smtp server from where you can send mails.
+If you want to send mails to your users, you have to adjust the `MAIL_*` settings to match a smtp server from where you can send mails.
 
 ### Configure JavaScript
 Spacialist is based on several JavaScript libraries, which are bundled using Webpack (configuration is done using Laravel Mix, a webpack-wrapper for Laravel). Only the zipped releases contain the already bundled JavaScript libraries. All other users have to run webpack to bundle these libraries.

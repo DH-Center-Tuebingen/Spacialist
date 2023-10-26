@@ -48,7 +48,7 @@ instance.interceptors.response.use(response => {
 
 export function useHttp() {
     return instance;
-};
+}
 
 export const open = axios.create();
 

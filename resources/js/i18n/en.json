@@ -74,7 +74,7 @@
         },
         "search": "Search…",
         "search_no_results": "No results",
-        "search_no_results_for": "No results for term <span class=\"fst-italic fw-bold\">{term}</span>",
+        "search_no_results_for": "No results for term:",
         "search_no_term_info": "Enter a search term",
         "search_no_term_info_global": "Enter a search term to search globally",
         "login": "Login",
@@ -581,12 +581,11 @@
             },
             "info": {
                 "set_to_language": "Set to <span class=\"fw-bold\">{lang}</span>",
-                "password_reset_link": "To use this function, you have to set the <code>MAIL_*</code> settings in your <code>.env</code> file. <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/blob/master/INSTALL.md#send-mails\" target=\"_blank\">Further informations</a>.",
                 "columns": "The sum of the column values must not be higher than 12."
             },
             "key": {
                 "language": "Language",
-                "password_reset_link": "Enable Reset Password Link",
+                "password_reset": "Enable Password Reset",
                 "color": {
                     "title": "Theme",
                     "style": {

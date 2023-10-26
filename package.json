@@ -18,7 +18,9 @@
         "development": "npx mix",
         "watch": "npx mix watch",
         "prod": "npm run production",
-        "production": "npx mix -p"
+        "production": "npx mix -p",
+        "lint": "npx eslint --ext .js,.vue resources/js",
+        "lint:fix": "npx eslint --ext .js,.vue resources/js --fix"
     },
     "devDependencies": {
         "@fortawesome/fontawesome-svg-core": "^6.4.0",
@@ -31,6 +33,10 @@
         "@vue/compiler-sfc": "^3.3.4",
         "@websanova/vue-auth": "^4.2.1",
         "axios": "^1.4.0",
+        "browser-sync": "^2.29.3",
+        "browser-sync-webpack-plugin": "^2.3.0",
+        "eslint": "^8.51.0",
+        "eslint-plugin-vue": "^9.17.0",
         "laravel-mix": "^6.0.49",
         "postcss": "^8.4.22",
         "resolve-url-loader": "^5.0.0",

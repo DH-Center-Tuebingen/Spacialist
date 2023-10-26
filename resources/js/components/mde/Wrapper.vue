@@ -1,6 +1,10 @@
 <template>
     <MilkdownProvider>
-        <MilkdownEditor class="milkdown-wrapper h-100" :ref="el => editorRef = el" :data="data" />
+        <MilkdownEditor
+            :ref="el => editorRef = el"
+            class="milkdown-wrapper h-100"
+            :data="data"
+        />
     </MilkdownProvider>
 </template>
   
@@ -9,11 +13,11 @@
         ref,
         toRefs,
     } from 'vue';
-    import MilkdownEditor from "./Main.vue";
-    import { MilkdownProvider } from "@milkdown/vue";
+    import MilkdownEditor from './Main.vue';
+    import { MilkdownProvider } from '@milkdown/vue';
     
     export default {
-        name: "MilkdownEditorWrapper",
+        name: 'MilkdownEditorWrapper',
         components: {
             MilkdownProvider,
             MilkdownEditor,
@@ -37,8 +41,6 @@
 
             return {
                 // HELPERS
-                // PROPS
-                data,
                 // LOCAL
                 getEditorMarkdown,
                 // STATE

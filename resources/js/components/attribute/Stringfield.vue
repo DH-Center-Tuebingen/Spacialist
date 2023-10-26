@@ -1,12 +1,12 @@
 <template>
     <textarea
+        :id="name"
+        v-model="v.value"
         class="form-control"
         :disabled="disabled"
-        :id="name"
         :name="name"
-        v-model="v.value"
-        @input="v.handleInput">
-    </textarea>
+        @input="v.handleInput"
+    />
 </template>
 
 <script>
@@ -93,9 +93,6 @@
                 // LOCAL
                 resetFieldState,
                 undirtyField,
-                // PROPS
-                name,
-                disabled,
                 // STATE
                 state,
                 v,

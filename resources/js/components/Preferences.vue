@@ -1,183 +1,64 @@
 <template>
+    <!-- eslint-disable vue/no-unused-components -->
     <div class="h-100 d-flex flex-column">
         <h3 class="d-flex flex-row gap-2 align-items-center">
             {{ t('global.preference', 2) }}
-            <button type="button" class="btn btn-outline-success btn-sm" @click="savePreferences()">
-                <i class="fas fa-fw fa-save"></i>
+            <button
+                type="button"
+                class="btn btn-outline-success btn-sm"
+                @click="savePreferences()"
+            >
+                <i class="fas fa-fw fa-save" />
                 {{ t('global.save') }}
             </button>
         </h3>
         <div class="table-responsive scroll-x-hidden">
-            <table class="table table-light table-striped table-hover mb-0" v-if="state.prefsLoaded" v-dcan="'preferences_write'">
+            <table
+                v-if="state.prefsLoaded"
+                v-dcan="'preferences_write'"
+                class="table table-light table-striped table-hover mb-0"
+            >
                 <thead class="sticky-top">
                     <tr class="text-nowrap">
                         <th>{{ t('global.preference') }}</th>
-                        <th style="width: 99%;" class="text-end">{{ t('global.value') }}</th>
+                        <th
+                            style="width: 99%;"
+                            class="text-end"
+                        >
+                            {{ t('global.value') }}
+                        </th>
                         <th>{{ t('global.allow_override') }}</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
+                    <tr
+                        v-for="preferencesBlock of preferencesConfig" 
+                        :key="preferencesBlock.label"
+                    >
                         <td>
                             <strong>
-                                {{ t('main.preference.key.language') }}
+                                {{ t(preferencesBlock.title) }}
                             </strong>
                         </td>
                         <td>
-                            <gui-language-preference
-                                :data="state.preferences['prefs.gui-language'].value"
-                                @changed="e => trackChanges('prefs.gui-language', e)">
-                            </gui-language-preference>
-                        </td>
-                        <td>
+                            <component
+                                :is="preferencesBlock.component"
+                                v-if="preferencesBlock.data === 'v-model'"
+                                v-model="state.preferences[preferencesBlock.label].value"
+                                @changed="e => trackChanges(preferencesBlock.label,'value' , e)"
+                            />
+                            <component
+                                :is="preferencesBlock.component"
+                                v-else
+                                :data="state.preferences[preferencesBlock.label].value"
+                                @changed="e => trackChanges(preferencesBlock.label,'value' , e)"
+                            />
+                        </td><td>
                             <div class="form-check form-switch d-flex justify-content-center">
-                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.gui-language'].allow_override" />
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <strong>
-                                {{ t('main.preference.key.color.title') }}
-                            </strong>
-                        </td>
-                        <td>
-                            <color-preference
-                                :data="state.preferences['prefs.color'].value"
-                                @changed="e => trackChanges('prefs.color', e)">
-                            </color-preference>
-                        </td>
-                        <td>
-                            <div class="form-check form-switch d-flex justify-content-center">
-                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.gui-language'].allow_override" />
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <strong>{{ t('main.preference.key.password_reset_link') }}</strong>
-                        </td>
-                        <td>
-                            <reset-email-preference
-                                :data="state.preferences['prefs.enable-password-reset-link'].value"
-                                @changed="e => trackChanges('prefs.enable-password-reset-link', e)">
-                            </reset-email-preference>
-                        </td>
-                        <td>
-                            <div class="form-check form-switch d-flex justify-content-center">
-                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.enable-password-reset-link'].allow_override" />
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <strong>{{ t('main.preference.key.columns.title') }}</strong>
-                        </td>
-                        <td>
-                            <columns-preference
-                                :data="state.preferences['prefs.columns'].value"
-                                @changed="e => trackChanges('prefs.columns', e)">
-                            </columns-preference>
-                        </td>
-                        <td>
-                            <div class="form-check form-switch d-flex justify-content-center">
-                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.columns'].allow_override" />
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <strong>{{ t('main.preference.key.tooltips') }}</strong>
-                        </td>
-                        <td>
-                            <tooltips-preference
-                                :data="state.preferences['prefs.show-tooltips'].value"
-                                @changed="e => trackChanges('prefs.show-tooltips', e)">
-                            </tooltips-preference>
-                        </td>
-                        <td>
-                            <div class="form-check form-switch d-flex justify-content-center">
-                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.show-tooltips'].allow_override" />
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <strong>{{ t('main.preference.key.tag_root') }}</strong>
-                        </td>
-                        <td>
-                            <tags-preference
-                                :data="state.preferences['prefs.tag-root'].value"
-                                @changed="e => trackChanges('prefs.tag-root', e)">
-                            </tags-preference>
-                        </td>
-                        <td>
-                            <div class="form-check form-switch d-flex justify-content-center">
-                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.tag-root'].allow_override" />
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <strong>{{ t('main.preference.key.link_thesaurex') }}</strong>
-                        </td>
-                        <td>
-                            <thesaurus-link-preference
-                                :data="state.preferences['prefs.link-to-thesaurex'].value"
-                                @changed="e => trackChanges('prefs.link-to-thesaurex', e)">
-                            </thesaurus-link-preference>
-                        </td>
-                        <td>
-                            <div class="form-check form-switch d-flex justify-content-center">
-                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.link-to-thesaurex'].allow_override" />
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <strong>{{ t('main.preference.key.project.name') }}</strong>
-                        </td>
-                        <td>
-                            <project-name-preference
-                                :data="state.preferences['prefs.project-name'].value"
-                                @changed="e => trackChanges('prefs.project-name', e)">
-                            </project-name-preference>
-                        </td>
-                        <td>
-                            <div class="form-check form-switch d-flex justify-content-center">
-                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.project-name'].allow_override" />
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <strong>{{ t('main.preference.key.project.maintainer') }}</strong>
-                        </td>
-                        <td>
-                            <project-maintainer-preference
-                                :data="state.preferences['prefs.project-maintainer'].value"
-                                @changed="e => trackChanges('prefs.project-maintainer', e)">
-                            </project-maintainer-preference>
-                        </td>
-                        <td>
-                            <div class="form-check form-switch d-flex justify-content-center">
-                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.project-maintainer'].allow_override" />
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <strong>{{ t('main.preference.key.map.projection') }}</strong>
-                        </td>
-                        <td>
-                            <map-projection-preference
-                                :data="state.preferences['prefs.map-projection'].value"
-                                @changed="e => trackChanges('prefs.map-projection', e)">
-                            </map-projection-preference>
-                        </td>
-                        <td>
-                            <div class="form-check form-switch d-flex justify-content-center">
-                                <input class="form-check-input" type="checkbox" v-model="state.preferences['prefs.map-projection'].allow_override" />
+                                <Checkbox
+                                    v-model="state.preferences[preferencesBlock.label].allow_override"
+                                    @changed="value => trackChanges(preferencesBlock.label, 'allow_override', value)"
+                                />
                             </div>
                         </td>
                     </tr>
@@ -188,6 +69,8 @@
 </template>
 
 <script>
+    /* eslint-disable vue/no-unused-components */
+    
     import {
         computed,
         reactive,
@@ -215,6 +98,9 @@
     import ProjectName from '@/components/preferences/ProjectName.vue';
     import ProjectMaintainer from '@/components/preferences/ProjectMaintainer.vue';
     import MapProjection from '@/components/preferences/MapProjection.vue';
+    import Checkbox from './forms/Checkbox.vue';
+
+
 
     export default {
         components: {
@@ -228,42 +114,49 @@
             'project-name-preference': ProjectName,
             'project-maintainer-preference': ProjectMaintainer,
             'map-projection-preference': MapProjection,
+            Checkbox,
         },
         setup(props, context) {
             const { t } = useI18n();
             const toast = useToast();
 
             // FUNCTIONS
-            const trackChanges = (label, data) => {
-                state.dirtyData[label] = {
-                    value: data.value,
-                };
+            const trackChanges = (label, key, data) => {
+
+                if(!state.dirtyData[label]) {
+
+                    // The endpoint expect all values to be set. 
+                    // If any of those change they will be overwritten.
+                    state.dirtyData[label] = {
+                        label,
+                        value: state.preferences[label].value,
+                        allow_override: state.preferences[label].allow_override,
+                    } 
+                }
+                
+                state.dirtyData[label][key] = data
             };
+
             const savePreferences = _ => {
                 if(!state.hasDirtyData) return;
 
-                let entries = [];
                 let updatedLanguage = null;
-                for(let k in state.dirtyData) {
-                    const dd = state.dirtyData[k];
-                    if(k == 'prefs.gui-language') {
+                for(let label in state.dirtyData) {
+                    const dirtyData = state.dirtyData[label];
+                    if(label == 'prefs.gui-language' && dirtyData.value) {
                         const userLang = store.getters.preferenceByKey('prefs.gui-language');
                         const sysLang = state.preferences['prefs.gui-language'];
                         // if user pref language does not differ from sys pref language
                         if(userLang === sysLang) {
                             // update current language in Spacialist
-                            updatedLanguage = dd.value;
+                            updatedLanguage = dirtyData.value;
                         }
                     }
-                    entries.push({
-                        value: dd.value,
-                        allow_override: state.preferences[k].allow_override,
-                        label: k,
-                    });
                 }
                 const data = {
-                    changes: entries,
+                    changes: Object.values(state.dirtyData),
                 };
+
                 patchPreferences(data).then(data => {
                     // Update language if value has changed
                     if(!!updatedLanguage) {
@@ -287,6 +180,61 @@
                 prefsLoaded: computed(_ => !!state.preferences),
             });
 
+            const preferencesConfig = [
+                {
+                    title: 'main.preference.key.language',
+                    label:  'prefs.gui-language',
+                    component: 'gui-language-preference',
+                    data: 'v-model'
+                },
+                {
+                    title: 'main.preference.key.color.title',
+                    label:  'prefs.color',
+                    component: 'color-preference',
+                },
+                {
+                    title: 'main.preference.key.password_reset',
+                    label:  'prefs.enable-password-reset-link',
+                    component: 'reset-email-preference',
+                },
+                {
+                    title: 'main.preference.key.columns.title',
+                    label:  'prefs.columns',
+                    component: 'columns-preference',
+                },
+                {
+                    title: 'main.preference.key.tooltips',
+                    label:  'prefs.show-tooltips',
+                    component: 'tooltips-preference',
+                },
+                {
+                    title: 'main.preference.key.tag_root',
+                    label:  'prefs.tag-root',
+                    component: 'tags-preference',
+                },
+                {
+                    title: 'main.preference.key.link_thesaurex',
+                    label: 'prefs.link-to-thesaurex',
+                    component: 'thesaurus-link-preference',
+                },
+                {
+                    title: 'main.preference.key.project.name',
+                    label: 'prefs.project-name',
+                    component: 'project-name-preference',
+                    data: 'v-model'
+                },
+                {
+                    title: 'main.preference.key.project.maintainer',
+                    label: 'prefs.project-maintainer',
+                    component: 'project-maintainer-preference',
+                },
+                {
+                    title: 'main.preference.key.map.projection',
+                    label: 'prefs.map-projection',
+                    component: 'map-projection-preference',
+                }
+            ]
+
             // RETURN
             return {
                 t,
@@ -298,6 +246,7 @@
                 // PROPS
                 // STATE
                 state,
+                preferencesConfig,
             };
         },
     }

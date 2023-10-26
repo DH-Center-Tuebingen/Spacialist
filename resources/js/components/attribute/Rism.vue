@@ -1,24 +1,46 @@
 <template>
     <div>
         <div class="input-group">
-            <input type="text" class="form-control" :disabled="disabled" v-model="v.value" @input="onInput()" />
-            <button type="button" class="btn btn-outline-secondary" :disabled="v.noContent" @click="loadRismInfo()">
-                <i class="fas fa-fw fa-eye"></i>
+            <input
+                v-model="v.value"
+                type="text"
+                class="form-control"
+                :disabled="disabled"
+                @input="onInput()"
+            >
+            <button
+                type="button"
+                class="btn btn-outline-secondary"
+                :disabled="v.noContent"
+                @click="loadRismInfo()"
+            >
+                <i class="fas fa-fw fa-eye" />
             </button>
         </div>
-        <div class="bg-light mt-2 p-2 border rounded" v-if="state.infoLoaded">
+        <div
+            v-if="state.infoLoaded"
+            class="bg-light mt-2 p-2 border rounded"
+        >
             <div class="d-flex flex-row justify-content-between">
                 <span class="fw-bold">
                     {{ state.text }}
                 </span>
-                <button type="button" class="btn-close" aria-label="Close" @click="closeInfoBox()">
-                </button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    @click="closeInfoBox()"
+                />
             </div>
             <footer class="blockquote-footer mt-2">
-                <span v-html="t('main.entity.attributes.rism.cite_info', {id: v.value})"></span>
+                <!-- eslint-disable-next-line vue/no-v-html -->
+                <span v-html="t('main.entity.attributes.rism.cite_info', {id: v.value})" />
             </footer>
         </div>
-        <p class="alert alert-danger my-2" v-if="state.infoErrored">
+        <p
+            v-if="state.infoErrored"
+            class="alert alert-danger my-2"
+        >
             {{ t('main.entity.attributes.rism.doesnt_exist') }}
         </p>
     </div>
@@ -48,10 +70,14 @@
 
     export default {
         props: {
-            name: String,
+            name: {
+                type: String,
+                 required: true,
+            },
             value: {
                 type: String,
                 required: false,
+                default: '',
             },
             disabled: {
                 type: Boolean,
@@ -66,7 +92,6 @@
             const {
                 name,
                 value,
-                disabled,
             } = toRefs(props);
 
             // FETCH
@@ -148,6 +173,7 @@
                         }
                         return t('main.entity.attributes.rism.doesnt_exist');
                     }
+                    return ''
                 }),
             });
             const v = reactive({
@@ -181,9 +207,6 @@
                 undirtyField,
                 onInput,
                 loadRismInfo,
-                // PROPS
-                disabled,
-                value,
                 // STATE
                 state,
                 v,

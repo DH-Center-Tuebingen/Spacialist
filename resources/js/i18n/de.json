@@ -74,7 +74,7 @@
         },
         "search": "Suche…",
         "search_no_results": "Keine Suchergebnisse",
-        "search_no_results_for": "Keine Ergebnisse für den Begriff <span class=\"fst-italic fw-bold\">{term}</span>",
+        "search_no_results_for": "Keine Ergebnisse für den Begriff:",
         "search_no_term_info": "Gib einen Suchbegriff ein",
         "search_no_term_info_global": "Gib einen Suchbegriff ein um das gesamte System zu durchsuchen",
         "login": "Einloggen",
@@ -581,12 +581,11 @@
             },
             "info": {
                 "set_to_language": "Auf <span class=\"fw-bold\">{lang}</span> stellen",
-                "password_reset_link": "Damit diese Funktion genutzt werden kann, müssen die <code>MAIL_*</code>-Werte in der <code>.env</code>-Datei gesetzt sein. <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/blob/master/INSTALL.md#send-mails\" target=\"_blank\">Weitere Informationen</a>.",
                 "columns": "Die Summe der Werte der Spalten darf 12 nicht überschreiten."
             },
             "key": {
                 "language": "Sprache",
-                "password_reset_link": "Passwort per Link zurücksetzen",
+                "password_reset": "Passwort zurücksetzen erlauben",
                 "color": {
                     "title": "Design",
                     "style": {

@@ -2,7 +2,8 @@
     <vue-final-modal
         class="modal-container modal"
         content-class="sp-modal-content sp-modal-content-sm"
-        name="edit-entity-type-modal">
+        name="edit-entity-type-modal"
+    >
         <div class="sp-modal-content sp-modal-content-sm">
             <div class="modal-header">
                 <h5 class="modal-title">
@@ -12,13 +13,26 @@
                         })
                     }}
                 </h5>
-                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-                </button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                />
             </div>
             <div class="modal-body nonscrollable">
-                <form id="edit-entity-type-form" name="edit-entity-type-form" role="form" @submit.prevent="confirmEdit()">
+                <form
+                    id="edit-entity-type-form"
+                    name="edit-entity-type-form"
+                    role="form"
+                    @submit.prevent="confirmEdit()"
+                >
                     <div class="row">
-                        <label class="col-form-label col-3" for="label">
+                        <label
+                            class="col-form-label col-3"
+                            for="label"
+                        >
                             {{ t('global.label') }}:
                         </label>
                         <div class="col-9">
@@ -26,17 +40,28 @@
                                 :endpoint="searchLabel"
                                 :key-fn="getConceptLabel"
                                 :default-value="state.defaultConcept"
-                                @selected="labelSelected" />
+                                @selected="labelSelected"
+                            />
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-outline-success" form="edit-entity-type-form" :disabled="!state.isValid">
-                    <i class="fas fa-fw fa-plus"></i> {{ t('global.save') }}
+                <button
+                    type="submit"
+                    class="btn btn-outline-success"
+                    form="edit-entity-type-form"
+                    :disabled="!state.isValid"
+                >
+                    <i class="fas fa-fw fa-plus" /> {{ t('global.save') }}
                 </button>
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                    <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                >
+                    <i class="fas fa-fw fa-times" /> {{ t('global.cancel') }}
                 </button>
             </div>
         </div>

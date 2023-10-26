@@ -2,19 +2,28 @@
     <div class="row">
         <div class="col-3 pt-2 border-end">
             <file-upload
-                accept="image/*"
-                class="w-100"
                 ref="upload"
                 v-model="state.fileQueue"
+                accept="image/*"
+                class="w-100"
                 :custom-action="uploadFile"
                 :directory="false"
                 :drop="true"
                 :multiple="false"
-                @input-file="inputFile">
-                    <user-avatar :user="state.avatarUser" class="d-flex justify-content-center"></user-avatar>
+                @input-file="inputFile"
+            >
+                <user-avatar
+                    :user="state.avatarUser"
+                    class="d-flex justify-content-center"
+                />
             </file-upload>
             <div class="text-center mt-3">
-                <button type="button" class="btn btn-outline-danger ms-2" :disabled="!state.avatarUser.avatar" @click="deleteAvatar()">
+                <button
+                    type="button"
+                    class="btn btn-outline-danger ms-2"
+                    :disabled="!state.avatarUser.avatar"
+                    @click="deleteAvatar()"
+                >
                     {{ t('global.delete') }}
                 </button>
             </div>
@@ -25,32 +34,63 @@
                     {{ t('global.user.info_title') }}
                 </h3>
                 <div>
-                    <button type="submit" class="btn btn-outline-success" form="profile-user-info-form">
-                        <i class="fas fa-fw fa-save"></i>
+                    <button
+                        type="submit"
+                        class="btn btn-outline-success"
+                        form="profile-user-info-form"
+                    >
+                        <i class="fas fa-fw fa-save" />
                         {{ t('global.save') }}
                     </button>
-                    <button type="button" class="btn btn-outline-warning ms-3" :disabled="!state.isDirty" @click="resetUserInfo()">
-                        <i class="fas fa-fw fa-undo"></i>
+                    <button
+                        type="button"
+                        class="btn btn-outline-warning ms-3"
+                        :disabled="!state.isDirty"
+                        @click="resetUserInfo()"
+                    >
+                        <i class="fas fa-fw fa-undo" />
                         {{ t('global.reset') }}
                     </button>
                 </div>
             </div>
-            <form id="profile-user-info-form" name="profile-user-info-form" class="row mt-3" role="form" @submit.prevent="updateUserInformation()">
+            <form
+                id="profile-user-info-form"
+                name="profile-user-info-form"
+                class="row mt-3"
+                role="form"
+                @submit.prevent="updateUserInformation()"
+            >
                 <div class="col-6">
                     <h4>
                         {{ t('global.user.personal_info_title') }}
                     </h4>
                     <div class="mb-2">
-                        <label class="fw-bold" for="profile-user-info-name">
+                        <label
+                            class="fw-bold"
+                            for="profile-user-info-name"
+                        >
                             {{ t('global.name') }}:
                         </label>
-                        <input type="text" class="form-control" id="profile-user-info-name" v-model="state.localUser.name" />
+                        <input
+                            id="profile-user-info-name"
+                            v-model="state.localUser.name"
+                            type="text"
+                            class="form-control"
+                        >
                     </div>
                     <div>
-                        <label class="fw-bold" for="profile-user-info-nickname">
+                        <label
+                            class="fw-bold"
+                            for="profile-user-info-nickname"
+                        >
                             {{ t('global.nickname') }}:
                         </label>
-                        <input type="text" class="form-control" id="profile-user-info-nickname" v-model="state.localUser.nickname" />
+                        <input
+                            id="profile-user-info-nickname"
+                            v-model="state.localUser.nickname"
+                            type="text"
+                            class="form-control"
+                        >
                     </div>
                 </div>
                 <div class="col-6">
@@ -58,23 +98,51 @@
                         {{ t('global.user.contact') }}
                     </h4>
                     <div class="mb-2">
-                        <label class="fw-bold" for="profile-user-contact-email">
-                            <i class="fas fa-fw fa-envelope"></i> {{ t('global.email') }}:
+                        <label
+                            class="fw-bold"
+                            for="profile-user-contact-email"
+                        >
+                            <i class="fas fa-fw fa-envelope" /> {{ t('global.email') }}:
                         </label>
-                        <input type="email" class="form-control" id="profile-user-contact-email" v-model="state.localUser.email" />
+                        <input
+                            id="profile-user-contact-email"
+                            v-model="state.localUser.email"
+                            type="email"
+                            class="form-control"
+                        >
                     </div>
                     <div class="mb-2">
-                        <label class="fw-bold" for="profile-user-contact-phonenumber">
-                            <i class="fas fa-fw fa-mobile-alt"></i> {{ t('global.phonenumber') }}:
+                        <label
+                            class="fw-bold"
+                            for="profile-user-contact-phonenumber"
+                        >
+                            <i class="fas fa-fw fa-mobile-alt" /> {{ t('global.phonenumber') }}:
                         </label>
-                        <input type="tel" class="form-control" id="profile-user-contact-phonenumber" v-model="state.localUser.metadata.phonenumber" />
+                        <input
+                            id="profile-user-contact-phonenumber"
+                            v-model="state.localUser.metadata.phonenumber"
+                            type="tel"
+                            class="form-control"
+                        >
                     </div>
                     <div>
-                        <label class="fw-bold" for="profile-user-contact-orcid">
-                            <i class="fab fa-fw fa-orcid"></i> {{ t('global.orcid') }}:
+                        <label
+                            class="fw-bold"
+                            for="profile-user-contact-orcid"
+                        >
+                            <i class="fab fa-fw fa-orcid" /> {{ t('global.orcid') }}:
                         </label>
-                        <input type="text" class="form-control" :class="{'is-invalid': state.invalidOrcid}" id="profile-user-contact-orcid" v-model="state.localUser.metadata.orcid" />
-                        <div v-if="state.invalidOrcid" class="invalid-feedback">
+                        <input
+                            id="profile-user-contact-orcid"
+                            v-model="state.localUser.metadata.orcid"
+                            type="text"
+                            class="form-control"
+                            :class="{'is-invalid': state.invalidOrcid}"
+                        >
+                        <div
+                            v-if="state.invalidOrcid"
+                            class="invalid-feedback"
+                        >
                             {{ t('global.user.invalid_orcid') }}
                         </div>
                     </div>

@@ -1,6 +1,7 @@
 <template>
     <multiselect
-        :valueProp="'id'"
+        v-model="v.value"
+        :value-prop="'id'"
         :label="'concept_url'"
         :track-by="'concept_url'"
         :object="true"
@@ -8,18 +9,23 @@
         :disabled="disabled"
         :options="selections"
         :name="name"
-        :closeOnSelect="false"
+        :close-on-select="false"
         :placeholder="t('global.select.placeholder')"
-        v-model="v.value"
-        @change="value => v.handleChange(value)">
-        <template v-slot:option="{ option }">
+        @change="value => v.handleChange(value)"
+    >
+        <template #option="{ option }">
             {{ translateConcept(option.concept_url) }}
         </template>
-        <template v-slot:tag="{ option, handleTagRemove, disabled }">
+        <template #tag="{ option, handleTagRemove, disabled: tagDisabled }">
             <div class="multiselect-tag">
                 {{ translateConcept(option.concept_url) }}
-                <span v-if="!disabled" class="multiselect-tag-remove" @click.prevent @mousedown.prevent.stop="handleTagRemove(option, $event)">
-                    <span class="multiselect-tag-remove-icon"></span>
+                <span
+                    v-if="!tagDisabled"
+                    class="multiselect-tag-remove"
+                    @click.prevent
+                    @mousedown.prevent.stop="handleTagRemove(option, $event)"
+                >
+                    <span class="multiselect-tag-remove-icon" />
                 </span>
             </div>
         </template>
@@ -63,6 +69,9 @@
                 required: true,
             },
         },
+        emits: [
+            'change',
+        ],
         setup(props, context) {
             const { t } = useI18n();
             const {
@@ -124,10 +133,6 @@
                 // LOCAL
                 resetFieldState,
                 undirtyField,
-                // PROPS
-                name,
-                disabled,
-                selections,
                 // STATE
                 state,
                 v,

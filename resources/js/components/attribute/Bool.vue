@@ -1,13 +1,14 @@
 <template>
     <div class="form-check form-switch h-100 d-flex align-items-center">
         <input
+            :id="name"
+            v-model="v.value"
             class="form-check-input"
             type="checkbox"
             :disabled="disabled"
-            :id="name"
             :name="name"
-            v-model="v.value"
-            @input="v.handleInput" />
+            @input="v.handleInput"
+        >
     </div>
 </template>
 
@@ -99,10 +100,6 @@
                 // LOCAL
                 resetFieldState,
                 undirtyField,
-                // PROPS
-                name,
-                disabled,
-                value,
                 // STATE
                 state,
                 v,

@@ -1,36 +1,57 @@
 <template>
-  <vue-final-modal
-    class="modal-container modal"
-    content-class="sp-modal-content sp-modal-content-xs"
-    name="deactivate-user-modal">
-    <div class="sp-modal-content sp-modal-content-xs">
-        <div class="modal-header">
-            <h5 class="modal-title">
-                {{
-                    t('global.deactivate_name.title', {name: user.name})
-                }}
-            </h5>
-            <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-            </button>
-        </div>
-        <div class="modal-body">
-            <div class="alert alert-info" role="alert">
-                {{ t('global.deactivate_name.info') }}
+    <vue-final-modal
+        class="modal-container modal"
+        content-class="sp-modal-content sp-modal-content-xs"
+        name="deactivate-user-modal"
+    >
+        <div class="sp-modal-content sp-modal-content-xs">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {{
+                        t('global.deactivate_name.title', {name: user.name})
+                    }}
+                </h5>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                />
             </div>
-            <div class="alert alert-danger" role="alert">
-                {{ t('global.deactivate_name.desc', {name: user.name}) }}
+            <div class="modal-body">
+                <div
+                    class="alert alert-info"
+                    role="alert"
+                >
+                    {{ t('global.deactivate_name.info') }}
+                </div>
+                <div
+                    class="alert alert-danger"
+                    role="alert"
+                >
+                    {{ t('global.deactivate_name.desc', {name: user.name}) }}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-outline-success"
+                    @click="confirmDeactivate()"
+                >
+                    <i class="fas fa-fw fa-check" /> {{ t('global.deactivate') }}
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                >
+                    <i class="fas fa-fw fa-times" /> {{ t('global.cancel') }}
+                </button>
             </div>
         </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-outline-success" @click="confirmDeactivate()">
-                <i class="fas fa-fw fa-check"></i> {{ t('global.deactivate') }}
-            </button>
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
-            </button>
-        </div>
-    </div>
-  </vue-final-modal>
+    </vue-final-modal>
 </template>
 
 <script>
@@ -72,8 +93,6 @@
             return {
                 t,
                 // HELPERS
-                // PROPS
-                user,
                 // LOCAL
                 closeModal,
                 confirmDeactivate,

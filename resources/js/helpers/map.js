@@ -41,14 +41,14 @@ export function getGeoJsonFormat() {
         convertFormats.geojson = new GeoJSON();
     }
     return convertFormats.geojson;
-};
+}
 
 export function getWktFormat() {
     if(!convertFormats.wkt) {
         convertFormats.wkt = new WKT();
     }
     return convertFormats.wkt;
-};
+}
 
 export function formatLengthArea(value, precision = 2, isArea = false) {
     if(!value) return value;
@@ -95,7 +95,7 @@ export function formatLengthArea(value, precision = 2, isArea = false) {
 
     const sizeInUnit = length * factor;
     return `${sizeInUnit.toFixed(precision)} ${unit}`;
-};
+}
 
 export function createOptionBasedStyle(options) {
     if(!options.default) {
@@ -237,7 +237,7 @@ export function createStyle(color = '#ffcc33', width = 2, styleOptions = {}) {
     }
 
     return new Style(options);
-};
+}
 
 export async function getLayers(includeEntityLayers = false) {
     const data = await getMapLayers(includeEntityLayers);
@@ -333,7 +333,7 @@ export function createNewLayer(layerData) {
         opacity: opacity,
         source: source
     });
-};
+}
 
 export function createVectorLayer(data = {}) {
     return new VectorLayer({
@@ -351,7 +351,7 @@ export function createVectorLayer(data = {}) {
         }),
         style: createStyle(data.color),
     });
-};
+}
 
 export async function registerProjection(srid) {
     // Only register projection, if different from included projections
@@ -369,4 +369,4 @@ export async function registerProjection(srid) {
             return new Promise(r => r(null));
         }
     });
-};
+}

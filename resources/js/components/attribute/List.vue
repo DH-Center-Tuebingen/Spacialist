@@ -1,15 +1,20 @@
 <template>
     <div>
         <div class="input-group">
-            <button type="button" class="btn btn-outline-secondary" :disabled="disabled" @click="toggleList()">
+            <button
+                type="button"
+                class="btn btn-outline-secondary"
+                :disabled="disabled"
+                @click="toggleList()"
+            >
                 <div v-show="!state.expanded">
-                    <i class="fas fa-fw fa-caret-up"></i>
+                    <i class="fas fa-fw fa-caret-up" />
                     <span v-if="v.value.length">
                         ({{ v.value.length }})
                     </span>
                 </div>
                 <div v-show="state.expanded">
-                    <i class="fas fa-fw fa-caret-down"></i>
+                    <i class="fas fa-fw fa-caret-down" />
                 </div>
             </button>
             <input type="text" class="form-control" :disabled="disabled" v-model="state.input" />
@@ -19,6 +24,7 @@
         </div>
         <ol class="mt-2 mb-0" v-if="state.expanded && v.value.length">
             <li v-for="(l, i) in v.value" :key="i">
+                <!-- eslint-disable-next-line vue/no-v-html -->
                 <span v-html="createAnchorFromUrl(l)"></span>
                 <a href="#" class="text-danger" v-if="!disabled" @click.prevent="removeListEntry(i)">
                     <i class="fas fa-fw fa-trash"></i>
@@ -43,7 +49,11 @@
 
     export default {
         props: {
-            name: String,
+            name:{ 
+                type: String, 
+                required: false, 
+                default: null
+            },
             entries: {
                 type: Array,
                 default: _ => new Array(),
@@ -56,9 +66,7 @@
         setup(props, context) {
             const { t } = useI18n();
             const {
-                name,
                 entries,
-                disabled,
             } = toRefs(props);
             // FETCH
 
@@ -123,9 +131,6 @@
                 toggleList,
                 resetFieldState,
                 undirtyField,
-                // PROPS
-                name,
-                disabled,
                 // STATE
                 state,
                 v,

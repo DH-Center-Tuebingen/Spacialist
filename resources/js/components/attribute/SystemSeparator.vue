@@ -1,10 +1,16 @@
 <template>
     <div class="d-flex flex-row align-items-center gap-2">
-        <div class="bg-secondary flex-grow-1 rounded-5" style="height: 3px;"/>
+        <div
+            class="bg-secondary flex-grow-1 rounded-5"
+            style="height: 3px;"
+        />
         <span class="fw-bold">
             {{ translateConcept(state.title) }}
         </span>
-        <div class="bg-secondary flex-grow-1 rounded-5" style="height: 3px;"/>
+        <div
+            class="bg-secondary flex-grow-1 rounded-5"
+            style="height: 3px;"
+        />
     </div>
 </template>
 
@@ -26,6 +32,7 @@
             title: {
                 type: String,
                 required: false,
+                default: null,
             },
         },
         setup(props, context) {

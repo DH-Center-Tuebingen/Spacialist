@@ -2,7 +2,8 @@
     <vue-final-modal
         class="modal-container modal"
         content-class="sp-modal-content sp-modal-content-sm"
-        name="save-screencast-modal">
+        name="save-screencast-modal"
+    >
         <div class="sp-modal-content sp-modal-content-sm">
             <div class="modal-header">
                 <h5 class="modal-title">
@@ -10,12 +11,22 @@
                         t('main.app.screencast.title')
                     }}
                 </h5>
-                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-                </button>
+                <button
+                    v-if="true"
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                />
             </div>
             <div class="modal-body">
-                <form id="storeScreencastModal" name="storeScreencastModal" role="form">
-                    <p class="alert alert-info">
+                <form
+                    id="storeScreencastModal"
+                    name="storeScreencastModal"
+                    role="form"
+                >
+                    <div class="alert alert-info">
                         {{ t('main.app.screencast.info') }}
                         <dl class="row mb-0">
                             <dt class="col-6 text-right">
@@ -37,18 +48,32 @@
                                 {{ state.content.type }}
                             </dd>
                         </dl>
-                    </p>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-success" @click="storeLocal()">
-                    <i class="fas fa-fw fa-file-download"></i> {{ t('main.app.screencast.actions.local.button') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-success"
+                    @click="storeLocal()"
+                >
+                    <i class="fas fa-fw fa-file-download" /> {{ t('main.app.screencast.actions.local.button') }}
                 </button>
-                <button type="button" class="btn btn-outline-success" v-if="state.filePluginInstalled" @click="storeOnServer()">
-                    <i class="fas fa-fw fa-file-upload"></i> {{ t('main.app.screencast.actions.server.button') }}
+                <button
+                    v-if="state.filePluginInstalled"
+                    type="button"
+                    class="btn btn-outline-success"
+                    @click="storeOnServer()"
+                >
+                    <i class="fas fa-fw fa-file-upload" /> {{ t('main.app.screencast.actions.server.button') }}
                 </button>
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                    <i class="fas fa-fw fa-times"></i> {{ t('global.close') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                >
+                    <i class="fas fa-fw fa-times" /> {{ t('global.close') }}
                 </button>
             </div>
         </div>
@@ -96,7 +121,7 @@
             const storeOnServer = _ => {
                 if(hasPlugin('File')) {
                     SpPS.data.plugins.file.api.uploadFile(state.content, {}, getFilename());
-                };
+                }
                 context.emit('confirm', false);
             };
             const closeModal = _ => {

@@ -1,11 +1,24 @@
 <template>
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb my-0 px-2 py-1">
-            <li class="breadcrumb-item breadcrumb-item-slash" :class="{'active': p.last}" v-for="p in state.parsedList" :key="p.id">
-                <span v-if="p.last" :title="p.name">
+            <li
+                v-for="p in state.parsedList"
+                :key="p.id"
+                class="breadcrumb-item breadcrumb-item-slash"
+                :class="{'active': p.last}"
+            >
+                <span
+                    v-if="p.last"
+                    :title="p.name"
+                >
                     {{ truncate(p.name, 25) }}
                 </span>
-                <router-link v-else :to="{name: 'entitydetail', params: {id: p.id}, query: currentRoute.query}" append :title="p.name">
+                <router-link
+                    v-else
+                    :to="{name: 'entitydetail', params: {id: p.id}, query: currentRoute.query}"
+                    append
+                    :title="p.name"
+                >
                     {{ truncate(p.name, 25) }}
                 </router-link>
             </li>

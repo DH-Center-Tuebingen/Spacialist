@@ -3,24 +3,29 @@
         <h4>
             {{ t('main.plugins.title') }}
             <file-upload
+                ref="upload"
+                v-model="state.files"
                 class="btn btn-sm btn-outline-primary clickable"
                 accept="application/zip"
                 extensions="zip"
-                ref="upload"
-                v-model="state.files"
                 :custom-action="uploadZip"
                 :directory="false"
                 :disabled="!can('preferences_create')"
                 :multiple="false"
                 :drop="true"
-                @input-file="inputFile">
-                    <span>
-                        <i class="fas fa-fw fa-file-import"></i> {{ t('main.plugins.upload') }}
-                    </span>
+                @input-file="inputFile"
+            >
+                <span>
+                    <i class="fas fa-fw fa-file-import" /> {{ t('main.plugins.upload') }}
+                </span>
             </file-upload>
         </h4>
         <div class="row row-cols-3 g-3">
-            <div class="col" v-for="plugin in state.sortedPlugins" :key="plugin.name">
+            <div
+                v-for="plugin in state.sortedPlugins"
+                :key="plugin.name"
+                class="col"
+            >
                 <div class="card h-100">
                     <div class="card-body d-flex flex-column">
                         <div class="d-flex flex-row flex-grow-1 mb-3 justify-content-between">
@@ -45,39 +50,72 @@
                                     {{ t('main.plugins.authors') }}
                                 </h6>
                                 <ul class="list-group list-group-flush">
-                                    <li class="list-group-item" v-for="(author, i) in plugin.metadata.authors" :key="i">
+                                    <li
+                                        v-for="(author, i) in plugin.metadata.authors"
+                                        :key="i"
+                                        class="list-group-item"
+                                    >
                                         {{ author }}
                                     </li>
                                 </ul>
                             </div>
                         </div>
                         <div class="">
-                            <button type="button" class="btn btn-sm btn-outline-warning" v-if="isInstalled(plugin)" @click="uninstall(plugin)">
-                                <i class="fas fa-fw fa-times"></i>
+                            <button
+                                v-if="isInstalled(plugin)"
+                                type="button"
+                                class="btn btn-sm btn-outline-warning"
+                                @click="uninstall(plugin)"
+                            >
+                                <i class="fas fa-fw fa-times" />
                                 {{ t('main.plugins.deactivate') }}
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-success" v-else @click="install(plugin)">
-                                <i class="fas fa-fw fa-plus"></i>
+                            <button
+                                v-else
+                                type="button"
+                                class="btn btn-sm btn-outline-success"
+                                @click="install(plugin)"
+                            >
+                                <i class="fas fa-fw fa-plus" />
                                 {{ t('main.plugins.activate') }}
                             </button>
-                            <div class="btn-group" role="group" v-if="updateAvailable(plugin)">
-                                <button type="button" class="btn btn-sm btn-outline-primary ms-2" @click="update(plugin)">
-                                    <i class="fas fa-fw fa-download"></i>
-                                    <span v-html="t('main.plugins.update_to', {version: plugin.update_available})"/>
+                            <div
+                                v-if="updateAvailable(plugin)"
+                                class="btn-group"
+                                role="group"
+                            >
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-primary ms-2"
+                                    @click="update(plugin)"
+                                >
+                                    <i class="fas fa-fw fa-download" />
+                                    <!-- eslint-disable-next-line vue/no-v-html -->
+                                    <span v-html="t('main.plugins.update_to', {version: plugin.update_available})" />
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-primary" :title="t('main.plugins.changelog_info')" @click="showChangelog(plugin)">
-                                    <i class="fas fa-fw fa-file-pen"></i>
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-primary"
+                                    :title="t('main.plugins.changelog_info')"
+                                    @click="showChangelog(plugin)"
+                                >
+                                    <i class="fas fa-fw fa-file-pen" />
                                 </button>
                             </div>
-                            <button type="button" class="btn btn-sm btn-outline-danger ms-2" @click="remove(plugin)">
-                                <i class="fas fa-fw fa-trash"></i>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-danger ms-2"
+                                @click="remove(plugin)"
+                            >
+                                <i class="fas fa-fw fa-trash" />
                                 {{ t('main.plugins.remove') }}
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
-            <alert v-if="(!state.sortedPlugins || state.sortedPlugins.length == 0)"
+            <alert
+                v-if="(!state.sortedPlugins || state.sortedPlugins.length == 0)"
                 :message="t('main.plugins.not_found')"
                 :type="'info'"
                 :noicon="false"
