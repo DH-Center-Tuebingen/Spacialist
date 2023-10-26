@@ -455,7 +455,7 @@
         },
         "search": "検索…",
         "search_no_results": "結果なし",
-        "search_no_results_for": "用語<span class=\"fst-italic fw-bold\">{term}</span>に該当する結果はありません",
+        "search_no_results_for": "用語 に該当する結果はありません:",
         "search_no_term_info": "検索語を入力する",
         "search_no_term_info_global": "グローバルに検索する場合は、検索語を入力してください",
         "login": "ログイン",

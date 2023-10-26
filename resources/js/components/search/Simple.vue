@@ -68,13 +68,17 @@
             </div>
         </template>
         <template #nooptions="">
-            <!-- eslint-disable vue/no-v-html -->
             <div
                 v-if="!!state.query"
                 class="p-2"
-                v-html="t('global.search_no_results_for', {term: state.query})"
-            />
-            <!-- eslint-enable vue/no-v-html -->
+            >
+                <span>
+                    {{ t('global.search_no_results_for') }}
+                </span>
+                <span class="fst-italic fw-bold">
+                    {{ state.query }}
+                </span>
+            </div>
             <div
                 v-else
                 class="p-1 text-muted"
