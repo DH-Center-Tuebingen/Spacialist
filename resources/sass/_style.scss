@@ -24,6 +24,10 @@ code.normal {
     font-weight: 400 !important;
 }
 
+.font-serif {
+    font-family: $font-family-serif;
+}
+
 .form-range::-moz-range-track, .form-range::-webkit-slider-runnable-track {
     background-color: var(--bs-secondary-bg);
 }
