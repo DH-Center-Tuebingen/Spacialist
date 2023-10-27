@@ -292,6 +292,7 @@
                 switch(datatype) {
                         case 'string':
                         case 'stringf':
+                        case 'richtext':
                         case 'geography':
                         case 'iconclass':
                         case 'rism':
@@ -380,6 +381,7 @@
                             return [];
                         case 'string':
                         case 'stringf':
+                        case 'richtext':
                         case 'string-sc':
                         case 'string-mc':
                         case 'geography':

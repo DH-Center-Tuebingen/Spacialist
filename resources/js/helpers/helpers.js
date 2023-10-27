@@ -321,6 +321,7 @@ export function getInitialAttributeValue(attribute) {
     switch(attribute.type) {
         case 'string':
         case 'stringf':
+        case 'richtext':
         case 'iconclass':
         case 'rism':
         case 'geography':
@@ -385,6 +386,7 @@ export function getAttributeValueAsString(rawValue, datatype) {
     switch(datatype) {
         case 'string':
         case 'stringf':
+        case 'richtext':
         case 'double':
         case 'integer':
         case 'boolean':
