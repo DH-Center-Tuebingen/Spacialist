@@ -129,6 +129,7 @@
         "attributes": {
             "string": "Textfeld",
             "stringf": "Textbox",
+            "richtext": "Rich-Text",
             "string-sc": "Einfachauswahl-Dropdown",
             "string-mc": "Mehrfachauswahl-Dropdown",
             "double": "Gleitkommazahl",

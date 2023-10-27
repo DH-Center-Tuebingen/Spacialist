@@ -129,6 +129,7 @@
         "attributes": {
             "string": "Textfield",
             "stringf": "Textbox",
+            "stringf": "Rich-Text",
             "string-sc": "Single Choice Dropdown",
             "string-mc": "Multiple Choice Dropdown",
             "double": "Numeric Input (Floating Point)",

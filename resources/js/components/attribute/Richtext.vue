@@ -1,12 +1,22 @@
 <template>
-    <textarea
-        :id="name"
-        v-model="v.value"
-        class="form-control"
-        :disabled="disabled"
-        :name="name"
-        @input="v.handleInput"
-    />
+    <div class="position-relative px-3 py-1 bg-secondary bg-opacity-10 rounded">
+        <md-viewer
+            v-if="v.value"
+            :source="v.value"
+        />
+        <div
+            v-else
+        >
+            No content yet.
+        </div>
+        <a
+            class="position-absolute top-0 end-0 text-reset"
+            href="#"
+            @click.prevent="openMdEditor()"
+        >
+            <i class="fas fa-fw fa-edit"></i>
+        </a>
+    </div>
 </template>
 
 <script>
@@ -16,9 +26,9 @@
         watch,
     } from 'vue';
 
-    import { useField } from 'vee-validate';
-
-    import * as yup from 'yup';
+    import {
+        showMarkdownEditor,
+    } from '@/helpers/modal.js';
 
     export default {
         props: {
@@ -46,34 +56,45 @@
             // FETCH
 
             // FUNCTIONS
+            const resetField = data => {
+                v.value = data.value || '';
+                v.meta.dirty = false;
+                v.meta.valid = true;
+            };
+            const handleInput = text => {
+                v.value = text || '';
+                v.meta.dirty = true;
+                v.meta.valid = true;
+            };
             const resetFieldState = _ => {
-                v.resetField({
+                resetField({
                     value: value.value
                 });
             };
             const undirtyField = _ => {
-                v.resetField({
+                resetField({
                     value: v.value,
+                });
+            };
+            const openMdEditor = _ => {
+                showMarkdownEditor(v.value, text => {
+                    handleInput(text);
                 });
             };
 
             // DATA
-            const {
-                handleInput,
-                value: fieldValue,
-                meta,
-                resetField,
-            } = useField(`rt_${name.value}`, yup.string(), {
-                initialValue: value.value,
-            });
             const state = reactive({
-
+                currentValue: '',
             });
+
+            state.currentValue = value.value || '';
+
             const v = reactive({
-                value: fieldValue,
-                handleInput,
-                meta,
-                resetField,
+                value: state.currentValue,
+                meta: {
+                    dirty: false,
+                    valid: true,
+                },
             });
 
             watch(value, (newValue, oldValue) => {
@@ -93,6 +114,7 @@
                 // LOCAL
                 resetFieldState,
                 undirtyField,
+                openMdEditor,
                 // STATE
                 state,
                 v,
