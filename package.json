@@ -50,6 +50,7 @@
     "dependencies": {
         "@fontsource/raleway": "^5.0.2",
         "@fontsource/source-code-pro": "^5.0.2",
+        "@fontsource/zilla-slab": "^5.0.8",
         "@milkdown/core": "^7.3.0",
         "@milkdown/plugin-clipboard": "^7.3.0",
         "@milkdown/plugin-diagram": "^7.3.0",
