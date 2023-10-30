@@ -1,8 +1,8 @@
 <template>
     <div class="position-relative px-3 py-1 bg-secondary bg-opacity-10 rounded">
         <md-viewer
-            v-if="v.value"
-            :source="v.value"
+            v-if="state.value"
+            :source="state.value"
         />
         <div
             v-else
@@ -10,11 +10,12 @@
             No content yet.
         </div>
         <a
+            v-if="disabled"
             class="position-absolute top-0 end-0 text-reset"
             href="#"
             @click.prevent="openMdEditor()"
         >
-            <i class="fas fa-fw fa-edit"></i>
+            <i class="fas fa-fw fa-edit" />
         </a>
     </div>
 </template>
@@ -49,75 +50,66 @@
         emits: ['change'],
         setup(props, context) {
             const {
-                name,
-                disabled,
-                value,
+                value: initial,
             } = toRefs(props);
-            // FETCH
+
+            const defaultValue = () => {
+                    return{
+                    value: initial.value || '',
+                    meta: {
+                        dirty: false,
+                        valid: true,
+                    },
+                }
+            }
+
+            const state = reactive(defaultValue());
 
             // FUNCTIONS
             const resetField = data => {
-                v.value = data.value || '';
-                v.meta.dirty = false;
-                v.meta.valid = true;
+                state = defaultValue();
             };
             const handleInput = text => {
-                v.value = text || '';
-                v.meta.dirty = true;
-                v.meta.valid = true;
+                state.value = text || '';
+                state.meta.dirty = true;
+                state.meta.valid = true;
             };
             const resetFieldState = _ => {
                 resetField({
-                    value: value.value
+                    value: initial.value
                 });
             };
             const undirtyField = _ => {
                 resetField({
-                    value: v.value,
+                    value: state.value,
                 });
             };
             const openMdEditor = _ => {
-                showMarkdownEditor(v.value, text => {
+                showMarkdownEditor(state.value, text => {
                     handleInput(text);
                 });
             };
 
-            // DATA
-            const state = reactive({
-                currentValue: '',
-            });
-
-            state.currentValue = value.value || '';
-
-            const v = reactive({
-                value: state.currentValue,
-                meta: {
-                    dirty: false,
-                    valid: true,
-                },
-            });
-
-            watch(value, (newValue, oldValue) => {
+            watch(initial.value, (newValue, oldValue) => {
                 resetFieldState();
             });
-            watch(v.meta, (newValue, oldValue) => {
+            watch(state.meta, (newValue, oldValue) => {
                 context.emit('change', {
-                    dirty: v.meta.dirty,
-                    valid: v.meta.valid,
-                    value: v.value,
+                    dirty: state.meta.dirty,
+                    valid: state.meta.valid,
+                    value: state.value,
                 });
             });
 
             // RETURN
             return {
-                // HELPERS
-                // LOCAL
+                // FUNCTIONS
                 resetFieldState,
                 undirtyField,
                 openMdEditor,
                 // STATE
                 state,
-                v,
+                
             }
         },
     }
