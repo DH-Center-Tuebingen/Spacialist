@@ -10,7 +10,7 @@
             No content yet.
         </div>
         <a
-            v-if="disabled"
+            v-if="!disabled"
             class="position-absolute top-0 end-0 text-reset"
             href="#"
             @click.prevent="openMdEditor()"
