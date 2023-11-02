@@ -94,14 +94,14 @@
             :options="epochs"
             :name="name"
             :placeholder="t('global.select.placeholder')"
-            @change="value => v.epoch.handleChange(value)"
+            @change="handleEpochChange"
         >
-            <template #option="{ option }">
+            <template v-slot:option="{ option }">
                 {{ translateConcept(option.concept_url) }}
             </template>
-            <template #singlelabel="{ value: singlelabelValue }">
+            <template v-slot:singlelabel="{ value }">
                 <div class="multiselect-single-label">
-                    {{ translateConcept(singlelabelValue.concept_url) }}
+                    {{ translateConcept(value.concept_url) }}
                 </div>
             </template>
         </multiselect>
@@ -201,6 +201,9 @@
             };
             const setLabel = (field, value) => {
                 v[field].handleChange(value);
+            };
+            const handleEpochChange = option => {
+                v.epoch.handleChange(option);
             };
 
             // DATA
@@ -329,6 +332,7 @@
                 undirtyField,
                 setLabel,
                 timeLabels,
+                handleEpochChange,
                 // STATE
                 state,
                 v,

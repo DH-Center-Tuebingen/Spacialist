@@ -145,7 +145,7 @@
                 default: 'single',
             },
             defaultValue: {
-                type: Object,
+                // type: Object,
                 required: false,
                 default: null,
             },
@@ -196,7 +196,7 @@
             };
             const handleSelection = option => {
                 let data = {}
-                if(!!option) {
+                if(option) {
                     if(mode.value == 'single') {
                         data = {
                             ...option,
@@ -221,18 +221,18 @@
             // DATA
             const state = reactive({
                 id: `multiselect-search-${getTs()}`,
-                entry: defaultValue,
+                entry: defaultValue.value ? defaultValue.value : (mode.value == 'single' ? {} : []),
                 query: '',
                 enableChain: computed(_ => chain.value && chain.value.length > 0),
             });
 
-            watch(_ => defaultValue.value, (newValue, oldValue) => {
-                if(!newValue || newValue.reset) {
-                    state.entry = null;
-                } else {
-                    state.entry = newValue;
-                }
-            });
+            // watch(_ => defaultValue.value, (newValue, oldValue) => {
+            //     if(!newValue || newValue.reset) {
+            //         state.entry = null;
+            //     } else {
+            //         state.entry = newValue;
+            //     }
+            // });
 
             // RETURN
             return {
