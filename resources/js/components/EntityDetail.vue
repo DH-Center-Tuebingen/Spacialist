@@ -214,6 +214,30 @@
                     <span v-else>
                         {{ translateConcept(key) }}
                     </span>
+                    <div
+                        v-if="state.dirtyStates[tg.id]"
+                        class="d-flex flex-row gap-2 align-items-center"
+                        @mouseover="showTabActions(tg.id, true)"
+                        @mouseleave="showTabActions(tg.id, false)"
+                    >
+                        <i class="fas fa-fw fa-2xs fa-circle text-warning" />
+                        <div
+                            v-show="state.attributeGrpHovered == tg.id"
+                        >
+                            <a
+                                href="#"
+                                @click.prevent.stop="saveEntity(`${tg.id}`)"
+                            >
+                                <i class="fas fa-fw fa-save text-success" />
+                            </a>
+                            <a
+                                href="#"
+                                @click.prevent.stop="resetForm(`${tg.id}`)"
+                            >
+                                <i class="fas fa-fw fa-undo text-warning" />
+                            </a>
+                        </div>
+                    </div>
                 </a>
             </li>
             <li
@@ -254,7 +278,7 @@
                 >
                     <attribute-list
                         v-if="state.attributesFetched"
-                        :ref="el => setAttrRef(el)"
+                        :ref="el => setAttrRefs(el, tg.id)"
                         v-dcan="'entity_data_read'"
                         class="pt-2 h-100 scroll-y-auto scroll-x-hidden"
                         :attributes="tg.data"
@@ -264,7 +288,7 @@
                         :metadata-addon="hasReferenceGroup"
                         :selections="state.entityTypeSelections"
                         :values="state.entity.data"
-                        @dirty="setFormState"
+                        @dirty="e => setFormState(e, tg.id)"
                         @metadata="showMetadata"
                     />
                 </form>
@@ -401,7 +425,7 @@ export default {
         });
 
         // DATA
-        const attrRef = ref({});
+        const attrRefs = ref({});
         const state = reactive({
             colorStyles: computed(_ => {
                 const colors = getEntityColors(state.entity.entity_type_id);
@@ -409,7 +433,14 @@ export default {
                     color: colors.backgroundColor
                 };
             }),
-            formDirty: false,
+            formDirty: computed(_ => {
+                for(let k in state.dirtyStates) {
+                    if(state.dirtyStates[k]) return true;
+                }
+                return false;
+            }),
+            dirtyStates: {},
+            attributeGrpHovered: null,
             hiddenAttributes: {},
             entityHeaderHovered: false,
             editedEntityName: '',
@@ -693,16 +724,48 @@ export default {
             }
 
             oldTabs.forEach(t => t.classList.remove('active'));
-            newTab.classList.add('active');
+            if(newTab) newTab.classList.add('active');
             oldPanels.forEach(p => p.classList.remove('show', 'active'));
-            newPanel.classList.add('show', 'active');
+            if(newPanel) newPanel.classList.add('show', 'active');
         };
         const onEntityHeaderHover = hoverState => {
             state.entityHeaderHovered = hoverState;
         };
-        const setFormState = e => {
-            state.formDirty = e.dirty && e.valid;
+        const showTabActions = (grp, status) => {
+            state.attributeGrpHovered = status ? grp : null;
+        };
+        const setFormState = (e, grp) => {
+            state.dirtyStates[grp] = e.dirty && e.valid;
             updateDependencyState(e.attribute_id, e.value);
+        };
+        const getDirtyValues = grp => {
+            const list = grp ? grp.split(',') : Object.keys(attrRefs.value);
+            let values = {};
+            list.forEach(g => {
+                values = {
+                    ...values,
+                    ...attrRefs.value[g].getDirtyValues(),
+                };
+            });
+            return values;
+        };
+        const undirtyList = grp => {
+            const list = grp ? grp.split(',') : Object.keys(attrRefs.value);
+            list.forEach(g => {
+                attrRefs.value[g].undirtyList();
+            });
+        };
+        const resetListValues = grp => {
+            const list = grp ? grp.split(',') : Object.keys(attrRefs.value);
+            list.forEach(g => {
+                attrRefs.value[g].resetListValues();
+            });
+        };
+        const resetDirtyStates = grp => {
+            const list = grp ? grp.split(',') : Object.keys(attrRefs.value);
+            list.forEach(g => {
+                state.dirtyStates[g] = false;
+            });
         };
         const fetchComments = _ => {
             if(!can('comments_read')) return;
@@ -732,9 +795,10 @@ export default {
                     state.entity.comments_count++;
                 }
             };
-            const saveEntity = _ => {
+            const saveEntity = grps => {
                 if(!can('entity_data_write')) return;
-                const dirtyValues = attrRef.value.getDirtyValues();
+
+                const dirtyValues = getDirtyValues(grps);
                 const patches = [];
                 const moderations = [];
 
@@ -774,8 +838,7 @@ export default {
                     moderations.push(aid);
                 }
                 return patchAttributes(state.entity.id, patches).then(data => {
-                    state.formDirty = false;
-                    attrRef.value.undirtyList();
+                    undirtyList(grps);
                     store.dispatch('updateEntity', data);
                     store.dispatch('updateEntityData', {
                         data: dirtyValues,
@@ -812,11 +875,12 @@ export default {
                 );
             });
         };
-        const resetForm = _ => {
-            attrRef.value.resetListValues();
+        const resetForm = grps => {
+            resetListValues(grps);
+            resetDirtyStates(grps);
         };
-        const setAttrRef = el => {
-            attrRef.value = el;
+        const setAttrRefs = (el, grp) => {
+            attrRefs.value[grp] = el;
         }
 
         // ON MOUNTED
@@ -831,7 +895,7 @@ export default {
             }
         });
         onBeforeUpdate(_ => {
-            attrRef.value = {};
+            attrRefs.value = {};
             state.commentLoadingState = 'not';
         });
 
@@ -930,13 +994,14 @@ export default {
             confirmDeleteEntity,
             setDetailPanel,
             onEntityHeaderHover,
+            showTabActions,
             setFormState,
             addComment,
             saveEntity,
             resetForm,
-            setAttrRef,
+            setAttrRefs,
             // STATE
-            attrRef,
+            attrRefs,
             state,
         };
     }
