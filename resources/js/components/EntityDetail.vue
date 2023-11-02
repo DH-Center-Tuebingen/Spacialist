@@ -185,8 +185,7 @@
             </div>
         </div>
         <ul
-            v-show="can('comments_read')"
-            id="myTab"
+            id="entity-detail-tabs"
             class="nav nav-tabs"
             role="tablist"
         >
@@ -216,7 +215,33 @@
                     </span>
                 </a>
             </li>
+            <!-- empty nav-item to separate metadata and comments from attributes -->
             <li
+                class="nav-item nav-item-list-divider ms-auto"
+            />
+            <li
+                v-show="can('entity_read')"
+                class="nav-item"
+                role="presentation"
+            >
+                <a
+                    id="active-entity-metadata-tab"
+                    class="nav-link active-entity-detail-tab d-flex gap-2 align-items-center"
+                    href="#"
+                    @click.prevent="setDetailPanel('metadata')"
+                >
+                    <i class="fas fa-fw fa-file-shield" />
+                    {{ t('main.entity.tabs.metadata') }}
+                    <span
+                        v-if="!state.entity.metadata || !state.entity.metadata.licence"
+                        :title="`No licence provided`"
+                    >
+                        <i class="fas fa-fw fa-2xs fa-circle text-warning" />
+                    </span>
+                </a>
+            </li>
+            <li
+                v-show="can('comments_read')"
                 class="nav-item"
                 role="presentation"
             >
@@ -268,6 +293,129 @@
                         @metadata="showMetadata"
                     />
                 </form>
+            </div>
+            <div
+                v-show="can('entity_read')"
+                id="active-entity-metadata-panel"
+                class="tab-pane fade h-100 active-entity-detail-panel d-flex flex-column overflow-hidden"
+                role="tabpanel"
+            >
+                <div
+                    class="mt-3"
+                >
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-success"
+                        @click="saveMetadata"
+                    >
+                        <i class="fas fa-fw fa-save" />
+                        Save Metadata
+                    </button>
+                </div>
+                <div
+                    class="d-flex flex-row gap-2 justify-content-between align-items-center mt-2"
+                >
+                    <div>
+                        <h5>Author/Creator</h5>
+                        <div
+                            v-if="getUserBy(state.entity.creator)"
+                            class="d-flex flex-row gap-2 align-items-center"
+                        >
+                            <a
+                                href="#"
+                                @click.prevent="showUserInfo(getUserBy(state.entity.creator))"
+                            >
+                                <span 
+                                    class="badge bg-primary bg-opacity-75 pe-3"
+                                    :class="{'bg-primary': state.entity.creator != userId(), 'bg-success': state.entity.creator == userId()}"
+                                >
+                                    {{ getUserBy(state.entity.creator).name }}
+                                </span>
+                                <user-avatar
+                                    :user="getUserBy(state.entity.creator)"
+                                    :size="20"
+                                    class="align-middle ms-n2"
+                                />
+                            </a>
+                        </div>
+                    </div>
+                    <div>
+                        <h5>Editors</h5>
+                        <div
+                            class="d-flex flex-row gap-2 align-items-center"
+                        >
+                            <a
+                                v-for="h in state.entity.editors"
+                                :key="h.user_id"
+                                href="#"
+                                @click.prevent="showUserInfo(getUserBy(h.user_id))"
+                            >
+                                <span 
+                                    class="badge bg-opacity-75 pe-3"
+                                    :class="{'bg-warning': h.user_id == state.entity.creator && h.user_id != userId(), 'bg-primary': h.user_id != state.entity.creator && h.user_id != userId(), 'bg-success': h.user_id == userId()}"
+                                >
+                                    {{ getUserBy(h.user_id).name }}
+                                </span>
+                                <user-avatar
+                                    :user="getUserBy(h.user_id)"
+                                    :size="20"
+                                    class="align-middle ms-n2"
+                                />
+                            </a>
+                        </div>
+                    </div>
+                    <div v-if="state.entity.metadata">
+                        <h5>License</h5>
+                        <input
+                            v-model="state.entityMetadata.licence"
+                            type="text"
+                            class="form-control"
+                            placeholder="CC-BY 4.0"
+                        >
+                    </div>
+                </div>
+                <form>
+                    <div>
+                        <label
+                            for="entity-metadata-input2"
+                            class="form-label"
+                        >
+                            Summary/Description
+                        </label>
+                        <!-- TODO replace with Richtext Attribute -->
+                        <textarea
+                            id="entity-metadata-input2"
+                            class="form-control"
+                            rows="3"
+                        />
+                    </div>
+                </form>
+                <div
+                    class="mt-2 pe-2 overflow-auto"
+                >
+                    <ul
+                        class="list-group"
+                    >
+                        <li
+                            v-for="entry in state.entity.history"
+                            class="list-group-item"
+                            :key="`entity-history-entry-${entry.id}`"
+                        >
+                            {{ entry.description }}
+                            <span 
+                                class="badge bg-opacity-75 pe-3"
+                                :class="{'bg-warning': entry.user_id == state.entity.creator && entry.user_id != userId(), 'bg-primary': entry.user_id != state.entity.creator && entry.user_id != userId(), 'bg-success': entry.user_id == userId()}"
+                            >
+                                {{ getUserBy(entry.user_id).name }}
+                            </span>
+                            <user-avatar
+                                :user="getUserBy(entry.user_id)"
+                                :size="20"
+                                class="align-middle ms-n2"
+                            />
+                        </li>
+                    </ul>
+                </div>
             </div>
             <div
                 v-show="can('comments_read')"
@@ -357,16 +505,21 @@ import { useToast } from '@/plugins/toast.js';
         getEntityComments,
         patchAttributes,
         patchEntityName,
+        patchEntityMetadata,
     } from '@/api.js';
     import {
         can,
         isModerated,
+        isArray,
+        userId,
         getAttribute,
+        getUserBy,
         getEntityColors,
         getEntityTypeName,
         getEntityTypeAttributeSelections,
         getEntityTypeDependencies,
         translateConcept,
+        _cloneDeep,
     } from '@/helpers/helpers.js';
     import {
         showDiscard,
@@ -413,6 +566,7 @@ export default {
             hiddenAttributes: {},
             entityHeaderHovered: false,
             editedEntityName: '',
+            entityMetadata: {},
             initFinished: false,
             commentLoadingState: 'not',
             hiddenAttributeState: false,
@@ -680,17 +834,18 @@ export default {
             if(tab === 'comments') {
                 newTab = document.getElementById('active-entity-comments-tab');
                 newPanel = document.getElementById('active-entity-comments-panel');
-                oldTabs = document.getElementsByClassName('active-entity-attributes-tab');
-                oldPanels = document.getElementsByClassName('active-entity-attributes-panel');
                 if(!state.commentsFetched) {
                     fetchComments();
                 }
+            } else if(tab === 'metadata') {
+                newTab = document.getElementById('active-entity-metadata-tab');
+                newPanel = document.getElementById('active-entity-metadata-panel');
             } else {
                 newTab = document.getElementById(`active-entity-attributes-group-${tabId}-tab`);
                 newPanel = document.getElementById(`active-entity-attributes-panel-${tabId}`);
-                oldTabs = document.getElementsByClassName('active-entity-detail-tab');
-                oldPanels = document.getElementsByClassName('active-entity-detail-panel');
             }
+            oldTabs = document.getElementsByClassName('active-entity-detail-tab');
+            oldPanels = document.getElementsByClassName('active-entity-detail-panel');
 
             oldTabs.forEach(t => t.classList.remove('active'));
             newTab.classList.add('active');
@@ -731,6 +886,32 @@ export default {
                     state.entity.comments.push(comment);
                     state.entity.comments_count++;
                 }
+            };
+            const saveMetadata = _ => {
+                const metadata = {};
+                for(let k in state.entityMetadata) {
+                    const upd = state.entityMetadata[k];
+                    const curr = state.entity.metadata[k];
+                    if(!curr || upd != curr) {
+                        metadata[k] = upd;
+                    }
+                }
+                patchEntityMetadata(state.entity.id, metadata).then(data => {
+                    store.dispatch('updateEntityMetadata', {
+                        eid: state.entity.id,
+                        data: data,
+                    });
+
+                    toast.$toast(
+                        t('main.entity.toasts.updated_metadata.msg', {
+                            name: data.name
+                        }),
+                        t('main.entity.toasts.updated_metadata.title'), {
+                        channel: 'success',
+                        autohide: true,
+                        icon: true,
+                    });
+                })
             };
             const saveEntity = _ => {
                 if(!can('entity_data_write')) return;
@@ -797,8 +978,7 @@ export default {
                     channel: 'success',
                     autohide: true,
                     icon: true,
-                },
-                );
+                });
             }).catch(error => {
                 const r = error.response;
                 toast.$toast(
@@ -866,6 +1046,11 @@ export default {
             async (newValue, oldValue) => {
                 if(!newValue || !newValue.id) return;
 
+                state.entityMetadata = _cloneDeep(state.entity.metadata);
+                if(isArray(state.entityMetadata)) {
+                    state.entityMetadata = {};
+                }
+
                 nextTick(_ => {
                     setDetailPanelView(route.query.view);
                 });
@@ -915,6 +1100,8 @@ export default {
             // HELPERS
             can,
             date,
+            userId,
+            getUserBy,
             showUserInfo,
             getEntityTypeName,
             getEntityColors,
@@ -932,6 +1119,7 @@ export default {
             onEntityHeaderHover,
             setFormState,
             addComment,
+            saveMetadata,
             saveEntity,
             resetForm,
             setAttrRef,

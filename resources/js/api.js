@@ -602,6 +602,12 @@ export async function patchEntityName(eid, name) {
     );
 }
 
+export async function patchEntityMetadata(eid, metadata) {
+    return $httpQueue.add(
+        () => http.patch(`entity/${eid}/metadata`, metadata).then(response => response.data)
+    );
+}
+
 export async function patchAttribute(entityId, attributeId, data) {
     return $httpQueue.add(
         () => http.patch(`/entity/${entityId}/attribute/${attributeId}`, data).then(response => response.data)

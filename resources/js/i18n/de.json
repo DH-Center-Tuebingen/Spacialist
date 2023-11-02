@@ -181,6 +181,8 @@
         "confirm_password": "Passwort wiederholen",
         "remember_me": "Eingeloggt bleiben",
         "orcid": "ORCID",
+        "licence": "Lizenz",
+        "licence_default": "Standard-Lizenz",
         "description": "Beschreibung",
         "roles": "Rollen",
         "permissions": "Berechtigungen",
@@ -306,6 +308,10 @@
                     "title": "Entität aktualisiert",
                     "msg": "Daten von {name} wurden erfolgreich aktualisiert."
                 },
+                "updated_metadata": {
+                    "title": "Metadaten aktualisiert",
+                    "msg": "Metadaten von {name} wurden erfolgreich aktualisiert."
+                },
                 "deleted": {
                     "title": "Entität gelöscht",
                     "msg": "{name} wurde erfolgreich gelöscht."
@@ -347,6 +353,7 @@
             "tabs": {
                 "default": "Allgemein",
                 "comments": "Kommentare",
+                "metadata": "Metadaten",
                 "untitled_group": "Unbenannt ({cnt})"
             },
             "modals": {

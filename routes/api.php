@@ -62,6 +62,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::patch('/multiedit', 'EntityController@multieditAttributes');
     Route::patch('/{id}/attribute/{aid}/moderate', 'EntityController@handleModeration')->where('id', '[0-9]+')->where('aid', '[0-9]+');
     Route::patch('/{id}/name', 'EntityController@patchName')->where('id', '[0-9]+');
+    Route::patch('/{id}/metadata', 'EntityController@patchMetadata')->where('id', '[0-9]+');
     Route::patch('/{id}/rank', 'EntityController@moveEntity')->where('id', '[0-9]+');
     Route::patch('/reference/{id}', 'ReferenceController@patchReference')->where('id', '[0-9]+');
 

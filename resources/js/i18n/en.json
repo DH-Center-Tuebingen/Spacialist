@@ -181,6 +181,8 @@
         "confirm_password": "Repeat Password",
         "remember_me": "Remember me",
         "orcid": "ORCID",
+        "licence": "Licence",
+        "licence_default": "Default Licence",
         "description": "Description",
         "roles": "Roles",
         "permissions": "Permissions",
@@ -306,6 +308,10 @@
                     "title": "Entity updated",
                     "msg": "Data of {name} successfully updated."
                 },
+                "updated_metadata": {
+                    "title": "Metadata updated",
+                    "msg": "Metadata of {name} successfully updated."
+                },
                 "deleted": {
                     "title": "Entity deleted",
                     "msg": "{name} successful deleted."
@@ -347,6 +353,7 @@
             "tabs": {
                 "default": "Default",
                 "comments": "Comments",
+                "metadata": "Metadata",
                 "untitled_group": "Untitled ({cnt})"
             },
             "modals": {

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Nicolaslopezj\Searchable\SearchableTrait;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
 
@@ -36,6 +37,13 @@ class Entity extends Model implements Searchable
         'parentIds',
         'parentNames',
         'attributeLinks',
+        'editors',
+        'creator',
+        'history',
+    ];
+
+    protected $casts = [
+        'metadata' => 'json',
     ];
 
     protected $with = [
@@ -299,6 +307,29 @@ class Entity extends Model implements Searchable
             ];
         }
         return $entities;
+    }
+
+    public function getEditorsAttribute() {
+        $causers = Activity::where('subject_id', $this->id)
+            ->where('subject_type', get_class($this))
+            ->groupBy('causer_id')
+            ->get(['causer_id as user_id']);
+        return $causers;
+    }
+
+    public function getCreatorAttribute() {
+        $creator = Activity::where('subject_id', $this->id)
+            ->where('subject_type', get_class($this))
+            ->orderBy('created_at','desc')
+            ->first();
+        return $creator->causer_id;
+    }
+
+    public function getHistoryAttribute() {
+        return Activity::where('subject_id', $this->id)
+            ->where('subject_type', get_class($this))
+            ->orderBy('created_at','desc')
+            ->get(['id', 'description', 'causer_id as user_id', 'created_at']);
     }
 
     public function parents() {
