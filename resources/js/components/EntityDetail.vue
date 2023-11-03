@@ -950,7 +950,7 @@ export default {
         // ON BEFORE LEAVE
         onBeforeRouteLeave(async (to, from) => {
             if(state.formDirty) {
-                showDiscard(to, _ => state.formDirty = false, saveEntity);
+                showDiscard(to, resetDirtyStates, saveEntity);
                 return false;
             } else {
                 store.dispatch('resetEntity');
@@ -960,7 +960,7 @@ export default {
         onBeforeRouteUpdate(async (to, from) => {
             if(to.params.id !== route.params.id) {
                 if(state.formDirty) {
-                    showDiscard(to, _ => state.formDirty = false, saveEntity);
+                    showDiscard(to, resetDirtyStates, saveEntity);
                     return false;
                 } else {
                     state.hiddenAttributes = {};

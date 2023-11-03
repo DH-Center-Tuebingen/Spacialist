@@ -8,7 +8,6 @@
         placeholder="0"
         :disabled="disabled"
         :name="name"
-        @input="v.handleInput"
     >
 </template>
 
@@ -62,7 +61,6 @@
 
             // DATA
             const {
-                handleInput,
                 value: fieldValue,
                 meta,
                 resetField,
@@ -74,13 +72,12 @@
             });
             const v = reactive({
                 value: fieldValue,
-                handleInput,
                 meta,
                 resetField,
             });
 
 
-            watch(value, (newValue, oldValue) => {
+            watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
             watch(_ => [v.meta.dirty, v.meta.valid], ([newDirty, newValid], [oldDirty, oldValid]) => {

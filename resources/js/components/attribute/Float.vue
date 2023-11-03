@@ -77,7 +77,7 @@
             });
 
 
-            watch(value, (newValue, oldValue) => {
+            watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
             watch(_ => [v.meta.dirty, v.meta.valid], ([newDirty, newValid], [oldDirty, oldValid]) => {

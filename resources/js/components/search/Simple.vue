@@ -145,7 +145,7 @@
                 default: 'single',
             },
             defaultValue: {
-                // type: Object,
+                type: Object, // TODO should be Array for Entity-MC
                 required: false,
                 default: null,
             },
@@ -226,13 +226,13 @@
                 enableChain: computed(_ => chain.value && chain.value.length > 0),
             });
 
-            // watch(_ => defaultValue.value, (newValue, oldValue) => {
-            //     if(!newValue || newValue.reset) {
-            //         state.entry = null;
-            //     } else {
-            //         state.entry = newValue;
-            //     }
-            // });
+            watch(_ => defaultValue.value, (newValue, oldValue) => {
+                if(!newValue || newValue.reset) {
+                    state.entry = mode.value == 'single' ? {} : [];
+                } else {
+                    state.entry = newValue;
+                }
+            });
 
             // RETURN
             return {
