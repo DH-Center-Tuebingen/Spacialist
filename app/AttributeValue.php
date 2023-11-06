@@ -95,6 +95,14 @@ class AttributeValue extends Model implements Searchable
                $this->geography_val->toWKT();
     }
 
+    public static function getValueFromKey($arr) {
+        if(!isset($arr)) return null;
+
+        if(isset($arr['str_val'])) {
+            return $arr['str_val'];
+        }
+    }
+
     public static function getValueById($aid, $cid) {
         $av = self::where('attribute_id', $aid)
             ->where('entity_id', $cid)->first();

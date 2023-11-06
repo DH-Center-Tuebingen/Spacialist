@@ -499,6 +499,13 @@
                 } else {
                     expClasses['col-md-9'] = true;
                 }
+
+                if(state.itemClasses) {
+                    const itmCls = state.itemClasses.split(' ');
+                    itmCls.forEach(itm => {
+                        expClasses[itm] = true;
+                    });
+                }
                 
                 return expClasses;
             };
@@ -750,6 +757,7 @@
                 hideLabels: computed(_ => options.value.hide_labels),
                 hideEntityLink: computed(_ => options.value.hide_entity_link),
                 ignoreMetadata: computed(_ => options.value.ignore_metadata),
+                itemClasses: computed(_ => options.value.item_classes),
             });
 
             // ON MOUNTED

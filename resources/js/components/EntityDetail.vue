@@ -165,8 +165,11 @@
             </div>
             <div>
                 <i class="fas fa-fw fa-user-edit" />
-                <span class="ms-1">
-                    {{ date(state.lastModified, undefined, true, true) }}
+                <span
+                    class="ms-1"
+                    :title="date(state.lastModified, undefined, true, true)"
+                >
+                    {{ ago(state.lastModified) }}
                 </span>
                 -
                 <a
@@ -316,7 +319,9 @@
                     class="d-flex flex-row gap-2 justify-content-between align-items-center mt-2"
                 >
                     <div>
-                        <h5>Author/Creator</h5>
+                        <h5 class="mb-1">
+                            Author/Creator
+                        </h5>
                         <div
                             v-if="getUserBy(state.entity.creator)"
                             class="d-flex flex-row gap-2 align-items-center"
@@ -340,7 +345,9 @@
                         </div>
                     </div>
                     <div>
-                        <h5>Editors</h5>
+                        <h5 class="mb-1">
+                            Editors
+                        </h5>
                         <div
                             class="d-flex flex-row gap-2 align-items-center"
                         >
@@ -365,7 +372,9 @@
                         </div>
                     </div>
                     <div v-if="state.entity.metadata">
-                        <h5>License</h5>
+                        <h5 class="mb-1">
+                            License
+                        </h5>
                         <input
                             v-model="state.entityMetadata.licence"
                             type="text"
@@ -377,42 +386,168 @@
                 <form>
                     <div>
                         <label
-                            for="entity-metadata-input2"
-                            class="form-label"
+                            for="entity-metadata-summary"
+                            class="form-label mb-1"
                         >
-                            Summary/Description
+                            <h5 class="mb-0">
+                                Summary/Description
+                            </h5>
                         </label>
                         <!-- TODO replace with Richtext Attribute -->
                         <textarea
-                            id="entity-metadata-input2"
+                            id="entity-metadata-summary"
                             class="form-control"
                             rows="3"
                         />
                     </div>
                 </form>
+                <hr>
                 <div
-                    class="mt-2 pe-2 overflow-auto"
+                    class="pe-2 overflow-auto"
                 >
+                    <h5 class="mb-1">
+                        History
+                    </h5>
                     <ul
                         class="list-group"
                     >
                         <li
                             v-for="entry in state.entity.history"
-                            class="list-group-item"
                             :key="`entity-history-entry-${entry.id}`"
+                            class="list-group-item d-flex flex-row gap-3 align-items-center"
                         >
-                            {{ entry.description }}
-                            <span 
-                                class="badge bg-opacity-75 pe-3"
-                                :class="{'bg-warning': entry.user_id == state.entity.creator && entry.user_id != userId(), 'bg-primary': entry.user_id != state.entity.creator && entry.user_id != userId(), 'bg-success': entry.user_id == userId()}"
+                            <span
+                                :title="entry.description"
                             >
-                                {{ getUserBy(entry.user_id).name }}
+                                <span
+                                    v-if="entry.description == 'created'"
+                                >
+                                    <i class="fas fa-fw fa-plus text-success" />
+                                </span>
+                                <span
+                                    v-else-if="entry.description == 'updated'"
+                                >
+                                    <i class="fas fa-fw fa-edit text-warning" />
+                                </span>
                             </span>
-                            <user-avatar
-                                :user="getUserBy(entry.user_id)"
-                                :size="20"
-                                class="align-middle ms-n2"
-                            />
+                            <div class="text-nowrap">
+                                <span 
+                                    class="badge bg-opacity-75 pe-3"
+                                    :class="{'bg-warning': entry.user_id == state.entity.creator && entry.user_id != userId(), 'bg-primary': entry.user_id != state.entity.creator && entry.user_id != userId(), 'bg-success': entry.user_id == userId()}"
+                                >
+                                    {{ getUserBy(entry.user_id).name }}
+                                </span>
+                                <user-avatar
+                                    :user="getUserBy(entry.user_id)"
+                                    :size="20"
+                                    class="align-middle ms-n2"
+                                />
+                            </div>
+                            <div class="flex-grow-1">
+                                <template
+                                    v-if="entry.subject_type == 'App\\Entity'"
+                                >
+                                    <span
+                                        v-if="entry.description == 'created'"
+                                    >
+                                        As Entity <span class="badge bg-primary bg-opacity-75">{{ entry.properties.attributes.name }}</span> ({{ getEntityTypeName(entry.properties.attributes.entity_type_id) }}) created.
+                                        <div
+                                            v-if="entry.properties.attributes.root_entity_id"
+                                        >
+                                            To <span class="fw-bold">{{ getEntity(entry.properties.attributes.root_entity_id).name }}</span>
+                                        </div>
+                                    </span>
+                                    <span
+                                        v-else-if="entry.description == 'updated'"
+                                        class="d-flex flex-row align-items-center gap-2"
+                                    >
+                                        Updated name <span class="badge bg-danger bg-opacity-75">{{ entry.properties.old.name }}</span>
+                                        <i class="fas fa-fw fa-2xs fa-arrow-right" /> <span class="badge bg-success bg-opacity-75">{{ entry.properties.attributes.name }}</span>
+                                    </span>
+                                </template>
+                                <template
+                                    v-else-if="entry.subject_type == 'attribute_values'"
+                                >
+                                    <div
+                                        v-if="entry.description == 'created'"
+                                    >
+                                        <span
+                                            class="d-flex flex-row align-items-center gap-2"
+                                        >
+                                            Added value to attribute <span class="fw-bold">{{ getAttributeName(entry.attribute.id) }}</span>
+                                            <a
+                                                href="#"
+                                                class="text-reset"
+                                                @click.prevent="state.showHistoryChange[entry.id] = !state.showHistoryChange[entry.id]"
+                                            >
+                                                <span v-show="state.showHistoryChange[entry.id]">
+                                                    <i class="fas fa-fw fa-eye" />
+                                                </span>
+                                                <span v-show="!state.showHistoryChange[entry.id]">
+                                                    <i class="fas fa-fw fa-eye-slash" />
+                                                </span>
+                                            </a>
+                                        </span>
+                                        <attribute-list
+                                            v-show="state.showHistoryChange[entry.id]"
+                                            :group="{name: 'entity-metadata-preview', pull: false, put: false}"
+                                            :classes="'mx-0 py-2 px-2 rounded-3 bg-primary bg-opacity-50'"
+                                            :attributes="formatHistoryEntryAttributes(entry.attribute)"
+                                            :values="formatHistoryEntryValue(entry.attribute.id, entry.value_after)"
+                                            :options="{'hide_labels': true, 'item_classes': 'px-0'}"
+                                            :selections="{}"
+                                            :preview="true"
+                                        />
+                                    </div>
+                                    <div
+                                        v-else-if="entry.description == 'updated'"
+                                    >
+                                        <span class="d-flex flex-row align-items-center gap-2">
+                                            Updated value of attribute <span class="fw-bold">{{ getAttributeName(entry.attribute.id) }}</span>
+                                            <a
+                                                href="#"
+                                                class="text-reset"
+                                                @click.prevent="state.showHistoryChange[entry.id] = !state.showHistoryChange[entry.id]"
+                                            >
+                                                <span v-show="state.showHistoryChange[entry.id]">
+                                                    <i class="fas fa-fw fa-eye" />
+                                                </span>
+                                                <span v-show="!state.showHistoryChange[entry.id]">
+                                                    <i class="fas fa-fw fa-eye-slash" />
+                                                </span>
+                                            </a>
+                                        </span>
+                                        <div
+                                            v-if="state.showHistoryChange[entry.id]"
+                                            class="d-flex flex-row gap-2 align-items-center"
+                                        >
+                                            <attribute-list
+                                                :group="{name: 'entity-metadata-preview', pull: false, put: false}"
+                                                :classes="'flex-grow-1 mx-0 py-2 px-2 rounded-3 bg-danger bg-opacity-50'"
+                                                :attributes="formatHistoryEntryAttributes(entry.attribute)"
+                                                :values="formatHistoryEntryValue(entry.attribute.id, entry.value_before)"
+                                                :options="{'hide_labels': true, 'item_classes': 'px-0'}"
+                                                :selections="{}"
+                                            />
+                                            <i class="fas fa-fw fa-arrow-right" />
+                                            <attribute-list
+                                                :group="{name: 'entity-metadata-preview', pull: false, put: false}"
+                                                :classes="'flex-grow-1 mx-0 py-2 px-2 rounded-3 bg-success bg-opacity-50'"
+                                                :attributes="formatHistoryEntryAttributes(entry.attribute)"
+                                                :values="formatHistoryEntryValue(entry.attribute.id, entry.value_after)"
+                                                :options="{'hide_labels': true, 'item_classes': 'px-0'}"
+                                                :selections="{}"
+                                            />
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                            <span
+                                class="small ms-auto text-secondary text-nowrap"
+                                :title="date(entry.created_at)"
+                            >
+                                {{ ago(entry.created_at) }}
+                            </span>
                         </li>
                     </ul>
                 </div>
@@ -500,7 +635,7 @@ import router from '@/bootstrap/router.js';
 
 import { useToast } from '@/plugins/toast.js';
 
-    import { date } from '@/helpers/filters.js';
+    import { ago, date } from '@/helpers/filters.js';
     import {
         getEntityComments,
         patchAttributes,
@@ -513,7 +648,9 @@ import { useToast } from '@/plugins/toast.js';
         isArray,
         userId,
         getAttribute,
+        getAttributeName,
         getUserBy,
+        getEntity,
         getEntityColors,
         getEntityTypeName,
         getEntityTypeAttributeSelections,
@@ -567,6 +704,7 @@ export default {
             entityHeaderHovered: false,
             editedEntityName: '',
             entityMetadata: {},
+            showHistoryChange: {},
             initFinished: false,
             commentLoadingState: 'not',
             hiddenAttributeState: false,
@@ -855,6 +993,19 @@ export default {
         const onEntityHeaderHover = hoverState => {
             state.entityHeaderHovered = hoverState;
         };
+        const formatHistoryEntryValue = (id, val) => {
+            return {
+                [id]: {
+                    value: val,
+                },
+            };
+        };
+        const formatHistoryEntryAttributes = attr => {
+            attr.isDisabled = true;
+            return [
+                attr
+            ];
+        };
         const setFormState = e => {
             state.formDirty = e.dirty && e.valid;
             updateDependencyState(e.attribute_id, e.value);
@@ -1099,11 +1250,14 @@ export default {
             t,
             // HELPERS
             can,
+            ago,
             date,
             userId,
             getUserBy,
             showUserInfo,
+            getAttributeName,
             getEntityTypeName,
+            getEntity,
             getEntityColors,
             translateConcept,
             // LOCAL
@@ -1117,6 +1271,8 @@ export default {
             confirmDeleteEntity,
             setDetailPanel,
             onEntityHeaderHover,
+            formatHistoryEntryValue,
+            formatHistoryEntryAttributes,
             setFormState,
             addComment,
             saveMetadata,
