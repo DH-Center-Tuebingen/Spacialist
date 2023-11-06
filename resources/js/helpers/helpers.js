@@ -203,8 +203,10 @@ export function getAttribute(id) {
     return store.getters.attributes.find(a => a.id == id) || {};
 }
 
-export function translateEntityType(id) {
-    return translateConcept(getEntityType(id).thesaurus_url);
+export function getAttributeName(id) {
+    const attr = getAttribute(id);
+    if(!attr) return '';
+    return translateConcept(attr.thesaurus_url);
 }
 
 export function getEntityType(id) {
@@ -458,6 +460,10 @@ export function calculateEntityColors(id, alpha = 0.5) {
         color: textColor,
         backgroundColor: color
     };
+}
+
+export function getEntity(id) {
+    return store.getters.entities[id] || {};
 }
 
 export function getEntityColors(id) {

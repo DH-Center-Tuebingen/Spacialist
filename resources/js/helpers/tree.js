@@ -8,7 +8,7 @@ import {
 } from '@/api.js';
 
 import {
-    translateEntityType,
+    getEntityTypeName,
 } from '@/helpers/helpers.js';
 
 export async function fetchChildren(id, sort = {by: 'rank', dir: 'asc'}) {
@@ -56,8 +56,8 @@ export function sortTree(by, dir, tree) {
             break;
         case 'type':
             sortFn = (a, b) => {
-                const aurl = translateEntityType(a.entity_type_id);
-                const burl = translateEntityType(b.entity_type_id);
+                const aurl = getEntityTypeName(a.entity_type_id);
+                const burl = getEntityTypeName(b.entity_type_id);
                 let value = 0;
                 if(aurl < burl) value = -1;
                 if(aurl > burl) value = 1;
