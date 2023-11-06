@@ -502,43 +502,77 @@
                                     <div
                                         v-else-if="entry.description == 'updated'"
                                     >
-                                        <span class="d-flex flex-row align-items-center gap-2">
-                                            Updated value of attribute <span class="fw-bold">{{ getAttributeName(entry.attribute.id) }}</span>
-                                            <a
-                                                href="#"
-                                                class="text-reset"
-                                                @click.prevent="state.showHistoryChange[entry.id] = !state.showHistoryChange[entry.id]"
-                                            >
-                                                <span v-show="state.showHistoryChange[entry.id]">
-                                                    <i class="fas fa-fw fa-eye" />
-                                                </span>
-                                                <span v-show="!state.showHistoryChange[entry.id]">
-                                                    <i class="fas fa-fw fa-eye-slash" />
-                                                </span>
-                                            </a>
-                                        </span>
-                                        <div
-                                            v-if="state.showHistoryChange[entry.id]"
-                                            class="d-flex flex-row gap-2 align-items-center"
+                                        <template
+                                            v-if="hasHistoryEntryKey(entry.properties.attributes, '!certainty') || hasHistoryEntryKey(entry.properties.old, '!certainty')"
                                         >
-                                            <attribute-list
-                                                :group="{name: 'entity-metadata-preview', pull: false, put: false}"
-                                                :classes="'flex-grow-1 mx-0 py-2 px-2 rounded-3 bg-danger bg-opacity-50'"
-                                                :attributes="formatHistoryEntryAttributes(entry.attribute)"
-                                                :values="formatHistoryEntryValue(entry.attribute.id, entry.value_before)"
-                                                :options="{'hide_labels': true, 'item_classes': 'px-0'}"
-                                                :selections="{}"
-                                            />
-                                            <i class="fas fa-fw fa-arrow-right" />
-                                            <attribute-list
-                                                :group="{name: 'entity-metadata-preview', pull: false, put: false}"
-                                                :classes="'flex-grow-1 mx-0 py-2 px-2 rounded-3 bg-success bg-opacity-50'"
-                                                :attributes="formatHistoryEntryAttributes(entry.attribute)"
-                                                :values="formatHistoryEntryValue(entry.attribute.id, entry.value_after)"
-                                                :options="{'hide_labels': true, 'item_classes': 'px-0'}"
-                                                :selections="{}"
-                                            />
-                                        </div>
+                                            <span class="d-flex flex-row align-items-center gap-2">
+                                                Updated value of attribute <span class="fw-bold">{{ getAttributeName(entry.attribute.id) }}</span>
+                                                <a
+                                                    href="#"
+                                                    class="text-reset"
+                                                    @click.prevent="state.showHistoryChange[entry.id] = !state.showHistoryChange[entry.id]"
+                                                >
+                                                    <span v-show="state.showHistoryChange[entry.id]">
+                                                        <i class="fas fa-fw fa-eye" />
+                                                    </span>
+                                                    <span v-show="!state.showHistoryChange[entry.id]">
+                                                        <i class="fas fa-fw fa-eye-slash" />
+                                                    </span>
+                                                </a>
+                                            </span>
+                                            <div
+                                                v-if="state.showHistoryChange[entry.id]"
+                                                class="d-flex flex-row gap-2 align-items-center"
+                                            >
+                                                <attribute-list
+                                                    v-if="hasHistoryEntryKey(entry.properties.old, '!certainty')"
+                                                    :group="{name: 'entity-metadata-preview', pull: false, put: false}"
+                                                    :classes="'flex-grow-1 mx-0 py-2 px-2 rounded-3 bg-danger bg-opacity-50'"
+                                                    :attributes="formatHistoryEntryAttributes(entry.attribute)"
+                                                    :values="formatHistoryEntryValue(entry.attribute.id, entry.value_before)"
+                                                    :options="{'hide_labels': true, 'item_classes': 'px-0'}"
+                                                    :selections="{}"
+                                                />
+                                                <span
+                                                    v-else
+                                                    class="badge bg-danger"
+                                                >
+                                                    No value recorded
+                                                </span>
+                                                <i class="fas fa-fw fa-arrow-right" />
+                                                <attribute-list
+                                                    v-if="hasHistoryEntryKey(entry.properties.attributes, '!certainty')"
+                                                    :group="{name: 'entity-metadata-preview', pull: false, put: false}"
+                                                    :classes="'flex-grow-1 mx-0 py-2 px-2 rounded-3 bg-success bg-opacity-50'"
+                                                    :attributes="formatHistoryEntryAttributes(entry.attribute)"
+                                                    :values="formatHistoryEntryValue(entry.attribute.id, entry.value_after)"
+                                                    :options="{'hide_labels': true, 'item_classes': 'px-0'}"
+                                                    :selections="{}"
+                                                />
+                                                <span
+                                                    v-else
+                                                    class="badge bg-danger"
+                                                >
+                                                    No value recorded
+                                                </span>
+                                            </div>
+                                        </template>
+                                        <template
+                                            v-else
+                                        >
+                                            Updated Certainty of <span class="fw-bold">{{ getAttributeName(entry.attribute.id) }}</span>
+                                            <div
+                                                class="d-flex flex-row align-items-center gap-1"
+                                            >
+                                                <span class="badge bg-danger bg-opacity-75">
+                                                    {{ entry.properties.old.certainty || Unknown }}
+                                                </span>
+                                                    <i class="fas fa-fw fa-xs fa-arrow-right" />
+                                                <span class="badge bg-success bg-opacity-75">
+                                                    {{ entry.properties.attributes.certainty || Unknown }}
+                                                </span>
+                                            </div>
+                                        </template>
                                     </div>
                                 </template>
                             </div>
@@ -993,6 +1027,16 @@ export default {
         const onEntityHeaderHover = hoverState => {
             state.entityHeaderHovered = hoverState;
         };
+        const hasHistoryEntryKey = (entry, key) => {
+            // if starts with !, func checks if there is any other key than the one provided
+            if(key.startsWith('!')) {
+                const searchKey = key.substr(1);
+                const keys = Object.keys(entry);
+                return !keys.includes(searchKey);
+            }
+
+            return !!entry[key];
+        };
         const formatHistoryEntryValue = (id, val) => {
             return {
                 [id]: {
@@ -1271,6 +1315,7 @@ export default {
             confirmDeleteEntity,
             setDetailPanel,
             onEntityHeaderHover,
+            hasHistoryEntryKey,
             formatHistoryEntryValue,
             formatHistoryEntryAttributes,
             setFormState,
