@@ -311,10 +311,19 @@ class Entity extends Model implements Searchable
     }
 
     public function getEditorsAttribute() {
-        $causers = Activity::where('subject_id', $this->id)
-            ->where('subject_type', get_class($this))
+        $curr = $this;
+        $assocAttrs = AttributeValue::with('attribute')->where('entity_id', $this->id)->get()->pluck('id');
+
+        $causers = Activity::where(function(Builder $query) use ($curr){
+                $query->where('subject_id', $curr->id)
+                    ->where('subject_type', get_class($curr));
+            })->orWhere(function(Builder $query) use ($assocAttrs){
+                $query->whereIn('subject_id', $assocAttrs)
+                    ->where('subject_type', (new AttributeValue())->getMorphClass());
+            })
             ->groupBy('causer_id')
-            ->get(['causer_id as user_id']);
+            ->select('causer_id as user_id')
+            ->get();
         return $causers;
     }
 
@@ -323,7 +332,7 @@ class Entity extends Model implements Searchable
             ->where('subject_type', get_class($this))
             ->orderBy('created_at','desc')
             ->first();
-        return $creator->causer_id;
+        return isset($creator) ? $creator->causer_id : null;
     }
 
     public function getHistoryAttribute() {
