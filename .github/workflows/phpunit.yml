@@ -60,7 +60,7 @@ jobs:
       run: mkdir -p build/logs
     - name: Execute tests (Unit and Feature tests) via PHPUnit
       run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
-    - uses: codecov/codecov-action@v1
+    - uses: codecov/codecov-action@v3
       name: Codecov Coverage
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
