@@ -26,7 +26,7 @@ class DemoSeeder extends Seeder
         $this->call(ThConceptNotesTableSeeder::class);
         $this->call(ThConceptNotesMasterTableSeeder::class);
 
-        $this->call(PermissionsTableSeeder::class);
+        // $this->call(PermissionsTableSeeder::class);
         $this->call(RolesTableSeeder::class);
         $this->call(PermissionRoleTableSeeder::class);
         $this->call(RoleUserTableSeeder::class);
