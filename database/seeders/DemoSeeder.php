@@ -32,13 +32,13 @@ class DemoSeeder extends Seeder
         $this->call(RoleUserTableSeeder::class);
 
         $this->call(BibliographyTableSeeder::class);
-        $this->call(GeodataTableSeeder::class);
+        // $this->call(GeodataTableSeeder::class);
         $this->call(AttributesTableSeeder::class);
         $this->call(EntityTypesTableSeeder::class);
         $this->call(EntitiesTableSeeder::class);
-        $this->call(FilesTableSeeder::class);
-        $this->call(FileTagsTableSeeder::class);
-        $this->call(AvailableLayersTableSeeder::class);
+        // $this->call(FilesTableSeeder::class);
+        // $this->call(FileTagsTableSeeder::class);
+        // $this->call(AvailableLayersTableSeeder::class);
         $this->call(EntityTypeRelationsTableSeeder::class);
         $this->call(EntityAttributesTableSeeder::class);
         $this->call(AttributeValuesTableSeeder::class);
