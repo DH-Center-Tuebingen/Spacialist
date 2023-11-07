@@ -42,7 +42,7 @@ class DemoSeeder extends Seeder
         $this->call(EntityTypeRelationsTableSeeder::class);
         $this->call(EntityAttributesTableSeeder::class);
         $this->call(AttributeValuesTableSeeder::class);
-        $this->call(EntityFilesTableSeeder::class);
+        // $this->call(EntityFilesTableSeeder::class);
         $this->call(ReferencesTableSeeder::class);
 
         // Set different root for tags
