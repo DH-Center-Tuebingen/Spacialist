@@ -10,12 +10,12 @@
     "require": {
         "php": ">=8.1.0",
         "bosnadev/database": "dev-master as 0.21.1",
+        "fileeye/pel": "^0.9.20",
         "guzzlehttp/guzzle": "^7.4",
         "laravel-lang/lang": "^12.21.1",
         "laravel/framework": "^10.0",
         "laravel/tinker": "~2.0",
         "laravel/ui": "^4.2",
-        "fileeye/pel": "^0.9.20",
         "mstaack/laravel-postgis": "^6.1",
         "nicolaslopezj/searchable": "^1.13.0",
         "php-open-source-saver/jwt-auth": "^2.1.0",

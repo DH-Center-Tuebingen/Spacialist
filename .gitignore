@@ -1,5 +1,8 @@
 # Created by https://www.gitignore.io
 
+## General ##
+_legacy
+
 ### NPM ###
 node_modules
 
@@ -28,3 +31,6 @@ yarn-error.log
 yarn.lock
 .env
 .env.testing
+
+# Vite
+/public/build

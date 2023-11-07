@@ -146,7 +146,7 @@
 </template>
 
 <script>
-    let d3 = require('d3-dsv');
+    import * as d3 from 'd3-dsv';
 
     import {
         computed,

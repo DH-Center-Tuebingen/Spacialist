@@ -176,7 +176,7 @@ PUSHER_APP_SECRET=
 JWT_SECRET=ase64:<32bit-key> #this needs to be a 32 digit random key. Use 'php artisan jwt:secret'
 JWT_BLACKLIST_GRACE_PERIOD=0
 
-MIX_APP_PATH=
+VITE_APP_PATH=
 ```
 
 #### Send Mails
@@ -185,10 +185,10 @@ If you want to send mails to your users, you have to adjust the `MAIL_*` setting
 ### Configure JavaScript
 Spacialist is based on several JavaScript libraries, which are bundled using Webpack (configuration is done using Laravel Mix, a webpack-wrapper for Laravel). Only the zipped releases contain the already bundled JavaScript libraries. All other users have to run webpack to bundle these libraries.
 
-Before running webpack, you have to adjust the public path in the mix config file `webpack.mix.js`. To do so, set your path using the `MIX_APP_PATH` variable in `.env` file.
+Before running webpack, you have to adjust the public path in the mix config file `webpack.mix.js`. To do so, set your path using the `VITE_APP_PATH` variable in `.env` file.
 
 ```bash
-MIX_APP_PATH=Spacialist/subfolder/instance/
+VITE_APP_PATH=Spacialist/subfolder/instance/
 ```
 
 Now you can run webpack using
