@@ -40,13 +40,19 @@ jobs:
         sudo apt -y install gdal-bin
     - name: Copy .env
       run: php -r "file_exists('.env') || copy('.env.phpunit', '.env');"
+    - name: Update Composer
+      run: composer update
     - name: Install Dependencies
       run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-    - name: Generate key
+    - name: Generate keys
       run: |
         php artisan key:generate
         php artisan jwt:secret
+    - name: Run migrations
+      run: |
         php artisan migrate
+    - name: Run seeds
+      run: |
         php artisan db:seed --class=DemoSeeder
     - name: Directory Permissions
       run: chmod -R 777 storage bootstrap/cache
