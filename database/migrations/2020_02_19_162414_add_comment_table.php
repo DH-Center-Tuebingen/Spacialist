@@ -3,6 +3,7 @@
 use App\AttributeValue;
 use App\Comment;
 use App\User;
+use App\Traits\ModerationScope;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -34,7 +35,7 @@ class AddCommentTable extends Migration
             $table->foreign('reply_to')->references('id')->on('comments')->onDelete('cascade');
         });
 
-        $values = AttributeValue::all();
+        $values = AttributeValue::withoutGlobalScope(ModerationScope::class)->get();
 
         foreach($values as $v) {
             try {
