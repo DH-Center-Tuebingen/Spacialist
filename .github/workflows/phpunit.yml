@@ -60,11 +60,10 @@ jobs:
       run: mkdir -p build/logs
     - name: Execute tests (Unit and Feature tests) via PHPUnit
       run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
-      continue-on-error: true
     - uses: codecov/codecov-action@v3
       name: Codecov Coverage
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./build/logs/clover.xml
         name: spacialist-php${{matrix.php-versions}}-${{matrix.databases}}-postgis${{matrix.pg-gis-combo}}
-        verbose: true
+        verbose: false
