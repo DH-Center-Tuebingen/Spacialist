@@ -15,6 +15,7 @@
     "homepage": "https://github.com/DH-Center-Tuebingen/Spacialist#readme",
     "scripts": {
         "dev": "vite",
+        "dev:open": "IS_OPEN=true vite",
         "build": "vite build",
         "build:open": "IS_OPEN=true vite build",
         "lint": "npx eslint --ext .js,.vue resources/js",
