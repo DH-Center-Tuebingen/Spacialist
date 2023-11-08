@@ -36,7 +36,6 @@
         "browser-sync-webpack-plugin": "^2.3.0",
         "eslint": "^8.51.0",
         "eslint-plugin-vue": "^9.17.0",
-        "laravel-mix": "^6.0.49",
         "laravel-vite-plugin": "^0.8.1",
         "postcss": "^8.4.22",
         "resolve-url-loader": "^5.0.0",
