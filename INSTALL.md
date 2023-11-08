@@ -144,8 +144,10 @@ Then paste this configuration (Please edit some of the configuration settings `*
 ```
 APP_NAME=Spacialist
 APP_ENV=local
-APP_DEBUG=true
+APP_DEBUG=false
 APP_KEY=base64:<32bit-key> #this needs to be a 32 digit random key. Use 'php artisan key:generate'
+APP_URL=http://localhost #set this to your proxy url if needed and enable it by setting APP_FORCE_URL to true
+APP_FORCE_URL=false #set this if you need to force using your proxy url
 
 # Your database setup. pgsql is PostgreSQL. Host, port, database, username and password need to be configured first (e.g. using your database server's commands).
 DB_CONNECTION=pgsql
@@ -177,6 +179,7 @@ JWT_SECRET=ase64:<32bit-key> #this needs to be a 32 digit random key. Use 'php a
 JWT_BLACKLIST_GRACE_PERIOD=0
 
 VITE_APP_PATH=
+VITE_APP_NAME='Custom Instance'
 ```
 
 #### Send Mails
