@@ -861,7 +861,7 @@ export function showDeleteAttribute(attribute, metadata, onDeleted) {
             onClosing(e) {
                 modal.destroy();
             },
-            onConfirm(e) {vapor
+            onConfirm(e) {
                 deleteAttribute(attribute.id).then(_ => {
                     if(!!onDeleted) {
                         onDeleted();
