@@ -178,7 +178,7 @@ PUSHER_APP_SECRET=
 JWT_SECRET=ase64:<32bit-key> #this needs to be a 32 digit random key. Use 'php artisan jwt:secret'
 JWT_BLACKLIST_GRACE_PERIOD=0
 
-VITE_APP_PATH=
+VITE_APP_PATH=${APP_URL}
 VITE_APP_NAME='Custom Instance'
 ```
 
