@@ -6,8 +6,13 @@
         :mode="state.mode"
         :default-value="v.fieldValue"
         @selected="e => entitySelected(e)"
-        @entry-click="e => entryClicked(e)" />
-    <router-link v-if="!hideLink && !multiple && v.value" :to="{name: 'entitydetail', params: {id: v.fieldValue.id}, query: state.query}" class="btn btn-outline-secondary btn-sm mt-2">
+        @entry-click="e => entryClicked(e)"
+    />
+    <router-link
+        v-if="!hideLink && !multiple && v.value"
+        :to="{name: 'entitydetail', params: {id: v.fieldValue.id}, query: state.query}" 
+        class="btn btn-outline-secondary btn-sm mt-2"
+    >
         {{ t('main.entity.attributes.entity.go_to', {name: v.fieldValue.name}) }}
     </router-link>
 </template>
@@ -87,7 +92,7 @@
                     if(multiple.value) {
                         data = entity.values;
                     } else {
-                        data = null;
+                        data = {};
                     }
                 } else if(added) {
                     if(multiple.value) {
@@ -111,7 +116,7 @@
             };
             const resetFieldState = _ => {
                 v.resetField({
-                    value: value.value
+                    value: value.value || (multiple.value ? [] : {})
                 });
             };
             const undirtyField = _ => {
@@ -127,7 +132,7 @@
                 meta,
                 resetField,
             } = useField(`entity_${name.value}`, yup.mixed(), {
-                initialValue: value.value,
+                initialValue: value.value || (multiple.value ? [] : {}),
             });
             const state = reactive({
                 query: computed(_ => route.query),
@@ -152,10 +157,13 @@
             });
 
 
-            watch(value, (newValue, oldValue) => {
+            watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
-            watch(v.meta, (newValue, oldValue) => {
+            watch(_ => [v.meta.dirty, v.meta.valid], ([newDirty, newValid], [oldDirty, oldValid]) => {
+                // only emit @change event if field is validated (required because Entity.vue components)
+                // trigger this watcher several times even if another component is updated/validated
+                if(!v.meta.validated) return;
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
@@ -174,11 +182,6 @@
                 resetFieldState,
                 undirtyField,
                 // PROPS
-                name,
-                multiple,
-                disabled,
-                hideLink,
-                value,
                 // STATE
                 state,
                 v,

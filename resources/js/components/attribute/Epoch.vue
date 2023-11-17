@@ -94,7 +94,7 @@
             :options="epochs"
             :name="name"
             :placeholder="t('global.select.placeholder')"
-            @change="value => v.epoch.handleChange(value)"
+            @change="handleEpochChange"
         >
             <template #option="{ option }">
                 {{ translateConcept(option.concept_url) }}
@@ -202,6 +202,9 @@
             const setLabel = (field, value) => {
                 v[field].handleChange(value);
             };
+            const handleEpochChange = option => {
+                v.epoch.handleChange(option);
+            };
 
             // DATA
             const timeLabels = ['BC', 'AD'];
@@ -307,7 +310,7 @@
             });
 
 
-            watch(value, (newValue, oldValue) => {
+            watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
             watch(_ => v.meta, (newValue, oldValue) => {
@@ -329,6 +332,7 @@
                 undirtyField,
                 setLabel,
                 timeLabels,
+                handleEpochChange,
                 // STATE
                 state,
                 v,
