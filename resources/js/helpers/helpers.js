@@ -335,7 +335,7 @@ export function getInitialAttributeValue(attribute) {
         case 'serial':
             let str = attribute.textContent;
             let toRepl = '%d';
-            let ctr = "1954";
+            let ctr = '1954';
             if(!str) {
                 str = 'Find_%05d_Placeholder';
             }
@@ -629,10 +629,10 @@ export function isArray(arr) {
     return Array.isArray(arr);
 }
 
-export const _cloneDeep = require('lodash/cloneDeep');
-export const _debounce = require('lodash/debounce');
-export const _throttle = require('lodash/throttle');
-export const _orderBy = require('lodash/orderBy');
+export {default as _cloneDeep} from 'lodash/cloneDeep';
+export {default as _debounce} from 'lodash/debounce';
+export {default as _throttle} from 'lodash/throttle';
+export {default as _orderBy} from 'lodash/orderBy';
 
 export function showErrorModal(errorMsg, headers, request) {
     showError({

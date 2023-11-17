@@ -383,7 +383,7 @@
     import DateAttr from '@/components/attribute/Date.vue';
     import SingleChoice from '@/components/attribute/SingleChoice.vue';
 
-    let d3 = require('d3-dsv');
+    import * as d3 from 'd3-dsv'; 
 
     export default {
         components: {
