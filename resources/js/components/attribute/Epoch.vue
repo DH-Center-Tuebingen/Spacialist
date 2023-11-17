@@ -96,12 +96,12 @@
             :placeholder="t('global.select.placeholder')"
             @change="handleEpochChange"
         >
-            <template v-slot:option="{ option }">
+            <template #option="{ option }">
                 {{ translateConcept(option.concept_url) }}
             </template>
-            <template v-slot:singlelabel="{ value }">
+            <template #singlelabel="{ value: singlelabelValue }">
                 <div class="multiselect-single-label">
-                    {{ translateConcept(value.concept_url) }}
+                    {{ translateConcept(singlelabelValue.concept_url) }}
                 </div>
             </template>
         </multiselect>

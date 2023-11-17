@@ -218,17 +218,28 @@
                 context.emit('entry-click', option);
             };
 
+            const getBaseValue = _ => {
+                    return mode.value == 'single' ? {} : [];
+            };
+            
+            const getDefaultValue = _ => {
+                if(defaultValue.value) 
+                    return defaultValue.value;
+                else
+                    return getBaseValue();
+            };
+
             // DATA
             const state = reactive({
                 id: `multiselect-search-${getTs()}`,
-                entry: defaultValue.value ? defaultValue.value : (mode.value == 'single' ? {} : []),
+                entry: getDefaultValue(),
                 query: '',
                 enableChain: computed(_ => chain.value && chain.value.length > 0),
             });
 
             watch(_ => defaultValue.value, (newValue, oldValue) => {
                 if(!newValue || newValue.reset) {
-                    state.entry = mode.value == 'single' ? {} : [];
+                    state.entry = getBaseValue();
                 } else {
                     state.entry = newValue;
                 }
