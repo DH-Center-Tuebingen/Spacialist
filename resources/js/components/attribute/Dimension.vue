@@ -205,7 +205,7 @@
             });
 
 
-            watch(value, (newValue, oldValue) => {
+            watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
             watch(_ => v.meta, (newValue, oldValue) => {

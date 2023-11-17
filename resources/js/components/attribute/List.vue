@@ -17,17 +17,38 @@
                     <i class="fas fa-fw fa-caret-down" />
                 </div>
             </button>
-            <input type="text" class="form-control" :disabled="disabled" v-model="state.input" />
-            <button type="button" class="btn btn-outline-success" v-if="!disabled" @click="addListEntry()">
-                <i class="fas fa-fw fa-plus"></i>
+            <input
+                v-model="state.input"
+                type="text"
+                class="form-control"
+                :disabled="disabled"
+            >
+            <button
+                v-if="!disabled"
+                type="button"
+                class="btn btn-outline-success"
+                @click="addListEntry()"
+            >
+                <i class="fas fa-fw fa-plus" />
             </button>
         </div>
-        <ol class="mt-2 mb-0" v-if="state.expanded && v.value.length">
-            <li v-for="(l, i) in v.value" :key="i">
+        <ol
+            v-if="state.expanded && v.value.length"
+            class="mt-2 mb-0"
+        >
+            <li
+                v-for="(l, i) in v.value"
+                :key="i"
+            >
                 <!-- eslint-disable-next-line vue/no-v-html -->
-                <span v-html="createAnchorFromUrl(l)"></span>
-                <a href="#" class="text-danger" v-if="!disabled" @click.prevent="removeListEntry(i)">
-                    <i class="fas fa-fw fa-trash"></i>
+                <span v-html="createAnchorFromUrl(l)" />
+                <a
+                    v-if="!disabled"
+                    href="#"
+                    class="text-danger"
+                    @click.prevent="removeListEntry(i)"
+                >
+                    <i class="fas fa-fw fa-trash" />
                 </a>
             </li>
         </ol>
@@ -108,14 +129,17 @@
                 value: entries.value.slice(),
             });
 
-            watch(v.meta, (newValue, oldValue) => {
+            watch(_ => [v.meta.dirty, v.meta.valid], ([newDirty, newValid], [oldDirty, oldValid]) => {
+                // only emit @change event if field is validated (required because Entity.vue components)
+                // trigger this watcher several times even if another component is updated/validated
+                if(!v.meta.validated) return;
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
                     value: v.value,
                 });
             });
-            watch(entries, (newValue, oldValue) => {
+            watch(_ => entries, (newValue, oldValue) => {
                 state.initialValue = newValue.slice();
                 resetFieldState();
             });
