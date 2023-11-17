@@ -257,7 +257,8 @@
             }
         },
         "markdown_editor": {
-            "title": "Markdown-Editor"
+            "title": "Markdown-Editor",
+            "edit": "Als Markdown bearbeiten"
         }
     },
     "main": {
