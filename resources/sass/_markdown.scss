@@ -1,4 +1,14 @@
-p.paragraph {
+.ProseMirror.editor {
+    min-height: 100%;
+}
+
+.ProseMirror:focus,
+.ProseMirror-focused {
+    outline: none;
+}
+
+.markdown-viewer > :last-child,
+.ProseMirror.editor > :last-child {
     margin-bottom: 0px !important;
 }
 

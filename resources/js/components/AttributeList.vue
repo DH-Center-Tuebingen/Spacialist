@@ -132,6 +132,15 @@
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
+                        <richtext-attribute
+                            v-else-if="element.datatype == 'richtext'"
+                            :ref="el => setRef(el, element.id)"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :name="`attr-${element.id}`"
+                            :value="state.attributeValues[element.id].value"
+                            @change="e => updateDirtyState(e, element.id)"
+                        />
+
                         <integer-attribute
                             v-else-if="element.datatype == 'integer'"
                             :ref="el => setRef(el, element.id)"
@@ -348,6 +357,7 @@
 
     import StringAttr from '@/components/attribute/String.vue';
     import Stringfield from '@/components/attribute/Stringfield.vue';
+    import Richtext from '@/components/attribute/Richtext.vue';
     import IntegerAttr from '@/components/attribute/Integer.vue';
     import FloatAttr from '@/components/attribute/Float.vue';
     import Bool from '@/components/attribute/Bool.vue';
@@ -373,6 +383,7 @@
         components: {
             'string-attribute': StringAttr,
             'stringfield-attribute': Stringfield,
+            'richtext-attribute': Richtext,
             'integer-attribute': IntegerAttr,
             'float-attribute': FloatAttr,
             'bool-attribute': Bool,

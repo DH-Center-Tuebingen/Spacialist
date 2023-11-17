@@ -219,6 +219,10 @@ class EditorController extends Controller {
                 'in_table' => false,
             ],
             [
+                'datatype' => 'richtext',
+                'in_table' => false,
+            ],
+            [
                 'datatype' => 'double',
                 'in_table' => true,
             ],

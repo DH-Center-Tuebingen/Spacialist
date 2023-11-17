@@ -239,13 +239,14 @@ export function showMapPicker(data, onConfirm) {
     modal.open();
 }
 
-export function showMarkdownEditor(data, onConfirm) {
+export function showMarkdownEditor(content, onConfirm, options = {}) {
     const uid = `MdEditorModal-${getTs()}`;
     const modal = useModal({
         component: MarkdownEditor,
         attrs: {
             name: uid,
-            data: data,
+            content: content,
+            options: options,
             onConfirm(e) {
                 if(!!onConfirm) {
                     onConfirm(e);
@@ -782,7 +783,7 @@ export function showMultiEditAttribute(entityIds, attributes) {
                     entries.push(entry);
                 }
                 multieditAttributes(entityIds, entries).then(_ => {
-                    store.dispatch("unsetTreeSelectionMode");
+                    store.dispatch('unsetTreeSelectionMode');
                     modal.destroy();
                     const title = t('main.entity.tree.multiedit.toast.saved.title');
                     const msg = t('main.entity.tree.multiedit.toast.saved.msg', {
@@ -861,7 +862,7 @@ export function showDeleteAttribute(attribute, metadata, onDeleted) {
             onClosing(e) {
                 modal.destroy();
             },
-            onConfirm(e) {vapor
+            onConfirm(e) {
                 deleteAttribute(attribute.id).then(_ => {
                     if(!!onDeleted) {
                         onDeleted();
