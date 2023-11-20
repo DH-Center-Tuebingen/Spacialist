@@ -64,7 +64,7 @@ const {
     push,
 } = router;
 
-global.Vue = Vue;
+window.Vue = Vue;
 window.Buffer = buffer.Buffer;
 
 export const SpPS = {
@@ -108,8 +108,8 @@ export const SpPS = {
         t: null,
     },
     initialize: (app, t) => {
-        global.SpPS = SpPS;
-        global.t = t;
+        window.SpPS = SpPS;
+        window.t = t;
         SpPS.data.app = app;
         SpPS.data.t = t;
     },

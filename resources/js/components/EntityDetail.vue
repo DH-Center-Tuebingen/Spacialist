@@ -216,6 +216,30 @@
                     <span v-else>
                         {{ translateConcept(key) }}
                     </span>
+                    <div
+                        v-if="state.dirtyStates[tg.id]"
+                        class="d-flex flex-row gap-2 align-items-center"
+                        @mouseover="showTabActions(tg.id, true)"
+                        @mouseleave="showTabActions(tg.id, false)"
+                    >
+                        <i class="fas fa-fw fa-2xs fa-circle text-warning" />
+                        <div
+                            v-show="state.attributeGrpHovered == tg.id"
+                        >
+                            <a
+                                href="#"
+                                @click.prevent.stop="saveEntity(`${tg.id}`)"
+                            >
+                                <i class="fas fa-fw fa-save text-success" />
+                            </a>
+                            <a
+                                href="#"
+                                @click.prevent.stop="resetForm(`${tg.id}`)"
+                            >
+                                <i class="fas fa-fw fa-undo text-warning" />
+                            </a>
+                        </div>
+                    </div>
                 </a>
             </li>
             <!-- empty nav-item to separate metadata and comments from attributes -->
@@ -282,7 +306,7 @@
                 >
                     <attribute-list
                         v-if="state.attributesFetched"
-                        :ref="el => setAttrRef(el)"
+                        :ref="el => setAttrRefs(el, tg.id)"
                         v-dcan="'entity_data_read'"
                         class="pt-2 h-100 scroll-y-auto scroll-x-hidden"
                         :attributes="tg.data"
@@ -292,7 +316,7 @@
                         :metadata-addon="hasReferenceGroup"
                         :selections="state.entityTypeSelections"
                         :values="state.entity.data"
-                        @dirty="setFormState"
+                        @dirty="e => setFormState(e, tg.id)"
                         @metadata="showMetadata"
                     />
                 </form>
@@ -725,7 +749,7 @@ export default {
         });
 
         // DATA
-        const attrRef = ref({});
+        const attrRefs = ref({});
         const state = reactive({
             colorStyles: computed(_ => {
                 const colors = getEntityColors(state.entity.entity_type_id);
@@ -733,7 +757,14 @@ export default {
                     color: colors.backgroundColor
                 };
             }),
-            formDirty: false,
+            formDirty: computed(_ => {
+                for(let k in state.dirtyStates) {
+                    if(state.dirtyStates[k]) return true;
+                }
+                return false;
+            }),
+            dirtyStates: {},
+            attributeGrpHovered: null,
             hiddenAttributes: {},
             entityHeaderHovered: false,
             editedEntityName: '',
@@ -1020,9 +1051,9 @@ export default {
             oldPanels = document.getElementsByClassName('active-entity-detail-panel');
 
             oldTabs.forEach(t => t.classList.remove('active'));
-            newTab.classList.add('active');
+            if(newTab) newTab.classList.add('active');
             oldPanels.forEach(p => p.classList.remove('show', 'active'));
-            newPanel.classList.add('show', 'active');
+            if(newPanel) newPanel.classList.add('show', 'active');
         };
         const onEntityHeaderHover = hoverState => {
             state.entityHeaderHovered = hoverState;
@@ -1050,9 +1081,41 @@ export default {
                 attr
             ];
         };
-        const setFormState = e => {
-            state.formDirty = e.dirty && e.valid;
+        const showTabActions = (grp, status) => {
+            state.attributeGrpHovered = status ? grp : null;
+        };
+        const setFormState = (e, grp) => {
+            state.dirtyStates[grp] = e.dirty && e.valid;
             updateDependencyState(e.attribute_id, e.value);
+        };
+        const getDirtyValues = grp => {
+            const list = grp ? grp.split(',') : Object.keys(attrRefs.value);
+            let values = {};
+            list.forEach(g => {
+                values = {
+                    ...values,
+                    ...attrRefs.value[g].getDirtyValues(),
+                };
+            });
+            return values;
+        };
+        const undirtyList = grp => {
+            const list = grp ? grp.split(',') : Object.keys(attrRefs.value);
+            list.forEach(g => {
+                attrRefs.value[g].undirtyList();
+            });
+        };
+        const resetListValues = grp => {
+            const list = grp ? grp.split(',') : Object.keys(attrRefs.value);
+            list.forEach(g => {
+                attrRefs.value[g].resetListValues();
+            });
+        };
+        const resetDirtyStates = grp => {
+            const list = grp ? grp.split(',') : Object.keys(attrRefs.value);
+            list.forEach(g => {
+                state.dirtyStates[g] = false;
+            });
         };
         const fetchComments = _ => {
             if(!can('comments_read')) return;
@@ -1108,9 +1171,10 @@ export default {
                     });
                 })
             };
-            const saveEntity = _ => {
+            const saveEntity = grps => {
                 if(!can('entity_data_write')) return;
-                const dirtyValues = attrRef.value.getDirtyValues();
+
+                const dirtyValues = getDirtyValues(grps);
                 const patches = [];
                 const moderations = [];
 
@@ -1133,12 +1197,12 @@ export default {
                             // patch.value = getCleanValue(patch.value, entity.attributes);
                         } else {
                             // value is empty, therefore it is a remove
-                            patch.op = "remove";
+                            patch.op = 'remove';
                         }
                     } else {
                         // there has been no entry in the database before, therefore it is an add operation
                         if(dirtyValues[v] && dirtyValues[v] != '') {
-                            patch.op = "add";
+                            patch.op = 'add';
                             patch.value = dirtyValues[v];
                             // patch.value = getCleanValue(patch.value, entity.attributes);
                         } else {
@@ -1150,8 +1214,7 @@ export default {
                     moderations.push(aid);
                 }
                 return patchAttributes(state.entity.id, patches).then(data => {
-                    state.formDirty = false;
-                    attrRef.value.undirtyList();
+                    undirtyList(grps);
                     store.dispatch('updateEntity', data);
                     store.dispatch('updateEntityData', {
                         data: dirtyValues,
@@ -1187,11 +1250,12 @@ export default {
                 );
             });
         };
-        const resetForm = _ => {
-            attrRef.value.resetListValues();
+        const resetForm = grps => {
+            resetListValues(grps);
+            resetDirtyStates(grps);
         };
-        const setAttrRef = el => {
-            attrRef.value = el;
+        const setAttrRefs = (el, grp) => {
+            attrRefs.value[grp] = el;
         }
 
         // ON MOUNTED
@@ -1206,7 +1270,7 @@ export default {
             }
         });
         onBeforeUpdate(_ => {
-            attrRef.value = {};
+            attrRefs.value = {};
             state.commentLoadingState = 'not';
         });
 
@@ -1266,7 +1330,7 @@ export default {
         // ON BEFORE LEAVE
         onBeforeRouteLeave(async (to, from) => {
             if(state.formDirty) {
-                showDiscard(to, _ => state.formDirty = false, saveEntity);
+                showDiscard(to, resetDirtyStates, saveEntity);
                 return false;
             } else {
                 store.dispatch('resetEntity');
@@ -1276,7 +1340,7 @@ export default {
         onBeforeRouteUpdate(async (to, from) => {
             if(to.params.id !== route.params.id) {
                 if(state.formDirty) {
-                    showDiscard(to, _ => state.formDirty = false, saveEntity);
+                    showDiscard(to, resetDirtyStates, saveEntity);
                     return false;
                 } else {
                     state.hiddenAttributes = {};
@@ -1318,107 +1382,17 @@ export default {
             hasHistoryEntryKey,
             formatHistoryEntryValue,
             formatHistoryEntryAttributes,
+            showTabActions,
             setFormState,
             addComment,
             saveMetadata,
             saveEntity,
             resetForm,
-            setAttrRef,
+            setAttrRefs,
             // STATE
-            attrRef,
+            attrRefs,
             state,
         };
     }
-    //     methods: {
-    //         getEntityData(entity) {
-    //             this.dataLoaded = false;
-    //             if(!this.$can('view_concept_props')) {
-    //                 Vue.set(this.selectedEntity, 'data', {});
-    //                 Vue.set(this.selectedEntity, 'attributes', []);
-    //                 Vue.set(this.selectedEntity, 'selections', {});
-    //                 Vue.set(this.selectedEntity, 'dependencies', []);
-    //                 Vue.set(this.selectedEntity, 'references', []);
-    //                 Vue.set(this.selectedEntity, 'comments', []);
-    //                 Vue.set(this, 'dataLoaded', true);
-    //                 return new Promise(r => r(null));
-    //             }
-    //             if(!this.selectedEntity.comments || this.selectedEntity.comments_count === 0) {
-    //                 Vue.set(this.selectedEntity, 'comments', []);
-    //             }
-    //             const cid = entity.id;
-    //             const ctid = entity.entity_type_id;
-    //             return $httpQueue.add(() => $http.get(`/entity/${cid}/data`).then(response => {
-    //                 // if result is empty, php returns [] instead of {}
-    //                 if(response.data instanceof Array) {
-    //                     response.data = {};
-    //                 }
-    //                 Vue.set(this.selectedEntity, 'data', response.data);
-    //                 return $http.get(`/editor/entity_type/${ctid}/attribute`);
-    //             }).then(response => {
-    //                 this.selectedEntity.attributes = [];
-    //                 let data = response.data;
-    //                 for(let i=0; i<data.attributes.length; i++) {
-    //                     let aid = data.attributes[i].id;
-    //                     if(!this.selectedEntity.data[aid]) {
-    //                         let val = {};
-    //                         switch(data.attributes[i].datatype) {
-    //                             case 'dimension':
-    //                             case 'epoch':
-    //                             case 'timeperiod':
-    //                                 val.value = {};
-    //                                 break;
-    //                             case 'table':
-    //                             case 'list':
-    //                                 val.value = [];
-    //                                 break;
-    //                         }
-    //                         Vue.set(this.selectedEntity.data, aid, val);
-    //                     } else {
-    //                         const val = this.selectedEntity.data[aid].value;
-    //                         switch(data.attributes[i].datatype) {
-    //                             case 'date':
-    //                                 const dtVal = new Date(val);
-    //                                 this.selectedEntity.data[aid].value = dtVal;
-    //                                 break;
-    //                         }
-    //                     }
-    //                     this.selectedEntity.attributes.push(data.attributes[i]);
-    //                 }
-    //                 // if result is empty, php returns [] instead of {}
-    //                 if(data.selections instanceof Array) {
-    //                     data.selections = {};
-    //                 }
-    //                 if(data.dependencies instanceof Array) {
-    //                     data.dependencies = {};
-    //                 }
-    //                 Vue.set(this.selectedEntity, 'selections', data.selections);
-    //                 Vue.set(this.selectedEntity, 'dependencies', data.dependencies);
-
-    //                 const aid = this.$route.params.aid;
-    //                 this.setReferenceAttribute(aid);
-    //                 Vue.set(this, 'dataLoaded', true);
-    //                 this.setEntityView();
-    //             }));
-    //         },
-    //         dependencyInfoHoverOver(event) {
-    //             if(this.dependencyInfoHovered) {
-    //                 return;
-    //             }
-    //             this.dependencyInfoHovered = true;
-    //             $('#dependency-info').popover({
-    //                 placement: 'bottom',
-    //                 animation: true,
-    //                 html: false,
-    //                 content: this.$tc('main.entity.attributes.hidden', this.hiddenAttributes, {
-    //                     cnt: this.hiddenAttributes
-    //                 })
-    //             });
-    //             $('#dependency-info').popover('show');
-    //         },
-    //         dependencyInfoHoverOut(event) {
-    //             this.dependencyInfoHovered = false;
-    //             $('#dependency-info').popover('dispose');
-    //         },
-    //     },
 }
 </script>

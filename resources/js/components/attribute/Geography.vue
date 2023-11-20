@@ -8,7 +8,6 @@
             type="text"
             :name="name"
             :placeholder="t('main.entity.attributes.add_wkt')"
-            @input="v.handleInput"
         >
 
         <button
@@ -94,7 +93,6 @@
             // DATA
             const {
                 handleChange,
-                handleInput,
                 value: fieldValue,
                 meta,
                 resetField,
@@ -106,17 +104,19 @@
             });
             const v = reactive({
                 handleChange,
-                handleInput,
                 value: fieldValue,
                 meta,
                 resetField,
             });
 
 
-            watch(value, (newValue, oldValue) => {
+            watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
-            watch(v.meta, (newValue, oldValue) => {
+            watch(_ => [v.meta.dirty, v.meta.valid], ([newDirty, newValid], [oldDirty, oldValid]) => {
+                // only emit @change event if field is validated (required because Entity.vue components)
+                // trigger this watcher several times even if another component is updated/validated
+                if(!v.meta.validated) return;
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,

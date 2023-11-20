@@ -144,8 +144,10 @@ Then paste this configuration (Please edit some of the configuration settings `*
 ```
 APP_NAME=Spacialist
 APP_ENV=local
-APP_DEBUG=true
+APP_DEBUG=false
 APP_KEY=base64:<32bit-key> #this needs to be a 32 digit random key. Use 'php artisan key:generate'
+APP_URL=http://localhost #set this to your proxy url if needed and enable it by setting APP_FORCE_URL to true
+APP_FORCE_URL=false #set this if you need to force using your proxy url
 
 # Your database setup. pgsql is PostgreSQL. Host, port, database, username and password need to be configured first (e.g. using your database server's commands).
 DB_CONNECTION=pgsql
@@ -176,27 +178,30 @@ PUSHER_APP_SECRET=
 JWT_SECRET=ase64:<32bit-key> #this needs to be a 32 digit random key. Use 'php artisan jwt:secret'
 JWT_BLACKLIST_GRACE_PERIOD=0
 
-MIX_APP_PATH=
+VITE_APP_PATH=${APP_URL}
+VITE_APP_NAME='Custom Instance'
 ```
 
 #### Send Mails
 If you want to send mails to your users, you have to adjust the `MAIL_*` settings to match a smtp server from where you can send mails.
 
 ### Configure JavaScript
-Spacialist is based on several JavaScript libraries, which are bundled using Webpack (configuration is done using Laravel Mix, a webpack-wrapper for Laravel). Only the zipped releases contain the already bundled JavaScript libraries. All other users have to run webpack to bundle these libraries.
+Spacialist is based on several JavaScript libraries, which are bundled using Vite.
+Before running Vite (`npm run dev` or `npm run build`), you have to adjust the app location path and the app name. This is done using the `VITE_APP_PATH` and `VITE_APP_NAME` variables in `.env` file.
 
-Before running webpack, you have to adjust the public path in the mix config file `webpack.mix.js`. To do so, set your path using the `MIX_APP_PATH` variable in `.env` file.
+**Note:** In the future zipped releases might be released, containing already bundled JavaScript libraries.
 
 ```bash
-MIX_APP_PATH=Spacialist/subfolder/instance/
+VITE_APP_PATH=Spacialist/subfolder/instance/
+VITE_APP_NAME=Custom Spacialist Instance
 ```
 
-Now you can run webpack using
+Now you can run Vite using
 
 ```bash
 npm run dev
 # or
-npm run prod
+npm run build
 ```
 depending on whether you want a debugging-friendly development build or an optimized production-ready build.
 

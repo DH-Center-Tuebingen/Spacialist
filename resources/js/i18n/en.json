@@ -129,6 +129,7 @@
         "attributes": {
             "string": "Textfield",
             "stringf": "Textbox",
+            "richtext": "Rich-Text",
             "string-sc": "Single Choice Dropdown",
             "string-mc": "Multiple Choice Dropdown",
             "double": "Numeric Input (Floating Point)",
@@ -145,7 +146,7 @@
             "geography": "WKT (Well-Known-Binary)",
             "table": "Table",
             "sql": "SQL-Query",
-            "separator": "Group Separator",
+            "system-separator": "Group Separator",
             "serial": "Serial (Auto-incrementing ID)",
             "serial_info": "<i class=\"fas fa-lightbulb me-1\"></i><br />All instances share this identifier as attribute. Add <code class=\"normal\">%d</code> as counter.<br /><span class=\"fw-medium mt-2\">Example:</span><br /><code class=\"normal\">Find_%d_Stone</code> would create Find_1_Stone, Find_2_Stone, &hellip;<br />To add a fixed width (e.g. 3 for 002 instead of 2), you can use <code class=\"normal\">%03d</code>.",
             "sql_info": "You can use <code class=\"normal\">:entity_id</code> in your SQL-Query to reference the entity this attribute is assigned to.",
@@ -258,7 +259,8 @@
             }
         },
         "markdown_editor": {
-            "title": "Markdown Editor"
+            "title": "Markdown Editor",
+            "edit": "Edit as Markdown"
         }
     },
     "main": {

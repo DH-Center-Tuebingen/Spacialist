@@ -29,7 +29,7 @@ class OpenAccessController extends Controller
 
         $attrData = [];
         foreach($attributes as $attr) {
-            if(!in_array($attr->attribute->datatype, ['string', 'stringf', 'iconclass', 'rism', 'double', 'integer', 'boolean', 'percentage', 'string-sc', 'geography', 'entity'])) {
+            if(!in_array($attr->attribute->datatype, ['string', 'stringf', 'richtext', 'iconclass', 'rism', 'double', 'integer', 'boolean', 'percentage', 'string-sc', 'geography', 'entity'])) {
                 continue;
             }
             $currData = [];

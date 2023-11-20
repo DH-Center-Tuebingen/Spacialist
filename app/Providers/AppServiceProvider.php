@@ -10,7 +10,9 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +25,15 @@ class AppServiceProvider extends ServiceProvider
     {
         DB::getDoctrineSchemaManager()->getDatabasePlatform()->registerDoctrineTypeMapping('geography', 'string');
         DB::getDoctrineSchemaManager()->getDatabasePlatform()->registerDoctrineTypeMapping('geometry', 'string');
+
+        // In some Proxy setups it might be necessary to enforce using the app's url as root url
+        if(env('APP_FORCE_URL') === true) {
+            $rootUrl = config('app.url');
+            URL::forceRootUrl($rootUrl);
+            if(Str::startsWith($rootUrl, 'https://')) {
+                URL::forceScheme('https');
+            }
+        }
 
         Paginator::useBootstrap();
         

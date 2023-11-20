@@ -124,8 +124,9 @@ class AttributeValue extends Model implements Searchable
 
         switch($datatype) {
             // for primitive types: just save them to the db
-            case 'stringf':
             case 'string':
+            case 'stringf':
+            case 'richtext':
             case 'iconclass':
             case 'rism':
                 $key = 'str_val';
@@ -237,6 +238,7 @@ class AttributeValue extends Model implements Searchable
         switch($type) {
             case 'string':
             case 'stringf':
+            case 'richtext':
             case 'iconclass':
             case 'rism':
                 $column = 'str_val';
@@ -290,6 +292,7 @@ class AttributeValue extends Model implements Searchable
         switch($type) {
             case 'string':
             case 'stringf':
+            case 'richtext':
             case 'date':
             case 'geography':
             case 'iconclass':

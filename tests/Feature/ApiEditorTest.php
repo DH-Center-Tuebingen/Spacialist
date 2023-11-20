@@ -183,6 +183,9 @@ class ApiEditorTest extends TestCase
                 'datatype' => 'stringf'
             ],
             [
+                'datatype' => 'richtext'
+            ],
+            [
                 'datatype' => 'double'
             ],
             [
