@@ -63,16 +63,16 @@
                 }
             }
 
-            const state = reactive(defaultValue());
+            const state = reactive(defaultValue()); 
 
-            // FUNCTIONS
+            // FUNCTIONS 
             const resetField = data => {
-                state = defaultValue();
+                Object.assign(state, defaultValue());
             };
             const handleInput = text => {
                 state.value = text || '';
                 state.meta.dirty = true;
-                state.meta.valid = true;
+                state.meta.valid = true; 
             };
             const resetFieldState = _ => {
                 resetField({
