@@ -189,7 +189,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :entries="state.attributeValues[element.id].value"
+                            :entries="state.attributeValues[element.id].value || []"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -209,7 +209,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="state.attributeValues[element.id].value || {}"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -456,12 +456,17 @@
             options: {
                 required: false,
                 type: Object,
-                default: {},
+                default: _ => new Object(),
             },
             preview: {
                 required: false,
                 type: Boolean,
                 default: false,
+            },
+            previewData: {
+                required: false,
+                type: Object,
+                default: _ => new Object(),
             },
         },
         emits: ['dirty'],

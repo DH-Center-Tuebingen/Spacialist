@@ -514,7 +514,7 @@
                                         </span>
                                         <attribute-list
                                             v-show="state.showHistoryChange[entry.id]"
-                                            :group="{name: 'entity-metadata-preview', pull: false, put: false}"
+                                            :group="{name: 'entity-history-created', pull: false, put: false}"
                                             :classes="'mx-0 py-2 px-2 rounded-3 bg-primary bg-opacity-50'"
                                             :attributes="formatHistoryEntryAttributes(entry.attribute)"
                                             :values="formatHistoryEntryValue(entry.attribute.id, entry.value_after)"
@@ -550,7 +550,7 @@
                                             >
                                                 <attribute-list
                                                     v-if="hasHistoryEntryKey(entry.properties.old, '!certainty')"
-                                                    :group="{name: 'entity-metadata-preview', pull: false, put: false}"
+                                                    :group="{name: 'entity-history-changed-from', pull: false, put: false}"
                                                     :classes="'flex-grow-1 mx-0 py-2 px-2 rounded-3 bg-danger bg-opacity-50'"
                                                     :attributes="formatHistoryEntryAttributes(entry.attribute)"
                                                     :values="formatHistoryEntryValue(entry.attribute.id, entry.value_before)"
@@ -566,7 +566,7 @@
                                                 <i class="fas fa-fw fa-arrow-right" />
                                                 <attribute-list
                                                     v-if="hasHistoryEntryKey(entry.properties.attributes, '!certainty')"
-                                                    :group="{name: 'entity-metadata-preview', pull: false, put: false}"
+                                                    :group="{name: 'entity-history-changed-to', pull: false, put: false}"
                                                     :classes="'flex-grow-1 mx-0 py-2 px-2 rounded-3 bg-success bg-opacity-50'"
                                                     :attributes="formatHistoryEntryAttributes(entry.attribute)"
                                                     :values="formatHistoryEntryValue(entry.attribute.id, entry.value_after)"
@@ -591,7 +591,7 @@
                                                 <span class="badge bg-danger bg-opacity-75">
                                                     {{ entry.properties.old.certainty || Unknown }}
                                                 </span>
-                                                    <i class="fas fa-fw fa-xs fa-arrow-right" />
+                                                <i class="fas fa-fw fa-xs fa-arrow-right" />
                                                 <span class="badge bg-success bg-opacity-75">
                                                     {{ entry.properties.attributes.certainty || Unknown }}
                                                 </span>
