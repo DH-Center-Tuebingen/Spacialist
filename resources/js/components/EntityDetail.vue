@@ -414,14 +414,14 @@
                             class="form-label mb-1"
                         >
                             <h5 class="mb-0">
-                                Summary/Description
+                                Summary
                             </h5>
                         </label>
-                        <!-- TODO replace with Richtext Attribute -->
-                        <textarea
+                        <richtext
                             id="entity-metadata-summary"
-                            class="form-control"
-                            rows="3"
+                            :ref="el => rtRef = el"
+                            :value="state.entityMetadata.summary"
+                            @change="updateEntityMetadata"
                         />
                     </div>
                 </form>
@@ -1058,6 +1058,9 @@ export default {
         const onEntityHeaderHover = hoverState => {
             state.entityHeaderHovered = hoverState;
         };
+        const updateEntityMetadata = e => {
+            state.entityMetadata.summary = e.value;
+        };
         const hasHistoryEntryKey = (entry, key) => {
             // if starts with !, func checks if there is any other key than the one provided
             if(key.startsWith('!')) {
@@ -1379,6 +1382,7 @@ export default {
             confirmDeleteEntity,
             setDetailPanel,
             onEntityHeaderHover,
+            updateEntityMetadata,
             hasHistoryEntryKey,
             formatHistoryEntryValue,
             formatHistoryEntryAttributes,
