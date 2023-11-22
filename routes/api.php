@@ -76,6 +76,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::get('/entity-type', 'SearchController@searchEntityTypes');
     Route::get('/label', 'SearchController@searchInThesaurus');
     Route::get('/attribute', 'SearchController@searchInAttributes');
+    Route::get('/users_groups', 'SearchController@searchInUsersAndGroups')->where('id', '[0-9]+');
     Route::get('/selection/{id}', 'SearchController@getConceptChildren')->where('id', '[0-9]+');
 });
 

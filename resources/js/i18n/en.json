@@ -5,6 +5,7 @@
         "restore": "Restore",
         "deactivate": "Deactivate",
         "reactivate": "Reactivate",
+        "access": "Access",
         "remove": "Remove",
         "reset": "Reset",
         "reset_password": "Reset Password",

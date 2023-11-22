@@ -5,6 +5,7 @@
         "restore": "Wiederherstellen",
         "deactivate": "Deaktivieren",
         "reactivate": "Reaktivieren",
+        "access": "Zugriff",
         "remove": "Entfernen",
         "reset": "Zurücksetzen",
         "reset_password": "Passwort zurücksetzen",
@@ -365,6 +366,9 @@
                 },
                 "multiedit": {
                     "title": "Mehrfach-Attribut-Bearbeitung"
+                },
+                "access": {
+                    "title": "Zugriff - Arbeitsgruppen"
                 },
                 "delete": {
                     "alert": "Wenn du <span class=\"fw-bold\">{name}</span> löschst, wird mindestens eine Entität ebenfalls gelöscht. | Wenn du <span class=\"fw-bold\">{name}</span> löschst, werden mindestens {cnt} Entitäten ebenfalls gelöscht."

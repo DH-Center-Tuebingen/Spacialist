@@ -65,6 +65,7 @@ import BibliographyItemDetails from '@/components/modals/bibliography/Details.vu
 import AddEntity from '@/components/modals/entity/Add.vue';
 import MoveEntity from '@/components/modals/entity/Move.vue';
 import DeleteEntity from '@/components/modals/entity/Delete.vue';
+import EntityAccess from '@/components/modals/entity/Access.vue';
 import AddEntityType from '@/components/modals/entitytype/Add.vue';
 import EditEntityType from '@/components/modals/entitytype/Edit.vue';
 import DeleteEntityType from '@/components/modals/entitytype/Delete.vue';
@@ -653,6 +654,24 @@ export function showDeleteEntity(entityId, onDeleted) {
                         }
                     });
                 });
+            },
+        },
+    });
+    modal.open();
+}
+
+export function showEntityAccess(entityId) {
+    const uid = `EntityAccess-${getTs()}`;
+    const modal = useModal({
+        component: EntityAccess,
+        attrs: {
+            name: uid,
+            entityId: entityId,
+            onClosing(e) {
+                modal.destroy();
+            },
+            onConfirm() {
+                modal.destroy();
             },
         },
     });

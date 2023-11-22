@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Attribute;
-use App\AttributeValue;
 use App\Bibliography;
 use App\Entity;
 use App\EntityType;
@@ -12,13 +11,12 @@ use App\Plugins\Map\App\SearchAspect\GeodataAspect;
 use App\SearchAspect\AttributeValueAspect;
 use App\ThConcept;
 use App\ThLanguage;
-
+use App\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 use Spatie\Searchable\Search;
-use Spatie\Searchable\ModelSearchAspect;
 
 class SearchController extends Controller {
     private static $shebangPrefix = [
@@ -197,6 +195,40 @@ class SearchController extends Controller {
             ->get();
 
         $matches = $matches->merge($foreignMatches);
+        return response()->json($matches);
+    }
+
+    public function searchInUsersAndGroups(Request $request) {
+        $user = auth()->user();
+        // if(!$user->can('users_roles_read') && !$user->can('working_groups_read')) {
+        if(!$user->can('users_roles_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to search for users and working groups')
+            ], 403);
+        }
+
+        
+        $q = $request->query('q');
+        $userMatches = User::withoutTrashed()
+            ->where(function($query) use ($q) {
+                $query->where('name', 'ilike', "%$q%")
+                    ->orWhere('nickname', 'ilike', "%$q%")
+                    ->orWhere('email', 'ilike', "%$q%")
+                    ->orWhereJsonContains('metadata->orcid', "%$q%");
+            })
+            ->get()
+            ->map(function($u) {
+                $u->result_type = 'u';
+                return $u;
+        });
+        
+        $groupMatches = collect([])->map(function($g) {
+            $g->result_type = 'wg';
+            return $g;
+        });
+
+        $matches = $userMatches->concat($groupMatches);
+
         return response()->json($matches);
     }
 

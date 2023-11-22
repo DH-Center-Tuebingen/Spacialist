@@ -908,3 +908,9 @@ export async function searchEntity(query = '') {
         () => http.get(`search/entity?q=${query}`).then(response => response.data)
     )
 }
+
+export async function searchGroupsAndUsers(query = '') {
+    return $httpQueue.add(
+        () => http.get(`search/users_groups?q=${query}`).then(response => response.data)
+    )
+}

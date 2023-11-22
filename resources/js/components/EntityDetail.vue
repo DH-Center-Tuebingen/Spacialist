@@ -152,6 +152,14 @@
                 >
                     <i class="fas fa-fw fa-trash" /> {{ t('global.delete') }}
                 </button>
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    :disabled="!can('entity_write')"
+                    @click="openWorkingGroups()"
+                >
+                    <i class="fas fa-fw fa-unlock-alt" /> {{ t('global.access') }}
+                </button>
             </div>
         </div>
         <div class="d-flex justify-content-between my-2">
@@ -395,6 +403,7 @@ import { useToast } from '@/plugins/toast.js';
     import {
         showDiscard,
         showDeleteEntity,
+        showEntityAccess,
         showUserInfo,
         canShowReferenceModal,
     } from '@/helpers/modal.js';
@@ -694,6 +703,9 @@ export default {
 
             showDeleteEntity(state.entity.id);
         };
+        const openWorkingGroups = _ => {
+            showEntityAccess(state.entity.id);
+        };
         const setDetailPanel = tab => {
             const query = {
                 view: tab,
@@ -992,6 +1004,7 @@ export default {
             showHiddenAttributes,
             hideHiddenAttributes,
             confirmDeleteEntity,
+            openWorkingGroups,
             setDetailPanel,
             onEntityHeaderHover,
             showTabActions,
