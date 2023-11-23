@@ -1,8 +1,9 @@
 <template>
     <div class="position-relative px-3 py-1 bg-secondary bg-opacity-10 rounded">
         <md-viewer
-            v-if="state.value"
-            :source="state.value"
+            v-if="current"
+            :id="name"
+            :source="current"
         />
         <div
             v-else
@@ -22,7 +23,9 @@
 
 <script>
     import {
+computed,
         reactive,
+        ref,
         toRefs,
         watch,
     } from 'vue';
@@ -53,53 +56,59 @@
                 value: initial,
             } = toRefs(props);
 
-            const defaultValue = () => {
-                    return{
-                    value: initial.value || '',
+            const current = ref(initial.value || '');
+            const meta = reactive({
+                dirty: false,
+                valid: true,
+            });
+
+            /**
+             * v is required as the attr-list fetches 
+             * the values of the attributes vai every
+             * attribute's v.value.
+             */
+            const v = computed(_ => {
+                return {
+                    value: current.value,
                     meta: {
-                        dirty: false,
-                        valid: true,
-                    },
-                }
-            }
+                        ...meta
+                    }
+                };
+            });
 
-            const state = reactive(defaultValue()); 
-
-            // FUNCTIONS 
-            const resetField = data => {
-                Object.assign(state, defaultValue());
-            };
             const handleInput = text => {
-                state.value = text || '';
-                state.meta.dirty = true;
-                state.meta.valid = true; 
+                current.value = text || '';
+                meta.dirty = true;
+                meta.valid = true;
+
+                context.emit('change', {
+                    dirty: meta.dirty,
+                    valid: meta.valid,
+                    value: current.value,
+                });
             };
+
             const resetFieldState = _ => {
-                resetField({
-                    value: initial.value
-                });
+                current.value = initial.value || '';
+                undirtyField();
             };
+
             const undirtyField = _ => {
-                resetField({
-                    value: state.value,
-                });
+                meta.dirty = false;
             };
+
+            watch(initial, _ => {
+                resetFieldState();
+            });
+
+
             const openMdEditor = _ => {
-                showMarkdownEditor(state.value, text => {
+                showMarkdownEditor(current.value, text => {
                     handleInput(text);
                 });
             };
 
-            watch(initial.value, (newValue, oldValue) => {
-                resetFieldState();
-            });
-            watch(state.meta, (newValue, oldValue) => {
-                context.emit('change', {
-                    dirty: state.meta.dirty,
-                    valid: state.meta.valid,
-                    value: state.value,
-                });
-            });
+
 
             // RETURN
             return {
@@ -108,8 +117,8 @@
                 undirtyField,
                 openMdEditor,
                 // STATE
-                state,
-                
+                current,
+                v
             }
         },
     }

@@ -49,6 +49,7 @@
         "vuex": "4.0.2"
     },
     "dependencies": {
+        "@f3ve/vue-markdown-it": "^0.2.0",
         "@fontsource/raleway": "^5.0.2",
         "@fontsource/source-code-pro": "^5.0.2",
         "@milkdown/core": "^7.3.0",
@@ -80,7 +81,7 @@
         "emojibase-data": "^15.0.0",
         "highlight.js": "^11.8.0",
         "lodash": "^4.17.21",
-        "markdown-vue": "^1.0.1",
+        "markdown-it": "^13.0.2",
         "ol": "^8.1.0",
         "ol-ext": "^4.0.10",
         "p-queue": "^7.3.4",

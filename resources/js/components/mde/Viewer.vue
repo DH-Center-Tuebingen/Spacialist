@@ -1,24 +1,26 @@
 <template>
-    <vue-markdown
-        class="markdown-viewer"
-        :rehype-plugins="state.plugins"
-        :source="source"
-    />
+    <div v-html="rendered" />
 </template>
 
 <script>
     import {
         computed,
         reactive,
+        ref,
         toRefs,
+watch,
     } from 'vue';
 
-    import VueMarkdown from 'markdown-vue'; 
+    import Markdown from 'markdown-it';
     import remarkGfm from 'remark-gfm';
     import remarkGemoji from 'remark-gemoji';
 
     export default {
         props: {
+            id: {
+                required: true,
+                type: String,
+            },
             source: {
                 required: true,
                 type: String,
@@ -29,18 +31,16 @@
                 default: 'gfm,emoji',
             },
         },
-        components: {
-            'vue-markdown': VueMarkdown,
-        },
         setup(props) {
             const {
                 source,
                 plugins,
             } = toRefs(props);
 
-            // FUNCTIONS
+            const rendered = computed(_ => {
+                return new Markdown().render(source.value);
+            });            
 
-            // DATA
             const state = reactive({
                 plugins: computed(_ => {
                     const selected = [];
@@ -61,13 +61,17 @@
                 }),
             });
 
-            // RETURN
             return {
-                // HELPERS
-                // LOCAL
-                // STATE
                 state,
+                rendered,
             }
         },
     };
 </script>
+
+
+<style scoped>
+pre {
+    background-color: red;
+}
+</style>
