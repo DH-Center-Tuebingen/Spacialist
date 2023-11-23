@@ -64,7 +64,7 @@
 
             /**
              * v is required as the attr-list fetches 
-             * the values of the attributes vai every
+             * the values of the attributes via every
              * attribute's v.value.
              */
             const v = computed(_ => {
