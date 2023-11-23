@@ -1,4 +1,5 @@
 <template>
+    <!-- eslint-disable-next-line vue/no-v-html-->
     <div v-html="rendered" />
 </template>
 
@@ -6,9 +7,7 @@
     import {
         computed,
         reactive,
-        ref,
         toRefs,
-watch,
     } from 'vue';
 
     import Markdown from 'markdown-it';

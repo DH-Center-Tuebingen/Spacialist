@@ -23,7 +23,7 @@
 
 <script>
     import {
-computed,
+        computed,
         reactive,
         ref,
         toRefs,
