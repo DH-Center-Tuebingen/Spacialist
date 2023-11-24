@@ -14,6 +14,7 @@
         rootCtx,
         defaultValueCtx,
         rootAttrsCtx,
+        editorViewOptionsCtx,
     } from '@milkdown/core';
     import {
         Milkdown,
@@ -44,12 +45,18 @@
                 required: true,
                 type: String,
             },
+            readonly: {
+                required: false,
+                type: Boolean,
+                default: false,
+            },
         },
         emits: ['closing'],
         setup(props, context) {
             const { t } = useI18n();
             const {
                 data,
+                readonly,
             } = toRefs(props);
 
             // FUNCTIONS
@@ -71,6 +78,10 @@
                         ctx.update(rootAttrsCtx, (prev) => ({
                             ...prev,
                             class: `milkdown h-100`,
+                        }));
+                        ctx.update(editorViewOptionsCtx, (prev) => ({
+                            ...prev,
+                            editable: _ => !readonly.value,
                         }));
                         ctx.get(listenerCtx).markdownUpdated((ctx, markdown, prevMarkdown) => {
                             state.markdownString = markdown;

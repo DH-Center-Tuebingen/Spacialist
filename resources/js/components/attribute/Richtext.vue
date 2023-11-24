@@ -3,6 +3,7 @@
         <md-viewer
             v-if="current"
             :id="name"
+            :classes="'mt-0 bg-none h-100'"
             :source="current"
         />
         <div

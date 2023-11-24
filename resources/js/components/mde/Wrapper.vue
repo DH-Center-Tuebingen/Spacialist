@@ -2,8 +2,9 @@
     <MilkdownProvider>
         <MilkdownEditor
             :ref="el => editorRef = el"
-            class="milkdown-wrapper h-100"
+            :class="classes"
             :data="data"
+            :readonly="readonly"
         />
     </MilkdownProvider>
 </template>
@@ -27,10 +28,22 @@
                 required: true,
                 type: String,
             },
+            classes: {
+                required: false,
+                type: String,
+                default: 'milkdown-wrapper h-100',
+            },
+            readonly: {
+                required: false,
+                type: Boolean,
+                default: false,
+            },
         },
         setup(props) {
             const {
                 data,
+                classes,
+                readonly,
             } = toRefs(props);
 
             const getEditorMarkdown = _ => {

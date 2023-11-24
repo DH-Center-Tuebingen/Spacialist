@@ -1,18 +1,15 @@
 <template>
-    <!-- eslint-disable-next-line vue/no-v-html-->
-    <div v-html="rendered" />
+    <md-editor
+        :data="source"
+        :readonly="true"
+        :classes="classes"
+    />
 </template>
 
 <script>
     import {
-        computed,
-        reactive,
         toRefs,
     } from 'vue';
-
-    import Markdown from 'markdown-it';
-    import remarkGfm from 'remark-gfm';
-    import remarkGemoji from 'remark-gemoji';
 
     export default {
         props: {
@@ -24,45 +21,19 @@
                 required: true,
                 type: String,
             },
-            plugins: {
+            classes: {
                 required: false,
                 type: String,
-                default: 'gfm,emoji',
+                default: 'milkdown-wrapper h-100',
             },
         },
         setup(props) {
             const {
                 source,
-                plugins,
+                classes,
             } = toRefs(props);
 
-            const rendered = computed(_ => {
-                return new Markdown().render(source.value);
-            });            
-
-            const state = reactive({
-                plugins: computed(_ => {
-                    const selected = [];
-                    if(!plugins.value) {
-                        return selected;
-                    }
-
-                    plugins.value.split(',').forEach(p => {
-                        p = p.trim();
-                        if(p == 'gfm') {
-                            selected.push(remarkGfm);
-                        } else if(p == 'emoji') {
-                            selected.push(remarkGemoji);
-                        }
-                    });
-
-                    return selected;
-                }),
-            });
-
             return {
-                state,
-                rendered,
             }
         },
     };
