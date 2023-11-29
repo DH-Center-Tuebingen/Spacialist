@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 - Support moderated roles/users that require a privileged user to accept/deny their changes in entity forms
 - New Attribute Type: _Richtext_ (A feature-rich alternative to _Textbox_ Attribute; based on Markdown)
 - Separate form Save/Reset in Entity Attribute Tabs (when using _Attribute Group Separator_)
+- Additional non-standard bibtex fields to _Bibliography_ (ISBN, ISSN, Language and Abstract)
 ### Fixed
 - Error in _Attribute List_ caused by _Entity (Multiple Choice)_ attribute
 - Attribute form Save/Reset handling due to newly introduced _Attribute Group Separator_

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 use App\Bibliography;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Storage;
 use RenanBr\BibTexParser\Listener;
 use RenanBr\BibTexParser\Exception\ParserException;
 use RenanBr\BibTexParser\Parser;
@@ -131,6 +130,7 @@ class BibliographyController extends Controller
         ]);
 
         $file = $request->file('file');
+        $noOverwriteOnDup = $request->input('no-overwrite', false);
         $listener = new Listener();
         $parser = new Parser();
         $parser->addListener($listener);
@@ -143,33 +143,69 @@ class BibliographyController extends Controller
         }
         $entries = $listener->export();
         $newChangedEntries = [];
+        $errored = null;
         foreach($entries as $entry) {
-            $insArray = array_intersect_key($entry, Bibliography::patchRules);
+            $isValid = Bibliography::validateMandatory($entry, $entry['type']);
+            if(!$isValid) {
+                $errored = [
+                    'type' => 'validation',
+                    'on' => $entry['_original'],
+                ];
+                break;
+            }
+
+            $insArray = Bibliography::stripDisallowed($entry, $entry['type']);
             // unset file, because file upload is (currently) not possible in import
             $insArray['file'] = null;
+
             // set citation key if none is present
             if(!array_key_exists('citation-key', $entry) || $entry['citation-key'] == '') {
                 $ckey = Bibliography::computeCitationKey($insArray);
             } else {
                 $ckey = $entry['citation-key'];
             }
+            $insArray['citekey'] = $ckey;
             $insArray['user_id'] = $user->id;
-            $bibliography = Bibliography::updateOrCreate(
-                ['citekey' => $ckey],
-                $insArray
-            );
-            if($bibliography->wasRecentlyCreated) {
+
+            $duplicate = Bibliography::duplicateCheck($insArray);
+            // if it is not a duplicate, create a new entry
+            if($duplicate === false) {
+                $bibliography = Bibliography::create($insArray);
                 $newChangedEntries[] = [
                     'entry' => Bibliography::find($bibliography->id),
                     'added' => true,
                 ];
-            } else if($bibliography->wasChanged()) {
-                $newChangedEntries[] = [
-                    'entry' => Bibliography::find($bibliography->id),
-                    'added' => false,
-                ];
+            } else {
+                if($noOverwriteOnDup) {
+                    $errored = [
+                        'type' => 'duplicate',
+                        'on' => $entry['_original'],
+                    ];
+                    break;
+                } else {
+                    foreach($insArray as $key => $value) {
+                        $duplicate->{$key} = $value;
+                    }
+                    $duplicate->save();
+                    $newChangedEntries[] = [
+                        'entry' => Bibliography::find($duplicate->id),
+                        'added' => false,
+                    ];
+                }
             }
         }
+
+        if(isset($errored)) {
+            if($errored['type'] == 'duplicate') {
+                $msg = 'Overwrite parameter not set! Existing entry is matching ' . $errored['on'];
+            } else if($errored == 'validation') {
+                $msg = 'Validation failed for ' . $errored['on'];
+            }
+            return response()->json([
+                'error' => $msg,
+            ], 400);
+        }
+
         return response()->json($newChangedEntries, 201);
     }
 
