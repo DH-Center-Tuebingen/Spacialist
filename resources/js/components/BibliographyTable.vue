@@ -723,7 +723,6 @@
                 // HELPERS
                 can,
                 createAnchorFromUrl,
-                highlight,
                 // LOCAL
                 debouncedSearch,
                 editItem,
