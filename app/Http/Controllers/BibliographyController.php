@@ -145,6 +145,8 @@ class BibliographyController extends Controller
         $newChangedEntries = [];
         foreach($entries as $entry) {
             $insArray = array_intersect_key($entry, Bibliography::patchRules);
+            // unset file, because file upload is (currently) not possible in import
+            $insArray['file'] = null;
             // set citation key if none is present
             if(!array_key_exists('citation-key', $entry) || $entry['citation-key'] == '') {
                 $ckey = Bibliography::computeCitationKey($insArray);

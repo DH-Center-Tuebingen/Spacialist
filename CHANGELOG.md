@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 - Permission Overview not visible if new role without preset is added
 - Save Permissions without changing state of _Moderation_ switch
 - Deleting a bibliography entry
+- Importing local file referenced in Bibtex import
 ### Changed
 - Entity tree sorting is now accessible through ...-menu
 - Reset Password Workflow
