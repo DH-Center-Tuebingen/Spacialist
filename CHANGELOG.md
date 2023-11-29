@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Error in _Attribute List_ caused by _Entity (Multiple Choice)_ attribute
 - Attribute form Save/Reset handling due to newly introduced _Attribute Group Separator_
+- Adding roles without setting a preset
 ### Changed
 - Entity tree sorting is now accessible through ...-menu
 - Reset Password Workflow
