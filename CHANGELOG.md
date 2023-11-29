@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 - Deleting a bibliography entry
 - Importing local file referenced in Bibtex import
 - Typos in Translation files
+- Updating bibliography entries
 ### Changed
 - Entity tree sorting is now accessible through ...-menu
 - Reset Password Workflow
