@@ -319,19 +319,19 @@ class Bibliography extends Model implements Searchable
 
     public static function stripDisallowed(array $fields, string $type) : array {
         $typeFields = self::bibtexTypes[$type];
-        $disallowedFields = array_diff(
-            array_keys(self::patchRules),
+        $allowedFields = array_merge(
             $typeFields['fields'],
             ['type', 'file']
         );
-        $allowedFields = [];
+        $strippedFields = [];
         foreach($fields as $key => $field) {
-            if(!in_array($key, $disallowedFields)) {
-                $allowedFields[$key] = $field;
+            // do not include disallowed or interal (starting with _) fields
+            if(!str_starts_with($key, '_') && in_array($key, $allowedFields)) {
+                $strippedFields[$key] = $field;
             }
         }
 
-        return $allowedFields;
+        return $strippedFields;
     }
 
     public function fieldsFromRequest($request, $user) {
@@ -356,10 +356,15 @@ class Bibliography extends Model implements Searchable
         return Reference::where('bibliography_id', $this->id)->count();
     }
 
-    public static function duplicateCheck(array $fields) : mixed {
+    public static function duplicateCheck(array $fields, bool $searchInCitationKey) : mixed {
         // check if entry with doi exists
         if(isset($fields['doi'])) {
             $duplicateEntry = self::where('doi', $fields['doi'])->first();
+            if(isset($duplicateEntry)) return $duplicateEntry;
+        }
+
+        if($searchInCitationKey && isset($fields['citekey'])) {
+            $duplicateEntry = self::where('citekey', $fields['citekey'])->first();
             if(isset($duplicateEntry)) return $duplicateEntry;
         }
 

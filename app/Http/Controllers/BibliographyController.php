@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Bibliography;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 use RenanBr\BibTexParser\Listener;
 use RenanBr\BibTexParser\Exception\ParserException;
 use RenanBr\BibTexParser\Parser;
@@ -144,6 +145,9 @@ class BibliographyController extends Controller
         $entries = $listener->export();
         $newChangedEntries = [];
         $errored = null;
+
+        DB::beginTransaction();
+
         foreach($entries as $entry) {
             $isValid = Bibliography::validateMandatory($entry, $entry['type']);
             if(!$isValid) {
@@ -159,15 +163,18 @@ class BibliographyController extends Controller
             $insArray['file'] = null;
 
             // set citation key if none is present
+            $useKeyInDupCheck = false;
             if(!array_key_exists('citation-key', $entry) || $entry['citation-key'] == '') {
                 $ckey = Bibliography::computeCitationKey($insArray);
             } else {
                 $ckey = $entry['citation-key'];
+                // if key is provided by uploaded file, use it to determine if entry already exists in db
+                $useKeyInDupCheck = true;
             }
             $insArray['citekey'] = $ckey;
             $insArray['user_id'] = $user->id;
 
-            $duplicate = Bibliography::duplicateCheck($insArray);
+            $duplicate = Bibliography::duplicateCheck($insArray, $useKeyInDupCheck);
             // if it is not a duplicate, create a new entry
             if($duplicate === false) {
                 $bibliography = Bibliography::create($insArray);
@@ -196,15 +203,18 @@ class BibliographyController extends Controller
         }
 
         if(isset($errored)) {
+            DB::rollBack();
             if($errored['type'] == 'duplicate') {
                 $msg = 'Overwrite parameter not set! Existing entry is matching ' . $errored['on'];
-            } else if($errored == 'validation') {
+            } else if($errored['type'] == 'validation') {
                 $msg = 'Validation failed for ' . $errored['on'];
             }
             return response()->json([
                 'error' => $msg,
             ], 400);
         }
+
+        DB::commit();
 
         return response()->json($newChangedEntries, 201);
     }

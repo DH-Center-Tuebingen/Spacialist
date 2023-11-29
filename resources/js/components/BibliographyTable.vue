@@ -546,6 +546,7 @@
         createDownloadLink,
         createAnchorFromUrl,
         getProjectName,
+        throwError,
         _debounce,
         _orderBy,
     } from '@/helpers/helpers.js';
@@ -621,6 +622,8 @@
                         channel: 'success',
                         duration: 10000,
                     });
+                }).catch(error => {
+                    throwError(error);
                 });
             };
             const exportFile = _ => {
