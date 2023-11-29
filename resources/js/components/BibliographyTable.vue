@@ -370,21 +370,21 @@
                         <td>
                             {{ entry.type }}
                         </td>
-                        <td v-html="highlight(entry.citekey, state.query)" />
-                        <td v-html="highlight(entry.author, state.query)" />
+                        <td v-html="formatBibtexAndShowHighlight(entry.citekey)" />
+                        <td v-html="formatBibtexAndShowHighlight(entry.author)" />
                         <td
                             v-if="state.showAllFields"
-                            v-html="highlight(entry.email, state.query)"
+                            v-html="formatBibtexAndShowHighlight(entry.email)"
                         />
-                        <td v-html="highlight(entry.year, state.query)" />
-                        <td v-html="highlight(entry.title, state.query)" />
-                        <td v-html="highlight(entry.booktitle, state.query)" />
-                        <td v-html="highlight(entry.publisher, state.query)" />
+                        <td v-html="formatBibtexAndShowHighlight(entry.year)" />
+                        <td v-html="formatBibtexAndShowHighlight(entry.title)" />
+                        <td v-html="formatBibtexAndShowHighlight(entry.booktitle)" />
+                        <td v-html="formatBibtexAndShowHighlight(entry.publisher)" />
                         <td>
                             {{ entry.pages }}
                         </td>
-                        <td v-html="highlight(entry.editor, state.query)" />
-                        <td v-html="highlight(entry.journal, state.query)" />
+                        <td v-html="formatBibtexAndShowHighlight(entry.editor)" />
+                        <td v-html="formatBibtexAndShowHighlight(entry.journal)" />
                         <td v-if="state.showAllFields">
                             {{ entry.month }}
                         </td>
@@ -411,11 +411,11 @@
                         </td>
                         <td
                             v-if="state.showAllFields"
-                            v-html="highlight(entry.doi, state.query)"
+                            v-html="formatBibtexAndShowHighlight(entry.doi)"
                         />
                         <td
                             v-if="state.showAllFields"
-                            v-html="highlight(entry.url, state.query)"
+                            v-html="formatBibtexAndShowHighlight(entry.url)"
                         />
                         <td v-if="state.showAllFields">
                             {{ entry.subtype }}
@@ -426,15 +426,15 @@
                         <td v-html="createAnchorFromUrl(entry.howpublished)" />
                         <td
                             v-if="state.showAllFields"
-                            v-html="highlight(entry.institution, state.query)"
+                            v-html="formatBibtexAndShowHighlight(entry.institution)"
                         />
                         <td
                             v-if="state.showAllFields"
-                            v-html="highlight(entry.organization, state.query)"
+                            v-html="formatBibtexAndShowHighlight(entry.organization)"
                         />
                         <td
                             v-if="state.showAllFields"
-                            v-html="highlight(entry.school, state.query)"
+                            v-html="formatBibtexAndShowHighlight(entry.school)"
                         />
                         <td v-if="state.showAllFields">
                             {{ entry.created_at }}
@@ -652,7 +652,6 @@
             };
             const openDeleteEntryModal = entry => {
                 if(!can('bibliography_delete')) return;
-
                 showDeleteBibliographyEntry(entry, onEntryDeleted);
             };
 
@@ -707,6 +706,17 @@
                 state.query = e.target.value;
             }, state.debounceTimeout);
 
+            const formatBibtexText = text => {
+                if(!text) return '';
+                return text.replace(/[\{\}]/g, '');
+            };
+
+            const formatBibtexAndShowHighlight = text => {
+                if(!text) return '';
+                text = formatBibtexText(text)
+                return highlight(text, state.query);
+            };
+
             // RETURN
             return {
                 t,
@@ -716,14 +726,15 @@
                 highlight,
                 // LOCAL
                 debouncedSearch,
-                setOrderColumn,
-                getNextEntries,
-                showNewItemModal,
                 editItem,
-                openDeleteEntryModal,
-                inputFile,
-                importFile,
                 exportFile,
+                formatBibtexAndShowHighlight,
+                getNextEntries,
+                importFile,
+                inputFile,
+                openDeleteEntryModal,
+                setOrderColumn,
+                showNewItemModal,
                 // PROPS
                 // STATE
                 state,
