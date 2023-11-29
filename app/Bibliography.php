@@ -337,14 +337,18 @@ class Bibliography extends Model implements Searchable
     public function fieldsFromRequest($request, $user) {
         $fields = is_array($request) ? $request : $request->toArray();
 
-        $isValid = self::validateMandatory($fields, $this->type);
-        if(!$isValid) return false;
-
         
         $filteredFields = self::stripDisallowed($fields, $this->type);
         foreach($filteredFields as $key => $value){
             $this->{$key} = $value;
         }
+
+        // updating an item does not have to update all fields
+        // thus we first set all allowed keys from request and then
+        // run validation on the update entry
+        $validateFields = array_intersect_key($this->toArray(), self::patchRules);
+        $isValid = self::validateMandatory($validateFields, $this->type);
+        if(!$isValid) return false;
 
         $this->citekey = self::computeCitationKey($this->toArray());
         $this->user_id = $user->id;
