@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 - Adding roles without setting a preset
 - Permission Overview not visible if new role without preset is added
 - Save Permissions without changing state of _Moderation_ switch
+- Deleting a bibliography entry
 ### Changed
 - Entity tree sorting is now accessible through ...-menu
 - Reset Password Workflow
