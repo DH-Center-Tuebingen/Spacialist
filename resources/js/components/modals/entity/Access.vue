@@ -1,10 +1,10 @@
 <template>
     <vue-final-modal
         class="modal-container modal"
-        content-class="sp-modal-content sp-modal-content-sm"
+        content-class="sp-modal-content"
         name="entity-access-modal"
     >
-        <div class="sp-modal-content sp-modal-content-sm">
+        <div class="sp-modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
                     {{ t('main.entity.modals.access.title') }}
@@ -103,6 +103,14 @@
                     v-if="state.isRestricted"
                     class="mt-2"
                 >
+                    <alert
+                        class="mt-3"
+                        :message="`Access Rules for users are having a <span class='fw-bold'>higher priority</span> than group rules! So it is possible to a whole group only read access, but allow a specific user from that group to have advanced access rights.`"
+                        :type="'info'"
+                        :noicon="false"
+                        :icontext="'Note'"
+                        :closeable="true"
+                    />
                     <hr>
                     <h5>Access Rules</h5>
                     <template v-if="state.accessRules.length > 0">
