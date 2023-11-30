@@ -104,6 +104,7 @@
             "title": "Einstellungen",
             "users": "Benutzerverwaltung",
             "roles": "Rollenverwaltung",
+            "groups": "Arbeitsgruppenverwaltung",
             "plugins": "Erweiterungen",
             "datamodel": "Datenmodell-Editor",
             "system": "System-Einstellungen",
@@ -186,6 +187,7 @@
         "description": "Beschreibung",
         "roles": "Rollen",
         "permissions": "Berechtigungen",
+        "groups": "Arbeitsgruppen",
         "added_at": "Hinzugefügt",
         "created_at": "Erstellt",
         "updated_at": "Aktualisert",
@@ -516,6 +518,20 @@
                 }
             },
             "add_permission_placeholder": "Berechtigungen hinzufügen"
+        },
+        "group": {
+            "add_button": "Arbeitsgruppe hinzufügen",
+            "toasts": {
+                "updated": {
+                    "title": "Arbeitsgruppe aktualisiert",
+                    "msg": "{name} wurde erfolgreich aktualisiert."
+                }
+            },
+            "modal": {
+                "new": {
+                    "title": "Neue Arbeitsgruppe"
+                }
+            }
         },
         "activity": {
             "title_project": "Projekt-Aktivität | Projekt-Aktivitäten",

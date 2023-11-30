@@ -1,29 +1,35 @@
 <template>
-    <div
-        v-if="item.result_type == 'u'"
-        class="d-flex flex-row gap-1 align-items-center"
-    >
-        <i class="fas fa-fw fa-user opacity-50 me-2" />
-
-        <a
-            href="#"
-            style="line-height: 0;"
-            @click.prevent="showUserInfo(state.user)"
+    <div>
+        <div
+            v-if="item.result_type == 'u'"
+            class="d-flex flex-row gap-1 align-items-center"
         >
-            <user-avatar
-                :user="state.user"
-                :size="24"
-            />
-        </a>
+            <i class="fas fa-fw fa-user opacity-50 me-2" />
 
-        <span>{{ item.name }}</span>
-        <span class="text-muted">{{ item.nickname }}</span>
-    </div>
-    <div
-        v-else-if="item.result_type == 'wg'"
-        class="d-flex flex-row gap-2 align-items-center"
-    >
-        <i class="fas fa-fw fa-users" />
+            <a
+                href="#"
+                style="line-height: 0;"
+                @click.prevent="showUserInfo(state.user)"
+            >
+                <user-avatar
+                    :user="state.user"
+                    :size="24"
+                />
+            </a>
+
+            <span>{{ item.name }}</span>
+            <span class="text-muted">{{ item.nickname }}</span>
+        </div>
+        <div
+            v-else-if="item.result_type == 'wg'"
+            class="d-flex flex-row gap-2 align-items-center"
+        >
+            <i class="fas fa-fw fa-users opacity-50 me-2" />
+
+            <span :title="item.description">
+                {{ item.display_name }}
+            </span>
+        </div>
     </div>
 </template>
 
@@ -56,8 +62,6 @@
             const {
                 item,
             } = toRefs(props);
-
-            console.log(item.value.name, item.value);
 
             // FUNCTIONS
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Attribute;
 use App\Entity;
 use App\File;
+use App\Group;
 use App\Permission;
 use App\Role;
 use App\User;
@@ -120,6 +121,18 @@ class UserController extends Controller
             'permissions' => $perms,
             'presets' => $presets,
         ]);
+    }
+
+    public function getGroups() {
+        $user = auth()->user();
+        if(!$user->can('users_roles_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to view groups')
+            ], 403);
+        }
+        $groups = Group::orderBy('id')->get();
+
+        return response()->json($groups);
     }
 
     public function getAccessGroups(Request $request) {
@@ -271,6 +284,26 @@ class UserController extends Controller
         $role->load(['derived', 'permissions']);
 
         return response()->json($role);
+    }
+
+    public function addGroup(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('users_roles_create')) {
+            return response()->json([
+                'error' => __('You do not have the permission to add groups')
+            ], 403);
+        }
+        $this->validate($request, Group::rules);
+
+        $grp = new Group();
+        foreach($request->only(array_keys(Group::rules)) as $key => $value) {
+            $grp->{$key} = $value;
+        }
+
+        $grp->save();
+        $grp = Group::find($grp->id);
+
+        return response()->json($grp);
     }
 
     public function logout(Request $request) {
@@ -528,6 +561,26 @@ class UserController extends Controller
         }
 
         $delRole->delete();
+        return response()->json(null, 204);
+    }
+
+    public function deleteGroup($id) {
+        $user = auth()->user();
+        if(!$user->can('users_roles_delete')) {
+            return response()->json([
+                'error' => __('You do not have the permission to delete groups')
+            ], 403);
+        }
+
+        try {
+            $delGrp = Group::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This group does not exist')
+            ], 400);
+        }
+
+        $delGrp->delete();
         return response()->json(null, 204);
     }
 

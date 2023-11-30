@@ -18,7 +18,7 @@
             <table
                 v-if="state.dataInitialized"
                 v-dcan="'users_roles_read'"
-                class="table table-striped table-hover table-light"
+                class="table table-striped table-hover table-light align-middle"
             >
                 <thead class="sticky-top">
                     <tr>
@@ -97,17 +97,30 @@
                             </div>
                         </td>
                         <td>
-                            {{ date(user.created_at) }}
+                            <span :title="date(user.created_at)">
+                                {{ ago(user.created_at) }}
+                            </span>
                         </td>
                         <td>
-                            {{ date(user.updated_at) }}
+                            <span :title="date(user.updated_at)">
+                                {{ ago(user.updated_at) }}
+                            </span>
                         </td>
                         <td>
                             <div class="dropdown">
-                                <span :id="`user-options-dropdown-${user.id}`" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fas fa-fw fa-ellipsis-vertical"></i>
-                                    <sup class="notification-info" v-if="userDirty(user.id)">
-                                        <i class="fas fa-fw fa-xs fa-circle text-warning"></i>
+                                <span
+                                    :id="`user-options-dropdown-${user.id}`"
+                                    class="clickable"
+                                    data-bs-toggle="dropdown"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                >
+                                    <i class="fas fa-fw fa-ellipsis-vertical" />
+                                    <sup
+                                        v-if="userDirty(user.id)"
+                                        class="notification-info"
+                                    >
+                                        <i class="fas fa-fw fa-xs fa-circle text-warning" />
                                     </sup>
                                 </span>
                                 <div
@@ -131,8 +144,14 @@
                                     >
                                         <i class="fas fa-fw fa-undo text-warning" /> {{ t('global.reset') }}
                                     </a>
-                                    <a class="dropdown-item" href="#" :disabled="state.currentUserId != user.id && !can('users_roles_write')" @click.prevent="updatePassword(user.id)">
-                                        <i class="fas fa-fw fa-paper-plane text-info"></i> {{ t('global.reset_password') }}
+                                    <a
+                                        class="dropdown-item"
+                                        href="#"
+                                        :disabled="state.currentUserId != user.id && !can('users_roles_write')"
+                                        @click.prevent="updatePassword(user.id)"
+                                    >
+                                        <i class="fas fa-fw fa-paper-plane text-info" />
+                                        {{ t('global.reset_password') }}
                                     </a>
                                     <a
                                         class="dropdown-item"
@@ -161,7 +180,7 @@
         >
             <table
                 v-dcan="'users_roles_read'"
-                class="table table-striped table-hover table-light"
+                class="table table-striped table-hover table-light align-middle"
             >
                 <thead class="sticky-top">
                     <tr>
@@ -213,17 +232,28 @@
                             />
                         </td>
                         <td>
-                            {{ date(dUser.created_at) }}
+                            <span :title="date(dUser.created_at)">
+                                {{ ago(dUser.created_at) }}
+                            </span>
                         </td>
                         <td>
-                            {{ date(dUser.updated_at) }}
+                            <span :title="date(dUser.updated_at)">
+                                {{ ago(dUser.updated_at) }}
+                            </span>
                         </td>
                         <td>
-                            {{ date(dUser.deleted_at) }}
+                            <span :title="date(dUser.deleted_at)">
+                                {{ ago(dUser.deleted_at) }}
+                            </span>
                         </td>
                         <td>
-                            <button class="btn btn-outline-success btn-sm" :disabled="!can('users_roles_delete')" @click="reactivateUser(dUser.id)">
-                                <i class="fas fa-fw fa-user-check"></i> {{ t('global.reactivate') }}
+                            <button
+                                class="btn btn-outline-success btn-sm"
+                                :disabled="!can('users_roles_delete')"
+                                @click="reactivateUser(dUser.id)"
+                            >
+                                <i class="fas fa-fw fa-user-check" />
+                                {{ t('global.reactivate') }}
                             </button>
                         </td>
                     </tr>
@@ -281,6 +311,7 @@
     } from '@/helpers/helpers.js';
     
     import {
+        ago,
         date,
     } from '@/helpers/filters.js';
 
@@ -521,6 +552,7 @@
                 t,
                 // HELPERS
                 can,
+                ago,
                 date,
                 getClassByValidation,
                 hasPreference,

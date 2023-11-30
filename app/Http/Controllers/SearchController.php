@@ -6,6 +6,7 @@ use App\Attribute;
 use App\Bibliography;
 use App\Entity;
 use App\EntityType;
+use App\Group;
 use App\Plugins\File\App\File;
 use App\Plugins\Map\App\SearchAspect\GeodataAspect;
 use App\SearchAspect\AttributeValueAspect;
@@ -222,10 +223,14 @@ class SearchController extends Controller {
                 return $u;
         });
         
-        $groupMatches = collect([])->map(function($g) {
-            $g->result_type = 'wg';
-            return $g;
-        });
+        $groupMatches = Group::where('name', 'ilike', "%$q%")
+            ->orWhere('display_name', 'ilike', "%$q%")
+            ->orWhere('description', 'ilike', "%$q%")
+            ->get()
+            ->map(function($g) {
+                $g->result_type = 'wg';
+                return $g;
+            });
 
         $matches = $userMatches->concat($groupMatches);
 

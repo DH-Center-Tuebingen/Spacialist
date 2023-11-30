@@ -28,6 +28,8 @@ import {
     addRole,
     patchRoleData,
     deleteRole,
+    addGroup,
+    deleteGroup,
     moveEntity,
 } from '@/api.js';
 
@@ -59,6 +61,8 @@ import DeactiveUser from '@/components/modals/user/Deactivate.vue';
 import AccessControl from '@/components/modals/role/AccessControl.vue';
 import AddRole from '@/components/modals/role/Add.vue';
 import DeleteRole from '@/components/modals/role/Delete.vue';
+import AddGroup from '@/components/modals/group/Add.vue';
+import DeleteGroup from '@/components/modals/group/Delete.vue';
 import BibliographyItem from '@/components/modals/bibliography/Item.vue';
 import DeleteBibliographyItem from '@/components/modals/bibliography/Delete.vue';
 import BibliographyItemDetails from '@/components/modals/bibliography/Details.vue';
@@ -484,6 +488,56 @@ export function showDeleteRole(role, onDeleted) {
                         onDeleted();
                     }
                     store.dispatch('deleteRole', role);
+                    modal.destroy();
+                });
+            },
+            onCancel(e) {
+                modal.destroy();
+            },
+        },
+    });
+    modal.open();
+}
+
+export function showAddGroup(onAdded) {
+    const uid = `AddGroup-${getTs()}`;
+    const modal = useModal({
+        component: AddGroup,
+        attrs: {
+            name: uid,
+            onAdd(e) {
+                if(!can('users_roles_create')) return;
+                addGroup(e).then(group => {
+                    if(!!onAdded) {
+                        onAdded();
+                    }
+                    store.dispatch('addGroup', group);
+                    modal.destroy();
+                });
+            },
+            onCancel(e) {
+                modal.destroy();
+            },
+        },
+    });
+    modal.open();
+}
+
+export function showDeleteGroup(group, onDeleted) {
+    const uid = `DeleteGroup-${getTs()}`;
+    const modal = useModal({
+        component: DeleteGroup,
+        attrs: {
+            name: uid,
+            group: group,
+            onConfirm(e) {
+                if(!can('users_roles_delete')) return;
+    
+                deleteGroup(group.id).then(_ => {
+                    if(!!onDeleted) {
+                        onDeleted();
+                    }
+                    store.dispatch('deleteGroup', role);
                     modal.destroy();
                 });
             },
