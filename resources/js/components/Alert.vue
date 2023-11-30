@@ -1,24 +1,63 @@
 <template>
     <div
-        class="alert"
+        class="alert position-relative"
         :class="state.classes"
         role="alert"
+        v-if="state.isActive"
     >
-        <div
-            v-if="state.hasIcon"
-            :class="state.iconWrapperClasses"
+        <template
+            v-if="state.isOpen"
         >
-            <i
-                class="fas"
-                :class="state.iconClasses"
-            />
-            <span class="fw-medium">
-                {{ icontext }}
-            </span>
+            <div
+                v-if="state.hasIcon"
+                :class="state.iconWrapperClasses"
+            >
+                <i
+                    class="fas"
+                    :class="state.iconClasses"
+                />
+                <span class="fw-medium">
+                    {{ icontext }}
+                </span>
+            </div>
+            <!-- We disable the v-html as there is no user data that get's inserted into the alerts. -->
+            <!-- eslint-disable-next-line vue/no-v-html -->
+            <div v-html="message" />
+        </template>
+        <span
+            v-else
+            class="text-muted fst-italic"
+        >
+            {{ t('main.app.alert_hidden') }}
+        </span>
+        <div
+            v-if="closeable"
+            class="position-absolute top-0 end-0 d-flex flex-row gap-2 me-2 mt-1"
+        >
+            <a
+                v-show="state.isOpen"
+                href="#"
+                class="text-muted"
+                @click.prevent="toggleVisibility"
+            >
+                <i class="fas fa-fw fa-caret-up" />
+            </a>
+            <a
+                v-show="!state.isOpen"
+                href="#"
+                class="text-muted"
+                @click.prevent="toggleVisibility"
+            >
+                <i class="fas fa-fw fa-caret-down" />
+            </a>
+            <a
+                href="#"
+                class="text-muted"
+                @click.prevent="closeAlert"
+            >
+                <i class="fas fa-fw fa-times" />
+            </a>
         </div>
-        <!-- We disable the v-html as there is no user data that get's inserted into the alerts. -->
-        <!-- eslint-disable-next-line vue/no-v-html -->
-        <div v-html="message" />
     </div>
 </template>
 
@@ -28,6 +67,7 @@
         reactive,
         toRefs,
     } from 'vue';
+    import { useI18n } from 'vue-i18n';
 
     export default {
         props: {
@@ -49,20 +89,35 @@
                 required: false,
                 type: String,
                 default: null
-            }
+            },
+            closeable: {
+                required: false,
+                type: Boolean,
+                default: false,
+            },
         },
         setup(props, context) {
+            const { t } = useI18n();
             const {
                 message,
                 type,
                 noicon,
                 icontext,
+                closeable,
             } = toRefs(props);
 
             // FUNCTIONS
+            const toggleVisibility = _ => {
+                state.isOpen = !state.isOpen;
+            };
+            const closeAlert = _ => {
+                state.isActive = false;
+            }
 
             // DATA
             const state = reactive({
+                isOpen: true,
+                isActive: true,
                 hasIcon: computed(_ => {
                     return !noicon.value && state.supportsIcon;
                 }),
@@ -154,8 +209,11 @@
 
             // RETURN
             return {
+                t,
                 // HELPERS
                 // LOCAL
+                toggleVisibility,
+                closeAlert,
                 // STATE
                 state,
             }

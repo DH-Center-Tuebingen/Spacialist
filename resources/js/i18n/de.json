@@ -286,7 +286,8 @@
                     }
                 }
             },
-            "page_access_denied": "Du hast nicht die nötigen Berechtigungen um diese Seite zu sehen. Fehlende Berechtigungen: {perm}"
+            "page_access_denied": "Du hast nicht die nötigen Berechtigungen um diese Seite zu sehen. Fehlende Berechtigungen: {perm}",
+            "alert_hidden": "Inhalt anzeigen…"
         },
         "csv": {
             "uploader": {

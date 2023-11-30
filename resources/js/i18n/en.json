@@ -285,7 +285,8 @@
                     }
                 }
             },
-            "page_access_denied": "You do not have permission(s) to access this page. Missing permissions: {perm}"
+            "page_access_denied": "You do not have permission(s) to access this page. Missing permissions: {perm}",
+            "alert_hidden": "Show content…"
         },
         "csv": {
             "uploader": {
