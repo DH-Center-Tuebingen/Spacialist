@@ -31,6 +31,7 @@ import {
     addGroup,
     deleteGroup,
     moveEntity,
+    restrictEntityAccess,
 } from '@/api.js';
 
 import {
@@ -724,8 +725,11 @@ export function showEntityAccess(entityId) {
             onClosing(e) {
                 modal.destroy();
             },
-            onConfirm() {
-                modal.destroy();
+            onConfirm(e) {
+                restrictEntityAccess(entityId, e).then(_ => {
+                    // TODO update store
+                    // modal.destroy();
+                });
             },
         },
     });

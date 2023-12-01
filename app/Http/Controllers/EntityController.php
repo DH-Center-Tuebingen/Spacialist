@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\AccessRule;
 use App\Attribute;
 use App\AttributeValue;
 use App\Entity;
@@ -11,8 +12,10 @@ use App\EntityType;
 use App\Exceptions\AmbiguousValueException;
 use App\Exceptions\InvalidDataException;
 use App\Geodata;
+use App\Group;
 use App\Reference;
 use App\ThConcept;
+use App\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -531,6 +534,56 @@ class EntityController extends Controller {
         DB::commit();
 
         return response()->json($addedEntities, 201);
+    }
+
+    public function restrictAccess($id, Request $request) {
+        $user = auth()->user();
+        if(!$user->can('entity_data_write')) {
+            return response()->json([
+                'error' => __('You do not have the permission to modify an entity\'s access')
+            ], 403);
+        }
+        $this->validate($request, [
+            'type' => 'required|string|in:restricted,users,open',
+            'rules' => 'array',
+        ]);
+
+        try {
+            $entity = Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist')
+            ], 400);
+        }
+
+        $type = $request->get('type');
+
+        // TODO add field to entity table
+        $entity->access_type->type = $type;
+        $entity->access_type->save();
+        $entity->touch();
+
+        if($type == 'restricted') {
+            $rules = $request->get('rules');
+            foreach($rules as $rule) {
+                $accessRule = new AccessRule();
+                $accessRule->restrictable_id = $entity->id;
+                $accessRule->restrictable_type = get_class($entity);
+
+                $accessRule->guardable_id = $rule['id'];
+                if($rule['guard_type'] == 'u') {
+                    $accessRule->guardable_type = User::class;
+                } else if($rule['guard_type'] == 'wg') {
+                    $accessRule->guardable_type = Group::class;
+                }
+                $accessRule->rule_type = $rule['type'];
+                if($rule['type'] == 'matrix') {
+                    $accessRule->rule_values = json_encode($rule['values']);
+                }
+
+                $accessRule->save();
+            }
+        }
     }
 
     // PATCH

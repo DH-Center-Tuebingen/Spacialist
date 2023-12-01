@@ -149,7 +149,7 @@
                                     <td class="d-flex flex-column">
                                         <div class="d-flex flex-row gap-2 align-items-center text-muted">
                                             <input
-                                                v-model="item.access_type"
+                                                v-model="item.rule_type"
                                                 type="radio"
                                                 class="form-check-input mt-0"
                                                 :name="`access-rule-radio-${i}`"
@@ -157,7 +157,7 @@
                                             >
                                             /
                                             <input
-                                                v-model="item.access_type"
+                                                v-model="item.rule_type"
                                                 type="radio"
                                                 class="form-check-input mt-0"
                                                 :name="`access-rule-radio-${i}`"
@@ -165,7 +165,7 @@
                                             >
                                             /
                                             <input
-                                                v-model="item.access_type"
+                                                v-model="item.rule_type"
                                                 type="radio"
                                                 class="form-check-input mt-0"
                                                 :name="`access-rule-radio-${i}`"
@@ -174,13 +174,13 @@
                                             >
                                         </div>
                                         <div
-                                            v-if="item.access_type == 'matrix'"
+                                            v-if="item.rule_type == 'matrix'"
                                             class="d-flex flex-row gap-3"
                                         >
                                             <div class="form-check">
                                                 <input
                                                     id="access-rule-matrix-write"
-                                                    v-model="item.matrix_values.write"
+                                                    v-model="item.rule_values.write"
                                                     class="form-check-input"
                                                     type="checkbox"
                                                 >
@@ -194,7 +194,7 @@
                                             <div class="form-check">
                                                 <input
                                                     id="access-rule-matrix-create"
-                                                    v-model="item.matrix_values.create"
+                                                    v-model="item.rule_values.create"
                                                     class="form-check-input"
                                                     type="checkbox"
                                                 >
@@ -208,7 +208,7 @@
                                             <div class="form-check">
                                                 <input
                                                     id="access-rule-matrix-delete"
-                                                    v-model="item.matrix_values.delete"
+                                                    v-model="item.rule_values.delete"
                                                     class="form-check-input"
                                                     type="checkbox"
                                                 >
@@ -222,7 +222,7 @@
                                             <div class="form-check">
                                                 <input
                                                     id="access-rule-matrix-export"
-                                                    v-model="item.matrix_values.export"
+                                                    v-model="item.rule_values.export"
                                                     class="form-check-input"
                                                     type="checkbox"
                                                 >
@@ -276,6 +276,7 @@
                 <button
                     type="submit"
                     class="btn btn-outline-success"
+                    :disabled="!rulesValid()"
                     @click="setAccess()"
                 >
                     <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
@@ -300,6 +301,8 @@
         toRefs,
     } from 'vue';
     import { useI18n } from 'vue-i18n';
+
+    import store from '@/bootstrap/store.js';
 
     import {
         searchGroupsAndUsers,
@@ -353,6 +356,8 @@
             const preprocessMatches = (results, query) => {
                 const filtered = [];
                 results.forEach(itm => {
+                    // multiselect component uses 'valueProp' as part of the id generation
+                    // thus same user id and group id would lead to errors
                     if(itm.result_type == 'wg') {
                         itm.id = `wg_${itm.id}`;
                     }
@@ -365,8 +370,8 @@
                 return filtered;
             };
             const setMatrixType = item => {
-                if(!item.matrix_values) {
-                    item.matrix_values = {
+                if(!item.rule_values) {
+                    item.rule_values = {
                         write: false,
                         create: false,
                         delete: false,
@@ -376,6 +381,7 @@
             }
             const addAccessRule = e => {
                 if(e.removed) return;
+                delete e.added;
                 state.accessRules.push(e);
                 state.resetValue = {
                     reset: true,
@@ -385,8 +391,52 @@
             const removeAccessRule = idx => {
                 state.accessRules.splice(idx, 1);
             }
+            const rulesValid = _ => {
+                if(state.isRestricted) {
+                    if(state.accessRules.length == 0) return false;
+
+                    for(let i=0; i<state.accessRules.length; i++) {
+                        const curr = state.accessRules[i];
+                        // an access rule requires a rule type...
+                        if(!curr.rule_type || curr.rule_type == '') {
+                            return false;
+                        }
+                        // ...and matrix rule type requires at least one matrix rule
+                        if(curr.rule_type == 'matrix' && !Object.values(curr.rule_values).includes(true)) {
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            };
             const setAccess = _ => {
-                context.emit('confirm', true);
+                if(!rulesValid()) return;
+
+                const data = {
+                    type: state.accessType,
+                };
+
+                if(state.isRestricted) {
+                    data.rules = state.accessRules.map(rule => {
+                        const stripped = {
+                            guard_type: rule.result_type,
+                            type: rule.rule_type,
+                        };
+
+                        if(`${rule.id}`.startsWith('wg_')) {
+                            stripped.id = parseInt(rule.id.substr(3))
+                        } else {
+                            stripped.id = rule.id;
+                        }
+                        if(rule.rule_type == 'matrix') {
+                            stripped.values = rule.rule_values;
+                        }
+                        return stripped;
+                    });
+                }
+
+                context.emit('confirm', data);
             };
             const closeModal = _ => {
                 context.emit('closing', false);
@@ -400,6 +450,7 @@
                 accessTypeValue: computed(_ => typeToValue(state.accessType)),
                 accessRuleIds: computed(_ => state.accessRules.map(ar => ar.id)),
                 accessRules: [],
+                entity: computed(_ => store.getters.entities[entityId.value]),
             });
 
             // RETURN
@@ -413,6 +464,7 @@
                 setMatrixType,
                 addAccessRule,
                 removeAccessRule,
+                rulesValid,
                 setAccess,
                 closeModal,
                 // STATE

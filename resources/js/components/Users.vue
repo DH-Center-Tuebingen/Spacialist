@@ -25,6 +25,7 @@
                         <th>{{ t('global.name') }}</th>
                         <th>{{ t('global.email') }}</th>
                         <th>{{ t('global.roles') }}</th>
+                        <th>{{ t('global.groups') }}</th>
                         <th>{{ t('global.added_at') }}</th>
                         <th>{{ t('global.updated_at') }}</th>
                         <th>{{ t('global.options') }}</th>
@@ -85,6 +86,31 @@
                                 :options="state.roles"
                                 :placeholder="t('main.user.add_role_placeholder')"
                                 @input="v.fields[user.id].roles.handleChange"
+                            />
+
+                            <div class="invalid-feedback">
+                                <span
+                                    v-for="(msg, i) in getErrors(user.id, 'roles')"
+                                    :key="i"
+                                >
+                                    {{ msg }}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <multiselect
+                                v-model="v.fields[user.id].groups.value"
+                                :class="getClassByValidation(getErrors(user.id, 'groups'))"
+                                :name="`groups_${user.id}`"
+                                :object="true"
+                                :label="'display_name'"
+                                :track-by="'display_name'"
+                                :value-prop="'id'"
+                                :mode="'tags'"
+                                :disabled="!can('users_roles_write')"
+                                :options="state.groups"
+                                :placeholder="t('main.user.add_group_placeholder')"
+                                @input="v.fields[user.id].groups.handleChange"
                             />
 
                             <div class="invalid-feedback">
@@ -357,6 +383,15 @@
                     } = useField(`roles_${u.id}`, yup.array(), {
                         initialValue: u.roles,
                     });
+                    const {
+                        errors: eg,
+                        meta: mg,
+                        value: vg,
+                        handleChange: hig,
+                        resetField: hrg,
+                    } = useField(`groups_${u.id}`, yup.array(), {
+                        initialValue: u.groups,
+                    });
                     v.fields[u.id] = reactive({
                         email: {
                             errors: em,
@@ -372,18 +407,30 @@
                             handleChange: hir,
                             reset: hrr,
                         },
+                        groups: {
+                            errors: eg,
+                            meta: mg,
+                            value: vg,
+                            handleChange: hig,
+                            reset: hrg,
+                        },
                     });
                 }
             };
             const userDirty = id => {
-                return v.fields[id].email.meta.dirty || v.fields[id].roles.meta.dirty;
+                return v.fields[id].email.meta.dirty ||
+                    v.fields[id].roles.meta.dirty ||
+                    v.fields[id].groups.meta.dirty;
             };
             const userValid = id => {
-                return v.fields[id].email.meta.valid && v.fields[id].roles.meta.valid;
+                return v.fields[id].email.meta.valid &&
+                v.fields[id].roles.meta.valid &&
+                v.fields[id].groups.meta.valid;
             };
             const resetUser = id => {
                 v.fields[id].email.reset();
                 v.fields[id].roles.reset();
+                v.fields[id].groups.reset();
             };
             const resetUserMeta = id => {
                 v.fields[id].email.reset({
@@ -391,6 +438,9 @@
                 });
                 v.fields[id].roles.reset({
                     value: v.fields[id].roles.value,
+                });
+                v.fields[id].groups.reset({
+                    value: v.fields[id].groups.value,
                 });
             };
             const patchUser = async id => {
@@ -404,6 +454,9 @@
                 if(v.fields[id].roles.meta.dirty) {
                     data.roles = v.fields[id].roles.value.map(r => r.id);
                 }
+                if(v.fields[id].groups.meta.dirty) {
+                    data.groups = v.fields[id].groups.value.map(g => g.id);
+                }
                 if(v.fields[id].email.meta.dirty) {
                     data.email = v.fields[id].email.value;
                 }
@@ -415,6 +468,7 @@
                         id: data.id,
                         email: data.email,
                         roles: data.roles,
+                        groups: data.groups,
                         updated_at: data.updated_at,
                     });
                     const msg = t('main.user.toasts.updated.msg', {
@@ -500,6 +554,13 @@
                                 v.fields[uid].roles.meta.dirty &&
                                 v.fields[uid].roles.meta.valid
                             )
+                        ) &&
+                        (
+                            !v.fields[uid].groups.meta.dirty ||
+                            (
+                                v.fields[uid].groups.meta.dirty &&
+                                v.fields[uid].groups.meta.valid
+                            )
                         )
                     ) {
                         await patchUser(uid);
@@ -519,6 +580,7 @@
                 }),
                 deletedUserList: computed(_ => store.getters.deletedUsers),
                 roles: computed(_ => store.getters.roles(true)),
+                groups: computed(_ => store.getters.groups),
                 dataInitialized: computed(_ => state.userList.length > 0 && state.roles.length > 0),
                 errors: {},
             });

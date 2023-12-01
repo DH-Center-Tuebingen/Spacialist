@@ -478,6 +478,12 @@ export async function importEntityData(data) {
     );
 }
 
+export async function restrictEntityAccess(eid, data) {
+    return $httpQueue.add(
+        () => http.post(`/entity/${eid}/access`, data).then(response => response.data)
+    );
+}
+
 export async function addEntityType(et) {
     const data = {
         concept_url: et.label.concept_url,

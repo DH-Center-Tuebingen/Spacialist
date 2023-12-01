@@ -12,6 +12,7 @@ use App\User;
 use App\Http\Controllers\Controller;
 use App\Plugin;
 use App\RolePreset;
+use App\UserGroup;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -96,7 +97,7 @@ class UserController extends Controller
                 'error' => __('You do not have the permission to view users')
             ], 403);
         }
-        $users = User::with('roles')->withoutTrashed()->orderBy('id')->get();
+        $users = User::with(['roles', 'groups', 'access_rules'])->withoutTrashed()->orderBy('id')->get();
         $delUsers = User::with('roles')->onlyTrashed()->orderBy('id')->get();
 
         return response()->json([
@@ -314,15 +315,16 @@ class UserController extends Controller
     // PATCH
 
     public function patchUser(Request $request, $id) {
-        $user = auth()->user();
+        $requser = auth()->user();
 
-        if(!$user->can('users_roles_write')) {
+        if(!$requser->can('users_roles_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to modify user data')
             ], 403);
         }
         $this->validate($request, [
             'roles' => 'array',
+            'groups' => 'array',
             'email' => 'email',
             'name' => 'string|max:255',
             'nickname' => 'alpha_dash|max:255|unique:users,nickname',
@@ -358,6 +360,28 @@ class UserController extends Controller
             $user->roles()->detach();
             $roles = $request->get('roles');
             $user->assignRole($roles);
+
+            // Update updated_at column
+            $user->touch();
+        }
+        if($request->has('groups')) {
+            $groups = $request->get('groups');
+            foreach($groups as $grpId) {
+                try {
+                    Group::findOrFail($grpId);
+                } catch(ModelNotFoundException $e) {
+                    return response()->json([
+                        'error' => __('This group does not exist')
+                    ], 400);
+                }
+                UserGroup::firstOrCreate([
+                    'user_id' => $user->id,
+                    'group_id' => $grpId,
+                ]);
+            }
+            UserGroup::where('user_id', $user->id)
+                ->whereNotIn('group_id', $groups)
+                ->delete();
 
             // Update updated_at column
             $user->touch();

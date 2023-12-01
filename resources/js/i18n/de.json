@@ -466,7 +466,8 @@
                     "message": "Dein Passwort wurde geändert. Du musst entweder dieses neue Passwort akzeptieren oder selbst ein neues vergeben. Dafür hast du nur noch einen weiteren Login übrig! | Dein Passwort wurde geändert. Du musst entweder dieses neue Passwort akzeptieren oder selbst ein neues vergeben. Dafür hast du noch {attempts} weitere Logins übrig."
                 }
             },
-            "add_role_placeholder": "Rollen hinzufügen"
+            "add_role_placeholder": "Rollen hinzufügen",
+            "add_group_placeholder": "Arbeitsgruppen hizufügen"
         },
         "role": {
             "add_button": "Neue Rolle hinzufügen",

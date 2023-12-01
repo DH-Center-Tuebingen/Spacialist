@@ -27,13 +27,22 @@ return new class extends Migration
             $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');
         });
 
+        Schema::create('access_types', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->integer('accessible_id');
+            $table->text('accessible_type');
+            $table->text('type');
+            $table->timestamps();
+        });
+
         Schema::create('access_rules', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('restrictable_id');
             $table->text('restrictable_type');
             $table->integer('guardable_id');
             $table->text('guardable_type');
-            $table->text('rule')->nullable();
+            $table->text('rule_type');
+            $table->jsonb('rule_values')->nullable();
             $table->timestamps();
         });
     }
@@ -44,6 +53,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('access_rules');
+        Schema::dropIfExists('access_types');
         Schema::dropIfExists('user_groups');
         Schema::dropIfExists('groups');
     }

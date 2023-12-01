@@ -4,6 +4,7 @@ namespace App;
 
 use App\Exceptions\AmbiguousValueException;
 use App\Traits\CommentTrait;
+use App\Traits\RestrictableTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Nicolaslopezj\Searchable\SearchableTrait;
@@ -15,6 +16,7 @@ use Spatie\Searchable\SearchResult;
 class Entity extends Model implements Searchable
 {
     use CommentTrait;
+    use RestrictableTrait;
     use SearchableTrait;
     use LogsActivity;
 
@@ -188,7 +190,7 @@ class Entity extends Model implements Searchable
     }
 
     public static function getEntitiesByParent($id = null) {
-        $entities = self::withCount(['child_entities as children_count']);
+        $entities = self::withCount(['child_entities as children_count'])->with('access_rules');
         if(!isset($id)) {
             $entities->whereNull('root_entity_id');
         } else {
