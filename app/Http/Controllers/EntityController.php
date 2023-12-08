@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\AccessRule;
+use App\AccessType;
 use App\Attribute;
 use App\AttributeValue;
 use App\Entity;
@@ -558,12 +559,11 @@ class EntityController extends Controller {
 
         $type = $request->get('type');
 
-        // TODO add field to entity table
-        $entity->access_type->type = $type;
-        $entity->access_type->save();
-        $entity->touch();
-
+        
         if($type == 'restricted') {
+            $entity->access_type()->updateOrCreate(['type' => $type]);
+            $entity->touch();
+
             $rules = $request->get('rules');
             foreach($rules as $rule) {
                 $accessRule = new AccessRule();
@@ -583,6 +583,18 @@ class EntityController extends Controller {
 
                 $accessRule->save();
             }
+        } else {
+            $eid = $entity->id;
+            $classType = get_class($entity);
+            if($type == 'users') {
+                AccessType::where('accessible_id', $eid)
+                    ->where('accessible_type', $classType)
+                    ->delete();
+            }
+            // if not restricted, remove all existing access rules
+            AccessRule::where('restrictable_id', $eid)
+                ->where('restrictable_type', $classType)
+                ->delete();
         }
     }
 

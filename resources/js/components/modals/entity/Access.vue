@@ -161,7 +161,7 @@
                                                 type="radio"
                                                 class="form-check-input mt-0"
                                                 :name="`access-rule-radio-${i}`"
-                                                value="role_based"
+                                                value="role"
                                             >
                                             /
                                             <input
@@ -299,6 +299,7 @@
         computed,
         reactive,
         toRefs,
+        onMounted,
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
@@ -452,6 +453,11 @@
                 accessRules: [],
                 entity: computed(_ => store.getters.entities[entityId.value]),
             });
+
+            onMounted(_ => {
+                state.accessRules = state.entity.access_rules ? state.entity.access_rules : [];
+                state.accessType = state.entity.access_type ? state.entity.access_type.type : 'users';
+            })
 
             // RETURN
             return {

@@ -20,6 +20,10 @@ class AccessRule extends Model
         'rule_values',
     ];
 
+    protected $casts = [
+        'rule_values' => 'array',
+    ];
+
     /**
      * Get the owning restrictable model.
      */

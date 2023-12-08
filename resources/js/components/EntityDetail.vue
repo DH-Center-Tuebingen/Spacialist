@@ -147,7 +147,7 @@
                 <button
                     type="button"
                     class="btn btn-outline-danger btn-sm"
-                    :disabled="!can('entity_delete')"
+                    :disabled="!can('entity_delete') || !state.entity.user_access.delete"
                     @click="confirmDeleteEntity()"
                 >
                     <i class="fas fa-fw fa-trash" /> {{ t('global.delete') }}
@@ -159,6 +159,12 @@
                     @click="openWorkingGroups()"
                 >
                     <i class="fas fa-fw fa-unlock-alt" /> {{ t('global.access') }}
+                    <span
+                        v-if="state.hasAccessRules"
+                        class="badge text-bg-primary"
+                    >
+                        {{ state.accessRuleCount }}
+                    </span>
                 </button>
             </div>
         </div>
@@ -501,6 +507,10 @@ export default {
                     };
                 }
             }),
+            hasAccessRules: computed(_ => {
+                return (state.entity && state.entity.access_rules && state.entity.access_rules.length > 0);
+            }),
+            accessRuleCount: computed(_ => state.hasAccessRules ? state.entity.access_rules.length : 0),
             entityTypeSelections: computed(_ => getEntityTypeAttributeSelections(state.entity.entity_type_id)),
             entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
             hasAttributeLinks: computed(_ => state.entity.attributeLinks && state.entity.attributeLinks.length > 0),

@@ -44,6 +44,16 @@ class Entity extends Model implements Searchable
         'user',
     ];
 
+    public $restrictable_permissions = [
+        'read' => ['entity_read', 'entity_data_read'],
+        'write' => ['entity_write', 'entity_data_write'],
+        'create' => ['entity_create', 'entity_data_create'],
+        'delete' => ['entity_delete', 'entity_data_delete'],
+        'export' => ['entity_export', 'entity_data_export'],
+    ];
+
+    public $restrictable_recursive_key = 'root_entity_id';
+
     protected const searchCols = [
         'name' => 10,
     ];
@@ -190,7 +200,7 @@ class Entity extends Model implements Searchable
     }
 
     public static function getEntitiesByParent($id = null) {
-        $entities = self::withCount(['child_entities as children_count'])->with('access_rules');
+        $entities = self::withCount(['child_entities as children_count']);
         if(!isset($id)) {
             $entities->whereNull('root_entity_id');
         } else {
