@@ -365,23 +365,9 @@ class UserController extends Controller
             $user->touch();
         }
         if($request->has('groups')) {
+            $user->groups()->detach();
             $groups = $request->get('groups');
-            foreach($groups as $grpId) {
-                try {
-                    Group::findOrFail($grpId);
-                } catch(ModelNotFoundException $e) {
-                    return response()->json([
-                        'error' => __('This group does not exist')
-                    ], 400);
-                }
-                UserGroup::firstOrCreate([
-                    'user_id' => $user->id,
-                    'group_id' => $grpId,
-                ]);
-            }
-            UserGroup::where('user_id', $user->id)
-                ->whereNotIn('group_id', $groups)
-                ->delete();
+            $user->groups()->attach($groups);
 
             // Update updated_at column
             $user->touch();
