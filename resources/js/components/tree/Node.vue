@@ -25,6 +25,29 @@
             <span :class="{ 'fw-bold': state.isSelected }">
                 {{ data.name }}
             </span>
+            <span
+                v-if="state.hasRestrictedAccess"
+                class="opacity-50 ms-1"
+                title="has access rules"
+            >
+                <i class="fas fa-fw fa-lock fa-xs" />
+            </span>
+            <span
+                v-else-if="state.hasOpenAccess"
+                class="opacity-50 ms-1"
+                title="has open access"
+            >
+                <i class="fas fa-fw fa-eye fa-xs" />
+            </span>
+            <span
+                v-if="data.user_access"
+            >
+                <span :class="{'text-success': data.user_access.read, 'text-danger': !data.user_access.read}">R</span>
+                <span :class="{'text-success': data.user_access.write, 'text-danger': !data.user_access.write}">W</span>
+                <span :class="{'text-success': data.user_access.create, 'text-danger': !data.user_access.create}">C</span>
+                <span :class="{'text-success': data.user_access.delete, 'text-danger': !data.user_access.delete}">D</span>
+                <span :class="{'text-success': data.user_access.export, 'text-danger': !data.user_access.export}">E</span>
+            </span>
         </a>
         <ul
             :id="`tree-node-${data.id}-contextmenu`"
@@ -146,43 +169,43 @@ export default {
 
         // FETCH
 
-            // FUNCTIONS
-            const hidePopup = _ => {
-                state.bsElem.hide();
-                state.ddVisible = false;
-                state.ddDomElem.classList.add('disabled');
-            };
-            const showPopup = _ => {
-                state.ddVisible = true;
-                nextTick(_ => {
-                    // To prevent opening the dropdown on normal click on Node,
-                    // the DD toggle must have class 'disabled'
-                    // This also prevents BS API call .show() to work...
-                    // Thus we remove the 'disabled' class before the API call and add it back on hide
-                    state.ddDomElem.classList.remove('disabled');
-                    state.bsElem.show();
-                })
-            };
-            const togglePopup = _ => {
-                if(state.ddVisible) {
-                    hidePopup();
-                } else {
-                    showPopup();
-                }
-            };
-            const addNewEntity = _ => {
-                showAddEntity(data.value);
-            };
-            const duplicateEntity = _ => {
-                duplicateEntityApi(data.value).then(data => {
-                    store.dispatch('addEntity', data);
-                });
-            };
-            const moveEntity = _ => {
-                ShowMoveEntity(data.value);
-            };
-            const deleteEntity = _ => {
-                if(!can('entity_delete')) return;
+        // FUNCTIONS
+        const hidePopup = _ => {
+            state.bsElem.hide();
+            state.ddVisible = false;
+            state.ddDomElem.classList.add('disabled');
+        };
+        const showPopup = _ => {
+            state.ddVisible = true;
+            nextTick(_ => {
+                // To prevent opening the dropdown on normal click on Node,
+                // the DD toggle must have class 'disabled'
+                // This also prevents BS API call .show() to work...
+                // Thus we remove the 'disabled' class before the API call and add it back on hide
+                state.ddDomElem.classList.remove('disabled');
+                state.bsElem.show();
+            })
+        };
+        const togglePopup = _ => {
+            if(state.ddVisible) {
+                hidePopup();
+            } else {
+                showPopup();
+            }
+        };
+        const addNewEntity = _ => {
+            showAddEntity(data.value);
+        };
+        const duplicateEntity = _ => {
+            duplicateEntityApi(data.value).then(data => {
+                store.dispatch('addEntity', data);
+            });
+        };
+        const moveEntity = _ => {
+            ShowMoveEntity(data.value);
+        };
+        const deleteEntity = _ => {
+            if(!can('entity_delete')) return;
 
             showDeleteEntity(data.value.id);
         };
@@ -226,6 +249,12 @@ export default {
                         return false;
                     }
                     return !hasIntersectionWithEntityAttributes(data.value.entity_type_id, store.getters.treeSelectionTypeIds);
+                }),
+                hasRestrictedAccess: computed(_ => {
+                    return data.value.access_type && data.value.access_type.type == 'restricted' && data.value.access_rules.length > 0;
+                }),
+                hasOpenAccess: computed(_ => {
+                    return data.value.access_type && data.value.access_type.type == 'open';
                 }),
             });
 
