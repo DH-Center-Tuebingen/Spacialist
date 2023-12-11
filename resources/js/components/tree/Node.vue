@@ -46,7 +46,7 @@
                 <span :class="{'text-success': data.user_access.write, 'text-danger': !data.user_access.write}">W</span>
                 <span :class="{'text-success': data.user_access.create, 'text-danger': !data.user_access.create}">C</span>
                 <span :class="{'text-success': data.user_access.delete, 'text-danger': !data.user_access.delete}">D</span>
-                <span :class="{'text-success': data.user_access.export, 'text-danger': !data.user_access.export}">E</span>
+                <span :class="{'text-success': data.user_access.share, 'text-danger': !data.user_access.share}">S</span>
             </span>
         </a>
         <ul

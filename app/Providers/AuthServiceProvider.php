@@ -48,9 +48,9 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('ds-delete', function($user, $model, $options = []) {
             return $this->handleDatasetGate($user, $model, $options, 'delete');
         });
-        // handles export/share access of objects through groups
-        Gate::define('ds-export', function($user, $model, $options = []) {
-            return $this->handleDatasetGate($user, $model, $options, 'export');
+        // handles share access of objects through groups
+        Gate::define('ds-share', function($user, $model, $options = []) {
+            return $this->handleDatasetGate($user, $model, $options, 'share');
         });
     }
 

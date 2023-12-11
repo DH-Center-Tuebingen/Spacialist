@@ -49,7 +49,7 @@ class Entity extends Model implements Searchable
         'write' => ['entity_write', 'entity_data_write'],
         'create' => ['entity_create', 'entity_data_create'],
         'delete' => ['entity_delete', 'entity_data_delete'],
-        'export' => ['entity_export', 'entity_data_export'],
+        'share' => ['entity_share', 'entity_data_share'],
     ];
 
     public $restrictable_recursive_key = 'root_entity_id';

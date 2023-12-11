@@ -221,16 +221,16 @@
                                             </div>
                                             <div class="form-check">
                                                 <input
-                                                    id="access-rule-matrix-export"
-                                                    v-model="item.rule_values.export"
+                                                    id="access-rule-matrix-share"
+                                                    v-model="item.rule_values.share"
                                                     class="form-check-input"
                                                     type="checkbox"
                                                 >
                                                 <label
                                                     class="form-check-label"
-                                                    for="access-rule-matrix-export"
+                                                    for="access-rule-matrix-share"
                                                 >
-                                                    Export
+                                                    Share
                                                 </label>
                                             </div>
                                         </div>
@@ -376,10 +376,10 @@
                         write: false,
                         create: false,
                         delete: false,
-                        export: false,
+                        share: false,
                     };
                 }
-            }
+            };
             const addAccessRule = e => {
                 if(e.removed) return;
                 delete e.added;
@@ -391,7 +391,7 @@
             };
             const removeAccessRule = idx => {
                 state.accessRules.splice(idx, 1);
-            }
+            };
             const rulesValid = _ => {
                 if(state.isRestricted) {
                     if(state.accessRules.length == 0) return false;

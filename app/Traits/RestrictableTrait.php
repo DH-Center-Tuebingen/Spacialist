@@ -59,7 +59,7 @@ trait RestrictableTrait
             'write' => false,
             'create' => false,
             'delete' => false,
-            'export' => false,
+            'share' => false,
         ];
         if(
             (!isset($accessTypes) || count($accessTypes) == 0)
@@ -156,7 +156,7 @@ trait RestrictableTrait
                     $result['write'] = false;
                     $result['create'] = false;
                     $result['delete'] = false;
-                    $result['export'] = false;
+                    $result['share'] = false;
                 } else if($rule->rule_type == 'matrix') {
                     // read is always allowed in matrix
                     $result['read'] = true;
@@ -222,8 +222,8 @@ trait RestrictableTrait
         return $this->userHasAccess('delete', $check_only);
     }
 
-    public function userHasExportAccess(bool $check_only = false) {
-        return $this->userHasAccess('export', $check_only);
+    public function userHasShareAccess(bool $check_only = false) {
+        return $this->userHasAccess('share', $check_only);
     }
 
     public function access_type() {
@@ -243,7 +243,7 @@ trait RestrictableTrait
                 'write' => $this->userHasWriteAccess(true),
                 'create' => $this->userHasCreateAccess(true),
                 'delete' => $this->userHasDeleteAccess(true),
-                'export' => $this->userHasExportAccess(true),
+                'share' => $this->userHasShareAccess(true),
             ];
         }
     }
