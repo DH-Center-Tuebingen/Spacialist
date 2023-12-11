@@ -147,7 +147,7 @@
                 <button
                     type="button"
                     class="btn btn-outline-danger btn-sm"
-                    :disabled="!can('entity_delete') || !state.entity.user_access.delete"
+                    :disabled="!can('entity_delete') || !hasDeleteAccess()"
                     @click="confirmDeleteEntity()"
                 >
                     <i class="fas fa-fw fa-trash" /> {{ t('global.delete') }}
@@ -708,6 +708,9 @@ export default {
         const hideHiddenAttributes = _ => {
             state.hiddenAttributeState = false;
         };
+        const hasDeleteAccess = _ => {
+            return state.entity.user_access && state.entity.user_access.delete;
+        };
         const confirmDeleteEntity = _ => {
             if(!can('entity_delete')) return;
 
@@ -1013,6 +1016,7 @@ export default {
             cancelEditEntityName,
             showHiddenAttributes,
             hideHiddenAttributes,
+            hasDeleteAccess,
             confirmDeleteEntity,
             openWorkingGroups,
             setDetailPanel,
