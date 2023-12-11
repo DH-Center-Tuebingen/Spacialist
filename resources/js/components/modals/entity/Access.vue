@@ -311,6 +311,8 @@
 
     import {
         getTs,
+        getUserBy,
+        getGroupBy,
     } from '@/helpers/helpers.js';
 
     import GroupUserItem from '@/components/user/GroupUserListItem.vue';
@@ -333,6 +335,34 @@
             } = toRefs(props);
 
             // FUNCTIONS
+            const convertAccessRules = rules => {
+                return rules.map(r => {
+                    let r2 = null;
+                    const metadata = {
+                        rule_type: r.rule_type,
+                        rule_values: r.rule_values,
+                    };
+                    if(r.guardable_type == 'App\\Group') {
+                        r2 = {
+                            ...getGroupBy(r.guardable_id),
+                            ...{
+                                id: `wg_${r.guardable_id}`,
+                            },
+                        };
+                        metadata.result_type = 'wg';
+                    } else if(r.guardable_type == 'App\\User') {
+                        r2 = getUserBy(r.id, 'id', true);
+                        metadata.result_type = 'u';
+                    }
+
+                    r2 = {
+                        ...r2,
+                        ...metadata,
+                    }
+
+                    return r2;
+                });
+            };
             const typeToValue = type => {
                 let val = 0;
                 if(type == 'restricted') {
@@ -455,7 +485,7 @@
             });
 
             onMounted(_ => {
-                state.accessRules = state.entity.access_rules ? state.entity.access_rules : [];
+                state.accessRules = state.entity.access_rules ? convertAccessRules(state.entity.access_rules) : [];
                 state.accessType = state.entity.access_type ? state.entity.access_type.type : 'users';
             })
 
