@@ -580,6 +580,8 @@ class EntityController extends Controller {
                 $accessRule->rule_type = $rule['type'];
                 if($rule['type'] == 'matrix') {
                     $accessRule->rule_values = $rule['values'];
+                } else {
+                    $accessRule->rule_values = null;
                 }
 
                 $accessRule->save();
