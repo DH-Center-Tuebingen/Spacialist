@@ -75,6 +75,7 @@ trait RestrictableTrait
         // access type is 'restricted' and user authenticated
         $userGroups = $user->groups()->pluck('id')->toArray();
         $grpStr = implode(",", $userGroups);
+        $grpQry = count($userGroups) > 0 ? "OR (ar.guardable_id IN ($grpStr) AND ar.guardable_type = 'App\Group')" : "";
 
         $rules = DB::select("
             SELECT ar.*
@@ -124,9 +125,7 @@ trait RestrictableTrait
                     at.type = 'restricted' AND ar.id IS NOT NULL AND (
                         (
                             ar.guardable_id = $user->id AND ar.guardable_type = 'App\User'
-                        ) OR (
-                            ar.guardable_id IN ($grpStr) AND ar.guardable_type = 'App\Group'
-                        )
+                        ) $grpQry
                     )
                 )
             )

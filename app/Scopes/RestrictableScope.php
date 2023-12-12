@@ -48,6 +48,7 @@ class RestrictableScope implements Scope
                 $type = get_class($model);
                 $tbl = (new $type())->getTable();
                 $grpStr = implode(",", $userGroups);
+                $grpQry = count($userGroups) > 0 ? "OR (ar.guardable_id IN ($grpStr) AND ar.guardable_type = 'App\Group')" : "";
                 $accessibleIds = Arr::flatten(
                     DB::select("
                         SELECT DISTINCT y.id
@@ -94,9 +95,7 @@ class RestrictableScope implements Scope
                             at.type = 'restricted' AND ar.id IS NOT NULL AND (
                                 (
                                     ar.guardable_id = $user->id AND ar.guardable_type = 'App\User'
-                                ) OR (
-                                    ar.guardable_id IN ($grpStr) AND ar.guardable_type = 'App\Group'
-                                )
+                                ) $grpQry
                             )
                         )
                     ")
