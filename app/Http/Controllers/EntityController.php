@@ -566,19 +566,20 @@ class EntityController extends Controller {
 
             $rules = $request->get('rules');
             foreach($rules as $rule) {
-                $accessRule = new AccessRule();
-                $accessRule->restrictable_id = $entity->id;
-                $accessRule->restrictable_type = get_class($entity);
-
-                $accessRule->guardable_id = $rule['id'];
                 if($rule['guard_type'] == 'u') {
-                    $accessRule->guardable_type = User::class;
+                    $gType = User::class;
                 } else if($rule['guard_type'] == 'wg') {
-                    $accessRule->guardable_type = Group::class;
+                    $gType = Group::class;
                 }
+                $accessRule = AccessRule::firstOrNew([
+                    'restrictable_id' => $entity->id,
+                    'restrictable_type' => get_class($entity),
+                    'guardable_id' => $rule['id'],
+                    'guardable_type' => $gType,
+                ]);
                 $accessRule->rule_type = $rule['type'];
                 if($rule['type'] == 'matrix') {
-                    $accessRule->rule_values = json_encode($rule['values']);
+                    $accessRule->rule_values = $rule['values'];
                 }
 
                 $accessRule->save();
