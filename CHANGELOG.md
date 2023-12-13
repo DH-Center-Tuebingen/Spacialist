@@ -5,11 +5,20 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Support Multiediting attributes across multiple entities (through ...-menu in entity tree)
 - Support moderated roles/users that require a privileged user to accept/deny their changes in entity forms
+- Serif font (Zilla Slab)
 - New Attribute Type: _Richtext_ (A feature-rich alternative to _Textbox_ Attribute; based on Markdown)
 - Separate form Save/Reset in Entity Attribute Tabs (when using _Attribute Group Separator_)
+- Additional non-standard bibtex fields to _Bibliography_ (ISBN, ISSN, Language and Abstract)
 ### Fixed
 - Error in _Attribute List_ caused by _Entity (Multiple Choice)_ attribute
 - Attribute form Save/Reset handling due to newly introduced _Attribute Group Separator_
+- Adding roles without setting a preset
+- Permission Overview not visible if new role without preset is added
+- Save Permissions without changing state of _Moderation_ switch
+- Deleting a bibliography entry
+- Importing local file referenced in Bibtex import
+- Typos in Translation files
+- Updating bibliography entries
 ### Changed
 - Entity tree sorting is now accessible through ...-menu
 - Reset Password Workflow

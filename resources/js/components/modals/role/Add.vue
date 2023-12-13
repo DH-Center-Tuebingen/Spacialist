@@ -202,8 +202,10 @@
                     name: v.fields.name.value,
                     display_name: v.fields.display_name.value,
                     description: v.fields.description.value,
-                    derived_from: v.fields.derived_from.value ? v.fields.derived_from.value.id : null,
                 };
+                if(v.fields.derived_from.vale) {
+                    role.derived_from = v.fields.derived_from.value.id;
+                }
                 context.emit('add', role);
             };
 

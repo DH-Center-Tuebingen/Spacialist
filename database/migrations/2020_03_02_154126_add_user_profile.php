@@ -1,6 +1,7 @@
 <?php
 
 use App\User;
+use App\Traits\ModerationScope;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -111,7 +112,7 @@ class AddUserProfile extends Migration
     private function getElements($tableName) {
         switch($tableName) {
             case 'attribute_values':
-                return \App\AttributeValue::all();
+                return \App\AttributeValue::withoutGlobalScope(ModerationScope::class)->get();
             case 'bibliography':
                 return \App\Bibliography::all();
             case 'entities':

@@ -604,7 +604,7 @@ export function showDeleteBibliographyEntry(entry, onDeleted) {
             onDelete(e) {
                 deleteBibliographyItem(entry.id).then(_ => {
                     if(!!onDeleted) {
-                        onDeleted();
+                        onDeleted(entry);
                     }
                     store.dispatch('deleteBibliographyItem', entry);
                     modal.destroy();

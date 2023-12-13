@@ -4,6 +4,12 @@ import '@fontsource/raleway/400.css';
 import '@fontsource/raleway/600.css';
 import '@fontsource/raleway/700.css';
 
+// Serif
+import '@fontsource/zilla-slab/300.css';
+import '@fontsource/zilla-slab/400.css';
+import '@fontsource/zilla-slab/600.css';
+import '@fontsource/zilla-slab/700.css';
+
 // Monospace
 import '@fontsource/source-code-pro/400.css';
 import '@fontsource/source-code-pro/500.css';
