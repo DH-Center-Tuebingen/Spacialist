@@ -14,11 +14,10 @@
     },
     "homepage": "https://github.com/DH-Center-Tuebingen/Spacialist#readme",
     "scripts": {
-        "dev": "npm run development",
-        "development": "npx mix",
-        "watch": "npx mix watch",
-        "prod": "npm run production",
-        "production": "npx mix -p",
+        "dev": "vite",
+        "dev:open": "IS_OPEN=true vite",
+        "build": "vite build",
+        "build:open": "IS_OPEN=true vite build",
         "lint": "npx eslint --ext .js,.vue resources/js",
         "lint:fix": "npx eslint --ext .js,.vue resources/js --fix"
     },
@@ -27,6 +26,7 @@
         "@fortawesome/free-brands-svg-icons": "^6.4.0",
         "@fortawesome/free-regular-svg-icons": "^6.4.0",
         "@fortawesome/free-solid-svg-icons": "^6.4.0",
+        "@vitejs/plugin-vue": "^4.4.0",
         "@vue/babel-helper-vue-jsx-merge-props": "^1.4.0",
         "@vue/babel-plugin-transform-vue-jsx": "^1.4.0",
         "@vue/cli-plugin-babel": "^5.0.8",
@@ -37,17 +37,19 @@
         "browser-sync-webpack-plugin": "^2.3.0",
         "eslint": "^8.51.0",
         "eslint-plugin-vue": "^9.17.0",
-        "laravel-mix": "^6.0.49",
+        "laravel-vite-plugin": "^0.8.1",
         "postcss": "^8.4.22",
         "resolve-url-loader": "^5.0.0",
         "sass": "^1.62.0",
         "sass-loader": "^13.3.1",
+        "vite": "^4.5.0",
         "vue": "^3.3.4",
         "vue-loader": "^17.2.2",
         "vue-router": "^4.2.2",
         "vuex": "4.0.2"
     },
     "dependencies": {
+        "@f3ve/vue-markdown-it": "^0.2.0",
         "@fontsource/raleway": "^5.0.2",
         "@fontsource/source-code-pro": "^5.0.2",
         "@fontsource/zilla-slab": "^5.0.8",
@@ -80,15 +82,12 @@
         "emojibase-data": "^15.0.0",
         "highlight.js": "^11.8.0",
         "lodash": "^4.17.21",
-        "markdown-vue": "^1.0.1",
         "ol": "^8.1.0",
         "ol-ext": "^4.0.10",
         "p-queue": "^7.3.4",
         "picmo": "^5.8.2",
         "process": "^0.11.10",
         "proj4": "^2.9.0",
-        "remark-gemoji": "^7.0.1",
-        "remark-gfm": "^3.0.1",
         "tree-vue-component": "^6.0.2",
         "vee-validate": "^4.9.6",
         "video.js": "^8.5.0",
@@ -99,5 +98,6 @@
         "vue-upload-component": "^3.1.8",
         "vuedraggable": "^4.1.0",
         "yup": "^1.2.0"
-    }
+    },
+    "type": "module"
 }

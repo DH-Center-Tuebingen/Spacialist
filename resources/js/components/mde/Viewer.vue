@@ -1,73 +1,47 @@
 <template>
-    <vue-markdown
-        class="markdown-viewer"
-        :rehype-plugins="state.plugins"
-        :source="source"
+    <md-editor
+        :data="source"
+        :readonly="true"
+        :classes="classes"
     />
 </template>
 
 <script>
     import {
-        computed,
-        reactive,
         toRefs,
     } from 'vue';
 
-    import VueMarkdown from 'markdown-vue'; 
-    import remarkGfm from 'remark-gfm';
-    import remarkGemoji from 'remark-gemoji';
-
     export default {
         props: {
+            id: {
+                required: true,
+                type: String,
+            },
             source: {
                 required: true,
                 type: String,
             },
-            plugins: {
+            classes: {
                 required: false,
                 type: String,
-                default: 'gfm,emoji',
+                default: 'milkdown-wrapper h-100',
             },
-        },
-        components: {
-            'vue-markdown': VueMarkdown,
         },
         setup(props) {
             const {
                 source,
-                plugins,
+                classes,
             } = toRefs(props);
 
-            // FUNCTIONS
-
-            // DATA
-            const state = reactive({
-                plugins: computed(_ => {
-                    const selected = [];
-                    if(!plugins.value) {
-                        return selected;
-                    }
-
-                    plugins.value.split(',').forEach(p => {
-                        p = p.trim();
-                        if(p == 'gfm') {
-                            selected.push(remarkGfm);
-                        } else if(p == 'emoji') {
-                            selected.push(remarkGemoji);
-                        }
-                    });
-
-                    return selected;
-                }),
-            });
-
-            // RETURN
             return {
-                // HELPERS
-                // LOCAL
-                // STATE
-                state,
             }
         },
     };
 </script>
+
+
+<style scoped>
+pre {
+    background-color: red;
+}
+</style>

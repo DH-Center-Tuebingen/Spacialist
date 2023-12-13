@@ -145,7 +145,7 @@
                 default: 'single',
             },
             defaultValue: {
-                type: Object,
+                type: Object, // TODO should be Array for Entity-MC
                 required: false,
                 default: null,
             },
@@ -196,7 +196,7 @@
             };
             const handleSelection = option => {
                 let data = {}
-                if(!!option) {
+                if(option) {
                     if(mode.value == 'single') {
                         data = {
                             ...option,
@@ -218,17 +218,28 @@
                 context.emit('entry-click', option);
             };
 
+            const getBaseValue = _ => {
+                    return mode.value == 'single' ? {} : [];
+            };
+            
+            const getDefaultValue = _ => {
+                if(defaultValue.value) 
+                    return defaultValue.value;
+                else
+                    return getBaseValue();
+            };
+
             // DATA
             const state = reactive({
                 id: `multiselect-search-${getTs()}`,
-                entry: defaultValue,
+                entry: getDefaultValue(),
                 query: '',
                 enableChain: computed(_ => chain.value && chain.value.length > 0),
             });
 
             watch(_ => defaultValue.value, (newValue, oldValue) => {
                 if(!newValue || newValue.reset) {
-                    state.entry = null;
+                    state.entry = getBaseValue();
                 } else {
                     state.entry = newValue;
                 }

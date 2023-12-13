@@ -43,7 +43,7 @@
                 class="btn btn-sm btn-outline-primary"
                 @click="openMdEditor()"
             >
-                Edit as Markdown
+                {{ t('global.markdown_editor.edit') }}
             </button>
         </div>
     </div>
@@ -120,6 +120,8 @@ reactive,
                 showMarkdownEditor(localData.description, text => {
                     localData.description = text;
                     onChange();
+                },{
+                    subtitle: t('main.preference.key.project.maintainer'),
                 });
             };
 

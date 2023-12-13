@@ -11,7 +11,7 @@
         :name="name"
         :close-on-select="false"
         :placeholder="t('global.select.placeholder')"
-        @change="value => v.handleChange(value)"
+        @change="v.handleChange"
     >
         <template #option="{ option }">
             {{ translateConcept(option.concept_url) }}
@@ -61,8 +61,9 @@
                 default: false,
             },
             value: {
-                type: Object,
+                type: Array,
                 required: true,
+                default: _ => [],
             },
             selections: {
                 type: Array,
@@ -113,8 +114,7 @@
                 resetField,
             });
 
-
-            watch(value, (newValue, oldValue) => {
+            watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
             watch(v.meta, (newValue, oldValue) => {

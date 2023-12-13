@@ -10,7 +10,10 @@ import {
     slugify
 } from '@/helpers/helpers.js';
 
-const appName = slugify(__APPNAME__, '_');
+if(!import.meta.env.VITE_APP_NAME) {
+    throw new Error(`VITE_APP_NAME not defined! See INSTALL.md for more information.`);
+}
+const appName = slugify(import.meta.env.VITE_APP_NAME, '_');
 
 export const vueAuth = createAuth({
     plugins: {

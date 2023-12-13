@@ -10,8 +10,12 @@
                     {{
                         t('global.markdown_editor.title')
                     }}
-                    <small>
-                        {{ t('main.preference.key.project.maintainer') }}
+
+                    <small
+                        v-if="options.subtitle"
+                        class="ms-2"
+                    >
+                        {{ options.subtitle }}
                     </small>
                 </h5>
                 <button
@@ -26,7 +30,7 @@
                 <md-editor
                     :ref="el => wrapperRef = el"
                     class="h-100"
-                    :data="data"
+                    :data="content"
                 />
             </div>
             <div class="modal-footer">
@@ -61,16 +65,20 @@
 
     export default {
         props: {
-            data: {
+            content: {
                 required: true,
                 type: String,
+            },
+            options: {
+                default: () => ({}),
+                type: Object,
             },
         },
         emits: ['confirm', 'closing'],
         setup(props, context) {
             const { t } = useI18n();
             const {
-                data,
+                content,
             } = toRefs(props);
 
             // FUNCTIONS
