@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Support Multiediting attributes across multiple entities (through ...-menu in entity tree)
 - Support moderated roles/users that require a privileged user to accept/deny their changes in entity forms
+- Serif font (Zilla Slab)
 - New Attribute Type: _Richtext_ (A feature-rich alternative to _Textbox_ Attribute; based on Markdown)
 - Separate form Save/Reset in Entity Attribute Tabs (when using _Attribute Group Separator_)
 ### Fixed
