@@ -4,11 +4,13 @@ namespace App;
 
 use App\Exceptions\AmbiguousValueException;
 use App\Traits\CommentTrait;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Nicolaslopezj\Searchable\SearchableTrait;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
 
@@ -36,6 +38,13 @@ class Entity extends Model implements Searchable
         'parentIds',
         'parentNames',
         'attributeLinks',
+        'editors',
+        'creator',
+        'history',
+    ];
+
+    protected $casts = [
+        'metadata' => 'json',
     ];
 
     protected $with = [
@@ -299,6 +308,80 @@ class Entity extends Model implements Searchable
             ];
         }
         return $entities;
+    }
+
+    public function getEditorsAttribute() {
+        $curr = $this;
+        $assocAttrs = AttributeValue::with('attribute')->where('entity_id', $this->id)->get()->pluck('id');
+
+        $causers = Activity::where(function(Builder $query) use ($curr){
+                $query->where('subject_id', $curr->id)
+                    ->where('subject_type', get_class($curr));
+            })->orWhere(function(Builder $query) use ($assocAttrs){
+                $query->whereIn('subject_id', $assocAttrs)
+                    ->where('subject_type', (new AttributeValue())->getMorphClass());
+            })
+            ->groupBy('causer_id')
+            ->select('causer_id as user_id')
+            ->get();
+        return $causers;
+    }
+
+    public function getCreatorAttribute() {
+        $creator = Activity::where('subject_id', $this->id)
+            ->where('subject_type', get_class($this))
+            ->orderBy('created_at','desc')
+            ->first();
+        return isset($creator) ? $creator->causer_id : null;
+    }
+
+    public function getHistoryAttribute() {
+        $curr = $this;
+        $vals = AttributeValue::with('attribute')->where('entity_id', $this->id)->get();
+        $assocAttrs = $vals->pluck('id');
+        $history = Activity::whereNot(function(Builder $query) {
+                $query->where('properties->attributes', '[]')
+                    ->where('properties->old', '[]');
+            })
+            ->where(function(Builder $outerQuery) use ($curr, $assocAttrs) {
+                $outerQuery->where(function(Builder $query) use ($curr){
+                    $query->where('subject_id', $curr->id)
+                        ->where('subject_type', get_class($curr));
+                })->orWhere(function(Builder $query) use ($assocAttrs){
+                    $query->whereIn('subject_id', $assocAttrs)
+                        ->where('subject_type', (new AttributeValue())->getMorphClass());
+                });
+            })
+            ->orderBy('created_at','desc')
+            ->select('id', 'subject_id', 'subject_type', 'description', 'causer_id as user_id', 'created_at', 'properties')
+            ->get();
+
+        return $history->filter(function($entry) {
+            $p = $entry->properties;
+            $attrLngth = $p->has('attributes') ? count($p['attributes']) : 0;
+            $oldLngth = $p->has('old') ? count($p['old']) : 0;
+            if($attrLngth == 1 && $oldLngth == 1) {
+                if(isset($p['attributes']['user_id']) && isset($p['old']['user_id'])) {
+                    return false;
+                }
+            }
+            return true;
+        })->transform(function($item, $key) use ($vals) {
+            if($item->subject_type == (new AttributeValue())->getMorphClass()) {
+                foreach($vals as $v) {
+                    if($v->id == $item->subject_id) {
+                        $item->attribute = $v->attribute;
+                        if($item->properties->has('attributes')) {
+                            $item->value_after = AttributeValue::getValueFromKey($item->properties['attributes']);
+                        }
+                        if($item->properties->has('old')) {
+                            $item->value_before = AttributeValue::getValueFromKey($item->properties['old']);
+                        }
+                    }
+                }
+            }
+            return $item;
+        });
     }
 
     public function parents() {

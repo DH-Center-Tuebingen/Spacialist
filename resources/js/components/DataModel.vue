@@ -60,7 +60,7 @@
                     :classes="'mx-2 py-3 rounded-3 bg-secondary bg-opacity-10'"
                     :attributes="state.systemAttributeList"
                     :values="[]"
-                    :nolabels="true"
+                    :options="{'hide_labels': true}"
                     :selections="{}"
                     :is-source="true"
                 />

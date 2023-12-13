@@ -830,6 +830,33 @@ class EntityController extends Controller {
         return response()->json($entity);
     }
 
+    public function patchMetadata($id, Request $request) {
+        $user = auth()->user();
+        if(!$user->can('entity_write')) {
+            return response()->json([
+                'error' => __('You do not have the permission to modify an entity\'s metadata')
+            ], 403);
+        }
+        $this->validate($request, [
+            'licence' => 'nullable|string'
+        ]);
+
+        try {
+            $entity = Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist')
+            ], 400);
+        }
+
+        $licence = $request->get('licence');
+        $metadata = $entity->metadata;
+        $metadata['licence'] = $licence;
+        $entity->metadata = $metadata;
+        $entity->save();
+        return response()->json($entity->metadata);
+    }
+
     public function moveEntity(Request $request, $id) {
         $user = auth()->user();
         if(!$user->can('entity_write')) {

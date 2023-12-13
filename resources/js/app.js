@@ -28,6 +28,7 @@ import Gradient from '@/components/Gradient.vue';
 import MarkdownViewer from '@/components/mde/Viewer.vue';
 import MarkdownEditor from '@/components/mde/Wrapper.vue';
 import BibtexCode from '@/components/bibliography/BibtexCode.vue';
+import Richtext from '@/components/attribute/Richtext.vue';
 
 // Init Libs
 // PQueue, httpQueue
@@ -232,6 +233,7 @@ app.component('ColorGradient', Gradient);
 app.component('MdViewer', MarkdownViewer);
 app.component('MdEditor', MarkdownEditor);
 app.component('BibtexCode', BibtexCode);
+app.component('Richtext', Richtext);
 // Third-Party components
 app.component('Multiselect', Multiselect);
 app.component('FileUpload', VueUploadComponent);

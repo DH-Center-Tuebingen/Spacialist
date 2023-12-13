@@ -165,8 +165,11 @@
             </div>
             <div>
                 <i class="fas fa-fw fa-user-edit" />
-                <span class="ms-1">
-                    {{ date(state.lastModified, undefined, true, true) }}
+                <span
+                    class="ms-1"
+                    :title="date(state.lastModified, undefined, true, true)"
+                >
+                    {{ ago(state.lastModified) }}
                 </span>
                 -
                 <a
@@ -185,8 +188,7 @@
             </div>
         </div>
         <ul
-            v-show="can('comments_read')"
-            id="myTab"
+            id="entity-detail-tabs"
             class="nav nav-tabs"
             role="tablist"
         >
@@ -240,7 +242,33 @@
                     </div>
                 </a>
             </li>
+            <!-- empty nav-item to separate metadata and comments from attributes -->
             <li
+                class="nav-item nav-item-list-divider ms-auto"
+            />
+            <li
+                v-show="can('entity_read')"
+                class="nav-item"
+                role="presentation"
+            >
+                <a
+                    id="active-entity-metadata-tab"
+                    class="nav-link active-entity-detail-tab d-flex gap-2 align-items-center"
+                    href="#"
+                    @click.prevent="setDetailPanel('metadata')"
+                >
+                    <i class="fas fa-fw fa-file-shield" />
+                    {{ t('main.entity.tabs.metadata') }}
+                    <span
+                        v-if="!state.entity.metadata || !state.entity.metadata.licence"
+                        :title="`No licence provided`"
+                    >
+                        <i class="fas fa-fw fa-2xs fa-circle text-warning" />
+                    </span>
+                </a>
+            </li>
+            <li
+                v-show="can('comments_read')"
                 class="nav-item"
                 role="presentation"
             >
@@ -292,6 +320,295 @@
                         @metadata="showMetadata"
                     />
                 </form>
+            </div>
+            <div
+                v-show="can('entity_read')"
+                id="active-entity-metadata-panel"
+                class="tab-pane fade h-100 active-entity-detail-panel d-flex flex-column overflow-hidden"
+                role="tabpanel"
+            >
+                <div
+                    class="mt-3"
+                >
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-success"
+                        @click="saveMetadata"
+                    >
+                        <i class="fas fa-fw fa-save" />
+                        Save Metadata
+                    </button>
+                </div>
+                <div
+                    class="d-flex flex-row gap-2 justify-content-between align-items-center mt-2"
+                >
+                    <div>
+                        <h5 class="mb-1">
+                            Author/Creator
+                        </h5>
+                        <div
+                            v-if="getUserBy(state.entity.creator)"
+                            class="d-flex flex-row gap-2 align-items-center"
+                        >
+                            <a
+                                href="#"
+                                @click.prevent="showUserInfo(getUserBy(state.entity.creator))"
+                            >
+                                <span 
+                                    class="badge bg-primary bg-opacity-75 pe-3"
+                                    :class="{'bg-primary': state.entity.creator != userId(), 'bg-success': state.entity.creator == userId()}"
+                                >
+                                    {{ getUserBy(state.entity.creator).name }}
+                                </span>
+                                <user-avatar
+                                    :user="getUserBy(state.entity.creator)"
+                                    :size="20"
+                                    class="align-middle ms-n2"
+                                />
+                            </a>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="mb-1">
+                            Editors
+                        </h5>
+                        <div
+                            class="d-flex flex-row gap-2 align-items-center"
+                        >
+                            <a
+                                v-for="h in state.entity.editors"
+                                :key="h.user_id"
+                                href="#"
+                                @click.prevent="showUserInfo(getUserBy(h.user_id))"
+                            >
+                                <span 
+                                    class="badge bg-opacity-75 pe-3"
+                                    :class="{'bg-warning': h.user_id == state.entity.creator && h.user_id != userId(), 'bg-primary': h.user_id != state.entity.creator && h.user_id != userId(), 'bg-success': h.user_id == userId()}"
+                                >
+                                    {{ getUserBy(h.user_id).name }}
+                                </span>
+                                <user-avatar
+                                    :user="getUserBy(h.user_id)"
+                                    :size="20"
+                                    class="align-middle ms-n2"
+                                />
+                            </a>
+                        </div>
+                    </div>
+                    <div v-if="state.entity.metadata">
+                        <h5 class="mb-1">
+                            License
+                        </h5>
+                        <input
+                            v-model="state.entityMetadata.licence"
+                            type="text"
+                            class="form-control"
+                            placeholder="CC-BY 4.0"
+                        >
+                    </div>
+                </div>
+                <form>
+                    <div>
+                        <label
+                            for="entity-metadata-summary"
+                            class="form-label mb-1"
+                        >
+                            <h5 class="mb-0">
+                                Summary
+                            </h5>
+                        </label>
+                        <richtext
+                            id="entity-metadata-summary"
+                            :ref="el => rtRef = el"
+                            :value="state.entityMetadata.summary"
+                            @change="updateEntityMetadata"
+                        />
+                    </div>
+                </form>
+                <hr>
+                <div
+                    class="pe-2 overflow-auto"
+                >
+                    <h5 class="mb-1">
+                        History
+                    </h5>
+                    <ul
+                        class="list-group"
+                    >
+                        <li
+                            v-for="entry in state.entity.history"
+                            :key="`entity-history-entry-${entry.id}`"
+                            class="list-group-item d-flex flex-row gap-3 align-items-center"
+                        >
+                            <span
+                                :title="entry.description"
+                            >
+                                <span
+                                    v-if="entry.description == 'created'"
+                                >
+                                    <i class="fas fa-fw fa-plus text-success" />
+                                </span>
+                                <span
+                                    v-else-if="entry.description == 'updated'"
+                                >
+                                    <i class="fas fa-fw fa-edit text-warning" />
+                                </span>
+                            </span>
+                            <div class="text-nowrap">
+                                <span 
+                                    class="badge bg-opacity-75 pe-3"
+                                    :class="{'bg-warning': entry.user_id == state.entity.creator && entry.user_id != userId(), 'bg-primary': entry.user_id != state.entity.creator && entry.user_id != userId(), 'bg-success': entry.user_id == userId()}"
+                                >
+                                    {{ getUserBy(entry.user_id).name }}
+                                </span>
+                                <user-avatar
+                                    :user="getUserBy(entry.user_id)"
+                                    :size="20"
+                                    class="align-middle ms-n2"
+                                />
+                            </div>
+                            <div class="flex-grow-1">
+                                <template
+                                    v-if="entry.subject_type == 'App\\Entity'"
+                                >
+                                    <span
+                                        v-if="entry.description == 'created'"
+                                    >
+                                        As Entity <span class="badge bg-primary bg-opacity-75">{{ entry.properties.attributes.name }}</span> ({{ getEntityTypeName(entry.properties.attributes.entity_type_id) }}) created.
+                                        <div
+                                            v-if="entry.properties.attributes.root_entity_id"
+                                        >
+                                            To <span class="fw-bold">{{ getEntity(entry.properties.attributes.root_entity_id).name }}</span>
+                                        </div>
+                                    </span>
+                                    <span
+                                        v-else-if="entry.description == 'updated'"
+                                        class="d-flex flex-row align-items-center gap-2"
+                                    >
+                                        Updated name <span class="badge bg-danger bg-opacity-75">{{ entry.properties.old.name }}</span>
+                                        <i class="fas fa-fw fa-2xs fa-arrow-right" /> <span class="badge bg-success bg-opacity-75">{{ entry.properties.attributes.name }}</span>
+                                    </span>
+                                </template>
+                                <template
+                                    v-else-if="entry.subject_type == 'attribute_values'"
+                                >
+                                    <div
+                                        v-if="entry.description == 'created'"
+                                    >
+                                        <span
+                                            class="d-flex flex-row align-items-center gap-2"
+                                        >
+                                            Added value to attribute <span class="fw-bold">{{ getAttributeName(entry.attribute.id) }}</span>
+                                            <a
+                                                href="#"
+                                                class="text-reset"
+                                                @click.prevent="state.showHistoryChange[entry.id] = !state.showHistoryChange[entry.id]"
+                                            >
+                                                <span v-show="state.showHistoryChange[entry.id]">
+                                                    <i class="fas fa-fw fa-eye" />
+                                                </span>
+                                                <span v-show="!state.showHistoryChange[entry.id]">
+                                                    <i class="fas fa-fw fa-eye-slash" />
+                                                </span>
+                                            </a>
+                                        </span>
+                                        <attribute-list
+                                            v-show="state.showHistoryChange[entry.id]"
+                                            :group="{name: 'entity-history-created', pull: false, put: false}"
+                                            :classes="'mx-0 py-2 px-2 rounded-3 bg-primary bg-opacity-50'"
+                                            :attributes="formatHistoryEntryAttributes(entry.attribute)"
+                                            :values="formatHistoryEntryValue(entry.attribute.id, entry.value_after)"
+                                            :options="{'hide_labels': true, 'item_classes': 'px-0'}"
+                                            :selections="{}"
+                                            :preview="true"
+                                        />
+                                    </div>
+                                    <div
+                                        v-else-if="entry.description == 'updated'"
+                                    >
+                                        <template
+                                            v-if="hasHistoryEntryKey(entry.properties.attributes, '!certainty') || hasHistoryEntryKey(entry.properties.old, '!certainty')"
+                                        >
+                                            <span class="d-flex flex-row align-items-center gap-2">
+                                                Updated value of attribute <span class="fw-bold">{{ getAttributeName(entry.attribute.id) }}</span>
+                                                <a
+                                                    href="#"
+                                                    class="text-reset"
+                                                    @click.prevent="state.showHistoryChange[entry.id] = !state.showHistoryChange[entry.id]"
+                                                >
+                                                    <span v-show="state.showHistoryChange[entry.id]">
+                                                        <i class="fas fa-fw fa-eye" />
+                                                    </span>
+                                                    <span v-show="!state.showHistoryChange[entry.id]">
+                                                        <i class="fas fa-fw fa-eye-slash" />
+                                                    </span>
+                                                </a>
+                                            </span>
+                                            <div
+                                                v-if="state.showHistoryChange[entry.id]"
+                                                class="d-flex flex-row gap-2 align-items-center"
+                                            >
+                                                <attribute-list
+                                                    v-if="hasHistoryEntryKey(entry.properties.old, '!certainty')"
+                                                    :group="{name: 'entity-history-changed-from', pull: false, put: false}"
+                                                    :classes="'flex-grow-1 mx-0 py-2 px-2 rounded-3 bg-danger bg-opacity-50'"
+                                                    :attributes="formatHistoryEntryAttributes(entry.attribute)"
+                                                    :values="formatHistoryEntryValue(entry.attribute.id, entry.value_before)"
+                                                    :options="{'hide_labels': true, 'item_classes': 'px-0'}"
+                                                    :selections="{}"
+                                                />
+                                                <span
+                                                    v-else
+                                                    class="badge bg-danger"
+                                                >
+                                                    No value recorded
+                                                </span>
+                                                <i class="fas fa-fw fa-arrow-right" />
+                                                <attribute-list
+                                                    v-if="hasHistoryEntryKey(entry.properties.attributes, '!certainty')"
+                                                    :group="{name: 'entity-history-changed-to', pull: false, put: false}"
+                                                    :classes="'flex-grow-1 mx-0 py-2 px-2 rounded-3 bg-success bg-opacity-50'"
+                                                    :attributes="formatHistoryEntryAttributes(entry.attribute)"
+                                                    :values="formatHistoryEntryValue(entry.attribute.id, entry.value_after)"
+                                                    :options="{'hide_labels': true, 'item_classes': 'px-0'}"
+                                                    :selections="{}"
+                                                />
+                                                <span
+                                                    v-else
+                                                    class="badge bg-danger"
+                                                >
+                                                    No value recorded
+                                                </span>
+                                            </div>
+                                        </template>
+                                        <template
+                                            v-else
+                                        >
+                                            Updated Certainty of <span class="fw-bold">{{ getAttributeName(entry.attribute.id) }}</span>
+                                            <div
+                                                class="d-flex flex-row align-items-center gap-1"
+                                            >
+                                                <span class="badge bg-danger bg-opacity-75">
+                                                    {{ entry.properties.old.certainty || Unknown }}
+                                                </span>
+                                                <i class="fas fa-fw fa-xs fa-arrow-right" />
+                                                <span class="badge bg-success bg-opacity-75">
+                                                    {{ entry.properties.attributes.certainty || Unknown }}
+                                                </span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                            <span
+                                class="small ms-auto text-secondary text-nowrap"
+                                :title="date(entry.created_at)"
+                            >
+                                {{ ago(entry.created_at) }}
+                            </span>
+                        </li>
+                    </ul>
+                </div>
             </div>
             <div
                 v-show="can('comments_read')"
@@ -376,21 +693,28 @@ import router from '@/bootstrap/router.js';
 
 import { useToast } from '@/plugins/toast.js';
 
-    import { date } from '@/helpers/filters.js';
+    import { ago, date } from '@/helpers/filters.js';
     import {
         getEntityComments,
         patchAttributes,
         patchEntityName,
+        patchEntityMetadata,
     } from '@/api.js';
     import {
         can,
         isModerated,
+        isArray,
+        userId,
         getAttribute,
+        getAttributeName,
+        getUserBy,
+        getEntity,
         getEntityColors,
         getEntityTypeName,
         getEntityTypeAttributeSelections,
         getEntityTypeDependencies,
         translateConcept,
+        _cloneDeep,
     } from '@/helpers/helpers.js';
     import {
         showDiscard,
@@ -444,6 +768,8 @@ export default {
             hiddenAttributes: {},
             entityHeaderHovered: false,
             editedEntityName: '',
+            entityMetadata: {},
+            showHistoryChange: {},
             initFinished: false,
             commentLoadingState: 'not',
             hiddenAttributeState: false,
@@ -711,17 +1037,18 @@ export default {
             if(tab === 'comments') {
                 newTab = document.getElementById('active-entity-comments-tab');
                 newPanel = document.getElementById('active-entity-comments-panel');
-                oldTabs = document.getElementsByClassName('active-entity-attributes-tab');
-                oldPanels = document.getElementsByClassName('active-entity-attributes-panel');
                 if(!state.commentsFetched) {
                     fetchComments();
                 }
+            } else if(tab === 'metadata') {
+                newTab = document.getElementById('active-entity-metadata-tab');
+                newPanel = document.getElementById('active-entity-metadata-panel');
             } else {
                 newTab = document.getElementById(`active-entity-attributes-group-${tabId}-tab`);
                 newPanel = document.getElementById(`active-entity-attributes-panel-${tabId}`);
-                oldTabs = document.getElementsByClassName('active-entity-detail-tab');
-                oldPanels = document.getElementsByClassName('active-entity-detail-panel');
             }
+            oldTabs = document.getElementsByClassName('active-entity-detail-tab');
+            oldPanels = document.getElementsByClassName('active-entity-detail-panel');
 
             oldTabs.forEach(t => t.classList.remove('active'));
             if(newTab) newTab.classList.add('active');
@@ -730,6 +1057,32 @@ export default {
         };
         const onEntityHeaderHover = hoverState => {
             state.entityHeaderHovered = hoverState;
+        };
+        const updateEntityMetadata = e => {
+            state.entityMetadata.summary = e.value;
+        };
+        const hasHistoryEntryKey = (entry, key) => {
+            // if starts with !, func checks if there is any other key than the one provided
+            if(key.startsWith('!')) {
+                const searchKey = key.substr(1);
+                const keys = Object.keys(entry);
+                return !keys.includes(searchKey);
+            }
+
+            return !!entry[key];
+        };
+        const formatHistoryEntryValue = (id, val) => {
+            return {
+                [id]: {
+                    value: val,
+                },
+            };
+        };
+        const formatHistoryEntryAttributes = attr => {
+            attr.isDisabled = true;
+            return [
+                attr
+            ];
         };
         const showTabActions = (grp, status) => {
             state.attributeGrpHovered = status ? grp : null;
@@ -794,6 +1147,32 @@ export default {
                     state.entity.comments.push(comment);
                     state.entity.comments_count++;
                 }
+            };
+            const saveMetadata = _ => {
+                const metadata = {};
+                for(let k in state.entityMetadata) {
+                    const upd = state.entityMetadata[k];
+                    const curr = state.entity.metadata[k];
+                    if(!curr || upd != curr) {
+                        metadata[k] = upd;
+                    }
+                }
+                patchEntityMetadata(state.entity.id, metadata).then(data => {
+                    store.dispatch('updateEntityMetadata', {
+                        eid: state.entity.id,
+                        data: data,
+                    });
+
+                    toast.$toast(
+                        t('main.entity.toasts.updated_metadata.msg', {
+                            name: data.name
+                        }),
+                        t('main.entity.toasts.updated_metadata.title'), {
+                        channel: 'success',
+                        autohide: true,
+                        icon: true,
+                    });
+                })
             };
             const saveEntity = grps => {
                 if(!can('entity_data_write')) return;
@@ -860,8 +1239,7 @@ export default {
                     channel: 'success',
                     autohide: true,
                     icon: true,
-                },
-                );
+                });
             }).catch(error => {
                 const r = error.response;
                 toast.$toast(
@@ -930,6 +1308,11 @@ export default {
             async (newValue, oldValue) => {
                 if(!newValue || !newValue.id) return;
 
+                state.entityMetadata = _cloneDeep(state.entity.metadata);
+                if(isArray(state.entityMetadata)) {
+                    state.entityMetadata = {};
+                }
+
                 nextTick(_ => {
                     setDetailPanelView(route.query.view);
                 });
@@ -978,9 +1361,14 @@ export default {
             t,
             // HELPERS
             can,
+            ago,
             date,
+            userId,
+            getUserBy,
             showUserInfo,
+            getAttributeName,
             getEntityTypeName,
+            getEntity,
             getEntityColors,
             translateConcept,
             // LOCAL
@@ -994,9 +1382,14 @@ export default {
             confirmDeleteEntity,
             setDetailPanel,
             onEntityHeaderHover,
+            updateEntityMetadata,
+            hasHistoryEntryKey,
+            formatHistoryEntryValue,
+            formatHistoryEntryAttributes,
             showTabActions,
             setFormState,
             addComment,
+            saveMetadata,
             saveEntity,
             resetForm,
             setAttrRefs,

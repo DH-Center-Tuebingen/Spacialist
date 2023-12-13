@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Illuminate\Support\Facades\DB;
 use MStaack\LaravelPostgis\Geometries\Geometry;
 use MStaack\LaravelPostgis\Eloquent\PostgisTrait;
 use MStaack\LaravelPostgis\Exceptions\UnknownWKTTypeException;
@@ -26,5 +27,11 @@ class Geodata
         } catch(UnknownWKTTypeException $e) {
             return null;
         }
+    }
+
+    public static function arrayToWkt($arr) {
+        $json = json_encode($arr);
+        return DB::select("SELECT ST_AsText(ST_GeomFromGeoJSON('$json')) AS wkt")[0]->wkt;
+
     }
 }

@@ -57,7 +57,6 @@
                         :attributes="state.previewAttribute.attribute"
                         :disable-drag="true"
                         :options="{'hide_labels': true}"
-                        :nolabels="true"
                         :values="state.previewAttribute.values"
                         :selections="{}"
                         :preview="true"

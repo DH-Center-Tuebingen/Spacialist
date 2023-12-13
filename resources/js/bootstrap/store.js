@@ -225,6 +225,12 @@ export const store = createStore({
                         entity.data[k].value = data.data[k];
                     }
                 },
+                updateEntityMetadata(state, data) {
+                    const entity = state.entities[data.eid];
+                    for(let k in data.data) {
+                        entity.metadata[k] = data.data[k];
+                    }
+                },
                 updateEntityDataModerations(state, data) {
                     const entity = state.entities[data.entity_id];
                     for(let i=0; i<data.attribute_ids.length; i++) {
@@ -705,6 +711,9 @@ export const store = createStore({
                 },
                 updateEntityData({commit}, data) {
                     commit('updateEntityData', data);
+                },
+                updateEntityMetadata({commit}, data) {
+                    commit('updateEntityMetadata', data);
                 },
                 updateEntityDataModerations({commit}, data) {
                     commit("updateEntityDataModerations", data);

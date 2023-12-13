@@ -132,7 +132,7 @@
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
-                        <richtext-attribute
+                        <richtext
                             v-else-if="element.datatype == 'richtext'"
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
@@ -189,7 +189,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :entries="state.attributeValues[element.id].value"
+                            :entries="state.attributeValues[element.id].value || []"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -209,7 +209,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="state.attributeValues[element.id].value || {}"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -357,7 +357,6 @@
 
     import StringAttr from '@/components/attribute/String.vue';
     import Stringfield from '@/components/attribute/Stringfield.vue';
-    import Richtext from '@/components/attribute/Richtext.vue';
     import IntegerAttr from '@/components/attribute/Integer.vue';
     import FloatAttr from '@/components/attribute/Float.vue';
     import Bool from '@/components/attribute/Bool.vue';
@@ -383,7 +382,6 @@
         components: {
             'string-attribute': StringAttr,
             'stringfield-attribute': Stringfield,
-            'richtext-attribute': Richtext,
             'integer-attribute': IntegerAttr,
             'float-attribute': FloatAttr,
             'bool-attribute': Bool,
@@ -456,12 +454,17 @@
             options: {
                 required: false,
                 type: Object,
-                default: {},
+                default: _ => new Object(),
             },
             preview: {
                 required: false,
                 type: Boolean,
                 default: false,
+            },
+            previewData: {
+                required: false,
+                type: Object,
+                default: _ => new Object(),
             },
         },
         emits: ['dirty'],
@@ -509,6 +512,13 @@
                     expClasses['col-md-12'] = true;
                 } else {
                     expClasses['col-md-9'] = true;
+                }
+
+                if(state.itemClasses) {
+                    const itmCls = state.itemClasses.split(' ');
+                    itmCls.forEach(itm => {
+                        expClasses[itm] = true;
+                    });
                 }
                 
                 return expClasses;
@@ -761,6 +771,7 @@
                 hideLabels: computed(_ => options.value.hide_labels),
                 hideEntityLink: computed(_ => options.value.hide_entity_link),
                 ignoreMetadata: computed(_ => options.value.ignore_metadata),
+                itemClasses: computed(_ => options.value.item_classes),
             });
 
             // ON MOUNTED
