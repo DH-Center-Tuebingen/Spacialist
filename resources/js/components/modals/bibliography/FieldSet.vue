@@ -142,8 +142,8 @@
                     const refField = state.type.mandatory[field];
                     rules = rules.when(refField, {
                         is: '',
-                        then: yup.string().required(o => bibtexExt.requiredIf(o, refField)),
-                        otherwise: yup.string(),
+                        then: _ => yup.string().required(o => bibtexExt.requiredIf(o, refField)),
+                        otherwise: _ => yup.string(),
                     });
                 }
                 return rules;

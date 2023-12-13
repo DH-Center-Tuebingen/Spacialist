@@ -201,7 +201,30 @@
 
             // FUNCTIONS
             const loadRolePermissions = permissions => {
-                if(permissions.length === 0) return;
+                if(permissions.length === 0) {
+                    state.permissionGroups.core.forEach(pg => {
+                        state.permissionStates[pg] = {
+                            read: 0,
+                            write: 0,
+                            create: 0,
+                            delete: 0,
+                            share: 0,
+                        };
+                    });
+                    for(let k in state.permissionGroups.plugins) {
+                        const curr = state.permissionGroups.plugins[k];
+                        curr.forEach(pg => {
+                            state.permissionStates[pg] = {
+                                read: 0,
+                                write: 0,
+                                create: 0,
+                                delete: 0,
+                                share: 0,
+                            };
+                        });
+                    }
+                    return;
+                }
 
                 // simple check whether this is an array of objects or strings
                 const isObject = (typeof permissions[0]) != 'string';
@@ -282,7 +305,7 @@
                 }
                 context.emit('save', {
                     permissions: permissions,
-                    is_moderated: state.moderated,
+                    is_moderated: !!state.moderated,
                 });
             };
 

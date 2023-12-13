@@ -217,7 +217,7 @@
             "empty_list": "Bisher keine Kommentare hinzugefügt.",
             "hide": "Kommentare ausblenden",
             "show": "Kommentare anzeigen",
-            "submit": "Kommtentar abschicken",
+            "submit": "Kommentar abschicken",
             "text_placeholder": "Kommentar eingeben",
             "hide_reply": "<span class=\"fw-bold\">Eine</span> Antwort ausblenden | <span class=\"fw-bold\">{cnt}</span> Antworten ausblenden",
             "show_reply": "<span class=\"fw-bold\">Eine</span> Antwort anzeigen | <span class=\"fw-bold\">{cnt}</span> Antworten anzeigen",
