@@ -338,7 +338,7 @@ class Bibliography extends Model implements Searchable
         $fields = is_array($request) ? $request : $request->toArray();
 
         
-        $filteredFields = self::stripDisallowed($fields, $this->type);
+        $filteredFields = self::stripDisallowed($fields, $this->type ?? $request['type']);
         foreach($filteredFields as $key => $value){
             $this->{$key} = $value;
         }
@@ -347,7 +347,7 @@ class Bibliography extends Model implements Searchable
         // thus we first set all allowed keys from request and then
         // run validation on the update entry
         $validateFields = array_intersect_key($this->toArray(), self::patchRules);
-        $isValid = self::validateMandatory($validateFields, $this->type);
+        $isValid = self::validateMandatory($validateFields, $this->type ?? $request['type']);
         if(!$isValid) return false;
 
         $this->citekey = self::computeCitationKey($this->toArray());
@@ -386,7 +386,7 @@ class Bibliography extends Model implements Searchable
         if(isset($fields['author']) || isset($fields['editor'])) {
             $authors = explode(' and ', $fields['author'] ?? $fields['editor']);
             $author = $authors[0];
-            $author = '_';
+            $author .= '_';
             $key .= $author;
         }
         if(isset($fields['title'])) {
