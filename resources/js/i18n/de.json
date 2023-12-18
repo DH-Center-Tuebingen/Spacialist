@@ -131,6 +131,7 @@
             "string": "Textfeld",
             "stringf": "Textbox",
             "richtext": "Rich-Text",
+            "richtext_empty": "Kein Inhalt",
             "string-sc": "Einfachauswahl-Dropdown",
             "string-mc": "Mehrfachauswahl-Dropdown",
             "double": "Gleitkommazahl",

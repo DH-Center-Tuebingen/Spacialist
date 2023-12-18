@@ -7,7 +7,7 @@
         <div
             v-else
         >
-            No content yet.
+            {{ t('global.attributes.richtext_empty') }}
         </div>
         <a
             v-if="!disabled"
@@ -26,6 +26,8 @@
         toRefs,
         watch,
     } from 'vue';
+
+    import { useI18n } from 'vue-i18n';
 
     import {
         showMarkdownEditor,
@@ -52,6 +54,7 @@
             const {
                 value: initial,
             } = toRefs(props);
+            const { t } = useI18n();
 
             const defaultValue = () => {
                     return{
@@ -103,13 +106,13 @@
 
             // RETURN
             return {
+                t,
                 // FUNCTIONS
                 resetFieldState,
                 undirtyField,
                 openMdEditor,
                 // STATE
                 state,
-                
             }
         },
     }
