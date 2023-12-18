@@ -266,6 +266,12 @@ async function fetchComments(id, type, aid = null) {
     return $httpQueue.add(() => http.get(endpoint).then(response => response.data).catch(error => { throw error; }));
 }
 
+export async function fetchEntityHistoryMetadata(id) {
+    return $httpQueue.add(
+        () => http.get(`/entity/${id}/metadata`).then(response => response.data)
+    );
+}
+
 export async function getBibtexFile() {
     return await $httpQueue.add(
         () => http.get('bibliography/export').then(response => response.data)

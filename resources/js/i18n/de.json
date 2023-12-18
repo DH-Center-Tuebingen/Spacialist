@@ -87,6 +87,7 @@
         "preview_not_available": "Keine Vorschau verfügbar",
         "note": "Hinweis",
         "information": "Information",
+        "history": "Verlauf",
         "tools": {
             "title": "Werkzeuge",
             "bibliography": "Literatur",
@@ -184,6 +185,7 @@
         "orcid": "ORCID",
         "licence": "Lizenz",
         "licence_default": "Standard-Lizenz",
+        "licence_missing": "Lizenz-Angabe fehlt",
         "description": "Beschreibung",
         "roles": "Rollen",
         "permissions": "Berechtigungen",
@@ -193,6 +195,9 @@
         "deactivated_at": "Deaktiviert",
         "timestamp": "Zeitstempel",
         "options": "Optionen",
+        "summary": "Zusammenfassung",
+        "creator": "Ersteller",
+        "editors": "Bearbeiter",
         "reply_to": "Antworten",
         "replying_to": "Antwort an {name}",
         "type": "Typ",
@@ -437,6 +442,9 @@
                         "cancel": "Bearbeitung verwerfen"
                     }
                 }
+            },
+            "metadata": {
+                "save": "Metadaten speichern"
             }
         },
         "user": {

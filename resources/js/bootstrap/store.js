@@ -231,6 +231,12 @@ export const store = createStore({
                         entity.metadata[k] = data.data[k];
                     }
                 },
+                updateEntityHistoryMetadata(state, data) {
+                    const entity = state.entities[data.eid];
+                    for(let k in data.data) {
+                        entity[k] = data.data[k];
+                    }
+                },
                 updateEntityDataModerations(state, data) {
                     const entity = state.entities[data.entity_id];
                     for(let i=0; i<data.attribute_ids.length; i++) {
@@ -715,8 +721,11 @@ export const store = createStore({
                 updateEntityMetadata({commit}, data) {
                     commit('updateEntityMetadata', data);
                 },
+                updateEntityHistoryMetadata({commit}, data) {
+                    commit('updateEntityHistoryMetadata', data);
+                },
                 updateEntityDataModerations({commit}, data) {
-                    commit("updateEntityDataModerations", data);
+                    commit('updateEntityDataModerations', data);
                 },
                 addEntityTypeAttribute({commit}, data) {
                     commit('addEntityTypeAttribute', data);

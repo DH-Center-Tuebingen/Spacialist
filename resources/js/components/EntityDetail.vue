@@ -261,7 +261,7 @@
                     {{ t('main.entity.tabs.metadata') }}
                     <span
                         v-if="!state.entity.metadata || !state.entity.metadata.licence"
-                        :title="`No licence provided`"
+                        :title="t('global.licence_missing')"
                     >
                         <i class="fas fa-fw fa-2xs fa-circle text-warning" />
                     </span>
@@ -332,11 +332,11 @@
                 >
                     <button
                         type="button"
-                        class="btn btn-sm btn-success"
+                        class="btn btn-sm btn-outline-success"
                         @click="saveMetadata"
                     >
                         <i class="fas fa-fw fa-save" />
-                        Save Metadata
+                        {{ t('main.entity.metadata.save') }}
                     </button>
                 </div>
                 <div
@@ -344,7 +344,7 @@
                 >
                     <div>
                         <h5 class="mb-1">
-                            Author/Creator
+                            {{ t('global.creator') }}
                         </h5>
                         <div
                             v-if="getUserBy(state.entity.creator)"
@@ -367,12 +367,16 @@
                                 />
                             </a>
                         </div>
+                        <span v-else>
+                            Fetching…
+                        </span>
                     </div>
                     <div>
                         <h5 class="mb-1">
-                            Editors
+                            {{ t('global.editors') }}
                         </h5>
                         <div
+                            v-if="state.entity.editors"
                             class="d-flex flex-row gap-2 align-items-center"
                         >
                             <a
@@ -394,16 +398,19 @@
                                 />
                             </a>
                         </div>
+                        <span v-else>
+                            Fetching…
+                        </span>
                     </div>
                     <div v-if="state.entity.metadata">
                         <h5 class="mb-1">
-                            License
+                            {{ t('global.licence') }}
                         </h5>
                         <input
                             v-model="state.entityMetadata.licence"
                             type="text"
                             class="form-control"
-                            placeholder="CC-BY 4.0"
+                            placeholder="CC-BY 4.0, ..."
                         >
                     </div>
                 </div>
@@ -414,7 +421,7 @@
                             class="form-label mb-1"
                         >
                             <h5 class="mb-0">
-                                Summary
+                                {{ t('global.summary') }}
                             </h5>
                         </label>
                         <richtext
@@ -427,13 +434,14 @@
                 </form>
                 <hr>
                 <div
-                    class="pe-2 overflow-auto"
+                    class="overflow-hidden d-flex flex-column"
                 >
                     <h5 class="mb-1">
-                        History
+                        {{ t('global.history') }}
                     </h5>
                     <ul
-                        class="list-group"
+                        v-if="state.entity.history"
+                        class="list-group pe-2 overflow-auto"
                     >
                         <li
                             v-for="entry in state.entity.history"
@@ -608,6 +616,11 @@
                             </span>
                         </li>
                     </ul>
+                    <alert
+                        v-else
+                        :type="'info'"
+                        :message="'Fetching history data…'"
+                    />
                 </div>
             </div>
             <div
@@ -695,6 +708,7 @@ import { useToast } from '@/plugins/toast.js';
 
     import { ago, date } from '@/helpers/filters.js';
     import {
+        fetchEntityHistoryMetadata,
         getEntityComments,
         patchAttributes,
         patchEntityName,
@@ -772,6 +786,7 @@ export default {
             showHistoryChange: {},
             initFinished: false,
             commentLoadingState: 'not',
+            metadataTabLoaded: false,
             hiddenAttributeState: false,
             attributesInTabs: true,
             routeQuery: computed(_ => route.query),
@@ -910,6 +925,17 @@ export default {
         });
 
         // FUNCTIONS
+        const fetchMetadataTabData = _ => {
+            if(state.metadataTabLoaded) return;
+
+            fetchEntityHistoryMetadata(state.entity.id).then(data => {
+                state.metadataTabLoaded = true;
+                store.dispatch('updateEntityHistoryMetadata', {
+                    eid: state.entity.id,
+                    data: data,
+                });
+            });
+        };
         const hasReferenceGroup = group => {
             if(!state.entity.references) return false;
             if(!Object.keys(state.entity.references).length) return false;
@@ -1043,6 +1069,7 @@ export default {
             } else if(tab === 'metadata') {
                 newTab = document.getElementById('active-entity-metadata-tab');
                 newPanel = document.getElementById('active-entity-metadata-panel');
+                fetchMetadataTabData();
             } else {
                 newTab = document.getElementById(`active-entity-attributes-group-${tabId}-tab`);
                 newPanel = document.getElementById(`active-entity-attributes-panel-${tabId}`);

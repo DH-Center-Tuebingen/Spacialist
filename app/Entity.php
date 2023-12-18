@@ -38,9 +38,6 @@ class Entity extends Model implements Searchable
         'parentIds',
         'parentNames',
         'attributeLinks',
-        'editors',
-        'creator',
-        'history',
     ];
 
     protected $casts = [

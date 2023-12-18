@@ -87,6 +87,7 @@
         "preview_not_available": "No preview available",
         "note": "Note",
         "information": "Information",
+        "history": "History",
         "tools": {
             "title": "Tools",
             "bibliography": "Bibliography",
@@ -184,6 +185,7 @@
         "orcid": "ORCID",
         "licence": "Licence",
         "licence_default": "Default Licence",
+        "licence_missing": "Licence missing",
         "description": "Description",
         "roles": "Roles",
         "permissions": "Permissions",
@@ -193,6 +195,9 @@
         "timestamp": "Timestamp",
         "deactivated_at": "Deactivated",
         "options": "Options",
+        "summary": "Summary",
+        "creator": "Creator",
+        "editors": "Editors",
         "reply_to": "Reply",
         "replying_to": "In reply to {name}",
         "type": "Type",
@@ -437,6 +442,9 @@
                         "cancel": "Cancel editing"
                     }
                 }
+            },
+            "metadata": {
+                "save": "Save Metadata"
             }
         },
         "user": {
