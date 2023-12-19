@@ -186,13 +186,15 @@
                                 @click.prevent="toggleReplies(comment)"
                             >
                                 <div v-show="state.repliesOpen[comment.id]">
-                                    <!-- eslint-disable-next-line vue/no-v-html -->
-                                    <span v-html="t('global.comments.hide_reply', comment.replies_count, {cnt: comment.replies_count})" />
+                                    <span>
+                                        {{ t('global.comments.hide_reply', comment.replies_count, {cnt: comment.replies_count}) }}
+                                    </span>
                                     <i class="fas fa-fw fa-caret-up" />
                                 </div>
                                 <div v-show="!state.repliesOpen[comment.id]">
-                                    <!-- eslint-disable-next-line vue/no-v-html -->
-                                    <span v-html="t('global.comments.show_reply', comment.replies_count, {cnt: comment.replies_count})" />
+                                    <span>
+                                        {{ t('global.comments.show_reply', comment.replies_count, {cnt: comment.replies_count}) }}
+                                    </span>
                                     <i class="fas fa-fw fa-caret-down" />
                                 </div>
                             </a>

@@ -219,8 +219,8 @@
             "show": "Kommentare anzeigen",
             "submit": "Kommentar abschicken",
             "text_placeholder": "Kommentar eingeben",
-            "hide_reply": "<span class=\"fw-bold\">Eine</span> Antwort ausblenden | <span class=\"fw-bold\">{cnt}</span> Antworten ausblenden",
-            "show_reply": "<span class=\"fw-bold\">Eine</span> Antwort anzeigen | <span class=\"fw-bold\">{cnt}</span> Antworten anzeigen",
+            "hide_reply": "Eine Antwort ausblenden | {cnt} Antworten ausblenden",
+            "show_reply": "Eine Antwort anzeigen | {cnt} Antworten anzeigen",
             "fetching": "Lade Kommentare&hellip;",
             "fetching_failed": "Laden der Kommentare fehlgeschlagen!",
             "retry_failed": "Wiederholen"

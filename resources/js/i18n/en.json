@@ -219,8 +219,8 @@
             "show": "Show comments",
             "submit": "Submit Comment",
             "text_placeholder": "Enter a comment",
-            "hide_reply": "Hide <span class=\"fw-bold\">one</span> reply | Hide <span class=\"fw-bold\">{cnt}</span> replies",
-            "show_reply": "Show <span class=\"fw-bold\">one</span> reply | Show <span class=\"fw-bold\">{cnt}</span> replies",
+            "hide_reply": "Hide one reply | Hide {cnt} replies",
+            "show_reply": "Show one reply | Show {cnt} replies",
             "fetching": "Fetching comments&hellip;",
             "fetching_failed": "Fetching comments failed!",
             "retry_failed": "Retry"
