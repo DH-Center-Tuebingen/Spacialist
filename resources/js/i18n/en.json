@@ -87,7 +87,19 @@
         "preview_not_available": "No preview available",
         "note": "Note",
         "information": "Information",
-        "history": "History",
+        "history": {
+            "title": "History",
+            "created_as": "Created as:",
+            "no_value": "No value recorded",
+            "entity": {
+                "created_in": "As Sub-Entity of:",
+                "name_update": "Updated name:",
+                "value_add_attribute": "Added value to attribute:",
+                "value_update_attribute": "Updated value of attribute:",
+                "certainty_update": "Cerntainty updated:",
+                "certainty_unknown": "Unknown"
+            }
+        },
         "tools": {
             "title": "Tools",
             "bibliography": "Bibliography",

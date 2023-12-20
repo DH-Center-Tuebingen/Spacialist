@@ -77,14 +77,10 @@
                                         class="dropdown-item d-flex align-items-center gap-1"
                                         :title="link.path.join(' / ')"
                                     >
-                                        <span
-                                            class="badge rounded-pill"
-                                            style="font-size: 8px;"
-                                            :style="getEntityColors(link.entity_type_id)"
-                                            :title="getEntityTypeName(link.entity_type_id)"
-                                        >
-                                            &nbsp;&nbsp;
-                                        </span>
+                                        <entity-type-label
+                                            :type="link.entity_type_id"
+                                            :icon-only="true"
+                                        />
                                         {{ link.name }}
                                         <span class="text-muted small">{{ link.attribute_urls.join(', ') }}</span>
                                     </router-link>
@@ -155,14 +151,10 @@
             </div>
         </div>
         <div class="d-flex justify-content-between my-2">
-            <div class="d-flex flex-row gap-1">
-                <span :style="state.colorStyles">
-                    <i class="fas fa-fw fa-circle" />
-                </span>
-                <span>
-                    {{ state.entityTypeLabel }}
-                </span>
-            </div>
+            <entity-type-label
+                :type="state.entity.entity_type_id"
+                :icon-only="false"
+            />
             <div>
                 <i class="fas fa-fw fa-user-edit" />
                 <span
@@ -263,7 +255,7 @@
                         v-if="!state.entity.metadata || !state.entity.metadata.licence"
                         :title="t('global.licence_missing')"
                     >
-                        <i class="fas fa-fw fa-2xs fa-circle text-warning" />
+                        <i class="fas fa-fw fa-exclamation text-warning" />
                     </span>
                 </a>
             </li>
@@ -437,7 +429,7 @@
                     class="overflow-hidden d-flex flex-column"
                 >
                     <h5 class="mb-1">
-                        {{ t('global.history') }}
+                        {{ t('global.history.title') }}
                     </h5>
                     <ul
                         v-if="state.entity.history"
@@ -462,40 +454,63 @@
                                     <i class="fas fa-fw fa-edit text-warning" />
                                 </span>
                             </span>
-                            <div class="text-nowrap">
-                                <span 
-                                    class="badge bg-opacity-75 pe-3"
-                                    :class="{'bg-warning': entry.user_id == state.entity.creator && entry.user_id != userId(), 'bg-primary': entry.user_id != state.entity.creator && entry.user_id != userId(), 'bg-success': entry.user_id == userId()}"
-                                >
-                                    {{ getUserBy(entry.user_id).name }}
-                                </span>
-                                <user-avatar
-                                    :user="getUserBy(entry.user_id)"
-                                    :size="20"
-                                    class="align-middle ms-n2"
-                                />
-                            </div>
                             <div class="flex-grow-1">
                                 <template
                                     v-if="entry.subject_type == 'App\\Entity'"
                                 >
-                                    <span
+                                    <div
                                         v-if="entry.description == 'created'"
                                     >
-                                        As Entity <span class="badge bg-primary bg-opacity-75">{{ entry.properties.attributes.name }}</span> ({{ getEntityTypeName(entry.properties.attributes.entity_type_id) }}) created.
+                                        <div
+                                            class="d-flex flex-row gap-2 align-items-center"
+                                        >
+                                            <span class="fw-bold">
+                                                {{ t('global.history.created_as') }}
+                                            </span>
+                                            <span class="badge bg-primary bg-opacity-75">{{ entry.properties.attributes.name }}</span>
+                                            <div class="d-flex flex-row">
+                                                (
+                                                <entity-type-label
+                                                    :type="entry.properties.attributes.entity_type_id"
+                                                    :icon-only="false"
+                                                />
+                                                )
+                                            </div>
+                                        </div>
                                         <div
                                             v-if="entry.properties.attributes.root_entity_id"
+                                            class="d-flex flex-row gap-2 align-items-center"
                                         >
-                                            To <span class="fw-bold">{{ getEntity(entry.properties.attributes.root_entity_id).name }}</span>
+                                            <span class="fw-bold">
+                                                {{ t('global.history.entity.created_in') }}
+                                            </span>
+                                            <router-link
+                                                class="link-underline link-underline-opacity-0 link-underline-opacity-100-hover"
+                                                :to="{name: 'entitydetail', params: {id: entry.properties.attributes.root_entity_id}, query: route.query}"
+                                                append
+                                            >
+                                                {{ getEntity(entry.properties.attributes.root_entity_id).name }}
+                                            </router-link>
                                         </div>
-                                    </span>
-                                    <span
+                                    </div>
+                                    <div
                                         v-else-if="entry.description == 'updated'"
-                                        class="d-flex flex-row align-items-center gap-2"
+                                        class="d-flex flex-column align-items-start gap-2"
                                     >
-                                        Updated name <span class="badge bg-danger bg-opacity-75">{{ entry.properties.old.name }}</span>
-                                        <i class="fas fa-fw fa-2xs fa-arrow-right" /> <span class="badge bg-success bg-opacity-75">{{ entry.properties.attributes.name }}</span>
-                                    </span>
+                                        <div
+                                            v-if="entry.properties.old.name && entry.properties.attributes.name"
+                                            class="d-flex flex-row gap-2 align-items-center"
+                                        >
+                                            <span class="fw-bold">
+                                                {{ t('global.history.entity.name_update') }}
+                                            </span>
+                                            <span class="badge bg-danger bg-opacity-75">{{ entry.properties.old.name }}</span>
+                                            <i class="fas fa-fw fa-2xs fa-arrow-right" /> <span class="badge bg-success bg-opacity-75">{{ entry.properties.attributes.name }}</span>
+                                        </div>
+                                        <div v-else>
+                                            Something has changed...
+                                        </div>
+                                    </div>
                                 </template>
                                 <template
                                     v-else-if="entry.subject_type == 'attribute_values'"
@@ -506,7 +521,12 @@
                                         <span
                                             class="d-flex flex-row align-items-center gap-2"
                                         >
-                                            Added value to attribute <span class="fw-bold">{{ getAttributeName(entry.attribute.id) }}</span>
+                                            <span class="fw-bold">
+                                                {{ t('global.history.entity.value_add_attribute') }}
+                                            </span>
+                                            <span>
+                                                {{ getAttributeName(entry.attribute.id) }}
+                                            </span>
                                             <a
                                                 href="#"
                                                 class="text-reset"
@@ -538,7 +558,12 @@
                                             v-if="hasHistoryEntryKey(entry.properties.attributes, '!certainty') || hasHistoryEntryKey(entry.properties.old, '!certainty')"
                                         >
                                             <span class="d-flex flex-row align-items-center gap-2">
-                                                Updated value of attribute <span class="fw-bold">{{ getAttributeName(entry.attribute.id) }}</span>
+                                                <span class="fw-bold">
+                                                    {{ t('global.history.entity.value_update_attribute') }}
+                                                </span>
+                                                <span>
+                                                    {{ getAttributeName(entry.attribute.id) }}
+                                                </span>
                                                 <a
                                                     href="#"
                                                     class="text-reset"
@@ -569,7 +594,9 @@
                                                     v-else
                                                     class="badge bg-danger"
                                                 >
-                                                    No value recorded
+                                                    <span class="fst-italic">
+                                                        {{ t('global.history.no_value') }}
+                                                    </span>
                                                 </span>
                                                 <i class="fas fa-fw fa-arrow-right" />
                                                 <attribute-list
@@ -585,28 +612,49 @@
                                                     v-else
                                                     class="badge bg-danger"
                                                 >
-                                                    No value recorded
+                                                    <span class="fst-italic">
+                                                        {{ t('global.history.no_value') }}
+                                                    </span>
                                                 </span>
                                             </div>
                                         </template>
-                                        <template
+                                        <div
                                             v-else
+                                            class="d-flex flex-row gap-2 align-items-center"
                                         >
-                                            Updated Certainty of <span class="fw-bold">{{ getAttributeName(entry.attribute.id) }}</span>
+                                            <span class="fw-bold">
+                                                {{ t('global.history.entity.certainty_update') }}
+                                            </span>
+                                            <span>
+                                                {{ getAttributeName(entry.attribute.id) }}
+                                            </span>
                                             <div
                                                 class="d-flex flex-row align-items-center gap-1"
                                             >
                                                 <span class="badge bg-danger bg-opacity-75">
-                                                    {{ entry.properties.old.certainty || Unknown }}
+                                                    {{ entry.properties.old.certainty || t('global.history.entity.certainty_unknown') }}
                                                 </span>
                                                 <i class="fas fa-fw fa-xs fa-arrow-right" />
                                                 <span class="badge bg-success bg-opacity-75">
-                                                    {{ entry.properties.attributes.certainty || Unknown }}
+                                                    {{ entry.properties.attributes.certainty || t('global.history.entity.certainty_unknown') }}
                                                 </span>
                                             </div>
-                                        </template>
+                                        </div>
                                     </div>
                                 </template>
+                            </div>
+                            <div class="text-nowrap">
+                                <span 
+                                    class="badge bg-opacity-75 pe-3"
+                                    :class="{'bg-warning': entry.user_id == state.entity.creator && entry.user_id != userId(), 'bg-primary': entry.user_id != state.entity.creator && entry.user_id != userId(), 'bg-success': entry.user_id == userId()}"
+                                >
+                                    {{ getUserBy(entry.user_id).name }}
+                                </span>
+                                <user-avatar
+                                    :user="getUserBy(entry.user_id)"
+                                    :size="20"
+                                    class="align-middle ms-n2"
+                                />
                             </div>
                             <span
                                 class="small ms-auto text-secondary text-nowrap"
@@ -723,8 +771,6 @@ import { useToast } from '@/plugins/toast.js';
         getAttributeName,
         getUserBy,
         getEntity,
-        getEntityColors,
-        getEntityTypeName,
         getEntityTypeAttributeSelections,
         getEntityTypeDependencies,
         translateConcept,
@@ -765,12 +811,6 @@ export default {
         // DATA
         const attrRefs = ref({});
         const state = reactive({
-            colorStyles: computed(_ => {
-                const colors = getEntityColors(state.entity.entity_type_id);
-                return {
-                    color: colors.backgroundColor
-                };
-            }),
             formDirty: computed(_ => {
                 for(let k in state.dirtyStates) {
                     if(state.dirtyStates[k]) return true;
@@ -853,9 +893,6 @@ export default {
                 return groups;
             }),
             attributesFetched: computed(_ => state.initFinished && state.entity.data && !!state.entityAttributes && state.entityAttributes.length > 0),
-            entityTypeLabel: computed(_ => {
-                return getEntityTypeName(state.entity.entity_type_id);
-            }),
             hiddenAttributeList: computed(_ => {
                 const keys = Object.keys(state.hiddenAttributes);
                 const values = Object.values(state.hiddenAttributes);
@@ -1342,6 +1379,11 @@ export default {
 
                 nextTick(_ => {
                     setDetailPanelView(route.query.view);
+
+                    const currUrlParam = route.query?.view;
+                    if(currUrlParam == 'metadata') {
+                        fetchMetadataTabData();
+                    }
                 });
             }
         );
@@ -1374,6 +1416,7 @@ export default {
                     return false;
                 } else {
                     state.hiddenAttributes = {};
+                    state.metadataTabLoaded = false;
                     // store.dispatch('resetEntity');
                     return true;
                 }
@@ -1386,6 +1429,7 @@ export default {
         // RETURN
         return {
             t,
+            route,
             // HELPERS
             can,
             ago,
@@ -1394,9 +1438,7 @@ export default {
             getUserBy,
             showUserInfo,
             getAttributeName,
-            getEntityTypeName,
             getEntity,
-            getEntityColors,
             translateConcept,
             // LOCAL
             hasReferenceGroup,

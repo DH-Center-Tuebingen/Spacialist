@@ -87,7 +87,19 @@
         "preview_not_available": "Keine Vorschau verfügbar",
         "note": "Hinweis",
         "information": "Information",
-        "history": "Verlauf",
+        "history": {
+            "title": "Verlauf",
+            "created_as": "Erstellt als:",
+            "no_value": "Kein Wert aufgezeichnet",
+            "entity": {
+                "created_in": "Als Unter-Entität von:",
+                "name_update": "Name aktualisiert:",
+                "value_add_attribute": "Wert zu Attribut hinzugefügt:",
+                "value_update_attribute": "Wert von Attribut geändert:",
+                "certainty_update": "Sicherheit aktualisiert:",
+                "certainty_unknown": "Unbekannt"
+            }
+        },
         "tools": {
             "title": "Werkzeuge",
             "bibliography": "Literatur",

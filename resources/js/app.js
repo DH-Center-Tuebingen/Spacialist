@@ -29,6 +29,7 @@ import MarkdownViewer from '@/components/mde/Viewer.vue';
 import MarkdownEditor from '@/components/mde/Wrapper.vue';
 import BibtexCode from '@/components/bibliography/BibtexCode.vue';
 import Richtext from '@/components/attribute/Richtext.vue';
+import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
 
 // Init Libs
 // PQueue, httpQueue
@@ -234,6 +235,7 @@ app.component('MdViewer', MarkdownViewer);
 app.component('MdEditor', MarkdownEditor);
 app.component('BibtexCode', BibtexCode);
 app.component('Richtext', Richtext);
+app.component('EntityTypeLabel', EntityTypeLabel);
 // Third-Party components
 app.component('Multiselect', Multiselect);
 app.component('FileUpload', VueUploadComponent);
