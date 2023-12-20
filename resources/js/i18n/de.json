@@ -467,7 +467,7 @@
                 }
             },
             "add_role_placeholder": "Rollen hinzufügen",
-            "add_group_placeholder": "Arbeitsgruppen hizufügen"
+            "deactivated_role_placeholder": "Keine Rollen zugeordnet",
         },
         "role": {
             "add_button": "Neue Rolle hinzufügen",

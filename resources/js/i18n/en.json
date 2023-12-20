@@ -462,7 +462,8 @@
                     "message": "Your password has been changed recently. You either have to accept that new password or set one yourself. To do so you have only one additional login left! | Your password has been changed recently. You either have to accept that new password or set one yourself. To do so you have {attempts} additional logins left."
                 }
             },
-            "add_role_placeholder": "Add roles"
+            "add_role_placeholder": "Add roles",
+            "deactivated_role_placeholder": "No roles assigned",
         },
         "role": {
             "add_button": "Add new Role",

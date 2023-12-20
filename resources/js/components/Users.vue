@@ -254,7 +254,7 @@
                                 :mode="'tags'"
                                 :disabled="true"
                                 :options="[]"
-                                :placeholder="t('main.user.add_role_placeholder')"
+                                :placeholder="t('main.user.deactivated_role_placeholder')"
                             />
                         </td>
                         <td>
