@@ -187,6 +187,7 @@
         "description": "Description",
         "roles": "Roles",
         "permissions": "Permissions",
+        "groups": "Working Groups",
         "added_at": "Added",
         "created_at": "Created",
         "updated_at": "Updated",
@@ -369,6 +370,9 @@
                 "multiedit": {
                     "title": "Multi-Edit Attributes"
                 },
+                "access": {
+                    "title": "Access - Working Groups"
+                },
                 "delete": {
                     "alert": "If you delete <span class=\"fw-bold\">{name}</span>, at least one entity is deleted, too. | If you delete <span class=\"fw-bold\">{name}</span>, at least {cnt} entities are deleted, too."
                 }
@@ -463,7 +467,9 @@
                 }
             },
             "add_role_placeholder": "Add roles",
+            "add_group_placeholder": "Add group",
             "deactivated_role_placeholder": "No roles assigned",
+            "deactivated_group_placeholder": "No groups assigned"
         },
         "role": {
             "add_button": "Add new Role",
@@ -516,6 +522,20 @@
                 }
             },
             "add_permission_placeholder": "Add permissions"
+        },
+        "group": {
+            "add_button": "Add Working Group",
+            "toasts": {
+                "updated": {
+                    "title": "Working Group updated",
+                    "msg": "{name} successfully updated."
+                }
+            },
+            "modal": {
+                "new": {
+                    "title": "New Working Group"
+                }
+            }
         },
         "activity": {
             "title_project": "Project Activity | Project Activities",
