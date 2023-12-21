@@ -255,7 +255,7 @@
                         v-if="!state.entity.metadata || !state.entity.metadata.licence"
                         :title="t('global.licence_missing')"
                     >
-                        <i class="fas fa-fw fa-exclamation text-warning" />
+                        <i class="fas fa-exclamation text-warning" />
                     </span>
                 </a>
             </li>
@@ -429,7 +429,7 @@
                     class="overflow-hidden d-flex flex-column"
                 >
                     <h5 class="mb-1">
-                        {{ t('global.history.title') }}
+                        {{ t('main.history.title') }}
                     </h5>
                     <ul
                         v-if="state.entity.history"
@@ -465,7 +465,7 @@
                                             class="d-flex flex-row gap-2 align-items-center"
                                         >
                                             <span class="fw-bold">
-                                                {{ t('global.history.created_as') }}
+                                                {{ t('main.history.created_as') }}
                                             </span>
                                             <span class="badge bg-primary bg-opacity-75">{{ entry.properties.attributes.name }}</span>
                                             <div class="d-flex flex-row">
@@ -482,7 +482,7 @@
                                             class="d-flex flex-row gap-2 align-items-center"
                                         >
                                             <span class="fw-bold">
-                                                {{ t('global.history.entity.created_in') }}
+                                                {{ t('main.history.entity.created_in') }}
                                             </span>
                                             <router-link
                                                 class="link-underline link-underline-opacity-0 link-underline-opacity-100-hover"
@@ -502,13 +502,88 @@
                                             class="d-flex flex-row gap-2 align-items-center"
                                         >
                                             <span class="fw-bold">
-                                                {{ t('global.history.entity.name_update') }}
+                                                {{ t('main.history.entity.name_update') }}
                                             </span>
                                             <span class="badge bg-danger bg-opacity-75">{{ entry.properties.old.name }}</span>
-                                            <i class="fas fa-fw fa-2xs fa-arrow-right" /> <span class="badge bg-success bg-opacity-75">{{ entry.properties.attributes.name }}</span>
+                                            <i class="fas fa-fw fa-2xs fa-arrow-right" />
+                                            <span class="badge bg-success bg-opacity-75">{{ entry.properties.attributes.name }}</span>
+                                        </div>
+                                        <div
+                                            v-else-if="(entry.properties.old.root_entity_id || entry.properties.old.rank) && entry.properties.attributes.root_entity_id || entry.properties.attributes.rank"
+                                            class="d-flex flex-row gap-2 align-items-center"
+                                        >
+                                            <span
+                                                class="fw-bold"
+                                            >
+                                                {{ t('main.history.entity.moved') }}
+                                            </span>
+                                            <span
+                                                class="badge bg-danger bg-opacity-75"
+                                            >
+                                                <template
+                                                    v-if="entry.properties.old.root_entity_id"
+                                                >
+                                                    <span
+                                                        v-if="getEntity(entry.properties.old.root_entity_id).name"
+                                                    >
+                                                        {{ getEntity(entry.properties.old.root_entity_id).name }}
+                                                    </span>
+                                                    <span
+                                                        v-else
+                                                        class="fst-italic"
+                                                        :title="t('main.history.entity.name_unknown_info')"
+                                                    >
+                                                        {{ t('main.history.entity.name_unknown') }}
+                                                    </span>
+                                                </template>
+                                                <span
+                                                    v-else
+                                                >
+                                                    {{ t('main.entity.top_level') }}
+                                                </span>
+                                                |
+                                                <span
+                                                    :title="t('main.history.entity.rank')"
+                                                >
+                                                    {{ entry.properties.old.rank }}
+                                                </span>
+                                            </span>
+                                            <i class="fas fa-fw fa-2xs fa-arrow-right" />
+                                            <span
+                                                class="badge bg-success bg-opacity-75"
+                                            >
+                                                <template
+                                                    v-if="entry.properties.attributes.root_entity_id"
+                                                >
+                                                    <span
+                                                        v-if="getEntity(entry.properties.attributes.root_entity_id).name"
+                                                    >
+                                                        {{ getEntity(entry.properties.attributes.root_entity_id).name }}
+                                                    </span>
+                                                    <span
+                                                        v-else
+                                                        class="fst-italic"
+                                                        :title="t('main.history.entity.name_unknown_info')"
+                                                    >
+                                                        {{ t('main.history.entity.name_unknown') }}
+                                                    </span>
+                                                </template>
+                                                <span
+                                                    v-else
+                                                >
+                                                    {{ t('main.entity.top_level') }}
+                                                </span>
+                                                |
+                                                <span
+                                                    :title="t('main.history.entity.rank')"
+                                                >
+                                                    {{ entry.properties.attributes.rank }}
+                                                </span>
+                                            </span>
                                         </div>
                                         <div v-else>
                                             Something has changed...
+                                            {{ entry.properties }}
                                         </div>
                                     </div>
                                 </template>
@@ -522,7 +597,7 @@
                                             class="d-flex flex-row align-items-center gap-2"
                                         >
                                             <span class="fw-bold">
-                                                {{ t('global.history.entity.value_add_attribute') }}
+                                                {{ t('main.history.entity.value_add_attribute') }}
                                             </span>
                                             <span>
                                                 {{ getAttributeName(entry.attribute.id) }}
@@ -559,7 +634,7 @@
                                         >
                                             <span class="d-flex flex-row align-items-center gap-2">
                                                 <span class="fw-bold">
-                                                    {{ t('global.history.entity.value_update_attribute') }}
+                                                    {{ t('main.history.entity.value_update_attribute') }}
                                                 </span>
                                                 <span>
                                                     {{ getAttributeName(entry.attribute.id) }}
@@ -595,7 +670,7 @@
                                                     class="badge bg-danger"
                                                 >
                                                     <span class="fst-italic">
-                                                        {{ t('global.history.no_value') }}
+                                                        {{ t('main.history.no_value') }}
                                                     </span>
                                                 </span>
                                                 <i class="fas fa-fw fa-arrow-right" />
@@ -613,7 +688,7 @@
                                                     class="badge bg-danger"
                                                 >
                                                     <span class="fst-italic">
-                                                        {{ t('global.history.no_value') }}
+                                                        {{ t('main.history.no_value') }}
                                                     </span>
                                                 </span>
                                             </div>
@@ -623,7 +698,7 @@
                                             class="d-flex flex-row gap-2 align-items-center"
                                         >
                                             <span class="fw-bold">
-                                                {{ t('global.history.entity.certainty_update') }}
+                                                {{ t('main.history.entity.certainty_update') }}
                                             </span>
                                             <span>
                                                 {{ getAttributeName(entry.attribute.id) }}
@@ -632,11 +707,11 @@
                                                 class="d-flex flex-row align-items-center gap-1"
                                             >
                                                 <span class="badge bg-danger bg-opacity-75">
-                                                    {{ entry.properties.old.certainty || t('global.history.entity.certainty_unknown') }}
+                                                    {{ entry.properties.old.certainty || t('main.history.entity.certainty_unknown') }}
                                                 </span>
                                                 <i class="fas fa-fw fa-xs fa-arrow-right" />
                                                 <span class="badge bg-success bg-opacity-75">
-                                                    {{ entry.properties.attributes.certainty || t('global.history.entity.certainty_unknown') }}
+                                                    {{ entry.properties.attributes.certainty || t('main.history.entity.certainty_unknown') }}
                                                 </span>
                                             </div>
                                         </div>

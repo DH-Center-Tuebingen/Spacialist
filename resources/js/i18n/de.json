@@ -87,19 +87,6 @@
         "preview_not_available": "Keine Vorschau verfügbar",
         "note": "Hinweis",
         "information": "Information",
-        "history": {
-            "title": "Verlauf",
-            "created_as": "Erstellt als:",
-            "no_value": "Kein Wert aufgezeichnet",
-            "entity": {
-                "created_in": "Als Unter-Entität von:",
-                "name_update": "Name aktualisiert:",
-                "value_add_attribute": "Wert zu Attribut hinzugefügt:",
-                "value_update_attribute": "Wert von Attribut geändert:",
-                "certainty_update": "Sicherheit aktualisiert:",
-                "certainty_unknown": "Unbekannt"
-            }
-        },
         "tools": {
             "title": "Werkzeuge",
             "bibliography": "Literatur",
@@ -321,6 +308,7 @@
         },
         "entity": {
             "title": "Entität | Entitäten",
+            "top_level": "Top-Level-Entität",
             "count": "Keine Top-Level Entitäten | Eine Top-Level Entität | {cnt} Top-Level Entitäten",
             "detail_tab_none_selected": "Keine Entität ausgewählt. Wähle aus dem Baum eine Entität aus um hier Details dazu zu erhalten.",
             "toasts": {
@@ -682,6 +670,23 @@
                 "support_archaeology": "Archäologische Unterstützung",
                 "project_lead": "Projektleitung",
                 "project_lead_former": "Ehemalige Projektleitung"
+            }
+        },
+        "history": {
+            "title": "Verlauf",
+            "created_as": "Erstellt als:",
+            "no_value": "Kein Wert aufgezeichnet",
+            "entity": {
+                "created_in": "Als Unter-Entität von:",
+                "name_update": "Name aktualisiert:",
+                "name_unknown": "Unbekannte Entität",
+                "name_unknown_info": "Das bedeutet, dass die Entität entweder gelöscht wurde oder du nicht die nötigen Berechtigungen besitzt.",
+                "value_add_attribute": "Wert zu Attribut hinzugefügt:",
+                "value_update_attribute": "Wert von Attribut geändert:",
+                "certainty_update": "Sicherheit aktualisiert:",
+                "certainty_unknown": "Unbekannt",
+                "moved": "Verschoben:",
+                "rank": "Rang"
             }
         },
         "bibliography": {

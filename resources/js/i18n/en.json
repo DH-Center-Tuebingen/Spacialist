@@ -87,19 +87,6 @@
         "preview_not_available": "No preview available",
         "note": "Note",
         "information": "Information",
-        "history": {
-            "title": "History",
-            "created_as": "Created as:",
-            "no_value": "No value recorded",
-            "entity": {
-                "created_in": "As Sub-Entity of:",
-                "name_update": "Updated name:",
-                "value_add_attribute": "Added value to attribute:",
-                "value_update_attribute": "Updated value of attribute:",
-                "certainty_update": "Cerntainty updated:",
-                "certainty_unknown": "Unknown"
-            }
-        },
         "tools": {
             "title": "Tools",
             "bibliography": "Bibliography",
@@ -321,6 +308,7 @@
         },
         "entity": {
             "title": "Entity | Entities",
+            "top_level": "Top-Level-Entity",
             "count": "No Top-Level-Entities | One Top-Level-Entity | {cnt} Top-Level-Entities",
             "detail_tab_none_selected": "No Entity selected. Select an Entity from the tree to see the details in this tab.",
             "toasts": {
@@ -682,6 +670,23 @@
                 "support_archaeology": "Archaeological Support",
                 "project_lead": "Project Lead",
                 "project_lead_former": "Former Project Lead"
+            }
+        },
+        "history": {
+            "title": "History",
+            "created_as": "Created as:",
+            "no_value": "No value recorded",
+            "entity": {
+                "created_in": "As Sub-Entity of:",
+                "name_update": "Updated name:",
+                "name_unknown": "Unknown Entity",
+                "name_unknown_info": "This means either that this Entity is deleted or you do not have the required access rights for it.",
+                "value_add_attribute": "Added value to attribute:",
+                "value_update_attribute": "Updated value of attribute:",
+                "certainty_update": "Cerntainty updated:",
+                "certainty_unknown": "Unknown",
+                "moved": "Moved:",
+                "rank": "Rank"
             }
         },
         "bibliography": {
