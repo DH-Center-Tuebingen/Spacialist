@@ -233,7 +233,7 @@
 
             // DATA
             const state = reactive({
-                delimiter: ',',
+                delimiter: localStorage.getItem('csv-table-delimiter') || ',' ,
                 hasHeaderRow: true,
                 showLinenumbers: false,
                 showCount: 10,
@@ -256,6 +256,11 @@
             onMounted(_ => {
                 recomputeRows();
             });
+
+            watch(_ => state.delimiter, _ => {
+                localStorage.setItem('csv-table-delimiter', state.delimiter);
+            });
+
             watch(_ => content.value, _ => {
                 recomputeRows();
             });
