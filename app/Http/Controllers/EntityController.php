@@ -372,7 +372,6 @@ class EntityController extends Controller {
 
         $duplicate = $entity->replicate();
         $duplicate->created_at = Carbon::now();
-        $duplicate->geodata_id = null;
         if(isset($duplicate->root_entity_id)) {
             $duplicate->rank = Entity::where('root_entity_id', $duplicate->root_entity_id)->max('rank') + 1;
         } else {
@@ -383,12 +382,14 @@ class EntityController extends Controller {
         $duplicate->save();
 
         // Files, bibliographies, attribute_values
-        $fileLinks = EntityFile::where('entity_id', $entity->id)->get();
-        foreach($fileLinks as $fileLink) {
-            $newLink = $fileLink->replicate();
-            $newLink->entity_id = $duplicate->id;
-            $newLink->user_id = $user->id;
-            $newLink->save();
+        if(sp_has_plugin('File')) {
+            $fileLinks = EntityFile::where('entity_id', $entity->id)->get();
+            foreach($fileLinks as $fileLink) {
+                $newLink = $fileLink->replicate();
+                $newLink->entity_id = $duplicate->id;
+                $newLink->user_id = $user->id;
+                $newLink->save();
+            }
         }
         $refs = Reference::where('entity_id', $entity->id)->get();
         foreach($refs as $ref) {
