@@ -372,9 +372,7 @@
             </template>
             <template v-else>
                 <div class="h-100 d-flex flex-column justify-content-center align-items-center">
-                    <div>
-                        <i class="fas fa-5x fa-fw fa-spinner fa-spin" />
-                    </div>
+                    <Spinner size="7x" />
 
                     <!-- eslint-disable vue/no-v-html -->
                     <h1
@@ -461,10 +459,12 @@ import {
 import {
     searchParamsToObject
 } from '@/helpers/routing.js';
+import Spinner from './components/Spinner.vue';
 
 export default {
     components: {
-        'modals-container': ModalsContainer,
+    'modals-container': ModalsContainer,
+    Spinner,
     },
     setup(props) {
         const { t, locale } = useI18n();
