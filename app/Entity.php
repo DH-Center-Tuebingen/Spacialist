@@ -99,7 +99,7 @@ class Entity extends Model implements Searchable
             )
             SELECT final_id
             FROM path
-            WHERE pathstr = ?
+            WHERE pathstr = ? AND path.root_entity_id IS NULL
         ", ["$last", "$delimiter", "$path"]);
         if(count($res) > 1) {
             throw new AmbiguousValueException("Path '$path' is ambiguous");
