@@ -9,6 +9,8 @@ All notable changes to this project will be documented in this file.
 - New Attribute Type: _Richtext_ (A feature-rich alternative to _Textbox_ Attribute; based on Markdown)
 - Separate form Save/Reset in Entity Attribute Tabs (when using _Attribute Group Separator_)
 - Additional non-standard bibtex fields to _Bibliography_ (ISBN, ISSN, Language and Abstract)
+- Auto-fill attributes in _Data Importer_
+- Plugin fields in _Data Importer_
 ### Fixed
 - Error in _Attribute List_ caused by _Entity (Multiple Choice)_ attribute
 - Attribute form Save/Reset handling due to newly introduced _Attribute Group Separator_
@@ -20,6 +22,7 @@ All notable changes to this project will be documented in this file.
 - Typos in Translation files
 - Updating bibliography entries
 - Duplicate Entity
+- Several fixes in _Data Importer_
 ### Changed
 - Entity tree sorting is now accessible through ...-menu
 - Reset Password Workflow

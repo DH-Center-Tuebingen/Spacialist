@@ -438,6 +438,7 @@ class EntityController extends Controller {
         $hasParent = false;
         $attributeIdx = [];
         $attributeTypes = [];
+        $pluginIdx = [];
         $addedEntities = [];
 
         DB::beginTransaction();
@@ -458,6 +459,14 @@ class EntityController extends Controller {
                                 $attributeIdx[$id] = $i;
                                 $attributeTypes[$id] = Attribute::find($id)->datatype;
                                 break;
+                            }
+                        }
+                        if(isset($data['plugins'])) {
+                            foreach($data['plugins'] as $id => $pcol) {
+                                if($pcol == $row[$i]) {
+                                    $pluginIdx[$id] = $i;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -487,8 +496,23 @@ class EntityController extends Controller {
             ], $data['entity_type_id'], $user, $rootEntityId);
 
             if($res['type'] === 'entity') {
-                $addedEntities[] = $res['entity'];
                 $eid = $res['entity']->id;
+                if(sp_has_plugin('Map') && isset($pluginIdx['map.geodata']) && isset($data['plugins']['map.epsg'])) {
+                    $srid = $data['plugins']['map.epsg'];
+                    $geom = $row[$pluginIdx['map.geodata']];
+                    $wkt = DB::select("SELECT ST_AsText(ST_Transform(ST_GeomFromText('$geom', $srid), 4326)) AS wkt")[0]->wkt;
+                    $parsedWkt = Geodata::parseWkt($wkt);
+                    if(isset($parsedWkt)) {
+                        $geodata = new \App\Plugins\Map\App\Geodata();
+                        $geodata->geom = $parsedWkt;
+                        $geodata->user_id = $user->id;
+                        $geodata->save();
+
+                        $res['entity']->geodata_id = $geodata->id;
+                        $res['entity']->save();
+                    }
+                }
+                $addedEntities[] = $res['entity'];
                 foreach($attributeIdx as $key => $val) {
                     $aid = intval($key);
                     $type = $attributeTypes[$aid];

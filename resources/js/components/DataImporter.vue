@@ -91,7 +91,7 @@
                             :options="state.availableColumns"
                             :placeholder="t('global.select.placeholder')"
                             :hide-selected="true"
-                            @select="e => onColumnSelected(e, 'name', true)"
+                            @select="e => onColumnSelected(e, 'name', 'main')"
                         />
                     </div>
                     <div class="col-md-4 col-sm-6">
@@ -125,8 +125,86 @@
                             :options="state.availableColumns"
                             :placeholder="t('global.select.placeholder')"
                             :hide-selected="true"
-                            @select="e => onColumnSelected(e, 'parent', true)"
+                            @select="e => onColumnSelected(e, 'parent', 'main')"
                         />
+                    </div>
+                    <hr>
+                    <div
+                        v-if="hasPlugins()"
+                        class="mt-0"
+                    >
+                        <a
+                            href="#"
+                            class="text-body text-decoration-none fw-bold"
+                            @click.prevent="state.showPluginTab = !state.showPluginTab"
+                        >
+                            Plugin-specific fields
+                            <span v-show="state.showPluginTab">
+                                <i class="fas fa-fw fa-caret-up" />
+                            </span>
+                            <span v-show="!state.showPluginTab">
+                                <i class="fas fa-fw fa-caret-down" />
+                            </span>
+                        </a>
+                        <div
+                            v-if="state.showPluginTab"
+                            class="row g-3"
+                        >
+                            <div
+                                v-if="hasPlugin('Map')"
+                                class="col-md-3 col-sm-6"
+                            >
+                                <label
+                                    for="import-entity-plugin-map-geodata"
+                                    class="form-label"
+                                >
+                                    Geo information to upload & link
+                                    <span
+                                        v-if="state.stats.plugins['map.geodata'] && state.stats.plugins['map.geodata'].missing > 0"
+                                        :title="t('main.importer.missing_non_required_values', {
+                                            miss: state.stats.plugins['map.geodata'].missing,
+                                            total: state.stats.plugins['map.geodata'].total,
+                                        }, state.stats.plugins['map.geodata'].total)"
+                                    >
+                                        <i class="fas fa-fw fa-exclamation-circle text-warning" />
+                                    </span>
+                                    <span
+                                        v-else-if="state.stats.plugins['map.geodata'] && state.stats.plugins['map.geodata'].missing == 0"
+                                        :title="t('main.importer.no_missing_values')"
+                                    >
+                                        <i class="fas fa-fw fa-check-circle text-success" />
+                                    </span>
+                                </label>
+                                <multiselect
+                                    id="import-entity-plugin-map-geodata"
+                                    v-model="state.postData.plugins['map.geodata']"
+                                    :classes="multiselectResetClasslist"
+                                    :object="false"
+                                    :mode="'single'"
+                                    :options="state.availableColumns"
+                                    :placeholder="t('global.select.placeholder')"
+                                    :hide-selected="true"
+                                    @select="e => onColumnSelected(e, 'map.geodata', 'plugin')"
+                                />
+                            </div>
+                            <div
+                                v-if="hasPlugin('Map')"
+                                class="col-1"
+                            >
+                                <label
+                                    for="import-entity-plugin-map-epsg"
+                                    class="form-label"
+                                >
+                                    EPSG-Code
+                                </label>
+                                <input
+                                    id="import-entity-plugin-map-epsg"
+                                    v-model="state.postData.plugins['map.epsg']"
+                                    class="form-control"
+                                    type="text"
+                                >
+                            </div>
+                        </div>
                     </div>
                     <hr>
                     <div class="col-6 col-sm-12" />
@@ -171,7 +249,7 @@
                                     :options="state.availableColumns"
                                     :placeholder="t('global.select.placeholder')"
                                     :hide-selected="true"
-                                    @select="e => onColumnSelected(e, attr.id)"
+                                    @select="e => onColumnSelected(e, attr.id, 'attr')"
                                 />
                             </div>
                             <hr
@@ -253,6 +331,8 @@
     import {
         translateConcept,
         multiselectResetClasslist,
+        hasPlugin,
+        hasPlugins,
     } from '@/helpers/helpers.js';
 
     import {
@@ -272,7 +352,7 @@
         // FETCH
         // FUNCTIONS
         const readContent = _ => {
-            if (!state.files || state.files.length == 0) {
+            if(!state.files || state.files.length == 0) {
                 state.content = '';
                 state.contentRead = false;
             } else {
@@ -285,45 +365,45 @@
             state.fileDelimiter = data.delimiter;
         };
         const guessColumns = _ => {
-            for (const attr of state.availableAttributes) {
+            for(const attr of state.availableAttributes) {
                 const bestMatch = {
                     col: null,
                     score: 0,
                 };
                 const name = translateConcept(attr.thesaurus_url);
-                for (const col of state.availableColumns) {
+                for(const col of state.availableColumns) {
                     const score = stringSimilarity(name, col);
-                    if (score > bestMatch.score) {
+                    if(score > bestMatch.score) {
                         bestMatch.col = col;
                         bestMatch.score = score;
                     }
                 }
-                if (bestMatch.col) {
+                if(bestMatch.col) {
                     state.postData.attributes[attr.id] = bestMatch.col;
-                    onColumnSelected(bestMatch.col, attr.id);
+                    onColumnSelected(bestMatch.col, attr.id, 'attr');
                 }
             }
         };
         const onEntityTypeSelected = e => {
-            state.availableAttributes = store.getters.entityTypeAttributes(e.id);
+            state.availableAttributes = store.getters.entityTypeAttributes(e.id).filter(eta => eta.datatype != 'system-separator');
             guessColumns();
         };
-        const onColumnSelected = (e, key, isNonAttribute = false) => {
+        const onColumnSelected = (e, key, type) => {
             const emptyValues = state.fileData.filter(fd => fd[e] == '');
             const stats = {
                 missing: emptyValues.length,
                 total: state.fileData.length,
             };
-            if (isNonAttribute) {
-                if (key == 'name') {
+            if(type == 'main') {
+                if(key == 'name') {
                     state.stats.entityName = stats;
-                }
-                else if (key == 'parent') {
+                } else if(key == 'parent') {
                     state.stats.entityParent = stats;
                 }
-            }
-            else {
+            } else if(type == 'attr') {
                 state.stats.attributes[key] = stats;
+            } else if(type == 'plugin') {
+                state.stats.plugins[key] = stats;
             }
         };
         const confirmImport = async _ => {
@@ -337,17 +417,18 @@
                 name_column: state.postData.entityName,
                 entity_type_id: state.postData.entityType.id,
                 attributes: state.postData.attributes,
+                plugins: state.postData.plugins,
             };
-            if (!!state.postData.entityParent) {
+            if(!!state.postData.entityParent) {
                 postData['parent_column'] = state.postData.entityParent;
             }
 
             try {
                 data.append('data', JSON.stringify(postData));
             
-                const responseData = await importEntityData(data)
+                const responseData = await importEntityData(data);
             
-                for (let i = 0; i < responseData.length; i++) {
+                for(let i = 0; i < responseData.length; i++) {
                     store.dispatch('addEntity', responseData[i]);
                 }
                 
@@ -360,11 +441,10 @@
                     icon: true,
                     simple: true,
                 });
-            }catch(e ) {
+            } catch(e) {
                 if(!e.response){
                     console.error(e);
-                }else{
-                    console.error(e.response.data);
+                } else {
                     showImportError(e.response.data);
                 }
             }
@@ -410,12 +490,14 @@
                 entityName: '',
                 entityParent: '',
                 attributes: {},
+                plugins: {},
             },
             postData: {
                 entityType: null,
                 entityName: null,
                 entityParent: null,
                 attributes: {},
+                plugins: {},
             },
             dataMissing: computed(_ => {
                 return !state.postData.entityType || !state.postData.entityName || state.stats.entityName.missing > 0;
@@ -426,7 +508,7 @@
             readContent();
         });
         watch(_ => state.files, async (newValue, oldValue) => {
-            if (newValue) {
+            if(newValue) {
                 readContent();
             }
         });
@@ -436,6 +518,8 @@
             // HELPERS
             translateConcept,
             multiselectResetClasslist,
+            hasPlugin,
+            hasPlugins,
             // LOCAL
             extractColumns,
             onEntityTypeSelected,

@@ -5,12 +5,27 @@ import {
     throwError,
 } from '@/helpers/helpers.js';
 
+const MAX_REQ = 1;
+let REQ_QUEUE = 0;
+
 const instance = axios.create();
 
 instance.defaults.baseURL = 'api/v1';
 instance.defaults.withCredentials = true;
+instance.interceptors.response.use(config => {
+    return new Promise((resolve, reject) => {
+        let interval = setInterval(_ => {
+            if(REQ_QUEUE < MAX_REQ) {
+                REQ_QUEUE++;
+                clearInterval(interval);
+                resolve(config);
+            }
+        }, 50);
+    });
+});
 instance.interceptors.response.use(response => {
-    return response;
+    REQ_QUEUE = Math.max(0,REQ_QUEUE - 1);
+    return Promise.resolve(response);
 }, error => {
     const code = error.response.status;
     switch(code) {
@@ -43,6 +58,7 @@ instance.interceptors.response.use(response => {
             throwError(error);
             break;
     }
+    REQ_QUEUE = Math.max(0,REQ_QUEUE - 1);
     return Promise.reject(error);
 });
 

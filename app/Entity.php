@@ -179,7 +179,7 @@ class Entity extends Model implements Searchable
             self::addSerial($entity->id, $s->id, $s->text, $nextValue, $user->id);
         }
 
-        $entity->children_count = 0;
+        $entity->withCount(['child_entities as children_count']);
 
         return [
             'type' => 'entity',

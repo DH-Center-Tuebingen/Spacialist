@@ -55,6 +55,10 @@ export function can(permissionString, oneOf) {
     }
 }
 
+export function hasPlugins() {
+    return store.getters.plugins.length > 0;
+}
+
 export function hasPlugin(id) {
     return store.getters.plugins.some(p => p.name == id);
 }
