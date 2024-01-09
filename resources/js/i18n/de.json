@@ -83,6 +83,7 @@
         "download": "Herunterladen",
         "download_with_name": "{name} herunterladen",
         "upload": "Hochladen",
+        "uploading": "Am Hochladen",
         "preview": "Vorschau",
         "preview_not_available": "Keine Vorschau verfügbar",
         "note": "Hinweis",
@@ -291,7 +292,9 @@
                 "delimiter": "Trennzeichen",
                 "delimiter_with_info": "Trennzeichen (',', ';', …)",
                 "has_header": "Hat eine Kopfzeile?",
+                "hide_preview": "Vorschau ausblenden", 
                 "show_linenumbers": "Zeilennummern anzeigen",
+                "show_preview": "Vorschau anzeigen",
                 "nr_of_shown_rows": "Anzahl der angezeigten Zeilen",
                 "nr_of_skipped_rows": "Anzahl der übersprungenen Zeilen"
             },

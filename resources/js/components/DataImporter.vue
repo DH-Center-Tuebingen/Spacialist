@@ -184,12 +184,22 @@
             </div>
             <div>
                 <button
+                    v-if="!state.uploading"
                     type="submit"
                     class="btn btn-outline-primary"
                     form="import-data-form"
-                    :disabled="state.dataMissing"
+                    :disabled="state.dataMissing || state.uploading"
                 >
                     {{ t('main.importer.import_btn') }}
+                </button>
+                <button
+                    v-else
+                    type="button"
+                    class="btn btn-outline-primary d-flex gap-2 align-items-center"
+                    disabled
+                >
+                    <Spinner />
+                    {{ $("global.uploading") }}
                 </button>
             </div>
         </div>
@@ -249,165 +259,196 @@
         showImportError,
     } from '@/helpers/modal.js';
 
+    import {stringSimilarity} from 'string-similarity-js';
+    import Spinner from './Spinner.vue';
+
     export default {
-        setup(props, context) {
-            const { t } = useI18n();
-            const toast = useToast();
-            // FETCH
-
-            // FUNCTIONS
-            const readContent = _ => {
-                if(!state.files || state.files.length == 0) {
-                    state.content = '';
-                    state.contentRead = false;
-                } else {
-                    fileReader.readAsText(state.files[0].file);
-                }
-            };
-            const extractColumns = data => {
-                state.availableColumns = data.header;
-                state.fileData = data.data;
-                state.fileDelimiter = data.delimiter;
-            };
-            const onEntityTypeSelected = e => {
-                state.availableAttributes = store.getters.entityTypeAttributes(e.id);
-            };
-            const onColumnSelected = (e, key, isNonAttribute = false) => {
-                const emptyValues = state.fileData.filter(fd => fd[e] == '');
-                const stats = {
-                    missing: emptyValues.length,
-                    total: state.fileData.length,
-                };
-                if(isNonAttribute) {
-                    if(key == 'name') {
-                        state.stats.entityName = stats;
-                    } else if(key == 'parent') {
-                        state.stats.entityParent = stats;
-                    }
-                } else {
-                    state.stats.attributes[key] = stats;
-                }
-            };
-            const confirmImport = _ => {
-                const data = new FormData();
-                data.append('file', state.files[0].file);
-                data.append('metadata', JSON.stringify({
-                    delimiter: state.fileDelimiter,
-                }));
-                const postData = {
-                    name_column: state.postData.entityName,
-                    entity_type_id: state.postData.entityType.id,
-                    attributes: state.postData.attributes,
-                };
-                if(!!state.postData.entityParent) {
-                    postData['parent_column'] = state.postData.entityParent;
-                }
-                data.append('data', JSON.stringify(postData));
-
-                importEntityData(data).then(data => {
-                    for(let i=0; i<data.length; i++) {
-                        store.dispatch('addEntity', data[i]);
-                    }
-                    toast.$toast(t('main.importer.success', {
-                        cnt: data.length
-                    }, data.length), '', {
-                        duration: 2500,
-                        autohide: true,
-                        channel: 'success',
-                        icon: true,
-                        simple: true,
-                    });
-                }).catch(e => {
-                    showImportError({
-                        message: e.response.data.error,
-                        data: e.response.data.data,
-                    });
-                });
-            };
-            const addFile = (newFile, oldFile) => {
-                // if(Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error) {
-                //     state.fileList.push(newFile);
-                // }
-            };
-            const removeFile = _ => {
-                state.files = [];
-                state.fileData = [];
+    components: { 
+        Spinner 
+    },
+    setup(props, context) {
+        const { t } = useI18n();
+        const toast = useToast();
+        // FETCH
+        // FUNCTIONS
+        const readContent = _ => {
+            if (!state.files || state.files.length == 0) {
                 state.content = '';
                 state.contentRead = false;
-                state.availableColumns = [];
-                state.availableAttributes = [];
-                state.stats.entityName = '';
-                state.stats.entityParent = '';
-                state.stats.attributes = {};
-                state.postData.entityType = null;
-                state.postData.entityName = null;
-                state.postData.entityParent = null;
-                state.postData.attributes = {};
-            };
-
-            // DATA
-            const fileReader = new FileReader();
-            fileReader.onload = e => {
-                state.content = e.target.result;
-                state.contentRead = true;
-            };
-            const attrRef = ref({});
-            const availableEntityTypes = Object.values(store.getters.entityTypes);
-            const state = reactive({
-                files: [],
-                fileData: [],
-                fileDelimiter: '',
-                content: '',
-                contentRead: false,
-                availableColumns: [],
-                availableAttributes: [],
-                stats: {
-                    entityName: '',
-                    entityParent: '',
-                    attributes: {},
-                },
-                postData: {
-                    entityType: null,
-                    entityName: null,
-                    entityParent: null,
-                    attributes: {},
-                },
-                dataMissing: computed(_ => {
-                    return !state.postData.entityType || !state.postData.entityName || state.stats.entityName.missing > 0;
-                }),
-            });
-
-            onMounted(_ => {
-                readContent();
-            });
-
-            watch(_ => state.files,
-                async(newValue, oldValue) => {
-                    if(newValue) {
-                        readContent();
+            } else {
+                fileReader.readAsText(state.files[0].file);
+            }
+        };
+        const extractColumns = data => {
+            state.availableColumns = data.header;
+            state.fileData = data.data;
+            state.fileDelimiter = data.delimiter;
+        };
+        const guessColumns = _ => {
+            for (const attr of state.availableAttributes) {
+                const bestMatch = {
+                    col: null,
+                    score: 0,
+                };
+                const name = translateConcept(attr.thesaurus_url);
+                for (const col of state.availableColumns) {
+                    const score = stringSimilarity(name, col);
+                    if (score > bestMatch.score) {
+                        bestMatch.col = col;
+                        bestMatch.score = score;
                     }
                 }
-            );
-
-            // RETURN
-            return {
-                t,
-                // HELPERS
-                translateConcept,
-                multiselectResetClasslist,
-                // LOCAL
-                extractColumns,
-                onEntityTypeSelected,
-                onColumnSelected,
-                confirmImport,
-                addFile,
-                removeFile,
-                // PROPS
-                // STATE
-                attrRef,
-                availableEntityTypes,
-                state,
+                if (bestMatch.col) {
+                    state.postData.attributes[attr.id] = bestMatch.col;
+                    onColumnSelected(bestMatch.col, attr.id);
+                }
+            }
+        };
+        const onEntityTypeSelected = e => {
+            state.availableAttributes = store.getters.entityTypeAttributes(e.id);
+            guessColumns();
+        };
+        const onColumnSelected = (e, key, isNonAttribute = false) => {
+            const emptyValues = state.fileData.filter(fd => fd[e] == '');
+            const stats = {
+                missing: emptyValues.length,
+                total: state.fileData.length,
             };
-        },
+            if (isNonAttribute) {
+                if (key == 'name') {
+                    state.stats.entityName = stats;
+                }
+                else if (key == 'parent') {
+                    state.stats.entityParent = stats;
+                }
+            }
+            else {
+                state.stats.attributes[key] = stats;
+            }
+        };
+        const confirmImport = async _ => {
+            const data = new FormData();
+            state.uploading = true;
+            data.append('file', state.files[0].file);
+            data.append('metadata', JSON.stringify({
+                delimiter: state.fileDelimiter,
+            }));
+            const postData = {
+                name_column: state.postData.entityName,
+                entity_type_id: state.postData.entityType.id,
+                attributes: state.postData.attributes,
+            };
+            if (!!state.postData.entityParent) {
+                postData['parent_column'] = state.postData.entityParent;
+            }
+
+            try {
+                data.append('data', JSON.stringify(postData));
+            
+                const responseData = await importEntityData(data)
+            
+                for (let i = 0; i < responseData.length; i++) {
+                    store.dispatch('addEntity', responseData[i]);
+                }
+                
+                toast.$toast(t('main.importer.success', {
+                    cnt: responseData.length
+                }, responseData.length), '', {
+                    duration: 2500,
+                    autohide: true,
+                    channel: 'success',
+                    icon: true,
+                    simple: true,
+                });
+            }catch(e ) {
+                if(!e.response){
+                    console.error(e);
+                }else{
+                    console.error(e.response.data);
+                    showImportError(e.response.data);
+                }
+            }
+            state.uploading = false;
+        };
+        const addFile = (newFile, oldFile) => {
+            // if(Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error) {
+            //     state.fileList.push(newFile);
+            // }
+        };
+        const removeFile = _ => {
+            state.files = [];
+            state.fileData = [];
+            state.content = '';
+            state.contentRead = false;
+            state.availableColumns = [];
+            state.availableAttributes = [];
+            state.stats.entityName = '';
+            state.stats.entityParent = '';
+            state.stats.attributes = {};
+            state.postData.entityType = null;
+            state.postData.entityName = null;
+            state.postData.entityParent = null;
+            state.postData.attributes = {};
+        };
+        // DATA
+        const fileReader = new FileReader();
+        fileReader.onload = e => {
+            state.content = e.target.result;
+            state.contentRead = true;
+        };
+        const attrRef = ref({});
+        const availableEntityTypes = Object.values(store.getters.entityTypes);
+        const state = reactive({
+            files: [],
+            fileData: [],
+            fileDelimiter: '',
+            content: '',
+            contentRead: false,
+            availableColumns: [],
+            availableAttributes: [],
+            stats: {
+                entityName: '',
+                entityParent: '',
+                attributes: {},
+            },
+            postData: {
+                entityType: null,
+                entityName: null,
+                entityParent: null,
+                attributes: {},
+            },
+            dataMissing: computed(_ => {
+                return !state.postData.entityType || !state.postData.entityName || state.stats.entityName.missing > 0;
+            }),
+            uploading: false,
+        });
+        onMounted(_ => {
+            readContent();
+        });
+        watch(_ => state.files, async (newValue, oldValue) => {
+            if (newValue) {
+                readContent();
+            }
+        });
+        // RETURN
+        return {
+            t,
+            // HELPERS
+            translateConcept,
+            multiselectResetClasslist,
+            // LOCAL
+            extractColumns,
+            onEntityTypeSelected,
+            onColumnSelected,
+            confirmImport,
+            addFile,
+            removeFile,
+            // PROPS
+            // STATE
+            attrRef,
+            availableEntityTypes,
+            state,
+        };
     }
+}
 </script>

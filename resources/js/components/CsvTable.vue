@@ -39,7 +39,7 @@
             >
                 <input
                     id="show-linenumbers"
-                    v-model="state.showLinenumbers"
+                    v-model="state.showLineNumbers"
                     class="form-check-input"
                     type="checkbox"
                 >
@@ -90,13 +90,17 @@
                 <a
                     href="#"
                     class="text-reset"
+                    style="text-decoration: none;"
                     @click.prevent="toggleShowPreview()"
                 >
                     <span v-if="state.showPreview">
                         <i class="fas fa-fw fa-eye-slash" />
+                        <span class="ps-1">{{ t("main.csv.uploader.hide_preview") }}</span>
+
                     </span>
                     <span v-else>
                         <i class="fas fa-fw fa-eye" />
+                        <span class="ps-1">{{ t("main.csv.uploader.show_preview") }}</span>
                     </span>
                 </a>
             </div>
@@ -111,7 +115,7 @@
             >
                 <thead class="table-light sticky-top">
                     <tr>
-                        <th v-if="state.showLinenumbers">
+                        <th v-if="state.showLineNumbers">
                             #
                         </th>
                         <th
@@ -127,7 +131,7 @@
                         v-for="(row, i) in state.computedRows.striped_data"
                         :key="i"
                     >
-                        <td v-if="state.showLinenumbers">
+                        <td v-if="state.showLineNumbers">
                             <span class="fw-bold">
                                 {{ i + 1 + state.skippedCount }}
                             </span>
@@ -146,147 +150,175 @@
 </template>
 
 <script>
-    import * as d3 from 'd3-dsv';
+import * as d3 from 'd3-dsv';
 
-    import {
-        computed,
-        onMounted,
-        reactive,
-        toRefs,
-        watch,
-    } from 'vue';
+import {
+    computed,
+    onMounted,
+    reactive,
+    toRefs,
+    watch,
+} from 'vue';
 
-    import { useI18n } from 'vue-i18n';
+import { useI18n } from 'vue-i18n';
 
-    import {
-        ucfirst,
-    } from '@/helpers/filters.js';
+import {
+    ucfirst,
+} from '@/helpers/filters.js';
 
-    export default {
-        props: {
-            content: {
-                required: true,
-                type: String
-            },
-            small: {
-                required: false,
-                type: Boolean
-            },
-            options: {
-                type: Boolean,
-                required: false,
-                default: true,
-            },
-            linenumbers: {
-                type: Boolean,
-                required: false,
-                default: false,
-            },
+export default {
+    props: {
+        content: {
+            required: true,
+            type: String
         },
-        emits: ['parse'],
-        setup(props, context) {
-            const { t } = useI18n();
+        small: {
+            required: false,
+            type: Boolean
+        },
+        options: {
+            type: Boolean,
+            required: false,
+            default: true,
+        },
+        linenumbers: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+    },
+    emits: ['parse'],
+    setup(props, context) {
+        const { t } = useI18n();
 
-            const {
-                content,
-                small,
-                linenumbers,
-            } = toRefs(props);
+        const {
+            content,
+            small,
+            linenumbers,
+        } = toRefs(props);
 
-            // FETCH
+        // FETCH
 
-            // FUNCTIONS
-            const toggleShowPreview = _ => {
-                state.showPreview = !state.showPreview;
-            };
-            const recomputeRows = (internal = false) => {
-                if(!content.value || !state.dsv) {
-                    state.computedRows = {};
-                    return;
-                }
-                const res = {
-                    header: null,
-                    data: null,
-                    striped_data: null,
-                    delimiter: state.delimiter || ',',
-                };
-                const headerRow = content.value.split('\n')[0];
-                const header = state.dsv.parseRows(headerRow)[0];
-                if(state.hasHeaderRow) {
-                    res.header = header;
-                    res.data = state.dsv.parse(content.value);
-                } else {
-                    const headerPlaceholder = [];
-                    for(let i=0; i<header.length; i++) {
-                        headerPlaceholder.push(`#${i+1}`);
-                    }
-                    res.data = state.dsv.parseRows(content.value);
-                    res.header = headerPlaceholder;
-                }
-                state.computedRows = res;
-                state.computedRows.striped_data = res.data.slice(state.stripedStart, state.stripedEnd);
-
-                if(!internal) {
-                    context.emit('parse', state.computedRows);
-                }
-            };
-
-            // DATA
-            const state = reactive({
-                delimiter: localStorage.getItem('csv-table-delimiter') || ',' ,
-                hasHeaderRow: true,
-                showLinenumbers: false,
-                showCount: 10,
-                skippedCount: 0,
-                showPreview: true,
-                computedRows: {},
-                dsv: computed(_ => d3.dsvFormat(state.delimiter || ',')),
-                rows: computed(_ => state.computedRows.data ? state.computedRows.data.length : 0),
-                maxRows: computed(_ => state.rows - state.skippedCount),
-                maxSkippedRows: computed(_ => state.rows > 0 ?  state.rows - 1 : 0),
-                stripedStart: computed(_ => state.skippedCount || 0),
-                stripedEnd: computed(_ => {
-                    return Math.min(
-                        (state.skippedCount || 0) + (state.showCount || 10),
-                        state.rows
-                    );
-                }),
-            });
-
-            onMounted(_ => {
-                recomputeRows();
-            });
-
-            watch(_ => state.delimiter, _ => {
-                localStorage.setItem('csv-table-delimiter', state.delimiter);
-            });
-
-            watch(_ => content.value, _ => {
-                recomputeRows();
-            });
-            watch(_ => state.dsv, _ => {
-                recomputeRows();
-            });
-            watch(_ => state.hasHeaderRow, _ => {
-                recomputeRows();
-            });
-            watch(_ => state.showCount, _ => {
-                recomputeRows(true);
-            });
-            watch(_ => state.skippedCount, _ => {
-                recomputeRows(true);
-            });
-
-            // RETURN
-            return {
-                t,
-                // HELPERS
-                ucfirst,
-                // LOCAL
-                toggleShowPreview,
-                // STATE
-                state,
+        // FUNCTIONS
+        const toggleShowPreview = _ => {
+            state.showPreview = !state.showPreview;
+        };
+        const recomputeRows = (internal = false) => {
+            if(!content.value || !state.dsv) {
+                state.computedRows = {};
+                return;
             }
-        },
-    }
+            const res = {
+                header: null,
+                data: null,
+                striped_data: null,
+                delimiter: state.delimiter || ',',
+            };
+            const headerRow = content.value.split('\n')[0];
+            const header = state.dsv.parseRows(headerRow)[0];
+            if(state.hasHeaderRow) {
+                res.header = header;
+                res.data = state.dsv.parse(content.value);
+            } else {
+                const headerPlaceholder = [];
+                for(let i = 0; i < header.length; i++) {
+                    headerPlaceholder.push(`#${i + 1}`);
+                }
+                res.data = state.dsv.parseRows(content.value);
+                res.header = headerPlaceholder;
+            }
+            state.computedRows = res;
+            state.computedRows.striped_data = res.data.slice(state.stripedStart, state.stripedEnd);
+
+            if(!internal) {
+                context.emit('parse', state.computedRows);
+            }
+        };
+
+        const storedDataString = localStorage.getItem('csv-table');
+        let storedData = {}
+
+        try {
+            storedData = JSON.parse(storedDataString || '{}');
+        } catch(e) {
+            console.error(e);
+        }
+
+        function storedOrDefault(key, defaultValue) {
+            return storedData.hasOwnProperty(key) ? storedData[key] : defaultValue;
+        }
+
+        // DATA
+        const state = reactive({
+            delimiter: storedOrDefault('delimiter', ','),
+            hasHeaderRow: storedOrDefault('hasHeaderRow', true),
+            showLineNumbers: storedOrDefault('showLineNumbers', false),
+            showCount: storedOrDefault('showCount', 10),
+            skippedCount: storedOrDefault('skippedCount', 0),
+            showPreview: storedOrDefault('showPreview', true),
+            computedRows: {},
+            dsv: computed(_ => d3.dsvFormat(state.delimiter || ',')),
+            rows: computed(_ => state.computedRows.data ? state.computedRows.data.length : 0),
+            maxRows: computed(_ => state.rows - state.skippedCount),
+            maxSkippedRows: computed(_ => state.rows > 0 ? state.rows - 1 : 0),
+            stripedStart: computed(_ => state.skippedCount || 0),
+            stripedEnd: computed(_ => {
+                return Math.min(
+                    (state.skippedCount || 0) + (state.showCount || 10),
+                    state.rows
+                );
+            }),
+        });
+
+        onMounted(_ => {
+            recomputeRows();
+        });
+
+
+        // Add watchers to all the localStorage keys
+        // on any change the localStorage will be updated.
+        const localStorageKeys = [
+            'delimiter',
+            'hasHeaderRow',
+            'showLineNumbers',
+            'showCount',
+            'skippedCount',
+            'showPreview',
+        ];
+
+        localStorageKeys.forEach(key => {
+            watch(_ => state[key], value => {
+                storedData[key] = value;
+                localStorage.setItem('csv-table', JSON.stringify(storedData));
+            });
+        });
+
+        watch(_ => content.value, _ => {
+            recomputeRows();
+        });
+        watch(_ => state.dsv, _ => {
+            recomputeRows();
+        });
+        watch(_ => state.hasHeaderRow, _ => {
+            recomputeRows();
+        });
+        watch(_ => state.showCount, _ => {
+            recomputeRows(true);
+        });
+        watch(_ => state.skippedCount, _ => {
+            recomputeRows(true);
+        });
+
+        // RETURN
+        return {
+            t,
+            // HELPERS
+            ucfirst,
+            // LOCAL
+            toggleShowPreview,
+            // STATE
+            state,
+        }
+    },
+}
 </script>

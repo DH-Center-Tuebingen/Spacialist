@@ -83,6 +83,7 @@
         "download": "Download",
         "download_with_name": "Download {name}",
         "upload": "Upload",
+        "uploading": "Uploading",
         "preview": "Preview",
         "preview_not_available": "No preview available",
         "note": "Note",
@@ -291,7 +292,9 @@
                 "delimiter": "Delimiter",
                 "delimiter_with_info": "Delimiter (',', ';', …)",
                 "has_header": "Has Header Row?",
+                "hide_preview": "Hide Preview",
                 "show_linenumbers": "Show Line numbers",
+                "show_preview": "Show Preview",
                 "nr_of_shown_rows": "Number of shown rows",
                 "nr_of_skipped_rows": "Number of skipped rows"
             },
