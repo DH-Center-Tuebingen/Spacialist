@@ -372,6 +372,9 @@ class EntityController extends Controller {
 
         $duplicate = $entity->replicate();
         $duplicate->created_at = Carbon::now();
+        if(sp_has_plugin('Map')) {
+            $duplicate->geodata_id = null;
+        }
         if(isset($duplicate->root_entity_id)) {
             $duplicate->rank = Entity::where('root_entity_id', $duplicate->root_entity_id)->max('rank') + 1;
         } else {
