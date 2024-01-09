@@ -372,7 +372,7 @@
             </template>
             <template v-else>
                 <div class="h-100 d-flex flex-column justify-content-center align-items-center">
-                    <Spinner size="7x" />
+                    <Spinner size="5x" />
 
                     <!-- eslint-disable vue/no-v-html -->
                     <h1
