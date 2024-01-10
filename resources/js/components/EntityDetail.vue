@@ -275,6 +275,7 @@
                     :id="`entity-attribute-form-${tg.id}`"
                     :name="`entity-attribute-form-${tg.id}`"
                     class="h-100"
+                    @submit.prevent
                 >
                     <attribute-list
                         v-if="state.attributesFetched"
