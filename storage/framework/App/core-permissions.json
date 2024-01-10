@@ -164,28 +164,28 @@
     "users_roles": [
         {
             "name": "read",
-            "display_name": "Read Users & Roles",
-            "description": "Ability to read users and roles"
+            "display_name": "Read Users, Roles & Groups",
+            "description": "Ability to read users, roles and working groups"
         },
         {
             "name": "write",
-            "display_name": "Write Users & Roles",
-            "description": "Ability to write users and roles"
+            "display_name": "Write Users, Roles & Groups",
+            "description": "Ability to write users, roles and working groups"
         },
         {
             "name": "create",
-            "display_name": "Create Users & Roles",
-            "description": "Ability to create users and roles"
+            "display_name": "Create Users, Roles & Groups",
+            "description": "Ability to create users, roles and working groups"
         },
         {
             "name": "delete",
-            "display_name": "Delete Users & Roles",
-            "description": "Ability to delete and deactivate users and roles"
+            "display_name": "Delete Users, Roles & Groups",
+            "description": "Ability to delete and deactivate users, roles and working groups"
         },
         {
             "name": "share",
-            "display_name": "Share Users & Roles",
-            "description": "Ability to share users and roles"
+            "display_name": "Share Users, Roles & Groups",
+            "description": "Ability to share users, roles and working groups"
         }
     ],
     "preferences": [

@@ -147,10 +147,24 @@
                 <button
                     type="button"
                     class="btn btn-outline-danger btn-sm"
-                    :disabled="!can('entity_delete')"
+                    :disabled="!can('entity_delete') || !hasDeleteAccess()"
                     @click="confirmDeleteEntity()"
                 >
                     <i class="fas fa-fw fa-trash" /> {{ t('global.delete') }}
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    :disabled="!can('entity_write')"
+                    @click="openWorkingGroups()"
+                >
+                    <i class="fas fa-fw fa-unlock-alt" /> {{ t('global.access') }}
+                    <span
+                        v-if="state.hasAccessRules"
+                        class="badge text-bg-primary"
+                    >
+                        {{ state.accessRuleCount }}
+                    </span>
                 </button>
             </div>
         </div>
@@ -394,6 +408,7 @@ import { useToast } from '@/plugins/toast.js';
     import {
         showDiscard,
         showDeleteEntity,
+        showEntityAccess,
         showUserInfo,
         canShowReferenceModal,
     } from '@/helpers/modal.js';
@@ -491,6 +506,10 @@ export default {
                     };
                 }
             }),
+            hasAccessRules: computed(_ => {
+                return (state.entity && state.entity.access_rules && state.entity.access_rules.length > 0);
+            }),
+            accessRuleCount: computed(_ => state.hasAccessRules ? state.entity.access_rules.length : 0),
             entityTypeSelections: computed(_ => getEntityTypeAttributeSelections(state.entity.entity_type_id)),
             entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
             hasAttributeLinks: computed(_ => state.entity.attributeLinks && state.entity.attributeLinks.length > 0),
@@ -688,10 +707,16 @@ export default {
         const hideHiddenAttributes = _ => {
             state.hiddenAttributeState = false;
         };
+        const hasDeleteAccess = _ => {
+            return state.entity.user_access && state.entity.user_access.delete;
+        };
         const confirmDeleteEntity = _ => {
             if(!can('entity_delete')) return;
 
             showDeleteEntity(state.entity.id);
+        };
+        const openWorkingGroups = _ => {
+            showEntityAccess(state.entity.id);
         };
         const setDetailPanel = tab => {
             const query = {
@@ -990,7 +1015,9 @@ export default {
             cancelEditEntityName,
             showHiddenAttributes,
             hideHiddenAttributes,
+            hasDeleteAccess,
             confirmDeleteEntity,
+            openWorkingGroups,
             setDetailPanel,
             onEntityHeaderHover,
             showTabActions,
