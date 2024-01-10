@@ -31,6 +31,7 @@
                     :track-by="'datatype'"
                     :placeholder="t('global.select.placeholder')"
                     :hide-selected="true"
+                    :search-filter="searchInAttributeTypes"
                     @select="typeSelected"
                 >
                     <template #option="{ option }">
@@ -264,6 +265,14 @@
             const getAttributeLabel = attribute => {
                 return translateConcept(attribute.thesaurus_url);
             };
+            const searchInAttributeTypes = (option, query) => {
+                if(query) {
+                    const tq = query.toLowerCase().trim();
+                    return option.datatype.indexOf(tq) !== -1 || t(`global.attributes.${option.datatype}`).toLowerCase().indexOf(tq) !== -1;
+                } else {
+                    return true;
+                }
+            };
 
             // DATA
             let types = [];
@@ -356,6 +365,7 @@
                 labelSelected,
                 typeSelected,
                 getAttributeLabel,
+                searchInAttributeTypes,
                 // STATE
                 state,
             }

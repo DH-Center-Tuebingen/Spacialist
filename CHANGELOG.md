@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file.
 - Typos in Translation files
 - Updating bibliography entries
 - Duplicate Entity
+- Search in Attribute List
 ### Changed
 - Entity tree sorting is now accessible through ...-menu
 - Reset Password Workflow
