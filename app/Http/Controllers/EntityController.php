@@ -147,7 +147,11 @@ class EntityController extends Controller {
                         ':entity_id' => $eid
                     ];
                 }
+
+                DB::beginTransaction();
                 $sqlValue = DB::select($text, $safes);
+                DB::rollBack();
+
                 // Check if only one result exists
                 if(count($sqlValue) === 1) {
                     // Get all column indices (keys) using the first row
@@ -277,7 +281,11 @@ class EntityController extends Controller {
                     ':entity_id' => $id
                 ];
             }
+
+            DB::beginTransaction();
             $sqlValue = DB::select($text, $safes);
+            DB::rollBack();
+
             // Check if only one result exists
             if(count($sqlValue) === 1) {
                 // Get all column indices (keys) using the first row
