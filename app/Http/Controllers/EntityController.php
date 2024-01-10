@@ -848,7 +848,7 @@ class EntityController extends Controller {
         ]);
 
         try {
-            $entity = Entity::findOrFail($id);
+            Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity does not exist')

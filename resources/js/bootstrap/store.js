@@ -154,6 +154,13 @@ export const store = createStore({
                 },
                 moveEntity(state, data) {
                     const entity = state.entities[data.entity_id];
+                    const oldRank = entity.rank;
+                    const newRank = data.rank;
+                    const rankIdx = newRank - 1;
+                    const append = data.to_end;
+
+                    entity.rank = newRank;
+
                     let oldSiblings;
                     if(!!entity.root_entity_id) {
                         oldSiblings = state.entities[entity.root_entity_id].children;
@@ -163,39 +170,57 @@ export const store = createStore({
                     const idx = oldSiblings.findIndex(n => n.id == entity.id);
                     if(idx > -1) {
                         oldSiblings.splice(idx, 1);
-                    }
-                    if(!data.parent_id) {
-                        // Update children state of old parent
-                        if(!!entity.root_entity_id) {
-                            const oldParent = state.entities[entity.root_entity_id];
-                            oldParent.children_count--;
-                            if(oldParent.children_count == 0) {
-                                oldParent.state.openable = false;
-                                oldParent.state.opened = false;
+                        oldSiblings.map(s => {
+                            if(s.rank > oldRank) {
+                                s.rank--;
                             }
+                        });
+                    }
+
+                    // Update children state of old parent
+                    if(!!entity.root_entity_id) {
+                        const oldParent = state.entities[entity.root_entity_id];
+                        oldParent.children_count--;
+                        if(oldParent.children_count == 0) {
+                            oldParent.state.openable = false;
+                            oldParent.state.opened = false;
                         }
+                    }
+
+                    if(!data.parent_id) {
+                        // Set new (= unset) parent
                         entity.root_entity_id = null;
-                        state.tree.push(entity);
+                        if(append) {
+                            state.tree.push(entity);
+                        } else {
+                            state.tree.splice(rankIdx, 0, entity);
+                            state.tree.map(s => {
+                                if(s.rank >= newRank) {
+                                    s.rank++;
+                                }
+                            });
+                        }
                     } else {
                         // Update children state of new parent
                         const parent = state.entities[data.parent_id];
                         if(!!parent) {
                             if(parent.childrenLoaded) {
                                 parent.children.push(entity);
+                                if(append) {
+                                    parent.children.push(entity);
+                                } else {
+                                    parent.children.splice(rankIdx, 0, entity);
+                                    parent.children.map(s => {
+                                        if(s.rank >= newRank) {
+                                            s.rank++;
+                                        }
+                                    });
+                                }
                             }
                             parent.children_count++;
                             parent.state.openable = true;
                         }
-                        // Also update children state of old parent
-                        if(!!entity.root_entity_id) {
-                            const oldParent = state.entities[entity.root_entity_id];
-                            oldParent.children_count--;
-                            if(oldParent.children_count == 0) {
-                                oldParent.state.openable = false;
-                                oldParent.state.opened = false;
-                            }
-                        }
-                        // Set new parent after updating states
+                        // Set new parent
                         entity.root_entity_id = data.parent_id;
                     }
                 },
