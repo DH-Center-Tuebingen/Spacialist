@@ -382,7 +382,7 @@
                     <Spinner size="5x" />
 
                     <!-- eslint-disable vue/no-v-html -->
-                    <h1
+                    <h3
                         class="mt-5" 
                         v-html="t('main.app.loading_screen_msg', { appname: state.appName })" 
                     />

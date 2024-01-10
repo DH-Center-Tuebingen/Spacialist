@@ -42,11 +42,10 @@
             <span
                 v-if="data.user_access"
             >
-                <span :class="{'text-success': data.user_access.read, 'text-danger': !data.user_access.read}">R</span>
-                <span :class="{'text-success': data.user_access.write, 'text-danger': !data.user_access.write}">W</span>
+                <!-- <span :class="{'text-success': data.user_access.write, 'text-danger': !data.user_access.write}">W</span>
                 <span :class="{'text-success': data.user_access.create, 'text-danger': !data.user_access.create}">C</span>
                 <span :class="{'text-success': data.user_access.delete, 'text-danger': !data.user_access.delete}">D</span>
-                <span :class="{'text-success': data.user_access.share, 'text-danger': !data.user_access.share}">S</span>
+                <span :class="{'text-success': data.user_access.share, 'text-danger': !data.user_access.share}">S</span> -->
             </span>
         </a>
         <ul
