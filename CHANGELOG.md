@@ -21,9 +21,12 @@ All notable changes to this project will be documented in this file.
 - Updating bibliography entries
 - Duplicate Entity
 - Search in Attribute List
+- Do not reload _Entity Detail_ on `Enter` key
+- Do not allow empty values in _List_ attribute
 ### Changed
 - Entity tree sorting is now accessible through ...-menu
 - Reset Password Workflow
+- Allow adding options in _List_ attribute on `Enter` key
 
 ## 0.9.14
 ### Added
