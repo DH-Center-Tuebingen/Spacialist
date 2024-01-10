@@ -22,11 +22,13 @@
                 type="text"
                 class="form-control"
                 :disabled="disabled"
+                @keydown.enter="addListEntry()"
             >
             <button
                 v-if="!disabled"
                 type="button"
                 class="btn btn-outline-success"
+                :disabled="!state.valid"
                 @click="addListEntry()"
             >
                 <i class="fas fa-fw fa-plus" />
@@ -57,6 +59,7 @@
 
 <script>
     import {
+        computed,
         reactive,
         toRefs,
         watch,
@@ -93,6 +96,7 @@
 
             // FUNCTIONS
             const addListEntry = _ => {
+                if(!state.valid) return;
                 v.value.push(state.input);
                 v.meta.dirty = true;
                 state.input = '';
@@ -120,6 +124,7 @@
                 input: '',
                 initialValue: entries.value.slice(),
                 expanded: false,
+                valid: computed(_ => !!state.input),
             });
             const v = reactive({
                 meta:{
