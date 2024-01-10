@@ -355,10 +355,10 @@ export function createVectorLayer(data = {}) {
 
 export async function registerProjection(srid) {
     // Only register projection, if different from included projections
+    const epsg = `EPSG:${srid}`;
     if(srid == 4326 || srid == 3857) {
         return new Promise(r => r(epsg));
     }
-    const epsg = `EPSG:${srid}`;
     return getMapProjection(srid).then(data => {
         if(data) {
             proj4.defs(epsg, data.proj4text);
