@@ -16,6 +16,11 @@ trait RestrictableTrait
         parent::boot();
 
         static::addGlobalScope(new RestrictableScope);
+
+        static::deleting(function($model) {
+            $model->access_type()->delete();
+            $model->access_rules()->delete();
+        });
     }
 
     public function initializeRestrictableTrait() {
