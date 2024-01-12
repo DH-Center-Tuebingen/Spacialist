@@ -1,16 +1,45 @@
 <template>
-    <div @dragenter="onDragEnter" @dragleave="onDragLeave" :id="`tree-node-${data.id}`" @click="e => addToMSList(e)">
-        <span v-show="state.isSelectionMode" class="mx-1">
-            <span v-show="state.multieditSelected" class="text-success">
-                <i class="fas fa-fw fa-circle-check"></i>
+    <div
+        :id="`tree-node-${data.id}`"
+        @dragenter="onDragEnter"
+        @dragleave="onDragLeave"
+        @click="e => addToMSList(e)"
+    >
+        <span
+            v-show="state.isSelectionMode"
+            class="mx-1"
+        >
+            <span
+                v-show="state.multieditSelected"
+                class="text-success"
+            >
+                <i class="fas fa-fw fa-circle-check" />
             </span>
             <span v-show="!state.multieditSelected">
-                <i class="far fa-fw fa-circle"></i>
+                <i class="far fa-fw fa-circle" />
             </span>
         </span>
-        <a href="" :id="`tree-node-cm-toggle-${data.id}`" @click.prevent @contextmenu.stop.prevent="togglePopup()" class="text-body text-decoration-none disabled" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false">
-            <span style="display: inline-block; text-align: center;" class="px-1">
-                <span v-if="data.children_count" class="badge rounded-pill" style="font-size: 9px;" :style="state.colorStyles" :title="data.children_count">
+        <a
+            :id="`tree-node-cm-toggle-${data.id}`"
+            href=""
+            class="text-body text-decoration-none disabled"
+            data-bs-toggle="dropdown"
+            data-bs-auto-close="true"
+            aria-expanded="false"
+            @click.prevent
+            @contextmenu.stop.prevent="togglePopup()"
+        >
+            <span
+                style="display: inline-block; text-align: center;"
+                class="px-1"
+            >
+                <span
+                    v-if="data.children_count"
+                    class="badge rounded-pill"
+                    style="font-size: 9px;"
+                    :style="state.colorStyles"
+                    :title="data.children_count"
+                >
                     {{ numPlus(data.children_count, 3) }}
                 </span>
                 <span
@@ -43,10 +72,10 @@
                 v-if="data.user_access"
             >
                 <span :class="{'text-success': data.user_access.read, 'text-danger': !data.user_access.read}">R</span>
-                <span :class="{'text-success': data.user_access.write, 'text-danger': !data.user_access.write}">W</span>
-                <span :class="{'text-success': data.user_access.create, 'text-danger': !data.user_access.create}">C</span>
-                <span :class="{'text-success': data.user_access.delete, 'text-danger': !data.user_access.delete}">D</span>
-                <span :class="{'text-success': data.user_access.share, 'text-danger': !data.user_access.share}">S</span>
+                <span :class="{'text-success': canWrite(data), 'text-danger': !canWrite(data)}">W</span>
+                <span :class="{'text-success': canCreate(data), 'text-danger': !canCreate(data)}">C</span>
+                <span :class="{'text-success': canDelete(data), 'text-danger': !canDelete(data)}">D</span>
+                <span :class="{'text-success': canShare(data), 'text-danger': !canShare(data)}">S</span>
             </span>
         </a>
         <ul
@@ -62,7 +91,9 @@
                     {{ data.name }}
                 </h6>
             </li>
-            <li>
+            <li
+                v-if="can('entity_create') && canCreate(data)"
+            >
                 <a
                     class="dropdown-item"
                     href="#"
@@ -75,7 +106,9 @@
                     </span>
                 </a>
             </li>
-            <li>
+            <li
+                v-if="can('entity_create') && canCreate(data)"
+            >
                 <a
                     class="dropdown-item"
                     href="#"
@@ -88,7 +121,9 @@
                     </span>
                 </a>
             </li>
-            <li>
+            <li
+                v-if="can('entity_write') && canWrite(data)"
+            >
                 <a
                     class="dropdown-item"
                     href="#"
@@ -101,7 +136,9 @@
                     </span>
                 </a>
             </li>
-            <li>
+            <li
+                v-if="can('entity_delete') && canDelete(data)"
+            >
                 <a
                     v-if="can('entity_delete')"
                     class="dropdown-item"
@@ -147,6 +184,10 @@ import store from '@/bootstrap/store.js';
     } from '@/api.js';
     import {
         can,
+        canWrite,
+        canCreate,
+        canDelete,
+        canShare,
         getEntityColors,
         hasIntersectionWithEntityAttributes,
     } from '@/helpers/helpers.js';
@@ -281,6 +322,10 @@ export default {
                 t,
                 // HELPERS
                 can,
+                canWrite,
+                canCreate,
+                canDelete,
+                canShare,
                 numPlus,
                 // LOCAL
                 togglePopup,

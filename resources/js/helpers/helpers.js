@@ -39,6 +39,10 @@ export async function initApp(locale) {
     return new Promise(r => r(null));
 }
 
+function hasUserAccess(model) {
+    return model.user_access;
+}
+
 export function can(permissionString, oneOf) {
     oneOf = oneOf || false;
     const user = store.getters.user;
@@ -53,6 +57,22 @@ export function can(permissionString, oneOf) {
     } else {
         return permissions.every(hasPermission);
     }
+}
+
+export function canWrite(model) {
+    return hasUserAccess(model) && model.user_access.write;
+}
+
+export function canCreate(model) {
+    return hasUserAccess(model) && model.user_access.create;
+}
+
+export function canDelete(model) {
+    return hasUserAccess(model) && model.user_access.delete;
+}
+
+export function canShare(model) {
+    return hasUserAccess(model) && model.user_access.share;
 }
 
 export function hasPlugin(id) {

@@ -131,7 +131,7 @@
                     type="submit"
                     form="entity-attribute-form"
                     class="btn btn-outline-success btn-sm"
-                    :disabled="!state.formDirty || !can('entity_data_write')"
+                    :disabled="!state.formDirty || !can('entity_data_write') || !canWrite(state.entity)"
                     @click.prevent="saveEntity()"
                 >
                     <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
@@ -147,7 +147,7 @@
                 <button
                     type="button"
                     class="btn btn-outline-danger btn-sm"
-                    :disabled="!can('entity_delete') || !hasDeleteAccess()"
+                    :disabled="!can('entity_delete') || !canDelete(state.entity)"
                     @click="confirmDeleteEntity()"
                 >
                     <i class="fas fa-fw fa-trash" /> {{ t('global.delete') }}
@@ -239,6 +239,7 @@
                             v-show="state.attributeGrpHovered == tg.id"
                         >
                             <a
+                                v-if="canWrite(state.entity)"
                                 href="#"
                                 @click.prevent.stop="saveEntity(`${tg.id}`)"
                             >
@@ -398,6 +399,8 @@ import { useToast } from '@/plugins/toast.js';
     } from '@/api.js';
     import {
         can,
+        canWrite,
+        canDelete,
         isModerated,
         getAttribute,
         getEntityColors,
@@ -708,9 +711,6 @@ export default {
         const hideHiddenAttributes = _ => {
             state.hiddenAttributeState = false;
         };
-        const hasDeleteAccess = _ => {
-            return state.entity.user_access && state.entity.user_access.delete;
-        };
         const confirmDeleteEntity = _ => {
             if(!can('entity_delete')) return;
 
@@ -821,7 +821,7 @@ export default {
                 }
             };
             const saveEntity = grps => {
-                if(!can('entity_data_write')) return;
+                if(!can('entity_data_write') || !canWrite(state.entity)) return;
 
                 const dirtyValues = getDirtyValues(grps);
                 const patches = [];
@@ -1003,6 +1003,8 @@ export default {
             t,
             // HELPERS
             can,
+            canWrite,
+            canDelete,
             date,
             showUserInfo,
             getEntityTypeName,
@@ -1016,7 +1018,6 @@ export default {
             cancelEditEntityName,
             showHiddenAttributes,
             hideHiddenAttributes,
-            hasDeleteAccess,
             confirmDeleteEntity,
             openWorkingGroups,
             setDetailPanel,
