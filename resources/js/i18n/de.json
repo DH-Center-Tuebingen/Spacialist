@@ -5,6 +5,7 @@
         "restore": "Wiederherstellen",
         "deactivate": "Deaktivieren",
         "reactivate": "Reaktivieren",
+        "access": "Zugriff",
         "remove": "Entfernen",
         "reset": "Zurücksetzen",
         "reset_password": "Passwort zurücksetzen",
@@ -103,6 +104,7 @@
             "title": "Einstellungen",
             "users": "Benutzerverwaltung",
             "roles": "Rollenverwaltung",
+            "groups": "Arbeitsgruppenverwaltung",
             "plugins": "Erweiterungen",
             "datamodel": "Datenmodell-Editor",
             "system": "System-Einstellungen",
@@ -185,6 +187,7 @@
         "description": "Beschreibung",
         "roles": "Rollen",
         "permissions": "Berechtigungen",
+        "groups": "Arbeitsgruppen",
         "added_at": "Hinzugefügt",
         "created_at": "Erstellt",
         "updated_at": "Aktualisert",
@@ -283,7 +286,8 @@
                     }
                 }
             },
-            "page_access_denied": "Du hast nicht die nötigen Berechtigungen um diese Seite zu sehen. Fehlende Berechtigungen: {perm}"
+            "page_access_denied": "Du hast nicht die nötigen Berechtigungen um diese Seite zu sehen. Fehlende Berechtigungen: {perm}",
+            "alert_hidden": "Inhalt anzeigen…"
         },
         "csv": {
             "uploader": {
@@ -365,6 +369,9 @@
                 },
                 "multiedit": {
                     "title": "Mehrfach-Attribut-Bearbeitung"
+                },
+                "access": {
+                    "title": "Zugriff - Arbeitsgruppen"
                 },
                 "delete": {
                     "alert": "Wenn du <span class=\"fw-bold\">{name}</span> löschst, wird mindestens eine Entität ebenfalls gelöscht. | Wenn du <span class=\"fw-bold\">{name}</span> löschst, werden mindestens {cnt} Entitäten ebenfalls gelöscht."
@@ -459,7 +466,10 @@
                     "message": "Dein Passwort wurde geändert. Du musst entweder dieses neue Passwort akzeptieren oder selbst ein neues vergeben. Dafür hast du nur noch einen weiteren Login übrig! | Dein Passwort wurde geändert. Du musst entweder dieses neue Passwort akzeptieren oder selbst ein neues vergeben. Dafür hast du noch {attempts} weitere Logins übrig."
                 }
             },
-            "add_role_placeholder": "Rollen hinzufügen"
+            "add_role_placeholder": "Rollen hinzufügen",
+            "add_group_placeholder": "Arbeitsgruppen hizufügen",
+            "deactivated_role_placeholder": "Keine Rollen zugeordnet",
+            "deactivated_group_placeholder": "Keine Gruppen zugeordnet"
         },
         "role": {
             "add_button": "Neue Rolle hinzufügen",
@@ -512,6 +522,20 @@
                 }
             },
             "add_permission_placeholder": "Berechtigungen hinzufügen"
+        },
+        "group": {
+            "add_button": "Arbeitsgruppe hinzufügen",
+            "toasts": {
+                "updated": {
+                    "title": "Arbeitsgruppe aktualisiert",
+                    "msg": "{name} wurde erfolgreich aktualisiert."
+                }
+            },
+            "modal": {
+                "new": {
+                    "title": "Neue Arbeitsgruppe"
+                }
+            }
         },
         "activity": {
             "title_project": "Projekt-Aktivität | Projekt-Aktivitäten",

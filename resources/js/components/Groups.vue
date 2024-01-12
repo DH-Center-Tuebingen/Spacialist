@@ -4,14 +4,14 @@
         class="d-flex flex-column h-100"
     >
         <h4 class="d-flex flex-row gap-2 align-items-center">
-            {{ t('global.roles') }}
+            {{ t('global.groups') }}
             <button
                 type="button"
                 class="btn btn-outline-success btn-sm"
                 :disabled="!can('users_roles_create')"
-                @click="showAddRoleModal()"
+                @click="showAddGroupModal()"
             >
-                <i class="fas fa-fw fa-plus" /> {{ t('main.role.add_button') }}
+                <i class="fas fa-fw fa-plus" /> {{ t('main.group.add_button') }}
             </button>
         </h4>
         <div class="table-responsive flex-grow-1">
@@ -24,7 +24,6 @@
                         <th>{{ t('global.name') }}</th>
                         <th>{{ t('global.display_name') }}</th>
                         <th>{{ t('global.description') }}</th>
-                        <th>{{ t('global.permissions') }}</th>
                         <th>{{ t('global.created_at') }}</th>
                         <th>{{ t('global.updated_at') }}</th>
                         <th>{{ t('global.options') }}</th>
@@ -32,91 +31,66 @@
                 </thead>
                 <tbody>
                     <tr
-                        v-for="role in state.roleList"
-                        :key="role.id"
+                        v-for="grp in state.groupList"
+                        :key="grp.id"
                     >
                         <td>
-                            {{ role.name }}
+                            {{ grp.name }}
                         </td>
-                        <td v-if="v.fields[role.id]">
+                        <td v-if="v.fields[grp.id]">
                             <input
-                                v-model="v.fields[role.id].display_name.value"
+                                v-model="v.fields[grp.id].display_name.value"
                                 type="text"
                                 class="form-control"
                                 required
-                                :class="getClassByValidation(getErrors(role.id, 'display_name'))"
-                                :name="`displayname_${role.id}`"
-                                @input="e => v.fields[role.id].display_name.handleChange(e)"
+                                :class="getClassByValidation(getErrors(grp.id, 'display_name'))"
+                                :name="`displayname_${grp.id}`"
+                                @input="e => v.fields[grp.id].display_name.handleChange(e)"
                             >
 
                             <div class="invalid-feedback">
                                 <span
-                                    v-for="(msg, i) in getErrors(role.id, 'display_name')"
+                                    v-for="(msg, i) in getErrors(grp.id, 'display_name')"
                                     :key="i"
                                 >
                                     {{ msg }}
                                 </span>
                             </div>
                         </td>
-                        <td v-if="v.fields[role.id]">
+                        <td v-if="v.fields[grp.id]">
                             <input
-                                v-model="v.fields[role.id].description.value"
+                                v-model="v.fields[grp.id].description.value"
                                 type="text"
                                 class="form-control"
                                 required
-                                :class="getClassByValidation(getErrors(role.id, 'description'))"
-                                :name="`description_${role.id}`"
-                                @input="e => v.fields[role.id].description.handleChange(e)"
+                                :class="getClassByValidation(getErrors(grp.id, 'description'))"
+                                :name="`description_${grp.id}`"
+                                @input="e => v.fields[grp.id].description.handleChange(e)"
                             >
 
                             <div class="invalid-feedback">
                                 <span
-                                    v-for="(msg, i) in getErrors(role.id, 'description')"
+                                    v-for="(msg, i) in getErrors(grp.id, 'description')"
                                     :key="i"
                                 >
                                     {{ msg }}
                                 </span>
-                            </div>
-                        </td>
-                        <td v-if="v.fields[role.id]">
-                            <div class="d-flex flex-row gap-2">
-                                <div
-                                    v-if="role.derived"
-                                    class="d-flex flex-row gap-2 align-items-center"
-                                >
-                                    <span class="text-muted">
-                                        {{ t('main.role.preset.derived_from') }}
-                                    </span>
-                                    <span class="badge bg-primary">
-                                        <i class="fas fa-fw fa-shield-alt" />
-                                        {{ t(`main.role.preset.${role.derived.name}`) }}
-                                    </span>
-                                </div>
-                                <a
-                                    v-if="can('users_roles_write')"
-                                    href="#"
-                                    class="text-decoration-none text-info"
-                                    :title="t('global.edit')"
-                                    @click.prevent="openAccessControlModal(role.id)"
-                                >
-                                    <i class="fas fa-fw fa-edit" />
-                                </a>
                             </div>
                         </td>
                         <td>
-                            <span :title="date(role.created_at)">
-                                {{ ago(role.created_at) }}
+                            <span :title="date(grp.created_at)">
+                                {{ ago(grp.created_at) }}
                             </span>
                         </td>
                         <td>
-                            <span :title="date(role.updated_at)">
-                                {{ ago(role.updated_at) }}
+                            <span :title="date(grp.updated_at)">
+                                {{ ago(grp.updated_at) }}
                             </span>
                         </td>
                         <td>
                             <div class="dropdown">
                                 <span
-                                    :id="`role-options-dropdown-${role.id}`"
+                                    :id="`role-options-dropdown-${grp.id}`"
                                     class="clickable"
                                     data-bs-toggle="dropdown"
                                     aria-haspopup="true"
@@ -124,7 +98,7 @@
                                 >
                                     <i class="fas fa-fw fa-ellipsis-vertical" />
                                     <sup
-                                        v-if="roleDirty(role.id)"
+                                        v-if="groupDirty(grp.id)"
                                         class="notification-info"
                                     >
                                         <i class="fas fa-fw fa-xs fa-circle text-warning" />
@@ -132,14 +106,14 @@
                                 </span>
                                 <div
                                     class="dropdown-menu"
-                                    :aria-labelledby="`role-options-dropdown-${role.id}`"
+                                    :aria-labelledby="`role-options-dropdown-${grp.id}`"
                                 > 
                                     <a
-                                        v-if="roleDirty(role.id)"
+                                        v-if="groupDirty(grp.id)"
                                         class="dropdown-item"
                                         href="#"
                                         :disabled="!can('users_roles_write')"
-                                        @click.prevent="patchRole(role.id)"
+                                        @click.prevent="patchGroup(grp.id)"
                                     >
                                         <i class="fas fa-fw fa-check text-success" /> {{ t('global.save') }}
                                     </a>
@@ -147,7 +121,7 @@
                                         class="dropdown-item"
                                         href="#"
                                         :disabled="!can('users_roles_delete')"
-                                        @click.prevent="deleteRole(role.id)"
+                                        @click.prevent="deleteGroup(grp.id)"
                                     >
                                         <i class="fas fa-fw fa-trash text-danger" /> {{ t('global.delete') }}
                                     </a>
@@ -181,22 +155,20 @@
 
     import {
         showDiscard,
-        showAddRole,
-        showDeleteRole,
-        showAccessControlModal,
+        showAddGroup,
+        showDeleteGroup,
     } from '@/helpers/modal.js';
     import {
         can,
         getClassByValidation,
         getErrorMessages,
-        getRoleBy,
     } from '@/helpers/helpers.js';
     import {
         ago,
         date,
     } from '@/helpers/filters.js';
     import {
-        patchRoleData,
+        patchGroupData,
     } from '@/api.js';
 
     export default {
@@ -205,8 +177,8 @@
             const toast = useToast();
 
             // FUNCTIONS
-            const updateValidationState = roles => {
-                const currentIds = roles.map(r => r.id);
+            const updateValidationState = groups => {
+                const currentIds = groups.map(r => r.id);
                 const oldIds = Object.keys(v.fields);
 
                 for(let i=0; i<oldIds.length; i++) {
@@ -218,10 +190,10 @@
                     }
                 }
 
-                for(let i=0; i<roles.length; i++) {
-                    const r = roles[i];
-                    // do not initialize existing roles
-                    if(!!v.fields[r.id]) continue;
+                for(let i=0; i<groups.length; i++) {
+                    const g = groups[i];
+                    // do not initialize existing groups
+                    if(!!v.fields[g.id]) continue;
 
                     const {
                         errors: edn,
@@ -229,8 +201,8 @@
                         value: vdn,
                         handleChange: hidn,
                         resetField: hrdn,
-                    } = useField(`displayname_${r.id}`, yup.string().required().max(255), {
-                        initialValue: r.display_name,
+                    } = useField(`displayname_${g.id}`, yup.string().required().max(255), {
+                        initialValue: g.display_name,
                     });
                     const {
                         errors: edesc,
@@ -238,10 +210,10 @@
                         value: vdesc,
                         handleChange: hidesc,
                         resetField: hrdesc,
-                    } = useField(`description_${r.id}`, yup.string().required().max(255), {
-                        initialValue: r.description,
+                    } = useField(`description_${g.id}`, yup.string().required().max(255), {
+                        initialValue: g.description,
                     });
-                    v.fields[r.id] = reactive({
+                    v.fields[g.id] = reactive({
                         display_name: {
                             errors: edn,
                             meta: mdn,
@@ -259,23 +231,23 @@
                     });
                 }
             };
-            const roleDirty = id => {
+            const groupDirty = id => {
                 if(!v.fields[id]) return false;
 
                 return v.fields[id].display_name.meta.dirty ||
                     v.fields[id].description.meta.dirty;
             };
-            const roleValid = id => {
+            const groupValid = id => {
                 if(!v.fields[id]) return false;
                 
                 return v.fields[id].display_name.meta.valid ||
                     v.fields[id].description.meta.valid;
             };
-            const resetRole = id => {
+            const resetGroup = id => {
                 v.fields[id].display_name.reset();
                 v.fields[id].description.reset();
             };
-            const resetRoleMeta = id => {
+            const resetGroupMeta = id => {
                 v.fields[id].display_name.reset({
                     value: v.fields[id].display_name.value,
                 });
@@ -283,8 +255,8 @@
                     value: v.fields[id].description.value,
                 });
             };
-            const patchRole = async id => {
-                if(!roleDirty(id) || !roleValid(id) || !can('users_roles_write')) {
+            const patchGroup = async id => {
+                if(!groupDirty(id) || !groupValid(id) || !can('users_roles_write')) {
                     return;
                 }
 
@@ -296,20 +268,20 @@
                     data.description = v.fields[id].description.value;
                 }
 
-                return await patchRoleData(id, data).then(data => {
+                return await patchGroupData(id, data).then(data => {
                     state.errors[id] = {};
-                    resetRoleMeta(id);
-                    store.dispatch('updateRole', {
+                    resetGroupMeta(id);
+                    store.dispatch('updateGroup', {
                         id: data.id,
                         display_name: data.display_name,
                         description: data.description,
                         updated_at: data.updated_at,
                     });
-                    const role = getRoleBy(id);
-                    const msg = t('main.role.toasts.updated.msg', {
-                        name: role.display_name
+                    const group = getGroupBy(id);
+                    const msg = t('main.group.toasts.updated.msg', {
+                        name: group.display_name
                     });
-                    const title = t('main.role.toasts.updated.title');
+                    const title = t('main.group.toasts.updated.title');
                     toast.$toast(msg, title, {
                         channel: 'success',
                     });
@@ -330,57 +302,52 @@
                     ...apiErrors,
                 ];
             };
-            const showAddRoleModal = _ => {
+            const showAddGroupModal = _ => {
                 if(!can('users_roles_create')) return;
-                showAddRole();
+                showAddGroup();
             };
-            const deleteRole = rid => {
+            const deleteGroup = gid => {
                 if(!can('users_roles_delete')) return;
-                showDeleteRole(getRoleBy(rid));
+                showDeleteGroup(getGroupBy(gid));
             };
-            const anyRoleDirty = _ => {
+            const anyGroupDirty = _ => {
                 let isDirty = false;
-                for(let i=0; i<state.roleList.length; i++) {
-                    const r = state.roleList[i];
-                    if(roleDirty(r.id)) {
+                for(let i=0; i<state.groupList.length; i++) {
+                    const g = state.groupList[i];
+                    if(groupDirty(g.id)) {
                         isDirty = true;
                         break;
                     }
                 }
                 return isDirty;
             };
-            const openAccessControlModal = roleId => {
-                if(!can('users_roles_write')) return;
-
-                showAccessControlModal(roleId);
-            };
             // Used in Discard Modal to make all fields undirty
             const resetData = _ => {
-                for(let i=0; i<state.roleList.length; i++) {
-                    resetRole(state.roleList[i].id);
+                for(let i=0; i<state.groupList.length; i++) {
+                    resetGroup(state.groupList[i].id);
                 }
             };
             // Used in Discard Modal to store data before moving on
             const onBeforeConfirm = async _ => {
-                for(let i=0; i<state.roleList.length; i++) {
-                    const rid = state.roleList[i].id;
+                for(let i=0; i<state.groupList.length; i++) {
+                    const gid = state.groupList[i].id;
                     if(
                         (
-                            !v.fields[rid].display_name.meta.dirty ||
+                            !v.fields[gid].display_name.meta.dirty ||
                             (
-                                v.fields[rid].display_name.meta.dirty &&
-                                v.fields[rid].display_name.meta.valid
+                                v.fields[gid].display_name.meta.dirty &&
+                                v.fields[gid].display_name.meta.valid
                             )
                         ) &&
                         (
-                            !v.fields[rid].description.meta.dirty ||
+                            !v.fields[gid].description.meta.dirty ||
                             (
-                                v.fields[rid].description.meta.dirty &&
-                                v.fields[rid].description.meta.valid
+                                v.fields[gid].description.meta.dirty &&
+                                v.fields[gid].description.meta.valid
                             )
                         )
                     ) {
-                        await patchRole(rid);
+                        await patchGroup(gid);
                     }
                 }
             };
@@ -388,8 +355,8 @@
             // DATA
             const state = reactive({
                 setupFinished: false,
-                roleList: computed(_ => store.getters.roles()),
-                dataInitialized: computed(_ => state.roleList.length > 0),
+                groupList: computed(_ => store.getters.groups),
+                dataInitialized: computed(_ => state.groupList.length > 0),
                 errors: {},
             });
             const v = reactive({
@@ -398,18 +365,18 @@
 
             // ON MOUNTED
             onMounted(_ => {
-                updateValidationState(state.roleList);
+                updateValidationState(state.groupList);
                 state.setupFinished = true;
             })
 
             // WATCHER
-            watch(_ => state.roleList.length, _ => {
-                updateValidationState(state.roleList);
+            watch(_ => state.groupList.length, _ => {
+                updateValidationState(state.groupList);
             });
 
             // ON BEFORE LEAVE
             onBeforeRouteLeave(async (to, from) => {
-                if(anyRoleDirty()) {
+                if(anyGroupDirty()) {
                     showDiscard(to, resetData, onBeforeConfirm);
                     return false;
                 } else {
@@ -426,14 +393,13 @@
                 date,
                 getClassByValidation,
                 // LOCAL
-                roleDirty,
-                roleValid,
-                resetRole,
-                patchRole,
-                deleteRole,
+                groupDirty,
+                groupValid,
+                resetGroup,
+                patchGroup,
+                deleteGroup,
                 getErrors,
-                showAddRoleModal,
-                openAccessControlModal,
+                showAddGroupModal,
                 // PROPS
                 // STATE
                 state,

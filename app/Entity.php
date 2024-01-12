@@ -4,6 +4,7 @@ namespace App;
 
 use App\Exceptions\AmbiguousValueException;
 use App\Traits\CommentTrait;
+use App\Traits\RestrictableTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Nicolaslopezj\Searchable\SearchableTrait;
@@ -15,6 +16,7 @@ use Spatie\Searchable\SearchResult;
 class Entity extends Model implements Searchable
 {
     use CommentTrait;
+    use RestrictableTrait;
     use SearchableTrait;
     use LogsActivity;
 
@@ -41,6 +43,16 @@ class Entity extends Model implements Searchable
     protected $with = [
         'user',
     ];
+
+    public $restrictable_permissions = [
+        'read' => ['entity_read', 'entity_data_read'],
+        'write' => ['entity_write', 'entity_data_write'],
+        'create' => ['entity_create', 'entity_data_create'],
+        'delete' => ['entity_delete', 'entity_data_delete'],
+        'share' => ['entity_share', 'entity_data_share'],
+    ];
+
+    public $restrictable_recursive_key = 'root_entity_id';
 
     protected const searchCols = [
         'name' => 10,

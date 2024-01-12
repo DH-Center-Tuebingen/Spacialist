@@ -26,6 +26,10 @@
         <template #singlelabel="{ value }">
             <div class="multiselect-single-label">
                 {{ displayResult(value) }}
+                <slot
+                    name="resultsc"
+                    :value="value"
+                />
             </div>
         </template>
         <template #tag="{ option, handleTagRemove, disabled }">
@@ -46,6 +50,10 @@
         <template #option="{ option }">
             <span v-if="!state.enableChain">
                 {{ displayResult(option) }}
+                <slot
+                    name="optionsc"
+                    :value="option"
+                />
             </span>
             <div
                 v-else
@@ -147,7 +155,7 @@
             defaultValue: {
                 type: Object, // TODO should be Array for Entity-MC
                 required: false,
-                default: null,
+                default: _ => new Object(),
             },
         },
         emits: ['selected', 'entry-click'],
@@ -178,7 +186,7 @@
                     return await new Promise(r => r([]));
                 }
                 const results = await endpoint.value(query);
-                if(!!filterFn.value && !!filterFn.value) {
+                if(!!filterFn.value) {
                     return filterFn.value(results, query);
                 } else {
                     return results;
@@ -195,6 +203,12 @@
                 }
             };
             const handleSelection = option => {
+                if(!state.entry && (!option || Object.keys(option).length == 0)) {
+                    return;
+                }
+                if(Object.keys(state.entry).length == 0 && Object.keys(option).length == 0) {
+                    return;
+                }
                 let data = {}
                 if(option) {
                     if(mode.value == 'single') {

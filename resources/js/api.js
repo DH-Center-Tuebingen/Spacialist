@@ -111,6 +111,11 @@ export async function fetchUsers() {
             presets: response.data.presets,
         });
     }));
+    await $httpQueue.add(() => http.get('group').then(response => {
+        store.dispatch('setGroups', {
+            groups: response.data,
+        });
+    }));
 }
 
 export async function fetchTopEntities() {
@@ -336,6 +341,13 @@ export async function addRole(role) {
     );
 }
 
+export async function addGroup(role) {
+    const data = only(role, ['name', 'display_name', 'description']);
+    return $httpQueue.add(
+        () =>  http.post('group', data).then(response => response.data)
+    );
+}
+
 export async function resetUserPassword(uid, password) {
     const data = {
         password: password,
@@ -463,6 +475,12 @@ export async function duplicateEntity(entity) {
 export async function importEntityData(data) {
     return $httpQueue.add(
         () => http.post(`/entity/import`, data).then(response => response.data).catch(e => {throw e})
+    );
+}
+
+export async function restrictEntityAccess(eid, data) {
+    return $httpQueue.add(
+        () => http.post(`/entity/${eid}/access`, data).then(response => response.data)
     );
 }
 
@@ -791,6 +809,10 @@ export async function patchRoleData(rid, data) {
     );
 }
 
+export async function patchGroupData(gid, data) {
+    return new Promise(r => r(null));
+}
+
 export async function updateReference(id, eid, url, data) {
     $httpQueue.add(
         () => http.patch(`/entity/reference/${id}`, data).then(response => {
@@ -819,6 +841,12 @@ export async function deactivateUser(id) {
 export async function deleteRole(id) {
     return $httpQueue.add(
         () => http.delete(`role/${id}`).then(response => response.data)
+    );
+}
+
+export async function deleteGroup(id) {
+    return $httpQueue.add(
+        () => http.delete(`group/${id}`).then(response => response.data)
     );
 }
 
@@ -906,5 +934,11 @@ export async function searchLabel(query = '') {
 export async function searchEntity(query = '') {
     return $httpQueue.add(
         () => http.get(`search/entity?q=${query}`).then(response => response.data)
+    )
+}
+
+export async function searchGroupsAndUsers(query = '') {
+    return $httpQueue.add(
+        () => http.get(`search/users_groups?q=${query}`).then(response => response.data)
     )
 }

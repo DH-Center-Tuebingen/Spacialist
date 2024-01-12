@@ -131,7 +131,7 @@
                     type="submit"
                     form="entity-attribute-form"
                     class="btn btn-outline-success btn-sm"
-                    :disabled="!state.formDirty || !can('entity_data_write')"
+                    :disabled="!state.formDirty || !can('entity_data_write') || !canWrite(state.entity)"
                     @click.prevent="saveEntity()"
                 >
                     <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
@@ -147,10 +147,24 @@
                 <button
                     type="button"
                     class="btn btn-outline-danger btn-sm"
-                    :disabled="!can('entity_delete')"
+                    :disabled="!can('entity_delete') || !canDelete(state.entity)"
                     @click="confirmDeleteEntity()"
                 >
                     <i class="fas fa-fw fa-trash" /> {{ t('global.delete') }}
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    :disabled="!can('entity_write')"
+                    @click="openWorkingGroups()"
+                >
+                    <i class="fas fa-fw fa-unlock-alt" /> {{ t('global.access') }}
+                    <span
+                        v-if="state.hasAccessRules"
+                        class="badge text-bg-primary"
+                    >
+                        {{ state.accessRuleCount }}
+                    </span>
                 </button>
             </div>
         </div>
@@ -225,6 +239,7 @@
                             v-show="state.attributeGrpHovered == tg.id"
                         >
                             <a
+                                v-if="canWrite(state.entity)"
                                 href="#"
                                 @click.prevent.stop="saveEntity(`${tg.id}`)"
                             >
@@ -384,6 +399,8 @@ import { useToast } from '@/plugins/toast.js';
     } from '@/api.js';
     import {
         can,
+        canWrite,
+        canDelete,
         isModerated,
         getAttribute,
         getEntityColors,
@@ -395,6 +412,7 @@ import { useToast } from '@/plugins/toast.js';
     import {
         showDiscard,
         showDeleteEntity,
+        showEntityAccess,
         showUserInfo,
         canShowReferenceModal,
     } from '@/helpers/modal.js';
@@ -492,6 +510,10 @@ export default {
                     };
                 }
             }),
+            hasAccessRules: computed(_ => {
+                return (state.entity && state.entity.access_rules && state.entity.access_rules.length > 0);
+            }),
+            accessRuleCount: computed(_ => state.hasAccessRules ? state.entity.access_rules.length : 0),
             entityTypeSelections: computed(_ => getEntityTypeAttributeSelections(state.entity.entity_type_id)),
             entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
             hasAttributeLinks: computed(_ => state.entity.attributeLinks && state.entity.attributeLinks.length > 0),
@@ -694,6 +716,9 @@ export default {
 
             showDeleteEntity(state.entity.id);
         };
+        const openWorkingGroups = _ => {
+            showEntityAccess(state.entity.id);
+        };
         const setDetailPanel = tab => {
             const query = {
                 view: tab,
@@ -796,7 +821,7 @@ export default {
                 }
             };
             const saveEntity = grps => {
-                if(!can('entity_data_write')) return;
+                if(!can('entity_data_write') || !canWrite(state.entity)) return;
 
                 const dirtyValues = getDirtyValues(grps);
                 const patches = [];
@@ -978,6 +1003,8 @@ export default {
             t,
             // HELPERS
             can,
+            canWrite,
+            canDelete,
             date,
             showUserInfo,
             getEntityTypeName,
@@ -992,6 +1019,7 @@ export default {
             showHiddenAttributes,
             hideHiddenAttributes,
             confirmDeleteEntity,
+            openWorkingGroups,
             setDetailPanel,
             onEntityHeaderHover,
             showTabActions,

@@ -5,6 +5,7 @@
         "restore": "Restore",
         "deactivate": "Deactivate",
         "reactivate": "Reactivate",
+        "access": "Access",
         "remove": "Remove",
         "reset": "Reset",
         "reset_password": "Reset Password",
@@ -103,6 +104,7 @@
             "title": "Settings",
             "users": "User Management",
             "roles": "Role Management",
+            "groups": "Working Group Management",
             "plugins": "Plugins",
             "datamodel": "Data-Model-Editor",
             "system": "System Preferences",
@@ -185,6 +187,7 @@
         "description": "Description",
         "roles": "Roles",
         "permissions": "Permissions",
+        "groups": "Working Groups",
         "added_at": "Added",
         "created_at": "Created",
         "updated_at": "Updated",
@@ -283,7 +286,8 @@
                     }
                 }
             },
-            "page_access_denied": "You do not have permission(s) to access this page. Missing permissions: {perm}"
+            "page_access_denied": "You do not have permission(s) to access this page. Missing permissions: {perm}",
+            "alert_hidden": "Show content…"
         },
         "csv": {
             "uploader": {
@@ -365,6 +369,9 @@
                 },
                 "multiedit": {
                     "title": "Multi-Edit Attributes"
+                },
+                "access": {
+                    "title": "Access - Working Groups"
                 },
                 "delete": {
                     "alert": "If you delete <span class=\"fw-bold\">{name}</span>, at least one entity is deleted, too. | If you delete <span class=\"fw-bold\">{name}</span>, at least {cnt} entities are deleted, too."
@@ -459,7 +466,10 @@
                     "message": "Your password has been changed recently. You either have to accept that new password or set one yourself. To do so you have only one additional login left! | Your password has been changed recently. You either have to accept that new password or set one yourself. To do so you have {attempts} additional logins left."
                 }
             },
-            "add_role_placeholder": "Add roles"
+            "add_role_placeholder": "Add roles",
+            "add_group_placeholder": "Add group",
+            "deactivated_role_placeholder": "No roles assigned",
+            "deactivated_group_placeholder": "No groups assigned"
         },
         "role": {
             "add_button": "Add new Role",
@@ -512,6 +522,20 @@
                 }
             },
             "add_permission_placeholder": "Add permissions"
+        },
+        "group": {
+            "add_button": "Add Working Group",
+            "toasts": {
+                "updated": {
+                    "title": "Working Group updated",
+                    "msg": "{name} successfully updated."
+                }
+            },
+            "modal": {
+                "new": {
+                    "title": "New Working Group"
+                }
+            }
         },
         "activity": {
             "title_project": "Project Activity | Project Activities",

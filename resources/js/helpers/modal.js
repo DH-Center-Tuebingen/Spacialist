@@ -28,7 +28,10 @@ import {
     addRole,
     patchRoleData,
     deleteRole,
+    addGroup,
+    deleteGroup,
     moveEntity,
+    restrictEntityAccess,
 } from '@/api.js';
 
 import {
@@ -59,12 +62,15 @@ import DeactiveUser from '@/components/modals/user/Deactivate.vue';
 import AccessControl from '@/components/modals/role/AccessControl.vue';
 import AddRole from '@/components/modals/role/Add.vue';
 import DeleteRole from '@/components/modals/role/Delete.vue';
+import AddGroup from '@/components/modals/group/Add.vue';
+import DeleteGroup from '@/components/modals/group/Delete.vue';
 import BibliographyItem from '@/components/modals/bibliography/Item.vue';
 import DeleteBibliographyItem from '@/components/modals/bibliography/Delete.vue';
 import BibliographyItemDetails from '@/components/modals/bibliography/Details.vue';
 import AddEntity from '@/components/modals/entity/Add.vue';
 import MoveEntity from '@/components/modals/entity/Move.vue';
 import DeleteEntity from '@/components/modals/entity/Delete.vue';
+import EntityAccess from '@/components/modals/entity/Access.vue';
 import AddEntityType from '@/components/modals/entitytype/Add.vue';
 import EditEntityType from '@/components/modals/entitytype/Edit.vue';
 import DeleteEntityType from '@/components/modals/entitytype/Delete.vue';
@@ -494,6 +500,56 @@ export function showDeleteRole(role, onDeleted) {
     modal.open();
 }
 
+export function showAddGroup(onAdded) {
+    const uid = `AddGroup-${getTs()}`;
+    const modal = useModal({
+        component: AddGroup,
+        attrs: {
+            name: uid,
+            onAdd(e) {
+                if(!can('users_roles_create')) return;
+                addGroup(e).then(group => {
+                    if(!!onAdded) {
+                        onAdded();
+                    }
+                    store.dispatch('addGroup', group);
+                    modal.destroy();
+                });
+            },
+            onCancel(e) {
+                modal.destroy();
+            },
+        },
+    });
+    modal.open();
+}
+
+export function showDeleteGroup(group, onDeleted) {
+    const uid = `DeleteGroup-${getTs()}`;
+    const modal = useModal({
+        component: DeleteGroup,
+        attrs: {
+            name: uid,
+            group: group,
+            onConfirm(e) {
+                if(!can('users_roles_delete')) return;
+    
+                deleteGroup(group.id).then(_ => {
+                    if(!!onDeleted) {
+                        onDeleted();
+                    }
+                    store.dispatch('deleteGroup', role);
+                    modal.destroy();
+                });
+            },
+            onCancel(e) {
+                modal.destroy();
+            },
+        },
+    });
+    modal.open();
+}
+
 export function showBibliographyEntry(data, onSave) {
     const uid = `AddBibliographyEntry-${getTs()}`;
     const modal = useModal({
@@ -652,6 +708,27 @@ export function showDeleteEntity(entityId, onDeleted) {
                             onDeleted(entity);
                         }
                     });
+                });
+            },
+        },
+    });
+    modal.open();
+}
+
+export function showEntityAccess(entityId) {
+    const uid = `EntityAccess-${getTs()}`;
+    const modal = useModal({
+        component: EntityAccess,
+        attrs: {
+            name: uid,
+            entityId: entityId,
+            onClosing(e) {
+                modal.destroy();
+            },
+            onConfirm(e) {
+                restrictEntityAccess(entityId, e).then(_ => {
+                    // TODO update store
+                    // modal.destroy();
                 });
             },
         },
