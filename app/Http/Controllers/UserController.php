@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Sleep;
 use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
@@ -165,6 +166,7 @@ class UserController extends Controller
             $user = User::where('email', $request->get('email'))->withoutTrashed()->first();
         }
         if(!isset($user)) {
+            Sleep::for(2)->seconds();
             return response()->json([
                 'error' => __('Invalid Credentials')
             ], 400);

@@ -24,10 +24,12 @@ All notable changes to this project will be documented in this file.
 - Do not reload _Entity Detail_ on `Enter` key
 - Do not allow empty values in _List_ attribute
 - Re-add Drag & Drop to _entity tree_
+- Reset error message on login
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
 - Allow adding options in _List_ attribute on `Enter` key
+- Set timeout & disable login button while authenticating
 
 ## 0.9.14
 ### Added

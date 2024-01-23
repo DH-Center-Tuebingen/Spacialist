@@ -89,6 +89,7 @@
                             <button
                                 type="submit"
                                 class="btn btn-primary"
+                                :disabled="state.submitting"
                             >
                                 {{ t('global.login') }}
                             </button>
@@ -132,11 +133,14 @@
                 redirect: {
                     name: 'home'
                 },
+                submitting: false,
                 error: {},
             });
 
             // FUNCTIONS
             const login = _ => {
+                state.submitting = true;
+                state.error = {};
                 let data = {
                     password: state.user.password
                 };
@@ -153,8 +157,12 @@
                     redirect: state.redirect,
                     fetchUser: true
                 })
-                .then(_ => initApp(locale))
+                .then(_ => {
+                    state.submitting = false;
+                    return initApp(locale);
+                })
                 .catch(e => {
+                    state.submitting = false;
                     state.error = getErrorMessages(e);
                     return Promise.reject();
                 })
