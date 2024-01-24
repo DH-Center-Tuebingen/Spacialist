@@ -1,7 +1,7 @@
 <template>
     <MilkdownProvider>
         <MilkdownEditor
-            :ref="el => editorRef = el"
+            ref="editorRef"
             :class="classes"
             :data="data"
             :readonly="readonly"
@@ -10,55 +10,42 @@
 </template>
   
 <script>
-    import {
-        ref,
-        toRefs,
-    } from 'vue';
-    import MilkdownEditor from './Main.vue';
-    import { MilkdownProvider } from '@milkdown/vue';
-    
-    export default {
-        name: 'MilkdownEditorWrapper',
-        components: {
-            MilkdownProvider,
-            MilkdownEditor,
-        },
-        props: {
-            data: {
-                required: true,
-                type: String,
-            },
-            classes: {
-                required: false,
-                type: String,
-                default: 'milkdown-wrapper h-100',
-            },
-            readonly: {
-                required: false,
-                type: Boolean,
-                default: false,
-            },
-        },
-        setup(props) {
-            const {
-                data,
-                classes,
-                readonly,
-            } = toRefs(props);
+import MilkdownEditor from './Main.vue';
+import { MilkdownProvider } from '@milkdown/vue';
 
-            const getEditorMarkdown = _ => {
-                return editorRef.value.getMarkdown();
-            };
-
-            const editorRef = ref({});
-
-            return {
-                // HELPERS
-                // LOCAL
-                getEditorMarkdown,
-                // STATE
-                editorRef,
-            };
+export default {
+    name: 'MilkdownEditorWrapper',
+    components: {
+        MilkdownProvider,
+        MilkdownEditor,
+    },
+    props: {
+        data: {
+            required: true,
+            type: String,
         },
-    };
+        classes: {
+            required: false,
+            type: String,
+            default: 'milkdown-wrapper h-100',
+        },
+        readonly: {
+            required: false,
+            type: Boolean,
+            default: false,
+        },
+    },
+    watch: {
+        data(newData, oldData) {
+            if (this.$refs.editorRef && this.$refs.editorRef.setMarkdown) {
+                this.$refs.editorRef.setMarkdown(newData);
+            }
+        }
+    },
+    methods: {
+        getEditorMarkdown() {
+            return this.$refs.editorRef.getMarkdown();
+        }
+    }
+};
 </script>

@@ -7,36 +7,23 @@
 </template>
 
 <script>
-    import {
-        toRefs,
-    } from 'vue';
-
-    export default {
-        props: {
-            id: {
-                required: true,
-                type: String,
-            },
-            source: {
-                required: true,
-                type: String,
-            },
-            classes: {
-                required: false,
-                type: String,
-                default: 'milkdown-wrapper h-100',
-            },
+export default {
+    props: {
+        id: {
+            required: true,
+            type: String,
         },
-        setup(props) {
-            const {
-                source,
-                classes,
-            } = toRefs(props);
-
-            return {
-            }
+        source: {
+            required: true,
+            type: String,
         },
-    };
+        classes: {
+            required: false,
+            type: String,
+            default: 'milkdown-wrapper h-100',
+        },
+    }
+};
 </script>
 
 
