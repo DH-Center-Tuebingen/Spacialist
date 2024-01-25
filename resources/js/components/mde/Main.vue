@@ -64,6 +64,11 @@ export default {
         const getMarkdown = _ => {
             return state.markdownString;
         };
+        const setMarkdown = markdown => {
+            if(editor) {
+                editor.action(replaceAll(markdown));
+            }
+        };
 
         // DATA
         const emojiPlugin = [
@@ -108,12 +113,6 @@ export default {
             show: false,
             markdownString: data.value,
         });
-
-
-        const setMarkdown = markdown => {
-            if (editor)
-                editor.action(replaceAll(markdown));
-        };
 
         // ON MOUNTED
 

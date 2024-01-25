@@ -10,6 +10,10 @@
 </template>
   
 <script>
+import {
+    ref,
+    watch,
+} from 'vue';
 import MilkdownEditor from './Main.vue';
 import { MilkdownProvider } from '@milkdown/vue';
 
@@ -35,17 +39,22 @@ export default {
             default: false,
         },
     },
-    watch: {
-        data(newData, oldData) {
-            if (this.$refs.editorRef && this.$refs.editorRef.setMarkdown) {
-                this.$refs.editorRef.setMarkdown(newData);
+    setup(props) {
+        const getEditorMarkdown = _ => {
+            return editorRef.value.getMarkdown();
+        };
+
+        const editorRef = ref({});
+        watch(_ => props.data, (newData, oldData) => {
+            if(editorRef.value && editorRef.value.setMarkdown) {
+                editorRef.value.setMarkdown(newData);
             }
+        });
+
+        return {
+            editorRef,
+            getEditorMarkdown,
         }
     },
-    methods: {
-        getEditorMarkdown() {
-            return this.$refs.editorRef.getMarkdown();
-        }
-    }
 };
 </script>
