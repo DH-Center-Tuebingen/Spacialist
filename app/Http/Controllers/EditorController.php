@@ -279,6 +279,10 @@ class EditorController extends Controller {
                 'in_table' => true,
             ],
             [
+                'datatype' => 'userlist',
+                'in_table' => true,
+            ],
+            [
                 'datatype' => 'table',
                 'in_table' => false,
             ],

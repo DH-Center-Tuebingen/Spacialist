@@ -126,6 +126,14 @@
                             :selections="state.selections[column.id]"
                             @change="e => updateDirtyState(e, $index, column.id)"
                         />
+
+                        <userlist-attribute
+                            v-else-if="column.datatype == 'userlist'"
+                            :ref="el => setRef(el, `${$index}_${column.id}`)"
+                            :name="`${name}-column-attr-${column.id}`"
+                            :value="row[column.id]"
+                            @change="e => updateDirtyState(e, $index, column.id)"
+                        />
                     </td>
                     <td
                         v-if="!disabled"
@@ -242,6 +250,13 @@
                             :name="`${name}-new-column-attr-${column.id}`"
                             :value="state.newRowColumns[column.id]"
                             :selections="state.selections[column.id]"
+                        />
+
+                        <userlist-attribute
+                            v-else-if="column.datatype == 'userlist'"
+                            :ref="el => setRef(el, column.id)"
+                            :name="`${name}-new-column-attr-${column.id}`"
+                            :value="state.newRowColumns[column.id]"
                         />
                     </td>
                     <td>
@@ -382,6 +397,7 @@
     import Entity from '@/components/attribute/Entity.vue';
     import DateAttr from '@/components/attribute/Date.vue';
     import SingleChoice from '@/components/attribute/SingleChoice.vue';
+    import UserList from '@/components/attribute/UserList.vue';
 
     import * as d3 from 'd3-dsv'; 
 
@@ -396,6 +412,7 @@
             'entity-attribute': Entity,
             'date-attribute': DateAttr,
             'singlechoice-attribute': SingleChoice,
+            'userlist-attribute': UserList,
         },
         props: {
             name: {

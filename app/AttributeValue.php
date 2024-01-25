@@ -192,6 +192,10 @@ class AttributeValue extends Model implements Searchable
                 $key = 'json_val';
                 $val = json_encode($rawValue);
                 break;
+            case 'userlist':
+                $key = 'json_val';
+                $val = json_encode($rawValue);
+                break;
             case 'geography':
                 $key = 'geography_val';
                 $val = Geodata::parseWkt($rawValue);
@@ -256,6 +260,7 @@ class AttributeValue extends Model implements Searchable
             case 'list':
             case 'table':
             case 'entity-mc':
+            case 'userlist':
                 $column = 'json_val';
                 break;
             case 'geography':
@@ -445,6 +450,9 @@ class AttributeValue extends Model implements Searchable
             case 'entity':
                 $entityId = Entity::getFromPath($trimmedVal);
                 $value = $entityId;
+                break;
+            case 'userlist':
+                $value = json_encode($trimmedVal);
                 break;
             case 'table':
             case 'sql':
