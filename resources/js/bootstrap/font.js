@@ -21,6 +21,7 @@ import {
     faGithub,
     faHtml5,
     faLaravel,
+    faMarkdown,
     faOrcid,
     faVuejs
 } from '@fortawesome/free-brands-svg-icons';
@@ -34,6 +35,12 @@ import {
     faSquareCheck,
 } from '@fortawesome/free-regular-svg-icons';
 import {
+    fa1,
+    fa2,
+    fa3,
+    fa4,
+    fa5,
+    fa6,
     faAdjust,
     faAlignLeft,
     faAlignCenter,
@@ -147,6 +154,7 @@ import {
     faOutdent,
     faPalette,
     faPaperPlane,
+    faParagraph,
     faPaste,
     faPause,
     faPaw,
@@ -213,6 +221,12 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
+    fa1,
+    fa2,
+    fa3,
+    fa4,
+    fa5,
+    fa6,
     faFacebookSquare,
     faGithub,
     faHtml5,
@@ -326,6 +340,7 @@ library.add(
     faLongArrowAltUp,
     faMagic,
     faMap,
+    faMarkdown,
     faMapMarkedAlt,
     faMapMarkerAlt,
     faMicrochip,
@@ -336,6 +351,7 @@ library.add(
     faOutdent,
     faPalette,
     faPaperPlane,
+    faParagraph,
     faPaste,
     faPause,
     faPaw,

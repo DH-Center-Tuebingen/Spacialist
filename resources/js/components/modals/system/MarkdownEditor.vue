@@ -29,7 +29,7 @@
             <div class="modal-body overflow-hidden">
                 <md-editor
                     :ref="el => wrapperRef = el"
-                    class="h-100"
+                    :classes="'milkdown-wrapper h-100 mt-0 p-0 d-flex flex-column'"
                     :data="content"
                 />
             </div>

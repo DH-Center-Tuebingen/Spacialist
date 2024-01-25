@@ -1,13 +1,38 @@
 <template>
-    <Milkdown :editor="editor" />
+    <div>
+        <command-palette
+            v-if="!readonly"
+            :editor="editor"
+            @toggle="setEditorType"
+        />
+        <hr
+            v-if="!readonly"
+            class="my-2 mx-2"
+        >
+        <Milkdown
+            v-show="state.type == 'md'"
+            :class="state.editModeClasses"
+            :editor="editor"
+        />
+        <textarea
+            v-show="state.type == 'raw'"
+            v-model="state.markdownString"
+            class="font-monospace border-0 flex-grow-1 w-100 rounded-3 bg-transparent px-2"
+            style="resize: none; outline: none;"
+        />
+    </div>
 </template>
 
 <script>
 import {
+    computed,
     reactive,
+    ref,
     toRefs,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
+
+import CommandPalette from './CommandPalette.vue';
 
 import {
     Editor,
@@ -40,6 +65,7 @@ import { replaceAll } from '@milkdown/utils';
 export default {
     components: {
         Milkdown,
+        CommandPalette,
     },
     props: {
         data: {
@@ -65,8 +91,16 @@ export default {
             return state.markdownString;
         };
         const setMarkdown = markdown => {
-            if(editor) {
-                editor.action(replaceAll(markdown));
+            if(editor.value) {
+                editor.value.action(replaceAll(markdown));
+            }
+        };
+        const setEditorType = _ => {
+            if(state.type == 'md') {
+                state.type = 'raw';
+            } else {
+                setMarkdown(getMarkdown());
+                state.type = 'md';
             }
         };
 
@@ -77,10 +111,10 @@ export default {
             emojiSchema,
         ].flat()
 
-        let editor = null
+        const editor = ref({})
 
-        useEditor((root) =>
-            editor = Editor.make()
+        useEditor((root) => 
+            editor.value = Editor.make()
                 .config((ctx) => {
                     ctx.set(rootCtx, root);
                     ctx.set(defaultValueCtx, data.value);
@@ -112,6 +146,17 @@ export default {
         const state = reactive({
             show: false,
             markdownString: data.value,
+            type: 'md',
+            editModeClasses: computed(_ => {
+                if(!readonly.value) {
+                    return [
+                        'flex-grow-1',
+                        'overflow-y-auto',
+                        'px-2',
+                    ];
+                }
+                return [];
+            }),
         });
 
         // ON MOUNTED
@@ -124,6 +169,7 @@ export default {
             // LOCAL
             getMarkdown,
             setMarkdown,
+            setEditorType,
             // STATE
             editor,
             state,

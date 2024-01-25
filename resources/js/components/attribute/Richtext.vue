@@ -1,5 +1,5 @@
 <template>
-    <div class="position-relative px-3 py-1 bg-secondary bg-opacity-10 rounded">
+    <div class="position-relative px-2 py-1 bg-secondary bg-opacity-10 rounded">
         <md-viewer
             v-if="current"
             :id="name"
