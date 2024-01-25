@@ -64,11 +64,12 @@
                     <h4>
                         {{ t('global.user.personal_info_title') }}
                     </h4>
-                    <div class="mb-2">
+                    <div>
                         <label
                             class="fw-bold"
                             for="profile-user-info-name"
                         >
+                            <i class="fas fa-fw fa-user" />
                             {{ t('global.name') }}:
                         </label>
                         <input
@@ -78,11 +79,12 @@
                             class="form-control"
                         >
                     </div>
-                    <div>
+                    <div class="mt-2">
                         <label
                             class="fw-bold"
                             for="profile-user-info-nickname"
                         >
+                            <i class="fas fa-fw fa-user-tag" />
                             {{ t('global.nickname') }}:
                         </label>
                         <input
@@ -92,12 +94,72 @@
                             class="form-control"
                         >
                     </div>
+                    <div class="mt-2">
+                        <label
+                            class="fw-bold"
+                            for="profile-user-info-role"
+                        >
+                            <i class="fas fa-fw fa-id-card-clip" />
+                            {{ t('global.user.role') }}:
+                        </label>
+                        <input
+                            id="profile-user-info-role"
+                            v-model="state.localUser.metadata.role"
+                            type="text"
+                            class="form-control"
+                        >
+                    </div>
+                    <div class="mt-2">
+                        <label
+                            class="fw-bold"
+                            for="profile-user-info-field"
+                        >
+                            <i class="fas fa-fw fa-chalkboard-user" />
+                            {{ t('global.user.field') }}:
+                        </label>
+                        <input
+                            id="profile-user-info-field"
+                            v-model="state.localUser.metadata.field"
+                            type="text"
+                            class="form-control"
+                        >
+                    </div>
+                    <div class="mt-2">
+                        <label
+                            class="fw-bold"
+                            for="profile-user-info-institution"
+                        >
+                            <i class="fas fa-fw fa-school" />
+                            {{ t('global.user.institution') }}:
+                        </label>
+                        <input
+                            id="profile-user-info-institution"
+                            v-model="state.localUser.metadata.institution"
+                            type="text"
+                            class="form-control"
+                        >
+                    </div>
+                    <div class="mt-2">
+                        <label
+                            class="fw-bold"
+                            for="profile-user-info-department"
+                        >
+                            <i class="fas fa-fw fa-users-between-lines" />
+                            {{ t('global.user.department') }}:
+                        </label>
+                        <input
+                            id="profile-user-info-department"
+                            v-model="state.localUser.metadata.department"
+                            type="text"
+                            class="form-control"
+                        >
+                    </div>
                 </div>
                 <div class="col-6">
                     <h4>
                         {{ t('global.user.contact') }}
                     </h4>
-                    <div class="mb-2">
+                    <div>
                         <label
                             class="fw-bold"
                             for="profile-user-contact-email"
@@ -111,7 +173,7 @@
                             class="form-control"
                         >
                     </div>
-                    <div class="mb-2">
+                    <div class="mt-2">
                         <label
                             class="fw-bold"
                             for="profile-user-contact-phonenumber"
@@ -125,7 +187,7 @@
                             class="form-control"
                         >
                     </div>
-                    <div>
+                    <div class="mt-2">
                         <label
                             class="fw-bold"
                             for="profile-user-contact-orcid"
@@ -185,19 +247,50 @@
             // FETCH
 
             // FUNCTIONS
+            const fields = {
+                name: {
+                    required: true,
+                },
+                nickname: {
+                    required: true,
+                },
+                email: {
+                    required: true,
+                },
+                phonenumber: {
+                    meta: true,
+                },
+                role: {
+                    meta: true,
+                },
+                field: {
+                    meta: true,
+                },
+                institution: {
+                    meta: true,
+                },
+                department: {
+                    meta: true,
+                },
+            };
+            // TODO replace fields and function with vee-validate
             const updateUserInformation = _ => {
                 let data = {};
-                if(state.localUser.name !== '' && state.localUser.name != state.user.name) {
-                    data.name = state.localUser.name;
-                }
-                if(state.localUser.nickname !== '' && state.localUser.nickname != state.user.nickname) {
-                    data.nickname = state.localUser.nickname;
-                }
-                if(state.localUser.email !== '' && state.localUser.email != state.user.email) {
-                    data.email = state.localUser.email;
-                }
-                if(state.localUser.metadata.phonenumber != state.user.metadata.phonenumber) {
-                    data.phonenumber = state.localUser.metadata.phonenumber;
+                for(let k in fields) {
+                    let validEntry = true;
+                    const curr = fields[k];
+                    const compA = curr.meta ? state.localUser.metadata[k] : state.localUser[k];
+                    const compB = curr.meta ? state.user.metadata[k] : state.user[k];
+                    if(compA == compB) {
+                        validEntry = false;
+                    } else {
+                        if(curr.required && compA === '') {
+                            validEntry = false;
+                        }
+                    }
+                    if(validEntry) {
+                        data[k] = compA;
+                    }
                 }
                 if(state.localUser.metadata.orcid != state.user.metadata.orcid && (!state.localUser.metadata.orcid || isValidOrcid(state.localUser.metadata.orcid))) {
                     data.orcid = state.localUser.metadata.orcid;

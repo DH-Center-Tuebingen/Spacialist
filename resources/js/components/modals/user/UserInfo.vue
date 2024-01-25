@@ -25,12 +25,50 @@
                         :user="user"
                         :size="128"
                     />
-                    <h3 class="mb-0 mt-2">
+                    <h3 class="mb-0 mt-1">
                         {{ user.name }}
                     </h3>
                     <h6 class="fw-normal text-muted">
                         {{ user.nickname }}
                     </h6>
+                </div>
+                <div class="d-flex flex-row gap-5">
+                    <dl class="flex-grow-1 text-end mb-0">
+                        <dt>
+                            {{ t('global.user.role') }}
+                            <i class="fas fa-fw fa-id-card-clip" />
+                        </dt>
+                        <dd>
+                            {{ user.metadata.role || t('global.user.not_assigned') }}
+                        </dd>
+                        <dt>
+                            {{ t('global.user.field') }}
+                            <i class="fas fa-fw fa-chalkboard-user" />
+                        </dt>
+                        <dd>
+                            {{ user.metadata.field || t('global.user.not_assigned') }}
+                        </dd>
+                    </dl>
+                    <div class="border" />
+                    <dl class="flex-grow-1 mb-0">
+                        <dt>
+                            <i class="fas fa-fw fa-school" />
+                            {{ t('global.user.institution') }}
+                        </dt>
+                        <dd>
+                            {{ user.metadata.institution || t('global.user.not_assigned') }}
+                        </dd>
+                        <dt>
+                            <i class="fas fa-fw fa-users-between-lines" />
+                            {{ t('global.user.department') }}
+                        </dt>
+                        <dd>
+                            {{ user.metadata.department || t('global.user.not_assigned') }}
+                        </dd>
+                    </dl>
+                </div>
+                <hr>
+                <div class="text-center">
                     <dl class="row">
                         <dt class="col-md-6">
                             {{ t('global.user.member_since') }}

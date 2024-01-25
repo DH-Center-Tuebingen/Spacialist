@@ -116,6 +116,11 @@
             "personal_info_title": "Personal Informationen",
             "member_since": "Member since",
             "deactivated_since": "<span class=\"fw-bold\">deactivated</span> since {dt}",
+            "role": "Role",
+            "field": "Field",
+            "institution": "Institution",
+            "department": "Department",
+            "not_assigned": "Not assigned",
             "contact": "Contact",
             "avatar": "Avatar",
             "invalid_orcid": "This ORCID is invalid"
