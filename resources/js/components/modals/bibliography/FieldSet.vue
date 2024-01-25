@@ -136,15 +136,17 @@
             };
             const getValidationRules = field => {
                 let rules = yup.string();
-                if(state.type.mandatory[field] === true) {
-                    rules = rules.required();
-                } else if(state.type.mandatory[field]) {
-                    const refField = state.type.mandatory[field];
-                    rules = rules.when(refField, {
-                        is: '',
-                        then: _ => yup.string().required(o => bibtexExt.requiredIf(o, refField)),
-                        otherwise: _ => yup.string(),
-                    });
+                if(state.type.mandatory) {
+                    if(state.type.mandatory[field] === true) {
+                        rules = rules.required();
+                    } else if(state.type.mandatory[field]) {
+                        const refField = state.type.mandatory[field];
+                        rules = rules.when(refField, {
+                            is: '',
+                            then: _ => yup.string().required(o => bibtexExt.requiredIf(o, refField)),
+                            otherwise: _ => yup.string(),
+                        });
+                    }
                 }
                 return rules;
             };
@@ -158,7 +160,7 @@
                     ruleSets[key] = getValidationRules(f);
                     initValues[key] = value;
                 });
-                const wh = Object.keys(state.type.mandatory).filter(m => state.type.mandatory[m] && state.type.mandatory[m] !== true);
+                const wh = state.type.mandatory ? Object.keys(state.type.mandatory).filter(m => state.type.mandatory[m] && state.type.mandatory[m] !== true) : [];
                 const schema = yup.object().shape(ruleSets, wh);
                 const {
                     meta: formMeta,
@@ -186,7 +188,7 @@
                 });
             };
             const isMandatoryField = field => {
-                return state.type.mandatory[field] === true;
+                return state.type.mandatory && state.type.mandatory[field] === true;
             };
 
             // DATA
