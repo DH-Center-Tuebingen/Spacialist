@@ -17,7 +17,7 @@ import '@fontsource/source-code-pro/500.css';
 // Font Awesome
 import { library, dom, findIconDefinition } from '@fortawesome/fontawesome-svg-core';
 import {
-    faFacebookSquare,
+    faFacebook,
     faGithub,
     faHtml5,
     faLaravel,
@@ -59,6 +59,7 @@ import {
     faCaretLeft,
     faCaretRight,
     faCaretUp,
+    faChalkboardUser,
     faChartBar,
     faChartPie,
     faCheck,
@@ -119,6 +120,7 @@ import {
     faHouse,
     faI,
     faIdBadge,
+    faIdCardClip,
     faImage,
     faIndent,
     faInfo,
@@ -165,6 +167,7 @@ import {
     faRulerCombined,
     faS,
     faSave,
+    faSchool,
     faSearch,
     faSearchPlus,
     faShieldAlt,
@@ -206,19 +209,16 @@ import {
     faUserCog,
     faUserEdit,
     faUsers,
+    faUsersBetweenLines,
+    faUserTag,
     faUserTimes,
     faVolumeMute,
     faVolumeUp,
     faWindowMaximize,
-    faIdCardClip,
-    faChalkboardUser,
-    faUsersBetweenLines,
-    faUserTag,
-    faSchool,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
-    faFacebookSquare,
+    faFacebook,
     faGithub,
     faHtml5,
     faLaravel,
