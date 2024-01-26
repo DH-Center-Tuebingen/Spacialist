@@ -1,24 +1,33 @@
 <template>
-    <div class="position-relative px-3 py-1 bg-secondary bg-opacity-10 rounded">
+    <div class="position-relative">
         <md-viewer
             v-if="current"
             :id="name"
-            :classes="'mt-0 bg-none h-100'"
+            :classes="classes"
             :source="current"
         />
         <div
             v-else
+            class="text-secondary fst-italic fw-medium opacity-50 user-select-none"
+            :class="classes"
         >
-            No content yet.
+            {{ t('global.missing.content') }}
         </div>
-        <a
-            v-if="!disabled"
-            class="position-absolute top-0 end-0 text-reset"
-            href="#"
-            @click.prevent="openMdEditor()"
-        >
-            <i class="fas fa-fw fa-edit" />
-        </a>
+        <div class="position-absolute top-0 end-0 h-100 pe-none ">
+            <div class="position-sticky top-0 bg-light pe-auto m-2 rounded">
+                <button
+                    v-if="!disabled"
+                    class="px-2 py-1 btn btn-outline-secondary btn-sm"
+                    href="#"
+                    @click.prevent="openMdEditor()"
+                >
+                    <i class="fas fa-fw fa-edit" />
+                    <span class="ms-2">
+                        {{ t('global.edit') }}
+                    </span>
+                </button>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -34,6 +43,7 @@
     import {
         showMarkdownEditor,
     } from '@/helpers/modal.js';
+    import { useI18n } from 'vue-i18n';
 
     export default {
         props: {
@@ -109,15 +119,19 @@
                 });
             };
 
+            const { t } = useI18n();
 
+            const classes = 'mt-0 bg-none h-100 form-control px-4 py-3'
 
             // RETURN
             return {
                 // FUNCTIONS
+                t,
                 resetFieldState,
                 undirtyField,
                 openMdEditor,
                 // STATE
+                classes,
                 current,
                 v
             }

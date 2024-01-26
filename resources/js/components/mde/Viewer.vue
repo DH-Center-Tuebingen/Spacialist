@@ -7,10 +7,6 @@
 </template>
 
 <script>
-    import {
-        toRefs,
-    } from 'vue';
-
     export default {
         props: {
             id: {
@@ -24,24 +20,8 @@
             classes: {
                 required: false,
                 type: String,
-                default: 'milkdown-wrapper h-100',
+                default: 'milkdown-wrapper p-3 mt-1 h-100',
             },
-        },
-        setup(props) {
-            const {
-                source,
-                classes,
-            } = toRefs(props);
-
-            return {
-            }
-        },
+        }
     };
 </script>
-
-
-<style scoped>
-pre {
-    background-color: red;
-}
-</style>

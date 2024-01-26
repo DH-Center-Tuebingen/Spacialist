@@ -362,6 +362,7 @@ export function getInitialAttributeValue(attribute) {
         case 'list':
         case 'string-mc':
         case 'entity-mc':
+        case 'userlist':
             return [];
         case 'date':
             return new Date();
@@ -415,6 +416,7 @@ export function getAttributeValueAsString(rawValue, datatype) {
         case 'string-mc':
         case 'entity':
         case 'entity-mc':
+        case 'userlist':
         case 'table':
         case 'sql':
             strValue = `TODO: ${datatype}`;

@@ -11,8 +11,8 @@
         "cancel": "Abbrechen",
         "close": "Schließen",
         "add": "Hinzufügen",
-        "edit": "Editieren",
-        "edited": "editiert",
+        "edit": "Bearbeiten",
+        "edited": "bearbeitet",
         "duplicate": "Duplizieren",
         "sort": "Sortieren",
         "resort": "Umsortieren",
@@ -61,6 +61,7 @@
         "has_links": "Hat keine Verknüpfungen | Hat eine Verknüpfung | Hat {cnt} Verknüpfungen",
         "discard": {
             "title": "Ungespeicherte Änderungen",
+            "changes": "Änderungen verwerfen",
             "msg": "Es gibt ungespeicherte Änderungen auf der aktuellen Seite. Willst du wirklich fortfahren und die Änderungen verwerfen?",
             "confirm": "Ja, Änderungen verwerfen",
             "confirm_and_save": "Nein, Speichern und fortfahren"
@@ -108,6 +109,9 @@
             "system": "System-Einstellungen",
             "about": "Über"
         },
+        "missing": {
+            "content": "Kein Inhalt vorhanden."
+        },
         "user": {
             "settings": "Einstellungen",
             "profile": "Profil",
@@ -143,6 +147,7 @@
             "percentage": "Prozentangabe",
             "entity": "Entität",
             "entity-mc": "Entität (Mehrfachauswahl)",
+            "userlist": "Benutzerliste",
             "epoch": "Zeitspanne & Epoche",
             "timeperiod": "Zeitspanne",
             "date": "Datum",
