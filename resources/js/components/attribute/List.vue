@@ -100,6 +100,7 @@
                 v.value.push(state.input);
                 v.meta.dirty = true;
                 state.input = '';
+                v.meta.validated = true;
             };
             const removeListEntry = index => {
                 v.value.splice(index, 1);
@@ -112,11 +113,13 @@
                 v.value = state.initialValue.slice();
                 v.meta.dirty = false;
                 v.meta.valid = true;
+                v.meta.validated = false;
             };
             const undirtyField = _ => {
                 state.initialValue = entries.value.slice();
                 v.meta.dirty = false;
                 v.meta.valid = true;
+                v.meta.validated = false;
             };
 
             // DATA
@@ -130,6 +133,7 @@
                 meta:{
                     dirty: false,
                     valid: true,
+                    validated: false,
                 },
                 value: entries.value.slice(),
             });
