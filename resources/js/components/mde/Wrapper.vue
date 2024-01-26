@@ -5,7 +5,7 @@
             :class="classes"
             :data="data"
             :readonly="readonly"
-            @update="(...args) => $emit('update', ...args)"
+            @update="emitUpdate"
         />
     </MilkdownProvider>
 </template>
@@ -41,9 +41,13 @@
             },
         },
         emits: ['update'],
-        setup(props) {
+        setup(props, context) {
             const getEditorMarkdown = _ => {
                 return editorRef.value.getMarkdown();
+            };
+
+            const emitUpdate = data => {
+                context.emit('update', data);
             };
 
             const editorRef = ref({});
@@ -56,7 +60,8 @@
             return {
                 editorRef,
                 getEditorMarkdown,
-            }
+                emitUpdate,
+            };
         },
     };
 </script>

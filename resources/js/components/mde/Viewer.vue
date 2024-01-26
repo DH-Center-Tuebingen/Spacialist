@@ -25,10 +25,3 @@
         }
     };
 </script>
-
-
-<style scoped>
-pre {
-    background-color: red;
-}
-</style>

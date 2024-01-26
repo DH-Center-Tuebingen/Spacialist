@@ -22,13 +22,13 @@
             <div class="modal-body overflow-hidden">
                 <md-editor
                     :ref="el => wrapperRef = el"
-                    @update="contentUpdated"
                     :classes="'milkdown-wrapper h-100 mt-0 p-0 d-flex flex-column'"
                     :data="content"
+                    @update="contentUpdated"
                 />
             </div>
             <div class="modal-footer">
-                <template v-if="isDirty">
+                <template v-if="state.isDirty">
                     <button
                         type="button"
                         class="btn btn-warning"
@@ -55,18 +55,15 @@
                 >
                     <i class="fas fa-fw fa-times" /> {{ t('global.cancel') }}
                 </button>
-
             </div>
         </div>
     </vue-final-modal>
 </template>
 
 <script>
-    import { computed } from 'vue';
     import {
         reactive,
         ref,
-        toRefs,
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
@@ -84,8 +81,6 @@
         emits: ['confirm', 'closing'],
         setup(props, context) {
             const { t } = useI18n();
-            const initialContent = props.content;
-            let content = ref(props.content);
 
             // FUNCTIONS
             const updateContent = _ => {
@@ -96,17 +91,16 @@
                 context.emit('closing', false);
             };
 
-            const isDirty = computed(() => {
-                return initialContent !== content.value;
-            });
-
-            const contentUpdated = (md) => {
-                content.value = md
+            const contentUpdated = _ => {
+                state.isDirty = true;
             };
 
             // DATA
             const wrapperRef = ref({});
 
+            const state = reactive({
+                isDirty: false,
+            });
 
             // RETURN
             return {
@@ -118,8 +112,8 @@
                 closeModal,
                 // STATE
                 wrapperRef,
-                isDirty,
-            }
+                state,
+            };
         },
-    }
+    };
 </script>
