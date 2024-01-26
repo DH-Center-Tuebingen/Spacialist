@@ -25,17 +25,19 @@
                         :user="user"
                         :size="128"
                     />
-                    <h3 class="mb-0 mt-2">
+                    <h3 class="mb-0 mt-1">
                         {{ user.name }}
                     </h3>
                     <h6 class="fw-normal text-muted">
                         {{ user.nickname }}
                     </h6>
-                    <dl class="row">
-                        <dt class="col-md-6">
+                </div>
+                <div class="d-flex flex-row justify-content-center gap-5">
+                    <dl class="mb-0 flex-grow-1 text-end">
+                        <dt>
                             {{ t('global.user.member_since') }}
                         </dt>
-                        <dd class="col-md-6">
+                        <dd>
                             <span
                                 id="user-member-since"
                                 :title="user.created_at"
@@ -52,23 +54,24 @@
                             />
                             <!-- eslint-enable-->
                         </dd>
-                        <dt class="col-md-6">
+                    </dl>
+                    <div class="border" />
+                    <dl class="mb-0 flex-grow-1">
+                        <dt>
                             {{ t('global.email') }}
                         </dt>
-                        <dd class="col-md-6">
+                        <dd>
                             <a :href="`mailto:${user.email}`">
                                 {{ user.email }}
                             </a>
                         </dd>
                         <dt
                             v-if="state.hasPhone"
-                            class="col-md-6"
                         >
                             {{ t('global.phonenumber') }}
                         </dt>
                         <dd
                             v-if="state.hasPhone"
-                            class="col-md-6"
                         >
                             <a :href="`tel:${user.metadata.phonenumber}`">
                                 {{ user.metadata.phonenumber }}
@@ -76,13 +79,11 @@
                         </dd>
                         <dt
                             v-if="state.hasOrcid"
-                            class="col-md-6"
                         >
                             {{ t('global.orcid') }}
                         </dt>
                         <dd
                             v-if="state.hasOrcid"
-                            class="col-md-6"
                         >
                             <a
                                 :href="`https://orcid.org/${user.metadata.orcid}`"
@@ -90,6 +91,42 @@
                             >
                                 {{ user.metadata.orcid }}
                             </a>
+                        </dd>
+                    </dl>
+                </div>
+                <hr>
+                <div class="d-flex flex-row justify-content-center gap-5">
+                    <dl class="mb-0 flex-grow-1 text-end">
+                        <dt>
+                            {{ t('global.user.role') }}
+                            <i class="fas fa-fw fa-id-card-clip" />
+                        </dt>
+                        <dd>
+                            {{ user.metadata.role || t('global.user.not_assigned') }}
+                        </dd>
+                        <dt>
+                            {{ t('global.user.field') }}
+                            <i class="fas fa-fw fa-chalkboard-user" />
+                        </dt>
+                        <dd>
+                            {{ user.metadata.field || t('global.user.not_assigned') }}
+                        </dd>
+                    </dl>
+                    <div class="border" />
+                    <dl class="mb-0 flex-grow-1">
+                        <dt>
+                            <i class="fas fa-fw fa-school" />
+                            {{ t('global.user.institution') }}
+                        </dt>
+                        <dd>
+                            {{ user.metadata.institution || t('global.user.not_assigned') }}
+                        </dd>
+                        <dt>
+                            <i class="fas fa-fw fa-users-between-lines" />
+                            {{ t('global.user.department') }}
+                        </dt>
+                        <dd>
+                            {{ user.metadata.department || t('global.user.not_assigned') }}
                         </dd>
                     </dl>
                 </div>

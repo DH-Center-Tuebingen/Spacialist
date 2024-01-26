@@ -87,7 +87,7 @@
                             href="https://www.facebook.com/esciencecenter"
                             target="_blank"
                         >
-                            <i class="fab fa-facebook-square fa-2x text-primary" />
+                            <i class="fab fa-facebook fa-2x text-primary" />
                         </a>
                         <a
                             href="https://github.com/DH-Center-Tuebingen/Spacialist"

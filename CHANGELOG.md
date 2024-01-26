@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - New Attribute Type: _Richtext_ (A feature-rich alternative to _Textbox_ Attribute; based on Markdown)
 - Separate form Save/Reset in Entity Attribute Tabs (when using _Attribute Group Separator_)
 - Additional non-standard bibtex fields to _Bibliography_ (ISBN, ISSN, Language and Abstract)
+- Additional fields in _User profile_ regarding institution
 ### Fixed
 - Error in _Attribute List_ caused by _Entity (Multiple Choice)_ attribute
 - Attribute form Save/Reset handling due to newly introduced _Attribute Group Separator_
@@ -30,6 +31,7 @@ All notable changes to this project will be documented in this file.
 - Reset Password Workflow
 - Allow adding options in _List_ attribute on `Enter` key
 - Set timeout & disable login button while authenticating
+- Better handling and validation of user input in _User profile_
 
 ## 0.9.14
 ### Added
