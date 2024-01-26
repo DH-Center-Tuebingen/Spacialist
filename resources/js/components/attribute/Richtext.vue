@@ -3,11 +3,15 @@
         <md-viewer
             v-if="current"
             :id="name"
-            :classes="'mt-0 bg-none h-100 form-control px-4 py-3'"
+            :classes="classes"
             :source="current"
         />
-        <div v-else>
-            No content yet.
+        <div
+            v-else
+            class="text-secondary fst-italic fw-medium opacity-50 user-select-none"
+            :class="classes"
+        >
+            {{ t('global.missing.content') }}
         </div>
         <div class="position-absolute top-0 end-0 h-100 pe-none ">
             <div class="position-sticky top-0 bg-light pe-auto m-2 rounded">
@@ -117,6 +121,8 @@
 
             const { t } = useI18n();
 
+            const classes = 'mt-0 bg-none h-100 form-control px-4 py-3'
+
             // RETURN
             return {
                 // FUNCTIONS
@@ -125,6 +131,7 @@
                 undirtyField,
                 openMdEditor,
                 // STATE
+                classes,
                 current,
                 v
             }
