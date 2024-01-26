@@ -296,6 +296,15 @@
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
+                        <userlist-attribute
+                            v-else-if="element.datatype == 'userlist'"
+                            :ref="el => setRef(el, element.id)"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :name="`attr-${element.id}`"
+                            :value="state.attributeValues[element.id].value"
+                            @change="e => updateDirtyState(e, element.id)"
+                        />
+
                         <sql-attribute
                             v-else-if="element.datatype == 'sql'"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
@@ -374,6 +383,7 @@
     import DateAttr from '@/components/attribute/Date.vue';
     import SingleChoice from '@/components/attribute/SingleChoice.vue';
     import MultiChoice from '@/components/attribute/MultiChoice.vue';
+    import UserList from '@/components/attribute/UserList.vue';
     import SqlAttr from '@/components/attribute/Sql.vue';
     import SystemSeparator from '@/components/attribute/SystemSeparator.vue';
     import DefaultAttr from '@/components/attribute/Default.vue';
@@ -400,6 +410,7 @@
             'date-attribute': DateAttr,
             'singlechoice-attribute': SingleChoice,
             'multichoice-attribute': MultiChoice,
+            'userlist-attribute': UserList,
             'sql-attribute': SqlAttr,
             'system-separator-attribute': SystemSeparator,
             'default-attribute': DefaultAttr,

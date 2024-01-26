@@ -82,6 +82,11 @@ $input-disabled-color: $gray-400 !default;
     }
 }
 
+// User list tag item
+.multiselect-tag-user {
+    background-color: rgba($green, var(--bs-bg-opacity, 1));
+  }
+
 .multiselect-dropdown {
     --ms-dropdown-border-color: #{$gray-300};
     --ms-dropdown-bg: #{$gray-100};

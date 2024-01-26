@@ -856,6 +856,8 @@ export default {
 
                 resetDirtyStates(grps);
 
+                    resetDirtyStates(grps);
+
                 toast.$toast(
                     t('main.entity.toasts.updated.msg', {
                         name: data.name

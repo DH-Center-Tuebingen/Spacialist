@@ -313,6 +313,7 @@
                         case 'entity':
                         case 'entity-mc':
                             // return 'entity';
+                        case 'userlist':
                         case 'epoch':
                         case 'timeperiod':
                         case 'dimension':
@@ -378,6 +379,7 @@
                         // TODO handle entity attributes
                         case 'entity':
                         case 'entity-mc':
+                        case 'userlist':
                             return [];
                         case 'string':
                         case 'stringf':

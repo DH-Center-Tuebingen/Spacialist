@@ -142,6 +142,7 @@
             "percentage": "Percentage",
             "entity": "Entity",
             "entity-mc": "Entity (Multiple Choice)",
+            "userlist": "User list",
             "epoch": "Time Period and Epoch",
             "timeperiod": "Time Period",
             "date": "Date",
