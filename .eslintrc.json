@@ -15,6 +15,10 @@
             "warn",
             4
         ],
+        "semi": [
+            "warn",
+            "always"
+        ],
         "no-console": "off",
         "no-unused-vars": "off",
         "no-extra-boolean-cast": "off",
