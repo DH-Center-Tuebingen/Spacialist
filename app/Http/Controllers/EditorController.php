@@ -14,6 +14,7 @@ use App\EntityTypeRelation;
 use App\Geodata;
 use App\Plugin;
 use App\ThConcept;
+use App\AttributeTypes\AttributeBase;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -116,100 +117,8 @@ class EditorController extends Controller {
                 'error' => __('You do not have the permission to view available attribute types')
             ], 403);
         }
-        return response()->json([
-            [
-                'datatype' => 'string',
-                'in_table' => true,
-            ],
-            [
-                'datatype' => 'stringf',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'richtext',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'double',
-                'in_table' => true,
-            ],
-            [
-                'datatype' => 'integer',
-                'in_table' => true,
-            ],
-            [
-                'datatype' => 'boolean',
-                'in_table' => true,
-            ],
-            [
-                'datatype' => 'string-sc',
-                'in_table' => true,
-            ],
-            [
-                'datatype' => 'string-mc',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'epoch',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'timeperiod',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'date',
-                'in_table' => true,
-            ],
-            [
-                'datatype' => 'dimension',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'list',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'geography',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'percentage',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'entity',
-                'in_table' => true,
-            ],
-            [
-                'datatype' => 'entity-mc',
-                'in_table' => true,
-            ],
-            [
-                'datatype' => 'userlist',
-                'in_table' => true,
-            ],
-            [
-                'datatype' => 'table',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'sql',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'serial',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'iconclass',
-                'in_table' => true,
-            ],
-            [
-                'datatype' => 'rism',
-                'in_table' => true,
-            ]
-        ]);
+
+        return response()->json(AttributeBase::getTypes());
     }
 
     public function getAvailableGeometryTypes() {
