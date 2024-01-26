@@ -58,6 +58,7 @@
     import { upload } from '@milkdown/plugin-upload';
     import { replaceAll } from '@milkdown/utils';
     import { watch } from 'vue';
+    import { usePreventNavigation } from '../../helpers/form';
 
     export default {
         components: {
@@ -106,9 +107,9 @@
                 emojiAttr,
                 remarkEmojiPlugin,
                 emojiSchema,
-            ].flat()
+            ].flat();
 
-            const editor = ref({})
+            const editor = ref({});
 
             useEditor((root) =>
                 editor.value = Editor.make()
@@ -156,6 +157,12 @@
                 }),
             });
 
+            // Only add the prevent navigation hook if the editor is not readonly
+            // otherwise the hook will be added concurrently and unecessary when the editor is used
+            // in preview mode.
+            if(!readonly.value)
+                usePreventNavigation(() => state.dirty);
+
             watch(() => state.markdownString,
                 (markdownString) => {
                     state.dirty = markdownString != data.value;
@@ -177,5 +184,5 @@
                 state,
             };
         },
-    }
+    };
 </script>
