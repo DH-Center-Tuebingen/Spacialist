@@ -31,7 +31,7 @@ export default {
         classes: {
             required: false,
             type: String,
-            default: 'milkdown-wrapper h-100',
+            default: 'milkdown-wrapper p-3 mt-1 h-100',
         },
         readonly: {
             required: false,

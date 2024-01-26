@@ -5,10 +5,6 @@
             :editor="editor"
             @toggle="setEditorType"
         />
-        <hr
-            v-if="!readonly"
-            class="my-2 mx-2"
-        >
         <Milkdown
             v-show="state.type == 'md'"
             :class="state.editModeClasses"
@@ -17,7 +13,7 @@
         <textarea
             v-show="state.type == 'raw'"
             v-model="state.markdownString"
-            class="font-monospace border-0 flex-grow-1 w-100 rounded-3 bg-transparent px-2"
+            class="font-monospace border-0 px-5 py-4 flex-grow-1 w-100 rounded-3 bg-transparent"
             style="resize: none; outline: none;"
         />
     </div>
@@ -113,7 +109,7 @@ export default {
 
         const editor = ref({})
 
-        useEditor((root) => 
+        useEditor((root) =>
             editor.value = Editor.make()
                 .config((ctx) => {
                     ctx.set(rootCtx, root);
@@ -152,7 +148,6 @@ export default {
                     return [
                         'flex-grow-1',
                         'overflow-y-auto',
-                        'px-2',
                     ];
                 }
                 return [];
