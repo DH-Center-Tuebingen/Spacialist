@@ -18,37 +18,42 @@
                         {{ options.subtitle }}
                     </small>
                 </h5>
-                <button
-                    type="button"
-                    class="btn-close"
-                    aria-label="Close"
-                    data-bs-dismiss="modal"
-                    @click="closeModal()"
-                />
             </div>
             <div class="modal-body overflow-hidden">
                 <md-editor
                     :ref="el => wrapperRef = el"
-                    class="h-100"
+                    :classes="'milkdown-wrapper h-100 mt-0 p-0 d-flex flex-column'"
                     :data="content"
+                    @update="contentUpdated"
                 />
             </div>
             <div class="modal-footer">
+                <template v-if="state.isDirty">
+                    <button
+                        type="button"
+                        class="btn btn-warning"
+                        data-bs-dismiss="modal"
+                        @click="closeModal()"
+                    >
+                        <i class="fas fa-fw fa-undo" />{{ t('global.discard.changes') }}
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-outline-success"
+                        data-bs-dismiss="modal"
+                        @click="updateContent()"
+                    >
+                        <i class="fas fa-fw fa-check" /> {{ t('global.apply') }}
+                    </button>
+                </template>
                 <button
-                    type="button"
-                    class="btn btn-outline-success"
-                    data-bs-dismiss="modal"
-                    @click="updateContent()"
-                >
-                    <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
-                </button>
-                <button
+                    v-else
                     type="button"
                     class="btn btn-outline-secondary"
                     data-bs-dismiss="modal"
                     @click="closeModal()"
                 >
-                    <i class="fas fa-fw fa-times" /> {{ t('global.close') }}
+                    <i class="fas fa-fw fa-times" /> {{ t('global.cancel') }}
                 </button>
             </div>
         </div>
@@ -59,7 +64,6 @@
     import {
         reactive,
         ref,
-        toRefs,
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
@@ -77,9 +81,6 @@
         emits: ['confirm', 'closing'],
         setup(props, context) {
             const { t } = useI18n();
-            const {
-                content,
-            } = toRefs(props);
 
             // FUNCTIONS
             const updateContent = _ => {
@@ -90,9 +91,15 @@
                 context.emit('closing', false);
             };
 
+            const contentUpdated = _ => {
+                state.isDirty = true;
+            };
+
             // DATA
             const wrapperRef = ref({});
+
             const state = reactive({
+                isDirty: false,
             });
 
             // RETURN
@@ -101,11 +108,12 @@
                 // HELPERS
                 // LOCAL
                 updateContent,
+                contentUpdated,
                 closeModal,
                 // STATE
-                state,
                 wrapperRef,
-            }
+                state,
+            };
         },
-    }
+    };
 </script>

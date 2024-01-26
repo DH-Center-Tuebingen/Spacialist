@@ -61,6 +61,7 @@
         "has_links": "Has no links | Has one link | Has {cnt} links",
         "discard": {
             "title": "Unsaved Changes",
+            "changes": "Discard changes",
             "msg": "There are unsaved changes on the current page. Do you really want to continue and discard changes?",
             "confirm": "Yes, discard changes",
             "confirm_and_save": "No, save and continue"
@@ -107,6 +108,9 @@
             "datamodel": "Data-Model-Editor",
             "system": "System Preferences",
             "about": "About"
+        },
+        "missing": {
+            "content": "No content yet."
         },
         "user": {
             "settings": "Preferences",
