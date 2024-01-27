@@ -4,15 +4,19 @@ namespace App\AttributeTypes;
 
 class SqlAttribute extends AttributeBase
 {
-    protected static $type = "sql";
-    protected static $inTable = false;
-    protected static $field = null;
+    protected static string $type = "sql";
+    protected static bool $inTable = false;
+    protected static ?string $field = null;
 
-    public function unserialize(string $data) : mixed {
-        info("Should unserialize $data!");
+    public static function fromImport(string $data) : mixed {
+        return null;
     }
 
-    public function serialize(mixed $data) : mixed {
-        info("Should serialize data!");
+    public static function unserialize(mixed $data) : mixed {
+        return false;
+    }
+
+    public static function serialize(mixed $data) : mixed {
+        return false;
     }
 }

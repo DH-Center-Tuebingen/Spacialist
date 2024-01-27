@@ -2,17 +2,23 @@
 
 namespace App\AttributeTypes;
 
+use App\Entity;
+
 class EntityAttribute extends AttributeBase
 {
-    protected static $type = "entity";
-    protected static $inTable = true;
-    protected static $field = 'entity_val';
+    protected static string $type = "entity";
+    protected static bool $inTable = true;
+    protected static ?string $field = 'entity_val';
 
-    public function unserialize(string $data) : mixed {
-        info("Should unserialize $data!");
+    public static function fromImport(string $data) : mixed {
+        return Entity::getFromPath($data);
     }
 
-    public function serialize(mixed $data) : mixed {
-        info("Should serialize data!");
+    public static function unserialize(mixed $data) : mixed {
+        return $data;
+    }
+
+    public static function serialize(mixed $data) : mixed {
+        return $data;
     }
 }

@@ -2,19 +2,40 @@
 
 namespace App\AttributeTypes;
 
+use App\AttributeValue;
+
 abstract class AttributeBase
 {
-    private static function getTypesFromFolder() : array {
-        $fullnames = array_map(function($file) {
-            return __NAMESPACE__ . '\\' . substr($file, 0, -4);
-        }, scandir(base_path("app".DIRECTORY_SEPARATOR."AttributeTypes")));
+    protected static string $type;
+    protected static ?string $field;
+    protected static bool $inTable;
+    protected static bool $hasSelection;
 
-        return array_values(
-            array_filter($fullnames, function($path){
-                return $path != __CLASS__ && class_exists($path);
-            })
-        );
-    }
+    private static array $types = [
+        "boolean" => BooleanAttribute::class,
+        "date" => DateAttribute::class,
+        "dimension" => DimensionAttribute::class,
+        "double" => DoubleAttribute::class,
+        "string-mc" => DropdownMultipleAttribute::class,
+        "string-sc" => DropdownSingleAttribute::class,
+        "entity" => EntityAttribute::class,
+        "entity-mc" => EntityMultipleAttribute::class,
+        "epoch" => EpochAttribute::class,
+        "geography" => GeographyAttribute::class,
+        "iconclass" => IconclassAttribute::class,
+        "integer" => IntegerAttribute::class,
+        "list" => ListAttribute::class,
+        "percentage" => PercentageAttribute::class,
+        "richtext" => RichtextAttribute::class,
+        "rism" => RismAttribute::class,
+        "serial" => SerialAttribute::class,
+        "sql" => SqlAttribute::class,
+        "string" => StringAttribute::class,
+        "stringf" => StringfieldAttribute::class,
+        "table" => TableAttribute::class,
+        "timeperiod" => TimeperiodAttribute::class,
+        "userlist" => UserlistAttribute::class,
+    ];
 
     public static function serialized() : array {
         return [
@@ -24,25 +45,22 @@ abstract class AttributeBase
     }
 
     public static function getTypes(bool $inTable = false) {
-        $types = self::getTypesFromFolder();
-
-        $list = array_map(function($class) {
-            return call_user_func("$class::serialized");
-        }, $types);
-
-        return $list;
+        return array_map(function($class) {
+            return $class::serialized();
+        }, self::$types);
     }
 
     public static function getMatchingClass(string $datatype) : mixed {
-        $types = self::getTypesFromFolder();
-
-        foreach($types as $class) {
-            if($datatype == call_user_func("$class::getType")) {
-                return new $class();
-            }
+        if(array_key_exists($datatype, self::$types)) {
+            return new self::$types[$datatype]();
         }
 
         return false;
+    }
+
+    public static function getFieldFromType(string $datatype) : ?string {
+        $class = self::getMatchingClass($datatype);
+        $class !== false ? $class::getField() : null;
     }
 
     public static function getType() : string {
@@ -53,7 +71,7 @@ abstract class AttributeBase
         return static::$inTable;
     }
 
-    public static function getField() : string {
+    public static function getField() : ?string {
         return static::$field;
     }
 
@@ -61,6 +79,13 @@ abstract class AttributeBase
         return isset(static::$hasSelection) && static::$hasSelection;
     }
 
-    public abstract function unserialize(string $data) : mixed;
-    public abstract function serialize(mixed $data) : mixed;
+    public static function serializeValue(AttributeValue $value) : mixed {
+        $class = self::getMatchingClass($value->attribute->datatype);
+        $field = $class::getField();
+        return $class::serialize($value->{$field});
+    }
+
+    public abstract static function fromImport(string $data) : mixed;
+    public abstract static function unserialize(mixed $data) : mixed;
+    public abstract static function serialize(mixed $data) : mixed;
 }

@@ -4,15 +4,19 @@ namespace App\AttributeTypes;
 
 class RichtextAttribute extends AttributeBase
 {
-    protected static $type = "richtext";
-    protected static $inTable = false;
-    protected static $field = 'str_val';
+    protected static string $type = "richtext";
+    protected static bool $inTable = false;
+    protected static ?string $field = 'str_val';
 
-    public function unserialize(string $data) : mixed {
-        info("Should unserialize $data!");
+    public static function fromImport(string $data) : mixed {
+        return $data;
     }
 
-    public function serialize(mixed $data) : mixed {
-        info("Should serialize data!");
+    public static function unserialize(mixed $data) : mixed {
+        return $data;
+    }
+
+    public static function serialize(mixed $data) : mixed {
+        return $data;
     }
 }

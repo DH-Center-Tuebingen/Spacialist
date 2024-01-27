@@ -7,10 +7,10 @@ use App\ThConcept;
 
 class TableAttribute extends AttributeBase
 {
-    protected static $type = "table";
-    protected static $inTable = false;
-    protected static $field = 'json_val';
-    protected static $hasSelection = true;
+    protected static string $type = "table";
+    protected static bool $inTable = false;
+    protected static ?string $field = 'json_val';
+    protected static bool $hasSelection = true;
 
     public static function getSelection(Attribute $a) {
         // string-sc is the only allowed type with selections in tables
@@ -25,11 +25,15 @@ class TableAttribute extends AttributeBase
         return $selection;
     }
 
-    public function unserialize(string $data) : mixed {
-        info("Should unserialize $data!");
+    public static function fromImport(string $data) : mixed {
+        return null;
     }
 
-    public function serialize(mixed $data) : mixed {
-        info("Should serialize data!");
+    public static function unserialize(mixed $data) : mixed {
+        return json_encode($data);
+    }
+
+    public static function serialize(mixed $data) : mixed {
+        return json_decode($data);
     }
 }

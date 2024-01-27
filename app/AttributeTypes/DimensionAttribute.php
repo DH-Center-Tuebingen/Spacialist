@@ -4,15 +4,30 @@ namespace App\AttributeTypes;
 
 class DimensionAttribute extends AttributeBase
 {
-    protected static $type = "dimension";
-    protected static $inTable = false;
-    protected static $field = 'json_val';
+    protected static string $type = "dimension";
+    protected static bool $inTable = false;
+    protected static ?string $field = 'json_val';
 
-    public function unserialize(string $data) : mixed {
-        info("Should unserialize $data!");
+    public static function fromImport(string $data) : mixed {
+        $parts = explode(';', $data);
+
+        if(count($parts) != 4) {
+            throw new InvalidDataException("Given data does not match this datatype's format (VAL1;VAL2;VAL3;UNIT)");
+        }
+
+        return json_encode([
+            'B' => floatval(trim($parts[0])),
+            'H' => floatval(trim($parts[1])),
+            'T' => floatval(trim($parts[2])),
+            'unit' => trim($parts[3]),
+        ]);
     }
 
-    public function serialize(mixed $data) : mixed {
-        info("Should serialize data!");
+    public static function unserialize(mixed $data) : mixed {
+        return json_encode($data);
+    }
+
+    public static function serialize(mixed $data) : mixed {
+        return json_decode($data);
     }
 }

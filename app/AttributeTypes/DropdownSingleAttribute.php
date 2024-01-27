@@ -7,20 +7,29 @@ use App\ThConcept;
 
 class DropdownSingleAttribute extends AttributeBase
 {
-    protected static $type = "string-sc";
-    protected static $inTable = true;
-    protected static $field = 'thesaurus_val';
-    protected static $hasSelection = true;
+    protected static string $type = "string-sc";
+    protected static bool $inTable = true;
+    protected static ?string $field = 'thesaurus_val';
+    protected static bool $hasSelection = true;
 
     public static function getSelection(Attribute $a) {
         return ThConcept::getChildren($a->thesaurus_root_url, $a->recursive);
     }
 
-    public function unserialize(string $data) : mixed {
-        info("Should unserialize $data!");
+    public static function fromImport(string $data) : mixed {
+        $concept = ThConcept::getByString($data);
+        if(isset($concept)) {
+            return $concept->concept_url;
+        } else {
+            throw new InvalidDataException("Given data is not a valid concept/label in the vocabulary");
+        }
     }
 
-    public function serialize(mixed $data) : mixed {
-        info("Should serialize data!");
+    public static function unserialize(mixed $data) : mixed {
+        return $data['concept_url'];
+    }
+
+    public static function serialize(mixed $data) : mixed {
+        return $data;
     }
 }
