@@ -25,6 +25,7 @@
         reactive,
         ref,
         toRefs,
+        watch,
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
@@ -57,7 +58,8 @@
     import { indent } from '@milkdown/plugin-indent';
     import { upload } from '@milkdown/plugin-upload';
     import { replaceAll } from '@milkdown/utils';
-    import { watch } from 'vue';
+
+    import { usePreventNavigation } from '@/helpers/form.js';
 
     export default {
         components: {
@@ -106,9 +108,9 @@
                 emojiAttr,
                 remarkEmojiPlugin,
                 emojiSchema,
-            ].flat()
+            ].flat();
 
-            const editor = ref({})
+            const editor = ref({});
 
             useEditor((root) =>
                 editor.value = Editor.make()
@@ -156,8 +158,13 @@
                 }),
             });
 
-            watch(() => state.markdownString,
-                (markdownString) => {
+            // Only add the prevent navigation hook if the editor is not readonly
+            // otherwise the hook will be added concurrently and unecessary when the editor is used
+            // in preview mode.
+            if(!readonly.value)
+                usePreventNavigation(_ => state.dirty);
+
+            watch(_ => state.markdownString, markdownString => {
                     state.dirty = markdownString != data.value;
                     context.emit('update', markdownString);
                 }
@@ -177,5 +184,5 @@
                 state,
             };
         },
-    }
+    };
 </script>
