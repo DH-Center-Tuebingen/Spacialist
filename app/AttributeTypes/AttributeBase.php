@@ -15,6 +15,7 @@ abstract class AttributeBase
     private static array $types = [
         "boolean" => BooleanAttribute::class,
         "date" => DateAttribute::class,
+        "daterange" => DaterangeAttribute::class,
         "dimension" => DimensionAttribute::class,
         "double" => DoubleAttribute::class,
         "string-mc" => DropdownMultipleAttribute::class,

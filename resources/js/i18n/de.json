@@ -151,6 +151,7 @@
             "epoch": "Zeitspanne & Epoche",
             "timeperiod": "Zeitspanne",
             "date": "Datum",
+            "daterange": "Datumsspanne",
             "dimension": "Abmessungen (BxHxT)",
             "list": "Liste",
             "geography": "WKT (Well-Known-Binary)",
