@@ -3,6 +3,7 @@
 namespace App\AttributeTypes;
 
 use App\AttributeValue;
+use Illuminate\Support\Arr;
 
 abstract class AttributeBase
 {
@@ -44,10 +45,28 @@ abstract class AttributeBase
         ];
     }
 
-    public static function getTypes(bool $inTable = false) {
-        return array_map(function($class) {
+    public static function getTypes(array $filters = []) : array {
+        if(count($filters) > 0) {
+            $types = Arr::where(self::$types, function(AttributeBase $attr) use($filters) {
+                foreach($filters as $on => $value) {
+                    if($on == "datatype") {
+                        if($attr::getType() != $value) return false;
+                    } else if($on == "in_table") {
+                        if($attr::getInTable() != $value) return false;
+                    } else if($on == "field") {
+                        if($attr::getField() != $value) return false; 
+                    } else if($on == "has_selection") {
+                        if($attr::getHasSelection() != $value) return false;
+                    }
+                }
+                return true;
+            });
+        } else {
+            $types = self::$types;
+        }
+        return array_map(function(AttributeBase $class) {
             return $class::serialized();
-        }, self::$types);
+        }, $types);
     }
 
     public static function getMatchingClass(string $datatype) : mixed {

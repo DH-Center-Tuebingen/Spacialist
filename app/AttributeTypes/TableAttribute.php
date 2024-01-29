@@ -13,14 +13,16 @@ class TableAttribute extends AttributeBase
     protected static bool $hasSelection = true;
 
     public static function getSelection(Attribute $a) {
-        // string-sc is the only allowed type with selections in tables
-        // TODO replace with all types matching $inTable = true ans $hasSelection = true
+        $types = array_map(function(array $entry) {
+            return $entry["datatype"];
+        }, AttributeBase::getTypes(['in_table' => true, 'has_selection' => true]));
+
         $columns = Attribute::where('parent_id', $a->id)
-            ->where('datatype', 'string-sc')
+            ->whereIn('datatype', $types)
             ->get();
         $selection = [];
         foreach($columns as $c) {
-            $selection[$c->id] = ThConcept::getChildren($c->thesaurus_root_url, $c->recursive);
+            $selection[$c->id] = $c->getSelection();
         }
         return $selection;
     }
