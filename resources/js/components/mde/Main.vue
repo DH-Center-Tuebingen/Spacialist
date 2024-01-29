@@ -25,6 +25,7 @@
         reactive,
         ref,
         toRefs,
+        watch,
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
@@ -57,8 +58,8 @@
     import { indent } from '@milkdown/plugin-indent';
     import { upload } from '@milkdown/plugin-upload';
     import { replaceAll } from '@milkdown/utils';
-    import { watch } from 'vue';
-    import { usePreventNavigation } from '../../helpers/form';
+
+    import { usePreventNavigation } from '@/helpers/form.js';
 
     export default {
         components: {
@@ -161,10 +162,9 @@
             // otherwise the hook will be added concurrently and unecessary when the editor is used
             // in preview mode.
             if(!readonly.value)
-                usePreventNavigation(() => state.dirty);
+                usePreventNavigation(_ => state.dirty);
 
-            watch(() => state.markdownString,
-                (markdownString) => {
+            watch(_ => state.markdownString, markdownString => {
                     state.dirty = markdownString != data.value;
                     context.emit('update', markdownString);
                 }

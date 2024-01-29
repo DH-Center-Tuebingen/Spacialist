@@ -584,7 +584,7 @@
             });
 
 
-            usePreventNavigation(() => state.formDirty);
+            usePreventNavigation(_ => state.formDirty);
 
             // FUNCTIONS
             const hasReferenceGroup = group => {

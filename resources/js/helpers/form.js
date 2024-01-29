@@ -15,14 +15,15 @@ export function usePreventNavigation(func) {
     // Keep this here until we know this is working properly.
     // Managing unbeforereload with vue and router is a bit tricky.
     const debug = true;
-    const debugLog = (msg) => console.trace(
+    const debugLog = msg => console.trace(
         `%c${msgHeader}${msg}`,
         'background: #3999ed; color: #f2f2f2; padding: 2px 6px; border-radius: 3px;'
     );
 
-    let preventNavigation = (function (e) {
-        if(debug)
+    let preventNavigation = (function(e) {
+        if(debug) {
             debugLog('preventNavigation');
+        }
 
         if(func()) {
             e.preventDefault();
@@ -30,14 +31,17 @@ export function usePreventNavigation(func) {
         }
     }).bind(this);
 
-    const add = () => {
-        if(debug)
+    const add = _ => {
+        if(debug) {
             debugLog('add');
+        }
         window.addEventListener('beforeunload', preventNavigation);
     };
-    const remove = () => {
-        if(debug)
+    const remove = _ => {
+        if(debug) {
             debugLog('remove');
+        }
+
         window.removeEventListener('beforeunload', preventNavigation);
     };
 
