@@ -69,7 +69,7 @@ abstract class AttributeBase
         }, $types));
     }
 
-    public static function getMatchingClass(string $datatype) : mixed {
+    public static function getMatchingClass(string $datatype) : bool|AttributeBase {
         if(array_key_exists($datatype, self::$types)) {
             return new self::$types[$datatype]();
         }
@@ -100,8 +100,12 @@ abstract class AttributeBase
 
     public static function serializeValue(AttributeValue $value) : mixed {
         $class = self::getMatchingClass($value->attribute->datatype);
-        $field = $class::getField();
-        return $class::serialize($value->{$field});
+        if($class !== false) {
+            $field = $class::getField();
+            return $class::serialize($value->{$field});
+        } else {
+            return null;
+        }
     }
 
     public abstract static function fromImport(string $data) : mixed;
