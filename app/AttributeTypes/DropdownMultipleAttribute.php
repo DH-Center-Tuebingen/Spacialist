@@ -4,6 +4,7 @@ namespace App\AttributeTypes;
 
 use App\Attribute;
 use App\ThConcept;
+use App\Exceptions\InvalidDataException;
 
 class DropdownMultipleAttribute extends AttributeBase
 {

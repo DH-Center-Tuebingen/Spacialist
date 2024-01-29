@@ -2,6 +2,8 @@
 
 namespace App\AttributeTypes;
 
+use App\Entity;
+
 class EntityMultipleAttribute extends AttributeBase
 {
     protected static string $type = "entity-mc";

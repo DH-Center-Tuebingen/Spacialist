@@ -58,9 +58,9 @@ abstract class AttributeBase
         return false;
     }
 
-    public static function getFieldFromType(string $datatype) : ?string {
+    public static function getFieldFromType(string $datatype) : null|string {
         $class = self::getMatchingClass($datatype);
-        $class !== false ? $class::getField() : null;
+        return $class !== false ? $class::getField() : null;
     }
 
     public static function getType() : string {

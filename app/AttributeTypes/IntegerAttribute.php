@@ -2,6 +2,8 @@
 
 namespace App\AttributeTypes;
 
+use App\Exceptions\InvalidDataException;
+
 class IntegerAttribute extends AttributeBase
 {
     protected static string $type = "integer";
