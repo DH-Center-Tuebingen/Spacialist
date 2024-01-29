@@ -27,6 +27,7 @@ All notable changes to this project will be documented in this file.
 - Re-add Drag & Drop to _entity tree_
 - Reset error message on login
 - No fields shown for _misc_ bibliography type
+- Deleting attributes while still used in entity types lead to wrong position of attributes after re-ordering
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
