@@ -8,10 +8,8 @@
         value-type="date"
         :name="name"
         :disabled="disabled"
-        :disabled-date="(date) => date > new Date()"
-        :max-date="new Date()"
         :show-week-number="true"
-        @input="handleInput"
+        @change="handleInput"
     >
         <template #icon-calendar>
             <i class="fas fa-fw fa-calendar-alt" />

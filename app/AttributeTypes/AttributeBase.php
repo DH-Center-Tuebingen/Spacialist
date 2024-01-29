@@ -47,7 +47,7 @@ abstract class AttributeBase
 
     public static function getTypes(array $filters = []) : array {
         if(count($filters) > 0) {
-            $types = Arr::where(self::$types, function(AttributeBase $attr) use($filters) {
+            $types = Arr::where(self::$types, function(string $attr, string $key) use($filters) {
                 foreach($filters as $on => $value) {
                     if($on == "datatype") {
                         if($attr::getType() != $value) return false;
@@ -64,9 +64,9 @@ abstract class AttributeBase
         } else {
             $types = self::$types;
         }
-        return array_map(function(AttributeBase $class) {
+        return array_values(array_map(function(string $class) {
             return $class::serialized();
-        }, $types);
+        }, $types));
     }
 
     public static function getMatchingClass(string $datatype) : mixed {

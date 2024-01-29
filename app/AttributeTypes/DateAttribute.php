@@ -6,7 +6,7 @@ class DateAttribute extends AttributeBase
 {
     protected static string $type = "date";
     protected static bool $inTable = true;
-    protected static ?string $field = 'date_val';
+    protected static ?string $field = 'dt_val';
 
     public static function fromImport(string $data) : mixed {
         return $data;
