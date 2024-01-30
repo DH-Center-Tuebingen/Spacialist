@@ -63,7 +63,7 @@
             };
             const resetFieldState = _ => {
                 v.resetField({
-                    value: value.value.map(dt => strToDate(dt)),
+                    value: value.value?.map(dt => strToDate(dt)),
                 });
             };
             const undirtyField = _ => {
@@ -86,7 +86,7 @@
                 meta,
                 resetField,
             } = useField(`daterange_${name.value}`, yup.array(), {
-                initialValue: value.value.map(dt => strToDate(dt)),
+                initialValue: value.value?.map(dt => strToDate(dt)),
             });
             const state = reactive({
 
