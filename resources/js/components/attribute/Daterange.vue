@@ -7,6 +7,7 @@
         input-class="form-control"
         value-type="date"
         :range="true"
+        :separator="' &ndash; '"
         :name="name"
         :disabled="disabled"
         :show-week-number="true"
