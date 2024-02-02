@@ -6,7 +6,7 @@ class SerialAttribute extends AttributeBase
 {
     protected static string $type = "serial";
     protected static bool $inTable = false;
-    protected static ?string $field = null;
+    protected static ?string $field = "str_val";
 
     public static function fromImport(string $data) : mixed {
         return null;
@@ -16,6 +16,6 @@ class SerialAttribute extends AttributeBase
     }
 
     public static function serialize(mixed $data) : mixed {
-        return false;
+        return $data;
     }
 }
