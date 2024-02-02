@@ -113,10 +113,10 @@ abstract class AttributeBase
     }
 
     public static function onCreateHandler(Entity $entity, User $user) : void {
-        $attributes = $entity->entity_type->attributes();
+        $attributes = $entity->entity_type->attributes()->get();
         foreach($attributes as $attr) {
             $class = self::getMatchingClass($attr->datatype);
-            if(method_exists($class, "handleOnCreate")) {
+            if($class && method_exists($class, "handleOnCreate")) {
                 $class::handleOnCreate($entity, $attr, $user);
             }
         }
