@@ -2,7 +2,11 @@
 
 namespace App\AttributeTypes;
 
+use App\Attribute;
 use App\AttributeValue;
+use App\Entity;
+use App\EntityType;
+use App\User;
 use Illuminate\Support\Arr;
 
 abstract class AttributeBase
@@ -105,6 +109,23 @@ abstract class AttributeBase
             return $class::serialize($value->{$field});
         } else {
             return null;
+        }
+    }
+
+    public static function onCreateHandler(Entity $entity, User $user) : void {
+        $attributes = $entity->entity_type->attributes();
+        foreach($attributes as $attr) {
+            $class = self::getMatchingClass($attr->datatype);
+            if(method_exists($class, "handleOnCreate")) {
+                $class::handleOnCreate($entity, $attr, $user);
+            }
+        }
+        
+    }
+    public static function onAddHandler(Attribute $attr, EntityType $entityType, User $user) : void {
+        $class = self::getMatchingClass($attr->datatype);
+        if(method_exists($class, "handleOnAdd")) {
+            $class::handleOnAdd($attr, $entityType, $user);
         }
     }
 

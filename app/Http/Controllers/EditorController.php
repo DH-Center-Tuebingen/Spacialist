@@ -273,6 +273,14 @@ class EditorController extends Controller {
             'position' => 'integer'
         ]);
 
+        try {
+            $entityType = EntityType::findOrFail($etid);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity-type does not exist')
+            ], 400);
+        }
+
         $aid = $request->get('attribute_id');
         $pos = $request->get('position');
         if(!isset($pos)) {
@@ -295,18 +303,7 @@ class EditorController extends Controller {
         $entityAttr = EntityAttribute::find($entityAttr->id);
 
         $attr = Attribute::find($aid);
-
-        // If new attribute is serial, add attribute to all existing entities
-        if($attr->datatype == 'serial') {
-            $entites = Entity::where('entity_type_id', $etid)
-                ->orderBy('created_at', 'asc')
-                ->get();
-            $ctr = 1;
-            foreach($entites as $e) {
-                Entity::addSerial($e->id, $aid, $attr->text, $ctr, $user->id);
-                $ctr++;
-            }
-        }
+        AttributeBase::onAddHandler($attr, $entityType, $user);
 
         $entityAttr->load('attribute');
         return response()->json($entityAttr, 201);
