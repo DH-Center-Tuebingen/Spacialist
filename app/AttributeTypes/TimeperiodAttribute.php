@@ -8,7 +8,7 @@ class TimeperiodAttribute extends AttributeBase
     protected static bool $inTable = true;
     protected static ?string $field = 'json_val';
 
-    public static function fromImport(string $data) : mixed {
+    public static function fromImport(int|float|bool|string $data) : mixed {
         $startLabel = 'ad';
         $endLabel = 'ad';
         $parts = explode(';', $data);

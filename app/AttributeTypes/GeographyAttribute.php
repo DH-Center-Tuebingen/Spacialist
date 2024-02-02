@@ -10,7 +10,7 @@ class GeographyAttribute extends AttributeBase
     protected static bool $inTable = true;
     protected static ?string $field = 'geography_val';
 
-    public static function fromImport(string $data) : mixed {
+    public static function fromImport(int|float|bool|string $data) : mixed {
         return Geodata::parseWkt($data);
     }
 

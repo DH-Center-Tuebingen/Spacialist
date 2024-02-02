@@ -10,7 +10,7 @@ class IntegerAttribute extends AttributeBase
     protected static bool $inTable = true;
     protected static ?string $field = 'int_val';
 
-    public static function fromImport(string $data) : mixed {
+    public static function fromImport(int|float|bool|string $data) : mixed {
         if(!is_int($data) && !ctype_digit($data)) {
             throw new InvalidDataException("Given data is not an integer");
         }

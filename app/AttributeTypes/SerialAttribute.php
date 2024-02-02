@@ -23,7 +23,7 @@ class SerialAttribute extends AttributeBase
         $av->save();
     }
 
-    public static function fromImport(string $data) : mixed {
+    public static function fromImport(int|float|bool|string $data) : mixed {
         return null;
     }
     public static function unserialize(mixed $data) : mixed {
