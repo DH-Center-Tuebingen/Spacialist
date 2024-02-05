@@ -417,6 +417,7 @@
                     "doesnt_exist": "Dieser RSIM-Eintrag existiert nicht"
                 },
                 "table": {
+                    "add_row": "Neue Zeile hinzufügen",
                     "chart": {
                         "number_sets": "Die letzten {cnt} Datensätze",
                         "include_in": "Verwenden",

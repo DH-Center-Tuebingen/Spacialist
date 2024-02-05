@@ -33,6 +33,7 @@ All notable changes to this project will be documented in this file.
 - Allow adding options in _List_ attribute on `Enter` key
 - Set timeout & disable login button while authenticating
 - Better handling and validation of user input in _User profile_
+- Made UI to add new rows to _Table_ attribute clearer
 
 ## 0.9.14
 ### Added
