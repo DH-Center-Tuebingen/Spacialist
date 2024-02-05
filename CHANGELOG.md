@@ -27,6 +27,7 @@ All notable changes to this project will be documented in this file.
 - Re-add Drag & Drop to _entity tree_
 - Reset error message on login
 - No fields shown for _misc_ bibliography type
+- Unsaved changes in _Data Model Editor_ were visible in the UI
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
