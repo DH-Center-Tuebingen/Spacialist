@@ -467,12 +467,17 @@
             options: {
                 required: false,
                 type: Object,
-                default: {},
+                default: _ => new Object(),
             },
             preview: {
                 required: false,
                 type: Boolean,
                 default: false,
+            },
+            previewData: {
+                required: false,
+                type: Object,
+                default: _ => new Object(),
             },
         },
         emits: ['dirty'],

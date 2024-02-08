@@ -180,7 +180,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr v-if="!disabled">
+                <tr v-if="!disabled && !state.isPreview">
                     <td
                         class="text-center"
                         style="--bs-table-striped-bg:248,249,250;"
