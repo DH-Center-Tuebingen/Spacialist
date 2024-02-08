@@ -31,7 +31,8 @@
             "nr_of_entries": "Keine Einträge | 1 Eintrag | {cnt} Einträge",
             "no_entries": "Keine Einträge gefunden.",
             "fetch_next_entries": "Weitere Einträge laden",
-            "no_more_entries": "Keine weiteren Einträge"
+            "no_more_entries": "Keine weiteren Einträge",
+            "stats": "Zeige {from}-{to} von {total}"
         },
         "select_all": "Alle auswählen",
         "select_none": "Alle abwählen",

@@ -236,6 +236,21 @@ export async function getEntityReferences(id) {
     );
 }
 
+export async function getEntityHistory(id, page = 1) {
+    return await $httpQueue.add(
+        () => http.get(`/entity/${id}/history?page=${page}`).then(response => {
+            store.dispatch('updateEntityHistoryMetadata', {
+                eid: id,
+                append: true,
+                data: {
+                    history: response.data.data,
+                },
+            });
+            return response.data;
+        })
+    );
+}
+
 export async function getEntityTypeAttributes(id) {
     return await $httpQueue.add(
         () => http.get(`/editor/entity_type/${id}/attribute`)

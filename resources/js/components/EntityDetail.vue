@@ -316,325 +316,307 @@
             <div
                 v-show="can('entity_read')"
                 id="active-entity-metadata-panel"
-                class="tab-pane fade h-100 active-entity-detail-panel d-flex flex-column overflow-hidden"
+                class="tab-pane fade h-100 active-entity-detail-panel overflow-hidden"
                 role="tabpanel"
             >
                 <div
-                    class="mt-3"
+                    class="d-flex flex-column h-100"
                 >
-                    <button
-                        type="button"
-                        class="btn btn-sm btn-outline-success"
-                        @click="saveMetadata"
+                    <div
+                        class="mt-3"
                     >
-                        <i class="fas fa-fw fa-save" />
-                        {{ t('main.entity.metadata.save') }}
-                    </button>
-                </div>
-                <div
-                    class="d-flex flex-row gap-2 justify-content-between align-items-center mt-2"
-                >
-                    <div>
-                        <h5 class="mb-1">
-                            {{ t('global.creator') }}
-                        </h5>
-                        <div
-                            v-if="getUserBy(state.entity.creator)"
-                            class="d-flex flex-row gap-2 align-items-center"
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-success"
+                            @click="saveMetadata"
                         >
-                            <a
-                                href="#"
-                                @click.prevent="showUserInfo(getUserBy(state.entity.creator))"
-                            >
-                                <span 
-                                    class="badge bg-primary bg-opacity-75 pe-3"
-                                    :class="{'bg-primary': state.entity.creator != userId(), 'bg-success': state.entity.creator == userId()}"
-                                >
-                                    {{ getUserBy(state.entity.creator).name }}
-                                </span>
-                                <user-avatar
-                                    :user="getUserBy(state.entity.creator)"
-                                    :size="20"
-                                    class="align-middle ms-n2"
-                                />
-                            </a>
-                        </div>
-                        <span v-else>
-                            Fetching…
-                        </span>
+                            <i class="fas fa-fw fa-save" />
+                            {{ t('main.entity.metadata.save') }}
+                        </button>
                     </div>
-                    <div>
-                        <h5 class="mb-1">
-                            {{ t('global.editors') }}
-                        </h5>
-                        <div
-                            v-if="state.entity.editors"
-                            class="d-flex flex-row gap-2 align-items-center"
-                        >
-                            <a
-                                v-for="h in state.entity.editors"
-                                :key="h.user_id"
-                                href="#"
-                                @click.prevent="showUserInfo(getUserBy(h.user_id))"
-                            >
-                                <span 
-                                    class="badge bg-opacity-75 pe-3"
-                                    :class="{'bg-warning': h.user_id == state.entity.creator && h.user_id != userId(), 'bg-primary': h.user_id != state.entity.creator && h.user_id != userId(), 'bg-success': h.user_id == userId()}"
-                                >
-                                    {{ getUserBy(h.user_id).name }}
-                                </span>
-                                <user-avatar
-                                    :user="getUserBy(h.user_id)"
-                                    :size="20"
-                                    class="align-middle ms-n2"
-                                />
-                            </a>
-                        </div>
-                        <span v-else>
-                            Fetching…
-                        </span>
-                    </div>
-                    <div v-if="state.entity.metadata">
-                        <h5 class="mb-1">
-                            {{ t('global.licence') }}
-                        </h5>
-                        <input
-                            v-model="state.entityMetadata.licence"
-                            type="text"
-                            class="form-control"
-                            placeholder="CC-BY 4.0, ..."
-                        >
-                    </div>
-                </div>
-                <form>
-                    <div>
-                        <label
-                            for="entity-metadata-summary"
-                            class="form-label mb-1"
-                        >
-                            <h5 class="mb-0">
-                                {{ t('global.summary') }}
+                    <div
+                        class="d-flex flex-row gap-2 justify-content-between align-items-center mt-2"
+                    >
+                        <div>
+                            <h5 class="mb-1">
+                                {{ t('global.creator') }}
                             </h5>
-                        </label>
-                        <richtext
-                            id="entity-metadata-summary"
-                            :ref="el => rtRef = el"
-                            :value="state.entityMetadata.summary"
-                            @change="updateEntityMetadata"
-                        />
+                            <div
+                                v-if="getUserBy(state.entity.creator)"
+                                class="d-flex flex-row gap-2 align-items-center"
+                            >
+                                <a
+                                    href="#"
+                                    @click.prevent="showUserInfo(getUserBy(state.entity.creator))"
+                                >
+                                    <span 
+                                        class="badge bg-primary bg-opacity-75 pe-3"
+                                        :class="{'bg-primary': state.entity.creator != userId(), 'bg-success': state.entity.creator == userId()}"
+                                    >
+                                        {{ getUserBy(state.entity.creator).name }}
+                                    </span>
+                                    <user-avatar
+                                        :user="getUserBy(state.entity.creator)"
+                                        :size="20"
+                                        class="align-middle ms-n2"
+                                    />
+                                </a>
+                            </div>
+                            <span v-else>
+                                Fetching…
+                            </span>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">
+                                {{ t('global.editors') }}
+                            </h5>
+                            <div
+                                v-if="state.entity.editors"
+                                class="d-flex flex-row gap-2 align-items-center"
+                            >
+                                <a
+                                    v-for="h in state.entity.editors"
+                                    :key="h.user_id"
+                                    href="#"
+                                    @click.prevent="showUserInfo(getUserBy(h.user_id))"
+                                >
+                                    <span 
+                                        class="badge bg-opacity-75 pe-3"
+                                        :class="{'bg-warning': h.user_id == state.entity.creator && h.user_id != userId(), 'bg-primary': h.user_id != state.entity.creator && h.user_id != userId(), 'bg-success': h.user_id == userId()}"
+                                    >
+                                        {{ getUserBy(h.user_id).name }}
+                                    </span>
+                                    <user-avatar
+                                        :user="getUserBy(h.user_id)"
+                                        :size="20"
+                                        class="align-middle ms-n2"
+                                    />
+                                </a>
+                            </div>
+                            <span v-else>
+                                Fetching…
+                            </span>
+                        </div>
+                        <div v-if="state.entity.metadata">
+                            <h5 class="mb-1">
+                                {{ t('global.licence') }}
+                            </h5>
+                            <input
+                                v-model="state.entityMetadata.licence"
+                                type="text"
+                                class="form-control"
+                                placeholder="CC-BY 4.0, ..."
+                            >
+                        </div>
                     </div>
-                </form>
-                <hr>
-                <div
-                    class="overflow-hidden d-flex flex-column"
-                >
-                    <h5 class="mb-1">
-                        {{ t('main.history.title') }}
-                    </h5>
-                    <ul
-                        v-if="state.entity.history"
-                        class="list-group pe-2 overflow-auto"
+                    <form>
+                        <div>
+                            <label
+                                for="entity-metadata-summary"
+                                class="form-label mb-1"
+                            >
+                                <h5 class="mb-0">
+                                    {{ t('global.summary') }}
+                                </h5>
+                            </label>
+                            <richtext
+                                id="entity-metadata-summary"
+                                :ref="el => rtRef = el"
+                                :value="state.entityMetadata.summary"
+                                @change="updateEntitySummary"
+                            />
+                        </div>
+                    </form>
+                    <hr>
+                    <div
+                        class="overflow-hidden d-flex flex-column"
                     >
-                        <li
-                            v-for="entry in state.entity.history"
-                            :key="`entity-history-entry-${entry.id}`"
-                            class="list-group-item d-flex flex-row gap-3 align-items-center"
-                        >
+                        <div class="d-flex flex-row gap-2">
+                            <h5 class="mb-1">
+                                {{ t('main.history.title') }}
+                            </h5>
                             <span
-                                :title="entry.description"
+                                v-if="state.historyPagination"
+                                class="fw-light"
+                            >
+                                {{ t('global.list.stats', {
+                                    from: state.historyPagination.from,
+                                    to: state.historyPagination.to,
+                                    total: state.historyPagination.total,
+                                }) }}
+                            </span>
+                        </div>
+                        <ul
+                            v-if="state.entity.history"
+                            v-infinite-scroll="fetchHistory"
+                            class="list-group pe-2 overflow-auto"
+                            :infinite-scroll-disabled="state.allHistoryFetched"
+                            infinite-scroll-delay="200"
+                            infinite-scroll-offset="100"
+                        >
+                            <li
+                                v-for="entry in state.entity.history"
+                                :key="`entity-history-entry-${entry.id}`"
+                                class="list-group-item d-flex flex-row gap-3 align-items-center"
                             >
                                 <span
-                                    v-if="entry.description == 'created'"
+                                    :title="entry.description"
                                 >
-                                    <i class="fas fa-fw fa-plus text-success" />
-                                </span>
-                                <span
-                                    v-else-if="entry.description == 'updated'"
-                                >
-                                    <i class="fas fa-fw fa-edit text-warning" />
-                                </span>
-                            </span>
-                            <div class="flex-grow-1">
-                                <template
-                                    v-if="entry.subject_type == 'App\\Entity'"
-                                >
-                                    <div
+                                    <span
                                         v-if="entry.description == 'created'"
                                     >
+                                        <i class="fas fa-fw fa-plus text-success" />
+                                    </span>
+                                    <span
+                                        v-else-if="entry.description == 'updated'"
+                                    >
+                                        <i class="fas fa-fw fa-edit text-warning" />
+                                    </span>
+                                </span>
+                                <div class="flex-grow-1">
+                                    <template
+                                        v-if="entry.subject_type == 'App\\Entity'"
+                                    >
                                         <div
-                                            class="d-flex flex-row gap-2 align-items-center"
+                                            v-if="entry.description == 'created'"
                                         >
-                                            <span class="fw-bold">
-                                                {{ t('main.history.created_as') }}
-                                            </span>
-                                            <span class="badge bg-primary bg-opacity-75">{{ entry.properties.attributes.name }}</span>
-                                            <div class="d-flex flex-row">
-                                                (
-                                                <entity-type-label
-                                                    :type="entry.properties.attributes.entity_type_id"
-                                                    :icon-only="false"
-                                                />
-                                                )
+                                            <div
+                                                class="d-flex flex-row gap-2 align-items-center"
+                                            >
+                                                <span class="fw-bold">
+                                                    {{ t('main.history.created_as') }}
+                                                </span>
+                                                <span class="badge bg-primary bg-opacity-75">{{ entry.properties.attributes.name }}</span>
+                                                <div class="d-flex flex-row">
+                                                    (
+                                                    <entity-type-label
+                                                        :type="entry.properties.attributes.entity_type_id"
+                                                        :icon-only="false"
+                                                    />
+                                                    )
+                                                </div>
+                                            </div>
+                                            <div
+                                                v-if="entry.properties.attributes.root_entity_id"
+                                                class="d-flex flex-row gap-2 align-items-center"
+                                            >
+                                                <span class="fw-bold">
+                                                    {{ t('main.history.entity.created_in') }}
+                                                </span>
+                                                <router-link
+                                                    class="link-underline link-underline-opacity-0 link-underline-opacity-100-hover"
+                                                    :to="{name: 'entitydetail', params: {id: entry.properties.attributes.root_entity_id}, query: route.query}"
+                                                    append
+                                                >
+                                                    {{ getEntity(entry.properties.attributes.root_entity_id).name }}
+                                                </router-link>
                                             </div>
                                         </div>
                                         <div
-                                            v-if="entry.properties.attributes.root_entity_id"
-                                            class="d-flex flex-row gap-2 align-items-center"
+                                            v-else-if="entry.description == 'updated'"
+                                            class="d-flex flex-column align-items-start gap-2"
                                         >
-                                            <span class="fw-bold">
-                                                {{ t('main.history.entity.created_in') }}
-                                            </span>
-                                            <router-link
-                                                class="link-underline link-underline-opacity-0 link-underline-opacity-100-hover"
-                                                :to="{name: 'entitydetail', params: {id: entry.properties.attributes.root_entity_id}, query: route.query}"
-                                                append
+                                            <div
+                                                v-if="entry.properties.old.name && entry.properties.attributes.name"
+                                                class="d-flex flex-row gap-2 align-items-center"
                                             >
-                                                {{ getEntity(entry.properties.attributes.root_entity_id).name }}
-                                            </router-link>
-                                        </div>
-                                    </div>
-                                    <div
-                                        v-else-if="entry.description == 'updated'"
-                                        class="d-flex flex-column align-items-start gap-2"
-                                    >
-                                        <div
-                                            v-if="entry.properties.old.name && entry.properties.attributes.name"
-                                            class="d-flex flex-row gap-2 align-items-center"
-                                        >
-                                            <span class="fw-bold">
-                                                {{ t('main.history.entity.name_update') }}
-                                            </span>
-                                            <span class="badge bg-danger bg-opacity-75">{{ entry.properties.old.name }}</span>
-                                            <i class="fas fa-fw fa-2xs fa-arrow-right" />
-                                            <span class="badge bg-success bg-opacity-75">{{ entry.properties.attributes.name }}</span>
-                                        </div>
-                                        <div
-                                            v-else-if="(entry.properties.old.root_entity_id || entry.properties.old.rank) && entry.properties.attributes.root_entity_id || entry.properties.attributes.rank"
-                                            class="d-flex flex-row gap-2 align-items-center"
-                                        >
-                                            <span
-                                                class="fw-bold"
-                                            >
-                                                {{ t('main.history.entity.moved') }}
-                                            </span>
-                                            <span
-                                                class="badge bg-danger bg-opacity-75"
-                                            >
-                                                <template
-                                                    v-if="entry.properties.old.root_entity_id"
-                                                >
-                                                    <span
-                                                        v-if="getEntity(entry.properties.old.root_entity_id).name"
-                                                    >
-                                                        {{ getEntity(entry.properties.old.root_entity_id).name }}
-                                                    </span>
-                                                    <span
-                                                        v-else
-                                                        class="fst-italic"
-                                                        :title="t('main.history.entity.name_unknown_info')"
-                                                    >
-                                                        {{ t('main.history.entity.name_unknown') }}
-                                                    </span>
-                                                </template>
-                                                <span
-                                                    v-else
-                                                >
-                                                    {{ t('main.entity.top_level') }}
-                                                </span>
-                                                |
-                                                <span
-                                                    :title="t('main.history.entity.rank')"
-                                                >
-                                                    {{ entry.properties.old.rank }}
-                                                </span>
-                                            </span>
-                                            <i class="fas fa-fw fa-2xs fa-arrow-right" />
-                                            <span
-                                                class="badge bg-success bg-opacity-75"
-                                            >
-                                                <template
-                                                    v-if="entry.properties.attributes.root_entity_id"
-                                                >
-                                                    <span
-                                                        v-if="getEntity(entry.properties.attributes.root_entity_id).name"
-                                                    >
-                                                        {{ getEntity(entry.properties.attributes.root_entity_id).name }}
-                                                    </span>
-                                                    <span
-                                                        v-else
-                                                        class="fst-italic"
-                                                        :title="t('main.history.entity.name_unknown_info')"
-                                                    >
-                                                        {{ t('main.history.entity.name_unknown') }}
-                                                    </span>
-                                                </template>
-                                                <span
-                                                    v-else
-                                                >
-                                                    {{ t('main.entity.top_level') }}
-                                                </span>
-                                                |
-                                                <span
-                                                    :title="t('main.history.entity.rank')"
-                                                >
-                                                    {{ entry.properties.attributes.rank }}
-                                                </span>
-                                            </span>
-                                        </div>
-                                        <div v-else>
-                                            Something has changed...
-                                            {{ entry.properties }}
-                                        </div>
-                                    </div>
-                                </template>
-                                <template
-                                    v-else-if="entry.subject_type == 'attribute_values'"
-                                >
-                                    <div
-                                        v-if="entry.description == 'created'"
-                                    >
-                                        <span
-                                            class="d-flex flex-row align-items-center gap-2"
-                                        >
-                                            <span class="fw-bold">
-                                                {{ t('main.history.entity.value_add_attribute') }}
-                                            </span>
-                                            <span>
-                                                {{ getAttributeName(entry.attribute.id) }}
-                                            </span>
-                                            <a
-                                                href="#"
-                                                class="text-reset"
-                                                @click.prevent="state.showHistoryChange[entry.id] = !state.showHistoryChange[entry.id]"
-                                            >
-                                                <span v-show="state.showHistoryChange[entry.id]">
-                                                    <i class="fas fa-fw fa-eye" />
-                                                </span>
-                                                <span v-show="!state.showHistoryChange[entry.id]">
-                                                    <i class="fas fa-fw fa-eye-slash" />
-                                                </span>
-                                            </a>
-                                        </span>
-                                        <attribute-list
-                                            v-show="state.showHistoryChange[entry.id]"
-                                            :group="{name: 'entity-history-created', pull: false, put: false}"
-                                            :classes="'mx-0 py-2 px-2 rounded-3 bg-primary bg-opacity-50'"
-                                            :attributes="formatHistoryEntryAttributes(entry.attribute)"
-                                            :values="formatHistoryEntryValue(entry.attribute.id, entry.value_after)"
-                                            :options="{'hide_labels': true, 'item_classes': 'px-0'}"
-                                            :selections="{}"
-                                            :preview="true"
-                                        />
-                                    </div>
-                                    <div
-                                        v-else-if="entry.description == 'updated'"
-                                    >
-                                        <template
-                                            v-if="hasHistoryEntryKey(entry.properties.attributes, '!certainty') || hasHistoryEntryKey(entry.properties.old, '!certainty')"
-                                        >
-                                            <span class="d-flex flex-row align-items-center gap-2">
                                                 <span class="fw-bold">
-                                                    {{ t('main.history.entity.value_update_attribute') }}
+                                                    {{ t('main.history.entity.name_update') }}
+                                                </span>
+                                                <span class="badge bg-danger bg-opacity-75">{{ entry.properties.old.name }}</span>
+                                                <i class="fas fa-fw fa-2xs fa-arrow-right" />
+                                                <span class="badge bg-success bg-opacity-75">{{ entry.properties.attributes.name }}</span>
+                                            </div>
+                                            <div
+                                                v-else-if="(entry.properties.old.root_entity_id || entry.properties.old.rank) && entry.properties.attributes.root_entity_id || entry.properties.attributes.rank"
+                                                class="d-flex flex-row gap-2 align-items-center"
+                                            >
+                                                <span
+                                                    class="fw-bold"
+                                                >
+                                                    {{ t('main.history.entity.moved') }}
+                                                </span>
+                                                <span
+                                                    class="badge bg-danger bg-opacity-75"
+                                                >
+                                                    <template
+                                                        v-if="entry.properties.old.root_entity_id"
+                                                    >
+                                                        <span
+                                                            v-if="getEntity(entry.properties.old.root_entity_id).name"
+                                                        >
+                                                            {{ getEntity(entry.properties.old.root_entity_id).name }}
+                                                        </span>
+                                                        <span
+                                                            v-else
+                                                            class="fst-italic"
+                                                            :title="t('main.history.entity.name_unknown_info')"
+                                                        >
+                                                            {{ t('main.history.entity.name_unknown') }}
+                                                        </span>
+                                                    </template>
+                                                    <span
+                                                        v-else
+                                                    >
+                                                        {{ t('main.entity.top_level') }}
+                                                    </span>
+                                                    |
+                                                    <span
+                                                        :title="t('main.history.entity.rank')"
+                                                    >
+                                                        {{ entry.properties.old.rank }}
+                                                    </span>
+                                                </span>
+                                                <i class="fas fa-fw fa-2xs fa-arrow-right" />
+                                                <span
+                                                    class="badge bg-success bg-opacity-75"
+                                                >
+                                                    <template
+                                                        v-if="entry.properties.attributes.root_entity_id"
+                                                    >
+                                                        <span
+                                                            v-if="getEntity(entry.properties.attributes.root_entity_id).name"
+                                                        >
+                                                            {{ getEntity(entry.properties.attributes.root_entity_id).name }}
+                                                        </span>
+                                                        <span
+                                                            v-else
+                                                            class="fst-italic"
+                                                            :title="t('main.history.entity.name_unknown_info')"
+                                                        >
+                                                            {{ t('main.history.entity.name_unknown') }}
+                                                        </span>
+                                                    </template>
+                                                    <span
+                                                        v-else
+                                                    >
+                                                        {{ t('main.entity.top_level') }}
+                                                    </span>
+                                                    |
+                                                    <span
+                                                        :title="t('main.history.entity.rank')"
+                                                    >
+                                                        {{ entry.properties.attributes.rank }}
+                                                    </span>
+                                                </span>
+                                            </div>
+                                            <div v-else>
+                                                Something has changed...
+                                                {{ entry.properties }}
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <template
+                                        v-else-if="entry.subject_type == 'attribute_values'"
+                                    >
+                                        <div
+                                            v-if="entry.description == 'created'"
+                                        >
+                                            <span
+                                                class="d-flex flex-row align-items-center gap-2"
+                                            >
+                                                <span class="fw-bold">
+                                                    {{ t('main.history.entity.value_add_attribute') }}
                                                 </span>
                                                 <span>
                                                     {{ getAttributeName(entry.attribute.id) }}
@@ -652,106 +634,155 @@
                                                     </span>
                                                 </a>
                                             </span>
+                                            <attribute-list
+                                                v-show="state.showHistoryChange[entry.id]"
+                                                :group="{name: 'entity-history-created', pull: false, put: false}"
+                                                :classes="'mx-0 py-2 px-2 rounded-3 bg-primary bg-opacity-50'"
+                                                :attributes="formatHistoryEntryAttributes(entry.attribute)"
+                                                :values="formatHistoryEntryValue(entry.attribute.id, entry.value_after)"
+                                                :options="{'hide_labels': true, 'item_classes': 'px-0'}"
+                                                :selections="{}"
+                                                :preview="true"
+                                            />
+                                        </div>
+                                        <div
+                                            v-else-if="entry.description == 'updated'"
+                                        >
+                                            <template
+                                                v-if="hasHistoryEntryKey(entry.properties.attributes, '!certainty') || hasHistoryEntryKey(entry.properties.old, '!certainty')"
+                                            >
+                                                <span class="d-flex flex-row align-items-center gap-2">
+                                                    <span class="fw-bold">
+                                                        {{ t('main.history.entity.value_update_attribute') }}
+                                                    </span>
+                                                    <span>
+                                                        {{ getAttributeName(entry.attribute.id) }}
+                                                    </span>
+                                                    <a
+                                                        href="#"
+                                                        class="text-reset"
+                                                        @click.prevent="state.showHistoryChange[entry.id] = !state.showHistoryChange[entry.id]"
+                                                    >
+                                                        <span v-show="state.showHistoryChange[entry.id]">
+                                                            <i class="fas fa-fw fa-eye" />
+                                                        </span>
+                                                        <span v-show="!state.showHistoryChange[entry.id]">
+                                                            <i class="fas fa-fw fa-eye-slash" />
+                                                        </span>
+                                                    </a>
+                                                </span>
+                                                <div
+                                                    v-if="state.showHistoryChange[entry.id]"
+                                                    class="d-flex flex-row gap-2 align-items-center"
+                                                >
+                                                    <attribute-list
+                                                        v-if="hasHistoryEntryKey(entry.properties.old, '!certainty')"
+                                                        :group="{name: 'entity-history-changed-from', pull: false, put: false}"
+                                                        :classes="'flex-grow-1 mx-0 py-2 px-2 rounded-3 bg-danger bg-opacity-50'"
+                                                        :attributes="formatHistoryEntryAttributes(entry.attribute)"
+                                                        :values="formatHistoryEntryValue(entry.attribute.id, entry.value_before)"
+                                                        :options="{'hide_labels': true, 'item_classes': 'px-0'}"
+                                                        :selections="{}"
+                                                    />
+                                                    <span
+                                                        v-else
+                                                        class="badge bg-danger"
+                                                    >
+                                                        <span class="fst-italic">
+                                                            {{ t('main.history.no_value') }}
+                                                        </span>
+                                                    </span>
+                                                    <i class="fas fa-fw fa-arrow-right" />
+                                                    <attribute-list
+                                                        v-if="hasHistoryEntryKey(entry.properties.attributes, '!certainty')"
+                                                        :group="{name: 'entity-history-changed-to', pull: false, put: false}"
+                                                        :classes="'flex-grow-1 mx-0 py-2 px-2 rounded-3 bg-success bg-opacity-50'"
+                                                        :attributes="formatHistoryEntryAttributes(entry.attribute)"
+                                                        :values="formatHistoryEntryValue(entry.attribute.id, entry.value_after)"
+                                                        :options="{'hide_labels': true, 'item_classes': 'px-0'}"
+                                                        :selections="{}"
+                                                    />
+                                                    <span
+                                                        v-else
+                                                        class="badge bg-danger"
+                                                    >
+                                                        <span class="fst-italic">
+                                                            {{ t('main.history.no_value') }}
+                                                        </span>
+                                                    </span>
+                                                </div>
+                                            </template>
                                             <div
-                                                v-if="state.showHistoryChange[entry.id]"
+                                                v-else
                                                 class="d-flex flex-row gap-2 align-items-center"
                                             >
-                                                <attribute-list
-                                                    v-if="hasHistoryEntryKey(entry.properties.old, '!certainty')"
-                                                    :group="{name: 'entity-history-changed-from', pull: false, put: false}"
-                                                    :classes="'flex-grow-1 mx-0 py-2 px-2 rounded-3 bg-danger bg-opacity-50'"
-                                                    :attributes="formatHistoryEntryAttributes(entry.attribute)"
-                                                    :values="formatHistoryEntryValue(entry.attribute.id, entry.value_before)"
-                                                    :options="{'hide_labels': true, 'item_classes': 'px-0'}"
-                                                    :selections="{}"
-                                                />
-                                                <span
-                                                    v-else
-                                                    class="badge bg-danger"
+                                                <span class="fw-bold">
+                                                    {{ t('main.history.entity.certainty_update') }}
+                                                </span>
+                                                <span>
+                                                    {{ getAttributeName(entry.attribute.id) }}
+                                                </span>
+                                                <div
+                                                    class="d-flex flex-row align-items-center gap-1"
                                                 >
-                                                    <span class="fst-italic">
-                                                        {{ t('main.history.no_value') }}
+                                                    <span class="badge bg-danger bg-opacity-75">
+                                                        {{ entry.properties.old.certainty || t('main.history.entity.certainty_unknown') }}
                                                     </span>
-                                                </span>
-                                                <i class="fas fa-fw fa-arrow-right" />
-                                                <attribute-list
-                                                    v-if="hasHistoryEntryKey(entry.properties.attributes, '!certainty')"
-                                                    :group="{name: 'entity-history-changed-to', pull: false, put: false}"
-                                                    :classes="'flex-grow-1 mx-0 py-2 px-2 rounded-3 bg-success bg-opacity-50'"
-                                                    :attributes="formatHistoryEntryAttributes(entry.attribute)"
-                                                    :values="formatHistoryEntryValue(entry.attribute.id, entry.value_after)"
-                                                    :options="{'hide_labels': true, 'item_classes': 'px-0'}"
-                                                    :selections="{}"
-                                                />
-                                                <span
-                                                    v-else
-                                                    class="badge bg-danger"
-                                                >
-                                                    <span class="fst-italic">
-                                                        {{ t('main.history.no_value') }}
+                                                    <i class="fas fa-fw fa-xs fa-arrow-right" />
+                                                    <span class="badge bg-success bg-opacity-75">
+                                                        {{ entry.properties.attributes.certainty || t('main.history.entity.certainty_unknown') }}
                                                     </span>
-                                                </span>
-                                            </div>
-                                        </template>
-                                        <div
-                                            v-else
-                                            class="d-flex flex-row gap-2 align-items-center"
-                                        >
-                                            <span class="fw-bold">
-                                                {{ t('main.history.entity.certainty_update') }}
-                                            </span>
-                                            <span>
-                                                {{ getAttributeName(entry.attribute.id) }}
-                                            </span>
-                                            <div
-                                                class="d-flex flex-row align-items-center gap-1"
-                                            >
-                                                <span class="badge bg-danger bg-opacity-75">
-                                                    {{ entry.properties.old.certainty || t('main.history.entity.certainty_unknown') }}
-                                                </span>
-                                                <i class="fas fa-fw fa-xs fa-arrow-right" />
-                                                <span class="badge bg-success bg-opacity-75">
-                                                    {{ entry.properties.attributes.certainty || t('main.history.entity.certainty_unknown') }}
-                                                </span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </template>
-                            </div>
-                            <div class="text-nowrap">
-                                <span 
-                                    class="badge bg-opacity-75 pe-3"
-                                    :class="{'bg-warning': entry.user_id == state.entity.creator && entry.user_id != userId(), 'bg-primary': entry.user_id != state.entity.creator && entry.user_id != userId(), 'bg-success': entry.user_id == userId()}"
+                                    </template>
+                                </div>
+                                <div class="text-nowrap">
+                                    <span 
+                                        class="badge bg-opacity-75 pe-3"
+                                        :class="{'bg-warning': entry.user_id == state.entity.creator && entry.user_id != userId(), 'bg-primary': entry.user_id != state.entity.creator && entry.user_id != userId(), 'bg-success': entry.user_id == userId()}"
+                                    >
+                                        {{ getUserBy(entry.user_id).name }}
+                                    </span>
+                                    <user-avatar
+                                        :user="getUserBy(entry.user_id)"
+                                        :size="20"
+                                        class="align-middle ms-n2"
+                                    />
+                                </div>
+                                <span
+                                    class="small ms-auto text-secondary text-nowrap"
+                                    :title="date(entry.created_at)"
                                 >
-                                    {{ getUserBy(entry.user_id).name }}
+                                    {{ ago(entry.created_at) }}
                                 </span>
-                                <user-avatar
-                                    :user="getUserBy(entry.user_id)"
-                                    :size="20"
-                                    class="align-middle ms-n2"
-                                />
-                            </div>
-                            <span
-                                class="small ms-auto text-secondary text-nowrap"
-                                :title="date(entry.created_at)"
-                            >
-                                {{ ago(entry.created_at) }}
-                            </span>
-                        </li>
-                    </ul>
-                    <alert
-                        v-else
-                        :type="'info'"
-                        :message="'Fetching history data…'"
-                    />
+                            </li>
+                        </ul>
+                        <alert
+                            v-else
+                            :type="'info'"
+                            :message="'Entity history is only loaded on demand.'"
+                        >
+                            <template #addon>
+                                <button
+                                    type="button"
+                                    class="mt-3 btn btn-outline-secondary btn-sm"
+                                    @click="fetchHistory"
+                                >
+                                    Load History
+                                </button>
+                            </template>
+                        </alert>
+                    </div>
                 </div>
             </div>
             <div
                 v-show="can('comments_read')"
                 id="active-entity-comments-panel"
-                class="tab-pane fade h-100 active-entity-detail-panel d-flex flex-column"
+                class="tab-pane fade h-100 active-entity-detail-panel"
                 role="tabpanel"
             >
+                Test
                 <div
                     v-if="state.entity.comments"
                     class="mb-auto scroll-y-auto h-100"
@@ -833,6 +864,7 @@ import { useToast } from '@/plugins/toast.js';
     import {
         fetchEntityHistoryMetadata,
         getEntityComments,
+        getEntityHistory,
         patchAttributes,
         patchEntityName,
         patchEntityMetadata,
@@ -899,6 +931,12 @@ export default {
             editedEntityName: '',
             entityMetadata: {},
             showHistoryChange: {},
+            historyPagination: null,
+            allHistoryFetched: computed(_ => {
+                if(!state.historyPagination) return false;
+
+                return state.historyPagination.current_page == state.historyPagination.last_page;
+            }),
             initFinished: false,
             commentLoadingState: 'not',
             metadataTabLoaded: false,
@@ -1197,7 +1235,7 @@ export default {
         const onEntityHeaderHover = hoverState => {
             state.entityHeaderHovered = hoverState;
         };
-        const updateEntityMetadata = e => {
+        const updateEntitySummary = e => {
             state.entityMetadata.summary = e.value;
         };
         const hasHistoryEntryKey = (entry, key) => {
@@ -1259,116 +1297,141 @@ export default {
                 state.dirtyStates[g] = false;
             });
         };
+        const fetchHistory = _ => {
+            // TODO history read permission?
+
+            let page = 1;
+            if(state.historyPagination) {
+                page = state.historyPagination.current_page + 1;
+            }
+
+            getEntityHistory(state.entity.id, page).then(data => {
+                delete data.data;
+                const {
+                    from,
+                    ...pagination
+                } = data;
+                if(!state.historyPagination) {
+                    state.historyPagination = {
+                        from: from,
+                    };
+                }
+                state.historyPagination = {
+                    ...state.historyPagination,
+                    ...pagination,
+                }
+            });
+        }
         const fetchComments = _ => {
             if(!can('comments_read')) return;
 
-                state.commentLoadingState = 'fetching';
-                getEntityComments(state.entity.id).then(comments => {
-                    store.dispatch('setEntityComments', comments);
-                    state.commentLoadingState = 'fetched';
-                }).catch(e => {
-                    state.commentLoadingState = 'failed';
+            state.commentLoadingState = 'fetching';
+            getEntityComments(state.entity.id).then(comments => {
+                store.dispatch('setEntityComments', comments);
+                state.commentLoadingState = 'fetched';
+            }).catch(e => {
+                state.commentLoadingState = 'failed';
+            });
+        };
+        const addComment = event => {
+            const comment = event.comment;
+            const replyTo = event.replyTo;
+            if(replyTo) {
+                const op = state.entity.comments.find(c => c.id == replyTo);
+                if(op.replies) {
+                    op.replies.push(comment);
+                }
+                op.replies_count++;
+            } else {
+                if(!state.entity.comments) {
+                    state.entity.comments = [];
+                }
+                state.entity.comments.push(comment);
+                state.entity.comments_count++;
+            }
+        };
+        const saveMetadata = _ => {
+            const metadata = {};
+            for(let k in state.entityMetadata) {
+                const upd = state.entityMetadata[k];
+                const curr = state.entity.metadata[k];
+                if(!curr || upd != curr) {
+                    metadata[k] = upd;
+                }
+            }
+            patchEntityMetadata(state.entity.id, metadata).then(data => {
+                store.dispatch('updateEntityMetadata', {
+                    eid: state.entity.id,
+                    data: data,
                 });
-            };
-            const addComment = event => {
-                const comment = event.comment;
-                const replyTo = event.replyTo;
-                if(replyTo) {
-                    const op = state.entity.comments.find(c => c.id == replyTo);
-                    if(op.replies) {
-                        op.replies.push(comment);
-                    }
-                    op.replies_count++;
-                } else {
-                    if(!state.entity.comments) {
-                        state.entity.comments = [];
-                    }
-                    state.entity.comments.push(comment);
-                    state.entity.comments_count++;
-                }
-            };
-            const saveMetadata = _ => {
-                const metadata = {};
-                for(let k in state.entityMetadata) {
-                    const upd = state.entityMetadata[k];
-                    const curr = state.entity.metadata[k];
-                    if(!curr || upd != curr) {
-                        metadata[k] = upd;
-                    }
-                }
-                patchEntityMetadata(state.entity.id, metadata).then(data => {
-                    store.dispatch('updateEntityMetadata', {
-                        eid: state.entity.id,
-                        data: data,
-                    });
 
-                    toast.$toast(
-                        t('main.entity.toasts.updated_metadata.msg', {
-                            name: data.name
-                        }),
-                        t('main.entity.toasts.updated_metadata.title'), {
-                        channel: 'success',
-                        autohide: true,
-                        icon: true,
-                    });
-                })
-            };
-            const saveEntity = grps => {
-                if(!can('entity_data_write')) return;
+                toast.$toast(
+                    t('main.entity.toasts.updated_metadata.msg', {
+                        name: data.name
+                    }),
+                    t('main.entity.toasts.updated_metadata.title'), {
+                    channel: 'success',
+                    autohide: true,
+                    icon: true,
+                });
+            })
+        };
+        const saveEntity = grps => {
+            if(!can('entity_data_write')) return;
 
-                const dirtyValues = getDirtyValues(grps);
-                const patches = [];
-                const moderations = [];
+            const dirtyValues = getDirtyValues(grps);
+            const patches = [];
+            const moderations = [];
 
-                for(let v in dirtyValues) {
-                    const aid = v;
-                    const data = state.entity.data[aid];
-                    const patch = {
-                        op: null,
-                        value: null,
-                        params: {
-                            aid: aid,
-                        },
-                    };
-                    if(data.id) {
-                        // if data.id exists, there has been an entry in the database, therefore it is a replace/remove operation
-                        if(dirtyValues[v] && dirtyValues[v] != '') {
-                            // value is set, therefore it is a replace
-                            patch.op = 'replace';
-                            patch.value = dirtyValues[v];
-                            // patch.value = getCleanValue(patch.value, entity.attributes);
-                        } else {
-                            // value is empty, therefore it is a remove
-                            patch.op = 'remove';
-                        }
+            for(let v in dirtyValues) {
+                const aid = v;
+                const data = state.entity.data[aid];
+                const patch = {
+                    op: null,
+                    value: null,
+                    params: {
+                        aid: aid,
+                    },
+                };
+                if(data.id) {
+                    // if data.id exists, there has been an entry in the database, therefore it is a replace/remove operation
+                    if(dirtyValues[v] && dirtyValues[v] != '') {
+                        // value is set, therefore it is a replace
+                        patch.op = 'replace';
+                        patch.value = dirtyValues[v];
+                        // patch.value = getCleanValue(patch.value, entity.attributes);
                     } else {
-                        // there has been no entry in the database before, therefore it is an add operation
-                        if(dirtyValues[v] && dirtyValues[v] != '') {
-                            patch.op = 'add';
-                            patch.value = dirtyValues[v];
-                            // patch.value = getCleanValue(patch.value, entity.attributes);
-                        } else {
-                            // there has be no entry in the database before and values are not different (should not happen ;))
-                            continue;
-                        }
+                        // value is empty, therefore it is a remove
+                        patch.op = 'remove';
                     }
-                    patches.push(patch);
-                    moderations.push(aid);
+                } else {
+                    // there has been no entry in the database before, therefore it is an add operation
+                    if(dirtyValues[v] && dirtyValues[v] != '') {
+                        patch.op = 'add';
+                        patch.value = dirtyValues[v];
+                        // patch.value = getCleanValue(patch.value, entity.attributes);
+                    } else {
+                        // there has be no entry in the database before and values are not different (should not happen ;))
+                        continue;
+                    }
                 }
-                return patchAttributes(state.entity.id, patches).then(data => {
-                    undirtyList(grps);
-                    store.dispatch('updateEntity', data);
-                    store.dispatch('updateEntityData', {
-                        data: dirtyValues,
-                        eid: state.entity.id,
+                patches.push(patch);
+                moderations.push(aid);
+            }
+            return patchAttributes(state.entity.id, patches).then(data => {
+                undirtyList(grps);
+                store.dispatch('updateEntity', data);
+                store.dispatch('updateEntityData', {
+                    data: dirtyValues,
+                    eid: state.entity.id,
+                });
+                if(isModerated()) {
+                    store.dispatch('updateEntityDataModerations', {
+                        entity_id: state.entity.id,
+                        attribute_ids: moderations,
+                        state: 'pending',
                     });
-                    if(isModerated()) {
-                        store.dispatch('updateEntityDataModerations', {
-                            entity_id: state.entity.id,
-                            attribute_ids: moderations,
-                            state: 'pending',
-                        });
-                    }
+                }
 
                 toast.$toast(
                     t('main.entity.toasts.updated.msg', {
@@ -1526,12 +1589,14 @@ export default {
             confirmDeleteEntity,
             setDetailPanel,
             onEntityHeaderHover,
-            updateEntityMetadata,
+            updateEntitySummary,
             hasHistoryEntryKey,
             formatHistoryEntryValue,
             formatHistoryEntryAttributes,
             showTabActions,
             setFormState,
+            fetchHistory,
+            fetchComments,
             addComment,
             saveMetadata,
             saveEntity,

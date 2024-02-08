@@ -234,7 +234,11 @@ export const store = createStore({
                 updateEntityHistoryMetadata(state, data) {
                     const entity = state.entities[data.eid];
                     for(let k in data.data) {
-                        entity[k] = data.data[k];
+                        if(data.append && Array.isArray(entity[k])) {
+                            entity[k] = entity[k].concat(data.data[k]);
+                        } else {
+                            entity[k] = data.data[k];
+                        }
                     }
                 },
                 updateEntityDataModerations(state, data) {

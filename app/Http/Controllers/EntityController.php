@@ -316,7 +316,7 @@ class EntityController extends Controller {
         return response()->json([
             'creator' => $entity->creator,
             'editors' => $entity->editors,
-            'history' => $entity->history,
+            'history' => null,
         ]);
     }
 
@@ -347,6 +347,29 @@ class EntityController extends Controller {
         }
 
         return Entity::getEntitiesByParent($id);
+    }
+
+    public function getEntityHistory(Request $request, $id) {
+        $user = auth()->user();
+        if(!$user->can('entity_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to get an entity set')
+            ], 403);
+        }
+
+        try {
+            $entity = Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist')
+            ], 400);
+        }
+
+        $page = $request->input('page', 1);
+
+        info($request);
+
+        return response()->json($entity->getHistory($page));
     }
 
     // POST
@@ -859,8 +882,9 @@ class EntityController extends Controller {
                 'error' => __('You do not have the permission to modify an entity\'s metadata')
             ], 403);
         }
-        $this->validate($request, [
-            'licence' => 'nullable|string'
+        $fields = $this->validate($request, [
+            'licence' => 'nullable|string',
+            'summary' => 'nullable|string',
         ]);
 
         try {
@@ -871,11 +895,15 @@ class EntityController extends Controller {
             ], 400);
         }
 
-        $licence = $request->get('licence');
+        info($fields);
+
         $metadata = $entity->metadata;
-        $metadata['licence'] = $licence;
+        foreach($fields as $field => $value) {
+            $metadata[$field] = $value;
+        }
         $entity->metadata = $metadata;
         $entity->save();
+
         return response()->json($entity->metadata);
     }
 
