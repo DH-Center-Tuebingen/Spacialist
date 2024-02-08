@@ -26,7 +26,7 @@ export async function markAllAsRead(ids = null, from = userNotifications()) {
     const data = {
         ids: ids
     };
-    return await $httpQueue.add(() => http.patch(`notification/read/`, data).then(response => {
+    return await $httpQueue.add(() => http.patch(`notification/read`, data).then(response => {
         let idsC = _cloneDeep(ids);
         from.forEach(elem => {
             const idx = idsC.findIndex(id => id === elem.id);
