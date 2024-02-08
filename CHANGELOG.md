@@ -29,7 +29,7 @@ All notable changes to this project will be documented in this file.
 - No fields shown for _misc_ bibliography type
 - Deleting attributes while still used in entity types lead to wrong position of attributes after re-ordering
 - Mark all notifications as read
-
+- Unsetting a date value
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
