@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\AttributeTypes\AttributeBase;
 use Illuminate\Database\Eloquent\Model;
 use MStaack\LaravelPostgis\Geometries\Geometry;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -70,23 +71,11 @@ class Attribute extends Model
     }
 
     public function getSelection() {
-        switch ($this->datatype) {
-            case 'string-sc':
-            case 'string-mc':
-            case 'epoch':
-                return ThConcept::getChildren($this->thesaurus_root_url, $this->recursive);
-            case 'table':
-                // Only string-sc is allowed in tables
-                $columns = Attribute::where('parent_id', $this->id)
-                    ->where('datatype', 'string-sc')
-                    ->get();
-                $selection = [];
-                foreach ($columns as $c) {
-                    $selection[$c->id] = ThConcept::getChildren($c->thesaurus_root_url, $c->recursive);
-                }
-                return $selection;
-            default:
-                return null;
+        $attributeClass = AttributeBase::getMatchingClass($this->datatype);
+        if($attributeClass !== false && $attributeClass::getHasSelection()) {
+            return $attributeClass::getSelection($this);
+        } else {
+            return null;
         }
     }
 

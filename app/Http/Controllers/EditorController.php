@@ -14,6 +14,7 @@ use App\EntityTypeRelation;
 use App\Geodata;
 use App\Plugin;
 use App\ThConcept;
+use App\AttributeTypes\AttributeBase;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -63,99 +64,6 @@ class EditorController extends Controller {
             ], 400);
         }
         return response()->json($entityType);
-    }
-
-    public function getEntityTypeAttributes($id) {
-        $user = auth()->user();
-        if(!$user->can('entity_type_read') || !$user->can('attribute_read')) {
-            return response()->json([
-                'error' => __('You do not have the permission to view entity data')
-            ], 403);
-        }
-        $attributes = DB::table('entity_types as c')
-            ->where('c.id', $id)
-            ->whereNull('a.parent_id')
-            ->join('entity_attributes as ca', 'c.id', '=', 'ca.entity_type_id')
-            ->join('attributes as a', 'ca.attribute_id', '=', 'a.id')
-            ->orderBy('ca.position', 'asc')
-            ->get();
-        $selections = [];
-        $dependencies = [];
-        foreach($attributes as $a) {
-            if(isset($a->depends_on)) {
-                $dependsOn = json_decode($a->depends_on);
-                foreach($dependsOn as $depAttr => $dep) {
-                    if(!isset($dependencies[$depAttr])) {
-                        $dependencies[$depAttr] = [];
-                    }
-                    $dependencies[$depAttr][] = $dep;
-                }
-            }
-            unset($a->depends_on);
-            switch($a->datatype) {
-                case 'string-sc':
-                case 'string-mc':
-                case 'epoch':
-                    $selections[$a->id] = ThConcept::getChildren($a->thesaurus_root_url, $a->recursive);
-                    break;
-                case 'table':
-                    $a->columns = Attribute::where('parent_id', $a->id)->get()->keyBy('id');
-                    // Only string-sc is allowed in tables
-                    $columns = Attribute::where('parent_id', $a->id)
-                        ->where('datatype', 'string-sc')
-                        ->get();
-                    foreach($columns as $c) {
-                        $selections[$c->id] = ThConcept::getChildren($c->thesaurus_root_url, $c->recursive);
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-        return response()->json([
-            'attributes' => $attributes,
-            'selections' => $selections,
-            'dependencies' => $dependencies
-        ]);
-    }
-
-    public function getAttributeSelection($id) {
-        $user = auth()->user();
-        if(!$user->can('attribute_read')) {
-            return response()->json([
-                'error' => __('You do not have the permission to view entity data')
-            ], 403);
-        }
-        try {
-            $attribute = Attribute::findOrFail($id);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This attribute does not exist')
-            ], 400);
-        }
-
-        $attribute->columns = Attribute::where('parent_id', $attribute->id)->get();
-        $selection = [];
-        switch($attribute->datatype) {
-            case 'string-sc':
-            case 'string-mc':
-            case 'epoch':
-                $selection = ThConcept::getChildren($attribute->thesaurus_root_url, $attribute->recursive);
-                break;
-            case 'table':
-                // Only string-sc is allowed in tables
-                $columns = Attribute::where('parent_id', $attribute->id)
-                    ->where('datatype', 'string-sc')
-                    ->get();
-                foreach($columns as $c) {
-                    $selection = ThConcept::getChildren($c->thesaurus_root_url, $c->recursive);
-                }
-                break;
-            default:
-                break;
-        }
-
-        return response()->json(array_values($selection));
     }
 
     public function getTopEntityTypes() {
@@ -209,100 +117,8 @@ class EditorController extends Controller {
                 'error' => __('You do not have the permission to view available attribute types')
             ], 403);
         }
-        return response()->json([
-            [
-                'datatype' => 'string',
-                'in_table' => true,
-            ],
-            [
-                'datatype' => 'stringf',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'richtext',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'double',
-                'in_table' => true,
-            ],
-            [
-                'datatype' => 'integer',
-                'in_table' => true,
-            ],
-            [
-                'datatype' => 'boolean',
-                'in_table' => true,
-            ],
-            [
-                'datatype' => 'string-sc',
-                'in_table' => true,
-            ],
-            [
-                'datatype' => 'string-mc',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'epoch',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'timeperiod',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'date',
-                'in_table' => true,
-            ],
-            [
-                'datatype' => 'dimension',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'list',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'geography',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'percentage',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'entity',
-                'in_table' => true,
-            ],
-            [
-                'datatype' => 'entity-mc',
-                'in_table' => true,
-            ],
-            [
-                'datatype' => 'userlist',
-                'in_table' => true,
-            ],
-            [
-                'datatype' => 'table',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'sql',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'serial',
-                'in_table' => false,
-            ],
-            [
-                'datatype' => 'iconclass',
-                'in_table' => true,
-            ],
-            [
-                'datatype' => 'rism',
-                'in_table' => true,
-            ]
-        ]);
+
+        return response()->json(AttributeBase::getTypes());
     }
 
     public function getAvailableGeometryTypes() {
@@ -457,6 +273,14 @@ class EditorController extends Controller {
             'position' => 'integer'
         ]);
 
+        try {
+            $entityType = EntityType::findOrFail($etid);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity-type does not exist')
+            ], 400);
+        }
+
         $aid = $request->get('attribute_id');
         $pos = $request->get('position');
         if(!isset($pos)) {
@@ -479,18 +303,7 @@ class EditorController extends Controller {
         $entityAttr = EntityAttribute::find($entityAttr->id);
 
         $attr = Attribute::find($aid);
-
-        // If new attribute is serial, add attribute to all existing entities
-        if($attr->datatype == 'serial') {
-            $entites = Entity::where('entity_type_id', $etid)
-                ->orderBy('created_at', 'asc')
-                ->get();
-            $ctr = 1;
-            foreach($entites as $e) {
-                Entity::addSerial($e->id, $aid, $attr->text, $ctr, $user->id);
-                $ctr++;
-            }
-        }
+        AttributeBase::onAddHandler($attr, $entityType, $user);
 
         $entityAttr->load('attribute');
         return response()->json($entityAttr, 201);

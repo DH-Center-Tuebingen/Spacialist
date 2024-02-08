@@ -28,12 +28,15 @@ All notable changes to this project will be documented in this file.
 - Reset error message on login
 - No fields shown for _misc_ bibliography type
 - Deleting attributes while still used in entity types lead to wrong position of attributes after re-ordering
+- Mark all notifications as read
+
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
 - Allow adding options in _List_ attribute on `Enter` key
 - Set timeout & disable login button while authenticating
 - Better handling and validation of user input in _User profile_
+- Attribute type backend logic moved to separate classes
 
 ## 0.9.14
 ### Added
