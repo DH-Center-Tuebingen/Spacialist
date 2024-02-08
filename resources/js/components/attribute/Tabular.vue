@@ -254,7 +254,7 @@
 
                         <userlist-attribute
                             v-else-if="column.datatype == 'userlist'"
-                            :ref="el => setRef(el, column.id)"
+                            :ref="el => setAddRef(el, `${column.id}`)"
                             :name="`${name}-new-column-attr-${column.id}`"
                             :value="state.newRowColumns[column.id]"
                         />
@@ -369,7 +369,7 @@
         BarElement,
         Legend,
         Tooltip,
-    } from 'chart.js'
+    } from 'chart.js';
 
     import { useI18n } from 'vue-i18n';
     import store from '@/bootstrap/store.js';
