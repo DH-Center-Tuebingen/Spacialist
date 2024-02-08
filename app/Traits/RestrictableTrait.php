@@ -4,14 +4,22 @@ namespace App\Traits;
 
 use App\AccessRule;
 use App\AccessType;
+use App\Group;
 use App\Scopes\RestrictableScope;
+use App\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 trait RestrictableTrait
 {
+    public static $restrictRules = [
+        'type' => 'required|string|in:restricted,users,open',
+        'rules' => 'array',
+    ];
+
     protected static function boot() {
         parent::boot();
 
@@ -207,6 +215,69 @@ trait RestrictableTrait
             return Gate::allows("ds-$type", [$this, $options]);
         } else {
             return Gate::authorize("ds-$type", [$this, $options]);
+        }
+    }
+
+    public function restrictAccess(array $data) {
+        $user = auth()->user();
+        $type = $data['type'];
+        $id = $this->id;
+        $class = get_class($this);
+
+        // private is simply a shortcut to restricted access to the current user
+        if($type == 'private') {
+            $type = 'restricted';
+            $data['rules'] = [
+                [
+                    "guard_type" => "u",
+                    "id" => $user->id,
+                ],
+            ];
+        }
+        
+        if($type == 'restricted') {
+            $this->access_type()->updateOrCreate(
+                [
+                    'accessible_id' => $id,
+                    'accessible_type' => $class,
+                ],
+                ['type' => $type],
+            );
+            $this->touch();
+
+            $rules = $data['rules'];
+            foreach($rules as $rule) {
+                if($rule['guard_type'] == 'u') {
+                    $gType = User::class;
+                } else if($rule['guard_type'] == 'wg') {
+                    $gType = Group::class;
+                }
+                $accessRule = AccessRule::firstOrNew([
+                    'restrictable_id' => $id,
+                    'restrictable_type' => $class,
+                    'guardable_id' => $rule['id'],
+                    'guardable_type' => $gType,
+                ]);
+                $accessRule->rule_type = $rule['type'];
+                if($rule['type'] == 'matrix') {
+                    $accessRule->rule_values = $rule['values'];
+                } else {
+                    $accessRule->rule_values = null;
+                }
+
+                $accessRule->save();
+            }
+        } else {
+            if($type == 'users') {
+                AccessType::where('accessible_id', $id)
+                    ->where('accessible_type', $class)
+                    ->delete();
+            }
+            // if not restricted, remove all existing access rules
+            // type = open and = users do not require access rules
+            AccessRule::where('restrictable_id', $id)
+                ->where('restrictable_type', $class)
+                ->delete();
         }
     }
 

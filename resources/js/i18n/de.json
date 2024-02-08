@@ -286,6 +286,11 @@
                     }
                 }
             },
+            "modals": {
+                "access": {
+                    "title": "Zugriffsregeln"
+                }
+            },
             "page_access_denied": "Du hast nicht die nötigen Berechtigungen um diese Seite zu sehen. Fehlende Berechtigungen: {perm}",
             "alert_hidden": "Inhalt anzeigen…"
         },
@@ -369,9 +374,6 @@
                 },
                 "multiedit": {
                     "title": "Mehrfach-Attribut-Bearbeitung"
-                },
-                "access": {
-                    "title": "Zugriff - Arbeitsgruppen"
                 },
                 "delete": {
                     "alert": "Wenn du <span class=\"fw-bold\">{name}</span> löschst, wird mindestens eine Entität ebenfalls gelöscht. | Wenn du <span class=\"fw-bold\">{name}</span> löschst, werden mindestens {cnt} Entitäten ebenfalls gelöscht."

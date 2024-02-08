@@ -31,7 +31,6 @@ import {
     addGroup,
     deleteGroup,
     moveEntity,
-    restrictEntityAccess,
 } from '@/api.js';
 
 import {
@@ -54,6 +53,7 @@ import CsvPicker from '@/components/modals/csv/Picker.vue';
 import MapPicker from '@/components/modals/map/Picker.vue';
 import MarkdownEditor from '@/components/modals/system/MarkdownEditor.vue';
 import Changelog from '@/components/modals/system/Changelog.vue';
+import AccessRules from '@/components/modals/system/AccessRules.vue';
 import UserInfo from '@/components/modals/user/UserInfo.vue';
 import AddUser from '@/components/modals/user/Add.vue';
 import ResetPassword from '@/components/modals/user/ResetPassword.vue';
@@ -70,7 +70,6 @@ import BibliographyItemDetails from '@/components/modals/bibliography/Details.vu
 import AddEntity from '@/components/modals/entity/Add.vue';
 import MoveEntity from '@/components/modals/entity/Move.vue';
 import DeleteEntity from '@/components/modals/entity/Delete.vue';
-import EntityAccess from '@/components/modals/entity/Access.vue';
 import AddEntityType from '@/components/modals/entitytype/Add.vue';
 import EditEntityType from '@/components/modals/entitytype/Edit.vue';
 import DeleteEntityType from '@/components/modals/entitytype/Delete.vue';
@@ -715,20 +714,20 @@ export function showDeleteEntity(entityId, onDeleted) {
     modal.open();
 }
 
-export function showEntityAccess(entityId) {
-    const uid = `EntityAccess-${getTs()}`;
+export function showAccessRules(dataId, handle) {
+    const uid = `AccessRules-${getTs()}`;
     const modal = useModal({
-        component: EntityAccess,
+        component: AccessRules,
         attrs: {
             name: uid,
-            entityId: entityId,
+            id: dataId,
             onClosing(e) {
                 modal.destroy();
             },
             onConfirm(e) {
-                restrictEntityAccess(entityId, e).then(_ => {
+                handle(dataId, e).then(_ => {
                     // TODO update store
-                    // modal.destroy();
+                    modal.destroy();
                 });
             },
         },

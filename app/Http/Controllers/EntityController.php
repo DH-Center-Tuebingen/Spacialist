@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\AccessRule;
-use App\AccessType;
 use App\Attribute;
 use App\AttributeValue;
 use App\Entity;
@@ -12,11 +10,9 @@ use App\EntityFile;
 use App\EntityType;
 use App\Exceptions\AmbiguousValueException;
 use App\Exceptions\InvalidDataException;
-use App\Geodata;
-use App\Group;
 use App\Reference;
 use App\ThConcept;
-use App\User;
+use App\Traits\RestrictableTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -544,10 +540,7 @@ class EntityController extends Controller {
                 'error' => __('You do not have the permission to modify an entity\'s access')
             ], 403);
         }
-        $this->validate($request, [
-            'type' => 'required|string|in:restricted,users,open',
-            'rules' => 'array',
-        ]);
+        $data = $this->validate($request, RestrictableTrait::$restrictRules);
 
         try {
             $entity = Entity::findOrFail($id);
@@ -556,49 +549,7 @@ class EntityController extends Controller {
                 'error' => __('This entity does not exist')
             ], 400);
         }
-
-        $type = $request->get('type');
-
-        
-        if($type == 'restricted') {
-            $entity->access_type()->updateOrCreate(['type' => $type]);
-            $entity->touch();
-
-            $rules = $request->get('rules');
-            foreach($rules as $rule) {
-                if($rule['guard_type'] == 'u') {
-                    $gType = User::class;
-                } else if($rule['guard_type'] == 'wg') {
-                    $gType = Group::class;
-                }
-                $accessRule = AccessRule::firstOrNew([
-                    'restrictable_id' => $entity->id,
-                    'restrictable_type' => get_class($entity),
-                    'guardable_id' => $rule['id'],
-                    'guardable_type' => $gType,
-                ]);
-                $accessRule->rule_type = $rule['type'];
-                if($rule['type'] == 'matrix') {
-                    $accessRule->rule_values = $rule['values'];
-                } else {
-                    $accessRule->rule_values = null;
-                }
-
-                $accessRule->save();
-            }
-        } else {
-            $eid = $entity->id;
-            $classType = get_class($entity);
-            if($type == 'users') {
-                AccessType::where('accessible_id', $eid)
-                    ->where('accessible_type', $classType)
-                    ->delete();
-            }
-            // if not restricted, remove all existing access rules
-            AccessRule::where('restrictable_id', $eid)
-                ->where('restrictable_type', $classType)
-                ->delete();
-        }
+        $entity->restrictAccess($data);
     }
 
     // PATCH

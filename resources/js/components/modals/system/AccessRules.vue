@@ -2,12 +2,12 @@
     <vue-final-modal
         class="modal-container modal"
         content-class="sp-modal-content"
-        name="entity-access-modal"
+        name="dataset-access-rules-modal"
     >
         <div class="sp-modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    {{ t('main.entity.modals.access.title') }}
+                    {{ t('main.app.modals.access.title') }}
                 </h5>
                 <button
                     type="button"
@@ -39,6 +39,15 @@
                         <button
                             type="button"
                             class="position-absolute top-0 start-0 translate-middle btn btn-sm rounded-pill"
+                            :class="btnStateClasses('private')"
+                            style="width: 2rem; height:2rem;"
+                            @click="state.accessType = 'private'"
+                        >
+                            <i class="fas fa-fw fa-user-lock fa-sm" />
+                        </button>
+                        <button
+                            type="button"
+                            class="position-absolute top-0 start-33 translate-middle btn btn-sm rounded-pill"
                             :class="btnStateClasses('restricted')"
                             style="width: 2rem; height:2rem;"
                             @click="state.accessType = 'restricted'"
@@ -47,7 +56,7 @@
                         </button>
                         <button
                             type="button"
-                            class="position-absolute top-0 start-50 translate-middle btn btn-sm rounded-pill"
+                            class="position-absolute top-0 start-66 translate-middle btn btn-sm rounded-pill"
                             :class="btnStateClasses('users')"
                             style="width: 2rem; height:2rem;"
                             @click="state.accessType = 'users'"
@@ -67,7 +76,16 @@
                     <div
                         class="d-flex flex-column bg-info bg-opacity-25 rounded-3 px-3 py-2 mt-3 text-center"
                     >
-                        <template v-if="state.accessType == 'restricted'">
+                        <template v-if="state.accessType == 'private'">
+                            <h5 class="mb-0">
+                                Private Access
+                            </h5>
+                            <hr class="my-2 mx-5">
+                            <p class="mb-0">
+                                This settings gives only yourself access to this data. All other users can neither see, nor modify.
+                            </p>
+                        </template>
+                        <template v-else-if="state.accessType == 'restricted'">
                             <h5 class="mb-0">
                                 Restricted Access
                             </h5>
@@ -91,12 +109,14 @@
                             </h5>
                             <hr class="my-2 mx-5">
                             <p class="mb-0">
-                                This gives the public read access to this data through the <span class="fst-italic">Open Access</span> feature. To allow the public to modify data, they still need a user account, so changes are always related to a specific user. 
+                                This gives the public read access to this data through the <span class="fst-italic">Open Access</span> feature. To allow the public to modify data, they still need a user account, so changes are always related to a specific user.
+                                <br>
+                                WIP: To allow external users to get read access through the <span class="fst-italic">Open Access</span> feature, but keep the restrictions on modification, use the checkbox in the respective type.
                             </p>
                         </template>
                     </div>
                     <div class="mt-3">
-                        <span class="fw-bold">Note</span>: <span class="fst-italic">data</span> in this context always refers to this entity and all it's sub-entities!
+                        <span class="fw-bold">Note</span>: <span class="fst-italic">data</span> in this context always refers to this entry and all it's (if possible) sub-entries!
                     </div>
                 </div>
                 <div
@@ -141,7 +161,7 @@
                             <tbody>
                                 <tr
                                     v-for="(item, i) in state.accessRules"
-                                    :key="`entity-access-rule-${i}`"
+                                    :key="`dataset-access-rule-${i}`"
                                 >
                                     <td class="mw-50">
                                         <group-user-item :item="item" />
@@ -255,7 +275,9 @@
                         :noicon="false"
                     />
 
-                    <h6 class="mt-3">Add Working group or User</h6>
+                    <h6 class="mt-3">
+                        Add Working group or User
+                    </h6>
                     <simple-search
                         :endpoint="searchGroupsAndUsers"
                         :key-fn="_ => {}"
@@ -322,7 +344,7 @@
             'group-user-item': GroupUserItem,
         },
         props: {
-            entityId: {
+            id: {
                 required: true,
                 type: Number,
             },
@@ -331,7 +353,7 @@
         setup(props, context) {
             const { t } = useI18n();
             const {
-                entityId,
+                id,
             } = toRefs(props);
 
             // FUNCTIONS
@@ -351,7 +373,7 @@
                         };
                         metadata.result_type = 'wg';
                     } else if(r.guardable_type == 'App\\User') {
-                        r2 = getUserBy(r.id, 'id', true);
+                        r2 = getUserBy(r.guardable_id, 'id', true);
                         metadata.result_type = 'u';
                     }
 
@@ -365,10 +387,12 @@
             };
             const typeToValue = type => {
                 let val = 0;
-                if(type == 'restricted') {
+                if(type == 'private') {
                     val = 0;
+                } else if(type == 'restricted') {
+                    val = 33;
                 } else if(type == 'users') {
-                    val = 50;
+                    val = 66;
                 } else if(type == 'open') {
                     val = 100;
                 }
@@ -481,7 +505,8 @@
                 accessTypeValue: computed(_ => typeToValue(state.accessType)),
                 accessRuleIds: computed(_ => state.accessRules.map(ar => ar.id)),
                 accessRules: [],
-                entity: computed(_ => store.getters.entities[entityId.value]),
+                // TODO replace with generic getter
+                entity: computed(_ => store.getters.entities[id.value]),
             });
 
             onMounted(_ => {

@@ -50,3 +50,12 @@ $input-color-placeholder: lighten($text-color, 30%);
 $breadcrumb-item-padding: .25rem;
 $breadcrumb-divider: quote(">");
 $breadcrumb-divider-flipped: $breadcrumb-divider;
+
+// Position values
+$position-values: (
+  0: 0,
+  33: 33%,
+  50: 50%,
+  66: 66%,
+  100: 100%
+);

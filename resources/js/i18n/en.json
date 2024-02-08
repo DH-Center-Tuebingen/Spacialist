@@ -286,6 +286,11 @@
                     }
                 }
             },
+            "modals": {
+                "access": {
+                    "title": "Access Rules"
+                }
+            },
             "page_access_denied": "You do not have permission(s) to access this page. Missing permissions: {perm}",
             "alert_hidden": "Show content…"
         },
@@ -369,9 +374,6 @@
                 },
                 "multiedit": {
                     "title": "Multi-Edit Attributes"
-                },
-                "access": {
-                    "title": "Access - Working Groups"
                 },
                 "delete": {
                     "alert": "If you delete <span class=\"fw-bold\">{name}</span>, at least one entity is deleted, too. | If you delete <span class=\"fw-bold\">{name}</span>, at least {cnt} entities are deleted, too."

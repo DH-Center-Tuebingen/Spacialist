@@ -396,6 +396,7 @@ import { useToast } from '@/plugins/toast.js';
         getEntityComments,
         patchAttributes,
         patchEntityName,
+        restrictEntityAccess,
     } from '@/api.js';
     import {
         can,
@@ -412,7 +413,7 @@ import { useToast } from '@/plugins/toast.js';
     import {
         showDiscard,
         showDeleteEntity,
-        showEntityAccess,
+        showAccessRules,
         showUserInfo,
         canShowReferenceModal,
     } from '@/helpers/modal.js';
@@ -717,7 +718,7 @@ export default {
             showDeleteEntity(state.entity.id);
         };
         const openWorkingGroups = _ => {
-            showEntityAccess(state.entity.id);
+            showAccessRules(state.entity.id, restrictEntityAccess);
         };
         const setDetailPanel = tab => {
             const query = {
