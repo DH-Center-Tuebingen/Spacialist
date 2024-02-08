@@ -149,8 +149,10 @@ export const store = createStore({
                 },
                 updateEntityType(state, data) {
                     const entityType = state.entityTypes[data.id];
-                    entityType.updated_at = data.updated_at;
-                    entityType.thesaurus_url = data.thesaurus_url;
+                    const values = only(data, ['thesaurus_url', 'updated_at', 'is_root', 'sub_entity_types']);
+                    for(let k in values) {
+                        entityType[k] = values[k];
+                    }
                 },
                 moveEntity(state, data) {
                     const entity = state.entities[data.entity_id];

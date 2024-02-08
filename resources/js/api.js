@@ -346,14 +346,18 @@ export async function confirmUserPassword(uid, password = null) {
     );
 }
 
-export async function updateEntityTypeRelation(entityType) {
-    const id = entityType.id;
-    const data = {
-        'is_root': entityType.is_root || false,
-        'sub_entity_types': entityType.sub_entity_types ? entityType.sub_entity_types.map(t => t.id) : [],
-    };
+export async function updateEntityTypeRelation(etid, values) {
+    const data = only(values, ['is_root', 'sub_entity_types']);
+
     return await $httpQueue.add(
-        () => http.post(`/editor/dm/${id}/relation`, data).then(response => response.data)
+        () => http.post(`/editor/dm/${etid}/relation`, data).then(response => {
+            store.dispatch('updateEntityType', {
+                ...data,
+                id: etid,
+            });
+
+            return response.data;
+        })
     );
 }
 
