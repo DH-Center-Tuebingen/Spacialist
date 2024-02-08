@@ -27,12 +27,19 @@ All notable changes to this project will be documented in this file.
 - Re-add Drag & Drop to _entity tree_
 - Reset error message on login
 - No fields shown for _misc_ bibliography type
+- Deleting attributes while still used in entity types lead to wrong position of attributes after re-ordering
+- Mark all notifications as read
+- Unsetting a date value
+- Unsaved changes in _Data Model Editor_ were visible in the UI
+
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
 - Allow adding options in _List_ attribute on `Enter` key
 - Set timeout & disable login button while authenticating
 - Better handling and validation of user input in _User profile_
+- Made UI to add new rows to _Table_ attribute clearer
+- Attribute type backend logic moved to separate classes
 - Set default value in parent element in _Add Attribute_ modal
 
 ## 0.9.14
