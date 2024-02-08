@@ -236,12 +236,6 @@ export async function getEntityReferences(id) {
     );
 }
 
-export async function getEntityTypeAttributes(id) {
-    return await $httpQueue.add(
-        () => http.get(`/editor/entity_type/${id}/attribute`)
-    )
-}
-
 export async function getEntityTypeOccurrenceCount(id) {
     return $httpQueue.add(
         () => http.get(`/editor/dm/entity_type/occurrence_count/${id}`).then(response => response.data)
