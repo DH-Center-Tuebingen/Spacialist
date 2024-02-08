@@ -418,6 +418,7 @@
                     "doesnt_exist": "THIS RSIM-Entry does not exist"
                 },
                 "table": {
+                    "add_row": "Add row",
                     "chart": {
                         "number_sets": "Last {cnt} data sets",
                         "include_in": "Use in chart",

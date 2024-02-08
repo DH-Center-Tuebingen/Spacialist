@@ -180,108 +180,49 @@
                         </div>
                     </td>
                 </tr>
-                <tr v-if="!disabled">
+                <tr v-if="!disabled && !state.isPreview">
+                    <td
+                        class="text-center"
+                        style="--bs-table-striped-bg:248,249,250;"
+                        :colspan="Object.keys(state.columns).length + 1"
+                    >
+                        <button
+                            type="button"
+                            class="btn btn-outline-success btn-sm w-100"
+                            @click="addTableRow()"
+                        >
+                            <i class="fas fa-fw fa-plus" />
+                            {{ t('main.entity.attributes.table.add_row') }}
+                        </button>
+                    </td>
+                </tr>
+                <tr
+                    v-if="!state.isPreview"
+                    class="border-0"
+                >
                     <td
                         v-for="(column, i) in state.columns"
                         :key="i"
                     >
-                        <string-attribute
-                            v-if="column.datatype == 'string'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newRowColumns[column.id]"
-                        />
-
-                        <integer-attribute
-                            v-else-if="column.datatype == 'integer'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newRowColumns[column.id]"
-                        />
-
-                        <float-attribute
-                            v-else-if="column.datatype == 'double'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newRowColumns[column.id]"
-                        />
-
-                        <bool-attribute
-                            v-else-if="column.datatype == 'boolean'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newRowColumns[column.id]"
-                        />
-
-                        <iconclass-attribute
-                            v-else-if="column.datatype == 'iconclass'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newRowColumns[column.id]"
-                            :attribute="column"
-                        />
-
-                        <rism-attribute
-                            v-else-if="column.datatype == 'rism'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newRowColumns[column.id]"
-                            :attribute="column"
-                        />
-
-                        <entity-attribute
-                            v-else-if="column.datatype == 'entity' || column.datatype == 'entity-mc'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :multiple="column.datatype == 'entity-mc'"
-                            :value="state.newRowColumns[column.id]"
-                        />
-
-                        <date-attribute
-                            v-else-if="column.datatype == 'date'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newRowColumns[column.id]"
-                        />
-
-                        <daterange-attribute
-                            v-else-if="column.datatype == 'daterange'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newRowColumns[column.id]"
-                        />
-
-                        <singlechoice-attribute
-                            v-else-if="column.datatype == 'string-sc'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newRowColumns[column.id]"
-                            :selections="state.selections[column.id]"
-                        />
-
-                        <userlist-attribute
-                            v-else-if="column.datatype == 'userlist'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newRowColumns[column.id]"
-                        />
-                    </td>
-                    <td>
-                        <button
-                            type="button"
-                            class="btn btn-success btn-sm"
-                            @click="addTableRow()"
+                        <form
+                            v-if="state.chartShown"
+                            class="d-flex flex-column"
                         >
-                            <i class="fas fa-fw fa-plus" />
-                        </button>
-                    </td>
-                </tr>
-                <tr class="border-0" v-if="!state.isPreview">
-                    <td v-for="(column, i) in state.columns" :key="i">
-                        <form class="d-flex flex-column" v-if="state.chartShown">
-                            <div class="form-check" v-show="['integer', 'double'].includes(column.datatype)">
-                                <input class="form-check-input" type="checkbox" :id="`include-cb-${column.id}`" v-model="state.chartSet[column.id]" @change="updateChart()" />
-                                <label class="form-check-label" :for="`include-cb-${column.id}`">
+                            <div
+                                v-show="['integer', 'double'].includes(column.datatype)"
+                                class="form-check"
+                            >
+                                <input
+                                    :id="`include-cb-${column.id}`"
+                                    v-model="state.chartSet[column.id]"
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    @change="updateChart()"
+                                >
+                                <label
+                                    class="form-check-label"
+                                    :for="`include-cb-${column.id}`"
+                                >
                                     {{ t('main.entity.attributes.table.chart.include_in') }}
                                 </label>
                             </div>
@@ -321,7 +262,7 @@
                             </div>
                         </form>
                     </td>
-                    <td>
+                    <td class="text-center">
                         <button
                             type="button"
                             class="btn btn-primary btn-sm"
@@ -606,19 +547,7 @@
                 v.handleChange(v.value.concat(rows));
             };
             const addTableRow = _ => {
-                const rowValue = {};
-                for(let k in state.columns) {
-                    const reference = newRowRefs.value[k];
-                    if(!!reference.v.value) {
-                        rowValue[k] = reference.v.value;
-                        state.newRowColumns[k] = null;
-                        if(!!reference.resetFieldState) {
-                            reference.resetFieldState();
-                        }
-                    }
-                }
-                v.handleChange(v.value.concat([rowValue]));
-                state.newRowColumns = {};
+                v.handleChange(v.value.concat([{}]));
             };
             const restoreTableRow = index => {
                 const currentValue = v.value;
@@ -645,16 +574,12 @@
                 v.handleChange(currentValue);
                 context.emit('change', e);
             };
-            const setAddRef = (el, idx) => {
-                newRowRefs.value[idx] = el;
-            };
             const setRef = (el, idx) => {
                 columnRefs.value[idx] = el;
             };
 
             // DATA
             const columnRefs = ref({});
-            const newRowRefs = ref({});
             const {
                 handleChange,
                 value: fieldValue,
@@ -778,7 +703,6 @@
                 markTableRowForDelete,
                 resetRow,
                 updateDirtyState,
-                setAddRef,
                 setRef,
                 // PROPS
                 // STATE

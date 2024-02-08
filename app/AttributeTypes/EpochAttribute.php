@@ -17,7 +17,7 @@ class EpochAttribute extends AttributeBase
         return ThConcept::getChildren($a->thesaurus_root_url, $a->recursive);
     }
 
-    public static function fromImport(string $data) : mixed {
+    public static function fromImport(int|float|bool|string $data) : mixed {
         $startLabel = 'ad';
         $endLabel = 'ad';
         $parts = explode(';', $data);

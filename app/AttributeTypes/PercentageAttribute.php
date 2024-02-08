@@ -8,7 +8,7 @@ class PercentageAttribute extends AttributeBase
     protected static bool $inTable = false;
     protected static ?string $field = 'int_val';
 
-    public static function fromImport(string $data) : mixed {
+    public static function fromImport(int|float|bool|string $data) : mixed {
         return IntegerAttribute::fromImport($data);
     }
 

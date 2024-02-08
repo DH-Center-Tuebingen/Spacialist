@@ -478,12 +478,17 @@
             options: {
                 required: false,
                 type: Object,
-                default: {},
+                default: _ => new Object(),
             },
             preview: {
                 required: false,
                 type: Boolean,
                 default: false,
+            },
+            previewData: {
+                required: false,
+                type: Object,
+                default: _ => new Object(),
             },
         },
         emits: ['dirty'],
@@ -649,13 +654,18 @@
                     // curr is e.g. null if attribute is hidden
                     if(!!curr && !!curr.v && curr.v.meta.dirty && curr.v.meta.valid) {
                         currValue = curr.v.value;
-                    }
-                    if(currValue !== null) {
-                        // filter out deleted table rows
-                        if(getAttribute(k).datatype == 'table') {
-                            currValue = currValue.filter(cv => !cv.mark_deleted);
+                        if(currValue !== null) {
+                            // filter out deleted table rows
+                            if(getAttribute(k).datatype == 'table') {
+                                currValue = currValue.filter(cv => !cv.mark_deleted);
+                            }
+                            values[k] = currValue;
+                        } else {
+                            // null is allowed for date
+                            if(getAttribute(k).datatype == 'date') {
+                                values[k] = currValue;
+                            }
                         }
-                        values[k] = currValue;
                     }
                 }
                 return values;

@@ -2,7 +2,11 @@
 
 namespace App\AttributeTypes;
 
+use App\Attribute;
 use App\AttributeValue;
+use App\Entity;
+use App\EntityType;
+use App\User;
 use Illuminate\Support\Arr;
 
 abstract class AttributeBase
@@ -70,7 +74,7 @@ abstract class AttributeBase
         }, $types));
     }
 
-    public static function getMatchingClass(string $datatype) : mixed {
+    public static function getMatchingClass(string $datatype) : bool|AttributeBase {
         if(array_key_exists($datatype, self::$types)) {
             return new self::$types[$datatype]();
         }
@@ -101,11 +105,32 @@ abstract class AttributeBase
 
     public static function serializeValue(AttributeValue $value) : mixed {
         $class = self::getMatchingClass($value->attribute->datatype);
-        $field = $class::getField();
-        return $class::serialize($value->{$field});
+        if($class !== false) {
+            $field = $class::getField();
+            return $class::serialize($value->{$field});
+        } else {
+            return null;
+        }
     }
 
-    public abstract static function fromImport(string $data) : mixed;
+    public static function onCreateHandler(Entity $entity, User $user) : void {
+        $attributes = $entity->entity_type->attributes()->get();
+        foreach($attributes as $attr) {
+            $class = self::getMatchingClass($attr->datatype);
+            if($class && method_exists($class, "handleOnCreate")) {
+                $class::handleOnCreate($entity, $attr, $user);
+            }
+        }
+        
+    }
+    public static function onAddHandler(Attribute $attr, EntityType $entityType, User $user) : void {
+        $class = self::getMatchingClass($attr->datatype);
+        if(method_exists($class, "handleOnAdd")) {
+            $class::handleOnAdd($attr, $entityType, $user);
+        }
+    }
+
+    public abstract static function fromImport(int|float|bool|string $data) : mixed;
     public abstract static function unserialize(mixed $data) : mixed;
     public abstract static function serialize(mixed $data) : mixed;
 }

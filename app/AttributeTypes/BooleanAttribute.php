@@ -8,7 +8,7 @@ class BooleanAttribute extends AttributeBase
     protected static bool $inTable = true;
     protected static ?string $field = 'int_val';
 
-    public static function fromImport(string $data) : mixed {
+    public static function fromImport(int|float|bool|string $data) : mixed {
         return 
                 $data == 1 || $data == '1' ||
                 strtolower($data) == 'true' || strtolower($data) == 't' ||

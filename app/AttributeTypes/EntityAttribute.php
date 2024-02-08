@@ -10,7 +10,7 @@ class EntityAttribute extends AttributeBase
     protected static bool $inTable = true;
     protected static ?string $field = 'entity_val';
 
-    public static function fromImport(string $data) : mixed {
+    public static function fromImport(int|float|bool|string $data) : mixed {
         return Entity::getFromPath($data);
     }
 

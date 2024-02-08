@@ -59,18 +59,23 @@
             // FUNCTIONS
             const resetFieldState = _ => {
                 v.resetField({
-                    value: new Date(value.value)
+                    value: value.value ? new Date(value.value) : null,
                 });
             };
             const undirtyField = _ => {
+                // v.value is already a date or null
                 v.resetField({
-                    value: new Date(v.value),
+                    value: v.value,
                 });
             };
             const handleInput = value => {
-                // add timezone offset before handle change
-                const correctValue = new Date(value.getTime() - (value.getTimezoneOffset()*60*1000));
-                v.handleChange(correctValue);
+                if(!value) {
+                    v.handleChange(value);
+                } else {
+                    // add timezone offset before handle change
+                    const correctValue = new Date(value.getTime() - (value.getTimezoneOffset()*60*1000));
+                    v.handleChange(correctValue);
+                }
             }
 
             // DATA
@@ -79,8 +84,8 @@
                 value: fieldValue,
                 meta,
                 resetField,
-            } = useField(`date_${name.value}`, yup.date(), {
-                initialValue: new Date(value.value),
+            } = useField(`date_${name.value}`, yup.date().nullable(), {
+                initialValue: value.value ? new Date(value.value) : null,
             });
             const state = reactive({
 

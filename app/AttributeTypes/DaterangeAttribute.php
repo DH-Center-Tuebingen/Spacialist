@@ -14,7 +14,7 @@ class DaterangeAttribute extends AttributeBase
         return date($format, strtotime($date));
     }
 
-    public static function fromImport(string $data) : mixed {
+    public static function fromImport(int|float|bool|string $data) : mixed {
         $dates = explode(";", $data);
 
         if(count($dates) != 2) {
