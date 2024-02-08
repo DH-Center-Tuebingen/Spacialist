@@ -90,6 +90,7 @@
                 <simple-search
                     :endpoint="searchLabel"
                     :key-fn="getConceptLabel"
+                    :default-value="state.attribute.label"
                     @selected="e => labelSelected(e, 'rootLabel')"
                 />
             </div>
