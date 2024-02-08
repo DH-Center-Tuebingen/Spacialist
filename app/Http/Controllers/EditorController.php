@@ -578,6 +578,13 @@ class EditorController extends Controller {
                 'error' => __('This attribute does not exist')
             ], 400);
         }
+
+        $entityAttributes = EntityAttribute::where('attribute_id', $id)->get();
+        foreach($entityAttributes as $ea) {
+            $ea->removeFromEntityType();
+            $ea->delete();
+        }
+
         $attribute->delete();
         return response()->json(null, 204);
     }
@@ -597,26 +604,8 @@ class EditorController extends Controller {
             ], 400);
         }
 
-        $pos = $ea->position;
-        $aid = $ea->attribute_id;
-        $etid = $ea->entity_type_id;
+        $ea->removeFromEntityType();
         $ea->delete();
-
-        $successors = EntityAttribute::where([
-                ['position', '>', $pos],
-                ['entity_type_id', '=', $etid]
-            ])->get();
-        foreach($successors as $s) {
-            $s->position--;
-            $s->save();
-        }
-
-        $entityIds = Entity::where('entity_type_id', $etid)
-            ->pluck('id')
-            ->toArray();
-        AttributeValue::where('attribute_id', $aid)
-            ->whereIn('entity_id', $entityIds)
-            ->delete();
 
         return response()->json(null, 204);
     }
