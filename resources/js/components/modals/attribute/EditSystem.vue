@@ -33,7 +33,6 @@
                             @selected="handleSeparatorRename"
                         />
                     </div>
-                    {{ state.title }}
                 </div>
             </div>
             <div class="modal-footer">
