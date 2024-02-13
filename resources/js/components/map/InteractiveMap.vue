@@ -241,7 +241,7 @@
                                         >
                                             <a
                                                 href=""
-                                                @click.prevent="confirmOverlayCoordinateEditing()"
+                                                @click.prevent="confirmOverlayCoordinateEditing(true, actionState.overlayData.feature)"
                                             >
                                                 <i class="fas fa-fw fa-check" />
                                             </a>
@@ -1119,14 +1119,20 @@
                     drawFeature(event.feature);
                 });
             };
-            const confirmOverlayCoordinateEditing = (confirm = true) => {
+            const confirmOverlayCoordinateEditing = (confirm, feature) => {
                 if(confirm) {
-                    // update coords
+                    const geom = feature.getGeometry();
+                    geom.setCoordinates(actionState.overlayCoordinateEdit);
+                    feature.setGeometry(geom);
+                    actionState.overlayData.coordinates = geom.getCoordinates();
+                    context.emit('modified', {
+                        features: [feature],
+                    });
                 } else {
                     // cancel
-                    actionState.overlayCoordinateEdit = [];
                 }
                 actionState.coordinateEditMode = false;
+                actionState.overlayCoordinateEdit = [];
             };
             const getFeaturesInExtent = layer => {
                 const allLayers = !layer;
