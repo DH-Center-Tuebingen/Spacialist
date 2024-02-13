@@ -140,12 +140,19 @@
     >
         <h4 class="popover-header d-flex flex-row gap-2 justify-content-between align-items-center">
             <div>
-                <span class="fw-medium">
-                    {{ actionState.overlayData.title }}
-                </span>
-                <span v-if="actionState.overlayData.subtitle">
-                    ({{ actionState.overlayData.subtitle }})
-                </span>
+                <slot
+                    name="title"
+                    :feature="actionState.overlayData.feature"
+                    :default-title="actionState.overlayData.title"
+                    :default-subtitle="actionState.overlayData.subtitle"
+                >
+                    <span class="fw-medium">
+                        {{ actionState.overlayData.title }}
+                    </span>
+                    <span v-if="actionState.overlayData.subtitle">
+                        ({{ actionState.overlayData.subtitle }})
+                    </span>
+                </slot>
             </div>
             <div>
                 <slot
@@ -417,6 +424,11 @@
                 required: false,
                 default: null,
             },
+            titleFn: {
+                type: Function,
+                required: false,
+                default: null,
+            },
         },
         emits: [
             'added', 
@@ -438,6 +450,7 @@
                 extent,
                 drawing,
                 triggerDataRescan,
+                titleFn,
             } = toRefs(props);
 
             // FUNCTIONS
@@ -820,8 +833,15 @@
                         actionState.popup.setPosition(coords);
 
                         let title = t('main.map.geometry_name', {id: props.id});
-                        if(props.entity) {
-                            title = `${props.entity_name} (${title})`;
+                        if(titleFn.value) {
+                            const fromFn = titleFn.value(feature);
+                            if(fromFn) {
+                                title = fromFn;
+                            }
+                        } else {
+                            if(props.entity) {
+                                title = `${props.entity_name} (${title})`;
+                            }
                         }
 
                         actionState.bsPopup = new Tooltip(actionState.popup.getElement(), {
