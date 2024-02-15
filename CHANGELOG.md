@@ -33,6 +33,7 @@ All notable changes to this project will be documented in this file.
 - Mark all notifications as read
 - Unsetting a date value
 - Unsaved changes in _Data Model Editor_ were visible in the UI
+- HTML content in comments
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
