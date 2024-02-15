@@ -24,6 +24,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        activity()->disableLogging();
+        $comments = Comment::all();
+        foreach($comments as $comment) {
+            $comment->content = htmlspecialchars_decode($comment->content);
+            $comment->saveQuietly();
+        }
+        activity()->enableLogging();
     }
 };
