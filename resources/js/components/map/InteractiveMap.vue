@@ -158,6 +158,7 @@
                 <slot
                     name="action"
                     :post-action-hook="data => postAction(data, actionState.overlayData.feature)"
+                    :feature="actionState.overlayData.feature"
                 />
             </div>
         </h4>
