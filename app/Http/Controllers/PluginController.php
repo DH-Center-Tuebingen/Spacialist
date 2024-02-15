@@ -153,7 +153,8 @@ class PluginController extends Controller
             ], 403);
         }
 
-        $plugin->handleUpdate();
+        $updatedFrom = $plugin->handleUpdate();
+        $plugin->changelog = $plugin->getChangelog($updatedFrom);
         return response()->json($plugin);
     }
 
