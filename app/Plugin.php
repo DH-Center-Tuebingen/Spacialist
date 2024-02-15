@@ -84,9 +84,11 @@ class Plugin extends Model
         $changelog = Str::finish(base_path("app/Plugins/$this->name"), '/') . 'CHANGELOG.md';
         if(!File::isFile($changelog)) return '';
         $changes = file_get_contents($changelog);
-        // if(isset($since)) {
-
-        // }
+        if(isset($since) && preg_match("/\\n#+\s(v\s?)?$since(\s-\s.+)?\\n/i", $changes, $matches, PREG_OFFSET_CAPTURE) !== false) {
+            if(count($matches) > 0) {
+                $changes = substr($changes, 0, $matches[0][1]);
+            }
+        }
         return $changes;
     }
 
@@ -181,6 +183,7 @@ class Plugin extends Model
     }
 
     public function handleUpdate() {
+        $oldVersion = $this->version;
         // TODO is it really the same as install?
         $this->handleInstallation();
 
@@ -189,6 +192,7 @@ class Plugin extends Model
         $this->update_available = null;
         $this->version = $info['version'];
         $this->save();
+        return $oldVersion;
     }
 
     public function handleUninstall() {
