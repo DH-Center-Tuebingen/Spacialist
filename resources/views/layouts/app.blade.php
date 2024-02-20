@@ -16,9 +16,9 @@
     @endphp
 
     @vite([
-            'resources/js/app.js',
-            'resources/sass/app' . $color . '.scss',
-        ])
+        'resources/js/app.js',
+        'resources/sass/app' . $color . '.scss',
+    ])
 
 
         @foreach($plugins as $plugin)

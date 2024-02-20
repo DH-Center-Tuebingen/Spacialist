@@ -11,18 +11,14 @@
 
     <title>{{ $p['prefs.project-name'] }}</title>
 
-    <!-- Styles -->
-    <link href="css/vue-multiselect.min.css" rel="stylesheet">
-    <link href="css/app{{$p['prefs.color']}}.css" rel="stylesheet">
+    @vite([
+        'resources/js/app.js',
+        'resources/sass/app' . $color . '.scss',
+    ])
 </head>
 <body>
     @if($access)
     <div id="app" class="d-flex flex-column"></div>
-
-    <!-- Scripts -->
-    <script src="js/open/manifest.js"></script>
-    <script src="js/open/vendor.js"></script>
-    <script src="js/open/open.js"></script>
     @else
     <div class="d-flex flex-column mt-5 align-items-center justify-content-center">
         <h2>
