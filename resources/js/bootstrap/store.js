@@ -207,7 +207,6 @@ export const store = createStore({
                         const parent = state.entities[data.parent_id];
                         if(!!parent) {
                             if(parent.childrenLoaded) {
-                                parent.children.push(entity);
                                 if(append) {
                                     parent.children.push(entity);
                                 } else {
