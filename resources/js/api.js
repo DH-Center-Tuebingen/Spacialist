@@ -767,7 +767,7 @@ export async function updateAttributeMetadata(etid, aid, pivid, data) {
 }
 
 export async function patchPreferences(data, uid) {
-    const endpoint = !!uid ? `preference/${uid}` : 'preference';
+    const endpoint = 'preference';
     return await http.patch(endpoint, data).then(response => response.data);
 }
 

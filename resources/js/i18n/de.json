@@ -217,7 +217,6 @@
         "depends_on": "Hängt ab von",
         "preference": "Einstellung | Einstellungen",
         "value": "Wert",
-        "allow_override": "Überschreibbar?",
         "tag": "Schlagwort | Schlagworte",
         "set": "Setzen",
         "has_tags": "Hat keine Schlagworte | Hat ein Schlagwort | Hat {cnt} Schlagworte",
@@ -595,6 +594,16 @@
             "info": {
                 "set_to_language": "Auf <span class=\"fw-bold\">{lang}</span> stellen",
                 "columns": "Die Summe der Werte der Spalten darf 12 nicht überschreiten."
+            },
+            "categories": {
+                "user": "Benutzer-Einstellungen",
+                "system": "System-Einstellungen",
+                "sub": {
+                    "general": "Allgemein",
+                    "layout": "Layout",
+                    "interface": "Benutzer-Interface"
+                },
+                "is_empty": "Keine Einstellungen in dieser Kategorie"
             },
             "key": {
                 "language": "Sprache",

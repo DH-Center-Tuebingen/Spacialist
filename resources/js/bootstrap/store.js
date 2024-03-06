@@ -73,6 +73,10 @@ export const store = createStore({
                         tools: [],
                         settings: [],
                     },
+                    registeredPluginPreferences: {
+                        user: {},
+                        system: {},
+                    },
                     hasAnalysis: false,
                 }
             },
@@ -575,6 +579,28 @@ export const store = createStore({
                 registerPluginInSlot(state, data) {
                     state.registeredPluginSlots[data.slot].push(data);
                 },
+                registerPluginPreference(state, data) {
+                    const category = state.registeredPluginPreferences[data.category];
+                    if(!category[data.subcategory]) {
+                        category[data.subcategory] = {
+                            preferences: [],
+                        };
+                    }
+                    const pref = {
+                        title: data.label,
+                        label: data.key,
+                        component: data.component,
+                        default_value: data.default_value,
+                    };
+                    if(data.data) {
+                        pref.data = data.data;
+                    }
+                    if(data.custom_subcategory) {
+                        category[data.subcategory].custom = true;
+                        category[data.subcategory].title = data.custom_label;
+                    }
+                    category[data.subcategory].preferences.push(pref);
+                },
                 setColorSets(state, data) {
                     state.colorSets = data;
                 },
@@ -832,6 +858,9 @@ export const store = createStore({
                 registerPluginInSlot({commit}, data) {
                     commit('registerPluginInSlot', data);
                 },
+                registerPluginPreference({commit}, data) {
+                    commit('registerPluginPreference', data);
+                },
                 setColorSets({commit}, data) {
                     commit('setColorSets', data);
                 },
@@ -890,6 +919,10 @@ export const store = createStore({
                 slotPlugins: state => slot => {
                     const p = state.registeredPluginSlots;
                     return slot ? p[slot] : p;
+                },
+                pluginPreferences: state => state.registeredPluginPreferences,
+                pluginPreferencesInCategory: state => cat => {
+                    return state.registeredPluginPreferences[cat];
                 },
                 colorSets: state => state.colorSets,
                 hasAnalysis: state => state.hasAnalysis,

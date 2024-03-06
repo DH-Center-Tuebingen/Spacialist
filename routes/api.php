@@ -160,7 +160,6 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::get('/{id}', 'PreferenceController@getUserPreferences')->where('id', '[0-9]+');
 
     Route::patch('/', 'PreferenceController@patchPreferences');
-    Route::patch('/{uid}', 'PreferenceController@patchPreferences')->where('uid', '[0-9]+');
 });
 
 // BIBLIOGRAPHY

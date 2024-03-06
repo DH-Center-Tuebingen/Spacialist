@@ -27,9 +27,9 @@ import UserPreferences from '@/components/UserPreferences.vue';
 import UserActivity from '@/components/UserActivity.vue';
 import UserNotifications from '@/components/notification/UserNotifications.vue';
 // Open Access Router Pages
-import Landing from "@/components/openaccess/Landing.vue";
-import FreeSearch from "@/components/openaccess/FreeSearch.vue";
-import SingleSearch from "@/components/openaccess/SingleSearch.vue";
+import Landing from '@/components/openaccess/Landing.vue';
+import FreeSearch from '@/components/openaccess/FreeSearch.vue';
+import SingleSearch from '@/components/openaccess/SingleSearch.vue';
 
 import DummyComponent from '@/components/DummyComponent.vue';
 import NotFound from '@/components/NotFound.vue';
@@ -235,7 +235,7 @@ export const router = createRouter({
             }
         },
         {
-            path: '/preferences',
+            path: '/preferences/system',
             name: 'preferences',
             component: Preferences,
             meta: {
@@ -243,9 +243,9 @@ export const router = createRouter({
             }
         },
         {
-            path: '/preferences/u/:id',
+            path: '/preferences/user',
             name: 'userpreferences',
-            component: UserPreferences,
+            component: Preferences,
             meta: {
                 auth: true
             }

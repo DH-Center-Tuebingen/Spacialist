@@ -217,7 +217,6 @@
         "depends_on": "Depends on",
         "preference": "Preference | Preferences",
         "value": "Value",
-        "allow_override": "Allow Override?",
         "tag": "Tag | Tags",
         "set": "Set",
         "has_tags": "Has no tags | Has one tag | Has {cnt} tags",
@@ -595,6 +594,16 @@
             "info": {
                 "set_to_language": "Set to <span class=\"fw-bold\">{lang}</span>",
                 "columns": "The sum of the column values must not be higher than 12."
+            },
+            "categories": {
+                "user": "User Preferences",
+                "system": "System Preferences",
+                "sub": {
+                    "general": "General",
+                    "layout": "Layout",
+                    "interface": "User Interface"
+                },
+                "is_empty": "No preferences in this category"
             },
             "key": {
                 "language": "Language",

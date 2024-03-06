@@ -38,7 +38,10 @@ class HomeController extends Controller
             $locale = \App::getLocale();
         }
 
-        $sysPrefs = Preference::getPreferences();
+        $sysPrefsValues = [];
+        foreach(Preference::getPreferences() as $k => $p) {
+            $sysPrefsValues[$k] = $p['value'];
+        }
 
         $concepts = ThConcept::getMap($locale);
 
@@ -48,7 +51,7 @@ class HomeController extends Controller
         $entityTypeMap = $entityTypes->getDictionary();
 
         return response()->json([
-            'system_preferences' => $sysPrefs,
+            'system_preferences' => $sysPrefsValues,
             'preferences' => $preferenceValues,
             'concepts' => $concepts,
             'entityTypes' => $entityTypeMap,

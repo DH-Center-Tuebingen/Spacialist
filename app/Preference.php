@@ -13,6 +13,8 @@ class Preference extends Model
      * @var array
      */
     protected $fillable = [
+        'label',
+        'default_value',
     ];
 
 
@@ -87,7 +89,7 @@ class Preference extends Model
     }
 
     public static function encodePreference($label, $decodedValue) {
-        $value;
+        $value = $decodedValue;
         switch($label) {
             case 'prefs.gui-language':
                 $value = json_encode(['language_key' => $decodedValue]);
