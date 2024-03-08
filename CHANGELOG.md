@@ -43,6 +43,7 @@ All notable changes to this project will be documented in this file.
 - Made UI to add new rows to _Table_ attribute clearer
 - Attribute type backend logic moved to separate classes
 - Set default value in parent element in _Add Attribute_ modal
+- Attributes in Dropdown attributes are now sorted alphabetically
 
 ## 0.9.14
 ### Added
