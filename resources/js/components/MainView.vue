@@ -75,55 +75,59 @@
                     >
                         {{ t('main.entity.references.empty') }}
                     </p>
-                    <div
+                    <template
                         v-for="(referenceGroup, key) in state.entity.references"
                         v-else
                         :key="key"
-                        class="reference-group"
                     >
-                        <h5 class="mb-1 fw-medium">
-                            <a
-                                href="#"
-                                class="text-decoration-none"
-                                @click.prevent="showMetadataForReferenceGroup(referenceGroup)"
-                            >
-                                {{ translateConcept(key) }}
-                            </a>
-                        </h5>
-                        <div class="list-group ps-2 w-90">
-                            <a
-                                v-for="(reference, i) in referenceGroup"
-                                :key="i"
-                                class="list-group-item list-group-item-action d-flex flex-row"
-                            >
-                                <div class="flex-grow-1">
-                                    <blockquote class="blockquote fs-09">
-                                        <p class="text-muted">
-                                            {{ reference.description }}
-                                        </p>
-                                    </blockquote>
-                                    <figcaption class="blockquote-footer fw-medium mb-0 d-flex gap-1">
-                                        <span>
-                                            {{ reference.bibliography.author }} in <cite :title="reference.bibliography.title">
-                                                {{ reference.bibliography.title }} ,{{ reference.bibliography.year }}
-                                            </cite>
+                        <div
+                            v-if="referenceGroup.length > 0"
+                            class="reference-group"
+                        >
+                            <h5 class="mb-1 fw-medium">
+                                <a
+                                    href="#"
+                                    class="text-decoration-none"
+                                    @click.prevent="showMetadataForReferenceGroup(referenceGroup)"
+                                >
+                                    {{ translateConcept(key) }}
+                                </a>
+                            </h5>
+                            <div class="list-group ps-2 w-90">
+                                <a
+                                    v-for="(reference, i) in referenceGroup"
+                                    :key="i"
+                                    class="list-group-item list-group-item-action d-flex flex-row"
+                                >
+                                    <div class="flex-grow-1">
+                                        <blockquote class="blockquote fs-09">
+                                            <p class="text-muted">
+                                                {{ reference.description }}
+                                            </p>
+                                        </blockquote>
+                                        <figcaption class="blockquote-footer fw-medium mb-0 d-flex gap-1">
+                                            <span>
+                                                {{ reference.bibliography.author }} in <cite :title="reference.bibliography.title">
+                                                    {{ reference.bibliography.title }} ,{{ reference.bibliography.year }}
+                                                </cite>
+                                            </span>
+                                            <a
+                                                href="#"
+                                                @click.prevent="openLiteratureInfo(reference)"
+                                            >
+                                                <i class="fas fa-fw fa-info-circle" />
+                                            </a>
+                                        </figcaption>
+                                    </div>
+                                    <div>
+                                        <span class="text-muted fw-light small">
+                                            {{ date(reference.updated_at) }}
                                         </span>
-                                        <a
-                                            href="#"
-                                            @click.prevent="openLiteratureInfo(reference)"
-                                        >
-                                            <i class="fas fa-fw fa-info-circle" />
-                                        </a>
-                                    </figcaption>
-                                </div>
-                                <div>
-                                    <span class="text-muted fw-light small">
-                                        {{ date(reference.updated_at) }}
-                                    </span>
-                                </div>
-                            </a>
+                                    </div>
+                                </a>
+                            </div>
                         </div>
-                    </div>
+                    </template>
                 </div>
             </div>
         </div>
