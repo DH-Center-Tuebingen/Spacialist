@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 - Additional non-standard bibtex fields to _Bibliography_ (ISBN, ISSN, Language and Abstract)
 - Additional fields in _User profile_ regarding institution
 - Keyboard Shortcut to save Entity (`Ctrl + s` for current open attribute tab, `Ctrl + Shift + s` for entire entity)
+- Info on hover to required fields in new/edit bibliography modal
 ### Fixed
 - Error in _Attribute List_ caused by _Entity (Multiple Choice)_ attribute
 - Attribute form Save/Reset handling due to newly introduced _Attribute Group Separator_
@@ -34,6 +35,7 @@ All notable changes to this project will be documented in this file.
 - Unsetting a date value
 - Unsaved changes in _Data Model Editor_ were visible in the UI
 - Moving entity in tree created a temporary duplicate
+- Add missing info (`**`) to bibliography fields that are only required if another field is **not** set
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow

@@ -5,13 +5,22 @@
             :key="field"
             class="row mb-3"
         >
-            <label class="col-form-label col-md-3 text-end">
+            <label
+                class="col-form-label col-md-3 d-flex flex-row justify-content-end"
+                :title="getFieldTitle(field)"
+            >
                 {{ t(`main.bibliography.column.${field}`) }}
                 <span
                     v-if="isMandatoryField(field)"
                     class="text-danger"
                 >
                     *
+                </span>
+                <span
+                    v-else-if="isMandatoryFieldIf(field)"
+                    class="text-danger"
+                >
+                    **
                 </span>
                 :
             </label>
@@ -191,6 +200,20 @@
                 return state.type.mandatory && state.type.mandatory[field] === true;
             };
 
+            const isMandatoryFieldIf = field => {
+                return state.type.mandatory && typeof state.type.mandatory[field] == 'string';
+            };
+
+            const getFieldTitle = field => {
+                if(isMandatoryField(field)) {
+                    return t('main.bibliography.types.validation.required', {col: field});
+                } else if(isMandatoryFieldIf(field)) {
+                    return t('main.bibliography.types.required_if', {col: state.type.mandatory[field]});
+                } else {
+                    return null;
+                }
+            };
+
             // DATA
             const state = reactive({
                 type: bibliographyTypes.find(bt => bt.name == type.value),
@@ -226,6 +249,8 @@
                 undirtyFields,
                 getData,
                 isMandatoryField,
+                isMandatoryFieldIf,
+                getFieldTitle,
                 //STATE
                 state,
                 v,

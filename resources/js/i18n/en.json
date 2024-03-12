@@ -750,7 +750,8 @@
                 "validation": {
                     "required": "@:main.bibliography.column.{col} is a required field",
                     "required_one_of": "Either @:main.bibliography.column.{col} or @:main.bibliography.column.{ref} must be set"
-                }
+                },
+                "required_if": "Required if {col} is not set"
             }
         },
         "importer": {
