@@ -661,10 +661,11 @@
                             }
                             values[k] = currValue;
                         } else {
-                            // null is allowed for date, string-sc
+                            // null is allowed for date, string-sc, entity
                             if(
                                 getAttribute(k).datatype == 'date' ||
-                                getAttribute(k).datatype == 'string-sc'
+                                getAttribute(k).datatype == 'string-sc' ||
+                                getAttribute(k).datatype == 'entity'
                             ) {
                                 values[k] = currValue;
                             }
