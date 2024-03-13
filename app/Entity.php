@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Exceptions\AmbiguousValueException;
+use App\Exceptions\EntityNotFoundException;
 use App\Traits\CommentTrait;
 use App\AttributeTypes\AttributeBase;
 use Illuminate\Database\Eloquent\Model;
@@ -107,7 +108,7 @@ class Entity extends Model implements Searchable
         } else if(count($res) === 1) {
             return $res[0]->final_id;
         } else {
-            return null;
+            throw new EntityNotFoundException("Path to entity does not exist '$path'");
         }
     }
 
@@ -309,8 +310,7 @@ class Entity extends Model implements Searchable
         return $this->parents()['ids'];
     }
 
-    public function getParentNamesAttribute()
-    {
+    public function getParentNamesAttribute() {
         // $res = DB::select("
         //     WITH RECURSIVE getpath AS (
         //         SELECT id as path, name as pathn, root_entity_id as parent FROM entities WHERE id = $this->id
@@ -327,8 +327,7 @@ class Entity extends Model implements Searchable
         return $this->parents()['names'];
     }
 
-    public function getAncestorsAttribute()
-    {
+    public function getAncestorsAttribute() {
         $parents = array_reverse($this->getParentNamesAttribute());
         array_pop($parents);
         return $parents;

@@ -187,8 +187,13 @@
                     type="submit"
                     class="btn btn-outline-primary"
                     form="import-data-form"
-                    :disabled="state.dataMissing"
+                    :disabled="state.dataMissing || uploading"
                 >
+                    <span v-if="uploading">
+                        <i 
+                            class="fas fa-fw fa-circle-notch me-1 fa-spin" 
+                        />
+                    </span>
                     {{ t('main.importer.import_btn') }}
                 </button>
             </div>
@@ -253,6 +258,7 @@
         setup(props, context) {
             const { t } = useI18n();
             const toast = useToast();
+            const uploading = ref(false);
             // FETCH
 
             // FUNCTIONS
@@ -304,8 +310,9 @@
                 }
                 data.append('data', JSON.stringify(postData));
 
+                uploading.value = true;
                 importEntityData(data).then(data => {
-                    for(let i=0; i<data.length; i++) {
+                    for(let i = 0; i < data.length; i++) {
                         store.dispatch('addEntity', data[i]);
                     }
                     toast.$toast(t('main.importer.success', {
@@ -322,6 +329,8 @@
                         message: e.response.data.error,
                         data: e.response.data.data,
                     });
+                }).finally(_ => {              
+                    uploading.value = false;
                 });
             };
             const addFile = (newFile, oldFile) => {
@@ -407,7 +416,8 @@
                 attrRef,
                 availableEntityTypes,
                 state,
+                uploading,
             };
         },
-    }
+    };
 </script>

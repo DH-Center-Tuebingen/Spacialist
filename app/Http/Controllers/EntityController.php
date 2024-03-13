@@ -13,6 +13,7 @@ use App\Exceptions\InvalidDataException;
 use App\Geodata;
 use App\Reference;
 use App\ThConcept;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -476,10 +477,10 @@ class EntityController extends Controller {
 
             try {
                 $rootEntityId = Entity::getFromPath($rootEntityPath);
-            } catch(AmbiguousValueException $ave) {
+            } catch(Exception $exception) {
                 DB::rollBack();
                 return response()->json([
-                    'error' => __($ave->getMessage()),
+                    'error' => __($exception->getMessage()),
                     'data' => [
                         'count' => count($addedEntities) + 1,
                         'entry' => $row[$nameIdx],
