@@ -34,6 +34,8 @@ All notable changes to this project will be documented in this file.
 - Unsetting a date value
 - Unsaved changes in _Data Model Editor_ were visible in the UI
 - Moving entity in tree created a temporary duplicate
+- After unset _Single Choice_ attribute value an Entity could not be saved/resetted
+- _Parent Attribute_ in _Single Choice_ attribute builder had no effect
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow

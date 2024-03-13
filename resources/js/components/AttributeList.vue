@@ -283,6 +283,9 @@
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :selections="selections[element.id]"
+                            :selection-from="element.root_attribute_id"
+                            :selection-from-value="state.rootAttributeValues[element.root_attribute_id]"
+                            @update-selection="e => handleSelectionUpdate(element.id, e)"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -363,6 +366,8 @@
     import {
         handleModeration as handleModerationApi,
     } from '@/api.js';
+
+    import store from '@/bootstrap/store.js';
 
     import StringAttr from '@/components/attribute/String.vue';
     import Stringfield from '@/components/attribute/Stringfield.vue';
@@ -500,6 +505,12 @@
             // FETCH
 
             // FUNCTIONS
+            const handleSelectionUpdate = (elemId, conceptId) => {
+                if(state.dynamicSelectionList.includes(elemId)) {
+                    state.rootAttributeValues[elemId] = conceptId;
+                }
+            };
+
             const clFromMetadata = elem => {
                 if(!state.ignoreMetadata && elem.pivot && elem.pivot.metadata && elem.pivot.metadata.width) {
                     const width = elem.pivot.metadata.width;
@@ -650,8 +661,11 @@
                             }
                             values[k] = currValue;
                         } else {
-                            // null is allowed for date
-                            if(getAttribute(k).datatype == 'date') {
+                            // null is allowed for date, string-sc
+                            if(
+                                getAttribute(k).datatype == 'date' ||
+                                getAttribute(k).datatype == 'string-sc'
+                            ) {
                                 values[k] = currValue;
                             }
                         }
@@ -664,6 +678,7 @@
                 if(state.attributeValues[aid].moderation_edit_state == 'active') {
                     return;
                 }
+
                 context.emit('dirty', {
                     ...e,
                     attribute_id: aid,
@@ -762,7 +777,17 @@
             const state = reactive({
                 attributeList: attributes,
                 attributeValues: values,
+                rootAttributeValues: {},
                 entity: computed(_ => store.getters.entity),
+                dynamicSelectionList: computed(_ => {
+                    const list = [];
+                    state.attributeList.forEach(a => {
+                        if(a.root_attribute_id) {
+                            list.push(a.root_attribute_id);
+                        }
+                    });
+                    return list;
+                }),
                 hoverStates: new Array(attributes.value.length).fill(false),
                 expansionStates: new Array(attributes.value.length).fill(false),
                 componentLoaded: computed(_ => state.attributeValues),
@@ -798,6 +823,7 @@
                 getCertaintyClass,
                 translateConcept,
                 // LOCAL
+                handleSelectionUpdate,
                 clFromMetadata,
                 attributeClasses,
                 expandedClasses,

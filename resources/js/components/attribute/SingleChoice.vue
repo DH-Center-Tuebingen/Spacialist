@@ -8,10 +8,11 @@
         :object="true"
         :mode="'single'"
         :disabled="disabled"
-        :options="selections"
+        :options="state.compSelection"
         :name="name"
         :placeholder="t('global.select.placeholder')"
-        @change="value => v.handleChange(value)"
+        @select="value => v.handleChange(value)"
+        @deselect="v.handleChange(null)"
     >
         <template #option="{ option }">
             {{ translateConcept(option.concept_url) }}
@@ -26,6 +27,7 @@
 
 <script>
     import {
+        computed,
         reactive,
         toRefs,
         watch,
@@ -36,6 +38,12 @@
     import * as yup from 'yup';
 
     import { useI18n } from 'vue-i18n';
+
+    import store from '@/bootstrap/store.js';
+
+    import {
+        searchConceptSelection,
+    } from '@/api.js';
 
     import {
         translateConcept,
@@ -62,8 +70,18 @@
                 type: Array,
                 required: true,
             },
+            selectionFrom: {
+                type: Number,
+                required: false,
+                default: 0,
+            },
+            selectionFromValue: {
+                type: Object,
+                required: false,
+                default: _ => new Object(),
+            },
         },
-        emits: ['change'],
+        emits: ['change', 'update-selection'],
         setup(props, context) {
             const { t } = useI18n();
             const {
@@ -71,10 +89,63 @@
                 disabled,
                 value,
                 selections,
+                selectionFrom,
+                selectionFromValue,
             } = toRefs(props);
+
+            const {
+                handleChange: veeHandleChange,
+                value: fieldValue,
+                meta,
+                resetField,
+            } = useField(`sc_${name.value}`, yup.mixed().nullable(), {
+                initialValue: value.value,
+            });
             // FETCH
 
             // FUNCTIONS
+            const handleUpdateForSelections = value => {
+                context.emit('update-selection', value?.id);
+                veeHandleChange(value);
+            };
+
+            const updateCurrentValue = _ => {
+                if(!v.value || Object.keys(v.value).length == 0) return;
+
+                // check if current selected value is part of available selection...
+                const idx = state.localSelection.findIndex(s => s.id == v.value.id);
+                if(idx == -1) {
+                    // ...otherwise unset value
+                    handleUpdateForSelections(null);
+                }
+            };
+
+            const handleSelectionUpdate = conceptId => {
+                if(!state.hasRootAttribute) return;
+
+                if(!conceptId) {
+                    state.localSelection = [];
+                    updateCurrentValue();
+                    return;
+                }
+
+                const cachedSelection = store.getters.cachedConceptSelection(conceptId);
+                if(!cachedSelection) {
+                    searchConceptSelection(conceptId).then(selection => {
+                        store.dispatch('setCachedConceptSelection', {
+                            id: conceptId,
+                            selection: selection,
+                        });
+
+                        state.localSelection = selection;
+                        updateCurrentValue();
+                    });
+                } else {
+                    state.localSelection = cachedSelection;
+                    updateCurrentValue();
+                }
+            };
+
             const resetFieldState = _ => {
                 v.resetField({
                     value: value.value
@@ -87,20 +158,22 @@
             };
 
             // DATA
-            const {
-                handleChange,
-                value: fieldValue,
-                meta,
-                resetField,
-            } = useField(`sc_${name.value}`, yup.mixed(), {
-                initialValue: value.value,
-            });
             const state = reactive({
-
+                hasRootAttribute: computed(_ => {
+                    return !!selectionFrom.value;
+                }),
+                localSelection: [],
+                compSelection: computed(_ => {
+                    if(state.hasRootAttribute) {
+                        return state.localSelection;
+                    } else {
+                        return selections.value;
+                    }
+                }),
             });
             const v = reactive({
                 value: fieldValue,
-                handleChange,
+                handleChange: handleUpdateForSelections,
                 meta,
                 resetField,
             });
@@ -119,6 +192,14 @@
                     value: v.value,
                 });
             });
+            if(state.hasRootAttribute) {
+                watch(selectionFromValue, (newValue, oldValue) => {
+                    if(typeof newValue == 'object') {
+                        newValue = null;
+                    }
+                    handleSelectionUpdate(newValue);
+                });
+            }
 
             // RETURN
             return {

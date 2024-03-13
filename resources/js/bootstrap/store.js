@@ -63,6 +63,7 @@ export const store = createStore({
                     treeSelectionMode: false,
                     treeSelection: {},
                     treeSelectionTypeIds: [],
+                    cachedConceptSelections: {},
                     user: {},
                     users: [],
                     version: {},
@@ -482,6 +483,9 @@ export const store = createStore({
                         state.treeSelectionTypeIds = [];
                     }
                 },
+                setCachedConceptSelection(state, data) {
+                    state.cachedConceptSelections[data.id] = data.selection;
+                },
                 setPreferences(state, data) {
                     state.preferences = data;
                 },
@@ -638,6 +642,9 @@ export const store = createStore({
                 },
                 unsetTreeSelectionMode({commit}) {
                     commit('setTreeSelectionMode', false);
+                },
+                setCachedConceptSelection({commit}, data) {
+                    commit('setCachedConceptSelection', data);
                 },
                 setMainViewTab({commit}, data) {
                     commit('setMainViewTab', data);
@@ -859,6 +866,8 @@ export const store = createStore({
                 treeSelectionCount: state => Object.keys(state.treeSelection).length,
                 treeSelectionTypeIds: state => state.treeSelectionTypeIds,
                 treeSelectionIntersection: state => getIntersectedEntityAttributes(state.treeSelectionTypeIds),
+                cachedConceptSelections: state => state.cachedConceptSelections,
+                cachedConceptSelection: state => id => state.cachedConceptSelections[id],
                 preferenceByKey: state => key => state.preferences[key],
                 preferences: state => state.preferences,
                 systemPreferences: state => state.systemPreferences,

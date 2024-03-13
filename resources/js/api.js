@@ -886,23 +886,29 @@ export async function deleteReferenceFromEntity(id, eid, url) {
 export async function searchGlobal(query = '') {
     return $httpQueue.add(
         () => http.get(`search?q=${query}`).then(response => response.data)
-    )
+    );
 }
 
 export async function searchAttribute(query = '') {
     return $httpQueue.add(
         () => http.get(`search/attribute?q=${query}`).then(response => response.data)
-    )
+    );
 }
 
 export async function searchLabel(query = '') {
     return $httpQueue.add(
         () => http.get(`search/label?q=${query}`).then(response => response.data)
-    )
+    );
 }
 
 export async function searchEntity(query = '') {
     return $httpQueue.add(
         () => http.get(`search/entity?q=${query}`).then(response => response.data)
-    )
+    );
+}
+
+export async function searchConceptSelection(cid) {
+    return $httpQueue.add(
+        () => http.get(`search/selection/${cid}`).then(response => response.data)
+    );
 }
