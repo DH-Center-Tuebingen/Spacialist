@@ -58,6 +58,8 @@
                             :track-by="'thesaurus_url'"
                             :value-prop="'id'"
                             :options="state.minimalEntityTypes"
+                            :close-on-select="false"
+                            :close-on-deelect="false"
                             :placeholder="t('global.select.placeholder')"
                         >
                             <template #option="{ option }">
@@ -358,7 +360,7 @@
                             )
                             ;
                 }),
-            })
+            });
 
             // RETURN
             return {
@@ -376,7 +378,7 @@
                 // PROPS
                 // STATE
                 state,
-            }
+            };
         },
         // methods: {
         //     editEntityAttribute(attribute, options) {
@@ -478,5 +480,5 @@
         //         }
         //     },
         // },
-    }
+    };
 </script>

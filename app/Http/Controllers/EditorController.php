@@ -205,6 +205,7 @@ class EditorController extends Controller {
             'datatype' => 'required|string',
             'root_id' => 'nullable|integer|exists:th_concept,id',
             'root_attribute_id' => 'nullable|integer|exists:attributes,id',
+            'restricted_types' => 'nullable|array|exists:entity_types,id',
             'columns' => 'nullable|array',
             'text' => 'string',
             'recursive' => 'nullable|boolean_string'
@@ -224,6 +225,9 @@ class EditorController extends Controller {
         } else if($request->has('root_attribute_id')) {
             $frid = $request->get('root_attribute_id');
             $attr->root_attribute_id = $frid;
+        }
+        if($request->has('restricted_types')) {
+            $attr->restrictions = json_encode($request->get('restricted_types'));
         }
         if($request->has('text')) {
             $attr->text = $request->get('text');

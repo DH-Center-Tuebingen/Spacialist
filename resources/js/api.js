@@ -493,6 +493,9 @@ export async function addAttribute(attribute) {
     if(attribute.rootAttributeLabel) {
         data.root_attribute_id = attribute.rootAttributeLabel.id;
     }
+    if(attribute.restrictedTypes) {
+        data.restricted_types = attribute.restrictedTypes.map(t => t.id);
+    }
     if(attribute.columns && attribute.columns.length > 0) {
         data.columns = attribute.columns.map(c => {
             const mappedC = {...c};
@@ -905,4 +908,11 @@ export async function searchEntity(query = '') {
     return $httpQueue.add(
         () => http.get(`search/entity?q=${query}`).then(response => response.data)
     )
+}
+
+export async function searchEntityInTypes(query = '', types = []) {
+    const typeList = types.join(',');
+    return $httpQueue.add(
+        () => http.get(`search/entity?q=${query}&t=${typeList}`).then(response => response.data)
+    );
 }

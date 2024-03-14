@@ -92,7 +92,14 @@ class SearchController extends Controller {
             ], 403);
         }
         $q = $request->query('q');
-        $matches = Entity::where('name', 'ilike', '%'.$q.'%')
+        $t = $request->query('t');
+
+        $matches = Entity::where('name', 'ilike', '%'.$q.'%');
+        if(isset($t)) {
+            $types = explode(',', $t);
+            $matches->whereIn('entity_type_id', $types);
+        }
+        $matches = $matches
             ->orderBy('name')
             ->get();
         $matches->each->append(['ancestors']);
