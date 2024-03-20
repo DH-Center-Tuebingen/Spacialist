@@ -393,16 +393,15 @@
                         meta,
                         value,
                         handleChange: e => {
-                            console.log('k CHANGED', e.target.value);
+                            console.log('CHANGED', fields[k]);
                             handleChange(e);
-                            trackChanges(k, 'value', e.target.value);
                         },
                         resetField,
                     };
                 }
             };
             const updateUserInformation = _ => {
-                if(!v.form.dirty || !v.form.valid) return;
+                // if(!v.form.dirty || !v.form.valid) return;
 
                 const data = {};
                 for(let k in fields) {
