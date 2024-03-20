@@ -39,7 +39,7 @@
                         type="submit"
                         class="btn btn-outline-success btn-sm"
                         form="profile-user-info-form"
-                        :disabled="!v.form.dirty || !v.form.valid"
+                        :disabled="!v.form.dirty"
                     >
                         <i class="fas fa-fw fa-save" />
                         {{ t('global.save') }}
@@ -392,7 +392,11 @@
                         errors,
                         meta,
                         value,
-                        handleChange,
+                        handleChange: e => {
+                            console.log('k CHANGED', e.target.value);
+                            handleChange(e);
+                            trackChanges(k, 'value', e.target.value);
+                        },
                         resetField,
                     };
                 }
@@ -450,7 +454,7 @@
             };
             const uploadFile = (file, component) => {
                 return setUserAvatar(file.file).then(data => {
-                    updateUserObjects(data)
+                    updateUserObjects(data);
                 });
             };
             const inputFile = (newFile, oldFile) => {
@@ -461,13 +465,13 @@
                 // Enable automatic upload
                 if(!!newFile && (Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error)) {
                     if(!newFile.active) {
-                        newFile.active = true
+                        newFile.active = true;
                     }
                 }
             };
             const appliedMetadata = u => {
-                const nu = _cloneDeep(u)
-                return u.metadata ? nu : {...nu, ...{metadata: {}}};
+                const nu = _cloneDeep(u);
+                return u.metadata ? nu : { ...nu, ...{ metadata: {} } };
             };
 
             // DATA
@@ -530,5 +534,5 @@
                 v,
             };
         },
-    }
+    };
 </script>
