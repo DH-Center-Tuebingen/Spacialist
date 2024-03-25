@@ -47,6 +47,7 @@ All notable changes to this project will be documented in this file.
 - Set default value in parent element in _Add Attribute_ modal
 - Values in Dropdown attributes are now sorted alphabetically
 - Values in Dropdown attributes are now searchable
+- Font size in dropdown menus
 
 ## 0.9.14
 ### Added
