@@ -15,7 +15,7 @@
                 </button>
             </h4>
             <entity-type-list
-                class="col px-0 h-100 d-flex flex-column overflow-hidden"
+                class="col px-0 h-100 d-flex flex-column"
                 :data="state.entityTypes"
                 :selected-id="state.selectedEntityType"
                 @delete-element="requestDeleteEntityType"

@@ -35,6 +35,7 @@ All notable changes to this project will be documented in this file.
 - Unsaved changes in _Data Model Editor_ were visible in the UI
 - Moving entity in tree created a temporary duplicate
 - Truncate long texts in csv preview
+- Entity Types in Data-Model-Editor not scrollable
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
