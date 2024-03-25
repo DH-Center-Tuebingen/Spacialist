@@ -26,7 +26,9 @@
                 />
             </div>
             <div
+                id="bibtex-item-modal"
                 class="modal-body"
+                tabindex="0"
                 :class="state.scrollStateBodyClasses"
                 @paste="handlePasteFromClipboard($event)"
             >
@@ -180,6 +182,7 @@
 
     import {
         computed,
+        onMounted,
         reactive,
         ref,
         toRefs,
@@ -316,6 +319,14 @@
                 disabled: computed(_ => !(!state.file && state.fileRemoved) && !(state.file && !state.fileRemoved) && !(state.formState.dirty && state.formState.valid)),
                 typeName: computed(_ => state.data.type ? state.data.type.name : null),
                 typeList: bibliographyTypes.map(t => t.name),
+            });
+
+            // ON MOUNTED
+            onMounted(_ => {
+                const pasteContainer = document.getElementById('bibtex-item-modal');
+                if(pasteContainer) {
+                    pasteContainer.focus();
+                }
             });
 
             // RETURN

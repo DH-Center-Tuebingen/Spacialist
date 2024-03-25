@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 - Additional fields in _User profile_ regarding institution
 - Keyboard Shortcut to save Entity (`Ctrl + s` for current open attribute tab, `Ctrl + Shift + s` for entire entity)
 - Show parent entity path in _Move entity_ modal
+- Pasting into _Bibliography Item_ now works without clicking first and display some more info
 ### Fixed
 - Error in _Attribute List_ caused by _Entity (Multiple Choice)_ attribute
 - Attribute form Save/Reset handling due to newly introduced _Attribute Group Separator_

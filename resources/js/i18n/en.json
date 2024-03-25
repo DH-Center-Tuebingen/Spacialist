@@ -670,7 +670,7 @@
         "bibliography": {
             "title": "Literature",
             "modal": {
-                "paste_info": "You can use <kbd><kbd>ctrl</kbd> + <kbd>v</kbd></kbd> to fill out the fields with a BibTeX entry from your clipboard.",
+                "paste_info": "You can use <kbd><kbd>ctrl</kbd> + <kbd>v</kbd></kbd> to fill out the fields with a BibTeX entry from your clipboard.<br>Click <u>here</u>, if the fill out does not work and try again.",
                 "bibtex_code": "BibTeX-Code",
                 "attach_file": "Select File or drop here",
                 "new": {
