@@ -385,9 +385,8 @@ class Bibliography extends Model implements Searchable
         $key = '';
         if(isset($fields['author']) || isset($fields['editor'])) {
             $authors = explode(' and ', $fields['author'] ?? $fields['editor']);
-            $author = $authors[0];
-            $author .= '_';
-            $key .= $author;
+            $author = explode(',', $authors[0]);
+            $key .= trim($author[0]);
         }
         if(isset($fields['title'])) {
             $title = $fields['title'];
@@ -395,21 +394,21 @@ class Bibliography extends Model implements Searchable
             $firstWord = '';
             $shortTitle = '';
             foreach($words as $word) {
+                // only keep (ascii) letters and numbers
+                $word = preg_replace('/[^A-Za-z0-9]/', '', Str::ascii(trim($word)));
                 if(strlen($firstWord) == 0 && strlen($word) > 3) {
                     $firstWord = $word;
                 }
                 $shortTitle .= strtolower($word[0]);
             }
             if(strlen($firstWord) == 0) {
-                $firstWord = $words[0];
+                $firstWord = strtolower($words[0]);
             }
-            $key .= "{$firstWord}_{$shortTitle}_";
+            $key .= "_{$firstWord}_{$shortTitle}";
         }
 
         if(isset($fields['year'])) {
-            $key .= $fields['year'];
-        } else {
-            $key .= '0000';
+            $key .= "_" . $fields['year'];
         }
 
         $initalKey = $key;
