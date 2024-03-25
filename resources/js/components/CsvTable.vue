@@ -125,7 +125,7 @@
                 <tbody>
                     <tr
                         v-for="(row, i) in state.computedRows.striped_data"
-                        :key="i"
+                        :key="`csv-preview-row-${i}`"
                     >
                         <td v-if="state.showLinenumbers">
                             <span class="fw-bold">
@@ -134,9 +134,16 @@
                         </td>
                         <td
                             v-for="(column, j) in row"
-                            :key="j"
+                            :key="`csv-preview-col-${i}-${j}`"
+                            @mouseenter="setHover(i, j, true)"
+                            @mouseleave="setHover(i, j, false)"
                         >
-                            {{ column }}
+                            <span v-if="state.hover[`${i}_${j}`]">
+                                {{ column }}
+                            </span>
+                            <span v-else>
+                                {{ truncate(column) }}
+                            </span>
                         </td>
                     </tr>
                 </tbody>
@@ -160,6 +167,7 @@
 
     import {
         ucfirst,
+        truncate,
     } from '@/helpers/filters.js';
 
     export default {
@@ -230,6 +238,9 @@
                     context.emit('parse', state.computedRows);
                 }
             };
+            const setHover = (rowIdx, colIdx, status) => {
+                state.hover[`${rowIdx}_${colIdx}`] = status;
+            };
 
             // DATA
             const state = reactive({
@@ -240,6 +251,7 @@
                 skippedCount: 0,
                 showPreview: true,
                 computedRows: {},
+                hover: {},
                 dsv: computed(_ => d3.dsvFormat(state.delimiter || ',')),
                 rows: computed(_ => state.computedRows.data ? state.computedRows.data.length : 0),
                 maxRows: computed(_ => state.rows - state.skippedCount),
@@ -277,8 +289,10 @@
                 t,
                 // HELPERS
                 ucfirst,
+                truncate,
                 // LOCAL
                 toggleShowPreview,
+                setHover,
                 // STATE
                 state,
             }
