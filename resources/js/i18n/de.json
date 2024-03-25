@@ -161,7 +161,79 @@
             "serial_info": "<i class=\"fas fa-lightbulb me-1\"></i><br />Alle Instanzen teilen diesen Identifier als Attribut. Benutze <code class=\"normal\">%d</code> als Zähler.<br /><span class=\"fw-medium mt-2\">Beispiel:</span><br /><code class=\"normal\">Fund_%d_Stein</code> würde zu Fund_1_Stein, Fund_2_Stein, &hellip; führen.<br />Um eine feste Breite (z.B. 3 für 002 anstatt 2) zu erzwingen, benutze <code class=\"normal\">%03d</code>.",
             "sql_info": "Du kannst mit <code class=\"normal\">:entity_id</code> in deiner SQL-Abfrage auf die Entität referenzieren, dem dieses Attribut zugewiesen ist.",
             "iconclass": "Iconclass",
-            "rism": "RISM"
+            "rism": "RISM",
+            "si-unit": "SI-Einheit",
+            "si_units": {
+                "time": {
+                    "label": "Zeit",
+                    "units": {
+                        "second": "Sekunden",
+                        "minute": "Minuten",
+                        "hour": "Stunden",
+                        "day": "Tage",
+                        "year": "Jahre"
+                    }
+                },
+                "length": {
+                    "label": "Länge",
+                    "units": {
+                        "nanometre": "Nanometer",
+                        "micrometre": "Mikrometer",
+                        "millimetre": "Millimeter",
+                        "centimetre": "Zentimeter",
+                        "decimetre": "Dezimeter",
+                        "metre": "Meter",
+                        "decametre": "Dekameter",
+                        "hectometre": "Hektometer",
+                        "kilometre": "Kilometer",
+                        "inch": "Zoll",
+                        "feet": "Fuß",
+                        "yard": "Yards",
+                        "mile": "Meilen"
+                    }
+                },
+                "area": {
+                    "label": "Fläche",
+                    "units": {
+                        "square_metre": "Quadratmeter",
+                        "square_kilometre": "Quadratkilometer",
+                        "square_inch": "Quadratzoll",
+                        "square_feet": "Quadratfuß",
+                        "square_yard": "Quadratyard",
+                        "square_mile": "Quadratmeile"
+                    }
+                },
+                "volume": {
+                    "label": "Volumen",
+                    "units": {
+                        "cubic_centimetre": "Kubikzentimeter",
+                        "cubic_decimetre": "Liter | Kubikdezimeter",
+                        "cubic_metre": "Kubikmeter",
+                        "cubic_kilometre": "Kubikkilometer",
+                        "cubic_inch": "Kubikzoll",
+                        "cubic_feet": "Kubikfuß",
+                        "cubic_yard": "Kubikyard",
+                        "cubic_mile": "Kubikmeile"
+                    }
+                },
+                "mass": {
+                    "label": "Gewicht",
+                    "units": {
+                        "gram": "Gramm",
+                        "kilogram": "Kilogramm",
+                        "ton": "Tonnen"
+                    }
+                },
+                "temperature": {
+                    "label": "Temperatur",
+                    "units": {
+                        "degree_celsius": "Celsius",
+                        "degree_kelvin": "Kelvin",
+                        "degree_fahrenheit": "Fahrenheit",
+                        "degree_réaumur": "Réaumur"
+                    }
+                }
+            }
         },
         "activity": "Aktivitäten",
         "action": "Aktion",

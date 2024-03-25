@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\AttributeTypes\AttributeBase;
 use App\EntityType;
 use App\Plugin;
 use App\Preference;
@@ -42,6 +43,14 @@ class HomeController extends Controller
 
         $concepts = ThConcept::getMap($locale);
 
+        $datatypes = AttributeBase::getTypes();
+        $addData = [];
+        foreach($datatypes as $key => $datatype) {
+            if(method_exists($datatype, "addGlobalData")) {
+                $addData[$key] = $datatype::addGlobalData();
+            }
+        }
+
         $entityTypes = EntityType::with(['sub_entity_types', 'layer', 'attributes'])
             ->orderBy('id')
             ->get();
@@ -52,6 +61,7 @@ class HomeController extends Controller
             'preferences' => $preferenceValues,
             'concepts' => $concepts,
             'entityTypes' => $entityTypeMap,
+            'datatype_data' => $addData,
             'colorsets' => sp_get_themes(),
             'analysis' => sp_has_analysis(),
         ]);

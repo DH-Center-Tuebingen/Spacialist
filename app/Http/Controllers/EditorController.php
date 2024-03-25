@@ -118,7 +118,7 @@ class EditorController extends Controller {
             ], 403);
         }
 
-        return response()->json(AttributeBase::getTypes());
+        return response()->json(AttributeBase::getTypes(true));
     }
 
     public function getAvailableGeometryTypes() {

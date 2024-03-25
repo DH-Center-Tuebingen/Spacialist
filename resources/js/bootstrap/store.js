@@ -57,6 +57,7 @@ export const store = createStore({
                     permissions: [],
                     preferences: {},
                     systemPreferences: {},
+                    datatypeData: {},
                     tags: [],
                     roles: [],
                     rolePresets: [],
@@ -585,6 +586,11 @@ export const store = createStore({
                 setAnalysis(state, data) {
                     state.hasAnalysis = data;
                 },
+                setDatatypeData(state, data) {
+                    for(let k in data) {
+                        state.datatypeData[k] = data[k];
+                    }
+                },
             },
             actions: {
                 setAppState({commit}, data) {
@@ -842,6 +848,9 @@ export const store = createStore({
                 setAnalysis({commit}, data) {
                     commit('setAnalysis', data);
                 },
+                setDatatypeData({commit}, data) {
+                    commit('setDatatypeData', data);
+                },
             },
             getters: {
                 appInitialized: state => state.appInitialized,
@@ -866,6 +875,8 @@ export const store = createStore({
                 preferenceByKey: state => key => state.preferences[key],
                 preferences: state => state.preferences,
                 systemPreferences: state => state.systemPreferences,
+                datatypeData: state => state.datatypeData,
+                datatypeDataOf: state => key => state.datatypeData[key],
                 tags: state => state.tags,
                 roles: state => noPerms => {
                     return noPerms ? state.roles.map(r => {
