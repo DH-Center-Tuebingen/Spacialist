@@ -28,12 +28,13 @@
                     :mode="'single'"
                     :options="state.attributeTypes"
                     :searchable="true"
+                    :filter-results="false"
                     :value-prop="'datatype'"
                     :track-by="'datatype'"
                     :placeholder="t('global.select.placeholder')"
                     :hide-selected="true"
-                    :search-filter="searchInAttributeTypes"
                     @select="typeSelected"
+                    @search-change="searchInAttributeTypes"
                 >
                     <template #option="{ option }">
                         {{ t(`global.attributes.${option.datatype}`) }}
@@ -309,13 +310,8 @@
             const getAttributeLabel = attribute => {
                 return translateConcept(attribute.thesaurus_url);
             };
-            const searchInAttributeTypes = (option, query) => {
-                if(query) {
-                    const tq = query.toLowerCase().trim();
-                    return option.datatype.indexOf(tq) !== -1 || t(`global.attributes.${option.datatype}`).toLowerCase().indexOf(tq) !== -1;
-                } else {
-                    return true;
-                }
+            const searchInAttributeTypes = query => {
+                state.query = query ? query.toLowerCase().trim() : null;
             };
 
             // DATA
@@ -339,6 +335,14 @@
                     textContent: '',
                     restrictedTypes: [],
                 },
+                query: null,
+                attributeTypes: computed(_ => {
+                    if(!state.query) return types;
+
+                    return types.filter(type => {
+                        return type.datatype.indexOf(state.query) !== -1 || t(`global.attributes.${type.datatype}`).toLowerCase().indexOf(state.query) !== -1;
+                    });
+                }),
                 searchResetValue: null,
                 formId: external.value || 'create-attribute-form',
                 attributeTypes: types,

@@ -184,7 +184,7 @@
                 const et = state.entityType;
                 const data = {
                     'is_root': et.is_root || false,
-                    'sub_entity_types': (et.sub_entity_types || []).map(t => t.id),
+                    'sub_entity_types': et.sub_entity_types || [],
                 };
 
                 updateEntityTypeRelation(et.id, data).then(_ => {

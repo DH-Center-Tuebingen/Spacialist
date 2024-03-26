@@ -1,19 +1,26 @@
 <template>
-    <div class="position-relative">
+    <div
+        class="position-relative"
+        @mouseenter="state.hovered = true"
+        @mouseleave="state.hovered = false"
+    >
         <md-viewer
             v-if="current"
             :id="name"
-            :classes="classes"
+            :classes="state.classes"
             :source="current"
         />
         <div
             v-else
             class="text-secondary fst-italic fw-medium opacity-50 user-select-none"
-            :class="classes"
+            :class="state.classes"
         >
             {{ t('global.missing.content') }}
         </div>
-        <div class="position-absolute top-0 end-0 h-100 pe-none ">
+        <div
+            class="position-absolute top-0 end-0 h-100 pe-none"
+            :class="state.onHoverBtnClasses"
+        >
             <div class="position-sticky top-0 bg-light pe-auto m-2 rounded">
                 <button
                     v-if="!disabled"
@@ -63,29 +70,10 @@
         },
         emits: ['change'],
         setup(props, context) {
+            const { t } = useI18n();
             const {
                 value: initial,
             } = toRefs(props);
-
-            const current = ref(initial.value || '');
-            const meta = reactive({
-                dirty: false,
-                valid: true,
-            });
-
-            /**
-             * v is required as the attr-list fetches 
-             * the values of the attributes via every
-             * attribute's v.value.
-             */
-            const v = computed(_ => {
-                return {
-                    value: current.value,
-                    meta: {
-                        ...meta
-                    }
-                };
-            });
 
             const handleInput = text => {
                 current.value = text || '';
@@ -119,9 +107,36 @@
                 });
             };
 
-            const { t } = useI18n();
+            const state = reactive({
+                classes: 'mt-0 bg-none h-100 form-control px-4 py-3',
+                hovered: false,
+                onHoverBtnClasses: computed(_ => {
+                    if(state.hovered) {
+                        return '';
+                    } else {
+                        return 'd-none';
+                    }
+                }),
+            });
+            const current = ref(initial.value || '');
+            const meta = reactive({
+                dirty: false,
+                valid: true,
+            });
 
-            const classes = 'mt-0 bg-none h-100 form-control px-4 py-3'
+            /**
+             * v is required as the attr-list fetches 
+             * the values of the attributes via every
+             * attribute's v.value.
+             */
+            const v = computed(_ => {
+                return {
+                    value: current.value,
+                    meta: {
+                        ...meta
+                    }
+                };
+            });
 
             // RETURN
             return {
@@ -131,10 +146,10 @@
                 undirtyField,
                 openMdEditor,
                 // STATE
-                classes,
                 current,
-                v
-            }
+                state,
+                v,
+            };
         },
     }
 </script>
