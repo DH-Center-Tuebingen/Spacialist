@@ -169,7 +169,7 @@ class SearchController extends Controller {
 
     public function searchInAttributes(Request $request) {
         $user = auth()->user();
-        if(!$user->can('thesaurus_read') || !$user->can('attributes_read')) {
+        if(!$user->can('thesaurus_read') || !$user->can('attribute_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to search for attributes')
             ], 403);
