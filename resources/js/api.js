@@ -348,9 +348,13 @@ export async function confirmUserPassword(uid, password = null) {
 
 export async function updateEntityTypeRelation(etid, values) {
     const data = only(values, ['is_root', 'sub_entity_types']);
+    const apiData = {...data};
+    if(data.sub_entity_types) {
+        apiData.sub_entity_types = data.sub_entity_types.map(t => t.id);
+    }
 
     return await $httpQueue.add(
-        () => http.post(`/editor/dm/${etid}/relation`, data).then(response => {
+        () => http.post(`/editor/dm/${etid}/relation`, apiData).then(response => {
             store.dispatch('updateEntityType', {
                 ...data,
                 id: etid,
