@@ -646,7 +646,7 @@
                         if(currValue !== null) {
                             // filter out deleted table rows
                             if(getAttribute(k).datatype == 'table') {
-                                currValue = currValue.filter(cv => !cv.mark_deleted);
+                                currValue = curr.compCurrValue().filter(cv => !cv.mark_deleted);
                             }
                             values[k] = currValue;
                         } else {

@@ -127,6 +127,16 @@
                             @change="e => updateDirtyState(e, $index, column.id)"
                         />
 
+                        <multichoice-attribute
+                            v-else-if="column.datatype == 'string-mc'"
+                            :ref="el => setRef(el, `${$index}_${column.id}`)"
+                            :disabled="disabled || row.mark_deleted"
+                            :name="`${name}-column-attr-${column.id}`"
+                            :value="row[column.id]"
+                            :selections="state.selections[column.id]"
+                            @change="e => updateDirtyState(e, $index, column.id)"
+                        />
+
                         <userlist-attribute
                             v-else-if="column.datatype == 'userlist'"
                             :ref="el => setRef(el, `${$index}_${column.id}`)"
@@ -345,6 +355,7 @@
     import Entity from '@/components/attribute/Entity.vue';
     import DateAttr from '@/components/attribute/Date.vue';
     import SingleChoice from '@/components/attribute/SingleChoice.vue';
+    import MultiChoice from '@/components/attribute/MultiChoice.vue';
     import UserList from '@/components/attribute/UserList.vue';
 
     import * as d3 from 'd3-dsv'; 
@@ -360,6 +371,7 @@
             'entity-attribute': Entity,
             'date-attribute': DateAttr,
             'singlechoice-attribute': SingleChoice,
+            'multichoice-attribute': MultiChoice,
             'userlist-attribute': UserList,
         },
         props: {
@@ -574,6 +586,22 @@
             const setRef = (el, idx) => {
                 columnRefs.value[idx] = el;
             };
+            const compCurrValue = _ => {
+                const currentValue = _cloneDeep(v.value);
+                for(let k in columnRefs.value) {
+                    const curr = columnRefs.value[k];
+                    if(!!curr.v && curr.v.meta.dirty) {
+                        const idxs = k.split('_');
+                        const rowIdx = idxs[0];
+                        const colIdx = idxs[1];
+                        const row = currentValue[rowIdx];
+                        if(row && !row.mark_deleted) {
+                            row[colIdx] = curr.v.value;
+                        }
+                    }
+                }
+                return currentValue;
+            };
 
             // DATA
             const columnRefs = ref({});
@@ -701,6 +729,7 @@
                 resetRow,
                 updateDirtyState,
                 setRef,
+                compCurrValue,
                 // PROPS
                 // STATE
                 state,
