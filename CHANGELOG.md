@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 - Additional non-standard bibtex fields to _Bibliography_ (ISBN, ISSN, Language and Abstract)
 - Additional fields in _User profile_ regarding institution
 - Keyboard Shortcut to save Entity (`Ctrl + s` for current open attribute tab, `Ctrl + Shift + s` for entire entity)
+- Allow _Multiple Choice Dropdown_ in _Table_ attribute
 ### Fixed
 - Error in _Attribute List_ caused by _Entity (Multiple Choice)_ attribute
 - Attribute form Save/Reset handling due to newly introduced _Attribute Group Separator_
