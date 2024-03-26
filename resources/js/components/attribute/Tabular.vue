@@ -574,6 +574,22 @@
             const setRef = (el, idx) => {
                 columnRefs.value[idx] = el;
             };
+            const compCurrValue = _ => {
+                const currentValue = _cloneDeep(v.value);
+                for(let k in columnRefs.value) {
+                    const curr = columnRefs.value[k];
+                    if(!!curr.v && curr.v.meta.dirty) {
+                        const idxs = k.split('_');
+                        const rowIdx = idxs[0];
+                        const colIdx = idxs[1];
+                        const row = currentValue[rowIdx];
+                        if(row && !row.mark_deleted) {
+                            row[colIdx] = curr.v.value;
+                        }
+                    }
+                }
+                return currentValue;
+            };
 
             // DATA
             const columnRefs = ref({});
@@ -701,6 +717,7 @@
                 resetRow,
                 updateDirtyState,
                 setRef,
+                compCurrValue,
                 // PROPS
                 // STATE
                 state,
