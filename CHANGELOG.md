@@ -36,6 +36,7 @@ All notable changes to this project will be documented in this file.
 - Moving entity in tree created a temporary duplicate
 - Certainty values lower than 0 or higher than 100
 - Speed-up slow rendering time of (large) entity trees
+- Do not send notifications on moving an entity
 
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu

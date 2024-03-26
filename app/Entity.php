@@ -192,7 +192,7 @@ class Entity extends Model implements Searchable
 
         foreach($oldEntities as $oc) {
             $oc->rank--;
-            $oc->save();
+            $oc->saveQuietly();
         }
 
         $query = null;
@@ -207,7 +207,7 @@ class Entity extends Model implements Searchable
 
         foreach($newEntities as $nc) {
             $nc->rank++;
-            $nc->save();
+            $nc->saveQuietly();
         }
 
         $entity->save();
