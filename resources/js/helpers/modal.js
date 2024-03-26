@@ -729,7 +729,7 @@ export function showDeleteEntityType(entityType, metadata, onDeleted) {
 
 export function showEditAttribute(aid, etid, metadata) {
     const isSystem = metadata && metadata.is_system;
-    const component = isSystem ? EditSystemAttribute : EditAttribute
+    const component = isSystem ? EditSystemAttribute : EditAttribute;
     const uid = `EditAttribute-${getTs()}`;
     const modal = useModal({
         component: component,
@@ -745,6 +745,7 @@ export function showEditAttribute(aid, etid, metadata) {
             async onConfirm(e) {
                 if(isSystem) {
                     await updateAttributeMetadata(etid, aid, metadata.pivot.id, e);
+                    modal.destroy();
                 } else {
                     if(e.metadata) {
                         await updateAttributeMetadata(etid, aid, metadata.pivot.id, e.metadata);

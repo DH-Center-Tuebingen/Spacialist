@@ -51,7 +51,7 @@ class BibliographyController extends Controller
                     case 'user_id':
                         break;
                     default:
-                        $content .= '    '.$k.': {'.$a.'}';
+                        $content .= '    '.$k.' = {'.$a.'}';
                         $content .= "\n";
                         break;
                 }

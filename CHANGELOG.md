@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 - Support moderated roles/users that require a privileged user to accept/deny their changes in entity forms
 - Serif font (Zilla Slab)
 - New Attribute Type: _Richtext_ (A feature-rich alternative to _Textbox_ Attribute; based on Markdown)
+- New Attribute Type: _Attribute Group Separator_ (A separator element to group attributes in tabs)
 - Separate form Save/Reset in Entity Attribute Tabs (when using _Attribute Group Separator_)
 - Additional non-standard bibtex fields to _Bibliography_ (ISBN, ISSN, Language and Abstract)
 - Additional fields in _User profile_ regarding institution
@@ -32,7 +33,11 @@ All notable changes to this project will be documented in this file.
 - Mark all notifications as read
 - Unsetting a date value
 - Unsaved changes in _Data Model Editor_ were visible in the UI
+- Moving entity in tree created a temporary duplicate
+- Certainty values lower than 0 or higher than 100
+- Speed-up slow rendering time of (large) entity trees
 - Do not send notifications on moving an entity
+
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
@@ -42,6 +47,8 @@ All notable changes to this project will be documented in this file.
 - Made UI to add new rows to _Table_ attribute clearer
 - Attribute type backend logic moved to separate classes
 - Set default value in parent element in _Add Attribute_ modal
+- Values in Dropdown attributes are now sorted alphabetically
+- Values in Dropdown attributes are now searchable
 
 ## 0.9.14
 ### Added
