@@ -41,6 +41,7 @@ All notable changes to this project will be documented in this file.
 - Deleting all notifications
 - Button style in notifcation panel
 - Remove headings without content from _References_ tab in Main View
+- HTML content in comments
 
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
