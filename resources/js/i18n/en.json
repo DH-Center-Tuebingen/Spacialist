@@ -151,6 +151,7 @@
             "epoch": "Time Period and Epoch",
             "timeperiod": "Time Period",
             "date": "Date",
+            "daterange": "Date Range",
             "dimension": "Dimensions (WxHxD)",
             "list": "List",
             "geography": "WKT (Well-Known-Binary)",

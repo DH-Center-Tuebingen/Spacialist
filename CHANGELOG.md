@@ -7,12 +7,15 @@ All notable changes to this project will be documented in this file.
 - Support moderated roles/users that require a privileged user to accept/deny their changes in entity forms
 - Serif font (Zilla Slab)
 - New Attribute Type: _Richtext_ (A feature-rich alternative to _Textbox_ Attribute; based on Markdown)
+- New Attribute Type: _Date range_
+- New Attribute Type: _Userlist_
 - New Attribute Type: _Attribute Group Separator_ (A separator element to group attributes in tabs)
 - Separate form Save/Reset in Entity Attribute Tabs (when using _Attribute Group Separator_)
 - Additional non-standard bibtex fields to _Bibliography_ (ISBN, ISSN, Language and Abstract)
 - Additional fields in _User profile_ regarding institution
 - Keyboard Shortcut to save Entity (`Ctrl + s` for current open attribute tab, `Ctrl + Shift + s` for entire entity)
 - Restrict search in _Entity_ attribute to specific entity-types
+
 ### Fixed
 - Error in _Attribute List_ caused by _Entity (Multiple Choice)_ attribute
 - Attribute form Save/Reset handling due to newly introduced _Attribute Group Separator_
@@ -43,12 +46,14 @@ All notable changes to this project will be documented in this file.
 - Button style in notifcation panel
 - Remove headings without content from _References_ tab in Main View
 - HTML content in comments
+
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
 - Allow adding options in _List_ attribute on `Enter` key
 - Set timeout & disable login button while authenticating
 - Better handling and validation of user input in _User profile_
+- Attribute type backend logic moved to separate classes
 - Made UI to add new rows to _Table_ attribute clearer
 - Attribute type backend logic moved to separate classes
 - Set default value in parent element in _Add Attribute_ modal
