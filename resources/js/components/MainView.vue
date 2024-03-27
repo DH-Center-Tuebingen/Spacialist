@@ -237,10 +237,7 @@
                     const isEmpty = !Object.keys(state.entity.references).length > 0;
                     if(isEmpty) return false;
 
-                    const doesNotContainItems = !(Object.values(state.entity.references).some(v => v.length > 0));
-                    if(doesNotContainItems) return false;
-
-                    return true;
+                    return Object.values(state.entity.references).some(v => v.length > 0);
                 }),
                 entityTypes: computed(_ => store.getters.entityTypes),
                 columnPref: computed(_ => store.getters.preferenceByKey('prefs.columns')),
