@@ -249,7 +249,12 @@ export const store = createStore({
                 updateEntityData(state, data) {
                     const entity = state.entities[data.eid];
                     for(let k in data.data) {
-                        entity.data[k].value = data.data[k];
+                        // when attribute value is set empty, delete whole attribute
+                        if(!data.data[k] && data.data[k] != false) {
+                            entity.data[k] = {};
+                        } else {
+                            entity.data[k].value = data.data[k];
+                        }
                     }
                 },
                 updateEntityDataModerations(state, data) {
