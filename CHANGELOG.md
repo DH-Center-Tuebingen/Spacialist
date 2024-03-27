@@ -34,6 +34,7 @@ All notable changes to this project will be documented in this file.
 - Mark all notifications as read
 - Unsetting a date value
 - Unsaved changes in _Data Model Editor_ were visible in the UI
+- Adding bibliography of type _misc_
 - Moving entity in tree created a temporary duplicate
 - Certainty values lower than 0 or higher than 100
 - Speed-up slow rendering time of (large) entity trees
@@ -42,7 +43,6 @@ All notable changes to this project will be documented in this file.
 - Button style in notifcation panel
 - Remove headings without content from _References_ tab in Main View
 - HTML content in comments
-
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
