@@ -274,6 +274,7 @@
                     :name="`entity-attribute-form-${tg.id}`"
                     class="h-100"
                     @submit.prevent
+                    @keydown.ctrl.s="e => handleSaveOnKey(e, `${tg.id}`)"
                 >
                     <attribute-list
                         v-if="state.attributesFetched"
@@ -800,6 +801,20 @@
                 }
             };
 
+            const handleSaveOnKey = (e, grp) => {
+                if(!can('entity_data_write')) return;
+                if(e.altKey) return;
+
+                e.preventDefault();
+                if(e.shiftKey) {
+                    if(!state.formDirty) return;
+                    saveEntity();
+                } else {
+                    if(!state.dirtyStates[grp]) return;
+                    saveEntity(grp);
+                }
+            };
+
             const saveEntity = grps => {
                 if(!can('entity_data_write')) return;
 
@@ -1008,6 +1023,7 @@
                 showTabActions,
                 setFormState,
                 addComment,
+                handleSaveOnKey,
                 saveEntity,
                 resetForm,
                 setAttrRefs,

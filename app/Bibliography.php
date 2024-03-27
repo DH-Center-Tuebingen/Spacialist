@@ -297,6 +297,10 @@ class Bibliography extends Model implements Searchable
     public static function validateMandatory(array $fields, string $type) : bool {
         $typeFields = self::bibtexTypes[$type];
 
+        if(!array_key_exists('mandatory', $typeFields) || count($typeFields['mandatory']) == 0) {
+            return true;
+        }
+
         foreach($typeFields['mandatory'] as $man => $manType) {
             // if is simple mandatory field, check if present
             // otherwise return false

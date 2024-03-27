@@ -56,7 +56,7 @@ export async function deleteAllNotifications(ids = null, from = userNotification
     const data = {
         ids: ids
     };
-    return await $httpQueue.add(() => http.patch(`notification/`, data).then(response => {
+    return await $httpQueue.add(() => http.patch(`notification`, data).then(response => {
         ids.forEach(id => {
             const idx = from.findIndex(elem => elem.id === id);
             if(idx > -1) {
