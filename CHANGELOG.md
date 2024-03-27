@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 - Additional non-standard bibtex fields to _Bibliography_ (ISBN, ISSN, Language and Abstract)
 - Additional fields in _User profile_ regarding institution
 - Keyboard Shortcut to save Entity (`Ctrl + s` for current open attribute tab, `Ctrl + Shift + s` for entire entity)
+- Restrict search in _Entity_ attribute to specific entity-types
 ### Fixed
 - Error in _Attribute List_ caused by _Entity (Multiple Choice)_ attribute
 - Attribute form Save/Reset handling due to newly introduced _Attribute Group Separator_
@@ -33,7 +34,15 @@ All notable changes to this project will be documented in this file.
 - Mark all notifications as read
 - Unsetting a date value
 - Unsaved changes in _Data Model Editor_ were visible in the UI
+- Moving entity in tree created a temporary duplicate
+- Certainty values lower than 0 or higher than 100
+- Speed-up slow rendering time of (large) entity trees
+- Do not send notifications on moving an entity
+- Deleting all notifications
+- Button style in notifcation panel
+- Remove headings without content from _References_ tab in Main View
 - HTML content in comments
+
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
@@ -43,6 +52,8 @@ All notable changes to this project will be documented in this file.
 - Made UI to add new rows to _Table_ attribute clearer
 - Attribute type backend logic moved to separate classes
 - Set default value in parent element in _Add Attribute_ modal
+- Values in Dropdown attributes are now sorted alphabetically
+- Values in Dropdown attributes are now searchable
 
 ## 0.9.14
 ### Added

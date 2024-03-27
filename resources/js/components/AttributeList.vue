@@ -264,6 +264,7 @@
                             :multiple="element.datatype == 'entity-mc'"
                             :hide-link="state.hideEntityLink"
                             :value="convertEntityValue(state.attributeValues[element.id], element.datatype == 'entity-mc')"
+                            :search-in="element.restrictions"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -828,7 +829,7 @@
                 // STATE
                 attrRefs,
                 state,
-            }
+            };
         },
-    }
+    };
 </script>
