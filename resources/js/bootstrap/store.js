@@ -253,7 +253,12 @@ export const store = createStore({
                         if(!data.data[k] && data.data[k] != false) {
                             entity.data[k] = {};
                         } else {
-                            entity.data[k].value = data.data[k];
+                            // if no id exists, this data is added
+                            if(!entity.data[k].id) {
+                                entity.data[k] = data.new_data[k];
+                            } else {
+                                entity.data[k].value = data.data[k];
+                            }
                         }
                     }
                 },

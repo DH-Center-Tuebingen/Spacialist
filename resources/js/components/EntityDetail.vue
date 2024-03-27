@@ -859,9 +859,10 @@
                 }
                 return patchAttributes(state.entity.id, patches).then(data => {
                     undirtyList(grps);
-                    store.dispatch('updateEntity', data);
+                    store.dispatch('updateEntity', data.entity);
                     store.dispatch('updateEntityData', {
                         data: dirtyValues,
+                        new_data: data.added_attributes,
                         eid: state.entity.id,
                     });
                     if(isModerated()) {
