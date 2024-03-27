@@ -3,15 +3,17 @@
         v-model="v.value"
         :classes="multiselectResetClasslist"
         :value-prop="'id'"
-        :label="'concept_url'"
         :track-by="'concept_url'"
         :object="true"
         :mode="'single'"
         :disabled="disabled"
-        :options="selections"
+        :options="state.filteredSelections"
         :name="name"
+        :searchable="true"
+        :filter-results="false"
         :placeholder="t('global.select.placeholder')"
         @change="value => v.handleChange(value)"
+        @search-change="setSearchQuery"
     >
         <template #option="{ option }">
             {{ translateConcept(option.concept_url) }}
@@ -26,6 +28,7 @@
 
 <script>
     import {
+        computed,
         reactive,
         toRefs,
         watch,
@@ -86,6 +89,10 @@
                 });
             };
 
+            const setSearchQuery = query => {
+                state.query = query ? query.toLowerCase().trim() : null;
+            };
+
             // DATA
             const {
                 handleChange,
@@ -96,7 +103,14 @@
                 initialValue: value.value,
             });
             const state = reactive({
+                query: null,
+                filteredSelections: computed(_ => {
+                    if(!state.query) return selections.value;
 
+                    return selections.value.filter(concept => {
+                        return concept.concept_url.toLowerCase().indexOf(state.query) !== -1 || translateConcept(concept.concept_url).toLowerCase().indexOf(state.query) !== -1;
+                    });
+                }),
             });
             const v = reactive({
                 value: fieldValue,
@@ -129,6 +143,7 @@
                 // LOCAL
                 resetFieldState,
                 undirtyField,
+                setSearchQuery,
                 // STATE
                 state,
                 v,
