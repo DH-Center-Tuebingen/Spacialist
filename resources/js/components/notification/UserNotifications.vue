@@ -91,7 +91,7 @@
                     <div class="text-end">
                         <button
                             type="button"
-                            class="btn btn-sm btn-success"
+                            class="btn btn-sm btn-outline-success"
                             :disabled="!state.notifications.length"
                             @click="markListAsRead(state.notifications)"
                         >
@@ -100,7 +100,7 @@
                         </button>
                         <button
                             type="button"
-                            class="btn btn-sm btn-danger ms-1"
+                            class="btn btn-sm btn-outline-danger ms-1"
                             :disabled="!state.notifications.length"
                             @click="deleteAll(state.notifications)"
                         >
@@ -138,7 +138,7 @@
                     <div class="text-end">
                         <button
                             type="button"
-                            class="btn btn-sm btn-success"
+                            class="btn btn-sm btn-outline-success"
                             :disabled="!state.unreadNotifications.length"
                             @click="markListAsRead(state.unreadNotifications)"
                         >
@@ -147,7 +147,7 @@
                         </button>
                         <button
                             type="button"
-                            class="btn btn-sm btn-danger ms-1"
+                            class="btn btn-sm btn-outline-danger ms-1"
                             :disabled="!state.unreadNotifications.length"
                             @click="deleteAll(state.unreadNotifications)"
                         >
@@ -185,7 +185,7 @@
                     <div class="text-end">
                         <button
                             type="button"
-                            class="btn btn-sm btn-danger"
+                            class="btn btn-sm btn-outline-danger"
                             :disabled="!state.readNotifications.length"
                             @click="deleteAll(state.readNotifications)"
                         >
@@ -223,7 +223,7 @@
                     <div class="text-end">
                         <button
                             type="button"
-                            class="btn btn-sm btn-success"
+                            class="btn btn-sm btn-outline-success"
                             :disabled="!state.systemNotifications.length"
                             @click="markListAsRead(state.systemNotifications)"
                         >
