@@ -812,6 +812,12 @@
 
             // ON MOUNTED
             onMounted(_ => {
+                state.dynamicSelectionList.forEach(rootId => {
+                    const attrValue = state.attributeValues[rootId].value;
+                    if(attrValue) {
+                        handleSelectionUpdate(rootId, attrValue.id);
+                    }
+                });
             });
             onBeforeUpdate(_ => {
                 attrRefs.value = {};
