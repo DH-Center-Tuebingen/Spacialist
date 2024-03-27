@@ -40,6 +40,7 @@ All notable changes to this project will be documented in this file.
 - Do not send notifications on moving an entity
 - Deleting all notifications
 - Button style in notifcation panel
+- Remove headings without content from _References_ tab in Main View
 
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
