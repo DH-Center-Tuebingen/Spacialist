@@ -749,8 +749,8 @@
                 "unpublished": "Nicht veröffentlicht",
                 "validation": {
                     "required": "„{field}“ ist ein Pflichtfeld",
-                    "required_if": "Muss gesetzt sein, falls „{col}“ nicht gesetzt ist",
-                    "required_one_of": "Entweder „{eitherField}“ oder „{orField}“ muss gesetzt sein"
+                    "required_if": "Pflichtfeld, falls „{col}“ nicht angegeben ist",
+                    "required_one_of": "Entweder „{eitherField}“ oder „{orField}“ muss angegeben sein"
                 }
             }
         },
