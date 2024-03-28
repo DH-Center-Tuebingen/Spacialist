@@ -26,8 +26,7 @@
     <div
         v-if="selectionFrom"
         :title="t('main.entity.attributes.root_attribute_info', { name: getAttributeName(selectionFrom) })"
-        class="badge bg-secondary"
-        style="cursor: pointer; user-select: none;"
+        class="badge border border-secondary text-reset cursor-help user-select-none mt-1"
     >
         <i class="fas fa-fw fa-link" />
         {{
