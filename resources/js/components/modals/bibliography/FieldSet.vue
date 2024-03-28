@@ -12,15 +12,16 @@
                 {{ t(`main.bibliography.column.${field}`) }}
                 <span
                     v-if="isMandatoryField(field)"
-                    class="text-danger"
+                    class="text-danger ms-1"
                 >
-                    *
+                    <i class="fas fa-2xs fa-asterisk" />
                 </span>
                 <span
                     v-else-if="isMandatoryFieldIf(field)"
-                    class="text-danger"
+                    class="text-danger ms-1"
                 >
-                    **
+                    <i class="fas fa-2xs fa-asterisk" />
+                    <i class="fas fa-fw fa-2xs fa-asterisk" />
                 </span>
                 :
             </label>
@@ -206,9 +207,11 @@
 
             const getFieldTitle = field => {
                 if(isMandatoryField(field)) {
-                    return t('main.bibliography.types.validation.required', {col: field});
+                    const fieldText = t(`main.bibliography.column.${field}`);
+                    return t('main.bibliography.types.validation.required', { field: fieldText });
                 } else if(isMandatoryFieldIf(field)) {
-                    return t('main.bibliography.types.required_if', {col: state.type.mandatory[field]});
+                    const col = t(`main.bibliography.column.${state.type.mandatory[field]}`);
+                    return t('main.bibliography.types.validation.required_if', { col });
                 } else {
                     return null;
                 }
@@ -254,7 +257,7 @@
                 //STATE
                 state,
                 v,
-            }
+            };
         },
-    }
+    };
 </script>
