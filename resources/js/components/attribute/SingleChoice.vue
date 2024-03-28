@@ -3,16 +3,18 @@
         v-model="v.value"
         :classes="multiselectResetClasslist"
         :value-prop="'id'"
-        :label="'concept_url'"
         :track-by="'concept_url'"
         :object="true"
         :mode="'single'"
         :disabled="disabled"
-        :options="state.compSelection"
+        :options="state.filteredSelections"
         :name="name"
+        :searchable="true"
+        :filter-results="false"
         :placeholder="t('global.select.placeholder')"
         @select="value => v.handleChange(value)"
         @deselect="v.handleChange(null)"
+        @search-change="setSearchQuery"
     >
         <template #option="{ option }">
             {{ translateConcept(option.concept_url) }}
@@ -168,6 +170,10 @@
                 });
             };
 
+            const setSearchQuery = query => {
+                state.query = query ? query.toLowerCase().trim() : null;
+            };
+
             // DATA
             const state = reactive({
                 hasRootAttribute: computed(_ => {
@@ -180,6 +186,15 @@
                     } else {
                         return selections.value;
                     }
+                }),
+                query: null,
+                filteredSelections: computed(_ => {
+                    const sel = state.compSelection;
+                    if(!state.query) return sel;
+
+                    return sel.filter(concept => {
+                        return concept.concept_url.toLowerCase().indexOf(state.query) !== -1 || translateConcept(concept.concept_url).toLowerCase().indexOf(state.query) !== -1;
+                    });
                 }),
             });
             const v = reactive({
@@ -222,6 +237,7 @@
                 // LOCAL
                 resetFieldState,
                 undirtyField,
+                setSearchQuery,
                 // STATE
                 state,
                 v,

@@ -879,3 +879,7 @@ export function copyToClipboard(elemId) {
 export function setPreference(prefKey, value) {
     this.state.preferences[prefKey] = value;
 }
+
+export function sortConcepts(ca, cb) {
+    return translateConcept(ca.concept_url).localeCompare(translateConcept(cb.concept_url));
+}

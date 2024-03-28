@@ -12,18 +12,23 @@ const t = i18n.global.t;
 
 export const bibtex = {
     mixed: {
-        required: o => t('main.bibliography.types.validation.required', {col: o.path}),
+        required: o => {
+            const field = t(`main.bibliography.column.${o.path}`);
+            return t('main.bibliography.types.validation.required', { field });
+        },
     }
 };
 export const bibtexExt = {
     requiredIf: (o, ref) => {
-        return t('main.bibliography.types.validation.required_one_of', {col: o.path, ref: ref});
+        const eitherField = t(`main.bibliography.column.${o.path}`);
+        const orField = t(`main.bibliography.column.${ref}`);
+        return t('main.bibliography.types.validation.required_one_of', { eitherField, orField });
     }
 };
 
 export const orcid = _ => {
-    addMethod(string, 'orcid', function() {
-        return this.test('test-orcid', t('global.user.invalid_orcid'), function(value) {
+    addMethod(string, 'orcid', function () {
+        return this.test('test-orcid', t('global.user.invalid_orcid'), function (value) {
             return isValidOrcid(value);
         });
     });

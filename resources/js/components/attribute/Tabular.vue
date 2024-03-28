@@ -344,6 +344,7 @@
     import RISM from '@/components/attribute/Rism.vue';
     import Entity from '@/components/attribute/Entity.vue';
     import DateAttr from '@/components/attribute/Date.vue';
+    import DaterangeAttr from '@/components/attribute/Daterange.vue';
     import SingleChoice from '@/components/attribute/SingleChoice.vue';
     import UserList from '@/components/attribute/UserList.vue';
 
@@ -359,6 +360,7 @@
             'rism-attribute': RISM,
             'entity-attribute': Entity,
             'date-attribute': DateAttr,
+            'daterange-attribute': DaterangeAttr,
             'singlechoice-attribute': SingleChoice,
             'userlist-attribute': UserList,
         },
@@ -448,6 +450,7 @@
                     case 'double':
                     case 'boolean':
                     case 'date':
+                    case 'daterange':
                     case 'iconclass':
                     case 'entity':
                     case 'entity-mc':

@@ -10,6 +10,7 @@ import {
     fillEntityData,
     only,
     slugify,
+    sortConcepts,
     getIntersectedEntityAttributes,
     hasIntersectionWithEntityAttributes,
 } from '@/helpers/helpers.js';
@@ -90,13 +91,16 @@ export const store = createStore({
                 setAttributeSelection(state, data) {
                     if(data.nested) {
                         for(let k in data.selection) {
-                            state.attributeSelections[k] = data.selection[k];
+                            state.attributeSelections[k] = data.selection[k].sort(sortConcepts);
                         }
                     } else {
-                        state.attributeSelections[data.id] = data.selection;
+                        state.attributeSelections[data.id] = data.selection.sort(sortConcepts);
                     }
                 },
                 setAttributeSelections(state, data) {
+                    for(let k in data) {
+                        data[k].sort(sortConcepts);
+                    }
                     state.attributeSelections = data;
                 },
                 setBibliography(state, data) {

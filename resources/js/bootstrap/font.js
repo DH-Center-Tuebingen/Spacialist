@@ -52,6 +52,7 @@ import {
     faAngleRight,
     faAngleUp,
     faArrowTurnUp,
+    faAsterisk,
     faBan,
     faBell,
     faBinoculars,
@@ -251,6 +252,7 @@ library.add(
     faAngleRight,
     faAngleUp,
     faArrowTurnUp,
+    faAsterisk,
     faBan,
     faBell,
     faBinoculars,
@@ -428,7 +430,7 @@ library.add(
     faVolumeMute,
     faVolumeUp,
     faWindowMaximize,
-)
+);
 dom.watch();
 
 export const iconList = fw => {
@@ -440,7 +442,7 @@ export const iconList = fw => {
             const icon = set[l];
             const iconCode = icon[3];
             const uniqueCode = `${k}_${iconCode}`;
-            const def = findIconDefinition({prefix: k, iconName: l});
+            const def = findIconDefinition({ prefix: k, iconName: l });
             if(!addedCodes[uniqueCode]) {
                 addedCodes[uniqueCode] = true;
                 let str = `${k} fa-${def.iconName}`;

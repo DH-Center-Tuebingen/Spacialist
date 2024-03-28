@@ -14,7 +14,8 @@
                     :endpoint="searchLabel"
                     :key-fn="getConceptLabel"
                     :default-value="state.searchResetValue"
-                    @selected="e => labelSelected(e, 'label')" />
+                    @selected="e => labelSelected(e, 'label')"
+                />
             </div>
         </div>
         <div class="mb-3">
@@ -27,12 +28,13 @@
                     :mode="'single'"
                     :options="state.attributeTypes"
                     :searchable="true"
+                    :filter-results="false"
                     :value-prop="'datatype'"
                     :track-by="'datatype'"
                     :placeholder="t('global.select.placeholder')"
                     :hide-selected="true"
-                    :search-filter="searchInAttributeTypes"
                     @select="typeSelected"
+                    @search-change="searchInAttributeTypes"
                 >
                     <template #option="{ option }">
                         {{ t(`global.attributes.${option.datatype}`) }}
@@ -111,6 +113,44 @@
             >
                 {{ t('global.recursive') }}
             </label>
+        </div>
+        <div
+            v-show="state.canRestrictTypes"
+            class="mb-3"
+        >
+            <label class="col-form-label col">
+                {{ t('global.attributes.restrictions.entity_type') }}:
+            </label>
+            <multiselect
+                v-model="state.attribute.restrictedTypes"
+                class="col"
+                :object="true"
+                :mode="'tags'"
+                :label="'thesaurus_url'"
+                :track-by="'thesaurus_url'"
+                :value-prop="'id'"
+                :options="state.minimalEntityTypes"
+                :close-on-select="false"
+                :close-on-deelect="false"
+                :placeholder="t('global.select.placeholder')"
+            >
+                <template #option="{ option }">
+                    {{ translateConcept(option.thesaurus_url) }}
+                </template>
+                <template #tag="{ option, handleTagRemove, disabled }">
+                    <div class="multiselect-tag">
+                        {{ translateConcept(option.thesaurus_url) }}
+                        <span
+                            v-if="!disabled"
+                            class="multiselect-tag-remove"
+                            @click.prevent
+                            @mousedown.prevent.stop="handleTagRemove(option, $event)"
+                        >
+                            <span class="multiselect-tag-remove-icon" />
+                        </span>
+                    </div>
+                </template>
+            </multiselect>
         </div>
         <div
             v-show="state.needsTextElement"
@@ -222,6 +262,7 @@
                 state.attribute.rootAttributeLabel = null;
                 state.attribute.differRoot = false;
                 state.attribute.textContent = '';
+                state.attribute.restrictedTypes = [];
                 state.searchResetValue = {
                     reset: true,
                     ts: getTs(),
@@ -239,6 +280,9 @@
                 }
                 if(!state.needsTextElement && !state.needsTextareaElement) {
                     state.attribute.textContent = '';
+                }
+                if(!state.canRestrictTypes || state.attribute.restrictedTypes.length == 0) {
+                    state.attribute.restrictedTypes = null;
                 }
                 context.emit('created', {...state.attribute});
                 reset();
@@ -266,13 +310,8 @@
             const getAttributeLabel = attribute => {
                 return translateConcept(attribute.thesaurus_url);
             };
-            const searchInAttributeTypes = (option, query) => {
-                if(query) {
-                    const tq = query.toLowerCase().trim();
-                    return option.datatype.indexOf(tq) !== -1 || t(`global.attributes.${option.datatype}`).toLowerCase().indexOf(tq) !== -1;
-                } else {
-                    return true;
-                }
+            const searchInAttributeTypes = query => {
+                state.query = query ? query.toLowerCase().trim() : null;
             };
 
             // DATA
@@ -294,10 +333,25 @@
                     rootAttributeLabel: null,
                     differRoot: false,
                     textContent: '',
+                    restrictedTypes: [],
                 },
+                query: null,
+                attributeTypes: computed(_ => {
+                    if(!state.query) return types;
+
+                    return types.filter(type => {
+                        return type.datatype.indexOf(state.query) !== -1 || t(`global.attributes.${type.datatype}`).toLowerCase().indexOf(state.query) !== -1;
+                    });
+                }),
                 searchResetValue: null,
                 formId: external.value || 'create-attribute-form',
                 attributeTypes: types,
+                minimalEntityTypes: computed(_ => {
+                    return Object.values(store.getters.entityTypes).map(et => ({
+                        id: et.id,
+                        thesaurus_url: et.thesaurus_url
+                    }));
+                }),
                 label: computed(_ => {
                     return createText.value || t('global.create');
                 }),
@@ -328,6 +382,9 @@
                     return state.attribute.type == 'string-sc' ||
                             state.attribute.type == 'string-mc' ||
                             state.attribute.type == 'epoch';
+                }),
+                canRestrictTypes: computed(_ => {
+                    return state.attribute.type == 'entity' || state.attribute.type == 'entity-mc';
                 }),
                 needsTextElement: computed(_ => {
                     return state.attribute.type == 'serial';
@@ -361,6 +418,7 @@
                 searchAttribute,
                 searchLabel,
                 getConceptLabel,
+                translateConcept,
                 // LOCAL
                 create,
                 labelSelected,
@@ -369,7 +427,7 @@
                 searchInAttributeTypes,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>
