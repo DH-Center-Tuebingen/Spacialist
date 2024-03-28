@@ -302,8 +302,10 @@
             const setCertainty = event => {
                 const maxSize = event.target.parentElement.scrollWidth; // progress bar width in px
                 const clickPos = event.layerX; // in px
+                const finalPos = Math.max(0, Math.min(clickPos, maxSize)); // clamp cursor pos to progress bar size
+                
                 const currentValue = state.certainty;
-                let value = parseInt(clickPos/maxSize*100);
+                let value = parseInt(finalPos/maxSize*100);
                 const diff = Math.abs(value-currentValue);
                 if(diff < 10) {
                     if(value > currentValue) {

@@ -264,11 +264,21 @@
                             :multiple="element.datatype == 'entity-mc'"
                             :hide-link="state.hideEntityLink"
                             :value="convertEntityValue(state.attributeValues[element.id], element.datatype == 'entity-mc')"
+                            :search-in="element.restrictions"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
                         <date-attribute
                             v-else-if="element.datatype == 'date'"
+                            :ref="el => setRef(el, element.id)"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :name="`attr-${element.id}`"
+                            :value="state.attributeValues[element.id].value"
+                            @change="e => updateDirtyState(e, element.id)"
+                        />
+
+                        <daterange-attribute
+                            v-else-if="element.datatype == 'daterange'"
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
@@ -381,6 +391,7 @@
     import Geography from '@/components/attribute/Geography.vue';
     import Entity from '@/components/attribute/Entity.vue';
     import DateAttr from '@/components/attribute/Date.vue';
+    import DaterangeAttr from '@/components/attribute/Daterange.vue';
     import SingleChoice from '@/components/attribute/SingleChoice.vue';
     import MultiChoice from '@/components/attribute/MultiChoice.vue';
     import UserList from '@/components/attribute/UserList.vue';
@@ -408,6 +419,7 @@
             'geography-attribute': Geography,
             'entity-attribute': Entity,
             'date-attribute': DateAttr,
+            'daterange-attribute': DaterangeAttr,
             'singlechoice-attribute': SingleChoice,
             'multichoice-attribute': MultiChoice,
             'userlist-attribute': UserList,
@@ -828,7 +840,7 @@
                 // STATE
                 attrRefs,
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

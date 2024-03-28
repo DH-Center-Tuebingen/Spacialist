@@ -1,34 +1,29 @@
+ 
 <template>
-    <multiselect
-        v-model="v.value"
-        :classes="multiselectResetClasslist"
-        :value-prop="'id'"
-        :track-by="'concept_url'"
-        :object="true"
-        :mode="'single'"
-        :disabled="disabled"
-        :options="state.filteredSelections"
+    <date-picker
+        :id="name"
+        v-model:value="v.value"
+        class="w-100"
+        input-class="form-control"
+        value-type="date"
+        :range="true"
+        :separator="' &ndash; '"
         :name="name"
-        :searchable="true"
-        :filter-results="false"
-        :placeholder="t('global.select.placeholder')"
-        @change="value => v.handleChange(value)"
-        @search-change="setSearchQuery"
+        :disabled="disabled"
+        :show-week-number="true"
+        @change="handleInput"
     >
-        <template #option="{ option }">
-            {{ translateConcept(option.concept_url) }}
+        <template #icon-calendar>
+            <i class="fas fa-fw fa-calendar-alt" />
         </template>
-        <template #singlelabel="{ value: singlelabelValue }">
-            <div class="multiselect-single-label">
-                {{ translateConcept(singlelabelValue.concept_url) }}
-            </div>
+        <template #icon-clear>
+            <i class="fas fa-fw fa-times" />
         </template>
-    </multiselect>
+    </date-picker>
 </template>
 
 <script>
     import {
-        computed,
         reactive,
         toRefs,
         watch,
@@ -37,13 +32,6 @@
     import { useField } from 'vee-validate';
 
     import * as yup from 'yup';
-
-    import { useI18n } from 'vue-i18n';
-
-    import {
-        translateConcept,
-        multiselectResetClasslist,
-    } from '@/helpers/helpers.js';
 
     export default {
         props: {
@@ -57,30 +45,26 @@
                 default: false,
             },
             value: {
-                type: Object,
-                required: true,
-                default: _ => ({}),
-            },
-            selections: {
-                type: Array,
+                type: String,
                 required: true,
             },
         },
         emits: ['change'],
         setup(props, context) {
-            const { t } = useI18n();
             const {
                 name,
                 disabled,
                 value,
-                selections,
             } = toRefs(props);
             // FETCH
 
             // FUNCTIONS
+            const strToDate = str => {
+                return new Date(str);
+            };
             const resetFieldState = _ => {
                 v.resetField({
-                    value: value.value
+                    value: value.value?.map(dt => strToDate(dt)),
                 });
             };
             const undirtyField = _ => {
@@ -88,10 +72,13 @@
                     value: v.value,
                 });
             };
-
-            const setSearchQuery = query => {
-                state.query = query ? query.toLowerCase().trim() : null;
-            };
+            const handleInput = value => {
+                // add timezone offset before handle change
+                const correctValue = value.map(date => {
+                    return new Date(date.getTime() - (date.getTimezoneOffset()*60*1000));
+                });
+                v.handleChange(correctValue);
+            }
 
             // DATA
             const {
@@ -99,18 +86,11 @@
                 value: fieldValue,
                 meta,
                 resetField,
-            } = useField(`sc_${name.value}`, yup.mixed(), {
-                initialValue: value.value,
+            } = useField(`daterange_${name.value}`, yup.array(), {
+                initialValue: value.value?.map(dt => strToDate(dt)),
             });
             const state = reactive({
-                query: null,
-                filteredSelections: computed(_ => {
-                    if(!state.query) return selections.value;
 
-                    return selections.value.filter(concept => {
-                        return concept.concept_url.toLowerCase().indexOf(state.query) !== -1 || translateConcept(concept.concept_url).toLowerCase().indexOf(state.query) !== -1;
-                    });
-                }),
             });
             const v = reactive({
                 value: fieldValue,
@@ -136,14 +116,11 @@
 
             // RETURN
             return {
-                t,
                 // HELPERS
-                translateConcept,
-                multiselectResetClasslist,
                 // LOCAL
                 resetFieldState,
                 undirtyField,
-                setSearchQuery,
+                handleInput,
                 // STATE
                 state,
                 v,
