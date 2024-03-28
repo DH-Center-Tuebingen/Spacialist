@@ -50,6 +50,7 @@ All notable changes to this project will be documented in this file.
 - Button style in notifcation panel
 - Remove headings without content from _References_ tab in Main View
 - HTML content in comments
+- Adding comments without content to _Entity_
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
