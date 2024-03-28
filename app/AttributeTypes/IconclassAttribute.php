@@ -6,7 +6,7 @@ class IconclassAttribute extends AttributeBase
 {
     protected static string $type = "iconclass";
     protected static bool $inTable = true;
-    protected static ?string $field = 'int_val';
+    protected static ?string $field = 'str_val';
 
     public static function fromImport(int|float|bool|string $data) : mixed {
         return $data;

@@ -877,7 +877,7 @@
 
                     toast.$toast(
                         t('main.entity.toasts.updated.msg', {
-                            name: data.name
+                            name: data.entity.name
                         }),
                         t('main.entity.toasts.updated.title'),
                         {
