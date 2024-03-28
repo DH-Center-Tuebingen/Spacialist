@@ -23,6 +23,17 @@
             </div>
         </template>
     </multiselect>
+    <div
+        v-if="selectionFrom"
+        :title="t('main.entity.attributes.root_attribute_info', { name: getAttributeName(selectionFrom) })"
+        class="badge bg-secondary"
+        style="cursor: pointer; user-select: none;"
+    >
+        <i class="fas fa-fw fa-link" />
+        {{
+            getAttributeName(selectionFrom)
+        }}
+    </div>
 </template>
 
 <script>
@@ -46,6 +57,7 @@
     } from '@/api.js';
 
     import {
+        getAttribute,
         translateConcept,
         multiselectResetClasslist,
     } from '@/helpers/helpers.js';
@@ -201,6 +213,14 @@
                 });
             }
 
+            const getAttributeName = id => {
+                const attribute = getAttribute(id);
+                if(attribute) {
+                    return translateConcept(attribute.thesaurus_url);
+                }
+                return '';
+            };
+
             // RETURN
             return {
                 t,
@@ -208,12 +228,13 @@
                 translateConcept,
                 multiselectResetClasslist,
                 // LOCAL
+                getAttributeName,
                 resetFieldState,
                 undirtyField,
                 // STATE
                 state,
                 v,
-            }
+            };
         },
-    }
+    };
 </script>
