@@ -57,7 +57,7 @@
     } from '@/api.js';
 
     import {
-        getAttribute,
+        getAttributeName,
         translateConcept,
         multiselectResetClasslist,
     } from '@/helpers/helpers.js';
@@ -213,22 +213,14 @@
                 });
             }
 
-            const getAttributeName = id => {
-                const attribute = getAttribute(id);
-                if(attribute) {
-                    return translateConcept(attribute.thesaurus_url);
-                }
-                return '';
-            };
-
             // RETURN
             return {
                 t,
                 // HELPERS
+                getAttributeName,
                 translateConcept,
                 multiselectResetClasslist,
                 // LOCAL
-                getAttributeName,
                 resetFieldState,
                 undirtyField,
                 // STATE
