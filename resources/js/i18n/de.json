@@ -752,8 +752,9 @@
                 "techreport": "Bericht einer Hochschule oder anderen Institution",
                 "unpublished": "Nicht veröffentlicht",
                 "validation": {
-                    "required": "@:main.bibliography.column.{col} ist ein Pflichtfeld",
-                    "required_one_of": "Entweder @:main.bibliography.column.{col} oder @:main.bibliography.column.{ref} muss gesetzt sein"
+                    "required": "„{field}“ ist ein Pflichtfeld",
+                    "required_if": "Pflichtfeld, falls „{col}“ nicht angegeben ist",
+                    "required_one_of": "Entweder „{eitherField}“ oder „{orField}“ muss angegeben sein"
                 }
             }
         },
