@@ -907,6 +907,12 @@ export async function searchEntity(query = '') {
     );
 }
 
+export async function searchConceptSelection(cid) {
+    return $httpQueue.add(
+        () => http.get(`search/selection/${cid}`).then(response => response.data)
+    );
+}
+
 export async function searchEntityInTypes(query = '', types = []) {
     const typeList = types.join(',');
     return $httpQueue.add(

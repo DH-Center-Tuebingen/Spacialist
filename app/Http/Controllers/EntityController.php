@@ -563,6 +563,7 @@ class EntityController extends Controller {
             ], 400);
         }
 
+        $addedAttributes = [];
         foreach($request->request as $patch) {
             $op = $patch['op'];
             $aid = $patch['params']['aid'];
@@ -641,6 +642,9 @@ class EntityController extends Controller {
             $attrval->{$formKeyValue->key} = $formKeyValue->val;
             $attrval->user_id = $user->id;
             $attrval->save();
+            if($op == 'add') {
+                $addedAttributes[$aid] = $attrval;
+            }
         }
 
         // Save model if last editor changed
@@ -654,7 +658,10 @@ class EntityController extends Controller {
 
         $entity->load('user');
 
-        return response()->json($entity);
+        return response()->json([
+            'entity' => $entity,
+            'added_attributes' => $addedAttributes,
+        ]);
     }
 
     public function patchAttribute($id, $aid, Request $request) {

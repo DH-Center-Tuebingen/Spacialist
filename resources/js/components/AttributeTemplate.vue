@@ -275,7 +275,7 @@
                 if(!state.allowsRestriction || state.attribute.differRoot) {
                     state.attribute.recursive = false;
                 }
-                if(!state.needsRootElement) {
+                if(!state.needsRootElement || state.attribute.rootAttributeLabel) {
                     state.attribute.rootLabel = null;
                 }
                 if(!state.needsTextElement && !state.needsTextareaElement) {

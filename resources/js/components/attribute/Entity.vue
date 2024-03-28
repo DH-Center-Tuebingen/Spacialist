@@ -98,7 +98,7 @@
                     if(multiple.value) {
                         data = entity.values;
                     } else {
-                        data = {};
+                        data = null;
                     }
                 } else if(added) {
                     if(multiple.value) {
@@ -138,8 +138,8 @@
                 value: fieldValue,
                 meta,
                 resetField,
-            } = useField(`entity_${name.value}`, yup.mixed(), {
-                initialValue: value.value || (multiple.value ? [] : {}),
+            } = useField(`entity_${name.value}`, yup.mixed().nullable(), {
+                initialValue: value.value || (multiple.value ? [] : null),
             });
             const state = reactive({
                 query: computed(_ => route.query),

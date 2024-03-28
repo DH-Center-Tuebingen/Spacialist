@@ -203,6 +203,13 @@ export function getAttribute(id) {
     return store.getters.attributes.find(a => a.id == id) || {};
 }
 
+export function getAttributeName(id) {
+    const attr = getAttribute(id);
+    if(!attr || !attr.thesaurus_url) return '';
+
+    return translateConcept(attr.thesaurus_url);
+}
+
 export function translateEntityType(id) {
     return translateConcept(getEntityType(id).thesaurus_url);
 }

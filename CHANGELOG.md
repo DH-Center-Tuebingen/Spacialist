@@ -39,6 +39,9 @@ All notable changes to this project will be documented in this file.
 - Unsaved changes in _Data Model Editor_ were visible in the UI
 - Adding bibliography of type _misc_
 - Moving entity in tree created a temporary duplicate
+- After unset _Single Choice_ attribute value an Entity could not be saved/resetted
+- After unset _Entity_ attribute value an Entity could not be saved/resetted
+- _Parent Attribute_ in _Single Choice_ attribute builder had no effect
 - Add missing info (`**`) to bibliography fields that are only required if another field is **not** set
 - Certainty values lower than 0 or higher than 100
 - Speed-up slow rendering time of (large) entity trees
