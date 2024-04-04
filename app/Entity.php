@@ -14,8 +14,7 @@ use Spatie\Activitylog\Models\Activity;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
 
-class Entity extends Model implements Searchable
-{
+class Entity extends Model implements Searchable {
     use CommentTrait;
     use SearchableTrait;
     use LogsActivity;
@@ -66,8 +65,7 @@ class Entity extends Model implements Searchable
         // 'geodata_id'        => 'integer|exists:geodata,id'
     ];
 
-    public function getActivitylogOptions() : LogOptions
-    {
+    public function getActivitylogOptions(): LogOptions {
         return LogOptions::defaults()
             ->logOnly(['id'])
             ->logFillable()
@@ -90,32 +88,32 @@ class Entity extends Model implements Searchable
         $curr = $this;
         $vals = AttributeValue::with('attribute')->where('entity_id', $this->id)->get();
         $assocAttrs = $vals->pluck('id');
-        $history = Activity::whereNot(function(Builder $query) {
-                $query->where('properties->attributes', '[]')
-                    ->where('properties->old', '[]');
-            })
-            ->where(function(Builder $outerQuery) use ($curr, $assocAttrs) {
-                $outerQuery->where(function(Builder $query) use ($curr){
+        $history = Activity::whereNot(function (Builder $query) {
+            $query->where('properties->attributes', '[]')
+                ->where('properties->old', '[]');
+        })
+            ->where(function (Builder $outerQuery) use ($curr, $assocAttrs) {
+                $outerQuery->where(function (Builder $query) use ($curr) {
                     $query->where('subject_id', $curr->id)
                         ->where('subject_type', get_class($curr));
-                })->orWhere(function(Builder $query) use ($assocAttrs){
+                })->orWhere(function (Builder $query) use ($assocAttrs) {
                     $query->whereIn('subject_id', $assocAttrs)
                         ->where('subject_type', (new AttributeValue())->getMorphClass());
                 });
             })
-            ->orderBy('created_at','desc')
+            ->orderBy('created_at', 'desc')
             ->select('id', 'subject_id', 'subject_type', 'description', 'causer_id as user_id', 'created_at', 'properties')
             ->paginate();
 
-        $history->getCollection()->transform(function($item, $key) use ($vals) {
-            if($item->subject_type == (new AttributeValue())->getMorphClass()) {
-                foreach($vals as $v) {
-                    if($v->id == $item->subject_id) {
+        $history->getCollection()->transform(function ($item, $key) use ($vals) {
+            if ($item->subject_type == (new AttributeValue())->getMorphClass()) {
+                foreach ($vals as $v) {
+                    if ($v->id == $item->subject_id) {
                         $item->attribute = $v->attribute;
-                        if($item->properties->has('attributes')) {
+                        if ($item->properties->has('attributes')) {
                             $item->value_after = AttributeValue::getValueFromKey($item->properties['attributes']);
                         }
-                        if($item->properties->has('old')) {
+                        if ($item->properties->has('old')) {
                             $item->value_before = AttributeValue::getValueFromKey($item->properties['old']);
                         }
                     }
@@ -155,7 +153,7 @@ class Entity extends Model implements Searchable
     }
 
     public static function getFromPath($path, $delimiter = "\\\\") {
-        if(!isset($path)) {
+        if (!isset($path)) {
             return null;
         }
 
@@ -175,9 +173,9 @@ class Entity extends Model implements Searchable
             FROM path
             WHERE pathstr = ?
         ", ["$last", "$delimiter", "$path"]);
-        if(count($res) > 1) {
+        if (count($res) > 1) {
             throw new AmbiguousValueException("Path '$path' is ambiguous");
-        } else if(count($res) === 1) {
+        } else if (count($res) === 1) {
             return $res[0]->final_id;
         } else {
             return null;
@@ -186,11 +184,11 @@ class Entity extends Model implements Searchable
 
     public static function create($fields, $entityTypeId, $user, $rootEntityId = null) {
         $isChild = isset($rootEntityId);
-        if($isChild) {
+        if ($isChild) {
             $parentCtid = self::find($rootEntityId)->entity_type_id;
             $relation = EntityTypeRelation::where('parent_id', $parentCtid)
                 ->where('child_id', $entityTypeId)->exists();
-            if(!$relation) {
+            if (!$relation) {
                 return [
                     'type' => 'error',
                     'msg' => __('This type is not an allowed sub-type.'),
@@ -198,7 +196,7 @@ class Entity extends Model implements Searchable
                 ];
             }
         } else {
-            if(!EntityType::find($entityTypeId)->is_root) {
+            if (!EntityType::find($entityTypeId)->is_root) {
                 return [
                     'type' => 'error',
                     'msg' => __('This type is not an allowed root-type.'),
@@ -209,7 +207,7 @@ class Entity extends Model implements Searchable
 
         $entity = new self();
         $rank;
-        if($isChild) {
+        if ($isChild) {
             $rank = self::where('root_entity_id', $rootEntityId)->max('rank') + 1;
             $entity->root_entity_id = $rootEntityId;
         } else {
@@ -217,7 +215,7 @@ class Entity extends Model implements Searchable
         }
         $entity->rank = $rank;
 
-        foreach($fields as $key => $value) {
+        foreach ($fields as $key => $value) {
             $entity->{$key} = $value;
         }
         $entity->entity_type_id = $entityTypeId;
@@ -228,10 +226,10 @@ class Entity extends Model implements Searchable
         $entity = self::find($entity->id);
 
         $serialAttributes = $entity->entity_type
-                ->attributes()
-                ->where('datatype', 'serial')
-                ->get();
-        foreach($serialAttributes as $s) {
+            ->attributes()
+            ->where('datatype', 'serial')
+            ->get();
+        foreach ($serialAttributes as $s) {
             $nextValue = 1;
             $cleanedRegex = preg_replace('/(.*)(%\d*d)(.*)/i', '/$1(\d+)$3/i', $s->text);
 
@@ -240,11 +238,11 @@ class Entity extends Model implements Searchable
                 ->orderBy('created_at', 'desc')
                 ->skip(1)
                 ->first();
-            if(isset($lastEntity)) {
+            if (isset($lastEntity)) {
                 $lastValue = AttributeValue::where('attribute_id', $s->id)
                     ->where('entity_id', $lastEntity->id)
                     ->first();
-                if(isset($lastValue)) {
+                if (isset($lastValue)) {
                     $nextValue = intval(preg_replace($cleanedRegex, '$1', $lastValue->str_val));
                     $nextValue++;
                 }
@@ -263,7 +261,7 @@ class Entity extends Model implements Searchable
 
     public static function getEntitiesByParent($id = null) {
         $entities = self::withCount(['child_entities as children_count']);
-        if(!isset($id)) {
+        if (!isset($id)) {
             $entities->whereNull('root_entity_id');
         } else {
             $entities->where('root_entity_id', $id);
@@ -280,20 +278,20 @@ class Entity extends Model implements Searchable
         $entity->user_id = $user->id;
 
         $query;
-        if(isset($entity->root_entity_id)) {
+        if (isset($entity->root_entity_id)) {
             $query = self::where('root_entity_id', $entity->root_entity_id);
         } else {
             $query = self::whereNull('root_entity_id');
         }
         $oldEntities = $query->where('rank', '>', $oldRank)->get();
 
-        foreach($oldEntities as $oc) {
+        foreach ($oldEntities as $oc) {
             $oc->rank--;
             $oc->save();
         }
 
         $query = null;
-        if($hasParent) {
+        if ($hasParent) {
             $entity->root_entity_id = $parent;
             $query = self::where('root_entity_id', $parent);
         } else {
@@ -302,7 +300,7 @@ class Entity extends Model implements Searchable
         }
         $newEntities = $query->where('rank', '>=', $rank)->get();
 
-        foreach($newEntities as $nc) {
+        foreach ($newEntities as $nc) {
             $nc->rank++;
             $nc->save();
         }
@@ -355,14 +353,14 @@ class Entity extends Model implements Searchable
         $entityMcAttributes = Attribute::where('datatype', 'entity-mc')
             ->get()->pluck('id')->toArray();
         $links = AttributeValue::where('entity_val', $this->id)
-            ->orWhere(function($query) use($entityMcAttributes) {
+            ->orWhere(function ($query) use ($entityMcAttributes) {
                 $query->whereJsonContains('json_val', $this->id)
                     ->whereIn('attribute_id', $entityMcAttributes);
             })
             ->with('attribute')
             ->get();
         $entities = [];
-        foreach($links as $link) {
+        foreach ($links as $link) {
             $entity = Entity::find($link->entity_id);
             $entities[] = [
                 'id' => $entity->id,
@@ -379,13 +377,13 @@ class Entity extends Model implements Searchable
         $curr = $this;
         $assocAttrs = AttributeValue::with('attribute')->where('entity_id', $this->id)->get()->pluck('id');
 
-        $causers = Activity::where(function(Builder $query) use ($curr){
-                $query->where('subject_id', $curr->id)
-                    ->where('subject_type', get_class($curr));
-            })->orWhere(function(Builder $query) use ($assocAttrs){
-                $query->whereIn('subject_id', $assocAttrs)
-                    ->where('subject_type', (new AttributeValue())->getMorphClass());
-            })
+        $causers = Activity::where(function (Builder $query) use ($curr) {
+            $query->where('subject_id', $curr->id)
+                ->where('subject_type', get_class($curr));
+        })->orWhere(function (Builder $query) use ($assocAttrs) {
+            $query->whereIn('subject_id', $assocAttrs)
+                ->where('subject_type', (new AttributeValue())->getMorphClass());
+        })
             ->groupBy('causer_id')
             ->select('causer_id as user_id')
             ->get();
@@ -395,7 +393,7 @@ class Entity extends Model implements Searchable
     public function getCreatorAttribute() {
         $creator = Activity::where('subject_id', $this->id)
             ->where('subject_type', get_class($this))
-            ->orderBy('created_at','desc')
+            ->where('description', 'created')
             ->first();
         return isset($creator) ? $creator->causer_id : null;
     }
@@ -412,7 +410,7 @@ class Entity extends Model implements Searchable
         ");
         $ids = [];
         $names = [];
-        foreach($res as $path) {
+        foreach ($res as $path) {
             $ids[] = $path->path;
             $names[] = $path->pathn;
         }
@@ -440,8 +438,7 @@ class Entity extends Model implements Searchable
         return $this->parents()['ids'];
     }
 
-    public function getParentNamesAttribute()
-    {
+    public function getParentNamesAttribute() {
         // $res = DB::select("
         //     WITH RECURSIVE getpath AS (
         //         SELECT id as path, name as pathn, root_entity_id as parent FROM entities WHERE id = $this->id
@@ -458,8 +455,7 @@ class Entity extends Model implements Searchable
         return $this->parents()['names'];
     }
 
-    public function getAncestorsAttribute()
-    {
+    public function getAncestorsAttribute() {
         $parents = array_reverse($this->getParentNamesAttribute());
         array_pop($parents);
         return $parents;
