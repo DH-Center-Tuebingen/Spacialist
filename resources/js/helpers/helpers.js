@@ -374,6 +374,17 @@ export function getInitialAttributeValue(attribute) {
         case 'string-sc':
         case 'table':
             return {};
+        case 'si-unit':
+            if(!attribute.siGroup) {
+                return { value: 0 };
+            } else {
+                return {
+                    value: 0,
+                    unit: attribute.siGroup,
+                    default: attribute.siGroupUnit,
+                };
+            }
+
     }
 }
 
@@ -476,6 +487,16 @@ export function getEntityColors(id) {
         colors = store.getters.entityTypeColors(id);
     }
     return colors;
+}
+
+export function siSymbolToStr(symbol) {
+    if(!symbol) return '';
+
+    if(Array.isArray(symbol)) {
+        return symbol[0];
+    } else {
+        return symbol;
+    }
 }
 
 export function isLoggedIn() {

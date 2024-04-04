@@ -16,7 +16,7 @@
             aria-haspopup="true"
             aria-expanded="false"
         >
-            {{ displaySymbol(v.unit.value?.symbol) }}
+            {{ siSymbolToStr(v.unit.value?.symbol) }}
         </button>
         <div class="dropdown-menu">
             <a
@@ -28,7 +28,7 @@
                 @click.prevent="setUnit(unit)"
             >
                 <span>
-                    {{ displaySymbol(unit.symbol) }}
+                    {{ siSymbolToStr(unit.symbol) }}
                 </span>
                 <span
                     :class="{'text-light text-opacity-75': unit.label == v.unit.value?.label, 'text-muted': unit.label != v.unit.value?.label}"
@@ -55,6 +55,10 @@
     import { useField } from 'vee-validate';
 
     import * as yup from 'yup';
+
+    import {
+        siSymbolToStr,
+    } from '@/helpers/helpers.js';
 
     export default {
         props: {
@@ -100,30 +104,14 @@
                 v.unit.handleChange(unit);
             };
 
-            const printSymbol = symbol => {
-                if(Array.isArray(symbol)) {
-                    return symbol.join(' | ');
-                } else {
-                    return symbol;
-                }
-            };
-
-            const displaySymbol = symbol => {
-                if(Array.isArray(symbol)) {
-                    return symbol[0];
-                } else {
-                    return symbol;
-                }
-            };
-
             // DATA
             const {
                 handleInput: hib,
                 value: vb,
                 meta: mb,
                 resetField: rfb,
-            } = useField(`value_${name.value}`, yup.number().positive(), {
-                initialValue: value.value.B,
+            } = useField(`value_${name.value}`, yup.number(), {
+                initialValue: value.value.value,
             });
             const {
                 handleInput: hiu,
@@ -131,12 +119,16 @@
                 value: vu,
                 meta: mu,
                 resetField: rfu,
-            } = useField(`unit_${name.value}`, yup.string().matches(/(nm|µm|mm|cm|dm|m|km)/), {
+            } = useField(`unit_${name.value}`, yup.string(), {
                 initialValue: value.value.unit,
             });
             const state = reactive({
-                unitGrp: 'area',
-                dimensionUnits: computed(_ => store.getters.datatypeDataOf('si-unit')[state.unitGrp].units),
+                unitGrp: value.value.unit,
+                dimensionUnits: computed(_ => {
+                    if(!state.unitGrp) return [];
+
+                    return store.getters.datatypeDataOf('si-unit')[state.unitGrp].units;
+                }),
             });
             const v = reactive({
                 value: computed(_ => {
@@ -166,7 +158,6 @@
                 },
             });
 
-
             watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
@@ -177,17 +168,28 @@
                     value: v.value,
                 });
             });
+            // only needed for preview, otherwise unit can not change
+            watch(_ => value.value.unit, (newValue, oldValue) => {
+                state.unitGrp = newValue;
+            });
+            watch(_ => value.value.default, (newValue, oldValue) => {
+                if(!newValue) {
+                    setUnit(null);
+                } else {
+                    const def = state.dimensionUnits.find(u => u.label == newValue);
+                    setUnit(def);
+                }
+            });
 
             // RETURN
             return {
                 t,
                 // HELPERS
+                siSymbolToStr,
                 // LOCAL
                 resetFieldState,
                 undirtyField,
                 setUnit,
-                printSymbol,
-                displaySymbol,
                 // STATE
                 state,
                 v,

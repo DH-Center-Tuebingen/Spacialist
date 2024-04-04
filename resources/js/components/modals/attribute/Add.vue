@@ -36,8 +36,13 @@
                                 </span>
                             </div>
                             <div>
-                                <button type="submit" class="btn btn-sm btn-outline-success" :form="state.tableFormId" :disabled="!state.tableColumnValidated">
-                                    <i class="fas fa-fw fa-plus"></i> {{ t('global.add_column') }}
+                                <button
+                                    type="submit"
+                                    class="btn btn-sm btn-outline-success"
+                                    :form="state.tableFormId"
+                                    :disabled="!state.tableColumnValidated"
+                                >
+                                    <i class="fas fa-fw fa-plus" /> {{ t('global.add_column') }}
                                 </button>
                             </div>
                         </h5>
@@ -45,7 +50,8 @@
                             :type="'table'"
                             :external="state.tableFormId"
                             @created="addColumn"
-                            @validation="checkTableValidation"  />
+                            @validation="checkTableValidation"
+                        />
                     </div>
                 </div>
                 <div v-if="state.previewAttribute">
