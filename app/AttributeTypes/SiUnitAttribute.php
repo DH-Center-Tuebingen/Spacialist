@@ -13,7 +13,7 @@ class SiUnitAttribute extends AttributeBase
     public static function getUnits() {
         return [
             'time' => [
-                'default' => 's',
+                'default' => 'second',
                 'units' => [
                     [
                         'symbol' => 's',
@@ -43,7 +43,7 @@ class SiUnitAttribute extends AttributeBase
                 ],
             ],
             'length' => [
-                'default' => 'm',
+                'default' => 'metre',
                 'units' => [
                     [
                         'symbol' => 'nm',
@@ -113,7 +113,7 @@ class SiUnitAttribute extends AttributeBase
                 ],
             ],
             'area' => [
-                'default' => 'm²',
+                'default' => 'square_metre',
                 'units' => [
                     [
                         'symbol' => ['m²', 'qm', 'sm'],
@@ -153,10 +153,10 @@ class SiUnitAttribute extends AttributeBase
                 ],
             ],
             'volume' => [
-                'default' => 'm³',
+                'default' => 'cubic_metre',
                 'units' => [
                     [
-                        'symbol' => 'cm³',
+                        'symbol' => ['cm³', 'ml'],
                         'convert' => fn($v) => $v * pow(10, -6),
                         'label' => 'cubic_centimetre',
                     ],
@@ -203,7 +203,7 @@ class SiUnitAttribute extends AttributeBase
                 ],
             ],
             'mass' => [
-                'default' => 'kg',
+                'default' => 'kilogram',
                 'units' => [
                     [
                         'symbol' => 'g',
@@ -233,8 +233,7 @@ class SiUnitAttribute extends AttributeBase
                 ],
             ],
             'temperature' => [
-                // K, C, F, R?
-                'default' => '°C',
+                'default' => 'degree_celsius',
                 'units' => [
                     [
                         'symbol' => '°C',
