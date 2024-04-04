@@ -320,7 +320,7 @@
             "toasts": {
                 "updated": {
                     "title": "Entität aktualisiert",
-                    "msg": "Daten von {name} wurden erfolgreich aktualisiert."
+                    "msg": "Daten von „{name}“ wurden erfolgreich aktualisiert."
                 },
                 "deleted": {
                     "title": "Entität gelöscht",
