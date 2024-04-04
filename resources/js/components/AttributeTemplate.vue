@@ -303,6 +303,7 @@
                 state.attribute.differRoot = false;
                 state.attribute.textContent = '';
                 state.attribute.siGroup = null;
+                state.attribute.siGroupUnit = null;
                 state.searchResetValue = {
                     reset: true,
                     ts: getTs(),
@@ -432,6 +433,8 @@
                                 state.needsTextareaElement &&
                                 state.attribute.textContent.length > 0
                             )
+                        ) && (
+                            (state.isSiUnit && state.attribute.siGroup && state.attribute.siGroupUnit) || !state.isSiUnit
                         );
                     context.emit('validation', isValid);
                     return isValid;

@@ -20,7 +20,7 @@
         </button>
         <div class="dropdown-menu">
             <a
-                v-for="(unit, i) in state.dimensionUnits"
+                v-for="(unit, i) in state.groupUnits"
                 :key="i"
                 class="dropdown-item d-flex flex-row justify-content-between gap-3"
                 :class="{'active': unit.label == v.unit.value?.label}"
@@ -70,6 +70,10 @@
                 type: Object,
                 default: _ => new Object(),
             },
+            metadata: {
+                type: Object,
+                default: _ => new Object(),
+            },
             disabled: {
                 type: Boolean,
             },
@@ -80,10 +84,16 @@
             const {
                 name,
                 value,
+                metadata,
                 disabled,
             } = toRefs(props);
 
             // FUNCTIONS
+            const getUnitFromLabel = lbl => {
+                if(!lbl) return null;
+
+                return state.groupUnits.find(u => u.label == lbl);
+            };
             const resetFieldState = _ => {
                 v.val.resetField({
                     value: value.value.value
@@ -105,6 +115,14 @@
             };
 
             // DATA
+            const state = reactive({
+                unitGrp: metadata.value.si_baseunit,
+                groupUnits: computed(_ => {
+                    if(!state.unitGrp) return [];
+
+                    return store.getters.datatypeDataOf('si-unit')[state.unitGrp].units;
+                }),
+            });
             const {
                 handleInput: hib,
                 value: vb,
@@ -120,15 +138,7 @@
                 meta: mu,
                 resetField: rfu,
             } = useField(`unit_${name.value}`, yup.string(), {
-                initialValue: value.value.unit,
-            });
-            const state = reactive({
-                unitGrp: value.value.unit,
-                dimensionUnits: computed(_ => {
-                    if(!state.unitGrp) return [];
-
-                    return store.getters.datatypeDataOf('si-unit')[state.unitGrp].units;
-                }),
+                initialValue: getUnitFromLabel(value.value.unit || metadata.value.si_default),
             });
             const v = reactive({
                 value: computed(_ => {
@@ -176,7 +186,7 @@
                 if(!newValue) {
                     setUnit(null);
                 } else {
-                    const def = state.dimensionUnits.find(u => u.label == newValue);
+                    const def = state.groupUnits.find(u => u.label == newValue);
                     setUnit(def);
                 }
             });
@@ -193,7 +203,7 @@
                 // STATE
                 state,
                 v,
-            }
+            };
         },
-    }
+    };
 </script>

@@ -219,6 +219,7 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
+                            :metadata="element.metadata"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -839,7 +840,7 @@
                 // STATE
                 attrRefs,
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

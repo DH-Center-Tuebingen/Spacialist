@@ -513,6 +513,10 @@ export async function addAttribute(attribute) {
     if(attribute.textContent) {
         data.text = attribute.textContent;
     }
+    if(attribute.siGroup) {
+        data.si_base = attribute.siGroup;
+        data.si_default = attribute.siGroupUnit;
+    }
 
     return $httpQueue.add(
         () => http.post(`/editor/dm/attribute`, data).then(response => response.data)

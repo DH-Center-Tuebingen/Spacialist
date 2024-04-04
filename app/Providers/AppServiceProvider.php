@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\AttributeTypes\SiUnitAttribute;
 use App\Bibliography;
 use App\Geodata;
 use App\Preference;
@@ -93,6 +94,27 @@ class AppServiceProvider extends ServiceProvider
         });
         Validator::extend('bibtex_type', function ($attribute, $value, $parameters, $validator) {
             return in_array($value, array_keys(Bibliography::bibtexTypes));
+        });
+        Validator::extend('si_baseunit', function ($attribute, $value, $parameters, $validator) {
+            return in_array($value, array_keys(SiUnitAttribute::getUnits()));
+        });
+        Validator::extend('si_unit', function ($attribute, $value, $parameters, $validator) {
+            if(count($parameters) != 1) {
+                return false;
+            }
+            $refField = request()->input($parameters[0]);
+            $baseunits = SiUnitAttribute::getUnits();
+            if(!in_array($refField, array_keys($baseunits))) {
+                return false;
+            }
+            $units = $baseunits[$refField]['units'];
+            foreach($units as $unit) {
+                if($unit['label'] == $value) {
+                    return true;
+                }
+            }
+
+            return false;
         });
     }
 

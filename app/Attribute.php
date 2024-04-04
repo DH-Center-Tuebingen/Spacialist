@@ -26,6 +26,10 @@ class Attribute extends Model
         'root_attribute_id',
     ];
 
+    protected $casts = [
+        'metadata' => 'array',
+    ];
+
     public function getActivitylogOptions() : LogOptions
     {
         return LogOptions::defaults()
