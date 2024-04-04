@@ -164,6 +164,7 @@
             "rism": "RISM",
             "si-unit": "SI-Unit",
             "si_units": {
+                "base_unit": "Base Unit",
                 "time": {
                     "label": "Time",
                     "units": {
@@ -200,6 +201,7 @@
                         "square_inch": "Square inch",
                         "square_feet": "Square feet",
                         "square_yard": "Square yard",
+                        "acre": "Acre",
                         "square_mile": "Square mile"
                     }
                 },
@@ -210,9 +212,10 @@
                         "cubic_decimetre": "Litre | Cubic decimetre",
                         "cubic_metre": "Cubic metre",
                         "cubic_kilometre": "Cubic kilometre",
-                        "cubic_inch": "Cubic inch",
-                        "cubic_feet": "Cubic feet",
-                        "cubic_yard": "Cubic yard",
+                        "fluid_ounce_us": "Fluid ounce (US)",
+                        "pint_us": "Pint (US)",
+                        "cup_us": "Cup (US)",
+                        "gallon_us": "Gallon (US)",
                         "cubic_mile": "Cubic mile"
                     }
                 },
@@ -221,7 +224,9 @@
                     "units": {
                         "gram": "Gram",
                         "kilogram": "Kilogram",
-                        "ton": "Tons"
+                        "ton": "Tons",
+                        "ounce": "Ounce",
+                        "pound": "Pound"
                     }
                 },
                 "temperature": {

@@ -141,6 +141,11 @@ class SiUnitAttribute extends AttributeBase
                         'label' => 'square_yard',
                     ],
                     [
+                        'symbol' => ['ac'],
+                        'convert' => fn($v) => $v * 4046.8564224,
+                        'label' => 'acre',
+                    ],
+                    [
                         'symbol' => ['mi²', 'qmi', 'smi'],
                         'convert' => fn($v) => $v * pow(1609.3440000009, 2),
                         'label' => 'square_mile',
@@ -171,19 +176,24 @@ class SiUnitAttribute extends AttributeBase
                         'label' => 'cubic_kilometre',
                     ],
                     [
-                        'symbol' => 'in³',
-                        'convert' => fn($v) => $v * pow(0.0254, 3),
-                        'label' => 'cubic_inch',
+                        'symbol' => 'fl oz',
+                        'convert' => fn($v) => $v * 0.000029573529651571238,
+                        'label' => 'fluid_ounce_us',
                     ],
                     [
-                        'symbol' => 'ft³',
-                        'convert' => fn($v) => $v * pow(0.3048, 3),
-                        'label' => 'cubic_feet',
+                        'symbol' => 'pt',
+                        'convert' => fn($v) => $v * 0.000473176,
+                        'label' => 'pint_us',
                     ],
                     [
-                        'symbol' => 'yd³',
-                        'convert' => fn($v) => $v * pow(0.9144, 3),
-                        'label' => 'cubic_yard',
+                        'symbol' => 'c',
+                        'convert' => fn($v) => $v * 0.0002365882372125699,
+                        'label' => 'cup_us',
+                    ],
+                    [
+                        'symbol' => 'gal',
+                        'convert' => fn($v) => $v * 0.003785412,
+                        'label' => 'gallon_us',
                     ],
                     [
                         'symbol' => 'mi³',
@@ -209,6 +219,16 @@ class SiUnitAttribute extends AttributeBase
                         'symbol' => 't',
                         'convert' => fn($v) => $v * pow(10, 3),
                         'label' => 'ton',
+                    ],
+                    [
+                        'symbol' => 'oz',
+                        'convert' => fn($v) => $v * 0.028349523125,
+                        'label' => 'ounce',
+                    ],
+                    [
+                        'symbol' => 'lb',
+                        'convert' => fn($v) => $v * 0.45359237,
+                        'label' => 'pound',
                     ],
                 ],
             ],
