@@ -140,7 +140,6 @@
             "string": "Textfield",
             "stringf": "Textbox",
             "richtext": "Rich-Text",
-            "richtext_empty": "No content yet",
             "string-sc": "Single Choice Dropdown",
             "string-mc": "Multiple Choice Dropdown",
             "double": "Numeric Input (Floating Point)",
