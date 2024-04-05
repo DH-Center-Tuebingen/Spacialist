@@ -106,15 +106,45 @@ class Entity extends Model implements Searchable {
             ->paginate();
 
         $history->getCollection()->transform(function ($item, $key) use ($vals) {
-            if ($item->subject_type == (new AttributeValue())->getMorphClass()) {
-                foreach ($vals as $v) {
-                    if ($v->id == $item->subject_id) {
+            if($item->subject_type == (new AttributeValue())->getMorphClass()) {
+                foreach($vals as $v) {
+                    if($v->id == $item->subject_id) {
                         $item->attribute = $v->attribute;
-                        if ($item->properties->has('attributes')) {
+                        if($item->properties->has('attributes')) {
                             $item->value_after = AttributeValue::getValueFromKey($item->properties['attributes']);
+                            if($v->attribute->datatype == 'entity') {
+                                $entity = Entity::find($item->value_after);
+                                $item->value_after = [
+                                    'id' => $item->value_after,
+                                    'name' => isset($entity) ? $entity->name : "main.entity.metadata.deleted_entity_name",
+                                ];
+                            } else if($v->attribute->datatype == 'entity-mc') {
+                                $item->value_after = array_map(function($eid) {
+                                    $entity = Entity::find($eid);
+                                    return [
+                                        'id' => $eid,
+                                        'name' => isset($entity) ? $entity->name : "main.entity.metadata.deleted_entity_name",
+                                    ];
+                                },$item->value_after);
+                            }
                         }
-                        if ($item->properties->has('old')) {
+                        if($item->properties->has('old')) {
                             $item->value_before = AttributeValue::getValueFromKey($item->properties['old']);
+                            if($v->attribute->datatype == 'entity') {
+                                $entity = Entity::find($item->value_before);
+                                $item->value_before = [
+                                    'id' => $item->value_before,
+                                    'name' => isset($entity) ? $entity->name : "main.entity.metadata.deleted_entity_name",
+                                ];
+                            } else if($v->attribute->datatype == 'entity-mc') {
+                                $item->value_before = array_map(function($eid) {
+                                    $entity = Entity::find($eid);
+                                    return [
+                                        'id' => $eid,
+                                        'name' => isset($entity) ? $entity->name : "main.entity.metadata.deleted_entity_name",
+                                    ];
+                                },$item->value_before);
+                            }
                         }
                     }
                 }
