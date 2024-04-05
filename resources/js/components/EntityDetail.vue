@@ -833,6 +833,8 @@
         getAttributeName,
         getUserBy,
         getEntity,
+        getEntityColors,
+        getEntityTypeName,
         getEntityTypeAttributeSelections,
         getEntityTypeDependencies,
         getConcept,
