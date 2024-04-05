@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Sleep;
 use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
@@ -165,6 +166,7 @@ class UserController extends Controller
             $user = User::where('email', $request->get('email'))->withoutTrashed()->first();
         }
         if(!isset($user)) {
+            Sleep::for(2)->seconds();
             return response()->json([
                 'error' => __('Invalid Credentials')
             ], 400);
@@ -294,6 +296,10 @@ class UserController extends Controller
             'name' => 'string|max:255',
             'nickname' => 'alpha_dash|max:255|unique:users,nickname',
             'phonenumber' => 'nullable|string|max:255',
+            'role' => 'nullable|string|max:255',
+            'field' => 'nullable|string|max:255',
+            'institution' => 'nullable|string|max:255',
+            'department' => 'nullable|string|max:255',
             'orcid' => 'nullable|orcid',
         ]);
 
@@ -341,12 +347,9 @@ class UserController extends Controller
             $user->nickname = Str::lower($request->get('nickname'));
             $user->save();
         }
-        if($request->has('phonenumber')) {
-            $user->setMetadata(['phonenumber' => $request->get('phonenumber')]);
-        }
-        if($request->has('orcid')) {
-            $user->setMetadata(['orcid' => $request->get('orcid')]);
-        }
+        $user->setMetadata(
+            $request->only('phonenumber', 'orcid', 'role', 'field', 'institution', 'department')
+        );
 
         // return user without roles relation
         $user->unsetRelation('roles');

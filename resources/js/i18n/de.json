@@ -11,8 +11,8 @@
         "cancel": "Abbrechen",
         "close": "Schließen",
         "add": "Hinzufügen",
-        "edit": "Editieren",
-        "edited": "editiert",
+        "edit": "Bearbeiten",
+        "edited": "bearbeitet",
         "duplicate": "Duplizieren",
         "sort": "Sortieren",
         "resort": "Umsortieren",
@@ -62,6 +62,7 @@
         "has_links": "Hat keine Verknüpfungen | Hat eine Verknüpfung | Hat {cnt} Verknüpfungen",
         "discard": {
             "title": "Ungespeicherte Änderungen",
+            "changes": "Änderungen verwerfen",
             "msg": "Es gibt ungespeicherte Änderungen auf der aktuellen Seite. Willst du wirklich fortfahren und die Änderungen verwerfen?",
             "confirm": "Ja, Änderungen verwerfen",
             "confirm_and_save": "Nein, Speichern und fortfahren"
@@ -109,6 +110,9 @@
             "system": "System-Einstellungen",
             "about": "Über"
         },
+        "missing": {
+            "content": "Kein Inhalt vorhanden."
+        },
         "user": {
             "settings": "Einstellungen",
             "profile": "Profil",
@@ -117,6 +121,11 @@
             "personal_info_title": "Persönliche Informationen",
             "member_since": "Mitglied seit",
             "deactivated_since": "<span class=\"fw-bold\">Deaktiviert</span> seit {dt}",
+            "role": "Rolle",
+            "field": "Fachgebiet",
+            "institution": "Einrichtung",
+            "department": "Abteilung",
+            "not_assigned": "Nicht angegeben",
             "contact": "Kontakt",
             "avatar": "Avatar",
             "invalid_orcid": "Die eigegebene ORCID ist ungültig"
@@ -140,9 +149,11 @@
             "percentage": "Prozentangabe",
             "entity": "Entität",
             "entity-mc": "Entität (Mehrfachauswahl)",
+            "userlist": "Benutzerliste",
             "epoch": "Zeitspanne & Epoche",
             "timeperiod": "Zeitspanne",
             "date": "Datum",
+            "daterange": "Datumsspanne",
             "dimension": "Abmessungen (BxHxT)",
             "list": "Liste",
             "geography": "WKT (Well-Known-Binary)",
@@ -153,7 +164,10 @@
             "serial_info": "<i class=\"fas fa-lightbulb me-1\"></i><br />Alle Instanzen teilen diesen Identifier als Attribut. Benutze <code class=\"normal\">%d</code> als Zähler.<br /><span class=\"fw-medium mt-2\">Beispiel:</span><br /><code class=\"normal\">Fund_%d_Stein</code> würde zu Fund_1_Stein, Fund_2_Stein, &hellip; führen.<br />Um eine feste Breite (z.B. 3 für 002 anstatt 2) zu erzwingen, benutze <code class=\"normal\">%03d</code>.",
             "sql_info": "Du kannst mit <code class=\"normal\">:entity_id</code> in deiner SQL-Abfrage auf die Entität referenzieren, dem dieses Attribut zugewiesen ist.",
             "iconclass": "Iconclass",
-            "rism": "RISM"
+            "rism": "RISM",
+            "restrictions": {
+                "entity_type": "Auf folgende Entitätstypen beschränken"
+            }
         },
         "activity": "Aktivitäten",
         "action": "Aktion",
@@ -225,10 +239,10 @@
             "empty_list": "Bisher keine Kommentare hinzugefügt.",
             "hide": "Kommentare ausblenden",
             "show": "Kommentare anzeigen",
-            "submit": "Kommtentar abschicken",
+            "submit": "Kommentar abschicken",
             "text_placeholder": "Kommentar eingeben",
-            "hide_reply": "<span class=\"fw-bold\">Eine</span> Antwort ausblenden | <span class=\"fw-bold\">{cnt}</span> Antworten ausblenden",
-            "show_reply": "<span class=\"fw-bold\">Eine</span> Antwort anzeigen | <span class=\"fw-bold\">{cnt}</span> Antworten anzeigen",
+            "hide_reply": "Eine Antwort ausblenden | {cnt} Antworten ausblenden",
+            "show_reply": "Eine Antwort anzeigen | {cnt} Antworten anzeigen",
             "fetching": "Lade Kommentare&hellip;",
             "fetching_failed": "Laden der Kommentare fehlgeschlagen!",
             "retry_failed": "Wiederholen"
@@ -315,7 +329,7 @@
             "toasts": {
                 "updated": {
                     "title": "Entität aktualisiert",
-                    "msg": "Daten von {name} wurden erfolgreich aktualisiert."
+                    "msg": "Daten von „{name}“ wurden erfolgreich aktualisiert."
                 },
                 "updated_metadata": {
                     "title": "Metadaten aktualisiert",
@@ -412,6 +426,7 @@
                 "entity": {
                     "go_to": "Springe zu {name}"
                 },
+                "root_attribute_info": "Die verfügbaren Werte dieses Attributes werden vom Attribut „{name}“ bestimmt.",
                 "iconclass": {
                     "cite_info": "Infos von <cite title=\"Iconclass\"><a href=\"http://iconclass.org/{class}.json\" target=\"_blank\">http://iconclass.org/{class}.json</a></cite>",
                     "doesnt_exist": "Diese Iconclass existiert nicht"
@@ -421,6 +436,7 @@
                     "doesnt_exist": "Dieser RSIM-Eintrag existiert nicht"
                 },
                 "table": {
+                    "add_row": "Neue Zeile hinzufügen",
                     "chart": {
                         "number_sets": "Die letzten {cnt} Datensätze",
                         "include_in": "Verwenden",
@@ -772,8 +788,9 @@
                 "techreport": "Bericht einer Hochschule oder anderen Institution",
                 "unpublished": "Nicht veröffentlicht",
                 "validation": {
-                    "required": "@:main.bibliography.column.{col} ist ein Pflichtfeld",
-                    "required_one_of": "Entweder @:main.bibliography.column.{col} oder @:main.bibliography.column.{ref} muss gesetzt sein"
+                    "required": "„{field}“ ist ein Pflichtfeld",
+                    "required_if": "Pflichtfeld, falls „{col}“ nicht angegeben ist",
+                    "required_one_of": "Entweder „{eitherField}“ oder „{orField}“ muss angegeben sein"
                 }
             }
         },

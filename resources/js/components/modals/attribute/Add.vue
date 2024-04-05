@@ -26,7 +26,7 @@
                     @validation="checkValidation"
                 />
                 <div v-if="state.hasColumns">
-                    <hr/>
+                    <hr>
                     <div class="bg-secondary bg-opacity-25 p-2 rounded">
                         <h5 class="d-flex flex-row justify-content-between">
                             <div>
@@ -36,8 +36,13 @@
                                 </span>
                             </div>
                             <div>
-                                <button type="submit" class="btn btn-sm btn-outline-success" :form="state.tableFormId" :disabled="!state.tableColumnValidated">
-                                    <i class="fas fa-fw fa-plus"></i> {{ t('global.add_column') }}
+                                <button
+                                    type="submit"
+                                    class="btn btn-sm btn-outline-success"
+                                    :form="state.tableFormId"
+                                    :disabled="!state.tableColumnValidated"
+                                >
+                                    <i class="fas fa-fw fa-plus" /> {{ t('global.add_column') }}
                                 </button>
                             </div>
                         </h5>
@@ -45,7 +50,8 @@
                             :type="'table'"
                             :external="state.tableFormId"
                             @created="addColumn"
-                            @validation="checkTableValidation"  />
+                            @validation="checkTableValidation"
+                        />
                     </div>
                 </div>
                 <div v-if="state.previewAttribute">
@@ -60,7 +66,8 @@
                         :values="state.previewAttribute.values"
                         :selections="{}"
                         :preview="true"
-                        :preview-data="state.previewData" />
+                        :preview-data="state.previewData"
+                    />
                 </div>
             </div>
             <div class="modal-footer">
@@ -203,7 +210,7 @@
                 checkTableValidation,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

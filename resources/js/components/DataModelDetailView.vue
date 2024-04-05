@@ -58,6 +58,8 @@
                             :track-by="'thesaurus_url'"
                             :value-prop="'id'"
                             :options="state.minimalEntityTypes"
+                            :close-on-select="false"
+                            :close-on-deelect="false"
                             :placeholder="t('global.select.placeholder')"
                         >
                             <template #option="{ option }">
@@ -152,6 +154,7 @@
         getEntityType,
         getEntityTypeAttributes,
         translateConcept,
+        _cloneDeep,
     } from '@/helpers/helpers.js';
 
     import {
@@ -177,7 +180,14 @@
             // FUNCTIONS
             const updateEntityType = _ => {
                 if(!state.entityType.id) return;
-                updateEntityTypeRelation(state.entityType).then(_ => {
+
+                const et = state.entityType;
+                const data = {
+                    'is_root': et.is_root || false,
+                    'sub_entity_types': et.sub_entity_types || [],
+                };
+
+                updateEntityTypeRelation(et.id, data).then(_ => {
                     const name = translateConcept(state.entityType.thesaurus_url);
                     toast.$toast(
                         t('main.datamodel.toasts.updated_type.msg', {
@@ -248,7 +258,7 @@
 
             // DATA
             const state = reactive({
-                entityType: computed(_ => getEntityType(currentRoute.params.id)),
+                entityType: computed(_ => _cloneDeep(getEntityType(currentRoute.params.id))),
                 entityAttributes: computed(_ => getEntityTypeAttributes(currentRoute.params.id)),
                 entityValues: computed(_ => {
                     let data = {};
@@ -350,7 +360,7 @@
                             )
                             ;
                 }),
-            })
+            });
 
             // RETURN
             return {
@@ -368,7 +378,7 @@
                 // PROPS
                 // STATE
                 state,
-            }
+            };
         },
         // methods: {
         //     editEntityAttribute(attribute, options) {
@@ -470,5 +480,5 @@
         //         }
         //     },
         // },
-    }
+    };
 </script>

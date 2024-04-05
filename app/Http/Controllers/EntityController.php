@@ -147,7 +147,11 @@ class EntityController extends Controller {
                         ':entity_id' => $eid
                     ];
                 }
+
+                DB::beginTransaction();
                 $sqlValue = DB::select($text, $safes);
+                DB::rollBack();
+
                 // Check if only one result exists
                 if(count($sqlValue) === 1) {
                     // Get all column indices (keys) using the first row
@@ -277,7 +281,11 @@ class EntityController extends Controller {
                     ':entity_id' => $id
                 ];
             }
+
+            DB::beginTransaction();
             $sqlValue = DB::select($text, $safes);
+            DB::rollBack();
+
             // Check if only one result exists
             if(count($sqlValue) === 1) {
                 // Get all column indices (keys) using the first row
@@ -415,7 +423,9 @@ class EntityController extends Controller {
 
         $duplicate = $entity->replicate();
         $duplicate->created_at = Carbon::now();
-        $duplicate->geodata_id = null;
+        if(sp_has_plugin('Map')) {
+            $duplicate->geodata_id = null;
+        }
         if(isset($duplicate->root_entity_id)) {
             $duplicate->rank = Entity::where('root_entity_id', $duplicate->root_entity_id)->max('rank') + 1;
         } else {
@@ -426,12 +436,14 @@ class EntityController extends Controller {
         $duplicate->save();
 
         // Files, bibliographies, attribute_values
-        $fileLinks = EntityFile::where('entity_id', $entity->id)->get();
-        foreach($fileLinks as $fileLink) {
-            $newLink = $fileLink->replicate();
-            $newLink->entity_id = $duplicate->id;
-            $newLink->user_id = $user->id;
-            $newLink->save();
+        if(sp_has_plugin('File')) {
+            $fileLinks = EntityFile::where('entity_id', $entity->id)->get();
+            foreach($fileLinks as $fileLink) {
+                $newLink = $fileLink->replicate();
+                $newLink->entity_id = $duplicate->id;
+                $newLink->user_id = $user->id;
+                $newLink->save();
+            }
         }
         $refs = Reference::where('entity_id', $entity->id)->get();
         foreach($refs as $ref) {
@@ -594,6 +606,7 @@ class EntityController extends Controller {
             ], 400);
         }
 
+        $addedAttributes = [];
         foreach($request->request as $patch) {
             $op = $patch['op'];
             $aid = $patch['params']['aid'];
@@ -672,6 +685,9 @@ class EntityController extends Controller {
             $attrval->{$formKeyValue->key} = $formKeyValue->val;
             $attrval->user_id = $user->id;
             $attrval->save();
+            if($op == 'add') {
+                $addedAttributes[$aid] = $attrval;
+            }
         }
 
         // Save model if last editor changed
@@ -685,7 +701,10 @@ class EntityController extends Controller {
 
         $entity->load('user');
 
-        return response()->json($entity);
+        return response()->json([
+            'entity' => $entity,
+            'added_attributes' => $addedAttributes,
+        ]);
     }
 
     public function patchAttribute($id, $aid, Request $request) {
@@ -917,7 +936,7 @@ class EntityController extends Controller {
         ]);
 
         try {
-            $entity = Entity::findOrFail($id);
+            Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity does not exist')

@@ -5,6 +5,7 @@ namespace App;
 use App\Exceptions\AmbiguousValueException;
 use App\Traits\CommentTrait;
 use Illuminate\Database\Eloquent\Builder;
+use App\AttributeTypes\AttributeBase;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Nicolaslopezj\Searchable\SearchableTrait;
@@ -254,33 +255,7 @@ class Entity extends Model implements Searchable {
 
         // TODO workaround to get all (optional, not part of request) attributes
         $entity = self::find($entity->id);
-
-        $serialAttributes = $entity->entity_type
-            ->attributes()
-            ->where('datatype', 'serial')
-            ->get();
-        foreach ($serialAttributes as $s) {
-            $nextValue = 1;
-            $cleanedRegex = preg_replace('/(.*)(%\d*d)(.*)/i', '/$1(\d+)$3/i', $s->text);
-
-            // get last added
-            $lastEntity = self::where('entity_type_id', $entity->entity_type_id)
-                ->orderBy('created_at', 'desc')
-                ->skip(1)
-                ->first();
-            if (isset($lastEntity)) {
-                $lastValue = AttributeValue::where('attribute_id', $s->id)
-                    ->where('entity_id', $lastEntity->id)
-                    ->first();
-                if (isset($lastValue)) {
-                    $nextValue = intval(preg_replace($cleanedRegex, '$1', $lastValue->str_val));
-                    $nextValue++;
-                }
-            }
-
-            self::addSerial($entity->id, $s->id, $s->text, $nextValue, $user->id);
-        }
-
+        AttributeBase::onCreateHandler($entity, $user);
         $entity->children_count = 0;
 
         return [
@@ -317,7 +292,7 @@ class Entity extends Model implements Searchable {
 
         foreach ($oldEntities as $oc) {
             $oc->rank--;
-            $oc->save();
+            $oc->saveQuietly();
         }
 
         $query = null;
@@ -332,19 +307,10 @@ class Entity extends Model implements Searchable {
 
         foreach ($newEntities as $nc) {
             $nc->rank++;
-            $nc->save();
+            $nc->saveQuietly();
         }
 
         $entity->save();
-    }
-
-    public static function addSerial($eid, $aid, $text, $ctr, $uid) {
-        $av = new AttributeValue();
-        $av->entity_id = $eid;
-        $av->attribute_id = $aid;
-        $av->str_val = sprintf($text, $ctr);
-        $av->user_id = $uid;
-        $av->save();
     }
 
     public function child_entities() {

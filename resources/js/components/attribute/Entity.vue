@@ -1,6 +1,6 @@
 <template>
     <simple-search
-        :endpoint="searchEntity"
+        :endpoint="searchWrapper"
         :key-text="'name'"
         :chain="'ancestors'"
         :mode="state.mode"
@@ -39,7 +39,7 @@
     import router from '@/bootstrap/router.js';
 
     import {
-        searchEntity,
+        searchEntityInTypes,
     } from '@/api.js';
 
     export default {
@@ -67,6 +67,11 @@
                 type: Object,
                 required: true,
             },
+            searchIn: {
+                type: Array,
+                required: false,
+                default: _ => [],
+            },
         },
         emits: ['change'],
         setup(props, context) {
@@ -78,6 +83,7 @@
                 disabled,
                 hideLink,
                 value,
+                searchIn,
             } = toRefs(props);
             // FETCH
 
@@ -93,7 +99,7 @@
                     if(multiple.value) {
                         data = entity.values;
                     } else {
-                        data = {};
+                        data = null;
                     }
                 } else if(added) {
                     if(multiple.value) {
@@ -125,6 +131,7 @@
                     value: v.fieldValue,
                 });
             };
+            const searchWrapper = query => searchEntityInTypes(query, searchIn.value || []);
 
             // DATA
             const {
@@ -132,8 +139,8 @@
                 value: fieldValue,
                 meta,
                 resetField,
-            } = useField(`entity_${name.value}`, yup.mixed(), {
-                initialValue: value.value || (multiple.value ? [] : {}),
+            } = useField(`entity_${name.value}`, yup.mixed().nullable(), {
+                initialValue: value.value || (multiple.value ? [] : null),
             });
             const state = reactive({
                 query: computed(_ => route.query),
@@ -176,17 +183,17 @@
             return {
                 t,
                 // HELPERS
-                searchEntity,
                 // LOCAL
                 entitySelected,
                 entryClicked,
                 resetFieldState,
                 undirtyField,
+                searchWrapper,
                 // PROPS
                 // STATE
                 state,
                 v,
-            }
+            };
         },
-    }
+    };
 </script>

@@ -264,11 +264,21 @@
                             :multiple="element.datatype == 'entity-mc'"
                             :hide-link="state.hideEntityLink"
                             :value="convertEntityValue(state.attributeValues[element.id], element.datatype == 'entity-mc')"
+                            :search-in="element.restrictions"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
                         <date-attribute
                             v-else-if="element.datatype == 'date'"
+                            :ref="el => setRef(el, element.id)"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :name="`attr-${element.id}`"
+                            :value="state.attributeValues[element.id].value"
+                            @change="e => updateDirtyState(e, element.id)"
+                        />
+
+                        <daterange-attribute
+                            v-else-if="element.datatype == 'daterange'"
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
@@ -283,6 +293,9 @@
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :selections="selections[element.id]"
+                            :selection-from="element.root_attribute_id"
+                            :selection-from-value="state.rootAttributeValues[element.root_attribute_id]"
+                            @update-selection="e => handleSelectionUpdate(element.id, e)"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -293,6 +306,15 @@
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :selections="selections[element.id]"
+                            @change="e => updateDirtyState(e, element.id)"
+                        />
+
+                        <userlist-attribute
+                            v-else-if="element.datatype == 'userlist'"
+                            :ref="el => setRef(el, element.id)"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :name="`attr-${element.id}`"
+                            :value="state.attributeValues[element.id].value"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -355,6 +377,8 @@
         handleModeration as handleModerationApi,
     } from '@/api.js';
 
+    import store from '@/bootstrap/store.js';
+
     import StringAttr from '@/components/attribute/String.vue';
     import Stringfield from '@/components/attribute/Stringfield.vue';
     import IntegerAttr from '@/components/attribute/Integer.vue';
@@ -371,8 +395,10 @@
     import Geography from '@/components/attribute/Geography.vue';
     import Entity from '@/components/attribute/Entity.vue';
     import DateAttr from '@/components/attribute/Date.vue';
+    import DaterangeAttr from '@/components/attribute/Daterange.vue';
     import SingleChoice from '@/components/attribute/SingleChoice.vue';
     import MultiChoice from '@/components/attribute/MultiChoice.vue';
+    import UserList from '@/components/attribute/UserList.vue';
     import SqlAttr from '@/components/attribute/Sql.vue';
     import SystemSeparator from '@/components/attribute/SystemSeparator.vue';
     import DefaultAttr from '@/components/attribute/Default.vue';
@@ -396,8 +422,10 @@
             'geography-attribute': Geography,
             'entity-attribute': Entity,
             'date-attribute': DateAttr,
+            'daterange-attribute': DaterangeAttr,
             'singlechoice-attribute': SingleChoice,
             'multichoice-attribute': MultiChoice,
+            'userlist-attribute': UserList,
             'sql-attribute': SqlAttr,
             'system-separator-attribute': SystemSeparator,
             'default-attribute': DefaultAttr,
@@ -487,6 +515,12 @@
             // FETCH
 
             // FUNCTIONS
+            const handleSelectionUpdate = (elemId, conceptId) => {
+                if(state.dynamicSelectionList.includes(elemId)) {
+                    state.rootAttributeValues[elemId] = conceptId;
+                }
+            };
+
             const clFromMetadata = elem => {
                 if(!state.ignoreMetadata && elem.pivot && elem.pivot.metadata && elem.pivot.metadata.width) {
                     const width = elem.pivot.metadata.width;
@@ -637,13 +671,22 @@
                     // curr is e.g. null if attribute is hidden
                     if(!!curr && !!curr.v && curr.v.meta.dirty && curr.v.meta.valid) {
                         currValue = curr.v.value;
-                    }
-                    if(currValue !== null) {
-                        // filter out deleted table rows
-                        if(getAttribute(k).datatype == 'table') {
-                            currValue = currValue.filter(cv => !cv.mark_deleted);
+                        if(currValue !== null) {
+                            // filter out deleted table rows
+                            if(getAttribute(k).datatype == 'table') {
+                                currValue = currValue.filter(cv => !cv.mark_deleted);
+                            }
+                            values[k] = currValue;
+                        } else {
+                            // null is allowed for date, string-sc, entity
+                            if(
+                                getAttribute(k).datatype == 'date' ||
+                                getAttribute(k).datatype == 'string-sc' ||
+                                getAttribute(k).datatype == 'entity'
+                            ) {
+                                values[k] = currValue;
+                            }
                         }
-                        values[k] = currValue;
                     }
                 }
                 return values;
@@ -653,6 +696,7 @@
                 if(state.attributeValues[aid].moderation_edit_state == 'active') {
                     return;
                 }
+
                 context.emit('dirty', {
                     ...e,
                     attribute_id: aid,
@@ -751,7 +795,17 @@
             const state = reactive({
                 attributeList: attributes,
                 attributeValues: values,
+                rootAttributeValues: {},
                 entity: computed(_ => store.getters.entity),
+                dynamicSelectionList: computed(_ => {
+                    const list = [];
+                    state.attributeList.forEach(a => {
+                        if(a.root_attribute_id) {
+                            list.push(a.root_attribute_id);
+                        }
+                    });
+                    return list;
+                }),
                 hoverStates: new Array(attributes.value.length).fill(false),
                 expansionStates: new Array(attributes.value.length).fill(false),
                 componentLoaded: computed(_ => state.attributeValues),
@@ -776,6 +830,12 @@
 
             // ON MOUNTED
             onMounted(_ => {
+                state.dynamicSelectionList.forEach(rootId => {
+                    const attrValue = state.attributeValues[rootId].value;
+                    if(attrValue) {
+                        handleSelectionUpdate(rootId, attrValue.id);
+                    }
+                });
             });
             onBeforeUpdate(_ => {
                 attrRefs.value = {};
@@ -788,6 +848,7 @@
                 getCertaintyClass,
                 translateConcept,
                 // LOCAL
+                handleSelectionUpdate,
                 clFromMetadata,
                 attributeClasses,
                 expandedClasses,
@@ -818,7 +879,7 @@
                 // STATE
                 attrRefs,
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

@@ -159,6 +159,9 @@ class CommentController extends Controller {
         $patchable = $request->only(array_keys(Comment::patchKeys));
 
         foreach ($patchable as $key => $val) {
+            if($key == 'content') {
+                $val = htmlspecialchars($val);
+            }
             $comment->{$key} = $val;
         }
         $comment->save();

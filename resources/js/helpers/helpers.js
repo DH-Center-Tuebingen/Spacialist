@@ -205,8 +205,13 @@ export function getAttribute(id) {
 
 export function getAttributeName(id) {
     const attr = getAttribute(id);
-    if(!attr) return '';
+    if(!attr || !attr.thesaurus_url) return '';
+
     return translateConcept(attr.thesaurus_url);
+}
+
+export function translateEntityType(id) {
+    return translateConcept(getEntityType(id).thesaurus_url);
 }
 
 export function getEntityType(id) {
@@ -364,6 +369,7 @@ export function getInitialAttributeValue(attribute) {
         case 'list':
         case 'string-mc':
         case 'entity-mc':
+        case 'userlist':
             return [];
         case 'date':
             return new Date();
@@ -417,6 +423,7 @@ export function getAttributeValueAsString(rawValue, datatype) {
         case 'string-mc':
         case 'entity':
         case 'entity-mc':
+        case 'userlist':
         case 'table':
         case 'sql':
             strValue = `TODO: ${datatype}`;
@@ -875,4 +882,8 @@ export function copyToClipboard(elemId) {
 
 export function setPreference(prefKey, value) {
     this.state.preferences[prefKey] = value;
+}
+
+export function sortConcepts(ca, cb) {
+    return translateConcept(ca.concept_url).localeCompare(translateConcept(cb.concept_url));
 }

@@ -1,16 +1,44 @@
 <template>
-    <div @dragenter="onDragEnter" @dragleave="onDragLeave" :id="`tree-node-${data.id}`" @click="e => addToMSList(e)">
-        <span v-show="state.isSelectionMode" class="mx-1">
-            <span v-show="state.multieditSelected" class="text-success">
-                <i class="fas fa-fw fa-circle-check"></i>
+    <div
+        :id="`tree-node-${data.id}`"
+        @dragenter="onDragEnter"
+        @dragleave="onDragLeave"
+        @click="e => addToMSList(e)"
+    >
+        <span
+            v-if="state.isSelectionMode"
+            class="mx-1"
+        >
+            <span
+                v-show="state.multieditSelected"
+                class="text-success"
+            >
+                <i class="fas fa-fw fa-circle-check" />
             </span>
             <span v-show="!state.multieditSelected">
-                <i class="far fa-fw fa-circle"></i>
+                <i class="far fa-fw fa-circle" />
             </span>
         </span>
-        <a href="" :id="`tree-node-cm-toggle-${data.id}`" @click.prevent @contextmenu.stop.prevent="togglePopup()" class="text-body text-decoration-none disabled" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false">
-            <span style="display: inline-block; text-align: center;" class="px-1">
-                <span v-if="data.children_count" class="badge rounded-pill" style="font-size: 9px;" :style="state.colorStyles" :title="data.children_count">
+        <a
+            :id="`tree-node-cm-toggle-${data.id}`"
+            href=""
+            class="text-body text-decoration-none disabled d-flex flex-row gap-1 ps-1"
+            data-bs-toggle="dropdown"
+            data-bs-auto-close="true"
+            aria-expanded="false"
+            @click.prevent
+            @contextmenu.stop.prevent="togglePopup()"
+        >
+            <span
+                class="d-flex flex-row align-items-center"
+            >
+                <span
+                    v-if="data.children_count"
+                    class="badge rounded-pill"
+                    style="font-size: 9px;"
+                    :style="state.colorStyles"
+                    :title="data.children_count"
+                >
                     {{ numPlus(data.children_count, 3) }}
                 </span>
                 <span
@@ -27,8 +55,9 @@
             </span>
         </a>
         <ul
+            v-if="state.ddVisible"
             :id="`tree-node-${data.id}-contextmenu`"
-            class="dropdown-menu"
+            class="dropdown-menu show"
         >
             <li>
                 <h6
@@ -99,16 +128,11 @@
 <script>
     import {
         computed,
-        nextTick,
         onMounted,
         reactive,
         toRefs,
         watch,
     } from 'vue';
-
-import {
-    Dropdown,
-} from 'bootstrap';
 
 import { useI18n } from 'vue-i18n';
 
@@ -148,20 +172,10 @@ export default {
 
             // FUNCTIONS
             const hidePopup = _ => {
-                state.bsElem.hide();
                 state.ddVisible = false;
-                state.ddDomElem.classList.add('disabled');
             };
             const showPopup = _ => {
                 state.ddVisible = true;
-                nextTick(_ => {
-                    // To prevent opening the dropdown on normal click on Node,
-                    // the DD toggle must have class 'disabled'
-                    // This also prevents BS API call .show() to work...
-                    // Thus we remove the 'disabled' class before the API call and add it back on hide
-                    state.ddDomElem.classList.remove('disabled');
-                    state.bsElem.show();
-                })
             };
             const togglePopup = _ => {
                 if(state.ddVisible) {
@@ -214,8 +228,6 @@ export default {
 
             // DATA
             const state = reactive({
-                ddDomElem: null,
-                bsElem: null,
                 ddVisible: false,
                 multieditSelected: false,
                 colorStyles: computed(_ => getEntityColors(data.value.entity_type_id)),
@@ -232,11 +244,6 @@ export default {
             // ON MOUNTED
             onMounted(_ => {
                 console.log("tree node component mounted");
-                state.ddDomElem = document.getElementById(`tree-node-cm-toggle-${data.value.id}`);
-                state.ddDomElem.addEventListener('hidden.bs.dropdown', _ => {
-                    hidePopup();
-                });
-                state.bsElem = new Dropdown(state.ddDomElem);
             });
 
             // WATCHER

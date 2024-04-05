@@ -26,7 +26,7 @@ export async function markAllAsRead(ids = null, from = userNotifications()) {
     const data = {
         ids: ids
     };
-    return await $httpQueue.add(() => http.patch(`notification/read/`, data).then(response => {
+    return await $httpQueue.add(() => http.patch(`notification/read`, data).then(response => {
         let idsC = _cloneDeep(ids);
         from.forEach(elem => {
             const idx = idsC.findIndex(id => id === elem.id);
@@ -56,7 +56,7 @@ export async function deleteAllNotifications(ids = null, from = userNotification
     const data = {
         ids: ids
     };
-    return await $httpQueue.add(() => http.patch(`notification/`, data).then(response => {
+    return await $httpQueue.add(() => http.patch(`notification`, data).then(response => {
         ids.forEach(id => {
             const idx = from.findIndex(elem => elem.id === id);
             if(idx > -1) {

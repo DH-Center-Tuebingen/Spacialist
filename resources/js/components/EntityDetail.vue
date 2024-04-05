@@ -291,6 +291,8 @@
                     :id="`entity-attribute-form-${tg.id}`"
                     :name="`entity-attribute-form-${tg.id}`"
                     class="h-100"
+                    @submit.prevent
+                    @keydown.ctrl.s="e => handleSaveOnKey(e, `${tg.id}`)"
                 >
                     <attribute-list
                         v-if="state.attributesFetched"
@@ -739,18 +741,17 @@
                 Test
                 <div
                     v-if="state.entity.comments"
-                    class="mb-auto scroll-y-auto h-100"
+                    class="mb-auto scroll-y-auto h-100 pe-2"
                 >
                     <div
                         v-if="state.commentsFetching"
                         class="mt-2"
                     >
-                        <!-- eslint-disable vue/no-v-html -->
-                        <p
-                            class="alert alert-info mb-0"
-                            v-html="t('global.comments.fetching')"
+                        <alert
+                            class="mb-0"
+                            type="info"
+                            :message="t('global.comments.fetching')"
                         />
-                        <!-- eslint-enable vue/no-v-html -->
                     </div>
                     <div
                         v-else-if="state.commentFetchFailed"
@@ -845,6 +846,8 @@
         canShowReferenceModal,
     } from '@/helpers/modal.js';
 
+    import { usePreventNavigation } from '@/helpers/form.js';
+
     export default {
         props: {
             bibliography: {
@@ -873,6 +876,12 @@
             // DATA
             const attrRefs = ref({});
             const state = reactive({
+                colorStyles: computed(_ => {
+                    const colors = getEntityColors(state.entity.entity_type_id);
+                    return {
+                        color: colors.backgroundColor
+                    };
+                }),
                 formDirty: computed(_ => {
                     for(let k in state.dirtyStates) {
                         if(state.dirtyStates[k]) return true;
@@ -961,6 +970,9 @@
                     return groups;
                 }),
                 attributesFetched: computed(_ => state.initFinished && state.entity.data && !!state.entityAttributes && state.entityAttributes.length > 0),
+                entityTypeLabel: computed(_ => {
+                    return getEntityTypeName(state.entity.entity_type_id);
+                }),
                 hiddenAttributeList: computed(_ => {
                     const keys = Object.keys(state.hiddenAttributes);
                     const values = Object.values(state.hiddenAttributes);
@@ -1028,6 +1040,8 @@
                     return state.commentLoadingState === 'failed';
                 }),
             });
+
+            usePreventNavigation(_ => state.formDirty);
 
             // FUNCTIONS
             const fetchMetadataTabData = _ => {
@@ -1220,7 +1234,7 @@
                 } else if(attribute.datatype == 'entity-mc') {
                     compValue.value = value.map(v => v.id);
                     compValue.name = value.map(v => {
-                        return v.name == 'main.entity.metadata.deleted_entity_name' ? t(v.name, {id: v.id}) : v.name
+                        return v.name == 'main.entity.metadata.deleted_entity_name' ? t(v.name, {id: v.id}) : v.name;
                     });
                 } else {
                     compValue.value = value;
@@ -1294,9 +1308,9 @@
                     state.historyPagination = {
                         ...state.historyPagination,
                         ...pagination,
-                    }
+                    };
                 });
-            }
+            };
             const fetchComments = _ => {
                 if(!can('comments_read')) return;
 
@@ -1308,6 +1322,7 @@
                     state.commentLoadingState = 'failed';
                 });
             };
+
             const addComment = event => {
                 const comment = event.comment;
                 const replyTo = event.replyTo;
@@ -1349,8 +1364,23 @@
                         autohide: true,
                         icon: true,
                     });
-                })
+                });
             };
+
+            const handleSaveOnKey = (e, grp) => {
+                if(!can('entity_data_write')) return;
+                if(e.altKey) return;
+
+                e.preventDefault();
+                if(e.shiftKey) {
+                    if(!state.formDirty) return;
+                    saveEntity();
+                } else {
+                    if(!state.dirtyStates[grp]) return;
+                    saveEntity(grp);
+                }
+            };
+
             const saveEntity = grps => {
                 if(!can('entity_data_write')) return;
 
@@ -1395,9 +1425,10 @@
                 }
                 return patchAttributes(state.entity.id, patches).then(data => {
                     undirtyList(grps);
-                    store.dispatch('updateEntity', data);
+                    store.dispatch('updateEntity', data.entity);
                     store.dispatch('updateEntityData', {
                         data: dirtyValues,
+                        new_data: data.added_attributes,
                         eid: state.entity.id,
                     });
                     if(isModerated()) {
@@ -1408,15 +1439,19 @@
                         });
                     }
 
+                    resetDirtyStates(grps);
+
                     toast.$toast(
                         t('main.entity.toasts.updated.msg', {
-                            name: data.name
+                            name: data.entity.name
                         }),
-                        t('main.entity.toasts.updated.title'), {
-                        channel: 'success',
-                        autohide: true,
-                        icon: true,
-                    });
+                        t('main.entity.toasts.updated.title'),
+                        {
+                            channel: 'success',
+                            autohide: true,
+                            icon: true,
+                        },
+                    );
                 }).catch(error => {
                     const r = error.response;
                     toast.$toast(
@@ -1436,7 +1471,7 @@
             };
             const setAttrRefs = (el, grp) => {
                 attrRefs.value[grp] = el;
-            }
+            };
 
             // ON MOUNTED
             onMounted(_ => {
@@ -1551,8 +1586,10 @@
                 getUserBy,
                 showUserInfo,
                 getAttributeName,
-                getEntity,
+                getEntityTypeName,
+                getEntityColors,
                 translateConcept,
+                getEntity,
                 // LOCAL
                 hasReferenceGroup,
                 showMetadata,
@@ -1574,6 +1611,7 @@
                 fetchComments,
                 addComment,
                 saveMetadata,
+                handleSaveOnKey,
                 saveEntity,
                 resetForm,
                 setAttrRefs,
@@ -1582,5 +1620,5 @@
                 state,
             };
         }
-    }
+    };
 </script>

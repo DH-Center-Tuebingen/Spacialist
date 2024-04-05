@@ -62,6 +62,7 @@
         "has_links": "Has no links | Has one link | Has {cnt} links",
         "discard": {
             "title": "Unsaved Changes",
+            "changes": "Discard changes",
             "msg": "There are unsaved changes on the current page. Do you really want to continue and discard changes?",
             "confirm": "Yes, discard changes",
             "confirm_and_save": "No, save and continue"
@@ -109,6 +110,9 @@
             "system": "System Preferences",
             "about": "About"
         },
+        "missing": {
+            "content": "No content yet."
+        },
         "user": {
             "settings": "Preferences",
             "profile": "Profile",
@@ -117,6 +121,11 @@
             "personal_info_title": "Personal Informationen",
             "member_since": "Member since",
             "deactivated_since": "<span class=\"fw-bold\">deactivated</span> since {dt}",
+            "role": "Role",
+            "field": "Field",
+            "institution": "Institution",
+            "department": "Department",
+            "not_assigned": "Not assigned",
             "contact": "Contact",
             "avatar": "Avatar",
             "invalid_orcid": "This ORCID is invalid"
@@ -140,9 +149,11 @@
             "percentage": "Percentage",
             "entity": "Entity",
             "entity-mc": "Entity (Multiple Choice)",
+            "userlist": "User list",
             "epoch": "Time Period and Epoch",
             "timeperiod": "Time Period",
             "date": "Date",
+            "daterange": "Date Range",
             "dimension": "Dimensions (WxHxD)",
             "list": "List",
             "geography": "WKT (Well-Known-Binary)",
@@ -153,7 +164,10 @@
             "serial_info": "<i class=\"fas fa-lightbulb me-1\"></i><br />All instances share this identifier as attribute. Add <code class=\"normal\">%d</code> as counter.<br /><span class=\"fw-medium mt-2\">Example:</span><br /><code class=\"normal\">Find_%d_Stone</code> would create Find_1_Stone, Find_2_Stone, &hellip;<br />To add a fixed width (e.g. 3 for 002 instead of 2), you can use <code class=\"normal\">%03d</code>.",
             "sql_info": "You can use <code class=\"normal\">:entity_id</code> in your SQL-Query to reference the entity this attribute is assigned to.",
             "iconclass": "Iconclass",
-            "rism": "RISM"
+            "rism": "RISM",
+            "restrictions": {
+                "entity_type": "Restrict to following Entity Types"
+            }
         },
         "activity": "Activity",
         "action": "Action",
@@ -227,8 +241,8 @@
             "show": "Show comments",
             "submit": "Submit Comment",
             "text_placeholder": "Enter a comment",
-            "hide_reply": "Hide <span class=\"fw-bold\">one</span> reply | Hide <span class=\"fw-bold\">{cnt}</span> replies",
-            "show_reply": "Show <span class=\"fw-bold\">one</span> reply | Show <span class=\"fw-bold\">{cnt}</span> replies",
+            "hide_reply": "Hide one reply | Hide {cnt} replies",
+            "show_reply": "Show one reply | Show {cnt} replies",
             "fetching": "Fetching comments&hellip;",
             "fetching_failed": "Fetching comments failed!",
             "retry_failed": "Retry"
@@ -315,7 +329,7 @@
             "toasts": {
                 "updated": {
                     "title": "Entity updated",
-                    "msg": "Data of {name} successfully updated."
+                    "msg": "Data of ‚{name}‘ successfully updated."
                 },
                 "updated_metadata": {
                     "title": "Metadata updated",
@@ -412,6 +426,7 @@
                 "entity": {
                     "go_to": "Go to {name}"
                 },
+                "root_attribute_info": "The values of this attribute are driven by the value selected in the attribute ‚{name}‘",
                 "iconclass": {
                     "cite_info": "Infos from <cite title=\"Iconclass\"><a href=\"http://iconclass.org/{class}.json\" target=\"_blank\">http://iconclass.org/{class}.json</a></cite>",
                     "doesnt_exist": "This iconclass does not exist"
@@ -421,6 +436,7 @@
                     "doesnt_exist": "THIS RSIM-Entry does not exist"
                 },
                 "table": {
+                    "add_row": "Add row",
                     "chart": {
                         "number_sets": "Last {cnt} data sets",
                         "include_in": "Use in chart",
@@ -737,7 +753,7 @@
                 "year": "Year",
                 "month": "Month",
                 "pages": "Pages",
-                "volume": "Volumne",
+                "volume": "Volume",
                 "number": "Number",
                 "chapter": "Chapter",
                 "edition": "Edition",
@@ -772,8 +788,9 @@
                 "techreport": "Techreport",
                 "unpublished": "Unpublished",
                 "validation": {
-                    "required": "@:main.bibliography.column.{col} is a required field",
-                    "required_one_of": "Either @:main.bibliography.column.{col} or @:main.bibliography.column.{ref} must be set"
+                    "required": "‘{field}’ is required",
+                    "required_if": "Required if ‘{col}’ is not set",
+                    "required_one_of": "Either ‘{eitherField}’ or ‘{orField}’ must be set"
                 }
             }
         },
