@@ -367,8 +367,6 @@ class EntityController extends Controller {
 
         $page = $request->input('page', 1);
 
-        info($request);
-
         return response()->json($entity->getHistory($page));
     }
 
@@ -894,8 +892,6 @@ class EntityController extends Controller {
                 'error' => __('This entity does not exist')
             ], 400);
         }
-
-        info($fields);
 
         $metadata = $entity->metadata;
         foreach($fields as $field => $value) {
