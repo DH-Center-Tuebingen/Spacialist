@@ -462,8 +462,9 @@
                                                 <span class="fw-bold">
                                                     {{ t('main.history.created_as') }}
                                                 </span>
-                                                <span class="badge bg-primary bg-opacity-75">{{
-                                                    entry.properties.attributes.name }}</span>
+                                                <span class="badge bg-primary bg-opacity-75">
+                                                    {{ entry.properties.attributes.name }}
+                                                </span>
                                                 <div class="d-flex flex-row">
                                                     (
                                                     <entity-type-label
@@ -500,11 +501,13 @@
                                                 <span class="fw-bold">
                                                     {{ t('main.history.entity.name_update') }}
                                                 </span>
-                                                <span class="badge bg-danger bg-opacity-75">{{ entry.properties.old.name
-                                                }}</span>
+                                                <span class="badge bg-danger bg-opacity-75">
+                                                    {{ entry.properties.old.name }}
+                                                </span>
                                                 <i class="fas fa-fw fa-2xs fa-arrow-right" />
-                                                <span class="badge bg-success bg-opacity-75">{{
-                                                    entry.properties.attributes.name }}</span>
+                                                <span class="badge bg-success bg-opacity-75">
+                                                    {{ entry.properties.attributes.name }}
+                                                </span>
                                             </div>
                                             <div
                                                 v-else-if="(entry.properties.old.root_entity_id || entry.properties.old.rank) && entry.properties.attributes.root_entity_id || entry.properties.attributes.rank"
@@ -594,7 +597,7 @@
                                                 :attributes="formatHistoryEntryAttributes(entry.attribute)"
                                                 :values="formatHistoryEntryValue(entry.attribute, entry.value_after)"
                                                 :options="{ 'hide_labels': true, 'item_classes': 'px-0' }"
-                                                :selections="formatHistoryEntrySelections(entry.attribute.id, entry.value_after)"
+                                                :selections="{}"
                                                 :preview="true"
                                             />
                                         </div>
@@ -633,7 +636,8 @@
                                                         :attributes="formatHistoryEntryAttributes(entry.attribute)"
                                                         :values="formatHistoryEntryValue(entry.attribute, entry.value_before)"
                                                         :options="{ 'hide_labels': true, 'item_classes': 'px-0' }"
-                                                        :selections="formatHistoryEntrySelections(entry.attribute.id, entry.value_before)"
+                                                        :selections="{}"
+                                                        :preview="true"
                                                     />
                                                     <span
                                                         v-else
@@ -651,7 +655,8 @@
                                                         :attributes="formatHistoryEntryAttributes(entry.attribute)"
                                                         :values="formatHistoryEntryValue(entry.attribute, entry.value_after)"
                                                         :options="{ 'hide_labels': true, 'item_classes': 'px-0' }"
-                                                        :selections="formatHistoryEntrySelections(entry.attribute.id, entry.value_after)"
+                                                        :selections="{}"
+                                                        :preview="true"
                                                     />
                                                     <span
                                                         v-else
@@ -675,13 +680,11 @@
                                                 </span>
                                                 <div class="d-flex flex-row align-items-center gap-1">
                                                     <span class="badge bg-danger bg-opacity-75">
-                                                        {{ entry.properties.old.certainty ||
-                                                            t('main.history.entity.certainty_unknown') }}
+                                                        {{ entry.properties.old.certainty || t('main.history.entity.certainty_unknown') }}
                                                     </span>
                                                     <i class="fas fa-fw fa-xs fa-arrow-right" />
                                                     <span class="badge bg-success bg-opacity-75">
-                                                        {{ entry.properties.attributes.certainty ||
-                                                            t('main.history.entity.certainty_unknown') }}
+                                                        {{ entry.properties.attributes.certainty || t('main.history.entity.certainty_unknown') }}
                                                     </span>
                                                 </div>
                                             </div>
@@ -831,6 +834,7 @@
         getEntity,
         getEntityTypeAttributeSelections,
         getEntityTypeDependencies,
+        getConcept,
         translateConcept,
         _cloneDeep,
     } from '@/helpers/helpers.js';
@@ -1200,18 +1204,30 @@
                 return !!entry[key];
             };
             const formatHistoryEntryValue = (attribute, value) => {
-
-                if(attribute.datatype.startsWith('string-') || attribute.datatype.startsWith('entity-')) {
-                    value = {
-                        id: value,
+                const compValue = {
+                    isDisabled: true,
+                };
+                if(attribute.datatype == 'string-sc') {
+                    compValue.value = {
+                        id: getConcept(value).id,
                         concept_url: value,
-                    }
+                    };
+                } else if(attribute.datatype == 'string-mc') {
+                    compValue.value = value;
+                } else if(attribute.datatype == 'entity') {
+                    compValue.value = value.id;
+                    compValue.name = value.name == 'main.entity.metadata.deleted_entity_name' ? t(value.name, {id: value.id}) : value.name;
+                } else if(attribute.datatype == 'entity-mc') {
+                    compValue.value = value.map(v => v.id);
+                    compValue.name = value.map(v => {
+                        return v.name == 'main.entity.metadata.deleted_entity_name' ? t(v.name, {id: v.id}) : v.name
+                    });
+                } else {
+                    compValue.value = value;
                 }
 
                 return {
-                    [attribute.id]: {
-                        value,
-                    },
+                    [attribute.id]: compValue,
                 };
             };
             const formatHistoryEntryAttributes = attr => {
@@ -1219,10 +1235,6 @@
                 return [
                     attr
                 ];
-            };
-            const formatHistoryEntrySelections = (attributeId, attributeValue) => {
-                const selections = { [attributeId]: [{ concept_url: attributeValue }] };
-                return selections
             };
             const showTabActions = (grp, status) => {
                 state.attributeGrpHovered = status ? grp : null;
@@ -1556,7 +1568,6 @@
                 hasHistoryEntryKey,
                 formatHistoryEntryValue,
                 formatHistoryEntryAttributes,
-                formatHistoryEntrySelections,
                 showTabActions,
                 setFormState,
                 fetchHistory,

@@ -446,7 +446,8 @@
                 }
             },
             "metadata": {
-                "save": "Metadaten speichern"
+                "save": "Metadaten speichern",
+                "deleted_entity_name": "Gelöschte Entität #{id}"
             }
         },
         "user": {

@@ -446,7 +446,8 @@
                 }
             },
             "metadata": {
-                "save": "Save Metadata"
+                "save": "Save Metadata",
+                "deleted_entity_name": "Deleted Entity #{id}"
             }
         },
         "user": {
