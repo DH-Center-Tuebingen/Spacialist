@@ -117,8 +117,27 @@
                             @change="e => updateDirtyState(e, $index, column.id)"
                         />
 
+                        <date-attribute
+                            v-else-if="column.datatype == 'daterange'"
+                            :ref="el => setRef(el, `${$index}_${column.id}`)"
+                            :disabled="disabled || row.mark_deleted"
+                            :name="`${name}-column-attr-${column.id}`"
+                            :value="row[column.id]"
+                            @change="e => updateDirtyState(e, $index, column.id)"
+                        />
+
                         <singlechoice-attribute
                             v-else-if="column.datatype == 'string-sc'"
+                            :ref="el => setRef(el, `${$index}_${column.id}`)"
+                            :disabled="disabled || row.mark_deleted"
+                            :name="`${name}-column-attr-${column.id}`"
+                            :value="row[column.id]"
+                            :selections="state.selections[column.id]"
+                            @change="e => updateDirtyState(e, $index, column.id)"
+                        />
+
+                        <multichoice-attribute
+                            v-else-if="column.datatype == 'string-mc'"
                             :ref="el => setRef(el, `${$index}_${column.id}`)"
                             :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
@@ -346,6 +365,7 @@
     import DateAttr from '@/components/attribute/Date.vue';
     import DaterangeAttr from '@/components/attribute/Daterange.vue';
     import SingleChoice from '@/components/attribute/SingleChoice.vue';
+    import MultiChoice from '@/components/attribute/MultiChoice.vue';
     import UserList from '@/components/attribute/UserList.vue';
 
     import * as d3 from 'd3-dsv'; 
@@ -362,6 +382,7 @@
             'date-attribute': DateAttr,
             'daterange-attribute': DaterangeAttr,
             'singlechoice-attribute': SingleChoice,
+            'multichoice-attribute': MultiChoice,
             'userlist-attribute': UserList,
         },
         props: {
