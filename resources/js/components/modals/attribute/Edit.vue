@@ -259,7 +259,7 @@
                     (!oldDep.attribute && currDep.attribute)
                 ) {
                     data.dependency = state.dependency;
-                } else if(oldDep.attribute && currDep.dependency) {
+                } else if(oldDep.attribute && currDep.attribute) {
                     // or else check if dep is set, but has different values
                     if(
                         oldDep.attribute.id != currDep.attribute.id ||
