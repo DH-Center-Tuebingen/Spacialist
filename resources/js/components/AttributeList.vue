@@ -108,9 +108,9 @@
                         </sup>
                         <sup
                             v-if="hasEmitter('onEditElement') && !!element.pivot.depends_on"
-                            class="font-size-50"
+                            :title="t('global.dependency.depends_on.desc')"
                         >
-                            <i class="fas fa-fw fa-circle text-warning" />
+                            <i class="fas fa-diagram-next text-warning fa-rotate-180" />
                         </sup>
                     </label>
                     <div :class="expandedClasses(index)">

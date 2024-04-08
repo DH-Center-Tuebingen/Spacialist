@@ -217,8 +217,13 @@
         "column": "Spalte | Spalten",
         "add_column": "Spalte hinzufügen",
         "geometry_type": "Geometrietyp",
-        "dependency": "Abhängigkeiten",
-        "depends_on": "Hängt ab von",
+        "dependency": {
+            "title": "Abhängigkeiten",
+            "depends_on": {
+                "title": "Hängt ab von",
+                "desc": "Sichtbarkeit hängt von einem anderen Attribut(wert) ab"
+            }
+        },
         "preference": "Einstellung | Einstellungen",
         "value": "Wert",
         "allow_override": "Überschreibbar?",
