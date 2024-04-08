@@ -246,7 +246,7 @@ export function getEntityTypeDependencies(id, aid) {
     if(!attrs) return {};
     if(!!aid) {
         const attr = attrs.find(a => a.id == aid);
-        return !!attr ? attr.pivot.depends_on : {};
+        return attr?.pivot?.depends_on || {};
     } else {
         const dependencies = {};
         attrs.forEach(a => {
@@ -266,7 +266,6 @@ export function getEntityTypeDependencies(id, aid) {
         });
         return dependencies;
     }
-
 }
 
 export function getAttributeSelections(attributes) {

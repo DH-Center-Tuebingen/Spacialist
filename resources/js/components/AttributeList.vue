@@ -724,9 +724,6 @@
             const setRef = (el, id) => {
                 attrRefs.value[id] = el;
             };
-            const checkDependency = id => {
-
-            };
             const onReorderHandler = data => {
                 context.emit('reorder-list', data);
             };
@@ -863,7 +860,6 @@
                 resetListValues,
                 undirtyList,
                 setRef,
-                checkDependency,
                 onEditHandler,
                 onRemoveHandler,
                 onDeleteHandler,

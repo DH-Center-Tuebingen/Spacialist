@@ -51,6 +51,9 @@ All notable changes to this project will be documented in this file.
 - Remove headings without content from _References_ tab in Main View
 - HTML content in comments
 - Adding comments without content to _Entity_
+- Only first letter/selection/… of values in tables saved to database
+- Dependency state of attributes not persisted
+- Correctly propagate attribute changes to update dependent attributes' visibility
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
