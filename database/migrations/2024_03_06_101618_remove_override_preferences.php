@@ -35,6 +35,9 @@ return new class extends Migration
             $table->boolean('allow_override')->nullable()->default(false);
         });
 
+        Preference::where('label', 'plugin.map.prefs.map-projection')
+            ->update(['label' => 'prefs.map-projection']);
+
         activity()->enableLogging();
     }
 };
