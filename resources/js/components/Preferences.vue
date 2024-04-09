@@ -10,7 +10,6 @@
                     v-for="(cat, k) in state.categories.user"
                     :key="`user-pref-subcat-${k}`"
                     :to="{ name: 'userpreferences', hash: `#${k}`}"
-                    class="nav-link text-reset py-0"
                     :class="setNavClasses(k, true)"
                 >
                     <span v-if="cat.custom">
@@ -30,7 +29,6 @@
                     v-for="(cat, k) in state.categories.system"
                     :key="`sys-pref-subcat-${k}`"
                     :to="{ name: 'preferences', hash: `#${k}`}"
-                    class="nav-link text-reset py-0"
                     :class="setNavClasses(k)"
                 >
                     <span v-if="cat.custom">
@@ -166,11 +164,11 @@
             };
 
             const setNavClasses = (subcategory, isUser = false) => {
+                const classes = ['nav-link', 'text-reset', 'py-0', 'px-2'];
                 if(isUser == (state.category == 'user') && state.subcategory == subcategory) {
-                    return ['active', 'text-muted'];
-                } else {
-                    return [];
+                    classes.push('active', 'text-muted');
                 }
+                return classes;
             };
 
             const trackChanges = (label, data) => {
@@ -425,5 +423,5 @@
                 state,
             };
         },
-    }
+    };
 </script>
