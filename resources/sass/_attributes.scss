@@ -1,0 +1,9 @@
+input.input-anchor {
+    color: $primary;
+    text-decoration: underline;
+}
+
+input.input-anchor:focus {
+    color: $body-color;
+    text-decoration: none;
+}
