@@ -46,7 +46,7 @@ return new class extends Migration
             $table->dropColumn('url');
         });
 
-        Storage::deleteDirectory('avatars');
+        Storage::deleteDirectory('bibliography');
 
         activity()->enableLogging();
     }
