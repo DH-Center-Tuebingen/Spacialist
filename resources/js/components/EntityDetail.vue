@@ -869,6 +869,7 @@
                         data: dirtyValues,
                         new_data: data.added_attributes,
                         eid: state.entity.id,
+                        sync: !isModerated(),
                     });
                     if(isModerated()) {
                         store.dispatch('updateEntityDataModerations', {

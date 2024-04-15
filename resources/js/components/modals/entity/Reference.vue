@@ -263,6 +263,7 @@
 
     import {
         can,
+        getAttribute,
         getCertaintyClass,
         translateConcept,
     } from '@/helpers/helpers.js';
@@ -419,7 +420,7 @@
                     );
                 }),
                 editItem: {},
-                attribute: entity.value.data[aid].attribute,
+                attribute: getAttribute(aid),
                 references: computed(_ => entity.value.references[state.attribute.thesaurus_url]),
                 bibliography: computed(_ => store.getters.bibliography),
                 startCertainty: entity.value.data[aid].certainty,
@@ -470,8 +471,8 @@
                 closeModal,
                 // STATE
                 state,
-            }
+            };
 
         },
-    }
+    };
 </script>

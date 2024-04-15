@@ -52,6 +52,7 @@ All notable changes to this project will be documented in this file.
 - HTML content in comments
 - Adding comments without content to _Entity_
 - Storing _false_ values in _Boolean_ attribute
+- Adding references to a newly added/saved attribute value
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
