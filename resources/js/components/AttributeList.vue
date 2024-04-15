@@ -27,6 +27,7 @@
                         class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break"
                         :for="`attr-${element.id}`"
                         :class="attributeClasses(element)"
+                        @click="e => handleLabelClick(e, element.datatype)"
                     >
                         <div
                             v-show="!!state.hoverStates[index]"
@@ -536,10 +537,14 @@
                 return 'col-12';
             };
             const attributeClasses = attribute => {
-                return {
-                    'copy-handle': props.isSource.value && !attribute.isDisabled,
-                    'not-allowed-handle text-muted': attribute.isDisabled,
-                };
+                const classes = [];
+                if(props.isSource.value && !attribute.isDisabled) {
+                    classes.push('copy-handle');
+                }
+                if(attribute.isDisabled) {
+                    classes.push('not-allowed-handle', 'text-muted');
+                }
+                return classes;
             };
             const expandedClasses = i => {
                 let expClasses = {};
@@ -754,6 +759,11 @@
             const hasEmitter = which => {
                 return !!attrs[which];
             };
+            const handleLabelClick = (e, attrType) => {
+                if(attrType == 'boolean') {
+                    e.preventDefault();
+                }
+            };
             const convertEntityValue = (value, isMultiple) => {
                 let actValue = null;
                 if(value == '' || !value.value) {
@@ -869,6 +879,7 @@
                 onDeleteHandler,
                 onMetadataHandler,
                 hasEmitter,
+                handleLabelClick,
                 convertEntityValue,
                 // STATE
                 attrRefs,

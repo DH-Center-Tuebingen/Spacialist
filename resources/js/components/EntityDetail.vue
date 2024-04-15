@@ -825,6 +825,7 @@
                 for(let v in dirtyValues) {
                     const aid = v;
                     const data = state.entity.data[aid];
+                    const type = getAttribute(aid)?.datatype;
                     const patch = {
                         op: null,
                         value: null,
@@ -834,7 +835,11 @@
                     };
                     if(data.id) {
                         // if data.id exists, there has been an entry in the database, therefore it is a replace/remove operation
-                        if(dirtyValues[v] && dirtyValues[v] != '') {
+                        if(
+                            (dirtyValues[v] && dirtyValues[v] != '')
+                            ||
+                            (type == 'boolean' && dirtyValues[v] === false)
+                        ) {
                             // value is set, therefore it is a replace
                             patch.op = 'replace';
                             patch.value = dirtyValues[v];
