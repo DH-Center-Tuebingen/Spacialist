@@ -10,7 +10,7 @@
   position: relative !important;
 }
 
-.multiselect-wide > .multiselect-dropdown {
+.multiselect-wide>.multiselect-dropdown {
   width: 20vw;
 }
 
@@ -21,4 +21,9 @@
 // User list tag item
 .multiselect-tag-user {
   background-color: rgba(16, 185, 129, var(--bs-bg-opacity, 1));
+}
+
+.input-group .multiselect {
+  width: auto;
+  flex: 1;
 }

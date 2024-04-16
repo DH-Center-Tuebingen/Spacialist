@@ -1,239 +1,133 @@
 <template>
-    <div class="h-100 d-flex flex-column">
-        <h4 class="d-flex flex-row gap-2 align-items-center">
-            {{ t('main.importer.title') }}
-            <button
-                v-show="state.contentRead"
-                type="button"
-                class="btn btn-outline-danger btn-sm"
-                @click="removeFile()"
-            >
-                <i class="fas fa-fw fa-times" />
-                {{ t('global.remove_file') }}
-            </button>
-        </h4>
-        <div
-            v-if="state.contentRead"
-            class="col d-flex flex-column gap-2"
-        >
-            <csv-table
-                :content="state.content"
-                :small="true"
-                :linenumbers="true"
-                @parse="e => extractColumns(e)"
-            />
-            <div class="flex-grow-1 scroll-y-auto scroll-x-hidden">
-                <form
-                    id="import-data-form"
-                    class="row g-3"
-                    name="import-data-form"
-                    @submit.prevent="confirmImport()"
+    <div class="data-importer d-flex flex-column overflow-hidden">
+        <header>
+            <h4>{{ t(`main.importer.title`) }}</h4>
+        </header>
+        <div class="layout flex-grow-1 overflow-hidden">
+            <div class="file-preview d-flex flex-column overflow-hidden gap-4">
+                <file-upload
+                    v-if="!state.fileLoaded"
+                    :model="state.files"
+                    class="rounded border-dashed flex-grow-1 d-flex flex-column gap-2 justify-content-center align-items-center clickable"
+                    accept="text/plain,text/csv"
+                    extensions="dsv,csv,tsv"
+                    :directory="false"
+                    :multiple="false"
+                    :drop="true"
+                    @input-file="addFile"
                 >
-                    <div class="col-md-4 col-sm-12">
-                        <label
-                            for="import-entity-type"
-                            class="form-label"
-                        >
-                            {{ t('main.importer.selected_entity_type') }}
-                        </label>
-                        <multiselect
-                            id="import-entity-type"
-                            v-model="state.postData.entityType"
-                            :classes="multiselectResetClasslist"
-                            :value-prop="'id'"
-                            :label="'thesaurus_url'"
-                            :track-by="'id'"
-                            :object="true"
-                            :mode="'single'"
-                            :options="availableEntityTypes"
-                            :placeholder="t('global.select.placeholder')"
-                            :hide-selected="true"
-                            @select="onEntityTypeSelected"
-                        >
-                            <template #option="{ option }">
-                                {{ translateConcept(option.thesaurus_url) }}
-                            </template>
-                            <template #singlelabel="{ value }">
-                                <div class="multiselect-single-label">
-                                    {{ translateConcept(value.thesaurus_url) }}
-                                </div>
-                            </template>
-                        </multiselect>
+                    <div class="info fw-bold fs-5">
+                        {{ t('main.importer.drop_csv_file') }}
                     </div>
-                    <div class="col-md-4 col-sm-6">
-                        <label
-                            for="import-entity-name"
-                            class="form-label"
-                        >
-                            {{ t('main.importer.column_entity_name') }}
-                            <span
-                                v-if="state.stats.entityName.missing > 0"
-                                :title="t('main.importer.missing_required_values', {
-                                    miss: state.stats.entityName.missing,
-                                    total: state.stats.entityName.total,
-                                }, state.stats.entityName.total)"
-                            >
-                                <i class="fas fa-fw fa-exclamation-circle text-danger" />
-                            </span>
-                            <span
-                                v-else-if="state.stats.entityName.missing == 0"
-                                :title="t('main.importer.no_missing_values')"
-                            >
-                                <i class="fas fa-fw fa-check-circle text-success" />
-                            </span>
-                        </label>
-                        <multiselect
-                            id="import-entity-name"
-                            v-model="state.postData.entityName"
-                            :classes="multiselectResetClasslist"
-                            :object="false"
-                            :mode="'single'"
-                            :options="state.availableColumns"
-                            :placeholder="t('global.select.placeholder')"
-                            :hide-selected="true"
-                            @select="e => onColumnSelected(e, 'name', true)"
-                        />
-                    </div>
-                    <div class="col-md-4 col-sm-6">
-                        <label
-                            for="import-entity-parent"
-                            class="form-label"
-                        >
-                            {{ t('main.importer.column_entity_parent') }}
-                            <span
-                                v-if="state.stats.entityParent.missing > 0"
-                                :title="t('main.importer.missing_non_required_values', {
-                                    miss: state.stats.entityParent.missing,
-                                    total: state.stats.entityParent.total,
-                                }, state.stats.entityParent.total)"
-                            >
-                                <i class="fas fa-fw fa-exclamation-circle text-warning" />
-                            </span>
-                            <span
-                                v-else-if="state.stats.entityParent.missing == 0"
-                                :title="t('main.importer.no_missing_values')"
-                            >
-                                <i class="fas fa-fw fa-check-circle text-success" />
-                            </span>
-                        </label>
-                        <multiselect
-                            id="import-entity-parent"
-                            v-model="state.postData.entityParent"
-                            :classes="multiselectResetClasslist"
-                            :object="false"
-                            :mode="'single'"
-                            :options="state.availableColumns"
-                            :placeholder="t('global.select.placeholder')"
-                            :hide-selected="true"
-                            @select="e => onColumnSelected(e, 'parent', true)"
-                        />
-                    </div>
-                    <hr>
-                    <div class="col-6 col-sm-12" />
-                    <div
-                        v-if="state.postData.entityType"
-                        class="row"
+                </file-upload>
+                <csv-table
+                    v-else
+                    class="flex-grow-1"
+                    :content="state.content"
+                    :small="true"
+                    @parse="e => extractColumns(e)"
+                />
+                <footer>
+                    <button
+                        v-show="state.fileLoaded"
+                        type="button"
+                        class="btn btn-outline-danger btn-sm"
+                        @click="removeFile()"
                     >
-                        <template
-                            v-for="(attr, i) in state.availableAttributes"
-                            :key="i"
+                        <i class="fas fa-fw fa-times" />
+                        {{ t('global.remove_file') }}
+                    </button>
+                </footer>
+            </div>
+            <div class="controls">
+                <div class="card">
+                    <header :class="cardHeaderClasses">
+                        {{ t('main.importer.entity_settings') }}
+                        <div class="toolbox" />
+                    </header>
+                    <div class="card-body">
+                        <EntityImporterSettings
+                            v-if="state.fileLoaded"
+                            v-model:entityType="entitySettings.entityType"
+                            v-model:entityName="entitySettings.entityName"
+                            v-model:entityParent="entitySettings.entityParent"
+                            :stats="state.stats"
+                            :available-entity-types="availableEntityTypes"
+                            :available-columns="state.availableColumns"
+                            @update:entity-name="onNameColumnChanged"
+                            @update:entity-parent="onParentColumnChanged"
+                        />
+                        <div
+                            v-else
+                            class="alert alert-primary"
                         >
-                            <div class="col-md-3 col-sm-6 d-flex align-items-center justify-content-end gap-2">
-                                <span
-                                    v-if="state.stats.attributes[attr.id] && state.stats.attributes[attr.id].missing > 0"
-                                    :title="t('main.importer.missing_non_required_values', {
-                                        miss: state.stats.attributes[attr.id].missing,
-                                        total: state.stats.attributes[attr.id].total,
-                                    }, state.stats.attributes[attr.id].total)"
-                                >
-                                    <i class="fas fa-fw fa-exclamation-circle text-warning" />
-                                </span>
-                                <span
-                                    v-else-if="state.stats.attributes[attr.id] && state.stats.attributes[attr.id].missing == 0"
-                                    :title="`You are all set. No missing values for this option.`"
-                                >
-                                    <i class="fas fa-fw fa-check-circle text-success" />
-                                </span>
-                                <span class="text-body">
-                                    {{ translateConcept(attr.thesaurus_url) }}
-                                </span>
-                                <span class="text-muted small">
-                                    {{ t(`global.attributes.${attr.datatype}`) }}
-                                </span>
-                            </div>
-                            <div class="col-md-3 col-sm-6">
-                                <multiselect
-                                    :id="`input-data-column-${attr.id}`"
-                                    v-model="state.postData.attributes[attr.id]"
-                                    :classes="multiselectResetClasslist"
-                                    :object="false"
-                                    :mode="'single'"
-                                    :options="state.availableColumns"
-                                    :placeholder="t('global.select.placeholder')"
-                                    :hide-selected="true"
-                                    @select="e => onColumnSelected(e, attr.id)"
-                                />
-                            </div>
-                            <hr
-                                v-if="i % 2 == 1"
-                                class="my-3"
-                            >
-                        </template>
+                            {{ t("main.importer.info.entity_settings_require_file") }}
+                        </div>
                     </div>
-                </form>
+                </div>
+                <div class="card">
+                    <header :class="cardHeaderClasses">
+                        {{ t('main.importer.attribute_mapping') }}
+                        <div class="toolbox" />
+                    </header>
+                    <div class="card-body">
+                        <EntityAttributeMapping
+                            v-if="state.fileLoaded && !!entitySettings.entityType"
+                            v-model:attribute-mapping="attributeSettings.mapping"
+                            :available-columns="state.availableColumns"
+                            :available-attributes="state.availableAttributes"
+                            :stats="state.stats"
+                            @row-changed="onAttributeMappingSelected"
+                        />
+                        <div
+                            v-else-if="!state.fileLoaded"
+                            class="alert alert-primary"
+                        >
+                            {{ t("main.importer.info.entity_settings_require_file") }}
+                        </div>
+                        <div
+                            v-else
+                            class="alert alert-primary"
+                        >
+                            {{ t("main.importer.info.entity_type_has_no_attributes") }}
+                        </div>
+                    </div>
+                </div>
+                <footer class="d-flex align-items-center justify-content-between">
+                    <span class="status text-danger">
+                        {{ state.error }}
+                    </span>
+                    <LoadingButton
+                        :loading="state.uploading"
+                        class="btn btn-primary"
+                        :disabled="!canImport"
+                        @click="confirmImport"
+                    >
+                        {{ t(`main.importer.import_btn`) }}
+                    </LoadingButton>
+                </footer>
             </div>
-            <div>
-                <button
-                    type="submit"
-                    class="btn btn-outline-primary"
-                    form="import-data-form"
-                    :disabled="state.dataMissing"
-                >
-                    {{ t('main.importer.import_btn') }}
-                </button>
-            </div>
-        </div>
-        <div
-            v-else
-            class="col d-flex flex-column gap-2"
-        >
-            <alert
-                :message="t('main.importer.upload_csv_info')"
-                :type="'info'"
-                :icontext="t('global.information')"
-            />
-            <file-upload
-                :ref="el => attrRef = el"
-                v-model="state.files"
-                class="rounded border-dashed flex-grow-1 d-flex flex-column gap-2 justify-content-center align-items-center clickable"
-                accept="text/plain,text/csv"
-                extensions="dsv,csv,tsv"
-                :directory="false"
-                :multiple="false"
-                :drop="true"
-                @input-file="addFile"
-            >
-                <i class="fas fa-fw fa-file-upload fa-5x" />
-                <h5>
-                    {{ t('main.importer.drop_csv_file') }}
-                </h5>
-            </file-upload>
         </div>
     </div>
 </template>
+
 
 <script>
     import {
         computed,
         reactive,
         ref,
-        onMounted,
         watch,
     } from 'vue';
 
-    import store from '@/bootstrap/store.js';
-    import { useI18n } from 'vue-i18n';
+    import VueUploadComponent from 'vue-upload-component';
+    import CsvTable from '../CsvTable.vue';
+    import EntityImporterSettings from '@/components/tools/importer/EntityImporterSettings.vue';
+    import EntityAttributeMapping from '../tools/importer/EntityAttributeMapping.vue';
 
+    import store from '@store';
+
+    import { useI18n } from 'vue-i18n';
     import { useToast } from '@/plugins/toast.js';
 
     import {
@@ -241,71 +135,126 @@
     } from '@/api.js';
 
     import {
-        translateConcept,
-        multiselectResetClasslist,
-    } from '@/helpers/helpers.js';
-
-    import {
         showImportError,
     } from '@/helpers/modal.js';
+    import {
+        useOptionalLocalStorage
+    } from '../../composables/local-storage';
+    import { onMounted } from 'vue';
+    import LoadingButton from '../forms/button/LoadingButton.vue';
 
     export default {
+        components: {
+            CsvTable,
+            FileUpload: VueUploadComponent,
+            EntityImporterSettings,
+            EntityAttributeMapping,
+            LoadingButton
+        },
         setup(props, context) {
             const { t } = useI18n();
             const toast = useToast();
-            // FETCH
 
             // FUNCTIONS
+
+            const fileReader = new FileReader();
+            fileReader.onload = e => {
+                state.fileLoaded = true;
+                state.content = e.target.result;
+                state.error = '';
+
+                fileContent.value = e.target.result;
+                console.log(e.target.result, fileContent);
+                saveFileContent();
+            };
+
+            fileReader.onerror = e => {
+                resetFileReader(t('main.importer.file_read'));
+            };
+
+            fileReader.onabort = e => {
+                resetFileReader(t('main.importer.file_read_abort'));
+            };
+
+            function resetFileReader(error = '') {
+                state.content = '';
+                state.fileLoaded = false;
+                state.error = error;
+            }
+
             const readContent = _ => {
                 if(!state.files || state.files.length == 0) {
-                    state.content = '';
-                    state.contentRead = false;
+                    resetFileReader();
                 } else {
                     fileReader.readAsText(state.files[0].file);
                 }
             };
+
+
             const extractColumns = data => {
                 state.availableColumns = data.header;
                 state.fileData = data.data;
                 state.fileDelimiter = data.delimiter;
             };
             const onEntityTypeSelected = e => {
-                state.availableAttributes = store.getters.entityTypeAttributes(e.id);
+                if(!e || isNaN(e.id)) {
+                    state.availableAttributes = [];
+                    return;
+                } else {
+                    state.availableAttributes = store.getters.entityTypeAttributes(e.id) || [];
+                }
             };
-            const onColumnSelected = (e, key, isNonAttribute = false) => {
-                const emptyValues = state.fileData.filter(fd => fd[e] == '');
-                const stats = {
+
+
+            const onNameColumnChanged = attributeValue => {
+                const stats = determineColumnStats(attributeValue);
+                state.stats.entityName = stats;
+            };
+
+            const onParentColumnChanged = attributeValue => {
+                const stats = determineColumnStats(attributeValue);
+                state.stats.entityParent = stats;
+            };
+
+            const onAttributeMappingSelected = (attributeId, attributeValue) => {
+                const stats = determineColumnStats(attributeValue);
+                state.stats.attributes[attributeId] = stats;
+            };
+
+            const determineColumnStats = (columnName) => {
+                if(state.availableColumns.indexOf(columnName) == -1) {
+                    return {
+                        missing: 0,
+                        total: 0,
+                    };
+                }
+
+                const emptyValues = state.fileData.filter(fd => fd[columnName] == '');
+                return {
                     missing: emptyValues.length,
                     total: state.fileData.length,
                 };
-                if(isNonAttribute) {
-                    if(key == 'name') {
-                        state.stats.entityName = stats;
-                    } else if(key == 'parent') {
-                        state.stats.entityParent = stats;
-                    }
-                } else {
-                    state.stats.attributes[key] = stats;
-                }
             };
+
             const confirmImport = _ => {
+                state.uploading = true;
                 const data = new FormData();
                 data.append('file', state.files[0].file);
                 data.append('metadata', JSON.stringify({
                     delimiter: state.fileDelimiter,
                 }));
                 const postData = {
-                    name_column: state.postData.entityName,
-                    entity_type_id: state.postData.entityType.id,
-                    attributes: state.postData.attributes,
+                    name_column: entitySettings.entityName,
+                    entity_type_id: entitySettings.entityType.id,
+                    attributes: attributeSettings.mapping,
                 };
-                if(!!state.postData.entityParent) {
-                    postData['parent_column'] = state.postData.entityParent;
+                if(!!entitySettings.entityParent) {
+                    postData['parent_column'] = entitySettings.entityParent;
                 }
                 data.append('data', JSON.stringify(postData));
 
                 importEntityData(data).then(data => {
-                    for(let i=0; i<data.length; i++) {
+                    for(let i = 0; i < data.length; i++) {
                         store.dispatch('addEntity', data[i]);
                     }
                     toast.$toast(t('main.importer.success', {
@@ -322,92 +271,174 @@
                         message: e.response.data.error,
                         data: e.response.data.data,
                     });
+                }).finally(_ => {
+                    state.uploading = false;
                 });
             };
-            const addFile = (newFile, oldFile) => {
-                // if(Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error) {
-                //     state.fileList.push(newFile);
-                // }
+            const addFile = (file) => {
+                if(file) {
+                    state.files = [file];
+                    readContent();
+                }
             };
+
+            const storageSettings = {
+                fileContent: false,
+                entitySettings: false,
+                attributeMapping: false,
+            };
+
+            // DATA
+
+            const {
+                value: fileContent,
+                reset: resetFileContent,
+                save: saveFileContent
+            } = useOptionalLocalStorage(
+                storageSettings.fileContent,
+                'importer_file_content', '');
+
+            const {
+                value: entitySettings,
+                reset: resetEntitySettings
+            } = useOptionalLocalStorage(
+                storageSettings.entitySettings,
+                'importer_entity_settings', {
+                entityType: null,
+                entityName: null,
+                entityParent: null,
+            });
+
+            const {
+                value: attributeSettings,
+                reset: resetAttributeSettings
+            } = useOptionalLocalStorage(
+                storageSettings.attributeMapping,
+                'importer_attribute_mapping', {
+                autoComplete: true,
+                mapping: {},
+            });
+
+
+
             const removeFile = _ => {
                 state.files = [];
                 state.fileData = [];
                 state.content = '';
-                state.contentRead = false;
+                state.error = '';
+                state.fileLoaded = false;
                 state.availableColumns = [];
                 state.availableAttributes = [];
-                state.stats.entityName = '';
-                state.stats.entityParent = '';
+                state.stats.entityName = { missing: 0, total: 0 };
+                state.stats.entityParent = { missing: 0, total: 0 };
                 state.stats.attributes = {};
-                state.postData.entityType = null;
-                state.postData.entityName = null;
-                state.postData.entityParent = null;
-                state.postData.attributes = {};
+
+                resetFileContent();
+                resetEntitySettings();
+                resetAttributeSettings();
             };
 
-            // DATA
-            const fileReader = new FileReader();
-            fileReader.onload = e => {
-                state.content = e.target.result;
-                state.contentRead = true;
-            };
-            const attrRef = ref({});
-            const availableEntityTypes = Object.values(store.getters.entityTypes);
+            const availableEntityTypes = computed(() => Object.values(store.getters.entityTypes));
             const state = reactive({
                 files: [],
                 fileData: [],
                 fileDelimiter: '',
-                content: '',
-                contentRead: false,
+                content: fileContent,
+                fileLoaded: false,
                 availableColumns: [],
                 availableAttributes: [],
                 stats: {
-                    entityName: '',
-                    entityParent: '',
-                    attributes: {},
-                },
-                postData: {
-                    entityType: null,
-                    entityName: null,
-                    entityParent: null,
+                    entityName: { missing: 0, total: 0 },
+                    entityParent: { missing: 0, total: 0 },
                     attributes: {},
                 },
                 dataMissing: computed(_ => {
-                    return !state.postData.entityType || !state.postData.entityName || state.stats.entityName.missing > 0;
+                    return !entitySettings.entityType || !entitySettings.entityName || state.stats.entityName.missing > 0;
                 }),
+                uploading: false,
             });
 
-            onMounted(_ => {
-                readContent();
-            });
-
-            watch(_ => state.files,
-                async(newValue, oldValue) => {
-                    if(newValue) {
-                        readContent();
-                    }
+            onMounted(() => {
+                if(fileContent.value) {
+                    state.fileLoaded = true;
                 }
-            );
+            });
+
+            watch(() => entitySettings.entityType, entityType => {
+                onEntityTypeSelected(entityType);
+            });
+
+            const canImport = computed(_ => {
+                return state.fileLoaded && !state.dataMissing;
+            });
+
+            const cardHeaderClasses = ['card-header', 'd-flex', 'justify-content-between'];
+
 
             // RETURN
             return {
                 t,
-                // HELPERS
-                translateConcept,
-                multiselectResetClasslist,
                 // LOCAL
+                canImport,
+                cardHeaderClasses,
                 extractColumns,
                 onEntityTypeSelected,
-                onColumnSelected,
+                onAttributeMappingSelected,
+                onNameColumnChanged,
+                onParentColumnChanged,
                 confirmImport,
                 addFile,
                 removeFile,
                 // PROPS
                 // STATE
-                attrRef,
                 availableEntityTypes,
                 state,
+                entitySettings,
+                attributeSettings,
+                storageSettings,
             };
         },
-    }
+    };
 </script>
+
+<style>
+    .data-importer {
+
+        th,
+        td {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 10rem;
+        }
+
+        .table-responsive {
+            overflow-x: visible !important;
+        }
+    }
+</style>
+
+
+<style scoped>
+    .controls {
+        display: grid;
+        grid-template-columns: minmax(1fr);
+        grid-template-rows: min-content minmax(min-content, 1fr) minmax(min-content, 1rem);
+        gap: 1rem;
+    }
+
+    .data-importer {
+        height: 100%;
+        background-color: whitesmoke;
+    }
+
+    .layout {
+        display: grid;
+        grid-template-columns: 2fr minmax(300px, 1fr);
+        gap: 1rem;
+    }
+
+    .file-preview {
+        max-height: 100%;
+    }
+</style>

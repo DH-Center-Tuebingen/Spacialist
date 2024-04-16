@@ -100,6 +100,11 @@
                 "stop": "Aufnahme beenden"
             }
         },
+        "paginator": {
+            "count": "Anzahl",
+            "of": "von",
+            "skip": "Ab"
+        },
         "settings": {
             "title": "Einstellungen",
             "users": "Benutzerverwaltung",
@@ -302,12 +307,14 @@
         "csv": {
             "uploader": {
                 "title": "CSV-Uploader",
+                "settings_title": "CSV-Einstellungen",
                 "delimiter": "Trennzeichen",
                 "delimiter_with_info": "Trennzeichen (',', ';', …)",
-                "has_header": "Hat eine Kopfzeile?",
-                "show_linenumbers": "Zeilennummern anzeigen",
+                "has_header": "Kopfzeile",
+                "show_linenumbers": "Zeilennum.",
                 "nr_of_shown_rows": "Anzahl der angezeigten Zeilen",
-                "nr_of_skipped_rows": "Anzahl der übersprungenen Zeilen"
+                "nr_of_skipped_rows": "Anzahl der übersprungenen Zeilen",
+                "eof": "End of File"
             },
             "picker": {
                 "title": "CSV-Auswahl"
@@ -761,16 +768,31 @@
         },
         "importer": {
             "title": "Daten-Importer",
+            "entity_settings": "Entitätseinstellungen",
+            "attribute_mapping": "Attribut-Zuordnung",
             "upload_csv_info": "Wähle eine CSV-Datei aus um Daten zum importieren.",
             "drop_csv_file": "CSV-Datei hier ablegen",
             "selected_entity_type": "Entitätstyp",
             "column_entity_name": "Entitätsname-Spalte",
             "column_entity_parent": "Übergeordnete Entität-Spalte",
             "import_btn": "Starte Datenimport",
+            "validate": "Validieren",
             "no_missing_values": "Keine fehlenden Werte. Du kannst loslegen!",
             "missing_required_values": "{miss} von 1 Eintrag ist leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das. | {miss} von {total} Einträgen sind leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das.",
             "missing_non_required_values": "{miss} von 1 Eintrag ist leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen. | {miss} von {total} Einträgen sind leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen.",
-            "success": "Import von 1 Eintrag abgeschlossen | Import von {cnt} Einträgen abgeschlossen"
+            "success": "Import von 1 Eintrag abgeschlossen | Import von {cnt} Einträgen abgeschlossen",
+            "indicator": {
+                "missing_value": "Kein Wert gesetzt",
+                "ok": "Dieser Wert ist korrekt"
+            },
+            "info": {
+                "entity_settings_require_file": "Noch keine Datei hochgeladen",
+                "entity_type_has_no_attributes": "Keine Attribute vorhanden. Bitte wählen Sie einen passenden Entitätstyp aus."
+            },
+            "error": {
+                "file_read": "Datei konnte nicht gelesen werden.",
+                "file_read_abort": "Datei-Lesevorgang abgebrochen."
+            }
         },
         "map": {
             "init_error": "Mehrere init-*-Attribute gesetzt. Es darf nur eines gesetzt sein.",
@@ -808,5 +830,12 @@
                 }
             }
         }
+    },
+    "keyboard": {
+        "tab": "Tab",
+        "space": "Leertaste"
+    },
+    "storage": {
+        "save_to_local_toggle": "Aktiviere, falls du die Werte lokal speichern möchtest."
     }
 }
