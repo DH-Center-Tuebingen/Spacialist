@@ -29,6 +29,7 @@
             </div>
             <multiselect
                 :id="`input-data-column-${attr.id}`"
+                :disabled="disabled"
                 :value="attributeMapping[attr.id]"
                 :classes="multiselectResetClasslist"
                 :object="false"
@@ -61,6 +62,10 @@
             ValuesMissingIndicator
         },
         props: {
+            disabled: {
+                type: Boolean,
+                required: true,
+            },
             attributeMapping: {
                 type: Object,
                 required: true,

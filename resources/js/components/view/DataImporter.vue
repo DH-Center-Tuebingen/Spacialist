@@ -50,10 +50,11 @@
                             v-if="state.fileLoaded"
                             v-model:entityType="entitySettings.entityType"
                             v-model:entityName="entitySettings.entityName"
-                            v-model:entityParent="entitySettings.entityParent"
+                            v-model:entity-parent="entitySettings.entityParent"
                             :stats="state.stats"
                             :available-entity-types="availableEntityTypes"
                             :available-columns="state.availableColumns"
+                            :disabled="state.uploading"
                             @update:entity-name="onNameColumnChanged"
                             @update:entity-parent="onParentColumnChanged"
                         />
@@ -77,6 +78,7 @@
                             :available-columns="state.availableColumns"
                             :available-attributes="state.availableAttributes"
                             :stats="state.stats"
+                            :disabled="state.uploading"
                             @row-changed="onAttributeMappingSelected"
                         />
                         <div
@@ -100,7 +102,7 @@
                     <LoadingButton
                         :loading="state.uploading"
                         class="btn btn-primary"
-                        :disabled="!canImport"
+                        :disabled="!canImport || state.uploading"
                         @click="confirmImport"
                     >
                         {{ t(`main.importer.import_btn`) }}
@@ -116,16 +118,17 @@
     import {
         computed,
         reactive,
-        ref,
         watch,
     } from 'vue';
+
+    import store from '%store';
+
+    import { stringSimilarity } from 'string-similarity-js';
 
     import VueUploadComponent from 'vue-upload-component';
     import CsvTable from '../CsvTable.vue';
     import EntityImporterSettings from '@/components/tools/importer/EntityImporterSettings.vue';
     import EntityAttributeMapping from '../tools/importer/EntityAttributeMapping.vue';
-
-    import store from '@store';
 
     import { useI18n } from 'vue-i18n';
     import { useToast } from '@/plugins/toast.js';
@@ -137,11 +140,17 @@
     import {
         showImportError,
     } from '@/helpers/modal.js';
+
+    import {
+        translateConcept,
+    } from '@/helpers/helpers.js';
+
     import {
         useOptionalLocalStorage
     } from '../../composables/local-storage';
     import { onMounted } from 'vue';
     import LoadingButton from '../forms/button/LoadingButton.vue';
+    import { nextTick } from 'process';
 
     export default {
         components: {
@@ -149,11 +158,24 @@
             FileUpload: VueUploadComponent,
             EntityImporterSettings,
             EntityAttributeMapping,
-            LoadingButton
+            LoadingButton,
+        },
+        props: {
+            debug: {
+                type: Boolean,
+                required: false,
+                default: false
+            },
         },
         setup(props, context) {
             const { t } = useI18n();
-            const toast = useToast();
+
+            let toast = null;
+            onMounted(() => {
+                nextTick(() => {
+                    toast = useToast();
+                });
+            });
 
             // FUNCTIONS
 
@@ -164,7 +186,6 @@
                 state.error = '';
 
                 fileContent.value = e.target.result;
-                console.log(e.target.result, fileContent);
                 saveFileContent();
             };
 
@@ -190,12 +211,98 @@
                 }
             };
 
-
             const extractColumns = data => {
                 state.availableColumns = data.header;
                 state.fileData = data.data;
                 state.fileDelimiter = data.delimiter;
+
+
+                /**
+                 * Required for the multselect to work properly.
+                 */
+                nextTick(() => {
+                    guessNameColumn();
+                    guessParentColumn();
+                    guessAttributeMapping();
+                });
+
             };
+
+            const minimumGuessScore = 0.5;
+
+            const guessFrom = function (arr, target) {
+                const bestMatch = {
+                    col: null,
+                    score: 0,
+                };
+                for(const col of arr) {
+                    const score = stringSimilarity(target, col);
+                    if(score > bestMatch.score) {
+                        bestMatch.col = col;
+                        bestMatch.score = score;
+                    }
+                }
+
+                return bestMatch;
+            };
+
+            const guessEntitySetting = (reactive, key, nameList, callback) => {
+
+                const setAndAvailable = Boolean(reactive[key] && state.availableColumns.indexOf(reactive[key]) != -1);
+
+                // If the parent column is already set and available, we don't need to guess
+                if(setAndAvailable) {
+                    return;
+                }
+
+                // If the parent column is not available (anymore), we need to reset it
+                if(!setAndAvailable && reactive[key]) {
+                    reactive[key] = null;
+                    return;
+                }
+
+                let bestGuess = {
+                    col: null,
+                    score: 0,
+                };
+                for(const name of nameList) {
+                    const guess = guessFrom(state.availableColumns, name);
+                    if(guess.score > bestGuess.score) {
+                        bestGuess = guess;
+                    }
+                }
+                if(bestGuess.col && bestGuess.score > minimumGuessScore) {
+                    reactive[key] = bestGuess.col;
+                    callback(bestGuess.col);
+                }
+
+                return bestGuess;
+            };
+
+            const guessNameColumn = _ => {
+                guessEntitySetting(entitySettings, 'entityName', ['name', 'key'], onNameColumnChanged);
+            };
+
+            const guessParentColumn = _ => {
+                guessEntitySetting(entitySettings, 'entityParent', ['parent', 'path'], onParentColumnChanged);
+            };
+
+            const guessAttributeMapping = _ => {
+                for(const attr of state.availableAttributes) {
+                    if(attributeSettings.mapping[attr.id]) {
+                        continue;
+                    }
+
+                    const name = translateConcept(attr.thesaurus_url);
+                    const bestGuess = guessFrom(state.availableColumns, name);
+
+                    if(bestGuess.col && bestGuess.score > minimumGuessScore) {
+                        attributeSettings.mapping[attr.id] = bestGuess.col;
+                        onAttributeMappingSelected(attr.id, bestGuess.col);
+                    }
+                }
+            };
+
             const onEntityTypeSelected = e => {
                 if(!e || isNaN(e.id)) {
                     state.availableAttributes = [];
@@ -203,15 +310,15 @@
                 } else {
                     state.availableAttributes = store.getters.entityTypeAttributes(e.id) || [];
                 }
+                guessAttributeMapping();
             };
-
 
             const onNameColumnChanged = attributeValue => {
                 const stats = determineColumnStats(attributeValue);
                 state.stats.entityName = stats;
             };
 
-            const onParentColumnChanged = attributeValue => {
+            const onParentColumnChanged = (attributeValue) => {
                 const stats = determineColumnStats(attributeValue);
                 state.stats.entityParent = stats;
             };
@@ -283,9 +390,9 @@
             };
 
             const storageSettings = {
-                fileContent: false,
-                entitySettings: false,
-                attributeMapping: false,
+                fileContent: props.debug,
+                entitySettings: props.debug,
+                attributeMapping: props.debug,
             };
 
             // DATA
@@ -318,8 +425,6 @@
                 autoComplete: true,
                 mapping: {},
             });
-
-
 
             const removeFile = _ => {
                 state.files = [];
@@ -373,7 +478,6 @@
             });
 
             const cardHeaderClasses = ['card-header', 'd-flex', 'justify-content-between'];
-
 
             // RETURN
             return {

@@ -9,17 +9,17 @@
             </label>
             <multiselect
                 id="import-entity-type"
-                :value="entityType"
                 :classes="multiselectResetClasslist"
-                :value-prop="'id'"
+                :disabled="disabled"
+                :hide-selected="true"
                 :label="'thesaurus_url'"
-                :track-by="'id'"
                 :object="true"
-                :mode="'single'"
                 :options="availableEntityTypes"
                 :placeholder="t('global.select.placeholder')"
-                :hide-selected="true"
                 :searchable="true"
+                :track-by="'id'"
+                :value-prop="'id'"
+                :value="entityType"
                 @change="value => $emit('update:entityType', value)"
             >
                 <template #option="{ option }">
@@ -49,14 +49,13 @@
             </label>
             <multiselect
                 id="import-entity-name"
-                :value="entityName"
                 :classes="multiselectResetClasslist"
-                :object="false"
-                :mode="'single'"
+                :disabled="disabled"
+                :hide-selected="true"
                 :options="availableColumns"
                 :placeholder="t('global.select.placeholder')"
-                :hide-selected="true"
                 :searchable="true"
+                :value="entityName"
                 @change="value => $emit('update:entityName', value)"
             />
         </div>
@@ -74,15 +73,14 @@
             </label>
             <multiselect
                 id="import-entity-parent"
-                :value="entityParent"
                 :classes="multiselectResetClasslist"
-                :object="false"
-                :mode="'single'"
+                :disabled="disabled"
+                :hide-selected="true"
+                :value="entityParent"
                 :options="availableColumns"
                 :placeholder="t('global.select.placeholder')"
-                :hide-selected="true"
                 :searchable="true"
-                @change="value => $emit('update:entityParent', value)"
+                @change="(value) => $emit('update:entityParent', value, entityParent)"
             />
         </div>
     </div>
@@ -105,6 +103,10 @@
             ValuesMissingIndicator
         },
         props: {
+            disabled: {
+                type: Boolean,
+                default: false,
+            },
             stats: {
                 type: Object,
                 required: true,

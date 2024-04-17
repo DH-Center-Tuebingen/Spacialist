@@ -190,17 +190,21 @@
             watch(_ => props.content.value, _ => {
                 recomputeRows();
             });
-            watch(_ => state.dsv, _ => {
-                recomputeRows();
+
+            watch(_ => csvSettings.hasHeaderRow, (newVal, oldVal) => {
+                if(oldVal !== newVal) {
+                    recomputeRows();
+                }
             });
-            watch(_ => csvSettings.hasHeaderRow, _ => {
-                recomputeRows();
+            watch(_ => csvSettings.showCount, (newVal, oldVal) => {
+                if(oldVal !== newVal) {
+                    recomputeRows(true);
+                }
             });
-            watch(_ => csvSettings.showCount, _ => {
-                recomputeRows(true);
-            });
-            watch(_ => csvSettings.skippedCount, _ => {
-                recomputeRows(true);
+            watch(_ => csvSettings.skippedCount, (newVal, oldVal) => {
+                if(oldVal !== newVal) {
+                    recomputeRows(true);
+                }
             });
             const cellClass = 'px-2 py-1';
             // RETURN

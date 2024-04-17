@@ -5,15 +5,19 @@ function resetToDefault(storage, defaultValue) {
     return Object.assign(storage, defaultValue);
 }
 
-export function useLocalStorage(name, defaultValue = {}) {
+function isRef(value) {
+    return (typeof value !== 'object');
+}
 
+function getRefValue(value) {
+    return isRef(value) ? ref(value) : reactive(value);
+}
+
+export function useLocalStorage(name, defaultValue = {}) {
+    const _isRef = isRef(defaultValue);
 
     let loaded = false;
-    const storage = isRef() ? ref(defaultValue) : reactive(defaultValue);
-
-    function isRef() {
-        return (typeof defaultValue !== 'object');
-    }
+    const storage = getRefValue(defaultValue);
 
     function load() {
         const data = localStorage.getItem(name);
@@ -28,8 +32,7 @@ export function useLocalStorage(name, defaultValue = {}) {
                 // the structure of the stored value.
 
 
-                if(!isRef()) {
-                    console.log('Merging', defaultValue, parsedData);
+                if(!_isRef) {
                     parsedData = { ...defaultValue, ...parsedData };
                 }
             } catch(e) {
@@ -39,18 +42,15 @@ export function useLocalStorage(name, defaultValue = {}) {
             parsedData = defaultValue;
         }
 
-        if(isRef()) {
+        if(_isRef) {
             storage.value = parsedData.value;
         } else {
             Object.assign(storage, parsedData);
-            if(parsedData.delimiter)
-                console.log('DELIMITER LOADED', parsedData.delimiter);
         }
     }
 
     onMounted(() => {
         load();
-        console.log('Loaded ' + name, storage);
         loaded = true;
     });
 
@@ -88,7 +88,7 @@ export function useOptionalLocalStorage(use, name, defaultValue = {}, ...args) {
     if(use) {
         return useLocalStorage(name, defaultValue, ...args);
     } else {
-        const value = reactive(defaultValue);
+        const value = getRefValue(defaultValue);
         return {
             load: _ => { },
             save: _ => { },

@@ -2,11 +2,14 @@
     <button
         class="btn"
         role="button"
+        :disabled="loading"
     >
-        <i
+        <span
             v-if="loading"
-            class="fas fa-fw fa-notch fa-spin"
-        />
+            class="me-1"
+        >
+            <i class="fas fa-fw fa-circle-notch fa-spin" />
+        </span>
         <slot />
     </button>
 </template>

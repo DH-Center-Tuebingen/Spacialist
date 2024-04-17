@@ -31,7 +31,8 @@ export default ({ mode }) => {
         resolve: {
             alias: {
                 '@': path.resolve(import.meta.dirname, './resources/js/'),
-                '@store': path.resolve(import.meta.dirname, './resources/js/bootstrap/store.js'),
+                '%store': path.resolve(import.meta.dirname, './resources/js/bootstrap/store.js'),
+                '%router': path.resolve(import.meta.dirname, './resources/js/bootstrap/router.js'),
             },
         },
     };
