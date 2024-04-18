@@ -662,14 +662,15 @@
             },
             "build_info": "Built with <i class=\"fab fa-fw fa-laravel\"></i> & <i class=\"fab fa-fw fa-vuejs\"></i>!",
             "contributor": "Contributor | Contributors",
+            "former_contributor": "Former",
             "roles": {
                 "development": "Development",
                 "development_lead": "Development Lead",
+                "support": "Support",
                 "support_development": "Development Support",
                 "support_database": "Database Support",
                 "support_archaeology": "Archaeological Support",
-                "project_lead": "Project Lead",
-                "project_lead_former": "Former Project Lead"
+                "project_lead": "Project Lead"
             }
         },
         "bibliography": {

@@ -63,17 +63,52 @@
                     </dd>
                 </dl>
                 <hr>
-                <h5>{{ t('main.about.contributor', 2) }}</h5>
+                <h5 class="mb-1">
+                    {{ t('main.about.contributor', 2) }}
+                </h5>
                 <div class="row gy-1">
                     <div
-                        v-for="contributor in contributors"
+                        v-for="contributor in contributors.active"
                         :key="contributor.name"
                         class="col-md-6 d-flex flex-column align-items-start"
                     >
                         <span>
                             {{ contributor.name }}
                         </span>
-                        <span class="badge bg-primary">
+                        <span class="badge bg-primary text-line">
+                            {{ transJoin(contributor.roles) }}
+                        </span>
+                    </div>
+                </div>
+                <h5 class="mt-3 mb-1">
+                    {{ t('main.about.former_contributor', 2) }}
+                    <small>
+                        <a
+                            href=""
+                            @click.prevent="toggleFormer()"
+                        >
+                            <span v-show="state.showFormer">
+                                <i class="fas fa-fw fa-eye" />
+                            </span>
+                            <span v-show="!state.showFormer">
+                                <i class="fas fa-fw fa-eye-slash" />
+                            </span>
+                        </a>
+                    </small>
+                </h5>
+                <div
+                    v-if="state.showFormer"
+                    class="row gy-1"
+                >
+                    <div
+                        v-for="contributor in contributors.former"
+                        :key="contributor.name"
+                        class="col-md-6 d-flex flex-column align-items-start"
+                    >
+                        <span>
+                            {{ contributor.name }}
+                        </span>
+                        <span class="badge bg-secondary text-line">
                             {{ transJoin(contributor.roles) }}
                         </span>
                     </div>
@@ -138,16 +173,20 @@
             const { t } = useI18n();
 
             // FUNCTIONS
-            const closeModal = _ => {
-                context.emit('closing', false);
-            }
+            const toggleFormer = _ => {
+                state.showFormer = !state.showFormer;
+            };
             const transJoin = roles => {
                 return join(roles.map(rn => t(`main.about.roles.${rn}`)));
-            }
+            };
+            const closeModal = _ => {
+                context.emit('closing', false);
+            };
 
             // DATA
             const contributors = getContributors();
             const state = reactive({
+                showFormer: false,
                 version: computed(_ => store.getters.version),
             });
 
@@ -160,8 +199,9 @@
                 // PROPS
                 // LOCAL
                 contributors,
-                closeModal,
+                toggleFormer,
                 transJoin,
+                closeModal,
                 // STATE
                 state,
             }
