@@ -38,6 +38,7 @@ All notable changes to this project will be documented in this file.
 - Moving entity in tree created a temporary duplicate
 - Truncate long texts in csv preview
 - Entity Types in Data-Model-Editor not scrollable
+- Scroll to entity in tree after selected (e.g. from a linked geometry on map or _Entity_ attribute)
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow

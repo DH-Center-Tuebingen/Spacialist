@@ -918,6 +918,13 @@
                         content: state.hiddenAttributeListing,
                     });
                 }
+                const eid = route.params.id;
+                const treeElem = document.getElementById(`tree-node-${eid}`);
+                if(treeElem) {
+                    treeElem.scrollIntoView({
+                        behavior: 'smooth',
+                    });
+                }
             });
 
             onBeforeUpdate(_ => {
