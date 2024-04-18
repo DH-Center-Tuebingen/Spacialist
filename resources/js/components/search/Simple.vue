@@ -195,7 +195,7 @@
                 }
             };
             const handleSelection = option => {
-                let data = {}
+                let data = {};
                 if(option) {
                     if(mode.value == 'single') {
                         data = {
@@ -206,7 +206,7 @@
                         data = {
                             values: option,
                             added: true,
-                        }
+                        };
                     }
                 } else {
                     data.removed = true;

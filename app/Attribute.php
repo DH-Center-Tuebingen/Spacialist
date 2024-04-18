@@ -24,6 +24,11 @@ class Attribute extends Model
         'parent_id',
         'recursive',
         'root_attribute_id',
+        'restrictions',
+    ];
+
+    protected $casts = [
+        'restrictions' => 'array',
     ];
 
     public function getActivitylogOptions() : LogOptions

@@ -859,9 +859,10 @@
                 }
                 return patchAttributes(state.entity.id, patches).then(data => {
                     undirtyList(grps);
-                    store.dispatch('updateEntity', data);
+                    store.dispatch('updateEntity', data.entity);
                     store.dispatch('updateEntityData', {
                         data: dirtyValues,
+                        new_data: data.added_attributes,
                         eid: state.entity.id,
                     });
                     if(isModerated()) {
@@ -874,11 +875,9 @@
 
                     resetDirtyStates(grps);
 
-                    resetDirtyStates(grps);
-
                     toast.$toast(
                         t('main.entity.toasts.updated.msg', {
-                            name: data.name
+                            name: data.entity.name
                         }),
                         t('main.entity.toasts.updated.title'),
                         {

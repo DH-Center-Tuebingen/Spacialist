@@ -5,7 +5,7 @@
         name="bibliograpy-item-modal"
     >
         <div class="sp-modal-content sp-modal-content-sm">
-            <div class="modal-header">
+            <header class="modal-header">
                 <h5
                     v-if="state.data.id"
                     class="modal-title"
@@ -24,7 +24,7 @@
                     aria-label="Close"
                     @click="closeModal()"
                 />
-            </div>
+            </header>
             <div
                 id="bibtex-item-modal"
                 class="modal-body"
@@ -146,7 +146,7 @@
                     :show="true"
                 />
             </div>
-            <div class="modal-footer">
+            <footer class="modal-footer">
                 <button
                     v-if="state.data.id"
                     type="submit"
@@ -172,7 +172,7 @@
                 >
                     <i class="fas fa-fw fa-times" /> {{ t('global.cancel') }}
                 </button>
-            </div>
+            </footer>
         </div>
     </vue-final-modal>
 </template>
@@ -237,7 +237,7 @@
             };
             const handlePasteFromClipboard = e => {
                 const items = e.clipboardData.items;
-                for(let i=0; i<items.length; i++) {
+                for(let i = 0; i < items.length; i++) {
                     const c = items[i];
                     if(c.kind == 'string' && c.type == 'text/plain') {
                         c.getAsString(s => {
@@ -256,7 +256,7 @@
             const removeQueuedFile = _ => {
                 state.fileRemoved = true;
                 state.fileContainer = [];
-            }
+            };
             const removeFile = _ => {
                 state.fileRemoved = true;
                 state.data.file = '';
@@ -293,7 +293,7 @@
             const state = reactive({
                 id: `bibliography-item-modal-bibtex-code-${getTs()}`,
                 data: data.value,
-                fieldData: {...data.value},
+                fieldData: { ...data.value },
                 error: {},
                 fileContainer: [],
                 scrollStateClasses: computed(_ => {
@@ -349,7 +349,7 @@
                 //STATE
                 state,
                 fieldsetRefs,
-            }
+            };
         },
-    }
+    };
 </script>

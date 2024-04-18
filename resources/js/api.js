@@ -145,7 +145,7 @@ export async function fetchPreData(locale) {
         store.commit('setSystemPreferences', response.data.system_preferences);
         store.dispatch('setColorSets', response.data.colorsets);
         store.dispatch('setAnalysis', response.data.analysis);
-        
+
         if(auth.ready()) {
             auth.load().then(_ => {
                 locale.value = store.getters.preferenceByKey('prefs.gui-language');
@@ -160,7 +160,7 @@ export async function fetchGeometryTypes() {
     return $httpQueue.add(
         () => http.get('editor/dm/geometry').then(response => {
             let geom = [];
-            for(let i=0; i<response.data.length; i++) {
+            for(let i = 0; i < response.data.length; i++) {
                 const g = response.data[i];
                 geom.push({
                     label: g,
@@ -204,35 +204,35 @@ export async function getCommentReplies(cid, endpoint = '/comment/{cid}/reply') 
 export async function getEntityParentIds(id) {
     return await $httpQueue.add(
         () => http.get(`/entity/${id}/parentIds`)
-        .then(response => {
-            return response.data;
-        })
+            .then(response => {
+                return response.data;
+            })
     );
 }
 
 export async function getEntityData(id) {
     return await $httpQueue.add(
         () => http.get(`/entity/${id}/data`)
-        .then(response => {
-            // PHP returns Array if it is empty
-            if(response.data instanceof Array) {
-                response.data = {};
-            }
-            return response.data;
-        })
+            .then(response => {
+                // PHP returns Array if it is empty
+                if(response.data instanceof Array) {
+                    response.data = {};
+                }
+                return response.data;
+            })
     );
 }
 
 export async function getEntityReferences(id) {
     return await $httpQueue.add(
         () => http.get(`/entity/${id}/reference`)
-        .then(response => {
-            // PHP returns Array if it is empty
-            if(response.data instanceof Array) {
-                response.data = {};
-            }
-            return response.data;
-        })
+            .then(response => {
+                // PHP returns Array if it is empty
+                if(response.data instanceof Array) {
+                    response.data = {};
+                }
+                return response.data;
+            })
     );
 }
 
@@ -319,14 +319,14 @@ export async function getMapProjection(srid) {
 export async function addUser(user) {
     const data = only(user, ['name', 'nickname', 'email', 'password']);
     return $httpQueue.add(
-        () =>  http.post('user', data).then(response => response.data)
+        () => http.post('user', data).then(response => response.data)
     );
 }
 
 export async function addRole(role) {
     const data = only(role, ['name', 'display_name', 'description', 'derived_from']);
     return $httpQueue.add(
-        () =>  http.post('role', data).then(response => response.data)
+        () => http.post('role', data).then(response => response.data)
     );
 }
 
@@ -337,10 +337,10 @@ export async function resetUserPassword(uid, password) {
     return $httpQueue.add(
         () => http.patch(`user/${uid}/password/reset`, data).then(response => response.data)
     );
-};
+}
 
 export async function confirmUserPassword(uid, password = null) {
-    const data = !!password ? {password: password} : {};
+    const data = !!password ? { password: password } : {};
     return $httpQueue.add(
         () => http.patch(`user/${uid}/password/confirm`, data).then(response => response.data)
     );
@@ -348,9 +348,13 @@ export async function confirmUserPassword(uid, password = null) {
 
 export async function updateEntityTypeRelation(etid, values) {
     const data = only(values, ['is_root', 'sub_entity_types']);
+    const apiData = {...data};
+    if(data.sub_entity_types) {
+        apiData.sub_entity_types = data.sub_entity_types.map(t => t.id);
+    }
 
     return await $httpQueue.add(
-        () => http.post(`/editor/dm/${etid}/relation`, data).then(response => {
+        () => http.post(`/editor/dm/${etid}/relation`, apiData).then(response => {
             store.dispatch('updateEntityType', {
                 ...data,
                 id: etid,
@@ -391,7 +395,7 @@ export async function editComment(cid, content, endpoint = '/comment/{cid}') {
     const data = {
         content: content,
     };
-    
+
     return $httpQueue.add(
         () => http.patch(endpoint, data).then(response => response.data)
     );
@@ -460,7 +464,7 @@ export async function duplicateEntity(entity) {
 
 export async function importEntityData(data) {
     return $httpQueue.add(
-        () => http.post(`/entity/import`, data).then(response => response.data).catch(e => {throw e})
+        () => http.post(`/entity/import`, data).then(response => response.data).catch(e => { throw e; })
     );
 }
 
@@ -493,9 +497,12 @@ export async function addAttribute(attribute) {
     if(attribute.rootAttributeLabel) {
         data.root_attribute_id = attribute.rootAttributeLabel.id;
     }
+    if(attribute.restrictedTypes) {
+        data.restricted_types = attribute.restrictedTypes.map(t => t.id);
+    }
     if(attribute.columns && attribute.columns.length > 0) {
         data.columns = attribute.columns.map(c => {
-            const mappedC = {...c};
+            const mappedC = { ...c };
             if(mappedC.label) {
                 mappedC.label_id = mappedC.label.id;
                 delete mappedC.label;
@@ -524,7 +531,7 @@ export async function addEntityTypeAttribute(etid, aid, to) {
     if(attrs.length < to && attrs[to].id == aid) {
         return;
     }
-    
+
     const rank = to + 1;
     const data = {
         attribute_id: aid,
@@ -538,15 +545,8 @@ export async function addEntityTypeAttribute(etid, aid, to) {
 
             const data = {
                 ...response.data,
-                id: relation.id,
+                ...relation,
                 entity_attribute_id: response.data.id,
-                datatype: relation.datatype,
-                thesaurus_url: relation.thesaurus_url,
-                thesaurus_root_url: relation.thesaurus_root_url,
-                text: relation.text,
-                parent_id: relation.parent_id,
-                root_attribute_id: relation.root_attribute_id,
-                recursive: relation.recursive,
                 pivot: {
                     id: response.data.id,
                     entity_type_id: response.data.entity_type_id,
@@ -639,7 +639,7 @@ export async function handleModeration(modAction, entity_id, attribute_id, overw
             return response.data;
         }).catch(error => { throw error; })
     );
-};
+}
 
 export async function multieditAttributes(entityIds, entries) {
     const data = {
@@ -653,7 +653,7 @@ export async function multieditAttributes(entityIds, entries) {
             throw error;
         })
     );
-};
+}
 
 export async function moveEntity(entityId, parentId = null, rank = null) {
     const data = {
@@ -711,7 +711,7 @@ export async function reorderEntityAttributes(etid, aid, from, to) {
     if(attrs[from].id != aid) {
         return;
     }
-    
+
     const rank = to + 1;
     const data = {
         position: rank
@@ -792,17 +792,17 @@ export async function patchRoleData(rid, data) {
 export async function updateReference(id, eid, url, data) {
     $httpQueue.add(
         () => http.patch(`/entity/reference/${id}`, data).then(response => {
-                const updData = {
-                    ...data,
-                    updated_at: response.data.updated_at,
-                }
-                store.dispatch('updateReference', {
-                    reference_id: id,
-                    entity_id: eid,
-                    attribute_url: url,
-                    data: updData,
-                });
-                return response.data;
+            const updData = {
+                ...data,
+                updated_at: response.data.updated_at,
+            };
+            store.dispatch('updateReference', {
+                reference_id: id,
+                entity_id: eid,
+                attribute_url: url,
+                data: updData,
+            });
+            return response.data;
         })
     );
 }
@@ -810,7 +810,7 @@ export async function updateReference(id, eid, url, data) {
 // DELETE
 export async function deactivateUser(id) {
     return $httpQueue.add(
-        () =>  http.delete(`user/${id}`).then(response => response.data)
+        () => http.delete(`user/${id}`).then(response => response.data)
     );
 }
 
@@ -886,23 +886,36 @@ export async function deleteReferenceFromEntity(id, eid, url) {
 export async function searchGlobal(query = '') {
     return $httpQueue.add(
         () => http.get(`search?q=${query}`).then(response => response.data)
-    )
+    );
 }
 
 export async function searchAttribute(query = '') {
     return $httpQueue.add(
         () => http.get(`search/attribute?q=${query}`).then(response => response.data)
-    )
+    );
 }
 
 export async function searchLabel(query = '') {
     return $httpQueue.add(
         () => http.get(`search/label?q=${query}`).then(response => response.data)
-    )
+    );
 }
 
 export async function searchEntity(query = '') {
     return $httpQueue.add(
         () => http.get(`search/entity?q=${query}`).then(response => response.data)
-    )
+    );
+}
+
+export async function searchConceptSelection(cid) {
+    return $httpQueue.add(
+        () => http.get(`search/selection/${cid}`).then(response => response.data)
+    );
+}
+
+export async function searchEntityInTypes(query = '', types = []) {
+    const typeList = types.join(',');
+    return $httpQueue.add(
+        () => http.get(`search/entity?q=${query}&t=${typeList}`).then(response => response.data)
+    );
 }

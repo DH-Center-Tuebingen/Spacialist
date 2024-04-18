@@ -5,13 +5,23 @@
             :key="field"
             class="row mb-3"
         >
-            <label class="col-form-label col-md-3 text-end">
+            <label
+                class="col-form-label col-md-3 d-flex flex-row justify-content-end"
+                :title="getFieldTitle(field)"
+            >
                 {{ t(`main.bibliography.column.${field}`) }}
                 <span
                     v-if="isMandatoryField(field)"
-                    class="text-danger"
+                    class="text-danger ms-1"
                 >
-                    *
+                    <i class="fas fa-2xs fa-asterisk" />
+                </span>
+                <span
+                    v-else-if="isMandatoryFieldIf(field)"
+                    class="text-danger ms-1"
+                >
+                    <i class="fas fa-2xs fa-asterisk" />
+                    <i class="fas fa-fw fa-2xs fa-asterisk" />
                 </span>
                 :
             </label>
@@ -191,6 +201,22 @@
                 return state.type.mandatory && state.type.mandatory[field] === true;
             };
 
+            const isMandatoryFieldIf = field => {
+                return state.type.mandatory && typeof state.type.mandatory[field] == 'string';
+            };
+
+            const getFieldTitle = field => {
+                if(isMandatoryField(field)) {
+                    const fieldText = t(`main.bibliography.column.${field}`);
+                    return t('main.bibliography.types.validation.required', { field: fieldText });
+                } else if(isMandatoryFieldIf(field)) {
+                    const col = t(`main.bibliography.column.${state.type.mandatory[field]}`);
+                    return t('main.bibliography.types.validation.required_if', { col });
+                } else {
+                    return null;
+                }
+            };
+
             // DATA
             const state = reactive({
                 type: bibliographyTypes.find(bt => bt.name == type.value),
@@ -226,10 +252,12 @@
                 undirtyFields,
                 getData,
                 isMandatoryField,
+                isMandatoryFieldIf,
+                getFieldTitle,
                 //STATE
                 state,
                 v,
-            }
+            };
         },
-    }
+    };
 </script>
