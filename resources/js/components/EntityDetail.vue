@@ -917,13 +917,6 @@
                         content: state.hiddenAttributeListing,
                     });
                 }
-                const eid = route.params.id;
-                const treeElem = document.getElementById(`tree-node-${eid}`);
-                if(treeElem) {
-                    treeElem.scrollIntoView({
-                        behavior: 'smooth',
-                    });
-                }
             });
 
             onBeforeUpdate(_ => {
@@ -964,6 +957,14 @@
 
                     nextTick(_ => {
                         setDetailPanelView(route.query.view);
+                        const eid = state.entity.id;
+                        const treeElem = document.getElementById(`tree-node-${eid}`);
+                        if(treeElem) {
+                            treeElem.scrollIntoView({
+                                behavior: 'smooth',
+                                inline: 'start',
+                            });
+                        }
                     });
                 }
             );
