@@ -650,7 +650,7 @@
                     switch(ad.operator) {
                         case '=':
                             if(type == 'string-sc') {
-                                matches = value.id == ad.value;
+                                matches = value?.id == ad.value;
                             } else if(type == 'string-mc') {
                                 matches = value && value.some(mc => mc.id == ad.value);
                             } else {
@@ -659,7 +659,7 @@
                             break;
                         case '!=':
                             if(type == 'string-sc') {
-                                matches = value.id != ad.value;
+                                matches = value?.id != ad.value;
                             } else if(type == 'string-mc') {
                                 matches = value && value.every(mc => mc.id != ad.value);
                             } else {
