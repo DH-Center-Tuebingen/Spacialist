@@ -1,19 +1,24 @@
 
 import { onMounted, reactive, ref, watch } from 'vue';
 
-function resetToDefault(storage, defaultValue) {
-    return Object.assign(storage, defaultValue);
-}
+
 
 function isRef(value) {
     return (typeof value !== 'object');
 }
 
 function getRefValue(value) {
-    return isRef(value) ? ref(value) : reactive(value);
+    return isRef(value) ? ref(value) : reactive({ ...value });
 }
 
-export function useLocalStorage(name, defaultValue = {}) {
+function resetToDefault(storage, defaultValue) {
+    console.log(defaultValue);
+    return (isRef(defaultValue)) ? storage.value = defaultValue : Object.assign(storage, defaultValue);
+}
+
+export function useLocalStorage(name, defaultValue = {}, {
+    onLoaded = _ => { },
+} = {}) {
     const _isRef = isRef(defaultValue);
 
     let loaded = false;
@@ -51,6 +56,7 @@ export function useLocalStorage(name, defaultValue = {}) {
 
     onMounted(() => {
         load();
+        onLoaded(storage);
         loaded = true;
     });
 

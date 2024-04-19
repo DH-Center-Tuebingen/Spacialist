@@ -31,7 +31,7 @@ import BibtexCode from '@/components/bibliography/BibtexCode.vue';
 
 // Init Libs
 // PQueue, httpQueue
-const queue = new PQueue({concurrency: 1});
+const queue = new PQueue({ concurrency: 1 });
 window.$httpQueue = queue;
 
 // Third-Party Components
@@ -48,7 +48,7 @@ import App from '@/App.vue';
 // Vuex
 import store from '@/bootstrap/store.js';
 // Vue-Router
-import router from '@/bootstrap/router.js';
+import router from '%router';
 // Axios
 import '@/bootstrap/http.js';
 // Vue-Auth
@@ -77,35 +77,35 @@ app.use(createVfm());
 
 // Directives
 app.directive('dcan', {
-    terminal: true,
-    beforeMount(el, bindings) {
-        const canI = can(bindings.value, bindings.modifiers.one);
-        
-        if(!canI) {
-            const warningElem = document.createElement('p');
-            warningElem.className = 'alert alert-warning v-can-warning';
-            warningElem.innerHTML = i18n.global.t('main.app.page_access_denied', {perm: bindings.value});
-            for(let i=0; i<el.children.length; i++) {
-                let c = el.children[i];
-                c.classList.add('v-can-hidden');
-            }
-            el.appendChild(warningElem);
-        }
-    },
-    unmounted(el) {
-        if(!el.children) return;
-        for(let i=0; i<el.children.length; i++) {
-            let c = el.children[i];
-            // remove our warning elem
-            if(c.classList.contains('v-can-warning')) {
-                el.removeChild(c);
-                continue;
-            }
-            if(c.classList.contains('v-can-hidden')) {
-                c.classList.remove('v-can-hidden');
-            }
-        }
+  terminal: true,
+  beforeMount(el, bindings) {
+    const canI = can(bindings.value, bindings.modifiers.one);
+
+    if(!canI) {
+      const warningElem = document.createElement('p');
+      warningElem.className = 'alert alert-warning v-can-warning';
+      warningElem.innerHTML = i18n.global.t('main.app.page_access_denied', { perm: bindings.value });
+      for(let i = 0; i < el.children.length; i++) {
+        let c = el.children[i];
+        c.classList.add('v-can-hidden');
+      }
+      el.appendChild(warningElem);
     }
+  },
+  unmounted(el) {
+    if(!el.children) return;
+    for(let i = 0; i < el.children.length; i++) {
+      let c = el.children[i];
+      // remove our warning elem
+      if(c.classList.contains('v-can-warning')) {
+        el.removeChild(c);
+        continue;
+      }
+      if(c.classList.contains('v-can-hidden')) {
+        c.classList.remove('v-can-hidden');
+      }
+    }
+  }
 });
 app.directive('highlightjs', {
   deep: true,
@@ -137,7 +137,7 @@ app.directive('highlightjs', {
 app.directive('resize', {
   beforeMount(el, binding) {
     if(!binding.value) return;
-    
+
     const resizeCallback = binding.value;
     window.addEventListener('resize', () => {
       const height = document.documentElement.clientHeight;
@@ -209,7 +209,7 @@ app.directive('infinite-scroll', {
     }
   },
   beforeUnmount(el, binding) {
-      el.onscroll = null;
+    el.onscroll = null;
   }
 });
 

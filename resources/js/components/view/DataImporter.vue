@@ -95,15 +95,35 @@
                         </div>
                     </div>
                 </div>
+                <importer-update-state
+                    v-if="state.validated"
+                    :conflict="state.validationData.conflict"
+                    :update="state.validationData.update"
+                    :create="state.validationData.create"
+                />
                 <footer class="d-flex align-items-center justify-content-between">
-                    <span class="status text-danger">
-                        {{ state.error }}
-                    </span>
+                    <button
+                        class="btn btn-danger"
+                        @click="cancelImport"
+                    >
+                        {{ t(`global.cancel`) }}
+                    </button>
+
                     <LoadingButton
+                        v-if="!state.validated"
+                        :loading="state.validating"
+                        class="btn btn-primary"
+                        :disabled="!canValidate || state.validating"
+                        @click="validate"
+                    >
+                        {{ t(`main.importer.validate`) }}
+                    </LoadingButton>
+                    <LoadingButton
+                        v-else
                         :loading="state.uploading"
                         class="btn btn-primary"
                         :disabled="!canImport || state.uploading"
-                        @click="confirmImport"
+                        @click="upload"
                     >
                         {{ t(`main.importer.import_btn`) }}
                     </LoadingButton>
@@ -127,6 +147,7 @@
 
     import VueUploadComponent from 'vue-upload-component';
     import CsvTable from '../CsvTable.vue';
+    import ImporterUpdateState from '../tools/importer/ImporterUpdateState.vue';
     import EntityImporterSettings from '@/components/tools/importer/EntityImporterSettings.vue';
     import EntityAttributeMapping from '../tools/importer/EntityAttributeMapping.vue';
 
@@ -135,6 +156,7 @@
 
     import {
         importEntityData,
+        validateEntityData,
     } from '@/api.js';
 
     import {
@@ -159,6 +181,7 @@
             EntityImporterSettings,
             EntityAttributeMapping,
             LoadingButton,
+            ImporterUpdateState,
         },
         props: {
             debug: {
@@ -214,6 +237,7 @@
             const extractColumns = data => {
                 state.availableColumns = data.header;
                 state.fileData = data.data;
+                state.hasHeaderRow = data.hasHeaderRow;
                 state.fileDelimiter = data.delimiter;
 
 
@@ -343,12 +367,12 @@
                 };
             };
 
-            const confirmImport = _ => {
-                state.uploading = true;
+            const buildFormData = _ => {
                 const data = new FormData();
                 data.append('file', state.files[0].file);
                 data.append('metadata', JSON.stringify({
                     delimiter: state.fileDelimiter,
+                    has_header_row: state.hasHeaderRow
                 }));
                 const postData = {
                     name_column: entitySettings.entityName,
@@ -359,8 +383,34 @@
                     postData['parent_column'] = entitySettings.entityParent;
                 }
                 data.append('data', JSON.stringify(postData));
+                return data;
+            };
 
-                importEntityData(data).then(data => {
+            const validate = _ => {
+                state.validating = true;
+                const formData = buildFormData();
+                validateEntityData(formData)
+                    .then(data => {
+                        state.validated = true;
+                        state.error = '';
+                        state.validationData = data;
+                        console.log(state.validationData);
+                    })
+                    .catch(e => {
+                        showImportError({
+                            message: e.response.data.error,
+                            data: e.response.data.data,
+                        });
+                    })
+                    .finally(_ => state.validating = false);
+            };
+
+            const upload = _ => {
+                state.uploading = true;
+                const formData = buildFormData();
+
+                importEntityData(formData).then(data => {
+                    state.imported = true;
                     for(let i = 0; i < data.length; i++) {
                         store.dispatch('addEntity', data[i]);
                     }
@@ -403,7 +453,8 @@
                 save: saveFileContent
             } = useOptionalLocalStorage(
                 storageSettings.fileContent,
-                'importer_file_content', '');
+                'importer_file_content', ''
+            );
 
             const {
                 value: entitySettings,
@@ -426,6 +477,38 @@
                 mapping: {},
             });
 
+            const resetImportState = _ => {
+                resetValidation();
+                resetImport();
+            };
+
+            const cancelImport = _ => {
+                resetSettings();
+                resetImportState();
+            };
+
+            const resetImport = _ => {
+                state.uploading = false;
+                state.imported = false;
+            };
+
+            const resetValidation = _ => {
+
+                state.validating = false;
+                state.validated = false;
+                state.validationData = {
+                    none: 0,
+                    exist: 0,
+                    multiple: 0,
+                    total: 0
+                };
+            };
+
+            const resetSettings = _ => {
+                resetEntitySettings();
+                resetAttributeSettings();
+            };
+
             const removeFile = _ => {
                 state.files = [];
                 state.fileData = [];
@@ -438,9 +521,8 @@
                 state.stats.entityParent = { missing: 0, total: 0 };
                 state.stats.attributes = {};
 
+                cancelImport();
                 resetFileContent();
-                resetEntitySettings();
-                resetAttributeSettings();
             };
 
             const availableEntityTypes = computed(() => Object.values(store.getters.entityTypes));
@@ -448,6 +530,7 @@
                 files: [],
                 fileData: [],
                 fileDelimiter: '',
+                hasHeaderRow: true,
                 content: fileContent,
                 fileLoaded: false,
                 availableColumns: [],
@@ -461,6 +544,15 @@
                     return !entitySettings.entityType || !entitySettings.entityName || state.stats.entityName.missing > 0;
                 }),
                 uploading: false,
+                imported: false,
+                validating: false,
+                validated: false,
+                validationData: {
+                    create: 0,
+                    update: 0,
+                    conflict: 0,
+                    total: 0
+                },
             });
 
             onMounted(() => {
@@ -473,8 +565,34 @@
                 onEntityTypeSelected(entityType);
             });
 
+            watch(entitySettings, (newVal, oldVal) => {
+                resetImportState();
+            });
+
+            watch(attributeSettings, (newVal, oldVal) => {
+                resetImportState();
+            });
+
+            const canValidate = computed(_ => {
+                return state.fileLoaded && !state.dataMissing && !state.validated;
+            });
+
+            const validationIsValid = computed(_ => {
+                // If there are multiple matches for single rows.
+                if(state.validationData.conflict > 0) {
+                    return false;
+                }
+
+                // If there are no values at all
+                if(state.validationData.create == 0 && state.validationData.update == 0) {
+                    return false;
+                }
+
+                return true;
+            });
+
             const canImport = computed(_ => {
-                return state.fileLoaded && !state.dataMissing;
+                return state.fileLoaded && !state.dataMissing && state.validated && validationIsValid.value && !state.uploading && !state.imported;
             });
 
             const cardHeaderClasses = ['card-header', 'd-flex', 'justify-content-between'];
@@ -484,16 +602,18 @@
                 t,
                 // LOCAL
                 canImport,
+                canValidate,
                 cardHeaderClasses,
+                addFile,
+                cancelImport,
                 extractColumns,
-                onEntityTypeSelected,
                 onAttributeMappingSelected,
+                onEntityTypeSelected,
                 onNameColumnChanged,
                 onParentColumnChanged,
-                confirmImport,
-                addFile,
                 removeFile,
-                // PROPS
+                upload,
+                validate,
                 // STATE
                 availableEntityTypes,
                 state,

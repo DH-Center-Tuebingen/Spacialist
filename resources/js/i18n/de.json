@@ -24,6 +24,7 @@
         "create": "Anlegen",
         "move": "Verschieben",
         "parse": "Parsen",
+        "conflict": "Konflikt",
         "file": "Datei",
         "remove_file": "Datei entfernen",
         "no_file": "Keine Datei vorhanden",
@@ -781,6 +782,14 @@
             "missing_required_values": "{miss} von 1 Eintrag ist leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das. | {miss} von {total} Einträgen sind leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das.",
             "missing_non_required_values": "{miss} von 1 Eintrag ist leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen. | {miss} von {total} Einträgen sind leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen.",
             "success": "Import von 1 Eintrag abgeschlossen | Import von {cnt} Einträgen abgeschlossen",
+            "validation": {
+                "title": "Validierung",
+                "mixed": "Einige Entitäten existieren bereits und werden aktualisieren, die restlichen werden neu erzeugt!",
+                "create": "Keine Überschneidung, alle Entitäten werden neu erzeugt!",
+                "update": "Alle Entitäten existieren bereits und werden aktualisiert!",
+                "multiple_error": "Manche Pfade existieren mehrfach, daher kann der Import nicht ausgeführt werden!",
+                "no_items": "Es gibt keine Werte zum importieren!"
+            },
             "indicator": {
                 "missing_value": "Kein Wert gesetzt",
                 "ok": "Dieser Wert ist korrekt"

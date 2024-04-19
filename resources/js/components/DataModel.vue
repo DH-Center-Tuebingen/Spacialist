@@ -83,129 +83,129 @@
 </template>
 
 <script>
-    import {
-        computed,
-        reactive,
-    } from 'vue';
+        import {
+            computed,
+            reactive,
+        } from 'vue';
 
-    import { useI18n } from 'vue-i18n';
+        import { useI18n } from 'vue-i18n';
 
-    import {
-        useRoute,
-    } from 'vue-router';
+        import {
+            useRoute,
+        } from 'vue-router';
 
-    import store from '@/bootstrap/store.js';
-    import router from '@/bootstrap/router.js';
+        import store from '@/bootstrap/store.js';
+        import router from '%router';
 
-    import {
-        duplicateEntityType as duplicateEntityTypeApi,
-        getEntityTypeOccurrenceCount,
-        getAttributeOccurrenceCount,
-    } from '@/api.js';
+        import {
+            duplicateEntityType as duplicateEntityTypeApi,
+            getEntityTypeOccurrenceCount,
+            getAttributeOccurrenceCount,
+        } from '@/api.js';
 
-    import {
-        getEntityTypeAttributes,
-    } from '@/helpers/helpers.js';
+        import {
+            getEntityTypeAttributes,
+        } from '@/helpers/helpers.js';
 
-    import {
-        showAddEntityType,
-        showDeleteEntityType,
-        showAddAttribute,
-        showDeleteAttribute,
-        showEditEntityType,
-    } from '@/helpers/modal.js';
+        import {
+            showAddEntityType,
+            showDeleteEntityType,
+            showAddAttribute,
+            showDeleteAttribute,
+            showEditEntityType,
+        } from '@/helpers/modal.js';
 
-    export default {
-        setup(props, context) {
-            const { t } = useI18n();
-            const currentRoute = useRoute();
+        export default {
+            setup(props, context) {
+                const { t } = useI18n();
+                const currentRoute = useRoute();
 
-            // FETCH
+                // FETCH
 
-            // FUNCTIONS
-            const setEntityType = event => {
-                router.push({
-                    name: 'dmdetail',
-                    params: {
-                        id: event.type.id
-                    }
-                });
-            };
-            const addEntityType = _ => {
-                showAddEntityType();
-            };
-            const duplicateEntityType = event => {
-                const attrs = getEntityTypeAttributes(event.id).slice();
-                duplicateEntityTypeApi(event.id).then(data => {
-                    data.attributes = attrs;
-                    store.dispatch('addEntityType', data);
-                })
-            };
-            const editEntityType = e => {
-                showEditEntityType(e.type);
-            };
-            const requestDeleteEntityType = event => {
-                getEntityTypeOccurrenceCount(event.type.id).then(data => {
-                    const metadata = {
-                        entityCount: data,
-                    };
-                    showDeleteEntityType(event.type, metadata, _ => {
-                        if(currentRoute.name == 'dmdetail' && currentRoute.params.id == event.type.id) {
-                            router.push({
-                                name: 'dme',
-                            });
+                // FUNCTIONS
+                const setEntityType = event => {
+                    router.push({
+                        name: 'dmdetail',
+                        params: {
+                            id: event.type.id
                         }
                     });
-                });
-            };
-            const createAttribute = _ => {
-                showAddAttribute();
-            };
-            const onDeleteAttribute = e => {
-                const attribute = e.element;
-                getAttributeOccurrenceCount(attribute.id).then(data => {
-                    const metadata = {
-                        attributeCount: data,
-                    };
-                    showDeleteAttribute(attribute, metadata);
-                });
-            };
+                };
+                const addEntityType = _ => {
+                    showAddEntityType();
+                };
+                const duplicateEntityType = event => {
+                    const attrs = getEntityTypeAttributes(event.id).slice();
+                    duplicateEntityTypeApi(event.id).then(data => {
+                        data.attributes = attrs;
+                        store.dispatch('addEntityType', data);
+                    })
+                };
+                const editEntityType = e => {
+                    showEditEntityType(e.type);
+                };
+                const requestDeleteEntityType = event => {
+                    getEntityTypeOccurrenceCount(event.type.id).then(data => {
+                        const metadata = {
+                            entityCount: data,
+                        };
+                        showDeleteEntityType(event.type, metadata, _ => {
+                            if(currentRoute.name == 'dmdetail' && currentRoute.params.id == event.type.id) {
+                                router.push({
+                                    name: 'dme',
+                                });
+                            }
+                        });
+                    });
+                };
+                const createAttribute = _ => {
+                    showAddAttribute();
+                };
+                const onDeleteAttribute = e => {
+                    const attribute = e.element;
+                    getAttributeOccurrenceCount(attribute.id).then(data => {
+                        const metadata = {
+                            attributeCount: data,
+                        };
+                        showDeleteAttribute(attribute, metadata);
+                    });
+                };
 
-            // DATA
-            const state = reactive({
-                systemAttributeList: computed(_ => store.getters.attributes.filter(a => a.is_system)),
-                attributeList: computed(_ => store.getters.attributes.filter(a => !a.is_system)),
-                // set values for all attributes to '', so values in <attribute-list> are existant
-                attributeListValues: computed(_ => {
-                    if(!state.attributeList) return;
-                    let data = {};
-                    for(let i=0; i<state.attributeList.length; i++) {
-                        let a = state.attributeList[i];
-                        data[a.id] = '';
-                    }
-                    return data;
-                }),
-                showHiddenAttributes: false,
-                entityTypes: computed(_ => Object.values(store.getters.entityTypes)),
-                selectedEntityType: computed(_ => currentRoute.params.id),
-                selectedEntityTypeAttributeIds: computed(_ => state.selectedEntityType ? getEntityTypeAttributes(state.selectedEntityType).map(a => a.id) : []),
-            });
+                // DATA
+                const state = reactive({
+                    systemAttributeList: computed(_ => store.getters.attributes.filter(a => a.is_system)),
+                    attributeList: computed(_ => store.getters.attributes.filter(a => !a.is_system)),
+                    // set values for all attributes to '', so values in <attribute-list> are existant
+                    attributeListValues: computed(_ => {
+                        if(!state.attributeList) return;
+                        let data = {};
+                        for(let i=0; i<state.attributeList.length; i++) {
+                            let a = state.attributeList[i];
+                            data[a.id] = '';
+                        }
+                        return data;
+                    }),
+                    showHiddenAttributes: false,
+                    entityTypes: computed(_ => Object.values(store.getters.entityTypes)),
+                    selectedEntityType: computed(_ => currentRoute.params.id),
+                    selectedEntityTypeAttributeIds: computed(_ => state.selectedEntityType ? getEntityTypeAttributes(state.selectedEntityType).map(a => a.id) : []),
+                });
 
-            // RETURN
-            return {
-                t,
-                // HELPERS
-                // LOCAL
-                setEntityType,
-                addEntityType,
-                duplicateEntityType,
-                editEntityType,
-                requestDeleteEntityType,
-                createAttribute,
-                onDeleteAttribute,
-                // STATE
-                state,
-            }
-        },
-    }
+                // RETURN
+                return {
+                    t,
+                    // HELPERS
+                    // LOCAL
+                    setEntityType,
+                    addEntityType,
+                    duplicateEntityType,
+                    editEntityType,
+                    requestDeleteEntityType,
+                    createAttribute,
+                    onDeleteAttribute,
+                    // STATE
+                    state,
+                }
+            },
+        }
 </script>

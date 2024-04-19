@@ -24,6 +24,7 @@
         "apply": "Apply",
         "move": "Move",
         "parse": "Parse",
+        "conflict": "Conflict",
         "file": "File",
         "remove_file": "Remove file",
         "no_file": "No file",
@@ -782,6 +783,14 @@
             "missing_required_values": "{miss} out of 1 entry is empty! This option does not allow empty values. Please fix this. | {miss} out of {total} entries are empty! This option does not allow empty values. Please fix this.",
             "missing_non_required_values": "{miss} out of 1 entry is empty! Filled values are not required for this attribute, so you can go on but may want to re-check. | {miss} out of {total} entries are empty! Filled values are not required for this attribute, so you can go on but may want to re-check.",
             "success": "Import of 1 entry finished | Import of {cnt} entries finished",
+            "validation": {
+                "title": "Validation",
+                "mixed": "Some entities do already exist and will be updated, the remaining will be created!",
+                "create": "All items will be created as new entities.",
+                "update": "All entites do already exist and will be updated.",
+                "multiple_error": "Some values match multiple entities and can not be imported.",
+                "no_items": "There are no items in your import"
+            },
             "indicator": {
                 "missing_value": "No value set",
                 "ok": "This value is set correctly"

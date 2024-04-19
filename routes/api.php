@@ -171,6 +171,8 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 
     Route::post('/', 'BibliographyController@addItem');
     Route::post('/import', 'BibliographyController@importBibtex');
+    Route::post('/import/validate', 'EntityController@validateImportData');
+    
     // form data params are not recognized using patch, thus using post
     Route::post('/{id}', 'BibliographyController@updateItem')->where('id', '[0-9]+');
 
