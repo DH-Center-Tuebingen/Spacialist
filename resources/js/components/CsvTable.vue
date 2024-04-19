@@ -132,7 +132,7 @@
                     header: null,
                     data: null,
                     striped_data: null,
-                    delimiter: csvSettings.delimiter,
+                    ...csvSettings,
                 };
                 const headerRow = props.content.split('\n')[0];
                 const header = state.dsv.parseRows(headerRow)[0];
@@ -171,7 +171,6 @@
                 computedRows: {},
                 dsv: computed(_ => d3.dsvFormat(csvSettings.delimiter || ',')),
                 endVisible: computed(_ => {
-                    console.log(state.stripedStart + csvSettings.showCount);
                     return state.stripedStart + csvSettings.showCount > state.rows;
                 }),
                 rows: computed(_ => state.computedRows.data ? state.computedRows.data.length : 0),
@@ -206,6 +205,13 @@
                     recomputeRows(true);
                 }
             });
+
+            watch(_ => csvSettings.delimiter, (newVal, oldVal) => {
+                if(oldVal !== newVal) {
+                    recomputeRows();
+                }
+            });
+
             const cellClass = 'px-2 py-1';
             // RETURN
             return {
