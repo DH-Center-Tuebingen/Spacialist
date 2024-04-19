@@ -13,6 +13,7 @@ use App\Exceptions\InvalidDataException;
 use App\Import\EntityImporter;
 use App\Reference;
 use App\ThConcept;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -464,12 +465,14 @@ class EntityController extends Controller {
         $headerRow = null;
         $headerRead = false;
         $hasParent = false;
-        $attributeIdx = [];
+        $attributeIdToColumnIdxMapping = [];
         $attributeTypes = [];
-        $addedEntities = [];
+        $changedEntities = [];
 
         DB::beginTransaction();
 
+        $parentIdx = null;
+        $nameIdx = null;
         while (($row = fgetcsv($handle, 0, $metadata['delimiter'])) !== false) {
             if (!$headerRead) {
                 $headerRead = true;
@@ -483,7 +486,7 @@ class EntityController extends Controller {
                     } else {
                         foreach ($data['attributes'] as $id => $a) {
                             if ($a == $row[$i]) {
-                                $attributeIdx[$id] = $i;
+                                $attributeIdToColumnIdxMapping[$id] = $i;
                                 $attributeTypes[$id] = Attribute::find($id)->datatype;
                                 break;
                             }
@@ -492,77 +495,97 @@ class EntityController extends Controller {
                 }
                 continue;
             }
+
             $rootEntityPath = $hasParent ? $row[$parentIdx] : null;
+            $entityName = $row[$nameIdx];
+            $entityPath = $hasParent ? implode("\\\\", [$rootEntityPath, $entityName]) : $entityName;
+            $entityId = null;
 
             try {
-                $rootEntityId = Entity::getFromPath($rootEntityPath);
+                $entityId = Entity::getFromPath($entityPath);
             } catch (AmbiguousValueException $ave) {
                 DB::rollBack();
                 return response()->json([
                     'error' => __($ave->getMessage()),
                     'data' => [
-                        'count' => count($addedEntities) + 1,
-                        'entry' => $row[$nameIdx],
+                        'count' => count($changedEntities) + 1,
+                        'entry' => $entityName,
                         'on' => $headerRow[$parentIdx],
                         'on_index' => $parentIdx + 1,
                         'on_value' => $row[$parentIdx],
                     ],
                 ], 400);
             }
+            try {
+                if ($entityId == null) {
+                    $entity = $this->createImportedEntity($entityName, $rootEntityPath, $data['entity_type_id'], $user);
 
-            $res = Entity::create([
-                'name' => $row[$nameIdx],
-            ], $data['entity_type_id'], $user, $rootEntityId);
-
-            if ($res['type'] === 'entity') {
-                $addedEntities[] = $res['entity'];
-                $eid = $res['entity']->id;
-                foreach ($attributeIdx as $key => $val) {
-                    $aid = intval($key);
-                    $type = $attributeTypes[$aid];
-                    $attrVal = new AttributeValue();
-                    $attrVal->entity_id = $eid;
-                    $attrVal->attribute_id = $aid;
-                    $attrVal->certainty = 100;
-                    $attrVal->user_id = $user->id;
-                    try {
-                        $setValue = $attrVal->setValueFromRaw($row[$val], $type);
-                        if ($setValue === null) {
-                            continue;
-                        }
-                        $attrVal->save();
-                    } catch (InvalidDataException | AmbiguousValueException $e) {
+                    // If create entity fails, return error
+                    if ($entity["type"] !== "entity") {
                         DB::rollBack();
-                        $colIdx = $val + 1;
                         return response()->json([
-                            'error' => __($e->getMessage()),
+                            'error' => $entity['msg'],
                             'data' => [
-                                'count' => count($addedEntities),
-                                'entry' => $row[$nameIdx],
-                                'on' => $headerRow[$val],
-                                'on_index' => $colIdx,
-                                'on_value' => $row[$val],
+                                'count' => count($changedEntities) + 1,
+                                'entry' => $entityName,
+                                'on' => __('Create Entity from given data'),
                             ],
-                        ], 400);
+                        ], $entity['code']);
                     }
+
+                    $entityId = $entity['entity']->id;
                 }
-            } else {
+
+                $this->setImportedAttributes($entityId, $row, $attributeIdToColumnIdxMapping, $attributeTypes, $user);
+                $changedEntities[] = $entityId;
+            } catch (Exception $e) {
                 DB::rollBack();
                 return response()->json([
-                    'error' => $res['msg'],
+                    'error' => __($e->getMessage()),
                     'data' => [
-                        'count' => count($addedEntities) + 1,
-                        'entry' => $row[$nameIdx],
-                        'on' => __('Create Entity from given data'),
+                        'count' => count($changedEntities) + 1,
+                        'entry' => $entityName,
+                        'on' => $headerRow[$parentIdx],
+                        'on_index' => $parentIdx + 1,
+                        'on_value' => $row[$parentIdx],
                     ],
-                ], $res['code']);
+                ], 400);
             }
         }
+
         fclose($handle);
-
         DB::commit();
+        return response()->json($changedEntities, 201);
+    }
 
-        return response()->json($addedEntities, 201);
+    function createImportedEntity($entityName, string $rootEntityPath, $entityTypeId, $user) {
+
+        try {
+            $rootEntityId = Entity::getFromPath($rootEntityPath);
+        } catch (AmbiguousValueException $ave) {
+            throw new Exception($ave->getMessage());
+        }
+
+        return Entity::create([
+            'name' => $entityName,
+        ], $entityTypeId, $user, $rootEntityId);
+    }
+
+    function setImportedAttributes($entity_id, $row, $attributeIdToColumnIdxMapping, $attributeTypes, $user) {
+        foreach ($attributeIdToColumnIdxMapping as $key => $val) {
+            $aid = intval($key);
+            $type = $attributeTypes[$aid];
+            $attrVal = new AttributeValue();
+            $attrVal->entity_id = $entity_id;
+            $attrVal->attribute_id = $aid;
+            $attrVal->certainty = 100;
+            $attrVal->user_id = $user->id;
+            $setValue = $attrVal->setValueFromRaw($row[$val], $type);
+            if ($setValue === null) {
+                continue;
+            }
+            $attrVal->save();
+        }
     }
 
     // PATCH
