@@ -103,8 +103,8 @@
                                         </p>
                                     </blockquote>
                                     <figcaption class="blockquote-footer fw-medium mb-0 d-flex gap-1">
-                                        <span>
-                                            {{ reference.bibliography.author }} in <cite :title="reference.bibliography.title">
+                                        <span :title="reference.bibliography.author">
+                                            {{ trimAuthors(reference.bibliography.author) }} in <cite :title="reference.bibliography.title">
                                                 {{ reference.bibliography.title }} ,{{ reference.bibliography.year }}
                                             </cite>
                                         </span>
@@ -156,6 +156,9 @@
     import {
         translateConcept,
     } from '@/helpers/helpers.js';
+    import {
+        trimAuthors,
+    } from '@/helpers/bibliography.js';
     import {
         date,
     } from '@/helpers/filters.js';
@@ -253,6 +256,7 @@
                 t,
                 // HELPERS
                 translateConcept,
+                trimAuthors,
                 date,
                 // LOCAL
                 setTab,

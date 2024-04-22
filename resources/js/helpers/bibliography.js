@@ -170,4 +170,18 @@ export const bibliographyTypes = [
             note: true,
         },
     }
-]
+];
+
+export const trimAuthors = (authors, count = 2) => {
+    if(!authors) return authors;
+
+    const authorList = authors.split(' and ');
+
+    // only add 'et. al.' to `count` or more authors
+    // otherwise return original authors
+    if(authorList.length <= count) {
+        return authors;
+    }
+
+    return authorList.slice(0, count).join(' and ') + ' et al.';
+};

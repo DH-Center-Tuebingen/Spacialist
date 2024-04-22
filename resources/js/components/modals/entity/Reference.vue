@@ -98,8 +98,11 @@
                                         {{ reference.description }}
                                     </p>
                                 </blockquote>
-                                <figcaption class="blockquote-footer fw-medium mb-0">
-                                    {{ reference.bibliography.author }} in <cite :title="reference.bibliography.title">
+                                <figcaption
+                                    class="blockquote-footer fw-medium mb-0"
+                                    :title="reference.bibliography.author"
+                                >
+                                    {{ trimAuthors(reference.bibliography.author) }} in <cite :title="reference.bibliography.title">
                                         {{ reference.bibliography.title }} ,{{ reference.bibliography.year }}
                                     </cite>
                                 </figcaption>
@@ -199,7 +202,7 @@
                                             <span class="fw-medium">{{ value.title }}</span>
                                             -
                                             <cite class="small">
-                                                {{ value.author }} ({{ value.year }})
+                                                {{ trimAuthors(value.author) }} ({{ value.year }})
                                             </cite>
                                         </div>
                                     </div>
@@ -210,7 +213,7 @@
                                             <span class="fw-medium">{{ option.title }}</span>
                                         </div>
                                         <cite class="small">
-                                            {{ option.author }} <span class="fw-light">({{ option.year }})</span>
+                                            {{ trimAuthors(option.author) }} <span class="fw-light">({{ option.year }})</span>
                                         </cite>
                                     </div>
                                 </template>
@@ -273,6 +276,9 @@
         updateReference,
         addReference,
     } from '@/api.js';
+    import {
+        trimAuthors,
+    } from '@/helpers/bibliography.js';
     import {
         date,
     } from '@/helpers/filters.js';
@@ -454,6 +460,7 @@
                 can,
                 getCertaintyClass,
                 translateConcept,
+                trimAuthors,
                 date,
                 // PROPS
                 // LOCAL
