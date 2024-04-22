@@ -14,7 +14,7 @@ class BooleanAttribute extends AttributeBase {
         }
 
         return
-            $data == 1 || $data == '1' || $data == "x" ||
+            $data == 1 || $data == '1' || $data == 'x' ||
             $data == 'true' || $data == 't' ||
             intval($data) > 0;
     }
