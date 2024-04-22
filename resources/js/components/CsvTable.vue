@@ -81,7 +81,6 @@
         computed,
         onMounted,
         reactive,
-        toRefs,
         watch,
     } from 'vue';
 
@@ -103,11 +102,6 @@
             small: {
                 required: false,
                 type: Boolean
-            },
-            options: {
-                type: Boolean,
-                required: false,
-                default: true,
             },
             linenumbers: {
                 type: Boolean,
@@ -230,11 +224,11 @@
 </script>
 
 <style scoped>
-    /*
+    /* 
         Bootstrap sets the sticky-top to z-index: 1020, which is the same level
         as the modals, which doesn't make sense in the table context.
         We reset it to the minimum value here. 
-         */
+    */
     thead {
         z-index: 1;
     }

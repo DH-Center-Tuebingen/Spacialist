@@ -3,7 +3,10 @@
         <header>
             <h4>{{ t(`main.importer.title`) }}</h4>
         </header>
-        <div class="layout flex-grow-1 overflow-hidden">
+        <div
+            class="layout flex-grow-1 overflow-hidden"
+            :class="state.csvTableCollapsed ? 'extended' : 'limited'"
+        >
             <div class="controls">
                 <div class="card">
                     <header :class="cardHeaderClasses">
@@ -46,7 +49,6 @@
                             :disabled="state.inputsDissabled"
                             @row-changed="onAttributeMappingSelected"
                         />
-
                         <div
                             v-else
                             class="alert alert-primary"
@@ -80,24 +82,24 @@
                         <div class="d-flex btn-group">
                             <button
                                 type="button"
-                                class="btn btn-outline-danger"
+                                class="btn btn-sm btn-outline-danger"
                                 :disabled="!state.fileLoaded"
                                 @click="removeFile()"
                             >
                                 {{ t('global.remove_file') }}
                             </button>
                             <button
-                                class="btn btn-outline-danger"
+                                class="btn btn-sm btn-outline-danger"
                                 :disabled="!state.fileLoaded"
                                 @click="cancelImport"
                             >
-                                {{ t(`global.cancel`) }}
+                                {{ t(`global.reset`) }}
                             </button>
                         </div>
                         <LoadingButton
                             v-if="!state.validated"
                             :loading="state.validating"
-                            class="btn btn-outline-primary"
+                            class="btn btn-sm btn-outline-primary"
                             :disabled="!canValidate || state.validating"
                             @click="validate"
                         >
@@ -106,15 +108,25 @@
                             </template>
                             {{ t(`main.importer.validate`) }}
                         </LoadingButton>
-                        <LoadingButton
+                        <div
                             v-else
-                            :loading="state.uploading"
-                            class="btn btn-outline-primary"
-                            :disabled="!canImport || state.uploading"
-                            @click="upload"
+                            class="btn-group"
                         >
-                            {{ t(`main.importer.import_btn`) }}
-                        </LoadingButton>
+                            <button
+                                class="btn btn-sm btn-outline-primary"
+                                @click="resetValidation"
+                            >
+                                {{ t(`global.edit`) }}
+                            </button>
+                            <LoadingButton
+                                :loading="state.uploading"
+                                class="btn btn-sm btn-outline-primary"
+                                :disabled="!canImport || state.uploading"
+                                @click="upload"
+                            >
+                                {{ t(`main.importer.import_btn`) }}
+                            </LoadingButton>
+                        </div>
                     </footer>
                 </div>
             </div>
@@ -138,6 +150,7 @@
                 </file-upload>
                 <csv-table
                     v-else
+                    ref="csvTableRef"
                     class="flex-grow-1"
                     :content="state.content"
                     :small="true"
@@ -153,6 +166,7 @@
     import {
         computed,
         reactive,
+        ref,
         watch,
     } from 'vue';
 
@@ -207,6 +221,8 @@
         },
         setup(props, context) {
             const { t } = useI18n();
+
+            const csvTableRef = ref(null);
 
             let toast = null;
             onMounted(() => {
@@ -570,6 +586,7 @@
                 inputsDissabled: computed(_ => {
                     return state.validated || state.uploading || state.imported;
                 }),
+                csvTableCollapsed: computed(() => state.fileLoaded && !csvTableRef.value?.csvSettings?.showPreview),
                 uploading: false,
                 imported: false,
                 validating: false,
@@ -641,12 +658,15 @@
                 removeFile,
                 upload,
                 validate,
+                resetValidation,
                 // STATE
                 availableEntityTypes,
                 state,
                 entitySettings,
                 attributeSettings,
                 storageSettings,
+                // REFS
+                csvTableRef,
             };
         },
     };
@@ -676,65 +696,68 @@
 
 
 
-<style scoped>
+<style scoped lang="scss">
+.controls {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.data-importer {
+    height: 100%;
+    background-color: whitesmoke;
+}
+
+.layout {
+    display: grid;
+    grid-template-rows: 1fr min-content;
+    gap: 1rem;
+
+    &.limited {
+        grid-template-rows: fit-content(50%) minmax(min-content, 1fr);
+    }
+}
+
+.entity-attribute-mapping {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: flex-end;
+}
+
+@media screen and (max-width: 1920px) {
+    .entity-attribute-mapping {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .file-preview,
     .controls {
-        display: grid;
-        grid-template-columns: 1fr 2fr 1fr;
-        gap: 1rem;
-        position: relative;
+        grid-template-columns: 1fr;
+        overflow-y: auto;
+        padding: 1rem;
+        border: 1px solid var(--bs-border-color-translucent);
+        border-radius: var(--bs-border-radius);
     }
-
-    .data-importer {
-        height: 100%;
-        background-color: whitesmoke;
-    }
-
-    .layout {
-        display: grid;
-        grid-template-rows: minmax(auto, 50%) 1fr;
-        gap: 1rem;
-    }
-
-
 
     .entity-attribute-mapping {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr 1fr;
-        align-items: flex-end;
+        grid-template-columns: 1fr;
     }
+}
 
-    @media screen and (max-width: 1920px) {
-        .entity-attribute-mapping {
-            grid-template-columns: 1fr 1fr;
-        }
-    }
+.file-preview {
+    max-height: 100%;
+}
 
-    @media (max-width: 768px) {
+.card-body {
+    overflow-y: auto;
+    max-height: 100%;
+}
 
-        .file-preview,
-        .controls {
-            grid-template-columns: 1fr;
-            overflow-y: auto;
-            padding: 1rem;
-            border: 1px solid var(--bs-border-color-translucent);
-            border-radius: var(--bs-border-radius);
-        }
-
-        .entity-attribute-mapping {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    .file-preview {
-        max-height: 100%;
-    }
-
-    .card-body {
-        overflow-y: auto;
-        max-height: 100%;
-    }
-
-    .card {
-        overflow-y: auto;
-    }
+.card {
+    overflow-y: auto;
+}
 </style>
