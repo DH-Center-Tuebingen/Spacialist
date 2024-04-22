@@ -12,7 +12,7 @@
         <template v-else-if="missing > 0">
             <span
                 v-if="allowEmpty"
-                :title="t('main.importer.missing_non_required_values', {
+                :title="t('main.importer.indicator.missing_non_required_values', {
                     miss: missing,
                     total: total,
                 }, total)"
@@ -21,7 +21,7 @@
             </span>
             <span
                 v-else
-                :title="t('main.importer.missing_required_values', {
+                :title="t('main.importer.indicator.missing_required_values', {
                     miss: missing,
                     total: total,
                 }, total)"
@@ -31,7 +31,7 @@
         </template>
         <span
             v-else
-            :title="t('main.importer.indicator.ok')"
+            :title="t('main.importer.indicator.no_missing_values')"
         >
             <i class="fas fa-fw fa-check-circle text-success" />
         </span>

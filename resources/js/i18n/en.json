@@ -774,15 +774,12 @@
             "import_settings": "Import-Settings",
             "upload_csv_info": "Select a CSV file to import data.",
             "drop_csv_file": "Drop CSV file here",
-            "csv_file_error": "CSV-Datei konnte nicht gelesen werden.",
+            "csv_file_error": "CSV file could not be read.",
             "selected_entity_type": "Entity-Type",
             "column_entity_name": "Entity Name-Column",
             "column_entity_parent": "Entity Parent-Column",
             "import_btn": "Start Import",
             "validate": "Validate",
-            "no_missing_values": "No missing values for this attribute. You are all set!",
-            "missing_required_values": "{miss} out of 1 entry is empty! This option does not allow empty values. Please fix this. | {miss} out of {total} entries are empty! This option does not allow empty values. Please fix this.",
-            "missing_non_required_values": "{miss} out of 1 entry is empty! Filled values are not required for this attribute, so you can go on but may want to re-check. | {miss} out of {total} entries are empty! Filled values are not required for this attribute, so you can go on but may want to re-check.",
             "success": "Import of 1 entry finished | Import of {cnt} entries finished",
             "validation": {
                 "title": "Validation",
@@ -795,7 +792,9 @@
             },
             "indicator": {
                 "missing_value": "No value set",
-                "ok": "This value is set correctly"
+                "no_missing_values": "No missing values for this attribute. You are all set!",
+                "missing_required_values": "{miss} out of 1 entry is empty! This option does not allow empty values. Please fix this. | {miss} out of {total} entries are empty! This option does not allow empty values. Please fix this.",
+                "missing_non_required_values": "{miss} out of 1 entry is empty! Filled values are not required for this attribute, so you can go on but may want to re-check. | {miss} out of {total} entries are empty! Filled values are not required for this attribute, so you can go on but may want to re-check."
             },
             "info": {
                 "entity_settings_require_file": "No file uploaded yet.",
@@ -803,7 +802,7 @@
             },
             "error": {
                 "file_read": "File could not be read.",
-                "file_read_abort": "Datei-Lesevorgang abgebrochen."
+                "file_read_abort": "File reading aborted."
             }
         },
         "map": {
@@ -846,8 +845,5 @@
     "keyboard": {
         "tab": "Tab",
         "space": "Spacebar"
-    },
-    "storage": {
-        "save_to_local_toggle": "Enable if you want to store the values locally"
     }
 }

@@ -312,10 +312,10 @@
                 "delimiter": "Trennzeichen",
                 "delimiter_with_info": "Trennzeichen (',', ';', …)",
                 "has_header": "Kopfzeile",
-                "show_linenumbers": "Zeilennum.",
+                "show_linenumbers": "Zeilennummern anzeigen",
                 "nr_of_shown_rows": "Anzahl der angezeigten Zeilen",
                 "nr_of_skipped_rows": "Anzahl der übersprungenen Zeilen",
-                "eof": "End of File"
+                "eof": "Ende der Datei"
             },
             "picker": {
                 "title": "CSV-Auswahl"
@@ -779,14 +779,11 @@
             "column_entity_parent": "Übergeordnete Entität-Spalte",
             "import_btn": "Starte Datenimport",
             "validate": "Validieren",
-            "no_missing_values": "Keine fehlenden Werte. Du kannst loslegen!",
-            "missing_required_values": "{miss} von 1 Eintrag ist leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das. | {miss} von {total} Einträgen sind leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das.",
-            "missing_non_required_values": "{miss} von 1 Eintrag ist leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen. | {miss} von {total} Einträgen sind leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen.",
             "success": "Import von 1 Eintrag abgeschlossen | Import von {cnt} Einträgen abgeschlossen",
             "validation": {
                 "title": "Validierung",
                 "waiting": "Validierung ausstehend",
-                "mixed": "Einige Entitäten existieren bereits und werden aktualisieren, die restlichen werden neu erzeugt!",
+                "mixed": "Einige Entitäten existieren bereits und werden aktualisieren, die anderen werden neu erzeugt!",
                 "create": "Keine Überschneidung, alle Entitäten werden neu erzeugt!",
                 "update": "Alle Entitäten existieren bereits und werden aktualisiert!",
                 "multiple_error": "Manche Pfade existieren mehrfach, daher kann der Import nicht ausgeführt werden!",
@@ -794,7 +791,9 @@
             },
             "indicator": {
                 "missing_value": "Kein Wert gesetzt",
-                "ok": "Dieser Wert ist korrekt"
+                "no_missing_values": "Keine fehlenden Werte. Du kannst loslegen!",
+                "missing_required_values": "{miss} von 1 Eintrag ist leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das. | {miss} von {total} Einträgen sind leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das.",
+                "missing_non_required_values": "{miss} von 1 Eintrag ist leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen. | {miss} von {total} Einträgen sind leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen."
             },
             "info": {
                 "entity_settings_require_file": "Noch keine Datei hochgeladen",
@@ -845,8 +844,5 @@
     "keyboard": {
         "tab": "Tab",
         "space": "Leertaste"
-    },
-    "storage": {
-        "save_to_local_toggle": "Aktiviere, falls du die Werte lokal speichern möchtest."
     }
 }
