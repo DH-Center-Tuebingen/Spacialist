@@ -44,14 +44,14 @@ class EntityImporter {
     }
 
     private function validateRowCallback($row, $data) {
+        $name = $row[$data['name_column']];
 
-        $nameColumn = $data['name_column'];
-        $parentColumn = $data['parent_column'];
-
-        $name = $row[$nameColumn];
-        $parent = $row[$parentColumn];
-
-        $rootPath = implode("\\\\", [$parent, $name]);
+        if(array_key_exists('parent_column', $data)) {
+            $parent =  $row[$data['parent_column']];
+            $rootPath = $parent . "\\\\" . $name;
+        } else {
+            $rootPath = $name;
+        }
 
         $status = $this->checkIfFileExists($rootPath);
         return [
