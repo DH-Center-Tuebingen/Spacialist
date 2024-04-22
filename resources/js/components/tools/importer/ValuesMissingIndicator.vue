@@ -6,7 +6,7 @@
         >
             <i
                 class="fas fa-fw fa-exclamation-circle"
-                :class="required ? 'text-danger' : 'text-warning'"
+                :class="required ? 'text-danger' : 'text-body-tertiary'"
             />
         </span>
         <template v-else-if="missing > 0">
