@@ -8,12 +8,14 @@ class Csv extends Parser {
     private bool $hasHeaderRow;
     private array $headers = [];
     private array $rows = [];
+    private string $encoding = 'UTF-8';
 
 
-    public function __construct(bool $hasHeaderRow = false, string $delimiter = ",", array $rows = []) {
+    public function __construct(bool $hasHeaderRow = false, string $delimiter = ",", array $rows = [], string $encoding = 'UTF-8') {
         $this->hasHeaderRow = $hasHeaderRow;
         $this->rows = $rows;
         $this->delimiter = $delimiter;
+        $this->encoding = $encoding;
     }
 
     public function getHeaders() {
@@ -80,6 +82,7 @@ class Csv extends Parser {
         }
 
         while (($row = fgetcsv($fileHandle, 0, $this->delimiter)) !== false) {
+            $row = $this->toUtf8($row);
             $this->appendRow($row, $rows, $rowCallback, $rowIndex);
             $rowIndex++;
         }
@@ -88,7 +91,7 @@ class Csv extends Parser {
     }
 
     private function appendRow($row, &$rows, $rowCallback, $rowIndex) {
-        $row = $this->parseRow(implode($this->delimiter, $row));
+        $row = $this->parseRow(implode($this->delimiter, array_map(fn($r) => ('"'.$r.'"'), $row)));
         if ($rowCallback) {
             $row = $rowCallback($row, $this->headers, $rows, $rowIndex);
         }
@@ -158,10 +161,27 @@ class Csv extends Parser {
         $headers = [];
 
         for ($i = 1; $i <= count($row); $i++) {
-            $headers[] = $i;
+            $headers[] = "#$i";
         }
 
         return $headers;
+    }
+
+    private function toUtf8(array|string $data) : array|string {
+        if($this->isUtf8()) return $data;
+
+        $tgt = 'UTF-8';
+        if(is_array($data)) {
+            $data = array_map(fn($str) => iconv($this->encoding, $tgt, $str), $data);
+        } else {
+            $data = iconv($this->encoding, $tgt, $data);
+        }
+
+        return $data;
+    }
+
+    private function isUtf8() : bool {
+        return $this->encoding == 'UTF-8';
     }
 
     /**
@@ -169,7 +189,7 @@ class Csv extends Parser {
      * Always using the correct delimiter.
      */
     private function getcsv($line) {
-        return str_getcsv($line, separator: $this->delimiter);
+        return $this->toUtf8(str_getcsv($line, separator: $this->delimiter));
     }
 
     private function verifyColumnExists($column) {

@@ -28,7 +28,7 @@ class EntityImporter {
 
 
     public function validateImportData($handle) {
-        $csvTable = new Csv($this->metadata['has_header_row'], $this->metadata['delimiter']);
+        $csvTable = new Csv($this->metadata['has_header_row'], $this->metadata['delimiter'], [], $this->metadata['encoding']);
 
         $result = [];
         $status = ImportResolution::getStatusArray();

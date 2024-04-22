@@ -219,6 +219,12 @@
 
             const fileReader = new FileReader();
             fileReader.onload = e => {
+                if(state.utf8Content && e.target.result.includes('�')) {
+                    // if utf-8 parsed content contains � try to re-read it in latin-2
+                    state.encoding = 'ISO-8859-2';
+                    readContent();
+                    return;
+                }
                 state.fileLoaded = true;
                 state.content = e.target.result;
                 state.error = '';
@@ -245,7 +251,7 @@
                 if(!state.files || state.files.length == 0) {
                     resetFileReader();
                 } else {
-                    fileReader.readAsText(state.files[0].file);
+                    fileReader.readAsText(state.files[0].file, state.encoding);
                 }
             };
 
@@ -387,7 +393,8 @@
                 data.append('file', state.files[0].file);
                 data.append('metadata', JSON.stringify({
                     delimiter: state.fileDelimiter,
-                    has_header_row: state.hasHeaderRow
+                    has_header_row: state.hasHeaderRow,
+                    encoding: state.encoding,
                 }));
                 const postData = {
                     name_column: entitySettings.entityName,
@@ -547,6 +554,7 @@
                 fileDelimiter: '',
                 hasHeaderRow: true,
                 content: fileContent,
+                encoding: 'UTF-8',
                 fileLoaded: false,
                 availableColumns: [],
                 availableAttributes: [],
@@ -555,6 +563,7 @@
                     entityParent: { missing: 0, total: 0 },
                     attributes: {},
                 },
+                utf8Content: computed(_ => state.encoding == 'UTF-8'),
                 dataMissing: computed(_ => {
                     return !entitySettings.entityType || !entitySettings.entityName || state.stats.entityName.missing > 0;
                 }),
