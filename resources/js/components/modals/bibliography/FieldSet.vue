@@ -187,6 +187,11 @@
                     };
                 });
             };
+            const updateValues = _ => {
+                state.type.fields.forEach(f => {
+                    v.fields[f].handleChange(data.value.fields[f] || '');
+                });
+            };
             const isMandatoryField = field => {
                 return state.type.mandatory && state.type.mandatory[field] === true;
             };
@@ -203,6 +208,10 @@
             yup.setLocale(bibtexValidation);
 
             initValidation();
+
+            watch(data.value, newValue => {
+                updateValues();
+            });
 
             watch(_ => state.formMeta, (newValue, oldValue) => {
                 const isDirty = newValue.dirty;

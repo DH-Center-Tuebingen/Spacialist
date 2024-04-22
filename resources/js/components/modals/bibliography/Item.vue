@@ -180,6 +180,7 @@
 
     import {
         computed,
+        nextTick,
         reactive,
         ref,
         toRefs,
@@ -191,6 +192,7 @@
         can,
         getTs,
         multiselectResetClasslist,
+        _cloneDeep,
     } from '@/helpers/helpers.js';
     import {
         bibliographyTypes,
@@ -225,10 +227,14 @@
                     const type = bibliographyTypes.find(t => t.name == entry.type);
                     state.data.type = type;
                     state.data.fields.citekey = entry.key;
-                    for(let k in entry.fields) {
-                        const p = entry.fields[k];
-                        state.data.fields[k] = p.join(', ');
-                    }
+                    nextTick(_ => {
+                        state.fieldData.type = type;
+                        state.fieldData.fields.citekey = entry.key;
+                        for(let k in entry.fields) {
+                            const p = entry.fields[k];
+                            state.fieldData.fields[k] = k == 'author' ? p.join(' and ') : p.join(', ');
+                        }
+                    });
                 } catch(err) {
                 }
             };
@@ -290,7 +296,7 @@
             const state = reactive({
                 id: `bibliography-item-modal-bibtex-code-${getTs()}`,
                 data: data.value,
-                fieldData: {...data.value},
+                fieldData: _cloneDeep(data.value),
                 error: {},
                 fileContainer: [],
                 scrollStateClasses: computed(_ => {
