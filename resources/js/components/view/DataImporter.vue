@@ -165,6 +165,8 @@
 <script>
     import {
         computed,
+        nextTick,
+        onMounted,
         reactive,
         ref,
         watch,
@@ -175,10 +177,12 @@
     import { stringSimilarity } from 'string-similarity-js';
 
     import VueUploadComponent from 'vue-upload-component';
-    import CsvTable from '../CsvTable.vue';
-    import ImporterUpdateState from '../tools/importer/ImporterUpdateState.vue';
+
+    import CsvTable from '@/components/CsvTable.vue';
+    import EntityAttributeMapping from '@/components/tools/importer/EntityAttributeMapping.vue';
     import EntityImporterSettings from '@/components/tools/importer/EntityImporterSettings.vue';
-    import EntityAttributeMapping from '../tools/importer/EntityAttributeMapping.vue';
+    import ImporterUpdateState from '@/components/tools/importer/ImporterUpdateState.vue';
+    import LoadingButton from '@/components/forms/button/LoadingButton.vue';
 
     import { useI18n } from 'vue-i18n';
     import { useToast } from '@/plugins/toast.js';
@@ -198,10 +202,8 @@
 
     import {
         useOptionalLocalStorage
-    } from '../../composables/local-storage';
-    import { onMounted } from 'vue';
-    import LoadingButton from '../forms/button/LoadingButton.vue';
-    import { nextTick } from 'process';
+    } from '@/composables/local-storage';
+
 
     export default {
         components: {
