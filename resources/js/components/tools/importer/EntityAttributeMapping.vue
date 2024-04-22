@@ -7,26 +7,24 @@
             {{ t('main.importer.info.entity_type_has_no_attributes') }}
         </div>
         <div
-            v-for="(attr, i) in [...availableAttributes, ...availableAttributes, ...availableAttributes, ...availableAttributes, ...availableAttributes, ...availableAttributes]"
+            v-for="(attr, i) in availableAttributes"
             :key="i"
             class="attribute-mapping-item"
         >
-            <div class="d-flex align-items-end">
+            <div class="d-flex gap-2">
+                <ValuesMissingIndicator
+                    :missing="getMissing(attr)"
+                    :total="getTotal(attr)"
+                />
                 <label
-                    class="form-label flex-grow-1"
+                    class="form-label"
                     :for="`input-data-column-${attr.id}`"
                 >
                     {{ translateConcept(attr.thesaurus_url) }}
-
                     <span class="ms-2 opacity-50 small">
                         {{ t(`global.attributes.${attr.datatype}`) }}
                     </span>
                 </label>
-                <ValuesMissingIndicator
-                    class="ms-2 mb-2"
-                    :missing="getMissing(attr)"
-                    :total="getTotal(attr)"
-                />
             </div>
             <multiselect
                 :id="`input-data-column-${attr.id}`"
