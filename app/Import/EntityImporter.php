@@ -46,21 +46,21 @@ class EntityImporter {
     private function validateRowCallback($row, $data) {
         $name = $row[$data['name_column']];
 
-        if(array_key_exists('parent_column', $data)) {
+        if (array_key_exists('parent_column', $data)) {
             $parent =  $row[$data['parent_column']];
             $rootPath = $parent . "\\\\" . $name;
         } else {
             $rootPath = $name;
         }
 
-        $status = $this->checkIfFileExists($rootPath);
+        $status = $this->checkIfEntityExists($rootPath);
         return [
             'path' => $rootPath,
             'status' => $status
         ];
     }
 
-    private function checkIfFileExists($path) {
+    private function checkIfEntityExists($path) {
         try {
             $id = Entity::getFromPath($path);
             return $id == null ? ImportResolution::toName(ImportResolutionType::CREATE) : ImportResolution::toName(ImportResolutionType::UPDATE);
