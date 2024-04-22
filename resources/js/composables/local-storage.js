@@ -12,7 +12,6 @@ function getRefValue(value) {
 }
 
 function resetToDefault(storage, defaultValue) {
-    console.log(defaultValue);
     return (isRef(defaultValue)) ? storage.value = defaultValue : Object.assign(storage, defaultValue);
 }
 
