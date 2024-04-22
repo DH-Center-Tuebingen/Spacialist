@@ -90,10 +90,10 @@
                 <button
                     class="btn btn-outline-secondary"
                     type="button"
+                    style="border-left-width: 2px;"
                     @click="changeCustomDelimiter"
                 >
                     <span v-if="useCustomDelimiter">
-
                         <i class="far fa-fw fa-rectangle-list" />
                     </span>
                     <span v-else>
@@ -237,7 +237,7 @@
                 width: '5em',
                 minWidth: '5em',
                 flex: '1 1 min-content',
-                zIndex: 2048,
+                zIndex: 500,
             };
 
             const rangeInformationText = computed(() => {

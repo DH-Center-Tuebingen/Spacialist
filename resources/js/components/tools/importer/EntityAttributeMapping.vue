@@ -1,5 +1,5 @@
 <template>
-    <div class="entity-attribute-mapping d-flex flex-column gap-2">
+    <div class="entity-attribute-mapping d-flex flex-column gap-3">
         <div
             v-if="!Array.isArray(availableAttributes) || availableAttributes.length == 0"
             class="alert alert-primary"
@@ -7,12 +7,13 @@
             {{ t('main.importer.info.entity_type_has_no_attributes') }}
         </div>
         <div
-            v-for="(attr, i) in availableAttributes"
+            v-for="(attr, i) in [...availableAttributes, ...availableAttributes, ...availableAttributes, ...availableAttributes, ...availableAttributes, ...availableAttributes]"
             :key="i"
+            class="attribute-mapping-item"
         >
-            <div class="d-flex align-items-centered">
+            <div class="d-flex align-items-end">
                 <label
-                    class="form-label"
+                    class="form-label flex-grow-1"
                     :for="`input-data-column-${attr.id}`"
                 >
                     {{ translateConcept(attr.thesaurus_url) }}
@@ -22,7 +23,7 @@
                     </span>
                 </label>
                 <ValuesMissingIndicator
-                    class="ms-2"
+                    class="ms-2 mb-2"
                     :missing="getMissing(attr)"
                     :total="getTotal(attr)"
                 />
@@ -38,6 +39,7 @@
                 :placeholder="t('global.select.placeholder')"
                 :hide-selected="true"
                 :searchable="true"
+                :append-to-body="true"
                 @select="(value) => updateAttributeMapping(attr.id, value)"
                 @change="(value) => deselectWorkAround(attr.id, value)"
             />
@@ -143,3 +145,4 @@
         },
     };
 </script>
+

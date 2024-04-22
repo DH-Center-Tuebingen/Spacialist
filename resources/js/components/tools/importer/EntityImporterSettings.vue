@@ -20,6 +20,7 @@
                 :track-by="'id'"
                 :value-prop="'id'"
                 :value="entityType"
+                :append-to-body="true"
                 @change="value => $emit('update:entityType', value)"
             >
                 <template #option="{ option }">
@@ -56,6 +57,7 @@
                 :placeholder="t('global.select.placeholder')"
                 :searchable="true"
                 :value="entityName"
+                :append-to-body="true"
                 @change="value => $emit('update:entityName', value)"
             />
         </div>
@@ -80,6 +82,7 @@
                 :options="availableColumns"
                 :placeholder="t('global.select.placeholder')"
                 :searchable="true"
+                :append-to-body="true"
                 @change="(value) => $emit('update:entityParent', value, entityParent)"
             />
         </div>

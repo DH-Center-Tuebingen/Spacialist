@@ -4,41 +4,6 @@
             <h4>{{ t(`main.importer.title`) }}</h4>
         </header>
         <div class="layout flex-grow-1 overflow-hidden">
-            <div class="file-preview d-flex flex-column overflow-hidden gap-4">
-                <file-upload
-                    v-if="!state.fileLoaded"
-                    :model="state.files"
-                    class="rounded border-dashed flex-grow-1 d-flex flex-column gap-2 justify-content-center align-items-center clickable"
-                    accept="text/plain,text/csv"
-                    extensions="dsv,csv,tsv"
-                    :directory="false"
-                    :multiple="false"
-                    :drop="true"
-                    @input-file="addFile"
-                >
-                    <div class="info fw-bold fs-5">
-                        {{ t('main.importer.drop_csv_file') }}
-                    </div>
-                </file-upload>
-                <csv-table
-                    v-else
-                    class="flex-grow-1"
-                    :content="state.content"
-                    :small="true"
-                    @parse="e => extractColumns(e)"
-                />
-                <footer>
-                    <button
-                        v-show="state.fileLoaded"
-                        type="button"
-                        class="btn btn-outline-danger btn-sm"
-                        @click="removeFile()"
-                    >
-                        <i class="fas fa-fw fa-times" />
-                        {{ t('global.remove_file') }}
-                    </button>
-                </footer>
-            </div>
             <div class="controls">
                 <div class="card">
                     <header :class="cardHeaderClasses">
@@ -54,7 +19,7 @@
                             :stats="state.stats"
                             :available-entity-types="availableEntityTypes"
                             :available-columns="state.availableColumns"
-                            :disabled="state.uploading"
+                            :disabled="state.inputsDissabled"
                             @update:entity-name="onNameColumnChanged"
                             @update:entity-parent="onParentColumnChanged"
                         />
@@ -78,15 +43,10 @@
                             :available-columns="state.availableColumns"
                             :available-attributes="state.availableAttributes"
                             :stats="state.stats"
-                            :disabled="state.uploading"
+                            :disabled="state.inputsDissabled"
                             @row-changed="onAttributeMappingSelected"
                         />
-                        <div
-                            v-else-if="!state.fileLoaded"
-                            class="alert alert-primary"
-                        >
-                            {{ t("main.importer.info.entity_settings_require_file") }}
-                        </div>
+
                         <div
                             v-else
                             class="alert alert-primary"
@@ -95,39 +55,94 @@
                         </div>
                     </div>
                 </div>
-                <importer-update-state
-                    v-if="state.validated"
-                    :conflict="state.validationData.conflict"
-                    :update="state.validationData.update"
-                    :create="state.validationData.create"
-                />
-                <footer class="d-flex align-items-center justify-content-between">
-                    <button
-                        class="btn btn-danger"
-                        @click="cancelImport"
-                    >
-                        {{ t(`global.cancel`) }}
-                    </button>
+                <div class="card">
+                    <header :class="cardHeaderClasses">
+                        {{ t('main.importer.import_settings') }}
+                    </header>
+                    <div class="card-body">
+                        <importer-update-state
+                            v-if="state.validated"
+                            :conflict="state.validationData.conflict"
+                            :update="state.validationData.update"
+                            :create="state.validationData.create"
+                        />
+                        <div
+                            v-else
+                            class="alert alert-primary d-flex align-items-center"
+                        >
+                            <span>
+                                {{ t(`main.importer.validation.waiting`) }}
+                            </span>
+                        </div>
+                    </div>
 
-                    <LoadingButton
-                        v-if="!state.validated"
-                        :loading="state.validating"
-                        class="btn btn-primary"
-                        :disabled="!canValidate || state.validating"
-                        @click="validate"
-                    >
-                        {{ t(`main.importer.validate`) }}
-                    </LoadingButton>
-                    <LoadingButton
-                        v-else
-                        :loading="state.uploading"
-                        class="btn btn-primary"
-                        :disabled="!canImport || state.uploading"
-                        @click="upload"
-                    >
-                        {{ t(`main.importer.import_btn`) }}
-                    </LoadingButton>
-                </footer>
+                    <footer class="card-footer d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div class="d-flex btn-group">
+                            <button
+                                type="button"
+                                class="btn btn-outline-danger"
+                                :disabled="!state.fileLoaded"
+                                @click="removeFile()"
+                            >
+                                {{ t('global.remove_file') }}
+                            </button>
+                            <button
+                                class="btn btn-outline-danger"
+                                :disabled="!state.fileLoaded"
+                                @click="cancelImport"
+                            >
+                                {{ t(`global.cancel`) }}
+                            </button>
+                        </div>
+                        <LoadingButton
+                            v-if="!state.validated"
+                            :loading="state.validating"
+                            class="btn btn-outline-primary"
+                            :disabled="!canValidate || state.validating"
+                            @click="validate"
+                        >
+                            <template #icon>
+                                <i class="fas fa-check me-1" />
+                            </template>
+                            {{ t(`main.importer.validate`) }}
+                        </LoadingButton>
+                        <LoadingButton
+                            v-else
+                            :loading="state.uploading"
+                            class="btn btn-outline-primary"
+                            :disabled="!canImport || state.uploading"
+                            @click="upload"
+                        >
+                            {{ t(`main.importer.import_btn`) }}
+                        </LoadingButton>
+                    </footer>
+                </div>
+            </div>
+
+            <div class="file-preview d-flex flex-column overflow-hidden gap-4">
+                <file-upload
+                    v-if="!state.fileLoaded"
+                    :model="state.files"
+                    class="rounded border-dashed flex-grow-1 d-flex flex-column gap-3 justify-content-center align-items-center clickable"
+                    accept="text/plain,text/csv"
+                    extensions="dsv,csv,tsv"
+                    :directory="false"
+                    :multiple="false"
+                    :drop="true"
+                    @input-file="addFile"
+                >
+                    <i class="fas fa-fw fa-file-upload fa-4x" />
+                    <div class="info fw-bold fs-5">
+                        {{ t('main.importer.drop_csv_file') }}
+                    </div>
+                </file-upload>
+                <csv-table
+                    v-else
+                    class="flex-grow-1"
+                    :content="state.content"
+                    :small="true"
+                    @parse="e => extractColumns(e)"
+                />
             </div>
         </div>
     </div>
@@ -543,6 +558,9 @@
                 dataMissing: computed(_ => {
                     return !entitySettings.entityType || !entitySettings.entityName || state.stats.entityName.missing > 0;
                 }),
+                inputsDissabled: computed(_ => {
+                    return state.validated || state.uploading || state.imported;
+                }),
                 uploading: false,
                 imported: false,
                 validating: false,
@@ -639,16 +657,22 @@
         .table-responsive {
             overflow-x: visible !important;
         }
+
+        .entity-attribute-mapping {
+            display: grid;
+            grid-auto-columns: minmax();
+        }
     }
 </style>
+
 
 
 <style scoped>
     .controls {
         display: grid;
-        grid-template-columns: minmax(1fr);
-        grid-template-rows: min-content minmax(min-content, 1fr) minmax(min-content, 1rem);
+        grid-template-columns: 1fr 2fr 1fr;
         gap: 1rem;
+        position: relative;
     }
 
     .data-importer {
@@ -658,11 +682,50 @@
 
     .layout {
         display: grid;
-        grid-template-columns: 2fr minmax(300px, 1fr);
+        grid-template-rows: minmax(auto, 50%) 1fr;
         gap: 1rem;
+    }
+
+
+
+    .entity-attribute-mapping {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 1fr;
+        align-items: flex-end;
+    }
+
+    @media screen and (max-width: 1920px) {
+        .entity-attribute-mapping {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+
+        .file-preview,
+        .controls {
+            grid-template-columns: 1fr;
+            overflow-y: auto;
+            padding: 1rem;
+            border: 1px solid var(--bs-border-color-translucent);
+            border-radius: var(--bs-border-radius);
+        }
+
+        .entity-attribute-mapping {
+            grid-template-columns: 1fr;
+        }
     }
 
     .file-preview {
         max-height: 100%;
+    }
+
+    .card-body {
+        overflow-y: auto;
+        max-height: 100%;
+    }
+
+    .card {
+        overflow-y: auto;
     }
 </style>

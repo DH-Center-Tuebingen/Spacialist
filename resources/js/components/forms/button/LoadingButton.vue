@@ -10,6 +10,11 @@
         >
             <i class="fas fa-fw fa-circle-notch fa-spin" />
         </span>
+        <slot
+            v-else
+            name="icon"
+        />
+
         <slot />
     </button>
 </template>

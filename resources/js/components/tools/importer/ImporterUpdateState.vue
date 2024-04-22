@@ -1,39 +1,34 @@
 <template>
-    <div class="importer-update-state d-flex card ">
-        <header class="card-header">
-            {{ t('main.importer.validation.title') }}
-        </header>
-        <div class="card-body ">
-            <div
-                class="alert d-flex align-items-center gap-4"
-                :class="activeOption.class"
-            >
-                <i :class="activeOption.icon" />
-                <span>
-                    {{ t(`main.importer.validation.${activeOption.text}`) }}
-                </span>
-            </div>
+    <div class="importer-update-state">
+        <div
+            class="alert d-flex align-items-center gap-4"
+            :class="activeOption.class"
+        >
+            <i :class="activeOption.icon" />
+            <span>
+                {{ t(`main.importer.validation.${activeOption.text}`) }}
+            </span>
+        </div>
 
-            <div class="input-group">
-                <ImporterUpdateItem
-                    :value="create"
-                    icon="fas fa-fw fa-circle-plus"
-                    class="input-group-text flex-grow-1 text-success"
-                    :title="t('global.create')"
-                />
-                <ImporterUpdateItem
-                    :value="update"
-                    icon="fas fa-fw fa-circle-arrow-up"
-                    class="input-group-text flex-grow-1 text-warning"
-                    :title="t('global.update')"
-                />
-                <ImporterUpdateItem
-                    :value="conflict"
-                    icon="fas fa-fw fa-circle-exclamation"
-                    class="input-group-text flex-grow-1 text-danger"
-                    :title="t('global.conflict')"
-                />
-            </div>
+        <div class="input-group">
+            <ImporterUpdateItem
+                :value="create"
+                icon="fas fa-fw fa-circle-plus"
+                class="input-group-text flex-grow-1 text-success"
+                :title="t('global.create')"
+            />
+            <ImporterUpdateItem
+                :value="update"
+                icon="fas fa-fw fa-circle-arrow-up"
+                class="input-group-text flex-grow-1 text-warning"
+                :title="t('global.update')"
+            />
+            <ImporterUpdateItem
+                :value="conflict"
+                icon="fas fa-fw fa-circle-exclamation"
+                class="input-group-text flex-grow-1 text-danger"
+                :title="t('global.conflict')"
+            />
         </div>
     </div>
 </template>

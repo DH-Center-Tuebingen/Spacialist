@@ -771,6 +771,7 @@
             "title": "Data-Importer",
             "entity_settings": "Entity Settings",
             "attribute_mapping": "Attribute Mapping",
+            "import_settings": "Import-Settings",
             "upload_csv_info": "Select a CSV file to import data.",
             "drop_csv_file": "Drop CSV file here",
             "csv_file_error": "CSV-Datei konnte nicht gelesen werden.",
@@ -785,6 +786,7 @@
             "success": "Import of 1 entry finished | Import of {cnt} entries finished",
             "validation": {
                 "title": "Validation",
+                "waiting": "Not Validation yet.",
                 "mixed": "Some entities do already exist and will be updated, the remaining will be created!",
                 "create": "All items will be created as new entities.",
                 "update": "All entites do already exist and will be updated.",

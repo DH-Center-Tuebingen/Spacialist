@@ -771,6 +771,7 @@
             "title": "Daten-Importer",
             "entity_settings": "Entitätseinstellungen",
             "attribute_mapping": "Attribut-Zuordnung",
+            "import_settings": "Import-Einstellungen",
             "upload_csv_info": "Wähle eine CSV-Datei aus um Daten zum importieren.",
             "drop_csv_file": "CSV-Datei hier ablegen",
             "selected_entity_type": "Entitätstyp",
@@ -784,6 +785,7 @@
             "success": "Import von 1 Eintrag abgeschlossen | Import von {cnt} Einträgen abgeschlossen",
             "validation": {
                 "title": "Validierung",
+                "waiting": "Validierung ausstehend",
                 "mixed": "Einige Entitäten existieren bereits und werden aktualisieren, die restlichen werden neu erzeugt!",
                 "create": "Keine Überschneidung, alle Entitäten werden neu erzeugt!",
                 "update": "Alle Entitäten existieren bereits und werden aktualisiert!",
