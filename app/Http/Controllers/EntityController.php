@@ -436,8 +436,6 @@ class EntityController extends Controller {
             'metadata' => 'required|json',
             'data' => 'required|json',
         ]);
-
-        return $user;
     }
 
     public function validateImportData(Request $request) {
@@ -455,7 +453,7 @@ class EntityController extends Controller {
     }
 
     public function importData(Request $request) {
-        $user = $this->verifyImportData($request);
+        $this->verifyImportData($request);
 
         $file = $request->file('file');
         $metadata = json_decode($request->get('metadata'), true);
@@ -517,6 +515,7 @@ class EntityController extends Controller {
                 ], 400);
             }
             try {
+                $user = auth()->user();
                 if ($entityId == null) {
                     $entity = $this->createImportedEntity($entityName, $rootEntityPath, $data['entity_type_id'], $user);
 
