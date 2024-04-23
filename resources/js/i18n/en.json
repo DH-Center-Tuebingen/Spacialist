@@ -24,6 +24,7 @@
         "apply": "Apply",
         "move": "Move",
         "parse": "Parse",
+        "conflict": "Conflict",
         "file": "File",
         "remove_file": "Remove file",
         "no_file": "No file",
@@ -88,6 +89,11 @@
         "preview_not_available": "No preview available",
         "note": "Note",
         "information": "Information",
+        "paginator": {
+            "count": "Count",
+            "of": "of",
+            "skip": "Skip"
+        },
         "tools": {
             "title": "Tools",
             "bibliography": "Bibliography",
@@ -302,12 +308,14 @@
         "csv": {
             "uploader": {
                 "title": "CSV-Uploader",
+                "settings_title": "CSV-Settings",
                 "delimiter": "Delimiter",
                 "delimiter_with_info": "Delimiter (',', ';', …)",
-                "has_header": "Has Header Row?",
+                "has_header": "Has Header Row",
                 "show_linenumbers": "Show Line numbers",
                 "nr_of_shown_rows": "Number of shown rows",
-                "nr_of_skipped_rows": "Number of skipped rows"
+                "nr_of_skipped_rows": "Number of skipped rows",
+                "eof": "End of File"
             },
             "picker": {
                 "title": "CSV-Picker"
@@ -761,16 +769,42 @@
         },
         "importer": {
             "title": "Data-Importer",
+            "entity_settings": "Entity Settings",
+            "attribute_mapping": "Attribute Mapping",
+            "import_settings": "Import-Settings",
             "upload_csv_info": "Select a CSV file to import data.",
             "drop_csv_file": "Drop CSV file here",
+            "csv_file_error": "CSV file could not be read.",
             "selected_entity_type": "Entity-Type",
             "column_entity_name": "Entity Name-Column",
             "column_entity_parent": "Entity Parent-Column",
             "import_btn": "Start Import",
-            "no_missing_values": "No missing values for this attribute. You are all set!",
-            "missing_required_values": "{miss} out of 1 entry is empty! This option does not allow empty values. Please fix this. | {miss} out of {total} entries are empty! This option does not allow empty values. Please fix this.",
-            "missing_non_required_values": "{miss} out of 1 entry is empty! Filled values are not required for this attribute, so you can go on but may want to re-check. | {miss} out of {total} entries are empty! Filled values are not required for this attribute, so you can go on but may want to re-check.",
-            "success": "Import of 1 entry finished | Import of {cnt} entries finished"
+            "validate": "Validate",
+            "success": "Import of 1 entry finished | Import of {cnt} entries finished",
+            "validation": {
+                "title": "Validation",
+                "waiting": "Not validated yet.",
+                "mixed": "Some entities do already exist and will be updated, the remaining will be created!",
+                "create": "All items will be created as new entities.",
+                "update": "All entites do already exist and will be updated.",
+                "imported": "All items were imported successfully.",
+                "multiple_error": "Some values match multiple entities and can not be imported.",
+                "no_items": "There are no items in your import"
+            },
+            "indicator": {
+                "missing_value": "No value set",
+                "no_missing_values": "No missing values for this attribute. You are all set!",
+                "missing_required_values": "{miss} out of 1 entry is empty! This option does not allow empty values. Please fix this. | {miss} out of {total} entries are empty! This option does not allow empty values. Please fix this.",
+                "missing_non_required_values": "{miss} out of 1 entry is empty! Filled values are not required for this attribute, so you can go on but may want to re-check. | {miss} out of {total} entries are empty! Filled values are not required for this attribute, so you can go on but may want to re-check."
+            },
+            "info": {
+                "entity_settings_require_file": "No file uploaded yet.",
+                "entity_type_has_no_attributes": "No attributes found. Please select a proper entity type."
+            },
+            "error": {
+                "file_read": "File could not be read.",
+                "file_read_abort": "File reading aborted."
+            }
         },
         "map": {
             "init_error": "Several init-*-Attributes are provided. Only one is allowed.",
@@ -808,5 +842,9 @@
                 }
             }
         }
+    },
+    "keyboard": {
+        "tab": "Tab",
+        "space": "Spacebar"
     }
 }
