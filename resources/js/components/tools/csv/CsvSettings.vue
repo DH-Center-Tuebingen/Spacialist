@@ -3,8 +3,8 @@
         class="csv-settings form-control d-inline-flex flex-wrap align-items-center gap-2"
         style="order: 1;"
     >
-        <div class="line line-top gap-2">
-            <div class="input-group  flex-nowrap">
+        <div class="line line-top d-flex flex-grow-1 justify-content-start align-items-center gap-2">
+            <div class="input-group flex-nowrap">
                 <span class="input-group-text">
                     {{ t('global.paginator.count') }}
                 </span>
@@ -53,12 +53,13 @@
             </div>
         </div>
         <div
-            class="line line-bottom gap-2 flex-wrap"
-            style="order: 2; flex-basis: fit-content;"
+            class="line line-bottom d-flex flex-grow-1 justify-content-start align-items-center gap-2 flex-wrap order-2"
+            :class="lineClassList"
+            style="flex-basis: fit-content;"
         >
             <div
-                class="delimiter-group input-group"
-                style="position: relative; flex-wrap: nowrap; flex-basis: fit-content; flex-grow: 1; max-width: 250px;"
+                class="delimiter-group input-group flex-grow-1"
+                style="flex-basis: fit-content; max-width: 250px;"
             >
                 <label
                     class="input-group-text"
@@ -256,7 +257,6 @@
                 minWidth: '5em',
             };
 
-
             return {
                 t,
                 changeCustomDelimiter,
@@ -270,14 +270,3 @@
 
     };
 </script>
-
-<style scoped>
-    .line {
-        display: flex;
-        flex: 1;
-        justify-content: flex-start;
-        align-items: center;
-        flex-wrap: nowrap;
-        gap: 2rem !important;
-    }
-</style>
