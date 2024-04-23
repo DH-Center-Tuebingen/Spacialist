@@ -198,10 +198,6 @@
         translateConcept,
     } from '@/helpers/helpers.js';
 
-    import {
-        useOptionalLocalStorage
-    } from '@/composables/local-storage';
-
 
     export default {
         components: {
@@ -209,13 +205,6 @@
             EntityAttributeMapping,
             LoadingButton,
             ImporterUpdateState,
-        },
-        props: {
-            debug: {
-                type: Boolean,
-                required: false,
-                default: false
-            },
         },
         setup(props, context) {
             const { t } = useI18n();
@@ -244,7 +233,6 @@
                 state.error = '';
 
                 fileContent.value = e.target.result;
-                saveFileContent();
             };
 
             fileReader.onerror = e => {
@@ -475,44 +463,28 @@
                 }
             };
 
-            const storageSettings = {
-                fileContent: props.debug,
-                entitySettings: props.debug,
-                attributeMapping: props.debug,
-            };
-
-            // DATA
-
-            const {
-                value: fileContent,
-                reset: resetFileContent,
-                save: saveFileContent
-            } = useOptionalLocalStorage(
-                storageSettings.fileContent,
-                'importer_file_content', ''
-            );
-
-            const {
-                value: entitySettings,
-                reset: resetEntitySettings
-            } = useOptionalLocalStorage(
-                storageSettings.entitySettings,
-                'importer_entity_settings', {
+            const entitySettings = reactive({
                 entityType: null,
                 entityName: null,
                 entityParent: null,
             });
 
-            const {
-                value: attributeSettings,
-                reset: resetAttributeSettings
-            } = useOptionalLocalStorage(
-                storageSettings.attributeMapping,
-                'importer_attribute_mapping', {
-                autoComplete: true,
+            function resetEntitySettings() {
+                entitySettings.entityType = null;
+                entitySettings.entityName = null;
+                entitySettings.entityParent = null;
+            }
+
+            const attributeSettings = reactive({
+                // autoComplete: true,
                 mapping: {},
             });
 
+            function resetAttributeSettings() {
+                attributeSettings.mapping = {};
+            }
+
+            // 
             const resetImportState = _ => {
                 resetValidation();
                 resetImport();
@@ -529,7 +501,6 @@
             };
 
             const resetValidation = _ => {
-
                 state.validating = false;
                 state.validated = false;
                 state.validationData = {
@@ -558,7 +529,6 @@
                 state.stats.attributes = {};
 
                 cancelImport();
-                resetFileContent();
             };
 
             const availableEntityTypes = computed(() => Object.values(store.getters.entityTypes));
@@ -567,7 +537,7 @@
                 fileData: [],
                 fileDelimiter: '',
                 hasHeaderRow: true,
-                content: fileContent,
+                content: '',
                 encoding: 'UTF-8',
                 fileLoaded: false,
                 availableColumns: [],
@@ -597,22 +567,8 @@
                 },
             });
 
-            onMounted(() => {
-                if(fileContent.value) {
-                    state.fileLoaded = true;
-                }
-            });
-
             watch(() => entitySettings.entityType, entityType => {
                 onEntityTypeSelected(entityType);
-            });
-
-            watch(entitySettings, (newVal, oldVal) => {
-                resetImportState();
-            });
-
-            watch(attributeSettings, (newVal, oldVal) => {
-                resetImportState();
             });
 
             const canValidate = computed(_ => {
@@ -662,7 +618,6 @@
                 state,
                 entitySettings,
                 attributeSettings,
-                storageSettings,
                 // REFS
                 csvTableRef,
             };
