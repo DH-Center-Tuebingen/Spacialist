@@ -92,15 +92,15 @@
 
             const activeOption = computed(() => {
                 if(props.conflict > 0)
-                    return options.value.conflict;
+                    return options.conflict;
                 if(props.update > 0 && props.create > 0)
-                    return options.value.mixed;
+                    return options.mixed;
                 if(props.update > 0)
-                    return options.value.update;
+                    return options.update;
                 if(props.create > 0)
-                    return options.value.create;
+                    return options.create;
 
-                return options.value.no_items;
+                return options.no_items;
             });
 
             return {
