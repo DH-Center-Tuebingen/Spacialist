@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 - Keyboard Shortcut to save Entity (`Ctrl + s` for current open attribute tab, `Ctrl + Shift + s` for entire entity)
 - Info on hover to required fields in new/edit bibliography modal
 - Restrict search in _Entity_ attribute to specific entity-types
+
 ### Fixed
 - Error in _Attribute List_ caused by _Entity (Multiple Choice)_ attribute
 - Attribute form Save/Reset handling due to newly introduced _Attribute Group Separator_
@@ -63,6 +64,7 @@ All notable changes to this project will be documented in this file.
 - Set default value in parent element in _Add Attribute_ modal
 - Values in Dropdown attributes are now sorted alphabetically
 - Values in Dropdown attributes are now searchable
+- Data Importer: Now supports the Boolean attribute with the value 'x'
 
 ## 0.9.14
 ### Added
