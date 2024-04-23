@@ -786,6 +786,7 @@
                 "mixed": "Einige Entitäten existieren bereits und werden aktualisieren, die anderen werden neu erzeugt!",
                 "create": "Keine Überschneidung, alle Entitäten werden neu erzeugt!",
                 "update": "Alle Entitäten existieren bereits und werden aktualisiert!",
+                "imported": "Alle Eigenschaften wurden erfolgreich importiert!",
                 "multiple_error": "Manche Pfade existieren mehrfach, daher kann der Import nicht ausgeführt werden!",
                 "no_items": "Es gibt keine Werte zum importieren!"
             },

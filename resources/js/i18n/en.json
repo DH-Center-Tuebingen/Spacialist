@@ -783,10 +783,11 @@
             "success": "Import of 1 entry finished | Import of {cnt} entries finished",
             "validation": {
                 "title": "Validation",
-                "waiting": "Not Validation yet.",
+                "waiting": "Not validated yet.",
                 "mixed": "Some entities do already exist and will be updated, the remaining will be created!",
                 "create": "All items will be created as new entities.",
                 "update": "All entites do already exist and will be updated.",
+                "imported": "All items were imported successfully.",
                 "multiple_error": "Some values match multiple entities and can not be imported.",
                 "no_items": "There are no items in your import"
             },

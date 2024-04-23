@@ -1,14 +1,11 @@
 <template>
     <div class="importer-update-state">
-        <div
-            class="alert d-flex align-items-center gap-4"
-            :class="activeOption.class"
-        >
-            <i :class="activeOption.icon" />
-            <span>
-                {{ t(`main.importer.validation.${activeOption.text}`) }}
-            </span>
-        </div>
+        <Alert
+            :message="t(`main.importer.validation.${activeOption.text}`)"
+            :noicon="false"
+            :type="activeOption.type"
+        />
+
 
         <div class="input-group">
             <ImporterUpdateItem
@@ -56,6 +53,10 @@
                 type: Number,
                 required: true
             },
+            imported: {
+                type: Boolean,
+                required: true
+            }
 
         },
         setup(props) {
@@ -65,32 +66,33 @@
             const options = {
                 conflict: {
                     text: 'multiple_error',
-                    class: 'alert-danger',
-                    icon: 'fas fa-exclamation-circle',
+                    type: 'error',
                 },
                 create: {
                     text: 'create',
-                    class: 'alert-success',
-                    icon: 'fas fa-circle-check',
+                    type: 'success',
                 },
                 mixed: {
                     text: 'mixed',
-                    class: 'alert-warning',
-                    icon: 'fas fa-exclamation-circle',
+                    type: 'warning',
                 },
                 no_items: {
                     text: 'no_items',
-                    class: 'alert-danger',
-                    icon: 'fas fa-exclamation-circle',
+                    type: 'error',
                 },
                 update: {
                     text: 'update',
-                    class: 'alert-warning',
-                    icon: 'fas fa-exclamation-circle',
+                    type: 'warning',
                 },
+                imported: {
+                    text: 'imported',
+                    type: 'success',
+                }
             };
 
             const activeOption = computed(() => {
+                if(props.imported)
+                    return options.imported;
                 if(props.conflict > 0)
                     return options.conflict;
                 if(props.update > 0 && props.create > 0)

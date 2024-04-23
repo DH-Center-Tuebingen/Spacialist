@@ -26,12 +26,11 @@
                             @update:entity-name="onNameColumnChanged"
                             @update:entity-parent="onParentColumnChanged"
                         />
-                        <div
+                        <Alert
                             v-else
-                            class="alert alert-primary"
-                        >
-                            {{ t("main.importer.info.entity_settings_require_file") }}
-                        </div>
+                            :message="t('main.importer.info.entity_settings_require_file')"
+                            type="info"
+                        />
                     </div>
                 </div>
                 <div class="card">
@@ -49,12 +48,11 @@
                             :disabled="state.inputsDissabled"
                             @row-changed="onAttributeMappingSelected"
                         />
-                        <div
+                        <Alert
                             v-else
-                            class="alert alert-primary"
-                        >
-                            {{ t("main.importer.info.entity_type_has_no_attributes") }}
-                        </div>
+                            type="info"
+                            :message="t('main.importer.info.entity_type_has_no_attributes')"
+                        />
                     </div>
                 </div>
                 <div class="card">
@@ -67,15 +65,13 @@
                             :conflict="state.validationData.conflict"
                             :update="state.validationData.update"
                             :create="state.validationData.create"
+                            :imported="state.imported"
                         />
-                        <div
+                        <Alert
                             v-else
-                            class="alert alert-primary d-flex align-items-center"
-                        >
-                            <span>
-                                {{ t(`main.importer.validation.waiting`) }}
-                            </span>
-                        </div>
+                            :message="t('main.importer.validation.waiting')"
+                            type="info"
+                        />
                     </div>
 
                     <footer class="card-footer d-flex flex-wrap align-items-center justify-content-between gap-2">
@@ -231,8 +227,6 @@
                 state.fileLoaded = true;
                 state.content = e.target.result;
                 state.error = '';
-
-                fileContent.value = e.target.result;
             };
 
             fileReader.onerror = e => {
@@ -512,6 +506,8 @@
                     multiple: 0,
                     total: 0
                 };
+
+                resetImport();
             };
 
             const resetSettings = _ => {
