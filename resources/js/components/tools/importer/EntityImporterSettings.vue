@@ -97,12 +97,10 @@
         translateConcept,
     } from '@/helpers/helpers.js';
 
-    import Multiselect from '@vueform/multiselect';
     import ValuesMissingIndicator from './ValuesMissingIndicator.vue';
 
     export default {
         components: {
-            Multiselect,
             ValuesMissingIndicator
         },
         props: {

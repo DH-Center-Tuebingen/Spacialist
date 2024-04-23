@@ -176,9 +176,7 @@
 
     import { stringSimilarity } from 'string-similarity-js';
 
-    import VueUploadComponent from 'vue-upload-component';
 
-    import CsvTable from '@/components/CsvTable.vue';
     import EntityAttributeMapping from '@/components/tools/importer/EntityAttributeMapping.vue';
     import EntityImporterSettings from '@/components/tools/importer/EntityImporterSettings.vue';
     import ImporterUpdateState from '@/components/tools/importer/ImporterUpdateState.vue';
@@ -207,8 +205,6 @@
 
     export default {
         components: {
-            CsvTable,
-            FileUpload: VueUploadComponent,
             EntityImporterSettings,
             EntityAttributeMapping,
             LoadingButton,

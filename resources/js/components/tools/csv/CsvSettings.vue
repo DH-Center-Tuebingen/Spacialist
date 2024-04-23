@@ -141,17 +141,13 @@
 </template>
 
 <script>
-    import Multiselect from '@vueform/multiselect';
+    import { computed } from 'vue';
     import { useI18n } from 'vue-i18n';
-
     import { multiselectResetClasslist } from '@/helpers/helpers.js';
     import IconButton from '../../forms/IconButton.vue';
-    import { computed } from 'vue';
-
 
     export default {
         components: {
-            Multiselect,
             IconButton
         },
         props: {
