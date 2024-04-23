@@ -1,7 +1,7 @@
 import { defineConfig, loadEnv } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
-import path, { dirname } from 'path';
+import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const isOpen = process.env.IS_OPEN === 'true';
@@ -33,9 +33,9 @@ export default ({ mode }) => {
         },
         resolve: {
             alias: {
-                '@': path.resolve(_dirname, './resources/js/'),
-                '%store': path.resolve(_dirname, './resources/js/bootstrap/store.js'),
-                '%router': path.resolve(_dirname, './resources/js/bootstrap/router.js'),
+                '@': resolve(_dirname, './resources/js/'),
+                '%store': resolve(_dirname, './resources/js/bootstrap/store.js'),
+                '%router': resolve(_dirname, './resources/js/bootstrap/router.js'),
             },
         },
     };
