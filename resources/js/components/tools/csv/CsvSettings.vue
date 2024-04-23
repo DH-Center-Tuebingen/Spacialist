@@ -1,8 +1,5 @@
 <template>
-    <form
-        class="csv-settings form-control d-inline-flex flex-wrap align-items-center gap-2"
-        style="order: 1;"
-    >
+    <form class="csv-settings form-control d-inline-flex flex-wrap align-items-center gap-2 order-1">
         <div class="line line-top d-flex flex-grow-1 justify-content-start align-items-center gap-2">
             <div class="input-group flex-nowrap">
                 <span class="input-group-text">
