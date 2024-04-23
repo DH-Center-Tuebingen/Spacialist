@@ -62,35 +62,33 @@
 
             const { t } = useI18n();
 
-            const options = computed(() => {
-                return {
-                    conflict: {
-                        text: 'multiple_error',
-                        class: 'alert-danger',
-                        icon: 'fas fa-exclamation-circle',
-                    },
-                    create: {
-                        text: 'create',
-                        class: 'alert-success',
-                        icon: 'fas fa-circle-check',
-                    },
-                    mixed: {
-                        text: 'mixed',
-                        class: 'alert-warning',
-                        icon: 'fas fa-exclamation-circle',
-                    },
-                    no_items: {
-                        text: 'no_items',
-                        class: 'alert-danger',
-                        icon: 'fas fa-exclamation-circle',
-                    },
-                    update: {
-                        text: 'update',
-                        class: 'alert-warning',
-                        icon: 'fas fa-exclamation-circle',
-                    },
-                };
-            });
+            const options = {
+                conflict: {
+                    text: 'multiple_error',
+                    class: 'alert-danger',
+                    icon: 'fas fa-exclamation-circle',
+                },
+                create: {
+                    text: 'create',
+                    class: 'alert-success',
+                    icon: 'fas fa-circle-check',
+                },
+                mixed: {
+                    text: 'mixed',
+                    class: 'alert-warning',
+                    icon: 'fas fa-exclamation-circle',
+                },
+                no_items: {
+                    text: 'no_items',
+                    class: 'alert-danger',
+                    icon: 'fas fa-exclamation-circle',
+                },
+                update: {
+                    text: 'update',
+                    class: 'alert-warning',
+                    icon: 'fas fa-exclamation-circle',
+                },
+            };
 
             const activeOption = computed(() => {
                 if(props.conflict > 0)
