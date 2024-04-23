@@ -65,9 +65,6 @@
             }
         },
         setup(props) {
-
-
-
             return {
                 t: useI18n().t,
                 translateConcept,

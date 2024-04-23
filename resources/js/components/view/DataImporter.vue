@@ -470,6 +470,8 @@
             });
 
             function resetEntitySettings() {
+                state.stats.entityName = { missing: 0, total: 0 };
+                state.stats.entityParent = { missing: 0, total: 0 };
                 entitySettings.entityType = null;
                 entitySettings.entityName = null;
                 entitySettings.entityParent = null;
@@ -481,6 +483,7 @@
             });
 
             function resetAttributeSettings() {
+                state.stats.attributes = {};
                 attributeSettings.mapping = {};
             }
 
