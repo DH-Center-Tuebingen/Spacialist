@@ -1,6 +1,9 @@
 <template>
     <div class="d-flex flex-column ">
-        <header class="d-flex gap-3 align-items-center overflow-visible mb-3">
+        <header
+            class="d-flex gap-3 align-items-center overflow-visible"
+            :class="csvSettings.showPreview ? 'mb-3' : ''"
+        >
             <CsvSettings
                 v-model:delimiter="csvSettings.delimiter"
                 v-model:has-header-row="csvSettings.hasHeaderRow"
@@ -226,10 +229,10 @@
 
 <style scoped>
     /* 
-                Bootstrap sets the sticky-top to z-index: 1020, which is the same level
-                as the modals, which doesn't make sense in the table context.
-                We reset it to the minimum value here. 
-            */
+                        Bootstrap sets the sticky-top to z-index: 1020, which is the same level
+                        as the modals, which doesn't make sense in the table context.
+                        We reset it to the minimum value here. 
+                    */
     thead {
         z-index: 1;
     }
