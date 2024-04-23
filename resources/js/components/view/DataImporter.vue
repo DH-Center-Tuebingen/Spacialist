@@ -412,7 +412,6 @@
                         state.validated = true;
                         state.error = '';
                         state.validationData = data;
-                        console.log(state.validationData);
                     })
                     .catch(e => {
                         showImportError({
