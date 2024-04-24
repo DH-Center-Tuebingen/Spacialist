@@ -660,7 +660,7 @@
                 "time": "Datum der Veröffentlichung",
                 "full_name": "Vollständiger Name"
             },
-            "build_info": "Mit <i class=\"fab fa-fw fa-laravel\"></i> & <i class=\"fab fa-fw fa-vuejs\"></i> erstellt!",
+            "build_info": "Erstellt mit <i class=\"fab fa-fw fa-laravel\"></i> & <i class=\"fab fa-fw fa-vuejs\"></i>!",
             "contributor": "Mitwirkender | Mitwirkende",
             "former_contributor": "Ehemaliger | Ehemalige",
             "roles": {
