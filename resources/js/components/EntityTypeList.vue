@@ -1,5 +1,5 @@
 <template>
-    <div class="list-group scroll-y-auto px-2">
+    <div class="list-group overflow-y-auto px-2">
         <a
             v-for="(entry, i) in state.entries"
             :key="i"

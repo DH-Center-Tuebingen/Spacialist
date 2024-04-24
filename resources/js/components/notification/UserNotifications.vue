@@ -108,7 +108,7 @@
                             {{ t('global.notifications.delete_all') }}
                         </button>
                     </div>
-                    <div class="scroll-y-auto mt-2">
+                    <div class="overflow-y-auto mt-2">
                         <notification-body
                             v-for="(n, idx) in state.notifications"
                             :key="`${n.id}_${idx}`"
@@ -155,7 +155,7 @@
                             {{ t('global.notifications.delete_all') }}
                         </button>
                     </div>
-                    <div class="scroll-y-auto mt-2">
+                    <div class="overflow-y-auto mt-2">
                         <notification-body
                             v-for="(n, idx) in state.unreadNotifications"
                             :key="`${n.id}_${idx}`"
@@ -193,7 +193,7 @@
                             {{ t('global.notifications.delete_all') }}
                         </button>
                     </div>
-                    <div class="scroll-y-auto mt-2">
+                    <div class="overflow-y-auto mt-2">
                         <notification-body
                             v-for="(n, idx) in state.readNotifications"
                             :key="`${n.id}_${idx}`"
@@ -231,7 +231,7 @@
                             {{ t('global.notifications.mark_all_as_read') }}
                         </button>
                     </div>
-                    <div class="scroll-y-auto mt-2">
+                    <div class="overflow-y-auto mt-2">
                         <notification-body
                             v-for="(n, idx) in state.systemNotifications"
                             :key="`${n.id}_${idx}`"
@@ -317,5 +317,5 @@
                 state,
             };
         },
-    }
+    };
 </script>

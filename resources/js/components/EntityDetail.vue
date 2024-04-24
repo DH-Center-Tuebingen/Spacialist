@@ -280,7 +280,7 @@
                         v-if="state.attributesFetched"
                         :ref="el => setAttrRefs(el, tg.id)"
                         v-dcan="'entity_data_read'"
-                        class="pt-2 h-100 scroll-y-auto scroll-x-hidden"
+                        class="pt-2 h-100 overflow-y-auto overflow-x-hidden"
                         :attributes="tg.data"
                         :hidden-attributes="state.hiddenAttributeList"
                         :show-hidden="state.hiddenAttributeState"
@@ -301,7 +301,7 @@
             >
                 <div
                     v-if="state.entity.comments"
-                    class="mb-auto scroll-y-auto h-100 pe-2"
+                    class="mb-auto overflow-y-auto h-100 pe-2"
                 >
                     <div
                         v-if="state.commentsFetching"
