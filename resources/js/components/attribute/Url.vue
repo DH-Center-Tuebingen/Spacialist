@@ -7,6 +7,7 @@
             type="text"
             :disabled="disabled"
             :name="name"
+            @mousedown="preventFocusOnCtrlClick"
             @click="openOnCtrlClick"
         >
         <a
@@ -23,7 +24,6 @@
 <script>
     import {
         reactive,
-        toRefs,
         watch,
     } from 'vue';
 
@@ -49,17 +49,10 @@
         },
         emits: ['change'],
         setup(props, context) {
-            const {
-                name,
-                disabled,
-                value,
-            } = toRefs(props);
-            // FETCH
-
             // FUNCTIONS
             const resetFieldState = _ => {
                 v.resetField({
-                    value: value.value
+                    value: props.value
                 });
             };
             const undirtyField = _ => {
@@ -67,10 +60,17 @@
                     value: v.value,
                 });
             };
+
+            const preventFocusOnCtrlClick = e => {
+                if(e.ctrlKey) {
+                    e.preventDefault();
+                }
+            };
+
             const openOnCtrlClick = e => {
                 if(e.ctrlKey) {
-                    window.open(v.value, '_blank', 'noreferrer');
                     e.preventDefault();
+                    window.open(v.value, '_blank', 'noreferrer');
                 }
             };
 
@@ -79,8 +79,8 @@
                 value: fieldValue,
                 meta,
                 resetField,
-            } = useField(`url_${name.value}`, yup.string().url(), {
-                initialValue: value.value,
+            } = useField(`url_${props.name}`, yup.string().url(), {
+                initialValue: props.value,
             });
             const state = reactive({
 
@@ -92,7 +92,7 @@
             });
 
 
-            watch(_ => value, (newValue, oldValue) => {
+            watch(_ => props.value, (newValue, oldValue) => {
                 resetFieldState();
             });
             watch(_ => v.value, (newValue, oldValue) => {
@@ -113,6 +113,7 @@
                 resetFieldState,
                 undirtyField,
                 openOnCtrlClick,
+                preventFocusOnCtrlClick,
                 // STATE
                 state,
                 v,
