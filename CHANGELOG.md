@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - Serif font (Zilla Slab)
 - New Attribute Type: _Richtext_ (A feature-rich alternative to _Textbox_ Attribute; based on Markdown)
 - New Attribute Type: _Date range_
+- New Attribute Type: _URL_
 - New Attribute Type: _Userlist_
 - New Attribute Type: _Attribute Group Separator_ (A separator element to group attributes in tabs)
 - Separate form Save/Reset in Entity Attribute Tabs (when using _Attribute Group Separator_)
@@ -16,7 +17,6 @@ All notable changes to this project will be documented in this file.
 - Keyboard Shortcut to save Entity (`Ctrl + s` for current open attribute tab, `Ctrl + Shift + s` for entire entity)
 - Info on hover to required fields in new/edit bibliography modal
 - Restrict search in _Entity_ attribute to specific entity-types
-- URL attribute type
 ### Fixed
 - Error in _Attribute List_ caused by _Entity (Multiple Choice)_ attribute
 - Attribute form Save/Reset handling due to newly introduced _Attribute Group Separator_
