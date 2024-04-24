@@ -50,13 +50,12 @@
             </div>
         </div>
         <div
-            class="line line-bottom d-flex flex-grow-1 justify-content-start align-items-center gap-2 flex-wrap order-2"
+            class="line line-bottom d-flex flex-grow-1 justify-content-start align-items-center gap-2 flex-wrap basis-fit-content order-2"
             :class="lineClassList"
-            style="flex-basis: fit-content;"
         >
             <div
-                class="delimiter-group input-group flex-grow-1"
-                style="flex-basis: fit-content; max-width: 250px;"
+                class="delimiter-group input-group flex-grow-1 flex-nowrap basis-fit-content"
+                style="max-width: 250px;"
             >
                 <label
                     class="input-group-text"
