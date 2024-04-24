@@ -241,7 +241,7 @@
                 }),
                 entityTypes: computed(_ => store.getters.entityTypes),
                 columnPref: computed(_ => store.getters.preferenceByKey('prefs.columns')),
-                isDetailLoaded: computed(_ => currentRoute.name == 'entitydetail'),
+                isDetailLoaded: computed(_ => store.getters.entity?.id > 0),
                 tabPlugins: computed(_ => store.getters.slotPlugins('tab')),
             });
 
