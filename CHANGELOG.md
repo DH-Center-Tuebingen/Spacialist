@@ -41,7 +41,6 @@ All notable changes to this project will be documented in this file.
 - Unsaved changes in _Data Model Editor_ were visible in the UI
 - Adding bibliography of type _misc_
 - Moving entity in tree created a temporary duplicate
-- Truncate long texts in csv preview
 - Entity Types in Data-Model-Editor not scrollable
 - Scroll to entity in tree after selected (e.g. from a linked geometry on map or _Entity_ attribute)
 - After unset _Single Choice_ attribute value an Entity could not be saved/resetted
