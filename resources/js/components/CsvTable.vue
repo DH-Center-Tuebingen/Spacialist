@@ -42,7 +42,7 @@
                 <tbody>
                     <tr
                         v-for="(row, i) in state.computedRows.striped_data"
-                        :key="i"
+                        :key="`csv-preview-row-${i}`"
                     >
                         <td
                             v-if="csvSettings.showLinenumbers"
@@ -54,7 +54,7 @@
                         </td>
                         <td
                             v-for="(column, j) in row"
-                            :key="j"
+                            :key="`csv-preview-col-${i}-${j}`"
                             :class="[...cellClass, state.wrapClass[`${i}_${j}`]]"
                             :title="column"
                             @click="toggleWrapping(i, j)"
@@ -185,7 +185,7 @@
                     return state.stripedStart + csvSettings.showCount > state.rows;
                 }),
                 rows: computed(_ => state.computedRows.data ? state.computedRows.data.length : 0),
-                maxRows: computed(_ => state.rows - props.skippedCount),
+                maxRows: computed(_ => state.rows - csvSettings.skippedCount),
                 maxSkippedRows: computed(_ => state.rows > 0 ? state.rows - 1 : 0),
                 stripedStart: computed(_ => csvSettings.skippedCount || 0),
                 stripedEnd: computed(_ => {
@@ -238,7 +238,7 @@
                 state,
                 csvSettings,
             };
-        }
+        },
     };
 </script>
 
