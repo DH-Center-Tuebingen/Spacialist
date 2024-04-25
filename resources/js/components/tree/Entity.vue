@@ -200,295 +200,295 @@
 </template>
 
 <script>
-    import {
-        computed,
-        onMounted,
-        onUnmounted,
-        reactive
-    } from 'vue';
+        import {
+            computed,
+            onMounted,
+            onUnmounted,
+            reactive
+        } from 'vue';
 
-    import { useRoute } from 'vue-router';
-    import { useI18n } from 'vue-i18n';
+        import { useRoute } from 'vue-router';
+        import { useI18n } from 'vue-i18n';
 
-    import TreeSearch from '@/components/tree/Search.vue';
+        import TreeSearch from '@/components/tree/Search.vue';
 
-    import store from '@/bootstrap/store.js';
-    import router from '@/bootstrap/router.js';
+        import store from '@/bootstrap/store.js';
+        import router from '%router';
 
-    import {
-        moveEntity,
-    } from '@/api.js';
+        import {
+            moveEntity,
+        } from '@/api.js';
 
-    import {
-        fetchChildren,
-        openPath,
-    } from '@/helpers/tree.js';
+        import {
+            fetchChildren,
+            openPath,
+        } from '@/helpers/tree.js';
 
-    import {
-        getEntityType,
-        getEntityTypes,
-    } from '@/helpers/helpers.js';
+        import {
+            getEntityType,
+            getEntityTypes,
+        } from '@/helpers/helpers.js';
 
-    import {
-        showAddEntity,
-        showMultiEditAttribute,
-    } from '@/helpers/modal.js';
+        import {
+            showAddEntity,
+            showMultiEditAttribute,
+        } from '@/helpers/modal.js';
 
-    import * as treeUtility from 'tree-vue-component';
+        import * as treeUtility from 'tree-vue-component';
 
-    const DropPosition = {
-        empty: 0,
-        up: 1,
-        inside: 2,
-        down: 3,
-    };
+        const DropPosition = {
+            empty: 0,
+            up: 1,
+            inside: 2,
+            down: 3,
+        };
 
-    export default {
-        components: {
-            'tree-search': TreeSearch,
-        },
-        setup(props) {
-            const { t } = useI18n();
-            const currentRoute = useRoute();
+        export default {
+            components: {
+                'tree-search': TreeSearch,
+            },
+            setup(props) {
+                const { t } = useI18n();
+                const currentRoute = useRoute();
 
-            // FETCH
+                // FETCH
 
-            // FUNCTIONS
-            // Drag & Drop helpers
-            const entityTypesAsArray = Object.values(getEntityTypes());
-            const droppedToRootLevel = (tgt, tgtPath) => {
-                return tgt.state.dropPosition != DropPosition.inside && tgtPath.length == 1;
-            };
-            const getNewRank = dropData => {
-                let newRank;
-                if(dropData.targetData.state.dropPosition == DropPosition.inside) {
-                    newRank = dropData.targetData.children_count + 1;
-                } else {
-                    const newParent = treeUtility.getNodeFromPath(state.tree, dropData.targetPath.slice(0, dropData.targetPath.length - 1));
-                    const oldParent = treeUtility.getNodeFromPath(state.tree, dropData.sourcePath.slice(0, dropData.sourcePath.length - 1));
-                    const oldRank = dropData.sourceData.rank;
-
-                    if(state.sort.by == 'rank') {
-                        if(dropData.targetData.state.dropPosition == DropPosition.up) {
-                            if(state.sort.dir == 'asc') {
-                                newRank = dropData.targetData.rank;
-                            } else {
-                                newRank = dropData.targetData.rank + 1;
-                            }
-                        } else if(dropData.targetData.state.dropPosition == DropPosition.down) {
-                            if(state.sort.dir == 'asc') {
-                                newRank = dropData.targetData.rank + 1;
-                            } else {
-                                newRank = dropData.targetData.rank;
-                            }
-                        }
-                        if(newParent == oldParent && newRank > oldRank) {
-                            newRank--;
-                        }
+                // FUNCTIONS
+                // Drag & Drop helpers
+                const entityTypesAsArray = Object.values(getEntityTypes());
+                const droppedToRootLevel = (tgt, tgtPath) => {
+                    return tgt.state.dropPosition != DropPosition.inside && tgtPath.length == 1;
+                };
+                const getNewRank = dropData => {
+                    let newRank;
+                    if(dropData.targetData.state.dropPosition == DropPosition.inside) {
+                        newRank = dropData.targetData.children_count + 1;
                     } else {
-                        newRank = newParent.children_count + 1;
+                        const newParent = treeUtility.getNodeFromPath(state.tree, dropData.targetPath.slice(0, dropData.targetPath.length - 1));
+                        const oldParent = treeUtility.getNodeFromPath(state.tree, dropData.sourcePath.slice(0, dropData.sourcePath.length - 1));
+                        const oldRank = dropData.sourceData.rank;
+
+                        if(state.sort.by == 'rank') {
+                            if(dropData.targetData.state.dropPosition == DropPosition.up) {
+                                if(state.sort.dir == 'asc') {
+                                    newRank = dropData.targetData.rank;
+                                } else {
+                                    newRank = dropData.targetData.rank + 1;
+                                }
+                            } else if(dropData.targetData.state.dropPosition == DropPosition.down) {
+                                if(state.sort.dir == 'asc') {
+                                    newRank = dropData.targetData.rank + 1;
+                                } else {
+                                    newRank = dropData.targetData.rank;
+                                }
+                            }
+                            if(newParent == oldParent && newRank > oldRank) {
+                                newRank--;
+                            }
+                        } else {
+                            newRank = newParent.children_count + 1;
+                        }
                     }
-                }
-                return newRank;
-            };
-            const isDropAllowed = dropData => {
-                const item = dropData.sourceData;
-                const target = dropData.targetData;
-                const dragEntityType = getEntityType(item.entity_type_id);
+                    return newRank;
+                };
+                const isDropAllowed = dropData => {
+                    const item = dropData.sourceData;
+                    const target = dropData.targetData;
+                    const dragEntityType = getEntityType(item.entity_type_id);
 
-                if(target.parentIds.indexOf(item.id) != -1 ||
-                   (target.state.dropPosition == DropPosition.inside && target.id == item.root_entity_id)) {
-                    return false;
-                }
+                    if(target.parentIds.indexOf(item.id) != -1 ||
+                       (target.state.dropPosition == DropPosition.inside && target.id == item.root_entity_id)) {
+                        return false;
+                    }
 
-                let realTarget;
-                if(droppedToRootLevel(target, dropData.targetPath)) {
-                    realTarget = null;
-                } else if(target.state.dropPosition == DropPosition.inside) {
-                    realTarget = target;
-                } else {
-                    realTarget = treeUtility.getNodeFromPath(state.tree, dropData.targetPath.slice(0, -1));
-                }
+                    let realTarget;
+                    if(droppedToRootLevel(target, dropData.targetPath)) {
+                        realTarget = null;
+                    } else if(target.state.dropPosition == DropPosition.inside) {
+                        realTarget = target;
+                    } else {
+                        realTarget = treeUtility.getNodeFromPath(state.tree, dropData.targetPath.slice(0, -1));
+                    }
 
-                // If currently dragged element is not allowed as root
-                // and dragged on element is a root element (no parent)
-                // do not allow drop
-                if(!dragEntityType.is_root && !realTarget) {
-                    return false;
-                }
+                    // If currently dragged element is not allowed as root
+                    // and dragged on element is a root element (no parent)
+                    // do not allow drop
+                    if(!dragEntityType.is_root && !realTarget) {
+                        return false;
+                    }
 
-                // Check if currently dragged entity type is allowed
-                // as subtype of current drop target
-                let index;
-                if(!realTarget) {
-                    index = entityTypesAsArray.findIndex(et => et.is_root && et.id == dragEntityType.id);
-                } else {
-                    index = getEntityType(realTarget.entity_type_id).sub_entity_types.findIndex(et => et.id == dragEntityType.id);
-                }
-                if(index == -1) {
-                    return false;
-                }
+                    // Check if currently dragged entity type is allowed
+                    // as subtype of current drop target
+                    let index;
+                    if(!realTarget) {
+                        index = entityTypesAsArray.findIndex(et => et.is_root && et.id == dragEntityType.id);
+                    } else {
+                        index = getEntityType(realTarget.entity_type_id).sub_entity_types.findIndex(et => et.id == dragEntityType.id);
+                    }
+                    if(index == -1) {
+                        return false;
+                    }
 
-                // In any other cases allow drop
-                return true;
-            };
+                    // In any other cases allow drop
+                    return true;
+                };
 
-            const itemClick = (item) => {
-                // if treeSelectionMode is active, itemClick is (wrongly) triggered, but has no data.
-                // Preventing itemClick to trigger would result in not checked checkboxes in node component
-                if(!item.data) return;
+                const itemClick = (item) => {
+                    // if treeSelectionMode is active, itemClick is (wrongly) triggered, but has no data.
+                    // Preventing itemClick to trigger would result in not checked checkboxes in node component
+                    if(!item.data) return;
 
-                if(state.entity.id == item.data.id) {
-                    router.push({
-                        append: true,
-                        name: 'home',
-                        query: currentRoute.query
+                    if(state.entity.id == item.data.id) {
+                        router.push({
+                            append: true,
+                            name: 'home',
+                            query: currentRoute.query
+                        });
+                    } else {
+                        router.push({
+                            name: 'entitydetail',
+                            params: {
+                                id: item.data.id
+                            },
+                            query: currentRoute.query
+                        });
+                    }
+                };
+                const itemToggle = eventData => {
+                    const item = eventData.data;
+                    if(item.children.length < item.children_count) {
+                        item.state.loading = true;
+                        fetchChildren(item.id, state.sort).then(response => {
+                            item.children =  response;
+                            item.state.loading = false;
+                            item.childrenLoaded = true;
+                        });
+                    }
+                    item.state.opened = !item.state.opened;
+                };
+                const itemDrop = dropData => {
+                    if(!state.isDragAllowed || !isDropAllowed(dropData)) {
+                        return;
+                    }
+
+                    const node = dropData.sourceData;
+                    const newRank = getNewRank(dropData);
+                    const oldRank = node.rank;
+                    let newParent;
+                    const oldParent = treeUtility.getNodeFromPath(state.tree, dropData.sourcePath.slice(0, dropData.sourcePath.length - 1));
+                    if(dropData.targetData.state.dropPosition == DropPosition.inside) {
+                        newParent = dropData.targetData;
+                    } else {
+                        newParent = treeUtility.getNodeFromPath(state.tree, dropData.targetPath.slice(0, dropData.targetPath.length - 1));
+                    }
+
+                    if (newParent == oldParent && newRank == oldRank) {
+                        return;
+                    }
+
+                    const eid = node.id;
+                    const pid = newParent ? newParent.id : null;
+
+                    moveEntity(eid, pid, newRank);
+                };
+                const toggleSelectMode = _ => {
+                    store.dispatch('toggleTreeSelectionMode');
+                };
+                const openMultieditModal = _ => {
+                    const entityIds = Object.keys(store.getters.treeSelection).map(id => parseInt(id));
+                    const attributes = store.getters.treeSelectionIntersection;
+                    showMultiEditAttribute(entityIds, attributes);
+                };
+                const getSortingStateClass = (attr, dir) => {
+                    if(state.sort.by == attr && state.sort.dir == dir) {
+                        return [
+                            'active',
+                        ];
+                    } else {
+                        return [];
+                    }
+                };
+                const setSort = (attr, dir) => {
+                    state.sort.by = attr;
+                    state.sort.dir = dir;
+                    store.dispatch('sortTree', {
+                        by: attr,
+                        dir: dir
                     });
-                } else {
-                    router.push({
-                        name: 'entitydetail',
-                        params: {
-                            id: item.data.id
-                        },
-                        query: currentRoute.query
-                    });
-                }
-            };
-            const itemToggle = eventData => {
-                const item = eventData.data;
-                if(item.children.length < item.children_count) {
-                    item.state.loading = true;
-                    fetchChildren(item.id, state.sort).then(response => {
-                        item.children =  response;
-                        item.state.loading = false;
-                        item.childrenLoaded = true;
-                    });
-                }
-                item.state.opened = !item.state.opened;
-            };
-            const itemDrop = dropData => {
-                if(!state.isDragAllowed || !isDropAllowed(dropData)) {
-                    return;
-                }
+                };
+                const openAddEntityDialog = _ => {
+                    showAddEntity(null);
+                };
+                const resetHighlighting = _ => {
+                    state.highlightedItems.forEach(i => i.state.highlighted = false);
+                    state.highlightedItems = [];
+                };
+                const highlightItems = async items => {
+                    for(let i=0; i<items.length; i++) {
+                        await openPath(items[i].parentIds, state.sort).then(targetNode => {
+                            targetNode.state.highlighted = true;
+                            state.highlightedItems.push(targetNode);
+                        });
+                    }
+                };
+                const searchResultSelected = item => {
+                    resetHighlighting();
+                    if(!item) return;
 
-                const node = dropData.sourceData;
-                const newRank = getNewRank(dropData);
-                const oldRank = node.rank;
-                let newParent;
-                const oldParent = treeUtility.getNodeFromPath(state.tree, dropData.sourcePath.slice(0, dropData.sourcePath.length - 1));
-                if(dropData.targetData.state.dropPosition == DropPosition.inside) {
-                    newParent = dropData.targetData;
-                } else {
-                    newParent = treeUtility.getNodeFromPath(state.tree, dropData.targetPath.slice(0, dropData.targetPath.length - 1));
-                }
+                    if(item.glob) {
+                        highlightItems(item.results);
+                    } else {
+                        router.push({
+                            name: 'entitydetail',
+                            params: {
+                                id: item.id
+                            },
+                            query: currentRoute.query
+                        });
+                    }
+                };
 
-                if (newParent == oldParent && newRank == oldRank) {
-                    return;
-                }
-
-                const eid = node.id;
-                const pid = newParent ? newParent.id : null;
-
-                moveEntity(eid, pid, newRank);
-            };
-            const toggleSelectMode = _ => {
-                store.dispatch('toggleTreeSelectionMode');
-            };
-            const openMultieditModal = _ => {
-                const entityIds = Object.keys(store.getters.treeSelection).map(id => parseInt(id));
-                const attributes = store.getters.treeSelectionIntersection;
-                showMultiEditAttribute(entityIds, attributes);
-            };
-            const getSortingStateClass = (attr, dir) => {
-                if(state.sort.by == attr && state.sort.dir == dir) {
-                    return [
-                        'active',
-                    ];
-                } else {
-                    return [];
-                }
-            };
-            const setSort = (attr, dir) => {
-                state.sort.by = attr;
-                state.sort.dir = dir;
-                store.dispatch('sortTree', {
-                    by: attr,
-                    dir: dir
+                // DATA
+                const state = reactive({
+                    selectMode: computed(_ => store.getters.treeSelectionMode),
+                    canOpenMultiEditModal: computed(_ => store.getters.treeSelectionCount >= 2),
+                    highlightedItems: [],
+                    tree: computed(_ => store.getters.tree),
+                    entity: computed(_ => store.getters.entity),
+                    entities: computed(_ => store.getters.entities),
+                    topLevelCount: computed(_ => state.tree.length || 0),
+                    isDragAllowed: computed(_ => state.sort.by == 'rank' && state.sort.dir == 'asc'),
+                    sort: {
+                        by: 'rank',
+                        dir: 'asc'
+                    },
                 });
-            };
-            const openAddEntityDialog = _ => {
-                showAddEntity(null);
-            };
-            const resetHighlighting = _ => {
-                state.highlightedItems.forEach(i => i.state.highlighted = false);
-                state.highlightedItems = [];
-            };
-            const highlightItems = async items => {
-                for(let i=0; i<items.length; i++) {
-                    await openPath(items[i].parentIds, state.sort).then(targetNode => {
-                        targetNode.state.highlighted = true;
-                        state.highlightedItems.push(targetNode);
-                    });
-                }
-            };
-            const searchResultSelected = item => {
-                resetHighlighting();
-                if(!item) return;
 
-                if(item.glob) {
-                    highlightItems(item.results);
-                } else {
-                    router.push({
-                        name: 'entitydetail',
-                        params: {
-                            id: item.id
-                        },
-                        query: currentRoute.query
-                    });
-                }
-            };
+                // ON MOUNTED
+                onMounted(_ => {
+                    console.log('entity tree component mounted');
+                    // document.addEventListener('click', check)
+                });
+                onUnmounted(_ => {
 
-            // DATA
-            const state = reactive({
-                selectMode: computed(_ => store.getters.treeSelectionMode),
-                canOpenMultiEditModal: computed(_ => store.getters.treeSelectionCount >= 2),
-                highlightedItems: [],
-                tree: computed(_ => store.getters.tree),
-                entity: computed(_ => store.getters.entity),
-                entities: computed(_ => store.getters.entities),
-                topLevelCount: computed(_ => state.tree.length || 0),
-                isDragAllowed: computed(_ => state.sort.by == 'rank' && state.sort.dir == 'asc'),
-                sort: {
-                    by: 'rank',
-                    dir: 'asc'
-                },
-            });
-
-            // ON MOUNTED
-            onMounted(_ => {
-                console.log('entity tree component mounted');
-                // document.addEventListener('click', check)
-            });
-            onUnmounted(_ => {
-
-            });
-            return {
-                t,
-                // HELPERS
-                // LOCAL
-                itemClick,
-                itemToggle,
-                itemDrop,
-                isDropAllowed,
-                toggleSelectMode,
-                openMultieditModal,
-                getSortingStateClass,
-                setSort,
-                openAddEntityDialog,
-                searchResultSelected,
-                // STATE
-                state,
-            };
+                });
+                return {
+                    t,
+                    // HELPERS
+                    // LOCAL
+                    itemClick,
+                    itemToggle,
+                    itemDrop,
+                    isDropAllowed,
+                    toggleSelectMode,
+                    openMultieditModal,
+                    getSortingStateClass,
+                    setSort,
+                    openAddEntityDialog,
+                    searchResultSelected,
+                    // STATE
+                    state,
+                };
+            }
         }
-    }
 </script>

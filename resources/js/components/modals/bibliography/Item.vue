@@ -26,9 +26,9 @@
                 />
             </header>
             <div
+                id="bibtex-item-modal"
                 class="modal-body"
                 :class="state.scrollStateBodyClasses"
-                @paste="handlePasteFromClipboard($event)"
             >
                 <alert
                     :message="t('main.bibliography.modal.paste_info')"
@@ -180,6 +180,8 @@
 
     import {
         computed,
+        onBeforeUnmount,
+        onMounted,
         reactive,
         ref,
         toRefs,
@@ -214,6 +216,14 @@
                 data,
             } = toRefs(props);
             const { t } = useI18n();
+
+            onMounted(_ => {
+                window.addEventListener('paste', handlePasteFromClipboard);
+            });
+
+            onBeforeUnmount(_ => {
+                window.removeEventListener('paste', handlePasteFromClipboard);
+            });
 
             // FUNCTIONS
             const fromBibtexEntry = str => {
@@ -327,7 +337,6 @@
                 multiselectResetClasslist,
                 // PROPS
                 // LOCAL
-                handlePasteFromClipboard,
                 importFile,
                 inputFile,
                 removeQueuedFile,

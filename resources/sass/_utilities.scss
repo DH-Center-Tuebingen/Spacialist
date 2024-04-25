@@ -134,6 +134,10 @@
     flex-basis: 0;
 }
 
+.basis-fit-content {
+    flex-basis: fit-content !important;
+}
+
 .list-group-item-hover:hover {
     background-color: $primary;
     color: $light;
