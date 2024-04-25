@@ -535,7 +535,7 @@ class EntityController extends Controller {
                     $entityId = $entity['entity']->id;
                 }
 
-                $this->setImportedAttributes($entityId, $row, $attributeIdToColumnIdxMapping, $attributeTypes, $user);
+                $this->setOrUpdateImportedAttributes($entityId, $row, $attributeIdToColumnIdxMapping, $attributeTypes, $user);
                 $changedEntities[] = $entityId;
             } catch (Exception $e) {
                 DB::rollBack();
@@ -570,15 +570,23 @@ class EntityController extends Controller {
         ], $entityTypeId, $user, $rootEntityId);
     }
 
-    function setImportedAttributes($entity_id, $row, $attributeIdToColumnIdxMapping, $attributeTypes, $user) {
+    function setOrUpdateImportedAttributes($entity_id, $row, $attributeIdToColumnIdxMapping, $attributeTypes, $user) {
         foreach ($attributeIdToColumnIdxMapping as $key => $val) {
             $aid = intval($key);
             $type = $attributeTypes[$aid];
-            $attrVal = new AttributeValue();
-            $attrVal->entity_id = $entity_id;
-            $attrVal->attribute_id = $aid;
-            $attrVal->certainty = 100;
-            $attrVal->user_id = $user->id;
+
+            $attrVal = AttributeValue::where([
+                'entity_id' => $entity_id,
+                'attribute_id' => $key,
+            ])->first();
+
+            if (!$attrVal) {
+                $attrVal = new AttributeValue();
+                $attrVal->entity_id = $entity_id;
+                $attrVal->attribute_id = $aid;
+                $attrVal->certainty = 100;
+                $attrVal->user_id = $user->id;
+            }
             $setValue = $attrVal->setValueFromRaw($row[$val], $type);
             if ($setValue === null) {
                 continue;
