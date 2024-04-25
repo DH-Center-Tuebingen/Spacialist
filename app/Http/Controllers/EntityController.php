@@ -575,18 +575,12 @@ class EntityController extends Controller {
             $aid = intval($key);
             $type = $attributeTypes[$aid];
 
-            $attrVal = AttributeValue::where([
+            $attrVal = AttributeValue::firstOrNew([
                 'entity_id' => $entity_id,
                 'attribute_id' => $key,
-            ])->first();
-
-            if (!$attrVal) {
-                $attrVal = new AttributeValue();
-                $attrVal->entity_id = $entity_id;
-                $attrVal->attribute_id = $aid;
-                $attrVal->certainty = 100;
-                $attrVal->user_id = $user->id;
-            }
+            ], [
+                'user_id' => $user->id,
+            ]);
             $setValue = $attrVal->setValueFromRaw($row[$val], $type);
             if ($setValue === null) {
                 continue;
