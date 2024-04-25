@@ -10,7 +10,7 @@
     />
     <router-link
         v-if="!hideLink && !multiple && v.value"
-        :to="{name: 'entitydetail', params: {id: v.fieldValue.id}, query: state.query}" 
+        :to="{name: 'entitydetail', params: {id: v.fieldValue.id}, query: state.query}"
         class="btn btn-outline-secondary btn-sm mt-2"
     >
         {{ t('main.entity.attributes.entity.go_to', {name: v.fieldValue.name}) }}
@@ -35,7 +35,7 @@
 
     import * as yup from 'yup';
 
-    import router from '@/bootstrap/router.js';
+    import router from '%router';
 
     import {
         searchEntityInTypes,
@@ -162,7 +162,6 @@
                     return value;
                 }),
             });
-
 
             watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();

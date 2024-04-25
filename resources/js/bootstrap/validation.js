@@ -29,7 +29,7 @@ export const bibtexExt = {
 export const orcid = _ => {
     addMethod(string, 'orcid', function () {
         return this.test('test-orcid', t('global.user.invalid_orcid'), function (value) {
-            return isValidOrcid(value);
+            return !value || isValidOrcid(value);
         });
     });
 
@@ -37,7 +37,7 @@ export const orcid = _ => {
 };
 
 export const simple = _ => {
-    return string().trim();
+    return string().trim().notRequired();
 };
 
 export const simple_max = (max = 255) => {
@@ -65,5 +65,5 @@ export const email = _ => {
 };
 
 export const phone = _ => {
-    return simple_max().matches(/^(\+[1-9]|0)[0-9 ]+$/);
+    return simple_max().matches(/^$|^(\+[1-9]|0)[0-9 ]+$/);
 };
