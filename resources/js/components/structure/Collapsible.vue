@@ -1,9 +1,7 @@
 <template>
     <div class="collapsible">
         <header
-            class="card-header d-flex justify-content-between user-select-none"
-            style="cursor: pointer;"
-            :style="collapsed ? 'border-bottom: none;' : ''"
+            class="card-header d-flex justify-content-between user-select-none clickable"
             :class="headerClasses"
             @click="() => collapsed = !collapsed"
         >
@@ -31,30 +29,28 @@
 </template>
 
 <script>
-    import { ref, watch } from 'vue';
+    import {
+        ref,
+    } from 'vue';
 
     export default {
         props: {
             bodyClasses: {
                 type: Array,
                 required: false,
-                default: () => ([])
-            }, headerClasses: {
+                default: () => ([]),
+            },
+            headerClasses: {
                 type: Array,
                 required: false,
-                default: () => ([])
+                default: () => ([]),
             },
         },
         setup() {
-
             const collapsed = ref(true);
 
-            watch(collapsed, (val) => {
-                console.log(val);
-            });
-
             return {
-                collapsed
+                collapsed,
             };
         }
     };
