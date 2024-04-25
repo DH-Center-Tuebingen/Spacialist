@@ -1,6 +1,7 @@
 <template>
     <div
         :id="`tree-node-${data.id}`"
+        class="d-flex"
         @dragenter="onDragEnter"
         @dragleave="onDragLeave"
         @click="e => addToMSList(e)"

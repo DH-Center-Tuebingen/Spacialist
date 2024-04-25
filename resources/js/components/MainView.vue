@@ -232,15 +232,14 @@
                     hasReferences: computed(_ => {
                         const isNotSet = !state.entity.references;
                         if(isNotSet) return false;
-
+                        
                         const isEmpty = !Object.keys(state.entity.references).length > 0;
                         if(isEmpty) return false;
-
                         return Object.values(state.entity.references).some(v => v.length > 0);
                     }),
                     entityTypes: computed(_ => store.getters.entityTypes),
                     columnPref: computed(_ => store.getters.preferenceByKey('prefs.columns')),
-                    isDetailLoaded: computed(_ => currentRoute.name == 'entitydetail'),
+                    isDetailLoaded: computed(_ => store.getters.entity?.id > 0),
                     tabPlugins: computed(_ => store.getters.slotPlugins('tab')),
                 });
 

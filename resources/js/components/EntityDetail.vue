@@ -954,9 +954,16 @@
             watch(_ => state.entity,
                 async (newValue, oldValue) => {
                     if(!newValue || !newValue.id) return;
-
                     nextTick(_ => {
                         setDetailPanelView(route.query.view);
+                        const eid = state.entity.id;
+                        const treeElem = document.getElementById(`tree-node-${eid}`);
+                        if(treeElem) {
+                            treeElem.scrollIntoView({
+                                behavior: 'smooth',
+                                inline: 'start',
+                            });
+                        }
                     });
                 }
             );

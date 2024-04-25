@@ -1,3 +1,7 @@
+.multiselect {
+  --ms-font-size: #{$input-btn-font-size};
+}
+
 .multiselect-clear {
   margin-right: auto !important;
 }
