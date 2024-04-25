@@ -112,7 +112,7 @@
                                                     :title="reference.bibliography.title"
                                                 >
                                                     {{ reference.bibliography.title }} ,{{ reference.bibliography.year
-                                                    }}
+                                                                                                        }}
                                                 </cite>
                                                 <a
                                                     href="#"
@@ -135,203 +135,202 @@
 </template>
 
 <script>
-    import {
-        computed,
-        onMounted,
-        reactive,
-    } from 'vue';
+        import {
+            computed,
+            onMounted,
+            reactive,
+        } from 'vue';
 
-    import {
-        onBeforeRouteUpdate,
-        onBeforeRouteLeave,
-    } from 'vue-router';
+        import {
+            onBeforeRouteUpdate,
+            onBeforeRouteLeave,
+        } from 'vue-router';
 
-    import { useI18n } from 'vue-i18n';
+        import { useI18n } from 'vue-i18n';
 
-    import {
-        useRoute,
-    } from 'vue-router';
+        import {
+            useRoute,
+        } from 'vue-router';
 
-    import store from '@/bootstrap/store.js';
-    import router from '@/bootstrap/router.js';
+        import store from '@/bootstrap/store.js';
+        import router from '%router';
 
-    import { useToast } from '@/plugins/toast.js';
+        import { useToast } from '@/plugins/toast.js';
 
-    import {
-        translateConcept,
-    } from '@/helpers/helpers.js';
-    import {
-        date,
-    } from '@/helpers/filters.js';
-    import {
-        canShowReferenceModal,
-        showLiteratureInfo,
-    } from '@/helpers/modal.js';
+        import {
+            translateConcept,
+        } from '@/helpers/helpers.js';
+        import {
+            date,
+        } from '@/helpers/filters.js';
+        import {
+            canShowReferenceModal,
+            showLiteratureInfo,
+        } from '@/helpers/modal.js';
 
-    export default {
-        setup(props, context) {
-            const { t } = useI18n();
-            const currentRoute = useRoute();
-            const toast = useToast();
+        export default {
+            setup(props, context) {
+                const { t } = useI18n();
+                const currentRoute = useRoute();
+                const toast = useToast();
 
-            // FUNCTIONS
-            const setTab = to => {
-                router.push({
-                    query: {
-                        ...currentRoute.query,
-                        tab: to,
-                    },
-                    append: true,
-                });
-            };
-            const isTab = id => {
-                return state.tab == id;
-            };
-            const showMetadataForReferenceGroup = referenceGroup => {
-                if(!referenceGroup) return;
-                if(!state.entity) return;
-                const aid = referenceGroup[0].attribute_id;
-
-                const canOpen = canShowReferenceModal(aid);
-                if(canOpen) {
+                // FUNCTIONS
+                const setTab = to => {
                     router.push({
-                        append: true,
-                        name: 'entityrefs',
-                        query: currentRoute.query,
-                        params: {
-                            aid: aid,
+                        query: {
+                            ...currentRoute.query,
+                            tab: to,
                         },
+                        append: true,
                     });
-                } else {
-                    const msg = t('main.entity.references.toasts.cannot_edit_metadata.msg');
-                    toast.$toast(msg, '', {
-                        duration: 2500,
-                        autohide: true,
-                        channel: 'warning',
-                        icon: true,
-                        simple: true,
-                    });
-                }
-            };
-            const openLiteratureInfo = reference => {
-                showLiteratureInfo(reference.bibliography.id);
-            };
+                };
+                const isTab = id => {
+                    return state.tab == id;
+                };
+                const showMetadataForReferenceGroup = referenceGroup => {
+                    if(!referenceGroup) return;
+                    if(!state.entity) return;
+                    const aid = referenceGroup[0].attribute_id;
 
-            // DATA
-            const state = reactive({
-                tab: computed(_ => store.getters.mainView.tab),
-                tabComponent: computed(_ => {
-                    const plugin = state.tabPlugins.find(p => p.key == state.tab);
-                    if(!!plugin) {
-                        return plugin.componentTag;
+                    const canOpen = canShowReferenceModal(aid);
+                    if(canOpen) {
+                        router.push({
+                            append: true,
+                            name: 'entityrefs',
+                            query: currentRoute.query,
+                            params: {
+                                aid: aid,
+                            },
+                        });
                     } else {
-                        return '';
+                        const msg = t('main.entity.references.toasts.cannot_edit_metadata.msg');
+                        toast.$toast(msg, '', {
+                            duration: 2500,
+                            autohide: true,
+                            channel: 'warning',
+                            icon: true,
+                            simple: true,
+                        });
                     }
-                }),
-                concepts: computed(_ => store.getters.concepts),
-                entity: computed(_ => store.getters.entity),
-                hasReferences: computed(_ => {
-                    const isNotSet = !state.entity.references;
-                    if(isNotSet) return false;
+                };
+                const openLiteratureInfo = reference => {
+                    showLiteratureInfo(reference.bibliography.id);
+                };
 
-                    const isEmpty = !Object.keys(state.entity.references).length > 0;
-                    if(isEmpty) return false;
+                // DATA
+                const state = reactive({
+                    tab: computed(_ => store.getters.mainView.tab),
+                    tabComponent: computed(_ => {
+                        const plugin = state.tabPlugins.find(p => p.key == state.tab);
+                        if(!!plugin) {
+                            return plugin.componentTag;
+                        } else {
+                            return '';
+                        }
+                    }),
+                    concepts: computed(_ => store.getters.concepts),
+                    entity: computed(_ => store.getters.entity),
+                    hasReferences: computed(_ => {
+                        const isNotSet = !state.entity.references;
+                        if(isNotSet) return false;
+                        
+                        const isEmpty = !Object.keys(state.entity.references).length > 0;
+                        if(isEmpty) return false;
+                        return Object.values(state.entity.references).some(v => v.length > 0);
+                    }),
+                    entityTypes: computed(_ => store.getters.entityTypes),
+                    columnPref: computed(_ => store.getters.preferenceByKey('prefs.columns')),
+                    isDetailLoaded: computed(_ => store.getters.entity?.id > 0),
+                    tabPlugins: computed(_ => store.getters.slotPlugins('tab')),
+                });
 
-                    return Object.values(state.entity.references).some(v => v.length > 0);
-                }),
-                entityTypes: computed(_ => store.getters.entityTypes),
-                columnPref: computed(_ => store.getters.preferenceByKey('prefs.columns')),
-                isDetailLoaded: computed(_ => store.getters.entity?.id > 0),
-                tabPlugins: computed(_ => store.getters.slotPlugins('tab')),
-            });
+                // ON MOUNTED
+                onMounted(_ => {
+                    console.log('mainview component mounted');
+                    store.dispatch('setMainViewTab', currentRoute.query.tab);
+                });
 
-            // ON MOUNTED
-            onMounted(_ => {
-                console.log('mainview component mounted');
-                store.dispatch('setMainViewTab', currentRoute.query.tab);
-            });
+                onBeforeRouteUpdate(async (to, from) => {
+                    if(to.query.tab !== from.query.tab) {
+                        store.dispatch('setMainViewTab', to.query.tab);
+                    }
+                });
+                onBeforeRouteLeave((to, from) => {
+                    store.dispatch('setMainViewTab', null);
+                });
 
-            onBeforeRouteUpdate(async (to, from) => {
-                if(to.query.tab !== from.query.tab) {
-                    store.dispatch('setMainViewTab', to.query.tab);
-                }
-            });
-            onBeforeRouteLeave((to, from) => {
-                store.dispatch('setMainViewTab', null);
-            });
-
-            // RETURN
-            return {
-                t,
-                // HELPERS
-                translateConcept,
-                date,
-                // LOCAL
-                setTab,
-                isTab,
-                showMetadataForReferenceGroup,
-                openLiteratureInfo,
-                // STATE
-                state,
-            };
-        }
-        // beforeRouteUpdate(to, from, next) {
-        //     if(to.query.tab) {
-        //         this.setTabOrPlugin(to.query.tab);
-        //     }
-        // },
-        // mounted() {},
-        // methods: {
-        //     setTabOrPlugin(key) {
-        //         if(key == 'references') {
-        //             this.setActiveTab('references');
-        //         } else {
-        //             const plugins = this.$getTabPlugins();
-        //             const plugin = plugins.find(p => p.key == key);
-        //             if(plugin) {
-        //                 this.setActivePlugin(plugin);
-        //             }
-        //         }
-        //     },
-        //     setActiveTab: function(tab) {
-        //         if(tab == 'references') {
-        //             if(!this.selectedEntity.id) return;
-        //             this.activePlugin = '';
-        //         }
-        //         this.tab = tab;
-        //     },
-        //     setActivePlugin: function(plugin) {
-        //         this.setActiveTab(plugin.key);
-        //         this.activePlugin = plugin.tag;
-        //     },
-        //     updateLink(geoId, entityId) {
-        //         if(entityId != this.selectedEntity.id) {
-        //             return;
-        //         }
-        //         this.selectedEntity.geodata_id = geoId;
-        //     },
-        // },
-        // data() {
-        //     return {
-        //         plugins: this.$getTabPlugins(),
-        //         activePlugin: '',
-        //     }
-        // },
-        // computed: {
-        //     tab: {
-        //         get() {
-        //             if(this.defaultKey) return this.defaultKey;
-        //             else if(this.plugins && this.plugins[0]) {
-        //                 this.activePlugin = this.plugins[0].tag;
-        //                 return this.plugins[0].key;
-        //             } else {
-        //                 return '';
-        //             }
-        //         },
-        //         set(newValue) {
-        //             this.defaultKey = newValue;
-        //         }
-        //     }
-        // }
-    };
+                // RETURN
+                return {
+                    t,
+                    // HELPERS
+                    translateConcept,
+                    date,
+                    // LOCAL
+                    setTab,
+                    isTab,
+                    showMetadataForReferenceGroup,
+                    openLiteratureInfo,
+                    // STATE
+                    state,
+                };
+            }
+            // beforeRouteUpdate(to, from, next) {
+            //     if(to.query.tab) {
+            //         this.setTabOrPlugin(to.query.tab);
+            //     }
+            // },
+            // mounted() {},
+            // methods: {
+            //     setTabOrPlugin(key) {
+            //         if(key == 'references') {
+            //             this.setActiveTab('references');
+            //         } else {
+            //             const plugins = this.$getTabPlugins();
+            //             const plugin = plugins.find(p => p.key == key);
+            //             if(plugin) {
+            //                 this.setActivePlugin(plugin);
+            //             }
+            //         }
+            //     },
+            //     setActiveTab: function(tab) {
+            //         if(tab == 'references') {
+            //             if(!this.selectedEntity.id) return;
+            //             this.activePlugin = '';
+            //         }
+            //         this.tab = tab;
+            //     },
+            //     setActivePlugin: function(plugin) {
+            //         this.setActiveTab(plugin.key);
+            //         this.activePlugin = plugin.tag;
+            //     },
+            //     updateLink(geoId, entityId) {
+            //         if(entityId != this.selectedEntity.id) {
+            //             return;
+            //         }
+            //         this.selectedEntity.geodata_id = geoId;
+            //     },
+            // },
+            // data() {
+            //     return {
+            //         plugins: this.$getTabPlugins(),
+            //         activePlugin: '',
+            //     }
+            // },
+            // computed: {
+            //     tab: {
+            //         get() {
+            //             if(this.defaultKey) return this.defaultKey;
+            //             else if(this.plugins && this.plugins[0]) {
+            //                 this.activePlugin = this.plugins[0].tag;
+            //                 return this.plugins[0].key;
+            //             } else {
+            //                 return '';
+            //             }
+            //         },
+            //         set(newValue) {
+            //             this.defaultKey = newValue;
+            //         }
+            //     }
+            // }
+        };
 </script>

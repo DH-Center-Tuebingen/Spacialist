@@ -7,10 +7,12 @@ const messages = {
     en: en,
     de: de,
     ja: ja,
-}
+};
+const locale = navigator.language.split('-')[0];
+
 const i18n = createI18n({
     legacy: false,
-    locale: navigator.language,
+    locale,
     fallbackLocale: 'en',
     messages: messages
 });

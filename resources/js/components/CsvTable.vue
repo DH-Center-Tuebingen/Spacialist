@@ -1,122 +1,39 @@
 <template>
-    <div>
-        <form
-            v-if="content"
-            class="row align-items-center"
+    <div class="d-flex flex-column ">
+        <header
+            class="d-flex gap-3 align-items-center overflow-visible"
+            :class="csvSettings.showPreview ? 'mb-3' : ''"
         >
-            <div class="col-auto">
-                <label
-                    for="delimiter"
-                    class="visually-hidden"
-                >
-                    {{ t('main.csv.uploader.delimiter') }}
-                </label>
-                <input
-                    id="delimiter"
-                    v-model="state.delimiter"
-                    type="text"
-                    class="form-control"
-                    :placeholder="t('main.csv.uploader.delimiter_with_info')"
-                >
-            </div>
-            <div class="col-auto form-check form-switch">
-                <input
-                    id="has-header"
-                    v-model="state.hasHeaderRow"
-                    class="form-check-input"
-                    type="checkbox"
-                >
-                <label
-                    class="form-check-label"
-                    for="has-header"
-                >
-                    {{ t('main.csv.uploader.has_header') }}
-                </label>
-            </div>
-            <div
-                v-if="linenumbers"
-                class="col-auto form-check form-switch"
-            >
-                <input
-                    id="show-linenumbers"
-                    v-model="state.showLinenumbers"
-                    class="form-check-input"
-                    type="checkbox"
-                >
-                <label
-                    class="form-check-label"
-                    for="show-linenumbers"
-                >
-                    {{ t('main.csv.uploader.show_linenumbers') }}
-                </label>
-            </div>
-            <div class="col-auto">
-                <label
-                    for="row-count"
-                    class="visually-hidden"
-                >
-                    {{ t('main.csv.uploader.nr_of_shown_rows') }}
-                </label>
-                <input
-                    id="row-count"
-                    v-model.number="state.showCount"
-                    type="number"
-                    class="form-control"
-                    min="0"
-                    :max="state.maxRows"
-                    step="1"
-                    :placeholder="t('main.csv.uploader.nr_of_shown_rows')"
-                >
-            </div>
-            <div class="col-auto">
-                <label
-                    for="skipped-row-count"
-                    class="visually-hidden"
-                >
-                    {{ t('main.csv.uploader.nr_of_skipped_rows') }}
-                </label>
-                <input
-                    id="skipped-row-count"
-                    v-model.number="state.skippedCount"
-                    type="number"
-                    class="form-control"
-                    min="0"
-                    :max="state.maxSkippedRows"
-                    step="1"
-                    :placeholder="t('main.csv.uploader.nr_of_skipped_rows')"
-                >
-            </div>
-            <div class="col-auto">
-                <a
-                    href="#"
-                    class="text-reset"
-                    @click.prevent="toggleShowPreview()"
-                >
-                    <span v-if="state.showPreview">
-                        <i class="fas fa-fw fa-eye-slash" />
-                    </span>
-                    <span v-else>
-                        <i class="fas fa-fw fa-eye" />
-                    </span>
-                </a>
-            </div>
-        </form>
-        <div
-            v-show="state.showPreview"
-            class="table-responsive"
-        >
+            <CsvSettings
+                v-model:delimiter="csvSettings.delimiter"
+                v-model:has-header-row="csvSettings.hasHeaderRow"
+                v-model:show-linenumbers="csvSettings.showLinenumbers"
+                v-model:show-count="csvSettings.showCount"
+                v-model:skipped-count="csvSettings.skippedCount"
+                v-model:useCustomDelimiter="csvSettings.useCustomDelimiter"
+                v-model:show-preview="csvSettings.showPreview"
+                class="d-flex"
+                :total="state.rows"
+            />
+        </header>
+        <div class="table-responsive position-relative flex-grow-1 overflow-y-auto overflow-x-auto">
             <table
-                class="table table-striped table-hover"
+                v-show="csvSettings.showPreview"
+                class="table table-bordered table-striped table-hover "
                 :class="{ 'table-sm': small }"
             >
                 <thead class="table-light sticky-top">
                     <tr>
-                        <th v-if="state.showLinenumbers">
+                        <th
+                            v-if="csvSettings.showLinenumbers"
+                            :class="cellClass"
+                        >
                             #
                         </th>
                         <th
                             v-for="(header, i) in state.computedRows.header"
                             :key="i"
+                            :class="cellClass"
                         >
                             {{ ucfirst(header) }}
                         </th>
@@ -127,19 +44,34 @@
                         v-for="(row, i) in state.computedRows.striped_data"
                         :key="`csv-preview-row-${i}`"
                     >
-                        <td v-if="state.showLinenumbers">
+                        <td
+                            v-if="csvSettings.showLinenumbers"
+                            :class="cellClass"
+                        >
                             <span class="fw-bold">
-                                {{ i + 1 + state.skippedCount }}
+                                {{ i + 1 + csvSettings.skippedCount }}
                             </span>
                         </td>
                         <td
                             v-for="(column, j) in row"
                             :key="`csv-preview-col-${i}-${j}`"
+                            :class="cellClass"
                         >
                             {{ column }}
                         </td>
                     </tr>
                 </tbody>
+                <caption
+                    v-if="state.endVisible"
+                    class="bg-dark text-light text-center"
+                >
+                    <div
+                        class="end-of-file"
+                        style=""
+                    >
+                        {{ t("main.csv.uploader.eof") }}
+                    </div>
+                </caption>
             </table>
         </div>
     </div>
@@ -152,7 +84,6 @@
         computed,
         onMounted,
         reactive,
-        toRefs,
         watch,
     } from 'vue';
 
@@ -161,8 +92,11 @@
     import {
         ucfirst,
     } from '@/helpers/filters.js';
+    import CsvSettings from './tools/csv/CsvSettings.vue';
+    import { useLocalStorage } from '../composables/local-storage';
 
     export default {
+        components: { CsvSettings },
         props: {
             content: {
                 required: true,
@@ -171,11 +105,6 @@
             small: {
                 required: false,
                 type: Boolean
-            },
-            options: {
-                type: Boolean,
-                required: false,
-                default: true,
             },
             linenumbers: {
                 type: Boolean,
@@ -186,21 +115,13 @@
         emits: ['parse'],
         setup(props, context) {
             const { t } = useI18n();
-
-            const {
-                content,
-                small,
-                linenumbers,
-            } = toRefs(props);
-
             // FETCH
-
             // FUNCTIONS
             const toggleShowPreview = _ => {
-                state.showPreview = !state.showPreview;
+                csvSettings.showPreview = !csvSettings.showPreview;
             };
             const recomputeRows = (internal = false) => {
-                if(!content.value || !state.dsv) {
+                if(!props.content || !state.dsv) {
                     state.computedRows = {};
                     return;
                 }
@@ -208,80 +129,111 @@
                     header: null,
                     data: null,
                     striped_data: null,
-                    delimiter: state.delimiter || ',',
+                    ...csvSettings,
                 };
-                const headerRow = content.value.split('\n')[0];
+                const headerRow = props.content.split('\n')[0];
                 const header = state.dsv.parseRows(headerRow)[0];
-                if(state.hasHeaderRow) {
+                if(csvSettings.hasHeaderRow) {
                     res.header = header;
-                    res.data = state.dsv.parse(content.value);
-                } else {
+                    res.data = state.dsv.parse(props.content);
+                }
+                else {
                     const headerPlaceholder = [];
                     for(let i = 0; i < header.length; i++) {
                         headerPlaceholder.push(`#${i + 1}`);
                     }
-                    res.data = state.dsv.parseRows(content.value);
+                    res.data = state.dsv.parseRows(props.content);
                     res.header = headerPlaceholder;
                 }
                 state.computedRows = res;
                 state.computedRows.striped_data = res.data.slice(state.stripedStart, state.stripedEnd);
-
                 if(!internal) {
                     context.emit('parse', state.computedRows);
                 }
             };
 
-            // DATA
-            const state = reactive({
+
+            const { value: csvSettings } = useLocalStorage('csv-settings', {
                 delimiter: ',',
                 hasHeaderRow: true,
                 showLinenumbers: false,
                 showCount: 10,
                 skippedCount: 0,
                 showPreview: true,
+                useCustomDelimiter: false,
+            });
+
+            // DATA
+            const state = reactive({
                 computedRows: {},
-                dsv: computed(_ => d3.dsvFormat(state.delimiter || ',')),
+                dsv: computed(_ => d3.dsvFormat(csvSettings.delimiter || ',')),
+                endVisible: computed(_ => {
+                    return state.stripedStart + csvSettings.showCount > state.rows;
+                }),
                 rows: computed(_ => state.computedRows.data ? state.computedRows.data.length : 0),
-                maxRows: computed(_ => state.rows - state.skippedCount),
+                maxRows: computed(_ => state.rows - csvSettings.skippedCount),
                 maxSkippedRows: computed(_ => state.rows > 0 ? state.rows - 1 : 0),
-                stripedStart: computed(_ => state.skippedCount || 0),
+                stripedStart: computed(_ => csvSettings.skippedCount || 0),
                 stripedEnd: computed(_ => {
-                    return Math.min(
-                        (state.skippedCount || 0) + (state.showCount || 10),
-                        state.rows
-                    );
+                    return Math.min((csvSettings.skippedCount || 0) + (csvSettings.showCount || 10),
+                        state.rows);
                 }),
             });
 
             onMounted(_ => {
                 recomputeRows();
             });
-            watch(_ => content.value, _ => {
+
+            watch(_ => props.content, _ => {
                 recomputeRows();
-            });
-            watch(_ => state.dsv, _ => {
-                recomputeRows();
-            });
-            watch(_ => state.hasHeaderRow, _ => {
-                recomputeRows();
-            });
-            watch(_ => state.showCount, _ => {
-                recomputeRows(true);
-            });
-            watch(_ => state.skippedCount, _ => {
-                recomputeRows(true);
             });
 
+            watch(_ => csvSettings.hasHeaderRow, (newVal, oldVal) => {
+                if(oldVal !== newVal) {
+                    recomputeRows();
+                }
+            });
+            watch(_ => csvSettings.showCount, (newVal, oldVal) => {
+                if(oldVal !== newVal) {
+                    recomputeRows(true);
+                }
+            });
+            watch(_ => csvSettings.skippedCount, (newVal, oldVal) => {
+                if(oldVal !== newVal) {
+                    recomputeRows(true);
+                }
+            });
+
+            watch(_ => csvSettings.delimiter, (newVal, oldVal) => {
+                if(oldVal !== newVal) {
+                    recomputeRows();
+                }
+            });
+
+            const cellClass = 'px-2 py-1';
             // RETURN
             return {
                 t,
                 // HELPERS
                 ucfirst,
                 // LOCAL
+                cellClass,
                 toggleShowPreview,
                 // STATE
                 state,
+                csvSettings,
             };
         },
     };
 </script>
+
+<style scoped>
+    /* 
+        Bootstrap sets the sticky-top to z-index: 1020, which is the same level
+        as the modals, which doesn't make sense in the table context.
+        We reset it to the minimum value here. 
+    */
+    thead {
+        z-index: 1;
+    }
+</style>
