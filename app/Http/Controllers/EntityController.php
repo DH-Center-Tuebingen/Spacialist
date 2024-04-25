@@ -11,6 +11,7 @@ use App\EntityType;
 use App\Exceptions\AmbiguousValueException;
 use App\Exceptions\InvalidDataException;
 use App\Import\EntityImporter;
+use App\Import\ImportException;
 use App\Reference;
 use App\ThConcept;
 use Exception;
@@ -446,8 +447,13 @@ class EntityController extends Controller {
         $data = json_decode($request->get('data'), true);
         $handle = fopen($file->getRealPath(), 'r');
 
-        $entityImport = new EntityImporter($metadata, $data);
-        $result = $entityImport->validateImportData($handle);
+        try {
+            $entityImport = new EntityImporter($metadata, $data);
+            $result = $entityImport->validateImportData($handle);
+        } catch (ImportException $e) {
+            $obj = $e->getObject();
+            return response()->json($obj, 400);
+        }
 
         return response()->json($result);
     }
@@ -498,6 +504,37 @@ class EntityController extends Controller {
             $entityName = $row[$nameIdx];
             $entityPath = $hasParent ? implode("\\\\", [$rootEntityPath, $entityName]) : $entityName;
             $entityId = null;
+
+            if ($hasParent) {
+                try {
+                    $parentEntity = Entity::getFromPath($rootEntityPath);
+                    if (!isset($parentEntity)) {
+                        DB::rollBack();
+                        return response()->json([
+                            'error' => __('Parent entity does not exist'),
+                            'data' => [
+                                'count' => count($changedEntities) + 1,
+                                'entry' => $entityName,
+                                'on' => $headerRow[$parentIdx],
+                                'on_index' => $parentIdx + 1,
+                                'on_value' => $row[$parentIdx],
+                            ],
+                        ], 400);
+                    }
+                } catch (AmbiguousValueException $ave) {
+                    DB::rollBack();
+                    return response()->json([
+                        'error' => __($ave->getMessage()),
+                        'data' => [
+                            'count' => count($changedEntities) + 1,
+                            'entry' => $entityName,
+                            'on' => $headerRow[$parentIdx],
+                            'on_index' => $parentIdx + 1,
+                            'on_value' => $row[$parentIdx],
+                        ],
+                    ], 400);
+                }
+            }
 
             try {
                 $entityId = Entity::getFromPath($entityPath);

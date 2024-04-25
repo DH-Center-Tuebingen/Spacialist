@@ -5,6 +5,8 @@ namespace App\Import;
 use App\File\Csv;
 use App\Entity;
 use App\Exceptions\AmbiguousValueException;
+use App\Import\ImportException;
+use App\Import\ImportExceptionData;
 use App\Import\ImportResolution;
 
 enum Action {
@@ -12,7 +14,6 @@ enum Action {
     case UPDATE;
     case DELETE;
 };
-
 
 
 class EntityImporter {
@@ -34,7 +35,7 @@ class EntityImporter {
         $status = ImportResolution::getStatusArray();
 
         $csvTable->parseFile($handle, function ($row, $headers, $_, $index) use (&$result, &$status) {
-            $info = $this->validateRowCallback($row, $this->data);
+            $info = $this->validateRowCallback($row, $this->data, $index);
             $status[$info['status']]++;
             $result[$index] = $info;
         });
@@ -43,11 +44,23 @@ class EntityImporter {
         return $status;
     }
 
-    private function validateRowCallback($row, $data) {
+    private function validateRowCallback($row, $data, $rowIndex) {
         $name = $row[$data['name_column']];
 
         if (array_key_exists('parent_column', $data)) {
             $parent =  $row[$data['parent_column']];
+
+            $parentEntity = Entity::getFromPath($parent);
+            if (!isset($parentEntity)) {
+                $exceptionData = new ImportExceptionData(
+                    count: $rowIndex,
+                    entry: $name,
+                    on: $parent,
+                    on_index: $data['parent_column'],
+                    on_value: $parent
+                );
+                throw new ImportException("Parent entity does not exist at: '$parent'", $exceptionData);
+            }
             $rootPath = $parent . "\\\\" . $name;
         } else {
             $rootPath = $name;
