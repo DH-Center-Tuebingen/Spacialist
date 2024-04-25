@@ -258,7 +258,7 @@
         toRefs,
     } from 'vue';
     import { useI18n } from 'vue-i18n';
-    import router from '@/bootstrap/router.js';
+    import router from '%router';
     import store from '@/bootstrap/store.js';
 
     import {
@@ -304,7 +304,7 @@
                 const maxSize = event.target.parentElement.scrollWidth; // progress bar width in px
                 const clickPos = event.layerX; // in px
                 const finalPos = Math.max(0, Math.min(clickPos, maxSize)); // clamp cursor pos to progress bar size
-                
+
                 const currentValue = state.certainty;
                 let value = parseInt(finalPos/maxSize*100);
                 const diff = Math.abs(value-currentValue);

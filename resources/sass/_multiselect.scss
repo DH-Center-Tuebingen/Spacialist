@@ -1,3 +1,7 @@
+.multiselect {
+  --ms-font-size: #{$input-btn-font-size};
+}
+
 .multiselect-clear {
   margin-right: auto !important;
 }
@@ -10,7 +14,7 @@
   position: relative !important;
 }
 
-.multiselect-wide > .multiselect-dropdown {
+.multiselect-wide>.multiselect-dropdown {
   width: 20vw;
 }
 

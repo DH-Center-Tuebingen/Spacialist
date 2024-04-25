@@ -8,11 +8,25 @@
             v-if="state.hasIcon"
             :class="state.iconWrapperClasses"
         >
-            <i
-                class="fas"
-                :class="state.iconClasses"
-            />
-            <span class="fw-medium">
+            <span v-show="type == 'success'">
+                <i class="fas fa-fw fa-check" />
+            </span>
+            <span v-show="type == 'note'">
+                <i class="fas fa-fw fa-lightbulb" />
+            </span>
+            <span v-show="type == 'info'">
+                <i class="fas fa-fw fa-info-circle" />
+            </span>
+            <span v-show="type == 'warning'">
+                <i class="fas fa-fw fa-exclamation-triangle" />
+            </span>
+            <span v-show="type == 'error'">
+                <i class="fas fa-fw fa-times" />
+            </span>
+            <span
+                v-if="icontext"
+                class="fw-medium ms-2"
+            >
                 {{ icontext }}
             </span>
         </div>
@@ -117,31 +131,6 @@
 
                     return classes;
                 }),
-                iconClasses: computed(_ => {
-                    let classes = [];
-                    if(!state.hasIcon) return classes;
-                    switch(type.value) {
-                        case 'success':
-                            classes.push('fa-check');
-                            break;
-                        case 'note':
-                            classes.push('fa-lightbulb');
-                            break;
-                        case 'info':
-                            classes.push('fa-info-circle');
-                            break;
-                        case 'warning':
-                            classes.push('fa-exclamation-triangle');
-                            break;
-                        case 'error':
-                            classes.push('fa-times');
-                            break;
-                    }
-                    if(state.hasIconText) {
-                        classes.push('me-2');
-                    }
-                    return classes;
-                }),
                 iconWrapperClasses: computed(_ => {
                     let classes = [];
                     if(!state.hasIcon) return classes;
@@ -158,7 +147,7 @@
                 // LOCAL
                 // STATE
                 state,
-            }
+            };
         },
     }
 </script>
