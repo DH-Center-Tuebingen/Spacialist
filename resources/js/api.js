@@ -348,7 +348,7 @@ export async function confirmUserPassword(uid, password = null) {
 
 export async function updateEntityTypeRelation(etid, values) {
     const data = only(values, ['is_root', 'sub_entity_types']);
-    const apiData = {...data};
+    const apiData = { ...data };
     if(data.sub_entity_types) {
         apiData.sub_entity_types = data.sub_entity_types.map(t => t.id);
     }
@@ -465,6 +465,12 @@ export async function duplicateEntity(entity) {
 export async function importEntityData(data) {
     return $httpQueue.add(
         () => http.post(`/entity/import`, data).then(response => response.data).catch(e => { throw e; })
+    );
+}
+
+export async function validateEntityData(data) {
+    return $httpQueue.add(
+        () => http.post(`/entity/import/validate`, data).then(response => response.data).catch(e => { throw e; })
     );
 }
 

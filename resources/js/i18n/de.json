@@ -24,6 +24,7 @@
         "create": "Anlegen",
         "move": "Verschieben",
         "parse": "Parsen",
+        "conflict": "Konflikt",
         "file": "Datei",
         "remove_file": "Datei entfernen",
         "no_file": "Keine Datei vorhanden",
@@ -99,6 +100,11 @@
                 "start": "Aufnahme starten",
                 "stop": "Aufnahme beenden"
             }
+        },
+        "paginator": {
+            "count": "Anzahl",
+            "of": "von",
+            "skip": "Ab"
         },
         "settings": {
             "title": "Einstellungen",
@@ -303,12 +309,14 @@
         "csv": {
             "uploader": {
                 "title": "CSV-Uploader",
+                "settings_title": "CSV-Einstellungen",
                 "delimiter": "Trennzeichen",
                 "delimiter_with_info": "Trennzeichen (',', ';', …)",
-                "has_header": "Hat eine Kopfzeile?",
+                "has_header": "Kopfzeile",
                 "show_linenumbers": "Zeilennummern anzeigen",
                 "nr_of_shown_rows": "Anzahl der angezeigten Zeilen",
-                "nr_of_skipped_rows": "Anzahl der übersprungenen Zeilen"
+                "nr_of_skipped_rows": "Anzahl der übersprungenen Zeilen",
+                "eof": "Ende der Datei"
             },
             "picker": {
                 "title": "CSV-Auswahl"
@@ -661,16 +669,17 @@
                 "time": "Datum der Veröffentlichung",
                 "full_name": "Vollständiger Name"
             },
-            "build_info": "Mit <i class=\"fab fa-fw fa-laravel\"></i> & <i class=\"fab fa-fw fa-vuejs\"></i> erstellt!",
+            "build_info": "Erstellt mit <i class=\"fab fa-fw fa-laravel\"></i> & <i class=\"fab fa-fw fa-vuejs\"></i>!",
             "contributor": "Mitwirkender | Mitwirkende",
+            "former_contributor": "Ehemaliger | Ehemalige",
             "roles": {
                 "development": "Entwicklung",
                 "development_lead": "Entwicklungsleiter",
+                "support": "Allgemeine Unterstützung",
                 "support_development": "Entwicklungsunterstützung",
                 "support_database": "Datenbankunterstützung",
                 "support_archaeology": "Archäologische Unterstützung",
-                "project_lead": "Projektleitung",
-                "project_lead_former": "Ehemalige Projektleitung"
+                "project_lead": "Projektleitung"
             }
         },
         "bibliography": {
@@ -762,16 +771,41 @@
         },
         "importer": {
             "title": "Daten-Importer",
+            "entity_settings": "Entitätseinstellungen",
+            "attribute_mapping": "Attribut-Zuordnung",
+            "import_settings": "Import-Einstellungen",
             "upload_csv_info": "Wähle eine CSV-Datei aus um Daten zum importieren.",
             "drop_csv_file": "CSV-Datei hier ablegen",
             "selected_entity_type": "Entitätstyp",
             "column_entity_name": "Entitätsname-Spalte",
             "column_entity_parent": "Übergeordnete Entität-Spalte",
             "import_btn": "Starte Datenimport",
-            "no_missing_values": "Keine fehlenden Werte. Du kannst loslegen!",
-            "missing_required_values": "{miss} von 1 Eintrag ist leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das. | {miss} von {total} Einträgen sind leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das.",
-            "missing_non_required_values": "{miss} von 1 Eintrag ist leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen. | {miss} von {total} Einträgen sind leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen.",
-            "success": "Import von 1 Eintrag abgeschlossen | Import von {cnt} Einträgen abgeschlossen"
+            "validate": "Validieren",
+            "success": "Import von 1 Eintrag abgeschlossen | Import von {cnt} Einträgen abgeschlossen",
+            "validation": {
+                "title": "Validierung",
+                "waiting": "Validierung ausstehend",
+                "mixed": "Einige Entitäten existieren bereits und werden aktualisieren, die anderen werden neu erzeugt!",
+                "create": "Keine Überschneidung, alle Entitäten werden neu erzeugt!",
+                "update": "Alle Entitäten existieren bereits und werden aktualisiert!",
+                "imported": "Alle Daten wurden erfolgreich importiert!",
+                "multiple_error": "Manche Pfade existieren mehrfach, daher kann der Import nicht ausgeführt werden!",
+                "no_items": "Es gibt keine Werte zum importieren!"
+            },
+            "indicator": {
+                "missing_value": "Kein Wert gesetzt",
+                "no_missing_values": "Keine fehlenden Werte. Du kannst loslegen!",
+                "missing_required_values": "{miss} von 1 Eintrag ist leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das. | {miss} von {total} Einträgen sind leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das.",
+                "missing_non_required_values": "{miss} von 1 Eintrag ist leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen. | {miss} von {total} Einträgen sind leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen."
+            },
+            "info": {
+                "entity_settings_require_file": "Noch keine Datei hochgeladen",
+                "entity_type_has_no_attributes": "Keine Attribute vorhanden. Bitte wählen Sie einen passenden Entitätstyp aus."
+            },
+            "error": {
+                "file_read": "Datei konnte nicht gelesen werden.",
+                "file_read_abort": "Datei-Lesevorgang abgebrochen."
+            }
         },
         "map": {
             "init_error": "Mehrere init-*-Attribute gesetzt. Es darf nur eines gesetzt sein.",
@@ -809,5 +843,9 @@
                 }
             }
         }
+    },
+    "keyboard": {
+        "tab": "Tab",
+        "space": "Leertaste"
     }
 }
