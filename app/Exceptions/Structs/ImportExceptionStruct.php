@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Import;
+namespace App\Exceptions\Structs;
 
 use JsonSerializable;
 
-class ImportExceptionData implements JsonSerializable {
+class ImportExceptionStruct implements JsonSerializable {
     public $count;
     public $entry;
     public $on;

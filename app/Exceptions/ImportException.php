@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Import;
+namespace App\Exceptions;
 
 use Exception;
+use App\Exceptions\Structs\ImportExceptionStruct;
 
 class ImportException extends Exception {
 
-    private ImportExceptionData $data;
+    private ImportExceptionStruct $data;
 
-    public function __construct(String $message, ImportExceptionData $data = null) {
+    public function __construct(String $message, ImportExceptionStruct $data = null) {
         parent::__construct($message);
 
         $this->data = $data;
@@ -19,7 +20,6 @@ class ImportException extends Exception {
     }
 
     public function getObject() {
-        info($this->message);
         return [
             "error" => __($this->getMessage()),
             "data" => $this->data

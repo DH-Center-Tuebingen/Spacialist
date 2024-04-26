@@ -5,9 +5,11 @@ namespace App\Import;
 use App\File\Csv;
 use App\Entity;
 use App\Exceptions\AmbiguousValueException;
-use App\Import\ImportException;
-use App\Import\ImportExceptionData;
+use App\Exceptions\ImportException;
+use App\Exceptions\Structs\ImportExceptionStruct;
 use App\Import\ImportResolution;
+
+
 
 enum Action {
     case CREATE;
@@ -52,7 +54,7 @@ class EntityImporter {
 
             $parentEntity = Entity::getFromPath($parent);
             if (!isset($parentEntity)) {
-                $exceptionData = new ImportExceptionData(
+                $exceptionData = new ImportExceptionStruct(
                     count: $rowIndex,
                     entry: $name,
                     on: $parent,

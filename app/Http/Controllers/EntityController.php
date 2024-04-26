@@ -9,9 +9,10 @@ use App\EntityAttribute;
 use App\EntityFile;
 use App\EntityType;
 use App\Exceptions\AmbiguousValueException;
+use App\Exceptions\ImportException;
+use App\Exceptions\Structs\ImportExceptionStruct;
 use App\Exceptions\InvalidDataException;
 use App\Import\EntityImporter;
-use App\Import\ImportException;
 use App\Reference;
 use App\ThConcept;
 use Exception;
@@ -505,6 +506,14 @@ class EntityController extends Controller {
             $entityPath = $hasParent ? implode("\\\\", [$rootEntityPath, $entityName]) : $entityName;
             $entityId = null;
 
+            $errorResponseData = new ImportExceptionStruct(
+                count: count($changedEntities) + 1,
+                entry: $entityName,
+                on: $headerRow[$parentIdx],
+                on_index: $parentIdx + 1,
+                on_value: $row[$parentIdx]
+            );
+
             if ($hasParent) {
                 try {
                     $parentEntity = Entity::getFromPath($rootEntityPath);
@@ -512,26 +521,14 @@ class EntityController extends Controller {
                         DB::rollBack();
                         return response()->json([
                             'error' => __('Parent entity does not exist'),
-                            'data' => [
-                                'count' => count($changedEntities) + 1,
-                                'entry' => $entityName,
-                                'on' => $headerRow[$parentIdx],
-                                'on_index' => $parentIdx + 1,
-                                'on_value' => $row[$parentIdx],
-                            ],
+                            'data' => $errorResponseData
                         ], 400);
                     }
                 } catch (AmbiguousValueException $ave) {
                     DB::rollBack();
                     return response()->json([
                         'error' => __($ave->getMessage()),
-                        'data' => [
-                            'count' => count($changedEntities) + 1,
-                            'entry' => $entityName,
-                            'on' => $headerRow[$parentIdx],
-                            'on_index' => $parentIdx + 1,
-                            'on_value' => $row[$parentIdx],
-                        ],
+                        'data' => $errorResponseData,
                     ], 400);
                 }
             }
@@ -542,13 +539,7 @@ class EntityController extends Controller {
                 DB::rollBack();
                 return response()->json([
                     'error' => __($ave->getMessage()),
-                    'data' => [
-                        'count' => count($changedEntities) + 1,
-                        'entry' => $entityName,
-                        'on' => $headerRow[$parentIdx],
-                        'on_index' => $parentIdx + 1,
-                        'on_value' => $row[$parentIdx],
-                    ],
+                    'data' => $errorResponseData,
                 ], 400);
             }
             try {
@@ -576,16 +567,7 @@ class EntityController extends Controller {
                 $changedEntities[] = $entityId;
             } catch (Exception $e) {
                 DB::rollBack();
-                return response()->json([
-                    'error' => __($e->getMessage()),
-                    'data' => [
-                        'count' => count($changedEntities) + 1,
-                        'entry' => $entityName,
-                        'on' => $headerRow[$parentIdx],
-                        'on_index' => $parentIdx + 1,
-                        'on_value' => $row[$parentIdx],
-                    ],
-                ], 400);
+                return response()->json($errorResponseData, 400);
             }
         }
 
