@@ -116,7 +116,7 @@
                     <h4>Drag attributes here</h4>
                 </div>
                 <attribute-list
-                    class="h-100 scroll-y-auto scroll-x-hidden"
+                    class="h-100 overflow-y-auto overflow-x-hidden"
                     group="attribute-selection"
                     :attributes="state.entityAttributes"
                     :values="state.entityValues"

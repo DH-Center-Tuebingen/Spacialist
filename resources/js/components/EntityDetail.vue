@@ -272,7 +272,7 @@
                 <form
                     :id="`entity-attribute-form-${tg.id}`"
                     :name="`entity-attribute-form-${tg.id}`"
-                    class="h-100"
+                    class="h-100 container-fluid"
                     @submit.prevent
                     @keydown.ctrl.s="e => handleSaveOnKey(e, `${tg.id}`)"
                 >
@@ -280,7 +280,7 @@
                         v-if="state.attributesFetched"
                         :ref="el => setAttrRefs(el, tg.id)"
                         v-dcan="'entity_data_read'"
-                        class="pt-2 h-100 scroll-y-auto scroll-x-hidden"
+                        class="pt-2 h-100 overflow-y-auto row"
                         :attributes="tg.data"
                         :hidden-attributes="state.hiddenAttributeList"
                         :show-hidden="state.hiddenAttributeState"
@@ -301,7 +301,7 @@
             >
                 <div
                     v-if="state.entity.comments"
-                    class="mb-auto scroll-y-auto h-100 pe-2"
+                    class="mb-auto overflow-y-auto h-100 pe-2"
                 >
                     <div
                         v-if="state.commentsFetching"
@@ -826,6 +826,7 @@
                     const aid = v;
                     const data = state.entity.data[aid];
                     const type = getAttribute(aid)?.datatype;
+                    
                     const patch = {
                         op: null,
                         value: null,
