@@ -26,7 +26,7 @@
                     @validation="checkValidation"
                 />
                 <div v-if="state.hasColumns">
-                    <hr/>
+                    <hr>
                     <div class="bg-secondary bg-opacity-25 p-2 rounded">
                         <h5 class="d-flex flex-row justify-content-between">
                             <div>
@@ -211,7 +211,7 @@
                 checkTableValidation,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

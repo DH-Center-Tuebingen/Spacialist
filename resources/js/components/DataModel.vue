@@ -15,7 +15,7 @@
                 </button>
             </h4>
             <entity-type-list
-                class="col px-0 h-100 d-flex flex-column overflow-hidden"
+                class="col px-0 h-100 d-flex flex-column"
                 :data="state.entityTypes"
                 :selected-id="state.selectedEntityType"
                 @delete-element="requestDeleteEntityType"
@@ -66,7 +66,7 @@
                 />
                 <hr>
                 <attribute-list
-                    :classes="'pe-2 col scroll-y-auto scroll-x-hidden'"
+                    :classes="'pe-2 col overflow-y-auto overflow-x-hidden'"
                     :group="{name: 'attribute-selection', pull: true, put: false}"
                     :attributes="state.attributeList"
                     :hidden-attributes="state.selectedEntityTypeAttributeIds"
@@ -95,7 +95,7 @@
     } from 'vue-router';
 
     import store from '@/bootstrap/store.js';
-    import router from '@/bootstrap/router.js';
+    import router from '%router';
 
     import {
         duplicateEntityType as duplicateEntityTypeApi,
@@ -139,7 +139,7 @@
                 duplicateEntityTypeApi(event.id).then(data => {
                     data.attributes = attrs;
                     store.dispatch('addEntityType', data);
-                })
+                });
             };
             const editEntityType = e => {
                 showEditEntityType(e.type);
@@ -205,7 +205,7 @@
                 onDeleteAttribute,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

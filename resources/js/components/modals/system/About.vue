@@ -63,43 +63,45 @@
                     </dd>
                 </dl>
                 <hr>
-                <h5>{{ t('main.about.contributor', 2) }}</h5>
-                <div class="row gy-1">
-                    <div
-                        v-for="contributor in contributors"
+                <h5 class="mb-3">
+                    {{ t('main.about.contributor', 2) }}
+                </h5>
+                <div class="row gy-2">
+                    <Contributor
+                        v-for="contributor in contributors.active"
                         :key="contributor.name"
-                        class="col-md-6 d-flex flex-column align-items-start"
-                    >
-                        <span>
-                            {{ contributor.name }}
-                        </span>
-                        <span class="badge bg-primary">
-                            {{ transJoin(contributor.roles) }}
-                        </span>
-                    </div>
+                        :value="contributor"
+                    />
                 </div>
                 <hr>
-                <div class="d-flex flex-row justify-content-between">
-                    <!-- eslint-disable-next-line vue/no-v-html -->
-                    <span v-html="t('main.about.build_info')" />
-                    <div>
-                        <a
-                            href="https://www.facebook.com/esciencecenter"
-                            target="_blank"
-                        >
-                            <i class="fab fa-facebook fa-2x text-primary" />
-                        </a>
-                        <a
-                            href="https://github.com/DH-Center-Tuebingen/Spacialist"
-                            target="_blank"
-                            class="ms-2"
-                        >
-                            <i class="fab fa-github fa-2x text-dark" />
-                        </a>
-                    </div>
-                </div>
+                <Collapsible
+                    :header-classes="['pt-2', 'pb-2']"
+                    :body-classes="['row']"
+                >
+                    <template #title>
+                        <h5>
+                            {{ t('main.about.former_contributor', 2) }}
+                        </h5>
+                    </template>
+
+                    <Contributor
+                        v-for="contributor in contributors.former"
+                        :key="contributor.name"
+                        :value="contributor"
+                    />
+                </Collapsible>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer d-flex justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                    <a
+                        href="https://github.com/DH-Center-Tuebingen/Spacialist"
+                        target="_blank"
+                        class="ms-2"
+                    >
+                        <i class="fab fa-github fa-2x text-dark" />
+                    </a>
+                    <span v-html="t('main.about.build_info')" />
+                </div>
                 <button
                     type="button"
                     class="btn btn-outline-secondary"
@@ -132,25 +134,33 @@
         getContributors,
     } from '@/helpers/globals.js';
 
+    import Collapsible from '@/components/structure/Collapsible.vue';
+    import Contributor from '@/components/user/Contributor.vue';
+
     export default {
+        components: {
+            Collapsible,
+            Contributor
+        },
         emits: ['closing'],
         setup(props, context) {
             const { t } = useI18n();
-
             // FUNCTIONS
-            const closeModal = _ => {
-                context.emit('closing', false);
-            }
+            const toggleFormer = _ => {
+                state.showFormer = !state.showFormer;
+            };
             const transJoin = roles => {
                 return join(roles.map(rn => t(`main.about.roles.${rn}`)));
-            }
-
+            };
+            const closeModal = _ => {
+                context.emit('closing', false);
+            };
             // DATA
             const contributors = getContributors();
             const state = reactive({
+                showFormer: false,
                 version: computed(_ => store.getters.version),
             });
-
             // RETURN
             return {
                 t,
@@ -160,11 +170,12 @@
                 // PROPS
                 // LOCAL
                 contributors,
-                closeModal,
+                toggleFormer,
                 transJoin,
+                closeModal,
                 // STATE
                 state,
-            }
-        },
-    }
+            };
+        }
+    };
 </script>

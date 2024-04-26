@@ -9,15 +9,20 @@
                         t('main.entity.modals.multiedit.title')
                     }}
                 </h5>
-                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-                </button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                />
             </div>
             <div class="modal-body">
                 <attribute-list
-                    class="pt-2 h-100 scroll-y-auto scroll-x-hidden"
                     v-if="state.attributesInitialized"
-                    v-dcan="'entity_data_read'"
                     :ref="el => listRef = el"
+                    v-dcan="'entity_data_read'"
+                    class="pt-2 h-100 overflow-y-auto overflow-x-hidden"
                     :options="{'ignore_metadata': true}"
                     :attributes="state.sortedAttributes"
                     :values="state.defaultValues"
@@ -27,11 +32,21 @@
                 />
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-outline-success" :disabled="!state.isDirty" @click="confirm()">
-                    <i class="fas fa-fw fa-save"></i> {{ t('global.save') }}
+                <button
+                    type="submit"
+                    class="btn btn-outline-success"
+                    :disabled="!state.isDirty"
+                    @click="confirm()"
+                >
+                    <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
                 </button>
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                    <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                >
+                    <i class="fas fa-fw fa-times" /> {{ t('global.cancel') }}
                 </button>
             </div>
         </div>
@@ -115,7 +130,6 @@
                 t,
                 // HELPERS
                 // PROPS
-                attributes,
                 // LOCAL
                 setDirtyState,
                 confirm,
@@ -123,7 +137,7 @@
                 // STATE
                 listRef,
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

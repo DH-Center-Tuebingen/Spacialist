@@ -1,6 +1,6 @@
 import auth from '@/bootstrap/auth.js';
 import store from '@/bootstrap/store.js';
-import router from '@/bootstrap/router.js';
+import router from '%router';
 
 import {
     fetchAttributes,
@@ -90,7 +90,7 @@ export function getCertaintyClass(certainty, prefix = 'bg') {
     return classes;
 }
 
-export const multiselectResetClasslist = {clear: 'multiselect-clear multiselect-clear-reset'};
+export const multiselectResetClasslist = { clear: 'multiselect-clear multiselect-clear-reset' };
 
 export function getInputCursorPosition(input) {
     const div = document.createElement('div');
@@ -203,6 +203,13 @@ export function getAttribute(id) {
     return store.getters.attributes.find(a => a.id == id) || {};
 }
 
+export function getAttributeName(id) {
+    const attr = getAttribute(id);
+    if(!attr || !attr.thesaurus_url) return '';
+
+    return translateConcept(attr.thesaurus_url);
+}
+
 export function translateEntityType(id) {
     return translateConcept(getEntityType(id).thesaurus_url);
 }
@@ -247,7 +254,7 @@ export function getEntityTypeDependencies(id, aid) {
                 const deps = a.pivot.depends_on;
                 const keys = Object.keys(deps);
                 const values = Object.values(deps);
-                for(let i=0; i<keys.length; i++) {
+                for(let i = 0; i < keys.length; i++) {
                     const currKey = keys[i];
                     const currValue = values[i];
                     if(!dependencies[currKey]) {
@@ -289,11 +296,11 @@ export function getIntersectedEntityAttributes(entityTypeLists) {
     }
 
     let intersections = [];
-    for(let i=1; i<entityTypeLists.length; i++) {
+    for(let i = 1; i < entityTypeLists.length; i++) {
         intersections = [];
         const attrN = getEntityTypeAttributes(entityTypeLists[i]);
-        for(let j=0; j<compArr.length; j++) {
-            for(let k=0; k<attrN.length; k++) {
+        for(let j = 0; j < compArr.length; j++) {
+            for(let k = 0; k < attrN.length; k++) {
                 const a1 = compArr[j];
                 const a2 = attrN[k];
                 if(a1.id == a2.id) {
@@ -355,7 +362,7 @@ export function getInitialAttributeValue(attribute) {
             }
             if(hasIdentifier && !isSimple) {
                 toRepl = matches[1];
-                let pad = parseInt(toRepl.substring(1, toRepl.length-1));
+                let pad = parseInt(toRepl.substring(1, toRepl.length - 1));
                 ctr = ctr.padStart(pad, '0');
             }
             return str.replaceAll(toRepl, ctr);
@@ -440,7 +447,7 @@ export function getAttributeValueAsString(rawValue, datatype) {
 // Fills non-present attribute values to be used in draggable components (e.g. attribute-list)
 export function fillEntityData(data, etid) {
     const attrs = getEntityTypeAttributes(etid);
-    for(let i=0; i<attrs.length; i++) {
+    for(let i = 0; i < attrs.length; i++) {
         const currAttr = attrs[i];
         if(!data[currAttr.id]) {
             data[currAttr.id] = {
@@ -460,11 +467,11 @@ export function calculateEntityColors(id, alpha = 0.5) {
     const cs = [r, g, b].map(c => {
         c /= 255.0;
         if(c <= 0.03928) c /= 12.92;
-        else c = Math.pow(((c+0.055)/1.055), 2.4);
+        else c = Math.pow(((c + 0.055) / 1.055), 2.4);
         return c;
     });
     // let cont = r*0.299 + g*0.587 + b*0.114;
-    const l = cs[0]*0.2126 + cs[1]*0.7152 + cs[2]*0.0722;
+    const l = cs[0] * 0.2126 + cs[1] * 0.7152 + cs[2] * 0.0722;
 
     // const textColor = cont > 150 ? '#000000' : '#ffffff';
     const textColor = l > 0.179 ? '#000000' : '#ffffff';
@@ -525,7 +532,7 @@ export function getUsers() {
 }
 
 // where can be any of 'start', 'end', 'whole' (default)
-export function filterUsers(term, ci=true, where='whole') {
+export function filterUsers(term, ci = true, where = 'whole') {
     const flags = ci ? 'i' : '';
     let pattern = term;
     if(where == 'start') {
@@ -575,7 +582,7 @@ export function getRoleBy(value, attr = 'id', withPermissions = false) {
 }
 
 export function throwError(error) {
-    if (error.response) {
+    if(error.response) {
         const r = error.response;
         const req = {
             status: r.status,
@@ -583,7 +590,7 @@ export function throwError(error) {
             method: r.config.method.toUpperCase()
         };
         showErrorModal(r.data, r.headers, req);
-    } else if (error.request) {
+    } else if(error.request) {
         showErrorModal(error.request);
     } else {
         showErrorModal(error.message || error);
@@ -607,7 +614,7 @@ export function simpleResourceType(resource) {
 export function findInList(list, searchValue, searchKey = 'id', recKey = 'children') {
     if(!list || list.length == 0) return;
 
-    for(let i=0; i<list.length; i++) {
+    for(let i = 0; i < list.length; i++) {
         if(list[i][searchKey] == searchValue) {
             return list[i];
         }
@@ -621,8 +628,8 @@ export function only(object, allows = []) {
         .filter(key => allows.includes(key))
         .reduce((obj, key) => {
             return {
-            ...obj,
-            [key]: object[key]
+                ...obj,
+                [key]: object[key]
             };
         }, {});
 }
@@ -632,8 +639,8 @@ export function except(object, excepts = []) {
         .filter(key => !excepts.includes(key))
         .reduce((obj, key) => {
             return {
-            ...obj,
-            [key]: object[key]
+                ...obj,
+                [key]: object[key]
             };
         }, {});
 }
@@ -654,10 +661,10 @@ export function isArray(arr) {
     return Array.isArray(arr);
 }
 
-export {default as _cloneDeep} from 'lodash/cloneDeep';
-export {default as _debounce} from 'lodash/debounce';
-export {default as _throttle} from 'lodash/throttle';
-export {default as _orderBy} from 'lodash/orderBy';
+export { default as _cloneDeep } from 'lodash/cloneDeep';
+export { default as _debounce } from 'lodash/debounce';
+export { default as _throttle } from 'lodash/throttle';
+export { default as _orderBy } from 'lodash/orderBy';
 
 export function showErrorModal(errorMsg, headers, request) {
     showError({
@@ -670,7 +677,7 @@ export function showErrorModal(errorMsg, headers, request) {
 export function getValidClass(msgObject, field) {
     let isInvalid = false;
     field.split('|').forEach(f => {
-        if (!!msgObject[f]) {
+        if(!!msgObject[f]) {
             isInvalid = true;
         }
     });
@@ -697,7 +704,7 @@ export function createAnchorFromUrl(url) {
 
 export function hasPreference(prefKey, prop) {
     const ps = store.getters.preferenceByKey(prefKey);
-    if (ps) {
+    if(ps) {
         return ps[prop] || ps;
     }
 }
@@ -780,7 +787,7 @@ export function slugify(s, delimiter = '-') {
     };
 
     // Transliterate characters to ASCII
-    for (var k in char_map) {
+    for(var k in char_map) {
         s = s.replace(RegExp(k, 'g'), char_map[k]);
     }
 
@@ -799,7 +806,7 @@ export function slugify(s, delimiter = '-') {
 
 export function hash(str) {
     let hash = 0;
-    for(let i=0; i<str.length; i++) {
+    for(let i = 0; i < str.length; i++) {
         hash = ((hash << 5) - hash) + str.charCodeAt(i);
         hash |= 0;
     }
@@ -855,7 +862,7 @@ export function userNotifications() {
 }
 
 export async function asyncFor(arr, callback) {
-    for(let i=0; i<arr.length; i++) {
+    for(let i = 0; i < arr.length; i++) {
         await callback(arr[i]);
     }
 }

@@ -3,14 +3,14 @@
         v-if="state.componentLoaded"
         v-model="state.attributeList"
         item-key="id"
-        class="attribute-list-container row align-content-start"
+        class="attribute-list-container align-content-start"
         :class="classes"
         :disabled="disableDrag || preview"
         :group="group"
         :move="handleMove"
         @change="handleUpdate"
     >
-        <template #item="{element, index}">
+        <template #item="{ element, index }">
             <div
                 v-if="!state.hiddenAttributeList[element.id] || showHidden"
                 class="mb-3"
@@ -27,6 +27,7 @@
                         class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break"
                         :for="`attr-${element.id}`"
                         :class="attributeClasses(element)"
+                        @click="e => handleLabelClick(e, element.datatype)"
                     >
                         <div
                             v-show="!!state.hoverStates[index]"
@@ -176,7 +177,7 @@
                             :value="state.attributeValues[element.id].value"
                             @change="e => updateDirtyState(e, element.id)"
                         />
-                                
+
                         <serial-attribute
                             v-else-if="element.datatype == 'serial'"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
@@ -274,11 +275,21 @@
                             :multiple="element.datatype == 'entity-mc'"
                             :hide-link="state.hideEntityLink"
                             :value="convertEntityValue(state.attributeValues[element.id], element.datatype == 'entity-mc')"
+                            :search-in="element.restrictions"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
                         <date-attribute
                             v-else-if="element.datatype == 'date'"
+                            :ref="el => setRef(el, element.id)"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :name="`attr-${element.id}`"
+                            :value="state.attributeValues[element.id].value"
+                            @change="e => updateDirtyState(e, element.id)"
+                        />
+
+                        <daterange-attribute
+                            v-else-if="element.datatype == 'daterange'"
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
@@ -293,6 +304,9 @@
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
                             :selections="selections[element.id]"
+                            :selection-from="element.root_attribute_id"
+                            :selection-from-value="state.rootAttributeValues[element.root_attribute_id]"
+                            @update-selection="e => handleSelectionUpdate(element.id, e)"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -374,6 +388,8 @@
         handleModeration as handleModerationApi,
     } from '@/api.js';
 
+    import store from '@/bootstrap/store.js';
+
     import StringAttr from '@/components/attribute/String.vue';
     import Stringfield from '@/components/attribute/Stringfield.vue';
     import Richtext from '@/components/attribute/Richtext.vue';
@@ -392,6 +408,7 @@
     import Geography from '@/components/attribute/Geography.vue';
     import Entity from '@/components/attribute/Entity.vue';
     import DateAttr from '@/components/attribute/Date.vue';
+    import DaterangeAttr from '@/components/attribute/Daterange.vue';
     import SingleChoice from '@/components/attribute/SingleChoice.vue';
     import MultiChoice from '@/components/attribute/MultiChoice.vue';
     import UserList from '@/components/attribute/UserList.vue';
@@ -420,6 +437,7 @@
             'geography-attribute': Geography,
             'entity-attribute': Entity,
             'date-attribute': DateAttr,
+            'daterange-attribute': DaterangeAttr,
             'singlechoice-attribute': SingleChoice,
             'multichoice-attribute': MultiChoice,
             'userlist-attribute': UserList,
@@ -441,7 +459,7 @@
             hiddenAttributes: {
                 required: false,
                 type: Array,
-                default: ()=>([]),
+                default: _ => ([]),
             },
             showHidden: {
                 required: false,
@@ -512,11 +530,17 @@
             // FETCH
 
             // FUNCTIONS
+            const handleSelectionUpdate = (elemId, conceptId) => {
+                if(state.dynamicSelectionList.includes(elemId)) {
+                    state.rootAttributeValues[elemId] = conceptId;
+                }
+            };
+
             const clFromMetadata = elem => {
                 if(!state.ignoreMetadata && elem.pivot && elem.pivot.metadata && elem.pivot.metadata.width) {
                     const width = elem.pivot.metadata.width;
                     switch(width) {
-                        case 50: 
+                        case 50:
                             return 'col-6';
                         default:
                             return 'col-12';
@@ -525,10 +549,14 @@
                 return 'col-12';
             };
             const attributeClasses = attribute => {
-                return {
-                    'copy-handle': props.isSource.value && !attribute.isDisabled,
-                    'not-allowed-handle text-muted': attribute.isDisabled,
-                };
+                const classes = [];
+                if(props.isSource.value && !attribute.isDisabled) {
+                    classes.push('copy-handle');
+                }
+                if(attribute.isDisabled) {
+                    classes.push('not-allowed-handle', 'text-muted');
+                }
+                return classes;
             };
             const expandedClasses = i => {
                 let expClasses = {};
@@ -538,7 +566,7 @@
                 } else {
                     expClasses['col-md-9'] = true;
                 }
-                
+
                 return expClasses;
             };
             const onAttributeExpand = (e, i) => {
@@ -662,8 +690,12 @@
                             }
                             values[k] = currValue;
                         } else {
-                            // null is allowed for date
-                            if(getAttribute(k).datatype == 'date') {
+                            // null is allowed for date, string-sc, entity
+                            if(
+                                getAttribute(k).datatype == 'date' ||
+                                getAttribute(k).datatype == 'string-sc' ||
+                                getAttribute(k).datatype == 'entity'
+                            ) {
                                 values[k] = currValue;
                             }
                         }
@@ -676,6 +708,7 @@
                 if(state.attributeValues[aid].moderation_edit_state == 'active') {
                     return;
                 }
+
                 context.emit('dirty', {
                     ...e,
                     attribute_id: aid,
@@ -738,6 +771,11 @@
             const hasEmitter = which => {
                 return !!attrs[which];
             };
+            const handleLabelClick = (e, attrType) => {
+                if(attrType == 'boolean') {
+                    e.preventDefault();
+                }
+            };
             const convertEntityValue = (value, isMultiple) => {
                 let actValue = null;
                 if(value == '' || !value.value) {
@@ -774,7 +812,17 @@
             const state = reactive({
                 attributeList: attributes,
                 attributeValues: values,
+                rootAttributeValues: {},
                 entity: computed(_ => store.getters.entity),
+                dynamicSelectionList: computed(_ => {
+                    const list = [];
+                    state.attributeList.forEach(a => {
+                        if(a.root_attribute_id) {
+                            list.push(a.root_attribute_id);
+                        }
+                    });
+                    return list;
+                }),
                 hoverStates: new Array(attributes.value.length).fill(false),
                 expansionStates: new Array(attributes.value.length).fill(false),
                 componentLoaded: computed(_ => state.attributeValues),
@@ -785,7 +833,7 @@
                     if(!state.componentLoaded) return {};
 
                     const list = {};
-                    for(let i=0; i<hiddenAttributes.value.length; i++) {
+                    for(let i = 0; i < hiddenAttributes.value.length; i++) {
                         const disId = hiddenAttributes.value[i];
                         list[disId] = true;
                     }
@@ -798,6 +846,12 @@
 
             // ON MOUNTED
             onMounted(_ => {
+                state.dynamicSelectionList.forEach(rootId => {
+                    const attrValue = state.attributeValues[rootId].value;
+                    if(attrValue) {
+                        handleSelectionUpdate(rootId, attrValue.id);
+                    }
+                });
             });
             onBeforeUpdate(_ => {
                 attrRefs.value = {};
@@ -810,6 +864,7 @@
                 getCertaintyClass,
                 translateConcept,
                 // LOCAL
+                handleSelectionUpdate,
                 clFromMetadata,
                 attributeClasses,
                 expandedClasses,
@@ -836,6 +891,7 @@
                 onDeleteHandler,
                 onMetadataHandler,
                 hasEmitter,
+                handleLabelClick,
                 convertEntityValue,
                 // STATE
                 attrRefs,

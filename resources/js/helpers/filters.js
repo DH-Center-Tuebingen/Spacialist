@@ -189,9 +189,9 @@ export function bibtexEntryToText(value, key = null) {
     return text;
 }
 export function bibtexify(value, type) {
-    let rendered = '<pre class=\'mb-0\'><code>';
+    let rendered = '<pre class=\'mb-0\'><code class=\'fs-1r\'>';
     if(type) {
-        rendered += '@'+type+' {'
+        rendered += '@'+type+' {';
         if(value['citekey']) rendered += value['citekey'] + ',';
         for(let k in value) {
             if(value[k] == null || value[k] == '' || k == 'citekey') continue;
