@@ -56,7 +56,9 @@ All notable changes to this project will be documented in this file.
 - Remove headings without content from _References_ tab in Main View
 - HTML content in comments
 - Adding comments without content to _Entity_
-- Missing Orchid-Id or empty phone number prevented users from saving the profile 
+- Storing _false_ values in _Boolean_ attribute
+- Adding references to a newly added/saved attribute value
+- Empty ORCID or phone number prevented users from saving the profile 
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
