@@ -3,14 +3,14 @@
         v-if="state.componentLoaded"
         v-model="state.attributeList"
         item-key="id"
-        class="attribute-list-container row align-content-start"
+        class="attribute-list-container align-content-start"
         :class="classes"
         :disabled="disableDrag || preview"
         :group="group"
         :move="handleMove"
         @change="handleUpdate"
     >
-        <template #item="{element, index}">
+        <template #item="{ element, index }">
             <div
                 v-if="!state.hiddenAttributeList[element.id] || showHidden"
                 class="mb-3"
@@ -176,7 +176,7 @@
                             :value="state.attributeValues[element.id].value"
                             @change="e => updateDirtyState(e, element.id)"
                         />
-                                
+
                         <serial-attribute
                             v-else-if="element.datatype == 'serial'"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
@@ -446,7 +446,7 @@
             hiddenAttributes: {
                 required: false,
                 type: Array,
-                default: ()=>([]),
+                default: _ => ([]),
             },
             showHidden: {
                 required: false,
@@ -527,7 +527,7 @@
                 if(!state.ignoreMetadata && elem.pivot && elem.pivot.metadata && elem.pivot.metadata.width) {
                     const width = elem.pivot.metadata.width;
                     switch(width) {
-                        case 50: 
+                        case 50:
                             return 'col-6';
                         default:
                             return 'col-12';
@@ -549,7 +549,7 @@
                 } else {
                     expClasses['col-md-9'] = true;
                 }
-                
+
                 return expClasses;
             };
             const onAttributeExpand = (e, i) => {
@@ -811,7 +811,7 @@
                     if(!state.componentLoaded) return {};
 
                     const list = {};
-                    for(let i=0; i<hiddenAttributes.value.length; i++) {
+                    for(let i = 0; i < hiddenAttributes.value.length; i++) {
                         const disId = hiddenAttributes.value[i];
                         list[disId] = true;
                     }

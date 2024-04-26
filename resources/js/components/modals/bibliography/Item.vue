@@ -305,9 +305,9 @@
                 fileContainer: [],
                 scrollStateClasses: computed(_ => {
                     if(state.data.type) {
-                        return ['scroll-y-auto', 'scroll-x-hidden'];
+                        return ['overflow-y-auto', 'overflow-x-hidden'];
                     } else {
-                        return ['scroll-visible'];
+                        return ['overflow-visible'];
                     }
                 }),
                 scrollStateBodyClasses: computed(_ => {
