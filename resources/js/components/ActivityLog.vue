@@ -117,7 +117,7 @@
                                 <pre
                                     v-highlightjs="state.dataString[i]"
                                     class="mb-0 small rounded"
-                                ><code class="text-prewrap word-break-all javascript" /></pre>
+                                ><code class="fs-1r text-prewrap word-break-all javascript" /></pre>
                             </div>
                         </td>
                     </tr>
