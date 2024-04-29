@@ -30,9 +30,7 @@
                 @click.prevent
                 @contextmenu.stop.prevent="togglePopup()"
             >
-                <span
-                    class="d-flex flex-row align-items-center"
-                >
+                <span class="d-flex flex-row align-items-center">
                     <span
                         v-if="data.children_count"
                         class="badge rounded-pill"
@@ -56,121 +54,53 @@
                 </span>
             </a>
         </div>
-        <ul
+        <TreeMenu
             v-if="state.ddVisible"
-            :id="`tree-node-${data.id}-contextmenu`"
-            class="dropdown-menu show"
-        >
-            <li>
-                <h6
-                    class="dropdown-header"
-                    @click.stop.prevent=""
-                    @dblclick.stop.prevent=""
-                >
-                    {{ data.name }}
-                </h6>
-            </li>
-            <li>
-                <a
-                    class="dropdown-item"
-                    href="#"
-                    @click.stop.prevent="addNewEntity()"
-                    @dblclick.stop.prevent=""
-                >
-                    <i class="fas fa-fw fa-plus text-success" />
-                    <span class="ms-2">
-                        {{ t('main.entity.tree.contextmenu.add') }}
-                    </span>
-                </a>
-            </li>
-            <li>
-                <a
-                    class="dropdown-item"
-                    href="#"
-                    @click.stop.prevent="duplicateEntity()"
-                    @dblclick.stop.prevent=""
-                >
-                    <i class="fas fa-fw fa-clone text-primary" />
-                    <span class="ms-2">
-                        {{ t('main.entity.tree.contextmenu.duplicate') }}
-                    </span>
-                </a>
-            </li>
-            <li>
-                <a
-                    class="dropdown-item"
-                    href="#"
-                    @click.stop.prevent="moveEntity()"
-                    @dblclick.stop.prevent=""
-                >
-                    <i class="fas fa-fw fa-external-link-alt text-primary" />
-                    <span class="ms-2">
-                        {{ t('main.entity.tree.contextmenu.move') }}
-                    </span>
-                </a>
-            </li>
-            <li>
-                <a
-                    v-if="can('entity_delete')"
-                    class="dropdown-item"
-                    href="#"
-                    @click.stop.prevent="deleteEntity()"
-                    @dblclick.stop.prevent=""
-                >
-                    <i class="fas fa-fw fa-trash text-danger" />
-                    <span class="ms-2">
-                        {{ t('main.entity.tree.contextmenu.delete') }}
-                    </span>
-                </a>
-            </li>
-        </ul>
+            :data="data"
+            @close="hidePopup()"
+        />
     </div>
 </template>
 
 <script>
     import {
         computed,
-        onMounted,
         reactive,
         toRefs,
         watch,
     } from 'vue';
 
-import { useI18n } from 'vue-i18n';
+    import { useI18n } from 'vue-i18n';
 
-import store from '@/bootstrap/store.js';
+    import store from '@/bootstrap/store.js';
 
-    import {
-        showAddEntity,
-        showDeleteEntity,
-        ShowMoveEntity,
-    } from '@/helpers/modal.js';
-    import {
-        duplicateEntity as duplicateEntityApi,
-    } from '@/api.js';
     import {
         can,
         getEntityColors,
         hasIntersectionWithEntityAttributes,
     } from '@/helpers/helpers.js';
+
     import {
         numPlus,
     } from '@/helpers/filters.js';
 
-export default {
-    props: {
-        data: {
-            required: true,
-            type: Object
-        }
-    },
-    setup(props) {
-        const { t } = useI18n();
-        const {
-            data,
-        } = toRefs(props);
+    import TreeMenu from './TreeMenu.vue';
 
-        // FETCH
+    export default {
+        components: {
+            TreeMenu,
+        },
+        props: {
+            data: {
+                required: true,
+                type: Object
+            }
+        },
+        setup(props) {
+            const { t } = useI18n();
+            const {
+                data,
+            } = toRefs(props);
 
             // FUNCTIONS
             const hidePopup = _ => {
@@ -186,28 +116,14 @@ export default {
                     showPopup();
                 }
             };
-            const addNewEntity = _ => {
-                showAddEntity(data.value);
-            };
-            const duplicateEntity = _ => {
-                duplicateEntityApi(data.value).then(data => {
-                    store.dispatch('addEntity', data);
-                });
-            };
-            const moveEntity = _ => {
-                ShowMoveEntity(data.value);
-            };
-            const deleteEntity = _ => {
-                if(!can('entity_delete')) return;
 
-            showDeleteEntity(data.value.id);
-        };
-        const onDragEnter = _ => {
-
-        };
-        const onDragLeave = _ => {
+            const onDragEnter = _ => {
 
             };
+            const onDragLeave = _ => {
+
+            };
+
             const addToMSList = event => {
                 if(!state.isSelectionMode) return;
 
@@ -243,11 +159,6 @@ export default {
                 }),
             });
 
-            // ON MOUNTED
-            onMounted(_ => {
-                console.log("tree node component mounted");
-            });
-
             // WATCHER
             watch(_ => state.isSelectionMode, (newValue, oldValue) => {
                 // if selection mode got disabled (checkbox not visible)
@@ -262,12 +173,9 @@ export default {
                 // HELPERS
                 can,
                 numPlus,
+                hidePopup,
                 // LOCAL
                 togglePopup,
-                addNewEntity,
-                duplicateEntity,
-                moveEntity,
-                deleteEntity,
                 onDragEnter,
                 onDragLeave,
                 addToMSList,
@@ -309,5 +217,5 @@ export default {
         //         }
         //     }
         // }
-    }
+    };
 </script>

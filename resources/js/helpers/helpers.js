@@ -1,5 +1,5 @@
 import auth from '@/bootstrap/auth.js';
-import store from '@/bootstrap/store.js';
+import store from '%store';
 import router from '%router';
 
 import {
@@ -102,7 +102,7 @@ export function getInputCursorPosition(input) {
     div.textContent = input.value.substr(0, input.selectionStart);
 
     const span = document.createElement('span');
-    span.textContent = input.value.substr(input.selectionStart) || '.'
+    span.textContent = input.value.substr(input.selectionStart) || '.';
     div.appendChild(span);
     document.body.appendChild(div);
     const offsetX = span.offsetLeft + input.offsetLeft;
