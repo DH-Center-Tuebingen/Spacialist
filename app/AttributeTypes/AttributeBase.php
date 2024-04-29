@@ -41,6 +41,7 @@ abstract class AttributeBase
         "table" => TableAttribute::class,
         "timeperiod" => TimeperiodAttribute::class,
         "userlist" => UserlistAttribute::class,
+        "url" => UrlAttribute::class,
         "si-unit" => SiUnitAttribute::class,
     ];
 
