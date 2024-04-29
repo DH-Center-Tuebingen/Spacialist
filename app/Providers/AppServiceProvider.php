@@ -96,14 +96,14 @@ class AppServiceProvider extends ServiceProvider
             return in_array($value, array_keys(Bibliography::bibtexTypes));
         });
         Validator::extend('si_baseunit', function ($attribute, $value, $parameters, $validator) {
-            return in_array($value, array_keys(SiUnitAttribute::getUnits()));
+            return in_array($value, array_keys(SiUnitAttribute::getGroups()));
         });
         Validator::extend('si_unit', function ($attribute, $value, $parameters, $validator) {
             if(count($parameters) != 1) {
                 return false;
             }
             $refField = request()->input($parameters[0]);
-            $baseunits = SiUnitAttribute::getUnits();
+            $baseunits = SiUnitAttribute::getGroups();
             if(!in_array($refField, array_keys($baseunits))) {
                 return false;
             }
