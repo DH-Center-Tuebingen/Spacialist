@@ -154,6 +154,7 @@
             "entity": "Entity",
             "entity-mc": "Entity (Multiple Choice)",
             "userlist": "User list",
+            "url": "URL/Website",
             "epoch": "Time Period and Epoch",
             "timeperiod": "Time Period",
             "date": "Date",
