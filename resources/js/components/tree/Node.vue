@@ -1,60 +1,61 @@
 <template>
     <div
         :id="`tree-node-${data.id}`"
-        class="d-flex"
         @dragenter="onDragEnter"
         @dragleave="onDragLeave"
         @click="e => addToMSList(e)"
     >
-        <span
-            v-if="state.isSelectionMode"
-            class="mx-1"
-        >
+        <div class="d-flex">
             <span
-                v-show="state.multieditSelected"
-                class="text-success"
-            >
-                <i class="fas fa-fw fa-circle-check" />
-            </span>
-            <span v-show="!state.multieditSelected">
-                <i class="far fa-fw fa-circle" />
-            </span>
-        </span>
-        <a
-            :id="`tree-node-cm-toggle-${data.id}`"
-            href=""
-            class="text-body text-decoration-none disabled d-flex flex-row gap-1 ps-1"
-            data-bs-toggle="dropdown"
-            data-bs-auto-close="true"
-            aria-expanded="false"
-            @click.prevent
-            @contextmenu.stop.prevent="togglePopup()"
-        >
-            <span
-                class="d-flex flex-row align-items-center"
+                v-if="state.isSelectionMode"
+                class="mx-1"
             >
                 <span
-                    v-if="data.children_count"
-                    class="badge rounded-pill"
-                    style="font-size: 9px;"
-                    :style="state.colorStyles"
-                    :title="data.children_count"
+                    v-show="state.multieditSelected"
+                    class="text-success"
                 >
-                    {{ numPlus(data.children_count, 3) }}
+                    <i class="fas fa-fw fa-circle-check" />
                 </span>
+                <span v-show="!state.multieditSelected">
+                    <i class="far fa-fw fa-circle" />
+                </span>
+            </span>
+            <a
+                :id="`tree-node-cm-toggle-${data.id}`"
+                href=""
+                class="text-body text-decoration-none disabled d-flex flex-row gap-1 ps-1"
+                data-bs-toggle="dropdown"
+                data-bs-auto-close="true"
+                aria-expanded="false"
+                @click.prevent
+                @contextmenu.stop.prevent="togglePopup()"
+            >
                 <span
-                    v-else
-                    class="badge rounded-pill"
-                    style="font-size: 8px;"
-                    :style="state.colorStyles"
+                    class="d-flex flex-row align-items-center"
                 >
-                    &nbsp;&nbsp;
+                    <span
+                        v-if="data.children_count"
+                        class="badge rounded-pill"
+                        style="font-size: 9px;"
+                        :style="state.colorStyles"
+                        :title="data.children_count"
+                    >
+                        {{ numPlus(data.children_count, 3) }}
+                    </span>
+                    <span
+                        v-else
+                        class="badge rounded-pill"
+                        style="font-size: 8px;"
+                        :style="state.colorStyles"
+                    >
+                        &nbsp;&nbsp;
+                    </span>
                 </span>
-            </span>
-            <span :class="{ 'fw-bold': state.isSelected }">
-                {{ data.name }}
-            </span>
-        </a>
+                <span :class="{ 'fw-bold': state.isSelected }">
+                    {{ data.name }}
+                </span>
+            </a>
+        </div>
         <ul
             v-if="state.ddVisible"
             :id="`tree-node-${data.id}-contextmenu`"
