@@ -6,7 +6,10 @@
             v-dcan="'entity_read'"
             :class="`h-100 d-flex flex-column col-md-${state.columnPref.left}`"
         >
-            <entity-tree class="col px-0 h-100" />
+            <entity-tree
+                id="main-entity-tree"
+                class="col px-0 h-100"
+            />
         </div>
         <div
             v-if="state.columnPref.center > 0"
@@ -136,6 +139,7 @@
 <script>
         import {
             computed,
+            onBeforeUnmount,
             onMounted,
             reactive,
         } from 'vue';
@@ -158,6 +162,7 @@
 
         import {
             translateConcept,
+            xpath,
         } from '@/helpers/helpers.js';
         import {
             date,
@@ -166,6 +171,9 @@
             canShowReferenceModal,
             showLiteratureInfo,
         } from '@/helpers/modal.js';
+        import {
+            fetchChildren,
+        } from '@/helpers/tree.js';
 
         export default {
             setup(props, context) {
@@ -217,7 +225,11 @@
                 };
 
                 // DATA
+                let entityTabGroups = null;
                 const state = reactive({
+                    altCaptured: null,
+                    isShortcutMode: false,
+                    treeRoot: null,
                     tab: computed(_ => store.getters.mainView.tab),
                     tabComponent: computed(_ => {
                         const plugin = state.tabPlugins.find(p => p.key == state.tab);
@@ -242,11 +254,161 @@
                     isDetailLoaded: computed(_ => store.getters.entity?.id > 0),
                     tabPlugins: computed(_ => store.getters.slotPlugins('tab')),
                 });
+                const switchTab = next => {
+                    if(currentRoute.name != 'entitydetail') return;
+
+                    if(!entityTabGroups || entityTabGroups.children.length == 0) return;
+
+                    let path = `//a[contains(@class,"active-entity-detail-tab") and contains(concat(" ", normalize-space(@class)," ")," active ")]`;
+
+                    if(next) {
+                        path = `(${path}/following::a[contains(@class,"active-entity-detail-tab")])[1]`;
+                    } else {
+                        path = `(${path}/preceding::a[contains(@class,"active-entity-detail-tab")])[last()]`;
+                    }
+                    let xp = xpath(path, entityTabGroups);
+                    let tgt = xp.iterateNext();
+
+                    if(!tgt) {
+                        if(next) {
+                            path = `(//a[contains(@class,"active-entity-detail-tab")])[1]`;
+                        } else {
+                            path = `(//a[contains(@class,"active-entity-detail-tab")])[last()]`;
+                        }
+                    }
+                    xp = xpath(path, entityTabGroups);
+                    tgt = xp.iterateNext();
+                    xp.click();
+                };
+                const switchEntity = next => {
+                    if(currentRoute.name != 'entitydetail') return;
+
+                    const e = state.entity;
+
+                    let xp = null;
+                    let path = '';
+                    if(next) {
+                        path = `//div[@id="tree-node-${e.id}"]/following::div[contains(@class,"entity-tree-node") and count(ancestor::ul/preceding-sibling::a/div[contains(@class,"entity-tree-node") and contains(@class, "node-closed")])=0][1]`;
+                    } else {
+                        path = `//div[@id="tree-node-${e.id}"]/preceding::div[contains(@class,"entity-tree-node") and count(ancestor::ul/preceding-sibling::a/div[contains(@class,"entity-tree-node") and contains(@class, "node-closed")])=0][1]`;
+                    }
+                    xp = xpath(path, state.treeRoot);
+                    let tgt = xp.iterateNext();
+
+                    if(!tgt) {
+                        if(next) {
+                            path = `(//div[contains(@class,"entity-tree-node")])[1]`;
+                        } else {
+                            path = `(//div[contains(@class,"entity-tree-node")])[last()]`;
+                        }
+                    }
+
+                    xp = xpath(path, state.treeRoot);
+                    tgt = xp.iterateNext();
+                    tgt.click();
+                };
+                const switchEntityLevel = open => {
+                    if(currentRoute.name != 'entitydetail') return;
+
+                    const e = state.entity;
+
+                    if(open && !e.state.openable) return;
+                    if(open && e.state.opened) return;
+                    if(open && e.children.length < e.children_count) {
+                        e.state.loading = true;
+                        fetchChildren(e.id).then(response => {
+                            e.children =  response;
+                            e.state.loading = false;
+                            e.childrenLoaded = true;
+                            e.state.opened = !e.state.opened;
+                        });
+                    } else {
+                        e.state.opened = !e.state.opened;
+                    }
+                    if(!open && e.root_entity_id) {
+                        const parent = store.getters.entities[e.root_entity_id];
+                        if(parent) {
+                            parent.state.opened = false;
+                            const {
+                                view,
+                                ...query
+                            } = currentRoute.query;
+                            router.push({
+                                name: 'entitydetail',
+                                params: {
+                                    id: parent.id,
+                                },
+                                query: query,
+                            });
+                        }
+                    }
+                };
+                const handleKeyboardShortcuts = event => {
+                    const key = event.keyCode;
+
+                    if(key == 18) {
+                        const now = (new Date()).getTime();
+                        if(!state.altCaptured) {
+                            state.altCaptured = now;
+                            setTimeout(_ => {
+                                state.altCaptured = null;
+                            }, 300);
+                        } else {
+                            if(now - state.altCaptured < 250) {
+                                state.isShortcutMode = !state.isShortcutMode;
+                                if(state.isShortcutMode) {
+                                    entityTabGroups = document.getElementById('active-entity-tab-groups');
+                                } else {
+                                    entityTabGroups = null;
+                                }
+                            }
+                            state.altCaptured = null;
+                        }
+                        event.preventDefault();
+                    } else {
+                        state.altCaptured = null;
+
+                        if(!state.isShortcutMode) return;
+
+                        // TODO find proper shortcuts for switching tabs
+                        // if(event.ctrlKey && event.altKey && key == 39) {
+                        //     switchTab(true);
+                        //     event.preventDefault();
+                        //     event.stopPropagation();
+                        // } else if(event.ctrlKey && event.altKey && key == 37) {
+                        //     switchTab(false);
+                        //     event.preventDefault();
+                        //     event.stopPropagation();
+                        // }
+                        if(event.ctrlKey && key == 38) {
+                            switchEntity(false);
+                            event.preventDefault();
+                            event.stopPropagation();
+                        } else if(event.ctrlKey && key == 40) {
+                            switchEntity(true);
+                            event.preventDefault();
+                            event.stopPropagation();
+                        } else if(event.ctrlKey && key == 39) {
+                            switchEntityLevel(true);
+                            event.preventDefault();
+                            event.stopPropagation();
+                        } else if(event.ctrlKey && key == 37) {
+                            switchEntityLevel(false);
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                    }
+                };
 
                 // ON MOUNTED
                 onMounted(_ => {
                     console.log('mainview component mounted');
                     store.dispatch('setMainViewTab', currentRoute.query.tab);
+                    state.treeRoot = document.getElementById('main-entity-tree');
+                    window.addEventListener('keydown', handleKeyboardShortcuts);
+                });
+                onBeforeUnmount(_ => {
+                    window.removeEventListener('keydown', handleKeyboardShortcuts);
                 });
 
                 onBeforeRouteUpdate(async (to, from) => {

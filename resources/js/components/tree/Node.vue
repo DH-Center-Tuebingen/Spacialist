@@ -1,7 +1,8 @@
 <template>
     <div
         :id="`tree-node-${data.id}`"
-        class="d-flex"
+        class="d-flex entity-tree-node"
+        :class="{'node-closed': !data.state.opened}"
         @dragenter="onDragEnter"
         @dragleave="onDragLeave"
         @click="e => addToMSList(e)"
@@ -308,5 +309,5 @@ export default {
         //         }
         //     }
         // }
-    }
+    };
 </script>

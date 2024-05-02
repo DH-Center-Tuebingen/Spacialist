@@ -185,60 +185,65 @@
             </div>
         </div>
         <ul
-            v-show="can('comments_read')"
-            id="myTab"
+            v-show="can('comments_read') || can('entity_read')"
+            id="active-entity-tab-groups"
             class="nav nav-tabs"
             role="tablist"
         >
-            <li
-                v-for="(tg, key) in state.entityGroups"
-                :key="`attribute-group-${tg.id}-tab`"
-                class="nav-item"
-                role="presentation"
+            <template
+                v-if="can('entity_read')"
             >
-                <a
-                    :id="`active-entity-attributes-group-${tg.id}-tab`"
-                    class="nav-link active-entity-attributes-tab active-entity-detail-tab d-flex gap-2 align-items-center"
-                    href="#"
-                    @click.prevent="setDetailPanel(`attributes-${tg.id}`)"
+                <li
+                    v-for="(tg, key) in state.entityGroups"
+                    :key="`attribute-group-${tg.id}-tab`"
+                    class="nav-item"
+                    role="presentation"
                 >
-                    <span class="fa-layers fa-fw">
-                        <i class="fas fa-fw fa-layer-group" />
-                        <span class="fa-layers-counter fa-counter-lg bg-secondary-subtle text-reset">
-                            {{ tg.data.length }}
-                        </span>
-                    </span>
-                    <span v-if="key == 'default'">
-                        {{ t('main.entity.tabs.default') }}
-                    </span>
-                    <span v-else>
-                        {{ translateConcept(key) }}
-                    </span>
-                    <div
-                        v-if="state.dirtyStates[tg.id]"
-                        class="d-flex flex-row gap-2 align-items-center"
-                        @mouseover="showTabActions(tg.id, true)"
-                        @mouseleave="showTabActions(tg.id, false)"
+                    <a
+                        :id="`active-entity-attributes-group-${tg.id}-tab`"
+                        class="nav-link active-entity-attributes-tab active-entity-detail-tab d-flex gap-2 align-items-center"
+                        href="#"
+                        @click.prevent="setDetailPanel(`attributes-${tg.id}`)"
                     >
-                        <i class="fas fa-fw fa-2xs fa-circle text-warning" />
-                        <div v-show="state.attributeGrpHovered == tg.id">
-                            <a
-                                href="#"
-                                @click.prevent.stop="saveEntity(`${tg.id}`)"
-                            >
-                                <i class="fas fa-fw fa-save text-success" />
-                            </a>
-                            <a
-                                href="#"
-                                @click.prevent.stop="resetForm(`${tg.id}`)"
-                            >
-                                <i class="fas fa-fw fa-undo text-warning" />
-                            </a>
+                        <span class="fa-layers fa-fw">
+                            <i class="fas fa-fw fa-layer-group" />
+                            <span class="fa-layers-counter fa-counter-lg bg-secondary-subtle text-reset">
+                                {{ tg.data.length }}
+                            </span>
+                        </span>
+                        <span v-if="key == 'default'">
+                            {{ t('main.entity.tabs.default') }}
+                        </span>
+                        <span v-else>
+                            {{ translateConcept(key) }}
+                        </span>
+                        <div
+                            v-if="state.dirtyStates[tg.id]"
+                            class="d-flex flex-row gap-2 align-items-center"
+                            @mouseover="showTabActions(tg.id, true)"
+                            @mouseleave="showTabActions(tg.id, false)"
+                        >
+                            <i class="fas fa-fw fa-2xs fa-circle text-warning" />
+                            <div v-show="state.attributeGrpHovered == tg.id">
+                                <a
+                                    href="#"
+                                    @click.prevent.stop="saveEntity(`${tg.id}`)"
+                                >
+                                    <i class="fas fa-fw fa-save text-success" />
+                                </a>
+                                <a
+                                    href="#"
+                                    @click.prevent.stop="resetForm(`${tg.id}`)"
+                                >
+                                    <i class="fas fa-fw fa-undo text-warning" />
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                </a>
-            </li>
+                    </a>
+                </li>
+            </template>
             <li
+                v-if="can('comments_read')"
                 class="nav-item"
                 role="presentation"
             >

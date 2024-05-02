@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file.
 - Info on hover to required fields in new/edit bibliography modal
 - Restrict search in _Entity_ attribute to specific entity-types
 - Entities can now be updated using the _Data Importer_
+- Shortcuts to navigate through _Entity Tree_ and _Entity Detail_
 ### Fixed
 - Error in _Attribute List_ caused by _Entity (Multiple Choice)_ attribute
 - Attribute form Save/Reset handling due to newly introduced _Attribute Group Separator_

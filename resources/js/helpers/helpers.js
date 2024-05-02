@@ -792,6 +792,12 @@ export function hash(str) {
     return hash;
 }
 
+export function xpath(path, context, type = XPathResult.ANY_TYPE) {
+    context = context || document;
+
+    return document.evaluate(path, context, null, type, null);
+}
+
 // UNVERIFIED
 
 export function getNotificationSourceLink(notification) {
