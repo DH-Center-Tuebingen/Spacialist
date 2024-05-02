@@ -567,7 +567,13 @@ class EntityController extends Controller {
                 $changedEntities[] = $entityId;
             } catch (Exception $e) {
                 DB::rollBack();
-                return response()->json($errorResponseData, 400);
+                return response()->json(
+                    [
+                        'error' => $e->getMessage(),
+                        'data' => $errorResponseData
+                    ],
+                    400
+                );
             }
         }
 
