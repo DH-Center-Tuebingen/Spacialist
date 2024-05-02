@@ -661,6 +661,7 @@ class EntityController extends Controller {
                     $attrval = new AttributeValue();
                     $attrval->entity_id = $id;
                     $attrval->attribute_id = $aid;
+                    $attrval->certainty = null;
                     if ($user->isModerated()) {
                         $attrval->moderate('pending', true, true);
                     }

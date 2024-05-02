@@ -75,6 +75,7 @@ All notable changes to this project will be documented in this file.
 - Font size in dropdown menus
 - _About_ modal contributors
 - Data Importer: Now supports the Boolean attribute with the value 'x'
+- Do not show "!" for attributes without value & replace initial "!" with "?" for attributes with value, but no certainty set
 
 ## 0.9.14
 ### Added

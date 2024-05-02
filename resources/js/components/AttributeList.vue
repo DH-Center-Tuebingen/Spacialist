@@ -93,17 +93,25 @@
                             {{ translateConcept(element.thesaurus_url) }}:
                         </span>
                         <sup
-                            v-if="hasEmitter('onMetadata')"
+                            v-if="hasEmitter('onMetadata') && hasAny(element)"
                             class="clickable"
                             @click="onMetadataHandler(element)"
                         >
-                            <span :class="getCertaintyClass(state.attributeValues[element.id].certainty, 'text')">
-                                <i class="fas fa-fw fa-exclamation" />
+                            <span
+                                v-if="hasCertainty(element)"
+                                :class="getCertaintyClass(state.attributeValues[element.id].certainty, 'text')"
+                            >
+                                <span v-show="isUnsetCertainty(element)">
+                                    <i class="fas fa-fw fa-question" />
+                                </span>
+                                <span v-show="!isUnsetCertainty(element)">
+                                    <i class="fas fa-fw fa-exclamation" />
+                                </span>
                             </span>
-                            <span v-if="state.attributeValues[element.id].comments_count > 0">
+                            <span v-if="hasComment(element)">
                                 <i class="fas fa-fw fa-comment" />
                             </span>
-                            <span v-if="metadataAddon(element.thesaurus_url)">
+                            <span v-if="hasBookmarks(element)">
                                 <i class="fas fa-fw fa-bookmark" />
                             </span>
                         </sup>
@@ -770,6 +778,22 @@
             const hasEmitter = which => {
                 return !!attrs[which];
             };
+            const hasCertainty = attribute => {
+                const c = state.attributeValues[attribute.id].certainty;
+                return c || c === 0 || c === null;
+            };
+            const isUnsetCertainty = attribute => {
+                return state.attributeValues[attribute.id].certainty === null;
+            };
+            const hasComment = attribute => {
+                return state.attributeValues[attribute.id].comments_count > 0;
+            };
+            const hasBookmarks = attribute => {
+                return metadataAddon.value && metadataAddon.value(attribute.thesaurus_url);
+            };
+            const hasAny = attribute => {
+                return hasCertainty(attribute) || hasComment(attribute) || hasBookmarks(attribute);
+            };
             const handleLabelClick = (e, attrType) => {
                 if(attrType == 'boolean') {
                     e.preventDefault();
@@ -890,6 +914,11 @@
                 onDeleteHandler,
                 onMetadataHandler,
                 hasEmitter,
+                hasCertainty,
+                isUnsetCertainty,
+                hasComment,
+                hasBookmarks,
+                hasAny,
                 handleLabelClick,
                 convertEntityValue,
                 // STATE

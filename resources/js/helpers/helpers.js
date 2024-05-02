@@ -75,18 +75,22 @@ export function getErrorMessages(error, suffix = '') {
 }
 
 export function getCertaintyClass(certainty, prefix = 'bg') {
-    let classes = {};
+    const classes = [];
 
-    if(certainty <= 25) {
-        classes[`${prefix}-danger`] = true;
-    } else if(certainty <= 50) {
-        classes[`${prefix}-warning`] = true;
-    } else if(certainty <= 75) {
-        classes[`${prefix}-info`] = true;
-    } else {
-        classes[`${prefix}-success`] = true;
+    if(certainty === null) {
+        return;
     }
 
+    let type = 'success';
+    if(certainty <= 25) {
+        type = 'danger';
+    } else if(certainty <= 50) {
+        type = 'warning';
+    } else if(certainty <= 75) {
+        type = 'info';
+    }
+
+    classes.push(`${prefix}-${type}`);
     return classes;
 }
 
