@@ -9,9 +9,11 @@ use App\EntityAttribute;
 use App\EntityFile;
 use App\EntityType;
 use App\Exceptions\AmbiguousValueException;
+use App\Exceptions\AttributeImportException;
 use App\Exceptions\ImportException;
 use App\Exceptions\Structs\ImportExceptionStruct;
 use App\Exceptions\InvalidDataException;
+use App\Exceptions\Structs\AttributeImportExceptionStruct;
 use App\Import\EntityImporter;
 use App\Reference;
 use App\ThConcept;
@@ -565,6 +567,18 @@ class EntityController extends Controller {
 
                 $this->setOrUpdateImportedAttributes($entityId, $row, $attributeIdToColumnIdxMapping, $attributeTypes, $user);
                 $changedEntities[] = $entityId;
+            } catch (AttributeImportException $e) {
+                DB::rollBack();
+                return response()->json($e->toImportExceptionObject(count($changedEntities) + 1, $entityName), 400);
+            } catch (ImportException $e) {
+                DB::rollBack();
+                return response()->json(
+                    [
+                        'error' => $e->getMessage(),
+                        'data' => $e->getData()
+                    ],
+                    400
+                );
             } catch (Exception $e) {
                 DB::rollBack();
                 return response()->json(
@@ -596,7 +610,7 @@ class EntityController extends Controller {
     }
 
     function setOrUpdateImportedAttributes($entity_id, $row, $attributeIdToColumnIdxMapping, $attributeTypes, $user) {
-        foreach ($attributeIdToColumnIdxMapping as $key => $val) {
+        foreach ($attributeIdToColumnIdxMapping as $key => $colIdx) {
             $aid = intval($key);
             $type = $attributeTypes[$aid];
 
@@ -606,7 +620,19 @@ class EntityController extends Controller {
             ], [
                 'user_id' => $user->id,
             ]);
-            $setValue = $attrVal->setValueFromRaw($row[$val], $type);
+            try {
+                $setValue = $attrVal->setValueFromRaw($row[$colIdx], $type);
+            } catch (InvalidDataException $e) {
+                throw new AttributeImportException(
+                    $e->getMessage(),
+                    new AttributeImportExceptionStruct(
+                        type: $type,
+                        columnIndex: $colIdx + 1,
+                        columnName: $row[$colIdx]
+                    )
+                );
+            }
+
             if ($setValue === null) {
                 continue;
             }
