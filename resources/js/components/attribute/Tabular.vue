@@ -117,7 +117,7 @@
                             @change="e => updateDirtyState(e, $index, column.id)"
                         />
 
-                        <date-attribute
+                        <daterange-attribute
                             v-else-if="column.datatype == 'daterange'"
                             :ref="el => setRef(el, `${$index}_${column.id}`)"
                             :disabled="disabled || row.mark_deleted"
