@@ -29,9 +29,6 @@ class Attribute extends Model
 
     protected $casts = [
         'restrictions' => 'array',
-    ];
-
-    protected $casts = [
         'metadata' => 'array',
     ];
 
