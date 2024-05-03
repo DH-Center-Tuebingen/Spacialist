@@ -72,7 +72,7 @@
             "info_issue": "If you think this is a bug, please have a look at our <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues\" target=\"_blank\">issue tracker</a> on github to see if this has been already reported or <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues?q=is:issue+is:closed\" target=\"_blank\">closed</a> in a later version (Your current version can be found in Settings > <i class=\"fas fa-fw fa-info-circle\"></i> About Dialog). If it is neither reported nor closed, feel free to <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues/new\" target=\"_blank\">open a new issue</a>.",
             "occur": "Error occured",
             "headers": "Headers",
-            "request_failed": "<code class=\"normal\">{method}</code>-Request to endpoint <code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code> failed with status code <span class=\"fw-medium\">{status}</span>."
+            "request_failed": "<code class=\"fw-normal\">{method}</code>-Request to endpoint <code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code> failed with status code <span class=\"fw-medium\">{status}</span>."
         },
         "search": "Search…",
         "search_no_results": "No results",
@@ -154,6 +154,7 @@
             "entity": "Entity",
             "entity-mc": "Entity (Multiple Choice)",
             "userlist": "User list",
+            "url": "URL/Website",
             "epoch": "Time Period and Epoch",
             "timeperiod": "Time Period",
             "date": "Date",
@@ -165,8 +166,8 @@
             "sql": "SQL-Query",
             "system-separator": "Group Separator",
             "serial": "Serial (Auto-incrementing ID)",
-            "serial_info": "<i class=\"fas fa-lightbulb me-1\"></i><br />All instances share this identifier as attribute. Add <code class=\"normal\">%d</code> as counter.<br /><span class=\"fw-medium mt-2\">Example:</span><br /><code class=\"normal\">Find_%d_Stone</code> would create Find_1_Stone, Find_2_Stone, &hellip;<br />To add a fixed width (e.g. 3 for 002 instead of 2), you can use <code class=\"normal\">%03d</code>.",
-            "sql_info": "You can use <code class=\"normal\">:entity_id</code> in your SQL-Query to reference the entity this attribute is assigned to.",
+            "serial_info": "<i class=\"fas fa-lightbulb me-1\"></i><br />All instances share this identifier as attribute. Add <code class=\"fw-normal\">%d</code> as counter.<br /><span class=\"fw-medium mt-2\">Example:</span><br /><code class=\"fw-normal\">Find_%d_Stone</code> would create Find_1_Stone, Find_2_Stone, &hellip;<br />To add a fixed width (e.g. 3 for 002 instead of 2), you can use <code class=\"fw-normal\">%03d</code>.",
+            "sql_info": "You can use <code class=\"fw-normal\">:entity_id</code> in your SQL-Query to reference the entity this attribute is assigned to.",
             "iconclass": "Iconclass",
             "rism": "RISM",
             "restrictions": {

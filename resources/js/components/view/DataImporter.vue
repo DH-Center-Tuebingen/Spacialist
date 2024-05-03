@@ -1,5 +1,5 @@
 <template>
-    <div class="data-importer d-flex flex-column overflow-hidden">
+    <div class="data-importer h-100 d-flex flex-column overflow-hidden">
         <header>
             <h4>{{ t(`main.importer.title`) }}</h4>
         </header>
@@ -8,12 +8,12 @@
             :class="state.csvTableCollapsed ? 'extended' : 'limited'"
         >
             <div class="controls">
-                <div class="card">
+                <div class="card overflow-y-auto">
                     <header :class="cardHeaderClasses">
                         {{ t('main.importer.entity_settings') }}
                         <div class="toolbox" />
                     </header>
-                    <div class="card-body">
+                    <div class="card-body overflow-y-auto mh-100">
                         <EntityImporterSettings
                             v-if="state.fileLoaded"
                             v-model:entityType="entitySettings.entityType"
@@ -33,12 +33,12 @@
                         />
                     </div>
                 </div>
-                <div class="card">
+                <div class="card overflow-y-auto">
                     <header :class="cardHeaderClasses">
                         {{ t('main.importer.attribute_mapping') }}
                         <div class="toolbox" />
                     </header>
-                    <div class="card-body">
+                    <div class="card-body overflow-y-auto mh-100">
                         <EntityAttributeMapping
                             v-if="state.fileLoaded && !!entitySettings.entityType"
                             v-model:attribute-mapping="attributeSettings.mapping"
@@ -55,11 +55,11 @@
                         />
                     </div>
                 </div>
-                <div class="card">
+                <div class="card overflow-y-auto">
                     <header :class="cardHeaderClasses">
                         {{ t('main.importer.import_settings') }}
                     </header>
-                    <div class="card-body">
+                    <div class="card-body overflow-y-auto mh-100">
                         <importer-update-state
                             v-if="state.validated"
                             :conflict="state.validationData.conflict"
@@ -127,7 +127,7 @@
                 </div>
             </div>
 
-            <div class="file-preview d-flex flex-column overflow-hidden gap-4">
+            <div class="file-preview d-flex flex-column overflow-hidden mh-100 gap-4">
                 <file-upload
                     v-if="!state.fileLoaded"
                     :model="state.files"
@@ -625,7 +625,6 @@
 
 <style>
     .data-importer {
-
         th,
         td {
             white-space: nowrap;
@@ -654,11 +653,6 @@
     gap: 1rem;
     position: relative;
     overflow: hidden;
-}
-
-.data-importer {
-    height: 100%;
-    background-color: whitesmoke;
 }
 
 .layout {
@@ -697,18 +691,5 @@
     .entity-attribute-mapping {
         grid-template-columns: 1fr;
     }
-}
-
-.file-preview {
-    max-height: 100%;
-}
-
-.card-body {
-    overflow-y: auto;
-    max-height: 100%;
-}
-
-.card {
-    overflow-y: auto;
 }
 </style>

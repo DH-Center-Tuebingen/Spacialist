@@ -251,227 +251,228 @@
 </template>
 
 <script>
-        import {
-            computed,
-            onMounted,
-            reactive,
-            toRefs,
-        } from 'vue';
-        import { useI18n } from 'vue-i18n';
-        import router from '%router';
-        import store from '@/bootstrap/store.js';
+    import {
+        computed,
+        onMounted,
+        reactive,
+        toRefs,
+    } from 'vue';
+    import { useI18n } from 'vue-i18n';
+    import router from '%router';
+    import store from '@/bootstrap/store.js';
 
-        import {
-            can,
-            getCertaintyClass,
-            translateConcept,
-        } from '@/helpers/helpers.js';
-        import {
-            patchAttribute,
-            getAttributeValueComments,
-            deleteReferenceFromEntity,
-            updateReference,
-            addReference,
-        } from '@/api.js';
-        import {
-            date,
-        } from '@/helpers/filters.js';
+    import {
+        can,
+        getAttribute,
+        getCertaintyClass,
+        translateConcept,
+    } from '@/helpers/helpers.js';
+    import {
+        patchAttribute,
+        getAttributeValueComments,
+        deleteReferenceFromEntity,
+        updateReference,
+        addReference,
+    } from '@/api.js';
+    import {
+        date,
+    } from '@/helpers/filters.js';
 
-        export default {
-            props: {
-                entity: {
-                    required: true,
-                    type: Object,
-                },
+    export default {
+        props: {
+            entity: {
+                required: true,
+                type: Object,
             },
-            setup(props, context) {
-                const { t } = useI18n();
-                const {
-                    entity,
-                } = toRefs(props);
-                const aid = router.currentRoute.value.params.aid;
+        },
+        setup(props, context) {
+            const { t } = useI18n();
+            const {
+                entity,
+            } = toRefs(props);
+            const aid = router.currentRoute.value.params.aid;
 
-                // FETCH
-                if(can('comments_read')) {
-                    getAttributeValueComments(entity.value.id, aid).then(comments => {
-                        state.comments = comments;
-                    });
+            // FETCH
+            if(can('comments_read')) {
+                getAttributeValueComments(entity.value.id, aid).then(comments => {
+                    state.comments = comments;
+                });
+            }
+
+            // FUNCTIONS
+            const setCertainty = event => {
+                const maxSize = event.target.parentElement.scrollWidth; // progress bar width in px
+                const clickPos = event.layerX; // in px
+                const finalPos = Math.max(0, Math.min(clickPos, maxSize)); // clamp cursor pos to progress bar size
+
+                const currentValue = state.certainty;
+                let value = parseInt(finalPos/maxSize*100);
+                const diff = Math.abs(value-currentValue);
+                if(diff < 10) {
+                    if(value > currentValue) {
+                        value = parseInt((value+10)/10)*10;
+                    } else {
+                        value = parseInt(value/10)*10;
+                    }
+                } else {
+                    value = parseInt((value+5)/10)*10;
                 }
 
-                // FUNCTIONS
-                const setCertainty = event => {
-                    const maxSize = event.target.parentElement.scrollWidth; // progress bar width in px
-                    const clickPos = event.layerX; // in px
-                    const finalPos = Math.max(0, Math.min(clickPos, maxSize)); // clamp cursor pos to progress bar size
-                
-                    const currentValue = state.certainty;
-                    let value = parseInt(finalPos/maxSize*100);
-                    const diff = Math.abs(value-currentValue);
-                    if(diff < 10) {
-                        if(value > currentValue) {
-                            value = parseInt((value+10)/10)*10;
-                        } else {
-                            value = parseInt(value/10)*10;
-                        }
-                    } else {
-                        value = parseInt((value+5)/10)*10;
-                    }
-
-                    state.certainty = value;
+                state.certainty = value;
+            };
+            const onUpdateCertainty = event => {
+                let data = {
+                    certainty: state.certainty,
                 };
-                const onUpdateCertainty = event => {
-                    let data = {
-                        certainty: state.certainty,
-                    };
-                    patchAttribute(entity.value.id, aid, data).then(data => {
-                        state.comments.push(event.comment);
-                        // set startCertainty to new, stored value
-                        state.startCertainty = state.certainty;
-                    });
+                patchAttribute(entity.value.id, aid, data).then(data => {
+                    state.comments.push(event.comment);
+                    // set startCertainty to new, stored value
+                    state.startCertainty = state.certainty;
+                });
+            };
+            const isMatch = (prop, exp) => {
+                return !!prop && !!prop.match(exp);
+            };
+            const filterBibliographyList = async query => {
+                if(!query) {
+                    return await new Promise(r => r(state.bibliography));
+                } else {
+                    const exp = new RegExp(query, 'i');
+                    return await new Promise(r => r(
+                        state.bibliography.filter(entry => {
+                            return (
+                                isMatch(entry.title, exp) ||
+                                isMatch(entry.booktitle, exp) ||
+                                isMatch(entry.author, exp) ||
+                                isMatch(entry.year, exp) ||
+                                isMatch(entry.citekey, exp) ||
+                                isMatch(entry.journal, exp)
+                            );
+                        })
+                    ));
+                }
+            };
+            const resetNewItem = _ => {
+                state.newItem.bibliography = {};
+                state.newItem.description = '';
+            };
+            const enableEditReference = reference => {
+                state.editItem = {
+                    ...reference
                 };
-                const isMatch = (prop, exp) => {
-                    return !!prop && !!prop.match(exp);
+            };
+            const cancelEditReference = _ => {
+                state.editItem = {};
+            };
+            const onAddReference = _ => {
+                if(!can('bibliography_read|entity_data_write')) return;
+                const data = {
+                    bibliography_id: state.newItem.bibliography.id,
+                    description: state.newItem.description,
                 };
-                const filterBibliographyList = async query => {
-                    if(!query) {
-                        return await new Promise(r => r(state.bibliography));
-                    } else {
-                        const exp = new RegExp(query, 'i');
-                        return await new Promise(r => r(
-                            state.bibliography.filter(entry => {
-                                return (
-                                    isMatch(entry.title, exp) ||
-                                    isMatch(entry.booktitle, exp) ||
-                                    isMatch(entry.author, exp) ||
-                                    isMatch(entry.year, exp) ||
-                                    isMatch(entry.citekey, exp) ||
-                                    isMatch(entry.journal, exp)
-                                );
-                            })
-                        ));
-                    }
+                addReference(entity.value.id, state.attribute.id, state.attribute.thesaurus_url, data).then(data => {
+                    resetNewItem();
+                });
+            };
+            const onDeleteReference = reference => {
+                if(!can('bibliography_read|entity_data_write')) return;
+                const id = reference.id;
+                deleteReferenceFromEntity(reference.id, entity.value.id, state.attribute.thesaurus_url).then(data => {
+                    cancelEditReference();
+                });
+            };
+            const onUpdateReference = editedReference => {
+                if(!can('bibliography_read|entity_data_write')) return;
+                const ref = state.references.find(r => r.id == editedReference.id);
+                if(ref.description == editedReference.description) {
+                    cancelEditReference();
+                    return;
+                }
+                const data = {
+                    description: editedReference.description
                 };
-                const resetNewItem = _ => {
-                    state.newItem.bibliography = {};
-                    state.newItem.description = '';
-                };
-                const enableEditReference = reference => {
-                    state.editItem = {
-                        ...reference
-                    };
-                };
-                const cancelEditReference = _ => {
-                    state.editItem = {};
-                };
-                const onAddReference = _ => {
-                    if(!can('bibliography_read|entity_data_write')) return;
-                    const data = {
-                        bibliography_id: state.newItem.bibliography.id,
-                        description: state.newItem.description,
-                    };
-                    addReference(entity.value.id, state.attribute.id, state.attribute.thesaurus_url, data).then(data => {
-                        resetNewItem();
-                    });
-                };
-                const onDeleteReference = reference => {
-                    if(!can('bibliography_read|entity_data_write')) return;
-                    const id = reference.id;
-                    deleteReferenceFromEntity(reference.id, entity.value.id, state.attribute.thesaurus_url).then(data => {
-                        cancelEditReference();
-                    });
-                };
-                const onUpdateReference = editedReference => {
-                    if(!can('bibliography_read|entity_data_write')) return;
-                    const ref = state.references.find(r => r.id == editedReference.id);
-                    if(ref.description == editedReference.description) {
-                        cancelEditReference();
-                        return;
-                    }
-                    const data = {
-                        description: editedReference.description
-                    };
-                    updateReference(ref.id, entity.value.id, state.attribute.thesaurus_url, data).then(data => {
-                        cancelEditReference();
-                    });
-                };
-                const closeModal = _ => {
-                    state.show = false;
-                    router.push({
-                        name: 'entitydetail',
-                        params: {
-                            id: entity.value.id,
-                        },
-                        query: router.currentRoute.value.query,
-                    });
-                };
-
-                // DATA
-                const state = reactive({
-                    show: false,
-                    newItem: {
-                        bibliography: {},
-                        description: '',
+                updateReference(ref.id, entity.value.id, state.attribute.thesaurus_url, data).then(data => {
+                    cancelEditReference();
+                });
+            };
+            const closeModal = _ => {
+                state.show = false;
+                router.push({
+                    name: 'entitydetail',
+                    params: {
+                        id: entity.value.id,
                     },
-                    addReferenceDisabled: computed(_ => {
-                        return (
-                            (!!state.newItem.bibliography && !state.newItem.bibliography.id) ||
-                            state.newItem.description.length == 0
-                        );
-                    }),
-                    editItem: {},
-                    attribute: entity.value.data[aid].attribute,
-                    references: computed(_ => entity.value.references[state.attribute.thesaurus_url]),
-                    bibliography: computed(_ => store.getters.bibliography),
-                    startCertainty: entity.value.data[aid].certainty,
-                    certainty: entity.value.data[aid].certainty,
-                    comments: [],
-                    comments_count: entity.value.data[aid].comments_count,
-                    resourceInfo: computed(_ => {
+                    query: router.currentRoute.value.query,
+                });
+            };
+
+            // DATA
+            const state = reactive({
+                show: false,
+                newItem: {
+                    bibliography: {},
+                    description: '',
+                },
+                addReferenceDisabled: computed(_ => {
+                    return (
+                        (!!state.newItem.bibliography && !state.newItem.bibliography.id) ||
+                        state.newItem.description.length == 0
+                    );
+                }),
+                editItem: {},
+                attribute: getAttribute(aid),
+                references: computed(_ => entity.value.references[state.attribute.thesaurus_url]),
+                bibliography: computed(_ => store.getters.bibliography),
+                startCertainty: entity.value.data[aid].certainty,
+                certainty: entity.value.data[aid].certainty,
+                comments: [],
+                comments_count: entity.value.data[aid].comments_count,
+                resourceInfo: computed(_ => {
+                    return {
+                        id: entity.value.data[aid].id,
+                        type: 'attribute_value',
+                    };
+                }),
+                commentMetadata: computed(_ => {
+                    if(state.startCertainty == state.certainty) {
+                        return {};
+                    } else {
                         return {
-                            id: entity.value.data[aid].id,
-                            type: 'attribute_value',
+                            certainty_from: state.startCertainty,
+                            certainty_to: state.certainty,
                         };
-                    }),
-                    commentMetadata: computed(_ => {
-                        if(state.startCertainty == state.certainty) {
-                            return {};
-                        } else {
-                            return {
-                                certainty_from: state.startCertainty,
-                                certainty_to: state.certainty,
-                            };
-                        }
-                    }),
-                });
+                    }
+                }),
+            });
 
-                // ON MOUNTED
-                onMounted(_ => {
-                    state.show = true;
-                });
+            // ON MOUNTED
+            onMounted(_ => {
+                state.show = true;
+            });
 
-                // RETURN
-                return {
-                    t,
-                    // HELPERS
-                    can,
-                    getCertaintyClass,
-                    translateConcept,
-                    date,
-                    // PROPS
-                    // LOCAL
-                    setCertainty,
-                    onUpdateCertainty,
-                    filterBibliographyList,
-                    enableEditReference,
-                    cancelEditReference,
-                    onAddReference,
-                    onDeleteReference,
-                    onUpdateReference,
-                    closeModal,
-                    // STATE
-                    state,
-                }
+            // RETURN
+            return {
+                t,
+                // HELPERS
+                can,
+                getCertaintyClass,
+                translateConcept,
+                date,
+                // PROPS
+                // LOCAL
+                setCertainty,
+                onUpdateCertainty,
+                filterBibliographyList,
+                enableEditReference,
+                cancelEditReference,
+                onAddReference,
+                onDeleteReference,
+                onUpdateReference,
+                closeModal,
+                // STATE
+                state,
+            };
 
-            },
-        }
+        },
+    };
 </script>

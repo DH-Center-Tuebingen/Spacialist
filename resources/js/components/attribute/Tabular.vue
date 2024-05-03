@@ -153,6 +153,14 @@
                             :value="row[column.id]"
                             @change="e => updateDirtyState(e, $index, column.id)"
                         />
+
+                        <url-attribute
+                            v-else-if="element.datatype == 'url'"
+                            :ref="el => setRef(el, `${$index}_${column.id}`)"
+                            :name="`${name}-column-attr-${column.id}`"
+                            :value="row[column.id]"
+                            @change="e => updateDirtyState(e, $index, column.id)"
+                        />
                     </td>
                     <td
                         v-if="!disabled"
@@ -367,6 +375,7 @@
     import SingleChoice from '@/components/attribute/SingleChoice.vue';
     import MultiChoice from '@/components/attribute/MultiChoice.vue';
     import UserList from '@/components/attribute/UserList.vue';
+    import Url from '@/components/attribute/Url.vue';
 
     import * as d3 from 'd3-dsv'; 
 
@@ -384,6 +393,7 @@
             'singlechoice-attribute': SingleChoice,
             'multichoice-attribute': MultiChoice,
             'userlist-attribute': UserList,
+            'url-attribute': Url,
         },
         props: {
             name: {

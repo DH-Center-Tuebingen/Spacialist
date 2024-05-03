@@ -63,7 +63,7 @@
                 </keep-alive>
                 <div
                     v-show="isTab('references') && !!state.entity.id"
-                    class="h-100 scroll-y-auto"
+                    class="h-100 overflow-y-auto"
                 >
                     <p
                         v-if="!state.hasReferences"
@@ -111,8 +111,7 @@
                                                 {{ reference.bibliography.author }} in <cite
                                                     :title="reference.bibliography.title"
                                                 >
-                                                    {{ reference.bibliography.title }} ,{{ reference.bibliography.year
-                                                                                                        }}
+                                                    {{ reference.bibliography.title }} ,{{ reference.bibliography.year }}
                                                 </cite>
                                                 <a
                                                     href="#"

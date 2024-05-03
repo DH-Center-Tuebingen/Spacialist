@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - Serif font (Zilla Slab)
 - New Attribute Type: _Richtext_ (A feature-rich alternative to _Textbox_ Attribute; based on Markdown)
 - New Attribute Type: _Date range_
+- New Attribute Type: _URL_
 - New Attribute Type: _Userlist_
 - New Attribute Type: _Attribute Group Separator_ (A separator element to group attributes in tabs)
 - Separate form Save/Reset in Entity Attribute Tabs (when using _Attribute Group Separator_)
@@ -61,6 +62,8 @@ All notable changes to this project will be documented in this file.
 - Only first letter/selection/… of values in tables saved to database
 - Dependency state of attributes not persisted
 - Correctly propagate attribute changes to update dependent attributes' visibility
+- Storing _false_ values in _Boolean_ attribute
+- Adding references to a newly added/saved attribute value
 - Empty ORCID or phone number prevented users from saving the profile 
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu

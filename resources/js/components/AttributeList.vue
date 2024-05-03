@@ -3,14 +3,14 @@
         v-if="state.componentLoaded"
         v-model="state.attributeList"
         item-key="id"
-        class="attribute-list-container row align-content-start"
+        class="attribute-list-container align-content-start"
         :class="classes"
         :disabled="disableDrag || preview"
         :group="group"
         :move="handleMove"
         @change="handleUpdate"
     >
-        <template #item="{element, index}">
+        <template #item="{ element, index }">
             <div
                 v-if="!state.hiddenAttributeList[element.id] || showHidden"
                 class="mb-3"
@@ -27,6 +27,7 @@
                         class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break"
                         :for="`attr-${element.id}`"
                         :class="attributeClasses(element)"
+                        @click="e => handleLabelClick(e, element.datatype)"
                     >
                         <div
                             v-show="!!state.hoverStates[index]"
@@ -176,7 +177,7 @@
                             :value="state.attributeValues[element.id].value"
                             @change="e => updateDirtyState(e, element.id)"
                         />
-                                
+
                         <serial-attribute
                             v-else-if="element.datatype == 'serial'"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
@@ -318,6 +319,15 @@
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
+                        <url-attribute
+                            v-else-if="element.datatype == 'url'"
+                            :ref="el => setRef(el, element.id)"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :name="`attr-${element.id}`"
+                            :value="state.attributeValues[element.id].value"
+                            @change="e => updateDirtyState(e, element.id)"
+                        />
+
                         <sql-attribute
                             v-else-if="element.datatype == 'sql'"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
@@ -400,6 +410,7 @@
     import SingleChoice from '@/components/attribute/SingleChoice.vue';
     import MultiChoice from '@/components/attribute/MultiChoice.vue';
     import UserList from '@/components/attribute/UserList.vue';
+    import Url from '@/components/attribute/Url.vue';
     import SqlAttr from '@/components/attribute/Sql.vue';
     import SystemSeparator from '@/components/attribute/SystemSeparator.vue';
     import DefaultAttr from '@/components/attribute/Default.vue';
@@ -428,6 +439,7 @@
             'singlechoice-attribute': SingleChoice,
             'multichoice-attribute': MultiChoice,
             'userlist-attribute': UserList,
+            'url-attribute': Url,
             'sql-attribute': SqlAttr,
             'system-separator-attribute': SystemSeparator,
             'default-attribute': DefaultAttr,
@@ -446,7 +458,7 @@
             hiddenAttributes: {
                 required: false,
                 type: Array,
-                default: ()=>([]),
+                default: _ => ([]),
             },
             showHidden: {
                 required: false,
@@ -527,7 +539,7 @@
                 if(!state.ignoreMetadata && elem.pivot && elem.pivot.metadata && elem.pivot.metadata.width) {
                     const width = elem.pivot.metadata.width;
                     switch(width) {
-                        case 50: 
+                        case 50:
                             return 'col-6';
                         default:
                             return 'col-12';
@@ -536,10 +548,14 @@
                 return 'col-12';
             };
             const attributeClasses = attribute => {
-                return {
-                    'copy-handle': props.isSource.value && !attribute.isDisabled,
-                    'not-allowed-handle text-muted': attribute.isDisabled,
-                };
+                const classes = [];
+                if(props.isSource.value && !attribute.isDisabled) {
+                    classes.push('copy-handle');
+                }
+                if(attribute.isDisabled) {
+                    classes.push('not-allowed-handle', 'text-muted');
+                }
+                return classes;
             };
             const expandedClasses = i => {
                 let expClasses = {};
@@ -549,7 +565,7 @@
                 } else {
                     expClasses['col-md-9'] = true;
                 }
-                
+
                 return expClasses;
             };
             const onAttributeExpand = (e, i) => {
@@ -751,6 +767,11 @@
             const hasEmitter = which => {
                 return !!attrs[which];
             };
+            const handleLabelClick = (e, attrType) => {
+                if(attrType == 'boolean') {
+                    e.preventDefault();
+                }
+            };
             const convertEntityValue = (value, isMultiple) => {
                 let actValue = null;
                 if(value == '' || !value.value) {
@@ -808,7 +829,7 @@
                     if(!state.componentLoaded) return {};
 
                     const list = {};
-                    for(let i=0; i<hiddenAttributes.value.length; i++) {
+                    for(let i = 0; i < hiddenAttributes.value.length; i++) {
                         const disId = hiddenAttributes.value[i];
                         list[disId] = true;
                     }
@@ -865,6 +886,7 @@
                 onDeleteHandler,
                 onMetadataHandler,
                 hasEmitter,
+                handleLabelClick,
                 convertEntityValue,
                 // STATE
                 attrRefs,

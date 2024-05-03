@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex flex-column ">
+    <div class="d-flex flex-column">
         <header
             class="d-flex gap-3 align-items-center overflow-visible"
             :class="csvSettings.showPreview ? 'mb-3' : ''"
@@ -55,7 +55,9 @@
                         <td
                             v-for="(column, j) in row"
                             :key="`csv-preview-col-${i}-${j}`"
-                            :class="cellClass"
+                            :class="[...cellClass, state.wrapClass[`${i}_${j}`]]"
+                            :title="column"
+                            @click="toggleWrapping(i, j)"
                         >
                             {{ column }}
                         </td>
@@ -117,6 +119,17 @@
             const { t } = useI18n();
             // FETCH
             // FUNCTIONS
+            const toggleWrapping = (row, col) => {
+                // do not toggle if user selects (part of) the content
+                if(window.getSelection().toString()) {
+                    return;
+                }
+                if(!state.wrapClass[`${row}_${col}`]) {
+                    state.wrapClass[`${row}_${col}`] = 'text-wrap';
+                } else {
+                    state.wrapClass[`${row}_${col}`] = '';
+                }
+            };
             const toggleShowPreview = _ => {
                 csvSettings.showPreview = !csvSettings.showPreview;
             };
@@ -166,6 +179,7 @@
             // DATA
             const state = reactive({
                 computedRows: {},
+                wrapClass: {},
                 dsv: computed(_ => d3.dsvFormat(csvSettings.delimiter || ',')),
                 endVisible: computed(_ => {
                     return state.stripedStart + csvSettings.showCount > state.rows;
@@ -218,6 +232,7 @@
                 ucfirst,
                 // LOCAL
                 cellClass,
+                toggleWrapping,
                 toggleShowPreview,
                 // STATE
                 state,

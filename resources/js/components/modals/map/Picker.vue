@@ -40,7 +40,7 @@
                     :on-modifyend="onGeoFeaturesUpdated"
                     :reset="true" /> -->
                 <div class="mt-2">
-                    WKT: <pre class="m-0"><code>{{ state.wktValue }}</code></pre>
+                    WKT: <pre class="m-0"><code class="fs-1r">{{ state.wktValue }}</code></pre>
                 </div>
             </div>
             <div class="modal-footer">
