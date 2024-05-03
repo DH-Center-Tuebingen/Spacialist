@@ -19,6 +19,8 @@ All notable changes to this project will be documented in this file.
 - Pasting into _Bibliography Item_ now works without clicking first and display some more info
 - Info on hover to required fields in new/edit bibliography modal
 - Restrict search in _Entity_ attribute to specific entity-types
+- Allow _Multiple Choice Dropdown_ in _Table_ attribute
+- Allow _Date Range_ in _Table_ attribute
 - Entities can now be updated using the _Data Importer_
 ### Fixed
 - Error in _Attribute List_ caused by _Entity (Multiple Choice)_ attribute
@@ -57,6 +59,9 @@ All notable changes to this project will be documented in this file.
 - Remove headings without content from _References_ tab in Main View
 - HTML content in comments
 - Adding comments without content to _Entity_
+- Only first letter/selection/… of values in tables saved to database
+- Dependency state of attributes not persisted
+- Correctly propagate attribute changes to update dependent attributes' visibility
 - Storing _false_ values in _Boolean_ attribute
 - Adding references to a newly added/saved attribute value
 - Empty ORCID or phone number prevented users from saving the profile 

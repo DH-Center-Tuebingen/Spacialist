@@ -137,7 +137,7 @@
             watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
-            watch(_ => [v.meta.dirty, v.meta.valid], ([newDirty, newValid], [oldDirty, oldValid]) => {
+            watch(_ => v.value, (newValue, oldValue) => {
                 // only emit @change event if field is validated (required because Entity.vue components)
                 // trigger this watcher several times even if another component is updated/validated
                 if(!v.meta.validated) return;
@@ -161,7 +161,7 @@
                 // STATE
                 users,
                 v,
-            }
+            };
         },
-    }
+    };
 </script>
