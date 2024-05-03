@@ -122,7 +122,7 @@ class Csv extends Parser {
         $row = [];
         $arr = $this->getcsv($line);
         for ($i = 0; $i < count($arr); $i++) {
-            $row[$this->headers[$i]] = $arr[$i];
+            $row[$this->headers[$i]] = trim($arr[$i]);
         }
         return $row;
     }
@@ -149,9 +149,13 @@ class Csv extends Parser {
         return $this->headerFromRow($row);
     }
 
+    private function trimRow($row) {
+        return array_map(fn($r) => trim($r), $row);
+    }
+
     private function headerFromRow($row) {
         if ($this->hasHeaderRow) {
-            return $row;
+            return $this->trimRow($row);
         } else {
             return $this->generateNumberHeaders($row);
         }
