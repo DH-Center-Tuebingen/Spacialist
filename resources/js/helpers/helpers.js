@@ -83,7 +83,7 @@ export function getCertainties() {
     return [
         {type: 'danger', icon: 'fas fa-fw fa-exclamation', rangeFunction: inRangeOf(0, 25)},
         {type: 'warning', icon: 'fas fa-fw fa-exclamation', rangeFunction: inRangeOf(25, 50)},
-        {type: 'info', icon: 'fas fa-fw fa-info', rangeFunction: inRangeOf(50, 100)},
+        {type: 'info', icon: 'fas fa-fw fa-exclamation', rangeFunction: inRangeOf(50, 100)},
         {type: 'success', icon: 'fas fa-fw fa-check', rangeFunction: (certainty) => certainty === 100},
         UNSET_CERTAINTY,
     ];
