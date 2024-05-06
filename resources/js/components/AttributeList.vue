@@ -94,10 +94,10 @@
                         </span>
                         <sup
                             v-if="hasEmitter('onMetadata')"
-                            class="clickable d-flex flex-row align-items-center gap-1 ms-1"
+                            class="clickable d-flex flex-row align-items-start ms-1"
                             @click="onMetadataHandler(element)"
                         >
-                            <validity-indicator :state="certaintyState(element)" />
+                            <validity-indicator :state="certainty(element)" />
                             <span v-if="hasComment(element)">
                                 <i class="fas fa-fw fa-comment" />
                             </span>
@@ -377,7 +377,6 @@
 
     import {
         getAttribute,
-        getCertaintyClass,
         translateConcept,
     } from '@/helpers/helpers.js';
 
@@ -771,9 +770,8 @@
                 return !!attrs[which];
             };
 
-            const certaintyState = attribute => {
-                if(state.attributeValues[attribute.id].certainty === null) return null;
-                return Boolean(state.attributeValues[attribute.id].certainty === 100);
+            const certainty = attribute => {
+                return state.attributeValues?.[attribute.id]?.certainty;
             };
 
             const hasComment = attribute => {
@@ -873,10 +871,9 @@
             return {
                 t,
                 // HELPERS
-                getCertaintyClass,
                 translateConcept,
                 // LOCAL
-                certaintyState,
+                certainty,
                 handleSelectionUpdate,
                 clFromMetadata,
                 attributeClasses,

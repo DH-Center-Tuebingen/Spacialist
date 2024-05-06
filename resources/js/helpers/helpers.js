@@ -74,27 +74,39 @@ export function getErrorMessages(error, suffix = '') {
     return msgObject;
 }
 
+
+const UNSET_CERTAINTY = {type: 'unset', icon: 'fas fa-fw fa-question', rangeFunction: (certainty) => certainty == null || certainty < 0 || certainty > 100};
+export function getCertainties() {
+    function inRangeOf(lowIn, highEx) {
+        return (certainty) => parseFloat(certainty) >= lowIn && parseFloat(certainty) < highEx;
+    }
+    return [
+        {type: 'danger', icon: 'fas fa-fw fa-exclamation', rangeFunction: inRangeOf(0, 25)},
+        {type: 'warning', icon: 'fas fa-fw fa-exclamation', rangeFunction: inRangeOf(25, 50)},
+        {type: 'info', icon: 'fas fa-fw fa-info', rangeFunction: inRangeOf(50, 100)},
+        {type: 'success', icon: 'fas fa-fw fa-check', rangeFunction: (certainty) => certainty === 100},
+        UNSET_CERTAINTY,
+    ];
+}
+
+export function getCertainty(value) {
+    for(const certainty of getCertainties()) {
+        if(certainty.rangeFunction(value)) {
+            return certainty;
+        }
+    }
+
+    return UNSET_CERTAINTY;
+}
+
 export function getCertaintyClass(certainty, prefix = 'bg') {
     const classes = [];
-
-    if(certainty === null) {
-        return;
-    }
-
-    let type = 'success';
-    if(certainty <= 25) {
-        type = 'danger';
-    } else if(certainty <= 50) {
-        type = 'warning';
-    } else if(certainty <= 75) {
-        type = 'info';
-    }
-
-    classes.push(`${prefix}-${type}`);
+    const cert = getCertainty(certainty);
+    classes.push(`${prefix}-${cert.type}`);
     return classes;
 }
 
-export const multiselectResetClasslist = { clear: 'multiselect-clear multiselect-clear-reset' };
+export const multiselectResetClasslist = {clear: 'multiselect-clear multiselect-clear-reset'};
 
 export function getInputCursorPosition(input) {
     const div = document.createElement('div');
@@ -106,7 +118,7 @@ export function getInputCursorPosition(input) {
     div.textContent = input.value.substr(0, input.selectionStart);
 
     const span = document.createElement('span');
-    span.textContent = input.value.substr(input.selectionStart) || '.'
+    span.textContent = input.value.substr(input.selectionStart) || '.';
     div.appendChild(span);
     document.body.appendChild(div);
     const offsetX = span.offsetLeft + input.offsetLeft;

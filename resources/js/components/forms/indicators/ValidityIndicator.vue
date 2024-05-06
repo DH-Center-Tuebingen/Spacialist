@@ -1,36 +1,37 @@
 <template>
     <div class="validity-indicator">
-        <span v-show="isNone">
-            <i class="fas fa-fw fa-question opacity-50" />
-        </span>
-        <span v-show="isOk">
-            <i class="fas fa-fw fa-check text-success" />
-        </span>
-        <span v-show="isBad">
-            <i class="fas fa-fw fa-exclamation text-danger" />
-        </span>
+        <template
+            v-for="certainty in certainties"
+            :key="certainty"
+        >
+            <span v-show="certainty.rangeFunction(state)">
+                <i :class="`${certainty.icon} text-${certainty.type}`" />
+            </span>
+        </template>
     </div>
 </template>
 
 <script>
-    import { computed } from 'vue';
+    import {
+        getCertainties
+    } from '../../../helpers/helpers';
 
     export default {
         props: {
             state: {
-                type: [Boolean, null],
+                type: [Number, null],
                 required: true,
+                validator: (value) => {
+                    return value === null || (value >= 0 && value <= 100);
+                },
             },
         },
         setup(props) {
-            const isNone = computed(() => props.state === null);
-            const isOk = computed(() => props.state === true);
-            const isBad = computed(() => props.state === false);
+
+            const certainties = getCertainties();
 
             return {
-                isNone,
-                isOk,
-                isBad,
+                certainties,
             };
         },
     };
