@@ -14,7 +14,7 @@
 <script>
     import {
         getCertainties
-    } from '../../../helpers/helpers';
+    } from '@/helpers/helpers.js';
 
     export default {
         props: {
