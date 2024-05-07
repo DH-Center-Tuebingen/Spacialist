@@ -177,10 +177,6 @@
                 t,
                 // HELPERS
                 can,
-                canWrite,
-                canCreate,
-                canDelete,
-                canShare,
                 numPlus,
                 hidePopup,
                 // LOCAL

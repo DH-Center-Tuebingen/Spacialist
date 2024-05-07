@@ -12,11 +12,25 @@
                 v-if="state.hasIcon"
                 :class="state.iconWrapperClasses"
             >
-                <i
-                    class="fas"
-                    :class="state.iconClasses"
-                />
-                <span class="fw-medium">
+                <span v-show="type == 'success'">
+                    <i class="fas fa-fw fa-check" />
+                </span>
+                <span v-show="type == 'note'">
+                    <i class="fas fa-fw fa-lightbulb" />
+                </span>
+                <span v-show="type == 'info'">
+                    <i class="fas fa-fw fa-info-circle" />
+                </span>
+                <span v-show="type == 'warning'">
+                    <i class="fas fa-fw fa-exclamation-triangle" />
+                </span>
+                <span v-show="type == 'error'">
+                    <i class="fas fa-fw fa-times" />
+                </span>
+                <span
+                    v-if="icontext"
+                    class="fw-medium ms-2"
+                >
                     {{ icontext }}
                 </span>
             </div>
@@ -57,27 +71,6 @@
             >
                 <i class="fas fa-fw fa-times" />
             </a>
-            <span v-show="type == 'success'">
-                <i class="fas fa-fw fa-check" />
-            </span>
-            <span v-show="type == 'note'">
-                <i class="fas fa-fw fa-lightbulb" />
-            </span>
-            <span v-show="type == 'info'">
-                <i class="fas fa-fw fa-info-circle" />
-            </span>
-            <span v-show="type == 'warning'">
-                <i class="fas fa-fw fa-exclamation-triangle" />
-            </span>
-            <span v-show="type == 'error'">
-                <i class="fas fa-fw fa-times" />
-            </span>
-            <span
-                v-if="icontext"
-                class="fw-medium ms-2"
-            >
-                {{ icontext }}
-            </span>
         </div>
     </div>
 </template>
@@ -133,7 +126,7 @@
             };
             const closeAlert = _ => {
                 state.isActive = false;
-            }
+            };
 
             // DATA
             const state = reactive({
@@ -214,5 +207,5 @@
                 state,
             };
         },
-    }
+    };
 </script>
