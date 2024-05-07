@@ -90,24 +90,14 @@
                             v-if="!element.is_system"
                             class="text-end col"
                         >
-                            {{ translateConcept(element.thesaurus_url) }}:
+                            {{ translateConcept(element.thesaurus_url) }}
                         </span>
                         <sup
-                            v-if="hasEmitter('onMetadata') && hasAny(element)"
-                            class="clickable"
+                            v-if="hasEmitter('onMetadata')"
+                            class="clickable d-flex flex-row align-items-start top-0"
                             @click="onMetadataHandler(element)"
                         >
-                            <span
-                                v-if="hasCertainty(element)"
-                                :class="getCertaintyClass(state.attributeValues[element.id].certainty, 'text')"
-                            >
-                                <span v-show="isUnsetCertainty(element)">
-                                    <i class="fas fa-fw fa-question" />
-                                </span>
-                                <span v-show="!isUnsetCertainty(element)">
-                                    <i class="fas fa-fw fa-exclamation" />
-                                </span>
-                            </span>
+                            <validity-indicator :state="certainty(element)" />
                             <span v-if="hasComment(element)">
                                 <i class="fas fa-fw fa-comment" />
                             </span>
@@ -387,7 +377,6 @@
 
     import {
         getAttribute,
-        getCertaintyClass,
         translateConcept,
     } from '@/helpers/helpers.js';
 
@@ -423,6 +412,7 @@
     import SystemSeparator from '@/components/attribute/SystemSeparator.vue';
     import DefaultAttr from '@/components/attribute/Default.vue';
     import ModerationPanel from '@/components/moderation/Panel.vue';
+    import ValidityIndicator from './forms/indicators/ValidityIndicator.vue';
 
     export default {
         components: {
@@ -452,6 +442,7 @@
             'system-separator-attribute': SystemSeparator,
             'default-attribute': DefaultAttr,
             'attribute-moderation-panel': ModerationPanel,
+            'validity-indicator': ValidityIndicator,
         },
         props: {
             classes: {
@@ -778,22 +769,18 @@
             const hasEmitter = which => {
                 return !!attrs[which];
             };
-            const hasCertainty = attribute => {
-                const c = state.attributeValues[attribute.id].certainty;
-                return c || c === 0 || c === null;
+
+            const certainty = attribute => {
+                return state.attributeValues?.[attribute.id]?.certainty;
             };
-            const isUnsetCertainty = attribute => {
-                return state.attributeValues[attribute.id].certainty === null;
-            };
+
             const hasComment = attribute => {
                 return state.attributeValues[attribute.id].comments_count > 0;
             };
             const hasBookmarks = attribute => {
                 return metadataAddon.value && metadataAddon.value(attribute.thesaurus_url);
             };
-            const hasAny = attribute => {
-                return hasCertainty(attribute) || hasComment(attribute) || hasBookmarks(attribute);
-            };
+
             const handleLabelClick = (e, attrType) => {
                 if(attrType == 'boolean') {
                     e.preventDefault();
@@ -884,9 +871,9 @@
             return {
                 t,
                 // HELPERS
-                getCertaintyClass,
                 translateConcept,
                 // LOCAL
+                certainty,
                 handleSelectionUpdate,
                 clFromMetadata,
                 attributeClasses,
@@ -914,11 +901,8 @@
                 onDeleteHandler,
                 onMetadataHandler,
                 hasEmitter,
-                hasCertainty,
-                isUnsetCertainty,
                 hasComment,
                 hasBookmarks,
-                hasAny,
                 handleLabelClick,
                 convertEntityValue,
                 // STATE
