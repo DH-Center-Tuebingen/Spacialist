@@ -186,13 +186,15 @@
                                 @click.prevent="toggleReplies(comment)"
                             >
                                 <div v-show="state.repliesOpen[comment.id]">
-                                    <!-- eslint-disable-next-line vue/no-v-html -->
-                                    <span v-html="t('global.comments.hide_reply', comment.replies_count, {cnt: comment.replies_count})" />
+                                    <span>
+                                        {{ t('global.comments.hide_reply', comment.replies_count, {cnt: comment.replies_count}) }}
+                                    </span>
                                     <i class="fas fa-fw fa-caret-up" />
                                 </div>
                                 <div v-show="!state.repliesOpen[comment.id]">
-                                    <!-- eslint-disable-next-line vue/no-v-html -->
-                                    <span v-html="t('global.comments.show_reply', comment.replies_count, {cnt: comment.replies_count})" />
+                                    <span>
+                                        {{ t('global.comments.show_reply', comment.replies_count, {cnt: comment.replies_count}) }}
+                                    </span>
                                     <i class="fas fa-fw fa-caret-down" />
                                 </div>
                             </a>
@@ -299,7 +301,7 @@
                     <button
                         type="submit"
                         class="btn btn-outline-success"
-                        :disabled="disabled"
+                        :disabled="!state.commentValid"
                     >
                         <i class="fas fa-fw fa-save" />
                         {{ t('global.comments.submit') }}
@@ -452,6 +454,8 @@
                 },
                 composedMessage: '',
                 currentUserId: userId(),
+                hasMetadata: computed(_ => !!metadata.value && Object.keys(metadata.value).length > 0),
+                commentValid: computed(_ => !disabled.value && (!!state.composedMessage || state.hasMetadata)),
                 commentsHidden: computed(_ => state.hideComments || !state.hasComments),
                 displayHideButton: computed(_ => hideButton.value && state.hasComments),
                 hasComments: computed(_ => comments.value.length > 0),
@@ -508,7 +512,7 @@
             };
             const postComment = _ => {
                 // comment needs at least changed metadata OR a message
-                if(disabled.value || (!state.composedMessage && !metadata.value)) return;
+                if(!state.commentValid) return;
 
                 const replyTo = state.replyTo.comment_id || null;
                 postCommentApi(state.composedMessage, resource.value, replyTo, metadata.value, postUrl.value).then(data => {
@@ -622,5 +626,5 @@
                 state,
             };
         },
-    }
+    };
 </script>

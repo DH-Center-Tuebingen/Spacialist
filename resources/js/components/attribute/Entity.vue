@@ -1,6 +1,6 @@
 <template>
     <simple-search
-        :endpoint="searchEntity"
+        :endpoint="searchWrapper"
         :key-text="'name'"
         :chain="'ancestors'"
         :mode="state.mode"
@@ -10,7 +10,7 @@
     />
     <router-link
         v-if="!hideLink && !multiple && v.value"
-        :to="{name: 'entitydetail', params: {id: v.fieldValue.id}, query: state.query}" 
+        :to="{name: 'entitydetail', params: {id: v.fieldValue.id}, query: state.query}"
         class="btn btn-outline-secondary btn-sm mt-2"
     >
         {{ t('main.entity.attributes.entity.go_to', {name: v.fieldValue.name}) }}
@@ -35,10 +35,10 @@
 
     import * as yup from 'yup';
 
-    import router from '@/bootstrap/router.js';
+    import router from '%router';
 
     import {
-        searchEntity,
+        searchEntityInTypes,
     } from '@/api.js';
 
     export default {
@@ -66,6 +66,11 @@
                 type: Object,
                 required: true,
             },
+            searchIn: {
+                type: Array,
+                required: false,
+                default: _ => [],
+            },
         },
         emits: ['change'],
         setup(props, context) {
@@ -77,6 +82,7 @@
                 disabled,
                 hideLink,
                 value,
+                searchIn,
             } = toRefs(props);
             // FETCH
 
@@ -92,7 +98,7 @@
                     if(multiple.value) {
                         data = entity.values;
                     } else {
-                        data = {};
+                        data = null;
                     }
                 } else if(added) {
                     if(multiple.value) {
@@ -124,6 +130,7 @@
                     value: v.fieldValue,
                 });
             };
+            const searchWrapper = query => searchEntityInTypes(query, searchIn.value || []);
 
             // DATA
             const {
@@ -131,8 +138,8 @@
                 value: fieldValue,
                 meta,
                 resetField,
-            } = useField(`entity_${name.value}`, yup.mixed(), {
-                initialValue: value.value || (multiple.value ? [] : {}),
+            } = useField(`entity_${name.value}`, yup.mixed().nullable(), {
+                initialValue: value.value || (multiple.value ? [] : null),
             });
             const state = reactive({
                 query: computed(_ => route.query),
@@ -156,11 +163,10 @@
                 }),
             });
 
-
             watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
-            watch(_ => [v.meta.dirty, v.meta.valid], ([newDirty, newValid], [oldDirty, oldValid]) => {
+            watch(_ => v.value, (newValue, oldValue) => {
                 // only emit @change event if field is validated (required because Entity.vue components)
                 // trigger this watcher several times even if another component is updated/validated
                 if(!v.meta.validated) return;
@@ -175,17 +181,17 @@
             return {
                 t,
                 // HELPERS
-                searchEntity,
                 // LOCAL
                 entitySelected,
                 entryClicked,
                 resetFieldState,
                 undirtyField,
+                searchWrapper,
                 // PROPS
                 // STATE
                 state,
                 v,
-            }
+            };
         },
-    }
+    };
 </script>

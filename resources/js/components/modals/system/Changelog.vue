@@ -25,7 +25,7 @@
             <div class="modal-body overflow-hidden d-flex flex-row">
                 <div class="rounded-4 ps-4 pe-0 py-3 bg-primary bg-opacity-10 overflow-hidden col d-flex flex-row">
                     <md-viewer
-                        class="font-monospace col scroll-y-auto pe-4"
+                        class="font-monospace col overflow-y-auto pe-4"
                         :source="plugin.changelog"
                     />
                 </div>
@@ -68,7 +68,7 @@
             // FUNCTIONS
             const closeModal = _ => {
                 context.emit('closing', false);
-            }
+            };
 
             // DATA
             const state = reactive({
@@ -82,7 +82,7 @@
                 closeModal,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

@@ -17,23 +17,32 @@ import '@fontsource/source-code-pro/500.css';
 // Font Awesome
 import { library, dom, findIconDefinition } from '@fortawesome/fontawesome-svg-core';
 import {
-    faFacebookSquare,
+    faFacebook,
     faGithub,
     faHtml5,
     faLaravel,
+    faMarkdown,
     faOrcid,
     faVuejs
 } from '@fortawesome/free-brands-svg-icons';
 import {
     faCircle as faCircleReg,
     faClipboard as faClipboardReg,
-    faQuestionCircle,
+    faKeyboard,
     faLaugh,
+    faQuestionCircle,
+    faRectangleList,
     faSadCry,
     faSquare,
     faSquareCheck,
 } from '@fortawesome/free-regular-svg-icons';
 import {
+    fa1,
+    fa2,
+    fa3,
+    fa4,
+    fa5,
+    fa6,
     faAdjust,
     faAlignLeft,
     faAlignCenter,
@@ -45,6 +54,8 @@ import {
     faAngleRight,
     faAngleUp,
     faArrowTurnUp,
+    faArrowUpRightFromSquare,
+    faAsterisk,
     faBan,
     faBell,
     faBinoculars,
@@ -59,6 +70,7 @@ import {
     faCaretLeft,
     faCaretRight,
     faCaretUp,
+    faChalkboardUser,
     faChartBar,
     faChartPie,
     faCheck,
@@ -79,6 +91,7 @@ import {
     faCopyright,
     faCubes,
     faDatabase,
+    faDiagramNext,
     faDotCircle,
     faDownload,
     faDrawPolygon,
@@ -119,6 +132,7 @@ import {
     faHouse,
     faI,
     faIdBadge,
+    faIdCardClip,
     faImage,
     faIndent,
     faInfo,
@@ -144,10 +158,14 @@ import {
     faMinus,
     faMobileAlt,
     faMonument,
+    faCircleNotch,
+    faCirclePlus,
+    faCircleArrowUp,
     faO,
     faOutdent,
     faPalette,
     faPaperPlane,
+    faParagraph,
     faPaste,
     faPause,
     faPaw,
@@ -166,6 +184,7 @@ import {
     faRulerCombined,
     faS,
     faSave,
+    faSchool,
     faSearch,
     faSearchPlus,
     faShieldAlt,
@@ -210,6 +229,7 @@ import {
     faUsers,
     faUserShield,
     faUsersBetweenLines,
+    faUserTag,
     faUserTimes,
     faVolumeMute,
     faVolumeUp,
@@ -217,7 +237,13 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
-    faFacebookSquare,
+    fa1,
+    fa2,
+    fa3,
+    fa4,
+    fa5,
+    fa6,
+    faFacebook,
     faGithub,
     faHtml5,
     faLaravel,
@@ -236,6 +262,8 @@ library.add(
     faAngleRight,
     faAngleUp,
     faArrowTurnUp,
+    faArrowUpRightFromSquare,
+    faAsterisk,
     faBan,
     faBell,
     faBinoculars,
@@ -250,6 +278,7 @@ library.add(
     faCaretLeft,
     faCaretRight,
     faCaretUp,
+    faChalkboardUser,
     faChartBar,
     faChartPie,
     faCheck,
@@ -271,6 +300,7 @@ library.add(
     faCopyright,
     faCubes,
     faDatabase,
+    faDiagramNext,
     faDotCircle,
     faDownload,
     faDrawPolygon,
@@ -311,11 +341,13 @@ library.add(
     faHouse,
     faI,
     faIdBadge,
+    faIdCardClip,
     faImage,
     faIndent,
     faInfo,
     faInfoCircle,
     faItalic,
+    faKeyboard,
     faLaugh,
     faLayerGroup,
     faLightbulb,
@@ -331,16 +363,21 @@ library.add(
     faLongArrowAltUp,
     faMagic,
     faMap,
+    faMarkdown,
     faMapMarkedAlt,
     faMapMarkerAlt,
     faMicrochip,
     faMinus,
     faMobileAlt,
     faMonument,
+    faCircleNotch,
+    faCirclePlus,
+    faCircleArrowUp,
     faO,
     faOutdent,
     faPalette,
     faPaperPlane,
+    faParagraph,
     faPaste,
     faPause,
     faPaw,
@@ -350,6 +387,7 @@ library.add(
     faPuzzlePiece,
     faQuestion,
     faQuoteRight,
+    faRectangleList,
     faRedo,
     faRedoAlt,
     faRepeat,
@@ -360,6 +398,7 @@ library.add(
     faS,
     faSadCry,
     faSave,
+    faSchool,
     faSearch,
     faSearchPlus,
     faShieldAlt,
@@ -406,11 +445,12 @@ library.add(
     faUsers,
     faUserShield,
     faUsersBetweenLines,
+    faUserTag,
     faUserTimes,
     faVolumeMute,
     faVolumeUp,
     faWindowMaximize,
-)
+);
 dom.watch();
 
 export const iconList = fw => {
@@ -422,7 +462,7 @@ export const iconList = fw => {
             const icon = set[l];
             const iconCode = icon[3];
             const uniqueCode = `${k}_${iconCode}`;
-            const def = findIconDefinition({prefix: k, iconName: l});
+            const def = findIconDefinition({ prefix: k, iconName: l });
             if(!addedCodes[uniqueCode]) {
                 addedCodes[uniqueCode] = true;
                 let str = `${k} fa-${def.iconName}`;

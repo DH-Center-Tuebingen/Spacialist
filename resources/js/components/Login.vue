@@ -15,7 +15,8 @@
                 <h6 class="card-subtitle mb-2 text-muted">
                     {{ t('global.login_subtitle') }}
                 </h6>
-                <div class="card-text" /><form @submit.prevent="login">
+                <div class="card-text" />
+                <form @submit.prevent="login">
                     <div class="mb-2">
                         <label
                             for="email"
@@ -89,6 +90,7 @@
                             <button
                                 type="submit"
                                 class="btn btn-primary"
+                                :disabled="state.submitting"
                             >
                                 {{ t('global.login') }}
                             </button>
@@ -102,100 +104,107 @@
 
 
 <script>
-    import {
-        reactive,
-        onMounted,
-    } from 'vue';
+        import {
+            reactive,
+            onMounted,
+        } from 'vue';
 
-    import { useI18n } from 'vue-i18n';
-    import { useRoute } from 'vue-router';
-    import auth from '@/bootstrap/auth.js';
-    import router from '@/bootstrap/router.js';
+        import { useI18n } from 'vue-i18n';
+        import { useRoute } from 'vue-router';
+        import auth from '@/bootstrap/auth.js';
+        import router from '%router';
 
-    import {
-        initApp,
-        getErrorMessages,
-        getValidClass,
-        getUser,
-    } from '@/helpers/helpers.js';
+        import {
+            initApp,
+            getErrorMessages,
+            getValidClass,
+            getUser,
+        } from '@/helpers/helpers.js';
 
-    import {
-        showConfirmPassword,
-    } from '@/helpers/modal.js';
+        import {
+            showConfirmPassword,
+        } from '@/helpers/modal.js';
 
-    export default {
-        setup() {
-            const { t, locale } = useI18n();
-            // DATA
-            const state = reactive({
-                user: {},
-                redirect: {
-                    name: 'home'
-                },
-                error: {},
-            });
+        export default {
+            setup() {
+                const { t, locale } = useI18n();
+                // DATA
+                const state = reactive({
+                    user: {},
+                    redirect: {
+                        name: 'home'
+                    },
+                    submitting: false,
+                    error: {},
+                });
 
-            // FUNCTIONS
-            const login = _ => {
-                let data = {
-                    password: state.user.password
-                };
-                // dirty check if email field should be treated
-                // as actual email address or nickname
-                if(state.user.email.includes('@')) {
-                    data.email = state.user.email;
-                } else {
-                    data.nickname = state.user.email;
-                }
-                auth.login({
-                    data: data,
-                    staySignedIn: state.user.remember,
-                    redirect: state.redirect,
-                    fetchUser: true
-                })
-                .then(_ => initApp(locale))
-                .catch(e => {
-                    state.error = getErrorMessages(e);
-                    return Promise.reject();
-                })
-                .then(_ => {
+                // FUNCTIONS
+                const login = _ => {
+                    state.submitting = true;
                     state.error = {};
-                    const currUser = getUser();
-                    if(currUser.login_attempts > 0 || currUser.login_attempts === 0) {
-                        showConfirmPassword(currUser.id);
+                    let data = {
+                        password: state.user.password
+                    };
+                    // dirty check if email field should be treated
+                    // as actual email address or nickname
+                    if(state.user.email.includes('@')) {
+                        data.email = state.user.email;
+                    } else {
+                        data.nickname = state.user.email;
+                    }
+                    auth.login({
+                        data: data,
+                        staySignedIn: state.user.remember,
+                        redirect: state.redirect,
+                        fetchUser: true
+                    })
+                    .then(_ => {
+                        state.submitting = false;
+                        return initApp(locale);
+                    })
+                    .catch(e => {
+                        state.submitting = false;
+                        state.error = getErrorMessages(e);
+                        return Promise.reject();
+                    })
+                    .then(_ => {
+                        state.error = {};
+                        const currUser = getUser();
+                        if(currUser.login_attempts > 0 || currUser.login_attempts === 0) {
+                            showConfirmPassword(currUser.id);
+                        }
+                    });
+                };
+
+                // ON MOUNTED
+                onMounted(_ => {
+                    if(auth.check()) {
+                        router.push({
+                            name: 'home'
+                        });
+                    }
+                    const lastRoute = auth.redirect() ? auth.redirect().from : undefined;
+                    const currentRoute = useRoute();
+                    if(lastRoute && lastRoute.name != 'login') {
+                        state.redirect = {
+                            name: lastRoute.name,
+                            params: lastRoute.params,
+                            query: lastRoute.query
+                        };
+                    } else if(currentRoute.query && currentRoute.query.redirect) {
+                        state.redirect = {
+                            path: currentRoute.query.redirect
+                        };
                     }
                 });
-            };
 
-            // ON MOUNTED
-            onMounted(_ => {
-                if(auth.check()) {
-                    router.push({
-                        name: 'home'
-                    });
-                }
-                const lastRoute = auth.redirect() ? auth.redirect().from : undefined;
-                const currentRoute = useRoute();
-                if(lastRoute && lastRoute.name != 'login') {
-                    state.redirect = {
-                        name: lastRoute.name,
-                        params: lastRoute.params,
-                        query: lastRoute.query
-                    };
-                } else if(currentRoute.query && currentRoute.query.redirect) {
-                    state.redirect = {
-                        path: currentRoute.query.redirect
-                    };
-                }
-            });
-
-            // RETURN
-            return {
-                t,
-                state,
-                login,
-                getValidClass,
-            };
-        },
-    }
+                // RETURN
+                return {
+                    t,
+                    state,
+                    login,
+                    getValidClass,
+                };
+            },
+        }
 </script>

@@ -91,7 +91,7 @@
                     <div class="text-end">
                         <button
                             type="button"
-                            class="btn btn-sm btn-success"
+                            class="btn btn-sm btn-outline-success"
                             :disabled="!state.notifications.length"
                             @click="markListAsRead(state.notifications)"
                         >
@@ -100,7 +100,7 @@
                         </button>
                         <button
                             type="button"
-                            class="btn btn-sm btn-danger ms-1"
+                            class="btn btn-sm btn-outline-danger ms-1"
                             :disabled="!state.notifications.length"
                             @click="deleteAll(state.notifications)"
                         >
@@ -108,7 +108,7 @@
                             {{ t('global.notifications.delete_all') }}
                         </button>
                     </div>
-                    <div class="scroll-y-auto mt-2">
+                    <div class="overflow-y-auto mt-2">
                         <notification-body
                             v-for="(n, idx) in state.notifications"
                             :key="`${n.id}_${idx}`"
@@ -138,7 +138,7 @@
                     <div class="text-end">
                         <button
                             type="button"
-                            class="btn btn-sm btn-success"
+                            class="btn btn-sm btn-outline-success"
                             :disabled="!state.unreadNotifications.length"
                             @click="markListAsRead(state.unreadNotifications)"
                         >
@@ -147,7 +147,7 @@
                         </button>
                         <button
                             type="button"
-                            class="btn btn-sm btn-danger ms-1"
+                            class="btn btn-sm btn-outline-danger ms-1"
                             :disabled="!state.unreadNotifications.length"
                             @click="deleteAll(state.unreadNotifications)"
                         >
@@ -155,7 +155,7 @@
                             {{ t('global.notifications.delete_all') }}
                         </button>
                     </div>
-                    <div class="scroll-y-auto mt-2">
+                    <div class="overflow-y-auto mt-2">
                         <notification-body
                             v-for="(n, idx) in state.unreadNotifications"
                             :key="`${n.id}_${idx}`"
@@ -185,7 +185,7 @@
                     <div class="text-end">
                         <button
                             type="button"
-                            class="btn btn-sm btn-danger"
+                            class="btn btn-sm btn-outline-danger"
                             :disabled="!state.readNotifications.length"
                             @click="deleteAll(state.readNotifications)"
                         >
@@ -193,7 +193,7 @@
                             {{ t('global.notifications.delete_all') }}
                         </button>
                     </div>
-                    <div class="scroll-y-auto mt-2">
+                    <div class="overflow-y-auto mt-2">
                         <notification-body
                             v-for="(n, idx) in state.readNotifications"
                             :key="`${n.id}_${idx}`"
@@ -223,7 +223,7 @@
                     <div class="text-end">
                         <button
                             type="button"
-                            class="btn btn-sm btn-success"
+                            class="btn btn-sm btn-outline-success"
                             :disabled="!state.systemNotifications.length"
                             @click="markListAsRead(state.systemNotifications)"
                         >
@@ -231,7 +231,7 @@
                             {{ t('global.notifications.mark_all_as_read') }}
                         </button>
                     </div>
-                    <div class="scroll-y-auto mt-2">
+                    <div class="overflow-y-auto mt-2">
                         <notification-body
                             v-for="(n, idx) in state.systemNotifications"
                             :key="`${n.id}_${idx}`"
@@ -317,5 +317,5 @@
                 state,
             };
         },
-    }
+    };
 </script>

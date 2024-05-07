@@ -22,11 +22,13 @@
                 type="text"
                 class="form-control"
                 :disabled="disabled"
+                @keydown.enter="addListEntry()"
             >
             <button
                 v-if="!disabled"
                 type="button"
                 class="btn btn-outline-success"
+                :disabled="!state.valid"
                 @click="addListEntry()"
             >
                 <i class="fas fa-fw fa-plus" />
@@ -57,6 +59,7 @@
 
 <script>
     import {
+        computed,
         reactive,
         toRefs,
         watch,
@@ -93,26 +96,35 @@
 
             // FUNCTIONS
             const addListEntry = _ => {
+                if(!state.valid) return;
                 v.value.push(state.input);
                 v.meta.dirty = true;
                 state.input = '';
+                v.meta.validated = true;
             };
             const removeListEntry = index => {
                 v.value.splice(index, 1);
                 v.meta.dirty = true;
+                v.meta.validated = true;
             };
             const toggleList = _ => {
                 state.expanded = !state.expanded;
             };
             const resetFieldState = _ => {
-                v.value = state.initialValue.slice();
+                // make sure to keep original array and only re-push values
+                v.value.length = 0;
+                v.value.push(...state.initialValue.slice());
+
                 v.meta.dirty = false;
                 v.meta.valid = true;
+                v.meta.validated = false;
             };
             const undirtyField = _ => {
-                state.initialValue = entries.value.slice();
+                state.initialValue = v.value.slice();
+
                 v.meta.dirty = false;
                 v.meta.valid = true;
+                v.meta.validated = false;
             };
 
             // DATA
@@ -120,16 +132,18 @@
                 input: '',
                 initialValue: entries.value.slice(),
                 expanded: false,
+                valid: computed(_ => !!state.input),
             });
             const v = reactive({
                 meta:{
                     dirty: false,
                     valid: true,
+                    validated: false,
                 },
                 value: entries.value.slice(),
             });
 
-            watch(_ => [v.meta.dirty, v.meta.valid], ([newDirty, newValid], [oldDirty, oldValid]) => {
+            watch(v.value, (newValue, oldValue) => {
                 // only emit @change event if field is validated (required because Entity.vue components)
                 // trigger this watcher several times even if another component is updated/validated
                 if(!v.meta.validated) return;

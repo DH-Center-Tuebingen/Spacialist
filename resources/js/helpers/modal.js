@@ -1,5 +1,5 @@
 import store from '@/bootstrap/store.js';
-import router from '@/bootstrap/router.js';
+import router from '%router';
 
 import { addToast } from '@/plugins/toast.js';
 
@@ -113,7 +113,7 @@ export function showDiscard(target, resetData, onBeforeConfirm) {
                 pushRoute();
             },
             onSaveConfirm(e) {
-                if (!!onBeforeConfirm) {
+                if(!!onBeforeConfirm) {
                     onBeforeConfirm().then(_ => {
                         modal.destroy();
                         pushRoute();
@@ -482,7 +482,7 @@ export function showDeleteRole(role, onDeleted) {
             role: role,
             onConfirm(e) {
                 if(!can('users_roles_delete')) return;
-    
+
                 deleteRole(role.id).then(_ => {
                     if(!!onDeleted) {
                         onDeleted();
@@ -805,7 +805,7 @@ export function showDeleteEntityType(entityType, metadata, onDeleted) {
 
 export function showEditAttribute(aid, etid, metadata) {
     const isSystem = metadata && metadata.is_system;
-    const component = isSystem ? EditSystemAttribute : EditAttribute
+    const component = isSystem ? EditSystemAttribute : EditAttribute;
     const uid = `EditAttribute-${getTs()}`;
     const modal = useModal({
         component: component,
@@ -821,6 +821,7 @@ export function showEditAttribute(aid, etid, metadata) {
             async onConfirm(e) {
                 if(isSystem) {
                     await updateAttributeMetadata(etid, aid, metadata.pivot.id, e);
+                    modal.destroy();
                 } else {
                     if(e.metadata) {
                         await updateAttributeMetadata(etid, aid, metadata.pivot.id, e.metadata);

@@ -1,10 +1,11 @@
 <template>
     <MilkdownProvider>
         <MilkdownEditor
-            :ref="el => editorRef = el"
+            ref="editorRef"
             :class="classes"
             :data="data"
             :readonly="readonly"
+            @update="emitUpdate"
         />
     </MilkdownProvider>
 </template>
@@ -12,11 +13,11 @@
 <script>
     import {
         ref,
-        toRefs,
+        watch,
     } from 'vue';
     import MilkdownEditor from './Main.vue';
     import { MilkdownProvider } from '@milkdown/vue';
-    
+
     export default {
         name: 'MilkdownEditorWrapper',
         components: {
@@ -31,7 +32,7 @@
             classes: {
                 required: false,
                 type: String,
-                default: 'milkdown-wrapper h-100',
+                default: 'milkdown-wrapper p-3 mt-1 h-100',
             },
             readonly: {
                 required: false,
@@ -39,25 +40,27 @@
                 default: false,
             },
         },
-        setup(props) {
-            const {
-                data,
-                classes,
-                readonly,
-            } = toRefs(props);
-
+        emits: ['update'],
+        setup(props, context) {
             const getEditorMarkdown = _ => {
                 return editorRef.value.getMarkdown();
             };
 
+            const emitUpdate = data => {
+                context.emit('update', data);
+            };
+
             const editorRef = ref({});
+            watch(_ => props.data, (newData, oldData) => {
+                if(editorRef.value && editorRef.value.setMarkdown) {
+                    editorRef.value.setMarkdown(newData);
+                }
+            });
 
             return {
-                // HELPERS
-                // LOCAL
-                getEditorMarkdown,
-                // STATE
                 editorRef,
+                getEditorMarkdown,
+                emitUpdate,
             };
         },
     };

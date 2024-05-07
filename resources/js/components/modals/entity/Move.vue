@@ -57,6 +57,7 @@
                                 :endpoint="searchEntity"
                                 :filter-fn="filterEntityResults"
                                 :key-text="'name'"
+                                :chain="'ancestors'"
                                 @selected="e => entitySelected(e)"
                             />
                         </div>

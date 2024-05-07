@@ -8,10 +8,8 @@
         value-type="date"
         :name="name"
         :disabled="disabled"
-        :disabled-date="(date) => date > new Date()"
-        :max-date="new Date()"
         :show-week-number="true"
-        @input="handleInput"
+        @change="handleInput"
     >
         <template #icon-calendar>
             <i class="fas fa-fw fa-calendar-alt" />
@@ -61,18 +59,23 @@
             // FUNCTIONS
             const resetFieldState = _ => {
                 v.resetField({
-                    value: new Date(value.value)
+                    value: value.value ? new Date(value.value) : null,
                 });
             };
             const undirtyField = _ => {
+                // v.value is already a date or null
                 v.resetField({
-                    value: new Date(v.value),
+                    value: v.value,
                 });
             };
             const handleInput = value => {
-                // add timezone offset before handle change
-                const correctValue = new Date(value.getTime() - (value.getTimezoneOffset()*60*1000));
-                v.handleChange(correctValue);
+                if(!value) {
+                    v.handleChange(value);
+                } else {
+                    // add timezone offset before handle change
+                    const correctValue = new Date(value.getTime() - (value.getTimezoneOffset()*60*1000));
+                    v.handleChange(correctValue);
+                }
             }
 
             // DATA
@@ -81,8 +84,8 @@
                 value: fieldValue,
                 meta,
                 resetField,
-            } = useField(`date_${name.value}`, yup.date(), {
-                initialValue: new Date(value.value),
+            } = useField(`date_${name.value}`, yup.date().nullable(), {
+                initialValue: value.value ? new Date(value.value) : null,
             });
             const state = reactive({
 
@@ -98,7 +101,7 @@
             watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
-            watch(_ => [v.meta.dirty, v.meta.valid], ([newDirty, newValid], [oldDirty, oldValid]) => {
+            watch(_ => v.value, (newValue, oldValue) => {
                 // only emit @change event if field is validated (required because Entity.vue components)
                 // trigger this watcher several times even if another component is updated/validated
                 if(!v.meta.validated) return;
@@ -119,7 +122,7 @@
                 // STATE
                 state,
                 v,
-            }
+            };
         },
-    }
+    };
 </script>

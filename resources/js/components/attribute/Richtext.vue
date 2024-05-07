@@ -1,24 +1,40 @@
 <template>
-    <div class="position-relative px-3 py-1 bg-secondary bg-opacity-10 rounded">
+    <div
+        class="position-relative"
+        @mouseenter="state.hovered = true"
+        @mouseleave="state.hovered = false"
+    >
         <md-viewer
             v-if="current"
             :id="name"
-            :classes="'mt-0 bg-none h-100'"
+            :classes="state.classes"
             :source="current"
         />
         <div
             v-else
+            class="text-secondary fst-italic fw-medium opacity-50 user-select-none"
+            :class="state.classes"
         >
-            No content yet.
+            {{ t('global.missing.content') }}
         </div>
-        <a
-            v-if="!disabled"
-            class="position-absolute top-0 end-0 text-reset"
-            href="#"
-            @click.prevent="openMdEditor()"
+        <div
+            class="position-absolute top-0 end-0 h-100 pe-none"
+            :class="state.onHoverBtnClasses"
         >
-            <i class="fas fa-fw fa-edit" />
-        </a>
+            <div class="position-sticky top-0 bg-light pe-auto m-2 rounded">
+                <button
+                    v-if="!disabled"
+                    class="px-2 py-1 btn btn-outline-secondary btn-sm"
+                    href="#"
+                    @click.prevent="openMdEditor()"
+                >
+                    <i class="fas fa-fw fa-edit" />
+                    <span class="ms-2">
+                        {{ t('global.edit') }}
+                    </span>
+                </button>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -34,6 +50,7 @@
     import {
         showMarkdownEditor,
     } from '@/helpers/modal.js';
+    import { useI18n } from 'vue-i18n';
 
     export default {
         props: {
@@ -53,29 +70,10 @@
         },
         emits: ['change'],
         setup(props, context) {
+            const { t } = useI18n();
             const {
                 value: initial,
             } = toRefs(props);
-
-            const current = ref(initial.value || '');
-            const meta = reactive({
-                dirty: false,
-                valid: true,
-            });
-
-            /**
-             * v is required as the attr-list fetches 
-             * the values of the attributes via every
-             * attribute's v.value.
-             */
-            const v = computed(_ => {
-                return {
-                    value: current.value,
-                    meta: {
-                        ...meta
-                    }
-                };
-            });
 
             const handleInput = text => {
                 current.value = text || '';
@@ -109,18 +107,49 @@
                 });
             };
 
+            const state = reactive({
+                classes: 'mt-0 bg-none h-100 form-control px-4 py-3',
+                hovered: false,
+                onHoverBtnClasses: computed(_ => {
+                    if(state.hovered) {
+                        return '';
+                    } else {
+                        return 'd-none';
+                    }
+                }),
+            });
+            const current = ref(initial.value || '');
+            const meta = reactive({
+                dirty: false,
+                valid: true,
+            });
 
+            /**
+             * v is required as the attr-list fetches 
+             * the values of the attributes via every
+             * attribute's v.value.
+             */
+            const v = computed(_ => {
+                return {
+                    value: current.value,
+                    meta: {
+                        ...meta
+                    }
+                };
+            });
 
             // RETURN
             return {
                 // FUNCTIONS
+                t,
                 resetFieldState,
                 undirtyField,
                 openMdEditor,
                 // STATE
                 current,
-                v
-            }
+                state,
+                v,
+            };
         },
     }
 </script>

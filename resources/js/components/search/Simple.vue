@@ -209,7 +209,7 @@
                 if(Object.keys(state.entry).length == 0 && Object.keys(option).length == 0) {
                     return;
                 }
-                let data = {}
+                let data = {};
                 if(option) {
                     if(mode.value == 'single') {
                         data = {
@@ -220,7 +220,7 @@
                         data = {
                             values: option,
                             added: true,
-                        }
+                        };
                     }
                 } else {
                     data.removed = true;

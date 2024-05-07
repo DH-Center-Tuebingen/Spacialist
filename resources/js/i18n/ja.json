@@ -451,7 +451,7 @@
             "info_issue": "もしこれがバグだと思うのなら、<a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues\" target=\"_blank\">github の課題追跡システム</a>で、すでに報告されていないか、<a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues?q=is:issue+is:closed\" target=\"_blank\"> 新しいバージョン</a>になっていないか見てください（現在のバージョンは設定から確認できます> <i class=\"fas fa-fw fa-info-circle\"></i>について）。もし、報告されておらず、閉じられている場合は、<a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues/new\" target=\"_blank\">新しい問題</a>を作成してください。",
             "occur": "エラーが発生しました",
             "headers": "ヘッダー",
-            "request_failed": "<code class=\"normal\">{method}</code>-エンドポイント<code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code>へのリクエストはステータスコード<span class=\"fw-medium\">{status}</span>で失敗しました。"
+            "request_failed": "<code class=\"fw-normal\">{method}</code>-エンドポイント<code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code>へのリクエストはステータスコード<span class=\"fw-medium\">{status}</span>で失敗しました。"
         },
         "search": "検索…",
         "search_no_results": "結果なし",
@@ -527,8 +527,8 @@
             "table": "テーブル",
             "sql": "SQL-クエリ",
             "serial": "シリアル(自動インクリメントID)",
-            "serial_info": "<i class=\"fas fa-lightbulb me-1\"></i><br />すべてのインスタンスはこの識別子を属性として共有する。カウンタとして<code class=\"normal\">%d</code>を追加する。<br /><span class=\"fw-medium mt-2\">例:</span><br /><code class=\"normal\">Fund_%d_Stein</code>は Fund_1_Stein, Fund_2_Stein, &hellip; を生成します。<br />固定幅（例えば002の場合2ではなく3）を追加するには、<code class=\"normal\">%03d</code>を使用することができます。",
-            "sql_info": "SQL-Queryで<code class=\"normal\">:entity_id</code>を使用すると、この属性が割り当てられているエンティティを参照することができます。",
+            "serial_info": "<i class=\"fas fa-lightbulb me-1\"></i><br />すべてのインスタンスはこの識別子を属性として共有する。カウンタとして<code class=\"fw-normal\">%d</code>を追加する。<br /><span class=\"fw-medium mt-2\">例:</span><br /><code class=\"fw-normal\">Fund_%d_Stein</code>は Fund_1_Stein, Fund_2_Stein, &hellip; を生成します。<br />固定幅（例えば002の場合2ではなく3）を追加するには、<code class=\"fw-normal\">%03d</code>を使用することができます。",
+            "sql_info": "SQL-Queryで<code class=\"fw-normal\">:entity_id</code>を使用すると、この属性が割り当てられているエンティティを参照することができます。",
             "iconclass": "アイコンクラス",
             "rism": "RISM"
         },
@@ -595,8 +595,8 @@
             "show": "コメントを表示する",
             "submit": "コメントを投稿する",
             "text_placeholder": "コメントを入力する",
-            "hide_reply": "返信を<span class=\"fw-bold\">一つ</span>隠す | <span class=\"fw-bold\">{cnt}</span>返信を隠す",
-            "show_reply": "返信を<span class=\"fw-bold\">一つ</span>件表示する | <span class=\"fw-bold\">{cnt}</span>返信を表示する",
+            "hide_reply": "返信を一つ隠す | {cnt}返信を隠す",
+            "show_reply": "返信を一つ件表示する | {cnt}返信を表示する",
             "fetching": "コメント取得中&hellip;",
             "fetching_failed": "コメントの取得に失敗しました！",
             "retry_failed": "再試行"

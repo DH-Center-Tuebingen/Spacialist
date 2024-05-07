@@ -10,6 +10,7 @@ import {
     fillEntityData,
     only,
     slugify,
+    sortConcepts,
     getIntersectedEntityAttributes,
     hasIntersectionWithEntityAttributes,
 } from '@/helpers/helpers.js';
@@ -64,6 +65,7 @@ export const store = createStore({
                     treeSelectionMode: false,
                     treeSelection: {},
                     treeSelectionTypeIds: [],
+                    cachedConceptSelections: {},
                     user: {},
                     users: [],
                     version: {},
@@ -75,7 +77,7 @@ export const store = createStore({
                         settings: [],
                     },
                     hasAnalysis: false,
-                }
+                };
             },
             mutations: {
                 setAppInitialized(state, data) {
@@ -90,13 +92,16 @@ export const store = createStore({
                 setAttributeSelection(state, data) {
                     if(data.nested) {
                         for(let k in data.selection) {
-                            state.attributeSelections[k] = data.selection[k];
+                            state.attributeSelections[k] = data.selection[k].sort(sortConcepts);
                         }
                     } else {
-                        state.attributeSelections[data.id] = data.selection;
+                        state.attributeSelections[data.id] = data.selection.sort(sortConcepts);
                     }
                 },
                 setAttributeSelections(state, data) {
+                    for(let k in data) {
+                        data[k].sort(sortConcepts);
+                    }
                     state.attributeSelections = data;
                 },
                 setBibliography(state, data) {
@@ -150,11 +155,20 @@ export const store = createStore({
                 },
                 updateEntityType(state, data) {
                     const entityType = state.entityTypes[data.id];
-                    entityType.updated_at = data.updated_at;
-                    entityType.thesaurus_url = data.thesaurus_url;
+                    const values = only(data, ['thesaurus_url', 'updated_at', 'is_root', 'sub_entity_types']);
+                    for(let k in values) {
+                        entityType[k] = values[k];
+                    }
                 },
                 moveEntity(state, data) {
                     const entity = state.entities[data.entity_id];
+                    const oldRank = entity.rank;
+                    const newRank = data.rank;
+                    const rankIdx = newRank - 1;
+                    const append = data.to_end;
+
+                    entity.rank = newRank;
+
                     let oldSiblings;
                     if(!!entity.root_entity_id) {
                         oldSiblings = state.entities[entity.root_entity_id].children;
@@ -164,39 +178,56 @@ export const store = createStore({
                     const idx = oldSiblings.findIndex(n => n.id == entity.id);
                     if(idx > -1) {
                         oldSiblings.splice(idx, 1);
-                    }
-                    if(!data.parent_id) {
-                        // Update children state of old parent
-                        if(!!entity.root_entity_id) {
-                            const oldParent = state.entities[entity.root_entity_id];
-                            oldParent.children_count--;
-                            if(oldParent.children_count == 0) {
-                                oldParent.state.openable = false;
-                                oldParent.state.opened = false;
+                        oldSiblings.map(s => {
+                            if(s.rank > oldRank) {
+                                s.rank--;
                             }
+                        });
+                    }
+
+                    // Update children state of old parent
+                    if(!!entity.root_entity_id) {
+                        const oldParent = state.entities[entity.root_entity_id];
+                        oldParent.children_count--;
+                        if(oldParent.children_count == 0) {
+                            oldParent.state.openable = false;
+                            oldParent.state.opened = false;
                         }
+                    }
+
+                    if(!data.parent_id) {
+                        // Set new (= unset) parent
                         entity.root_entity_id = null;
-                        state.tree.push(entity);
+                        if(append) {
+                            state.tree.push(entity);
+                        } else {
+                            state.tree.splice(rankIdx, 0, entity);
+                            state.tree.map(s => {
+                                if(s.rank >= newRank) {
+                                    s.rank++;
+                                }
+                            });
+                        }
                     } else {
                         // Update children state of new parent
                         const parent = state.entities[data.parent_id];
                         if(!!parent) {
                             if(parent.childrenLoaded) {
-                                parent.children.push(entity);
+                                if(append) {
+                                    parent.children.push(entity);
+                                } else {
+                                    parent.children.splice(rankIdx, 0, entity);
+                                    parent.children.map(s => {
+                                        if(s.rank >= newRank) {
+                                            s.rank++;
+                                        }
+                                    });
+                                }
                             }
                             parent.children_count++;
                             parent.state.openable = true;
                         }
-                        // Also update children state of old parent
-                        if(!!entity.root_entity_id) {
-                            const oldParent = state.entities[entity.root_entity_id];
-                            oldParent.children_count--;
-                            if(oldParent.children_count == 0) {
-                                oldParent.state.openable = false;
-                                oldParent.state.opened = false;
-                            }
-                        }
-                        // Set new parent after updating states
+                        // Set new parent
                         entity.root_entity_id = data.parent_id;
                     }
                 },
@@ -223,7 +254,26 @@ export const store = createStore({
                 updateEntityData(state, data) {
                     const entity = state.entities[data.eid];
                     for(let k in data.data) {
-                        entity.data[k].value = data.data[k];
+                        // when attribute value is set empty, delete whole attribute
+                        if(!data.data[k] && data.data[k] != false) {
+                            entity.data[k] = {};
+                            if(data.sync) {
+                                state.entity.data[k] = {};
+                            }
+                        } else {
+                            // if no id exists, this data is added
+                            if(!entity.data[k].id) {
+                                entity.data[k] = data.new_data[k];
+                                if(data.sync) {
+                                    state.entity.data[k] = data.new_data[k];
+                                }
+                            } else {
+                                entity.data[k].value = data.data[k];
+                                if(data.sync) {
+                                    state.entity.data[k].value = data.data[k];
+                                }
+                            }
+                        }
                     }
                 },
                 updateEntityDataModerations(state, data) {
@@ -477,6 +527,9 @@ export const store = createStore({
                         state.treeSelectionTypeIds = [];
                     }
                 },
+                setCachedConceptSelection(state, data) {
+                    state.cachedConceptSelections[data.id] = data.selection;
+                },
                 setPreferences(state, data) {
                     state.preferences = data;
                 },
@@ -623,7 +676,7 @@ export const store = createStore({
                     commit('setUsers', data);
                 },
                 sortTree({commit}, sort) {
-                    commit('sortTree', sort)
+                    commit('sortTree', sort);
                 },
                 addToTreeSelection({commit}, data) {
                     commit('addToTreeSelection', data);
@@ -639,6 +692,9 @@ export const store = createStore({
                 },
                 unsetTreeSelectionMode({commit}) {
                     commit('setTreeSelectionMode', false);
+                },
+                setCachedConceptSelection({commit}, data) {
+                    commit('setCachedConceptSelection', data);
                 },
                 setMainViewTab({commit}, data) {
                     commit('setMainViewTab', data);
@@ -734,7 +790,7 @@ export const store = createStore({
                     commit('updateEntityData', data);
                 },
                 updateEntityDataModerations({commit}, data) {
-                    commit("updateEntityDataModerations", data);
+                    commit('updateEntityDataModerations', data);
                 },
                 addEntityTypeAttribute({commit}, data) {
                     commit('addEntityTypeAttribute', data);
@@ -869,6 +925,8 @@ export const store = createStore({
                 treeSelectionCount: state => Object.keys(state.treeSelection).length,
                 treeSelectionTypeIds: state => state.treeSelectionTypeIds,
                 treeSelectionIntersection: state => getIntersectedEntityAttributes(state.treeSelectionTypeIds),
+                cachedConceptSelections: state => state.cachedConceptSelections,
+                cachedConceptSelection: state => id => state.cachedConceptSelections[id],
                 preferenceByKey: state => key => state.preferences[key],
                 preferences: state => state.preferences,
                 systemPreferences: state => state.systemPreferences,
