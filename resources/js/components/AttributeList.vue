@@ -94,7 +94,7 @@
                         </span>
                         <sup
                             v-if="hasEmitter('onMetadata')"
-                            class="clickable d-flex flex-row align-items-start ms-1"
+                            class="clickable d-flex flex-row align-items-start top-0"
                             @click="onMetadataHandler(element)"
                         >
                             <validity-indicator :state="certainty(element)" />
