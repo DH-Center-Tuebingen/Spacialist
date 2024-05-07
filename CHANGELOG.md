@@ -22,6 +22,7 @@ All notable changes to this project will be documented in this file.
 - Allow _Multiple Choice Dropdown_ in _Table_ attribute
 - Allow _Date Range_ in _Table_ attribute
 - Entities can now be updated using the _Data Importer_
+- Option to display attributes in _Data Model Editor_ in groups
 ### Fixed
 - Error in _Attribute List_ caused by _Entity (Multiple Choice)_ attribute
 - Attribute form Save/Reset handling due to newly introduced _Attribute Group Separator_
@@ -80,6 +81,7 @@ All notable changes to this project will be documented in this file.
 - Font size in dropdown menus
 - _About_ modal contributors
 - Data Importer: Now supports the Boolean attribute with the value 'x'
+- Move switch to show hidden attributes in _Data Model Editor_ to dropdown
 
 ## 0.9.14
 ### Added
