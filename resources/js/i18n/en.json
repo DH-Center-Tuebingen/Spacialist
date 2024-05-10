@@ -24,6 +24,7 @@
         "apply": "Apply",
         "move": "Move",
         "parse": "Parse",
+        "conflict": "Conflict",
         "file": "File",
         "remove_file": "Remove file",
         "no_file": "No file",
@@ -71,7 +72,7 @@
             "info_issue": "If you think this is a bug, please have a look at our <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues\" target=\"_blank\">issue tracker</a> on github to see if this has been already reported or <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues?q=is:issue+is:closed\" target=\"_blank\">closed</a> in a later version (Your current version can be found in Settings > <i class=\"fas fa-fw fa-info-circle\"></i> About Dialog). If it is neither reported nor closed, feel free to <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues/new\" target=\"_blank\">open a new issue</a>.",
             "occur": "Error occured",
             "headers": "Headers",
-            "request_failed": "<code class=\"normal\">{method}</code>-Request to endpoint <code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code> failed with status code <span class=\"fw-medium\">{status}</span>."
+            "request_failed": "<code class=\"fw-normal\">{method}</code>-Request to endpoint <code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code> failed with status code <span class=\"fw-medium\">{status}</span>."
         },
         "search": "Search…",
         "search_no_results": "No results",
@@ -88,6 +89,11 @@
         "preview_not_available": "No preview available",
         "note": "Note",
         "information": "Information",
+        "paginator": {
+            "count": "Count",
+            "of": "of",
+            "skip": "Skip"
+        },
         "tools": {
             "title": "Tools",
             "bibliography": "Bibliography",
@@ -148,9 +154,11 @@
             "entity": "Entity",
             "entity-mc": "Entity (Multiple Choice)",
             "userlist": "User list",
+            "url": "URL/Website",
             "epoch": "Time Period and Epoch",
             "timeperiod": "Time Period",
             "date": "Date",
+            "daterange": "Date Range",
             "dimension": "Dimensions (WxHxD)",
             "list": "List",
             "geography": "WKT (Well-Known-Binary)",
@@ -158,10 +166,13 @@
             "sql": "SQL-Query",
             "system-separator": "Group Separator",
             "serial": "Serial (Auto-incrementing ID)",
-            "serial_info": "<i class=\"fas fa-lightbulb me-1\"></i><br />All instances share this identifier as attribute. Add <code class=\"normal\">%d</code> as counter.<br /><span class=\"fw-medium mt-2\">Example:</span><br /><code class=\"normal\">Find_%d_Stone</code> would create Find_1_Stone, Find_2_Stone, &hellip;<br />To add a fixed width (e.g. 3 for 002 instead of 2), you can use <code class=\"normal\">%03d</code>.",
-            "sql_info": "You can use <code class=\"normal\">:entity_id</code> in your SQL-Query to reference the entity this attribute is assigned to.",
+            "serial_info": "<i class=\"fas fa-lightbulb me-1\"></i><br />All instances share this identifier as attribute. Add <code class=\"fw-normal\">%d</code> as counter.<br /><span class=\"fw-medium mt-2\">Example:</span><br /><code class=\"fw-normal\">Find_%d_Stone</code> would create Find_1_Stone, Find_2_Stone, &hellip;<br />To add a fixed width (e.g. 3 for 002 instead of 2), you can use <code class=\"fw-normal\">%03d</code>.",
+            "sql_info": "You can use <code class=\"fw-normal\">:entity_id</code> in your SQL-Query to reference the entity this attribute is assigned to.",
             "iconclass": "Iconclass",
-            "rism": "RISM"
+            "rism": "RISM",
+            "restrictions": {
+                "entity_type": "Restrict to following Entity Types"
+            }
         },
         "activity": "Activity",
         "action": "Action",
@@ -213,8 +224,13 @@
         "column": "Column | Columns",
         "add_column": "Add column",
         "geometry_type": "Geometry-Type",
-        "dependency": "Dependency",
-        "depends_on": "Depends on",
+        "dependency": {
+            "title": "Dependency",
+            "depends_on": {
+                "title": "Depends on",
+                "desc": "Visibility is based on another attribute (value)"
+            }
+        },
         "preference": "Preference | Preferences",
         "value": "Value",
         "allow_override": "Allow Override?",
@@ -298,12 +314,14 @@
         "csv": {
             "uploader": {
                 "title": "CSV-Uploader",
+                "settings_title": "CSV-Settings",
                 "delimiter": "Delimiter",
                 "delimiter_with_info": "Delimiter (',', ';', …)",
-                "has_header": "Has Header Row?",
+                "has_header": "Has Header Row",
                 "show_linenumbers": "Show Line numbers",
                 "nr_of_shown_rows": "Number of shown rows",
-                "nr_of_skipped_rows": "Number of skipped rows"
+                "nr_of_skipped_rows": "Number of skipped rows",
+                "eof": "End of File"
             },
             "picker": {
                 "title": "CSV-Picker"
@@ -316,7 +334,7 @@
             "toasts": {
                 "updated": {
                     "title": "Entity updated",
-                    "msg": "Data of {name} successfully updated."
+                    "msg": "Data of ‚{name}‘ successfully updated."
                 },
                 "deleted": {
                     "title": "Entity deleted",
@@ -408,6 +426,7 @@
                 "entity": {
                     "go_to": "Go to {name}"
                 },
+                "root_attribute_info": "The values of this attribute are driven by the value selected in the attribute ‚{name}‘",
                 "iconclass": {
                     "cite_info": "Infos from <cite title=\"Iconclass\"><a href=\"http://iconclass.org/{class}.json\" target=\"_blank\">http://iconclass.org/{class}.json</a></cite>",
                     "doesnt_exist": "This iconclass does not exist"
@@ -657,14 +676,15 @@
             },
             "build_info": "Built with <i class=\"fab fa-fw fa-laravel\"></i> & <i class=\"fab fa-fw fa-vuejs\"></i>!",
             "contributor": "Contributor | Contributors",
+            "former_contributor": "Former",
             "roles": {
                 "development": "Development",
                 "development_lead": "Development Lead",
+                "support": "Support",
                 "support_development": "Development Support",
                 "support_database": "Database Support",
                 "support_archaeology": "Archaeological Support",
-                "project_lead": "Project Lead",
-                "project_lead_former": "Former Project Lead"
+                "project_lead": "Project Lead"
             }
         },
         "bibliography": {
@@ -748,23 +768,50 @@
                 "techreport": "Techreport",
                 "unpublished": "Unpublished",
                 "validation": {
-                    "required": "@:main.bibliography.column.{col} is a required field",
-                    "required_one_of": "Either @:main.bibliography.column.{col} or @:main.bibliography.column.{ref} must be set"
+                    "required": "‘{field}’ is required",
+                    "required_if": "Required if ‘{col}’ is not set",
+                    "required_one_of": "Either ‘{eitherField}’ or ‘{orField}’ must be set"
                 }
             }
         },
         "importer": {
             "title": "Data-Importer",
+            "entity_settings": "Entity Settings",
+            "attribute_mapping": "Attribute Mapping",
+            "import_settings": "Import-Settings",
             "upload_csv_info": "Select a CSV file to import data.",
             "drop_csv_file": "Drop CSV file here",
+            "csv_file_error": "CSV file could not be read.",
             "selected_entity_type": "Entity-Type",
             "column_entity_name": "Entity Name-Column",
             "column_entity_parent": "Entity Parent-Column",
             "import_btn": "Start Import",
-            "no_missing_values": "No missing values for this attribute. You are all set!",
-            "missing_required_values": "{miss} out of 1 entry is empty! This option does not allow empty values. Please fix this. | {miss} out of {total} entries are empty! This option does not allow empty values. Please fix this.",
-            "missing_non_required_values": "{miss} out of 1 entry is empty! Filled values are not required for this attribute, so you can go on but may want to re-check. | {miss} out of {total} entries are empty! Filled values are not required for this attribute, so you can go on but may want to re-check.",
-            "success": "Import of 1 entry finished | Import of {cnt} entries finished"
+            "validate": "Validate",
+            "success": "Import of 1 entry finished | Import of {cnt} entries finished",
+            "validation": {
+                "title": "Validation",
+                "waiting": "Not validated yet.",
+                "mixed": "Some entities do already exist and will be updated, the remaining will be created!",
+                "create": "All items will be created as new entities.",
+                "update": "All entites do already exist and will be updated.",
+                "imported": "All items were imported successfully.",
+                "multiple_error": "Some values match multiple entities and can not be imported.",
+                "no_items": "There are no items in your import"
+            },
+            "indicator": {
+                "missing_value": "No value set",
+                "no_missing_values": "No missing values for this attribute. You are all set!",
+                "missing_required_values": "{miss} out of 1 entry is empty! This option does not allow empty values. Please fix this. | {miss} out of {total} entries are empty! This option does not allow empty values. Please fix this.",
+                "missing_non_required_values": "{miss} out of 1 entry is empty! Filled values are not required for this attribute, so you can go on but may want to re-check. | {miss} out of {total} entries are empty! Filled values are not required for this attribute, so you can go on but may want to re-check."
+            },
+            "info": {
+                "entity_settings_require_file": "No file uploaded yet.",
+                "entity_type_has_no_attributes": "No attributes found. Please select a proper entity type."
+            },
+            "error": {
+                "file_read": "File could not be read.",
+                "file_read_abort": "File reading aborted."
+            }
         },
         "map": {
             "init_error": "Several init-*-Attributes are provided. Only one is allowed.",
@@ -802,5 +849,9 @@
                 }
             }
         }
+    },
+    "keyboard": {
+        "tab": "Tab",
+        "space": "Spacebar"
     }
 }

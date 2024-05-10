@@ -24,6 +24,7 @@
         "create": "Anlegen",
         "move": "Verschieben",
         "parse": "Parsen",
+        "conflict": "Konflikt",
         "file": "Datei",
         "remove_file": "Datei entfernen",
         "no_file": "Keine Datei vorhanden",
@@ -71,7 +72,7 @@
             "info_issue": "Wenn du denkst, dass diese Fehlermeldung ein Bug ist, schaue in unserem <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues\" target=\"_blank\">Bugtracker</a> auf Github nach, ob der Fehler schon gemeldet wurde oder sogar bereits in einer aktuelleren Version <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues?q=is:issue+is:closed\" target=\"_blank\">geschlossen</a> wurde (Deine aktuelle Version findest du über Einstellungen > <i class=\"fas fa-fw fa-info-circle\"></i> Über). Wenn es weder gemeldet, noch geschlossen ist, kannst du gerne einen <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues/new\" target=\"_blank\">neuen Bug</a> melden.",
             "occur": "Fehler aufgetreten",
             "headers": "Kopfzeilen",
-            "request_failed": "<code class=\"normal\">{method}</code>-Anfrage an den Endpunkt <code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code> ist mit Statuscode <span class=\"fw-medium\">{status}</span> fehlgeschlagen."
+            "request_failed": "<code class=\"fw-normal\">{method}</code>-Anfrage an den Endpunkt <code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code> ist mit Statuscode <span class=\"fw-medium\">{status}</span> fehlgeschlagen."
         },
         "search": "Suche…",
         "search_no_results": "Keine Suchergebnisse",
@@ -99,6 +100,11 @@
                 "start": "Aufnahme starten",
                 "stop": "Aufnahme beenden"
             }
+        },
+        "paginator": {
+            "count": "Anzahl",
+            "of": "von",
+            "skip": "Ab"
         },
         "settings": {
             "title": "Einstellungen",
@@ -148,9 +154,11 @@
             "entity": "Entität",
             "entity-mc": "Entität (Mehrfachauswahl)",
             "userlist": "Benutzerliste",
+            "url": "URL/Webseite",
             "epoch": "Zeitspanne & Epoche",
             "timeperiod": "Zeitspanne",
             "date": "Datum",
+            "daterange": "Datumsspanne",
             "dimension": "Abmessungen (BxHxT)",
             "list": "Liste",
             "geography": "WKT (Well-Known-Binary)",
@@ -158,10 +166,13 @@
             "sql": "SQL-Abfrage",
             "system-separator": "Gruppen-Trenner",
             "serial": "Fortlaufende ID",
-            "serial_info": "<i class=\"fas fa-lightbulb me-1\"></i><br />Alle Instanzen teilen diesen Identifier als Attribut. Benutze <code class=\"normal\">%d</code> als Zähler.<br /><span class=\"fw-medium mt-2\">Beispiel:</span><br /><code class=\"normal\">Fund_%d_Stein</code> würde zu Fund_1_Stein, Fund_2_Stein, &hellip; führen.<br />Um eine feste Breite (z.B. 3 für 002 anstatt 2) zu erzwingen, benutze <code class=\"normal\">%03d</code>.",
-            "sql_info": "Du kannst mit <code class=\"normal\">:entity_id</code> in deiner SQL-Abfrage auf die Entität referenzieren, dem dieses Attribut zugewiesen ist.",
+            "serial_info": "<i class=\"fas fa-lightbulb me-1\"></i><br />Alle Instanzen teilen diesen Identifier als Attribut. Benutze <code class=\"fw-normal\">%d</code> als Zähler.<br /><span class=\"fw-medium mt-2\">Beispiel:</span><br /><code class=\"fw-normal\">Fund_%d_Stein</code> würde zu Fund_1_Stein, Fund_2_Stein, &hellip; führen.<br />Um eine feste Breite (z.B. 3 für 002 anstatt 2) zu erzwingen, benutze <code class=\"fw-normal\">%03d</code>.",
+            "sql_info": "Du kannst mit <code class=\"fw-normal\">:entity_id</code> in deiner SQL-Abfrage auf die Entität referenzieren, dem dieses Attribut zugewiesen ist.",
             "iconclass": "Iconclass",
-            "rism": "RISM"
+            "rism": "RISM",
+            "restrictions": {
+                "entity_type": "Auf folgende Entitätstypen beschränken"
+            }
         },
         "activity": "Aktivitäten",
         "action": "Aktion",
@@ -213,8 +224,13 @@
         "column": "Spalte | Spalten",
         "add_column": "Spalte hinzufügen",
         "geometry_type": "Geometrietyp",
-        "dependency": "Abhängigkeiten",
-        "depends_on": "Hängt ab von",
+        "dependency": {
+            "title": "Abhängigkeiten",
+            "depends_on": {
+                "title": "Hängt ab von",
+                "desc": "Sichtbarkeit hängt von einem anderen Attribut(wert) ab"
+            }
+        },
         "preference": "Einstellung | Einstellungen",
         "value": "Wert",
         "allow_override": "Überschreibbar?",
@@ -298,12 +314,14 @@
         "csv": {
             "uploader": {
                 "title": "CSV-Uploader",
+                "settings_title": "CSV-Einstellungen",
                 "delimiter": "Trennzeichen",
                 "delimiter_with_info": "Trennzeichen (',', ';', …)",
-                "has_header": "Hat eine Kopfzeile?",
+                "has_header": "Kopfzeile",
                 "show_linenumbers": "Zeilennummern anzeigen",
                 "nr_of_shown_rows": "Anzahl der angezeigten Zeilen",
-                "nr_of_skipped_rows": "Anzahl der übersprungenen Zeilen"
+                "nr_of_skipped_rows": "Anzahl der übersprungenen Zeilen",
+                "eof": "Ende der Datei"
             },
             "picker": {
                 "title": "CSV-Auswahl"
@@ -316,7 +334,7 @@
             "toasts": {
                 "updated": {
                     "title": "Entität aktualisiert",
-                    "msg": "Daten von {name} wurden erfolgreich aktualisiert."
+                    "msg": "Daten von „{name}“ wurden erfolgreich aktualisiert."
                 },
                 "deleted": {
                     "title": "Entität gelöscht",
@@ -408,6 +426,7 @@
                 "entity": {
                     "go_to": "Springe zu {name}"
                 },
+                "root_attribute_info": "Die verfügbaren Werte dieses Attributes werden vom Attribut „{name}“ bestimmt.",
                 "iconclass": {
                     "cite_info": "Infos von <cite title=\"Iconclass\"><a href=\"http://iconclass.org/{class}.json\" target=\"_blank\">http://iconclass.org/{class}.json</a></cite>",
                     "doesnt_exist": "Diese Iconclass existiert nicht"
@@ -655,16 +674,17 @@
                 "time": "Datum der Veröffentlichung",
                 "full_name": "Vollständiger Name"
             },
-            "build_info": "Mit <i class=\"fab fa-fw fa-laravel\"></i> & <i class=\"fab fa-fw fa-vuejs\"></i> erstellt!",
+            "build_info": "Erstellt mit <i class=\"fab fa-fw fa-laravel\"></i> & <i class=\"fab fa-fw fa-vuejs\"></i>!",
             "contributor": "Mitwirkender | Mitwirkende",
+            "former_contributor": "Ehemaliger | Ehemalige",
             "roles": {
                 "development": "Entwicklung",
                 "development_lead": "Entwicklungsleiter",
+                "support": "Allgemeine Unterstützung",
                 "support_development": "Entwicklungsunterstützung",
                 "support_database": "Datenbankunterstützung",
                 "support_archaeology": "Archäologische Unterstützung",
-                "project_lead": "Projektleitung",
-                "project_lead_former": "Ehemalige Projektleitung"
+                "project_lead": "Projektleitung"
             }
         },
         "bibliography": {
@@ -748,23 +768,49 @@
                 "techreport": "Bericht einer Hochschule oder anderen Institution",
                 "unpublished": "Nicht veröffentlicht",
                 "validation": {
-                    "required": "@:main.bibliography.column.{col} ist ein Pflichtfeld",
-                    "required_one_of": "Entweder @:main.bibliography.column.{col} oder @:main.bibliography.column.{ref} muss gesetzt sein"
+                    "required": "„{field}“ ist ein Pflichtfeld",
+                    "required_if": "Pflichtfeld, falls „{col}“ nicht angegeben ist",
+                    "required_one_of": "Entweder „{eitherField}“ oder „{orField}“ muss angegeben sein"
                 }
             }
         },
         "importer": {
             "title": "Daten-Importer",
+            "entity_settings": "Entitätseinstellungen",
+            "attribute_mapping": "Attribut-Zuordnung",
+            "import_settings": "Import-Einstellungen",
             "upload_csv_info": "Wähle eine CSV-Datei aus um Daten zum importieren.",
             "drop_csv_file": "CSV-Datei hier ablegen",
             "selected_entity_type": "Entitätstyp",
             "column_entity_name": "Entitätsname-Spalte",
             "column_entity_parent": "Übergeordnete Entität-Spalte",
             "import_btn": "Starte Datenimport",
-            "no_missing_values": "Keine fehlenden Werte. Du kannst loslegen!",
-            "missing_required_values": "{miss} von 1 Eintrag ist leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das. | {miss} von {total} Einträgen sind leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das.",
-            "missing_non_required_values": "{miss} von 1 Eintrag ist leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen. | {miss} von {total} Einträgen sind leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen.",
-            "success": "Import von 1 Eintrag abgeschlossen | Import von {cnt} Einträgen abgeschlossen"
+            "validate": "Validieren",
+            "success": "Import von 1 Eintrag abgeschlossen | Import von {cnt} Einträgen abgeschlossen",
+            "validation": {
+                "title": "Validierung",
+                "waiting": "Validierung ausstehend",
+                "mixed": "Einige Entitäten existieren bereits und werden aktualisieren, die anderen werden neu erzeugt!",
+                "create": "Keine Überschneidung, alle Entitäten werden neu erzeugt!",
+                "update": "Alle Entitäten existieren bereits und werden aktualisiert!",
+                "imported": "Alle Daten wurden erfolgreich importiert!",
+                "multiple_error": "Manche Pfade existieren mehrfach, daher kann der Import nicht ausgeführt werden!",
+                "no_items": "Es gibt keine Werte zum importieren!"
+            },
+            "indicator": {
+                "missing_value": "Kein Wert gesetzt",
+                "no_missing_values": "Keine fehlenden Werte. Du kannst loslegen!",
+                "missing_required_values": "{miss} von 1 Eintrag ist leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das. | {miss} von {total} Einträgen sind leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das.",
+                "missing_non_required_values": "{miss} von 1 Eintrag ist leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen. | {miss} von {total} Einträgen sind leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen."
+            },
+            "info": {
+                "entity_settings_require_file": "Noch keine Datei hochgeladen",
+                "entity_type_has_no_attributes": "Keine Attribute vorhanden. Bitte wählen Sie einen passenden Entitätstyp aus."
+            },
+            "error": {
+                "file_read": "Datei konnte nicht gelesen werden.",
+                "file_read_abort": "Datei-Lesevorgang abgebrochen."
+            }
         },
         "map": {
             "init_error": "Mehrere init-*-Attribute gesetzt. Es darf nur eines gesetzt sein.",
@@ -802,5 +848,9 @@
                 }
             }
         }
+    },
+    "keyboard": {
+        "tab": "Tab",
+        "space": "Leertaste"
     }
 }

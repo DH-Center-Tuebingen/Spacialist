@@ -12,7 +12,7 @@
                 {{ t('global.save') }}
             </button>
         </h3>
-        <div class="table-responsive scroll-x-hidden">
+        <div class="table-responsive overflow-x-hidden">
             <table
                 v-if="state.prefsLoaded"
                 v-dcan="'preferences_write'"
@@ -131,10 +131,10 @@
                         label,
                         value: state.preferences[label].value,
                         allow_override: state.preferences[label].allow_override,
-                    } 
+                    };
                 }
                 
-                state.dirtyData[label][key] = data
+                state.dirtyData[label][key] = data;
             };
 
             const savePreferences = _ => {
@@ -233,7 +233,7 @@
                     label: 'prefs.map-projection',
                     component: 'map-projection-preference',
                 }
-            ]
+            ];
 
             // RETURN
             return {
@@ -249,5 +249,5 @@
                 preferencesConfig,
             };
         },
-    }
+    };
 </script>

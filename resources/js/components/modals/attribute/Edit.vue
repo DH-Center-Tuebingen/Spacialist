@@ -23,7 +23,7 @@
             </div>
             <div class="modal-body nonscrollable">
                 <h5 class="text-center">
-                    {{ t('global.dependency') }}
+                    {{ t('global.dependency.title') }}
                 </h5>
                 <div class="mb-3 row">
                     <label class="col-form-label text-end col-md-2">
@@ -53,7 +53,7 @@
                 </div>
                 <div class="mb-3 row">
                     <label class="col-form-label col-md-2">
-                        {{ t('global.depends_on') }}:
+                        {{ t('global.dependency.depends_on.title') }}:
                     </label>
                     <div class="col-md-10">
                         <multiselect
@@ -259,7 +259,7 @@
                     (!oldDep.attribute && currDep.attribute)
                 ) {
                     data.dependency = state.dependency;
-                } else if(oldDep.attribute && currDep.dependency) {
+                } else if(oldDep.attribute && currDep.attribute) {
                     // or else check if dep is set, but has different values
                     if(
                         oldDep.attribute.id != currDep.attribute.id ||

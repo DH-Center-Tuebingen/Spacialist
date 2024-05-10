@@ -258,11 +258,12 @@
         toRefs,
     } from 'vue';
     import { useI18n } from 'vue-i18n';
-    import router from '@/bootstrap/router.js';
+    import router from '%router';
     import store from '@/bootstrap/store.js';
 
     import {
         can,
+        getAttribute,
         getCertaintyClass,
         translateConcept,
     } from '@/helpers/helpers.js';
@@ -302,8 +303,10 @@
             const setCertainty = event => {
                 const maxSize = event.target.parentElement.scrollWidth; // progress bar width in px
                 const clickPos = event.layerX; // in px
+                const finalPos = Math.max(0, Math.min(clickPos, maxSize)); // clamp cursor pos to progress bar size
+
                 const currentValue = state.certainty;
-                let value = parseInt(clickPos/maxSize*100);
+                let value = parseInt(finalPos/maxSize*100);
                 const diff = Math.abs(value-currentValue);
                 if(diff < 10) {
                     if(value > currentValue) {
@@ -417,7 +420,7 @@
                     );
                 }),
                 editItem: {},
-                attribute: entity.value.data[aid].attribute,
+                attribute: getAttribute(aid),
                 references: computed(_ => entity.value.references[state.attribute.thesaurus_url]),
                 bibliography: computed(_ => store.getters.bibliography),
                 startCertainty: entity.value.data[aid].certainty,
@@ -468,8 +471,8 @@
                 closeModal,
                 // STATE
                 state,
-            }
+            };
 
         },
-    }
+    };
 </script>
