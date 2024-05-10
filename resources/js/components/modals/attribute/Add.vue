@@ -136,7 +136,7 @@
                 state.attribute = e;
             };
             const checkValidation = e => {
-                state.validated = e;
+                state.attributeTemplateValid = e;
             };
             const checkTableValidation = e => {
                 state.tableColumnValidated = e;
@@ -147,7 +147,14 @@
             const state = reactive({
                 attribute: {},
                 columns: [],
-                validated: false,
+                attributeTemplateValid: false,
+                validated: computed(_ => {
+                    if(!state.attribute.type) return false;
+
+                    return state.attributeTemplateValid && (
+                        !state.hasColumns || state.columns.length > 0
+                    );
+                }),
                 tableColumnValidated: false,
                 formId: 'new-attribute-form-external-submit',
                 tableFormId: 'new-attribute-form-table-type-external-submit',
