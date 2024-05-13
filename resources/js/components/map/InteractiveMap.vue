@@ -199,7 +199,7 @@
                         <i class="fas fa-fw fa-caret-down" />
                     </span>
                 </dt>
-                <dd class="mb-0 mh-300p scroll-y-auto">
+                <dd class="mb-0 mh-300p overflow-y-auto">
                     <div v-if="actionState.overlayData.showCoordinates">
                         <table class="table table-striped table-borderless table-sm mb-0">
                             <tbody>
@@ -1307,7 +1307,7 @@
                         p: `${state.mapId}-popup`,
                         h: `${state.mapId}-hover-popup`,
                         m: `${state.mapId}-measure-popup`,
-                    }
+                    };
                 }),
                 overlayOpen: computed(_ => Object.keys(actionState.overlayData).length > 0),
                 overlayIsPoint: computed(_ => {
@@ -1365,7 +1365,7 @@
 
                     return coordList;
                 }),
-            })
+            });
 
             // ON MOUNTED
             onMounted(async _ => {
@@ -1533,8 +1533,8 @@
                 // STATE
                 state,
                 actionState,
-            }
+            };
             
         },
-    }
+    };
 </script>

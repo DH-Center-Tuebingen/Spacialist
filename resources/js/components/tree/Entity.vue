@@ -179,7 +179,7 @@
             </button>
             <tree
                 id="entity-tree"
-                class="col px-0 scroll-y-auto"
+                class="col px-0 overflow-y-auto"
                 :data="state.tree"
                 size="small"
                 :draggable="state.isDragAllowed"
@@ -213,7 +213,7 @@
     import TreeSearch from '@/components/tree/Search.vue';
 
     import store from '@/bootstrap/store.js';
-    import router from '@/bootstrap/router.js';
+    import router from '%router';
 
     import {
         moveEntity,
@@ -297,7 +297,7 @@
                 const dragEntityType = getEntityType(item.entity_type_id);
 
                 if(target.parentIds.indexOf(item.id) != -1 ||
-                   (target.state.dropPosition == DropPosition.inside && target.id == item.root_entity_id)) {
+                    (target.state.dropPosition == DropPosition.inside && target.id == item.root_entity_id)) {
                     return false;
                 }
 
@@ -490,5 +490,5 @@
                 state,
             };
         }
-    }
+    };
 </script>

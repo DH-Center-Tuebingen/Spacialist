@@ -26,7 +26,7 @@
                     @validation="checkValidation"
                 />
                 <div v-if="state.hasColumns">
-                    <hr/>
+                    <hr>
                     <div class="bg-secondary bg-opacity-25 p-2 rounded">
                         <h5 class="d-flex flex-row justify-content-between">
                             <div>
@@ -36,8 +36,13 @@
                                 </span>
                             </div>
                             <div>
-                                <button type="submit" class="btn btn-sm btn-outline-success" :form="state.tableFormId" :disabled="!state.tableColumnValidated">
-                                    <i class="fas fa-fw fa-plus"></i> {{ t('global.add_column') }}
+                                <button
+                                    type="submit"
+                                    class="btn btn-sm btn-outline-success"
+                                    :form="state.tableFormId"
+                                    :disabled="!state.tableColumnValidated"
+                                >
+                                    <i class="fas fa-fw fa-plus" /> {{ t('global.add_column') }}
                                 </button>
                             </div>
                         </h5>
@@ -45,7 +50,8 @@
                             :type="'table'"
                             :external="state.tableFormId"
                             @created="addColumn"
-                            @validation="checkTableValidation"  />
+                            @validation="checkTableValidation"
+                        />
                     </div>
                 </div>
                 <div v-if="state.previewAttribute">
@@ -130,7 +136,7 @@
                 state.attribute = e;
             };
             const checkValidation = e => {
-                state.validated = e;
+                state.attributeTemplateValid = e;
             };
             const checkTableValidation = e => {
                 state.tableColumnValidated = e;
@@ -141,7 +147,14 @@
             const state = reactive({
                 attribute: {},
                 columns: [],
-                validated: false,
+                attributeTemplateValid: false,
+                validated: computed(_ => {
+                    if(!state.attribute.type) return false;
+
+                    return state.attributeTemplateValid && (
+                        !state.hasColumns || state.columns.length > 0
+                    );
+                }),
                 tableColumnValidated: false,
                 formId: 'new-attribute-form-external-submit',
                 tableFormId: 'new-attribute-form-table-type-external-submit',
@@ -205,7 +218,7 @@
                 checkTableValidation,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

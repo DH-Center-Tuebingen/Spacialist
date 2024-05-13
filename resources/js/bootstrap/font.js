@@ -28,8 +28,10 @@ import {
 import {
     faCircle as faCircleReg,
     faClipboard as faClipboardReg,
-    faQuestionCircle,
+    faKeyboard,
     faLaugh,
+    faQuestionCircle,
+    faRectangleList,
     faSadCry,
     faSquare,
     faSquareCheck,
@@ -52,6 +54,8 @@ import {
     faAngleRight,
     faAngleUp,
     faArrowTurnUp,
+    faArrowUpRightFromSquare,
+    faAsterisk,
     faBan,
     faBell,
     faBinoculars,
@@ -87,6 +91,7 @@ import {
     faCopyright,
     faCubes,
     faDatabase,
+    faDiagramNext,
     faDotCircle,
     faDownload,
     faDrawPolygon,
@@ -152,6 +157,9 @@ import {
     faMinus,
     faMobileAlt,
     faMonument,
+    faCircleNotch,
+    faCirclePlus,
+    faCircleArrowUp,
     faO,
     faOutdent,
     faPalette,
@@ -251,6 +259,8 @@ library.add(
     faAngleRight,
     faAngleUp,
     faArrowTurnUp,
+    faArrowUpRightFromSquare,
+    faAsterisk,
     faBan,
     faBell,
     faBinoculars,
@@ -287,6 +297,7 @@ library.add(
     faCopyright,
     faCubes,
     faDatabase,
+    faDiagramNext,
     faDotCircle,
     faDownload,
     faDrawPolygon,
@@ -333,6 +344,7 @@ library.add(
     faInfo,
     faInfoCircle,
     faItalic,
+    faKeyboard,
     faLaugh,
     faLayerGroup,
     faLightbulb,
@@ -354,6 +366,9 @@ library.add(
     faMinus,
     faMobileAlt,
     faMonument,
+    faCircleNotch,
+    faCirclePlus,
+    faCircleArrowUp,
     faO,
     faOutdent,
     faPalette,
@@ -368,6 +383,7 @@ library.add(
     faPuzzlePiece,
     faQuestion,
     faQuoteRight,
+    faRectangleList,
     faRedo,
     faRedoAlt,
     faRepeat,
@@ -428,7 +444,7 @@ library.add(
     faVolumeMute,
     faVolumeUp,
     faWindowMaximize,
-)
+);
 dom.watch();
 
 export const iconList = fw => {
@@ -440,7 +456,7 @@ export const iconList = fw => {
             const icon = set[l];
             const iconCode = icon[3];
             const uniqueCode = `${k}_${iconCode}`;
-            const def = findIconDefinition({prefix: k, iconName: l});
+            const def = findIconDefinition({ prefix: k, iconName: l });
             if(!addedCodes[uniqueCode]) {
                 addedCodes[uniqueCode] = true;
                 let str = `${k} fa-${def.iconName}`;

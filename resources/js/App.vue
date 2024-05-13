@@ -102,7 +102,7 @@
                                         {{ t('global.notifications.mark_all_as_read') }}
                                     </a>
                                 </div>
-                                <div class="col-12 bg-light text-dark px-0 mh-75v scroll-y-auto">
+                                <div class="col-12 bg-light text-dark px-0 mh-75v overflow-y-auto">
                                     <notification-body
                                         v-for="(n, idx) in state.notifications"
                                         :key="n.id"
@@ -598,7 +598,7 @@ export default {
         });
         watch(state.auth, (newValue, oldValue) => {
             store.commit('setUser', state.auth.user());
-        })
+        });
 
         // ON MOUNTED
         onMounted(_ => {
@@ -660,5 +660,5 @@ export default {
             state,
         };
     }
-}
+};
 </script>

@@ -10,6 +10,7 @@ import {
     fillEntityData,
     only,
     slugify,
+    sortConcepts,
     getIntersectedEntityAttributes,
     hasIntersectionWithEntityAttributes,
 } from '@/helpers/helpers.js';
@@ -63,6 +64,7 @@ export const store = createStore({
                     treeSelectionMode: false,
                     treeSelection: {},
                     treeSelectionTypeIds: [],
+                    cachedConceptSelections: {},
                     user: {},
                     users: [],
                     version: {},
@@ -78,7 +80,7 @@ export const store = createStore({
                         system: {},
                     },
                     hasAnalysis: false,
-                }
+                };
             },
             mutations: {
                 setAppInitialized(state, data) {
@@ -93,13 +95,16 @@ export const store = createStore({
                 setAttributeSelection(state, data) {
                     if(data.nested) {
                         for(let k in data.selection) {
-                            state.attributeSelections[k] = data.selection[k];
+                            state.attributeSelections[k] = data.selection[k].sort(sortConcepts);
                         }
                     } else {
-                        state.attributeSelections[data.id] = data.selection;
+                        state.attributeSelections[data.id] = data.selection.sort(sortConcepts);
                     }
                 },
                 setAttributeSelections(state, data) {
+                    for(let k in data) {
+                        data[k].sort(sortConcepts);
+                    }
                     state.attributeSelections = data;
                 },
                 setBibliography(state, data) {
@@ -252,7 +257,26 @@ export const store = createStore({
                 updateEntityData(state, data) {
                     const entity = state.entities[data.eid];
                     for(let k in data.data) {
-                        entity.data[k].value = data.data[k];
+                        // when attribute value is set empty, delete whole attribute
+                        if(!data.data[k] && data.data[k] != false) {
+                            entity.data[k] = {};
+                            if(data.sync) {
+                                state.entity.data[k] = {};
+                            }
+                        } else {
+                            // if no id exists, this data is added
+                            if(!entity.data[k].id) {
+                                entity.data[k] = data.new_data[k];
+                                if(data.sync) {
+                                    state.entity.data[k] = data.new_data[k];
+                                }
+                            } else {
+                                entity.data[k].value = data.data[k];
+                                if(data.sync) {
+                                    state.entity.data[k].value = data.data[k];
+                                }
+                            }
+                        }
                     }
                 },
                 updateEntityDataModerations(state, data) {
@@ -486,6 +510,9 @@ export const store = createStore({
                         state.treeSelectionTypeIds = [];
                     }
                 },
+                setCachedConceptSelection(state, data) {
+                    state.cachedConceptSelections[data.id] = data.selection;
+                },
                 setPreferences(state, data) {
                     state.preferences = data;
                 },
@@ -648,7 +675,7 @@ export const store = createStore({
                     commit('setUsers', data);
                 },
                 sortTree({commit}, sort) {
-                    commit('sortTree', sort)
+                    commit('sortTree', sort);
                 },
                 addToTreeSelection({commit}, data) {
                     commit('addToTreeSelection', data);
@@ -664,6 +691,9 @@ export const store = createStore({
                 },
                 unsetTreeSelectionMode({commit}) {
                     commit('setTreeSelectionMode', false);
+                },
+                setCachedConceptSelection({commit}, data) {
+                    commit('setCachedConceptSelection', data);
                 },
                 setMainViewTab({commit}, data) {
                     commit('setMainViewTab', data);
@@ -759,7 +789,7 @@ export const store = createStore({
                     commit('updateEntityData', data);
                 },
                 updateEntityDataModerations({commit}, data) {
-                    commit("updateEntityDataModerations", data);
+                    commit('updateEntityDataModerations', data);
                 },
                 addEntityTypeAttribute({commit}, data) {
                     commit('addEntityTypeAttribute', data);
@@ -888,6 +918,8 @@ export const store = createStore({
                 treeSelectionCount: state => Object.keys(state.treeSelection).length,
                 treeSelectionTypeIds: state => state.treeSelectionTypeIds,
                 treeSelectionIntersection: state => getIntersectedEntityAttributes(state.treeSelectionTypeIds),
+                cachedConceptSelections: state => state.cachedConceptSelections,
+                cachedConceptSelection: state => id => state.cachedConceptSelections[id],
                 preferenceByKey: state => key => state.preferences[key],
                 preferences: state => state.preferences,
                 systemPreferences: state => state.systemPreferences,

@@ -60,7 +60,7 @@
             </h3>
             <div
                 v-if="state.categoryPreferences && state.categoryPreferences.length > 0"
-                class="table-responsive flex-grow-1 scroll-x-hidden"
+                class="table-responsive flex-grow-1 overflow-x-hidden"
             >
                 <table
                     v-dcan="'preferences_write'"
@@ -227,6 +227,32 @@
                 });
             };
 
+            const setProgramPreferences = (categories, name) => {
+                for(let k in preferencesConfig[name]) {
+                    const subcategory = preferencesConfig[name][k];
+                    categories[name][k] = {
+                        preferences: subcategory.preferences.slice(),
+                    };
+                }
+            };
+
+            const setPluginPreferences = (categories, name) => {
+                for(let k in state.pluginPreferences[name]) {
+                    const subcategory = state.pluginPreferences[name][k];
+                    if(!categories[name][k]) {
+                        categories[name][k] = {
+                            preferences: subcategory.preferences.slice(),
+                        };
+                        if(subcategory.custom) {
+                            categories[name][k].custom = true;
+                            categories[name][k].title = subcategory.title;
+                        }
+                    } else {
+                        categories[name][k].preferences = categories[name][k].preferences.concat(subcategory.preferences.slice());
+                    }
+                }
+            };
+
             // DATA
             const preferencesConfig = {
                 user: {
@@ -363,32 +389,6 @@
                     return state.categories[state.category][state.subcategory].preferences;
                 }),
             });
-
-            function setProgramPreferences(categories, name) {
-                for(let k in preferencesConfig[name]) {
-                    const subcategory = preferencesConfig[name][k];
-                    categories[name][k] = {
-                        preferences: subcategory.preferences.slice(),
-                    };
-                }
-            }
-
-            function setPluginPreferences(categories, name) {
-                for(let k in state.pluginPreferences[name]) {
-                    const subcategory = state.pluginPreferences[name][k];
-                    if(!categories[name][k]) {
-                        categories[name][k] = {
-                            preferences: subcategory.preferences.slice(),
-                        };
-                        if(subcategory.custom) {
-                            categories[name][k].custom = true;
-                            categories[name][k].title = subcategory.title;
-                        }
-                    } else {
-                        categories[name][k].preferences = categories[name][k].preferences.concat(subcategory.preferences.slice());
-                    }
-                }
-            }
 
             setCategories(currentRoute);
 

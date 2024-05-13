@@ -13,7 +13,7 @@ import EntityReferenceModal from '@/components/modals/entity/Reference.vue';
 // Tools
 import Bibliography from '@/components/BibliographyTable.vue';
 import GlobalActivity from '@/components/GlobalActivity.vue';
-import DataImporter from '@/components/DataImporter.vue';
+import DataImporter from '@/components/view/DataImporter.vue';
 // Settings
 import Users from '@/components/Users.vue';
 import Roles from '@/components/Roles.vue';
@@ -305,32 +305,32 @@ export const openRouter = createRouter({
     },
     routes: [
         {
-            path: "/",
-            name: "landing",
+            path: '/',
+            name: 'landing',
             component: Landing,
             meta: {
                 auth: false,
             },
         },
         {
-            path: "/free",
-            name: "freesearch",
+            path: '/free',
+            name: 'freesearch',
             component: FreeSearch,
             meta: {
                 auth: false,
             },
         },
         {
-            path: "/single",
-            name: "singlesearch",
+            path: '/single',
+            name: 'singlesearch',
             component: SingleSearch,
             meta: {
                 auth: false,
             },
         },
         {
-            path: "/:pathMatch(.*)",
-            name: "not-found",
+            path: '/:pathMatch(.*)',
+            name: 'not-found',
             component: NotFound,
             meta: {
                 auth: false,
@@ -340,5 +340,5 @@ export const openRouter = createRouter({
 });
 
 export function useOpenRouter() {
-  return openRouter;
+    return openRouter;
 }
