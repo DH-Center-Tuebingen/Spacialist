@@ -4,7 +4,10 @@
             v-for="certainty in certainties"
             :key="certainty"
         >
-            <span v-show="certainty.rangeFunction(state)">
+            <span
+                v-show="certainty.rangeFunction(state)"
+                :class="certainty.class"
+            >
                 <i :class="`${certainty.icon} text-${certainty.type}`" />
             </span>
         </template>
