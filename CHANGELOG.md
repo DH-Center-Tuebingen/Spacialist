@@ -66,6 +66,8 @@ All notable changes to this project will be documented in this file.
 - Adding references to a newly added/saved attribute value
 - Empty ORCID or phone number prevented users from saving the profile
 - Activity was not shown/blank
+- Adding empty table was possible and error was thrown
+
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
@@ -76,6 +78,7 @@ All notable changes to this project will be documented in this file.
 - Made UI to add new rows to _Table_ attribute clearer
 - Attribute type backend logic moved to separate classes
 - Set default value in parent element in _Add Attribute_ modal
+- Rework System/User Preferences and allow plugins to add their own preferences
 - Values in Dropdown attributes are now sorted alphabetically
 - Values in Dropdown attributes are now searchable
 - Font size in dropdown menus

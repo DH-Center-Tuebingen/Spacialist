@@ -206,7 +206,7 @@ class EditorController extends Controller {
             'root_id' => 'nullable|integer|exists:th_concept,id',
             'root_attribute_id' => 'nullable|integer|exists:attributes,id',
             'restricted_types' => 'nullable|array|exists:entity_types,id',
-            'columns' => 'nullable|array',
+            'columns' => 'required_if:datatype,table|array|min:1',
             'text' => 'string',
             'recursive' => 'nullable|boolean_string'
         ]);
