@@ -99,10 +99,10 @@
                         >
                             <validity-indicator :state="certainty(element)" />
                             <span v-if="hasComment(element)">
-                                <i class="fas fa-fw fa-comment" />
+                                <i class="far fa-fw fa-comment" />
                             </span>
                             <span v-if="hasBookmarks(element)">
-                                <i class="fas fa-fw fa-bookmark" />
+                                <i class="far fa-fw fa-bookmark" />
                             </span>
                         </sup>
                         <sup
