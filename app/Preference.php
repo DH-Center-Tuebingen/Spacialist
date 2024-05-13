@@ -4,6 +4,7 @@ namespace App;
 
 use App\UserPreference;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Preference extends Model
 {
@@ -24,7 +25,7 @@ class Preference extends Model
         return $prefObj;
     }
 
-    public static function getUserPreferences($id) {
+    public static function getUserPreferences($id, $simple = false) {
         $userPrefs = UserPreference::select('user_preferences.*', 'preferences.*', 'value as default_value')
             ->join('preferences', 'user_preferences.pref_id', 'preferences.id')
             ->where('user_id', $id)
@@ -32,7 +33,7 @@ class Preference extends Model
         $systemPrefs = self::whereNotIn('id', $userPrefs->pluck('pref_id')->toArray())
             ->get();
         $prefs = $systemPrefs->merge($userPrefs);
-        $prefObj = self::decodePreferences($prefs);
+        $prefObj = self::decodePreferences($prefs, $simple);
         return $prefObj;
     }
 
@@ -77,7 +78,7 @@ class Preference extends Model
             case 'prefs.project-maintainer':
                 return $value;
             case 'prefs.map-projection':
-                $proj4 = \DB::table('spatial_ref_sys')
+                $proj4 = DB::table('spatial_ref_sys')
                     ->where('auth_srid', $value->epsg)
                     ->value('proj4text');
                 return [

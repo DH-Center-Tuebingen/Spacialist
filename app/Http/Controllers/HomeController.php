@@ -6,8 +6,8 @@ use App\EntityType;
 use App\Plugin;
 use App\Preference;
 use App\ThConcept;
-use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 
 class HomeController extends Controller
 {
@@ -27,21 +27,14 @@ class HomeController extends Controller
 
     public function getGlobalData() {
         if(auth()->check()) {
-            $preferences = Preference::getUserPreferences(auth()->id());
-            $preferenceValues = [];
-            foreach($preferences as $k => $p) {
-                $preferenceValues[$k] = $p->value;
-            }
+            $preferenceValues = Preference::getUserPreferences(auth()->id(), true);
             $locale = auth()->user()->getLanguage();
         } else {
             $preferenceValues = [];
-            $locale = \App::getLocale();
+            $locale = App::getLocale();
         }
 
-        $sysPrefsValues = [];
-        foreach(Preference::getPreferences() as $k => $p) {
-            $sysPrefsValues[$k] = $p['value'];
-        }
+        $sysPrefsValues = Preference::getPreferences(true);
 
         $concepts = ThConcept::getMap($locale);
 
