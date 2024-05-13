@@ -9,7 +9,7 @@
                 <router-link
                     v-for="(cat, k) in state.categories.user"
                     :key="`user-pref-subcat-${k}`"
-                    :to="{ name: 'userpreferences', hash: `#${k}`}"
+                    :to="{ name: 'userpreferences', hash: `#${k}` }"
                     :class="setNavClasses(k, true)"
                 >
                     <span v-if="cat.custom">
@@ -28,7 +28,7 @@
                 <router-link
                     v-for="(cat, k) in state.categories.system"
                     :key="`sys-pref-subcat-${k}`"
-                    :to="{ name: 'preferences', hash: `#${k}`}"
+                    :to="{ name: 'preferences', hash: `#${k}` }"
                     :class="setNavClasses(k)"
                 >
                     <span v-if="cat.custom">
@@ -68,7 +68,7 @@
                 >
                     <tbody>
                         <tr
-                            v-for="preferencesBlock in state.categoryPreferences" 
+                            v-for="preferencesBlock in state.categoryPreferences"
                             :key="preferencesBlock.label"
                         >
                             <td>
@@ -77,13 +77,13 @@
                                 </strong>
                             </td>
                             <td>
-                                <component 
+                                <component
                                     :is="preferencesBlock.component"
                                     :model-value="(preferencesBlock.data === 'v-model') ? state.preferences[preferencesBlock.label] : null"
                                     :data="(preferencesBlock.data === undefined) ? state.preferences[preferencesBlock.label] : null"
                                     @update:model-value="value => updateValue(preferencesBlock, value)"
                                     @changed="e => trackChanges(preferencesBlock.label, e)"
-                                /> 
+                                />
                             </td>
                         </tr>
                     </tbody>
@@ -108,13 +108,9 @@
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
-
     import store from '@/bootstrap/store.js';
-
     import { useToast } from '@/plugins/toast.js';
-
     import { patchPreferences } from '@/api.js';
-
 
     import {
         useRoute,
@@ -193,7 +189,7 @@
                 if(preferencesBlock.data === 'v-model') {
                     state.preferences[preferencesBlock.label] = data;
                 }
-            }; 
+            };
 
             const savePreferences = _ => {
                 if(!state.hasDirtyData) return;
@@ -222,7 +218,7 @@
                         locale.value = updatedLanguage;
                     }
                     state.dirtyData = {};
-    
+
                     const label = t('main.preference.toasts.updated.msg');
                     toast.$toast(label, '', {
                         channel: 'success',
@@ -241,13 +237,13 @@
                         preferences: [
                             {
                                 title: 'main.preference.key.language',
-                                label:  'prefs.gui-language',
+                                label: 'prefs.gui-language',
                                 component: 'gui-language-preference',
                                 data: 'v-model'
                             },
                             {
                                 title: 'main.preference.key.color.title',
-                                label:  'prefs.color',
+                                label: 'prefs.color',
                                 component: 'color-preference',
                             },
                         ],
@@ -256,12 +252,12 @@
                         preferences: [
                             {
                                 title: 'main.preference.key.columns.title',
-                                label:  'prefs.columns',
+                                label: 'prefs.columns',
                                 component: 'columns-preference',
                             },
                             {
                                 title: 'main.preference.key.tooltips',
-                                label:  'prefs.show-tooltips',
+                                label: 'prefs.show-tooltips',
                                 component: 'tooltips-preference',
                             },
                         ],
@@ -272,12 +268,12 @@
                         preferences: [
                             {
                                 title: 'main.preference.key.password_reset',
-                                label:  'prefs.enable-password-reset-link',
+                                label: 'prefs.enable-password-reset-link',
                                 component: 'reset-email-preference',
                             },
                             {
                                 title: 'main.preference.key.tag_root',
-                                label:  'prefs.tag-root',
+                                label: 'prefs.tag-root',
                                 component: 'tags-preference',
                             },
                             {
@@ -302,13 +298,13 @@
                         preferences: [
                             {
                                 title: 'main.preference.key.language',
-                                label:  'prefs.gui-language',
+                                label: 'prefs.gui-language',
                                 component: 'gui-language-preference',
                                 data: 'v-model'
                             },
                             {
                                 title: 'main.preference.key.color.title',
-                                label:  'prefs.color',
+                                label: 'prefs.color',
                                 component: 'color-preference',
                             },
                         ],
@@ -317,12 +313,12 @@
                         preferences: [
                             {
                                 title: 'main.preference.key.columns.title',
-                                label:  'prefs.columns',
+                                label: 'prefs.columns',
                                 component: 'columns-preference',
                             },
                             {
                                 title: 'main.preference.key.tooltips',
-                                label:  'prefs.show-tooltips',
+                                label: 'prefs.show-tooltips',
                                 component: 'tooltips-preference',
                             },
                         ],
@@ -351,56 +347,48 @@
                 }),
                 pluginPreferences: computed(_ => store.getters.pluginPreferences),
                 categories: computed(_ => {
-                    const cats = {
+                    const categories = {
                         user: {},
                         system: {},
                     };
-                    for(let k in preferencesConfig.user) {
-                        const subcategory = preferencesConfig.user[k];
-                        cats.user[k] = {
-                            preferences: subcategory.preferences.slice(),
-                        };
+
+                    for(let category in categories){
+                        setProgramPreferences(categories, category);
+                        setPluginPreferences(categories, category);
                     }
-                    for(let k in preferencesConfig.system) {
-                        const subcategory = preferencesConfig.system[k];
-                        cats.system[k] = {
-                            preferences: subcategory.preferences.slice(),
-                        };
-                    }
-                    for(let k in state.pluginPreferences.user) {
-                        const subcategory = state.pluginPreferences.user[k];
-                        if(!cats.user[k]) {
-                            cats.user[k] = {
-                                preferences: subcategory.preferences.slice(),
-                            };
-                            if(subcategory.custom) {
-                                cats.user[k].custom = true;
-                                cats.user[k].title = subcategory.title;
-                            }
-                        } else {
-                            cats.user[k].preferences = cats.user[k].preferences.concat(subcategory.preferences.slice());
-                        }
-                    }
-                    for(let k in state.pluginPreferences.system) {
-                        const subcategory = state.pluginPreferences.system[k];
-                        if(!cats.system[k]) {
-                            cats.system[k] = {
-                                preferences: subcategory.preferences.slice(),
-                            };
-                            if(subcategory.custom) {
-                                cats.system[k].custom = true;
-                                cats.system[k].title = subcategory.title;
-                            }
-                        } else {
-                            cats.system[k].preferences = cats.system[k].preferences.concat(subcategory.preferences.slice());
-                        }
-                    }
-                    return cats;
+
+                    return categories;
                 }),
                 categoryPreferences: computed(_ => {
                     return state.categories[state.category][state.subcategory].preferences;
                 }),
             });
+
+            function setProgramPreferences(categories, name) {
+                for(let k in preferencesConfig[name]) {
+                    const subcategory = preferencesConfig[name][k];
+                    categories[name][k] = {
+                        preferences: subcategory.preferences.slice(),
+                    };
+                }
+            }
+
+            function setPluginPreferences(categories, name) {
+                for(let k in state.pluginPreferences[name]) {
+                    const subcategory = state.pluginPreferences[name][k];
+                    if(!categories[name][k]) {
+                        categories[name][k] = {
+                            preferences: subcategory.preferences.slice(),
+                        };
+                        if(subcategory.custom) {
+                            categories[name][k].custom = true;
+                            categories[name][k].title = subcategory.title;
+                        }
+                    } else {
+                        categories[name][k].preferences = categories[name][k].preferences.concat(subcategory.preferences.slice());
+                    }
+                }
+            }
 
             setCategories(currentRoute);
 
