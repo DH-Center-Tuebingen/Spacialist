@@ -9,9 +9,11 @@ use App\EntityAttribute;
 use App\EntityFile;
 use App\EntityType;
 use App\Exceptions\AmbiguousValueException;
+use App\Exceptions\AttributeImportException;
 use App\Exceptions\ImportException;
 use App\Exceptions\Structs\ImportExceptionStruct;
 use App\Exceptions\InvalidDataException;
+use App\Exceptions\Structs\AttributeImportExceptionStruct;
 use App\Import\EntityImporter;
 use App\Reference;
 use App\ThConcept;
@@ -459,6 +461,9 @@ class EntityController extends Controller {
         return response()->json($result);
     }
 
+    /**
+     * TODO: Move this functionality into the EntityImporter class.
+     */
     public function importData(Request $request) {
         $this->verifyImportData($request);
 
@@ -466,6 +471,13 @@ class EntityController extends Controller {
         $metadata = json_decode($request->get('metadata'), true);
         $data = json_decode($request->get('data'), true);
         $handle = fopen($file->getRealPath(), 'r');
+
+        // Data values
+        $nameColumn = trim($data['name_column']);
+        $parentColumn = isset($data['parent_column']) ? trim($data['parent_column']) : null;
+        $entityTypeId = trim($data['entity_type_id']);
+        $attributesMapping = array_map(fn ($col) => trim($col), $data['attributes']);
+
 
         $headerRow = null;
         $headerRead = false;
@@ -479,26 +491,35 @@ class EntityController extends Controller {
         $parentIdx = null;
         $nameIdx = null;
         while (($row = fgetcsv($handle, 0, $metadata['delimiter'])) !== false) {
+            $row = array_map(fn ($column) => trim($column), $row);
+
             if (!$headerRead) {
                 $headerRead = true;
                 $headerRow = $row;
                 for ($i = 0; $i < count($row); $i++) {
-                    if ($row[$i] == $data['name_column']) {
+                    if ($row[$i] == $nameColumn) {
                         $nameIdx = $i;
-                    } else if (isset($data['parent_column']) && $row[$i] == $data['parent_column']) {
+                    } else if (isset($parentColumn) && $row[$i] == $parentColumn) {
                         $parentIdx = $i;
                         $hasParent = true;
-                    } else {
-                        foreach ($data['attributes'] as $id => $a) {
-                            if ($a == $row[$i]) {
-                                $attributeIdToColumnIdxMapping[$id] = $i;
-                                $attributeTypes[$id] = Attribute::find($id)->datatype;
-                                break;
-                            }
+                    }
+
+                    foreach ($attributesMapping as $id => $a) {
+                        if ($a == $row[$i]) {
+                            $attributeIdToColumnIdxMapping[$id] = $i;
+                            $attributeTypes[$id] = Attribute::find($id)->datatype;
+                            break;
                         }
                     }
                 }
                 continue;
+            }
+            
+            if (!isset($nameIdx)) {
+                throw new ImportException(
+                    "Name column '" . $nameColumn . "' could not be found in CSV file",
+                    new ImportExceptionStruct(on: $nameColumn)
+                );
             }
 
             $rootEntityPath = $hasParent ? $row[$parentIdx] : null;
@@ -545,7 +566,7 @@ class EntityController extends Controller {
             try {
                 $user = auth()->user();
                 if ($entityId == null) {
-                    $entity = $this->createImportedEntity($entityName, $rootEntityPath, $data['entity_type_id'], $user);
+                    $entity = $this->createImportedEntity($entityName, $rootEntityPath, $entityTypeId, $user);
 
                     // If create entity fails, return error
                     if ($entity["type"] !== "entity") {
@@ -565,9 +586,27 @@ class EntityController extends Controller {
 
                 $this->setOrUpdateImportedAttributes($entityId, $row, $attributeIdToColumnIdxMapping, $attributeTypes, $user);
                 $changedEntities[] = $entityId;
+            } catch (AttributeImportException $e) {
+                DB::rollBack();
+                return response()->json($e->toImportExceptionObject(count($changedEntities) + 1, $entityName), 400);
+            } catch (ImportException $e) {
+                DB::rollBack();
+                return response()->json(
+                    [
+                        'error' => $e->getMessage(),
+                        'data' => $e->getData()
+                    ],
+                    400
+                );
             } catch (Exception $e) {
                 DB::rollBack();
-                return response()->json($errorResponseData, 400);
+                return response()->json(
+                    [
+                        'error' => $e->getMessage(),
+                        'data' => $errorResponseData
+                    ],
+                    400
+                );
             }
         }
 
@@ -590,7 +629,7 @@ class EntityController extends Controller {
     }
 
     function setOrUpdateImportedAttributes($entity_id, $row, $attributeIdToColumnIdxMapping, $attributeTypes, $user) {
-        foreach ($attributeIdToColumnIdxMapping as $key => $val) {
+        foreach ($attributeIdToColumnIdxMapping as $key => $colIdx) {
             $aid = intval($key);
             $type = $attributeTypes[$aid];
 
@@ -600,7 +639,19 @@ class EntityController extends Controller {
             ], [
                 'user_id' => $user->id,
             ]);
-            $setValue = $attrVal->setValueFromRaw($row[$val], $type);
+            try {
+                $setValue = $attrVal->setValueFromRaw($row[$colIdx], $type);
+            } catch (InvalidDataException $e) {
+                throw new AttributeImportException(
+                    $e->getMessage(),
+                    new AttributeImportExceptionStruct(
+                        type: $type,
+                        columnIndex: $colIdx + 1,
+                        columnName: $row[$colIdx]
+                    )
+                );
+            }
+
             if ($setValue === null) {
                 continue;
             }

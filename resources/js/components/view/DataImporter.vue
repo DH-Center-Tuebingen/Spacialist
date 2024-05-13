@@ -194,6 +194,10 @@
         translateConcept,
     } from '@/helpers/helpers.js';
 
+    import {
+        handleUnhandledErrors
+    } from '../../bootstrap/http';
+
 
     export default {
         components: {
@@ -413,10 +417,12 @@
                         state.error = '';
                         state.validationData = data;
                     })
-                    .catch(e => {
-                        showImportError({
-                            message: e.response.data.error,
-                            data: e.response.data.data,
+                    .catch(axiosError => {
+                        handleUnhandledErrors(axiosError, e => {
+                            showImportError({
+                                message: e.response.data.error,
+                                data: e.response.data.data,
+                            });
                         });
                     })
                     .finally(_ => state.validating = false);
@@ -440,10 +446,12 @@
                         icon: true,
                         simple: true,
                     });
-                }).catch(e => {
-                    showImportError({
-                        message: e.response.data.error,
-                        data: e.response.data.data,
+                }).catch(axiosError => {
+                    handleUnhandledErrors(axiosError, (e) => {
+                        showImportError({
+                            message: e.response.data.error,
+                            data: e.response.data.data,
+                        });
                     });
                 }).finally(_ => {
                     state.uploading = false;
@@ -625,6 +633,7 @@
 
 <style>
     .data-importer {
+
         th,
         td {
             white-space: nowrap;
@@ -646,50 +655,57 @@
 
 
 
-<style scoped lang="scss">
-.controls {
-    display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
-    gap: 1rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.layout {
-    display: grid;
-    grid-template-rows: 1fr min-content;
-    gap: 1rem;
-
-    &.limited {
-        grid-template-rows: fit-content(50%) minmax(min-content, 1fr);
-    }
-}
-
-.entity-attribute-mapping {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr 1fr;
-    align-items: flex-end;
-}
-
-@media screen and (max-width: 1920px) {
-    .entity-attribute-mapping {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-@media (max-width: 768px) {
-
-    .file-preview,
+<style
+    scoped
+    lang="scss"
+>
     .controls {
-        grid-template-columns: 1fr;
-        overflow-y: auto;
-        padding: 1rem;
-        border: 1px solid var(--bs-border-color-translucent);
-        border-radius: var(--bs-border-radius);
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+        gap: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .layout {
+        display: grid;
+        grid-template-rows: 1fr min-content;
+        gap: 1rem;
+
+        &.limited {
+            grid-template-rows: fit-content(50%) minmax(min-content, 1fr);
+        }
     }
 
     .entity-attribute-mapping {
-        grid-template-columns: 1fr;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 1fr;
+        align-items: flex-end;
     }
-}
+
+    @media screen and (max-width: 1920px) {
+        .entity-attribute-mapping {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+
+        .card {
+            overflow-y: visible !important;
+        }
+
+        .file-preview,
+        .controls {
+            grid-template-columns: 1fr;
+            overflow-y: auto;
+            padding: 1rem;
+            border: 1px solid var(--bs-border-color-translucent);
+            border-radius: var(--bs-border-radius);
+        }
+
+        .entity-attribute-mapping {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>

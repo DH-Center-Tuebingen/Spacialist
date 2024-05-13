@@ -167,7 +167,7 @@
                         H: v.H.value,
                         T: v.T.value,
                         unit: v.unit.value,
-                    }
+                    };
                 }),
                 meta: computed(_ => {
                     return {
@@ -175,7 +175,7 @@
                         valid: ((v.B.meta.dirty && v.B.meta.valid) || !v.B.meta.dirty) &&
                                ((v.H.meta.dirty && v.H.meta.valid) || !v.H.meta.dirty) &&
                                ((v.T.meta.dirty && v.T.meta.valid) || !v.T.meta.dirty),
-                    }
+                    };
                 }),
                 B: {
                     value: vb,
@@ -208,7 +208,7 @@
             watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
-            watch(_ => v.meta, (newValue, oldValue) => {
+            watch(_ => v.value, (newValue, oldValue) => {
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
@@ -227,7 +227,7 @@
                 // STATE
                 state,
                 v,
-            }
+            };
         },
-    }
+    };
 </script>

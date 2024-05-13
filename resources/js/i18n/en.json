@@ -224,8 +224,13 @@
         "column": "Column | Columns",
         "add_column": "Add column",
         "geometry_type": "Geometry-Type",
-        "dependency": "Dependency",
-        "depends_on": "Depends on",
+        "dependency": {
+            "title": "Dependency",
+            "depends_on": {
+                "title": "Depends on",
+                "desc": "Visibility is based on another attribute (value)"
+            }
+        },
         "preference": "Preference | Preferences",
         "value": "Value",
         "allow_override": "Allow Override?",
