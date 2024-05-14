@@ -271,9 +271,9 @@ export const store = createStore({
                                     state.entity.data[k] = data.new_data[k];
                                 }
                             } else {
-                                entity.data[k].value = data.data[k];
+                                entity.data[k] = data.data[k];
                                 if(data.sync) {
-                                    state.entity.data[k].value = data.data[k];
+                                    state.entity.data[k] = data.data[k];
                                 }
                             }
                         }

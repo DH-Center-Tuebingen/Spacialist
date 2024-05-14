@@ -90,20 +90,18 @@
                             v-if="!element.is_system"
                             class="text-end col"
                         >
-                            {{ translateConcept(element.thesaurus_url) }}:
+                            {{ translateConcept(element.thesaurus_url) }}
                         </span>
                         <sup
                             v-if="hasEmitter('onMetadata')"
-                            class="clickable"
+                            class="clickable d-flex flex-row align-items-start top-0"
                             @click="onMetadataHandler(element)"
                         >
-                            <span :class="getCertaintyClass(state.attributeValues[element.id].certainty, 'text')">
-                                <i class="fas fa-fw fa-exclamation" />
-                            </span>
-                            <span v-if="state.attributeValues[element.id].comments_count > 0">
+                            <validity-indicator :state="certainty(element)" />
+                            <span v-if="hasComment(element)">
                                 <i class="fas fa-fw fa-comment" />
                             </span>
-                            <span v-if="metadataAddon(element.thesaurus_url)">
+                            <span v-if="hasBookmarks(element)">
                                 <i class="fas fa-fw fa-bookmark" />
                             </span>
                         </sup>
@@ -379,7 +377,6 @@
 
     import {
         getAttribute,
-        getCertaintyClass,
         translateConcept,
     } from '@/helpers/helpers.js';
 
@@ -415,6 +412,7 @@
     import SystemSeparator from '@/components/attribute/SystemSeparator.vue';
     import DefaultAttr from '@/components/attribute/Default.vue';
     import ModerationPanel from '@/components/moderation/Panel.vue';
+    import ValidityIndicator from './forms/indicators/ValidityIndicator.vue';
 
     export default {
         components: {
@@ -444,6 +442,7 @@
             'system-separator-attribute': SystemSeparator,
             'default-attribute': DefaultAttr,
             'attribute-moderation-panel': ModerationPanel,
+            'validity-indicator': ValidityIndicator,
         },
         props: {
             classes: {
@@ -767,6 +766,18 @@
             const hasEmitter = which => {
                 return !!attrs[which];
             };
+
+            const certainty = attribute => {
+                return state.attributeValues?.[attribute.id]?.certainty;
+            };
+
+            const hasComment = attribute => {
+                return state.attributeValues[attribute.id].comments_count > 0;
+            };
+            const hasBookmarks = attribute => {
+                return metadataAddon.value && metadataAddon.value(attribute.thesaurus_url);
+            };
+
             const handleLabelClick = (e, attrType) => {
                 if(attrType == 'boolean') {
                     e.preventDefault();
@@ -857,9 +868,9 @@
             return {
                 t,
                 // HELPERS
-                getCertaintyClass,
                 translateConcept,
                 // LOCAL
+                certainty,
                 handleSelectionUpdate,
                 clFromMetadata,
                 attributeClasses,
@@ -886,6 +897,8 @@
                 onDeleteHandler,
                 onMetadataHandler,
                 hasEmitter,
+                hasComment,
+                hasBookmarks,
                 handleLabelClick,
                 convertEntityValue,
                 // STATE

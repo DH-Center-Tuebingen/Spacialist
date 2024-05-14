@@ -74,23 +74,39 @@ export function getErrorMessages(error, suffix = '') {
     return msgObject;
 }
 
-export function getCertaintyClass(certainty, prefix = 'bg') {
-    let classes = {};
 
-    if(certainty <= 25) {
-        classes[`${prefix}-danger`] = true;
-    } else if(certainty <= 50) {
-        classes[`${prefix}-warning`] = true;
-    } else if(certainty <= 75) {
-        classes[`${prefix}-info`] = true;
-    } else {
-        classes[`${prefix}-success`] = true;
+const UNSET_CERTAINTY = {type: 'unset', icon: 'fas fa-fw fa-question', rangeFunction: (certainty) => certainty == null || certainty < 0 || certainty > 100};
+export function getCertainties() {
+    function inRangeOf(lowIn, highEx) {
+        return (certainty) => parseFloat(certainty) >= lowIn && parseFloat(certainty) < highEx;
+    }
+    return [
+        {type: 'danger', icon: 'fas fa-fw fa-exclamation', rangeFunction: inRangeOf(0, 25)},
+        {type: 'warning', icon: 'fas fa-fw fa-exclamation', rangeFunction: inRangeOf(25, 50)},
+        {type: 'info', icon: 'fas fa-fw fa-exclamation', rangeFunction: inRangeOf(50, 100)},
+        {type: 'success', icon: 'fas fa-fw fa-check', rangeFunction: (certainty) => certainty === 100},
+        UNSET_CERTAINTY,
+    ];
+}
+
+export function getCertainty(value) {
+    for(const certainty of getCertainties()) {
+        if(certainty.rangeFunction(value)) {
+            return certainty;
+        }
     }
 
+    return UNSET_CERTAINTY;
+}
+
+export function getCertaintyClass(certainty, prefix = 'bg') {
+    const classes = [];
+    const cert = getCertainty(certainty);
+    classes.push(`${prefix}-${cert.type}`);
     return classes;
 }
 
-export const multiselectResetClasslist = { clear: 'multiselect-clear multiselect-clear-reset' };
+export const multiselectResetClasslist = {clear: 'multiselect-clear multiselect-clear-reset'};
 
 export function getInputCursorPosition(input) {
     const div = document.createElement('div');
