@@ -102,7 +102,7 @@
                                     class="blockquote-footer fw-medium mb-0"
                                     :title="reference.bibliography.author"
                                 >
-                                    {{ trimAuthors(reference.bibliography.author) }} in <cite :title="reference.bibliography.title">
+                                    {{ formatAuthors(reference.bibliography.author) }} in <cite :title="reference.bibliography.title">
                                         {{ reference.bibliography.title }} ,{{ reference.bibliography.year }}
                                     </cite>
                                 </figcaption>
@@ -202,7 +202,7 @@
                                             <span class="fw-medium">{{ value.title }}</span>
                                             -
                                             <cite class="small">
-                                                {{ trimAuthors(value.author) }} ({{ value.year }})
+                                                {{ formatAuthors(value.author) }} ({{ value.year }})
                                             </cite>
                                         </div>
                                     </div>
@@ -213,7 +213,7 @@
                                             <span class="fw-medium">{{ option.title }}</span>
                                         </div>
                                         <cite class="small">
-                                            {{ trimAuthors(option.author) }} <span class="fw-light">({{ option.year }})</span>
+                                            {{ formatAuthors(option.author) }} <span class="fw-light">({{ option.year }})</span>
                                         </cite>
                                     </div>
                                 </template>
@@ -278,7 +278,7 @@
         addReference,
     } from '@/api.js';
     import {
-        trimAuthors,
+        formatAuthors,
     } from '@/helpers/bibliography.js';
     import {
         date,
@@ -463,7 +463,7 @@
                 can,
                 getCertaintyClass,
                 translateConcept,
-                trimAuthors,
+                formatAuthors,
                 date,
                 // PROPS
                 // LOCAL

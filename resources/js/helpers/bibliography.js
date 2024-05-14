@@ -60,7 +60,7 @@ export const bibliographyTypes = [
         name: 'conference',
         id: 5,
         fields: [
-                'author', 'title', 'booktitle', 'year', 'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note', 'email', 'url'
+            'author', 'title', 'booktitle', 'year', 'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note', 'email', 'url'
         ],
         mandatory: {
             author: true,
@@ -89,7 +89,7 @@ export const bibliographyTypes = [
         name: 'inproceedings',
         id: 7,
         fields: [
-                'author', 'title', 'booktitle', 'year', 'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note', 'email', 'url'
+            'author', 'title', 'booktitle', 'year', 'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note', 'email', 'url'
         ],
         mandatory: {
             author: true,
@@ -172,16 +172,64 @@ export const bibliographyTypes = [
     }
 ];
 
-export const trimAuthors = (authors, count = 2) => {
+export const formatAuthors = (authors) => {
     if(!authors) return authors;
 
-    const authorList = authors.split(' and ');
+    const authorsList = authors.split(/\s+and\s+/g);
 
-    // only add 'et. al.' to `count` or more authors
-    // otherwise return original authors
-    if(authorList.length <= count) {
-        return authors;
+    if(authorsList.length > 2) {
+        return formatAuthorName(authorsList[0]) + ' et al.';
+    } else {
+        return authorsList.map(author => formatAuthorName(author)).join(' and ');
+    }
+};
+
+export const formatAuthorName = (author) => {
+    let { firstNames, lastName, suffix } = extractAuthorNames(author);
+
+    // For the name "Martin Luther King Jr" we want the result to be "King, M. L., Jr"
+    const firstName = firstNames.map(name => `${name.charAt(0).toUpperCase()}.`).join(' ');
+
+    if(suffix) {
+        return `${lastName}, ${firstName}, ${suffix}`;
+    } else if(firstName != '') {
+        return `${lastName}, ${firstName}`;
+    } else {
+        return lastName;
+    }
+};
+
+const extractAuthorNames = (author) => {
+
+    let names = author.split(/\s*,\s*/g);
+    let firstNames;
+    let lastName;
+    let suffix;
+
+    if(names.length === 0) {
+        return author;
+    } else if(names.length === 1) {
+        // When author is in the format: "First Last"
+        names = names[0].split(/\s+/g);
+
+        suffix = null;
+        lastName = names.pop();
+        firstNames = names;
+    } else {
+        // When author is in the format: "Last, Suffix, First"
+        lastName = names.shift();
+        firstNames = names.pop();
+        firstNames = firstNames.split(/\s+/g);
+
+        if(names.length > 0) {
+            suffix = names.shift();
+        }
+
     }
 
-    return authorList.slice(0, count).join(' and ') + ' et al.';
+    return {
+        firstNames,
+        lastName,
+        suffix
+    };
 };
