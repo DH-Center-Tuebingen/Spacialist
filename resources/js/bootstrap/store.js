@@ -879,7 +879,15 @@ export const store = createStore({
                 concepts: state => state.concepts,
                 entities: state => state.entities,
                 entityTypes: state => state.entityTypes,
-                entityTypeAttributes: state => id => state.entityTypeAttributes[id],
+                entityTypeAttributes: state => (id, exclude = false) => {
+                    if(exclude === true) {
+                        return state.entityTypeAttributes[id].filter(a => a.datatype != 'system-separator');
+                    } else if(Array.isArray(exclude)) {
+                        return state.entityTypeAttributes[id].filter(a => !exclude.includes(a.datatype));
+                    }
+
+                    return state.entityTypeAttributes[id];
+                },
                 entityTypeColors: state => id => state.entityTypeColors[id],
                 geometryTypes: state => state.geometryTypes,
                 mainView: state => state.mainView,

@@ -353,7 +353,7 @@
                     state.availableAttributes = [];
                     return;
                 } else {
-                    state.availableAttributes = store.getters.entityTypeAttributes(e.id) || [];
+                    state.availableAttributes = store.getters.entityTypeAttributes(e.id, true) || [];
                 }
                 guessAttributeMapping();
             };
