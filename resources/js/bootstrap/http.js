@@ -1,5 +1,5 @@
 import axios from 'axios';
-import router from '@/bootstrap/router.js';
+import router from '%router';
 
 import {
     throwError,

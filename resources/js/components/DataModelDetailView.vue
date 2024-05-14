@@ -58,6 +58,8 @@
                             :track-by="'thesaurus_url'"
                             :value-prop="'id'"
                             :options="state.minimalEntityTypes"
+                            :close-on-select="false"
+                            :close-on-deelect="false"
                             :placeholder="t('global.select.placeholder')"
                         >
                             <template #option="{ option }">
@@ -114,7 +116,7 @@
                     <h4>Drag attributes here</h4>
                 </div>
                 <attribute-list
-                    class="h-100 scroll-y-auto scroll-x-hidden"
+                    class="h-100 overflow-y-auto overflow-x-hidden"
                     group="attribute-selection"
                     :attributes="state.entityAttributes"
                     :values="state.entityValues"
@@ -182,7 +184,7 @@
                 const et = state.entityType;
                 const data = {
                     'is_root': et.is_root || false,
-                    'sub_entity_types': (et.sub_entity_types || []).map(t => t.id),
+                    'sub_entity_types': et.sub_entity_types || [],
                 };
 
                 updateEntityTypeRelation(et.id, data).then(_ => {
@@ -358,7 +360,7 @@
                             )
                             ;
                 }),
-            })
+            });
 
             // RETURN
             return {
@@ -376,7 +378,7 @@
                 // PROPS
                 // STATE
                 state,
-            }
+            };
         },
         // methods: {
         //     editEntityAttribute(attribute, options) {
@@ -478,5 +480,5 @@
         //         }
         //     },
         // },
-    }
+    };
 </script>

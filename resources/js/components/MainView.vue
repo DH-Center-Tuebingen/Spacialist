@@ -6,9 +6,7 @@
             v-dcan="'entity_read'"
             :class="`h-100 d-flex flex-column col-md-${state.columnPref.left}`"
         >
-            <entity-tree
-                class="col px-0 h-100"
-            />
+            <entity-tree class="col px-0 h-100" />
         </div>
         <div
             v-if="state.columnPref.center > 0"
@@ -38,8 +36,8 @@
                 >
                     <router-link
                         class="nav-link"
-                        :class="{active: state.tab == plugin.key}"
-                        :to="{ query: { tab: plugin.key }}"
+                        :class="{ active: state.tab == plugin.key }"
+                        :to="{ query: { tab: plugin.key } }"
                         append
                     >
                         <i
@@ -52,7 +50,7 @@
                     <a
                         href="#"
                         class="nav-link"
-                        :class="{active: state.tab == 'references', disabled: !state.entity.id}"
+                        :class="{ active: state.tab == 'references', disabled: !state.entity.id }"
                         @click.prevent="setTab('references')"
                     >
                         <i class="fas fa-fw fa-bookmark" /> {{ t('main.entity.references.title') }}
@@ -61,13 +59,11 @@
             </ul>
             <div class="mt-2 col px-0 overflow-hidden">
                 <keep-alive>
-                    <component
-                        :is="state.tabComponent"
-                    />
+                    <component :is="state.tabComponent" />
                 </keep-alive>
                 <div
                     v-show="isTab('references') && !!state.entity.id"
-                    class="h-100 scroll-y-auto"
+                    class="h-100 overflow-y-auto"
                 >
                     <p
                         v-if="!state.hasReferences"
@@ -75,55 +71,62 @@
                     >
                         {{ t('main.entity.references.empty') }}
                     </p>
-                    <div
+                    <template
                         v-for="(referenceGroup, key) in state.entity.references"
                         v-else
                         :key="key"
-                        class="reference-group"
                     >
-                        <h5 class="mb-1 fw-medium">
-                            <a
-                                href="#"
-                                class="text-decoration-none"
-                                @click.prevent="showMetadataForReferenceGroup(referenceGroup)"
-                            >
-                                {{ translateConcept(key) }}
-                            </a>
-                        </h5>
-                        <div class="list-group ps-2 w-90">
-                            <a
-                                v-for="(reference, i) in referenceGroup"
-                                :key="i"
-                                class="list-group-item list-group-item-action d-flex flex-row"
-                            >
-                                <div class="flex-grow-1">
-                                    <blockquote class="blockquote fs-09">
-                                        <p class="text-muted">
-                                            {{ reference.description }}
-                                        </p>
-                                    </blockquote>
-                                    <figcaption class="blockquote-footer fw-medium mb-0 d-flex gap-1">
-                                        <span :title="reference.bibliography.author">
-                                            {{ trimAuthors(reference.bibliography.author) }} in <cite :title="reference.bibliography.title">
-                                                {{ reference.bibliography.title }} ,{{ reference.bibliography.year }}
-                                            </cite>
+                        <div
+                            v-if="referenceGroup.length > 0"
+                            class="reference-group"
+                        >
+                            <h5 class="mb-2 fw-medium">
+                                <a
+                                    href="#"
+                                    class="text-decoration-none"
+                                    @click.prevent="showMetadataForReferenceGroup(referenceGroup)"
+                                >
+                                    {{ translateConcept(key) }}
+                                </a>
+                            </h5>
+                            <div class="list-group w-90">
+                                <div
+                                    v-for="(reference, i) in referenceGroup"
+                                    :key="i"
+                                    class="list-group-item pt-0"
+                                >
+                                    <header class="text-end">
+                                        <span class="text-muted fw-light small">
+                                            {{ date(reference.updated_at) }}
                                         </span>
-                                        <a
-                                            href="#"
-                                            @click.prevent="openLiteratureInfo(reference)"
-                                        >
-                                            <i class="fas fa-fw fa-info-circle" />
-                                        </a>
-                                    </figcaption>
+                                    </header>
+                                    <div>
+                                        <blockquote class="blockquote fs-09 mb-4">
+                                            <p class="text-muted">
+                                                {{ reference.description }}
+                                            </p>
+                                        </blockquote>
+                                        <figcaption class="blockquote-footer fw-medium mb-0 d-flex gap-1">
+                                            <span :title="reference.bibliography.author">
+                                                {{ trimAuthors(reference.bibliography.author) }} in
+                                                <cite :title="reference.bibliography.title">
+                                                    {{ reference.bibliography.title }} ,{{ reference.bibliography.year
+                                                    }}
+                                                </cite>
+                                                <a
+                                                    href="#"
+                                                    class="ms-1"
+                                                    @click.prevent="openLiteratureInfo(reference)"
+                                                >
+                                                    <i class="fas fa-fw fa-info-circle" />
+                                                </a>
+                                            </span>
+                                        </figcaption>
+                                    </div>
                                 </div>
-                                <div>
-                                    <span class="text-muted fw-light small">
-                                        {{ date(reference.updated_at) }}
-                                    </span>
-                                </div>
-                            </a>
+                            </div>
                         </div>
-                    </div>
+                    </template>
                 </div>
             </div>
         </div>
@@ -136,7 +139,7 @@
         onMounted,
         reactive,
     } from 'vue';
-    
+
     import {
         onBeforeRouteUpdate,
         onBeforeRouteLeave,
@@ -149,23 +152,26 @@
     } from 'vue-router';
 
     import store from '@/bootstrap/store.js';
-    import router from '@/bootstrap/router.js';
-
-    import { useToast } from '@/plugins/toast.js';
+    import router from '%router';
 
     import {
         translateConcept,
     } from '@/helpers/helpers.js';
+    
     import {
         trimAuthors,
     } from '@/helpers/bibliography.js';
+
     import {
         date,
     } from '@/helpers/filters.js';
+
     import {
         canShowReferenceModal,
         showLiteratureInfo,
     } from '@/helpers/modal.js';
+
+    import { useToast } from '@/plugins/toast.js';
 
     export default {
         setup(props, context) {
@@ -229,10 +235,17 @@
                 }),
                 concepts: computed(_ => store.getters.concepts),
                 entity: computed(_ => store.getters.entity),
-                hasReferences: computed(_ => !!state.entity.references && Object.keys(state.entity.references).length > 0),
+                hasReferences: computed(_ => {
+                    const isNotSet = !state.entity.references;
+                    if(isNotSet) return false;
+
+                    const isEmpty = !Object.keys(state.entity.references).length > 0;
+                    if(isEmpty) return false;
+                    return Object.values(state.entity.references).some(v => v.length > 0);
+                }),
                 entityTypes: computed(_ => store.getters.entityTypes),
                 columnPref: computed(_ => store.getters.preferenceByKey('prefs.columns')),
-                isDetailLoaded: computed(_ => currentRoute.name == 'entitydetail'),
+                isDetailLoaded: computed(_ => store.getters.entity?.id > 0),
                 tabPlugins: computed(_ => store.getters.slotPlugins('tab')),
             });
 
@@ -251,79 +264,79 @@
                 store.dispatch('setMainViewTab', null);
             });
 
-            // RETURN
-            return {
-                t,
-                // HELPERS
-                translateConcept,
-                trimAuthors,
-                date,
-                // LOCAL
-                setTab,
-                isTab,
-                showMetadataForReferenceGroup,
-                openLiteratureInfo,
-                // STATE
-                state,
-            };
-        }
-        // beforeRouteUpdate(to, from, next) {
-        //     if(to.query.tab) {
-        //         this.setTabOrPlugin(to.query.tab);
-        //     }
-        // },
-        // mounted() {},
-        // methods: {
-        //     setTabOrPlugin(key) {
-        //         if(key == 'references') {
-        //             this.setActiveTab('references');
-        //         } else {
-        //             const plugins = this.$getTabPlugins();
-        //             const plugin = plugins.find(p => p.key == key);
-        //             if(plugin) {
-        //                 this.setActivePlugin(plugin);
-        //             }
-        //         }
-        //     },
-        //     setActiveTab: function(tab) {
-        //         if(tab == 'references') {
-        //             if(!this.selectedEntity.id) return;
-        //             this.activePlugin = '';
-        //         }
-        //         this.tab = tab;
-        //     },
-        //     setActivePlugin: function(plugin) {
-        //         this.setActiveTab(plugin.key);
-        //         this.activePlugin = plugin.tag;
-        //     },
-        //     updateLink(geoId, entityId) {
-        //         if(entityId != this.selectedEntity.id) {
-        //             return;
-        //         }
-        //         this.selectedEntity.geodata_id = geoId;
-        //     },
-        // },
-        // data() {
-        //     return {
-        //         plugins: this.$getTabPlugins(),
-        //         activePlugin: '',
-        //     }
-        // },
-        // computed: {
-        //     tab: {
-        //         get() {
-        //             if(this.defaultKey) return this.defaultKey;
-        //             else if(this.plugins && this.plugins[0]) {
-        //                 this.activePlugin = this.plugins[0].tag;
-        //                 return this.plugins[0].key;
-        //             } else {
-        //                 return '';
-        //             }
-        //         },
-        //         set(newValue) {
-        //             this.defaultKey = newValue;
-        //         }
-        //     }
-        // }
-    }
+                // RETURN
+                return {
+                    t,
+                    // HELPERS
+                    translateConcept,
+                    trimAuthors,
+                    date,
+                    // LOCAL
+                    setTab,
+                    isTab,
+                    showMetadataForReferenceGroup,
+                    openLiteratureInfo,
+                    // STATE
+                    state,
+                };
+            }
+            // beforeRouteUpdate(to, from, next) {
+            //     if(to.query.tab) {
+            //         this.setTabOrPlugin(to.query.tab);
+            //     }
+            // },
+            // mounted() {},
+            // methods: {
+            //     setTabOrPlugin(key) {
+            //         if(key == 'references') {
+            //             this.setActiveTab('references');
+            //         } else {
+            //             const plugins = this.$getTabPlugins();
+            //             const plugin = plugins.find(p => p.key == key);
+            //             if(plugin) {
+            //                 this.setActivePlugin(plugin);
+            //             }
+            //         }
+            //     },
+            //     setActiveTab: function(tab) {
+            //         if(tab == 'references') {
+            //             if(!this.selectedEntity.id) return;
+            //             this.activePlugin = '';
+            //         }
+            //         this.tab = tab;
+            //     },
+            //     setActivePlugin: function(plugin) {
+            //         this.setActiveTab(plugin.key);
+            //         this.activePlugin = plugin.tag;
+            //     },
+            //     updateLink(geoId, entityId) {
+            //         if(entityId != this.selectedEntity.id) {
+            //             return;
+            //         }
+            //         this.selectedEntity.geodata_id = geoId;
+            //     },
+            // },
+            // data() {
+            //     return {
+            //         plugins: this.$getTabPlugins(),
+            //         activePlugin: '',
+            //     }
+            // },
+            // computed: {
+            //     tab: {
+            //         get() {
+            //             if(this.defaultKey) return this.defaultKey;
+            //             else if(this.plugins && this.plugins[0]) {
+            //                 this.activePlugin = this.plugins[0].tag;
+            //                 return this.plugins[0].key;
+            //             } else {
+            //                 return '';
+            //             }
+            //         },
+            //         set(newValue) {
+            //             this.defaultKey = newValue;
+            //         }
+            //     }
+            // }
+        };
 </script>

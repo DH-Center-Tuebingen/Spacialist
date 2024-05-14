@@ -132,7 +132,7 @@
             watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
-            watch(v.meta, (newValue, oldValue) => {
+            watch(_ => v.value, (newValue, oldValue) => {
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
@@ -152,7 +152,7 @@
                 // STATE
                 state,
                 v,
-            }
+            };
         },
-    }
+    };
 </script>
