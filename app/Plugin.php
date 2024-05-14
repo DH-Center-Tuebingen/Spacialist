@@ -127,7 +127,7 @@ class Plugin extends Model
         $nonExistingPlugins = self::whereNotIn('name', $pluginNames)->get();
 
         foreach($nonExistingPlugins as $removedPlugin) {
-            $removedPlugin->delete();
+            $removedPlugin->handleRemove();
         }
     }
 
@@ -196,10 +196,7 @@ class Plugin extends Model
     }
 
     public function handleUninstall() {
-        $this->rollbackMigrations();
         $this->removeScript();
-        $this->removePermissions();
-        $this->uninstallPresets();
 
         $this->installed_at = null;
         $this->save();
@@ -209,9 +206,15 @@ class Plugin extends Model
         // if installed, first rollback migrations and delete all files and presets
         if(isset($this->installed_at)) {
             $this->handleUninstall();
+            $this->rollbackMigrations();
+            $this->removePermissions();
+            $this->uninstallPresets();
         }
 
+        $this->removePreferences();
         sp_remove_dir(base_path("app/Plugins/$this->name"));
+
+        $this->delete();
     }
 
     public function getPermissions() {
@@ -344,5 +347,10 @@ class Plugin extends Model
 
     private function uninstallPresets() {
         RolePresetPlugin::where('from', $this->id)->delete();
+    }
+
+    private function removePreferences() {
+        $id = Str::kebab($this->name);
+        Preference::where('label', 'ilike', "plugin.$id.%")->delete();
     }
 }
