@@ -65,7 +65,9 @@ All notable changes to this project will be documented in this file.
 - Storing _false_ values in _Boolean_ attribute
 - Adding references to a newly added/saved attribute value
 - Empty ORCID or phone number prevented users from saving the profile
+- Activity was not shown/blank
 - Adding empty table was possible and error was thrown
+
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
