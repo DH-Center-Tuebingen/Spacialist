@@ -24,7 +24,7 @@
                     :message="state.htmlMessage"
                     :type="'error'"
                     :noicon="false"
-                    :icontext="'Error Message'"
+                    :icontext="t('global.error.alert_title')"
                 />
             </div>
             <div class="modal-footer">
@@ -74,19 +74,33 @@
             // DATA
             const state = reactive({
                 htmlMessage: computed(_ => {
-                    let msg = `<div class='lead'>
+                    const i18nMsg =
+                        data.value.data.on_index && data.value.data.on_value
+                        ?
+                        t('main.importer.modal.error.msg_detail', {
+                            count: data.value.data.count,
+                            name: data.value.data.entry,
+                            index: data.value.data.on_index,
+                            col_name: data.value.data.on_name,
+                            datatype: data.value.data.on,
+                            value: data.value.data.on_value,
+                        })
+                        :
+                        t('main.importer.modal.error.msg_detail', {
+                            count: data.value.data.count,
+                            name: data.value.data.entry,
+                            value: data.value.data.on,
+                        });
+
+                    const msg =
+                    `<div class='lead'>
                         ${data.value.message}
                     </div>
-                    <hr/>`;
-                    if(data.value.data.on_index && data.value.data.on_value) {
-                        msg += `<div>
-                            Error while importing entry in line ${data.value.data.count} (<span class='fst-italic'>${data.value.data.entry}</span>) while parsing column ${data.value.data.on_index} (<span class='fst-italic'>${data.value.data.on}</span>) with invalid value <span class='fw-bold'>${data.value.data.on_value}</span>
-                        </div>`;
-                    } else {
-                        msg += `<div>
-                            Error while importing entry in line ${data.value.data.count} (<span class='fst-italic'>${data.value.data.entry}</span>): <span class='fw-bold'>${data.value.data.on}</span>
-                        </div>`;
-                    }
+                    <hr/>
+                    <div>
+                        ${i18nMsg}
+                    </div>
+                    `;
                     return msg;
                 })
             });

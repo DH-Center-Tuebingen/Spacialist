@@ -26,7 +26,8 @@ class AttributeImportException extends Exception {
             entry: $entry,
             on: $this->data->type,
             on_index: $this->data->columnIndex,
-            on_value: $this->data->columnName
+            on_value: $this->data->columnValue,
+            on_name: $this->data->columnName
         );
 
         return [

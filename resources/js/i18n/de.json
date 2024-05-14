@@ -68,7 +68,7 @@
             "confirm_and_save": "Nein, Speichern und fortfahren"
         },
         "error": {
-            "alert_title": "Fehlermeldung:",
+            "alert_title": "Fehlermeldung",
             "info_issue": "Wenn du denkst, dass diese Fehlermeldung ein Bug ist, schaue in unserem <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues\" target=\"_blank\">Bugtracker</a> auf Github nach, ob der Fehler schon gemeldet wurde oder sogar bereits in einer aktuelleren Version <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues?q=is:issue+is:closed\" target=\"_blank\">geschlossen</a> wurde (Deine aktuelle Version findest du über Einstellungen > <i class=\"fas fa-fw fa-info-circle\"></i> Über). Wenn es weder gemeldet, noch geschlossen ist, kannst du gerne einen <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues/new\" target=\"_blank\">neuen Bug</a> melden.",
             "occur": "Fehler aufgetreten",
             "headers": "Kopfzeilen",
@@ -810,6 +810,12 @@
             "error": {
                 "file_read": "Datei konnte nicht gelesen werden.",
                 "file_read_abort": "Datei-Lesevorgang abgebrochen."
+            },
+            "modal": {
+                "error": {
+                    "msg_detail": "Fehler beim Importieren des Eintrags in Zeile {count} (<span class='fst-italic'>{name}</span>) in Spalte <span class='fw-bold'>{col_name}</span> (#{index}) mit Datentyp <span class='fst-italic'>{datatype}</span> und dem fehlerhaften Wert <span class='fw-bold'>{value}</span>",
+                    "msg": "Fehler beim Importieren des Eintrags in Zeile {count} (<span class='fst-italic'>{name}</span>): <span class='fw-bold'>{value}</span>"
+                }
             }
         },
         "map": {

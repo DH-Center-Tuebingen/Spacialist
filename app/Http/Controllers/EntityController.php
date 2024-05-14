@@ -584,7 +584,7 @@ class EntityController extends Controller {
                     $entityId = $entity['entity']->id;
                 }
 
-                $this->setOrUpdateImportedAttributes($entityId, $row, $attributeIdToColumnIdxMapping, $attributeTypes, $user);
+                $this->setOrUpdateImportedAttributes($entityId, $row, $headerRow, $attributeIdToColumnIdxMapping, $attributeTypes, $user);
                 $changedEntities[] = $entityId;
             } catch (AttributeImportException $e) {
                 DB::rollBack();
@@ -628,7 +628,7 @@ class EntityController extends Controller {
         ], $entityTypeId, $user, $rootEntityId);
     }
 
-    function setOrUpdateImportedAttributes($entity_id, $row, $attributeIdToColumnIdxMapping, $attributeTypes, $user) {
+    function setOrUpdateImportedAttributes($entity_id, $row, $headerRow, $attributeIdToColumnIdxMapping, $attributeTypes, $user) {
         foreach ($attributeIdToColumnIdxMapping as $key => $colIdx) {
             $aid = intval($key);
             $type = $attributeTypes[$aid];
@@ -647,7 +647,8 @@ class EntityController extends Controller {
                     new AttributeImportExceptionStruct(
                         type: $type,
                         columnIndex: $colIdx + 1,
-                        columnName: $row[$colIdx]
+                        columnValue: $row[$colIdx],
+                        columnName: $headerRow[$colIdx]
                     )
                 );
             }
