@@ -104,7 +104,8 @@
                                             href="#"
                                             @click.prevent="exportFile('search')"
                                         >
-                                            <i class="fas fa-fw fa-file-export" /> {{ t('main.bibliography.export_search') }}
+                                            <i class="fas fa-fw fa-file-export" />
+                                            {{ t('main.bibliography.export_search') }}
                                         </a>
                                     </li>
                                 </ul>
@@ -391,13 +392,15 @@
                         :key="entry.id"
                     >
                         <td class="fw-bold">
-                            {{ i+1 }}
+                            {{ i + 1 }}
                         </td>
                         <td>
                             {{ entry.type }}
                         </td>
                         <td v-html="formatBibtexAndShowHighlight(entry.citekey)" />
-                        <td v-html="formatBibtexAndShowHighlight(entry.author)" />
+                        <td>
+                            {{ formatAuthors(entry.author, 4) }}
+                        </td>
                         <td
                             v-if="state.showAllFields"
                             v-html="formatBibtexAndShowHighlight(entry.email)"
@@ -561,6 +564,7 @@
 
     import {
         bibliographyTypes,
+        formatAuthors,
     } from '@/helpers/bibliography.js';
 
     import {
@@ -612,15 +616,15 @@
             };
             const showNewItemModal = _ => {
                 if(!can('bibliography_create')) return;
-                
-                showBibliographyEntry({fields: {}}, _ => {
+
+                showBibliographyEntry({ fields: {} }, _ => {
                     if(state.allEntries.length < chunkSize) {
                         state.entriesLoaded++;
                     }
                 });
             };
             const onEntryDeleted = entry => {
-                const label = t('main.bibliography.toast.delete.msg', {name: entry.title});
+                const label = t('main.bibliography.toast.delete.msg', { name: entry.title });
                 const title = t('main.bibliography.toast.delete.title');
                 toast.$toast(label, title, {
                     channel: 'success',
@@ -632,7 +636,7 @@
                 // Enable automatic upload
                 if(!!newFile && (Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error)) {
                     if(!newFile.active) {
-                        newFile.active = true
+                        newFile.active = true;
                     }
                 }
             };
@@ -642,7 +646,7 @@
                     const lng = data.length;
                     const lngAdd = data.filter(item => item.added).length;
                     const lngUpd = lng - lngAdd;
-                    const label = t('main.bibliography.toast.import.msg', {cnt: lngAdd, cnt_upd: lngUpd});
+                    const label = t('main.bibliography.toast.import.msg', { cnt: lngAdd, cnt_upd: lngUpd });
                     const title = t('main.bibliography.toast.import.title');
                     toast.$toast(label, title, {
                         channel: 'success',
@@ -750,7 +754,7 @@
 
             const formatBibtexAndShowHighlight = text => {
                 if(!text) return '';
-                text = formatBibtexText(text)
+                text = formatBibtexText(text);
                 return highlight(text, state.query);
             };
 
@@ -764,6 +768,7 @@
                 debouncedSearch,
                 editItem,
                 exportFile,
+                formatAuthors,
                 formatBibtexAndShowHighlight,
                 getNextEntries,
                 importFile,
@@ -776,5 +781,5 @@
                 state,
             };
         },
-    }
+    };
 </script>
