@@ -491,7 +491,7 @@ class EntityController extends Controller {
         $parentIdx = null;
         $nameIdx = null;
         while (($row = fgetcsv($handle, 0, $metadata['delimiter'])) !== false) {
-            $row = array_map(fn ($column) => trim($column), $row);
+            $row = sp_trim_array($row);
 
             if (!$headerRead) {
                 $headerRead = true;

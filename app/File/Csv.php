@@ -150,7 +150,7 @@ class Csv extends Parser {
     }
 
     private function trimRow($row) {
-        return array_map(fn($r) => trim($r), $row);
+        return sp_trim_array($row);
     }
 
     private function headerFromRow($row) {
