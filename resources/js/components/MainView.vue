@@ -107,20 +107,7 @@
                                             </p>
                                         </blockquote>
                                         <figcaption class="blockquote-footer fw-medium mb-0 d-flex gap-1">
-                                            <span :title="reference.bibliography.author">
-                                                {{ formatAuthors(reference.bibliography.author) }} in
-                                                <cite :title="reference.bibliography.title">
-                                                    {{ reference.bibliography.title }} ,{{ reference.bibliography.year
-                                                    }}
-                                                </cite>
-                                                <a
-                                                    href="#"
-                                                    class="ms-1"
-                                                    @click.prevent="openLiteratureInfo(reference)"
-                                                >
-                                                    <i class="fas fa-fw fa-info-circle" />
-                                                </a>
-                                            </span>
+                                            <Citation :value="reference.bibliography" />
                                         </figcaption>
                                     </div>
                                 </div>
@@ -159,21 +146,21 @@
     } from '@/helpers/helpers.js';
 
     import {
-        formatAuthors,
-    } from '@/helpers/bibliography.js';
-
-    import {
         date,
     } from '@/helpers/filters.js';
 
     import {
         canShowReferenceModal,
-        showLiteratureInfo,
     } from '@/helpers/modal.js';
 
     import { useToast } from '@/plugins/toast.js';
 
+    import Citation from '@/components/bibliography/Citation.vue';
+
     export default {
+        components: {   
+            Citation,
+        },
         setup(props, context) {
             const { t } = useI18n();
             const currentRoute = useRoute();
@@ -217,9 +204,6 @@
                         simple: true,
                     });
                 }
-            };
-            const openLiteratureInfo = reference => {
-                showLiteratureInfo(reference.bibliography.id);
             };
 
             // DATA
@@ -269,13 +253,11 @@
                     t,
                     // HELPERS
                     translateConcept,
-                    formatAuthors,
                     date,
                     // LOCAL
                     setTab,
                     isTab,
                     showMetadataForReferenceGroup,
-                    openLiteratureInfo,
                     // STATE
                     state,
                 };

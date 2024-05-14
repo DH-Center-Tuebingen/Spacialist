@@ -172,15 +172,19 @@ export const bibliographyTypes = [
     }
 ];
 
-export const formatAuthors = (authors) => {
+export const formatAuthors = (authors, shortenWhenMoreThan = 0) => {
     if(!authors) return authors;
 
     const authorsList = authors.split(/\s+and\s+/g);
 
-    if(authorsList.length > 2) {
+    if(shortenWhenMoreThan > 0 && authorsList.length > shortenWhenMoreThan) {
         return formatAuthorName(authorsList[0]) + ' et al.';
     } else {
-        return authorsList.map(author => formatAuthorName(author)).join(' and ');
+        if(authorsList.length === 1) return formatAuthorName(authorsList[0]);
+        else {
+            let last = authorsList.pop();
+            return authorsList.map(author => formatAuthorName(author)).join(', ') + ' and ' + formatAuthorName(last);
+        }
     }
 };
 
@@ -188,7 +192,7 @@ export const formatAuthorName = (author) => {
     let { firstNames, lastName, suffix } = extractAuthorNames(author);
 
     // For the name "Martin Luther King Jr" we want the result to be "King, M. L., Jr"
-    const firstName = firstNames.map(name => `${name.charAt(0).toUpperCase()}.`).join(' ');
+    const firstName = firstNames.map(name => `${name.charAt(0)}.`).join(' ');
 
     if(suffix) {
         return `${lastName}, ${firstName}, ${suffix}`;
