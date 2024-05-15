@@ -28,7 +28,6 @@
             <div
                 id="bibtex-item-modal"
                 class="modal-body"
-                :class="state.scrollStateBodyClasses"
             >
                 <alert
                     :message="t('main.bibliography.modal.paste_info')"
@@ -52,13 +51,18 @@
                         <div class="col-md-9">
                             <multiselect
                                 v-model="state.data.type"
-                                :classes="multiselectResetClasslist"
+                                class="multiselect-modal"
+                                :classes="{
+                                    ...multiselectResetClasslist,
+                                    'dropdown': 'multiselect-dropdown multiselect-modal-dropdown'
+                                }"
                                 :label="'name'"
                                 :track-by="'name'"
                                 :object="true"
                                 :value-prop="'id'"
                                 :searchable="true"
                                 :options="bibliographyTypes"
+                                :append-to-body="true"
                                 :placeholder="t('global.select.placeholder')"
                             >
                                 <template #option="{ option }">
@@ -314,13 +318,6 @@
                         return ['overflow-y-auto', 'overflow-x-hidden'];
                     } else {
                         return ['overflow-visible'];
-                    }
-                }),
-                scrollStateBodyClasses: computed(_ => {
-                    if(state.data.type) {
-                        return [];
-                    } else {
-                        return ['nonscrollable'];
                     }
                 }),
                 file: computed(_ => state.fileContainer.length > 0 ? state.fileContainer[0] : null),
