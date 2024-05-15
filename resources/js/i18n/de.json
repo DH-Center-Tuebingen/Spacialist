@@ -732,6 +732,7 @@
             "add": "Neuen Literatur-Eintrag anlegen",
             "import": "BibTeX-Datei importieren",
             "export": "BibTeX-Datei exportieren",
+            "export_search": "Suchtreffer als BibTeX-Datei exportieren",
             "show_all_fields": "Alle Felder anzeigen",
             "column": {
                 "citekey": "Zitations-Schlüssel",

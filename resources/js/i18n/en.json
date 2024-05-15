@@ -732,6 +732,7 @@
             "add": "Add new Bibliography-Entry",
             "import": "Import BibTeX-File",
             "export": "Export BibTeX-File",
+            "export_search": "Export search results to BibTeX-File",
             "show_all_fields": "Show all fields",
             "column": {
                 "citekey": "Citation-Key",

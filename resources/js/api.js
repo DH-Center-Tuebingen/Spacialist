@@ -260,9 +260,14 @@ async function fetchComments(id, type, aid = null) {
     return $httpQueue.add(() => http.get(endpoint).then(response => response.data).catch(error => { throw error; }));
 }
 
-export async function getBibtexFile() {
+export async function exportBibtexFile(selection) {
+    const data = {};
+    if(!!selection) {
+        data.selection = selection;
+    }
+
     return await $httpQueue.add(
-        () => http.get('bibliography/export').then(response => response.data)
+        () => http.post('bibliography/export', data).then(response => response.data)
     );
 }
 
