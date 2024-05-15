@@ -95,7 +95,7 @@
         ucfirst,
     } from '@/helpers/filters.js';
     import CsvSettings from './tools/csv/CsvSettings.vue';
-    import { useLocalStorage } from '../composables/local-storage';
+    import { useLocalStorage } from '@/composables/local-storage';
 
     export default {
         components: { CsvSettings },

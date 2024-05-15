@@ -332,6 +332,14 @@
                 };
                 patchAttribute(entity.value.id, aid, data).then(data => {
                     state.comments.push(event.comment);
+
+                    const dataRow = {[aid]: data};
+                    store.commit('updateEntityData', {
+                        eid: entity.value.id,
+                        data: dataRow,
+                        new_data: dataRow,
+                        sync: true,
+                    });
                     // set startCertainty to new, stored value
                     state.startCertainty = state.certainty;
                 });

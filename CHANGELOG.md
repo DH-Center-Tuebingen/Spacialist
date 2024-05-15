@@ -69,6 +69,8 @@ All notable changes to this project will be documented in this file.
 - Generated citation key in Bibliography could contain metadata characters
 - Adding literature entry from clipboard
 - Bibtex type `inbook` could not be added
+- Activity was not shown/blank
+- Adding empty table was possible and error was thrown
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
@@ -79,12 +81,14 @@ All notable changes to this project will be documented in this file.
 - Made UI to add new rows to _Table_ attribute clearer
 - Attribute type backend logic moved to separate classes
 - Set default value in parent element in _Add Attribute_ modal
+- Rework System/User Preferences and allow plugins to add their own preferences
 - Values in Dropdown attributes are now sorted alphabetically
 - Values in Dropdown attributes are now searchable
 - Font size in dropdown menus
 - _About_ modal contributors
 - Data Importer: Now supports the Boolean attribute with the value 'x'
 - Append `et al.` to citations in reference tab and modal
+- Do not show "!" for attributes without value & replace initial "!" with "?" for attributes with value, but no certainty set
 
 ## 0.9.14
 ### Added

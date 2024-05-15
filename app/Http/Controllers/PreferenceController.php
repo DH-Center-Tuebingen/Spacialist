@@ -53,31 +53,8 @@ class PreferenceController extends Controller {
     // POST
 
     // PATCH
-    public function patchPreferences(Request $request, $uid = -1) {
+    public function patchPreferences(Request $request) {
         $user = auth()->user();
-        $isUserPref = $uid > 0;
-
-        // If user who tries to set preferences is not supplied uid,
-        // check if they are allowed to set preferences of other users
-        if($isUserPref && $user->id !== $uid && !$user->can('preferences_write')) {
-            return response()->json([
-                'error' => __('You do not have the permission to edit preferences of another user')
-            ], 403);
-        } else if(!$isUserPref && !$user->can('preferences_write')) {
-            return response()->json([
-                'error' => __('You do not have the permission to edit system preferences')
-            ], 403);
-        }
-        // When try to set preferences of user, check for existence first
-        if($isUserPref) {
-            try {
-                User::findOrFail($uid);
-            } catch (ModelNotFoundException $e) {
-                return response()->json([
-                    'error' => __('This user does not exist')
-                ], 400);
-            }
-        }
 
         $this->validate($request, [
             'changes' => 'required|array',
@@ -88,6 +65,13 @@ class PreferenceController extends Controller {
         foreach($changes as $c) {
             $label = $c['label'];
             $value = $c['value'];
+            $isUser = isset($c['user']) && $c['user'];
+
+            if(!$isUser && !$user->can('preferences_write')) {
+                return response()->json([
+                    'error' => __('You do not have the permission to edit system preferences')
+                ], 403);
+            }
 
             try {
                 $pref = Preference::where('label', $label)->firstOrFail();
@@ -98,29 +82,13 @@ class PreferenceController extends Controller {
             }
             $encodedValue = Preference::encodePreference($label, $value);
     
-            if($isUserPref) {
-                $userPref = UserPreference::where('pref_id', $pref->id)
-                    ->where('user_id', $uid)
-                    ->first();
-                // if this preference doesn't exist for the desired user: create it
-                if(!isset($userPref)) {
-                    $userPref = new UserPreference();
-                    $userPref->pref_id = $pref->id;
-                    $userPref->user_id = $uid;
-                }
-                $userPref->value = $encodedValue;
-                $userPref->save();
+            if($isUser) {
+                UserPreference::updateOrCreate(
+                    ['pref_id' => $pref->id, 'user_id' => $user->id],
+                    ['value' => $encodedValue]
+                );
             } else {
                 $pref->default_value = $encodedValue;
-                $allowOverride = $c['allow_override'];
-                if($allowOverride === true || $allowOverride === false) {
-                    $removeUserPrefs = $pref->allow_override && !$allowOverride;
-                    $pref->allow_override = $allowOverride;
-                    // remove stored user prefs, if pref is no longer overridable
-                    if($removeUserPrefs) {
-                        UserPreference::where('pref_id', $pref->id)->delete();
-                    }
-                }
                 $pref->save();
             }
         }
