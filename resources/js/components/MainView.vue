@@ -100,29 +100,7 @@
                                             {{ date(reference.updated_at) }}
                                         </span>
                                     </header>
-                                    <div>
-                                        <blockquote class="blockquote fs-09 mb-4">
-                                            <p class="text-muted">
-                                                {{ reference.description }}
-                                            </p>
-                                        </blockquote>
-                                        <figcaption class="blockquote-footer fw-medium mb-0 d-flex gap-1">
-                                            <span :title="reference.bibliography.author">
-                                                {{ trimAuthors(reference.bibliography.author) }} in
-                                                <cite :title="reference.bibliography.title">
-                                                    {{ reference.bibliography.title }} ,{{ reference.bibliography.year
-                                                    }}
-                                                </cite>
-                                                <a
-                                                    href="#"
-                                                    class="ms-1"
-                                                    @click.prevent="openLiteratureInfo(reference)"
-                                                >
-                                                    <i class="fas fa-fw fa-info-circle" />
-                                                </a>
-                                            </span>
-                                        </figcaption>
-                                    </div>
+                                    <Quotation :value="reference" />
                                 </div>
                             </div>
                         </div>
@@ -157,9 +135,9 @@
     import {
         translateConcept,
     } from '@/helpers/helpers.js';
-    
+
     import {
-        trimAuthors,
+        formatAuthors,
     } from '@/helpers/bibliography.js';
 
     import {
@@ -173,7 +151,12 @@
 
     import { useToast } from '@/plugins/toast.js';
 
+    import Quotation from '@/components/bibliography/Quotation.vue';
+
     export default {
+        components: {
+            Quotation,
+        },
         setup(props, context) {
             const { t } = useI18n();
             const currentRoute = useRoute();
@@ -264,79 +247,79 @@
                 store.dispatch('setMainViewTab', null);
             });
 
-                // RETURN
-                return {
-                    t,
-                    // HELPERS
-                    translateConcept,
-                    trimAuthors,
-                    date,
-                    // LOCAL
-                    setTab,
-                    isTab,
-                    showMetadataForReferenceGroup,
-                    openLiteratureInfo,
-                    // STATE
-                    state,
-                };
-            }
-            // beforeRouteUpdate(to, from, next) {
-            //     if(to.query.tab) {
-            //         this.setTabOrPlugin(to.query.tab);
-            //     }
-            // },
-            // mounted() {},
-            // methods: {
-            //     setTabOrPlugin(key) {
-            //         if(key == 'references') {
-            //             this.setActiveTab('references');
-            //         } else {
-            //             const plugins = this.$getTabPlugins();
-            //             const plugin = plugins.find(p => p.key == key);
-            //             if(plugin) {
-            //                 this.setActivePlugin(plugin);
-            //             }
-            //         }
-            //     },
-            //     setActiveTab: function(tab) {
-            //         if(tab == 'references') {
-            //             if(!this.selectedEntity.id) return;
-            //             this.activePlugin = '';
-            //         }
-            //         this.tab = tab;
-            //     },
-            //     setActivePlugin: function(plugin) {
-            //         this.setActiveTab(plugin.key);
-            //         this.activePlugin = plugin.tag;
-            //     },
-            //     updateLink(geoId, entityId) {
-            //         if(entityId != this.selectedEntity.id) {
-            //             return;
-            //         }
-            //         this.selectedEntity.geodata_id = geoId;
-            //     },
-            // },
-            // data() {
-            //     return {
-            //         plugins: this.$getTabPlugins(),
-            //         activePlugin: '',
-            //     }
-            // },
-            // computed: {
-            //     tab: {
-            //         get() {
-            //             if(this.defaultKey) return this.defaultKey;
-            //             else if(this.plugins && this.plugins[0]) {
-            //                 this.activePlugin = this.plugins[0].tag;
-            //                 return this.plugins[0].key;
-            //             } else {
-            //                 return '';
-            //             }
-            //         },
-            //         set(newValue) {
-            //             this.defaultKey = newValue;
-            //         }
-            //     }
-            // }
-        };
+            // RETURN
+            return {
+                t,
+                // HELPERS
+                translateConcept,
+                formatAuthors,
+                date,
+                // LOCAL
+                setTab,
+                isTab,
+                showMetadataForReferenceGroup,
+                openLiteratureInfo,
+                // STATE
+                state,
+            };
+        }
+        // beforeRouteUpdate(to, from, next) {
+        //     if(to.query.tab) {
+        //         this.setTabOrPlugin(to.query.tab);
+        //     }
+        // },
+        // mounted() {},
+        // methods: {
+        //     setTabOrPlugin(key) {
+        //         if(key == 'references') {
+        //             this.setActiveTab('references');
+        //         } else {
+        //             const plugins = this.$getTabPlugins();
+        //             const plugin = plugins.find(p => p.key == key);
+        //             if(plugin) {
+        //                 this.setActivePlugin(plugin);
+        //             }
+        //         }
+        //     },
+        //     setActiveTab: function(tab) {
+        //         if(tab == 'references') {
+        //             if(!this.selectedEntity.id) return;
+        //             this.activePlugin = '';
+        //         }
+        //         this.tab = tab;
+        //     },
+        //     setActivePlugin: function(plugin) {
+        //         this.setActiveTab(plugin.key);
+        //         this.activePlugin = plugin.tag;
+        //     },
+        //     updateLink(geoId, entityId) {
+        //         if(entityId != this.selectedEntity.id) {
+        //             return;
+        //         }
+        //         this.selectedEntity.geodata_id = geoId;
+        //     },
+        // },
+        // data() {
+        //     return {
+        //         plugins: this.$getTabPlugins(),
+        //         activePlugin: '',
+        //     }
+        // },
+        // computed: {
+        //     tab: {
+        //         get() {
+        //             if(this.defaultKey) return this.defaultKey;
+        //             else if(this.plugins && this.plugins[0]) {
+        //                 this.activePlugin = this.plugins[0].tag;
+        //                 return this.plugins[0].key;
+        //             } else {
+        //                 return '';
+        //             }
+        //         },
+        //         set(newValue) {
+        //             this.defaultKey = newValue;
+        //         }
+        //     }
+        // }
+    };
 </script>
