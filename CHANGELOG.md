@@ -23,7 +23,6 @@ All notable changes to this project will be documented in this file.
 - Allow _Date Range_ in _Table_ attribute
 - Entities can now be updated using the _Data Importer_
 - Add option to export only search results in _Bibliograpy_
-
 ### Fixed
 - Error in _Attribute List_ caused by _Entity (Multiple Choice)_ attribute
 - Attribute form Save/Reset handling due to newly introduced _Attribute Group Separator_
@@ -66,10 +65,10 @@ All notable changes to this project will be documented in this file.
 - Correctly propagate attribute changes to update dependent attributes' visibility
 - Storing _false_ values in _Boolean_ attribute
 - Adding references to a newly added/saved attribute value
-- Empty ORCID or phone number prevented users from saving the profile 
+- Empty ORCID or phone number prevented users from saving the profile
 - Generated citation key in Bibliography could contain metadata characters
 - Adding literature entry from clipboard
-
+- Bibtex type `inbook` could not be added
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow

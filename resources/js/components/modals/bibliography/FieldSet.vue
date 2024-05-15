@@ -170,7 +170,18 @@
                     ruleSets[key] = getValidationRules(f);
                     initValues[key] = value;
                 });
-                const wh = state.type.mandatory ? Object.keys(state.type.mandatory).filter(m => state.type.mandatory[m] && state.type.mandatory[m] !== true) : [];
+                const wh = state.type.mandatory
+                    ?
+                    Object.keys(state.type.mandatory)
+                        .filter(m => state.type.mandatory[m] && state.type.mandatory[m] !== true)
+                        .map(m => {
+                            return [
+                                m,
+                                state.type.mandatory[m],
+                            ];
+                        })
+                    :
+                    [];
                 const schema = yup.object().shape(ruleSets, wh);
                 const {
                     meta: formMeta,
