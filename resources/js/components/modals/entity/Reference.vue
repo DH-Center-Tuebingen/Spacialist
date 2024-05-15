@@ -40,7 +40,7 @@
                         :aria-valuenow="state.certainty"
                         aria-valuemin="0"
                         aria-valuemax="100"
-                        :style="{width: state.certainty+'%'}"
+                        :style="{ width: state.certainty + '%' }"
                     >
                         <span class="sr-only">
                             {{ state.certainty }}% certainty
@@ -92,21 +92,10 @@
                         class="list-group-item d-flex flex-row justify-content-between"
                     >
                         <div class="flex-grow-1">
-                            <div v-if="state.editItem.id !== reference.id">
-                                <blockquote class="blockquote fs-09">
-                                    <p class="text-muted">
-                                        {{ reference.description }}
-                                    </p>
-                                </blockquote>
-                                <figcaption
-                                    class="blockquote-footer fw-medium mb-0"
-                                    :title="reference.bibliography.author"
-                                >
-                                    {{ formatAuthors(reference.bibliography.author) }} in <cite :title="reference.bibliography.title">
-                                        {{ reference.bibliography.title }} ,{{ reference.bibliography.year }}
-                                    </cite>
-                                </figcaption>
-                            </div>
+                            <Quotation
+                                v-if="state.editItem.id !== reference.id"
+                                :value="reference"
+                            />
                             <div
                                 v-else
                                 class="d-flex align-items-center"
@@ -213,7 +202,8 @@
                                             <span class="fw-medium">{{ option.title }}</span>
                                         </div>
                                         <cite class="small">
-                                            {{ formatAuthors(option.author) }} <span class="fw-light">({{ option.year }})</span>
+                                            {{ formatAuthors(option.author) }} <span class="fw-light">({{ option.year
+                                            }})</span>
                                         </cite>
                                     </div>
                                 </template>
@@ -284,7 +274,12 @@
         date,
     } from '@/helpers/filters.js';
 
+    import Quotation from '../../bibliography/Quotation.vue';
+
     export default {
+        components: {
+            Quotation,
+        },
         props: {
             entity: {
                 required: true,
@@ -312,16 +307,16 @@
                 const finalPos = Math.max(0, Math.min(clickPos, maxSize)); // clamp cursor pos to progress bar size
 
                 const currentValue = state.certainty;
-                let value = parseInt(finalPos/maxSize*100);
-                const diff = Math.abs(value-currentValue);
+                let value = parseInt(finalPos / maxSize * 100);
+                const diff = Math.abs(value - currentValue);
                 if(diff < 10) {
                     if(value > currentValue) {
-                        value = parseInt((value+10)/10)*10;
+                        value = parseInt((value + 10) / 10) * 10;
                     } else {
-                        value = parseInt(value/10)*10;
+                        value = parseInt(value / 10) * 10;
                     }
                 } else {
-                    value = parseInt((value+5)/10)*10;
+                    value = parseInt((value + 5) / 10) * 10;
                 }
 
                 state.certainty = value;

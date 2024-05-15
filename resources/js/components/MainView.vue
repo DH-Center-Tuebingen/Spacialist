@@ -93,23 +93,14 @@
                                 <div
                                     v-for="(reference, i) in referenceGroup"
                                     :key="i"
-                                    class="list-group-item pt-0"
+                                    class="list-group-item small"
                                 >
-                                    <header class="text-end">
+                                    <Quotation :value="reference" />
+                                    <footer class="text-end">
                                         <span class="text-muted fw-light small">
                                             {{ date(reference.updated_at) }}
                                         </span>
-                                    </header>
-                                    <div>
-                                        <blockquote class="blockquote fs-09 mb-4">
-                                            <p class="text-muted">
-                                                {{ reference.description }}
-                                            </p>
-                                        </blockquote>
-                                        <figcaption class="blockquote-footer fw-medium mb-0 d-flex gap-1">
-                                            <Citation :value="reference.bibliography" />
-                                        </figcaption>
-                                    </div>
+                                    </footer>
                                 </div>
                             </div>
                         </div>
@@ -155,11 +146,11 @@
 
     import { useToast } from '@/plugins/toast.js';
 
-    import Citation from '@/components/bibliography/Citation.vue';
+    import Quotation from '@/components/bibliography/Quotation.vue';
 
     export default {
-        components: {   
-            Citation,
+        components: {
+            Quotation,
         },
         setup(props, context) {
             const { t } = useI18n();
@@ -248,77 +239,19 @@
                 store.dispatch('setMainViewTab', null);
             });
 
-                // RETURN
-                return {
-                    t,
-                    // HELPERS
-                    translateConcept,
-                    date,
-                    // LOCAL
-                    setTab,
-                    isTab,
-                    showMetadataForReferenceGroup,
-                    // STATE
-                    state,
-                };
-            }
-            // beforeRouteUpdate(to, from, next) {
-            //     if(to.query.tab) {
-            //         this.setTabOrPlugin(to.query.tab);
-            //     }
-            // },
-            // mounted() {},
-            // methods: {
-            //     setTabOrPlugin(key) {
-            //         if(key == 'references') {
-            //             this.setActiveTab('references');
-            //         } else {
-            //             const plugins = this.$getTabPlugins();
-            //             const plugin = plugins.find(p => p.key == key);
-            //             if(plugin) {
-            //                 this.setActivePlugin(plugin);
-            //             }
-            //         }
-            //     },
-            //     setActiveTab: function(tab) {
-            //         if(tab == 'references') {
-            //             if(!this.selectedEntity.id) return;
-            //             this.activePlugin = '';
-            //         }
-            //         this.tab = tab;
-            //     },
-            //     setActivePlugin: function(plugin) {
-            //         this.setActiveTab(plugin.key);
-            //         this.activePlugin = plugin.tag;
-            //     },
-            //     updateLink(geoId, entityId) {
-            //         if(entityId != this.selectedEntity.id) {
-            //             return;
-            //         }
-            //         this.selectedEntity.geodata_id = geoId;
-            //     },
-            // },
-            // data() {
-            //     return {
-            //         plugins: this.$getTabPlugins(),
-            //         activePlugin: '',
-            //     }
-            // },
-            // computed: {
-            //     tab: {
-            //         get() {
-            //             if(this.defaultKey) return this.defaultKey;
-            //             else if(this.plugins && this.plugins[0]) {
-            //                 this.activePlugin = this.plugins[0].tag;
-            //                 return this.plugins[0].key;
-            //             } else {
-            //                 return '';
-            //             }
-            //         },
-            //         set(newValue) {
-            //             this.defaultKey = newValue;
-            //         }
-            //     }
-            // }
-        };
+            // RETURN
+            return {
+                t,
+                date,
+                // HELPERS
+                translateConcept,
+                // LOCAL
+                setTab,
+                isTab,
+                showMetadataForReferenceGroup,
+                // STATE
+                state,
+            };
+        }
+    };
 </script>
