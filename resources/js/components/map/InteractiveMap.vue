@@ -1149,6 +1149,7 @@
                     context.emit('modified', {
                         features: [feature],
                     });
+                    setOverlay(feature);
                 } else {
                     // cancel
                 }
