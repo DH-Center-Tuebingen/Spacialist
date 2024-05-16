@@ -113,4 +113,8 @@ class AvailableLayer extends Model
     public function entity_type() {
         return $this->belongsTo('App\EntityType');
     }
+
+    public function user_layer_option() {
+        return $this->hasMany('App\Plugins\Map\App\UserLayerOption', 'layer_id', 'id');
+    }
 }

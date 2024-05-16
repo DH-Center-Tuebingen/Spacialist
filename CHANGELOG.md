@@ -44,6 +44,7 @@ All notable changes to this project will be documented in this file.
 - Mark all notifications as read
 - Unsetting a date value
 - Unsaved changes in _Data Model Editor_ were visible in the UI
+- Trigger event on updating point coordinates in popup
 - Adding bibliography of type _misc_
 - Moving entity in tree created a temporary duplicate
 - Entity Types in Data-Model-Editor not scrollable
