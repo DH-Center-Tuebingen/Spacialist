@@ -63,6 +63,7 @@
                             v-model="state.files"
                             class="btn btn-sm btn-outline-primary clickable"
                             accept=".bib,.bibtex,application/x-bibtex,text/x-bibtex,text/plain"
+                            extensions="bib,bibtex"
                             :custom-action="importFile"
                             :directory="false"
                             :disabled="!can('bibliography_write|bibliography_create')"
