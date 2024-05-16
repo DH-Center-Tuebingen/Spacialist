@@ -914,7 +914,7 @@
                 actionState.measure.tooltipElement = document.getElementById(actionState.popupIds.m);
                 actionState.measure.tooltip = new Overlay({
                     element: actionState.measure.tooltipElement,
-                    offset: [0, 5]
+                    offset: [0, -10]
                 });
                 state.map.addOverlay(actionState.measure.tooltip);
             };
@@ -1449,6 +1449,7 @@
                     actionState.overlay = new Overlay({
                         element: overlayElem,
                         positioning: 'bottom-center',
+                        offset: [0, -10],
                         autoPan: true,
                         autoPanAnimation: {
                             duration: 250,
