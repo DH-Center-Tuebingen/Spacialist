@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use RenanBr\BibTexParser\Listener;
 use RenanBr\BibTexParser\Exception\ParserException;
 use RenanBr\BibTexParser\Parser;
+use RenanBr\BibTexParser\Processor\TagNameCaseProcessor;
 
 class BibliographyController extends Controller
 {
@@ -93,6 +94,12 @@ class BibliographyController extends Controller
         $file = $request->file('file');
         $noOverwriteOnDup = $request->input('no-overwrite', false);
         $listener = new Listener();
+        $listener->addProcessor(new TagNameCaseProcessor(CASE_LOWER));
+        $listener->addProcessor(function($entry) {
+            $entry['_type'] = strtolower($entry['_type']);
+            $entry['type'] = strtolower($entry['type']);
+            return $entry;
+        });
         $parser = new Parser();
         $parser->addListener($listener);
         try {
