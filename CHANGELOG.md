@@ -72,6 +72,7 @@ All notable changes to this project will be documented in this file.
 - Bibtex type `inbook` could not be added
 - Activity was not shown/blank
 - Adding empty table was possible and error was thrown
+- Bibliography import: files with .bib & .bibtex not visible on Windows and Mac
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
@@ -90,6 +91,7 @@ All notable changes to this project will be documented in this file.
 - Data Importer: Now supports the Boolean attribute with the value 'x'
 - Append `et al.` to citations in reference tab and modal
 - Do not show "!" for attributes without value & replace initial "!" with "?" for attributes with value, but no certainty set
+- Bibtex import now is case-insensitive for type and keys
 
 ## 0.9.14
 ### Added

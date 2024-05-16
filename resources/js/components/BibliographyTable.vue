@@ -62,7 +62,7 @@
                             ref="upload"
                             v-model="state.files"
                             class="btn btn-sm btn-outline-primary clickable"
-                            accept="application/x-bibtex,text/x-bibtex,text/plain"
+                            accept=".bib,.bibtex,application/x-bibtex,text/x-bibtex,text/plain"
                             extensions="bib,bibtex"
                             :custom-action="importFile"
                             :directory="false"
@@ -632,7 +632,7 @@
                 // Enable automatic upload
                 if(!!newFile && (Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error)) {
                     if(!newFile.active) {
-                        newFile.active = true
+                        newFile.active = true;
                     }
                 }
             };
@@ -750,7 +750,7 @@
 
             const formatBibtexAndShowHighlight = text => {
                 if(!text) return '';
-                text = formatBibtexText(text)
+                text = formatBibtexText(text);
                 return highlight(text, state.query);
             };
 
@@ -776,5 +776,5 @@
                 state,
             };
         },
-    }
+    };
 </script>
