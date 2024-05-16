@@ -89,6 +89,7 @@ All notable changes to this project will be documented in this file.
 - Data Importer: Now supports the Boolean attribute with the value 'x'
 - Append `et al.` to citations in reference tab and modal
 - Do not show "!" for attributes without value & replace initial "!" with "?" for attributes with value, but no certainty set
+- Bibtex import now is case-insensitive for type and keys
 
 ## 0.9.14
 ### Added
