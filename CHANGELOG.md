@@ -71,6 +71,7 @@ All notable changes to this project will be documented in this file.
 - Bibtex type `inbook` could not be added
 - Activity was not shown/blank
 - Adding empty table was possible and error was thrown
+- Bibliography import: files with .bib & .bibtex not visible on Windows and Mac
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
