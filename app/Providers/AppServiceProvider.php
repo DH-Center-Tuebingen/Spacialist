@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\AttributeTypes\SiUnitAttribute;
+use App\AttributeTypes\Units\Implementations\UnitManager;
 use App\Bibliography;
 use App\Geodata;
 use App\Preference;
@@ -96,26 +96,26 @@ class AppServiceProvider extends ServiceProvider
             return in_array($value, array_keys(Bibliography::bibtexTypes));
         });
         Validator::extend('si_baseunit', function ($attribute, $value, $parameters, $validator) {
-            return in_array($value, array_keys(SiUnitAttribute::getGroups()));
+            return UnitManager::get()->hasQuantity($value);
         });
         Validator::extend('si_unit', function ($attribute, $value, $parameters, $validator) {
             if(count($parameters) != 1) {
                 return false;
             }
             $refField = request()->input($parameters[0]);
-            $baseunits = SiUnitAttribute::getGroups();
-            if(!in_array($refField, array_keys($baseunits))) {
-                return false;
-            }
-            $units = $baseunits[$refField]['units'];
-            foreach($units as $unit) {
-                if($unit['label'] == $value) {
-                    return true;
-                }
+            $unitSystem = UnitManager::get()->getUnitSystem($refField);
+
+            if(isset($unitSystem)) {
+               $unit = UnitManager::get()->getUnitSystem($refField)->getByLabel($value);
+               if(isset($unit)) {
+                   return true;
+               }
             }
 
             return false;
         });
+
+        UnitManager::init();
     }
 
     /**

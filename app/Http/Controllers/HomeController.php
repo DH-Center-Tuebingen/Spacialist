@@ -44,10 +44,10 @@ class HomeController extends Controller
         $concepts = ThConcept::getMap($locale);
 
         $datatypes = AttributeBase::getTypes();
-        $addData = [];
+        $datatypeData = [];
         foreach($datatypes as $key => $datatype) {
-            if(method_exists($datatype, "addGlobalData")) {
-                $addData[$key] = $datatype::addGlobalData();
+            if(method_exists($datatype, "getGlobalData")) {
+                $datatypeData[$key] = $datatype::getGlobalData();
             }
         }
 
@@ -61,7 +61,7 @@ class HomeController extends Controller
             'preferences' => $preferenceValues,
             'concepts' => $concepts,
             'entityTypes' => $entityTypeMap,
-            'datatype_data' => $addData,
+            'datatype_data' => $datatypeData,
             'colorsets' => sp_get_themes(),
             'analysis' => sp_has_analysis(),
         ]);
