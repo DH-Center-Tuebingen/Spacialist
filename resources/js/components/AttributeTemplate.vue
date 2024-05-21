@@ -192,9 +192,7 @@
                 />
             </div>
         </div>
-        <template
-            v-if="state.isSiUnit"
-        >
+        <template v-if="state.isSiUnit">
             <div class="mb-3">
                 <label class="col-form-label col-3">
                     {{ t('global.attributes.si_units.base_unit') }}:
@@ -260,7 +258,8 @@
                                         {{ siSymbolToStr(value.symbol) }}
                                     </span>
                                     <span>
-                                        {{ t(`global.attributes.si_units.${state.attribute.siGroup}.units.${value.label}`) }}
+                                        {{ t(`global.attributes.si_units.${state.attribute.siGroup}.units.${value.label}`)
+                                        }}
                                     </span>
                                 </div>
                             </div>
@@ -344,7 +343,7 @@
                 state.attribute.restrictedTypes = [];
                 state.attribute.siGroup = null;
                 state.attribute.siGroupUnit = null;
-                
+
                 state.searchResetValue = {
                     reset: true,
                     ts: getTs(),
@@ -366,7 +365,7 @@
                 if(!state.canRestrictTypes || state.attribute.restrictedTypes.length == 0) {
                     state.attribute.restrictedTypes = null;
                 }
-                context.emit('created', {...state.attribute});
+                context.emit('created', { ...state.attribute });
                 reset();
             };
             const emitUpdate = _ => {
@@ -403,9 +402,11 @@
                     state.siGroupUnits = null;
                 } else {
                     const grp = store.getters.datatypeDataOf('si-unit')[state.attribute.siGroup];
-                    const matchUnit = grp.units.find(u => grp.default == u.label);
+                    const matchUnit = grp.units.find(u => grp.default == u.symbol);
                     if(matchUnit) {
                         state.attribute.siGroupUnit = matchUnit.label;
+                    } else {
+                        state.attribute.siGroupUnit = null;
                     }
                     state.siGroupUnits = grp.units;
                 }
@@ -474,7 +475,7 @@
                 label: computed(_ => {
                     return createText.value || t('global.create');
                 }),
-                validated: computed(_ =>  {
+                validated: computed(_ => {
                     let isValid = state.attribute.label &&
                         state.attribute.label.id > 0 &&
                         state.attribute.type &&
@@ -492,9 +493,9 @@
                     return isValid;
                 }),
                 allowsRestriction: computed(_ => {
-                    return  state.attribute.type == 'string-sc' ||
-                            state.attribute.type == 'string-mc' ||
-                            state.attribute.type == 'epoch';
+                    return state.attribute.type == 'string-sc' ||
+                        state.attribute.type == 'string-mc' ||
+                        state.attribute.type == 'epoch';
                 }),
                 isStringSc: computed(_ => {
                     return state.attribute.type == 'string-sc';
@@ -504,8 +505,8 @@
                 }),
                 needsRootElement: computed(_ => {
                     return state.attribute.type == 'string-sc' ||
-                            state.attribute.type == 'string-mc' ||
-                            state.attribute.type == 'epoch';
+                        state.attribute.type == 'string-mc' ||
+                        state.attribute.type == 'epoch';
                 }),
                 canRestrictTypes: computed(_ => {
                     return state.attribute.type == 'entity' || state.attribute.type == 'entity-mc';
@@ -523,11 +524,11 @@
                         state.attribute.rootLabel &&
                         state.attribute.rootLabel.id > 0
                     ) || (
-                        state.attribute.type == 'string-sc' &&
-                        state.attribute.differRoot &&
-                        state.attribute.rootAttributeLabel &&
-                        state.attribute.rootAttributeLabel.id > 0
-                    );
+                            state.attribute.type == 'string-sc' &&
+                            state.attribute.differRoot &&
+                            state.attribute.rootAttributeLabel &&
+                            state.attribute.rootAttributeLabel.id > 0
+                        );
                 }),
             });
 

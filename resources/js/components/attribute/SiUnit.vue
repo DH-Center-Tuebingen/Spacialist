@@ -1,12 +1,12 @@
 <template>
     <div class="input-group">
         <input
-            v-model="v.val.value"
+            v-model="valueValue"
             type="number"
             class="form-control text-center"
             :disabled="disabled"
             step="0.01"
-            @input="v.val.handleInput"
+            @input="handleValueInput"
         >
         <button
             class="btn btn-outline-secondary dropdown-toggle"
@@ -16,24 +16,24 @@
             aria-haspopup="true"
             aria-expanded="false"
         >
-            {{ siSymbolToStr(v.unit.value?.symbol) }}
+            {{ siSymbolToStr(unitValue?.symbol) }}
         </button>
         <div class="dropdown-menu">
             <a
-                v-for="(unit, i) in state.groupUnits"
+                v-for="(unit, i) in state.groupUnits "
                 :key="i"
                 class="dropdown-item d-flex flex-row justify-content-between gap-3"
-                :class="{'active': unit.label == v.unit.value?.label}"
+                :class="{ 'active': unit.label == unitValue?.label }"
                 href="#"
-                @click.prevent="setUnit(unit)"
+                @click.prevent="handleUnitChange(unit)"
             >
                 <span>
                     {{ siSymbolToStr(unit.symbol) }}
                 </span>
                 <span
-                    :class="{'text-light text-opacity-75': unit.label == v.unit.value?.label, 'text-muted': unit.label != v.unit.value?.label}"
+                    :class="{ 'text-light text-opacity-75': unit.label == unitValue?.label, 'text-muted': unit.label != unitValue?.label }"
                 >
-                    {{ t(`global.attributes.si_units.${state.unitGrp}.units.${unit.label}`) }}
+                    {{ t(`global.attributes.si_units.${state.unitGrp}.units.${unit.label} `) }}
                 </span>
             </a>
         </div>
@@ -94,83 +94,77 @@
 
                 return state.groupUnits.find(u => u.label == lbl);
             };
-            const resetFieldState = _ => {
-                v.val.resetField({
-                    value: value.value.value
-                });
-                v.unit.resetField({
-                    value: value.value.unit,
-                });
-            };
-            const undirtyField = _ => {
-                v.val.resetField({
-                    value: v.val.value,
-                });
-                v.unit.resetField({
-                    value: v.unit.value,
-                });
-            };
-            const setUnit = (unit) => {
-                v.unit.handleChange(unit);
-            };
+
 
             // DATA
             const state = reactive({
                 unitGrp: metadata.value.si_baseunit,
                 groupUnits: computed(_ => {
                     if(!state.unitGrp) return [];
+                    let groupName = state.unitGrp;
 
-                    return store.getters.datatypeDataOf('si-unit')[state.unitGrp].units;
+                    const allGroups = store.getters.datatypeDataOf('si-unit');
+                    if(!allGroups) return [];
+
+                    let group = allGroups[groupName];
+                    if(!group || !group.units) return [];
+
+                    return group.units;
                 }),
             });
+
             const {
-                handleInput: hib,
-                value: vb,
-                meta: mb,
-                resetField: rfb,
+                handleInput: handleValueInput,
+                value: valueValue,
+                meta: valueMeta,
+                resetField: resetValueField,
             } = useField(`value_${name.value}`, yup.number(), {
                 initialValue: value.value.value,
             });
+
             const {
-                handleInput: hiu,
-                handleChange: hcu,
-                value: vu,
-                meta: mu,
-                resetField: rfu,
+                handleChange: handleUnitChange,
+                value: unitValue,
+                meta: unitMeta,
+                resetField: resetUnitField,
             } = useField(`unit_${name.value}`, yup.string(), {
                 initialValue: getUnitFromLabel(value.value.unit || metadata.value.si_default),
             });
+
             const v = reactive({
                 value: computed(_ => {
                     return {
-                        value: v.val.value,
-                        unit: v.unit.value.label,
-                    }
+                        value: valueValue.value,
+                        unit: unitValue.value?.label || '',
+                    };
                 }),
                 meta: computed(_ => {
                     return {
-                        dirty: v.val.meta.dirty || v.unit.meta.dirty,
-                        valid: ((v.val.meta.dirty && v.val.meta.valid) || !v.val.meta.dirty)
+                        dirty: valueMeta.dirty || unitMeta.dirty,
+                        valid: ((valueMeta.dirty && valueMeta.valid) || !valueMeta.dirty)
                     };
                 }),
-                val: {
-                    value: vb,
-                    meta: mb,
-                    resetField: rfb,
-                    handleInput: hib,
-                },
-                unit: {
-                    value: vu,
-                    meta: mu,
-                    resetField: rfu,
-                    handleInput: hiu,
-                    handleChange: hcu,
-                },
             });
+
+            const resetFieldState = _ => {
+                resetValueField();
+                resetUnitField();
+            };
+
+            const undirtyField = _ => {
+                resetValueField({
+                    value: valueValue.value,
+                });
+
+                resetUnitField({
+                    value: unitValue.value,
+                });
+            };
 
             watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
+
             watch(_ => v.meta, (newValue, oldValue) => {
                 context.emit('change', {
                     dirty: v.meta.dirty,
@@ -178,16 +172,23 @@
                     value: v.value,
                 });
             });
+
             // only needed for preview, otherwise unit can not change
-            watch(_ => value.value.unit, (newValue, oldValue) => {
-                state.unitGrp = newValue;
-            });
+            // this is not yet working properly.
+            // watch(_ => props.metadata, (newValue, oldValue) => {
+            //     state.unitGrp = newValue;
+            //     console.log('unitGrp', state.unitGrp);
+            // }, {
+            //     immediate: true,
+
+            // });
+
             watch(_ => value.value.default, (newValue, oldValue) => {
                 if(!newValue) {
-                    setUnit(null);
+                    handleUnitChange(null);
                 } else {
                     const def = state.groupUnits.find(u => u.label == newValue);
-                    setUnit(def);
+                    handleUnitChange(def);
                 }
             });
 
@@ -199,10 +200,14 @@
                 // LOCAL
                 resetFieldState,
                 undirtyField,
-                setUnit,
+                handleUnitChange,
+                handleValueInput,
                 // STATE
                 state,
                 v,
+                valueValue,
+                unitValue,
+
             };
         },
     };
