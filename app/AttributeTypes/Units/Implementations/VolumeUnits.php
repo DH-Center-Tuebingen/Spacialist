@@ -29,8 +29,8 @@ class VolumeUnits extends UnitSystem {
 
     private function addSiUnits(BaseUnit $cubicMetre) {
         $this->addMultiple([
-            new SiUnit(Si::$KILO, $cubicMetre),
-            new SiUnit(Si::$CENTI, $cubicMetre),
+            new Unit('litre', 'l', Call::si(Si::$DECI->getPower(), 3)),
+            new Unit('millilitre', 'ml', Call::si(Si::$CENTI->getPower(), 3)),
         ]);
     }
 

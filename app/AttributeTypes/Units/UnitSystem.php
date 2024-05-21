@@ -34,6 +34,10 @@ class UnitSystem {
         $this->units[] = $unit;
     }
 
+    public function get(string $label): ?Unit {
+        return $this->getByLabel($label);
+    }
+
     public function getByLabel(string $label): ?Unit {
 
         if(!isset($this->labelMap[$label])) return null;

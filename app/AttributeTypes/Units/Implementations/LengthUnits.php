@@ -24,6 +24,8 @@ class LengthUnits extends UnitSystem {
 
         $this->addSiUnits($metre);
         $this->addImperialUnits();
+
+        $this->add(new Unit('light_year', 'ly', Call::multiply(9460730472580800)));
     }
 
     private function addSiUnits(BaseUnit $metre) {
@@ -42,7 +44,6 @@ class LengthUnits extends UnitSystem {
             new Unit('feet', 'ft', Call::multiply(FOOT)),
             new Unit('yard', 'yd', Call::multiply(YARD)),
             new Unit('mile', 'mi', Call::multiply(MILE)),
-            new Unit('light_year', 'ly', Call::multiply(9460730472580800)),
         ]);
     }
 }

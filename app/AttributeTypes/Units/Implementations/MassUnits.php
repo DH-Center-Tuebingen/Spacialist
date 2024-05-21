@@ -33,8 +33,8 @@ class MassUnits extends UnitSystem
 
     private function addImperialUnits(){
         $this->addMultiple([
-            new Unit('ounce', 'oz', Call::multiply(0.028349523125)),
-            new Unit('pound', 'lb', Call::multiply(0.45359237)),
+            new Unit('ounce', 'oz', Call::multiply(28.349523125)),
+            new Unit('pound', 'lb', Call::multiply(453.59237)),
         ]);
     }
 

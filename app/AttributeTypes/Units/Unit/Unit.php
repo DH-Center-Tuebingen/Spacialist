@@ -22,6 +22,10 @@ class Unit {
         return $this->symbol;
     }
 
+    public function is($value) {
+        return $this->normalize($value);
+    }
+
     public function normalize($value) {
         return ($this->conversion)($value);
     }
