@@ -14,13 +14,13 @@ use const App\AttributeTypes\Units\Constants\Imperial\INCH;
 use const App\AttributeTypes\Units\Constants\Imperial\MILE;
 use const App\AttributeTypes\Units\Constants\Imperial\YARD;
 
-const METRE = 'metre';
-
 class LengthUnits extends UnitSystem {
 
+    const METRE = 'metre';
+
     public function __construct() {
-        $metre = new BaseUnit(METRE, 'm');
-        parent::__construct('length', new BaseUnit(METRE, 'm'));
+        $metre = new BaseUnit(self::METRE, 'm');
+        parent::__construct('length', new BaseUnit(self::METRE, 'm'));
 
         $this->addSiUnits($metre);
         $this->addImperialUnits();
@@ -38,7 +38,7 @@ class LengthUnits extends UnitSystem {
         ]);
     }
 
-    private function addImperialUnits(){
+    private function addImperialUnits() {
         $this->addMultiple([
             new Unit('inch', 'in', Call::multiply(INCH)),
             new Unit('feet', 'ft', Call::multiply(FOOT)),

@@ -24,14 +24,14 @@ class SiUnit extends Unit {
     }
 
     private function constructLabel() {
-        return $this->prefix->getSymbol() . $this->baseUnit->getLabel();
+        return $this->prefix->getLabel() . $this->baseUnit->getLabel();
     }
 
     private function constructSymbol() {
         return $this->prefix->getSymbol() . $this->baseUnit->getSymbol();
     }
 
-    public function constructConversion(){
-        return Call::si($this->prefix->getPower(), $this->dimension);
+    public function constructConversion() {
+        return Call::si($this->prefix, $this->dimension);
     }
 }

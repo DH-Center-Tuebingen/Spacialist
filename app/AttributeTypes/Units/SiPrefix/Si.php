@@ -2,9 +2,9 @@
 
 namespace App\AttributeTypes\Units\SiPrefix;
 
-class Si {
+abstract class Si {
 
-    public static SiPrefix $YOTTA; 
+    public static SiPrefix $YOTTA;
     public static SiPrefix $ZETTA;
     public static SiPrefix $EXA;
     public static SiPrefix $PETA;
@@ -25,7 +25,7 @@ class Si {
     public static SiPrefix $ZEPTO;
     public static SiPrefix $YOCTO;
 
-    public static function init(){
+    public static function init() {
         self::$YOTTA = new SiPrefix('yotta', 'Y', 24);
         self::$ZETTA = new SiPrefix('zetta', 'Z', 21);
         self::$EXA = new SiPrefix('exa', 'E', 18);

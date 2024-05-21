@@ -14,13 +14,14 @@ use const App\AttributeTypes\Units\Constants\Imperial\GALLON_US;
 use const App\AttributeTypes\Units\Constants\Imperial\MILE;
 use const App\AttributeTypes\Units\Constants\Imperial\PINT_US;
 
-const CUBIC = 'qubic_';
-const CUBIC_METRE =  CUBIC . 'metre';
-
 class VolumeUnits extends UnitSystem {
 
+    const CUBIC = 'cubic_';
+    const METRE = 'metre';
+    const CUBIC_METRE =  self::CUBIC . self::METRE;
+
     public function __construct() {
-        $cubicMetre = new BaseUnit(CUBIC_METRE, 'm³');
+        $cubicMetre = new BaseUnit(self::CUBIC_METRE, 'm³');
         parent::__construct('volume', $cubicMetre);
 
         $this->addSiUnits($cubicMetre);
@@ -29,8 +30,8 @@ class VolumeUnits extends UnitSystem {
 
     private function addSiUnits(BaseUnit $cubicMetre) {
         $this->addMultiple([
-            new Unit('litre', 'l', Call::si(Si::$DECI->getPower(), 3)),
-            new Unit('millilitre', 'ml', Call::si(Si::$CENTI->getPower(), 3)),
+            new Unit('litre', 'l', Call::si(Si::$DECI, 3)),
+            new Unit('millilitre', 'ml', Call::si(Si::$CENTI, 3)),
         ]);
     }
 
@@ -39,7 +40,7 @@ class VolumeUnits extends UnitSystem {
             new Unit('fluid_ounce_us', 'fl oz', Call::multiply(FLUID_OUNCE_US)),
             new Unit('pint_us', 'pt', Call::multiply(PINT_US)),
             new Unit('gallon_us', 'gal', Call::multiply(GALLON_US)),
-            new Unit(CUBIC . 'mile', 'mi³', Call::multiply(MILE, 3)),
+            new Unit(self::CUBIC . 'mile', 'mi³', Call::multiply(MILE, 3)),
         ]);
     }
 }

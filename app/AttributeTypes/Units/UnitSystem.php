@@ -4,6 +4,7 @@ namespace App\AttributeTypes\Units;
 
 use App\AttributeTypes\Units\Unit\BaseUnit;
 use App\AttributeTypes\Units\Unit\Unit;;
+
 use Exception;
 
 class UnitSystem {
@@ -26,7 +27,7 @@ class UnitSystem {
 
     public function add(Unit $unit) {
         if (isset($this->labelMap[$unit->getLabel()]) || isset($this->symbolMap[$unit->getSymbol()])) {
-            throw new Exception('Unit already exists');
+            throw new Exception("Unit already exists: {$unit->getLabel()} ({$unit->getSymbol()})");
         }
 
         $this->labelMap[$unit->getLabel()] = $unit;
@@ -40,13 +41,13 @@ class UnitSystem {
 
     public function getByLabel(string $label): ?Unit {
 
-        if(!isset($this->labelMap[$label])) return null;
+        if (!isset($this->labelMap[$label])) return null;
 
         return $this->labelMap[$label];
     }
 
     public function getBySymbol(string $symbol): ?Unit {
-        if(!isset($this->symbolMap[$symbol])) return null;
+        if (!isset($this->symbolMap[$symbol])) return null;
 
         return $this->symbolMap[$symbol];
     }
@@ -55,7 +56,7 @@ class UnitSystem {
         return $this->units[0];
     }
 
-    public function getName(){
+    public function getName() {
         return $this->name;
     }
 
@@ -63,10 +64,10 @@ class UnitSystem {
         return $this->units;
     }
 
-    public function toArray(){
+    public function toArray() {
         $array = [];
         $array['default'] = $this->getBaseUnit()->getSymbol(); // Shouldn't we better use the label here?
-        $array['units'] = array_map(function($unit) {
+        $array['units'] = array_map(function ($unit) {
             return $unit->toObject();
         }, $this->units);
         return $array;
