@@ -33,7 +33,7 @@
                 <span
                     :class="{ 'text-light text-opacity-75': unit.label == unitValue?.label, 'text-muted': unit.label != unitValue?.label }"
                 >
-                    {{ t(`global.attributes.si_units.${state.unitGrp}.units.${unit.label} `) }}
+                    {{ t(`global.attributes.si_units.${state.unitGrp}.units.${unit.label}`) }}
                 </span>
             </a>
         </div>

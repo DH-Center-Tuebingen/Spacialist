@@ -200,7 +200,7 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
-                            :epochs="selections[element.id]"
+                            :epochs="selections[element.id] || []"
                             :type="element.datatype"
                             @change="e => updateDirtyState(e, element.id)"
                         />
@@ -303,7 +303,7 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
-                            :selections="selections[element.id]"
+                            :selections="selections[element.id] || []"
                             :selection-from="element.root_attribute_id"
                             :selection-from-value="state.rootAttributeValues[element.root_attribute_id]"
                             @update-selection="e => handleSelectionUpdate(element.id, e)"
@@ -316,7 +316,7 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
-                            :selections="selections[element.id]"
+                            :selections="selections[element.id] || []"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -482,10 +482,10 @@
                 type: Boolean,
                 default: false
             },
-            group: { // required if onReorder is set // TODO
+            group: {
                 required: false,
-                type: String,
-                default: null,
+                type: Object,
+                default: _ => new Object(),
             },
             isSource: {
                 required: false,

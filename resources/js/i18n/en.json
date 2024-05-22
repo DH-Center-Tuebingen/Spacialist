@@ -204,6 +204,7 @@
                 "area": {
                     "label": "Area",
                     "units": {
+                        "square_centimetre": "Square centimetre",
                         "square_metre": "Square metre",
                         "square_kilometre": "Square kilometre",
                         "square_inch": "Square inch",
@@ -216,6 +217,8 @@
                 "volume": {
                     "label": "Volume",
                     "units": {
+                        "millilitre": "Millilitre",
+                        "litre": "Litre",
                         "cubic_centimetre": "Cubic centimetre",
                         "cubic_decimetre": "Litre | Cubic decimetre",
                         "cubic_metre": "Cubic metre",

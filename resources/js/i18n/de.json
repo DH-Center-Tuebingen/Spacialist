@@ -204,6 +204,7 @@
                 "area": {
                     "label": "Fläche",
                     "units": {
+                        "square_centimetre": "Quadratzentimeter",
                         "square_metre": "Quadratmeter",
                         "square_kilometre": "Quadratkilometer",
                         "square_inch": "Quadratzoll",
@@ -216,6 +217,8 @@
                 "volume": {
                     "label": "Volumen",
                     "units": {
+                        "millilitre": "Milliliter",
+                        "litre": "Liter",
                         "cubic_centimetre": "Kubikzentimeter",
                         "cubic_decimetre": "Liter | Kubikdezimeter",
                         "cubic_metre": "Kubikmeter",
