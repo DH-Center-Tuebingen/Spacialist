@@ -4,7 +4,7 @@ namespace App\AttributeTypes\Units\Implementations;
 
 use App\AttributeTypes\Units\Unit;
 use App\AttributeTypes\Units\UnitSystem;
-use App\Models\Singleton;
+use App\Patterns\Singleton;
 use Exception;
 
 class UnitManager extends Singleton {
