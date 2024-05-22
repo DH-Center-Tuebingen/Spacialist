@@ -2,36 +2,33 @@
 
 namespace App\AttributeTypes\Units\Implementations;
 
-use App\AttributeTypes\Units\Unit\BaseUnit;
-use App\AttributeTypes\Units\Call;
-use App\AttributeTypes\Units\SiPrefix\Si;
-use App\AttributeTypes\Units\Unit\SiUnit;
-use App\AttributeTypes\Units\Unit\Unit;
+use App\AttributeTypes\Units\Constants\Imperial;
+use App\AttributeTypes\Units\Constants\Si;
+use App\AttributeTypes\Units\Unit;
 use App\AttributeTypes\Units\UnitSystem;
+use App\AttributeTypes\Units\UnitType;
 
-class MassUnits extends UnitSystem {
+class MassUnits extends UnitSystem
+{
 
-    public function __construct() {
-        // For simplicity and concistency we use g instead of kg as the base unit
-        $grams = new BaseUnit('gram', 'g');
-        parent::__construct('mass', $grams);
+    public function __construct()
+    {
+        parent::__construct('mass', [
+            Unit::createUnit('milligram', 'mg', Si::MILLI, 1, UnitType::SI),
+            Unit::createBase( 'gram'     , 'g'),
+            Unit::createUnit('kilogram' , 'kg', Si::KILO, 1, UnitType::SI),
+            Unit::createUnit('ton'      , 't', Si::MEGA, 1, UnitType::SI),
+        ]);
 
-        $this->addSiUnits($grams);
         $this->addImperialUnits();
     }
 
-    private function addSiUnits(BaseUnit $grams) {
+    private function addImperialUnits(){
         $this->addMultiple([
-            new Unit('ton', 't', Call::Si(Si::$MEGA)),
-            new SiUnit(Si::$KILO, $grams),
-            new SiUnit(Si::$MILLI, $grams),
+            Unit::createUnit('ounce', 'oz', Imperial::OUNCE_2_G),
+            Unit::createUnit('pound', 'lb', Imperial::POUND_2_G),
         ]);
     }
 
-    private function addImperialUnits() {
-        $this->addMultiple([
-            new Unit('ounce', 'oz', Call::multiply(28.349523125)),
-            new Unit('pound', 'lb', Call::multiply(453.59237)),
-        ]);
-    }
-}
+
+} 

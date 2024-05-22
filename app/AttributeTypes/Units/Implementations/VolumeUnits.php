@@ -2,45 +2,31 @@
 
 namespace App\AttributeTypes\Units\Implementations;
 
-use App\AttributeTypes\Units\Unit\BaseUnit;
-use App\AttributeTypes\Units\Call;
-use App\AttributeTypes\Units\Unit\Unit;
-use App\AttributeTypes\Units\SiPrefix\Si;
-use App\AttributeTypes\Units\Unit\SiUnit;
+use App\AttributeTypes\Units\Constants\Imperial;
+use App\AttributeTypes\Units\Constants\Si;
+use App\AttributeTypes\Units\Unit;
 use App\AttributeTypes\Units\UnitSystem;
-
-use const App\AttributeTypes\Units\Constants\Imperial\FLUID_OUNCE_US;
-use const App\AttributeTypes\Units\Constants\Imperial\GALLON_US;
-use const App\AttributeTypes\Units\Constants\Imperial\MILE;
-use const App\AttributeTypes\Units\Constants\Imperial\PINT_US;
+use App\AttributeTypes\Units\UnitType;
 
 class VolumeUnits extends UnitSystem {
-
-    const CUBIC = 'cubic_';
-    const METRE = 'metre';
-    const CUBIC_METRE =  self::CUBIC . self::METRE;
+    private const DIM = 3;
 
     public function __construct() {
-        $cubicMetre = new BaseUnit(self::CUBIC_METRE, 'm³');
-        parent::__construct('volume', $cubicMetre);
-
-        $this->addSiUnits($cubicMetre);
-        $this->addImperialUnits();
-    }
-
-    private function addSiUnits(BaseUnit $cubicMetre) {
-        $this->addMultiple([
-            new Unit('litre', 'l', Call::si(Si::$DECI, 3)),
-            new Unit('millilitre', 'ml', Call::si(Si::$CENTI, 3)),
+        parent::__construct('volume', [
+            Unit::createBase( 'cubic_metre', 'm³'),
+            Unit::createUnit('litre'      , 'l', Si::DECI, self::DIM, UnitType::SI),
+            Unit::createUnit('millilitre' , 'ml', Si::CENTI, self::DIM, UnitType::SI),
         ]);
+
+        $this->addImperialUnits();
     }
 
     private function addImperialUnits() {
         $this->addMultiple([
-            new Unit('fluid_ounce_us', 'fl oz', Call::multiply(FLUID_OUNCE_US)),
-            new Unit('pint_us', 'pt', Call::multiply(PINT_US)),
-            new Unit('gallon_us', 'gal', Call::multiply(GALLON_US)),
-            new Unit(self::CUBIC . 'mile', 'mi³', Call::multiply(MILE, 3)),
+            Unit::createUnit('fluid_ounce_us', 'fl oz', Imperial::FLUID_OUNCE_US),
+            Unit::createUnit('pint_us'       , 'pt', Imperial::PINT_US),
+            Unit::createUnit('gallon_us'     , 'gal', Imperial::GALLON_US),
+            Unit::createUnit('cubic_mile'    , 'mi³', Imperial::MILE_2_M, self::DIM),
         ]);
     }
 }

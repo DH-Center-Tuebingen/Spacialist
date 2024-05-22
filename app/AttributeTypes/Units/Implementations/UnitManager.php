@@ -2,8 +2,7 @@
 
 namespace App\AttributeTypes\Units\Implementations;
 
-use App\AttributeTypes\Units\Unit\Unit;;
-
+use App\AttributeTypes\Units\Unit;
 use App\AttributeTypes\Units\UnitSystem;
 use App\Models\Singleton;
 use Exception;

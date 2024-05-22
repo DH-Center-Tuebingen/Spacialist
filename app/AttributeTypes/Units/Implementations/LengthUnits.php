@@ -2,48 +2,33 @@
 
 namespace App\AttributeTypes\Units\Implementations;
 
-use App\AttributeTypes\Units\Unit\BaseUnit;
-use App\AttributeTypes\Units\Call;
-use App\AttributeTypes\Units\Unit\Unit;
-use App\AttributeTypes\Units\SiPrefix\Si;
-use App\AttributeTypes\Units\Unit\SiUnit;
+use App\AttributeTypes\Units\Constants\Imperial;
+use App\AttributeTypes\Units\Constants\General;
+use App\AttributeTypes\Units\Constants\Si;
+use App\AttributeTypes\Units\Unit;
 use App\AttributeTypes\Units\UnitSystem;
-
-use const App\AttributeTypes\Units\Constants\Imperial\FOOT;
-use const App\AttributeTypes\Units\Constants\Imperial\INCH;
-use const App\AttributeTypes\Units\Constants\Imperial\MILE;
-use const App\AttributeTypes\Units\Constants\Imperial\YARD;
+use App\AttributeTypes\Units\UnitType;
 
 class LengthUnits extends UnitSystem {
 
-    const METRE = 'metre';
-
     public function __construct() {
-        $metre = new BaseUnit(self::METRE, 'm');
-        parent::__construct('length', new BaseUnit(self::METRE, 'm'));
-
-        $this->addSiUnits($metre);
-        $this->addImperialUnits();
-
-        $this->add(new Unit('light_year', 'ly', Call::multiply(9460730472580800)));
-    }
-
-    private function addSiUnits(BaseUnit $metre) {
-        $this->addMultiple([
-            new SiUnit(Si::$KILO, $metre),
-            new SiUnit(Si::$CENTI, $metre),
-            new SiUnit(Si::$MILLI, $metre),
-            new SiUnit(Si::$MICRO, $metre),
-            new SiUnit(Si::$NANO, $metre),
+        parent::__construct('length', [
+            Unit::createUnit('nanometre' , 'nm', Si::NANO, 1, UnitType::SI),
+            Unit::createUnit('micrometre', 'µm', Si::MICRO, 1, UnitType::SI),
+            Unit::createUnit('millimetre', 'mm', Si::MILLI, 1, UnitType::SI),
+            Unit::createUnit('centimetre', 'cm', Si::CENTI, 1, UnitType::SI),
+            Unit::createBase( 'metre'     , 'm'),
+            Unit::createUnit('kilometre' , 'km', Si::KILO, 1, UnitType::SI),
         ]);
-    }
 
-    private function addImperialUnits() {
         $this->addMultiple([
-            new Unit('inch', 'in', Call::multiply(INCH)),
-            new Unit('feet', 'ft', Call::multiply(FOOT)),
-            new Unit('yard', 'yd', Call::multiply(YARD)),
-            new Unit('mile', 'mi', Call::multiply(MILE)),
+            Unit::createUnit('inch'      , 'in', Imperial::INCH_2_M),
+            Unit::createUnit('feet'      , 'ft', Imperial::FOOT_2_M),
+            Unit::createUnit('yard'      , 'yd', Imperial::YARD_2_M),
+            Unit::createUnit('mile'      , 'mi', Imperial::MILE_2_M),
         ]);
+        $this->add(
+            Unit::createUnit('light_year', 'ly', General::LIGHTYEAR),
+        );
     }
 }

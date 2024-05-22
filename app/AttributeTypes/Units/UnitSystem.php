@@ -2,8 +2,7 @@
 
 namespace App\AttributeTypes\Units;
 
-use App\AttributeTypes\Units\Unit\BaseUnit;
-use App\AttributeTypes\Units\Unit\Unit;;
+use App\AttributeTypes\Units\Unit;
 
 use Exception;
 
@@ -13,14 +12,32 @@ class UnitSystem {
     private $units = [];
     private $labelMap = [];
     private $symbolMap = [];
+    private $baseIndex = null;
 
-    public function __construct(string $name, BaseUnit $baseUnit) {
+    public function __construct(string $name, array $units) {
         $this->name = $name;
-        $this->add($baseUnit);
+        $baseFound = false;
+        foreach($units as $unit) {
+            $position = $this->add($unit);
+            if($unit->getBase()) {
+                if($baseFound) {
+                    throw new Exception('Base already defined for this Unit System');
+                }
+                $baseFound = true;
+                $this->baseIndex = $position - 1;
+            }
+        }
+
+        if(!$baseFound) {
+            throw new Exception('No Base defined for this Unit System');
+        }
     }
 
     public function addMultiple(array $units) {
         foreach ($units as $unit) {
+            if($unit->getBase()) {
+                throw new Exception('Base already defined for this Unit System');
+            }
             $this->add($unit);
         }
     }
@@ -30,9 +47,14 @@ class UnitSystem {
             throw new Exception("Unit already exists: {$unit->getLabel()} ({$unit->getSymbol()})");
         }
 
+        if($unit->getBase() && isset($this->baseIndex)) {
+            throw new Exception('Base already defined for this Unit System');
+        }
+
         $this->labelMap[$unit->getLabel()] = $unit;
         $this->symbolMap[$unit->getSymbol()] = $unit;
         $this->units[] = $unit;
+        return count($this->units);
     }
 
     public function get(string $label): ?Unit {
@@ -53,7 +75,7 @@ class UnitSystem {
     }
 
     public function getBaseUnit() {
-        return $this->units[0];
+        return $this->units[$this->baseIndex];
     }
 
     public function getName() {
@@ -65,11 +87,11 @@ class UnitSystem {
     }
 
     public function toArray() {
-        $array = [];
-        $array['default'] = $this->getBaseUnit()->getSymbol(); // Shouldn't we better use the label here?
-        $array['units'] = array_map(function ($unit) {
-            return $unit->toObject();
-        }, $this->units);
-        return $array;
+        return [
+            'default' => $this->getBaseUnit()->getSymbol(), // Shouldn't we better use the label here?
+            'units' => array_map(function ($unit) {
+                return $unit->toObject();
+            }, $this->units),
+        ];
     }
 }

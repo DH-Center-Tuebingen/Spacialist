@@ -1,19 +1,17 @@
 <?php
 
-namespace App\AttributeTypes\Units\Constants\Imperial;
+namespace App\AttributeTypes\Units\Constants;
 
-// Length
-const INCH = 0.0254;
-const FOOT = 0.3048;
-const YARD = 0.9144;
-const MILE = 1609.344;
-
-// Area
-const ACRE = 4046.8564224;
-
-// Volume
-const FLUID_OUNCE_US = 2.95735295625e-5;
-const PINT_US = 4.73176473e-4;
-
-const CUPS_US = 2.365882372125699e-4;
-const GALLON_US = 3.785411784e-3;
+class Imperial {
+    public const /*float*/ INCH_2_M = 0.0254;
+    public const /*float*/ FOOT_2_M = 0.3048;
+    public const /*float*/ YARD_2_M = 0.9144;
+    public const /*float*/ MILE_2_M = 1609.344;
+    public const /*float*/ ACRE_2_M2 = 4046.8564224;
+    public const /*float*/ OUNCE_2_G = 28.349523125;
+    public const /*float*/ POUND_2_G = 453.59237;
+    public const /*float*/ FLUID_OUNCE_US = 2.95735295625e-5;
+    public const /*float*/ PINT_US = 4.73176473e-4;
+    public const /*float*/ CUPS_US = 2.365882372125699e-4;
+    public const /*float*/ GALLON_US = 3.785411784e-3;
+}

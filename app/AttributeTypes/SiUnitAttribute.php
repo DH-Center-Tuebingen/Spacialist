@@ -3,9 +3,6 @@
 namespace App\AttributeTypes;
 
 use App\AttributeTypes\Units\Implementations\UnitManager;
-use App\AttributeTypes\Units\TimeUnits;
-use App\AttributeTypes\Units\Unit\Unit;
-use App\AttributeTypes\Units\UnitSystem;
 use App\Exceptions\InvalidDataException;
 
 
