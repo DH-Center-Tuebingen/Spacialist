@@ -304,11 +304,15 @@
         "column": "Spalte | Spalten",
         "add_column": "Spalte hinzufügen",
         "geometry_type": "Geometrietyp",
-        "dependency": "Abhängigkeiten",
-        "depends_on": "Hängt ab von",
+        "dependency": {
+            "title": "Abhängigkeiten",
+            "depends_on": {
+                "title": "Hängt ab von",
+                "desc": "Sichtbarkeit hängt von einem anderen Attribut(wert) ab"
+            }
+        },
         "preference": "Einstellung | Einstellungen",
         "value": "Wert",
-        "allow_override": "Überschreibbar?",
         "tag": "Schlagwort | Schlagworte",
         "set": "Setzen",
         "has_tags": "Hat keine Schlagworte | Hat ein Schlagwort | Hat {cnt} Schlagworte",
@@ -690,6 +694,16 @@
                 "set_to_language": "Auf <span class=\"fw-bold\">{lang}</span> stellen",
                 "columns": "Die Summe der Werte der Spalten darf 12 nicht überschreiten."
             },
+            "categories": {
+                "user": "Benutzer-Einstellungen",
+                "system": "System-Einstellungen",
+                "sub": {
+                    "general": "Allgemein",
+                    "layout": "Layout",
+                    "interface": "Benutzer-Interface"
+                },
+                "is_empty": "Keine Einstellungen in dieser Kategorie"
+            },
             "key": {
                 "language": "Sprache",
                 "password_reset": "Passwort zurücksetzen erlauben",
@@ -798,6 +812,7 @@
             "add": "Neuen Literatur-Eintrag anlegen",
             "import": "BibTeX-Datei importieren",
             "export": "BibTeX-Datei exportieren",
+            "export_search": "Suchtreffer als BibTeX-Datei exportieren",
             "show_all_fields": "Alle Felder anzeigen",
             "column": {
                 "citekey": "Zitations-Schlüssel",

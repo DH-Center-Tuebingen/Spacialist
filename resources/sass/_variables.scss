@@ -17,7 +17,6 @@ $navbar-default-bg: #fff !default;
 
 // Panels
 $panel-default-heading-bg: #fff !default;
-
 $enable-rounded: true !default;
 
 // Borders
@@ -50,3 +49,13 @@ $input-color-placeholder: lighten($text-color, 30%);
 $breadcrumb-item-padding: .25rem;
 $breadcrumb-divider: quote(">");
 $breadcrumb-divider-flipped: $breadcrumb-divider;
+
+// Dropdowns
+.dropdown-menu {
+    // Hover
+    --bs-dropdown-link-hover-bg: var(--bs-gray-200) !important;
+
+    //Active
+    --bs-dropdown-link-active-color: var(--bs-body-color) !important;
+    --bs-dropdown-link-active-bg: var(--bs-gray-400) !important;
+}

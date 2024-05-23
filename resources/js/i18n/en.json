@@ -304,11 +304,15 @@
         "column": "Column | Columns",
         "add_column": "Add column",
         "geometry_type": "Geometry-Type",
-        "dependency": "Dependency",
-        "depends_on": "Depends on",
+        "dependency": {
+            "title": "Dependency",
+            "depends_on": {
+                "title": "Depends on",
+                "desc": "Visibility is based on another attribute (value)"
+            }
+        },
         "preference": "Preference | Preferences",
         "value": "Value",
-        "allow_override": "Allow Override?",
         "tag": "Tag | Tags",
         "set": "Set",
         "has_tags": "Has no tags | Has one tag | Has {cnt} tags",
@@ -690,6 +694,16 @@
                 "set_to_language": "Set to <span class=\"fw-bold\">{lang}</span>",
                 "columns": "The sum of the column values must not be higher than 12."
             },
+            "categories": {
+                "user": "User Preferences",
+                "system": "System Preferences",
+                "sub": {
+                    "general": "General",
+                    "layout": "Layout",
+                    "interface": "User Interface"
+                },
+                "is_empty": "No preferences in this category"
+            },
             "key": {
                 "language": "Language",
                 "password_reset": "Enable Password Reset",
@@ -798,6 +812,7 @@
             "add": "Add new Bibliography-Entry",
             "import": "Import BibTeX-File",
             "export": "Export BibTeX-File",
+            "export_search": "Export search results to BibTeX-File",
             "show_all_fields": "Show all fields",
             "column": {
                 "citekey": "Citation-Key",
