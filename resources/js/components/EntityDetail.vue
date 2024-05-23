@@ -826,7 +826,7 @@
                     const aid = v;
                     const data = state.entity.data[aid];
                     const type = getAttribute(aid)?.datatype;
-                    
+
                     const patch = {
                         op: null,
                         value: null,
@@ -894,10 +894,21 @@
                         },
                     );
                 }).catch(error => {
-                    const r = error.response;
+                    let response = error.response;
+
+                    if(!response) {
+                        response = {
+                            data: {
+                                error: t('global.errors.unknown')
+                            },
+                            status: 417,
+                            statusText: 'Could not decode response'
+                        };
+                    }
+
                     toast.$toast(
-                        r.data.error,
-                        `${r.status}: ${r.statusText}`, {
+                        response.data.error,
+                        `${response.status}: ${response.statusText}`, {
                         channel: 'error',
                         autohide: true,
                         icon: true,
