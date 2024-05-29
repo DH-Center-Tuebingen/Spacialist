@@ -328,7 +328,7 @@ class ApiDataImporterTest extends TestCase {
     }
 
     public function testDataImport() {
-        $response = $this->userRequest()->post('/api/v1/entity/import/validate', [
+        $response = $this->userRequest()->post('/api/v1/entity/import', [
             'file' => $this->createCSVFile([
                 ['name', 'parent', 'Abmessungen'],
                 ['imported',  'Site A', '1;2;3;cm'],
@@ -341,7 +341,7 @@ class ApiDataImporterTest extends TestCase {
                 ]
             ),
             'metadata' => $this->getMetaData(),
-        ])->assertStatus(200);
+        ])->assertStatus(201);
 
         $entityId = null;
         try {
@@ -351,10 +351,12 @@ class ApiDataImporterTest extends TestCase {
         }
 
         $this->assertNotNull($entityId);
-
         $entity = Entity::find($entityId);
         $this->assertNotNull($entity);
-        // $this->assertEquals('imported', $entity->name);
-        // $this->assertEquals('Site A', $entity->);
+
+        $this->assertEquals('imported', $entity->name);
+        $entityData = $entity->getData();
+        info(json_encode($entityData));
+        $this->assertEquals(json_decode('{"B":1,"H":2,"T":3,"unit":"cm"}'), $entityData[9]->value);
     }
 }
