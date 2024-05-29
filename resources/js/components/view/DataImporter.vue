@@ -508,9 +508,9 @@
                 state.validating = false;
                 state.validated = false;
                 state.validationData = {
-                    none: 0,
-                    exist: 0,
-                    multiple: 0,
+                    create: 0,
+                    update: 0,
+                    conflict: 0,
                     total: 0
                 };
 

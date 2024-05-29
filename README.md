@@ -39,6 +39,8 @@ All PHPUnit tests are based on the `DemoSeeder` seed. To run tests, follow these
     - For `.env`: `php artisan db:seed --class=DemoSeeder`
 4. Run `vendor/bin/phpunit`
 
+Note: To re-run all migrations you can use this command `php artisan migrate:fresh --seed  --seeder=DemoSeeder --env=testing`
+
 ## Screenshots
 
 For more screenshots have a look at the [screenshot folder][scr_folder]

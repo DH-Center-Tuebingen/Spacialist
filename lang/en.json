@@ -12,11 +12,8 @@
     "Office Documents": "Office Documents",
     "Spreadsheets": "Spreadsheets",
     "Presentation Files": "Presentation Files",
-
     "Invalid Credentials": "Invalid Credentials",
-
     "Copy": "Copy",
-
     "You do not have the permission to view references": "You do not have the permission to view references",
     "You do not have the permission to add references": "You do not have the permission to add references",
     "This entity does not exist": "This entity does not exist",
@@ -110,6 +107,22 @@
     "This tag does not exist": "This tag does not exist",
     "HTML not supported for file type": "HTML not supported for file type :mime",
     "Presentations not yet supported!": "Presentations not yet supported!",
-
-    "Start date of a time period must not be after it's end date": "Start date of a time period must not be after it's end date"
+    "Start date of a time period must not be after it's end date": "Start date of a time period must not be after it's end date",
+    "entity-importer": {
+        "empty": "No rows to import",
+        "file-not-found": "File could not be read.",
+        "missing-data": "Required column is missing: :column",
+        "invalid-data": "Invalid data: [:column] => :value",
+        "attribute-could-not-be-imported": "Attribute could not be imported: :attribute",
+        "attribute-does-not-exist": "The attribute does not exist: :attributes",
+        "attribute-column-does-not-exist": "The attribute columns do not exist: :columns",
+        "name-column-does-not-exist": "The column for the name does not exist: :column",
+        "parent-column-does-non-exist": "The column for the parent entity does not exist: :column",
+        "parent-entity-does-not-exist": "The parent entity does not exist: :entity",
+        "entity-type-does-not-exist": "The entity type does not exist: :type",
+        "entity-type-relation-not-allowed": "The relationship between entity types is not allowed: :parent -> :child",
+        "entity-already-exists": "The entity already exists: :entity",
+        "name-column-empty": "Name is missing",
+        "no-headers-found": "No columns found"
+    }
 }

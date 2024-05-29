@@ -15,6 +15,8 @@ use App\Exceptions\Structs\ImportExceptionStruct;
 use App\Exceptions\InvalidDataException;
 use App\Exceptions\Structs\AttributeImportExceptionStruct;
 use App\Import\EntityImporter;
+use App\Import\ImportResolution;
+use App\Import\ImportResolutionType;
 use App\Reference;
 use App\ThConcept;
 use Exception;
@@ -448,17 +450,20 @@ class EntityController extends Controller {
         $file = $request->file('file');
         $metadata = json_decode($request->get('metadata'), true);
         $data = json_decode($request->get('data'), true);
-        $handle = fopen($file->getRealPath(), 'r');
 
-        try {
-            $entityImport = new EntityImporter($metadata, $data);
-            $result = $entityImport->validateImportData($handle);
-        } catch (ImportException $e) {
-            $obj = $e->getObject();
-            return response()->json($obj, 400);
+        $entityImport = new EntityImporter($metadata, $data);
+        $resolver = $entityImport->validateImportData($file->getRealPath());
+
+        if ($resolver->hasErrors()) {
+
+            info($resolver->getErrors());
+
+            return response()->json([
+                'error' => $resolver->getErrors(),
+            ], 400);
+        } else {
+            return response()->json($resolver->getArray());
         }
-
-        return response()->json($result);
     }
 
     /**
@@ -514,10 +519,11 @@ class EntityController extends Controller {
                 }
                 continue;
             }
-            
+
             if (!isset($nameIdx)) {
                 throw new ImportException(
                     "Name column '" . $nameColumn . "' could not be found in CSV file",
+                    400,
                     new ImportExceptionStruct(on: $nameColumn)
                 );
             }
