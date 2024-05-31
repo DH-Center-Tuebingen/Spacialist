@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 use Illuminate\Http\UploadedFile;
 
+use function PHPUnit\Framework\assertJson;
 
 class ApiDataImporterTest extends TestCase {
 
@@ -25,6 +26,13 @@ class ApiDataImporterTest extends TestCase {
             ['大和', '', '黃色的', '王;伟祺;平安'],
             ['やまと', 'Site A', 'きいろい', "ひまり;まゆみ;ユイ"],
             ['ياماتو', 'Site B', 'أصفر', "عَلِي;يُوْسِف;حَسَن"],
+        ], $delimiter);
+    }
+
+    private function createDimensionsCSVFile($delimiter = ",") {
+        return $this->createCSVFile([
+            ['name', 'parent', 'Abmessungen'],
+            ['imported', 'Site A', '1;2;3;cm'],
         ], $delimiter);
     }
 
@@ -49,6 +57,16 @@ class ApiDataImporterTest extends TestCase {
             "entity_type_id" => $entityTypeId,
             "attributes" => $attributes,
         ]);
+    }
+
+    private function getDimensionsData(){
+        return $this->getData(
+            parentColumn: 'parent',
+            entityTypeId: 6,
+            attributes: [
+                9 => "Abmessungen",
+            ]
+            );
     }
 
     private function getMetaData(string $delimiter = ",", bool $hasHeaderRow = true) {
@@ -291,7 +309,7 @@ class ApiDataImporterTest extends TestCase {
         ]);
     }
 
-    public function testValidationOfAttributeValueCanBeImported() {
+    public function testValidationOfAttributeValueSucceeds() {
         $response = $this->userRequest()->post('/api/v1/entity/import/validate', [
             'file' => $this->createCSVFile([
                 ['name', 'parent', 'Abmessungen'],
@@ -305,10 +323,12 @@ class ApiDataImporterTest extends TestCase {
                 ]
             ),
             'metadata' => $this->getMetaData(),
-        ])->assertStatus(200);
+        ]);
+
+        $response->assertStatus(200);
     }
 
-    public function testValidationOfAttributeValueCannotBeImported() {
+    public function testValidationOfAttributeValueFails() {
         $response = $this->userRequest()->post('/api/v1/entity/import/validate', [
             'file' => $this->createCSVFile([
                 ['name', 'parent', 'Abmessungen'],
@@ -327,21 +347,22 @@ class ApiDataImporterTest extends TestCase {
         ]);
     }
 
-    public function testDataImport() {
+    public function testDataImportSuccess() {
         $response = $this->userRequest()->post('/api/v1/entity/import', [
-            'file' => $this->createCSVFile([
-                ['name', 'parent', 'Abmessungen'],
-                ['imported',  'Site A', '1;2;3;cm'],
-            ]),
-            'data' => $this->getData(
-                parentColumn: 'parent',
-                entityTypeId: 6,
-                attributes: [
-                    9 => "Abmessungen",
-                ]
-            ),
+            'file' => $this->createDimensionsCSVFile(),
+            'data' => $this->getDimensionsData(),
             'metadata' => $this->getMetaData(),
-        ])->assertStatus(201);
+        ]);
+
+        if($response->status() !== 201){
+            $response->assertJson([
+                'error' => 'any'
+            ]);
+        }
+
+        $response->assertStatus(201);
+
+
 
         $entityId = null;
         try {
@@ -356,7 +377,79 @@ class ApiDataImporterTest extends TestCase {
 
         $this->assertEquals('imported', $entity->name);
         $entityData = $entity->getData();
-        info(json_encode($entityData));
         $this->assertEquals(json_decode('{"B":1,"H":2,"T":3,"unit":"cm"}'), $entityData[9]->value);
     }
+
+    public function testDataImportFailsOnEmptyFile(){
+        $this->userRequest()->post('/api/v1/entity/import', [
+            'file' => $this->createCSVFile([]),
+            'data' => $this->getData(),
+            'metadata' => $this->getMetaData(),
+        ])
+        ->assertStatus(400)
+        ->assertJson([
+            'error' => 'entity-importer.empty'
+        ]);
+    }
+
+    public function testDataImportCanCreateAttribute(){
+        $this->userRequest()->post('/api/v1/entity/import', [
+            'file' => $this->createCSVFile([["name", "parent", "Notizen"],["Site A", "", "updated"]]),
+            'data' => $this->getData(
+                attributes: [
+                    8 => "Notizen",
+                ]
+            ),
+            'metadata' => $this->getMetaData(),
+        ])
+        ->assertStatus(201);
+        
+        $entityId = Entity::getFromPath('Site A');
+        $data = Entity::find($entityId)->getData();
+        $this->assertEquals('updated', $data[8]->value);
+    }
+
+    public function testDataImportCanUpdateAttribute(){
+        $this->userRequest()->post('/api/v1/entity/import', [
+            'file' => $this->createCSVFile([["name", "parent", "Alternativer Name"],["Site A", "", "alt name;alias"]]),
+            'data' => $this->getData(
+                attributes: [
+                    15 => "Alternativer Name",
+                ]
+            ),
+            'metadata' => $this->getMetaData(),
+        ])
+        ->assertStatus(201);
+        
+        $entityId = Entity::getFromPath('Site A');
+        $data = Entity::find($entityId)->getData();
+        $this->assertEquals(["alt name", "alias"], $data[15]->value);
+    }
+
+    public function testDataImportFailsWithIncompatibleMapping(){
+        $response = $this->userRequest()->post('/api/v1/entity/import', [
+            'file' => $this->createCSVFile([["name", "parent", "Notizen"],["Site A", "", "updated"]]),
+            'data' => $this->getData(
+                attributes: [
+                   99 => "Notizen",
+                ]
+            ),
+            'metadata' => $this->getMetaData(),
+        ])
+        ->assertStatus(400);
+        
+        $response->assertJson([
+            'error' => 'entity-importer.attribute-does-not-exist',
+            'data' => [
+                'count' => -1,
+                'entry' => null,
+                'on' => -1,
+                'on_index' => -1,
+                'on_value' => null,
+                'on_name' => null
+            ] 
+        ]);
+    }
+
+
 }

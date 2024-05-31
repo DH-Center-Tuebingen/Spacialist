@@ -80,7 +80,7 @@ class Entity extends Model implements Searchable {
         return array_keys(self::searchCols);
     }
 
-    public static function getFromPath($path, $delimiter = "\\\\") {
+    public static function getFromPath($path, $delimiter = "\\\\"): ?int {
         if (!isset($path)) {
             return null;
         }
@@ -339,7 +339,6 @@ class Entity extends Model implements Searchable {
             ->withModerated()
             ->get();
 
-        info($attributes);
         $data = [];
         foreach ($attributes as $a) {
             switch ($a->attribute->datatype) {

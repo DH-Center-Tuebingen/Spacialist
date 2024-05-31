@@ -96,7 +96,6 @@ class EntityImporter {
             return $this->resolver->conflict(__("entity-importer.empty"));
         }
 
-
         $this->verifyNameColumn($headers);
         $this->verifyParentColumn($headers);
         $this->verifyEntityType($this->entityTypeId);
@@ -156,7 +155,6 @@ class EntityImporter {
             }
 
             $attr = Attribute::find($attribute);
-            info($attr);
             if (!$attr) {
                 array_push($indexErrors, $attribute);
             } else {
@@ -232,7 +230,6 @@ class EntityImporter {
                 $attrClass = AttributeBase::getMatchingClass($datatype);
                 $attrClass::fromImport($row[$column]);
             } catch (Exception $e) {
-                info($column);
                 array_push($errors, $column);
             }
         }
