@@ -43,7 +43,7 @@ class ImportResolution {
         return $this;
     }
 
-    public function getArray() {
+    public function getSummary() {
         return [
             self::getKey(ImportResolutionType::CREATE) => $this->status[ImportResolutionType::CREATE->name],
             self::getKey(ImportResolutionType::UPDATE) => $this->status[ImportResolutionType::UPDATE->name],

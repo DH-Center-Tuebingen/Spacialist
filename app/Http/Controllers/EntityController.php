@@ -454,13 +454,10 @@ class EntityController extends Controller {
         $entityImport = new EntityImporter($metadata, $data);
         $resolver = $entityImport->validateImportData($file->getRealPath());
 
-        if ($resolver->hasErrors()) {
-            return response()->json([
-                'error' => $resolver->getErrors(),
-            ], 400);
-        } else {
-            return response()->json($resolver->getArray());
-        }
+        return response()->json([
+            'errors' => $resolver->getErrors(),
+            'summary' => $resolver->getSummary(),
+        ]);
     }
 
     /**
