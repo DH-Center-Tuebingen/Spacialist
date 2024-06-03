@@ -641,7 +641,7 @@ class EntityController extends Controller {
     function createImportedEntity($entityName, ?string $rootEntityPath, $entityTypeId, $user) {
 
         $rootEntityId = null;
-        if (isset($rootEntityPathy)) {
+        if (isset($rootEntityPath)) {
             try {
                 $rootEntityId = Entity::getFromPath($rootEntityPath);
             } catch (AmbiguousValueException $ave) {

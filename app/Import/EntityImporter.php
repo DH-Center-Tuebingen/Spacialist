@@ -214,10 +214,10 @@ class EntityImporter {
 
         $filepath = implode(self::PARENT_DELIMITER, array_filter([$parentPath, $row[$this->nameColumn]], fn ($part) => !empty($part)));
         if ($this->checkIfEntityExists($filepath)) {
-            $this->rowConflict($rowIndex, "entity-importer.entity-already-exists", ["entity" => $filepath]);
-            return false;
+            $this->resolver->update();
+        } else {
+            $this->resolver->create();
         }
-
 
         return true;
     }

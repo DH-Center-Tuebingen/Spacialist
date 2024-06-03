@@ -65,6 +65,7 @@ class Csv extends Parser {
         if ($this->hasHeaderRow) {
             $utf8Line = $this->toUtf8($row);
             $headers = $this->fromCsvLine($utf8Line);
+            $headers = array_map(fn ($header) => trim($header), $headers);
         } else {
             $headers = $this->generateNumberHeaders($row);
         }
