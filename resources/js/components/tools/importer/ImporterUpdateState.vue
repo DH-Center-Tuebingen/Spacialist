@@ -1,13 +1,6 @@
 <template>
     <div class="importer-update-state">
-        <Alert
-            :message="t(`main.importer.validation.${activeOption.text}`)"
-            :noicon="false"
-            :type="activeOption.type"
-        />
-
-
-        <div class="input-group">
+        <div class="input-group mb-1">
             <ImporterUpdateItem
                 :value="create"
                 icon="fas fa-fw fa-circle-plus"
@@ -27,6 +20,21 @@
                 :title="t('global.conflict')"
             />
         </div>
+        <Alert
+            v-if="errors.length == 0"
+            :message="t(`main.importer.validation.${activeOption.text}`)"
+            :noicon="false"
+            :type="activeOption.type"
+        />
+        <Alert
+            v-for="(error, index) in errors"
+            v-else
+            :key="index"
+            :message="error"
+            :noicon="true"
+            type="error"
+            class="mb-1 py-1 px-2"
+        />
     </div>
 </template>
 
@@ -56,6 +64,10 @@
             imported: {
                 type: Boolean,
                 required: true
+            },
+            errors: {
+                type: Array,
+                default: () => []
             }
 
         },

@@ -66,6 +66,7 @@
                             :update="state.validationData.update"
                             :create="state.validationData.create"
                             :imported="state.imported"
+                            :errors="state.validationErrors"
                         />
                         <Alert
                             v-else
@@ -415,15 +416,11 @@
                     .then(data => {
                         state.validated = true;
                         state.error = '';
-                        state.validationData = data;
+                        state.validationData = data.summary;
+                        state.validationErrors = data.errors;
                     })
                     .catch(axiosError => {
-                        handleUnhandledErrors(axiosError, e => {
-                            showImportError({
-                                message: e.response.data.error,
-                                data: e.response.data.data,
-                            });
-                        });
+                        console.error(axiosError);
                     })
                     .finally(_ => state.validating = false);
             };
@@ -508,9 +505,9 @@
                 state.validating = false;
                 state.validated = false;
                 state.validationData = {
-                    none: 0,
-                    exist: 0,
-                    multiple: 0,
+                    create: 0,
+                    update: 0,
+                    conflict: 0,
                     total: 0
                 };
 
@@ -565,6 +562,7 @@
                 imported: false,
                 validating: false,
                 validated: false,
+                validationErrors: [],
                 validationData: {
                     create: 0,
                     update: 0,

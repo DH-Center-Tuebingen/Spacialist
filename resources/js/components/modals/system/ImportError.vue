@@ -62,10 +62,6 @@
         setup(props, context) {
             const { t } = useI18n();
 
-            const {
-                data,
-            } = toRefs(props);
-
             // FUNCTIONS
             const closeModal = _ => {
                 context.emit('closing', false);
@@ -74,27 +70,39 @@
             // DATA
             const state = reactive({
                 htmlMessage: computed(_ => {
+
+                    const data = props.data;
+                    const isRowError = data?.data?.on_index && data?.data?.on_value;
+
+                    const onIndex = data?.data?.on_index || 'N/A';
+                    const onValue = data?.data?.on_value || 'N/A';
+                    const onName = data?.data?.on_name || 'N/A';
+                    const on = data?.data?.on || 'N/A';
+                    const count = data?.data?.count || 'N/A';
+                    const entry = data?.data?.entry || 'N/A';
+
+
                     const i18nMsg =
-                        data.value.data.on_index && data.value.data.on_value
-                        ?
-                        t('main.importer.modal.error.msg_detail', {
-                            count: data.value.data.count,
-                            name: data.value.data.entry,
-                            index: data.value.data.on_index,
-                            col_name: data.value.data.on_name,
-                            datatype: data.value.data.on,
-                            value: data.value.data.on_value,
-                        })
-                        :
-                        t('main.importer.modal.error.msg_detail', {
-                            count: data.value.data.count,
-                            name: data.value.data.entry,
-                            value: data.value.data.on,
-                        });
+                        isRowError
+                            ?
+                            t('main.importer.modal.error.msg_detail', {
+                                count: count,
+                                name: entry,
+                                index: onIndex,
+                                col_name: onName,
+                                datatype: on,
+                                value: onValue,
+                            })
+                            :
+                            t('main.importer.modal.error.msg_detail', {
+                                count: count,
+                                name: entry,
+                                value: on,
+                            });
 
                     const msg =
-                    `<div class='lead'>
-                        ${data.value.message}
+                        `<div class='lead'>
+                        ${data.message}
                     </div>
                     <hr/>
                     <div>
@@ -114,7 +122,7 @@
                 closeModal,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>
