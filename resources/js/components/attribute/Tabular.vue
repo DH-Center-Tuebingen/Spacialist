@@ -3,6 +3,7 @@
         <table class="table table-striped table-hovered table-sm mb-0">
             <thead class="thead-light">
                 <tr>
+                    <th>#</th>
                     <th
                         v-for="(column, i) in state.columns"
                         :key="i"
@@ -35,183 +36,32 @@
                 </tr>
             </thead>
             <tbody>
-                <tr
-                    v-for="(row, $index) in v.value"
-                    :key="$index"
+                <template
+                    v-for="(row, $index) in state.actualShow"
+                    :key="`tabular-row-${$index}`"
                 >
                     <td
-                        v-for="(column, i) in state.columns"
-                        :key="i"
+                        v-if="row.hidden_info"
+                        class="text-muted text-center fs-5 p-2 bg-primary-subtle"
+                        :colspan="Object.keys(state.columns).length + 2"
+                        @click="state.showAll = true"
                     >
-                        <string-attribute
-                            v-if="column.datatype == 'string'"
-                            :ref="el => setRef(el, `${$index}_${column.id}`)"
-                            :disabled="disabled || row.mark_deleted"
-                            :name="`${name}-column-attr-${column.id}`"
-                            :value="row[column.id]"
-                            @change="e => updateDirtyState(e, $index, column.id)"
-                        />
-
-                        <integer-attribute
-                            v-else-if="column.datatype == 'integer'"
-                            :ref="el => setRef(el, `${$index}_${column.id}`)"
-                            :disabled="disabled || row.mark_deleted"
-                            :name="`${name}-column-attr-${column.id}`"
-                            :value="row[column.id]"
-                            @change="e => updateDirtyState(e, $index, column.id)"
-                        />
-
-                        <float-attribute
-                            v-else-if="column.datatype == 'double'"
-                            :ref="el => setRef(el, `${$index}_${column.id}`)"
-                            :disabled="disabled || row.mark_deleted"
-                            :name="`${name}-column-attr-${column.id}`"
-                            :value="row[column.id]"
-                            @change="e => updateDirtyState(e, $index, column.id)"
-                        />
-
-                        <bool-attribute
-                            v-else-if="column.datatype == 'boolean'"
-                            :ref="el => setRef(el, `${$index}_${column.id}`)"
-                            :disabled="disabled || row.mark_deleted"
-                            :name="`${name}-column-attr-${column.id}`"
-                            :value="row[column.id]"
-                            @change="e => updateDirtyState(e, $index, column.id)"
-                        />
-
-                        <iconclass-attribute
-                            v-else-if="column.datatype == 'iconclass'"
-                            :ref="el => setRef(el, `${$index}_${column.id}`)"
-                            :disabled="disabled || row.mark_deleted"
-                            :name="`${name}-column-attr-${column.id}`"
-                            :value="row[column.id]"
-                            :attribute="element"
-                            @change="e => updateDirtyState(e, $index, column.id)"
-                        />
-
-                        <rism-attribute
-                            v-else-if="column.datatype == 'rism'"
-                            :ref="el => setRef(el, `${$index}_${column.id}`)"
-                            :disabled="disabled || row.mark_deleted"
-                            :name="`${name}-column-attr-${column.id}`"
-                            :value="row[column.id]"
-                            :attribute="element"
-                            @change="e => updateDirtyState(e, $index, column.id)"
-                        />
-
-                        <entity-attribute
-                            v-else-if="column.datatype == 'entity'"
-                            :ref="el => setRef(el, `${$index}_${column.id}`)"
-                            :disabled="disabled || row.mark_deleted"
-                            :name="`${name}-column-attr-${column.id}`"
-                            :value="row[column.id]"
-                            @change="e => updateDirtyState(e, $index, column.id)"
-                        />
-
-                        <date-attribute
-                            v-else-if="column.datatype == 'date'"
-                            :ref="el => setRef(el, `${$index}_${column.id}`)"
-                            :disabled="disabled || row.mark_deleted"
-                            :name="`${name}-column-attr-${column.id}`"
-                            :value="row[column.id]"
-                            @change="e => updateDirtyState(e, $index, column.id)"
-                        />
-
-                        <daterange-attribute
-                            v-else-if="column.datatype == 'daterange'"
-                            :ref="el => setRef(el, `${$index}_${column.id}`)"
-                            :disabled="disabled || row.mark_deleted"
-                            :name="`${name}-column-attr-${column.id}`"
-                            :value="row[column.id]"
-                            @change="e => updateDirtyState(e, $index, column.id)"
-                        />
-
-                        <singlechoice-attribute
-                            v-else-if="column.datatype == 'string-sc'"
-                            :ref="el => setRef(el, `${$index}_${column.id}`)"
-                            :disabled="disabled || row.mark_deleted"
-                            :name="`${name}-column-attr-${column.id}`"
-                            :value="row[column.id]"
-                            :selections="state.selections[column.id]"
-                            @change="e => updateDirtyState(e, $index, column.id)"
-                        />
-
-                        <multichoice-attribute
-                            v-else-if="column.datatype == 'string-mc'"
-                            :ref="el => setRef(el, `${$index}_${column.id}`)"
-                            :disabled="disabled || row.mark_deleted"
-                            :name="`${name}-column-attr-${column.id}`"
-                            :value="row[column.id]"
-                            :selections="state.selections[column.id]"
-                            @change="e => updateDirtyState(e, $index, column.id)"
-                        />
-
-                        <userlist-attribute
-                            v-else-if="column.datatype == 'userlist'"
-                            :ref="el => setRef(el, `${$index}_${column.id}`)"
-                            :name="`${name}-column-attr-${column.id}`"
-                            :value="row[column.id]"
-                            @change="e => updateDirtyState(e, $index, column.id)"
-                        />
-
-                        <url-attribute
-                            v-else-if="element.datatype == 'url'"
-                            :ref="el => setRef(el, `${$index}_${column.id}`)"
-                            :name="`${name}-column-attr-${column.id}`"
-                            :value="row[column.id]"
-                            @change="e => updateDirtyState(e, $index, column.id)"
-                        />
+                        show {{ v.value.length - 20 }} hidden rows…
                     </td>
-                    <td
-                        v-if="!disabled"
-                        class="text-center"
-                    >
-                        <div class="dropdown">
-                            <span
-                                :id="`tabular-row-options-${$index}`"
-                                class="clickable"
-                                data-bs-toggle="dropdown"
-                                aria-haspopup="true"
-                                aria-expanded="false"
-                            >
-                                <i class="fas fa-fw fa-ellipsis-h" />
-                            </span>
-                            <div
-                                class="dropdown-menu"
-                                :aria-labelledby="`tabular-row-options-${$index}`"
-                            >
-                                <a
-                                    class="dropdown-item"
-                                    href="#"
-                                    @click.prevent="resetRow($index)"
-                                >
-                                    <i class="fas fa-fw fa-undo text-info" /> {{ t('global.reset') }}
-                                </a>
-                                <a
-                                    v-if="row.mark_deleted"
-                                    class="dropdown-item"
-                                    href="#"
-                                    @click.prevent="restoreTableRow($index)"
-                                >
-                                    <i class="fas fa-fw fa-trash-restore text-warning" /> {{ t('global.restore') }}
-                                </a>
-                                <a
-                                    v-else
-                                    class="dropdown-item"
-                                    href="#"
-                                    @click.prevent="markTableRowForDelete($index)"
-                                >
-                                    <i class="fas fa-fw fa-trash text-danger" /> {{ t('global.delete') }}
-                                </a>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
+                    <Row
+                        v-else
+                        :data="row"
+                        :columns="state.columns"
+                        :number="getActualRowNumber($index)"
+                        :disabled="disabled"
+                        :hideLinks="hideLinks"
+                    />
+                </template>
                 <tr v-if="!disabled && !state.isPreview">
                     <td
                         class="text-center"
                         style="--bs-table-striped-bg:248,249,250;"
-                        :colspan="Object.keys(state.columns).length + 1"
+                        :colspan="Object.keys(state.columns).length + 2"
                     >
                         <button
                             type="button"
@@ -227,6 +77,7 @@
                     v-if="!state.isPreview"
                     class="border-0"
                 >
+                    <td>&nbsp;</td>
                     <td
                         v-for="(column, i) in state.columns"
                         :key="i"
@@ -363,6 +214,8 @@
         showCsvColumnPicker,
     } from '@/helpers/modal.js';
 
+    import Row from '@/components/attribute/TabularRow.vue';
+
     import StringAttr from '@/components/attribute/String.vue';
     import IntegerAttr from '@/components/attribute/Integer.vue';
     import FloatAttr from '@/components/attribute/Float.vue';
@@ -381,19 +234,20 @@
 
     export default {
         components: {
-            'string-attribute': StringAttr,
-            'integer-attribute': IntegerAttr,
-            'float-attribute': FloatAttr,
-            'bool-attribute': Bool,
-            'iconclass-attribute': Iconclass,
-            'rism-attribute': RISM,
-            'entity-attribute': Entity,
-            'date-attribute': DateAttr,
-            'daterange-attribute': DaterangeAttr,
-            'singlechoice-attribute': SingleChoice,
-            'multichoice-attribute': MultiChoice,
-            'userlist-attribute': UserList,
-            'url-attribute': Url,
+            // 'string-attribute': StringAttr,
+            // 'integer-attribute': IntegerAttr,
+            // 'float-attribute': FloatAttr,
+            // 'bool-attribute': Bool,
+            // 'iconclass-attribute': Iconclass,
+            // 'rism-attribute': RISM,
+            // 'entity-attribute': Entity,
+            // 'date-attribute': DateAttr,
+            // 'daterange-attribute': DaterangeAttr,
+            // 'singlechoice-attribute': SingleChoice,
+            // 'multichoice-attribute': MultiChoice,
+            // 'userlist-attribute': UserList,
+            // 'url-attribute': Url,
+            Row,
         },
         props: {
             name: {
@@ -410,13 +264,14 @@
                 required: false,
                 default: _ => new Array(),
             },
-            selections: {
-                type: Object,
-                default: null
-            },
             attribute: {
                 type: Object,
                 default: null
+            },
+            hideLinks: {
+                type: Boolean,
+                required: false,
+                default: false,
             },
             previewColumns: {
                 required: false,
@@ -444,11 +299,14 @@
                 value,
                 selections,
                 attribute,
+                hideLinks,
                 previewColumns,
             } = toRefs(props);
 
             // FETCH
 
+            const CUT_SIZE = 10;
+            const CUT_THRES = (CUT_SIZE * 2) + Math.floor(CUT_SIZE / 2);
             // FUNCTIONS
             const resetFieldState = _ => {
                 v.resetField({
@@ -599,6 +457,14 @@
                 }
                 restoreTableRow(index);
             };
+            const getActualRowNumber = idx => {
+                if(state.showAll || !state.needsCut) return idx;
+                if(idx < CUT_SIZE) return idx;
+
+                // add hidden cut length (total length - size of first and last cut)
+                // minus 1 (because hidden row info is added as element)
+                return idx + (v.value.length - (CUT_SIZE * 2) - 1);
+            };
             const updateDirtyState = (e, rowIdx, columnId) => {
                 const currentValue = _cloneDeep(v.value);
                 currentValue[rowIdx][columnId] = e.value;
@@ -634,6 +500,23 @@
                     }
                     return list;
                 }),
+                showAll: false,
+                actualShow: computed(_ => {
+                    if(state.needsCut && !state.showAll) {
+                        return [
+                            ...state.firstCut,
+                            {
+                                hidden_info: true,
+                            },
+                            ...state.lastCut,
+                        ];
+                    } else {
+                        return v.value;
+                    }
+                }),
+                needsCut: computed(_ => v.value.length > CUT_THRES),
+                firstCut: computed(_ => v.value.slice(0, CUT_SIZE)),
+                lastCut: computed(_ => v.value.slice(-CUT_SIZE)),
                 newRowColumns: {},
                 deletedRows: {},
                 expanded: false,
@@ -695,7 +578,6 @@
                 resetField,
             });
 
-
             watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
@@ -733,6 +615,7 @@
                 restoreTableRow,
                 markTableRowForDelete,
                 resetRow,
+                getActualRowNumber,
                 updateDirtyState,
                 setRef,
                 // PROPS

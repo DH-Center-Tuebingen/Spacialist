@@ -266,14 +266,14 @@ export const store = createStore({
                         } else {
                             // if no id exists, this data is added
                             if(!entity.data[k].id) {
-                                entity.data[k] = data.new_data[k];
+                                entity.data[k].value = data.new_data[k];
                                 if(data.sync) {
-                                    state.entity.data[k] = data.new_data[k];
+                                    state.entity.data[k].value = data.new_data[k];
                                 }
                             } else {
-                                entity.data[k] = data.data[k];
+                                entity.data[k].value = data.data[k];
                                 if(data.sync) {
-                                    state.entity.data[k] = data.data[k];
+                                    state.entity.data[k].value = data.data[k];
                                 }
                             }
                         }

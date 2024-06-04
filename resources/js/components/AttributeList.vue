@@ -113,239 +113,15 @@
                         </sup>
                     </label>
                     <div :class="expandedClasses(index)">
-                        <string-attribute
-                            v-if="element.datatype == 'string'"
+                        <Attribute
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <stringfield-attribute
-                            v-else-if="element.datatype == 'stringf'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <richtext-attribute
-                            v-else-if="element.datatype == 'richtext'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <integer-attribute
-                            v-else-if="element.datatype == 'integer'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <float-attribute
-                            v-else-if="element.datatype == 'double'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <bool-attribute
-                            v-else-if="element.datatype == 'boolean'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <percentage-attribute
-                            v-else-if="element.datatype == 'percentage'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <serial-attribute
-                            v-else-if="element.datatype == 'serial'"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                        />
-
-                        <list-attribute
-                            v-else-if="element.datatype == 'list'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :entries="state.attributeValues[element.id].value"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <epoch-attribute
-                            v-else-if="element.datatype == 'epoch' || element.datatype == 'timeperiod'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            :epochs="selections[element.id]"
-                            :type="element.datatype"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <dimension-attribute
-                            v-else-if="element.datatype == 'dimension'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <tabular-attribute
-                            v-else-if="element.datatype == 'table'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            :attribute="element"
-                            :selections="selections"
-                            :preview-columns="preview ? previewData[element.id] : null"
-                            @expanded="e => onAttributeExpand(e, index)"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <iconclass-attribute
-                            v-else-if="element.datatype == 'iconclass'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            :attribute="element"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <rism-attribute
-                            v-else-if="element.datatype == 'rism'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            :attribute="element"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <geography-attribute
-                            v-else-if="element.datatype == 'geography'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            :attribute="element"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <entity-attribute
-                            v-else-if="element.datatype == 'entity' || element.datatype == 'entity-mc'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :multiple="element.datatype == 'entity-mc'"
-                            :hide-link="state.hideEntityLink"
-                            :value="convertEntityValue(state.attributeValues[element.id], element.datatype == 'entity-mc')"
-                            :search-in="element.restrictions"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <date-attribute
-                            v-else-if="element.datatype == 'date'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <daterange-attribute
-                            v-else-if="element.datatype == 'daterange'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <singlechoice-attribute
-                            v-else-if="element.datatype == 'string-sc'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            :selections="selections[element.id]"
-                            :selection-from="element.root_attribute_id"
-                            :selection-from-value="state.rootAttributeValues[element.root_attribute_id]"
-                            @update-selection="e => handleSelectionUpdate(element.id, e)"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <multichoice-attribute
-                            v-else-if="element.datatype == 'string-mc'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            :selections="selections[element.id]"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <userlist-attribute
-                            v-else-if="element.datatype == 'userlist'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <url-attribute
-                            v-else-if="element.datatype == 'url'"
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            @change="e => updateDirtyState(e, element.id)"
-                        />
-
-                        <sql-attribute
-                            v-else-if="element.datatype == 'sql'"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                        />
-
-                        <system-separator-attribute
-                            v-else-if="element.datatype == 'system-separator'"
-                            :name="`attr-${element.id}`"
-                            :title="getSeparatorTitle(element)"
-                        />
-
-                        <default-attribute
-                            v-else
-                            :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
-                            @change="e => updateDirtyState(e, element.id)"
+                            :data="element"
+                            :value-wrapper="state.attributeValues[element.id]"
+                            :disabled="state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :react-to="state.rootAttributeValues[element.root_attribute_id]"
+                            :hide-links="state.hideEntityLink"
+                            @change="updateDirtyState"
+                            @update-selection="handleSelectionUpdate"
                         />
 
                         <attribute-moderation-panel
@@ -386,61 +162,11 @@
 
     import store from '@/bootstrap/store.js';
 
-    import StringAttr from '@/components/attribute/String.vue';
-    import Stringfield from '@/components/attribute/Stringfield.vue';
-    import Richtext from '@/components/attribute/Richtext.vue';
-    import IntegerAttr from '@/components/attribute/Integer.vue';
-    import FloatAttr from '@/components/attribute/Float.vue';
-    import Bool from '@/components/attribute/Bool.vue';
-    import Percentage from '@/components/attribute/Percentage.vue';
-    import Serial from '@/components/attribute/Serial.vue';
-    import List from '@/components/attribute/List.vue';
-    import Epoch from '@/components/attribute/Epoch.vue';
-    import Dimension from '@/components/attribute/Dimension.vue';
-    import Tabular from '@/components/attribute/Tabular.vue';
-    import Iconclass from '@/components/attribute/Iconclass.vue';
-    import RISM from '@/components/attribute/Rism.vue';
-    import Geography from '@/components/attribute/Geography.vue';
-    import Entity from '@/components/attribute/Entity.vue';
-    import DateAttr from '@/components/attribute/Date.vue';
-    import DaterangeAttr from '@/components/attribute/Daterange.vue';
-    import SingleChoice from '@/components/attribute/SingleChoice.vue';
-    import MultiChoice from '@/components/attribute/MultiChoice.vue';
-    import UserList from '@/components/attribute/UserList.vue';
-    import Url from '@/components/attribute/Url.vue';
-    import SqlAttr from '@/components/attribute/Sql.vue';
-    import SystemSeparator from '@/components/attribute/SystemSeparator.vue';
-    import DefaultAttr from '@/components/attribute/Default.vue';
     import ModerationPanel from '@/components/moderation/Panel.vue';
     import ValidityIndicator from './forms/indicators/ValidityIndicator.vue';
 
     export default {
         components: {
-            'string-attribute': StringAttr,
-            'stringfield-attribute': Stringfield,
-            'richtext-attribute': Richtext,
-            'integer-attribute': IntegerAttr,
-            'float-attribute': FloatAttr,
-            'bool-attribute': Bool,
-            'percentage-attribute': Percentage,
-            'serial-attribute': Serial,
-            'dimension-attribute': Dimension,
-            'epoch-attribute': Epoch,
-            'list-attribute': List,
-            'tabular-attribute': Tabular,
-            'iconclass-attribute': Iconclass,
-            'rism-attribute': RISM,
-            'geography-attribute': Geography,
-            'entity-attribute': Entity,
-            'date-attribute': DateAttr,
-            'daterange-attribute': DaterangeAttr,
-            'singlechoice-attribute': SingleChoice,
-            'multichoice-attribute': MultiChoice,
-            'userlist-attribute': UserList,
-            'url-attribute': Url,
-            'sql-attribute': SqlAttr,
-            'system-separator-attribute': SystemSeparator,
-            'default-attribute': DefaultAttr,
             'attribute-moderation-panel': ModerationPanel,
             'validity-indicator': ValidityIndicator,
         },
@@ -528,7 +254,9 @@
             // FETCH
 
             // FUNCTIONS
-            const handleSelectionUpdate = (elemId, conceptId) => {
+            const handleSelectionUpdate = e => {
+                const elemId = e.elemId;
+                const conceptId = e.conceptId;
                 if(state.dynamicSelectionList.includes(elemId)) {
                     state.rootAttributeValues[elemId] = conceptId;
                 }
@@ -630,13 +358,6 @@
                 }
             };
 
-            const getSeparatorTitle = element => {
-                if(element.pivot && element.pivot.metadata) {
-                    return element.pivot.metadata.title;
-                } else {
-                    return null;
-                }
-            };
             const onEnter = i => {
                 state.hoverStates[i] = state.isHoveringPossible;
             };
@@ -701,16 +422,13 @@
                 }
                 return values;
             };
-            const updateDirtyState = (e, aid) => {
+            const updateDirtyState = e => {
                 // Do not update dirty state if attribute is currently in moderation edit mode
-                if(state.attributeValues[aid].moderation_edit_state == 'active') {
+                if(state.attributeValues[e.attribute_id].moderation_edit_state == 'active') {
                     return;
                 }
 
-                context.emit('dirty', {
-                    ...e,
-                    attribute_id: aid,
-                });
+                context.emit('dirty', e);
             };
             const resetListValues = _ => {
                 for(let k in attrRefs.value) {
@@ -856,7 +574,10 @@
                 state.dynamicSelectionList.forEach(rootId => {
                     const attrValue = state.attributeValues[rootId].value;
                     if(attrValue) {
-                        handleSelectionUpdate(rootId, attrValue.id);
+                        handleSelectionUpdate({
+                            elemId: rootId,
+                            conceptId: attrValue.id,
+                        });
                     }
                 });
             });
@@ -882,7 +603,6 @@
                 toggleAttributeValue,
                 handleModeration,
                 handleEditModeration,
-                getSeparatorTitle,
                 onEnter,
                 onLeave,
                 handleMove,
@@ -900,7 +620,6 @@
                 hasComment,
                 hasBookmarks,
                 handleLabelClick,
-                convertEntityValue,
                 // STATE
                 attrRefs,
                 state,

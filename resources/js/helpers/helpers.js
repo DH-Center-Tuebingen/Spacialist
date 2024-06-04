@@ -284,6 +284,10 @@ export function getEntityTypeDependencies(id, aid) {
     }
 }
 
+export function getAttributeSelection(aid) {
+    return store.getters.attributeSelections[aid];
+}
+
 export function getAttributeSelections(attributes) {
     const sel = store.getters.attributeSelections;
     let filteredSel = {};
@@ -396,6 +400,48 @@ export function getInitialAttributeValue(attribute) {
         case 'string-sc':
         case 'table':
             return {};
+    }
+}
+
+export function getEmptyAttributeValue(type) {
+    if(!type) return null;
+
+    switch(type) {
+        case 'boolean':
+            return false;
+        case 'geography':
+        case 'iconclass':
+        case 'string-sc':
+        case 'date':
+        case 'url':
+            return '';
+        case 'dimension':
+        case 'entity':
+        case 'epoch':
+        case 'timeperiod':
+            return {};
+        case 'float':
+        case 'integer':
+        case 'percentage':
+            return;
+        case 'list':
+        case 'daterange':
+        case 'string-mc':
+        case 'entity-mc':
+        case 'tabular':
+        case 'userlist':
+            return [];
+        case 'richtext':
+        case 'rism':
+        case 'string':
+        case 'stringf':
+        case 'system-separator':
+            return '';
+        case 'serial':
+        case 'sql':
+            return null;
+        default:
+            return '';
     }
 }
 
