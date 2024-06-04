@@ -25,7 +25,13 @@ abstract class TestCase extends BaseTestCase {
 
     protected function setUp(): void {
         parent::setUp();
-        $this->seed();
+        // Running the seeders is problematic as the
+        // test database should be setup correctly beforehand
+        // and the seeders should not be necessary.
+        // $this->seed([
+        //     'DatabaseSeeder',
+        //     'DemoSeeder'
+        // ]);
         $this->user = null;
         $this->token = null;
         $this->getUserToken();

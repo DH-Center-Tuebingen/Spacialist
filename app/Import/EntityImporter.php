@@ -7,12 +7,10 @@ use App\Entity;
 use App\EntityType;
 use App\EntityTypeRelation;
 use App\Exceptions\AmbiguousValueException;
-use App\Exceptions\ImportException;
-use App\Exceptions\Structs\ImportExceptionStruct;
 use App\Import\ImportResolution;
 use App\Attribute;
 use App\AttributeTypes\AttributeBase;
-use App\Exceptions\InvalidDataException;
+use App\ThConcept;
 use Exception;
 
 enum Action {
@@ -37,7 +35,8 @@ class EntityImporter {
     public function __construct($metadata, $data) {
         $this->resolver = new ImportResolution();
         $this->metadata = $metadata;
-        $this->nameColumn = $data['name_column'];
+
+        $this->nameColumn = $data['name_column'] ?? '';
         $this->entityTypeId = $data['entity_type_id'];
         $this->attributesMap = $data['attributes'];
 
@@ -73,7 +72,6 @@ class EntityImporter {
     }
 
     public function validateImportData($filepath) {
-
         $this->validateStringData('nameColumn', 'name_column');
         $this->validateStringData('entityTypeId', 'entity_type_id');
         $this->validateAttributeData();
@@ -163,7 +161,7 @@ class EntityImporter {
         }
 
         if (count($indexErrors) > 0) {
-            $this->resolver->conflict(__("entity-importer.attribute-does-not-exist", ["attributes" => implode(", ", $indexErrors)]));
+            $this->resolver->conflict(__("entity-importer.attribute-id-does-not-exist", ["attributes" => implode(", ", $indexErrors)]));
         }
 
         if (count($nameErrors) > 0) {
@@ -208,7 +206,13 @@ class EntityImporter {
 
         $isAllowedAsChild = EntityTypeRelation::isAllowed($parentTypeId, $this->entityTypeId);
         if (!$isAllowedAsChild) {
-            $this->rowConflict($rowIndex, "entity-importer.entity-type-relation-not-allowed", ["entity_type_id" => $this->entityTypeId]);
+            $childTh = EntityType::find($this->entityTypeId)->thesaurus_url;
+            $childName = ThConcept::getLabel($childTh);
+
+            $parentTh = EntityType::find($parentTypeId)->thesaurus_url;
+            $parentName = ThConcept::getLabel($parentTh);
+
+            $this->rowConflict($rowIndex, "entity-importer.entity-type-relation-not-allowed", ["child" => $childName, "parent" => $parentName]);
             return false;
         }
 

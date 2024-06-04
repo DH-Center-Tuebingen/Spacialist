@@ -514,8 +514,9 @@ class EntityController extends Controller {
                 }
             } catch (ModelNotFoundException $e) {
                 DB::rollBack();
+                $ids = $e->getIds();
                 return response()->json([
-                    'error' => __('entity-importer.attribute-does-not-exist'),
+                    'error' => __('entity-importer.attribute-id-does-not-exist', ['attributes' => join(', ', $ids)]),
                     'data' => new ImportExceptionStruct(),
                 ], 400);
             }
