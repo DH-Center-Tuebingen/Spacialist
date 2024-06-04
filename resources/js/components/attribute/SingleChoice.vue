@@ -10,6 +10,8 @@
         :options="state.filteredSelections"
         :name="name"
         :searchable="true"
+        :infinite="true"
+        :limit="15"
         :filter-results="false"
         :placeholder="t('global.select.placeholder')"
         @select="value => v.handleChange(value)"
