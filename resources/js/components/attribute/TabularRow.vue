@@ -1,15 +1,21 @@
 <template>
     <tr>
-        <td class="fw-bold">{{ number + 1 }}</td>
+        <td
+            class="fw-bold"
+            :class="state.rowStateClasses"
+        >
+            {{ number + 1 }}
+        </td>
         <td
             v-for="(column, i) in columns"
             :key="`tabluar-row-${number}-column-${i}`"
+            :class="state.rowStateClasses"
         >
             <Attribute
                 :ref="el => setRef(el, i)"
                 :data="column"
                 :value-wrapper="{value: data[column.id]}"
-                :disabled="disabled"
+                :disabled="disabled || data.mark_deleted"
                 :react-to="state.rootAttributeValues[column.root_attribute_id]"
                 :hide-links="hideLinks"
                 @change="e => updateDirtyState(e, column.id)"
@@ -19,10 +25,11 @@
         <td
             v-if="!disabled"
             class="text-center"
+            :class="state.rowStateClasses"
         >
             <div class="dropdown">
                 <span
-                    :id="`tabular-row-options-${$index}`"
+                    :id="`tabular-row-options-${number}`"
                     class="clickable"
                     data-bs-toggle="dropdown"
                     aria-haspopup="true"
@@ -32,12 +39,12 @@
                 </span>
                 <div
                     class="dropdown-menu"
-                    :aria-labelledby="`tabular-row-options-${$index}`"
+                    :aria-labelledby="`tabular-row-options-${number}`"
                 >
                     <a
                         class="dropdown-item"
                         href="#"
-                        @click.prevent="resetRow($index)"
+                        @click.prevent="reset"
                     >
                         <i class="fas fa-fw fa-undo text-info" /> {{ t('global.reset') }}
                     </a>
@@ -45,7 +52,7 @@
                         v-if="data.mark_deleted"
                         class="dropdown-item"
                         href="#"
-                        @click.prevent="restoreTableRow($index)"
+                        @click.prevent="restore"
                     >
                         <i class="fas fa-fw fa-trash-restore text-warning" /> {{ t('global.restore') }}
                     </a>
@@ -53,7 +60,7 @@
                         v-else
                         class="dropdown-item"
                         href="#"
-                        @click.prevent="markTableRowForDelete($index)"
+                        @click.prevent="markForDelete"
                     >
                         <i class="fas fa-fw fa-trash text-danger" /> {{ t('global.delete') }}
                     </a>
@@ -71,21 +78,12 @@
         reactive,
         ref,
         toRefs,
+        watch,
     } from 'vue';
 
-    import { useField } from 'vee-validate';
-
-    import * as yup from 'yup';
-
     import { useI18n } from 'vue-i18n';
-    import store from '@/bootstrap/store.js';
 
     import {
-        createDownloadLink,
-        getTs,
-        getAttribute,
-        slugify,
-        translateConcept,
         _cloneDeep,
     } from '@/helpers/helpers.js';
 
@@ -115,7 +113,7 @@
                 default: false,
             },
         },
-        emits: ['change'],
+        emits: ['change', 'delete', 'reset', 'restore'],
         setup(props, context) {
             const { t } = useI18n();
 
@@ -138,69 +136,63 @@
                 }
             };
             const updateDirtyState = (e, columnId) => {
-                // const currentValue = _cloneDeep(v.value);
-                // currentValue[rowIdx][columnId] = e.value;
-                // v.handleChange(currentValue);
-                // context.emit('change', e);
-                console.log("TODO", e, columnId);
+                state.currentValue[columnId] = e.value;
+                v.meta.dirty = getRowDirty();
+                v.meta.valid = getRowValid();
+                const emitData = {
+                    dirty: v.meta.dirty,
+                    valid: v.meta.valid,
+                    value: state.currentValue,
+                };
+                context.emit('change', emitData);
             };
             const setRef = (el, idx) => {
                 columnRefs.value[idx] = el;
             };
-            // const resetFieldState = _ => {
-            //     v.resetField({
-            //         value: value.value
-            //     });
-            //     for(let k in columnRefs.value) {
-            //         const curr = columnRefs.value[k];
-            //         if(!!curr && !!curr.v && curr.v.meta.dirty && !!curr.resetFieldState) {
-            //             curr.resetFieldState();
-            //         }
-            //     }
-            //     state.deletedRows = {};
-            // };
-            // const undirtyField = _ => {
-            //     v.resetField({
-            //         value: v.value.filter(cv => !cv.mark_deleted),
-            //     });
-            //     for(let k in columnRefs.value) {
-            //         const curr = columnRefs.value[k];
-            //         if(!!curr.v && curr.v.meta.dirty && !!curr.undirtyField) {
-            //             curr.undirtyField();
-            //         }
-            //     }
-            // };
-            // const restoreTableRow = index => {
-            //     const currentValue = v.value;
-            //     delete currentValue[index].mark_deleted;
-            //     v.handleChange(currentValue);
-            // };
-            // const markTableRowForDelete = index => {
-            //     const currentValue = _cloneDeep(v.value);
-            //     currentValue[index].mark_deleted = true;
-            //     v.handleChange(currentValue);
-            // };
-            // const resetRow = index => {
-            //     for(let k in state.columns) {
-            //         const reference = columnRefs.value[`${index}_${state.columns[k].id}`];
-            //         if(!!reference.resetFieldState) {
-            //             reference.resetFieldState();
-            //         }
-            //     }
-            //     restoreTableRow(index);
-            // };
+            const resetFieldState = _ => {
+                for(let k in columnRefs.value) {
+                    const curr = columnRefs.value[k];
+                    if(curr?.v?.meta?.dirty && !!curr.resetFieldState) {
+                        curr.resetFieldState();
+                    }
+                }
+            };
+            const undirtyField = _ => {
+                for(let k in columnRefs.value) {
+                    const curr = columnRefs.value[k];
+                    if(curr?.v?.meta?.dirty && !!curr.undirtyField) {
+                        curr.undirtyField();
+                    }
+                }
+            };
+            const getRowValid = _ => {
+                for(let k in columnRefs.value) {
+                    const curr = columnRefs.value[k];
+                    if(!curr?.v?.meta?.valid) return false;
+                }
+                return true;
+            };
+            const getRowDirty = _ => {
+                for(let k in columnRefs.value) {
+                    const curr = columnRefs.value[k];
+                    if(!!curr?.v?.meta?.dirty) return true;
+                }
+                return false;
+            };
+            const markForDelete = _ => {
+                context.emit('delete');
+            };
+            const restore = _ => {
+                context.emit('restore');
+            };
+            const reset = _ => {
+                context.emit('reset');
+            };
 
             // DATA
             const columnRefs = ref({});
-            // const {
-            //     handleChange,
-            //     value: fieldValue,
-            //     meta,
-            //     resetField,
-            // } = useField(`tabular_${name.value}`, yup.array(), {
-            //     initialValue: value.value,
-            // });
             const state = reactive({
+                currentValue: _cloneDeep(data.value),
                 rootAttributeValues: {},
                 dynamicSelectionList: computed(_ => {
                     const list = [];
@@ -212,27 +204,27 @@
                     }
                     return list;
                 }),
+                rowStateClasses: computed(_ => {
+                    const classes = [];
+                    if(data.value.mark_deleted) {
+                        classes.push('bg-danger', 'bg-opacity-50');
+                    }
+                    return classes;
+                }),
             });
-            // const v = reactive({
-            //     value: fieldValue,
-            //     handleChange,
-            //     meta,
-            //     resetField,
-            // });
+            const v = reactive({
+                value: state.currentValue,
+                meta: {
+                    dirty: false,
+                    valid: true,
+                },
+            });
 
-            // watch(_ => value, (newValue, oldValue) => {
-            //     resetFieldState();
-            // });
-            // watch(_ => v.value, (newValue, oldValue) => {
-            //     // only emit @change event if field is validated (required because Entity.vue components)
-            //     // trigger this watcher several times even if another component is updated/validated
-            //     if(!v.meta.validated) return;
-            //     context.emit('change', {
-            //         dirty: v.meta.dirty,
-            //         valid: v.meta.valid,
-            //         value: v.value,
-            //     });
-            // });
+            watch(_ => data, (newValue, oldValue) => {
+                state.currentValue = _cloneDeep(data.value);
+                resetFieldState();
+
+            });
 
             // ON MOUNTED
             onMounted(_ => {
@@ -255,13 +247,18 @@
                 t,
                 // HELPERS
                 // LOCAL
+                resetFieldState,
+                undirtyField,
                 handleSelectionUpdate,
                 updateDirtyState,
                 setRef,
+                markForDelete,
+                restore,
+                reset,
                 // PROPS
                 // STATE
                 state,
-                // v,
+                v,
             };
         },
     };

@@ -50,11 +50,16 @@
                     </td>
                     <Row
                         v-else
+                        :ref="el => setRef(el, $index)"
                         :data="row"
                         :columns="state.columns"
-                        :number="getActualRowNumber($index)"
+                        :number="getActualRowIndex($index)"
                         :disabled="disabled"
-                        :hideLinks="hideLinks"
+                        :hide-links="hideLinks"
+                        @change="e => updateDirtyState(e, $index)"
+                        @delete="markTableRowForDelete($index)"
+                        @reset="resetRow($index)"
+                        @restore="restoreTableRow($index)"
                     />
                 </template>
                 <tr v-if="!disabled && !state.isPreview">
@@ -312,9 +317,9 @@
                 v.resetField({
                     value: value.value
                 });
-                for(let k in columnRefs.value) {
-                    const curr = columnRefs.value[k];
-                    if(!!curr && !!curr.v && curr.v.meta.dirty && !!curr.resetFieldState) {
+                for(let k in rowRefs.value) {
+                    const curr = rowRefs.value[k];
+                    if(curr?.v?.meta?.dirty && !!curr.resetFieldState) {
                         curr.resetFieldState();
                     }
                 }
@@ -324,9 +329,9 @@
                 v.resetField({
                     value: v.value.filter(cv => !cv.mark_deleted),
                 });
-                for(let k in columnRefs.value) {
-                    const curr = columnRefs.value[k];
-                    if(!!curr.v && curr.v.meta.dirty && !!curr.undirtyField) {
+                for(let k in rowRefs.value) {
+                    const curr = rowRefs.value[k];
+                    if(curr?.v?.meta?.dirty && !!curr.undirtyField) {
                         curr.undirtyField();
                     }
                 }
@@ -438,26 +443,28 @@
             const addTableRow = _ => {
                 v.handleChange(v.value.concat([{}]));
             };
-            const restoreTableRow = index => {
+            const restoreTableRow = rowIdx => {
+                const actualRow = getActualRowIndex(rowIdx);
                 const currentValue = v.value;
-                delete currentValue[index].mark_deleted;
+                delete currentValue[actualRow].mark_deleted;
                 v.handleChange(currentValue);
             };
-            const markTableRowForDelete = index => {
+            const markTableRowForDelete = rowIdx => {
+                const actualRow = getActualRowIndex(rowIdx);
                 const currentValue = _cloneDeep(v.value);
-                currentValue[index].mark_deleted = true;
+                currentValue[actualRow].mark_deleted = true;
                 v.handleChange(currentValue);
             };
-            const resetRow = index => {
-                for(let k in state.columns) {
-                    const reference = columnRefs.value[`${index}_${state.columns[k].id}`];
-                    if(!!reference.resetFieldState) {
-                        reference.resetFieldState();
-                    }
+            const resetRow = rowIdx => {
+                const actualRow = getRowRefIndex(rowIdx);
+
+                const curr = rowRefs.value[actualRow];
+                if(curr?.resetFieldState) {
+                    curr.resetFieldState();
                 }
-                restoreTableRow(index);
+                restoreTableRow(rowIdx);
             };
-            const getActualRowNumber = idx => {
+            const getActualRowIndex = idx => {
                 if(state.showAll || !state.needsCut) return idx;
                 if(idx < CUT_SIZE) return idx;
 
@@ -465,18 +472,23 @@
                 // minus 1 (because hidden row info is added as element)
                 return idx + (v.value.length - (CUT_SIZE * 2) - 1);
             };
-            const updateDirtyState = (e, rowIdx, columnId) => {
+            const getRowRefIndex = idx => {
+                return `row-${getActualRowIndex(idx)}`;
+            };
+            const updateDirtyState = (e, rowIdx) => {
+                const actualRow = getActualRowIndex(rowIdx);
                 const currentValue = _cloneDeep(v.value);
-                currentValue[rowIdx][columnId] = e.value;
+                currentValue[actualRow] = e.value;
                 v.handleChange(currentValue);
                 context.emit('change', e);
             };
             const setRef = (el, idx) => {
-                columnRefs.value[idx] = el;
+                const actualRow = getRowRefIndex(idx);
+                rowRefs.value[actualRow] = el;
             };
 
             // DATA
-            const columnRefs = ref({});
+            const rowRefs = ref({});
             const {
                 handleChange,
                 value: fieldValue,
@@ -615,7 +627,7 @@
                 restoreTableRow,
                 markTableRowForDelete,
                 resetRow,
-                getActualRowNumber,
+                getActualRowIndex,
                 updateDirtyState,
                 setRef,
                 // PROPS
