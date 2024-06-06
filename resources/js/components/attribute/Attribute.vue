@@ -378,29 +378,7 @@
             };
 
             const getValueOrDefault = _ => {
-                const valObj = valueWrapper.value;
-                let defVal = valObj.value;
-                switch(state.type) {
-                    case 'entity':
-                        if(valObj.value) {
-                            defVal = {
-                                id: valObj.value,
-                                name: valObj.name,
-                            };
-                        }
-                        break;
-                    case 'entity-mc':
-                        if(valObj.value) {
-                            defVal = valObj.value.map((val, idx) => {
-                                return {
-                                    id: val,
-                                    name: valObj.name[idx],
-                                };
-                            });
-                        }
-                        break;
-                }
-                return defVal || getEmptyAttributeValue();
+                return valueWrapper.value.value || getEmptyAttributeValue(state.type);
             };
 
             const undirtyField = _ => {

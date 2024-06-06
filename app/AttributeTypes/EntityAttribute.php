@@ -15,10 +15,18 @@ class EntityAttribute extends AttributeBase
     }
 
     public static function unserialize(mixed $data) : mixed {
-        return $data;
+        if($data["name"] == "error.deleted_entity") {
+            return null;
+        } else {
+            return $data["id"];
+        }
     }
 
     public static function serialize(mixed $data) : mixed {
-        return $data;
+        $entity = Entity::without(['user'])->find($data);
+        return [
+            "id" => $data,
+            "name" => isset($entity) ? $entity->name : "error.deleted_entity",
+        ];
     }
 }

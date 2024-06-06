@@ -1,7 +1,7 @@
 <template>
     <simple-search
         :endpoint="searchWrapper"
-        :key-text="'name'"
+        :key-fn="handleDisplayResult"
         :chain="'ancestors'"
         :mode="state.mode"
         :default-value="v.fieldValue"
@@ -9,7 +9,7 @@
         @entry-click="e => entryClicked(e)"
     />
     <router-link
-        v-if="!hideLink && !multiple && v.value"
+        v-if="!hideLink && !multiple && Object.keys(v.value).length > 0 && v.fieldValue.name != 'error.deleted_entity'"
         :to="{name: 'entitydetail', params: {id: v.fieldValue.id}, query: state.query}"
         class="btn btn-outline-secondary btn-sm mt-2"
     >
@@ -36,6 +36,10 @@
     import * as yup from 'yup';
 
     import router from '%router';
+
+    import {
+        only,
+    } from '@/helpers/helpers.js';
 
     import {
         searchEntityInTypes,
@@ -120,6 +124,10 @@
                     query: route.query
                 });
             };
+            const handleDisplayResult = e => {
+                if(e.name == 'error.deleted_entity') return t('main.entity.attributes.table.error.deleted_entity');
+                return e?.name;
+            };
             const resetFieldState = _ => {
                 v.resetField({
                     value: value.value || (multiple.value ? [] : {})
@@ -154,9 +162,9 @@
                     let value = null;
                     if(v.fieldValue) {
                         if(multiple.value) {
-                            value = v.fieldValue.map(fv => fv.id);
+                            value = v.fieldValue.map(fv => only(fv, ['id', 'name']));
                         } else {
-                            value = v.fieldValue.id;
+                            value = only(v.fieldValue, ['id', 'name']);
                         }
                     }
                     return value;
@@ -184,6 +192,7 @@
                 // LOCAL
                 entitySelected,
                 entryClicked,
+                handleDisplayResult,
                 resetFieldState,
                 undirtyField,
                 searchWrapper,

@@ -428,7 +428,7 @@ export function getEmptyAttributeValue(type) {
         case 'daterange':
         case 'string-mc':
         case 'entity-mc':
-        case 'tabular':
+        case 'table':
         case 'userlist':
             return [];
         case 'richtext':

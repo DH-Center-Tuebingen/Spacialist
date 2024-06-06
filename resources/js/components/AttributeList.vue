@@ -120,6 +120,8 @@
                             :disabled="state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :react-to="state.rootAttributeValues[element.root_attribute_id]"
                             :hide-links="state.hideEntityLink"
+                            :preview="preview"
+                            :preview-data="previewData"
                             @change="updateDirtyState"
                             @update-selection="handleSelectionUpdate"
                         />

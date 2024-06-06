@@ -63,6 +63,7 @@
         getAttributeName,
         translateConcept,
         multiselectResetClasslist,
+        only,
     } from '@/helpers/helpers.js';
 
     export default {
@@ -121,7 +122,7 @@
             // FUNCTIONS
             const handleUpdateForSelections = value => {
                 context.emit('update-selection', value?.id);
-                veeHandleChange(value);
+                formatAndHandleChange(value);
             };
 
             const updateCurrentValue = _ => {
@@ -172,6 +173,16 @@
                 });
             };
 
+            const formatValue = value => {
+                return only(value, ['id', 'concept_url']);
+            };
+
+            const formatAndHandleChange = value => {
+                return veeHandleChange(
+                    formatValue(value)
+                );
+            };
+
             const setSearchQuery = query => {
                 state.query = query ? query.toLowerCase().trim() : null;
             };
@@ -217,7 +228,7 @@
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
-                    value: v.value,
+                    value: formatValue(v.value),
                 });
             });
             if(state.hasRootAttribute) {

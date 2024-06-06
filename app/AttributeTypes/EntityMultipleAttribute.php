@@ -21,10 +21,25 @@ class EntityMultipleAttribute extends AttributeBase
     }
 
     public static function unserialize(mixed $data) : mixed {
-        return json_encode($data);
+        $result = [];
+        foreach($data as $entry) {
+            if($entry["name"] == "error.deleted_entity") {
+                continue;
+            }
+
+            $result[] = $entry["id"];
+        }
+        return json_encode($result);
     }
 
     public static function serialize(mixed $data) : mixed {
-        return json_decode($data);
+        $decodedData = json_decode($data);
+        $entityList = Entity::without(['user'])->whereIn('id', $decodedData)->pluck('name', 'id');
+        return array_map(function($value) use ($entityList) {
+            return [
+                "id" => $value,
+                "name" => $entityList[$value] ?? "error.deleted_entity",
+            ];
+        }, $decodedData);
     }
 }

@@ -436,6 +436,9 @@
                 },
                 "table": {
                     "add_row": "Neue Zeile hinzufügen",
+                    "error": {
+                        "deleted_entity": "Gelöschte Entität"
+                    },
                     "chart": {
                         "number_sets": "Die letzten {cnt} Datensätze",
                         "include_in": "Verwenden",
