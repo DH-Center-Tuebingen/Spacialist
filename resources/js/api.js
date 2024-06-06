@@ -522,6 +522,10 @@ export async function addAttribute(attribute) {
                 mappedC.root_id = mappedC.rootLabel.id;
                 delete mappedC.rootLabel;
             }
+            if(mappedC.restrictedTypes) {
+                mappedC.restricted_types = mappedC.restrictedTypes.map(t => t.id);
+                delete mappedC.restrictedTypes;
+            }
             mappedC.datatype = mappedC.type;
             delete mappedC.type;
             return mappedC;
