@@ -339,18 +339,19 @@ export function isAllowedSubEntityType(parentId, id) {
     return parent.sub_entity_types.some(et => et.id == id);
 }
 
-export function getInitialAttributeValue(attribute) {
-    switch(attribute.type) {
+export function getInitialAttributeValue(attribute, typeAttr = 'type') {
+    switch(attribute[typeAttr]) {
         case 'string':
         case 'stringf':
         case 'richtext':
         case 'iconclass':
         case 'rism':
         case 'geography':
+        case 'date':
+        case 'url':
             return '';
         case 'integer':
         case 'double':
-            return 0;
         case 'boolean':
             return 0;
         case 'percentage':
@@ -385,17 +386,28 @@ export function getInitialAttributeValue(attribute) {
         case 'string-mc':
         case 'entity-mc':
         case 'userlist':
+        case 'daterange':
+        case 'table':
             return [];
-        case 'date':
-            return new Date();
         case 'sql':
             return t('global.preview_not_available');
         case 'epoch':
         case 'dimension':
         case 'entity':
         case 'string-sc':
-        case 'table':
             return {};
+        case 'si-unit':
+            if(!attribute.siGroup) {
+                return { value: 0 };
+            } else {
+                return {
+                    value: 0,
+                    unit: attribute.siGroup,
+                    default: attribute.siGroupUnit,
+                };
+            }
+        default:
+            return '';
     }
 }
 
@@ -498,6 +510,16 @@ export function getEntityColors(id) {
         colors = store.getters.entityTypeColors(id);
     }
     return colors;
+}
+
+export function siSymbolToStr(symbol) {
+    if(!symbol) return '';
+
+    if(Array.isArray(symbol)) {
+        return symbol[0];
+    } else {
+        return symbol;
+    }
 }
 
 export function isLoggedIn() {

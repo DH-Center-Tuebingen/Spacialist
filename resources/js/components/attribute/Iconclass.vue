@@ -81,7 +81,6 @@
             value: {
                 type: String,
                 required: true,
-                default: null,
             },
             disabled: {
                 type: Boolean,

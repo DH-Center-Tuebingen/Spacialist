@@ -29,6 +29,7 @@ class Attribute extends Model
 
     protected $casts = [
         'restrictions' => 'array',
+        'metadata' => 'array',
     ];
 
     public function getActivitylogOptions() : LogOptions

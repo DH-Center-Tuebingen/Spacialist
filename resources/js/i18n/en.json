@@ -170,6 +170,86 @@
             "sql_info": "You can use <code class=\"fw-normal\">:entity_id</code> in your SQL-Query to reference the entity this attribute is assigned to.",
             "iconclass": "Iconclass",
             "rism": "RISM",
+            "si-unit": "SI-Unit",
+            "si_units": {
+                "base_unit": "Base Unit",
+                "time": {
+                    "label": "Time",
+                    "units": {
+                        "second": "Seconds",
+                        "minute": "Minutes",
+                        "hour": "Hours",
+                        "day": "Days",
+                        "year": "Years"
+                    }
+                },
+                "length": {
+                    "label": "Length",
+                    "units": {
+                        "nanometre": "Nanometre",
+                        "micrometre": "Micrometre",
+                        "millimetre": "Millimetre",
+                        "centimetre": "Centimetre",
+                        "decimetre": "Decimetre",
+                        "metre": "Metre",
+                        "decametre": "Decametre",
+                        "hectometre": "Hectometre",
+                        "kilometre": "Kilometre",
+                        "inch": "Inch",
+                        "feet": "Feet",
+                        "yard": "Yards",
+                        "mile": "Miles"
+                    }
+                },
+                "area": {
+                    "label": "Area",
+                    "units": {
+                        "square_centimetre": "Square centimetre",
+                        "square_metre": "Square metre",
+                        "square_kilometre": "Square kilometre",
+                        "square_inch": "Square inch",
+                        "square_feet": "Square feet",
+                        "square_yard": "Square yard",
+                        "acre": "Acre",
+                        "square_mile": "Square mile"
+                    }
+                },
+                "volume": {
+                    "label": "Volume",
+                    "units": {
+                        "millilitre": "Millilitre",
+                        "litre": "Litre",
+                        "cubic_centimetre": "Cubic centimetre",
+                        "cubic_decimetre": "Litre | Cubic decimetre",
+                        "cubic_metre": "Cubic metre",
+                        "cubic_kilometre": "Cubic kilometre",
+                        "fluid_ounce_us": "Fluid ounce (US)",
+                        "pint_us": "Pint (US)",
+                        "cup_us": "Cup (US)",
+                        "gallon_us": "Gallon (US)",
+                        "cubic_mile": "Cubic mile"
+                    }
+                },
+                "mass": {
+                    "label": "Mass",
+                    "units": {
+                        "gram": "Gram",
+                        "kilogram": "Kilogram",
+                        "ton": "Tons",
+                        "ounce": "Ounce",
+                        "pound": "Pound"
+                    }
+                },
+                "temperature": {
+                    "label": "Temperature",
+                    "units": {
+                        "degree_celsius": "Celsius",
+                        "degree_kelvin": "Kelvin",
+                        "degree_fahrenheit": "Fahrenheit",
+                        "degree_réaumur": "Réaumur"
+                    }
+                }
+            },
             "restrictions": {
                 "entity_type": "Restrict to following Entity Types"
             }

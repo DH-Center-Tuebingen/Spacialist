@@ -118,7 +118,7 @@ class EditorController extends Controller {
             ], 403);
         }
 
-        return response()->json(AttributeBase::getTypes());
+        return response()->json(AttributeBase::getTypes(true));
     }
 
     public function getAvailableGeometryTypes() {
@@ -208,7 +208,9 @@ class EditorController extends Controller {
             'restricted_types' => 'nullable|array|exists:entity_types,id',
             'columns' => 'required_if:datatype,table|array|min:1',
             'text' => 'string',
-            'recursive' => 'nullable|boolean_string'
+            'recursive' => 'nullable|boolean_string',
+            'si_base' => 'nullable|si_baseunit',
+            'si_default' => 'nullable|si_unit:si_base'
         ]);
 
         $lid = $request->get('label_id');
@@ -231,6 +233,12 @@ class EditorController extends Controller {
         }
         if ($request->has('text')) {
             $attr->text = $request->get('text');
+        }
+        if($request->has('si_base')) {
+            $attr->metadata = [
+                'si_baseunit' => $request->get('si_base'),
+                'si_default' => $request->get('si_default'),
+            ];
         }
         $attr->save();
 
