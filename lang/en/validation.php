@@ -31,7 +31,6 @@ return [
     ],
     'boolean'              => 'The :attribute field must be true or false.',
     'confirmed'            => 'The :attribute confirmation does not match.',
-    'import_format'        => 'Provided data has the wrong format, expected: :format',
     'date'                 => 'The :attribute is not a valid date.',
     'date_format'          => 'The :attribute does not match the format :format.',
     'different'            => 'The :attribute and :other must be different.',
@@ -44,6 +43,7 @@ return [
     'file'                 => 'The :attribute must be a file.',
     'filled'               => 'The :attribute field must have a value.',
     'image'                => 'The :attribute must be an image.',
+    'import_format'        => 'Provided data has the wrong format, expected: :format',
     'in'                   => 'The selected :attribute is invalid.',
     'in_array'             => 'The :attribute field does not exist in :other.',
     'integer'              => 'The :attribute must be an integer.',
@@ -119,5 +119,5 @@ return [
     */
 
     'attributes' => [],
-    
+
 ];
