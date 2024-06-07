@@ -31,6 +31,7 @@ return [
     ],
     'boolean'              => 'The :attribute field must be true or false.',
     'confirmed'            => 'The :attribute confirmation does not match.',
+    'import_format'        => 'Provided data has the wrong format, expected: :format',
     'date'                 => 'The :attribute is not a valid date.',
     'date_format'          => 'The :attribute does not match the format :format.',
     'different'            => 'The :attribute and :other must be different.',
@@ -84,6 +85,7 @@ return [
     ],
     'string'               => 'The :attribute must be a string.',
     'timezone'             => 'The :attribute must be a valid zone.',
+    'unit'                 => 'The :attribute must be a valid unit.',
     'unique'               => 'The :attribute has already been taken.',
     'uploaded'             => 'The :attribute failed to upload.',
     'url'                  => 'The :attribute format is invalid.',
@@ -117,5 +119,5 @@ return [
     */
 
     'attributes' => [],
-
+    
 ];

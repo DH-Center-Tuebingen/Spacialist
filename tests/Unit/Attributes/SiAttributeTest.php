@@ -2,12 +2,14 @@
 
 namespace Tests\Unit\Attributes;
 
+use App\AttributeTypes\SiUnitAttribute;
 use App\AttributeTypes\Units\Implementations\AreaUnits;
 use App\AttributeTypes\Units\Implementations\LengthUnits;
 use App\AttributeTypes\Units\Implementations\MassUnits;
 use App\AttributeTypes\Units\Implementations\TemperatureUnits;
 use App\AttributeTypes\Units\Implementations\TimeUnits;
 use App\AttributeTypes\Units\Implementations\VolumeUnits;
+use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
 
@@ -278,4 +280,95 @@ class SiAttributeTest extends TestCase {
         $this->assertEquals('mi³', $cubicMile->getSymbol());
         $this->assertEqualsWithDelta($baseUnit->is(4168181825.44058), $cubicMile->is(1), self::INACCURACY);
     }
+
+    public function testImportErrorWrongValue(){
+        $importValue = 10;
+        $this->expectException(InvalidDataException::class);
+        $this->expectExceptionMessage('The value must be a string.');
+        SiUnitAttribute::fromImport($importValue);
+    }
+
+    public function testImportErrorWrongFormatNoSeparator() {
+        $importValue = "wrong format";
+        $this->expectException(InvalidDataException::class);
+        $this->expectExceptionMessage('Provided data has the wrong format, expected: value;unit');
+        SiUnitAttribute::fromImport($importValue);
+    }
+
+  
+    public function testImportErrorWrongFormatTooManySeparators() {
+        $importValue = "value;unit;extra";
+        $this->expectException(InvalidDataException::class);
+        $this->expectExceptionMessage('Provided data has the wrong format, expected: value;unit');
+        SiUnitAttribute::fromImport($importValue);
+    }
+  
+    public function testImportErrorNotANumber() {
+        $importValue = "not a number;unit";
+        $this->expectException(InvalidDataException::class);
+        $this->expectExceptionMessage('The section 1 must be a number.');
+        SiUnitAttribute::fromImport($importValue);
+    }
+
+    
+
+    public function testImportErrorNotAUnit() {
+        $importValue = "2;not a unit";
+        $this->expectException(InvalidDataException::class);
+        $this->expectExceptionMessage('The section 2 must be a valid unit.');
+        SiUnitAttribute::fromImport($importValue);
+    }
+
+
+
+    public function testImportSuccess() {
+        $importValue = "10.5;km";
+        $expected = json_encode([
+            'value' => 10.5,
+            'unit' => 'km',
+            'normalized' => 10500,
+        ]);
+        $this->assertEquals($expected, SiUnitAttribute::fromImport($importValue));
+    } 
+
+    public function testSerialize(){
+        $data = `{
+            'value': 10.5,
+            'unit': 'km',
+            'normalized': 10500,
+        }`;
+        $expected = json_encode($data);
+        $this->assertEquals($expected, SiUnitAttribute::serialize($data));
+    }
+
+    public function testUnserializeConflictNoUnit(){
+        $data = [
+            'value' => 10.5,
+        ];
+        $this->expectException(InvalidDataException::class);
+        $this->expectExceptionMessage('The value must be a valid unit.');
+        SiUnitAttribute::unserialize($data);
+    }
+
+    public function testUnserializeConflictInvalidUnit(){
+        $data = [
+            'value' => 10.5,
+            "unit" => "invalid unit",
+        ];
+        $this->expectException(InvalidDataException::class);
+        $this->expectExceptionMessage('The value must be a valid unit.');
+        SiUnitAttribute::unserialize($data);
+    }
+
+    public function testUnserializeSuccess(){
+        $data = [
+            'value' => 10.5,
+            'unit' => 'km',
+        ];
+        $expected = $data;
+        $expected["normalized"] = 10500;
+        $expected = json_encode($expected);
+        $this->assertEquals($expected, SiUnitAttribute::unserialize($data));
+    }
+
 }
