@@ -337,7 +337,7 @@ class SiAttributeTest extends TestCase {
             'unit': 'km',
             'normalized': 10500,
         }`;
-        $expected = json_encode($data);
+        $expected = json_decode($data);
         $this->assertEquals($expected, SiUnitAttribute::serialize($data));
     }
 
