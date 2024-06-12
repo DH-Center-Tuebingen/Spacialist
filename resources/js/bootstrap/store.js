@@ -266,9 +266,11 @@ export const store = createStore({
                         } else {
                             // if no id exists, this data is added
                             if(!entity.data[k].id) {
-                                entity.data[k].value = data.new_data[k];
+                                entity.data[k] = data.new_data[k];
+                                entity.data[k].value = data.data[k];
                                 if(data.sync) {
-                                    state.entity.data[k].value = data.new_data[k];
+                                    state.entity.data[k] = data.new_data[k];
+                                    state.entity.data[k].value = data.data[k];
                                 }
                             } else {
                                 entity.data[k].value = data.data[k];
@@ -582,7 +584,7 @@ export const store = createStore({
                         for(let k in props) {
                             updPlugin[k] = props[k];
                         }
-                        
+
                         if(data.uninstalled) {
                             plugin = updPlugin;
                             remove = true;
