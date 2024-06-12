@@ -38,7 +38,7 @@
             <tbody>
                 <template
                     v-for="(row, $index) in state.actualShow"
-                    :key="`tabular-row-${$index}`"
+                    :key="`tabular-row-${uniqueRowIndex(row)}`"
                 >
                     <td
                         v-if="row.hidden_info"
@@ -209,6 +209,7 @@
         createDownloadLink,
         getTs,
         getAttribute,
+        hash,
         slugify,
         translateConcept,
         _cloneDeep,
@@ -319,6 +320,9 @@
             const CUT_SIZE = 10;
             const CUT_THRES = (CUT_SIZE * 2) + Math.floor(CUT_SIZE / 2);
             // FUNCTIONS
+            const uniqueRowIndex = row => {
+                return hash(JSON.stringify(row));
+            };
             const resetFieldState = _ => {
                 v.resetField({
                     value: value.value
@@ -342,7 +346,7 @@
                     }
                 }
             };
-            
+
             const getSimpleValue = (datatype, valueObject) => {
                 switch(datatype) {
                     case 'string':
@@ -621,6 +625,7 @@
                 // HELPERS
                 translateConcept,
                 // LOCAL
+                uniqueRowIndex,
                 resetFieldState,
                 undirtyField,
                 openCsvUpload,
