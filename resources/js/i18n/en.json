@@ -598,6 +598,10 @@
                 },
                 "moderation": {
                     "required": "Requires Moderation"
+                },
+                "module": {
+                    "core": "Default",
+                    "plugins": "Extensions"
                 }
             },
             "preset": {
