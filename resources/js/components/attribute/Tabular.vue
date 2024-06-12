@@ -333,7 +333,7 @@
             };
             const undirtyField = _ => {
                 v.resetField({
-                    value: v.value.filter(cv => !cv.mark_deleted),
+                    value: v.value.filter(cv => !cv.mark_deleted && Object.keys(cv).length > 0),
                 });
                 for(let k in rowRefs.value) {
                     const curr = rowRefs.value[k];

@@ -36,6 +36,8 @@ class TableAttribute extends AttributeBase
             ->pluck('id', 'datatype')
             ->toArray();
         foreach($data as $rowId => $row) {
+            // skip empty rows
+            if(count($row) === 0) continue;
             foreach($row as $aid => $colValue) {
                 foreach($attributeTypes as $type => $tid) {
                     if($aid == $tid) {
@@ -48,9 +50,11 @@ class TableAttribute extends AttributeBase
                 }
             }
         }
-        return json_encode($data);
+        // array_filter with one argument (no callback) filters all empty (`empty()`) values
+        $cleanData = array_values(array_filter($data));
+        return json_encode($cleanData);
     }
-    
+
     public static function serialize(mixed $data) : mixed {
         $attributeTypes = Attribute::whereNotNull('parent_id')
             ->whereIn('datatype', ['entity', 'entity-mc'])
