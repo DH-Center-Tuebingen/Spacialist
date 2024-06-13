@@ -31,7 +31,7 @@ A list with all available plugins is **coming soon**.
 All PHPUnit tests are based on the `DemoSeeder` seed. To run tests, follow these steps:
 
 1. Create a new database and a `.env.testing` file (`cp .env .env.testing`) and reference the DB in your `.env.testing`.
-2. Run `php artisan test:refresh` This will:
+2. Run `php artisan app:test --refresh --skip` This will:
     1. Run migrations `php artisan migrate --env=testing`
     2. Run seeds `php artisan db:seed --class=DemoSeeder --env=testing`
 3. Run `php artisan test` or `vendor/bin/phpunit`

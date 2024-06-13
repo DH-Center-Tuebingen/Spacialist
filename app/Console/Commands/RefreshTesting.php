@@ -1,13 +1,58 @@
 <?php
 
-use Illuminate\Support\Facades\Artisan;
+namespace App\Console\Commands;
 
-    Artisan::command('test:refresh', function () {
-        $this->call('migrate:fresh', [
-            '--env' => 'testing',
-        ]);
-        $this->call('db:seed', [
-            '--env' => 'testing',
-            '--class' => 'DemoSeeder',
-        ]);
-    })->describe('Resets the testing database and seeds the demo data.');
+use Illuminate\Console\Command;
+
+class RefreshTesting extends Command {
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'app:test {--r|refresh : Whether the database should be refreshed} {--s|skip : If tests should be run, e.g. when doing a refresh you may want to skip the testing.}';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Spacialist testing utility. Can be used to reset all test to a clean state, using the --refresh (-r) option.';
+
+    /**
+     * Create a new command instance.
+     *
+     * @return void
+     */
+    public function __construct() {
+        parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
+    public function handle() {
+
+        if ($this->option('refresh')) {
+            $this->info('Refreshing testing database...');
+            $this->call('migrate:fresh', [
+                '--env' => 'testing',
+            ]);
+            $this->call('db:seed', [
+                '--env' => 'testing',
+                '--class' => 'DemoSeeder',
+            ]);
+        }
+
+        if (!$this->option('skip')) {
+            $this->info('Running tests...');
+            $this->call('test', [
+                '--env' => 'testing'
+            ]);
+        } else {
+            $this->info('Skipping tests...');
+        }
+    }
+}
