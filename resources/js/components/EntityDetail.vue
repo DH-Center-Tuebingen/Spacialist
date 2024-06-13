@@ -420,7 +420,7 @@
                         </div>
                     </form>
                     <hr>
-                    <div class="overflow-hidden d-flex flex-column">
+                    <div class="entity-history overflow-hidden d-flex flex-column">
                         <div class="d-flex flex-row gap-2">
                             <h5 class="mb-1">
                                 {{ t('main.history.title') }}
@@ -436,284 +436,13 @@
                                 }) }}
                             </span>
                         </div>
-                        <ul
+                        <EntityHistory
                             v-if="state.entity.history"
-                            v-infinite-scroll="fetchHistory"
-                            class="list-group pe-2 overflow-auto"
-                            :infinite-scroll-disabled="state.allHistoryFetched"
-                            infinite-scroll-delay="200"
-                            infinite-scroll-offset="100"
-                        >
-                            <li
-                                v-for="entry in state.entity.history"
-                                :key="`entity-history-entry-${entry.id}`"
-                                class="list-group-item d-flex flex-row gap-3 align-items-center"
-                            >
-                                <span :title="entry.description">
-                                    <span v-if="entry.description == 'created'">
-                                        <i class="fas fa-fw fa-plus text-success" />
-                                    </span>
-                                    <span v-else-if="entry.description == 'updated'">
-                                        <i class="fas fa-fw fa-edit text-warning" />
-                                    </span>
-                                </span>
-                                <div class="flex-grow-1">
-                                    <template v-if="entry.subject_type == 'App\\Entity'">
-                                        <div v-if="entry.description == 'created'">
-                                            <div class="d-flex flex-row gap-2 align-items-center">
-                                                <span class="fw-bold">
-                                                    {{ t('main.history.created_as') }}
-                                                </span>
-                                                <span class="badge bg-primary bg-opacity-75">
-                                                    {{ entry.properties.attributes.name }}
-                                                </span>
-                                                <div class="d-flex flex-row">
-                                                    (
-                                                    <entity-type-label
-                                                        :type="entry.properties.attributes.entity_type_id"
-                                                        :icon-only="false"
-                                                    />
-                                                    )
-                                                </div>
-                                            </div>
-                                            <div
-                                                v-if="entry.properties.attributes.root_entity_id"
-                                                class="d-flex flex-row gap-2 align-items-center"
-                                            >
-                                                <span class="fw-bold">
-                                                    {{ t('main.history.entity.created_in') }}
-                                                </span>
-                                                <router-link
-                                                    class="link-underline link-underline-opacity-0 link-underline-opacity-100-hover"
-                                                    :to="{ name: 'entitydetail', params: { id: entry.properties.attributes.root_entity_id }, query: route.query }"
-                                                    append
-                                                >
-                                                    {{ getEntity(entry.properties.attributes.root_entity_id).name }}
-                                                </router-link>
-                                            </div>
-                                        </div>
-                                        <div
-                                            v-else-if="entry.description == 'updated'"
-                                            class="d-flex flex-column align-items-start gap-2"
-                                        >
-                                            <div
-                                                v-if="entry.properties.old.name && entry.properties.attributes.name"
-                                                class="d-flex flex-row gap-2 align-items-center"
-                                            >
-                                                <span class="fw-bold">
-                                                    {{ t('main.history.entity.name_update') }}
-                                                </span>
-                                                <span class="badge bg-danger bg-opacity-75">
-                                                    {{ entry.properties.old.name }}
-                                                </span>
-                                                <i class="fas fa-fw fa-2xs fa-arrow-right" />
-                                                <span class="badge bg-success bg-opacity-75">
-                                                    {{ entry.properties.attributes.name }}
-                                                </span>
-                                            </div>
-                                            <div
-                                                v-else-if="(entry.properties.old.root_entity_id || entry.properties.old.rank) && entry.properties.attributes.root_entity_id || entry.properties.attributes.rank"
-                                                class="d-flex flex-row gap-2 align-items-center"
-                                            >
-                                                <span class="fw-bold">
-                                                    {{ t('main.history.entity.moved') }}
-                                                </span>
-                                                <span class="badge bg-danger bg-opacity-75">
-                                                    <template v-if="entry.properties.old.root_entity_id">
-                                                        <span v-if="getEntity(entry.properties.old.root_entity_id).name">
-                                                            {{ getEntity(entry.properties.old.root_entity_id).name }}
-                                                        </span>
-                                                        <span
-                                                            v-else
-                                                            class="fst-italic"
-                                                            :title="t('main.history.entity.name_unknown_info')"
-                                                        >
-                                                            {{ t('main.history.entity.name_unknown') }}
-                                                        </span>
-                                                    </template>
-                                                    <span v-else>
-                                                        {{ t('main.entity.top_level') }}
-                                                    </span>
-                                                    |
-                                                    <span :title="t('main.history.entity.rank')">
-                                                        {{ entry.properties.old.rank }}
-                                                    </span>
-                                                </span>
-                                                <i class="fas fa-fw fa-2xs fa-arrow-right" />
-                                                <span class="badge bg-success bg-opacity-75">
-                                                    <template v-if="entry.properties.attributes.root_entity_id">
-                                                        <span
-                                                            v-if="getEntity(entry.properties.attributes.root_entity_id).name"
-                                                        >
-                                                            {{ getEntity(entry.properties.attributes.root_entity_id).name }}
-                                                        </span>
-                                                        <span
-                                                            v-else
-                                                            class="fst-italic"
-                                                            :title="t('main.history.entity.name_unknown_info')"
-                                                        >
-                                                            {{ t('main.history.entity.name_unknown') }}
-                                                        </span>
-                                                    </template>
-                                                    <span v-else>
-                                                        {{ t('main.entity.top_level') }}
-                                                    </span>
-                                                    |
-                                                    <span :title="t('main.history.entity.rank')">
-                                                        {{ entry.properties.attributes.rank }}
-                                                    </span>
-                                                </span>
-                                            </div>
-                                            <div v-else>
-                                                Something has changed...
-                                                {{ entry.properties }}
-                                            </div>
-                                        </div>
-                                    </template>
-                                    <template v-else-if="entry.subject_type == 'attribute_values'">
-                                        <div v-if="entry.description == 'created'">
-                                            <span class="d-flex flex-row align-items-center gap-2">
-                                                <span class="fw-bold">
-                                                    {{ t('main.history.entity.value_add_attribute') }}
-                                                </span>
-                                                <span>
-                                                    {{ getAttributeName(entry.attribute.id) }}
-                                                </span>
-                                                <a
-                                                    href="#"
-                                                    class="text-reset"
-                                                    @click.prevent="state.showHistoryChange[entry.id] = !state.showHistoryChange[entry.id]"
-                                                >
-                                                    <span v-show="state.showHistoryChange[entry.id]">
-                                                        <i class="fas fa-fw fa-eye" />
-                                                    </span>
-                                                    <span v-show="!state.showHistoryChange[entry.id]">
-                                                        <i class="fas fa-fw fa-eye-slash" />
-                                                    </span>
-                                                </a>
-                                            </span>
-                                            <attribute-list
-                                                v-show="state.showHistoryChange[entry.id]"
-                                                :group="{ name: 'entity-history-created', pull: false, put: false }"
-                                                :classes="'mx-0 py-2 px-2 rounded-3 bg-primary bg-opacity-50'"
-                                                :attributes="formatHistoryEntryAttributes(entry.attribute)"
-                                                :values="formatHistoryEntryValue(entry.attribute, entry.value_after)"
-                                                :options="{ 'hide_labels': true, 'item_classes': 'px-0' }"
-                                                :selections="{}"
-                                                :preview="true"
-                                            />
-                                        </div>
-                                        <div v-else-if="entry.description == 'updated'">
-                                            <template
-                                                v-if="hasHistoryEntryKey(entry.properties.attributes, '!certainty') || hasHistoryEntryKey(entry.properties.old, '!certainty')"
-                                            >
-                                                <span class="d-flex flex-row align-items-center gap-2">
-                                                    <span class="fw-bold">
-                                                        {{ t('main.history.entity.value_update_attribute') }}
-                                                    </span>
-                                                    <span>
-                                                        {{ getAttributeName(entry.attribute.id) }}
-                                                    </span>
-                                                    <a
-                                                        href="#"
-                                                        class="text-reset"
-                                                        @click.prevent="state.showHistoryChange[entry.id] = !state.showHistoryChange[entry.id]"
-                                                    >
-                                                        <span v-show="state.showHistoryChange[entry.id]">
-                                                            <i class="fas fa-fw fa-eye" />
-                                                        </span>
-                                                        <span v-show="!state.showHistoryChange[entry.id]">
-                                                            <i class="fas fa-fw fa-eye-slash" />
-                                                        </span>
-                                                    </a>
-                                                </span>
-                                                <div
-                                                    v-if="state.showHistoryChange[entry.id]"
-                                                    class="d-flex flex-row gap-2 align-items-center"
-                                                >
-                                                    <attribute-list
-                                                        v-if="hasHistoryEntryKey(entry.properties.old, '!certainty')"
-                                                        :group="{ name: 'entity-history-changed-from', pull: false, put: false }"
-                                                        :classes="'flex-grow-1 mx-0 py-2 px-2 rounded-3 bg-danger bg-opacity-50'"
-                                                        :attributes="formatHistoryEntryAttributes(entry.attribute)"
-                                                        :values="formatHistoryEntryValue(entry.attribute, entry.value_before)"
-                                                        :options="{ 'hide_labels': true, 'item_classes': 'px-0' }"
-                                                        :selections="{}"
-                                                        :preview="true"
-                                                    />
-                                                    <span
-                                                        v-else
-                                                        class="badge bg-danger"
-                                                    >
-                                                        <span class="fst-italic">
-                                                            {{ t('main.history.no_value') }}
-                                                        </span>
-                                                    </span>
-                                                    <i class="fas fa-fw fa-arrow-right" />
-                                                    <attribute-list
-                                                        v-if="hasHistoryEntryKey(entry.properties.attributes, '!certainty')"
-                                                        :group="{ name: 'entity-history-changed-to', pull: false, put: false }"
-                                                        :classes="'flex-grow-1 mx-0 py-2 px-2 rounded-3 bg-success bg-opacity-50'"
-                                                        :attributes="formatHistoryEntryAttributes(entry.attribute)"
-                                                        :values="formatHistoryEntryValue(entry.attribute, entry.value_after)"
-                                                        :options="{ 'hide_labels': true, 'item_classes': 'px-0' }"
-                                                        :selections="{}"
-                                                        :preview="true"
-                                                    />
-                                                    <span
-                                                        v-else
-                                                        class="badge bg-danger"
-                                                    >
-                                                        <span class="fst-italic">
-                                                            {{ t('main.history.no_value') }}
-                                                        </span>
-                                                    </span>
-                                                </div>
-                                            </template>
-                                            <div
-                                                v-else
-                                                class="d-flex flex-row gap-2 align-items-center"
-                                            >
-                                                <span class="fw-bold">
-                                                    {{ t('main.history.entity.certainty_update') }}
-                                                </span>
-                                                <span>
-                                                    {{ getAttributeName(entry.attribute.id) }}
-                                                </span>
-                                                <div class="d-flex flex-row align-items-center gap-1">
-                                                    <span class="badge bg-danger bg-opacity-75">
-                                                        {{ entry.properties.old.certainty || t('main.history.entity.certainty_unknown') }}
-                                                    </span>
-                                                    <i class="fas fa-fw fa-xs fa-arrow-right" />
-                                                    <span class="badge bg-success bg-opacity-75">
-                                                        {{ entry.properties.attributes.certainty || t('main.history.entity.certainty_unknown') }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </div>
-                                <div class="text-nowrap">
-                                    <span
-                                        class="badge bg-opacity-75 pe-3"
-                                        :class="{ 'bg-warning': entry.user_id == state.entity.creator && entry.user_id != userId(), 'bg-primary': entry.user_id != state.entity.creator && entry.user_id != userId(), 'bg-success': entry.user_id == userId() }"
-                                    >
-                                        {{ getUserBy(entry.user_id).name }}
-                                    </span>
-                                    <user-avatar
-                                        :user="getUserBy(entry.user_id)"
-                                        :size="20"
-                                        class="align-middle ms-n2"
-                                    />
-                                </div>
-                                <span
-                                    class="small ms-auto text-secondary text-nowrap"
-                                    :title="date(entry.created_at)"
-                                >
-                                    {{ ago(entry.created_at) }}
-                                </span>
-                            </li>
-                        </ul>
+                            :history="state.entity.history"
+                            :all-fetched="allHistoryFetched"
+                            :creator-id="state.entity.creator"
+                            @more="fetchHistory"
+                        />
                         <alert
                             v-else
                             :type="'info'"
@@ -731,59 +460,59 @@
                         </alert>
                     </div>
                 </div>
-            </div>
-            <div
-                v-show="can('comments_read')"
-                id="active-entity-comments-panel"
-                class="tab-pane fade h-100 active-entity-detail-panel"
-                role="tabpanel"
-            >
-                Test
                 <div
-                    v-if="state.entity.comments"
-                    class="mb-auto scroll-y-auto h-100 pe-2"
+                    v-show="can('comments_read')"
+                    id="active-entity-comments-panel"
+                    class="tab-pane fade h-100 active-entity-detail-panel"
+                    role="tabpanel"
                 >
+                    Test
                     <div
-                        v-if="state.commentsFetching"
-                        class="mt-2"
+                        v-if="state.entity.comments"
+                        class="mb-auto scroll-y-auto h-100 pe-2"
                     >
-                        <alert
-                            class="mb-0"
-                            type="info"
-                            :message="t('global.comments.fetching')"
+                        <div
+                            v-if="state.commentsFetching"
+                            class="mt-2"
+                        >
+                            <alert
+                                class="mb-0"
+                                type="info"
+                                :message="t('global.comments.fetching')"
+                            />
+                        </div>
+                        <div
+                            v-else-if="state.commentFetchFailed"
+                            class="mt-2"
+                        >
+                            <p class="alert alert-danger mb-0">
+                                {{ t('global.comments.fetching_failed') }}
+                                <button
+                                    type="button"
+                                    class="d-block mt-2 btn btn-sm btn-outline-success"
+                                    @click="fetchComments"
+                                >
+                                    <i class="fas fa-fw fa-sync" />
+                                    {{ t('global.comments.retry_failed') }}
+                                </button>
+                            </p>
+                        </div>
+                        <comment-list
+                            v-else
+                            :avatar="48"
+                            :comments="state.entity.comments"
+                            :hide-button="false"
+                            :resource="state.resourceInfo"
+                            @added="addComment"
                         />
                     </div>
-                    <div
-                        v-else-if="state.commentFetchFailed"
-                        class="mt-2"
-                    >
-                        <p class="alert alert-danger mb-0">
-                            {{ t('global.comments.fetching_failed') }}
-                            <button
-                                type="button"
-                                class="d-block mt-2 btn btn-sm btn-outline-success"
-                                @click="fetchComments"
-                            >
-                                <i class="fas fa-fw fa-sync" />
-                                {{ t('global.comments.retry_failed') }}
-                            </button>
-                        </p>
-                    </div>
-                    <comment-list
-                        v-else
-                        :avatar="48"
-                        :comments="state.entity.comments"
-                        :hide-button="false"
-                        :resource="state.resourceInfo"
-                        @added="addComment"
-                    />
                 </div>
             </div>
+            <router-view
+                v-if="state.attributesFetched"
+                :entity="state.entity"
+            />
         </div>
-        <router-view
-            v-if="state.attributesFetched"
-            :entity="state.entity"
-        />
     </div>
 </template>
 
@@ -830,14 +559,11 @@
         isArray,
         userId,
         getAttribute,
-        getAttributeName,
         getUserBy,
-        getEntity,
         getEntityColors,
         getEntityTypeName,
         getEntityTypeAttributeSelections,
         getEntityTypeDependencies,
-        getConcept,
         translateConcept,
         _cloneDeep,
     } from '@/helpers/helpers.js';
@@ -850,7 +576,12 @@
 
     import { usePreventNavigation } from '@/helpers/form.js';
 
+    import EntityHistory from '@/components/entity/EntityHistory.vue';
+
     export default {
+        components: {
+            EntityHistory,
+        },
         props: {
             bibliography: {
                 required: false,
@@ -896,7 +627,6 @@
                 entityHeaderHovered: false,
                 editedEntityName: '',
                 entityMetadata: {},
-                showHistoryChange: {},
                 historyPagination: null,
                 allHistoryFetched: computed(_ => {
                     if(!state.historyPagination) return false;
@@ -1209,49 +939,7 @@
             const updateEntitySummary = e => {
                 state.entityMetadata.summary = e.value;
             };
-            const hasHistoryEntryKey = (entry, key) => {
-                // if starts with !, func checks if there is any other key than the one provided
-                if(key.startsWith('!')) {
-                    const searchKey = key.substr(1);
-                    const keys = Object.keys(entry);
-                    return !keys.includes(searchKey);
-                }
 
-                return !!entry[key];
-            };
-            const formatHistoryEntryValue = (attribute, value) => {
-                const compValue = {
-                    isDisabled: true,
-                };
-                if(attribute.datatype == 'string-sc') {
-                    compValue.value = {
-                        id: getConcept(value).id,
-                        concept_url: value,
-                    };
-                } else if(attribute.datatype == 'string-mc') {
-                    compValue.value = value;
-                } else if(attribute.datatype == 'entity') {
-                    compValue.value = value.id;
-                    compValue.name = value.name == 'main.entity.metadata.deleted_entity_name' ? t(value.name, {id: value.id}) : value.name;
-                } else if(attribute.datatype == 'entity-mc') {
-                    compValue.value = value.map(v => v.id);
-                    compValue.name = value.map(v => {
-                        return v.name == 'main.entity.metadata.deleted_entity_name' ? t(v.name, {id: v.id}) : v.name;
-                    });
-                } else {
-                    compValue.value = value;
-                }
-
-                return {
-                    [attribute.id]: compValue,
-                };
-            };
-            const formatHistoryEntryAttributes = attr => {
-                attr.isDisabled = true;
-                return [
-                    attr
-                ];
-            };
             const showTabActions = (grp, status) => {
                 state.attributeGrpHovered = status ? grp : null;
             };
@@ -1587,11 +1275,9 @@
                 userId,
                 getUserBy,
                 showUserInfo,
-                getAttributeName,
                 getEntityTypeName,
                 getEntityColors,
                 translateConcept,
-                getEntity,
                 // LOCAL
                 hasReferenceGroup,
                 showMetadata,
@@ -1604,9 +1290,6 @@
                 setDetailPanel,
                 onEntityHeaderHover,
                 updateEntitySummary,
-                hasHistoryEntryKey,
-                formatHistoryEntryValue,
-                formatHistoryEntryAttributes,
                 showTabActions,
                 setFormState,
                 fetchHistory,
