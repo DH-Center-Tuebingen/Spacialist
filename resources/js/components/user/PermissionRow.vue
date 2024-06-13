@@ -10,6 +10,7 @@
             <a
                 href="#"
                 class="text-reset text-decoration-none"
+                draggable="false"
                 @click.prevent="change(right)"
             >
                 <AccessControlState :status="permissionMap?.[name]?.[right] ?? Infinity" />
@@ -19,6 +20,7 @@
             <a
                 href="#"
                 class="text-reset text-decoration-none"
+                draggable="false"
                 @click.prevent="change('all')"
             >
                 <AccessControlState :status="allState(name)" />

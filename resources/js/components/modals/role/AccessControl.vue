@@ -64,8 +64,8 @@
                 </div>
                 <PermissionMatrix
                     v-if="state.permissionsLoaded"
+                    v-model:permission-map="state.permissionStates"
                     :permission-groups="state.permissionGroups"
-                    :permission-map="state.permissionStates"
                 />
             </div>
             <div class="modal-footer">
@@ -114,7 +114,9 @@
     import PermissionMatrix from '../../user/PermissionMatrix.vue';
 
     export default {
-
+        components: {
+            PermissionMatrix,
+        },
         props: {
             roleId: {
                 type: Number,
@@ -271,7 +273,6 @@
                 // HELPERS
                 // PROPS
                 // LOCAL
-                changePermissionState,
                 allState,
                 resetToPreset,
                 closeModal,

@@ -37,19 +37,30 @@
                 @change="(grp, right) => changePermissionState(grp, right)"
             />
 
-            <!-- <template
-                v-for="(plugin, i) in permissionGroups.plugins"
-                :key="plugin[i].title"
+            <template
+                v-for="(pluginGroup, pluginName) in pluginsUsingPermissions"
+                :key="pluginName"
             >
                 <tr>
                     <td
                         colspan="7"
                         class="fw-bold text-start"
                     >
-                        {{ t(`plugin.${i}.title`) }} ({{ t(`main.role.permissions.groups.is_plugin`) }})
+                        {{ t(`plugin.${pluginName}.title`) }} ({{ t(`main.role.permissions.groups.is_plugin`) }})
                     </td>
                 </tr>
-            </template> -->
+                <PermissionRow
+                    v-for="permissionGroup in pluginGroup"
+                    :key="permissionGroup"
+                    :label="t(`main.role.permissions.groups.${permissionGroup}`)"
+                    :permission-map="permissionMap"
+                    :name="permissionGroup"
+                    :rights="rights"
+                    @change="(grp, right) => changePermissionState(grp, right)"
+                >
+                    />
+                </permissionrow>
+            </template>
         </tbody>
     </table>
 </template>
@@ -60,6 +71,7 @@
     import { cloneDeep } from 'lodash';
     import PermissionRow from './PermissionRow.vue';
     import { determineUniformState } from '../../helpers/role';
+    import { computed } from 'vue';
 
     export default {
         components: {
@@ -118,27 +130,30 @@
                 ctx.emit('update:permissionMap', newPermissionMap);
             };
 
-            // {{ t(`plugin.${i}.title`) }} ({{ t(`main.role.permissions.groups.is_plugin`) }})
-            //                 </td>
-            //             </tr>
-            //             <tr v-for="(pluginSet, j) in pg" :key="j">
-            //                 <td class="text-start">
-            //                     {{ t(`plugin.${i}.permissions.groups.${pluginSet}`) }}
+            const pluginsUsingPermissions = computed(() => {
+                const entries = Object.entries(props.permissionGroups.plugins);
 
-            // const groupLabel = (moduleName, permissionGroup) => {
-            //     if(moduleName == 'plugin') {
-            //         return t(`plugin.${i}.permissions.groups.${permissionGroup}`);
-            //     } else {
-            //         return );
-            //     }
-            // };
+                let filteredEntries = entries.filter(([_, plginPermissions]) => {
+                    if(Array.isArray(plginPermissions)) {
+                        return plginPermissions.length > 0;
+                    }
+                    return false;
+                });
+
+                const filteredPluginGroup = filteredEntries.reduce((acc, [pluginName, pluginPermissions]) => {
+                    acc[pluginName] = pluginPermissions;
+                    return acc;
+                }, {});
+                return filteredPluginGroup;
+            });
 
             return {
                 changePermissionState,
-                t,
                 controlClasses: {
                     'opacity-50': props.disabled,
                 },
+                pluginsUsingPermissions,
+                t,
             };
         },
     };
