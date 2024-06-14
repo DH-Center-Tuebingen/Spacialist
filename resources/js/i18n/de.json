@@ -704,6 +704,15 @@
                 "certainty_unknown": "Unbekannt",
                 "moved": "Verschoben:",
                 "rank": "Rang"
+            },
+            "type": {
+                "unknown": "Unbekannter Verlaufstyp",
+                "App\\Entity": "Entität",
+                "attribute_value": "Attributwert"
+            },
+            "actions": {
+                "load": "Load History",
+                "update": "Update History"
             }
         },
         "bibliography": {
