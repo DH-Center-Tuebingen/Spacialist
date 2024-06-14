@@ -481,13 +481,18 @@ export const store = createStore({
                     sortTree(sort.by, sort.dir, state.tree);
                 },
                 addToTreeSelection(state, data) {
-                    const addPossible = hasIntersectionWithEntityAttributes(data.value.entity_type_id, state.treeSelectionTypeIds);
-                    if(addPossible || state.treeSelectionTypeIds.length == 0) {
-                        state.treeSelection[data.id] = data.value;
+                    // SO: IMO This should not be handled here.
+                    // If the user selects incopatible entities, he has to remove them manually.
+                    // This is also not reflected in the multiselect in the tree. 
+                    // So it's just an invisible barrier that hides errors.
+                    // Also in conflict with other actions like multi-move I'm working on.
 
+                    // const addPossible = hasIntersectionWithEntityAttributes(data.value.entity_type_id, state.treeSelectionTypeIds);
+                    // if(addPossible || state.treeSelectionTypeIds.length == 0) {
+                        state.treeSelection[data.id] = data.value;
                         state.treeSelectionTypeIds = [];
                         state.treeSelectionTypeIds = updateSelectionTypeIdList(state.treeSelection);
-                    }
+                    // }
                 },
                 removeFromTreeSelection(state, data) {
                     delete state.treeSelection[data.id];

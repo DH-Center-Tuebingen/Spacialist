@@ -213,6 +213,16 @@ class Entity extends Model implements Searchable
         $entity->save();
     }
 
+    public static function getNextRank($parent_id = null){
+        $rank=0;
+        if(isset($parent_id)) {
+            $rank = Entity::where('root_entity_id', $parent_id)->max('rank');
+        } else {
+            $rank = Entity::whereNull('root_entity_id')->max('rank');
+        }
+        return $rank + 1;
+    }
+
     public function child_entities() {
         return $this->hasMany('App\Entity', 'root_entity_id')->orderBy('id');
     }

@@ -671,6 +671,28 @@ export async function multieditAttributes(entityIds, entries) {
     );
 }
 
+export async function moveEntities(entityIds, parentId = null) {
+    const data = {
+        parent_id: parentId,
+        entity_ids: entityIds,
+    };
+    return $httpQueue.add(
+        () => http.post(`/entity/moveMultiple`, data).then(response => {
+            
+            response.data.forEach(entity => {
+                console.log(entity);
+                store.dispatch('moveEntity', entity);
+            });
+
+            // Clears the multiselect
+            store.dispatch('unsetTreeSelectionMode');
+
+            return response.data;
+        }).catch(error => {
+            console.error(error);
+        }));
+}
+
 export async function moveEntity(entityId, parentId = null, rank = null) {
     const data = {
         parent_id: parentId,

@@ -445,6 +445,7 @@
                 "multiedit": {
                     "title": "Toggle Multiedit",
                     "open": "Open Multiedit Tool",
+                    "warning": "This operation will edit all selected entities at once!",
                     "toast": {
                         "saved": {
                             "title": "Multiedit successful",

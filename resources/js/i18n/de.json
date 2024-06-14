@@ -445,6 +445,7 @@
                 "multiedit": {
                     "title": "Mehrfachauswahl umschalten",
                     "open": "Mehrfach-Bearbeitungs-Werkzeug öffnen",
+                    "warning": "Diese Aktion wird alle ausgewählten Entitäten betreffen.", 
                     "toast": {
                         "saved": {
                             "title": "Mehrfach-Bearbeitung erfolgreich",

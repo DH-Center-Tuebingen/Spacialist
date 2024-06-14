@@ -57,6 +57,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::post('/import', 'EntityController@importData')->where('id', '[0-9]+')->where('aid', '[0-9]+');
     Route::post('/import/validate', 'EntityController@validateImportData');
     Route::post('/{id}/reference/{aid}', 'ReferenceController@addReference')->where('id', '[0-9]+')->where('aid', '[0-9]+');
+    Route::post('/moveMultiple', 'EntityController@moveEntities');
 
     Route::patch('/{id}/attributes', 'EntityController@patchAttributes')->where('id', '[0-9]+');
     Route::patch('/{id}/attribute/{aid}', 'EntityController@patchAttribute')->where('id', '[0-9]+')->where('aid', '[0-9]+');
