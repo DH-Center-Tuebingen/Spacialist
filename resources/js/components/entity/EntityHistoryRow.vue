@@ -8,7 +8,10 @@
                 </span>
             </span>
             <div>
-                <span
+                <span class="fw-bold">
+                    {{ entry.properties.attributes.name }}
+                </span>
+                <!-- <span
                     v-if="isCreate"
                     class="fw-bold"
                 >
@@ -31,7 +34,7 @@
                     class="fw-bold"
                 >
                     {{ t('main.history.entity.certainty_update') }}
-                </span>
+                </span> -->
             </div>
 
             <!-- <div class="flex-grow-1">
@@ -189,10 +192,7 @@
                             </span>
                             
                         </template>
-<div
-    v-else
-    class="d-flex flex-row gap-2 align-items-center"
->
+<div v-else class="d-flex flex-row gap-2 align-items-center">
     <span class="fw-bold">
         {{ t('main.history.entity.certainty_update') }}
     </span>
@@ -246,6 +246,10 @@
                 </span>
             </div>
         </header>
+
+        <pre>
+            {{ entry }}
+        </pre>
 
         <div
             v-if="!collapsed"
@@ -405,6 +409,7 @@
 
 
             const formatHistoryEntryValue = (attribute, value) => {
+                console.log(attribute);
                 const compValue = {
                     isDisabled: true,
                 };
@@ -432,6 +437,7 @@
                 };
             };
             const formatHistoryEntryAttributes = attr => {
+                console.log(attr);
                 attr.isDisabled = true;
                 return [
                     attr

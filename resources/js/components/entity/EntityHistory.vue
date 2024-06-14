@@ -11,10 +11,17 @@
             :key="`entity-history-entry-${entry.id}`"
             class="list-group-item"
         >
+            <div v-if="entry.subject_type === 'App\\Entity'">
+                {{ t('main.history.type.App\\Entity') }}
+            </div>
             <EntityHistoryRow
+                v-else-if="entry.subject_type === 'attribute_values'"
                 :entry="entry"
                 :creator-id="creatorId"
             />
+            <div v-else>
+                {{ t('main.history.type.unknown') }}
+            </div>
         </li>
     </ul>
 </template>

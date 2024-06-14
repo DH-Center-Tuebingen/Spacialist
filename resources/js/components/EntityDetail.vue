@@ -436,13 +436,21 @@
                                 }) }}
                             </span>
                         </div>
-                        <EntityHistory
-                            v-if="state.entity.history"
-                            :history="state.entity.history"
-                            :all-fetched="allHistoryFetched"
-                            :creator-id="state.entity.creator"
-                            @more="fetchHistory"
-                        />
+                        <template v-if="state.entity.history">
+                            <button
+                                type="button"
+                                class="my-2 btn btn-outline-secondary btn-sm"
+                                @click="fetchHistory"
+                            >
+                                {{ t('main.history.actions.update') }}
+                            </button>
+                            <EntityHistory
+                                :history="state.entity.history"
+                                :all-fetched="allHistoryFetched"
+                                :creator-id="state.entity.creator"
+                                @more="fetchHistory"
+                            />
+                        </template>
                         <alert
                             v-else
                             :type="'info'"
@@ -454,7 +462,7 @@
                                     class="mt-3 btn btn-outline-secondary btn-sm"
                                     @click="fetchHistory"
                                 >
-                                    Load History
+                                    {{ t('main.history.actions.load') }}
                                 </button>
                             </template>
                         </alert>

@@ -704,6 +704,15 @@
                 "certainty_unknown": "Unknown",
                 "moved": "Moved:",
                 "rank": "Rank"
+            },
+            "type": {
+                "unknown": "Unknown History-Type",
+                "App\\Entity": "Entity",
+                "attribute_value": "Attribute Value"
+            },
+            "actions": {
+                "load": "Load History",
+                "update": "Update History"
             }
         },
         "bibliography": {
