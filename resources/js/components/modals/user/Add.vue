@@ -1,115 +1,211 @@
 <template>
-  <vue-final-modal
-    class="modal-container modal"
-    content-class=""
-    name="add-user-modal">
-    <div class="sp-modal-content sp-modal-content-xs">
-        <div class="modal-header">
-            <h5 class="modal-title">
-                {{
-                    t('main.user.modal.new.title')
-                }}
-            </h5>
-            <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-            </button>
+    <vue-final-modal
+        class="modal-container modal"
+        content-class=""
+        name="add-user-modal"
+    >
+        <div class="sp-modal-content sp-modal-content-xs">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {{
+                        t('main.user.modal.new.title')
+                    }}
+                </h5>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                />
+            </div>
+            <div class="modal-body">
+                <form
+                    id="newUserForm"
+                    name="newUserForm"
+                    role="form"
+                    @submit.prevent="onAdd()"
+                >
+                    <div class="mb-3">
+                        <label
+                            class="col-form-label col-12"
+                            for="name"
+                        >
+                            {{ t('global.name') }}
+                            <span class="text-danger">*</span>:
+                        </label>
+                        <div class="col-12">
+                            <input
+                                id="name"
+                                v-model="v.fields.name.value"
+                                class="form-control"
+                                :class="getClassByValidation(state.errors.name)"
+                                type="text"
+                                required
+                                @input="e => handleChange(e, 'name')"
+                            >
+    
+                            <div class="invalid-feedback">
+                                <span
+                                    v-for="(msg, i) in state.errors.name"
+                                    :key="i"
+                                >
+                                    {{ msg }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label
+                            class="col-form-label col-12"
+                            for="nickname"
+                        >
+                            {{ t('global.nickname') }}
+                            <span class="text-danger">*</span>:
+                        </label>
+                        <div class="col-12">
+                            <input
+                                id="nickname"
+                                v-model="v.fields.nickname.value"
+                                class="form-control"
+                                :class="getClassByValidation(state.errors.nickname)"
+                                type="text"
+                                required
+                                @input="e => handleChange(e, 'nickname')"
+                            >
+    
+                            <div class="invalid-feedback">
+                                <span
+                                    v-for="(msg, i) in state.errors.nickname"
+                                    :key="i"
+                                >
+                                    {{ msg }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label
+                            class="col-form-label col-12"
+                            for="email"
+                        >
+                            {{ t('global.email') }}
+                            <span class="text-danger">*</span>:
+                        </label>
+                        <div class="col-12">
+                            <input
+                                id="email"
+                                v-model="v.fields.email.value"
+                                class="form-control"
+                                :class="getClassByValidation(state.errors.email)"
+                                type="email"
+                                required
+                                @input="e => handleChange(e, 'email')"
+                            >
+    
+                            <div class="invalid-feedback">
+                                <span
+                                    v-for="(msg, i) in state.errors.email"
+                                    :key="i"
+                                >
+                                    {{ msg }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label
+                            class="col-form-label col-12"
+                            for="password"
+                        >
+                            {{ t('global.password') }}
+                            <span class="text-danger">*</span>:
+                        </label>
+                        <div class="col-12">
+                            <input
+                                id="password"
+                                v-model="v.fields.password.value"
+                                class="form-control d-inline"
+                                :class="getClassByValidation(state.errors.password)"
+                                type="password"
+                                required
+                                @input="e => handleChange(e, 'password')"
+                            >
+                            <a
+                                href="#"
+                                class="text-muted ms--4-5"
+                                tabindex="-1"
+                                @click.prevent="togglePasswordVisibility()"
+                            >
+                                <span v-show="!state.showPassword">
+                                    <i class="fas fa-fw fa-eye" />
+                                </span>
+                                <span v-show="state.showPassword">
+                                    <i class="fas fa-fw fa-eye-slash" />
+                                </span>
+                            </a>
+    
+                            <div class="invalid-feedback">
+                                <span
+                                    v-for="(msg, i) in state.errors.password"
+                                    :key="i"
+                                >
+                                    {{ msg }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label
+                            class="col-form-label col-12"
+                            for="password_confirm"
+                        >
+                            {{ t('global.confirm_password') }}
+                            <span class="text-danger">*</span>:
+                        </label>
+                        <div class="col-12">
+                            <input
+                                id="password_confirm"
+                                v-model="v.fields.password_confirm.value"
+                                class="form-control"
+                                :class="getClassByValidation(state.errors.password_confirm)"
+                                type="password"
+                                required
+                                @input="e => handleChange(e, 'password_confirm')"
+                            >
+    
+                            <div class="invalid-feedback">
+                                <span
+                                    v-for="(msg, i) in state.errors.password_confirm"
+                                    :key="i"
+                                >
+                                    {{ msg }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="submit"
+                    class="btn btn-outline-success"
+                    :disabled="!state.form.dirty || !state.form.valid"
+                    form="newUserForm"
+                >
+                    <i class="fas fa-fw fa-plus" /> {{ t('global.add') }}
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                >
+                    <i class="fas fa-fw fa-times" /> {{ t('global.cancel') }}
+                </button>
+            </div>
         </div>
-        <div class="modal-body">
-            <form id="newUserForm" name="newUserForm" role="form" @submit.prevent="onAdd()">
-                <div class="mb-3">
-                    <label class="col-form-label col-12" for="name">
-                        {{ t('global.name') }}
-                        <span class="text-danger">*</span>:
-                    </label>
-                    <div class="col-12">
-                        <input class="form-control" :class="getClassByValidation(state.errors.name)" type="text" id="name" v-model="v.fields.name.value" @input="e => handleChange(e, 'name')" required />
-    
-                        <div class="invalid-feedback">
-                            <span v-for="(msg, i) in state.errors.name" :key="i">
-                                {{ msg }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label class="col-form-label col-12" for="nickname">
-                        {{ t('global.nickname') }}
-                        <span class="text-danger">*</span>:
-                    </label>
-                    <div class="col-12">
-                        <input class="form-control" :class="getClassByValidation(state.errors.nickname)" type="text" id="nickname" v-model="v.fields.nickname.value" @input="e => handleChange(e, 'nickname')" required />
-    
-                        <div class="invalid-feedback">
-                            <span v-for="(msg, i) in state.errors.nickname" :key="i">
-                                {{ msg }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label class="col-form-label col-12" for="email">
-                        {{ t('global.email') }}
-                        <span class="text-danger">*</span>:
-                    </label>
-                    <div class="col-12">
-                        <input class="form-control" :class="getClassByValidation(state.errors.email)" type="email" id="email" v-model="v.fields.email.value" @input="e => handleChange(e, 'email')" required />
-    
-                        <div class="invalid-feedback">
-                            <span v-for="(msg, i) in state.errors.email" :key="i">
-                                {{ msg }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label class="col-form-label col-12" for="password">
-                        {{ t('global.password') }}
-                        <span class="text-danger">*</span>:
-                    </label>
-                    <div class="col-12">
-                        <input class="form-control d-inline" :class="getClassByValidation(state.errors.password)" type="password" id="password" v-model="v.fields.password.value" @input="e => handleChange(e, 'password')" required />
-                        <a href="#" class="text-muted ms--4-5" @click.prevent="togglePasswordVisibility()" tabindex="-1">
-                            <span v-show="!state.showPassword">
-                                <i class="fas fa-fw fa-eye"></i>
-                            </span>
-                            <span v-show="state.showPassword">
-                                <i class="fas fa-fw fa-eye-slash"></i>
-                            </span>
-                        </a>
-    
-                        <div class="invalid-feedback">
-                            <span v-for="(msg, i) in state.errors.password" :key="i">
-                                {{ msg }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label class="col-form-label col-12" for="password_confirm">
-                        {{ t('global.confirm_password') }}
-                        <span class="text-danger">*</span>:
-                    </label>
-                    <div class="col-12">
-                        <input class="form-control" :class="getClassByValidation(state.errors.password_confirm)" type="password" id="password_confirm" v-model="v.fields.password_confirm.value" @input="e => handleChange(e, 'password_confirm')" required />
-    
-                        <div class="invalid-feedback">
-                            <span v-for="(msg, i) in state.errors.password_confirm" :key="i">
-                                {{ msg }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button type="submit" class="btn btn-outline-success" :disabled="!state.form.dirty || !state.form.valid" form="newUserForm">
-                <i class="fas fa-fw fa-plus"></i> {{ t('global.add') }}
-            </button>
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
-            </button>
-        </div>
-    </div>
-  </vue-final-modal>
+    </vue-final-modal>
 </template>
 
 <script>
@@ -134,6 +230,7 @@
             errors: {
                 required: false,
                 type: Object,
+                default: _ => ({}),
             },
         },
         emits: ['add', 'cancel'],
@@ -273,8 +370,6 @@
                 t,
                 // HELPERS
                 getClassByValidation,
-                // PROPS
-                errors,
                 // LOCAL
                 closeModal,
                 handleChange,

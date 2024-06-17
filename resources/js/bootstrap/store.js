@@ -10,12 +10,26 @@ import {
     fillEntityData,
     only,
     slugify,
+    sortConcepts,
+    getIntersectedEntityAttributes,
+    hasIntersectionWithEntityAttributes,
 } from '@/helpers/helpers.js';
 import {
     getEntityData,
     getEntityParentIds,
     getEntityReferences,
 } from '@/api.js';
+
+function updateSelectionTypeIdList(selection) {
+    const tmpDict = {};
+    for(let k in selection) {
+        const curr = selection[k];
+        if(!tmpDict[curr.entity_type_id]) {
+            tmpDict[curr.entity_type_id] = 1;
+        }
+    }
+    return Object.keys(tmpDict).map(tdk => parseInt(tdk));
+}
 
 export const store = createStore({
     modules: {
@@ -47,6 +61,10 @@ export const store = createStore({
                     roles: [],
                     rolePresets: [],
                     tree: [],
+                    treeSelectionMode: false,
+                    treeSelection: {},
+                    treeSelectionTypeIds: [],
+                    cachedConceptSelections: {},
                     user: {},
                     users: [],
                     version: {},
@@ -71,9 +89,18 @@ export const store = createStore({
                     state.attributeTypes = data;
                 },
                 setAttributeSelection(state, data) {
-                    state.attributeSelections[data.id] = data.selection;
+                    if(data.nested) {
+                        for(let k in data.selection) {
+                            state.attributeSelections[k] = data.selection[k].sort(sortConcepts);
+                        }
+                    } else {
+                        state.attributeSelections[data.id] = data.selection.sort(sortConcepts);
+                    }
                 },
                 setAttributeSelections(state, data) {
+                    for(let k in data) {
+                        data[k].sort(sortConcepts);
+                    }
                     state.attributeSelections = data;
                 },
                 setBibliography(state, data) {
@@ -127,11 +154,20 @@ export const store = createStore({
                 },
                 updateEntityType(state, data) {
                     const entityType = state.entityTypes[data.id];
-                    entityType.updated_at = data.updated_at;
-                    entityType.thesaurus_url = data.thesaurus_url;
+                    const values = only(data, ['thesaurus_url', 'updated_at', 'is_root', 'sub_entity_types']);
+                    for(let k in values) {
+                        entityType[k] = values[k];
+                    }
                 },
                 moveEntity(state, data) {
                     const entity = state.entities[data.entity_id];
+                    const oldRank = entity.rank;
+                    const newRank = data.rank;
+                    const rankIdx = newRank - 1;
+                    const append = data.to_end;
+
+                    entity.rank = newRank;
+
                     let oldSiblings;
                     if(!!entity.root_entity_id) {
                         oldSiblings = state.entities[entity.root_entity_id].children;
@@ -141,39 +177,56 @@ export const store = createStore({
                     const idx = oldSiblings.findIndex(n => n.id == entity.id);
                     if(idx > -1) {
                         oldSiblings.splice(idx, 1);
-                    }
-                    if(!data.parent_id) {
-                        // Update children state of old parent
-                        if(!!entity.root_entity_id) {
-                            const oldParent = state.entities[entity.root_entity_id];
-                            oldParent.children_count--;
-                            if(oldParent.children_count == 0) {
-                                oldParent.state.openable = false;
-                                oldParent.state.opened = false;
+                        oldSiblings.map(s => {
+                            if(s.rank > oldRank) {
+                                s.rank--;
                             }
+                        });
+                    }
+
+                    // Update children state of old parent
+                    if(!!entity.root_entity_id) {
+                        const oldParent = state.entities[entity.root_entity_id];
+                        oldParent.children_count--;
+                        if(oldParent.children_count == 0) {
+                            oldParent.state.openable = false;
+                            oldParent.state.opened = false;
                         }
+                    }
+
+                    if(!data.parent_id) {
+                        // Set new (= unset) parent
                         entity.root_entity_id = null;
-                        state.tree.push(entity);
+                        if(append) {
+                            state.tree.push(entity);
+                        } else {
+                            state.tree.splice(rankIdx, 0, entity);
+                            state.tree.map(s => {
+                                if(s.rank >= newRank) {
+                                    s.rank++;
+                                }
+                            });
+                        }
                     } else {
                         // Update children state of new parent
                         const parent = state.entities[data.parent_id];
                         if(!!parent) {
                             if(parent.childrenLoaded) {
-                                parent.children.push(entity);
+                                if(append) {
+                                    parent.children.push(entity);
+                                } else {
+                                    parent.children.splice(rankIdx, 0, entity);
+                                    parent.children.map(s => {
+                                        if(s.rank >= newRank) {
+                                            s.rank++;
+                                        }
+                                    });
+                                }
                             }
                             parent.children_count++;
                             parent.state.openable = true;
                         }
-                        // Also update children state of old parent
-                        if(!!entity.root_entity_id) {
-                            const oldParent = state.entities[entity.root_entity_id];
-                            oldParent.children_count--;
-                            if(oldParent.children_count == 0) {
-                                oldParent.state.openable = false;
-                                oldParent.state.opened = false;
-                            }
-                        }
-                        // Set new parent after updating states
+                        // Set new parent
                         entity.root_entity_id = data.parent_id;
                     }
                 },
@@ -200,7 +253,40 @@ export const store = createStore({
                 updateEntityData(state, data) {
                     const entity = state.entities[data.eid];
                     for(let k in data.data) {
-                        entity.data[k].value = data.data[k];
+                        // when attribute value is set empty, delete whole attribute
+                        if(!data.data[k] && data.data[k] != false) {
+                            entity.data[k] = {};
+                        } else {
+                            // if no id exists, this data is added
+                            if(!entity.data[k].id) {
+                                entity.data[k] = data.new_data[k];
+                            } else {
+                                entity.data[k].value = data.data[k];
+                            }
+                        }
+                    }
+                },
+                updateEntityMetadata(state, data) {
+                    const entity = state.entities[data.eid];
+                    for(let k in data.data) {
+                        entity.metadata[k] = data.data[k];
+                    }
+                },
+                updateEntityHistoryMetadata(state, data) {
+                    const entity = state.entities[data.eid];
+                    for(let k in data.data) {
+                        if(data.append && Array.isArray(entity[k])) {
+                            entity[k] = entity[k].concat(data.data[k]);
+                        } else {
+                            entity[k] = data.data[k];
+                        }
+                    }
+                },
+                updateEntityDataModerations(state, data) {
+                    const entity = state.entities[data.entity_id];
+                    for(let i=0; i<data.attribute_ids.length; i++) {
+                        const curr = data.attribute_ids[i];
+                        entity.data[curr].moderation_state = data.state;
                     }
                 },
                 addEntityTypeAttribute(state, data) {
@@ -289,7 +375,7 @@ export const store = createStore({
                 updateUser(state, data) {
                     const index = state.users.findIndex(u => u.id == data.id);
                     if(index > -1) {
-                        const cleanData = only(data, ['email', 'roles', 'updated_at', 'deleted_at',]);
+                        const cleanData = only(data, ['email', 'roles', 'updated_at', 'deleted_at', 'login_attempts',]);
                         const currentData = state.users[index];
                         state.users[index] = {
                             ...currentData,
@@ -318,7 +404,7 @@ export const store = createStore({
                 updateRole(state, data) {
                     const index = state.roles.findIndex(r => r.id == data.id);
                     if(index > -1) {
-                        const cleanData = only(data, ['display_name', 'description', 'permissions', 'updated_at', 'deleted_at',]);
+                        const cleanData = only(data, ['display_name', 'description', 'permissions', 'is_moderated', 'updated_at', 'deleted_at',]);
                         const currentData = state.roles[index];
                         state.roles[index] = {
                             ...currentData,
@@ -395,6 +481,40 @@ export const store = createStore({
                 },
                 sortTree(state, sort) {
                     sortTree(sort.by, sort.dir, state.tree);
+                },
+                addToTreeSelection(state, data) {
+                    const addPossible = hasIntersectionWithEntityAttributes(data.value.entity_type_id, state.treeSelectionTypeIds);
+                    if(addPossible || state.treeSelectionTypeIds.length == 0) {
+                        state.treeSelection[data.id] = data.value;
+
+                        state.treeSelectionTypeIds = [];
+                        state.treeSelectionTypeIds = updateSelectionTypeIdList(state.treeSelection);
+                    }
+                },
+                removeFromTreeSelection(state, data) {
+                    delete state.treeSelection[data.id];
+
+                    state.treeSelectionTypeIds = [];
+                    state.treeSelectionTypeIds = updateSelectionTypeIdList(state.treeSelection);
+                },
+                toggleTreeSelectionMode(state) {
+                    state.treeSelectionMode = !state.treeSelectionMode;
+
+                    if(!state.treeSelectionMode) {
+                        state.treeSelection = {};
+                        state.treeSelectionTypeIds = [];
+                    }
+                },
+                setTreeSelectionMode(state, data) {
+                    state.treeSelectionMode = data;
+
+                    if(!state.treeSelectionMode) {
+                        state.treeSelection = {};
+                        state.treeSelectionTypeIds = [];
+                    }
+                },
+                setCachedConceptSelection(state, data) {
+                    state.cachedConceptSelections[data.id] = data.selection;
                 },
                 setPreferences(state, data) {
                     state.preferences = data;
@@ -506,9 +626,9 @@ export const store = createStore({
                 updateBibliography({commit}, data) {
                     data.forEach(itemWrap => {
                         if(itemWrap.added) {
-                            commit("addBibliographyItem", itemWrap.entry);
+                            commit('addBibliographyItem', itemWrap.entry);
                         } else {
-                            commit("updateBibliographyItem", itemWrap.entry);
+                            commit('updateBibliographyItem', itemWrap.entry);
                         }
                     });
                 },
@@ -537,6 +657,24 @@ export const store = createStore({
                 },
                 sortTree({commit}, sort) {
                     commit('sortTree', sort)
+                },
+                addToTreeSelection({commit}, data) {
+                    commit('addToTreeSelection', data);
+                },
+                removeFromTreeSelection({commit}, data) {
+                    commit('removeFromTreeSelection', data);
+                },
+                toggleTreeSelectionMode({commit}) {
+                    commit('toggleTreeSelectionMode');
+                },
+                setTreeSelectionMode({commit}) {
+                    commit('setTreeSelectionMode', true);
+                },
+                unsetTreeSelectionMode({commit}) {
+                    commit('setTreeSelectionMode', false);
+                },
+                setCachedConceptSelection({commit}, data) {
+                    commit('setCachedConceptSelection', data);
                 },
                 setMainViewTab({commit}, data) {
                     commit('setMainViewTab', data);
@@ -631,6 +769,15 @@ export const store = createStore({
                 updateEntityData({commit}, data) {
                     commit('updateEntityData', data);
                 },
+                updateEntityMetadata({commit}, data) {
+                    commit('updateEntityMetadata', data);
+                },
+                updateEntityHistoryMetadata({commit}, data) {
+                    commit('updateEntityHistoryMetadata', data);
+                },
+                updateEntityDataModerations({commit}, data) {
+                    commit('updateEntityDataModerations', data);
+                },
                 addEntityTypeAttribute({commit}, data) {
                     commit('addEntityTypeAttribute', data);
                 },
@@ -704,6 +851,7 @@ export const store = createStore({
                     if(data.selection) {
                         commit('setAttributeSelection', {
                             id: data.attribute.id,
+                            nested: data.attribute.datatype == 'table',
                             selection: data.selection,
                         });
                     }
@@ -749,6 +897,13 @@ export const store = createStore({
                 geometryTypes: state => state.geometryTypes,
                 mainView: state => state.mainView,
                 tree: state => state.tree,
+                treeSelectionMode: state => state.treeSelectionMode,
+                treeSelection: state => state.treeSelection,
+                treeSelectionCount: state => Object.keys(state.treeSelection).length,
+                treeSelectionTypeIds: state => state.treeSelectionTypeIds,
+                treeSelectionIntersection: state => getIntersectedEntityAttributes(state.treeSelectionTypeIds),
+                cachedConceptSelections: state => state.cachedConceptSelections,
+                cachedConceptSelection: state => id => state.cachedConceptSelections[id],
                 preferenceByKey: state => key => state.preferences[key],
                 preferences: state => state.preferences,
                 systemPreferences: state => state.systemPreferences,
@@ -772,6 +927,7 @@ export const store = createStore({
                 deletedUsers: state => state.deletedUsers,
                 user: state => state.user,
                 isLoggedIn: state => !!state.user,
+                isModerated: state => state.user.roles.some(r => r.is_moderated),
                 entity: state => state.entity,
                 file: state => state.file,
                 version: state => state.version,

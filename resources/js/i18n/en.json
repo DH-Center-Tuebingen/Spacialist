@@ -7,13 +7,14 @@
         "reactivate": "Reactivate",
         "remove": "Remove",
         "reset": "Reset",
-        "send_reset_mail": "Send mail to reset password",
+        "reset_password": "Reset Password",
         "cancel": "Cancel",
         "close": "Close",
         "add": "Add",
         "edit": "Edit",
         "edited": "edited",
         "duplicate": "Duplicate",
+        "sort": "Sort",
         "resort": "Re-sort",
         "update": "Update",
         "replace": "Replace",
@@ -30,7 +31,8 @@
             "nr_of_entries": "No Entries | 1 Entry | {cnt} Entries",
             "no_entries": "No entries found.",
             "fetch_next_entries": "Fetch next entries",
-            "no_more_entries": "No more entries"
+            "no_more_entries": "No more entries",
+            "stats": "Displaying {from}-{to} of {total}"
         },
         "select_all": "Select All",
         "select_none": "Deselect All",
@@ -60,6 +62,7 @@
         "has_links": "Has no links | Has one link | Has {cnt} links",
         "discard": {
             "title": "Unsaved Changes",
+            "changes": "Discard changes",
             "msg": "There are unsaved changes on the current page. Do you really want to continue and discard changes?",
             "confirm": "Yes, discard changes",
             "confirm_and_save": "No, save and continue"
@@ -73,7 +76,7 @@
         },
         "search": "Search…",
         "search_no_results": "No results",
-        "search_no_results_for": "No results for term <span class=\"fst-italic fw-bold\">{term}</span>",
+        "search_no_results_for": "No results for term:",
         "search_no_term_info": "Enter a search term",
         "search_no_term_info_global": "Enter a search term to search globally",
         "login": "Login",
@@ -107,6 +110,9 @@
             "system": "System Preferences",
             "about": "About"
         },
+        "missing": {
+            "content": "No content yet."
+        },
         "user": {
             "settings": "Preferences",
             "profile": "Profile",
@@ -115,6 +121,11 @@
             "personal_info_title": "Personal Informationen",
             "member_since": "Member since",
             "deactivated_since": "<span class=\"fw-bold\">deactivated</span> since {dt}",
+            "role": "Role",
+            "field": "Field",
+            "institution": "Institution",
+            "department": "Department",
+            "not_assigned": "Not assigned",
             "contact": "Contact",
             "avatar": "Avatar",
             "invalid_orcid": "This ORCID is invalid"
@@ -128,6 +139,7 @@
         "attributes": {
             "string": "Textfield",
             "stringf": "Textbox",
+            "richtext": "Rich-Text",
             "string-sc": "Single Choice Dropdown",
             "string-mc": "Multiple Choice Dropdown",
             "double": "Numeric Input (Floating Point)",
@@ -136,20 +148,25 @@
             "percentage": "Percentage",
             "entity": "Entity",
             "entity-mc": "Entity (Multiple Choice)",
+            "userlist": "User list",
             "epoch": "Time Period and Epoch",
             "timeperiod": "Time Period",
             "date": "Date",
+            "daterange": "Date Range",
             "dimension": "Dimensions (WxHxD)",
             "list": "List",
             "geography": "WKT (Well-Known-Binary)",
             "table": "Table",
             "sql": "SQL-Query",
-            "separator": "Group Separator",
+            "system-separator": "Group Separator",
             "serial": "Serial (Auto-incrementing ID)",
             "serial_info": "<i class=\"fas fa-lightbulb me-1\"></i><br />All instances share this identifier as attribute. Add <code class=\"normal\">%d</code> as counter.<br /><span class=\"fw-medium mt-2\">Example:</span><br /><code class=\"normal\">Find_%d_Stone</code> would create Find_1_Stone, Find_2_Stone, &hellip;<br />To add a fixed width (e.g. 3 for 002 instead of 2), you can use <code class=\"normal\">%03d</code>.",
             "sql_info": "You can use <code class=\"normal\">:entity_id</code> in your SQL-Query to reference the entity this attribute is assigned to.",
             "iconclass": "Iconclass",
-            "rism": "RISM"
+            "rism": "RISM",
+            "restrictions": {
+                "entity_type": "Restrict to following Entity Types"
+            }
         },
         "activity": "Activity",
         "action": "Action",
@@ -180,6 +197,9 @@
         "confirm_password": "Repeat Password",
         "remember_me": "Remember me",
         "orcid": "ORCID",
+        "licence": "Licence",
+        "licence_default": "Default Licence",
+        "licence_missing": "Licence missing",
         "description": "Description",
         "roles": "Roles",
         "permissions": "Permissions",
@@ -189,6 +209,9 @@
         "timestamp": "Timestamp",
         "deactivated_at": "Deactivated",
         "options": "Options",
+        "summary": "Summary",
+        "creator": "Creator",
+        "editors": "Editors",
         "reply_to": "Reply",
         "replying_to": "In reply to {name}",
         "type": "Type",
@@ -217,8 +240,8 @@
             "show": "Show comments",
             "submit": "Submit Comment",
             "text_placeholder": "Enter a comment",
-            "hide_reply": "Hide <span class=\"fw-bold\">one</span> reply | Hide <span class=\"fw-bold\">{cnt}</span> replies",
-            "show_reply": "Show <span class=\"fw-bold\">one</span> reply | Show <span class=\"fw-bold\">{cnt}</span> replies",
+            "hide_reply": "Hide one reply | Hide {cnt} replies",
+            "show_reply": "Show one reply | Show {cnt} replies",
             "fetching": "Fetching comments&hellip;",
             "fetching_failed": "Fetching comments failed!",
             "retry_failed": "Retry"
@@ -255,7 +278,8 @@
             }
         },
         "markdown_editor": {
-            "title": "Markdown Editor"
+            "title": "Markdown Editor",
+            "edit": "Edit as Markdown"
         }
     },
     "main": {
@@ -298,12 +322,17 @@
         },
         "entity": {
             "title": "Entity | Entities",
+            "top_level": "Top-Level-Entity",
             "count": "No Top-Level-Entities | One Top-Level-Entity | {cnt} Top-Level-Entities",
             "detail_tab_none_selected": "No Entity selected. Select an Entity from the tree to see the details in this tab.",
             "toasts": {
                 "updated": {
                     "title": "Entity updated",
-                    "msg": "Data of {name} successfully updated."
+                    "msg": "Data of ‚{name}‘ successfully updated."
+                },
+                "updated_metadata": {
+                    "title": "Metadata updated",
+                    "msg": "Metadata of {name} successfully updated."
                 },
                 "deleted": {
                     "title": "Entity deleted",
@@ -331,11 +360,22 @@
                         "children": "Count Sub-Entities - Descending",
                         "type": "Entity-Type - Descending"
                     }
+                },
+                "multiedit": {
+                    "title": "Toggle Multiedit",
+                    "open": "Open Multiedit Tool",
+                    "toast": {
+                        "saved": {
+                            "title": "Multiedit successful",
+                            "msg": "Successfully edited content of {attr_cnt} attributes for {ent_cnt} entities."
+                        }
+                    }
                 }
             },
             "tabs": {
                 "default": "Default",
                 "comments": "Comments",
+                "metadata": "Metadata",
                 "untitled_group": "Untitled ({cnt})"
             },
             "modals": {
@@ -349,6 +389,9 @@
                 "edit": {
                     "title_type": "Edit Entity-Type - {name}",
                     "title_attribute": "Edit Attribute - {name}"
+                },
+                "multiedit": {
+                    "title": "Multi-Edit Attributes"
                 },
                 "delete": {
                     "alert": "If you delete <span class=\"fw-bold\">{name}</span>, at least one entity is deleted, too. | If you delete <span class=\"fw-bold\">{name}</span>, at least {cnt} entities are deleted, too."
@@ -382,6 +425,7 @@
                 "entity": {
                     "go_to": "Go to {name}"
                 },
+                "root_attribute_info": "The values of this attribute are driven by the value selected in the attribute ‚{name}‘",
                 "iconclass": {
                     "cite_info": "Infos from <cite title=\"Iconclass\"><a href=\"http://iconclass.org/{class}.json\" target=\"_blank\">http://iconclass.org/{class}.json</a></cite>",
                     "doesnt_exist": "This iconclass does not exist"
@@ -391,13 +435,34 @@
                     "doesnt_exist": "THIS RSIM-Entry does not exist"
                 },
                 "table": {
+                    "add_row": "Add row",
                     "chart": {
                         "number_sets": "Last {cnt} data sets",
                         "include_in": "Use in chart",
                         "use_difference": "Use difference",
                         "use_as_label": "Use as label"
                     }
+                },
+                "moderation": {
+                    "locked_state_info": "This attribute is locked, because it is moderated and has to be accepted or denied by a privileged user.",
+                    "view_modified_data": "Show modified data",
+                    "view_original_data": "Show original data",
+                    "accept_changes": "Accept changes",
+                    "deny_changes": "Deny changes",
+                    "deleted_by": "<i class=\"fas fa-fw fa-trash\"></i> deleted {ts}",
+                    "modified_by": "<i class=\"fas fa-fw fa-edit\"></i> modified {ts}",
+                    "edit_moderated_value": {
+                        "title": "Edit changes",
+                        "accept": "Accept edited changes",
+                        "enable": "Enable Edit Mode",
+                        "reset": "Reset edited changes",
+                        "cancel": "Cancel editing"
+                    }
                 }
+            },
+            "metadata": {
+                "save": "Save Metadata",
+                "deleted_entity_name": "Deleted Entity #{id}"
             }
         },
         "user": {
@@ -409,11 +474,22 @@
                 "updated": {
                     "title": "User updated",
                     "msg": "{name} successfully updated."
+                },
+                "reset_password": {
+                    "title": "Password updated",
+                    "message": "Password for User {name} ({nickname}) successfully updated."
                 }
             },
             "modal": {
                 "new": {
                     "title": "New User"
+                },
+                "reset_password": {
+                    "title": "Reset Password"
+                },
+                "confirm_password": {
+                    "title": "Confirm Password",
+                    "message": "Your password has been changed recently. You either have to accept that new password or set one yourself. To do so you have only one additional login left! | Your password has been changed recently. You either have to accept that new password or set one yourself. To do so you have {attempts} additional logins left."
                 }
             },
             "add_role_placeholder": "Add roles"
@@ -443,6 +519,9 @@
                     "preferences": "Preferences",
                     "thesaurus": "Thesaurus",
                     "is_plugin": "Plugin"
+                },
+                "moderation": {
+                    "required": "Requires Moderation"
                 }
             },
             "preset": {
@@ -537,12 +616,11 @@
             },
             "info": {
                 "set_to_language": "Set to <span class=\"fw-bold\">{lang}</span>",
-                "password_reset_link": "To use this function, you have to set the <code>MAIL_*</code> settings in your <code>.env</code> file. <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/blob/master/INSTALL.md#send-mails\" target=\"_blank\">Further informations</a>.",
                 "columns": "The sum of the column values must not be higher than 12."
             },
             "key": {
                 "language": "Language",
-                "password_reset_link": "Enable Reset Password Link",
+                "password_reset": "Enable Password Reset",
                 "color": {
                     "title": "Theme",
                     "style": {
@@ -611,6 +689,23 @@
                 "project_lead_former": "Former Project Lead"
             }
         },
+        "history": {
+            "title": "History",
+            "created_as": "Created as:",
+            "no_value": "No value recorded",
+            "entity": {
+                "created_in": "As Sub-Entity of:",
+                "name_update": "Updated name:",
+                "name_unknown": "Unknown Entity",
+                "name_unknown_info": "This means either that this Entity is deleted or you do not have the required access rights for it.",
+                "value_add_attribute": "Added value to attribute:",
+                "value_update_attribute": "Updated value of attribute:",
+                "certainty_update": "Cerntainty updated:",
+                "certainty_unknown": "Unknown",
+                "moved": "Moved:",
+                "rank": "Rank"
+            }
+        },
         "bibliography": {
             "title": "Literature",
             "modal": {
@@ -657,7 +752,7 @@
                 "year": "Year",
                 "month": "Month",
                 "pages": "Pages",
-                "volume": "Volumne",
+                "volume": "Volume",
                 "number": "Number",
                 "chapter": "Chapter",
                 "edition": "Edition",
@@ -692,8 +787,9 @@
                 "techreport": "Techreport",
                 "unpublished": "Unpublished",
                 "validation": {
-                    "required": "@:main.bibliography.column.{col} is a required field",
-                    "required_one_of": "Either @:main.bibliography.column.{col} or @:main.bibliography.column.{ref} must be set"
+                    "required": "‘{field}’ is required",
+                    "required_if": "Required if ‘{col}’ is not set",
+                    "required_one_of": "Either ‘{eitherField}’ or ‘{orField}’ must be set"
                 }
             }
         },

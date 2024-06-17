@@ -37,6 +37,10 @@ $brand-danger: $red;
 // Corners
 $enable-rounded: false;
 
+// Inputs
+$input-disabled-bg: $gray-200 !default;
+$input-disabled-color: $gray-400 !default;
+
 
 // Addons
 
@@ -49,9 +53,18 @@ $enable-rounded: false;
 .multiselect {
     --ms-bg: $gray-100;
     color: $gray-600;
+
     @if not $enable-rounded {
         --ms-radius: 0px;
     }
+}
+
+.multiselect.is-disabled {
+    --ms-bg-disabled: #{$input-disabled-bg};
+    --ms-color-disabled: #{$input-disabled-color};
+
+    color: var(--ms-color-disabled) !important;
+    border-color: #{$input-disabled-color} !important;
 }
 
 .multiselect-search {
@@ -63,14 +76,21 @@ $enable-rounded: false;
     --ms-tag-color: #{$gray-600};
     --ms-tag-bg-disabled: #{$gray-400};
     --ms-tag-color-disabled: #{$gray-600};
+
     @if not $enable-rounded {
         --ms-tag-radius: 0px;
     }
 }
 
+// User list tag item
+.multiselect-tag-user {
+    background-color: rgba($green, var(--bs-bg-opacity, 1));
+  }
+
 .multiselect-dropdown {
     --ms-dropdown-border-color: #{$gray-300};
     --ms-dropdown-bg: #{$gray-100};
+
     @if not $enable-rounded {
         --ms-dropdown-radius: 0px;
     }

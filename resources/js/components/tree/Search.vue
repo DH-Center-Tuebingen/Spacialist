@@ -3,7 +3,8 @@
         :endpoint="searchEntity"
         :filter-fn="prependSelectAllMatches"
         :key-text="'name'"
-        @selected="e => entitySelected(e)" />
+        @selected="e => entitySelected(e)"
+    />
 </template>
 
 <script>

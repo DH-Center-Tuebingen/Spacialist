@@ -7,13 +7,14 @@
         "reactivate": "Reaktivieren",
         "remove": "Entfernen",
         "reset": "Zurücksetzen",
-        "send_reset_mail": "E-Mail zum Zurücksetzen des Passworts senden",
+        "reset_password": "Passwort zurücksetzen",
         "cancel": "Abbrechen",
         "close": "Schließen",
         "add": "Hinzufügen",
-        "edit": "Editieren",
-        "edited": "editiert",
+        "edit": "Bearbeiten",
+        "edited": "bearbeitet",
         "duplicate": "Duplizieren",
+        "sort": "Sortieren",
         "resort": "Umsortieren",
         "update": "Aktualisieren",
         "replace": "Ersetzen",
@@ -30,7 +31,8 @@
             "nr_of_entries": "Keine Einträge | 1 Eintrag | {cnt} Einträge",
             "no_entries": "Keine Einträge gefunden.",
             "fetch_next_entries": "Weitere Einträge laden",
-            "no_more_entries": "Keine weiteren Einträge"
+            "no_more_entries": "Keine weiteren Einträge",
+            "stats": "Zeige {from}-{to} von {total}"
         },
         "select_all": "Alle auswählen",
         "select_none": "Alle abwählen",
@@ -60,6 +62,7 @@
         "has_links": "Hat keine Verknüpfungen | Hat eine Verknüpfung | Hat {cnt} Verknüpfungen",
         "discard": {
             "title": "Ungespeicherte Änderungen",
+            "changes": "Änderungen verwerfen",
             "msg": "Es gibt ungespeicherte Änderungen auf der aktuellen Seite. Willst du wirklich fortfahren und die Änderungen verwerfen?",
             "confirm": "Ja, Änderungen verwerfen",
             "confirm_and_save": "Nein, Speichern und fortfahren"
@@ -73,7 +76,7 @@
         },
         "search": "Suche…",
         "search_no_results": "Keine Suchergebnisse",
-        "search_no_results_for": "Keine Ergebnisse für den Begriff <span class=\"fst-italic fw-bold\">{term}</span>",
+        "search_no_results_for": "Keine Ergebnisse für den Begriff:",
         "search_no_term_info": "Gib einen Suchbegriff ein",
         "search_no_term_info_global": "Gib einen Suchbegriff ein um das gesamte System zu durchsuchen",
         "login": "Einloggen",
@@ -107,6 +110,9 @@
             "system": "System-Einstellungen",
             "about": "Über"
         },
+        "missing": {
+            "content": "Kein Inhalt vorhanden."
+        },
         "user": {
             "settings": "Einstellungen",
             "profile": "Profil",
@@ -115,6 +121,11 @@
             "personal_info_title": "Persönliche Informationen",
             "member_since": "Mitglied seit",
             "deactivated_since": "<span class=\"fw-bold\">Deaktiviert</span> seit {dt}",
+            "role": "Rolle",
+            "field": "Fachgebiet",
+            "institution": "Einrichtung",
+            "department": "Abteilung",
+            "not_assigned": "Nicht angegeben",
             "contact": "Kontakt",
             "avatar": "Avatar",
             "invalid_orcid": "Die eigegebene ORCID ist ungültig"
@@ -128,6 +139,7 @@
         "attributes": {
             "string": "Textfeld",
             "stringf": "Textbox",
+            "richtext": "Rich-Text",
             "string-sc": "Einfachauswahl-Dropdown",
             "string-mc": "Mehrfachauswahl-Dropdown",
             "double": "Gleitkommazahl",
@@ -136,9 +148,11 @@
             "percentage": "Prozentangabe",
             "entity": "Entität",
             "entity-mc": "Entität (Mehrfachauswahl)",
+            "userlist": "Benutzerliste",
             "epoch": "Zeitspanne & Epoche",
             "timeperiod": "Zeitspanne",
             "date": "Datum",
+            "daterange": "Datumsspanne",
             "dimension": "Abmessungen (BxHxT)",
             "list": "Liste",
             "geography": "WKT (Well-Known-Binary)",
@@ -149,7 +163,10 @@
             "serial_info": "<i class=\"fas fa-lightbulb me-1\"></i><br />Alle Instanzen teilen diesen Identifier als Attribut. Benutze <code class=\"normal\">%d</code> als Zähler.<br /><span class=\"fw-medium mt-2\">Beispiel:</span><br /><code class=\"normal\">Fund_%d_Stein</code> würde zu Fund_1_Stein, Fund_2_Stein, &hellip; führen.<br />Um eine feste Breite (z.B. 3 für 002 anstatt 2) zu erzwingen, benutze <code class=\"normal\">%03d</code>.",
             "sql_info": "Du kannst mit <code class=\"normal\">:entity_id</code> in deiner SQL-Abfrage auf die Entität referenzieren, dem dieses Attribut zugewiesen ist.",
             "iconclass": "Iconclass",
-            "rism": "RISM"
+            "rism": "RISM",
+            "restrictions": {
+                "entity_type": "Auf folgende Entitätstypen beschränken"
+            }
         },
         "activity": "Aktivitäten",
         "action": "Aktion",
@@ -180,6 +197,9 @@
         "confirm_password": "Passwort wiederholen",
         "remember_me": "Eingeloggt bleiben",
         "orcid": "ORCID",
+        "licence": "Lizenz",
+        "licence_default": "Standard-Lizenz",
+        "licence_missing": "Lizenz-Angabe fehlt",
         "description": "Beschreibung",
         "roles": "Rollen",
         "permissions": "Berechtigungen",
@@ -189,6 +209,9 @@
         "deactivated_at": "Deaktiviert",
         "timestamp": "Zeitstempel",
         "options": "Optionen",
+        "summary": "Zusammenfassung",
+        "creator": "Ersteller",
+        "editors": "Bearbeiter",
         "reply_to": "Antworten",
         "replying_to": "Antwort an {name}",
         "type": "Typ",
@@ -215,10 +238,10 @@
             "empty_list": "Bisher keine Kommentare hinzugefügt.",
             "hide": "Kommentare ausblenden",
             "show": "Kommentare anzeigen",
-            "submit": "Kommtentar abschicken",
+            "submit": "Kommentar abschicken",
             "text_placeholder": "Kommentar eingeben",
-            "hide_reply": "<span class=\"fw-bold\">Eine</span> Antwort ausblenden | <span class=\"fw-bold\">{cnt}</span> Antworten ausblenden",
-            "show_reply": "<span class=\"fw-bold\">Eine</span> Antwort anzeigen | <span class=\"fw-bold\">{cnt}</span> Antworten anzeigen",
+            "hide_reply": "Eine Antwort ausblenden | {cnt} Antworten ausblenden",
+            "show_reply": "Eine Antwort anzeigen | {cnt} Antworten anzeigen",
             "fetching": "Lade Kommentare&hellip;",
             "fetching_failed": "Laden der Kommentare fehlgeschlagen!",
             "retry_failed": "Wiederholen"
@@ -255,7 +278,8 @@
             }
         },
         "markdown_editor": {
-            "title": "Markdown-Editor"
+            "title": "Markdown-Editor",
+            "edit": "Als Markdown bearbeiten"
         }
     },
     "main": {
@@ -298,12 +322,17 @@
         },
         "entity": {
             "title": "Entität | Entitäten",
+            "top_level": "Top-Level-Entität",
             "count": "Keine Top-Level Entitäten | Eine Top-Level Entität | {cnt} Top-Level Entitäten",
             "detail_tab_none_selected": "Keine Entität ausgewählt. Wähle aus dem Baum eine Entität aus um hier Details dazu zu erhalten.",
             "toasts": {
                 "updated": {
                     "title": "Entität aktualisiert",
-                    "msg": "Daten von {name} wurden erfolgreich aktualisiert."
+                    "msg": "Daten von „{name}“ wurden erfolgreich aktualisiert."
+                },
+                "updated_metadata": {
+                    "title": "Metadaten aktualisiert",
+                    "msg": "Metadaten von {name} wurden erfolgreich aktualisiert."
                 },
                 "deleted": {
                     "title": "Entität gelöscht",
@@ -331,11 +360,22 @@
                         "children": "Anzahl Unter-Entitäten - Absteigend",
                         "type": "Entitätstyp - Absteigend"
                     }
+                },
+                "multiedit": {
+                    "title": "Mehrfachauswahl umschalten",
+                    "open": "Mehrfach-Bearbeitungs-Werkzeug öffnen",
+                    "toast": {
+                        "saved": {
+                            "title": "Mehrfach-Bearbeitung erfolgreich",
+                            "msg": "Die Werte von {attr_cnt} Attributen in {ent_cnt} Entitäten erfolgreich bearbeitet."
+                        }
+                    }
                 }
             },
             "tabs": {
                 "default": "Allgemein",
                 "comments": "Kommentare",
+                "metadata": "Metadaten",
                 "untitled_group": "Unbenannt ({cnt})"
             },
             "modals": {
@@ -349,6 +389,9 @@
                 "edit": {
                     "title_type": "Entitätstyp editieren - {name}",
                     "title_attribute": "Attribut editieren - {name}"
+                },
+                "multiedit": {
+                    "title": "Mehrfach-Attribut-Bearbeitung"
                 },
                 "delete": {
                     "alert": "Wenn du <span class=\"fw-bold\">{name}</span> löschst, wird mindestens eine Entität ebenfalls gelöscht. | Wenn du <span class=\"fw-bold\">{name}</span> löschst, werden mindestens {cnt} Entitäten ebenfalls gelöscht."
@@ -382,6 +425,7 @@
                 "entity": {
                     "go_to": "Springe zu {name}"
                 },
+                "root_attribute_info": "Die verfügbaren Werte dieses Attributes werden vom Attribut „{name}“ bestimmt.",
                 "iconclass": {
                     "cite_info": "Infos von <cite title=\"Iconclass\"><a href=\"http://iconclass.org/{class}.json\" target=\"_blank\">http://iconclass.org/{class}.json</a></cite>",
                     "doesnt_exist": "Diese Iconclass existiert nicht"
@@ -391,13 +435,34 @@
                     "doesnt_exist": "Dieser RSIM-Eintrag existiert nicht"
                 },
                 "table": {
+                    "add_row": "Neue Zeile hinzufügen",
                     "chart": {
                         "number_sets": "Die letzten {cnt} Datensätze",
                         "include_in": "Verwenden",
                         "use_difference": "Differenz verwenden",
                         "use_as_label": "Als Beschriftung verwenden"
                     }
+                },
+                "moderation": {
+                    "locked_state_info": "Dieses Attribute ist gesperrt, da die Änderungen moderiert werden müssen und noch nicht von einem berechtigten Benutzer angenommen oder abgelehnt wurden.",
+                    "view_modified_data": "Geänderte Daten anzeigen",
+                    "view_original_data": "Originaldaten anzeigen",
+                    "accept_changes": "Änderungen annehmen",
+                    "deny_changes": "Änderungen ablehnen",
+                    "deleted_by": "<i class=\"fas fa-fw fa-trash\"></i> gelöscht {ts}",
+                    "modified_by": "<i class=\"fas fa-fw fa-edit\"></i> geändert {ts}",
+                    "edit_moderated_value": {
+                        "title": "Änderung bearbeiten",
+                        "accept": "Bearbeitete Änderung annehmen",
+                        "enable": "Bearbeitungsmodus aktivieren",
+                        "reset": "Bearbeitete Änderung zurücksetzen",
+                        "cancel": "Bearbeitung verwerfen"
+                    }
                 }
+            },
+            "metadata": {
+                "save": "Metadaten speichern",
+                "deleted_entity_name": "Gelöschte Entität #{id}"
             }
         },
         "user": {
@@ -409,11 +474,22 @@
                 "updated": {
                     "title": "Benutzer aktualisiert",
                     "msg": "{name} wurde erfolgreich aktualisiert."
+                },
+                "reset_password": {
+                    "title": "Passwort aktualisiert",
+                    "message": "Passwort für Benutzer {name} ({nickname}) wurde erfolgreich aktualisiert."
                 }
             },
             "modal": {
                 "new": {
                     "title": "Neuer Benutzer"
+                },
+                "reset_password": {
+                    "title": "Passwort zurücksetzen"
+                },
+                "confirm_password": {
+                    "title": "Passwort bestätigen",
+                    "message": "Dein Passwort wurde geändert. Du musst entweder dieses neue Passwort akzeptieren oder selbst ein neues vergeben. Dafür hast du nur noch einen weiteren Login übrig! | Dein Passwort wurde geändert. Du musst entweder dieses neue Passwort akzeptieren oder selbst ein neues vergeben. Dafür hast du noch {attempts} weitere Logins übrig."
                 }
             },
             "add_role_placeholder": "Rollen hinzufügen"
@@ -443,6 +519,9 @@
                     "preferences": "Einstellungen",
                     "thesaurus": "Thesaurus",
                     "is_plugin": "Erweiterung"
+                },
+                "moderation": {
+                    "required": "Moderation notwendig"
                 }
             },
             "preset": {
@@ -537,12 +616,11 @@
             },
             "info": {
                 "set_to_language": "Auf <span class=\"fw-bold\">{lang}</span> stellen",
-                "password_reset_link": "Damit diese Funktion genutzt werden kann, müssen die <code>MAIL_*</code>-Werte in der <code>.env</code>-Datei gesetzt sein. <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/blob/master/INSTALL.md#send-mails\" target=\"_blank\">Weitere Informationen</a>.",
                 "columns": "Die Summe der Werte der Spalten darf 12 nicht überschreiten."
             },
             "key": {
                 "language": "Sprache",
-                "password_reset_link": "Passwort per Link zurücksetzen",
+                "password_reset": "Passwort zurücksetzen erlauben",
                 "color": {
                     "title": "Design",
                     "style": {
@@ -609,6 +687,23 @@
                 "support_archaeology": "Archäologische Unterstützung",
                 "project_lead": "Projektleitung",
                 "project_lead_former": "Ehemalige Projektleitung"
+            }
+        },
+        "history": {
+            "title": "Verlauf",
+            "created_as": "Erstellt als:",
+            "no_value": "Kein Wert aufgezeichnet",
+            "entity": {
+                "created_in": "Als Unter-Entität von:",
+                "name_update": "Name aktualisiert:",
+                "name_unknown": "Unbekannte Entität",
+                "name_unknown_info": "Das bedeutet, dass die Entität entweder gelöscht wurde oder du nicht die nötigen Berechtigungen besitzt.",
+                "value_add_attribute": "Wert zu Attribut hinzugefügt:",
+                "value_update_attribute": "Wert von Attribut geändert:",
+                "certainty_update": "Sicherheit aktualisiert:",
+                "certainty_unknown": "Unbekannt",
+                "moved": "Verschoben:",
+                "rank": "Rang"
             }
         },
         "bibliography": {
@@ -692,8 +787,9 @@
                 "techreport": "Bericht einer Hochschule oder anderen Institution",
                 "unpublished": "Nicht veröffentlicht",
                 "validation": {
-                    "required": "@:main.bibliography.column.{col} ist ein Pflichtfeld",
-                    "required_one_of": "Entweder @:main.bibliography.column.{col} oder @:main.bibliography.column.{ref} muss gesetzt sein"
+                    "required": "„{field}“ ist ein Pflichtfeld",
+                    "required_if": "Pflichtfeld, falls „{col}“ nicht angegeben ist",
+                    "required_one_of": "Entweder „{eitherField}“ oder „{orField}“ muss angegeben sein"
                 }
             }
         },

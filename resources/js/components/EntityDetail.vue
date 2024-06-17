@@ -1,101 +1,203 @@
 <template>
     <div class="h-100 d-flex flex-column">
-        <entity-breadcrumbs class="mb-2 small" :entity="state.entity" v-if="state.showBreadcrumb"></entity-breadcrumbs>
+        <entity-breadcrumbs
+            v-if="state.showBreadcrumb"
+            class="mb-2 small"
+            :entity="state.entity"
+        />
         <div class="d-flex align-items-center justify-content-between">
-            <h3 class="mb-0" @mouseenter="onEntityHeaderHover(true)" @mouseleave="onEntityHeaderHover(false)">
+            <h3
+                class="mb-0"
+                @mouseenter="onEntityHeaderHover(true)"
+                @mouseleave="onEntityHeaderHover(false)"
+            >
                 <span v-if="!state.entity.editing">
                     {{ state.entity.name }}
                     <small class="d-inline-flex gap-1">
-                        <button id="hidden-attributes-icon" v-show="state.hiddenAttributeCount > 0" class="border-0 bg-body text-secondary p-0" data-bs-container="body" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="bottom" :data-bs-content="state.hiddenAttributeListing" data-bs-html="true" data-bs-custom-class="popover-p-2" @mousedown="showHiddenAttributes()" @mouseup="hideHiddenAttributes()">
+                        <button
+                            v-show="state.hiddenAttributeCount > 0"
+                            id="hidden-attributes-icon"
+                            class="border-0 bg-body text-secondary p-0"
+                            data-bs-container="body"
+                            data-bs-toggle="popover"
+                            data-bs-trigger="hover"
+                            data-bs-placement="bottom"
+                            :data-bs-content="state.hiddenAttributeListing"
+                            data-bs-html="true"
+                            data-bs-custom-class="popover-p-2"
+                            @mousedown="showHiddenAttributes()"
+                            @mouseup="hideHiddenAttributes()"
+                        >
                             <span v-show="state.hiddenAttributeState">
                                 <span class="fa-layers fa-fw">
-                                    <i class="fas fa-eye fa-xs"></i>
-                                    <span class="fa-layers-counter fa-counter-lg" style="background:Tomato">
+                                    <i class="fas fa-eye fa-xs" />
+                                    <span
+                                        class="fa-layers-counter fa-counter-lg"
+                                        style="background:Tomato"
+                                    >
                                         {{ state.hiddenAttributeCount }}
                                     </span>
                                 </span>
                             </span>
                             <span v-show="!state.hiddenAttributeState">
                                 <span class="fa-layers fa-fw">
-                                    <i class="fas fa-eye-slash fa-xs"></i>
-                                    <span class="fa-layers-counter fa-counter-lg" style="background:Tomato">
+                                    <i class="fas fa-eye-slash fa-xs" />
+                                    <span
+                                        class="fa-layers-counter fa-counter-lg"
+                                        style="background:Tomato"
+                                    >
                                         {{ state.hiddenAttributeCount }}
                                     </span>
                                 </span>
                             </span>
                         </button>
-                        <span class="dropdown bg-body text-secondary clickable me-1" v-if="state.hasAttributeLinks">
-                            <span class="fa-layers fa-fw" data-bs-toggle="dropdown">
-                                <i class="fas fa-fw fa-xs fa-link fa-xs"></i>
-                                <span class="fa-layers-counter fa-counter-lg" style="background:Tomato">
+                        <span
+                            v-if="state.hasAttributeLinks"
+                            class="dropdown bg-body text-secondary clickable me-1"
+                        >
+                            <span
+                                class="fa-layers fa-fw"
+                                data-bs-toggle="dropdown"
+                            >
+                                <i class="fas fa-fw fa-xs fa-link fa-xs" />
+                                <span
+                                    class="fa-layers-counter fa-counter-lg"
+                                    style="background:Tomato"
+                                >
                                     {{ state.entity.attributeLinks.length }}
                                 </span>
                             </span>
                             <ul class="dropdown-menu">
-                                <li v-for="link in state.groupedAttributeLinks" :key="link.id">
-                                    <router-link :to="{name: 'entitydetail', params: {id: link.id}, query: state.routeQuery}" class="dropdown-item d-flex align-items-center gap-1" :title="link.path.join(' / ')">
-                                        <span class="badge rounded-pill" style="font-size: 8px;" :style="getEntityColors(link.entity_type_id)" :title="getEntityTypeName(link.entity_type_id)">
-                                            &nbsp;&nbsp;
-                                        </span>
+                                <li
+                                    v-for="link in state.groupedAttributeLinks"
+                                    :key="link.id"
+                                >
+                                    <router-link
+                                        :to="{ name: 'entitydetail', params: { id: link.id }, query: state.routeQuery }"
+                                        class="dropdown-item d-flex align-items-center gap-1"
+                                        :title="link.path.join(' / ')"
+                                    >
+                                        <entity-type-label
+                                            :type="link.entity_type_id"
+                                            :icon-only="true"
+                                        />
                                         {{ link.name }}
                                         <span class="text-muted small">{{ link.attribute_urls.join(', ') }}</span>
                                     </router-link>
                                 </li>
                             </ul>
                         </span>
-                        <a href="#" v-if="state.entityHeaderHovered && can('entity_write')" class="text-secondary" @click.prevent="editEntityName()">
-                            <i class="fas fa-fw fa-edit fa-xs"></i>
+                        <a
+                            v-if="state.entityHeaderHovered && can('entity_write')"
+                            href="#"
+                            class="text-secondary"
+                            @click.prevent="editEntityName()"
+                        >
+                            <i class="fas fa-fw fa-edit fa-xs" />
                         </a>
                     </small>
                 </span>
-                <form class="d-flex flex-row" v-else @submit.prevent="updateEntityName()">
-                    <input type="text" class="form-control form-control-sm me-2" v-model="state.editedEntityName" />
-                    <button type="submit" class="btn btn-outline-success btn-sm me-2">
-                        <i class="fas fa-fw fa-check"></i>
+                <form
+                    v-else
+                    class="d-flex flex-row"
+                    @submit.prevent="updateEntityName()"
+                >
+                    <input
+                        v-model="state.editedEntityName"
+                        type="text"
+                        class="form-control form-control-sm me-2"
+                    >
+                    <button
+                        type="submit"
+                        class="btn btn-outline-success btn-sm me-2"
+                    >
+                        <i class="fas fa-fw fa-check" />
                     </button>
-                    <button type="reset" class="btn btn-outline-danger btn-sm" @click="cancelEditEntityName()">
-                        <i class="fas fa-fw fa-ban"></i>
+                    <button
+                        type="reset"
+                        class="btn btn-outline-danger btn-sm"
+                        @click="cancelEditEntityName()"
+                    >
+                        <i class="fas fa-fw fa-ban" />
                     </button>
                 </form>
             </h3>
             <div class="d-flex flex-row gap-2">
-                <button type="submit" form="entity-attribute-form" class="btn btn-outline-success btn-sm" :disabled="!state.formDirty || !can('entity_data_write')" @click.prevent="saveEntity()">
-                    <i class="fas fa-fw fa-save"></i> {{ t('global.save') }}
+                <button
+                    type="submit"
+                    form="entity-attribute-form"
+                    class="btn btn-outline-success btn-sm"
+                    :disabled="!state.formDirty || !can('entity_data_write')"
+                    @click.prevent="saveEntity()"
+                >
+                    <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
                 </button>
-                <button type="button" class="btn btn-outline-warning btn-sm" :disabled="!state.formDirty" @click="resetForm()">
-                    <i class="fas fa-fw fa-undo"></i> {{ t('global.reset') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-warning btn-sm"
+                    :disabled="!state.formDirty"
+                    @click="resetForm()"
+                >
+                    <i class="fas fa-fw fa-undo" /> {{ t('global.reset') }}
                 </button>
-                <button type="button" class="btn btn-outline-danger btn-sm" :disabled="!can('entity_delete')" @click="confirmDeleteEntity()">
-                    <i class="fas fa-fw fa-trash"></i> {{ t('global.delete') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-danger btn-sm"
+                    :disabled="!can('entity_delete')"
+                    @click="confirmDeleteEntity()"
+                >
+                    <i class="fas fa-fw fa-trash" /> {{ t('global.delete') }}
                 </button>
             </div>
         </div>
         <div class="d-flex justify-content-between my-2">
-            <div class="d-flex flex-row gap-1">
-                <span :style="state.colorStyles">
-                    <i class="fas fa-fw fa-circle"></i>
-                </span>
-                <span>
-                    {{ state.entityTypeLabel }}
-                </span>
-            </div>
+            <entity-type-label
+                :type="state.entity.entity_type_id"
+                :icon-only="false"
+            />
             <div>
-                <i class="fas fa-fw fa-user-edit"></i>
-                <span class="ms-1">
-                    {{ date(state.lastModified, undefined, true, true) }}
+                <i class="fas fa-fw fa-user-edit" />
+                <span
+                    class="ms-1"
+                    :title="date(state.lastModified, undefined, true, true)"
+                >
+                    {{ ago(state.lastModified) }}
                 </span>
                 -
-                <a href="#" @click.prevent="showUserInfo(state.entityUser)" class="fw-medium" v-if="state.entity.user">
+                <a
+                    v-if="state.entity.user"
+                    href="#"
+                    class="fw-medium"
+                    @click.prevent="showUserInfo(state.entityUser)"
+                >
                     {{ state.entityUser.name }}
-                    <user-avatar :user="state.entityUser" :size="20" class="align-middle"></user-avatar>
+                    <user-avatar
+                        :user="state.entityUser"
+                        :size="20"
+                        class="align-middle"
+                    />
                 </a>
             </div>
         </div>
-        <ul class="nav nav-tabs" id="myTab" role="tablist" v-show="can('comments_read')">
-            <li class="nav-item" role="presentation" v-for="(tg, key) in state.entityGroups" :key="`attribute-group-${tg.id}-tab`">
-                <a class="nav-link active-entity-attributes-tab active-entity-detail-tab d-flex gap-2 align-items-center" :id="`active-entity-attributes-group-${tg.id}-tab`" href="#" @click.prevent="setDetailPanel(`attributes-${tg.id}`)">
+        <ul
+            id="entity-detail-tabs"
+            class="nav nav-tabs"
+            role="tablist"
+        >
+            <li
+                v-for="(tg, key) in state.entityGroups"
+                :key="`attribute-group-${tg.id}-tab`"
+                class="nav-item"
+                role="presentation"
+            >
+                <a
+                    :id="`active-entity-attributes-group-${tg.id}-tab`"
+                    class="nav-link active-entity-attributes-tab active-entity-detail-tab d-flex gap-2 align-items-center"
+                    href="#"
+                    @click.prevent="setDetailPanel(`attributes-${tg.id}`)"
+                >
                     <span class="fa-layers fa-fw">
-                        <i class="fas fa-fw fa-layer-group"></i>
+                        <i class="fas fa-fw fa-layer-group" />
                         <span class="fa-layers-counter fa-counter-lg bg-secondary-subtle text-reset">
                             {{ tg.data.length }}
                         </span>
@@ -106,12 +208,66 @@
                     <span v-else>
                         {{ translateConcept(key) }}
                     </span>
+                    <div
+                        v-if="state.dirtyStates[tg.id]"
+                        class="d-flex flex-row gap-2 align-items-center"
+                        @mouseover="showTabActions(tg.id, true)"
+                        @mouseleave="showTabActions(tg.id, false)"
+                    >
+                        <i class="fas fa-fw fa-2xs fa-circle text-warning" />
+                        <div v-show="state.attributeGrpHovered == tg.id">
+                            <a
+                                href="#"
+                                @click.prevent.stop="saveEntity(`${tg.id}`)"
+                            >
+                                <i class="fas fa-fw fa-save text-success" />
+                            </a>
+                            <a
+                                href="#"
+                                @click.prevent.stop="resetForm(`${tg.id}`)"
+                            >
+                                <i class="fas fa-fw fa-undo text-warning" />
+                            </a>
+                        </div>
+                    </div>
                 </a>
             </li>
-            <li class="nav-item" role="presentation">
-                <a class="nav-link active-entity-detail-tab d-flex gap-2 align-items-center" id="active-entity-comments-tab" href="#" @click.prevent="setDetailPanel('comments')">
+            <!-- empty nav-item to separate metadata and comments from attributes -->
+            <li class="nav-item nav-item-list-divider ms-auto" />
+            <li
+                v-show="can('entity_read')"
+                class="nav-item"
+                role="presentation"
+            >
+                <a
+                    id="active-entity-metadata-tab"
+                    class="nav-link active-entity-detail-tab d-flex gap-2 align-items-center"
+                    href="#"
+                    @click.prevent="setDetailPanel('metadata')"
+                >
+                    <i class="fas fa-fw fa-file-shield" />
+                    {{ t('main.entity.tabs.metadata') }}
+                    <span
+                        v-if="!state.entity.metadata || !state.entity.metadata.licence"
+                        :title="t('global.licence_missing')"
+                    >
+                        <i class="fas fa-exclamation text-warning" />
+                    </span>
+                </a>
+            </li>
+            <li
+                v-show="can('comments_read')"
+                class="nav-item"
+                role="presentation"
+            >
+                <a
+                    id="active-entity-comments-tab"
+                    class="nav-link active-entity-detail-tab d-flex gap-2 align-items-center"
+                    href="#"
+                    @click.prevent="setDetailPanel('comments')"
+                >
                     <span class="fa-layers fa-fw">
-                        <i class="fas fa-fw fa-comments"></i>
+                        <i class="fas fa-fw fa-comments" />
                         <span class="fa-layers-counter fa-counter-lg bg-secondary-subtle text-reset">
                             {{ state.entity.comments_count }}
                         </span>
@@ -120,14 +276,29 @@
                 </a>
             </li>
         </ul>
-        <div class="tab-content col ps-0 pe-0 overflow-hidden" id="entity-detail-tab-content">
-            <div class="tab-pane fade h-100 active-entity-detail-panel active-entity-attributes-panel show active" :id="`active-entity-attributes-panel-${tg.id}`" role="tabpanel" v-for="tg in state.entityGroups" :key="`attribute-group-${tg.id}-panel`">
-                <form :id="`entity-attribute-form-${tg.id}`" :name="`entity-attribute-form-${tg.id}`" class="h-100">
+        <div
+            id="entity-detail-tab-content"
+            class="tab-content col ps-0 pe-0 overflow-hidden"
+        >
+            <div
+                v-for="tg in state.entityGroups"
+                :id="`active-entity-attributes-panel-${tg.id}`"
+                :key="`attribute-group-${tg.id}-panel`"
+                class="tab-pane fade h-100 active-entity-detail-panel active-entity-attributes-panel show active"
+                role="tabpanel"
+            >
+                <form
+                    :id="`entity-attribute-form-${tg.id}`"
+                    :name="`entity-attribute-form-${tg.id}`"
+                    class="h-100"
+                    @submit.prevent
+                    @keydown.ctrl.s="e => handleSaveOnKey(e, `${tg.id}`)"
+                >
                     <attribute-list
-                        class="pt-2 h-100 scroll-y-auto scroll-x-hidden"
                         v-if="state.attributesFetched"
+                        :ref="el => setAttrRefs(el, tg.id)"
                         v-dcan="'entity_data_read'"
-                        :ref="el => setAttrRef(el)"
+                        class="pt-2 h-100 scroll-y-auto scroll-x-hidden"
                         :attributes="tg.data"
                         :hidden-attributes="state.hiddenAttributeList"
                         :show-hidden="state.hiddenAttributeState"
@@ -135,22 +306,465 @@
                         :metadata-addon="hasReferenceGroup"
                         :selections="state.entityTypeSelections"
                         :values="state.entity.data"
-                        @dirty="setFormState"
-                        @metadata="showMetadata">
-                    </attribute-list>
+                        @dirty="e => setFormState(e, tg.id)"
+                        @metadata="showMetadata"
+                    />
                 </form>
             </div>
-            <div class="tab-pane fade h-100 active-entity-detail-panel d-flex flex-column" id="active-entity-comments-panel" role="tabpanel" v-show="can('comments_read')">
-                <div class="mb-auto scroll-y-auto h-100" v-if="state.entity.comments">
-                    <div v-if="state.commentsFetching" class="mt-2">
-                        <p class="alert alert-info mb-0" v-html="t('global.comments.fetching')">
-                        </p>
+            <div
+                v-show="can('entity_read')"
+                id="active-entity-metadata-panel"
+                class="tab-pane fade h-100 active-entity-detail-panel overflow-hidden"
+                role="tabpanel"
+            >
+                <div class="d-flex flex-column h-100">
+                    <div class="mt-3">
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-success"
+                            @click="saveMetadata"
+                        >
+                            <i class="fas fa-fw fa-save" />
+                            {{ t('main.entity.metadata.save') }}
+                        </button>
                     </div>
-                    <div v-else-if="state.commentFetchFailed" class="mt-2">
+                    <div class="d-flex flex-row gap-2 justify-content-between align-items-center mt-2">
+                        <div>
+                            <h5 class="mb-1">
+                                {{ t('global.creator') }}
+                            </h5>
+                            <div
+                                v-if="getUserBy(state.entity.creator)"
+                                class="d-flex flex-row gap-2 align-items-center"
+                            >
+                                <a
+                                    href="#"
+                                    @click.prevent="showUserInfo(getUserBy(state.entity.creator))"
+                                >
+                                    <span
+                                        class="badge bg-primary bg-opacity-75 pe-3"
+                                        :class="{ 'bg-primary': state.entity.creator != userId(), 'bg-success': state.entity.creator == userId() }"
+                                    >
+                                        {{ getUserBy(state.entity.creator).name }}
+                                    </span>
+                                    <user-avatar
+                                        :user="getUserBy(state.entity.creator)"
+                                        :size="20"
+                                        class="align-middle ms-n2"
+                                    />
+                                </a>
+                            </div>
+                            <span v-else>
+                                Fetching…
+                            </span>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">
+                                {{ t('global.editors') }}
+                            </h5>
+                            <div
+                                v-if="state.entity.editors"
+                                class="d-flex flex-row gap-2 align-items-center"
+                            >
+                                <a
+                                    v-for="h in state.entity.editors"
+                                    :key="h.user_id"
+                                    href="#"
+                                    @click.prevent="showUserInfo(getUserBy(h.user_id))"
+                                >
+                                    <span
+                                        class="badge bg-opacity-75 pe-3"
+                                        :class="{ 'bg-warning': h.user_id == state.entity.creator && h.user_id != userId(), 'bg-primary': h.user_id != state.entity.creator && h.user_id != userId(), 'bg-success': h.user_id == userId() }"
+                                    >
+                                        {{ getUserBy(h.user_id).name }}
+                                    </span>
+                                    <user-avatar
+                                        :user="getUserBy(h.user_id)"
+                                        :size="20"
+                                        class="align-middle ms-n2"
+                                    />
+                                </a>
+                            </div>
+                            <span v-else>
+                                Fetching…
+                            </span>
+                        </div>
+                        <div v-if="state.entity.metadata">
+                            <h5 class="mb-1">
+                                {{ t('global.licence') }}
+                            </h5>
+                            <input
+                                v-model="state.entityMetadata.licence"
+                                type="text"
+                                class="form-control"
+                                placeholder="CC-BY 4.0, ..."
+                            >
+                        </div>
+                    </div>
+                    <form>
+                        <div>
+                            <label
+                                for="entity-metadata-summary"
+                                class="form-label mb-1"
+                            >
+                                <h5 class="mb-0">
+                                    {{ t('global.summary') }}
+                                </h5>
+                            </label>
+                            <richtext
+                                id="entity-metadata-summary"
+                                :ref="el => rtRef = el"
+                                :value="state.entityMetadata.summary"
+                                @change="updateEntitySummary"
+                            />
+                        </div>
+                    </form>
+                    <hr>
+                    <div class="overflow-hidden d-flex flex-column">
+                        <div class="d-flex flex-row gap-2">
+                            <h5 class="mb-1">
+                                {{ t('main.history.title') }}
+                            </h5>
+                            <span
+                                v-if="state.historyPagination"
+                                class="fw-light"
+                            >
+                                {{ t('global.list.stats', {
+                                    from: state.historyPagination.from,
+                                    to: state.historyPagination.to,
+                                    total: state.historyPagination.total,
+                                }) }}
+                            </span>
+                        </div>
+                        <ul
+                            v-if="state.entity.history"
+                            v-infinite-scroll="fetchHistory"
+                            class="list-group pe-2 overflow-auto"
+                            :infinite-scroll-disabled="state.allHistoryFetched"
+                            infinite-scroll-delay="200"
+                            infinite-scroll-offset="100"
+                        >
+                            <li
+                                v-for="entry in state.entity.history"
+                                :key="`entity-history-entry-${entry.id}`"
+                                class="list-group-item d-flex flex-row gap-3 align-items-center"
+                            >
+                                <span :title="entry.description">
+                                    <span v-if="entry.description == 'created'">
+                                        <i class="fas fa-fw fa-plus text-success" />
+                                    </span>
+                                    <span v-else-if="entry.description == 'updated'">
+                                        <i class="fas fa-fw fa-edit text-warning" />
+                                    </span>
+                                </span>
+                                <div class="flex-grow-1">
+                                    <template v-if="entry.subject_type == 'App\\Entity'">
+                                        <div v-if="entry.description == 'created'">
+                                            <div class="d-flex flex-row gap-2 align-items-center">
+                                                <span class="fw-bold">
+                                                    {{ t('main.history.created_as') }}
+                                                </span>
+                                                <span class="badge bg-primary bg-opacity-75">
+                                                    {{ entry.properties.attributes.name }}
+                                                </span>
+                                                <div class="d-flex flex-row">
+                                                    (
+                                                    <entity-type-label
+                                                        :type="entry.properties.attributes.entity_type_id"
+                                                        :icon-only="false"
+                                                    />
+                                                    )
+                                                </div>
+                                            </div>
+                                            <div
+                                                v-if="entry.properties.attributes.root_entity_id"
+                                                class="d-flex flex-row gap-2 align-items-center"
+                                            >
+                                                <span class="fw-bold">
+                                                    {{ t('main.history.entity.created_in') }}
+                                                </span>
+                                                <router-link
+                                                    class="link-underline link-underline-opacity-0 link-underline-opacity-100-hover"
+                                                    :to="{ name: 'entitydetail', params: { id: entry.properties.attributes.root_entity_id }, query: route.query }"
+                                                    append
+                                                >
+                                                    {{ getEntity(entry.properties.attributes.root_entity_id).name }}
+                                                </router-link>
+                                            </div>
+                                        </div>
+                                        <div
+                                            v-else-if="entry.description == 'updated'"
+                                            class="d-flex flex-column align-items-start gap-2"
+                                        >
+                                            <div
+                                                v-if="entry.properties.old.name && entry.properties.attributes.name"
+                                                class="d-flex flex-row gap-2 align-items-center"
+                                            >
+                                                <span class="fw-bold">
+                                                    {{ t('main.history.entity.name_update') }}
+                                                </span>
+                                                <span class="badge bg-danger bg-opacity-75">
+                                                    {{ entry.properties.old.name }}
+                                                </span>
+                                                <i class="fas fa-fw fa-2xs fa-arrow-right" />
+                                                <span class="badge bg-success bg-opacity-75">
+                                                    {{ entry.properties.attributes.name }}
+                                                </span>
+                                            </div>
+                                            <div
+                                                v-else-if="(entry.properties.old.root_entity_id || entry.properties.old.rank) && entry.properties.attributes.root_entity_id || entry.properties.attributes.rank"
+                                                class="d-flex flex-row gap-2 align-items-center"
+                                            >
+                                                <span class="fw-bold">
+                                                    {{ t('main.history.entity.moved') }}
+                                                </span>
+                                                <span class="badge bg-danger bg-opacity-75">
+                                                    <template v-if="entry.properties.old.root_entity_id">
+                                                        <span v-if="getEntity(entry.properties.old.root_entity_id).name">
+                                                            {{ getEntity(entry.properties.old.root_entity_id).name }}
+                                                        </span>
+                                                        <span
+                                                            v-else
+                                                            class="fst-italic"
+                                                            :title="t('main.history.entity.name_unknown_info')"
+                                                        >
+                                                            {{ t('main.history.entity.name_unknown') }}
+                                                        </span>
+                                                    </template>
+                                                    <span v-else>
+                                                        {{ t('main.entity.top_level') }}
+                                                    </span>
+                                                    |
+                                                    <span :title="t('main.history.entity.rank')">
+                                                        {{ entry.properties.old.rank }}
+                                                    </span>
+                                                </span>
+                                                <i class="fas fa-fw fa-2xs fa-arrow-right" />
+                                                <span class="badge bg-success bg-opacity-75">
+                                                    <template v-if="entry.properties.attributes.root_entity_id">
+                                                        <span
+                                                            v-if="getEntity(entry.properties.attributes.root_entity_id).name"
+                                                        >
+                                                            {{ getEntity(entry.properties.attributes.root_entity_id).name }}
+                                                        </span>
+                                                        <span
+                                                            v-else
+                                                            class="fst-italic"
+                                                            :title="t('main.history.entity.name_unknown_info')"
+                                                        >
+                                                            {{ t('main.history.entity.name_unknown') }}
+                                                        </span>
+                                                    </template>
+                                                    <span v-else>
+                                                        {{ t('main.entity.top_level') }}
+                                                    </span>
+                                                    |
+                                                    <span :title="t('main.history.entity.rank')">
+                                                        {{ entry.properties.attributes.rank }}
+                                                    </span>
+                                                </span>
+                                            </div>
+                                            <div v-else>
+                                                Something has changed...
+                                                {{ entry.properties }}
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <template v-else-if="entry.subject_type == 'attribute_values'">
+                                        <div v-if="entry.description == 'created'">
+                                            <span class="d-flex flex-row align-items-center gap-2">
+                                                <span class="fw-bold">
+                                                    {{ t('main.history.entity.value_add_attribute') }}
+                                                </span>
+                                                <span>
+                                                    {{ getAttributeName(entry.attribute.id) }}
+                                                </span>
+                                                <a
+                                                    href="#"
+                                                    class="text-reset"
+                                                    @click.prevent="state.showHistoryChange[entry.id] = !state.showHistoryChange[entry.id]"
+                                                >
+                                                    <span v-show="state.showHistoryChange[entry.id]">
+                                                        <i class="fas fa-fw fa-eye" />
+                                                    </span>
+                                                    <span v-show="!state.showHistoryChange[entry.id]">
+                                                        <i class="fas fa-fw fa-eye-slash" />
+                                                    </span>
+                                                </a>
+                                            </span>
+                                            <attribute-list
+                                                v-show="state.showHistoryChange[entry.id]"
+                                                :group="{ name: 'entity-history-created', pull: false, put: false }"
+                                                :classes="'mx-0 py-2 px-2 rounded-3 bg-primary bg-opacity-50'"
+                                                :attributes="formatHistoryEntryAttributes(entry.attribute)"
+                                                :values="formatHistoryEntryValue(entry.attribute, entry.value_after)"
+                                                :options="{ 'hide_labels': true, 'item_classes': 'px-0' }"
+                                                :selections="{}"
+                                                :preview="true"
+                                            />
+                                        </div>
+                                        <div v-else-if="entry.description == 'updated'">
+                                            <template
+                                                v-if="hasHistoryEntryKey(entry.properties.attributes, '!certainty') || hasHistoryEntryKey(entry.properties.old, '!certainty')"
+                                            >
+                                                <span class="d-flex flex-row align-items-center gap-2">
+                                                    <span class="fw-bold">
+                                                        {{ t('main.history.entity.value_update_attribute') }}
+                                                    </span>
+                                                    <span>
+                                                        {{ getAttributeName(entry.attribute.id) }}
+                                                    </span>
+                                                    <a
+                                                        href="#"
+                                                        class="text-reset"
+                                                        @click.prevent="state.showHistoryChange[entry.id] = !state.showHistoryChange[entry.id]"
+                                                    >
+                                                        <span v-show="state.showHistoryChange[entry.id]">
+                                                            <i class="fas fa-fw fa-eye" />
+                                                        </span>
+                                                        <span v-show="!state.showHistoryChange[entry.id]">
+                                                            <i class="fas fa-fw fa-eye-slash" />
+                                                        </span>
+                                                    </a>
+                                                </span>
+                                                <div
+                                                    v-if="state.showHistoryChange[entry.id]"
+                                                    class="d-flex flex-row gap-2 align-items-center"
+                                                >
+                                                    <attribute-list
+                                                        v-if="hasHistoryEntryKey(entry.properties.old, '!certainty')"
+                                                        :group="{ name: 'entity-history-changed-from', pull: false, put: false }"
+                                                        :classes="'flex-grow-1 mx-0 py-2 px-2 rounded-3 bg-danger bg-opacity-50'"
+                                                        :attributes="formatHistoryEntryAttributes(entry.attribute)"
+                                                        :values="formatHistoryEntryValue(entry.attribute, entry.value_before)"
+                                                        :options="{ 'hide_labels': true, 'item_classes': 'px-0' }"
+                                                        :selections="{}"
+                                                        :preview="true"
+                                                    />
+                                                    <span
+                                                        v-else
+                                                        class="badge bg-danger"
+                                                    >
+                                                        <span class="fst-italic">
+                                                            {{ t('main.history.no_value') }}
+                                                        </span>
+                                                    </span>
+                                                    <i class="fas fa-fw fa-arrow-right" />
+                                                    <attribute-list
+                                                        v-if="hasHistoryEntryKey(entry.properties.attributes, '!certainty')"
+                                                        :group="{ name: 'entity-history-changed-to', pull: false, put: false }"
+                                                        :classes="'flex-grow-1 mx-0 py-2 px-2 rounded-3 bg-success bg-opacity-50'"
+                                                        :attributes="formatHistoryEntryAttributes(entry.attribute)"
+                                                        :values="formatHistoryEntryValue(entry.attribute, entry.value_after)"
+                                                        :options="{ 'hide_labels': true, 'item_classes': 'px-0' }"
+                                                        :selections="{}"
+                                                        :preview="true"
+                                                    />
+                                                    <span
+                                                        v-else
+                                                        class="badge bg-danger"
+                                                    >
+                                                        <span class="fst-italic">
+                                                            {{ t('main.history.no_value') }}
+                                                        </span>
+                                                    </span>
+                                                </div>
+                                            </template>
+                                            <div
+                                                v-else
+                                                class="d-flex flex-row gap-2 align-items-center"
+                                            >
+                                                <span class="fw-bold">
+                                                    {{ t('main.history.entity.certainty_update') }}
+                                                </span>
+                                                <span>
+                                                    {{ getAttributeName(entry.attribute.id) }}
+                                                </span>
+                                                <div class="d-flex flex-row align-items-center gap-1">
+                                                    <span class="badge bg-danger bg-opacity-75">
+                                                        {{ entry.properties.old.certainty || t('main.history.entity.certainty_unknown') }}
+                                                    </span>
+                                                    <i class="fas fa-fw fa-xs fa-arrow-right" />
+                                                    <span class="badge bg-success bg-opacity-75">
+                                                        {{ entry.properties.attributes.certainty || t('main.history.entity.certainty_unknown') }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                                <div class="text-nowrap">
+                                    <span
+                                        class="badge bg-opacity-75 pe-3"
+                                        :class="{ 'bg-warning': entry.user_id == state.entity.creator && entry.user_id != userId(), 'bg-primary': entry.user_id != state.entity.creator && entry.user_id != userId(), 'bg-success': entry.user_id == userId() }"
+                                    >
+                                        {{ getUserBy(entry.user_id).name }}
+                                    </span>
+                                    <user-avatar
+                                        :user="getUserBy(entry.user_id)"
+                                        :size="20"
+                                        class="align-middle ms-n2"
+                                    />
+                                </div>
+                                <span
+                                    class="small ms-auto text-secondary text-nowrap"
+                                    :title="date(entry.created_at)"
+                                >
+                                    {{ ago(entry.created_at) }}
+                                </span>
+                            </li>
+                        </ul>
+                        <alert
+                            v-else
+                            :type="'info'"
+                            :message="'Entity history is only loaded on demand.'"
+                        >
+                            <template #addon>
+                                <button
+                                    type="button"
+                                    class="mt-3 btn btn-outline-secondary btn-sm"
+                                    @click="fetchHistory"
+                                >
+                                    Load History
+                                </button>
+                            </template>
+                        </alert>
+                    </div>
+                </div>
+            </div>
+            <div
+                v-show="can('comments_read')"
+                id="active-entity-comments-panel"
+                class="tab-pane fade h-100 active-entity-detail-panel"
+                role="tabpanel"
+            >
+                Test
+                <div
+                    v-if="state.entity.comments"
+                    class="mb-auto scroll-y-auto h-100 pe-2"
+                >
+                    <div
+                        v-if="state.commentsFetching"
+                        class="mt-2"
+                    >
+                        <alert
+                            class="mb-0"
+                            type="info"
+                            :message="t('global.comments.fetching')"
+                        />
+                    </div>
+                    <div
+                        v-else-if="state.commentFetchFailed"
+                        class="mt-2"
+                    >
                         <p class="alert alert-danger mb-0">
                             {{ t('global.comments.fetching_failed') }}
-                            <button type="button" class="d-block mt-2 btn btn-sm btn-outline-success" @click="fetchComments">
-                                <i class="fas fa-fw fa-sync"></i>
+                            <button
+                                type="button"
+                                class="d-block mt-2 btn btn-sm btn-outline-success"
+                                @click="fetchComments"
+                            >
+                                <i class="fas fa-fw fa-sync" />
                                 {{ t('global.comments.retry_failed') }}
                             </button>
                         </p>
@@ -161,15 +775,15 @@
                         :comments="state.entity.comments"
                         :hide-button="false"
                         :resource="state.resourceInfo"
-                        @added="addComment">
-                    </comment-list>
+                        @added="addComment"
+                    />
                 </div>
             </div>
         </div>
         <router-view
             v-if="state.attributesFetched"
-            :entity="state.entity">
-        </router-view>
+            :entity="state.entity"
+        />
     </div>
 </template>
 
@@ -183,7 +797,7 @@
         ref,
         watch,
     } from 'vue';
-    
+
     import {
         useRoute,
         onBeforeRouteLeave,
@@ -201,20 +815,31 @@
 
     import { useToast } from '@/plugins/toast.js';
 
-    import { date } from '@/helpers/filters.js';
+    import { ago, date } from '@/helpers/filters.js';
     import {
+        fetchEntityHistoryMetadata,
         getEntityComments,
+        getEntityHistory,
         patchAttributes,
         patchEntityName,
+        patchEntityMetadata,
     } from '@/api.js';
     import {
         can,
+        isModerated,
+        isArray,
+        userId,
         getAttribute,
+        getAttributeName,
+        getUserBy,
+        getEntity,
         getEntityColors,
         getEntityTypeName,
         getEntityTypeAttributeSelections,
         getEntityTypeDependencies,
+        getConcept,
         translateConcept,
+        _cloneDeep,
     } from '@/helpers/helpers.js';
     import {
         showDiscard,
@@ -222,6 +847,8 @@
         showUserInfo,
         canShowReferenceModal,
     } from '@/helpers/modal.js';
+
+    import { usePreventNavigation } from '@/helpers/form.js';
 
     export default {
         props: {
@@ -233,7 +860,7 @@
             onDelete: {
                 required: false,
                 type: Function,
-                default: () => {}
+                default: () => { }
             }
         },
         setup(props) {
@@ -249,7 +876,7 @@
             });
 
             // DATA
-            const attrRef = ref({});
+            const attrRefs = ref({});
             const state = reactive({
                 colorStyles: computed(_ => {
                     const colors = getEntityColors(state.entity.entity_type_id);
@@ -257,12 +884,28 @@
                         color: colors.backgroundColor
                     };
                 }),
-                formDirty: false,
+                formDirty: computed(_ => {
+                    for(let k in state.dirtyStates) {
+                        if(state.dirtyStates[k]) return true;
+                    }
+                    return false;
+                }),
+                dirtyStates: {},
+                attributeGrpHovered: null,
                 hiddenAttributes: {},
                 entityHeaderHovered: false,
                 editedEntityName: '',
+                entityMetadata: {},
+                showHistoryChange: {},
+                historyPagination: null,
+                allHistoryFetched: computed(_ => {
+                    if(!state.historyPagination) return false;
+
+                    return state.historyPagination.current_page == state.historyPagination.last_page;
+                }),
                 initFinished: false,
                 commentLoadingState: 'not',
+                metadataTabLoaded: false,
                 hiddenAttributeState: false,
                 attributesInTabs: true,
                 routeQuery: computed(_ => route.query),
@@ -282,7 +925,7 @@
                         state.entityAttributes.forEach(a => {
                             if(a.is_system && a.datatype == 'system-separator') {
                                 if(!a.pivot.metadata || !a.pivot.metadata.title) {
-                                    currentGroup = t(`main.entity.tabs.untitled_group`, {cnt: currentUnnamedGroupCntr});
+                                    currentGroup = t(`main.entity.tabs.untitled_group`, { cnt: currentUnnamedGroupCntr });
                                     currentUnnamedGroupCntr++;
                                 } else {
                                     currentGroup = translateConcept(a.pivot.metadata.title);
@@ -336,7 +979,7 @@
                     const keys = Object.keys(state.hiddenAttributes);
                     const values = Object.values(state.hiddenAttributes);
                     const list = [];
-                    for(let i=0; i<keys.length; i++) {
+                    for(let i = 0; i < keys.length; i++) {
                         if(values[i].hide && (!state.hiddenAttributes[values[i].by] || !state.hiddenAttributes[values[i].by].hide)) {
                             list.push(keys[i]);
                         }
@@ -350,7 +993,7 @@
                         const keys = Object.keys(state.hiddenAttributes);
                         const values = Object.values(state.hiddenAttributes);
                         const listGroups = {};
-                        for(let i=0; i<keys.length; i++) {
+                        for(let i = 0; i < keys.length; i++) {
                             const k = keys[i];
                             const v = values[i];
                             if(v.hide && (!state.hiddenAttributes[v.by] || !state.hiddenAttributes[v.by].hide)) {
@@ -365,7 +1008,7 @@
                             listing += `<span class="text-muted fw-light fs-6"># ${translateConcept(grpAttr.thesaurus_url)}</span>`;
                             listing += `<ol class="mb-0">`;
                             // const data = state.entity.data[keys[i]];
-                            for(let i=0; i<listGroups[k].length; i++) {
+                            for(let i = 0; i < listGroups[k].length; i++) {
                                 const attr = getAttribute(listGroups[k][i]);
                                 listing += `<li><span class="fw-bold">${translateConcept(attr.thesaurus_url)}</span></li>`;
                             }
@@ -400,7 +1043,20 @@
                 }),
             });
 
+            usePreventNavigation(_ => state.formDirty);
+
             // FUNCTIONS
+            const fetchMetadataTabData = _ => {
+                if(state.metadataTabLoaded) return;
+
+                fetchEntityHistoryMetadata(state.entity.id).then(data => {
+                    state.metadataTabLoaded = true;
+                    store.dispatch('updateEntityHistoryMetadata', {
+                        eid: state.entity.id,
+                        data: data,
+                    });
+                });
+            };
             const hasReferenceGroup = group => {
                 if(!state.entity.references) return false;
                 if(!Object.keys(state.entity.references).length) return false;
@@ -494,8 +1150,8 @@
             };
             const updateAllDependencies = _ => {
                 if(!state.entityAttributes) return;
-                
-                for(let i=0; i<state.entityAttributes.length; i++) {
+
+                for(let i = 0; i < state.entityAttributes.length; i++) {
                     const curr = state.entityAttributes[i];
                     updateDependencyState(curr.id, state.entity.data[curr.id].value);
                 }
@@ -528,29 +1184,134 @@
                 if(tab === 'comments') {
                     newTab = document.getElementById('active-entity-comments-tab');
                     newPanel = document.getElementById('active-entity-comments-panel');
-                    oldTabs = document.getElementsByClassName('active-entity-attributes-tab');
-                    oldPanels = document.getElementsByClassName('active-entity-attributes-panel');
                     if(!state.commentsFetched) {
                         fetchComments();
                     }
+                } else if(tab === 'metadata') {
+                    newTab = document.getElementById('active-entity-metadata-tab');
+                    newPanel = document.getElementById('active-entity-metadata-panel');
+                    fetchMetadataTabData();
                 } else {
                     newTab = document.getElementById(`active-entity-attributes-group-${tabId}-tab`);
                     newPanel = document.getElementById(`active-entity-attributes-panel-${tabId}`);
-                    oldTabs = document.getElementsByClassName('active-entity-detail-tab');
-                    oldPanels = document.getElementsByClassName('active-entity-detail-panel');
                 }
+                oldTabs = document.getElementsByClassName('active-entity-detail-tab');
+                oldPanels = document.getElementsByClassName('active-entity-detail-panel');
 
                 oldTabs.forEach(t => t.classList.remove('active'));
-                newTab.classList.add('active');
+                if(newTab) newTab.classList.add('active');
                 oldPanels.forEach(p => p.classList.remove('show', 'active'));
-                newPanel.classList.add('show', 'active');
+                if(newPanel) newPanel.classList.add('show', 'active');
             };
             const onEntityHeaderHover = hoverState => {
                 state.entityHeaderHovered = hoverState;
             };
-            const setFormState = e => {
-                state.formDirty = e.dirty && e.valid;
+            const updateEntitySummary = e => {
+                state.entityMetadata.summary = e.value;
+            };
+            const hasHistoryEntryKey = (entry, key) => {
+                // if starts with !, func checks if there is any other key than the one provided
+                if(key.startsWith('!')) {
+                    const searchKey = key.substr(1);
+                    const keys = Object.keys(entry);
+                    return !keys.includes(searchKey);
+                }
+
+                return !!entry[key];
+            };
+            const formatHistoryEntryValue = (attribute, value) => {
+                const compValue = {
+                    isDisabled: true,
+                };
+                if(attribute.datatype == 'string-sc') {
+                    compValue.value = {
+                        id: getConcept(value).id,
+                        concept_url: value,
+                    };
+                } else if(attribute.datatype == 'string-mc') {
+                    compValue.value = value;
+                } else if(attribute.datatype == 'entity') {
+                    compValue.value = value.id;
+                    compValue.name = value.name == 'main.entity.metadata.deleted_entity_name' ? t(value.name, {id: value.id}) : value.name;
+                } else if(attribute.datatype == 'entity-mc') {
+                    compValue.value = value.map(v => v.id);
+                    compValue.name = value.map(v => {
+                        return v.name == 'main.entity.metadata.deleted_entity_name' ? t(v.name, {id: v.id}) : v.name;
+                    });
+                } else {
+                    compValue.value = value;
+                }
+
+                return {
+                    [attribute.id]: compValue,
+                };
+            };
+            const formatHistoryEntryAttributes = attr => {
+                attr.isDisabled = true;
+                return [
+                    attr
+                ];
+            };
+            const showTabActions = (grp, status) => {
+                state.attributeGrpHovered = status ? grp : null;
+            };
+            const setFormState = (e, grp) => {
+                state.dirtyStates[grp] = e.dirty && e.valid;
                 updateDependencyState(e.attribute_id, e.value);
+            };
+            const getDirtyValues = grp => {
+                const list = grp ? grp.split(',') : Object.keys(attrRefs.value);
+                let values = {};
+                list.forEach(g => {
+                    values = {
+                        ...values,
+                        ...attrRefs.value[g].getDirtyValues(),
+                    };
+                });
+                return values;
+            };
+            const undirtyList = grp => {
+                const list = grp ? grp.split(',') : Object.keys(attrRefs.value);
+                list.forEach(g => {
+                    attrRefs.value[g].undirtyList();
+                });
+            };
+            const resetListValues = grp => {
+                const list = grp ? grp.split(',') : Object.keys(attrRefs.value);
+                list.forEach(g => {
+                    attrRefs.value[g].resetListValues();
+                });
+            };
+            const resetDirtyStates = grp => {
+                const list = grp ? grp.split(',') : Object.keys(attrRefs.value);
+                list.forEach(g => {
+                    state.dirtyStates[g] = false;
+                });
+            };
+            const fetchHistory = _ => {
+                // TODO history read permission?
+
+                let page = 1;
+                if(state.historyPagination) {
+                    page = state.historyPagination.current_page + 1;
+                }
+
+                getEntityHistory(state.entity.id, page).then(data => {
+                    delete data.data;
+                    const {
+                        from,
+                        ...pagination
+                    } = data;
+                    if(!state.historyPagination) {
+                        state.historyPagination = {
+                            from: from,
+                        };
+                    }
+                    state.historyPagination = {
+                        ...state.historyPagination,
+                        ...pagination,
+                    };
+                });
             };
             const fetchComments = _ => {
                 if(!can('comments_read')) return;
@@ -563,6 +1324,7 @@
                     state.commentLoadingState = 'failed';
                 });
             };
+
             const addComment = event => {
                 const comment = event.comment;
                 const replyTo = event.replyTo;
@@ -580,10 +1342,53 @@
                     state.entity.comments_count++;
                 }
             };
-            const saveEntity = _ => {
+            const saveMetadata = _ => {
+                const metadata = {};
+                for(let k in state.entityMetadata) {
+                    const upd = state.entityMetadata[k];
+                    const curr = state.entity.metadata[k];
+                    if(!curr || upd != curr) {
+                        metadata[k] = upd;
+                    }
+                }
+                patchEntityMetadata(state.entity.id, metadata).then(data => {
+                    store.dispatch('updateEntityMetadata', {
+                        eid: state.entity.id,
+                        data: data,
+                    });
+
+                    toast.$toast(
+                        t('main.entity.toasts.updated_metadata.msg', {
+                            name: data.name
+                        }),
+                        t('main.entity.toasts.updated_metadata.title'), {
+                        channel: 'success',
+                        autohide: true,
+                        icon: true,
+                    });
+                });
+            };
+
+            const handleSaveOnKey = (e, grp) => {
                 if(!can('entity_data_write')) return;
-                const dirtyValues = attrRef.value.getDirtyValues();
-                var patches = [];
+                if(e.altKey) return;
+
+                e.preventDefault();
+                if(e.shiftKey) {
+                    if(!state.formDirty) return;
+                    saveEntity();
+                } else {
+                    if(!state.dirtyStates[grp]) return;
+                    saveEntity(grp);
+                }
+            };
+
+            const saveEntity = grps => {
+                if(!can('entity_data_write')) return;
+
+                const dirtyValues = getDirtyValues(grps);
+                const patches = [];
+                const moderations = [];
 
                 for(let v in dirtyValues) {
                     const aid = v;
@@ -604,12 +1409,12 @@
                             // patch.value = getCleanValue(patch.value, entity.attributes);
                         } else {
                             // value is empty, therefore it is a remove
-                            patch.op = "remove";
+                            patch.op = 'remove';
                         }
                     } else {
                         // there has been no entry in the database before, therefore it is an add operation
                         if(dirtyValues[v] && dirtyValues[v] != '') {
-                            patch.op = "add";
+                            patch.op = 'add';
                             patch.value = dirtyValues[v];
                             // patch.value = getCleanValue(patch.value, entity.attributes);
                         } else {
@@ -618,21 +1423,32 @@
                         }
                     }
                     patches.push(patch);
+                    moderations.push(aid);
                 }
                 return patchAttributes(state.entity.id, patches).then(data => {
-                    state.formDirty = false;
-                    attrRef.value.undirtyList();
-                    store.dispatch('updateEntity', data);
+                    undirtyList(grps);
+                    store.dispatch('updateEntity', data.entity);
                     store.dispatch('updateEntityData', {
                         data: dirtyValues,
+                        new_data: data.added_attributes,
                         eid: state.entity.id,
                     });
+                    if(isModerated()) {
+                        store.dispatch('updateEntityDataModerations', {
+                            entity_id: state.entity.id,
+                            attribute_ids: moderations,
+                            state: 'pending',
+                        });
+                    }
+
+                    resetDirtyStates(grps);
 
                     toast.$toast(
                         t('main.entity.toasts.updated.msg', {
-                            name: data.name
+                            name: data.entity.name
                         }),
-                        t('main.entity.toasts.updated.title'), {
+                        t('main.entity.toasts.updated.title'),
+                        {
                             channel: 'success',
                             autohide: true,
                             icon: true,
@@ -643,34 +1459,35 @@
                     toast.$toast(
                         r.data.error,
                         `${r.status}: ${r.statusText}`, {
-                            channel: 'error',
-                            autohide: true,
-                            icon: true,
-                            duration: 5000,
-                        },
+                        channel: 'error',
+                        autohide: true,
+                        icon: true,
+                        duration: 5000,
+                    },
                     );
                 });
             };
-            const resetForm = _ => {
-                attrRef.value.resetListValues();
+            const resetForm = grps => {
+                resetListValues(grps);
+                resetDirtyStates(grps);
             };
-            const setAttrRef = el => {
-                attrRef.value = el;
-            }
+            const setAttrRefs = (el, grp) => {
+                attrRefs.value[grp] = el;
+            };
 
             // ON MOUNTED
             onMounted(_ => {
-                console.log("entity detail component mounted");
+                console.log('entity detail component mounted');
                 let hiddenAttrElem = document.getElementById('hidden-attributes-icon');
                 if(!!hiddenAttrElem) {
                     new Popover(hiddenAttrElem, {
-                        title: _ => t('main.entity.attributes.hidden', {cnt: state.hiddenAttributeCount}, state.hiddenAttributeCount),
+                        title: _ => t('main.entity.attributes.hidden', { cnt: state.hiddenAttributeCount }, state.hiddenAttributeCount),
                         content: state.hiddenAttributeListing,
                     });
                 }
             });
             onBeforeUpdate(_ => {
-                attrRef.value = {};
+                attrRefs.value = {};
                 state.commentLoadingState = 'not';
             });
 
@@ -680,7 +1497,7 @@
                         let hiddenAttrElem = document.getElementById('hidden-attributes-icon');
                         if(!!hiddenAttrElem) {
                             new Popover(hiddenAttrElem, {
-                                title: _ => t('main.entity.attributes.hidden', {cnt: state.hiddenAttributeCount}, state.hiddenAttributeCount),
+                                title: _ => t('main.entity.attributes.hidden', { cnt: state.hiddenAttributeCount }, state.hiddenAttributeCount),
                                 content: state.hiddenAttributeListing,
                             });
                         }
@@ -705,8 +1522,18 @@
                 async (newValue, oldValue) => {
                     if(!newValue || !newValue.id) return;
 
+                    state.entityMetadata = _cloneDeep(state.entity.metadata);
+                    if(isArray(state.entityMetadata)) {
+                        state.entityMetadata = {};
+                    }
+
                     nextTick(_ => {
                         setDetailPanelView(route.query.view);
+
+                        const currUrlParam = route.query?.view;
+                        if(currUrlParam == 'metadata') {
+                            fetchMetadataTabData();
+                        }
                     });
                 }
             );
@@ -725,7 +1552,7 @@
             // ON BEFORE LEAVE
             onBeforeRouteLeave(async (to, from) => {
                 if(state.formDirty) {
-                    showDiscard(to, _ => state.formDirty = false, saveEntity);
+                    showDiscard(to, resetDirtyStates, saveEntity);
                     return false;
                 } else {
                     store.dispatch('resetEntity');
@@ -735,10 +1562,11 @@
             onBeforeRouteUpdate(async (to, from) => {
                 if(to.params.id !== route.params.id) {
                     if(state.formDirty) {
-                        showDiscard(to, _ => state.formDirty = false, saveEntity);
+                        showDiscard(to, resetDirtyStates, saveEntity);
                         return false;
                     } else {
                         state.hiddenAttributes = {};
+                        state.metadataTabLoaded = false;
                         // store.dispatch('resetEntity');
                         return true;
                     }
@@ -751,13 +1579,19 @@
             // RETURN
             return {
                 t,
+                route,
                 // HELPERS
                 can,
+                ago,
                 date,
+                userId,
+                getUserBy,
                 showUserInfo,
+                getAttributeName,
                 getEntityTypeName,
                 getEntityColors,
                 translateConcept,
+                getEntity,
                 // LOCAL
                 hasReferenceGroup,
                 showMetadata,
@@ -769,106 +1603,24 @@
                 confirmDeleteEntity,
                 setDetailPanel,
                 onEntityHeaderHover,
+                updateEntitySummary,
+                hasHistoryEntryKey,
+                formatHistoryEntryValue,
+                formatHistoryEntryAttributes,
+                showTabActions,
                 setFormState,
+                fetchHistory,
+                fetchComments,
                 addComment,
+                saveMetadata,
+                handleSaveOnKey,
                 saveEntity,
                 resetForm,
-                setAttrRef,
+                setAttrRefs,
                 // STATE
-                attrRef,
+                attrRefs,
                 state,
             };
         }
-    //     methods: {
-    //         getEntityData(entity) {
-    //             this.dataLoaded = false;
-    //             if(!this.$can('view_concept_props')) {
-    //                 Vue.set(this.selectedEntity, 'data', {});
-    //                 Vue.set(this.selectedEntity, 'attributes', []);
-    //                 Vue.set(this.selectedEntity, 'selections', {});
-    //                 Vue.set(this.selectedEntity, 'dependencies', []);
-    //                 Vue.set(this.selectedEntity, 'references', []);
-    //                 Vue.set(this.selectedEntity, 'comments', []);
-    //                 Vue.set(this, 'dataLoaded', true);
-    //                 return new Promise(r => r(null));
-    //             }
-    //             if(!this.selectedEntity.comments || this.selectedEntity.comments_count === 0) {
-    //                 Vue.set(this.selectedEntity, 'comments', []);
-    //             }
-    //             const cid = entity.id;
-    //             const ctid = entity.entity_type_id;
-    //             return $httpQueue.add(() => $http.get(`/entity/${cid}/data`).then(response => {
-    //                 // if result is empty, php returns [] instead of {}
-    //                 if(response.data instanceof Array) {
-    //                     response.data = {};
-    //                 }
-    //                 Vue.set(this.selectedEntity, 'data', response.data);
-    //                 return $http.get(`/editor/entity_type/${ctid}/attribute`);
-    //             }).then(response => {
-    //                 this.selectedEntity.attributes = [];
-    //                 let data = response.data;
-    //                 for(let i=0; i<data.attributes.length; i++) {
-    //                     let aid = data.attributes[i].id;
-    //                     if(!this.selectedEntity.data[aid]) {
-    //                         let val = {};
-    //                         switch(data.attributes[i].datatype) {
-    //                             case 'dimension':
-    //                             case 'epoch':
-    //                             case 'timeperiod':
-    //                                 val.value = {};
-    //                                 break;
-    //                             case 'table':
-    //                             case 'list':
-    //                                 val.value = [];
-    //                                 break;
-    //                         }
-    //                         Vue.set(this.selectedEntity.data, aid, val);
-    //                     } else {
-    //                         const val = this.selectedEntity.data[aid].value;
-    //                         switch(data.attributes[i].datatype) {
-    //                             case 'date':
-    //                                 const dtVal = new Date(val);
-    //                                 this.selectedEntity.data[aid].value = dtVal;
-    //                                 break;
-    //                         }
-    //                     }
-    //                     this.selectedEntity.attributes.push(data.attributes[i]);
-    //                 }
-    //                 // if result is empty, php returns [] instead of {}
-    //                 if(data.selections instanceof Array) {
-    //                     data.selections = {};
-    //                 }
-    //                 if(data.dependencies instanceof Array) {
-    //                     data.dependencies = {};
-    //                 }
-    //                 Vue.set(this.selectedEntity, 'selections', data.selections);
-    //                 Vue.set(this.selectedEntity, 'dependencies', data.dependencies);
-
-    //                 const aid = this.$route.params.aid;
-    //                 this.setReferenceAttribute(aid);
-    //                 Vue.set(this, 'dataLoaded', true);
-    //                 this.setEntityView();
-    //             }));
-    //         },
-    //         dependencyInfoHoverOver(event) {
-    //             if(this.dependencyInfoHovered) {
-    //                 return;
-    //             }
-    //             this.dependencyInfoHovered = true;
-    //             $('#dependency-info').popover({
-    //                 placement: 'bottom',
-    //                 animation: true,
-    //                 html: false,
-    //                 content: this.$tc('main.entity.attributes.hidden', this.hiddenAttributes, {
-    //                     cnt: this.hiddenAttributes
-    //                 })
-    //             });
-    //             $('#dependency-info').popover('show');
-    //         },
-    //         dependencyInfoHoverOut(event) {
-    //             this.dependencyInfoHovered = false;
-    //             $('#dependency-info').popover('dispose');
-    //         },
-    //     },
-    }
+    };
 </script>

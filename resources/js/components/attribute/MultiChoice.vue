@@ -1,25 +1,37 @@
 <template>
     <multiselect
-        :valueProp="'id'"
+        v-model="v.value"
+        :value-prop="'id'"
         :label="'concept_url'"
         :track-by="'concept_url'"
         :object="true"
         :mode="'tags'"
         :disabled="disabled"
-        :options="selections"
+        :options="state.filteredSelections"
         :name="name"
-        :closeOnSelect="false"
+        :searchable="true"
+        :filter-results="false"
+        :close-on-select="false"
         :placeholder="t('global.select.placeholder')"
-        v-model="v.value"
-        @change="value => v.handleChange(value)">
-        <template v-slot:option="{ option }">
+        @change="v.handleChange"
+        @search-change="setSearchQuery"
+    >
+        <template #option="{ option }">
             {{ translateConcept(option.concept_url) }}
         </template>
-        <template v-slot:tag="{ option, handleTagRemove, disabled }">
-            <div class="multiselect-tag">
+        <template #tag="{ option, handleTagRemove, disabled: tagDisabled }">
+            <div
+                class="multiselect-tag"
+                :class="{'pe-2': tagDisabled}"
+            >
                 {{ translateConcept(option.concept_url) }}
-                <span v-if="!disabled" class="multiselect-tag-remove" @click.prevent @mousedown.prevent.stop="handleTagRemove(option, $event)">
-                    <span class="multiselect-tag-remove-icon"></span>
+                <span
+                    v-if="!tagDisabled"
+                    class="multiselect-tag-remove"
+                    @click.prevent
+                    @mousedown.prevent.stop="handleTagRemove(option, $event)"
+                >
+                    <span class="multiselect-tag-remove-icon" />
                 </span>
             </div>
         </template>
@@ -28,6 +40,7 @@
 
 <script>
     import {
+        computed,
         reactive,
         toRefs,
         watch,
@@ -55,14 +68,18 @@
                 default: false,
             },
             value: {
-                type: Object,
+                type: Array,
                 required: true,
+                default: _ => [],
             },
             selections: {
                 type: Array,
                 required: true,
             },
         },
+        emits: [
+            'change',
+        ],
         setup(props, context) {
             const { t } = useI18n();
             const {
@@ -85,6 +102,10 @@
                 });
             };
 
+            const setSearchQuery = query => {
+                state.query = query ? query.toLowerCase().trim() : null;
+            };
+
             // DATA
             const {
                 handleChange,
@@ -95,7 +116,14 @@
                 initialValue: value.value,
             });
             const state = reactive({
+                query: null,
+                filteredSelections: computed(_ => {
+                    if(!state.query) return selections.value;
 
+                    return selections.value.filter(concept => {
+                        return concept.concept_url.toLowerCase().indexOf(state.query) !== -1 || translateConcept(concept.concept_url).toLowerCase().indexOf(state.query) !== -1;
+                    });
+                }),
             });
             const v = reactive({
                 value: fieldValue,
@@ -104,6 +132,9 @@
                 resetField,
             });
 
+            watch(_ => value, (newValue, oldValue) => {
+                resetFieldState();
+            });
             watch(v.meta, (newValue, oldValue) => {
                 context.emit('change', {
                     dirty: v.meta.dirty,
@@ -120,10 +151,7 @@
                 // LOCAL
                 resetFieldState,
                 undirtyField,
-                // PROPS
-                name,
-                disabled,
-                selections,
+                setSearchQuery,
                 // STATE
                 state,
                 v,

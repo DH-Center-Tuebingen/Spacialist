@@ -4,7 +4,7 @@ export function $validateObject(value) {
     // or an empty array
     // (empty assoc arrays are simple arrays in php)
     return typeof value == 'object' || (typeof value == 'array' && value.length == 0);
-};
+}
 
 export function isValidOrcid(oid) {
     if(oid === '') {
@@ -25,4 +25,4 @@ export function isValidOrcid(oid) {
     let chk = (12 - (tot % 11)) % 11;
     if(chk == 10) chk = 'X';
     return oid[oid.length-1].toUpperCase() == chk;
-};
+}

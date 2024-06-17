@@ -1,13 +1,13 @@
 <template>
     <div>
         <span v-show="state.hasUnknownState">
-            <i class="fas fa-fw fa-minus"></i>
+            <i class="fas fa-fw fa-minus" />
         </span>
         <span v-show="state.hasAcceptState">
-            <i class="fas fa-fw fa-check"></i>
+            <i class="fas fa-fw fa-check" />
         </span>
         <span v-show="state.hasNonAcceptState">
-            <i class="fas fa-fw fa-ban"></i>
+            <i class="fas fa-fw fa-ban" />
         </span>
     </div>
 </template>
@@ -43,8 +43,6 @@
             // RETURN
             return {
                 // HELPERS
-                // PROPS
-                status,
                 // LOCAL
                 // STATE
                 state,

@@ -1,27 +1,56 @@
 <template>
     <div>
         <div class="input-group">
-            <button type="button" class="btn btn-outline-secondary" :disabled="disabled" @click="toggleList()">
+            <button
+                type="button"
+                class="btn btn-outline-secondary"
+                :disabled="disabled"
+                @click="toggleList()"
+            >
                 <div v-show="!state.expanded">
-                    <i class="fas fa-fw fa-caret-up"></i>
+                    <i class="fas fa-fw fa-caret-up" />
                     <span v-if="v.value.length">
                         ({{ v.value.length }})
                     </span>
                 </div>
                 <div v-show="state.expanded">
-                    <i class="fas fa-fw fa-caret-down"></i>
+                    <i class="fas fa-fw fa-caret-down" />
                 </div>
             </button>
-            <input type="text" class="form-control" :disabled="disabled" v-model="state.input" />
-            <button type="button" class="btn btn-outline-success" @click="addListEntry()">
-                <i class="fas fa-fw fa-plus"></i>
+            <input
+                v-model="state.input"
+                type="text"
+                class="form-control"
+                :disabled="disabled"
+                @keydown.enter="addListEntry()"
+            >
+            <button
+                v-if="!disabled"
+                type="button"
+                class="btn btn-outline-success"
+                :disabled="!state.valid"
+                @click="addListEntry()"
+            >
+                <i class="fas fa-fw fa-plus" />
             </button>
         </div>
-        <ol class="mt-2 mb-0" v-if="state.expanded && v.value.length">
-            <li v-for="(l, i) in v.value" :key="i">
-                <span v-html="createAnchorFromUrl(l)"></span>
-                <a href="#" class="text-danger" @click.prevent="removeListEntry(i)">
-                    <i class="fas fa-fw fa-trash"></i>
+        <ol
+            v-if="state.expanded && v.value.length"
+            class="mt-2 mb-0"
+        >
+            <li
+                v-for="(l, i) in v.value"
+                :key="i"
+            >
+                <!-- eslint-disable-next-line vue/no-v-html -->
+                <span v-html="createAnchorFromUrl(l)" />
+                <a
+                    v-if="!disabled"
+                    href="#"
+                    class="text-danger"
+                    @click.prevent="removeListEntry(i)"
+                >
+                    <i class="fas fa-fw fa-trash" />
                 </a>
             </li>
         </ol>
@@ -30,6 +59,7 @@
 
 <script>
     import {
+        computed,
         reactive,
         toRefs,
         watch,
@@ -43,7 +73,11 @@
 
     export default {
         props: {
-            name: String,
+            name:{ 
+                type: String, 
+                required: false, 
+                default: null
+            },
             entries: {
                 type: Array,
                 default: _ => new Array(),
@@ -56,17 +90,17 @@
         setup(props, context) {
             const { t } = useI18n();
             const {
-                name,
                 entries,
-                disabled,
             } = toRefs(props);
             // FETCH
 
             // FUNCTIONS
             const addListEntry = _ => {
+                if(!state.valid) return;
                 v.value.push(state.input);
                 v.meta.dirty = true;
                 state.input = '';
+                v.meta.validated = true;
             };
             const removeListEntry = index => {
                 v.value.splice(index, 1);
@@ -79,11 +113,13 @@
                 v.value = state.initialValue.slice();
                 v.meta.dirty = false;
                 v.meta.valid = true;
+                v.meta.validated = false;
             };
             const undirtyField = _ => {
                 state.initialValue = entries.value.slice();
                 v.meta.dirty = false;
                 v.meta.valid = true;
+                v.meta.validated = false;
             };
 
             // DATA
@@ -91,24 +127,30 @@
                 input: '',
                 initialValue: entries.value.slice(),
                 expanded: false,
+                valid: computed(_ => !!state.input),
             });
             const v = reactive({
                 meta:{
                     dirty: false,
                     valid: true,
+                    validated: false,
                 },
                 value: entries.value.slice(),
             });
 
-            watch(v.meta, (newValue, oldValue) => {
+            watch(_ => [v.meta.dirty, v.meta.valid], ([newDirty, newValid], [oldDirty, oldValid]) => {
+                // only emit @change event if field is validated (required because Entity.vue components)
+                // trigger this watcher several times even if another component is updated/validated
+                if(!v.meta.validated) return;
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
                     value: v.value,
                 });
             });
-            watch(entries, (newValue, oldValue) => {
+            watch(_ => entries, (newValue, oldValue) => {
                 state.initialValue = newValue.slice();
+                resetFieldState();
             });
 
             // RETURN
@@ -122,9 +164,6 @@
                 toggleList,
                 resetFieldState,
                 undirtyField,
-                // PROPS
-                name,
-                disabled,
                 // STATE
                 state,
                 v,

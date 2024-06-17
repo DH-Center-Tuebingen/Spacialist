@@ -48,7 +48,16 @@ instance.interceptors.response.use(response => {
 
 export function useHttp() {
     return instance;
-};
+}
+
+export const open = axios.create();
+
+open.defaults.baseURL = 'api/v1/open';
+open.defaults.withCredentials = false;
+
+export function useOpenHttp() {
+    return open;
+}
 
 export const external = axios.create({
     headers: {

@@ -1,11 +1,12 @@
 <template>
     <input
+        :id="name"
         class="form-control-plaintext"
         type="text"
         readonly
-        :id="name"
         :name="name"
-        :value="value" />
+        :value="value"
+    >
 </template>
 
 <script>
@@ -47,12 +48,6 @@
 
             // RETURN
             return {
-                // HELPERS
-                // LOCAL
-                // PROPS
-                name,
-                disabled,
-                value,
                 // STATE
                 state,
             }

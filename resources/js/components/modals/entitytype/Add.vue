@@ -2,36 +2,62 @@
     <vue-final-modal
         class="modal-container modal"
         content-class="sp-modal-content sp-modal-content-sm"
-        name="delete-entity-type-modal">
+        name="delete-entity-type-modal"
+    >
         <div class="sp-modal-content sp-modal-content-sm">
             <div class="modal-header">
                 <h5 class="modal-title">
                     {{ t('main.datamodel.entity.modal.new.title') }}
                 </h5>
-                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-                </button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                />
             </div>
             <div class="modal-body nonscrollable">
-                <form name="newEntityTypeForm" id="newEntityTypeForm" role="form" @submit.prevent="add()">
+                <form
+                    id="newEntityTypeForm"
+                    name="newEntityTypeForm"
+                    role="form"
+                    @submit.prevent="add()"
+                >
                     <div class="mb-3">
-                        <label class="col-form-label col-md-3" for="name">
+                        <label
+                            class="col-form-label col-md-3"
+                            for="name"
+                        >
                             {{ t('global.label') }}:
                         </label>
                         <div class="col-md-9">
                             <simple-search
                                 :endpoint="searchLabel"
                                 :key-fn="getConceptLabel"
-                                @selected="labelSelected" />
+                                @selected="labelSelected"
+                            />
                         </div>
                     </div>
                     <div class="form-check form-switch mb-3">
-                        <input type="checkbox" class="form-check-input" id="isRoot" v-model="state.entityType.is_root" />
-                        <label class="form-check-label" for="isRoot">
+                        <input
+                            id="isRoot"
+                            v-model="state.entityType.is_root"
+                            type="checkbox"
+                            class="form-check-input"
+                        >
+                        <label
+                            class="form-check-label"
+                            for="isRoot"
+                        >
                             {{ t('main.datamodel.detail.properties.top_level') }}
                         </label>
                     </div>
                     <div class="mb-3">
-                        <label class="col-form-label col-md-3" for="name">
+                        <label
+                            class="col-form-label col-md-3"
+                            for="name"
+                        >
                             {{ t('global.geometry_type') }}:
                         </label>
                         <div class="col-md-9">
@@ -42,21 +68,31 @@
                                 :object="true"
                                 :label="'label'"
                                 :track-by="'key'"
-                                :valueProp="'key'"
+                                :value-prop="'key'"
                                 :mode="'single'"
                                 :options="state.availableGeometryTypes"
-                                :placeholder="t('global.select.placeholder')">
-                            </multiselect>
+                                :placeholder="t('global.select.placeholder')"
+                            />
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-outline-success" form="newEntityTypeForm" :disabled="state.dataMissing">
-                    <i class="fas fa-fw fa-plus"></i> {{ t('global.add') }}
+                <button
+                    type="submit"
+                    class="btn btn-outline-success"
+                    form="newEntityTypeForm"
+                    :disabled="state.dataMissing"
+                >
+                    <i class="fas fa-fw fa-plus" /> {{ t('global.add') }}
                 </button>
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                    <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                >
+                    <i class="fas fa-fw fa-times" /> {{ t('global.cancel') }}
                 </button>
             </div>
         </div>

@@ -17,3 +17,8 @@
 .multiselect-option {
   --ms-option-bg-selected: #{$green};
 }
+
+// User list tag item
+.multiselect-tag-user {
+  background-color: rgba(16, 185, 129, var(--bs-bg-opacity, 1));
+}

@@ -1,8 +1,15 @@
 <template>
     <div class="row">
-        <label class="col-md-2 form-label"></label>
+        <label class="col-md-2 form-label" />
         <div class="col-md-10">
-            <input class="form-control" type="text" v-model="data" :readonly="readonly" @input="onChange" />
+            <input
+                :value="data"
+                class="form-control"
+                type="text"
+                :readonly="readonly"
+                :disabled="readonly"
+                @input="onChange"
+            >
         </div>
     </div>
 </template>
@@ -38,9 +45,7 @@
             // FUNCTIONS
             const onChange = _debounce(e => {
                 if(readonly.value) return;
-                context.emit('changed', {
-                    value: e.target.value
-                });
+                context.emit('changed', e.target.value);
             }, 250);
 
             // DATA
@@ -49,9 +54,6 @@
             return {
                 // LOCAL
                 onChange,
-                // PROPS
-                data,
-                readonly,
                 // STATE
             };
         }

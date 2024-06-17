@@ -2,7 +2,8 @@
     <vue-final-modal
         class="modal-container modal"
         content-class="sp-modal-content sp-modal-content-sm"
-        name="edit-attribute-modal">
+        name="edit-attribute-modal"
+    >
         <div class="sp-modal-content sp-modal-content-sm">
             <div class="modal-header">
                 <h5 class="modal-title">
@@ -12,8 +13,13 @@
                         })
                     }}
                 </h5>
-                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-                </button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                />
             </div>
             <div class="modal-body nonscrollable">
                 <div class="row">
@@ -24,17 +30,27 @@
                         <simple-search
                             :endpoint="searchLabel"
                             :key-fn="getConceptLabel"
-                            @selected="handleSeparatorRename" />
+                            @selected="handleSeparatorRename"
+                        />
                     </div>
-                    {{ state.title }}
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-outline-success" :disabled="!state.isValid" @click="confirmEdit()">
-                    <i class="fas fa-fw fa-save"></i> {{ t('global.update') }}
+                <button
+                    type="submit"
+                    class="btn btn-outline-success"
+                    :disabled="!state.isValid"
+                    @click="confirmEdit()"
+                >
+                    <i class="fas fa-fw fa-save" /> {{ t('global.update') }}
                 </button>
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                    <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                >
+                    <i class="fas fa-fw fa-times" /> {{ t('global.cancel') }}
                 </button>
             </div>
         </div>

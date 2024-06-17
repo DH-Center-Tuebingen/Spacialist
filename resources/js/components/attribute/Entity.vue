@@ -1,13 +1,19 @@
 <template>
     <simple-search
-        :endpoint="searchEntity"
+        :endpoint="searchWrapper"
         :key-text="'name'"
         :chain="'ancestors'"
         :mode="state.mode"
         :default-value="v.fieldValue"
+        :disabled="disabled"
         @selected="e => entitySelected(e)"
-        @entry-click="e => entryClicked(e)" />
-    <router-link v-if="!multiple && v.value" :to="{name: 'entitydetail', params: {id: v.fieldValue.id}, query: state.query}" class="btn btn-outline-secondary btn-sm mt-2">
+        @entry-click="e => entryClicked(e)"
+    />
+    <router-link
+        v-if="!hideLink && !multiple && v.value"
+        :to="{name: 'entitydetail', params: {id: v.fieldValue.id}, query: state.query}" 
+        class="btn btn-outline-secondary btn-sm mt-2"
+    >
         {{ t('main.entity.attributes.entity.go_to', {name: v.fieldValue.name}) }}
     </router-link>
 </template>
@@ -33,7 +39,7 @@
     import router from '@/bootstrap/router.js';
 
     import {
-        searchEntity,
+        searchEntityInTypes,
     } from '@/api.js';
 
     export default {
@@ -52,9 +58,19 @@
                 required: false,
                 default: false,
             },
+            hideLink: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
             value: {
                 type: Object,
                 required: true,
+            },
+            searchIn: {
+                type: Array,
+                required: false,
+                default: _ => [],
             },
         },
         emits: ['change'],
@@ -65,7 +81,9 @@
                 name,
                 multiple,
                 disabled,
+                hideLink,
                 value,
+                searchIn,
             } = toRefs(props);
             // FETCH
 
@@ -93,6 +111,8 @@
                 v.handleChange(data);
             };
             const entryClicked = e => {
+                if(hideLink.value) return;
+
                 router.push({
                     name: 'entitydetail',
                     params: {
@@ -103,7 +123,7 @@
             };
             const resetFieldState = _ => {
                 v.resetField({
-                    value: value.value
+                    value: value.value || (multiple.value ? [] : {})
                 });
             };
             const undirtyField = _ => {
@@ -111,6 +131,7 @@
                     value: v.fieldValue,
                 });
             };
+            const searchWrapper = query => searchEntityInTypes(query, searchIn.value || []);
 
             // DATA
             const {
@@ -118,8 +139,8 @@
                 value: fieldValue,
                 meta,
                 resetField,
-            } = useField(`entity_${name.value}`, yup.mixed(), {
-                initialValue: value.value,
+            } = useField(`entity_${name.value}`, yup.mixed().nullable(), {
+                initialValue: value.value || (multiple.value ? [] : null),
             });
             const state = reactive({
                 query: computed(_ => route.query),
@@ -143,7 +164,14 @@
                 }),
             });
 
-            watch(v.meta, (newValue, oldValue) => {
+
+            watch(_ => value, (newValue, oldValue) => {
+                resetFieldState();
+            });
+            watch(_ => [v.meta.dirty, v.meta.valid], ([newDirty, newValid], [oldDirty, oldValid]) => {
+                // only emit @change event if field is validated (required because Entity.vue components)
+                // trigger this watcher several times even if another component is updated/validated
+                if(!v.meta.validated) return;
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
@@ -155,21 +183,17 @@
             return {
                 t,
                 // HELPERS
-                searchEntity,
                 // LOCAL
                 entitySelected,
                 entryClicked,
                 resetFieldState,
                 undirtyField,
+                searchWrapper,
                 // PROPS
-                name,
-                multiple,
-                disabled,
-                value,
                 // STATE
                 state,
                 v,
-            }
+            };
         },
-    }
+    };
 </script>

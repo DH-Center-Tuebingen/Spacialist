@@ -1,15 +1,55 @@
 <template>
     <div class="input-group">
-        <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="v.B.handleInput" v-model="v.B.value"/>
-            <span class="input-group-text">&times;</span>
-        <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="v.H.handleInput" v-model="v.H.value"/>
-            <span class="input-group-text">&times;</span>
-        <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="v.T.handleInput" v-model="v.T.value"/>
-        <button class="btn btn-outline-secondary  dropdown-toggle" :disabled="disabled" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <input
+            v-model="v.B.value"
+            type="number"
+            class="form-control text-center"
+            :disabled="disabled"
+            min="0"
+            max="9999"
+            step="0.01"
+            @input="v.B.handleInput"
+        >
+        <span class="input-group-text">&times;</span>
+        <input
+            v-model="v.H.value"
+            type="number"
+            class="form-control text-center"
+            :disabled="disabled"
+            min="0"
+            max="9999"
+            step="0.01"
+            @input="v.H.handleInput"
+        >
+        <span class="input-group-text">&times;</span>
+        <input
+            v-model="v.T.value"
+            type="number"
+            class="form-control text-center"
+            :disabled="disabled"
+            min="0"
+            max="9999"
+            step="0.01"
+            @input="v.T.handleInput"
+        >
+        <button
+            class="btn btn-outline-secondary  dropdown-toggle"
+            :disabled="disabled"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+        >
             {{ v.unit.value }}
         </button>
         <div class="dropdown-menu">
-            <a class="dropdown-item" href="#" v-for="(unit, i) in dimensionUnits" @click.prevent="setUnit(unit)" :key="i">
+            <a
+                v-for="(unit, i) in dimensionUnits"
+                :key="i"
+                class="dropdown-item"
+                href="#"
+                @click.prevent="setUnit(unit)"
+            >
                 {{ unit }}
             </a>
         </div>
@@ -30,7 +70,10 @@
 
     export default {
         props: {
-            name: String,
+            name: {
+                type: String,
+                required: true,
+            },
             value: {
                 type: Object,
                 default: _ => new Object(),
@@ -161,6 +204,10 @@
                 },
             });
 
+
+            watch(_ => value, (newValue, oldValue) => {
+                resetFieldState();
+            });
             watch(_ => v.meta, (newValue, oldValue) => {
                 context.emit('change', {
                     dirty: v.meta.dirty,
@@ -177,9 +224,6 @@
                 resetFieldState,
                 undirtyField,
                 setUnit,
-                // PROPS
-                name,
-                disabled,
                 // STATE
                 state,
                 v,

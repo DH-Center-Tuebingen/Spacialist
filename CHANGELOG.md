@@ -1,6 +1,69 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.10 - Jelling
+### Added
+- Support Multiediting attributes across multiple entities (through ...-menu in entity tree)
+- Support moderated roles/users that require a privileged user to accept/deny their changes in entity forms
+- Serif font (Zilla Slab)
+- New Attribute Type: _Richtext_ (A feature-rich alternative to _Textbox_ Attribute; based on Markdown)
+- New Attribute Type: _Date range_
+- New Attribute Type: _Userlist_
+- New Attribute Type: _Attribute Group Separator_ (A separator element to group attributes in tabs)
+- Separate form Save/Reset in Entity Attribute Tabs (when using _Attribute Group Separator_)
+- Additional non-standard bibtex fields to _Bibliography_ (ISBN, ISSN, Language and Abstract)
+- Additional fields in _User profile_ regarding institution
+- Keyboard Shortcut to save Entity (`Ctrl + s` for current open attribute tab, `Ctrl + Shift + s` for entire entity)
+- Info on hover to required fields in new/edit bibliography modal
+- Restrict search in _Entity_ attribute to specific entity-types
+### Fixed
+- Error in _Attribute List_ caused by _Entity (Multiple Choice)_ attribute
+- Attribute form Save/Reset handling due to newly introduced _Attribute Group Separator_
+- Adding roles without setting a preset
+- Permission Overview not visible if new role without preset is added
+- Save Permissions without changing state of _Moderation_ switch
+- Deleting a bibliography entry
+- Importing local file referenced in Bibtex import
+- Typos in Translation files
+- Updating bibliography entries
+- Duplicate Entity
+- Search in Attribute List
+- Do not reload _Entity Detail_ on `Enter` key
+- Do not allow empty values in _List_ attribute
+- Re-add Drag & Drop to _entity tree_
+- Reset error message on login
+- No fields shown for _misc_ bibliography type
+- Deleting attributes while still used in entity types lead to wrong position of attributes after re-ordering
+- Mark all notifications as read
+- Unsetting a date value
+- Unsaved changes in _Data Model Editor_ were visible in the UI
+- Adding bibliography of type _misc_
+- Moving entity in tree created a temporary duplicate
+- After unset _Single Choice_ attribute value an Entity could not be saved/resetted
+- After unset _Entity_ attribute value an Entity could not be saved/resetted
+- _Parent Attribute_ in _Single Choice_ attribute builder had no effect
+- Add missing info (`**`) to bibliography fields that are only required if another field is **not** set
+- Certainty values lower than 0 or higher than 100
+- Speed-up slow rendering time of (large) entity trees
+- Do not send notifications on moving an entity
+- Deleting all notifications
+- Button style in notifcation panel
+- Remove headings without content from _References_ tab in Main View
+- HTML content in comments
+- Adding comments without content to _Entity_
+### Changed
+- _Entity tree_ sorting is now accessible through ...-menu
+- Reset Password Workflow
+- Allow adding options in _List_ attribute on `Enter` key
+- Set timeout & disable login button while authenticating
+- Better handling and validation of user input in _User profile_
+- Attribute type backend logic moved to separate classes
+- Made UI to add new rows to _Table_ attribute clearer
+- Attribute type backend logic moved to separate classes
+- Set default value in parent element in _Add Attribute_ modal
+- Values in Dropdown attributes are now sorted alphabetically
+- Values in Dropdown attributes are now searchable
+
 ## 0.9.14
 ### Added
 - Changelog Viewer
@@ -35,6 +98,13 @@ All notable changes to this project will be documented in this file.
 - Error on page access with no installed plugins (because Plugin directory is missing)
 
 ## 0.9.10
+### Added
+- Background to column section in _Add Attribute_ modal to better distinguish it from the main section
+### Fixed
+- Reset label search after column added to table datatype in _Add Attribute_ modal
+- Reset column values after new row is added in _Entity Detail_ form
+- Preview for _table_ datatype
+- Dropdowns for columns of newly added _table_ attribute only visible after page reload
 ### Changed
 - Attributes in entity detail's link list are now grouped by linked entity
 

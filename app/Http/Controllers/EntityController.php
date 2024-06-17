@@ -147,7 +147,11 @@ class EntityController extends Controller {
                         ':entity_id' => $eid
                     ];
                 }
+
+                DB::beginTransaction();
                 $sqlValue = DB::select($text, $safes);
+                DB::rollBack();
+
                 // Check if only one result exists
                 if(count($sqlValue) === 1) {
                     // Get all column indices (keys) using the first row
@@ -196,12 +200,14 @@ class EntityController extends Controller {
                 })
                 ->where('entity_id', $id)
                 ->where('attribute_id', $aid)
+                ->withModerated()
                 ->get();
         } else {
             $attributes = AttributeValue::whereHas('attribute', function(Builder $q) {
                     $q->where('datatype', '!=', 'sql');
                 })
                 ->where('entity_id', $id)
+                ->withModerated()
                 ->get();
         }
 
@@ -215,16 +221,34 @@ class EntityController extends Controller {
                     $a->name = Entity::find($a->entity_val)->name;
                     break;
                 case 'entity-mc':
-                    $value = [];
+                    $names = [];
                     foreach(json_decode($a->json_val) as $dec) {
-                        $value[] = Entity::find($dec)->name;
+                        $names[] = Entity::find($dec)->name;
                     }
-                    $a->name = $value;
+                    $a->name = $names;
                     break;
                 default:
                     break;
             }
-            $a->value = $a->getValue();
+            $value = $a->getValue();
+            if($a->moderation_state == 'pending-delete') {
+                $a->value = [];
+                $a->original_value = $value;
+            } else {
+                $a->value = $value;
+            }
+            if(isset($data[$a->attribute_id])) {
+                $oldAttr = $data[$a->attribute_id];
+                // check if stored entry is moderated one
+                // if so, add current value as original value
+                // otherwise, set stored entry as original value
+                if(isset($oldAttr->moderation_state)) {
+                    $oldAttr->original_value = $value;
+                    $a = $oldAttr;
+                } else {
+                    $a->original_value = $oldAttr->value;
+                }
+            }
             $data[$a->attribute_id] = $a;
         }
 
@@ -257,7 +281,11 @@ class EntityController extends Controller {
                     ':entity_id' => $id
                 ];
             }
+
+            DB::beginTransaction();
             $sqlValue = DB::select($text, $safes);
+            DB::rollBack();
+
             // Check if only one result exists
             if(count($sqlValue) === 1) {
                 // Get all column indices (keys) using the first row
@@ -276,6 +304,28 @@ class EntityController extends Controller {
         }
 
         return response()->json($data);
+    }
+
+    public function getMetadata($id) {
+        $user = auth()->user();
+        if(!$user->can('entity_read') || !$user->can('entity_data_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to get an entity\'s metadata')
+            ], 403);
+        }
+
+        try {
+            $entity = Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist')
+            ], 400);
+        }
+        return response()->json([
+            'creator' => $entity->creator,
+            'editors' => $entity->editors,
+            'history' => null,
+        ]);
     }
 
     public function getParentIds($id) {
@@ -305,6 +355,27 @@ class EntityController extends Controller {
         }
 
         return Entity::getEntitiesByParent($id);
+    }
+
+    public function getEntityHistory(Request $request, $id) {
+        $user = auth()->user();
+        if(!$user->can('entity_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to get an entity set')
+            ], 403);
+        }
+
+        try {
+            $entity = Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist')
+            ], 400);
+        }
+
+        $page = $request->input('page', 1);
+
+        return response()->json($entity->getHistory($page));
     }
 
     // POST
@@ -352,7 +423,9 @@ class EntityController extends Controller {
 
         $duplicate = $entity->replicate();
         $duplicate->created_at = Carbon::now();
-        $duplicate->geodata_id = null;
+        if(sp_has_plugin('Map')) {
+            $duplicate->geodata_id = null;
+        }
         if(isset($duplicate->root_entity_id)) {
             $duplicate->rank = Entity::where('root_entity_id', $duplicate->root_entity_id)->max('rank') + 1;
         } else {
@@ -363,12 +436,14 @@ class EntityController extends Controller {
         $duplicate->save();
 
         // Files, bibliographies, attribute_values
-        $fileLinks = EntityFile::where('entity_id', $entity->id)->get();
-        foreach($fileLinks as $fileLink) {
-            $newLink = $fileLink->replicate();
-            $newLink->entity_id = $duplicate->id;
-            $newLink->user_id = $user->id;
-            $newLink->save();
+        if(sp_has_plugin('File')) {
+            $fileLinks = EntityFile::where('entity_id', $entity->id)->get();
+            foreach($fileLinks as $fileLink) {
+                $newLink = $fileLink->replicate();
+                $newLink->entity_id = $duplicate->id;
+                $newLink->user_id = $user->id;
+                $newLink->save();
+            }
         }
         $refs = Reference::where('entity_id', $entity->id)->get();
         foreach($refs as $ref) {
@@ -474,7 +549,7 @@ class EntityController extends Controller {
                     $attrVal->certainty = 100;
                     $attrVal->user_id = $user->id;
                     try {
-                        $setValue = $attrVal->setValue($row[$val], $type);
+                        $setValue = $attrVal->setValueFromRaw($row[$val], $type);
                         if($setValue === null) {
                             continue;
                         }
@@ -531,6 +606,7 @@ class EntityController extends Controller {
             ], 400);
         }
 
+        $addedAttributes = [];
         foreach($request->request as $patch) {
             $op = $patch['op'];
             $aid = $patch['params']['aid'];
@@ -540,20 +616,54 @@ class EntityController extends Controller {
                         ['entity_id', '=', $id],
                         ['attribute_id', '=', $aid]
                     ])->first();
-                    $attrval->delete();
+                    if(!isset($attrval)) {
+                        return response()->json([
+                            'error' => __('This attribute value does either not exist or is in moderation state.')
+                        ], 400);
+                    }
+                    if($user->isModerated()) {
+                        $attrval->moderate('pending-delete', true);
+                    } else {
+                        $attrval->delete();
+                    }
                     break;
                 case 'add':
+                    $alreadyAdded = AttributeValue::where('entity_id', $id)
+                        ->where('attribute_id', $aid)
+                        ->withModerated()
+                        ->exists();
+                    if($alreadyAdded) {
+                        return response()->json([
+                            'error' => __('There is already a value set for this attribute or it is in moderation state.')
+                        ], 400);
+                    }
                     $value = $patch['value'];
                     $attrval = new AttributeValue();
                     $attrval->entity_id = $id;
                     $attrval->attribute_id = $aid;
+                    if($user->isModerated()) {
+                        $attrval->moderate('pending', true, true);
+                    }
                     break;
                 case 'replace':
+                     $alreadyModerated = AttributeValue::where('entity_id', $id)
+                        ->where('attribute_id', $aid)
+                        ->onlyModerated()
+                        ->exists();
+                    if($alreadyModerated) {
+                        return response()->json([
+                            'error' => __('This attribute value is in moderation state. A user with appropriate permissions has to accept or deny it first.')
+                        ], 400);
+                    }
                     $value = $patch['value'];
                     $attrval = AttributeValue::where([
                         ['entity_id', '=', $id],
                         ['attribute_id', '=', $aid]
                     ])->first();
+                    if($user->isModerated()) {
+                        $attrval = $attrval->moderate('pending', false, true);
+                        unset($attrval->comments_count);
+                    }
                     break;
                 default:
                     return response()->json([
@@ -565,85 +675,19 @@ class EntityController extends Controller {
             if($op == 'remove') continue;
             
             $attr = Attribute::find($aid);
-            switch($attr->datatype) {
-                // for primitive types: just save them to the db
-                case 'stringf':
-                case 'string':
-                case 'iconclass':
-                case 'rism':
-                    $attrval->str_val = $value;
-                    break;
-                case 'double':
-                    $attrval->dbl_val = $value;
-                    break;
-                case 'boolean':
-                case 'percentage':
-                case 'integer':
-                    $attrval->int_val = $value;
-                    break;
-                case 'date':
-                    $attrval->dt_val = $value;
-                    break;
-                case 'string-sc':
-                    $thesaurus_url = $value['concept_url'];
-                    $attrval->thesaurus_val = $thesaurus_url;
-                    break;
-                case 'string-mc':
-                    $thesaurus_urls = [];
-                    foreach($value as $val) {
-                        $thesaurus_urls[] = [
-                            "concept_url" => $val['concept_url'],
-                            "id" => $val['id']
-                        ];
-                    }
-                    $attrval->json_val = json_encode($thesaurus_urls);
-                    break;
-                case 'epoch':
-                case 'timeperiod':
-                case 'dimension':
-                case 'list':
-                case 'table':
-                    // check for invalid time spans
-                    if($attr->datatype == 'epoch' || $attr->datatype == 'timeperiod') {
-                        $sl = isset($value['startLabel']) ? strtoupper($value['startLabel']) : null;
-                        $el = isset($value['endLabel']) ? strtoupper($value['endLabel']) : null;
-                        $s = $value['start'];
-                        $e = $value['end'];
-                        if(
-                            (isset($s) && !isset($sl))
-                            ||
-                            (isset($e) && !isset($el))
-                        ) {
-                            return response()->json([
-                                'error' => __('You have to specify if your date is BC or AD.')
-                            ], 422);
-                        }
-                        if(
-                            ($sl == 'AD' && $el == 'BC')
-                            ||
-                            ($sl == 'BC' && $el == 'BC' && $s < $e)
-                            ||
-                            ($sl == 'AD' && $el == 'AD' && $s > $e)
-                        ) {
-                            return response()->json([
-                                'error' => __('Start date of a time period must not be after it\'s end date')
-                            ], 422);
-                        }
-                    }
-                    $attrval->json_val = json_encode($value);
-                    break;
-                case 'entity':
-                    $attrval->entity_val = $value;
-                    break;
-                case 'entity-mc':
-                    $attrval->json_val = json_encode($value);
-                    break;
-                case 'geography':
-                    $attrval->geography_val = Geodata::parseWkt($value);
-                    break;
+            try {
+                $formKeyValue = AttributeValue::getFormattedKeyValue($attr->datatype, $value);
+            } catch(InvalidDataException $ide) {
+                return response()->json([
+                    'error' => $ide->getMessage(),
+                ], 422);
             }
+            $attrval->{$formKeyValue->key} = $formKeyValue->val;
             $attrval->user_id = $user->id;
             $attrval->save();
+            if($op == 'add') {
+                $addedAttributes[$aid] = $attrval;
+            }
         }
 
         // Save model if last editor changed
@@ -657,7 +701,10 @@ class EntityController extends Controller {
 
         $entity->load('user');
 
-        return response()->json($entity);
+        return response()->json([
+            'entity' => $entity,
+            'added_attributes' => $addedAttributes,
+        ]);
     }
 
     public function patchAttribute($id, $aid, Request $request) {
@@ -706,6 +753,116 @@ class EntityController extends Controller {
         return response()->json($attrValue, 201);
     }
 
+    public function multieditAttributes(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('entity_data_write')) {
+            return response()->json([
+                'error' => __('You do not have the permission to modify an entity\'s data')
+            ], 403);
+        }
+
+        $this->validate($request, [
+            'entity_ids' => 'required|array',
+            'entries' => 'required|array',
+        ]);
+
+        $entities = $request->get('entity_ids');
+        $attrValues = $request->get('entries');
+
+        DB::beginTransaction();
+
+        foreach($attrValues as $av) {
+            try {
+                $attr = Attribute::findOrFail($av['attribute_id']);
+            } catch(ModelNotFoundException $e) {
+                DB::rollBack();
+                return response()->json([
+                    'error' => __('This attribute does not exist'),
+                ], 400);
+            }
+            try {
+                $formKeyValue = AttributeValue::getFormattedKeyValue($attr->datatype, $av['value']);
+            } catch(InvalidDataException $ide) {
+                DB::rollBack();
+                return response()->json([
+                    'error' => $ide->getMessage(),
+                ], 422);
+            }
+            foreach($entities as $eid) {
+                AttributeValue::updateOrCreate(
+                    ['entity_id' => $eid, 'attribute_id' => $av['attribute_id']],
+                    [
+                        $formKeyValue->key => $formKeyValue->val,
+                        'user_id' => $user->id,
+                    ]
+                );
+            }
+        }
+
+        DB::commit();
+
+        return response()->json(null, 204);
+    }
+
+    public function handleModeration($id, $aid, Request $request) {
+        $user = auth()->user();
+        if(!$user->can('entity_data_write') || $user->isModerated()) {
+            return response()->json([
+                'error' => __('You do not have the permission to modify an entity\'s data')
+            ], 403);
+        }
+        $this->validate($request, [
+            'action' => 'required|string|mod_action',
+            'value' => 'nullable',
+        ]);
+
+        $action = $request->get('action');
+
+        try {
+            Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist')
+            ], 400);
+        }
+        try {
+            $attribute = Attribute::findOrFail($aid);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This attribute does not exist')
+            ], 400);
+        }
+
+        $attrValue = AttributeValue::where('entity_id', $id)
+            ->where('attribute_id', $aid)
+            ->onlyModerated()
+            ->first();
+
+        if(!isset($attrValue)) {
+            return response()->json([
+                'error' => __('This attribute value does not exist')
+            ], 400);
+        }
+
+        $attrValue->moderate($action);
+
+        $editedValue = $request->get('value');
+        if(isset($editedValue) && $action == 'accept') {
+            try {
+                $formKeyValue = AttributeValue::getFormattedKeyValue($attribute->datatype, $editedValue);
+            } catch(InvalidDataException $ide) {
+                return response()->json([
+                    'error' => $ide->getMessage(),
+                ], 422);
+            }
+            $attrValue->{$formKeyValue->key} = $formKeyValue->val;
+            $attrValue->user_id = $user->id;
+            $attrValue->save();
+        }
+
+        return response()->json(null, 204);
+    }
+
     public function patchName($id, Request $request) {
         $user = auth()->user();
         if(!$user->can('entity_write')) {
@@ -735,6 +892,36 @@ class EntityController extends Controller {
         return response()->json($entity);
     }
 
+    public function patchMetadata($id, Request $request) {
+        $user = auth()->user();
+        if(!$user->can('entity_write')) {
+            return response()->json([
+                'error' => __('You do not have the permission to modify an entity\'s metadata')
+            ], 403);
+        }
+        $fields = $this->validate($request, [
+            'licence' => 'nullable|string',
+            'summary' => 'nullable|string',
+        ]);
+
+        try {
+            $entity = Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist')
+            ], 400);
+        }
+
+        $metadata = $entity->metadata;
+        foreach($fields as $field => $value) {
+            $metadata[$field] = $value;
+        }
+        $entity->metadata = $metadata;
+        $entity->save();
+
+        return response()->json($entity->metadata);
+    }
+
     public function moveEntity(Request $request, $id) {
         $user = auth()->user();
         if(!$user->can('entity_write')) {
@@ -749,7 +936,7 @@ class EntityController extends Controller {
         ]);
 
         try {
-            $entity = Entity::findOrFail($id);
+            Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity does not exist')

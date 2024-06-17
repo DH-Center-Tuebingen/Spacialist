@@ -1,28 +1,50 @@
 <template>
     <div>
         <div class="input-group">
-            <input type="text" class="form-control" :disabled="disabled" v-model="v.value" @input="onInput()" />
-            <button type="button" class="btn btn-outline-secondary" :disabled="v.noContent" @click="loadIconclassInfo()">
-                <i class="fas fa-fw fa-eye"></i>
+            <input
+                v-model="v.value"
+                type="text"
+                class="form-control"
+                :disabled="disabled"
+                @input="onInput()"
+            >
+            <button
+                type="button"
+                class="btn btn-outline-secondary"
+                :disabled="v.noContent"
+                @click="loadIconclassInfo()"
+            >
+                <i class="fas fa-fw fa-eye" />
             </button>
         </div>
-        <div class="bg-light mt-2 p-2 border rounded" v-if="state.infoLoaded">
+        <div
+            v-if="state.infoLoaded"
+            class="bg-light mt-2 p-2 border rounded"
+        >
             <div class="d-flex flex-row justify-content-between">
                 <span class="fw-bold">
                     {{ state.text }}
                 </span>
-                <button type="button" class="btn-close" aria-label="Close" @click="closeInfoBox()">
-                </button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    @click="closeInfoBox()"
+                />
             </div>
-            <hr class="my-2" />
+            <hr class="my-2">
             <div>
                 <span>{{ state.keywords.join(' &bull; ') }}</span>
             </div>
             <footer class="blockquote-footer mt-2">
-                <span v-html="t('main.entity.attributes.iconclass.cite_info', {class: v.value})"></span>
+                <!-- eslint-disable-next-line vue/no-v-html -->
+                <span v-html="t('main.entity.attributes.iconclass.cite_info', {class: v.value})" />
             </footer>
         </div>
-        <p class="alert alert-danger my-2" v-if="state.infoErrored">
+        <p
+            v-if="state.infoErrored"
+            class="alert alert-danger my-2"
+        >
             {{ t('main.entity.attributes.iconclass.doesnt_exist') }}
         </p>
     </div>
@@ -52,10 +74,14 @@
 
     export default {
         props: {
-            name: String,
+            name: {
+                type:String , 
+                required: true
+            },
             value: {
                 type: String,
-                required: false,
+                required: true,
+                default: null,
             },
             disabled: {
                 type: Boolean,
@@ -70,7 +96,6 @@
             const {
                 name,
                 value,
-                disabled,
             } = toRefs(props);
 
             // FETCH
@@ -133,11 +158,13 @@
                     if(state.infoLoaded) {
                         return state.info.kw[state.language] ? state.info.kw[state.language] : state.info.kw['en'];
                     }
+                    return []
                 }),
                 text: computed(_ => {
                     if(state.infoLoaded) {
                         return state.info.txt[state.language] ? state.info.txt[state.language] : state.info.txt['en'];
                     }
+                    return ''
                 }),
             });
             const v = reactive({
@@ -148,7 +175,14 @@
                 noContent: computed(_ => !v.value),
             });
 
-            watch(v.meta, (newValue, oldValue) => {
+
+            watch(_ => value, (newValue, oldValue) => {
+                resetFieldState();
+            });
+            watch(_ => [v.meta.dirty, v.meta.valid], ([newDirty, newValid], [oldDirty, oldValid]) => {
+                // only emit @change event if field is validated (required because Entity.vue components)
+                // trigger this watcher several times even if another component is updated/validated
+                if(!v.meta.validated) return;
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
@@ -167,9 +201,6 @@
                 undirtyField,
                 onInput,
                 loadIconclassInfo,
-                // PROPS
-                disabled,
-                value,
                 // STATE
                 state,
                 v,

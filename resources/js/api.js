@@ -15,7 +15,7 @@ export async function fetchVersion() {
     await $httpQueue.add(() => http.get('/version').then(response => {
         store.dispatch('setVersion', response.data);
     }));
-};
+}
 
 export async function fetchPlugins() {
     await $httpQueue.add(
@@ -23,7 +23,7 @@ export async function fetchPlugins() {
             store.dispatch('setPlugins', response.data);
         })
     );
-};
+}
 
 export async function uploadPlugin(file) {
     const formData = new FormData();
@@ -34,7 +34,7 @@ export async function uploadPlugin(file) {
             store.dispatch('addPlugin', response.data);
         })
     );
-};
+}
 
 export async function installPlugin(id) {
     return $httpQueue.add(
@@ -50,7 +50,7 @@ export async function installPlugin(id) {
             return response.data;
         })
     );
-};
+}
 
 export async function updatePlugin(id) {
     return $httpQueue.add(
@@ -66,7 +66,7 @@ export async function updatePlugin(id) {
             });
         })
     );
-};
+}
 
 export async function uninstallPlugin(id) {
     return $httpQueue.add(
@@ -82,7 +82,7 @@ export async function uninstallPlugin(id) {
             return response.data;
         })
     );
-};
+}
 
 export async function removePlugin(id) {
     return $httpQueue.add(
@@ -94,7 +94,7 @@ export async function removePlugin(id) {
             return response.data;
         })
     );
-};
+}
 
 export async function fetchUsers() {
     store.commit('setUser', auth.user());
@@ -111,31 +111,31 @@ export async function fetchUsers() {
             presets: response.data.presets,
         });
     }));
-};
+}
 
 export async function fetchTopEntities() {
     await $httpQueue.add(() => http.get('/entity/top').then(response => {
         store.dispatch('setInitialEntities', response.data);
     }));
-};
+}
 
 export async function fetchAttributes() {
     return await $httpQueue.add(() => http.get('editor/dm/attribute').then(response => {
         store.dispatch('setAttributes', response.data);
     }));
-};
+}
 
 export async function fetchBibliography() {
     await $httpQueue.add(() => http.get('bibliography').then(response => {
         store.dispatch('setBibliography', response.data);
     }));
-};
+}
 
 export async function fetchTags() {
     await $httpQueue.add(() => http.get('tag').then(response => {
         store.dispatch('setTags', response.data);
     }));
-};
+}
 
 export async function fetchPreData(locale) {
     return $httpQueue.add(() => http.get('pre').then(response => {
@@ -145,7 +145,7 @@ export async function fetchPreData(locale) {
         store.commit('setSystemPreferences', response.data.system_preferences);
         store.dispatch('setColorSets', response.data.colorsets);
         store.dispatch('setAnalysis', response.data.analysis);
-        
+
         if(auth.ready()) {
             auth.load().then(_ => {
                 locale.value = store.getters.preferenceByKey('prefs.gui-language');
@@ -154,13 +154,13 @@ export async function fetchPreData(locale) {
             locale.value = store.getters.preferenceByKey('prefs.gui-language');
         }
     }));
-};
+}
 
 export async function fetchGeometryTypes() {
     return $httpQueue.add(
         () => http.get('editor/dm/geometry').then(response => {
             let geom = [];
-            for(let i=0; i<response.data.length; i++) {
+            for(let i = 0; i < response.data.length; i++) {
                 const g = response.data[i];
                 geom.push({
                     label: g,
@@ -174,7 +174,7 @@ export async function fetchGeometryTypes() {
             store.dispatch('setGeometryTypes', geom);
         })
     );
-};
+}
 
 export async function fetchAttributeTypes() {
     return $httpQueue.add(
@@ -182,16 +182,16 @@ export async function fetchAttributeTypes() {
             store.dispatch('setAttributeTypes', response.data);
         })
     );
-};
+}
 
 // GET
 export async function getEntityComments(id) {
     return fetchComments(id, 'entity');
-};
+}
 
 export async function getAttributeValueComments(eid, aid) {
     return fetchComments(eid, 'attribute_value', aid);
-};
+}
 
 export async function getCommentReplies(cid, endpoint = '/comment/{cid}/reply') {
     endpoint = endpoint.replaceAll('{cid}', cid);
@@ -199,54 +199,69 @@ export async function getCommentReplies(cid, endpoint = '/comment/{cid}/reply') 
     return $httpQueue.add(
         () => http.get(endpoint).then(response => response.data)
     );
-};
+}
 
 export async function getEntityParentIds(id) {
     return await $httpQueue.add(
         () => http.get(`/entity/${id}/parentIds`)
-        .then(response => {
-            return response.data;
-        })
+            .then(response => {
+                return response.data;
+            })
     );
-};
+}
 
 export async function getEntityData(id) {
     return await $httpQueue.add(
         () => http.get(`/entity/${id}/data`)
-        .then(response => {
-            // PHP returns Array if it is empty
-            if(response.data instanceof Array) {
-                response.data = {};
-            }
-            return response.data;
-        })
+            .then(response => {
+                // PHP returns Array if it is empty
+                if(response.data instanceof Array) {
+                    response.data = {};
+                }
+                return response.data;
+            })
     );
-};
+}
 
 export async function getEntityReferences(id) {
     return await $httpQueue.add(
         () => http.get(`/entity/${id}/reference`)
-        .then(response => {
-            // PHP returns Array if it is empty
-            if(response.data instanceof Array) {
-                response.data = {};
-            }
+            .then(response => {
+                // PHP returns Array if it is empty
+                if(response.data instanceof Array) {
+                    response.data = {};
+                }
+                return response.data;
+            })
+    );
+}
+
+export async function getEntityHistory(id, page = 1) {
+    return await $httpQueue.add(
+        () => http.get(`/entity/${id}/history?page=${page}`).then(response => {
+            store.dispatch('updateEntityHistoryMetadata', {
+                eid: id,
+                append: true,
+                data: {
+                    history: response.data.data,
+                },
+            });
             return response.data;
         })
     );
-};
+}
 
 export async function getEntityTypeAttributes(id) {
     return await $httpQueue.add(
         () => http.get(`/editor/entity_type/${id}/attribute`)
-    )
-};
+    );
+}
 
 export async function getEntityTypeOccurrenceCount(id) {
     return $httpQueue.add(
         () => http.get(`/editor/dm/entity_type/occurrence_count/${id}`).then(response => response.data)
     );
-};
+}
 
 export async function getAttributeOccurrenceCount(aid, etid) {
     let endpoint = `/editor/dm/attribute/occurrence_count/${aid}`;
@@ -256,7 +271,7 @@ export async function getAttributeOccurrenceCount(aid, etid) {
     return $httpQueue.add(
         () => http.get(endpoint).then(response => response.data)
     );
-};
+}
 
 async function fetchComments(id, type, aid = null) {
     let endpoint = `/comment/resource/${id}?r=${type}`;
@@ -264,31 +279,37 @@ async function fetchComments(id, type, aid = null) {
         endpoint = `${endpoint}&aid=${aid}`;
     }
     return $httpQueue.add(() => http.get(endpoint).then(response => response.data).catch(error => { throw error; }));
-};
+}
+
+export async function fetchEntityHistoryMetadata(id) {
+    return $httpQueue.add(
+        () => http.get(`/entity/${id}/metadata`).then(response => response.data)
+    );
+}
 
 export async function getBibtexFile() {
     return await $httpQueue.add(
         () => http.get('bibliography/export').then(response => response.data)
     );
-};
+}
 
 export async function getIconClassInfo(iconClass) {
     return external.get(`http://iconclass.org/${iconClass}.json`, {
         crossdomain: true
     }).then(response => response.data).catch(e => e);
-};
+}
 
 export async function getRismInfo(rismId) {
     return external.get(`https://muscat.rism.info/sru/sources?operation=searchRetrieve&version=1.1&query=id=${rismId}&maximumRecords=1`, {
         crossdomain: true
     }).then(response => response.data).catch(e => e);
-};
+}
 
 export async function fetchChildren(id) {
     return $httpQueue.add(
         () => http.get(`/entity/byParent/${id}`).then(response => response.data)
     );
-};
+}
 
 export async function getMapLayers(includeEntityLayers) {
     let url = `map/layer`;
@@ -298,7 +319,7 @@ export async function getMapLayers(includeEntityLayers) {
     return $httpQueue.add(
         () => http.get(url).then(response => response.data)
     );
-};
+}
 
 export async function moveMapLayer(id, neighborId) {
     const data = {
@@ -307,54 +328,69 @@ export async function moveMapLayer(id, neighborId) {
     return $httpQueue.add(
         () => http.patch(`/map/layer/${id}/switch`, data).then(response => response.data)
     );
-};
+}
 
 export async function changeMapLayerClass(id) {
     return $httpQueue.add(
         () => http.patch(`/map/layer/${id}/move`).then(response => response.data)
     );
-};
+}
 
 export async function getMapProjection(srid) {
     return $httpQueue.add(
         () => http.get(`map/epsg/${srid}`).then(response => response.data)
     );
-};
+}
 
 // POST
 export async function addUser(user) {
     const data = only(user, ['name', 'nickname', 'email', 'password']);
     return $httpQueue.add(
-        () =>  http.post('user', data).then(response => response.data)
+        () => http.post('user', data).then(response => response.data)
     );
-};
+}
 
 export async function addRole(role) {
     const data = only(role, ['name', 'display_name', 'description', 'derived_from']);
     return $httpQueue.add(
-        () =>  http.post('role', data).then(response => response.data)
+        () => http.post('role', data).then(response => response.data)
     );
-};
+}
 
-export async function sendResetPasswordMail(email) {
+export async function resetUserPassword(uid, password) {
     const data = {
-        email: email,
+        password: password,
     };
     return $httpQueue.add(
-        () => http.post(`user/reset/password`, data).then(response => response.data)
+        () => http.patch(`user/${uid}/password/reset`, data).then(response => response.data)
     );
-};
+}
 
-export async function updateEntityTypeRelation(entityType) {
-    const id = entityType.id;
-    const data = {
-        'is_root': entityType.is_root || false,
-        'sub_entity_types': entityType.sub_entity_types ? entityType.sub_entity_types.map(t => t.id) : [],
-    };
-    return await $httpQueue.add(
-        () => http.post(`/editor/dm/${id}/relation`, data).then(response => response.data)
+export async function confirmUserPassword(uid, password = null) {
+    const data = !!password ? { password: password } : {};
+    return $httpQueue.add(
+        () => http.patch(`user/${uid}/password/confirm`, data).then(response => response.data)
     );
-};
+}
+
+export async function updateEntityTypeRelation(etid, values) {
+    const data = only(values, ['is_root', 'sub_entity_types']);
+    const apiData = {...data};
+    if(data.sub_entity_types) {
+        apiData.sub_entity_types = data.sub_entity_types.map(t => t.id);
+    }
+
+    return await $httpQueue.add(
+        () => http.post(`/editor/dm/${etid}/relation`, apiData).then(response => {
+            store.dispatch('updateEntityType', {
+                ...data,
+                id: etid,
+            });
+
+            return response.data;
+        })
+    );
+}
 
 export async function postComment(content, resource, replyTo = null, metadata = null, endpoint = '/comment') {
     let data = {
@@ -378,7 +414,7 @@ export async function postComment(content, resource, replyTo = null, metadata = 
     return $httpQueue.add(
         () => http.post(endpoint, data).then(response => response.data)
     );
-};
+}
 
 export async function editComment(cid, content, endpoint = '/comment/{cid}') {
     endpoint = endpoint.replaceAll('{cid}', cid);
@@ -386,11 +422,11 @@ export async function editComment(cid, content, endpoint = '/comment/{cid}') {
     const data = {
         content: content,
     };
-    
+
     return $httpQueue.add(
         () => http.patch(endpoint, data).then(response => response.data)
     );
-};
+}
 
 export async function addOrUpdateBibliographyItem(item, file) {
     const data = new FormData();
@@ -415,7 +451,7 @@ export async function addOrUpdateBibliographyItem(item, file) {
             () => http.post('bibliography', data).then(response => response.data)
         );
     }
-};
+}
 
 export async function updateBibliography(file) {
     let formData = new FormData();
@@ -423,7 +459,7 @@ export async function updateBibliography(file) {
     return await $httpQueue.add(
         () => http.post('bibliography/import', formData).then(response => response.data)
     );
-};
+}
 
 export async function setUserAvatar(file) {
     let formData = new FormData();
@@ -431,7 +467,7 @@ export async function setUserAvatar(file) {
     return await $httpQueue.add(
         () => http.post(`user/avatar`, formData).then(response => response.data)
     );
-};
+}
 
 export async function addEntity(entity) {
     const data = {
@@ -444,20 +480,20 @@ export async function addEntity(entity) {
     return $httpQueue.add(
         () => http.post(`/entity`, data).then(response => response.data)
     );
-};
+}
 
 export async function duplicateEntity(entity) {
     const data = {};
     return $httpQueue.add(
         () => http.post(`/entity/${entity.id}/duplicate`, data).then(response => response.data)
     );
-};
+}
 
 export async function importEntityData(data) {
     return $httpQueue.add(
-        () => http.post(`/entity/import`, data).then(response => response.data).catch(e => {throw e})
+        () => http.post(`/entity/import`, data).then(response => response.data).catch(e => { throw e; })
     );
-};
+}
 
 export async function addEntityType(et) {
     const data = {
@@ -468,13 +504,13 @@ export async function addEntityType(et) {
     return $httpQueue.add(
         () => http.post(`/editor/dm/entity_type`, data).then(response => response.data)
     );
-};
+}
 
 export async function duplicateEntityType(id) {
     return $httpQueue.add(
         () => http.post(`/editor/dm/entity_type/${id}/duplicate`).then(response => response.data)
     );
-};
+}
 
 export async function addAttribute(attribute) {
     const data = {
@@ -488,9 +524,12 @@ export async function addAttribute(attribute) {
     if(attribute.rootAttributeLabel) {
         data.root_attribute_id = attribute.rootAttributeLabel.id;
     }
+    if(attribute.restrictedTypes) {
+        data.restricted_types = attribute.restrictedTypes.map(t => t.id);
+    }
     if(attribute.columns && attribute.columns.length > 0) {
         data.columns = attribute.columns.map(c => {
-            const mappedC = {...c};
+            const mappedC = { ...c };
             if(mappedC.label) {
                 mappedC.label_id = mappedC.label.id;
                 delete mappedC.label;
@@ -511,7 +550,7 @@ export async function addAttribute(attribute) {
     return $httpQueue.add(
         () => http.post(`/editor/dm/attribute`, data).then(response => response.data)
     );
-};
+}
 
 export async function addEntityTypeAttribute(etid, aid, to) {
     const attrs = storedEntityTypeAttributes(etid);
@@ -519,7 +558,7 @@ export async function addEntityTypeAttribute(etid, aid, to) {
     if(attrs.length < to && attrs[to].id == aid) {
         return;
     }
-    
+
     const rank = to + 1;
     const data = {
         attribute_id: aid,
@@ -533,15 +572,8 @@ export async function addEntityTypeAttribute(etid, aid, to) {
 
             const data = {
                 ...response.data,
-                id: relation.id,
+                ...relation,
                 entity_attribute_id: response.data.id,
-                datatype: relation.datatype,
-                thesaurus_url: relation.thesaurus_url,
-                thesaurus_root_url: relation.thesaurus_root_url,
-                text: relation.text,
-                parent_id: relation.parent_id,
-                root_attribute_id: relation.root_attribute_id,
-                recursive: relation.recursive,
                 pivot: {
                     id: response.data.id,
                     entity_type_id: response.data.entity_type_id,
@@ -556,7 +588,7 @@ export async function addEntityTypeAttribute(etid, aid, to) {
             return new Promise(r => r(data));
         })
     );
-};
+}
 
 export async function addReference(eid, aid, url, data) {
     $httpQueue.add(
@@ -568,7 +600,7 @@ export async function addReference(eid, aid, url, data) {
             return response.data;
         })
     );
-};
+}
 
 export async function getFilteredActivity(pageUrl, payload) {
     pageUrl = pageUrl || 'activity';
@@ -583,7 +615,7 @@ export async function getFilteredActivity(pageUrl, payload) {
             };
         })
     );
-};
+}
 
 // PATCH
 export async function patchEntityName(eid, name) {
@@ -593,19 +625,68 @@ export async function patchEntityName(eid, name) {
     return $httpQueue.add(
         () => http.patch(`entity/${eid}/name`, data).then(response => response.data)
     );
-};
+}
+
+export async function patchEntityMetadata(eid, metadata) {
+    return $httpQueue.add(
+        () => http.patch(`entity/${eid}/metadata`, metadata).then(response => response.data)
+    );
+}
 
 export async function patchAttribute(entityId, attributeId, data) {
     return $httpQueue.add(
         () => http.patch(`/entity/${entityId}/attribute/${attributeId}`, data).then(response => response.data)
     );
-};
+}
 
 export async function patchAttributes(entityId, data) {
     return $httpQueue.add(
         () => http.patch(`/entity/${entityId}/attributes`, data).then(response => response.data).catch(error => { throw error; })
     );
-};
+}
+
+export async function handleModeration(modAction, entity_id, attribute_id, overwrite_value = null) {
+    const data = {
+        action: modAction,
+    };
+
+    if(overwrite_value) {
+        data.value = overwrite_value;
+    }
+
+    return $httpQueue.add(
+        () => http.patch(`/entity/${entity_id}/attribute/${attribute_id}/moderate`, data).then(response => {
+            store.dispatch('updateEntityDataModerations', {
+                entity_id: entity_id,
+                attribute_ids: [attribute_id],
+                state: null,
+            });
+            if(overwrite_value) {
+                store.dispatch('updateEntityData', {
+                    eid: entity_id,
+                    data: {
+                        [attribute_id]: overwrite_value,
+                    },
+                });
+            }
+            return response.data;
+        }).catch(error => { throw error; })
+    );
+}
+
+export async function multieditAttributes(entityIds, entries) {
+    const data = {
+        entity_ids: entityIds,
+        entries: entries,
+    };
+    return $httpQueue.add(
+        () => http.patch(`/entity/multiedit`, data).then(response => {
+            return response.data;
+        }).catch(error => {
+            throw error;
+        })
+    );
+}
 
 export async function moveEntity(entityId, parentId = null, rank = null) {
     const data = {
@@ -629,7 +710,7 @@ export async function moveEntity(entityId, parentId = null, rank = null) {
             return response.data;
         })
     );
-};
+}
 
 export async function patchEntityType(etid, updatedProps) {
     // If no props updated, do nothing
@@ -652,7 +733,7 @@ export async function patchEntityType(etid, updatedProps) {
             return response.data;
         })
     );
-};
+}
 
 export async function reorderEntityAttributes(etid, aid, from, to) {
     if(from == to) {
@@ -663,7 +744,7 @@ export async function reorderEntityAttributes(etid, aid, from, to) {
     if(attrs[from].id != aid) {
         return;
     }
-    
+
     const rank = to + 1;
     const data = {
         position: rank
@@ -681,7 +762,7 @@ export async function reorderEntityAttributes(etid, aid, from, to) {
             return response.data;
         })
     );
-};
+}
 
 export async function updateAttributeDependency(etid, aid, dependency) {
     const data = {};
@@ -702,7 +783,7 @@ export async function updateAttributeDependency(etid, aid, dependency) {
             return data;
         })
     );
-};
+}
 
 export async function updateAttributeMetadata(etid, aid, pivid, data) {
     return $httpQueue.add(
@@ -716,110 +797,110 @@ export async function updateAttributeMetadata(etid, aid, pivid, data) {
             return response.data;
         })
     );
-};
+}
 
 export async function patchPreferences(data, uid) {
     const endpoint = !!uid ? `preference/${uid}` : 'preference';
     return await http.patch(endpoint, data).then(response => response.data);
-};
+}
 
 export async function reactivateUser(uid) {
     return $httpQueue.add(
         () => http.patch(`user/restore/${uid}`).then(response => response.data)
     );
-};
+}
 
 export async function patchUserData(uid, data) {
     return $httpQueue.add(
         () => http.patch(`user/${uid}`, data).then(response => response.data)
     );
-};
+}
 
 export async function patchRoleData(rid, data) {
     return $httpQueue.add(
         () => http.patch(`role/${rid}`, data).then(response => response.data)
     );
-};
+}
 
 export async function updateReference(id, eid, url, data) {
     $httpQueue.add(
         () => http.patch(`/entity/reference/${id}`, data).then(response => {
-                const updData = {
-                    ...data,
-                    updated_at: response.data.updated_at,
-                }
-                store.dispatch('updateReference', {
-                    reference_id: id,
-                    entity_id: eid,
-                    attribute_url: url,
-                    data: updData,
-                });
-                return response.data;
+            const updData = {
+                ...data,
+                updated_at: response.data.updated_at,
+            };
+            store.dispatch('updateReference', {
+                reference_id: id,
+                entity_id: eid,
+                attribute_url: url,
+                data: updData,
+            });
+            return response.data;
         })
     );
-};
+}
 
 // DELETE
 export async function deactivateUser(id) {
     return $httpQueue.add(
-        () =>  http.delete(`user/${id}`).then(response => response.data)
+        () => http.delete(`user/${id}`).then(response => response.data)
     );
-};
+}
 
 export async function deleteRole(id) {
     return $httpQueue.add(
         () => http.delete(`role/${id}`).then(response => response.data)
     );
-};
+}
 
 export async function deleteUserAvatar() {
     return await $httpQueue.add(
         () => http.delete(`user/avatar`).then(response => response.data)
     );
-};
+}
 
 export async function deleteComment(cid, endpoint = '/comment/{cid}') {
     endpoint = endpoint.replaceAll('{cid}', cid);
     return $httpQueue.add(
         () => http.delete(endpoint).then(response => response.data)
     );
-};
+}
 
 export async function deleteEntity(eid) {
     return $httpQueue.add(
         () => http.delete(`entity/${eid}`).then(response => response.data)
     );
-};
+}
 
 export async function deleteEntityType(etid) {
     return $httpQueue.add(
         () => http.delete(`editor/dm/entity_type/${etid}`).then(response => response.data)
     );
-};
+}
 
 export async function removeEntityTypeAttribute(id) {
     return $httpQueue.add(
         () => http.delete(`/editor/dm/entity_type/attribute/${id}`).then(response => response.data)
     );
-};
+}
 
 export async function deleteAttribute(aid) {
     return $httpQueue.add(
         () => http.delete(`editor/dm/attribute/${aid}`).then(response => response.data)
     );
-};
+}
 
 export async function deleteBibliographyItemFile(id) {
     return await $httpQueue.add(
         () => http.delete(`bibliography/${id}/file`).then(response => response.data)
     );
-};
+}
 
 export async function deleteBibliographyItem(id) {
     return $httpQueue.add(
         () => http.delete(`bibliography/${id}`).then(response => response.data)
     );
-};
+}
 
 export async function deleteReferenceFromEntity(id, eid, url) {
     return $httpQueue.add(
@@ -832,29 +913,42 @@ export async function deleteReferenceFromEntity(id, eid, url) {
             return response.data;
         })
     );
-};
+}
 
 // SEARCH
 export async function searchGlobal(query = '') {
     return $httpQueue.add(
         () => http.get(`search?q=${query}`).then(response => response.data)
-    )
-};
+    );
+}
 
 export async function searchAttribute(query = '') {
     return $httpQueue.add(
         () => http.get(`search/attribute?q=${query}`).then(response => response.data)
-    )
-};
+    );
+}
 
 export async function searchLabel(query = '') {
     return $httpQueue.add(
         () => http.get(`search/label?q=${query}`).then(response => response.data)
-    )
-};
+    );
+}
 
 export async function searchEntity(query = '') {
     return $httpQueue.add(
         () => http.get(`search/entity?q=${query}`).then(response => response.data)
-    )
-};
+    );
+}
+
+export async function searchConceptSelection(cid) {
+    return $httpQueue.add(
+        () => http.get(`search/selection/${cid}`).then(response => response.data)
+    );
+}
+
+export async function searchEntityInTypes(query = '', types = []) {
+    const typeList = types.join(',');
+    return $httpQueue.add(
+        () => http.get(`search/entity?q=${query}&t=${typeList}`).then(response => response.data)
+    );
+}

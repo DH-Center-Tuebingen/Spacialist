@@ -15,8 +15,16 @@
             </button>
         </div>
         <div class="modal-body">
-            <div class="d-flex flex-column gap-2 align-items-start" v-if="state.isDerived">
-                <div class="d-flex flex-row align-items-center gap-2">
+            <div class="d-flex flex-row-reverse justify-content-between gap-2">
+                <div>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" role="switch" :id="`role-${state.role.id}-moderation`" v-model="state.moderated">
+                        <label class="form-check-label" :for="`role-${state.role.id}-moderation`">
+                            {{ t('main.role.permissions.moderation.required') }}
+                        </label>
+                    </div>
+                </div>
+                <div class="d-flex flex-row align-items-center gap-2" v-if="state.isDerived">
                     <span class="text-muted">
                         {{ t('main.role.preset.derived_from') }}
                     </span>
@@ -175,14 +183,14 @@
     } from '@/helpers/accesscontrol.js';
 
     export default {
+        components: {
+            'acl-state': AccessControlState,
+        },
         props: {
             roleId: {
                 type: Number,
                 required: true,
             }
-        },
-        components: {
-            'acl-state': AccessControlState,
         },
         emits: ['save', 'cancel'],
         setup(props, context) {
@@ -193,7 +201,30 @@
 
             // FUNCTIONS
             const loadRolePermissions = permissions => {
-                if(permissions.length === 0) return;
+                if(permissions.length === 0) {
+                    state.permissionGroups.core.forEach(pg => {
+                        state.permissionStates[pg] = {
+                            read: 0,
+                            write: 0,
+                            create: 0,
+                            delete: 0,
+                            share: 0,
+                        };
+                    });
+                    for(let k in state.permissionGroups.plugins) {
+                        const curr = state.permissionGroups.plugins[k];
+                        curr.forEach(pg => {
+                            state.permissionStates[pg] = {
+                                read: 0,
+                                write: 0,
+                                create: 0,
+                                delete: 0,
+                                share: 0,
+                            };
+                        });
+                    }
+                    return;
+                }
 
                 // simple check whether this is an array of objects or strings
                 const isObject = (typeof permissions[0]) != 'string';
@@ -272,7 +303,10 @@
                         }
                     }
                 }
-                context.emit('save', permissions);
+                context.emit('save', {
+                    permissions: permissions,
+                    is_moderated: !!state.moderated,
+                });
             };
 
             // DATA
@@ -281,6 +315,7 @@
                 role: computed(_ => getRoleBy(roleId.value, 'id', true) || {}),
                 permissionStates: {},
                 permissionGroups: null,
+                moderated: false,
                 isDerived: computed(_ => state.role.derived),
                 differsFromPreset: computed(_ => {
                     if(!state.isDerived) return false;
@@ -300,6 +335,7 @@
 
             // ON MOUNTED
             onMounted(async _ => {
+                state.moderated = state.role.is_moderated;
                 state.permissionGroups = await getAccessGroups();
                 loadRolePermissions(state.role.permissions);
                 state.permissionsLoaded = true;

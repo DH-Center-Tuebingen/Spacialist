@@ -135,6 +135,12 @@ export function getOrderedDate(short = false, withTime = false) {
     }
 }
 
+export function randomId(min = 0, max = 100) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min);
+}
+
 export function getConcept(url) {
     if(!url || !hasConcept(url)) {
         return {};
@@ -190,11 +196,18 @@ export async function handleDeletedEntity(entity) {
         }
     }
     return new Promise(r => r(null));
-};
+}
 
 export function getAttribute(id) {
     if(!id) return {};
     return store.getters.attributes.find(a => a.id == id) || {};
+}
+
+export function getAttributeName(id) {
+    const attr = getAttribute(id);
+    if(!attr || !attr.thesaurus_url) return '';
+
+    return translateConcept(attr.thesaurus_url);
 }
 
 export function translateEntityType(id) {
@@ -256,18 +269,53 @@ export function getEntityTypeDependencies(id, aid) {
 
 }
 
-export function getEntityTypeAttributeSelections(id) {
-    const attrs = getEntityTypeAttributes(id);
-    if(!attrs) return {};
-    const attrIds = attrs.map(a => a.id);
+export function getAttributeSelections(attributes) {
     const sel = store.getters.attributeSelections;
     let filteredSel = {};
     for(let k in sel) {
-        if(attrIds.findIndex(aid => aid == k) > -1) {
+        if(attributes.findIndex(a => a.id == k) > -1) {
             filteredSel[k] = sel[k];
         }
     }
     return filteredSel;
+}
+
+export function getEntityTypeAttributeSelections(id) {
+    const attrs = getEntityTypeAttributes(id);
+    if(!attrs) return {};
+    return getAttributeSelections(attrs);
+}
+
+export function getIntersectedEntityAttributes(entityTypeLists) {
+    if(entityTypeLists.length == 0) return [];
+
+    let compArr = getEntityTypeAttributes(entityTypeLists[0]);
+
+    if(entityTypeLists.length == 1) {
+        return compArr;
+    }
+
+    let intersections = [];
+    for(let i=1; i<entityTypeLists.length; i++) {
+        intersections = [];
+        const attrN = getEntityTypeAttributes(entityTypeLists[i]);
+        for(let j=0; j<compArr.length; j++) {
+            for(let k=0; k<attrN.length; k++) {
+                const a1 = compArr[j];
+                const a2 = attrN[k];
+                if(a1.id == a2.id) {
+                    intersections.push(a1);
+                }
+            }
+        }
+        compArr = intersections;
+    }
+
+    return intersections;
+}
+
+export function hasIntersectionWithEntityAttributes(etid, entityTypeList) {
+    return getIntersectedEntityAttributes([etid, ...entityTypeList]).length > 0;
 }
 
 export function isAllowedSubEntityType(parentId, id) {
@@ -276,25 +324,64 @@ export function isAllowedSubEntityType(parentId, id) {
     return parent.sub_entity_types.some(et => et.id == id);
 }
 
-export function defaultAttributeValue(datatype) {
-    const val = {};
-    switch(datatype) {
-        case 'dimension':
-        case 'epoch':
-        case 'timeperiod':
-            val.value = {};
-            break;
+export function getInitialAttributeValue(attribute) {
+    switch(attribute.type) {
+        case 'string':
+        case 'stringf':
+        case 'richtext':
+        case 'iconclass':
+        case 'rism':
+        case 'geography':
+            return '';
+        case 'integer':
+        case 'double':
+            return 0;
+        case 'boolean':
+            return 0;
+        case 'percentage':
+            return 50;
+        case 'serial':
+            let str = attribute.textContent;
+            let toRepl = '%d';
+            let ctr = '1954';
+            if(!str) {
+                str = 'Find_%05d_Placeholder';
+            }
+            let hasIdentifier = false;
+            let isSimple = true;
+            let matches = str.match(/.*(%d).*/);
+            if(matches && matches[1]) {
+                hasIdentifier = true;
+                isSimple = true;
+            } else {
+                matches = str.match(/.*(%\d*d).*/);
+                if(matches && matches[1]) {
+                    hasIdentifier = true;
+                    isSimple = false;
+                }
+            }
+            if(hasIdentifier && !isSimple) {
+                toRepl = matches[1];
+                let pad = parseInt(toRepl.substring(1, toRepl.length-1));
+                ctr = ctr.padStart(pad, '0');
+            }
+            return str.replaceAll(toRepl, ctr);
+        case 'list':
         case 'string-mc':
         case 'entity-mc':
+        case 'userlist':
+            return [];
+        case 'date':
+            return new Date();
+        case 'sql':
+            return t('global.preview_not_available');
+        case 'epoch':
+        case 'dimension':
+        case 'entity':
+        case 'string-sc':
         case 'table':
-        case 'list':
-            val.value = [];
-            break;
-        default:
-            val.value = '';
-            break;
+            return {};
     }
-    return val;
 }
 
 export function getAttributeValueAsString(rawValue, datatype) {
@@ -307,6 +394,7 @@ export function getAttributeValueAsString(rawValue, datatype) {
     switch(datatype) {
         case 'string':
         case 'stringf':
+        case 'richtext':
         case 'double':
         case 'integer':
         case 'boolean':
@@ -335,6 +423,7 @@ export function getAttributeValueAsString(rawValue, datatype) {
         case 'string-mc':
         case 'entity':
         case 'entity-mc':
+        case 'userlist':
         case 'table':
         case 'sql':
             strValue = `TODO: ${datatype}`;
@@ -350,7 +439,9 @@ export function fillEntityData(data, etid) {
     for(let i=0; i<attrs.length; i++) {
         const currAttr = attrs[i];
         if(!data[currAttr.id]) {
-            data[currAttr.id] = defaultAttributeValue(currAttr.datatype);
+            data[currAttr.id] = {
+                value: getInitialAttributeValue(currAttr),
+            };
         }
     }
     return data;
@@ -380,6 +471,10 @@ export function calculateEntityColors(id, alpha = 0.5) {
     };
 }
 
+export function getEntity(id) {
+    return store.getters.entities[id] || {};
+}
+
 export function getEntityColors(id) {
     let colors = store.getters.entityTypeColors(id);
     if(!colors) {
@@ -402,9 +497,13 @@ export function getUser() {
     return isLoggedIn() ? auth.user() : {};
 }
 
+export function isModerated() {
+    return isLoggedIn() ? store.getters.isModerated : true;
+}
+
 export function userId() {
     return getUser().id || -1;
-};
+}
 
 export function getUsers() {
     const fallback = [];
@@ -413,7 +512,7 @@ export function getUsers() {
     } else {
         return fallback;
     }
-};
+}
 
 // where can be any of 'start', 'end', 'whole' (default)
 export function filterUsers(term, ci=true, where='whole') {
@@ -428,7 +527,7 @@ export function filterUsers(term, ci=true, where='whole') {
     return getUsers().filter(u => {
         return regex.test(u.name) || regex.test(u.nickname);
     });
-};
+}
 
 export function getRoles(withPermissions = false) {
     const fallback = [];
@@ -437,7 +536,7 @@ export function getRoles(withPermissions = false) {
     } else {
         return fallback;
     }
-};
+}
 
 export function getUserBy(value, attr = 'id') {
     if(!value) return null;
@@ -453,7 +552,7 @@ export function getUserBy(value, attr = 'id') {
     } else {
         return null;
     }
-};
+}
 
 export function getRoleBy(value, attr = 'id', withPermissions = false) {
     if(isLoggedIn()) {
@@ -463,7 +562,7 @@ export function getRoleBy(value, attr = 'id', withPermissions = false) {
     } else {
         return null;
     }
-};
+}
 
 export function throwError(error) {
     if (error.response) {
@@ -479,7 +578,7 @@ export function throwError(error) {
     } else {
         showErrorModal(error.message || error);
     }
-};
+}
 
 export function simpleResourceType(resource) {
     switch(resource) {
@@ -493,7 +592,7 @@ export function simpleResourceType(resource) {
         default:
             return resource;
     }
-};
+}
 
 export function findInList(list, searchValue, searchKey = 'id', recKey = 'children') {
     if(!list || list.length == 0) return;
@@ -505,7 +604,7 @@ export function findInList(list, searchValue, searchKey = 'id', recKey = 'childr
         const gotIt = findInList(list[i][recKey], searchValue, searchKey, recKey);
         if(gotIt) return gotIt;
     }
-};
+}
 
 export function only(object, allows = []) {
     return Object.keys(object)
@@ -516,7 +615,7 @@ export function only(object, allows = []) {
             [key]: object[key]
             };
         }, {});
-};
+}
 
 export function except(object, excepts = []) {
     return Object.keys(object)
@@ -527,7 +626,7 @@ export function except(object, excepts = []) {
             [key]: object[key]
             };
         }, {});
-};
+}
 
 export function getElementAttribute(el, attribute, defaultValue, type = 'string') {
     let value = el.getAttribute(attribute);
@@ -543,12 +642,12 @@ export function getElementAttribute(el, attribute, defaultValue, type = 'string'
 
 export function isArray(arr) {
     return Array.isArray(arr);
-};
+}
 
-export const _cloneDeep = require('lodash/cloneDeep');
-export const _debounce = require('lodash/debounce');
-export const _throttle = require('lodash/throttle');
-export const _orderBy = require('lodash/orderBy');
+export {default as _cloneDeep} from 'lodash/cloneDeep';
+export {default as _debounce} from 'lodash/debounce';
+export {default as _throttle} from 'lodash/throttle';
+export {default as _orderBy} from 'lodash/orderBy';
 
 export function showErrorModal(errorMsg, headers, request) {
     showError({
@@ -556,7 +655,7 @@ export function showErrorModal(errorMsg, headers, request) {
         headers: headers,
         request: request,
     });
-};
+}
 
 export function getValidClass(msgObject, field) {
     let isInvalid = false;
@@ -570,37 +669,37 @@ export function getValidClass(msgObject, field) {
         // 'is-valid': !msgObject[field],
         'is-invalid': isInvalid
     };
-};
+}
 
 export function getClassByValidation(errorList) {
     return {
         // 'is-valid': !msgObject[field],
         'is-invalid': !!errorList && errorList.length > 0,
     };
-};
+}
 
 export function createAnchorFromUrl(url) {
     if(!url) return url;
     if(typeof url != 'string' || !url.replace) return url;
     const urlRegex = /(\b(https?):\/\/[-A-Z0-9+#&=?@%_.]*[-A-Z0-9+#&=?@%_\/])/ig;
     return url.replace(urlRegex, match => `<a href="${match}" target="_blank">${match}</a>`);
-};
+}
 
 export function hasPreference(prefKey, prop) {
     const ps = store.getters.preferenceByKey(prefKey);
     if (ps) {
         return ps[prop] || ps;
     }
-};
+}
 
 export function getPreference(prefKey) {
     return store.getters.preferenceByKey(prefKey);
-};
+}
 
 export function getProjectName(slug = false) {
     const name = getPreference('prefs.project-name');
     return slug ? slugify(name) : name;
-};
+}
 
 export function slugify(s, delimiter = '-') {
     var char_map = {
@@ -739,29 +838,29 @@ export function getNotificationSourceLink(notification) {
             }
         };
     }
-};
+}
 
 export function userNotifications() {
     return getUser().notifications || [];
-};
+}
 
 export async function asyncFor(arr, callback) {
     for(let i=0; i<arr.length; i++) {
         await callback(arr[i]);
     }
-};
+}
 
 export function createDownloadLink(content, filename, base64 = false, contentType = 'text/plain') {
-    var link = document.createElement("a");
+    var link = document.createElement('a');
     let url;
     if(base64) {
         url = `data:${contentType};base64,${content}`;
     } else {
         url = window.URL.createObjectURL(new Blob([content]));
     }
-    link.setAttribute("href", url);
-    link.setAttribute("type", contentType);
-    link.setAttribute("download", filename);
+    link.setAttribute('href', url);
+    link.setAttribute('type', contentType);
+    link.setAttribute('download', filename);
     document.body.appendChild(link);
     link.click();
 }
@@ -774,13 +873,17 @@ export function copyToClipboard(elemId) {
     selection.removeAllRanges();
     selection.addRange(range);
     try {
-        document.execCommand("copy");
+        document.execCommand('copy');
         selection.removeAllRanges();
     } catch(err) {
         console.log(err);
     }
-};
+}
 
 export function setPreference(prefKey, value) {
     this.state.preferences[prefKey] = value;
+}
+
+export function sortConcepts(ca, cb) {
+    return translateConcept(ca.concept_url).localeCompare(translateConcept(cb.concept_url));
 }

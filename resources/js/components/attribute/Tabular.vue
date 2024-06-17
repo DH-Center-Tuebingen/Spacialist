@@ -3,32 +3,54 @@
         <table class="table table-striped table-hovered table-sm mb-0">
             <thead class="thead-light">
                 <tr>
-                    <th v-for="(column, i) in state.columns" :key="i">
+                    <th
+                        v-for="(column, i) in state.columns"
+                        :key="i"
+                    >
                         {{ translateConcept(column.thesaurus_url) }}
                     </th>
                     <th>
-                        <a class="text-body" href="#" @click.prevent="emitExpandToggle()">
-                            <i class="fas fa-fw fa-expand"></i>
+                        <a
+                            class="text-body"
+                            href="#"
+                            @click.prevent="emitExpandToggle()"
+                        >
+                            <i class="fas fa-fw fa-expand" />
                         </a>
-                        <a class="text-body" href="#" @click.prevent="openCsvUpload()">
-                            <i class="fas fa-fw fa-file-upload"></i>
+                        <a
+                            class="text-body"
+                            href="#"
+                            @click.prevent="openCsvUpload()"
+                        >
+                            <i class="fas fa-fw fa-file-upload" />
                         </a>
-                        <a class="text-body" href="#" @click.prevent="downloadAs('csv')">
-                            <i class="fas fa-fw fa-file-download"></i>
+                        <a
+                            class="text-body"
+                            href="#"
+                            @click.prevent="downloadAs('csv')"
+                        >
+                            <i class="fas fa-fw fa-file-download" />
                         </a>
                     </th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(row, $index) in v.value" :key="$index">
-                    <td v-for="(column, i) in state.columns" :key="i">
+                <tr
+                    v-for="(row, $index) in v.value"
+                    :key="$index"
+                >
+                    <td
+                        v-for="(column, i) in state.columns"
+                        :key="i"
+                    >
                         <string-attribute
                             v-if="column.datatype == 'string'"
                             :ref="el => setRef(el, `${$index}_${column.id}`)"
                             :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
-                            @change="e => updateDirtyState(e, $index, column.id)" />
+                            @change="e => updateDirtyState(e, $index, column.id)"
+                        />
 
                         <integer-attribute
                             v-else-if="column.datatype == 'integer'"
@@ -36,7 +58,8 @@
                             :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
-                            @change="e => updateDirtyState(e, $index, column.id)" />
+                            @change="e => updateDirtyState(e, $index, column.id)"
+                        />
 
                         <float-attribute
                             v-else-if="column.datatype == 'double'"
@@ -44,7 +67,8 @@
                             :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
-                            @change="e => updateDirtyState(e, $index, column.id)" />
+                            @change="e => updateDirtyState(e, $index, column.id)"
+                        />
 
                         <bool-attribute
                             v-else-if="column.datatype == 'boolean'"
@@ -52,7 +76,8 @@
                             :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
-                            @change="e => updateDirtyState(e, $index, column.id)" />
+                            @change="e => updateDirtyState(e, $index, column.id)"
+                        />
 
                         <iconclass-attribute
                             v-else-if="column.datatype == 'iconclass'"
@@ -61,7 +86,8 @@
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             :attribute="element"
-                            @change="e => updateDirtyState(e, $index, column.id)" />
+                            @change="e => updateDirtyState(e, $index, column.id)"
+                        />
 
                         <rism-attribute
                             v-else-if="column.datatype == 'rism'"
@@ -70,14 +96,17 @@
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             :attribute="element"
-                            @change="e => updateDirtyState(e, $index, column.id)" />
+                            @change="e => updateDirtyState(e, $index, column.id)"
+                        />
 
-                        <entity-attribute v-else-if="column.datatype == 'entity'"
+                        <entity-attribute
+                            v-else-if="column.datatype == 'entity'"
                             :ref="el => setRef(el, `${$index}_${column.id}`)"
                             :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
-                            @change="e => updateDirtyState(e, $index, column.id)" />
+                            @change="e => updateDirtyState(e, $index, column.id)"
+                        />
 
                         <date-attribute
                             v-else-if="column.datatype == 'date'"
@@ -85,7 +114,8 @@
                             :disabled="disabled || row.mark_deleted"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
-                            @change="e => updateDirtyState(e, $index, column.id)" />
+                            @change="e => updateDirtyState(e, $index, column.id)"
+                        />
 
                         <singlechoice-attribute
                             v-else-if="column.datatype == 'string-sc'"
@@ -94,118 +124,151 @@
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
                             :selections="state.selections[column.id]"
-                            @change="e => updateDirtyState(e, $index, column.id)" />
+                            @change="e => updateDirtyState(e, $index, column.id)"
+                        />
+
+                        <userlist-attribute
+                            v-else-if="column.datatype == 'userlist'"
+                            :ref="el => setRef(el, `${$index}_${column.id}`)"
+                            :name="`${name}-column-attr-${column.id}`"
+                            :value="row[column.id]"
+                            @change="e => updateDirtyState(e, $index, column.id)"
+                        />
                     </td>
-                    <td v-if="!disabled" class="text-center">
+                    <td
+                        v-if="!disabled"
+                        class="text-center"
+                    >
                         <div class="dropdown">
-                            <span :id="`tabular-row-options-${$index}`" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-fw fa-ellipsis-h"></i>
+                            <span
+                                :id="`tabular-row-options-${$index}`"
+                                class="clickable"
+                                data-bs-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                            >
+                                <i class="fas fa-fw fa-ellipsis-h" />
                             </span>
-                            <div class="dropdown-menu" :aria-labelledby="`tabular-row-options-${$index}`">
-                                <a class="dropdown-item" href="#" @click.prevent="resetRow($index)">
-                                    <i class="fas fa-fw fa-undo text-info"></i> {{ t('global.reset') }}
+                            <div
+                                class="dropdown-menu"
+                                :aria-labelledby="`tabular-row-options-${$index}`"
+                            >
+                                <a
+                                    class="dropdown-item"
+                                    href="#"
+                                    @click.prevent="resetRow($index)"
+                                >
+                                    <i class="fas fa-fw fa-undo text-info" /> {{ t('global.reset') }}
                                 </a>
-                                <a class="dropdown-item" href="#" v-if="row.mark_deleted" @click.prevent="restoreTableRow($index)">
-                                    <i class="fas fa-fw fa-trash-restore text-warning"></i> {{ t('global.restore') }}
+                                <a
+                                    v-if="row.mark_deleted"
+                                    class="dropdown-item"
+                                    href="#"
+                                    @click.prevent="restoreTableRow($index)"
+                                >
+                                    <i class="fas fa-fw fa-trash-restore text-warning" /> {{ t('global.restore') }}
                                 </a>
-                                <a class="dropdown-item" href="#" v-else @click.prevent="markTableRowForDelete($index)">
-                                    <i class="fas fa-fw fa-trash text-danger"></i> {{ t('global.delete') }}
+                                <a
+                                    v-else
+                                    class="dropdown-item"
+                                    href="#"
+                                    @click.prevent="markTableRowForDelete($index)"
+                                >
+                                    <i class="fas fa-fw fa-trash text-danger" /> {{ t('global.delete') }}
                                 </a>
                             </div>
                         </div>
                     </td>
                 </tr>
-                <tr v-if="!disabled">
-                    <td v-for="(column, i) in state.columns" :key="i">
-                        <string-attribute
-                            v-if="column.datatype == 'string'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newRowColumns[column.id]" />
-
-                        <integer-attribute
-                            v-else-if="column.datatype == 'integer'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newRowColumns[column.id]" />
-
-                        <float-attribute
-                            v-else-if="column.datatype == 'double'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newRowColumns[column.id]" />
-
-                        <bool-attribute
-                            v-else-if="column.datatype == 'boolean'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newRowColumns[column.id]" />
-
-                        <iconclass-attribute
-                            v-else-if="column.datatype == 'iconclass'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newRowColumns[column.id]"
-                            :attribute="column" />
-
-                        <rism-attribute
-                            v-else-if="column.datatype == 'rism'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newRowColumns[column.id]"
-                            :attribute="column" />
-
-                        <entity-attribute v-else-if="column.datatype == 'entity' || column.datatype == 'entity-mc'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :multiple="column.datatype == 'entity-mc'"
-                            :value="state.newRowColumns[column.id]" />
-
-                        <date-attribute
-                            v-else-if="column.datatype == 'date'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newRowColumns[column.id]" />
-
-                        <singlechoice-attribute
-                            v-else-if="column.datatype == 'string-sc'"
-                            :ref="el => setAddRef(el, `${column.id}`)"
-                            :name="`${name}-new-column-attr-${column.id}`"
-                            :value="state.newRowColumns[column.id]"
-                            :selections="state.selections[column.id]" />
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-success btn-sm" @click="addTableRow()">
-                            <i class="fas fa-fw fa-plus"></i>
+                <tr v-if="!disabled && !state.isPreview">
+                    <td
+                        class="text-center"
+                        style="--bs-table-striped-bg:248,249,250;"
+                        :colspan="Object.keys(state.columns).length + 1"
+                    >
+                        <button
+                            type="button"
+                            class="btn btn-outline-success btn-sm w-100"
+                            @click="addTableRow()"
+                        >
+                            <i class="fas fa-fw fa-plus" />
+                            {{ t('main.entity.attributes.table.add_row') }}
                         </button>
                     </td>
                 </tr>
-                <tr class="border-0">
-                    <td v-for="(column, i) in state.columns" :key="i">
-                        <form class="d-flex flex-column" v-if="state.chartShown">
-                            <div class="form-check" v-show="['integer', 'double'].includes(column.datatype)">
-                                <input class="form-check-input" type="checkbox" :id="`include-cb-${column.id}`" v-model="state.chartSet[column.id]" @change="updateChart()" />
-                                <label class="form-check-label" :for="`include-cb-${column.id}`">
+                <tr
+                    v-if="!state.isPreview"
+                    class="border-0"
+                >
+                    <td
+                        v-for="(column, i) in state.columns"
+                        :key="i"
+                    >
+                        <form
+                            v-if="state.chartShown"
+                            class="d-flex flex-column"
+                        >
+                            <div
+                                v-show="['integer', 'double'].includes(column.datatype)"
+                                class="form-check"
+                            >
+                                <input
+                                    :id="`include-cb-${column.id}`"
+                                    v-model="state.chartSet[column.id]"
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    @change="updateChart()"
+                                >
+                                <label
+                                    class="form-check-label"
+                                    :for="`include-cb-${column.id}`"
+                                >
                                     {{ t('main.entity.attributes.table.chart.include_in') }}
                                 </label>
                             </div>
-                            <div class="form-check" v-show="['integer', 'double'].includes(column.datatype)">
-                                <input class="form-check-input" type="checkbox" :id="`difference-cb-${column.id}`" v-model="state.chartAcc[column.id]" @change="updateChart()" />
-                                <label class="form-check-label" :for="`difference-cb-${column.id}`">
+                            <div
+                                v-show="['integer', 'double'].includes(column.datatype)"
+                                class="form-check"
+                            >
+                                <input
+                                    :id="`difference-cb-${column.id}`"
+                                    v-model="state.chartAcc[column.id]"
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    @change="updateChart()"
+                                >
+                                <label
+                                    class="form-check-label"
+                                    :for="`difference-cb-${column.id}`"
+                                >
                                     {{ t('main.entity.attributes.table.chart.use_difference') }}
                                 </label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" :id="`label-radio-${column.id}`" :value="column.id" v-model="state.chartLabel" @change="updateChart()" />
-                                <label class="form-check-label" :for="`label-radio-${column.id}`">
+                                <input
+                                    :id="`label-radio-${column.id}`"
+                                    v-model="state.chartLabel"
+                                    class="form-check-input"
+                                    type="radio"
+                                    :value="column.id"
+                                    @change="updateChart()"
+                                >
+                                <label
+                                    class="form-check-label"
+                                    :for="`label-radio-${column.id}`"
+                                >
                                     {{ t('main.entity.attributes.table.chart.use_as_label') }}
                                 </label>
                             </div>
                         </form>
                     </td>
-                    <td>
-                        <button type="button" class="btn btn-primary btn-sm" @click="toggleChart()">
-                            <i class="fas fa-fw fa-chart-bar"></i>
+                    <td class="text-center">
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-sm"
+                            @click="toggleChart()"
+                        >
+                            <i class="fas fa-fw fa-chart-bar" />
                         </button>
                     </td>
                 </tr>
@@ -213,12 +276,20 @@
         </table>
         <div v-show="state.chartShown">
             <div class="d-flex flex-row gap-2">
-                <input type="range" class="form-range" min="1" :max="value.length" step="1" v-model.number="state.chartSetLength" @change="updateChart()" />
+                <input
+                    v-model.number="state.chartSetLength"
+                    type="range"
+                    class="form-range"
+                    min="1"
+                    :max="value.length"
+                    step="1"
+                    @change="updateChart()"
+                >
                 <span>
                     {{ t('main.entity.attributes.table.chart.number_sets', {cnt: state.chartSetLength}) }}
                 </span>
             </div>
-            <canvas :id="state.chartId"></canvas>
+            <canvas :id="state.chartId" />
         </div>
     </div>
 </template>
@@ -246,7 +317,7 @@
         BarElement,
         Legend,
         Tooltip,
-    } from 'chart.js'
+    } from 'chart.js';
 
     import { useI18n } from 'vue-i18n';
     import store from '@/bootstrap/store.js';
@@ -273,11 +344,26 @@
     import RISM from '@/components/attribute/Rism.vue';
     import Entity from '@/components/attribute/Entity.vue';
     import DateAttr from '@/components/attribute/Date.vue';
+    import DaterangeAttr from '@/components/attribute/Daterange.vue';
     import SingleChoice from '@/components/attribute/SingleChoice.vue';
+    import UserList from '@/components/attribute/UserList.vue';
 
-    let d3 = require('d3-dsv');
+    import * as d3 from 'd3-dsv'; 
 
     export default {
+        components: {
+            'string-attribute': StringAttr,
+            'integer-attribute': IntegerAttr,
+            'float-attribute': FloatAttr,
+            'bool-attribute': Bool,
+            'iconclass-attribute': Iconclass,
+            'rism-attribute': RISM,
+            'entity-attribute': Entity,
+            'date-attribute': DateAttr,
+            'daterange-attribute': DaterangeAttr,
+            'singlechoice-attribute': SingleChoice,
+            'userlist-attribute': UserList,
+        },
         props: {
             name: {
                 type: String,
@@ -295,21 +381,17 @@
             },
             selections: {
                 type: Object,
+                default: null
             },
             attribute: {
                 type: Object,
+                default: null
             },
-        },
-        components: {
-            'string-attribute': StringAttr,
-            'integer-attribute': IntegerAttr,
-            'float-attribute': FloatAttr,
-            'bool-attribute': Bool,
-            'iconclass-attribute': Iconclass,
-            'rism-attribute': RISM,
-            'entity-attribute': Entity,
-            'date-attribute': DateAttr,
-            'singlechoice-attribute': SingleChoice,
+            previewColumns: {
+                required: false,
+                type: Object,
+                default: null,
+            },
         },
         emits: ['change', 'expanded'],
         setup(props, context) {
@@ -331,6 +413,7 @@
                 value,
                 selections,
                 attribute,
+                previewColumns,
             } = toRefs(props);
 
             // FETCH
@@ -367,6 +450,7 @@
                     case 'double':
                     case 'boolean':
                     case 'date':
+                    case 'daterange':
                     case 'iconclass':
                     case 'entity':
                     case 'entity-mc':
@@ -463,18 +547,7 @@
                 v.handleChange(v.value.concat(rows));
             };
             const addTableRow = _ => {
-                const rowValue = {};
-                for(let k in state.columns) {
-                    const reference = newRowRefs.value[k];
-                    if(!!reference.v.value) {
-                        rowValue[k] = reference.v.value;
-                        if(!!reference.resetFieldState) {
-                            reference.resetFieldState();
-                        }
-                    }
-                }
-                v.handleChange(v.value.concat([rowValue]));
-                state.newRowColumns = {};
+                v.handleChange(v.value.concat([{}]));
             };
             const restoreTableRow = index => {
                 const currentValue = v.value;
@@ -501,16 +574,12 @@
                 v.handleChange(currentValue);
                 context.emit('change', e);
             };
-            const setAddRef = (el, idx) => {
-                newRowRefs.value[idx] = el;
-            };
             const setRef = (el, idx) => {
                 columnRefs.value[idx] = el;
             };
 
             // DATA
             const columnRefs = ref({});
-            const newRowRefs = ref({});
             const {
                 handleChange,
                 value: fieldValue,
@@ -520,10 +589,11 @@
                 initialValue: value.value,
             });
             const state = reactive({
-                columns: computed(_ => getAttribute(attribute.value.id).columns),
+                isPreview: computed(_ => previewColumns.value && Object.keys(previewColumns.value).length > 0),
+                columns: computed(_ => state.isPreview ? previewColumns.value : getAttribute(attribute.value.id).columns),
                 selections: computed(_ => {
                     const list = {};
-                    if(!state.columns) return list;
+                    if(!state.columns || state.isPreview) return list;
 
                     for(let k in state.columns) {
                         const curr = state.columns[k];
@@ -594,7 +664,14 @@
                 resetField,
             });
 
-            watch(v.meta, (newValue, oldValue) => {
+
+            watch(_ => value, (newValue, oldValue) => {
+                resetFieldState();
+            });
+            watch(_ => [v.meta.dirty, v.meta.valid], ([newDirty, newValid], [oldDirty, oldValid]) => {
+                // only emit @change event if field is validated (required because Entity.vue components)
+                // trigger this watcher several times even if another component is updated/validated
+                if(!v.meta.validated) return;
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
@@ -626,15 +703,8 @@
                 markTableRowForDelete,
                 resetRow,
                 updateDirtyState,
-                setAddRef,
                 setRef,
-                resetFieldState,
-                undirtyField,
                 // PROPS
-                name,
-                disabled,
-                attribute,
-                selections,
                 // STATE
                 state,
                 v,

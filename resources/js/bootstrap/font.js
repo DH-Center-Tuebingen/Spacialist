@@ -1,20 +1,27 @@
 // Sans serif
-import "@fontsource/raleway/300.css";
-import "@fontsource/raleway/400.css";
-import "@fontsource/raleway/600.css";
-import "@fontsource/raleway/700.css";
+import '@fontsource/raleway/300.css';
+import '@fontsource/raleway/400.css';
+import '@fontsource/raleway/600.css';
+import '@fontsource/raleway/700.css';
+
+// Serif
+import '@fontsource/zilla-slab/300.css';
+import '@fontsource/zilla-slab/400.css';
+import '@fontsource/zilla-slab/600.css';
+import '@fontsource/zilla-slab/700.css';
 
 // Monospace
-import "@fontsource/source-code-pro/400.css";
-import "@fontsource/source-code-pro/500.css";
+import '@fontsource/source-code-pro/400.css';
+import '@fontsource/source-code-pro/500.css';
 
 // Font Awesome
 import { library, dom, findIconDefinition } from '@fortawesome/fontawesome-svg-core';
 import {
-    faFacebookSquare,
+    faFacebook,
     faGithub,
     faHtml5,
     faLaravel,
+    faMarkdown,
     faOrcid,
     faVuejs
 } from '@fortawesome/free-brands-svg-icons';
@@ -28,6 +35,12 @@ import {
     faSquareCheck,
 } from '@fortawesome/free-regular-svg-icons';
 import {
+    fa1,
+    fa2,
+    fa3,
+    fa4,
+    fa5,
+    fa6,
     faAdjust,
     faAlignLeft,
     faAlignCenter,
@@ -38,6 +51,9 @@ import {
     faAngleLeft,
     faAngleRight,
     faAngleUp,
+    faArrowRight,
+    faArrowTurnUp,
+    faAsterisk,
     faBan,
     faBell,
     faBinoculars,
@@ -52,11 +68,15 @@ import {
     faCaretLeft,
     faCaretRight,
     faCaretUp,
+    faChalkboardUser,
     faChartBar,
     faChartPie,
     faCheck,
     faCheckCircle,
+    faChevronLeft,
+    faChevronRight,
     faCircle,
+    faCircleCheck,
     faClipboard,
     faClock,
     faClone,
@@ -74,6 +94,7 @@ import {
     faDrawPolygon,
     faEdit,
     faEllipsisH,
+    faEllipsisVertical,
     faEnvelope,
     faExchangeAlt,
     faExclamation,
@@ -96,6 +117,7 @@ import {
     faFilePdf,
     faFilePen,
     faFilePowerpoint,
+    faFileShield,
     faFileUpload,
     faFileVideo,
     faFileWord,
@@ -108,6 +130,7 @@ import {
     faHouse,
     faI,
     faIdBadge,
+    faIdCardClip,
     faImage,
     faIndent,
     faInfo,
@@ -117,6 +140,7 @@ import {
     faLightbulb,
     faLink,
     faList,
+    faListCheck,
     faListOl,
     faListUl,
     faLongArrowAltDown,
@@ -135,6 +159,7 @@ import {
     faOutdent,
     faPalette,
     faPaperPlane,
+    faParagraph,
     faPaste,
     faPause,
     faPaw,
@@ -153,6 +178,7 @@ import {
     faRulerCombined,
     faS,
     faSave,
+    faSchool,
     faSearch,
     faSearchPlus,
     faShieldAlt,
@@ -194,6 +220,8 @@ import {
     faUserCog,
     faUserEdit,
     faUsers,
+    faUsersBetweenLines,
+    faUserTag,
     faUserTimes,
     faVolumeMute,
     faVolumeUp,
@@ -201,7 +229,13 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
-    faFacebookSquare,
+    fa1,
+    fa2,
+    fa3,
+    fa4,
+    fa5,
+    fa6,
+    faFacebook,
     faGithub,
     faHtml5,
     faLaravel,
@@ -219,6 +253,9 @@ library.add(
     faAngleLeft,
     faAngleRight,
     faAngleUp,
+    faArrowRight,
+    faArrowTurnUp,
+    faAsterisk,
     faBan,
     faBell,
     faBinoculars,
@@ -233,11 +270,15 @@ library.add(
     faCaretLeft,
     faCaretRight,
     faCaretUp,
+    faChalkboardUser,
     faChartBar,
     faChartPie,
     faCheck,
     faCheckCircle,
+    faChevronLeft,
+    faChevronRight,
     faCircle,
+    faCircleCheck,
     faCircleReg,
     faClipboard,
     faClock,
@@ -256,6 +297,7 @@ library.add(
     faDrawPolygon,
     faEdit,
     faEllipsisH,
+    faEllipsisVertical,
     faEnvelope,
     faExchangeAlt,
     faExclamation,
@@ -278,6 +320,7 @@ library.add(
     faFilePdf,
     faFilePen,
     faFilePowerpoint,
+    faFileShield,
     faFileUpload,
     faFileVideo,
     faFileWord,
@@ -290,6 +333,7 @@ library.add(
     faHouse,
     faI,
     faIdBadge,
+    faIdCardClip,
     faImage,
     faIndent,
     faInfo,
@@ -300,6 +344,7 @@ library.add(
     faLightbulb,
     faLink,
     faList,
+    faListCheck,
     faListOl,
     faListUl,
     faLongArrowAltDown,
@@ -308,6 +353,7 @@ library.add(
     faLongArrowAltUp,
     faMagic,
     faMap,
+    faMarkdown,
     faMapMarkedAlt,
     faMapMarkerAlt,
     faMicrochip,
@@ -318,6 +364,7 @@ library.add(
     faOutdent,
     faPalette,
     faPaperPlane,
+    faParagraph,
     faPaste,
     faPause,
     faPaw,
@@ -337,6 +384,7 @@ library.add(
     faS,
     faSadCry,
     faSave,
+    faSchool,
     faSearch,
     faSearchPlus,
     faShieldAlt,
@@ -380,11 +428,13 @@ library.add(
     faUserCog,
     faUserEdit,
     faUsers,
+    faUsersBetweenLines,
+    faUserTag,
     faUserTimes,
     faVolumeMute,
     faVolumeUp,
     faWindowMaximize,
-)
+);
 dom.watch();
 
 export const iconList = fw => {
@@ -396,7 +446,7 @@ export const iconList = fw => {
             const icon = set[l];
             const iconCode = icon[3];
             const uniqueCode = `${k}_${iconCode}`;
-            const def = findIconDefinition({prefix: k, iconName: l});
+            const def = findIconDefinition({ prefix: k, iconName: l });
             if(!addedCodes[uniqueCode]) {
                 addedCodes[uniqueCode] = true;
                 let str = `${k} fa-${def.iconName}`;
@@ -404,7 +454,7 @@ export const iconList = fw => {
                 list.push({
                     class: str,
                     key: def.iconName,
-                    unicode: def.icon[3].padStart(4, "0"),
+                    unicode: def.icon[3].padStart(4, '0'),
                     label: def.iconName,
                 });
             }

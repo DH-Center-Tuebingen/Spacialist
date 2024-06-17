@@ -1,7 +1,20 @@
 <template>
     <span style="display: inline-flex;">
-        <img v-if="user.avatar" :src="user.avatar_url" alt="user avatar" :width="size" :height="size" :class="state.styles" class="object-fit-cover" />
-        <div v-else :style="state.initialsStyles.container" :class="state.styles" class="d-flex justify-content-center align-items-center">
+        <img
+            v-if="user.avatar"
+            :src="user.avatar_url"
+            alt="user avatar"
+            :width="size"
+            :height="size"
+            :class="state.styles"
+            class="object-fit-cover"
+        >
+        <div
+            v-else
+            :style="state.initialsStyles.container"
+            :class="state.styles"
+            class="d-flex justify-content-center align-items-center"
+        >
             <span :style="state.initialsStyles.text">
                 {{ state.initials }}
             </span>
@@ -82,7 +95,6 @@
             // RETURN
             return {
                 state,
-                user,
             }
         }
     }

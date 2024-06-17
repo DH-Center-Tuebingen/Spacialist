@@ -134,22 +134,6 @@
     flex-basis: 0;
 }
 
-.reorder-handle, .grab-handle {
-    cursor: grab;
-}
-
-.reorder-handle:active {
-    cursor: grabbing;
-}
-
-.copy-handle {
-    cursor: copy;
-}
-
-.not-allowed-handle {
-    cursor: not-allowed;
-}
-
 .list-group-item-hover:hover {
     background-color: $primary;
     color: $light;
@@ -179,28 +163,28 @@
     border-style: dashed !important;
 }
 
-.opacity-0 {
-    opacity: 0;
-}
-
-.opacity-25 {
-    opacity: 0.25;
-}
-
-.opacity-50 {
-    opacity: 0.5;
-}
-
-.opacity-75 {
-    opacity: 0.75;
-}
-
-.opacity-1 {
-    opacity: 1;
-}
-
 .clickable {
     cursor: pointer;
+}
+
+.cursor-help {
+    cursor: help;
+}
+
+.reorder-handle, .grab-handle {
+    cursor: grab;
+}
+
+.reorder-handle:active {
+    cursor: grabbing;
+}
+
+.copy-handle {
+    cursor: copy;
+}
+
+.not-allowed-handle {
+    cursor: not-allowed;
 }
 
 .scroll-x-hidden {

@@ -1,89 +1,135 @@
 <template>
     <div class="row">
         <div class="col-md-4">
-            <form role="form" id="filter-activity-form" v-show="!state.hideFilterPanel" name="filter-activity-form" @submit.prevent="filterActivity(state.filters)">
-                <div class="row mb-3" v-if="!state.hideUser">
-                    <label class="col-form-label col-md-3" for="filter-activity-user">
+            <form
+                v-show="!state.hideFilterPanel"
+                id="filter-activity-form"
+                role="form"
+                name="filter-activity-form"
+                @submit.prevent="filterActivity(state.filters)"
+            >
+                <div
+                    v-if="!state.hideUser"
+                    class="row mb-3"
+                >
+                    <label
+                        class="col-form-label col-md-3"
+                        for="filter-activity-user"
+                    >
                         {{ t('global.users', 2) }}:
                     </label>
                     <div class="col-md-9">
                         <multiselect
-                            v-model="state.filters.users"
                             id="filter-activity-user"
+                            v-model="state.filters.users"
                             :mode="'tags'"
                             :options="state.allUsers"
                             :searchable="true"
-                            :valueProp="'id'"
-                            :trackBy="'name'"
+                            :value-prop="'id'"
+                            :track-by="'name'"
                             :label="'name'"
                             :placeholder="t('global.select.placeholder')"
-                            :hideSelected="true">
-                        </multiselect>
+                            :hide-selected="true"
+                        />
                     </div>
                 </div>
                 <div class="row mb-3">
-                    <label class="col-form-label col-md-3" for="filter-activity-timespan-from">
+                    <label
+                        class="col-form-label col-md-3"
+                        for="filter-activity-timespan-from"
+                    >
                         {{ t('global.timespan') }}:
                     </label>
                     <div class="col-md-9">
                         <div class="row align-items-center">
                             <date-picker
-                                class="mx-datepicker-col-5"
                                 id="filter-activity-timespan-from"
                                 v-model:value="state.filters.from"
+                                class="mx-datepicker-col-5"
                                 :disabled-date="(date) => date > (state.filters.to ? state.filters.to : new Date())"
                                 :input-class="'form-control'"
                                 :show-week-number="true"
-                                :value-type="'date'">
-                                <template v-slot:icon-calendar>
-                                    <i class="fas fa-fw fa-calendar-alt"></i>
+                                :value-type="'date'"
+                            >
+                                <template #icon-calendar>
+                                    <i class="fas fa-fw fa-calendar-alt" />
                                 </template>
-                                <template v-slot:icon-clear>
-                                    <i class="fas fa-fw fa-times"></i>
+                                <template #icon-clear>
+                                    <i class="fas fa-fw fa-times" />
                                 </template>
                             </date-picker>
                             <div class="col-2 d-flex flex-row align-items-center justify-content-between">
-                                <button type="button" class="btn btn-sm btn-outline-secondary py-0" :disabled="!state.filters.from" @click="state.filters.to = state.filters.from">
-                                    <i class="fas fa-fw fa-long-arrow-alt-right"></i>
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-secondary py-0"
+                                    :disabled="!state.filters.from"
+                                    @click="state.filters.to = state.filters.from"
+                                >
+                                    <i class="fas fa-fw fa-long-arrow-alt-right" />
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary py-0" :disabled="!state.filters.to" @click="state.filters.from = state.filters.to">
-                                    <i class="fas fa-fw fa-long-arrow-alt-left"></i>
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-secondary py-0"
+                                    :disabled="!state.filters.to"
+                                    @click="state.filters.from = state.filters.to"
+                                >
+                                    <i class="fas fa-fw fa-long-arrow-alt-left" />
                                 </button>
                             </div>
                             <date-picker
-                                class="mx-datepicker-col-5"
                                 id="filter-activity-timespan-to"
                                 v-model:value="state.filters.to"
+                                class="mx-datepicker-col-5"
                                 :disabled-date="(date) => date > new Date() || date < (state.filters.from ? state.filters.from : new Date(0))"
                                 :input-class="'form-control'"
                                 :show-week-number="true"
-                                :value-type="'date'">
-                                <template v-slot:icon-calendar>
-                                    <i class="fas fa-fw fa-calendar-alt"></i>
+                                :value-type="'date'"
+                            >
+                                <template #icon-calendar>
+                                    <i class="fas fa-fw fa-calendar-alt" />
                                 </template>
-                                <template v-slot:icon-clear>
-                                    <i class="fas fa-fw fa-times"></i>
+                                <template #icon-clear>
+                                    <i class="fas fa-fw fa-times" />
                                 </template>
                             </date-picker>
                         </div>
                     </div>
                 </div>
                 <div class="row mb-3">
-                    <label class="col-form-label col-md-3" for="filter-activity-rawdata">
+                    <label
+                        class="col-form-label col-md-3"
+                        for="filter-activity-rawdata"
+                    >
                         {{ t('main.activity.search_in_raw_data') }}:
                     </label>
                     <div class="col-md-9">
-                        <input type="text" class="form-control" id="filter-activity-rawdata" v-model="state.filters.data_text" />
+                        <input
+                            id="filter-activity-rawdata"
+                            v-model="state.filters.data_text"
+                            type="text"
+                            class="form-control"
+                        >
                     </div>
                 </div>
-                <button type="submit" class="btn btn-outline-primary">
+                <button
+                    type="submit"
+                    class="btn btn-outline-primary"
+                >
                     {{ t('main.activity.apply_filter') }}
                 </button>
             </form>
             <div :class="{'mt-3': !state.hideFilterPanel}">
                 <div class="form-check form-switch">
-                    <input type="checkbox" class="form-check-input" id="hide-filter-panel-switch" v-model="state.hideFilterPanel">
-                    <label class="form-check-label" for="hide-filter-panel-switch">
+                    <input
+                        id="hide-filter-panel-switch"
+                        v-model="state.hideFilterPanel"
+                        type="checkbox"
+                        class="form-check-input"
+                    >
+                    <label
+                        class="form-check-label"
+                        for="hide-filter-panel-switch"
+                    >
                         {{ t('main.activity.hide_filter_panel') }}
                     </label>
                 </div>

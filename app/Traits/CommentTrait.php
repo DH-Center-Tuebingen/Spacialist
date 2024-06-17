@@ -18,7 +18,7 @@ trait CommentTrait
         if(!isset($user)) $user = auth()->user();
         $comment = new Comment();
         $comment->user_id = $user->id;
-        $comment->content = $data['content'] ?? '';
+        $comment->content = htmlspecialchars($data['content'] ?? '');
         $comment->metadata = $data['metadata'] ?? [];
 
         if(isset($data['reply_to'])) {
@@ -51,6 +51,6 @@ trait CommentTrait
     }
 
     public function comments() {
-        return $this->morphMany('App\Comment', 'commentable')->orderBy('id');
+        return $this->morphMany(Comment::class, 'commentable')->orderBy('id');
     }
 }

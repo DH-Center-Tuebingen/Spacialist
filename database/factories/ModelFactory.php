@@ -307,6 +307,7 @@ $factory->define(App\AttributeValue::class, function(Faker $faker) {
     switch($attribute->datatype) {
         case 'string':
         case 'stringf':
+        case 'richtext':
         case 'list':
             $dt = 'str_val';
             $val = $faker->sentence($nbWords = 6, $variableNbWords = true);

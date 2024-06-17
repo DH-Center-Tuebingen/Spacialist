@@ -1,16 +1,16 @@
 <template>
     <div class="d-flex">
         <input
+            :id="name"
+            v-model="v.value"
             class="form-range"
             type="range"
             step="1"
             min="0"
             max="100"
             :disabled="disabled"
-            :id="name"
             :name="name"
-            v-model="v.value"
-            @input="v.handleInput" />
+        >
         <span class="ms-3">
             {{ v.value }}%
         </span>
@@ -67,7 +67,6 @@
 
             // DATA
             const {
-                handleInput,
                 value: fieldValue,
                 meta,
                 resetField,
@@ -79,12 +78,18 @@
             });
             const v = reactive({
                 value: fieldValue,
-                handleInput,
                 meta,
                 resetField,
             });
 
-            watch(v.meta, (newValue, oldValue) => {
+
+            watch(_ => value, (newValue, oldValue) => {
+                resetFieldState();
+            });
+            watch(_ => [v.meta.dirty, v.meta.valid], ([newDirty, newValid], [oldDirty, oldValid]) => {
+                // only emit @change event if field is validated (required because Entity.vue components)
+                // trigger this watcher several times even if another component is updated/validated
+                if(!v.meta.validated) return;
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
@@ -98,10 +103,6 @@
                 // LOCAL
                 resetFieldState,
                 undirtyField,
-                // PROPS
-                name,
-                disabled,
-                value,
                 // STATE
                 state,
                 v,

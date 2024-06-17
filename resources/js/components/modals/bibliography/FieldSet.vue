@@ -1,23 +1,56 @@
 <template>
     <div>
-        <div v-for="(data, field) in v.fields" :key="field" class="row mb-3">
-            <label class="col-form-label col-md-3 text-end">
+        <div
+            v-for="(fieldData, field) in v.fields"
+            :key="field"
+            class="row mb-3"
+        >
+            <label
+                class="col-form-label col-md-3 d-flex flex-row justify-content-end"
+                :title="getFieldTitle(field)"
+            >
                 {{ t(`main.bibliography.column.${field}`) }}
-                <span v-if="isMandatoryField(field)" class="text-danger">
-                    *
+                <span
+                    v-if="isMandatoryField(field)"
+                    class="text-danger ms-1"
+                >
+                    <i class="fas fa-2xs fa-asterisk" />
+                </span>
+                <span
+                    v-else-if="isMandatoryFieldIf(field)"
+                    class="text-danger ms-1"
+                >
+                    <i class="fas fa-2xs fa-asterisk" />
+                    <i class="fas fa-fw fa-2xs fa-asterisk" />
                 </span>
                 :
             </label>
             <div class="col-md-9">
-                <input type="text" class="form-control d-inline" :name="`${field}`" :class="getClassByValidation(data.errors)" v-model="data.value" @input="data.handleChange" />
-                <a href="#" class="text-muted ms--4-5" v-show="data.meta.dirty" @click.prevent="resetField(field)" tabindex="-1">
+                <input
+                    v-model="fieldData.value"
+                    type="text"
+                    class="form-control d-inline"
+                    :name="`${field}`"
+                    :class="getClassByValidation(fieldData.errors)"
+                    @input="fieldData.handleChange"
+                >
+                <a
+                    v-show="fieldData.meta.dirty"
+                    href="#"
+                    class="text-muted ms--4-5"
+                    tabindex="-1"
+                    @click.prevent="resetField(field)"
+                >
                     <span>
-                        <i class="fas fa-fw fa-undo"></i>
+                        <i class="fas fa-fw fa-undo" />
                     </span>
                 </a>
 
                 <div class="invalid-feedback">
-                    <span v-for="(msg, i) in data.errors" :key="i">
+                    <span
+                        v-for="(msg, i) in fieldData.errors"
+                        :key="i"
+                    >
                         {{ msg }}
                     </span>
                 </div>
@@ -113,15 +146,17 @@
             };
             const getValidationRules = field => {
                 let rules = yup.string();
-                if(state.type.mandatory[field] === true) {
-                    rules = rules.required();
-                } else if(state.type.mandatory[field]) {
-                    const refField = state.type.mandatory[field];
-                    rules = rules.when(refField, {
-                        is: '',
-                        then: yup.string().required(o => bibtexExt.requiredIf(o, refField)),
-                        otherwise: yup.string(),
-                    });
+                if(state.type.mandatory) {
+                    if(state.type.mandatory[field] === true) {
+                        rules = rules.required();
+                    } else if(state.type.mandatory[field]) {
+                        const refField = state.type.mandatory[field];
+                        rules = rules.when(refField, {
+                            is: '',
+                            then: _ => yup.string().required(o => bibtexExt.requiredIf(o, refField)),
+                            otherwise: _ => yup.string(),
+                        });
+                    }
                 }
                 return rules;
             };
@@ -135,7 +170,7 @@
                     ruleSets[key] = getValidationRules(f);
                     initValues[key] = value;
                 });
-                const wh = Object.keys(state.type.mandatory).filter(m => state.type.mandatory[m] && state.type.mandatory[m] !== true);
+                const wh = state.type.mandatory ? Object.keys(state.type.mandatory).filter(m => state.type.mandatory[m] && state.type.mandatory[m] !== true) : [];
                 const schema = yup.object().shape(ruleSets, wh);
                 const {
                     meta: formMeta,
@@ -163,7 +198,23 @@
                 });
             };
             const isMandatoryField = field => {
-                return state.type.mandatory[field] === true;
+                return state.type.mandatory && state.type.mandatory[field] === true;
+            };
+
+            const isMandatoryFieldIf = field => {
+                return state.type.mandatory && typeof state.type.mandatory[field] == 'string';
+            };
+
+            const getFieldTitle = field => {
+                if(isMandatoryField(field)) {
+                    const fieldText = t(`main.bibliography.column.${field}`);
+                    return t('main.bibliography.types.validation.required', { field: fieldText });
+                } else if(isMandatoryFieldIf(field)) {
+                    const col = t(`main.bibliography.column.${state.type.mandatory[field]}`);
+                    return t('main.bibliography.types.validation.required_if', { col });
+                } else {
+                    return null;
+                }
             };
 
             // DATA
@@ -201,10 +252,12 @@
                 undirtyFields,
                 getData,
                 isMandatoryField,
+                isMandatoryFieldIf,
+                getFieldTitle,
                 //STATE
                 state,
                 v,
-            }
+            };
         },
-    }
+    };
 </script>

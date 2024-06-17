@@ -2,7 +2,9 @@
 
 namespace App;
 
+use App\AttributeTypes\AttributeBase;
 use Illuminate\Database\Eloquent\Model;
+use MStaack\LaravelPostgis\Geometries\Geometry;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
@@ -22,6 +24,11 @@ class Attribute extends Model
         'parent_id',
         'recursive',
         'root_attribute_id',
+        'restrictions',
+    ];
+
+    protected $casts = [
+        'restrictions' => 'array',
     ];
 
     public function getActivitylogOptions() : LogOptions
@@ -32,24 +39,48 @@ class Attribute extends Model
             ->logOnlyDirty();
     }
 
-    public function getSelection() {
+    public function getEntityAttributeValueName() {
+        $name = null;
+        switch($this->datatype) {
+            case 'entity':
+                $name = Entity::find($this->pivot->entity_val)->name;
+                break;
+            case 'entity-mc':
+                $value = [];
+                foreach(json_decode($this->pivot->json_val) as $dec) {
+                    $value[] = Entity::find($dec)->name;
+                }
+                $name = $value;
+                break;
+        }
+        return $name;
+    }
+
+    public function getAttributeValueFromEntityPivot()
+    {
         switch ($this->datatype) {
             case 'string-sc':
-            case 'string-mc':
-            case 'epoch':
-                return ThConcept::getChildren($this->thesaurus_root_url, $this->recursive);
-            case 'table':
-                // Only string-sc is allowed in tables
-                $columns = Attribute::where('parent_id', $this->id)
-                    ->where('datatype', 'string-sc')
-                    ->get();
-                $selection = [];
-                foreach ($columns as $c) {
-                    $selection[$c->id] = ThConcept::getChildren($c->thesaurus_root_url, $c->recursive);
-                }
-                return $selection;
+                $this->pivot->thesaurus_val = ThConcept::where('concept_url', $this->pivot->thesaurus_val)->first();
+                break;
             default:
-                return null;
+                break;
+        }
+        return $this->pivot->str_val ??
+            $this->pivot->int_val ??
+            $this->pivot->dbl_val ??
+            $this->pivot->entity_val ??
+            $this->pivot->thesaurus_val ??
+            json_decode($this->pivot->json_val) ??
+            $this->pivot->dt_val ??
+            Geometry::fromWKB($this->pivot->geography_val)->toWKT();
+    }
+
+    public function getSelection() {
+        $attributeClass = AttributeBase::getMatchingClass($this->datatype);
+        if($attributeClass !== false && $attributeClass::getHasSelection()) {
+            return $attributeClass::getSelection($this);
+        } else {
+            return null;
         }
     }
 

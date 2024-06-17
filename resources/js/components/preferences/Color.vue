@@ -1,25 +1,26 @@
 <template>
     <div class="row">
-        <label class="col-md-2 form-label"></label>
+        <label class="col-md-2 form-label" />
         <div class="col-md-10">
             <multiselect
-                v-model="data"
                 id="color-search"
-                :trackBy="'id'"
+                :value="data"
+                :track-by="'id'"
                 :label="'id'"
-                :valueProp="'key'"
-                :hideSelected="true"
+                :value-prop="'key'"
+                :hide-selected="true"
                 :mode="'single'"
                 :filterResults="true"
                 :options="state.colorList"
                 :searchable="true"
-                :readonly="readonly"
+                :disabled="readonly"
                 :placeholder="t('global.select.placeholder')"
-                @change="onChange">
-                <template v-slot:option="{ option }">
+                @change="onChange"
+            >
+                <template #option="{ option }">
                     {{ t(`main.preference.key.color.style.${option.id}`) }}
                 </template>
-                <template v-slot:singlelabel="{ value }">
+                <template #singlelabel="{ value }">
                     <div class="multiselect-single-label">
                         {{ t(`main.preference.key.color.style.${value.id}`) }}
                     </div>
@@ -65,9 +66,7 @@
             // FUNCTIONS
             const onChange = value => {
                 if(readonly.value) return;
-                context.emit('changed', {
-                    value: value
-                });
+                context.emit('changed', value);
             };
 
             // DATA
@@ -80,9 +79,6 @@
                 t,
                 // LOCAL
                 onChange,
-                // PROPS
-                data,
-                readonly,
                 // STATE
                 state,
             };

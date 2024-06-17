@@ -28,6 +28,8 @@ import Gradient from '@/components/Gradient.vue';
 import MarkdownViewer from '@/components/mde/Viewer.vue';
 import MarkdownEditor from '@/components/mde/Wrapper.vue';
 import BibtexCode from '@/components/bibliography/BibtexCode.vue';
+import Richtext from '@/components/attribute/Richtext.vue';
+import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
 
 // Init Libs
 // PQueue, httpQueue
@@ -40,7 +42,6 @@ import VueUploadComponent from 'vue-upload-component';
 import DatePicker from 'vue-datepicker-next';
 import draggable from 'vuedraggable';
 import { Tree, Node, } from "tree-vue-component";
-import VueMarkdown from 'markdown-vue';
 
 // Components
 import App from '@/App.vue';
@@ -215,32 +216,33 @@ app.directive('infinite-scroll', {
 });
 
 // Components
-app.component('attribute-list', AttributeList);
-app.component('entity-type-list', EntityTypeList);
-app.component('entity-tree', EntityTree);
-app.component('entity-breadcrumbs', EntityBreadcrumbs);
-app.component('user-avatar', UserAvatar);
-app.component('activity-log', ActivityLog);
-app.component('comment-list', CommentList);
-app.component('emoji-picker', EmojiPicker);
-app.component('global-search', GlobalSearch);
-app.component('simple-search', SimpleSearch);
-app.component('sp-map', InteractiveMap);
-app.component('alert', Alert);
-app.component('notification-body', NotificationBody);
-app.component('csv-table', CsvTable);
-app.component('color-gradient', Gradient);
-app.component('vue-markdown', VueMarkdown);
-app.component('md-viewer', MarkdownViewer);
-app.component('md-editor', MarkdownEditor);
-app.component("bibtex-code", BibtexCode);
+app.component('AttributeList', AttributeList);
+app.component('EntityTypeList', EntityTypeList);
+app.component('EntityTree', EntityTree);
+app.component('EntityBreadcrumbs', EntityBreadcrumbs);
+app.component('UserAvatar', UserAvatar);
+app.component('ActivityLog', ActivityLog);
+app.component('CommentList', CommentList);
+app.component('EmojiPicker', EmojiPicker);
+app.component('GlobalSearch', GlobalSearch);
+app.component('SimpleSearch', SimpleSearch);
+app.component('SpMap', InteractiveMap);
+app.component('Alert', Alert);
+app.component('NotificationBody', NotificationBody);
+app.component('CsvTable', CsvTable);
+app.component('ColorGradient', Gradient);
+app.component('MdViewer', MarkdownViewer);
+app.component('MdEditor', MarkdownEditor);
+app.component('BibtexCode', BibtexCode);
+app.component('Richtext', Richtext);
+app.component('EntityTypeLabel', EntityTypeLabel);
 // Third-Party components
-app.component('multiselect', Multiselect);
-app.component('file-upload', VueUploadComponent);
-app.component('date-picker', DatePicker);
-app.component('draggable', draggable);
-app.component('node', Node);
-app.component('tree', Tree);
+app.component('Multiselect', Multiselect);
+app.component('FileUpload', VueUploadComponent);
+app.component('DatePicker', DatePicker);
+app.component('Draggable', draggable);
+app.component('Node', Node);
+app.component('Tree', Tree);
 
 SpPS.initialize(app, i18n.global.t);
 

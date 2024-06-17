@@ -3,18 +3,23 @@
 namespace App;
 
 use App\Exceptions\InvalidDataException;
+use App\Plugins\Map\App\Geodata;
+use App\AttributeTypes\AttributeBase;
 use Illuminate\Database\Eloquent\Model;
 use MStaack\LaravelPostgis\Eloquent\PostgisTrait;
 use App\Traits\CommentTrait;
+use App\Traits\ModerationTrait;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
+use stdClass;
 
 class AttributeValue extends Model implements Searchable
 {
     use PostgisTrait;
     use CommentTrait;
+    use ModerationTrait;
     use LogsActivity;
 
     protected $table = 'attribute_values';
@@ -55,6 +60,11 @@ class AttributeValue extends Model implements Searchable
         'geography_val',
     ];
 
+    protected $copyOn = [
+        'entity_id',
+        'attribute_id',
+    ];
+
     const patchRules = [
         'certainty' => 'integer|between:0,100',
     ];
@@ -76,14 +86,36 @@ class AttributeValue extends Model implements Searchable
     }
 
     public function getValue() {
-        return $this->str_val ??
-               $this->int_val ??
-               $this->dbl_val ??
-               $this->entity_val ??
-               $this->thesaurus_val ??
-               json_decode($this->json_val) ??
-               $this->dt_val ??
-               $this->geography_val->toWKT();
+        return AttributeBase::serializeValue($this);
+    }
+
+    public static function getValueFromKey($arr) {
+        if(!isset($arr)) return null;
+
+        if(isset($arr['str_val'])) {
+            return $arr['str_val'];
+        }
+        if(isset($arr['int_val'])) {
+            return $arr['int_val'];
+        }
+        if(isset($arr['dbl_val'])) {
+            return $arr['dbl_val'];
+        }
+        if(isset($arr['entity_val'])) {
+            return $arr['entity_val'];
+        }
+        if(isset($arr['thesaurus_val'])) {
+            return $arr['thesaurus_val'];
+        }
+        if(isset($arr['json_val'])) {
+            return json_decode($arr['json_val']);
+        }
+        if(isset($arr['dt_val'])) {
+            return $arr['dt_val'];
+        }
+        if(isset($arr['geography_val'])) {
+            return Geodata::arrayToWkt($arr['geography_val']);
+        }
     }
 
     public static function getValueById($aid, $cid) {
@@ -102,10 +134,19 @@ class AttributeValue extends Model implements Searchable
         $this->save();
     }
 
+    public static function getFormattedKeyValue($datatype, $rawValue) : stdClass {
+        $class = AttributeBase::getMatchingClass($datatype);
+        $keyValue = new stdClass();
+        $keyValue->key = $class::getField();
+        $keyValue->val = $class::unserialize($rawValue);
+
+        return $keyValue;
+    }
+
     // Does not handle InvalidDataException and AmbiguousValueException in stringToValue method here!
     // Throws InvalidDataException
     // Throws AmbiguousValueException
-    public function setValue($strValue, $type = null, $save = false) {
+    public function setValueFromRaw($strValue, $type = null, $save = false) {
         if(!isset($type)) {
             $type = Attribute::first($this->attribute_id)->datatype;
         }
@@ -124,50 +165,7 @@ class AttributeValue extends Model implements Searchable
     }
 
     public static function getValueColumn($type) {
-        $column = '';
-        switch($type) {
-            case 'string':
-            case 'stringf':
-            case 'iconclass':
-            case 'rism':
-                $column = 'str_val';
-                break;
-            case 'double':
-                $column = 'dbl_val';
-                break;
-            case 'integer':
-            case 'boolean':
-            case 'percentage':
-                $column = 'int_val';
-                break;
-            case 'string-sc':
-                $column = 'thesaurus_val';
-                break;
-            case 'date':
-                $column = 'dt_val';
-                break;
-            case 'string-mc':
-            case 'epoch':
-            case 'timeperiod':
-            case 'dimension':
-            case 'list':
-            case 'table':
-            case 'entity-mc':
-                $column = 'json_val';
-                break;
-            case 'geography':
-                $column = 'geography_val';
-                break;
-            case 'entity':
-                $column = 'entity_val';
-                break;
-            case 'sql':
-            case 'serial':
-                $column = null;
-                break;
-        }
-
-        return $column;
+        return AttributeBase::getFieldFromType($type);
     }
 
     // Throws InvalidDataException
@@ -175,181 +173,8 @@ class AttributeValue extends Model implements Searchable
     public static function stringToValue($strValue, $type) {
         if(!isset($strValue) || trim($strValue) === '') return null;
 
-        $trimmedVal = trim($strValue);
-        $value = null;
-
-        switch($type) {
-            case 'string':
-            case 'stringf':
-            case 'date':
-            case 'geography':
-            case 'iconclass':
-            case 'rism':
-                $value = $trimmedVal;
-                break;
-            case 'double':
-                if(!is_numeric($trimmedVal)) {
-                    throw new InvalidDataException("Given data is not a number");
-                }
-                $value = floatval($trimmedVal);
-                break;
-            case 'integer':
-            case 'percentage':
-                if(!is_int($trimmedVal) && !ctype_digit($trimmedVal)) {
-                    throw new InvalidDataException("Given data is not an integer");
-                }
-                $value = intval($trimmedVal);
-                break;
-            case 'boolean':
-                $value = $trimmedVal == 1 ||
-                          $trimmedVal == '1' ||
-                          strtolower($trimmedVal) == 'true' ||
-                          strtolower($trimmedVal) == 't' ||
-                          intval($trimmedVal) > 0;
-                break;
-            case 'string-sc':
-                $concept = ThConcept::getByString($trimmedVal);
-                if(isset($concept)) {
-                    $value = $concept->concept_url;
-                } else {
-                    throw new InvalidDataException("Given data is not a valid concept/label in the vocabulary");
-                }
-                break;
-            case 'string-mc':
-                $convValues = [];
-                $parts = explode(';', $trimmedVal);
-                foreach($parts as $part) {
-                    $trimmedPart = trim($part);
-                    $concept = ThConcept::getByString($trimmedPart);
-                    if(isset($concept)) {
-                        $convValues[] = [
-                            'id' => $concept->id,
-                            'concept_url' => $concept->concept_url,
-                        ];
-                    } else {
-                        throw new InvalidDataException("Given data part ($trimmedPart) is not a valid concept/label in the vocabulary");
-                    }
-                }
-                $value = json_encode($convValues);
-                break;
-            case 'epoch':
-                $startLabel = 'ad';
-                $endLabel = 'ad';
-                $parts = explode(';', $trimmedVal);
-
-                if(count($parts) != 3) {
-                    throw new InvalidDataException("Given data does not match this datatype's format (START;END;CONCEPT)");
-                }
-
-                $start = intval(trim($parts[0]));
-                $end = intval(trim($parts[1]));
-
-                if($end < $start) {
-                    throw new InvalidDataException("Start date must not be after end data ($start, $end)");
-                }
-                
-                $concept = ThConcept::getByString(trim($parts[2]));
-                $epoch = null;
-                if(isset($concept)) {
-                    $epoch = [
-                        'id' => $concept->id,
-                        'concept_url' => $concept->concept_url,
-                    ];
-                } else {
-                    throw new InvalidDataException("Given data is not a valid concept/label in the vocabulary");
-                }
-                if($start < 0) {
-                    $startLabel = 'bc';
-                    $start = abs($start);
-                }
-                if($end < 0) {
-                    $endLabel = 'bc';
-                    $end = abs($end);
-                }
-                $value = json_encode([
-                    'start' => $start,
-                    'startLabel' => $startLabel,
-                    'end' => $end,
-                    'endLabel' => $endLabel,
-                    'epoch' => $epoch,
-                ]);
-                break;
-            case 'timeperiod':
-                $startLabel = 'ad';
-                $endLabel = 'ad';
-                $parts = explode(';', $trimmedVal);
-
-                if(count($parts) != 2) {
-                    throw new InvalidDataException("Given data does not match this datatype's format (START;END)");
-                }
-
-                $start = intval(trim($parts[0]));
-                $end = intval(trim($parts[1]));
-
-                if($end < $start) {
-                    throw new InvalidDataException("Start date must not be after end data ($start, $end)");
-                }
-
-                if($start < 0) {
-                    $startLabel = 'bc';
-                    $start = abs($start);
-                }
-                if($end < 0) {
-                    $endLabel = 'bc';
-                    $end = abs($end);
-                }
-                $value = json_encode([
-                    'start' => $start,
-                    'startLabel' => $startLabel,
-                    'end' => $end,
-                    'endLabel' => $endLabel,
-                ]);
-                break;
-            case 'dimension':
-                $parts = explode(';', $trimmedVal);
-
-                if(count($parts) != 4) {
-                    throw new InvalidDataException("Given data does not match this datatype's format (VAL1;VAL2;VAL3;UNIT)");
-                }
-
-                $value = json_encode([
-                    'B' => floatval(trim($parts[0])),
-                    'H' => floatval(trim($parts[1])),
-                    'T' => floatval(trim($parts[2])),
-                    'unit' => trim($parts[3]),
-                ]);
-                break;
-            case 'list':
-                $trimmedValues = [];
-                $parts = explode(';', $trimmedVal);
-                foreach($parts as $part) {
-                    $trimmedValues[] = trim($part);
-                }
-                $value = json_encode($trimmedValues);
-                break;
-            case 'entity-mc':
-                $idList = [];
-                $parts = explode(';', $trimmedVal);
-                foreach($parts as $part) {
-                    $trimmedPart = trim($part);
-
-                    $entityId = Entity::getFromPath($trimmedPart);
-                    $idList[] = $entityId;
-                }
-                $value = json_encode($idList);
-                break;
-            case 'entity':
-                $entityId = Entity::getFromPath($trimmedVal);
-                $value = $entityId;
-                break;
-            case 'table':
-            case 'sql':
-            case 'serial':
-                $value = null;
-                break;
-        }
-
-        return $value;
+        $attributeClass = AttributeBase::getMatchingClass($type);
+        return $attributeClass::fromImport(trim($strValue));
     }
 
     public function user() {

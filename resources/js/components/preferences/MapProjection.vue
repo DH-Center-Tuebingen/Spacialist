@@ -4,7 +4,17 @@
             {{ t('main.preference.key.map.epsg') }}:
         </label>
         <div class="col-md-10">
-            <input class="form-control" type="number" min="0" max="99999" step="1" v-model="data.epsg" :readonly="readonly" @input="onChange" />
+            <input
+                :value="data.epsg"
+                class="form-control"
+                type="number"
+                min="0"
+                max="99999"
+                step="1"
+                :disabled="readonly"
+                :readonly="readonly"
+                @input="onChange"
+            >
         </div>
     </div>
 </template>
@@ -24,7 +34,10 @@
         props: {
             data: {
                 required: true,
-                type: Number,
+                type: Object,
+                validator: (value) => {
+                    return typeof value.epsg === 'number';
+                }
             },
             readonly: {
                 required: false,
@@ -43,9 +56,7 @@
             // FUNCTIONS
             const onChange = _debounce(e => {
                 if(readonly.value) return;
-                context.emit('changed', {
-                    value: e.target.value
-                });
+                context.emit('changed', {epsg: e.target.value});
             }, 250);
 
             // RETURN
@@ -53,9 +64,6 @@
                 t,
                 // LOCAL
                 onChange,
-                // PROPS
-                data,
-                readonly,
                 // STATE
             };
         }

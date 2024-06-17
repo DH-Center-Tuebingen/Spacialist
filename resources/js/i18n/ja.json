@@ -340,12 +340,11 @@
             },
             "info": {
                 "set_to_language": "<span class=\"fw-bold\">{lang}</span>に設定する",
-                "password_reset_link": "この機能を使用するには、<code>.env</code>ファイルで<code>MAIL_*</code>設定を行う必要があります。<a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/blob/master/INSTALL.md#send-mails\" target=\"_blank\">詳細情報</a>.",
                 "columns": "カラムの値の合計は12を超えてはなりません"
             },
             "key": {
                 "language": "言語",
-                "password_reset_link": "パスワードリセットリンクを有効にする",
+                "password_reset": "パスワードリセットリンクを有効にする",
                 "columns": {
                     "title": "メインビューの列",
                     "left": "左のカラム",
@@ -397,6 +396,7 @@
         "edit": "編集する",
         "edited": "編集済み",
         "duplicate": "複製",
+        "sort": "ソート",
         "resort": "順を変え",
         "update": "更新",
         "replace": "置き換え",
@@ -455,7 +455,7 @@
         },
         "search": "検索…",
         "search_no_results": "結果なし",
-        "search_no_results_for": "用語<span class=\"fst-italic fw-bold\">{term}</span>に該当する結果はありません",
+        "search_no_results_for": "用語 に該当する結果はありません:",
         "search_no_term_info": "検索語を入力する",
         "search_no_term_info_global": "グローバルに検索する場合は、検索語を入力してください",
         "login": "ログイン",
@@ -595,8 +595,8 @@
             "show": "コメントを表示する",
             "submit": "コメントを投稿する",
             "text_placeholder": "コメントを入力する",
-            "hide_reply": "返信を<span class=\"fw-bold\">一つ</span>隠す | <span class=\"fw-bold\">{cnt}</span>返信を隠す",
-            "show_reply": "返信を<span class=\"fw-bold\">一つ</span>件表示する | <span class=\"fw-bold\">{cnt}</span>返信を表示する",
+            "hide_reply": "返信を一つ隠す | {cnt}返信を隠す",
+            "show_reply": "返信を一つ件表示する | {cnt}返信を表示する",
             "fetching": "コメント取得中&hellip;",
             "fetching_failed": "コメントの取得に失敗しました！",
             "retry_failed": "再試行"

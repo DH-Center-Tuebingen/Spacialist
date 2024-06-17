@@ -1,22 +1,21 @@
  
 <template>
     <date-picker
+        :id="name"
+        v-model:value="v.value"
         class="w-100"
         input-class="form-control"
         value-type="date"
-        :id="name"
         :name="name"
         :disabled="disabled"
-        :disabled-date="(date) => date > new Date()"
-        :max-date="new Date()"
         :show-week-number="true"
-        v-model:value="v.value"
-        @input="handleInput">
-        <template v-slot:icon-calendar>
-            <i class="fas fa-fw fa-calendar-alt"></i>
+        @change="handleInput"
+    >
+        <template #icon-calendar>
+            <i class="fas fa-fw fa-calendar-alt" />
         </template>
-        <template v-slot:icon-clear>
-            <i class="fas fa-fw fa-times"></i>
+        <template #icon-clear>
+            <i class="fas fa-fw fa-times" />
         </template>
     </date-picker>
 </template>
@@ -60,18 +59,23 @@
             // FUNCTIONS
             const resetFieldState = _ => {
                 v.resetField({
-                    value: new Date(value.value)
+                    value: value.value ? new Date(value.value) : null,
                 });
             };
             const undirtyField = _ => {
+                // v.value is already a date or null
                 v.resetField({
-                    value: new Date(v.value),
+                    value: v.value,
                 });
             };
             const handleInput = value => {
-                // add timezone offset before handle change
-                const correctValue = new Date(value.getTime() - (value.getTimezoneOffset()*60*1000));
-                v.handleChange(correctValue);
+                if(!value) {
+                    v.handleChange(value);
+                } else {
+                    // add timezone offset before handle change
+                    const correctValue = new Date(value.getTime() - (value.getTimezoneOffset()*60*1000));
+                    v.handleChange(correctValue);
+                }
             }
 
             // DATA
@@ -80,8 +84,8 @@
                 value: fieldValue,
                 meta,
                 resetField,
-            } = useField(`date_${name.value}`, yup.date(), {
-                initialValue: new Date(value.value),
+            } = useField(`date_${name.value}`, yup.date().nullable(), {
+                initialValue: value.value ? new Date(value.value) : null,
             });
             const state = reactive({
 
@@ -93,7 +97,14 @@
                 resetField,
             });
 
-            watch(v.meta, (newValue, oldValue) => {
+
+            watch(_ => value, (newValue, oldValue) => {
+                resetFieldState();
+            });
+            watch(_ => [v.meta.dirty, v.meta.valid], ([newDirty, newValid], [oldDirty, oldValid]) => {
+                // only emit @change event if field is validated (required because Entity.vue components)
+                // trigger this watcher several times even if another component is updated/validated
+                if(!v.meta.validated) return;
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
@@ -108,10 +119,6 @@
                 resetFieldState,
                 undirtyField,
                 handleInput,
-                // PROPS
-                name,
-                disabled,
-                value,
                 // STATE
                 state,
                 v,
