@@ -326,6 +326,16 @@
                 required: false,
                 default: false,
             },
+            preview: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
+            previewData: {
+                type: Object,
+                required: false,
+                default: _ => new Object(),
+            },
         },
         emits: ['change', 'update-selection'],
         setup(props, context) {
@@ -335,6 +345,8 @@
                 disabled,
                 reactTo,
                 hideLinks,
+                preview,
+                previewData,
             } = toRefs(props);
             // FETCH
 
@@ -345,7 +357,7 @@
                 value: computed(_ => getValueOrDefault()),
                 // TODO check for selection need?
                 selection: computed(_ => getAttributeSelection(data.value.id) || {}),
-                
+
             });
 
             const setRef = el => {

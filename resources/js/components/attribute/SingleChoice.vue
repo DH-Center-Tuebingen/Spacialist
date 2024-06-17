@@ -92,9 +92,9 @@
                 default: 0,
             },
             selectionFromValue: {
-                type: Object,
+                type: Number,
                 required: false,
-                default: _ => new Object(),
+                default: -1,
             },
         },
         emits: ['change', 'update-selection'],
@@ -233,7 +233,7 @@
             });
             if(state.hasRootAttribute) {
                 watch(selectionFromValue, (newValue, oldValue) => {
-                    if(typeof newValue == 'object') {
+                    if(typeof newValue == 'object' || newValue == -1) {
                         newValue = null;
                     }
                     handleSelectionUpdate(newValue);

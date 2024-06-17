@@ -38,7 +38,7 @@
             <tbody>
                 <template
                     v-for="(row, $index) in state.actualShow"
-                    :key="`tabular-row-${uniqueRowIndex(row)}`"
+                    :key="`tabular-row-${uniqueRowIndex(row, $index)}`"
                 >
                     <td
                         v-if="row.hidden_info"
@@ -236,7 +236,7 @@
     import UserList from '@/components/attribute/UserList.vue';
     import Url from '@/components/attribute/Url.vue';
 
-    import * as d3 from 'd3-dsv'; 
+    import * as d3 from 'd3-dsv';
 
     export default {
         components: {
@@ -320,8 +320,9 @@
             const CUT_SIZE = 10;
             const CUT_THRES = (CUT_SIZE * 2) + Math.floor(CUT_SIZE / 2);
             // FUNCTIONS
-            const uniqueRowIndex = row => {
-                return hash(JSON.stringify(row));
+            const uniqueRowIndex = (row, index) => {
+                const idx = getActualRowIndex(index);
+                return hash(JSON.stringify(row)) + idx;
             };
             const resetFieldState = _ => {
                 v.resetField({
@@ -564,7 +565,7 @@
                                     data: [],
                                     backgroundColor: `rgba(${Math.floor(Math.random()*256)}, ${Math.floor(Math.random()*256)}, ${Math.floor(Math.random()*256)}, 0.25)`,
                                     label: `${translateConcept(label.thesaurus_url)}`
-                                }
+                                };
                             }
                             let value;
                             if(state.chartAcc[k]) {

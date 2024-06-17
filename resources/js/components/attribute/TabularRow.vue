@@ -8,7 +8,7 @@
         </td>
         <td
             v-for="(column, i) in columns"
-            :key="`tabluar-row-${number}-column-${i}`"
+            :key="`tabular-row-${number}-column-${i}`"
             :class="state.rowStateClasses"
         >
             <Attribute
