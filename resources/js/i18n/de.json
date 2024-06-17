@@ -424,9 +424,13 @@
                 "add": "Neue Top-Level Entität hinzufügen",
                 "contextmenu": {
                     "add": "Unterentität hinzufügen",
+                    "delete": "Entität löschen",
                     "duplicate": "Duplikat erzeugen",
+                    "move-selection": "Ausgewählte Entitäten verschieben",
                     "move": "Im Baum verschieben",
-                    "delete": "Entität löschen"
+                    "select-all-siblings-of-type": "Nachbarn dieses Typs auswählen",
+                    "select-all-siblings": "Nachbarn auswählen",
+                    "unselect-all": "Auswahl aufheben"
                 },
                 "sorts": {
                     "asc": {
@@ -445,7 +449,7 @@
                 "multiedit": {
                     "title": "Mehrfachauswahl umschalten",
                     "open": "Mehrfach-Bearbeitungs-Werkzeug öffnen",
-                    "warning": "Diese Aktion wird alle ausgewählten Entitäten betreffen.", 
+                    "warning": "Diese Aktion wird alle ausgewählten Entitäten betreffen.",
                     "toast": {
                         "saved": {
                             "title": "Mehrfach-Bearbeitung erfolgreich",

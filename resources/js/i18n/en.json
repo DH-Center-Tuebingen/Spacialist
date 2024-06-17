@@ -424,9 +424,13 @@
                 "add": "Add new Top-Level-Entity",
                 "contextmenu": {
                     "add": "Add Sub-Entity",
+                    "delete": "Delete Entity",
                     "duplicate": "Create Duplicate",
+                    "move-selection": "Move Selection",
                     "move": "Move in Tree",
-                    "delete": "Delete Entity"
+                    "select-all-siblings-of-type": "Select Siblings of same Type",
+                    "select-all-siblings": "Select Siblings",
+                    "unselect-all": "Unselect All"
                 },
                 "sorts": {
                     "asc": {

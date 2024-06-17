@@ -678,9 +678,8 @@ export async function moveEntities(entityIds, parentId = null) {
     };
     return $httpQueue.add(
         () => http.post(`/entity/moveMultiple`, data).then(response => {
-            
+
             response.data.forEach(entity => {
-                console.log(entity);
                 store.dispatch('moveEntity', entity);
             });
 

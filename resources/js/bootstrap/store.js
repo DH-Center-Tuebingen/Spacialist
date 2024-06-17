@@ -1,4 +1,4 @@
-import { createStore } from 'vuex';
+import {createStore} from 'vuex';
 
 import {
     sortTree,
@@ -282,15 +282,15 @@ export const store = createStore({
                 },
                 updateEntityDataModerations(state, data) {
                     const entity = state.entities[data.entity_id];
-                    for(let i=0; i<data.attribute_ids.length; i++) {
+                    for(let i = 0; i < data.attribute_ids.length; i++) {
                         const curr = data.attribute_ids[i];
                         entity.data[curr].moderation_state = data.state;
                     }
                 },
                 addEntityTypeAttribute(state, data) {
                     const attrs = state.entityTypeAttributes[data.entity_type_id];
-                    attrs.splice(data.position-1, 0, data);
-                    for(let i=data.position; i<attrs.length; i++) {
+                    attrs.splice(data.position - 1, 0, data);
+                    for(let i = data.position; i < attrs.length; i++) {
                         if(attrs[i].position) {
                             attrs[i].position++;
                         } else if(attrs[i].pivot && attrs[i].pivot.position) {
@@ -304,7 +304,7 @@ export const store = createStore({
                     if(idx > -1) {
                         attrs.splice(idx, 1);
                     }
-                    for(let i=idx; i<attrs.length; i++) {
+                    for(let i = idx; i < attrs.length; i++) {
                         if(attrs[i].position) {
                             attrs[i].position++;
                         } else if(attrs[i].pivot && attrs[i].pivot.position) {
@@ -338,7 +338,7 @@ export const store = createStore({
                     const movedAttrs = attrs.splice(from, 1);
                     attrs.splice(to, 0, ...movedAttrs);
                     if(from < to) {
-                        for(let i=from; i<to; i++) {
+                        for(let i = from; i < to; i++) {
                             if(attrs[i].position) {
                                 attrs[i].position++;
                             } else if(attrs[i].pivot && attrs[i].pivot.position) {
@@ -346,7 +346,7 @@ export const store = createStore({
                             }
                         }
                     } else {
-                        for(let i=to+1; i<=from; i++) {
+                        for(let i = to + 1; i <= from; i++) {
                             if(attrs[i].position) {
                                 attrs[i].position--;
                             } else if(attrs[i].pivot && attrs[i].pivot.position) {
@@ -480,6 +480,11 @@ export const store = createStore({
                 sortTree(state, sort) {
                     sortTree(sort.by, sort.dir, state.tree);
                 },
+                resetTreeSelection(state) {
+                    state.treeSelection = {};
+                    state.treeSelectionTypeIds = [];
+                    state.treeSelectionTypeIds = updateSelectionTypeIdList(state.treeSelection);
+                },
                 addToTreeSelection(state, data) {
                     // SO: IMO This should not be handled here.
                     // If the user selects incopatible entities, he has to remove them manually.
@@ -489,9 +494,25 @@ export const store = createStore({
 
                     // const addPossible = hasIntersectionWithEntityAttributes(data.value.entity_type_id, state.treeSelectionTypeIds);
                     // if(addPossible || state.treeSelectionTypeIds.length == 0) {
+
+                    // The process of adding a lot in a row is really slow.
+                    // So we add all as bulk to only trigger the 'computed' values once.
+                    if(Array.isArray(data)) {
+                        let objs = data.reduce((acc, curr) => {
+                            acc[curr.id] = curr.value;
+                            return acc;
+                        }
+                            , {});
+                        state.treeSelection = {
+                            ...state.treeSelection,
+                            ...objs,
+                        };
+                    } else {
                         state.treeSelection[data.id] = data.value;
-                        state.treeSelectionTypeIds = [];
-                        state.treeSelectionTypeIds = updateSelectionTypeIdList(state.treeSelection);
+                    }
+
+                    state.treeSelectionTypeIds = [];
+                    state.treeSelectionTypeIds = updateSelectionTypeIdList(state.treeSelection);
                     // }
                 },
                 removeFromTreeSelection(state, data) {
@@ -588,7 +609,7 @@ export const store = createStore({
                         for(let k in props) {
                             updPlugin[k] = props[k];
                         }
-                        
+
                         if(data.uninstalled) {
                             plugin = updPlugin;
                             remove = true;
@@ -693,6 +714,9 @@ export const store = createStore({
                 },
                 removeFromTreeSelection({commit}, data) {
                     commit('removeFromTreeSelection', data);
+                },
+                resetTreeSelection({commit}) {
+                    commit('resetTreeSelection');
                 },
                 toggleTreeSelectionMode({commit}) {
                     commit('toggleTreeSelectionMode');
