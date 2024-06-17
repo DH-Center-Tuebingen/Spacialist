@@ -12,6 +12,8 @@ class DemoSeeder extends Seeder {
      * @return void
      */
     public function run() {
+        activity()->disableLogging();
+
         $this->call(UsersTableSeeder::class);
 
         $this->call(ThesaurexSeeder::class);
@@ -66,5 +68,7 @@ class DemoSeeder extends Seeder {
         if (\DB::connection()->getDriverName() === 'pgsql') {
             $this->call(FixSequencesSeeder::class);
         }
+
+        activity()->enableLogging();
     }
 }

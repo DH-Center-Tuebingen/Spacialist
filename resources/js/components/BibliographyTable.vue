@@ -62,7 +62,7 @@
                             ref="upload"
                             v-model="state.files"
                             class="btn btn-sm btn-outline-primary clickable"
-                            accept="application/x-bibtex,text/x-bibtex,text/plain"
+                            accept=".bib,.bibtex,application/x-bibtex,text/x-bibtex,text/plain"
                             extensions="bib,bibtex"
                             :custom-action="importFile"
                             :directory="false"
@@ -77,13 +77,39 @@
                         </file-upload>
                     </li>
                     <li class="list-inline-item">
-                        <button
-                            type="button"
-                            class="btn btn-sm btn-outline-primary"
-                            @click="exportFile()"
+                        <div
+                            class="btn-group"
+                            role="group"
                         >
-                            <i class="fas fa-fw fa-file-export" /> {{ t('main.bibliography.export') }}
-                        </button>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-primary"
+                                @click="exportFile()"
+                            >
+                                <i class="fas fa-fw fa-file-export" /> {{ t('main.bibliography.export') }}
+                            </button>
+                            <div
+                                class="btn-group"
+                                role="group"
+                            >
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-primary dropdown-toggle"
+                                    data-bs-toggle="dropdown"
+                                />
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a
+                                            class="dropdown-item"
+                                            href="#"
+                                            @click.prevent="exportFile('search')"
+                                        >
+                                            <i class="fas fa-fw fa-file-export" /> {{ t('main.bibliography.export_search') }}
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </li>
                 </ul>
             </div>
@@ -538,7 +564,7 @@
     } from '@/helpers/bibliography.js';
 
     import {
-        getBibtexFile,
+        exportBibtexFile,
         updateBibliography,
     } from '@/api.js';
     import {
@@ -564,7 +590,7 @@
             const toast = useToast();
             // FETCH
 
-            const chunkSize = 20
+            const chunkSize = 20;
 
             // FUNCTIONS
             const setOrderColumn = column => {
@@ -606,7 +632,7 @@
                 // Enable automatic upload
                 if(!!newFile && (Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error)) {
                     if(!newFile.active) {
-                        newFile.active = true
+                        newFile.active = true;
                     }
                 }
             };
@@ -626,10 +652,15 @@
                     throwError(error);
                 });
             };
-            const exportFile = _ => {
+            const exportFile = type => {
                 if(!can('bibliography_share')) return;
 
-                getBibtexFile().then(data => {
+                let selection = null;
+                if(type == 'search' && state.query.length > 0) {
+                    selection = state.filteredEntries.map(e => e.id);
+                }
+
+                exportBibtexFile(selection).then(data => {
                     const filename = getProjectName(true) + '.bibtex';
                     createDownloadLink(data, filename, false, 'application/x-bibtex');
                 });
@@ -680,7 +711,7 @@
                         return 0;
                     }
                 }),
-                orderedBibliography: computed(_ => {
+                filteredEntries: computed(_ => {
                     const query = state.query.toLowerCase();
                     let filteredEntries = [];
                     if(!query.length) {
@@ -700,8 +731,11 @@
                             return false;
                         });
                     }
-                    const size = Math.min(state.entriesLoaded, filteredEntries.length);
-                    return _orderBy(filteredEntries, state.orderColumn, state.orderType).slice(0, size);
+                    return filteredEntries;
+                }),
+                orderedBibliography: computed(_ => {
+                    const size = Math.min(state.entriesLoaded, state.filteredEntries.length);
+                    return _orderBy(state.filteredEntries, state.orderColumn, state.orderType).slice(0, size);
                 })
             });
 
@@ -716,7 +750,7 @@
 
             const formatBibtexAndShowHighlight = text => {
                 if(!text) return '';
-                text = formatBibtexText(text)
+                text = formatBibtexText(text);
                 return highlight(text, state.query);
             };
 
@@ -742,5 +776,5 @@
                 state,
             };
         },
-    }
+    };
 </script>

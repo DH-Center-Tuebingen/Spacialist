@@ -515,6 +515,7 @@ export function showBibliographyEntry(data, onSave) {
                             type: e.data.type.name,
                             fields: {
                                 ...e.data.fields,
+                                citekey: reData.citekey,
                                 file: reData.file,
                                 file_url: reData.file_url,
                             },

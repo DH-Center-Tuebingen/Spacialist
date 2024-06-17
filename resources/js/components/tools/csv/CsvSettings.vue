@@ -143,7 +143,7 @@
     import { computed } from 'vue';
     import { useI18n } from 'vue-i18n';
     import { multiselectResetClasslist } from '@/helpers/helpers.js';
-    import IconButton from '../../forms/IconButton.vue';
+    import IconButton from '@/components/forms/IconButton.vue';
 
     export default {
         components: {

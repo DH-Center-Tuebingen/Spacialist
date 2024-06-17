@@ -1,5 +1,5 @@
 import auth from '@/bootstrap/auth.js';
-import store from '@/bootstrap/store.js';
+import store from '%store';
 import router from '%router';
 
 import {
@@ -74,23 +74,39 @@ export function getErrorMessages(error, suffix = '') {
     return msgObject;
 }
 
-export function getCertaintyClass(certainty, prefix = 'bg') {
-    let classes = {};
 
-    if(certainty <= 25) {
-        classes[`${prefix}-danger`] = true;
-    } else if(certainty <= 50) {
-        classes[`${prefix}-warning`] = true;
-    } else if(certainty <= 75) {
-        classes[`${prefix}-info`] = true;
-    } else {
-        classes[`${prefix}-success`] = true;
+const UNSET_CERTAINTY = {type: 'unset', icon: 'fas fa-fw fa-question', rangeFunction: (certainty) => certainty == null || certainty < 0 || certainty > 100};
+export function getCertainties() {
+    function inRangeOf(lowIn, highEx) {
+        return (certainty) => parseFloat(certainty) >= lowIn && parseFloat(certainty) < highEx;
+    }
+    return [
+        {type: 'danger', icon: 'fas fa-fw fa-exclamation', rangeFunction: inRangeOf(0, 25)},
+        {type: 'warning', icon: 'fas fa-fw fa-exclamation', rangeFunction: inRangeOf(25, 50)},
+        {type: 'info', icon: 'fas fa-fw fa-exclamation', rangeFunction: inRangeOf(50, 100)},
+        {type: 'success', icon: 'fas fa-fw fa-check', rangeFunction: (certainty) => certainty === 100},
+        UNSET_CERTAINTY,
+    ];
+}
+
+export function getCertainty(value) {
+    for(const certainty of getCertainties()) {
+        if(certainty.rangeFunction(value)) {
+            return certainty;
+        }
     }
 
+    return UNSET_CERTAINTY;
+}
+
+export function getCertaintyClass(certainty, prefix = 'bg') {
+    const classes = [];
+    const cert = getCertainty(certainty);
+    classes.push(`${prefix}-${cert.type}`);
     return classes;
 }
 
-export const multiselectResetClasslist = { clear: 'multiselect-clear multiselect-clear-reset' };
+export const multiselectResetClasslist = {clear: 'multiselect-clear multiselect-clear-reset'};
 
 export function getInputCursorPosition(input) {
     const div = document.createElement('div');
@@ -102,7 +118,7 @@ export function getInputCursorPosition(input) {
     div.textContent = input.value.substr(0, input.selectionStart);
 
     const span = document.createElement('span');
-    span.textContent = input.value.substr(input.selectionStart) || '.'
+    span.textContent = input.value.substr(input.selectionStart) || '.';
     div.appendChild(span);
     document.body.appendChild(div);
     const offsetX = span.offsetLeft + input.offsetLeft;
@@ -323,18 +339,19 @@ export function isAllowedSubEntityType(parentId, id) {
     return parent.sub_entity_types.some(et => et.id == id);
 }
 
-export function getInitialAttributeValue(attribute) {
-    switch(attribute.type) {
+export function getInitialAttributeValue(attribute, typeAttr = 'type') {
+    switch(attribute[typeAttr]) {
         case 'string':
         case 'stringf':
         case 'richtext':
         case 'iconclass':
         case 'rism':
         case 'geography':
+        case 'date':
+        case 'url':
             return '';
         case 'integer':
         case 'double':
-            return 0;
         case 'boolean':
             return 0;
         case 'percentage':
@@ -369,17 +386,28 @@ export function getInitialAttributeValue(attribute) {
         case 'string-mc':
         case 'entity-mc':
         case 'userlist':
+        case 'daterange':
+        case 'table':
             return [];
-        case 'date':
-            return new Date();
         case 'sql':
             return t('global.preview_not_available');
         case 'epoch':
         case 'dimension':
         case 'entity':
         case 'string-sc':
-        case 'table':
             return {};
+        case 'si-unit':
+            if(!attribute.siGroup) {
+                return { value: 0 };
+            } else {
+                return {
+                    value: 0,
+                    unit: attribute.siGroup,
+                    default: attribute.siGroupUnit,
+                };
+            }
+        default:
+            return '';
     }
 }
 
@@ -482,6 +510,16 @@ export function getEntityColors(id) {
         colors = store.getters.entityTypeColors(id);
     }
     return colors;
+}
+
+export function siSymbolToStr(symbol) {
+    if(!symbol) return '';
+
+    if(Array.isArray(symbol)) {
+        return symbol[0];
+    } else {
+        return symbol;
+    }
 }
 
 export function isLoggedIn() {
@@ -873,10 +911,6 @@ export function copyToClipboard(elemId) {
     } catch(err) {
         console.log(err);
     }
-}
-
-export function setPreference(prefKey, value) {
-    this.state.preferences[prefKey] = value;
 }
 
 export function sortConcepts(ca, cb) {

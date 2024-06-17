@@ -140,17 +140,25 @@
     >
         <h4 class="popover-header d-flex flex-row gap-2 justify-content-between align-items-center">
             <div>
-                <span class="fw-medium">
-                    {{ actionState.overlayData.title }}
-                </span>
-                <span v-if="actionState.overlayData.subtitle">
-                    ({{ actionState.overlayData.subtitle }})
-                </span>
+                <slot
+                    name="title"
+                    :feature="actionState.overlayData.feature"
+                    :default-title="actionState.overlayData.title"
+                    :default-subtitle="actionState.overlayData.subtitle"
+                >
+                    <span class="fw-medium">
+                        {{ actionState.overlayData.title }}
+                    </span>
+                    <span v-if="actionState.overlayData.subtitle">
+                        ({{ actionState.overlayData.subtitle }})
+                    </span>
+                </slot>
             </div>
             <div>
                 <slot
                     name="action"
                     :post-action-hook="data => postAction(data, actionState.overlayData.feature)"
+                    :feature="actionState.overlayData.feature"
                 />
             </div>
         </h4>
@@ -241,7 +249,7 @@
                                         >
                                             <a
                                                 href=""
-                                                @click.prevent="confirmOverlayCoordinateEditing()"
+                                                @click.prevent="confirmOverlayCoordinateEditing(true, actionState.overlayData.feature)"
                                             >
                                                 <i class="fas fa-fw fa-check" />
                                             </a>
@@ -417,6 +425,11 @@
                 required: false,
                 default: null,
             },
+            titleFn: {
+                type: Function,
+                required: false,
+                default: null,
+            },
         },
         emits: [
             'added', 
@@ -438,6 +451,7 @@
                 extent,
                 drawing,
                 triggerDataRescan,
+                titleFn,
             } = toRefs(props);
 
             // FUNCTIONS
@@ -820,8 +834,15 @@
                         actionState.popup.setPosition(coords);
 
                         let title = t('main.map.geometry_name', {id: props.id});
-                        if(props.entity) {
-                            title = `${props.entity_name} (${title})`;
+                        if(titleFn.value) {
+                            const fromFn = titleFn.value(feature);
+                            if(fromFn) {
+                                title = fromFn;
+                            }
+                        } else {
+                            if(props.entity) {
+                                title = `${props.entity_name} (${title})`;
+                            }
                         }
 
                         actionState.bsPopup = new Tooltip(actionState.popup.getElement(), {
@@ -893,7 +914,7 @@
                 actionState.measure.tooltipElement = document.getElementById(actionState.popupIds.m);
                 actionState.measure.tooltip = new Overlay({
                     element: actionState.measure.tooltipElement,
-                    offset: [0, 5]
+                    offset: [0, -10]
                 });
                 state.map.addOverlay(actionState.measure.tooltip);
             };
@@ -1119,14 +1140,21 @@
                     drawFeature(event.feature);
                 });
             };
-            const confirmOverlayCoordinateEditing = (confirm = true) => {
+            const confirmOverlayCoordinateEditing = (confirm, feature) => {
                 if(confirm) {
-                    // update coords
+                    const geom = feature.getGeometry();
+                    geom.setCoordinates(actionState.overlayCoordinateEdit);
+                    feature.setGeometry(geom);
+                    actionState.overlayData.coordinates = geom.getCoordinates();
+                    context.emit('modified', {
+                        features: [feature],
+                    });
+                    setOverlay(feature);
                 } else {
                     // cancel
-                    actionState.overlayCoordinateEdit = [];
                 }
                 actionState.coordinateEditMode = false;
+                actionState.overlayCoordinateEdit = [];
             };
             const getFeaturesInExtent = layer => {
                 const allLayers = !layer;
@@ -1421,6 +1449,7 @@
                     actionState.overlay = new Overlay({
                         element: overlayElem,
                         positioning: 'bottom-center',
+                        offset: [0, -10],
                         autoPan: true,
                         autoPanAnimation: {
                             duration: 250,

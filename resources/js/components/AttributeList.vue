@@ -90,20 +90,18 @@
                             v-if="!element.is_system"
                             class="text-end col"
                         >
-                            {{ translateConcept(element.thesaurus_url) }}:
+                            {{ translateConcept(element.thesaurus_url) }}
                         </span>
                         <sup
                             v-if="hasEmitter('onMetadata')"
-                            class="clickable"
+                            class="clickable d-flex flex-row align-items-start top-0"
                             @click="onMetadataHandler(element)"
                         >
-                            <span :class="getCertaintyClass(state.attributeValues[element.id].certainty, 'text')">
-                                <i class="fas fa-fw fa-exclamation" />
-                            </span>
-                            <span v-if="state.attributeValues[element.id].comments_count > 0">
+                            <validity-indicator :state="certainty(element)" />
+                            <span v-if="hasComment(element)">
                                 <i class="fas fa-fw fa-comment" />
                             </span>
-                            <span v-if="metadataAddon(element.thesaurus_url)">
+                            <span v-if="hasBookmarks(element)">
                                 <i class="fas fa-fw fa-bookmark" />
                             </span>
                         </sup>
@@ -200,7 +198,7 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
-                            :epochs="selections[element.id]"
+                            :epochs="selections[element.id] || []"
                             :type="element.datatype"
                             @change="e => updateDirtyState(e, element.id)"
                         />
@@ -211,6 +209,16 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
+                            @change="e => updateDirtyState(e, element.id)"
+                        />
+
+                        <si-unit-attribute
+                            v-else-if="element.datatype == 'si-unit'"
+                            :ref="el => setRef(el, element.id)"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :name="`attr-${element.id}`"
+                            :value="state.attributeValues[element.id].value"
+                            :metadata="element.metadata"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -293,7 +301,7 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
-                            :selections="selections[element.id]"
+                            :selections="selections[element.id] || []"
                             :selection-from="element.root_attribute_id"
                             :selection-from-value="state.rootAttributeValues[element.root_attribute_id]"
                             @update-selection="e => handleSelectionUpdate(element.id, e)"
@@ -306,7 +314,7 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
-                            :selections="selections[element.id]"
+                            :selections="selections[element.id] || []"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -379,7 +387,6 @@
 
     import {
         getAttribute,
-        getCertaintyClass,
         translateConcept,
     } from '@/helpers/helpers.js';
 
@@ -400,6 +407,7 @@
     import List from '@/components/attribute/List.vue';
     import Epoch from '@/components/attribute/Epoch.vue';
     import Dimension from '@/components/attribute/Dimension.vue';
+    import SiUnit from '@/components/attribute/SiUnit.vue';
     import Tabular from '@/components/attribute/Tabular.vue';
     import Iconclass from '@/components/attribute/Iconclass.vue';
     import RISM from '@/components/attribute/Rism.vue';
@@ -415,6 +423,7 @@
     import SystemSeparator from '@/components/attribute/SystemSeparator.vue';
     import DefaultAttr from '@/components/attribute/Default.vue';
     import ModerationPanel from '@/components/moderation/Panel.vue';
+    import ValidityIndicator from './forms/indicators/ValidityIndicator.vue';
 
     export default {
         components: {
@@ -427,6 +436,7 @@
             'percentage-attribute': Percentage,
             'serial-attribute': Serial,
             'dimension-attribute': Dimension,
+            'si-unit-attribute': SiUnit,
             'epoch-attribute': Epoch,
             'list-attribute': List,
             'tabular-attribute': Tabular,
@@ -444,6 +454,7 @@
             'system-separator-attribute': SystemSeparator,
             'default-attribute': DefaultAttr,
             'attribute-moderation-panel': ModerationPanel,
+            'validity-indicator': ValidityIndicator,
         },
         props: {
             classes: {
@@ -470,10 +481,10 @@
                 type: Boolean,
                 default: false
             },
-            group: { // required if onReorder is set // TODO
+            group: {
                 required: false,
-                type: String,
-                default: null,
+                type: Object,
+                default: _ => new Object(),
             },
             isSource: {
                 required: false,
@@ -767,6 +778,18 @@
             const hasEmitter = which => {
                 return !!attrs[which];
             };
+
+            const certainty = attribute => {
+                return state.attributeValues?.[attribute.id]?.certainty;
+            };
+
+            const hasComment = attribute => {
+                return state.attributeValues[attribute.id].comments_count > 0;
+            };
+            const hasBookmarks = attribute => {
+                return metadataAddon.value && metadataAddon.value(attribute.thesaurus_url);
+            };
+
             const handleLabelClick = (e, attrType) => {
                 if(attrType == 'boolean') {
                     e.preventDefault();
@@ -857,9 +880,9 @@
             return {
                 t,
                 // HELPERS
-                getCertaintyClass,
                 translateConcept,
                 // LOCAL
+                certainty,
                 handleSelectionUpdate,
                 clFromMetadata,
                 attributeClasses,
@@ -886,6 +909,8 @@
                 onDeleteHandler,
                 onMetadataHandler,
                 hasEmitter,
+                hasComment,
+                hasBookmarks,
                 handleLabelClick,
                 convertEntityValue,
                 // STATE

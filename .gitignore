@@ -18,6 +18,7 @@ phpunit.xml.bak
 
 ## Created by PHPUnit/Coveralls
 /build
+phpunit.xml.bak
 
 ## Created by Laravel
 /node_modules

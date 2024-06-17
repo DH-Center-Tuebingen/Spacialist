@@ -42,6 +42,7 @@ abstract class AttributeBase
         "timeperiod" => TimeperiodAttribute::class,
         "userlist" => UserlistAttribute::class,
         "url" => UrlAttribute::class,
+        "si-unit" => SiUnitAttribute::class,
     ];
 
     public static function serialized() : array {
@@ -51,7 +52,7 @@ abstract class AttributeBase
         ];
     }
 
-    public static function getTypes(array $filters = []) : array {
+    public static function getTypes(bool $serialized = false, array $filters = []) : array {
         if(count($filters) > 0) {
             $types = Arr::where(self::$types, function(string $attr, string $key) use($filters) {
                 foreach($filters as $on => $value) {
@@ -70,9 +71,14 @@ abstract class AttributeBase
         } else {
             $types = self::$types;
         }
-        return array_values(array_map(function(string $class) {
-            return $class::serialized();
-        }, $types));
+
+        if($serialized) {
+            return array_values(array_map(function(string $class) {
+                return $class::serialized();
+            }, $types));
+        } else {
+            return $types;
+        }
     }
 
     public static function getMatchingClass(string $datatype) : bool|AttributeBase {
