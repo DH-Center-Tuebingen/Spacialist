@@ -9,10 +9,14 @@ use App\EntityAttribute;
 use App\EntityFile;
 use App\EntityType;
 use App\Exceptions\AmbiguousValueException;
+use App\Exceptions\AttributeImportException;
 use App\Exceptions\ImportException;
 use App\Exceptions\Structs\ImportExceptionStruct;
 use App\Exceptions\InvalidDataException;
+use App\Exceptions\Structs\AttributeImportExceptionStruct;
 use App\Import\EntityImporter;
+use App\Import\ImportResolution;
+use App\Import\ImportResolutionType;
 use App\Reference;
 use App\ThConcept;
 use Exception;
@@ -446,19 +450,19 @@ class EntityController extends Controller {
         $file = $request->file('file');
         $metadata = json_decode($request->get('metadata'), true);
         $data = json_decode($request->get('data'), true);
-        $handle = fopen($file->getRealPath(), 'r');
 
-        try {
-            $entityImport = new EntityImporter($metadata, $data);
-            $result = $entityImport->validateImportData($handle);
-        } catch (ImportException $e) {
-            $obj = $e->getObject();
-            return response()->json($obj, 400);
-        }
+        $entityImport = new EntityImporter($metadata, $data);
+        $resolver = $entityImport->validateImportData($file->getRealPath());
 
-        return response()->json($result);
+        return response()->json([
+            'errors' => $resolver->getErrors(),
+            'summary' => $resolver->getSummary(),
+        ]);
     }
 
+    /**
+     * TODO: Move this functionality into the EntityImporter class.
+     */
     public function importData(Request $request) {
         $this->verifyImportData($request);
 
@@ -467,8 +471,14 @@ class EntityController extends Controller {
         $data = json_decode($request->get('data'), true);
         $handle = fopen($file->getRealPath(), 'r');
 
+        // Data values
+        $nameColumn = trim($data['name_column']);
+        $parentColumn = isset($data['parent_column']) ? trim($data['parent_column']) : null;
+        $entityTypeId = trim($data['entity_type_id']);
+        $attributesMapping = array_map(fn ($col) => trim($col), $data['attributes']);
+
+
         $headerRow = null;
-        $headerRead = false;
         $hasParent = false;
         $attributeIdToColumnIdxMapping = [];
         $attributeTypes = [];
@@ -476,45 +486,73 @@ class EntityController extends Controller {
 
         DB::beginTransaction();
 
+        $affectedRows = 0;
         $parentIdx = null;
         $nameIdx = null;
-        while (($row = fgetcsv($handle, 0, $metadata['delimiter'])) !== false) {
-            if (!$headerRead) {
-                $headerRead = true;
+
+
+        // Getting headers
+        if (($row = fgetcsv($handle, 0, $metadata['delimiter'])) !== false) {
+            $row = sp_trim_array($row);
+            try {
                 $headerRow = $row;
                 for ($i = 0; $i < count($row); $i++) {
-                    if ($row[$i] == $data['name_column']) {
+                    if ($row[$i] == $nameColumn) {
                         $nameIdx = $i;
-                    } else if (isset($data['parent_column']) && $row[$i] == $data['parent_column']) {
+                    } else if (isset($parentColumn) && $row[$i] == $parentColumn) {
                         $parentIdx = $i;
                         $hasParent = true;
-                    } else {
-                        foreach ($data['attributes'] as $id => $a) {
-                            if ($a == $row[$i]) {
-                                $attributeIdToColumnIdxMapping[$id] = $i;
-                                $attributeTypes[$id] = Attribute::find($id)->datatype;
-                                break;
-                            }
+                    }
+
+                    foreach ($attributesMapping as $id => $a) {
+                        if ($a == $row[$i]) {
+                            $attributeIdToColumnIdxMapping[$id] = $i;
+                            $attributeTypes[$id] = Attribute::findOrFail($id)->datatype;
+                            break;
                         }
                     }
                 }
-                continue;
+            } catch (ModelNotFoundException $e) {
+                DB::rollBack();
+                $ids = $e->getIds();
+                return response()->json([
+                    'error' => __('entity-importer.attribute-id-does-not-exist', ['attributes' => join(', ', $ids)]),
+                    'data' => new ImportExceptionStruct(),
+                ], 400);
+            }
+        }
+
+        //Processing rows
+        while (($row = fgetcsv($handle, 0, $metadata['delimiter'])) !== false) {
+            $row = sp_trim_array($row);
+            $affectedRows++;
+
+            if (!isset($nameIdx)) {
+                throw new ImportException(
+                    "Name column '" . $nameColumn . "' could not be found in CSV file",
+                    400,
+                    new ImportExceptionStruct(on: $nameColumn)
+                );
             }
 
             $rootEntityPath = $hasParent ? $row[$parentIdx] : null;
             $entityName = $row[$nameIdx];
-            $entityPath = $hasParent ? implode("\\\\", [$rootEntityPath, $entityName]) : $entityName;
+            $entityPath = $entityName;
             $entityId = null;
 
             $errorResponseData = new ImportExceptionStruct(
                 count: count($changedEntities) + 1,
                 entry: $entityName,
-                on: $headerRow[$parentIdx],
-                on_index: $parentIdx + 1,
-                on_value: $row[$parentIdx]
             );
 
-            if ($hasParent) {
+            if ($hasParent && !empty($rootEntityPath)) {
+
+                $entityPath = implode("\\\\", [$rootEntityPath, $entityName]);
+
+                $errorResponseData->on = $headerRow[$parentIdx];
+                $errorResponseData->on_index = $parentIdx + 1;
+                $errorResponseData->on_value = $row[$parentIdx];
+
                 try {
                     $parentEntity = Entity::getFromPath($rootEntityPath);
                     if (!isset($parentEntity)) {
@@ -545,7 +583,7 @@ class EntityController extends Controller {
             try {
                 $user = auth()->user();
                 if ($entityId == null) {
-                    $entity = $this->createImportedEntity($entityName, $rootEntityPath, $data['entity_type_id'], $user);
+                    $entity = $this->createImportedEntity($entityName, $rootEntityPath, $entityTypeId, $user);
 
                     // If create entity fails, return error
                     if ($entity["type"] !== "entity") {
@@ -563,12 +601,37 @@ class EntityController extends Controller {
                     $entityId = $entity['entity']->id;
                 }
 
-                $this->setOrUpdateImportedAttributes($entityId, $row, $attributeIdToColumnIdxMapping, $attributeTypes, $user);
+                $this->setOrUpdateImportedAttributes($entityId, $row, $headerRow, $attributeIdToColumnIdxMapping, $attributeTypes, $user);
                 $changedEntities[] = $entityId;
+            } catch (AttributeImportException $e) {
+                DB::rollBack();
+                return response()->json($e->toImportExceptionObject(count($changedEntities) + 1, $entityName), 400);
+            } catch (ImportException $e) {
+                DB::rollBack();
+                return response()->json(
+                    [
+                        'error' => $e->getMessage(),
+                        'data' => $e->getData()
+                    ],
+                    400
+                );
             } catch (Exception $e) {
                 DB::rollBack();
-                return response()->json($errorResponseData, 400);
+                return response()->json(
+                    [
+                        'error' => $e->getMessage(),
+                        'data' => $errorResponseData
+                    ],
+                    400
+                );
             }
+        }
+
+        if ($affectedRows === 0) {
+            DB::rollBack();
+            return response()->json([
+                'error' => __('entity-importer.empty'),
+            ], 400);
         }
 
         fclose($handle);
@@ -576,12 +639,15 @@ class EntityController extends Controller {
         return response()->json($changedEntities, 201);
     }
 
-    function createImportedEntity($entityName, string $rootEntityPath, $entityTypeId, $user) {
+    function createImportedEntity($entityName, ?string $rootEntityPath, $entityTypeId, $user) {
 
-        try {
-            $rootEntityId = Entity::getFromPath($rootEntityPath);
-        } catch (AmbiguousValueException $ave) {
-            throw new Exception($ave->getMessage());
+        $rootEntityId = null;
+        if (isset($rootEntityPath)) {
+            try {
+                $rootEntityId = Entity::getFromPath($rootEntityPath);
+            } catch (AmbiguousValueException $ave) {
+                throw new Exception($ave->getMessage());
+            }
         }
 
         return Entity::create([
@@ -589,8 +655,8 @@ class EntityController extends Controller {
         ], $entityTypeId, $user, $rootEntityId);
     }
 
-    function setOrUpdateImportedAttributes($entity_id, $row, $attributeIdToColumnIdxMapping, $attributeTypes, $user) {
-        foreach ($attributeIdToColumnIdxMapping as $key => $val) {
+    function setOrUpdateImportedAttributes($entity_id, $row, $headerRow, $attributeIdToColumnIdxMapping, $attributeTypes, $user) {
+        foreach ($attributeIdToColumnIdxMapping as $key => $colIdx) {
             $aid = intval($key);
             $type = $attributeTypes[$aid];
 
@@ -600,7 +666,20 @@ class EntityController extends Controller {
             ], [
                 'user_id' => $user->id,
             ]);
-            $setValue = $attrVal->setValueFromRaw($row[$val], $type);
+            try {
+                $setValue = $attrVal->setValueFromRaw($row[$colIdx], $type);
+            } catch (InvalidDataException $e) {
+                throw new AttributeImportException(
+                    $e->getMessage(),
+                    new AttributeImportExceptionStruct(
+                        type: $type,
+                        columnIndex: $colIdx + 1,
+                        columnValue: $row[$colIdx],
+                        columnName: $headerRow[$colIdx]
+                    )
+                );
+            }
+
             if ($setValue === null) {
                 continue;
             }

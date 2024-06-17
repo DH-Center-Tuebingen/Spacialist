@@ -12,6 +12,10 @@ thesaurex
 /db
 /app/Plugins/
 
+
+## PHPUnit
+phpunit.xml.bak
+
 ## Created by PHPUnit/Coveralls
 /build
 phpunit.xml.bak
