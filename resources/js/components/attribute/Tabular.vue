@@ -322,7 +322,8 @@
             // FUNCTIONS
             const uniqueRowIndex = (row, index) => {
                 const idx = getActualRowIndex(index);
-                return hash(JSON.stringify(row)) + idx;
+                return idx;
+                // return hash(JSON.stringify(row)) + idx;
             };
             const resetFieldState = _ => {
                 v.resetField({
