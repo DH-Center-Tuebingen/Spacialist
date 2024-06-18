@@ -1,5 +1,8 @@
 <template>
-    <tr>
+    <tr
+        @mouseenter="state.isHovered = true"
+        @mouseleave="state.isHovered = false"
+    >
         <td
             class="fw-bold"
             :class="state.rowStateClasses"
@@ -27,7 +30,10 @@
             class="text-center"
             :class="state.rowStateClasses"
         >
-            <div class="dropdown">
+            <div
+                v-if="state.isHovered"
+                class="dropdown"
+            >
                 <span
                     :id="`tabular-row-options-${number}`"
                     class="clickable"
@@ -193,6 +199,7 @@
             const columnRefs = ref({});
             const state = reactive({
                 currentValue: _cloneDeep(data.value),
+                isHovered: false,
                 rootAttributeValues: {},
                 dynamicSelectionList: computed(_ => {
                     const list = [];
