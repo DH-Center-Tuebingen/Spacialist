@@ -96,6 +96,12 @@ export async function removePlugin(id) {
     );
 }
 
+export async function fetchEntityMetadata(id) {
+    const {data} = await $httpQueue.add(() => http.get(`entity/${id}/metadata`));
+    store.dispatch('updateEntityMetadata', {eid: id, data});
+    return data;
+}
+
 export async function fetchUsers() {
     store.commit('setUser', auth.user());
     await $httpQueue.add(() => http.get('user').then(response => {
@@ -236,21 +242,6 @@ export async function getEntityReferences(id) {
     );
 }
 
-export async function getEntityHistory(id, page = 1) {
-    return await $httpQueue.add(
-        () => http.get(`/entity/${id}/history?page=${page}`).then(response => {
-            store.dispatch('updateEntityHistoryMetadata', {
-                eid: id,
-                append: true,
-                data: {
-                    history: response.data.data,
-                },
-            });
-            return response.data;
-        })
-    );
-}
-
 export async function getEntityTypeAttributes(id) {
     return await $httpQueue.add(
         () => http.get(`/editor/entity_type/${id}/attribute`)
@@ -278,13 +269,7 @@ async function fetchComments(id, type, aid = null) {
     if(!!aid) {
         endpoint = `${endpoint}&aid=${aid}`;
     }
-    return $httpQueue.add(() => http.get(endpoint).then(response => response.data).catch(error => { throw error; }));
-}
-
-export async function fetchEntityHistoryMetadata(id) {
-    return $httpQueue.add(
-        () => http.get(`/entity/${id}/metadata`).then(response => response.data)
-    );
+    return $httpQueue.add(() => http.get(endpoint).then(response => response.data).catch(error => {throw error;}));
 }
 
 export async function getBibtexFile() {
@@ -367,7 +352,7 @@ export async function resetUserPassword(uid, password) {
 }
 
 export async function confirmUserPassword(uid, password = null) {
-    const data = !!password ? { password: password } : {};
+    const data = !!password ? {password: password} : {};
     return $httpQueue.add(
         () => http.patch(`user/${uid}/password/confirm`, data).then(response => response.data)
     );
@@ -491,7 +476,7 @@ export async function duplicateEntity(entity) {
 
 export async function importEntityData(data) {
     return $httpQueue.add(
-        () => http.post(`/entity/import`, data).then(response => response.data).catch(e => { throw e; })
+        () => http.post(`/entity/import`, data).then(response => response.data).catch(e => {throw e;})
     );
 }
 
@@ -529,7 +514,7 @@ export async function addAttribute(attribute) {
     }
     if(attribute.columns && attribute.columns.length > 0) {
         data.columns = attribute.columns.map(c => {
-            const mappedC = { ...c };
+            const mappedC = {...c};
             if(mappedC.label) {
                 mappedC.label_id = mappedC.label.id;
                 delete mappedC.label;
@@ -629,7 +614,7 @@ export async function patchEntityName(eid, name) {
 
 export async function patchEntityMetadata(eid, metadata) {
     return $httpQueue.add(
-        () => http.patch(`entity/${eid}/metadata`, metadata).then(response => response.data)
+        () => http.patch(`entity/${eid}/metadata`, metadata).then(response => response.data).catch(error => {throw error;})
     );
 }
 
@@ -641,7 +626,7 @@ export async function patchAttribute(entityId, attributeId, data) {
 
 export async function patchAttributes(entityId, data) {
     return $httpQueue.add(
-        () => http.patch(`/entity/${entityId}/attributes`, data).then(response => response.data).catch(error => { throw error; })
+        () => http.patch(`/entity/${entityId}/attributes`, data).then(response => response.data).catch(error => {throw error;})
     );
 }
 
@@ -670,7 +655,7 @@ export async function handleModeration(modAction, entity_id, attribute_id, overw
                 });
             }
             return response.data;
-        }).catch(error => { throw error; })
+        }).catch(error => {throw error;})
     );
 }
 

@@ -81,110 +81,20 @@ class Entity extends Model implements Searchable {
         );
     }
 
+    public function getAllMetadata(){
+        return [
+            'creator' => $this->creator,
+            'editors' => $this->editors,
+            'metadata' => $this->metadata,
+        ];
+    }  
+    
     public static function getSearchCols(): array {
         return array_keys(self::searchCols);
     }
 
-    public function getHistory($page = 1) {
-        $curr = $this;
-        $vals = AttributeValue::with('attribute')->where('entity_id', $this->id)->get();
-        $assocAttrs = $vals->pluck('id');
-        $history = Activity::whereNot(function (Builder $query) {
-            $query->where('properties->attributes', '[]')
-                ->where('properties->old', '[]');
-        })
-            ->where(function (Builder $outerQuery) use ($curr, $assocAttrs) {
-                $outerQuery->where(function (Builder $query) use ($curr) {
-                    $query->where('subject_id', $curr->id)
-                        ->where('subject_type', get_class($curr));
-                })->orWhere(function (Builder $query) use ($assocAttrs) {
-                    $query->whereIn('subject_id', $assocAttrs)
-                        ->where('subject_type', (new AttributeValue())->getMorphClass());
-                });
-            })
-            ->orderBy('created_at', 'desc')
-            ->select('id', 'subject_id', 'subject_type', 'description', 'causer_id as user_id', 'created_at', 'properties')
-            ->paginate();
-
-        $history->getCollection()->transform(function ($item, $key) use ($vals) {
-            if($item->subject_type == (new AttributeValue())->getMorphClass()) {
-                foreach($vals as $v) {
-                    if($v->id == $item->subject_id) {
-                        $item->attribute = $v->attribute;
-                        if($item->properties->has('attributes')) {
-                            $item->value_after = AttributeValue::getValueFromKey($item->properties['attributes']);
-                            if($v->attribute->datatype == 'entity') {
-                                $entity = Entity::find($item->value_after);
-                                $item->value_after = [
-                                    'id' => $item->value_after,
-                                    'name' => isset($entity) ? $entity->name : "main.entity.metadata.deleted_entity_name",
-                                ];
-                            } else if($v->attribute->datatype == 'entity-mc') {
-                                $item->value_after = array_map(function($eid) {
-                                    $entity = Entity::find($eid);
-                                    return [
-                                        'id' => $eid,
-                                        'name' => isset($entity) ? $entity->name : "main.entity.metadata.deleted_entity_name",
-                                    ];
-                                },$item->value_after);
-                            }
-                        }
-                        if($item->properties->has('old')) {
-                            $item->value_before = AttributeValue::getValueFromKey($item->properties['old']);
-                            if($v->attribute->datatype == 'entity') {
-                                $entity = Entity::find($item->value_before);
-                                $item->value_before = [
-                                    'id' => $item->value_before,
-                                    'name' => isset($entity) ? $entity->name : "main.entity.metadata.deleted_entity_name",
-                                ];
-                            } else if($v->attribute->datatype == 'entity-mc') {
-                                $item->value_before = array_map(function($eid) {
-                                    $entity = Entity::find($eid);
-                                    return [
-                                        'id' => $eid,
-                                        'name' => isset($entity) ? $entity->name : "main.entity.metadata.deleted_entity_name",
-                                    ];
-                                },$item->value_before);
-                            }
-                        }
-                    }
-                }
-            }
-            return $item;
-        });
-
-        return $history;
-
-        // return $history->filter(function($entry) {
-        //     $p = $entry->properties;
-        //     $attrLngth = $p->has('attributes') ? count($p['attributes']) : 0;
-        //     $oldLngth = $p->has('old') ? count($p['old']) : 0;
-        //     if($attrLngth == 1 && $oldLngth == 1) {
-        //         if(isset($p['attributes']['user_id']) && isset($p['old']['user_id'])) {
-        //             return false;
-        //         }
-        //     }
-        //     return true;
-        // })->transform(function($item, $key) use ($vals) {
-        //     if($item->subject_type == (new AttributeValue())->getMorphClass()) {
-        //         foreach($vals as $v) {
-        //             if($v->id == $item->subject_id) {
-        //                 $item->attribute = $v->attribute;
-        //                 if($item->properties->has('attributes')) {
-        //                     $item->value_after = AttributeValue::getValueFromKey($item->properties['attributes']);
-        //                 }
-        //                 if($item->properties->has('old')) {
-        //                     $item->value_before = AttributeValue::getValueFromKey($item->properties['old']);
-        //                 }
-        //             }
-        //         }
-        //     }
-        //     return $item;
-        // });
-    }
-
     public static function getFromPath($path, $delimiter = "\\\\") {
-        if (!isset($path)) {
+        if(!isset($path)) {
             return null;
         }
 
@@ -204,9 +114,9 @@ class Entity extends Model implements Searchable {
             FROM path
             WHERE pathstr = ?
         ", ["$last", "$delimiter", "$path"]);
-        if (count($res) > 1) {
+        if(count($res) > 1) {
             throw new AmbiguousValueException("Path '$path' is ambiguous");
-        } else if (count($res) === 1) {
+        } else if(count($res) === 1) {
             return $res[0]->final_id;
         } else {
             return null;
@@ -215,11 +125,11 @@ class Entity extends Model implements Searchable {
 
     public static function create($fields, $entityTypeId, $user, $rootEntityId = null) {
         $isChild = isset($rootEntityId);
-        if ($isChild) {
+        if($isChild) {
             $parentCtid = self::find($rootEntityId)->entity_type_id;
             $relation = EntityTypeRelation::where('parent_id', $parentCtid)
                 ->where('child_id', $entityTypeId)->exists();
-            if (!$relation) {
+            if(!$relation) {
                 return [
                     'type' => 'error',
                     'msg' => __('This type is not an allowed sub-type.'),
@@ -227,7 +137,7 @@ class Entity extends Model implements Searchable {
                 ];
             }
         } else {
-            if (!EntityType::find($entityTypeId)->is_root) {
+            if(!EntityType::find($entityTypeId)->is_root) {
                 return [
                     'type' => 'error',
                     'msg' => __('This type is not an allowed root-type.'),
@@ -238,7 +148,7 @@ class Entity extends Model implements Searchable {
 
         $entity = new self();
         $rank;
-        if ($isChild) {
+        if($isChild) {
             $rank = self::where('root_entity_id', $rootEntityId)->max('rank') + 1;
             $entity->root_entity_id = $rootEntityId;
         } else {
@@ -246,7 +156,7 @@ class Entity extends Model implements Searchable {
         }
         $entity->rank = $rank;
 
-        foreach ($fields as $key => $value) {
+        foreach($fields as $key => $value) {
             $entity->{$key} = $value;
         }
         $entity->entity_type_id = $entityTypeId;
@@ -266,7 +176,7 @@ class Entity extends Model implements Searchable {
 
     public static function getEntitiesByParent($id = null) {
         $entities = self::withCount(['child_entities as children_count']);
-        if (!isset($id)) {
+        if(!isset($id)) {
             $entities->whereNull('root_entity_id');
         } else {
             $entities->where('root_entity_id', $id);
@@ -283,20 +193,20 @@ class Entity extends Model implements Searchable {
         $entity->user_id = $user->id;
 
         $query;
-        if (isset($entity->root_entity_id)) {
+        if(isset($entity->root_entity_id)) {
             $query = self::where('root_entity_id', $entity->root_entity_id);
         } else {
             $query = self::whereNull('root_entity_id');
         }
         $oldEntities = $query->where('rank', '>', $oldRank)->get();
 
-        foreach ($oldEntities as $oc) {
+        foreach($oldEntities as $oc) {
             $oc->rank--;
             $oc->saveQuietly();
         }
 
         $query = null;
-        if ($hasParent) {
+        if($hasParent) {
             $entity->root_entity_id = $parent;
             $query = self::where('root_entity_id', $parent);
         } else {
@@ -305,7 +215,7 @@ class Entity extends Model implements Searchable {
         }
         $newEntities = $query->where('rank', '>=', $rank)->get();
 
-        foreach ($newEntities as $nc) {
+        foreach($newEntities as $nc) {
             $nc->rank++;
             $nc->saveQuietly();
         }
@@ -356,7 +266,7 @@ class Entity extends Model implements Searchable {
             ->with('attribute')
             ->get();
         $entities = [];
-        foreach ($links as $link) {
+        foreach($links as $link) {
             $entity = Entity::find($link->entity_id);
             $entities[] = [
                 'id' => $entity->id,
@@ -406,7 +316,7 @@ class Entity extends Model implements Searchable {
         ");
         $ids = [];
         $names = [];
-        foreach ($res as $path) {
+        foreach($res as $path) {
             $ids[] = $path->path;
             $names[] = $path->pathn;
         }

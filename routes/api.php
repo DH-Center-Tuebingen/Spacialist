@@ -52,7 +52,6 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::get('/{id}/reference', 'ReferenceController@getByEntity')->where('id', '[0-9]+');
     Route::get('/{id}/parentIds', 'EntityController@getParentIds')->where('id', '[0-9]+');
     Route::get('/byParent/{id}', 'EntityController@getEntitiesByParent')->where('id', '[0-9]+');
-    Route::get('/{id}/history', 'EntityController@getEntityHistory')->where('id', '[0-9]+');
 
     Route::post('', 'EntityController@addEntity');
     Route::post('/{id}/duplicate', 'EntityController@duplicateEntity')->where('id', '[0-9]+');
@@ -136,7 +135,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 });
 
 // COMMENTS
-Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/comment')->group(function () {
+Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/comment')->group(function() {
     Route::get('/resource/{id}', 'CommentController@getComments')->where('id', '[0-9]+');
     Route::get('/{id}/reply', 'CommentController@getCommentReplies')->where('id', '[0-9]+');
 

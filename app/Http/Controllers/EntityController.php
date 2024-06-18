@@ -321,11 +321,7 @@ class EntityController extends Controller {
                 'error' => __('This entity does not exist')
             ], 400);
         }
-        return response()->json([
-            'creator' => $entity->creator,
-            'editors' => $entity->editors,
-            'history' => null,
-        ]);
+        return response()->json($entity->getAllMetadata());
     }
 
     public function getParentIds($id) {
@@ -355,27 +351,6 @@ class EntityController extends Controller {
         }
 
         return Entity::getEntitiesByParent($id);
-    }
-
-    public function getEntityHistory(Request $request, $id) {
-        $user = auth()->user();
-        if(!$user->can('entity_read')) {
-            return response()->json([
-                'error' => __('You do not have the permission to get an entity set')
-            ], 403);
-        }
-
-        try {
-            $entity = Entity::findOrFail($id);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This entity does not exist')
-            ], 400);
-        }
-
-        $page = $request->input('page', 1);
-
-        return response()->json($entity->getHistory($page));
     }
 
     // POST
@@ -415,7 +390,7 @@ class EntityController extends Controller {
         try {
             $entity = Entity::without(['user', 'parentIds', 'parentNames'])->findOrFail($id);
             unset($entity->comments_count);
-        } catch (ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity does not exist')
             ], 400);
@@ -919,7 +894,7 @@ class EntityController extends Controller {
         $entity->metadata = $metadata;
         $entity->save();
 
-        return response()->json($entity->metadata);
+        return response()->json($entity->getAllMetadata());
     }
 
     public function moveEntity(Request $request, $id) {
