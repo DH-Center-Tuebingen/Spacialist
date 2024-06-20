@@ -157,6 +157,10 @@ export const store = createStore({
                         entity.name = data.name;
                     }
                 },
+                updateEntityModificationState(state, data) {
+                    const entity = state.entities[data.id];
+                    entity.reverb_state = data.status;
+                },
                 updateEntityType(state, data) {
                     const entityType = state.entityTypes[data.id];
                     const values = only(data, ['thesaurus_url', 'updated_at', 'is_root', 'sub_entity_types']);
@@ -781,6 +785,17 @@ export const store = createStore({
                 },
                 updateEntity({commit}, data) {
                     commit('updateEntity', data);
+                },
+                updateEntityModificationState({commit}, data) {
+                    if (data.status == 'added') {
+                        const n = new Node(data.data);
+                        if (!!data.data.root_entity_id) {
+                            commit('addEntity', n);
+                        } else {
+                            commit('addRootEntity', n);
+                        }
+                    }
+                    commit('updateEntityModificationState', data);
                 },
                 updateEntityType({commit}, data) {
                     commit('updateEntityType', data);

@@ -612,6 +612,16 @@ export default {
                 container: 'toast-container',
             });
             useToast();
+
+            Echo.channel('entity_updates')
+                .listen('EntityUpdated', e => {
+                    store.dispatch('updateEntityModificationState', {
+                        status: e.status,
+                        id: e.entity.id,
+                        data: e.entity,
+                    });
+                })
+
             // if (adapter.browserDetails.browser == 'firefox') {
             //     adapter.browserShim.shimGetDisplayMedia(window, 'window');
             // }

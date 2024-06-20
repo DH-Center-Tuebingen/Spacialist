@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Entity;
 use App\Notification;
 use App\Notifications\EntityUpdated;
+use App\Events\EntityUpdated as EntityUpdatedEvent;
 use App\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Spatie\Activitylog\Models\Activity;
@@ -13,6 +14,7 @@ class EntityObserver
 {
     /**
      * Handle the Entity "saving" event.
+     * Notifications have to be send before entity is updated to get correct recipient list
      *
      * @param  \App\Entity  $entity
      * @return void
@@ -26,6 +28,22 @@ class EntityObserver
                 User::find($uid)->notify(new EntityUpdated($entity));
             } catch(ModelNotFoundException $e) {
             }
+        }
+    }
+
+    /**
+     * Handle the Entity "saved" event.
+     * dispatching update events require persisted new entity data
+     * 
+     * @param \App\Entity $entity
+     * @return void
+     * 
+     */    
+    public function saved(Entity $entity) {
+        if($entity->wasRecentlyCreated) {
+            EntityUpdatedEvent::dispatch($entity, "added");
+        } else {
+            EntityUpdatedEvent::dispatch($entity, "updated");
         }
     }
 

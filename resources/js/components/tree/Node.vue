@@ -51,6 +51,12 @@
                 </span>
                 <span :class="{ 'fw-bold': state.isSelected }">
                     {{ data.name }}
+                    <span v-if="state.modificationState == 'updated'">
+                        *
+                    </span>
+                    <span v-if="state.modificationState == 'added'">
+                        +
+                    </span>
                 </span>
             </a>
         </div>
@@ -148,6 +154,7 @@
             const state = reactive({
                 ddVisible: false,
                 multieditSelected: false,
+                modificationState: computed(_ => store.getters.entities[data.value.id].reverb_state),
                 colorStyles: computed(_ => getEntityColors(data.value.entity_type_id)),
                 isSelected: computed(_ => store.getters.entity.id === data.value.id),
                 isSelectionMode: computed(_ => store.getters.treeSelectionMode),
