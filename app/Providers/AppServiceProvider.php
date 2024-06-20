@@ -22,8 +22,8 @@ class AppServiceProvider extends ServiceProvider {
      * @return void
      */
     public function boot() {
-        DB::getDoctrineSchemaManager()->getDatabasePlatform()->registerDoctrineTypeMapping('geography', 'string');
-        DB::getDoctrineSchemaManager()->getDatabasePlatform()->registerDoctrineTypeMapping('geometry', 'string');
+        // DB::getDoctrineSchemaManager()->getDatabasePlatform()->registerDoctrineTypeMapping('geography', 'string');
+        // DB::getDoctrineSchemaManager()->getDatabasePlatform()->registerDoctrineTypeMapping('geometry', 'string');
 
         // In some Proxy setups it might be necessary to enforce using the app's url as root url
         if (env('APP_FORCE_URL') === true) {

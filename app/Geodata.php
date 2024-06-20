@@ -2,13 +2,13 @@
 
 namespace App;
 
-use MStaack\LaravelPostgis\Geometries\Geometry;
-use MStaack\LaravelPostgis\Eloquent\PostgisTrait;
+use Clickbar\Magellan\Data\Geometries\Geometry;
+use Clickbar\Magellan\Database\Eloquent\HasPostgisColumns;
 use MStaack\LaravelPostgis\Exceptions\UnknownWKTTypeException;
 
 class Geodata
 {
-    use PostgisTrait;
+    use HasPostgisColumns;
 
     protected static $availableGeometryTypes = [
         'Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon'
