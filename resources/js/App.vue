@@ -39,6 +39,15 @@
                                 <global-search />
                             </form>
                         </li>
+                        <li class="nav-item">
+                            <button
+                                type="button"
+                                class="btn btn-primary btn-sm"
+                                @click="testWs()"
+                            >
+                                Test WebSocket Connection
+                            </button>
+                        </li>
                     </ul>
 
                     <!-- Right Side Of Navbar -->
@@ -378,8 +387,8 @@
 
                     <!-- eslint-disable vue/no-v-html -->
                     <h1
-                        class="mt-5" 
-                        v-html="t('main.app.loading_screen_msg', { appname: state.appName })" 
+                        class="mt-5"
+                        v-html="t('main.app.loading_screen_msg', { appname: state.appName })"
                     />
                     <!-- eslint-enable-->
                 </div>
@@ -465,6 +474,10 @@ import {
     searchParamsToObject
 } from '@/helpers/routing.js';
 
+import {
+    listenToTest,
+} from '@/helpers/websocket.js';
+
 export default {
     components: {
         'modals-container': ModalsContainer,
@@ -475,6 +488,8 @@ export default {
         // FETCH
         initApp(locale).then(_ => {
             store.dispatch('setAppState', true);
+            // Testing WebSockets
+            // listenToTest();
         }).catch(e => {
             if(e.response.status == 401) {
                 store.dispatch('setAppState', true);
@@ -575,6 +590,9 @@ export default {
         const showAboutModal = _ => {
             showAbout();
         };
+        const testWs = _ => {
+            listenToTest();
+        };
 
         // WATCHER
         // watch(_ => state.ready, (newValue, oldValue) => {
@@ -621,15 +639,6 @@ export default {
             });
             useToast();
 
-            Echo.channel('entity_updates')
-                .listen('EntityUpdated', e => {
-                    store.dispatch('updateEntityModificationState', {
-                        status: e.status,
-                        id: e.entity.id,
-                        data: e.entity,
-                    });
-                })
-
             // if (adapter.browserDetails.browser == 'firefox') {
             //     adapter.browserShim.shimGetDisplayMedia(window, 'window');
             // }
@@ -673,6 +682,7 @@ export default {
             deleteNotification,
             logout,
             showAboutModal,
+            testWs,
             // PROPS
             // STATE
             state,

@@ -30,7 +30,7 @@ import { createVfm } from 'vue-final-modal';
 // Font Awesome
 import '@/bootstrap/font.js';
 // Laravel Echo (Frontend part of Reverb aka WebSockets)
-import '@/bootstrap/echo.js';
+import '@/bootstrap/websocket.js';
 
 // Plugin System
 import { SpPS } from '@/bootstrap/plugins.js';

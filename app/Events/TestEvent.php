@@ -9,9 +9,8 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use App\Entity;
 
-class EntityUpdated implements ShouldBroadcast
+class TestEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -19,12 +18,9 @@ class EntityUpdated implements ShouldBroadcast
      * Create a new event instance.
      */
     public function __construct(
-        public Entity $entity,
-        public ?string $status = null,
-    )
-    {
-        $this->entity = $entity;
-        $this->status = $status ?? "$entity->name updated";
+        public string $message
+    ) {
+        $this->message = $message;
     }
 
     /**
@@ -35,7 +31,8 @@ class EntityUpdated implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('entity_updates'),
+            new Channel('testchannel'),
+            new PrivateChannel('private_testchannel'),
         ];
     }
 }

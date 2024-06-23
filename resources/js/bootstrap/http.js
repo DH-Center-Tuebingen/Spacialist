@@ -5,6 +5,12 @@ import {
     throwError,
 } from '@/helpers/helpers.js';
 
+export const root_api = axios.create();
+root_api.defaults.baseURL = 'api';
+root_api.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+root_api.defaults.withCredentials = true;
+root_api.defaults.withXSRFToken = true;
+
 const instance = axios.create();
 
 // These errors need to be handled manually.
@@ -20,7 +26,7 @@ export function isUnhandledError(axiosError) {
 
 // Some errors are handled by the system.
 // If we handle those again, we have e.g. multiple error popups.
-// This allows us to just catch the errors that are not handled by 
+// This allows us to just catch the errors that are not handled by
 // the system.
 export function handleUnhandledErrors(axiosError, callback) {
     if (isUnhandledError(axiosError)) {
