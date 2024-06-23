@@ -3,7 +3,6 @@ import {
     external,
 } from '@/bootstrap/http.js';
 import store from '@/bootstrap/store.js';
-import auth from '@/bootstrap/auth.js';
 import {
     only,
     simpleResourceType,
@@ -11,6 +10,18 @@ import {
 } from '@/helpers/helpers.js';
 
 // GET AND STORE (FETCH)
+export async function logout() {
+    await $httpQueue.add(() => http.post('/auth/logout').then(_ => {
+        store.dispatch('setUserLogin', false);
+        store.dispatch('setUser', {});
+    }));
+}
+
+export async function getCsrfCookie() {
+    await $httpQueue.add(() => http.get('http://localhost:8000/sanctum/csrf-cookie').then(response => {
+    }));
+}
+
 export async function fetchVersion() {
     await $httpQueue.add(() => http.get('/version').then(response => {
         store.dispatch('setVersion', response.data);
@@ -96,8 +107,17 @@ export async function removePlugin(id) {
     );
 }
 
+export async function fetchUser() {
+    await $httpQueue.add(() => http.get('/auth/user').then(response => {
+        const data = response.data;
+        const loginSuccessful = data.status == 'success';
+        const userData = loginSuccessful ? data.data : {};
+        store.dispatch('setUserLogin', loginSuccessful);
+        store.dispatch('setUser', userData);
+    }));
+}
+
 export async function fetchUsers() {
-    store.commit('setUser', auth.user());
     await $httpQueue.add(() => http.get('user').then(response => {
         store.dispatch('setUsers', {
             active: response.data.users,
@@ -147,13 +167,14 @@ export async function fetchPreData(locale) {
         store.dispatch('setAnalysis', response.data.analysis);
         store.dispatch('setDatatypeData', response.data.datatype_data);
 
-        if(auth.ready()) {
-            auth.load().then(_ => {
-                locale.value = store.getters.preferenceByKey('prefs.gui-language');
-            });
-        } else {
-            locale.value = store.getters.preferenceByKey('prefs.gui-language');
-        }
+        locale.value = store.getters.preferenceByKey('prefs.gui-language');
+        // if(auth.ready()) {
+        //     auth.load().then(_ => {
+        //         locale.value = store.getters.preferenceByKey('prefs.gui-language');
+        //     });
+        // } else {
+        //     locale.value = store.getters.preferenceByKey('prefs.gui-language');
+        // }
     }));
 }
 
@@ -322,6 +343,12 @@ export async function getMapProjection(srid) {
 }
 
 // POST
+export async function login(credentials) {
+    await $httpQueue.add(() => http.post('/auth/login', credentials).then(response => {
+        return response.data;
+    }));
+}
+
 export async function addUser(user) {
     const data = only(user, ['name', 'nickname', 'email', 'password']);
     return $httpQueue.add(

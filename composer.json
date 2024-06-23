@@ -15,6 +15,7 @@
         "laravel-lang/lang": "^12.21.1",
         "laravel/framework": "^11.0",
         "laravel/reverb": "@beta",
+        "laravel/sanctum": "^4.0",
         "laravel/tinker": "~2.0",
         "laravel/ui": "^4.2",
         "nicolaslopezj/searchable": "^1.13.0",

@@ -29,7 +29,9 @@ export function handleUnhandledErrors(axiosError, callback) {
 }
 
 instance.defaults.baseURL = 'api/v1';
+instance.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 instance.defaults.withCredentials = true;
+instance.defaults.withXSRFToken = true;
 instance.interceptors.response.use(response => {
     return response;
 }, error => {

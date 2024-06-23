@@ -7,13 +7,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Sanctum\HasApiTokens;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 use Spatie\Activitylog\Traits\CausesActivity;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements JWTSubject
+class User extends Authenticatable
 {
     use Notifiable;
     use HasRoles;
@@ -21,6 +22,7 @@ class User extends Authenticatable implements JWTSubject
     use LogsActivity;
     use SoftDeletesWithTrashed;
     use HasFactory;
+    use HasApiTokens;
     // use Authenticatable;
 
     protected $guard_name = 'web';
@@ -124,22 +126,4 @@ class User extends Authenticatable implements JWTSubject
     // public function roles() {
     //     return $this->belongsToMany('App\Role', 'role_user', 'user_id', 'role_id');
     // }
-
-    /**
-     * Get the identifier that will be stored in the subject claim of the JWT.
-     *
-     * @return mixed
-     */
-    public function getJWTIdentifier() {
-        return $this->getKey();
-    }
-
-    /**
-     * Return a key value array, containing any custom claims to be added to the JWT.
-     *
-     * @return array
-     */
-    public function getJWTCustomClaims() {
-        return [];
-    }
 }

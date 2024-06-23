@@ -436,9 +436,12 @@ import videojs from 'video.js';
 import Record from 'videojs-record';
 
 import store from '@/bootstrap/store.js';
-import auth from '@/bootstrap/auth.js';
 import { useI18n } from 'vue-i18n';
 import { provideToast, useToast } from '@/plugins/toast.js';
+
+import {
+    logout as apiLogout,
+} from '@/api.js';
 
 import {
     getPreference,
@@ -504,10 +507,10 @@ export default {
             isRecording: false,
             plugins: computed(_ => store.getters.slotPlugins()),
             hasAnalysis: computed(_ => store.getters.hasAnalysis),
-            auth: auth,
             appName: computed(_ => getProjectName()),
             init: computed(_ => store.getters.appInitialized),
             loggedIn: computed(_ => store.getters.isLoggedIn),
+            ready: computed(_ => state.loggedIn && state.init),
             authUser: computed(_ => store.getters.user),
             notifications: computed(_ => {
                 return userNotifications();
@@ -563,9 +566,10 @@ export default {
             deleteNotificationHelper(event);
         };
         const logout = _ => {
-            auth.logout({
-                makeRequest: true,
-                redirect: '/login'
+            apiLogout().then(_ => {
+                router.push({
+                    name: 'login'
+                });
             });
         };
         const showAboutModal = _ => {
@@ -573,6 +577,10 @@ export default {
         };
 
         // WATCHER
+        // watch(_ => state.ready, (newValue, oldValue) => {
+        //     if(state.ready) {
+        //     }
+        // });
         watch(_ => state.loggedIn, (newValue, oldValue) => {
             if(newValue && !oldValue) {
                 const route = router.currentRoute.value;
@@ -596,9 +604,9 @@ export default {
                 // })
             }
         });
-        watch(state.auth, (newValue, oldValue) => {
-            store.commit('setUser', state.auth.user());
-        });
+        // watch(state.auth, (newValue, oldValue) => {
+        //     store.commit('setUser', state.auth.user());
+        // });
 
         // ON MOUNTED
         onMounted(_ => {

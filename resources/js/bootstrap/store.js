@@ -38,6 +38,7 @@ export const store = createStore({
             state() {
                 return {
                     appInitialized: false,
+                    userLoggedIn: false,
                     attributes: [],
                     attributeTypes: [],
                     attributeSelections: {},
@@ -86,6 +87,9 @@ export const store = createStore({
             mutations: {
                 setAppInitialized(state, data) {
                     state.appInitialized = data;
+                },
+                setUserLogin(state, data) {
+                    state.userLoggedIn = data;
                 },
                 setAttributes(state, data) {
                     state.attributes = data;
@@ -375,9 +379,27 @@ export const store = createStore({
                     state.users.push(data);
                 },
                 updateUser(state, data) {
-                    const index = state.users.findIndex(u => u.id == data.id);
+                    const {
+                        is_profile_data,
+                        ...userData
+                    } = data;
+                    const index = state.users.findIndex(u => u.id == userData.id);
                     if(index > -1) {
-                        const cleanData = only(data, ['email', 'roles', 'updated_at', 'deleted_at', 'login_attempts',]);
+                        let allowedProps = [
+                            'email',
+                            'roles',
+                            'updated_at',
+                            'deleted_at',
+                            'login_attempts',
+                        ];
+                        if(is_profile_data) {
+                            allowedProps.push(
+                                'nickname',
+                                'metadata',
+                            );
+                        }
+
+                        const cleanData = only(data, allowedProps);
                         const currentData = state.users[index];
                         state.users[index] = {
                             ...currentData,
@@ -649,6 +671,9 @@ export const store = createStore({
                 setAppState({commit}, data) {
                     commit('setAppInitialized', data);
                 },
+                setUserLogin({commit}, data) {
+                    commit('setUserLogin', data);
+                },
                 setBibliography({commit}, data) {
                     commit('setBibliography', data);
                 },
@@ -683,6 +708,9 @@ export const store = createStore({
                 },
                 setUsers({commit}, data) {
                     commit('setUsers', data);
+                },
+                setUser({commit}, data) {
+                    commit('setUser', data);
                 },
                 sortTree({commit}, sort) {
                     commit('sortTree', sort);
@@ -833,6 +861,13 @@ export const store = createStore({
                 updateUser({commit}, data) {
                     commit('updateUser', data);
                 },
+                updateUserProfile({commit}, data) {
+                    commit('setUser', data);
+                    commit('updateUser', {
+                        ...data,
+                        is_profile_data: true,
+                    });
+                },
                 deactivateUser({commit}, data) {
                     commit('deactivateUser', data);
                 },
@@ -924,6 +959,7 @@ export const store = createStore({
             },
             getters: {
                 appInitialized: state => state.appInitialized,
+                loggedIn: state => state.userLoggedIn,
                 attributes: state => state.attributes,
                 attributeTypes: state => state.attributeTypes,
                 attributeTableTypes: state => state.attributeTypes.filter(at => at.in_table),

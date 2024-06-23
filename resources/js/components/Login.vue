@@ -111,7 +111,7 @@
 
         import { useI18n } from 'vue-i18n';
         import { useRoute } from 'vue-router';
-        import auth from '@/bootstrap/auth.js';
+        import store from '%store';
         import router from '%router';
 
         import {
@@ -124,6 +124,11 @@
         import {
             showConfirmPassword,
         } from '@/helpers/modal.js';
+
+        import {
+            getCsrfCookie,
+            login as apiLogin,
+        } from '@/api.js';
 
         export default {
             setup() {
@@ -152,18 +157,22 @@
                     } else {
                         data.nickname = state.user.email;
                     }
-                    auth.login({
-                        data: data,
-                        staySignedIn: state.user.remember,
-                        redirect: state.redirect,
-                        fetchUser: true
-                    })
-                    .then(_ => {
+                    apiLogin(data)
+                    // auth.login({
+                    //     data: data,
+                    //     staySignedIn: state.user.remember,
+                    //     redirect: state.redirect,
+                    //     fetchUser: true
+                    // })
+                    .then(userData => {
                         state.submitting = false;
+                        console.log("init app!", state.redirect, userData);
                         return initApp(locale);
                     })
                     .catch(e => {
                         state.submitting = false;
+                        store.dispatch('setUserLogin', false);
+                        store.dispatch('setUser', {});
                         state.error = getErrorMessages(e);
                         return Promise.reject();
                     })
@@ -178,24 +187,31 @@
 
                 // ON MOUNTED
                 onMounted(_ => {
-                    if(auth.check()) {
+                    if(store.getters.loggedIn) {
                         router.push({
                             name: 'home'
                         });
+                    } else {
+                        getCsrfCookie();
                     }
-                    const lastRoute = auth.redirect() ? auth.redirect().from : undefined;
-                    const currentRoute = useRoute();
-                    if(lastRoute && lastRoute.name != 'login') {
-                        state.redirect = {
-                            name: lastRoute.name,
-                            params: lastRoute.params,
-                            query: lastRoute.query
-                        };
-                    } else if(currentRoute.query && currentRoute.query.redirect) {
-                        state.redirect = {
-                            path: currentRoute.query.redirect
-                        };
-                    }
+                    // if(auth.check()) {
+                    //     router.push({
+                    //         name: 'home'
+                    //     });
+                    // }
+                    // const lastRoute = auth.redirect() ? auth.redirect().from : undefined;
+                    // const currentRoute = useRoute();
+                    // if(lastRoute && lastRoute.name != 'login') {
+                    //     state.redirect = {
+                    //         name: lastRoute.name,
+                    //         params: lastRoute.params,
+                    //         query: lastRoute.query
+                    //     };
+                    // } else if(currentRoute.query && currentRoute.query.redirect) {
+                    //     state.redirect = {
+                    //         path: currentRoute.query.redirect
+                    //     };
+                    // }
                 });
 
                 // RETURN

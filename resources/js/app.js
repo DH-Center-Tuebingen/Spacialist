@@ -23,8 +23,6 @@ import store from '@/bootstrap/store.js';
 import router from '%router';
 // Axios
 import '@/bootstrap/http.js';
-// Vue-Auth
-import vueAuth from '@/bootstrap/auth.js';
 // vue-i18n
 import i18n from '@/bootstrap/i18n.js';
 // vue-final-modal
@@ -44,7 +42,7 @@ const app = createApp(App);
 app.use(i18n);
 app.use(router);
 app.use(store);
-app.use(vueAuth);
+// app.use(vueAuth);
 app.use(createVfm());
 
 initDirectives(app);

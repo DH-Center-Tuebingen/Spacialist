@@ -341,7 +341,8 @@
         phone as vPhone,
         orcid as vOrcid,
     } from '@/bootstrap/validation.js';
-    import auth from '@/bootstrap/auth.js';
+
+    import store from '%store';
 
     import {
         getUser,
@@ -440,13 +441,10 @@
             const updateUserObjects = data => {
                 // Workaround to update avatar image, because url may not change
                 data.avatar_url += `#${Date.now()}`;
-                auth.user({
+                store.dispatch('updateUserProfile', {
                     ...getUser(),
-                    ...data
+                    ...data,
                 });
-                auth.user(
-                    appliedMetadata(getUser())
-                );
             };
             const uploadFile = (file, component) => {
                 return setUserAvatar(file.file).then(data => {

@@ -1,6 +1,7 @@
-import auth from '@/bootstrap/auth.js';
+// import auth from '@/bootstrap/auth.js';
 import store from '%store';
 import router from '%router';
+
 
 import {
     fetchAttributes,
@@ -9,10 +10,12 @@ import {
     fetchTopEntities,
     fetchPreData,
     fetchGeometryTypes,
+    fetchUser,
     fetchUsers,
     fetchVersion,
     fetchPlugins,
     fetchAttributeTypes,
+    getCsrfCookie,
 } from '@/api.js';
 
 import {
@@ -25,6 +28,8 @@ import {
 
 export async function initApp(locale) {
     store.dispatch('setAppState', false);
+    await getCsrfCookie();
+    await fetchUser();
     await fetchPreData(locale);
     await fetchAttributes();
     await fetchUsers();
@@ -523,11 +528,11 @@ export function siSymbolToStr(symbol) {
 }
 
 export function isLoggedIn() {
-    return auth.check();
+    return store.getters.loggedIn;
 }
 
 export function getUser() {
-    return isLoggedIn() ? auth.user() : {};
+    return isLoggedIn() ? store.getters.user : {};
 }
 
 export function isModerated() {

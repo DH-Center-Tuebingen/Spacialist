@@ -18,6 +18,7 @@ use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Sleep;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -69,7 +70,7 @@ class UserController extends Controller
                     if(isset($attrUrl)) {
                         $data['attribute_url'] = $attrUrl;
                     }
-                    
+
                     $n->info = $data;
                 }
             } else if($n->type == 'App\Notifications\EntityUpdated') {
@@ -178,9 +179,11 @@ class UserController extends Controller
         }
         $credentials = request($creds);
 
-        if(!$token = auth()->attempt($credentials)) {
+        if(!Auth::guard('web')->attempt($credentials, true)) {
             return response()->json(['error' => __('Invalid Credentials')], 400);
         }
+
+        $request->session()->regenerate();
 
         if($user->login_attempts > 0) {
             $user->login_attempts--;
@@ -188,8 +191,7 @@ class UserController extends Controller
         }
 
         return response()
-            ->json(null, 200)
-            ->header('Authorization', $token);
+            ->json($user, 200);
     }
 
     public function addUser(Request $request) {
@@ -483,7 +485,7 @@ class UserController extends Controller
             $password = Hash::make($request->get('password'));
             $pUser->password = $password;
         }
-        
+
         $pUser->login_attempts = null;
         $pUser->save();
 
