@@ -19,8 +19,9 @@ Broadcast::channel('App.User.{id}', function (User $user, $id) {
 });
 
 Broadcast::channel('entity_updates', function (User $user) {
-    info("is user allowed to broadcast?");
-    info($user);
-    info($user->can('entity_read') ? "Yes, allowed" : "No, not allowed");
     return $user->can('entity_read');
+});
+
+Broadcast::channel('private_testchannel', function (User $user) {
+    return true;
 });

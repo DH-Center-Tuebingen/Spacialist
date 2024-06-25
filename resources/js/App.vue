@@ -39,15 +39,6 @@
                                 <global-search />
                             </form>
                         </li>
-                        <li class="nav-item">
-                            <button
-                                type="button"
-                                class="btn btn-primary btn-sm"
-                                @click="testWs()"
-                            >
-                                Test WebSocket Connection
-                            </button>
-                        </li>
                     </ul>
 
                     <!-- Right Side Of Navbar -->
@@ -474,10 +465,6 @@ import {
     searchParamsToObject
 } from '@/helpers/routing.js';
 
-import {
-    listenToTest,
-} from '@/helpers/websocket.js';
-
 export default {
     components: {
         'modals-container': ModalsContainer,
@@ -486,11 +473,7 @@ export default {
         const { t, locale } = useI18n();
 
         // FETCH
-        initApp(locale).then(_ => {
-            store.dispatch('setAppState', true);
-            // Testing WebSockets
-            // listenToTest();
-        }).catch(e => {
+        initApp(locale).catch(e => {
             if(e.response.status == 401) {
                 store.dispatch('setAppState', true);
             } else {
@@ -590,9 +573,6 @@ export default {
         const showAboutModal = _ => {
             showAbout();
         };
-        const testWs = _ => {
-            listenToTest();
-        };
 
         // WATCHER
         // watch(_ => state.ready, (newValue, oldValue) => {
@@ -639,7 +619,7 @@ export default {
             });
             useToast();
 
-            // if (adapter.browserDetails.browser == 'firefox') {
+            // if(adapter.browserDetails.browser == 'firefox') {
             //     adapter.browserShim.shimGetDisplayMedia(window, 'window');
             // }
             rtc.player = videojs('#rtc-sharing-container', rtc.options);
@@ -682,7 +662,6 @@ export default {
             deleteNotification,
             logout,
             showAboutModal,
-            testWs,
             // PROPS
             // STATE
             state,
