@@ -12,18 +12,18 @@ use App\Http\Controllers\Controller;
 use App\Plugin;
 use App\RolePreset;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Sleep;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
     public function __construct() {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:sanctum', ['except' => ['login']]);
     }
 
     // GET
@@ -46,7 +46,7 @@ class UserController extends Controller
                     case 'App\Entity':
                         try {
                             $name = Entity::findOrFail($n->data['resource']['id'])->name;
-                        } catch (ModelNotFoundException $e) {
+                        } catch(ModelNotFoundException $e) {
                             $skip = true;
                         }
                         break;
@@ -55,7 +55,7 @@ class UserController extends Controller
                         try {
                             $name = Entity::findOrFail($n->data['resource']['meta']['entity_id'])->name;
                             $attrUrl = Attribute::findOrFail($n->data['resource']['meta']['attribute_id'])->thesaurus_url;
-                        } catch (ModelNotFoundException $e) {
+                        } catch(ModelNotFoundException $e) {
                             $skip = true;
                         }
                         break;
@@ -78,7 +78,7 @@ class UserController extends Controller
                     $n->info = [
                         'name' => Entity::findOrFail($n->data['resource']['id'])->name,
                     ];
-                } catch (ModelNotFoundException $e) {
+                } catch(ModelNotFoundException $e) {
                 }
             }
             return $n;
@@ -278,8 +278,11 @@ class UserController extends Controller
     }
 
     public function logout(Request $request) {
-        auth()->logout(true);
-        auth()->invalidate(true);
+        Auth::guard('web')->logout(true);
+        // auth()->invalidate(true);
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
     }
 
     // PATCH
@@ -362,7 +365,7 @@ class UserController extends Controller
     public function restoreUser($id)
     {
         $user = auth()->user();
-        if (!$user->can('users_roles_delete')) {
+        if(!$user->can('users_roles_delete')) {
             return response()->json([
                 'error' => __('You do not have the permission to restore users')
             ], 403);
@@ -370,7 +373,7 @@ class UserController extends Controller
 
         try {
             $delUser = User::onlyTrashed()->findOrFail($id);
-        } catch (ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This user does not exist')
             ], 400);

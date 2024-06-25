@@ -609,7 +609,7 @@ export const store = createStore({
                         for(let k in props) {
                             updPlugin[k] = props[k];
                         }
-                        
+
                         if(data.uninstalled) {
                             plugin = updPlugin;
                             remove = true;
@@ -815,9 +815,9 @@ export const store = createStore({
                     commit('updateEntity', data);
                 },
                 updateEntityModificationState({commit}, data) {
-                    if (data.status == 'added') {
+                    if(data.status == 'added') {
                         const n = new Node(data.data);
-                        if (!!data.data.root_entity_id) {
+                        if(!!data.data.root_entity_id) {
                             commit('addEntity', n);
                         } else {
                             commit('addRootEntity', n);
@@ -1012,7 +1012,7 @@ export const store = createStore({
                 users: state => state.users,
                 deletedUsers: state => state.deletedUsers,
                 user: state => state.user,
-                isLoggedIn: state => !!state.user,
+                isLoggedIn: state => !!state.user?.id,
                 isModerated: state => state.user.roles.some(r => r.is_moderated),
                 entity: state => state.entity,
                 file: state => state.file,

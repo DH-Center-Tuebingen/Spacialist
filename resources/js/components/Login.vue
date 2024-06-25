@@ -144,7 +144,7 @@
                 });
 
                 // FUNCTIONS
-                const login = _ => {
+                const login = async _ => {
                     state.submitting = true;
                     state.error = {};
                     let data = {
@@ -157,6 +157,7 @@
                     } else {
                         data.nickname = state.user.email;
                     }
+                    await getCsrfCookie();
                     apiLogin(data)
                     // auth.login({
                     //     data: data,
@@ -166,7 +167,6 @@
                     // })
                     .then(userData => {
                         state.submitting = false;
-                        console.log("init app!", state.redirect, userData);
                         return initApp(locale);
                     })
                     .catch(e => {
@@ -191,8 +191,6 @@
                         router.push({
                             name: 'home'
                         });
-                    } else {
-                        getCsrfCookie();
                     }
                     // if(auth.check()) {
                     //     router.push({

@@ -28,7 +28,6 @@ import {
 
 export async function initApp(locale) {
     store.dispatch('setAppState', false);
-    await getCsrfCookie();
     await fetchUser();
     await fetchPreData(locale);
     await fetchAttributes();

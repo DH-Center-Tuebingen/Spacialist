@@ -5,11 +5,11 @@ import {
     throwError,
 } from '@/helpers/helpers.js';
 
-export const root_api = axios.create();
-root_api.defaults.baseURL = 'api';
-root_api.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-root_api.defaults.withCredentials = true;
-root_api.defaults.withXSRFToken = true;
+export const web_http = axios.create();
+web_http.defaults.baseURL = '';
+web_http.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+web_http.defaults.withCredentials = true;
+web_http.defaults.withXSRFToken = true;
 
 const instance = axios.create();
 
@@ -17,10 +17,10 @@ const instance = axios.create();
 export const unhandledErrors = [400, 422];
 
 export function isUnhandledError(axiosError) {
-    if (!axiosError?.response?.status) throw Error('Response object is missing status property');
+    if(!axiosError?.response?.status) throw Error('Response object is missing status property');
     const status = axiosError.response.status;
     // If status is below 400, we don't need to handle it.
-    if (status < 400) return false;
+    if(status < 400) return false;
     return unhandledErrors.includes(status);
 }
 
@@ -29,7 +29,7 @@ export function isUnhandledError(axiosError) {
 // This allows us to just catch the errors that are not handled by
 // the system.
 export function handleUnhandledErrors(axiosError, callback) {
-    if (isUnhandledError(axiosError)) {
+    if(isUnhandledError(axiosError)) {
         return callback(axiosError);
     }
 }
@@ -41,25 +41,39 @@ instance.defaults.withXSRFToken = true;
 instance.interceptors.response.use(response => {
     return response;
 }, error => {
-    if (isUnhandledError(error)) {
+    if(isUnhandledError(error)) {
         return Promise.reject(error);
     }
     const code = error.response.status;
-    switch (code) {
+    switch(code) {
         case 401:
             // Only append redirect query if from another route than login
             // to prevent recursivly appending current route's full path
             // on reloading login page
-            if (router.currentRoute.name != 'login' && !!router.currentRoute.value.redirectedFrom) {
-                const redirectPath = router.currentRoute.value.redirectedFrom.fullPath;
+            if(router.currentRoute.name != 'login') {
+                let query = router.currentRoute.value.query;
+                if(!!router.currentRoute.value.redirectedFrom) {
+                    const redirectPath = router.currentRoute.value.redirectedFrom.fullPath;
+                    query = {
+                        ...query,
+                        redirect: redirectPath,
+                    };
+                }
                 router.push({
                     name: 'login',
-                    query: {
-                        ...router.currentRoute.value.query,
-                        redirect: redirectPath,
-                    },
+                    query: query,
                 });
             }
+            // if(router.currentRoute.name != 'login' && !!router.currentRoute.value.redirectedFrom) {
+            //     const redirectPath = router.currentRoute.value.redirectedFrom.fullPath;
+            //     router.push({
+            //         name: 'login',
+            //         query: {
+            //             ...router.currentRoute.value.query,
+            //             redirect: redirectPath,
+            //         },
+            //     });
+            // }
             // auth().logout({
             //     redirect: {
             //         name: 'login',
@@ -94,13 +108,13 @@ export const external = axios.create({
 });
 
 export const global_api = (verb, url, data, external = false, withHeaders = false) => {
-    if (external) {
-        if (verb.toLowerCase() == 'get' || verb.toLowerCase() == 'delete') {
+    if(external) {
+        if(verb.toLowerCase() == 'get' || verb.toLowerCase() == 'delete') {
             return $httpQueue.add(
                 () => external[verb](url, {
                     crossdomain: true,
                 }).then(response => {
-                    if (withHeaders) {
+                    if(withHeaders) {
                         return {
                             data: response.data,
                             headers: response.headers,
@@ -115,7 +129,7 @@ export const global_api = (verb, url, data, external = false, withHeaders = fals
                 () => external[verb](url, data, {
                     crossdomain: true,
                 }).then(response => {
-                    if (withHeaders) {
+                    if(withHeaders) {
                         return {
                             data: response.data,
                             headers: response.headers,
@@ -127,10 +141,10 @@ export const global_api = (verb, url, data, external = false, withHeaders = fals
             );
         }
     } else {
-        if (verb.toLowerCase() == 'get' || verb.toLowerCase() == 'delete') {
+        if(verb.toLowerCase() == 'get' || verb.toLowerCase() == 'delete') {
             return $httpQueue.add(
                 () => instance[verb](url, data).then(response => {
-                    if (withHeaders) {
+                    if(withHeaders) {
                         return {
                             data: response.data,
                             headers: response.headers,
@@ -143,7 +157,7 @@ export const global_api = (verb, url, data, external = false, withHeaders = fals
         } else {
             return $httpQueue.add(
                 () => instance[verb](url, data).then(response => {
-                    if (withHeaders) {
+                    if(withHeaders) {
                         return {
                             data: response.data,
                             headers: response.headers,

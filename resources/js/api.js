@@ -1,6 +1,7 @@
 import {
     default as http,
     external,
+    web_http,
 } from '@/bootstrap/http.js';
 import store from '@/bootstrap/store.js';
 import {
@@ -18,7 +19,7 @@ export async function logout() {
 }
 
 export async function getCsrfCookie() {
-    await $httpQueue.add(() => http.get('http://localhost:8000/sanctum/csrf-cookie').then(response => {
+    await $httpQueue.add(() => web_http.get('/sanctum/csrf-cookie').then(response => {
     }));
 }
 
