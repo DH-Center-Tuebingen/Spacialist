@@ -112,12 +112,12 @@
             });
 
             const addEntity = _ => {
-                if(!can('entity_create') || canCreate(props.data)) return;
+                if(!can('entity_create') || !canCreate(props.data)) return;
 
                 showAddEntity(props.data);
             };
             const duplicateEntity = _ => {
-                if(!can('entity_create') || canCreate(props.data)) return;
+                if(!can('entity_create') || !canCreate(props.data)) return;
 
                 duplicateEntityApi(props.data).then(data => {
                     store.dispatch('addEntity', props.data);
@@ -125,14 +125,14 @@
                 });
             };
             const moveEntity = _ => {
-                if(!can('entity_write') || canWrite(props.data)) return;
+                if(!can('entity_write') || !canWrite(props.data)) return;
 
                 ShowMoveEntity(props.data);
                 context.emit('close');
             };
 
             const deleteEntity = _ => {
-                if(!can('entity_delete') || canDelete(props.data)) return;
+                if(!can('entity_delete') || !canDelete(props.data)) return;
 
                 showDeleteEntity(props.data.id);
                 context.emit('close');
