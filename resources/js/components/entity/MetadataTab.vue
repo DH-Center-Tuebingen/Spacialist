@@ -70,15 +70,26 @@
                 </form>
             </div>
 
-            <button
-                type="button"
-                class="d-block ms-auto btn btn-sm btn-outline-success mt-2"
-                :disabled="!isDirty"
-                @click="saveMetadata"
-            >
-                <i class="fas fa-fw fa-save" />
-                {{ t('main.entity.metadata.save') }}
-            </button>
+            <div class="d-flex justify-content-end gap-2">
+                <button
+                    type="button"
+                    class="btn btn-sm btn-outline-warning mt-2"
+                    :disabled="!isDirty"
+                    @click="resetForm"
+                >
+                    <i class="fas fa-fw fa-undo" />
+                    {{ t('global.reset') }}
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-sm btn-outline-success mt-2"
+                    :disabled="!isDirty"
+                    @click="save"
+                >
+                    <i class="fas fa-fw fa-save" />
+                    {{ t('main.entity.metadata.save') }}
+                </button>
+            </div>
         </div>
     </div>
 </template>
@@ -124,6 +135,11 @@
                 licence: '',
             });
 
+            const resetForm = _ => {
+                metadata.summary = loadedMetadata.summary;
+                metadata.licence = loadedMetadata.licence;
+            };
+
             const creatorId = computed(_ => {
                 if(!entity.value?.metadata?.creator) return 0;
                 return entity.value.metadata.creator;
@@ -158,7 +174,7 @@
             });
 
 
-            const saveMetadata = async _ => {
+            const save = async _ => {
                 if(isDirty.value) {
                     patchEntityMetadata(entity.value.id, changedMetadata.value).then(data => {
 
@@ -198,10 +214,9 @@
                 loading.value = true;
                 fetchEntityMetadata(entity.value.id).then((value) => {
                     loading.value = false;
-                    setMetadata(value.metadata);
+                    setMetadata({...value.metadata});
                 });
             };
-
 
             watch(entity, (newVal) => {
                 loading.value = false;
@@ -209,7 +224,6 @@
                     updateMetaData();
                 }
             });
-
 
             return {
                 changedMetadata,
@@ -219,7 +233,8 @@
                 entity,
                 isDirty,
                 metadata,
-                saveMetadata,
+                resetForm,
+                save,
                 t: useI18n().t,
                 updateEntitySummary,
             };
