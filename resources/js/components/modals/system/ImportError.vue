@@ -49,7 +49,7 @@
         toRefs,
     } from 'vue';
 
-    import { useI18n } from 'vue-i18n';
+    import {useI18n} from 'vue-i18n';
 
     export default {
         props: {
@@ -60,7 +60,7 @@
         },
         emits: ['closing'],
         setup(props, context) {
-            const { t } = useI18n();
+            const {t} = useI18n();
 
             const {
                 data,
@@ -74,17 +74,25 @@
             // DATA
             const state = reactive({
                 htmlMessage: computed(_ => {
+
+                    const message = data?.value?.message || 'Unknown error';
+                    const on_index = data?.value?.data?.on_index || null;
+                    const on = data?.value?.data?.on || '"unknown"';
+                    const on_value = data?.value?.data?.on_value || null;
+                    const count = data?.value?.data?.count || '"unknown"';
+                    const entry = data?.value?.data?.entry || '"unknown"';
+
                     let msg = `<div class='lead'>
-                        ${data.value.message}
+                        ${message}
                     </div>
                     <hr/>`;
-                    if(data.value.data.on_index && data.value.data.on_value) {
+                    if(on_index && on_value) {
                         msg += `<div>
-                            Error while importing entry in line ${data.value.data.count} (<span class='fst-italic'>${data.value.data.entry}</span>) while parsing column ${data.value.data.on_index} (<span class='fst-italic'>${data.value.data.on}</span>) with invalid value <span class='fw-bold'>${data.value.data.on_value}</span>
+                            Error while importing entry in line ${count} (<span class='fst-italic'>${entry}</span>) while parsing column ${on_index} (<span class='fst-italic'>${on}</span>) with invalid value <span class='fw-bold'>${on_value}</span>
                         </div>`;
                     } else {
                         msg += `<div>
-                            Error while importing entry in line ${data.value.data.count} (<span class='fst-italic'>${data.value.data.entry}</span>): <span class='fw-bold'>${data.value.data.on}</span>
+                            Error while importing entry in line ${count} (<span class='fst-italic'>${entry}</span>): <span class='fw-bold'>${on}</span>
                         </div>`;
                     }
                     return msg;
@@ -100,7 +108,7 @@
                 closeModal,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>
