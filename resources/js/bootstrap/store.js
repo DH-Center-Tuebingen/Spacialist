@@ -1,4 +1,4 @@
-import { createStore } from 'vuex';
+import {createStore} from 'vuex';
 
 import {
     sortTree,
@@ -280,17 +280,37 @@ export const store = createStore({
                         }
                     }
                 },
+                updateEntityMetadata(state, data) {
+                    let metadata = {};
+                    for(let k in data.data) {
+                        metadata[k] = data.data[k];
+                    }
+
+                    const eid = data.eid;
+                    if(!state.entities?.[eid]) {
+                        return;
+                    }
+
+                    if(state.entities?.[eid].metadata) {
+                        state.entity.metadata = {};
+                    }
+
+                    state.entities[eid].metadata = {
+                        ...state.entities[eid].metadata,
+                        ...metadata,
+                    };
+                },
                 updateEntityDataModerations(state, data) {
                     const entity = state.entities[data.entity_id];
-                    for(let i=0; i<data.attribute_ids.length; i++) {
+                    for(let i = 0; i < data.attribute_ids.length; i++) {
                         const curr = data.attribute_ids[i];
                         entity.data[curr].moderation_state = data.state;
                     }
                 },
                 addEntityTypeAttribute(state, data) {
                     const attrs = state.entityTypeAttributes[data.entity_type_id];
-                    attrs.splice(data.position-1, 0, data);
-                    for(let i=data.position; i<attrs.length; i++) {
+                    attrs.splice(data.position - 1, 0, data);
+                    for(let i = data.position; i < attrs.length; i++) {
                         if(attrs[i].position) {
                             attrs[i].position++;
                         } else if(attrs[i].pivot && attrs[i].pivot.position) {
@@ -304,7 +324,7 @@ export const store = createStore({
                     if(idx > -1) {
                         attrs.splice(idx, 1);
                     }
-                    for(let i=idx; i<attrs.length; i++) {
+                    for(let i = idx; i < attrs.length; i++) {
                         if(attrs[i].position) {
                             attrs[i].position++;
                         } else if(attrs[i].pivot && attrs[i].pivot.position) {
@@ -338,7 +358,7 @@ export const store = createStore({
                     const movedAttrs = attrs.splice(from, 1);
                     attrs.splice(to, 0, ...movedAttrs);
                     if(from < to) {
-                        for(let i=from; i<to; i++) {
+                        for(let i = from; i < to; i++) {
                             if(attrs[i].position) {
                                 attrs[i].position++;
                             } else if(attrs[i].pivot && attrs[i].pivot.position) {
@@ -346,7 +366,7 @@ export const store = createStore({
                             }
                         }
                     } else {
-                        for(let i=to+1; i<=from; i++) {
+                        for(let i = to + 1; i <= from; i++) {
                             if(attrs[i].position) {
                                 attrs[i].position--;
                             } else if(attrs[i].pivot && attrs[i].pivot.position) {
@@ -583,7 +603,7 @@ export const store = createStore({
                         for(let k in props) {
                             updPlugin[k] = props[k];
                         }
-                        
+
                         if(data.uninstalled) {
                             plugin = updPlugin;
                             remove = true;
@@ -793,6 +813,9 @@ export const store = createStore({
                 },
                 updateEntityData({commit}, data) {
                     commit('updateEntityData', data);
+                },
+                updateEntityMetadata({commit}, data) {
+                    commit('updateEntityMetadata', data);
                 },
                 updateEntityDataModerations({commit}, data) {
                     commit('updateEntityDataModerations', data);

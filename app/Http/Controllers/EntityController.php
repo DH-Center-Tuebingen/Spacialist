@@ -313,6 +313,24 @@ class EntityController extends Controller {
         return response()->json($data);
     }
 
+    public function getMetadata($id) {
+        $user = auth()->user();
+        if(!$user->can('entity_read') || !$user->can('entity_data_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to get an entity\'s metadata')
+            ], 403);
+        }
+
+        try {
+            $entity = Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist')
+            ], 400);
+        }
+        return response()->json($entity->getAllMetadata());
+    }
+
     public function getParentIds($id) {
         $user = auth()->user();
         if (!$user->can('entity_read')) {
@@ -379,7 +397,7 @@ class EntityController extends Controller {
         try {
             $entity = Entity::without(['user', 'parentIds', 'parentNames'])->findOrFail($id);
             unset($entity->comments_count);
-        } catch (ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity does not exist'),
             ], 400);
@@ -992,6 +1010,36 @@ class EntityController extends Controller {
         $entity->load('user');
 
         return response()->json($entity);
+    }
+
+    public function patchMetadata($id, Request $request) {
+        $user = auth()->user();
+        if(!$user->can('entity_write')) {
+            return response()->json([
+                'error' => __('You do not have the permission to modify an entity\'s metadata')
+            ], 403);
+        }
+        $fields = $this->validate($request, [
+            'licence' => 'nullable|string',
+            'summary' => 'nullable|string',
+        ]);
+
+        try {
+            $entity = Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist')
+            ], 400);
+        }
+
+        $metadata = $entity->metadata;
+        foreach($fields as $field => $value) {
+            $metadata[$field] = $value;
+        }
+        $entity->metadata = $metadata;
+        $entity->save();
+
+        return response()->json($entity->getAllMetadata());
     }
 
     public function moveEntity(Request $request, $id) {

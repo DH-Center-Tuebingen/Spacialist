@@ -35,8 +35,8 @@ import '@/bootstrap/font.js';
 // Plugin System
 import { SpPS } from '@/bootstrap/plugins.js';
 
-import initGlobalComponents from './bootstrap/global-components';
-import initDirectives from './bootstrap/directives';
+import initGlobalComponents from '@/bootstrap/global-components.js';
+import initDirectives from '@/bootstrap/directives.js';
 
 const app = createApp(App);
 app.use(i18n);

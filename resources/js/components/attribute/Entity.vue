@@ -5,6 +5,7 @@
         :chain="'ancestors'"
         :mode="state.mode"
         :default-value="v.fieldValue"
+        :disabled="disabled"
         @selected="e => entitySelected(e)"
         @entry-click="e => entryClicked(e)"
     />
