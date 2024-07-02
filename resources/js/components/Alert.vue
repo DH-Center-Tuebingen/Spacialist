@@ -1,13 +1,11 @@
 <template>
     <div
+        v-if="state.isActive"
         class="alert position-relative"
         :class="state.classes"
         role="alert"
-        v-if="state.isActive"
     >
-        <template
-            v-if="state.isOpen"
-        >
+        <template v-if="state.isOpen">
             <div
                 v-if="state.hasIcon"
                 :class="state.iconWrapperClasses"
@@ -81,7 +79,7 @@
         reactive,
         toRefs,
     } from 'vue';
-    import { useI18n } from 'vue-i18n';
+    import {useI18n} from 'vue-i18n';
 
     export default {
         props: {
@@ -111,7 +109,7 @@
             },
         },
         setup(props, context) {
-            const { t } = useI18n();
+            const {t} = useI18n();
             const {
                 message,
                 type,
@@ -136,7 +134,7 @@
                     return !noicon.value && state.supportsIcon;
                 }),
                 hasIconText: computed(_ => {
-                    return state.hasIcon &&  !!icontext.value;
+                    return state.hasIcon && !!icontext.value;
                 }),
                 supportsIcon: computed(_ => {
                     switch(type.value) {
@@ -174,7 +172,7 @@
                             classes.push('alert-primary');
                             break;
                     }
-                    
+
                     if(state.hasIcon) {
                         classes.push('d-flex');
                         if(state.hasIconText) {

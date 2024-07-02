@@ -418,7 +418,10 @@
         "entity": {
             "title": "Entity | Entities",
             "count": "No Top-Level-Entities | One Top-Level-Entity | {cnt} Top-Level-Entities",
-            "detail_tab_none_selected": "No Entity selected. Select an Entity from the tree to see the details in this tab.",
+            "detail": {
+                "no_attributes": "This entity group has no attributes.",
+                "no_entity_selected": "No Entity selected. Select an Entity from the tree to see the details in this tab."
+            },
             "toasts": {
                 "updated": {
                     "title": "Entity updated",

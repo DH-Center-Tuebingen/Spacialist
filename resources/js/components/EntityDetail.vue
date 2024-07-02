@@ -284,6 +284,13 @@
                 class="tab-pane fade h-100 active-entity-detail-panel active-entity-attributes-panel show active"
                 role="tabpanel"
             >
+                <Alert
+                    v-if="isEmpty(tg)"
+                    type="info"
+                    :noicon="false"
+                    :message="t('main.entity.detail.no_attributes')"
+                    class="mt-2"
+                />
                 <form
                     :id="`entity-attribute-form-${tg.id}`"
                     :name="`entity-attribute-form-${tg.id}`"
@@ -379,7 +386,7 @@
         onBeforeRouteUpdate,
     } from 'vue-router';
 
-    import { useI18n } from 'vue-i18n';
+    import {useI18n} from 'vue-i18n';
 
     import {
         Popover,
@@ -388,9 +395,9 @@
     import store from '@/bootstrap/store.js';
     import router from '%router';
 
-    import { useToast } from '@/plugins/toast.js';
+    import {useToast} from '@/plugins/toast.js';
 
-    import { date } from '@/helpers/filters.js';
+    import {date} from '@/helpers/filters.js';
     import {
         getEntityComments,
         patchAttributes,
@@ -417,9 +424,14 @@
         canShowReferenceModal,
     } from '@/helpers/modal.js';
 
-    import { usePreventNavigation } from '@/helpers/form.js';
+    import {usePreventNavigation} from '@/helpers/form.js';
+
+    import Alert from './Alert.vue';
 
     export default {
+        components: {
+            Alert,
+        },
         props: {
             bibliography: {
                 required: false,
@@ -433,7 +445,7 @@
             }
         },
         setup(props) {
-            const { t } = useI18n();
+            const {t} = useI18n();
             const route = useRoute();
             const toast = useToast();
 
@@ -490,50 +502,47 @@
                 initFinished: false,
                 commentLoadingState: 'not',
                 hiddenAttributeState: false,
-                attributesInTabs: true,
                 routeQuery: computed(_ => route.query),
                 entity: computed(_ => store.getters.entity),
                 entityUser: computed(_ => state.entity.user),
                 entityAttributes: computed(_ => store.getters.entityTypeAttributes(state.entity.entity_type_id)),
                 entityGroups: computed(_ => {
-                    if(!state.entityAttributes) {
-                        return state.entityAttributes;
+
+                    const tabGroups = {};
+                    let currentGroup = 'default';
+                    let currentGroupId = 'default';
+                    let currentUnnamedGroupCntr = 1;
+
+                    function addCurrentGroupIfNotExists() {
+                        if(!tabGroups[currentGroup]) {
+                            tabGroups[currentGroup] = {
+                                id: currentGroupId,
+                                data: [],
+                            };
+                        }
                     }
 
-                    if(state.attributesInTabs) {
-                        const tabGroups = {};
-                        let currentGroup = 'default';
-                        let currentGroupId = 'default';
-                        let currentUnnamedGroupCntr = 1;
+                    addCurrentGroupIfNotExists();
+
+                    if(state.entityAttributes && state.entityAttributes.length > 0) {
                         state.entityAttributes.forEach(a => {
                             if(a.is_system && a.datatype == 'system-separator') {
                                 if(!a.pivot.metadata || !a.pivot.metadata.title) {
-                                    currentGroup = t(`main.entity.tabs.untitled_group`, { cnt: currentUnnamedGroupCntr });
+                                    currentGroup = t(`main.entity.tabs.untitled_group`, {cnt: currentUnnamedGroupCntr});
                                     currentUnnamedGroupCntr++;
                                 } else {
                                     currentGroup = translateConcept(a.pivot.metadata.title);
                                 }
                                 currentGroupId = a.pivot.id;
+                                addCurrentGroupIfNotExists();
                                 return;
                             }
-                            if(!tabGroups[currentGroup]) {
-                                tabGroups[currentGroup] = {
-                                    id: currentGroupId,
-                                    data: []
-                                };
-                            }
+
                             tabGroups[currentGroup].data.push(a);
                         });
-
-                        return tabGroups;
-                    } else {
-                        return {
-                            default: {
-                                id: 'default',
-                                data: state.entityAttributes,
-                            },
-                        };
                     }
+
+                    return tabGroups;
                 }),
                 entityTypeSelections: computed(_ => getEntityTypeAttributeSelections(state.entity.entity_type_id)),
                 entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
@@ -817,6 +826,11 @@
                     state.dirtyStates[g] = false;
                 });
             };
+
+            const isEmpty = group => {
+                return state.initFinished && group.data.length == 0;
+            };
+
             const fetchComments = _ => {
                 if(!can('comments_read')) return;
 
@@ -976,7 +990,7 @@
                 let hiddenAttrElem = document.getElementById('hidden-attributes-icon');
                 if(!!hiddenAttrElem) {
                     new Popover(hiddenAttrElem, {
-                        title: _ => t('main.entity.attributes.hidden', { cnt: state.hiddenAttributeCount }, state.hiddenAttributeCount),
+                        title: _ => t('main.entity.attributes.hidden', {cnt: state.hiddenAttributeCount}, state.hiddenAttributeCount),
                         content: state.hiddenAttributeListing,
                     });
                 }
@@ -993,7 +1007,7 @@
                         let hiddenAttrElem = document.getElementById('hidden-attributes-icon');
                         if(!!hiddenAttrElem) {
                             new Popover(hiddenAttrElem, {
-                                title: _ => t('main.entity.attributes.hidden', { cnt: state.hiddenAttributeCount }, state.hiddenAttributeCount),
+                                title: _ => t('main.entity.attributes.hidden', {cnt: state.hiddenAttributeCount}, state.hiddenAttributeCount),
                                 content: state.hiddenAttributeListing,
                             });
                         }
@@ -1082,6 +1096,7 @@
                 translateConcept,
                 // LOCAL
                 hasReferenceGroup,
+                isEmpty,
                 showMetadata,
                 editEntityName,
                 updateEntityName,
