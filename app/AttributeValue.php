@@ -89,6 +89,35 @@ class AttributeValue extends Model implements Searchable
         return AttributeBase::serializeValue($this);
     }
 
+    public static function getValueFromKey($arr) {
+        if(!isset($arr)) return null;
+
+        if(isset($arr['str_val'])) {
+            return $arr['str_val'];
+        }
+        if(isset($arr['int_val'])) {
+            return $arr['int_val'];
+        }
+        if(isset($arr['dbl_val'])) {
+            return $arr['dbl_val'];
+        }
+        if(isset($arr['entity_val'])) {
+            return $arr['entity_val'];
+        }
+        if(isset($arr['thesaurus_val'])) {
+            return $arr['thesaurus_val'];
+        }
+        if(isset($arr['json_val'])) {
+            return json_decode($arr['json_val']);
+        }
+        if(isset($arr['dt_val'])) {
+            return $arr['dt_val'];
+        }
+        if(isset($arr['geography_val'])) {
+            return Geodata::arrayToWkt($arr['geography_val']);
+        }
+    }
+
     public static function getValueById($aid, $cid) {
         $av = self::where('attribute_id', $aid)
             ->where('entity_id', $cid)->first();

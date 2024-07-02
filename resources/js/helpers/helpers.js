@@ -498,6 +498,10 @@ export function calculateEntityColors(id, alpha = 0.5) {
     };
 }
 
+export function getEntity(id) {
+    return store.getters.entities[id] || {};
+}
+
 export function getEntityColors(id) {
     let colors = store.getters.entityTypeColors(id);
     if(!colors) {

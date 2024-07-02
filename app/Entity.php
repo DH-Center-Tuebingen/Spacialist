@@ -4,6 +4,7 @@ namespace App;
 
 use App\Exceptions\AmbiguousValueException;
 use App\Traits\CommentTrait;
+use Illuminate\Database\Eloquent\Builder;
 use App\AttributeTypes\AttributeBase;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Nicolaslopezj\Searchable\SearchableTrait;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
 
@@ -37,6 +39,10 @@ class Entity extends Model implements Searchable {
         'parentIds',
         'parentNames',
         'attributeLinks',
+    ];
+
+    protected $casts = [
+        'metadata' => 'json',
     ];
 
     protected $with = [
@@ -76,6 +82,14 @@ class Entity extends Model implements Searchable {
         );
     }
 
+    public function getAllMetadata(){
+        return [
+            'creator' => $this->creator,
+            'editors' => $this->editors,
+            'metadata' => $this->metadata,
+        ];
+    }  
+    
     public static function getSearchCols(): array {
         return array_keys(self::searchCols);
     }
@@ -152,9 +166,7 @@ class Entity extends Model implements Searchable {
 
         // TODO workaround to get all (optional, not part of request) attributes
         $entity = self::find($entity->id);
-
         AttributeBase::onCreateHandler($entity, $user);
-
         $entity->children_count = 0;
 
         return [
@@ -268,6 +280,31 @@ class Entity extends Model implements Searchable {
             ];
         }
         return $entities;
+    }
+
+    public function getEditorsAttribute() {
+        $curr = $this;
+        $assocAttrs = AttributeValue::with('attribute')->where('entity_id', $this->id)->get()->pluck('id');
+
+        $causers = Activity::where(function (Builder $query) use ($curr) {
+            $query->where('subject_id', $curr->id)
+                ->where('subject_type', get_class($curr));
+        })->orWhere(function (Builder $query) use ($assocAttrs) {
+            $query->whereIn('subject_id', $assocAttrs)
+                ->where('subject_type', (new AttributeValue())->getMorphClass());
+        })
+            ->groupBy('causer_id')
+            ->select('causer_id as user_id')
+            ->get();
+        return $causers;
+    }
+
+    public function getCreatorAttribute() {
+        $creator = Activity::where('subject_id', $this->id)
+            ->where('subject_type', get_class($this))
+            ->where('description', 'created')
+            ->first();
+        return isset($creator) ? $creator->causer_id : null;
     }
 
     public function parents() {
