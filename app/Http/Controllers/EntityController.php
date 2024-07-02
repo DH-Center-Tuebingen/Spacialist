@@ -565,7 +565,7 @@ class EntityController extends Controller {
                 }
 
                 $this->setOrUpdateImportedAttributes($entityId, $row, $attributeIdToColumnIdxMapping, $attributeTypes, $user);
-                $changedEntities[] = $entityId;
+                $changedEntities[] = $entity['entity'];
             } catch(Exception $e) {
                 DB::rollBack();
                 return response()->json([
