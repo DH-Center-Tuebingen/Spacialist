@@ -3,17 +3,33 @@
         <nav class="navbar navbar-dark bg-dark navbar-expand-lg overlay-all">
             <div class="container">
                 <!-- Branding Image -->
-                <a
-                    href="/open"
+                <router-link
+                    :to="{ name: 'landing' }"
                     class="navbar-brand"
                 >
                     <img
-                        src="favicon.png"
+                        src="/favicon.png"
                         class="logo"
                         alt="spacialist logo"
                     >
-                    {{ state.projectName }}
-                </a>
+                    {{ getPreference('prefs.project-name') }}
+                </router-link>
+                <div
+                    id="navbarSupportedContent"
+                    class="collapse navbar-collapse"
+                >
+                    <!-- Left Side Of Navbar -->
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <router-link
+                                :to="{ name: 'modules' }"
+                                class="nav-link"
+                            >
+                                Modules
+                            </router-link>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </nav>
         <div class="container my-3 col overflow-hidden d-flex flex-column">
@@ -62,5 +78,5 @@
                 state,
             };
         }
-    }
+    };
 </script>

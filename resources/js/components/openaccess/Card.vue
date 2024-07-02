@@ -6,9 +6,20 @@
             </div> -->
             <div class="col-md-12">
                 <div class="card-body">
-                    <h5 class="card-title fw-bold">
-                        {{ entity.name }}
-                    </h5>
+                    <div class="d-flex flex-row justify-content-between">
+                        <h5 class="card-title fw-bold">
+                            {{ entity.name }}
+                        </h5>
+                        <div>
+                            <router-link
+                                class="text-muted text-decoration-none"
+                                :to="{ name: 'entryview-entity', params: {id: entity.id}}"
+                            >
+                                Go to Entry
+                                <i class="fas fa-fw fa-arrow-up-right-from-square" />
+                            </router-link>
+                        </div>
+                    </div>
                     <p class="card-text">
                         <small class="text-muted d-flex flex-row justify-content-between">
                             <div>
@@ -38,31 +49,40 @@
                         </small>
                     </p>
                     <div class="d-flex flex-row justify-content-center gap-3">
-                        <hr class="text-muted flex-grow-1"/>
-                        <button class="btn btn-fab btn-primary" @click="toggleShowData()">
+                        <hr class="text-muted flex-grow-1">
+                        <button
+                            class="btn btn-fab btn-primary"
+                            @click="toggleShowData()"
+                        >
                             <span v-show="state.showData">
-                                <i class="fas fa-fw fa-minus roll-in"></i>
+                                <i class="fas fa-fw fa-minus roll-in" />
                             </span>
                             <span v-show="!state.showData">
-                                <i class="fas fa-fw fa-plus roll-in"></i>
+                                <i class="fas fa-fw fa-plus roll-in" />
                             </span>
                         </button>
-                        <hr class="text-muted flex-grow-1"/>
+                        <hr class="text-muted flex-grow-1">
                     </div>
-                    <div class="bg-white rounded-2 p-3 mt-2" v-show="state.showData">
+                    <div
+                        v-show="state.showData"
+                        class="bg-white rounded-2 p-3 mt-2"
+                    >
                         <h6 class="card-text fw-bold">
                             Entity Data
                         </h6>
                         <attribute-list
-                            class="fade-in-fast"
                             v-if="state.attributes.length > 0"
+                            class="fade-in-fast"
                             :attributes="state.attributes"
                             :selections="{}"
                             :options="{'hide_labels': true, 'hide_entity_link': true}"
                             :values="state.values"
                             :disable-drag="true"
                         />
-                        <p class="alert alert-warning" v-else>
+                        <p
+                            v-else
+                            class="alert alert-warning"
+                        >
                             No data available.
                         </p>
                     </div>
@@ -122,12 +142,12 @@
                         };
                     }
                     return vals;
-                })
+                }),
             });
 
             // FUNCTIONS
             const toggleShowData = _ => {
-                state.showData = !state.showData
+                state.showData = !state.showData;
             };
 
             // WATCHER
@@ -146,5 +166,5 @@
                 state,
             };
         }
-    }
+    };
 </script>
