@@ -26,9 +26,8 @@
                 />
             </header>
             <div
+                id="bibtex-item-modal"
                 class="modal-body"
-                :class="state.scrollStateBodyClasses"
-                @paste="handlePasteFromClipboard($event)"
             >
                 <alert
                     :message="t('main.bibliography.modal.paste_info')"
@@ -52,13 +51,18 @@
                         <div class="col-md-9">
                             <multiselect
                                 v-model="state.data.type"
-                                :classes="multiselectResetClasslist"
+                                class="multiselect-modal"
+                                :classes="{
+                                    ...multiselectResetClasslist,
+                                    'dropdown': 'multiselect-dropdown multiselect-modal-dropdown'
+                                }"
                                 :label="'name'"
                                 :track-by="'name'"
                                 :object="true"
                                 :value-prop="'id'"
                                 :searchable="true"
                                 :options="bibliographyTypes"
+                                :append-to-body="true"
                                 :placeholder="t('global.select.placeholder')"
                             >
                                 <template #option="{ option }">
@@ -180,6 +184,9 @@
 
     import {
         computed,
+        nextTick,
+        onBeforeUnmount,
+        onMounted,
         reactive,
         ref,
         toRefs,
@@ -191,6 +198,7 @@
         can,
         getTs,
         multiselectResetClasslist,
+        _cloneDeep,
     } from '@/helpers/helpers.js';
     import {
         bibliographyTypes,
@@ -215,6 +223,14 @@
             } = toRefs(props);
             const { t } = useI18n();
 
+            onMounted(_ => {
+                window.addEventListener('paste', handlePasteFromClipboard);
+            });
+
+            onBeforeUnmount(_ => {
+                window.removeEventListener('paste', handlePasteFromClipboard);
+            });
+
             // FUNCTIONS
             const fromBibtexEntry = str => {
                 try {
@@ -225,10 +241,14 @@
                     const type = bibliographyTypes.find(t => t.name == entry.type);
                     state.data.type = type;
                     state.data.fields.citekey = entry.key;
-                    for(let k in entry.fields) {
-                        const p = entry.fields[k];
-                        state.data.fields[k] = p.join(', ');
-                    }
+                    nextTick(_ => {
+                        state.fieldData.type = type;
+                        state.fieldData.fields.citekey = entry.key;
+                        for(let k in entry.fields) {
+                            const p = entry.fields[k];
+                            state.fieldData.fields[k] = k == 'author' ? p.join(' and ') : p.join(', ');
+                        }
+                    });
                 } catch(err) {
                 }
             };
@@ -290,21 +310,14 @@
             const state = reactive({
                 id: `bibliography-item-modal-bibtex-code-${getTs()}`,
                 data: data.value,
-                fieldData: { ...data.value },
+                fieldData: _cloneDeep(data.value),
                 error: {},
                 fileContainer: [],
                 scrollStateClasses: computed(_ => {
                     if(state.data.type) {
-                        return ['scroll-y-auto', 'scroll-x-hidden'];
+                        return ['overflow-y-auto', 'overflow-x-hidden'];
                     } else {
-                        return ['scroll-visible'];
-                    }
-                }),
-                scrollStateBodyClasses: computed(_ => {
-                    if(state.data.type) {
-                        return [];
-                    } else {
-                        return ['nonscrollable'];
+                        return ['overflow-visible'];
                     }
                 }),
                 file: computed(_ => state.fileContainer.length > 0 ? state.fileContainer[0] : null),
@@ -327,7 +340,6 @@
                 multiselectResetClasslist,
                 // PROPS
                 // LOCAL
-                handlePasteFromClipboard,
                 importFile,
                 inputFile,
                 removeQueuedFile,

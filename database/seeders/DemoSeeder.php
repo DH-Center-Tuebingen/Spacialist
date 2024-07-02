@@ -5,26 +5,18 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 
-class DemoSeeder extends Seeder
-{
+class DemoSeeder extends Seeder {
     /**
      * Run the database seeds.
      *
      * @return void
      */
-    public function run()
-    {
+    public function run() {
+        activity()->disableLogging();
+
         $this->call(UsersTableSeeder::class);
 
-        $this->call(ThLanguageTableSeeder::class);
-        $this->call(ThConceptTableSeeder::class);
-        $this->call(ThConceptMasterTableSeeder::class);
-        $this->call(ThConceptLabelTableSeeder::class);
-        $this->call(ThConceptLabelMasterTableSeeder::class);
-        $this->call(ThBroadersTableSeeder::class);
-        $this->call(ThBroadersMasterTableSeeder::class);
-        $this->call(ThConceptNotesTableSeeder::class);
-        $this->call(ThConceptNotesMasterTableSeeder::class);
+        $this->call(ThesaurexSeeder::class);
 
         // $this->call(PermissionsTableSeeder::class);
         $this->call(RolesTableSeeder::class);
@@ -64,7 +56,7 @@ class DemoSeeder extends Seeder
             'test_archive.zip',
         ];
         $path = storage_path() . "/framework/testing/";
-        foreach($testFiles as $f) {
+        foreach ($testFiles as $f) {
             $filehandle = fopen("$path$f", 'r');
             Storage::put(
                 $f,
@@ -73,8 +65,10 @@ class DemoSeeder extends Seeder
             fclose($filehandle);
         }
 
-        if(\DB::connection()->getDriverName() === 'pgsql') {
+        if (\DB::connection()->getDriverName() === 'pgsql') {
             $this->call(FixSequencesSeeder::class);
         }
+
+        activity()->enableLogging();
     }
 }

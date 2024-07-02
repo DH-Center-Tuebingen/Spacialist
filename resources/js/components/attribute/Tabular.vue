@@ -117,6 +117,15 @@
                             @change="e => updateDirtyState(e, $index, column.id)"
                         />
 
+                        <daterange-attribute
+                            v-else-if="column.datatype == 'daterange'"
+                            :ref="el => setRef(el, `${$index}_${column.id}`)"
+                            :disabled="disabled || row.mark_deleted"
+                            :name="`${name}-column-attr-${column.id}`"
+                            :value="row[column.id]"
+                            @change="e => updateDirtyState(e, $index, column.id)"
+                        />
+
                         <singlechoice-attribute
                             v-else-if="column.datatype == 'string-sc'"
                             :ref="el => setRef(el, `${$index}_${column.id}`)"
@@ -127,8 +136,26 @@
                             @change="e => updateDirtyState(e, $index, column.id)"
                         />
 
+                        <multichoice-attribute
+                            v-else-if="column.datatype == 'string-mc'"
+                            :ref="el => setRef(el, `${$index}_${column.id}`)"
+                            :disabled="disabled || row.mark_deleted"
+                            :name="`${name}-column-attr-${column.id}`"
+                            :value="row[column.id]"
+                            :selections="state.selections[column.id]"
+                            @change="e => updateDirtyState(e, $index, column.id)"
+                        />
+
                         <userlist-attribute
                             v-else-if="column.datatype == 'userlist'"
+                            :ref="el => setRef(el, `${$index}_${column.id}`)"
+                            :name="`${name}-column-attr-${column.id}`"
+                            :value="row[column.id]"
+                            @change="e => updateDirtyState(e, $index, column.id)"
+                        />
+
+                        <url-attribute
+                            v-else-if="element.datatype == 'url'"
                             :ref="el => setRef(el, `${$index}_${column.id}`)"
                             :name="`${name}-column-attr-${column.id}`"
                             :value="row[column.id]"
@@ -346,7 +373,9 @@
     import DateAttr from '@/components/attribute/Date.vue';
     import DaterangeAttr from '@/components/attribute/Daterange.vue';
     import SingleChoice from '@/components/attribute/SingleChoice.vue';
+    import MultiChoice from '@/components/attribute/MultiChoice.vue';
     import UserList from '@/components/attribute/UserList.vue';
+    import Url from '@/components/attribute/Url.vue';
 
     import * as d3 from 'd3-dsv'; 
 
@@ -362,7 +391,9 @@
             'date-attribute': DateAttr,
             'daterange-attribute': DaterangeAttr,
             'singlechoice-attribute': SingleChoice,
+            'multichoice-attribute': MultiChoice,
             'userlist-attribute': UserList,
+            'url-attribute': Url,
         },
         props: {
             name: {
@@ -668,7 +699,7 @@
             watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
-            watch(_ => [v.meta.dirty, v.meta.valid], ([newDirty, newValid], [oldDirty, oldValid]) => {
+            watch(_ => v.value, (newValue, oldValue) => {
                 // only emit @change event if field is validated (required because Entity.vue components)
                 // trigger this watcher several times even if another component is updated/validated
                 if(!v.meta.validated) return;
@@ -708,14 +739,7 @@
                 // STATE
                 state,
                 v,
-            }
+            };
         },
-        // mounted () {
-        //     this.$el.value = this.value;
-        //     for(let k in this.attribute.columns) {
-        //         const c = this.attribute.columns[k];
-        //         Vue.set(this.newRowColumns, c.id, null);
-        //     }
-        // },
-    }
+    };
 </script>

@@ -9,7 +9,7 @@ use App\Exceptions\InvalidDataException;
 class DropdownMultipleAttribute extends AttributeBase
 {
     protected static string $type = "string-mc";
-    protected static bool $inTable = false;
+    protected static bool $inTable = true;
     protected static ?string $field = 'json_val';
     protected static bool $hasSelection = true;
 

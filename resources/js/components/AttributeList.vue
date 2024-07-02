@@ -3,14 +3,14 @@
         v-if="state.componentLoaded"
         v-model="state.attributeList"
         item-key="id"
-        class="attribute-list-container row align-content-start"
+        class="attribute-list-container align-content-start"
         :class="classes"
         :disabled="disableDrag || preview"
         :group="group"
         :move="handleMove"
         @change="handleUpdate"
     >
-        <template #item="{element, index}">
+        <template #item="{ element, index }">
             <div
                 v-if="!state.hiddenAttributeList[element.id] || showHidden"
                 class="mb-3"
@@ -27,6 +27,7 @@
                         class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break"
                         :for="`attr-${element.id}`"
                         :class="attributeClasses(element)"
+                        @click="e => handleLabelClick(e, element.datatype)"
                     >
                         <div
                             v-show="!!state.hoverStates[index]"
@@ -89,28 +90,26 @@
                             v-if="!element.is_system"
                             class="text-end col"
                         >
-                            {{ translateConcept(element.thesaurus_url) }}:
+                            {{ translateConcept(element.thesaurus_url) }}
                         </span>
                         <sup
                             v-if="hasEmitter('onMetadata')"
-                            class="clickable"
+                            class="clickable d-flex flex-row align-items-start top-0"
                             @click="onMetadataHandler(element)"
                         >
-                            <span :class="getCertaintyClass(state.attributeValues[element.id].certainty, 'text')">
-                                <i class="fas fa-fw fa-exclamation" />
-                            </span>
-                            <span v-if="state.attributeValues[element.id].comments_count > 0">
+                            <validity-indicator :state="certainty(element)" />
+                            <span v-if="hasComment(element)">
                                 <i class="fas fa-fw fa-comment" />
                             </span>
-                            <span v-if="metadataAddon(element.thesaurus_url)">
+                            <span v-if="hasBookmarks(element)">
                                 <i class="fas fa-fw fa-bookmark" />
                             </span>
                         </sup>
                         <sup
                             v-if="hasEmitter('onEditElement') && !!element.pivot.depends_on"
-                            class="font-size-50"
+                            :title="t('global.dependency.depends_on.desc')"
                         >
-                            <i class="fas fa-fw fa-circle text-warning" />
+                            <i class="fas fa-diagram-next text-warning fa-rotate-180" />
                         </sup>
                     </label>
                     <div :class="expandedClasses(index)">
@@ -176,7 +175,7 @@
                             :value="state.attributeValues[element.id].value"
                             @change="e => updateDirtyState(e, element.id)"
                         />
-                                
+
                         <serial-attribute
                             v-else-if="element.datatype == 'serial'"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
@@ -199,7 +198,7 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
-                            :epochs="selections[element.id]"
+                            :epochs="selections[element.id] || []"
                             :type="element.datatype"
                             @change="e => updateDirtyState(e, element.id)"
                         />
@@ -210,6 +209,16 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value || {}"
+                            @change="e => updateDirtyState(e, element.id)"
+                        />
+
+                        <si-unit-attribute
+                            v-else-if="element.datatype == 'si-unit'"
+                            :ref="el => setRef(el, element.id)"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :name="`attr-${element.id}`"
+                            :value="state.attributeValues[element.id].value"
+                            :metadata="element.metadata"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -292,7 +301,7 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
-                            :selections="selections[element.id]"
+                            :selections="selections[element.id] || []"
                             :selection-from="element.root_attribute_id"
                             :selection-from-value="state.rootAttributeValues[element.root_attribute_id]"
                             @update-selection="e => handleSelectionUpdate(element.id, e)"
@@ -305,12 +314,21 @@
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
                             :value="state.attributeValues[element.id].value"
-                            :selections="selections[element.id]"
+                            :selections="selections[element.id] || []"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
                         <userlist-attribute
                             v-else-if="element.datatype == 'userlist'"
+                            :ref="el => setRef(el, element.id)"
+                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :name="`attr-${element.id}`"
+                            :value="state.attributeValues[element.id].value"
+                            @change="e => updateDirtyState(e, element.id)"
+                        />
+
+                        <url-attribute
+                            v-else-if="element.datatype == 'url'"
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
@@ -369,7 +387,6 @@
 
     import {
         getAttribute,
-        getCertaintyClass,
         translateConcept,
     } from '@/helpers/helpers.js';
 
@@ -389,6 +406,7 @@
     import List from '@/components/attribute/List.vue';
     import Epoch from '@/components/attribute/Epoch.vue';
     import Dimension from '@/components/attribute/Dimension.vue';
+    import SiUnit from '@/components/attribute/SiUnit.vue';
     import Tabular from '@/components/attribute/Tabular.vue';
     import Iconclass from '@/components/attribute/Iconclass.vue';
     import RISM from '@/components/attribute/Rism.vue';
@@ -399,10 +417,12 @@
     import SingleChoice from '@/components/attribute/SingleChoice.vue';
     import MultiChoice from '@/components/attribute/MultiChoice.vue';
     import UserList from '@/components/attribute/UserList.vue';
+    import Url from '@/components/attribute/Url.vue';
     import SqlAttr from '@/components/attribute/Sql.vue';
     import SystemSeparator from '@/components/attribute/SystemSeparator.vue';
     import DefaultAttr from '@/components/attribute/Default.vue';
     import ModerationPanel from '@/components/moderation/Panel.vue';
+    import ValidityIndicator from './forms/indicators/ValidityIndicator.vue';
 
     export default {
         components: {
@@ -414,6 +434,7 @@
             'percentage-attribute': Percentage,
             'serial-attribute': Serial,
             'dimension-attribute': Dimension,
+            'si-unit-attribute': SiUnit,
             'epoch-attribute': Epoch,
             'list-attribute': List,
             'tabular-attribute': Tabular,
@@ -426,10 +447,12 @@
             'singlechoice-attribute': SingleChoice,
             'multichoice-attribute': MultiChoice,
             'userlist-attribute': UserList,
+            'url-attribute': Url,
             'sql-attribute': SqlAttr,
             'system-separator-attribute': SystemSeparator,
             'default-attribute': DefaultAttr,
             'attribute-moderation-panel': ModerationPanel,
+            'validity-indicator': ValidityIndicator,
         },
         props: {
             classes: {
@@ -444,7 +467,7 @@
             hiddenAttributes: {
                 required: false,
                 type: Array,
-                default: ()=>([]),
+                default: _ => ([]),
             },
             showHidden: {
                 required: false,
@@ -456,10 +479,10 @@
                 type: Boolean,
                 default: false
             },
-            group: { // required if onReorder is set // TODO
+            group: {
                 required: false,
-                type: String,
-                default: null,
+                type: Object,
+                default: _ => new Object(),
             },
             isSource: {
                 required: false,
@@ -525,7 +548,7 @@
                 if(!state.ignoreMetadata && elem.pivot && elem.pivot.metadata && elem.pivot.metadata.width) {
                     const width = elem.pivot.metadata.width;
                     switch(width) {
-                        case 50: 
+                        case 50:
                             return 'col-6';
                         default:
                             return 'col-12';
@@ -534,10 +557,14 @@
                 return 'col-12';
             };
             const attributeClasses = attribute => {
-                return {
-                    'copy-handle': props.isSource.value && !attribute.isDisabled,
-                    'not-allowed-handle text-muted': attribute.isDisabled,
-                };
+                const classes = [];
+                if(props.isSource.value && !attribute.isDisabled) {
+                    classes.push('copy-handle');
+                }
+                if(attribute.isDisabled) {
+                    classes.push('not-allowed-handle', 'text-muted');
+                }
+                return classes;
             };
             const expandedClasses = i => {
                 let expClasses = {};
@@ -729,9 +756,6 @@
             const setRef = (el, id) => {
                 attrRefs.value[id] = el;
             };
-            const checkDependency = id => {
-
-            };
             const onReorderHandler = data => {
                 context.emit('reorder-list', data);
             };
@@ -758,6 +782,23 @@
             };
             const hasEmitter = which => {
                 return !!attrs[which];
+            };
+
+            const certainty = attribute => {
+                return state.attributeValues?.[attribute.id]?.certainty;
+            };
+
+            const hasComment = attribute => {
+                return state.attributeValues[attribute.id].comments_count > 0;
+            };
+            const hasBookmarks = attribute => {
+                return metadataAddon.value && metadataAddon.value(attribute.thesaurus_url);
+            };
+
+            const handleLabelClick = (e, attrType) => {
+                if(attrType == 'boolean') {
+                    e.preventDefault();
+                }
             };
             const convertEntityValue = (value, isMultiple) => {
                 let actValue = null;
@@ -816,7 +857,7 @@
                     if(!state.componentLoaded) return {};
 
                     const list = {};
-                    for(let i=0; i<hiddenAttributes.value.length; i++) {
+                    for(let i = 0; i < hiddenAttributes.value.length; i++) {
                         const disId = hiddenAttributes.value[i];
                         list[disId] = true;
                     }
@@ -845,9 +886,9 @@
             return {
                 t,
                 // HELPERS
-                getCertaintyClass,
                 translateConcept,
                 // LOCAL
+                certainty,
                 handleSelectionUpdate,
                 clFromMetadata,
                 attributeClasses,
@@ -869,12 +910,14 @@
                 resetListValues,
                 undirtyList,
                 setRef,
-                checkDependency,
                 onEditHandler,
                 onRemoveHandler,
                 onDeleteHandler,
                 onMetadataHandler,
                 hasEmitter,
+                hasComment,
+                hasBookmarks,
+                handleLabelClick,
                 convertEntityValue,
                 // STATE
                 attrRefs,

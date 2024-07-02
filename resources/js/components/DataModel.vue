@@ -15,7 +15,7 @@
                 </button>
             </h4>
             <entity-type-list
-                class="col px-0 h-100 d-flex flex-column overflow-hidden"
+                class="col px-0 h-100 d-flex flex-column"
                 :data="state.entityTypes"
                 :selected-id="state.selectedEntityType"
                 @delete-element="requestDeleteEntityType"
@@ -66,7 +66,7 @@
                 />
                 <hr>
                 <attribute-list
-                    :classes="'pe-2 col scroll-y-auto scroll-x-hidden'"
+                    :classes="'pe-2 col overflow-y-auto overflow-x-hidden'"
                     :group="{name: 'attribute-selection', pull: true, put: false}"
                     :attributes="state.attributeList"
                     :hidden-attributes="state.selectedEntityTypeAttributeIds"
@@ -95,7 +95,7 @@
     } from 'vue-router';
 
     import store from '@/bootstrap/store.js';
-    import router from '@/bootstrap/router.js';
+    import router from '%router';
 
     import {
         duplicateEntityType as duplicateEntityTypeApi,
@@ -105,6 +105,7 @@
 
     import {
         getEntityTypeAttributes,
+        getInitialAttributeValue,
     } from '@/helpers/helpers.js';
 
     import {
@@ -139,7 +140,7 @@
                 duplicateEntityTypeApi(event.id).then(data => {
                     data.attributes = attrs;
                     store.dispatch('addEntityType', data);
-                })
+                });
             };
             const editEntityType = e => {
                 showEditEntityType(e.type);
@@ -173,6 +174,7 @@
 
             // DATA
             const state = reactive({
+                siu: computed(_ => store.getters.datatypeDataOf('si-unit')),
                 systemAttributeList: computed(_ => store.getters.attributes.filter(a => a.is_system)),
                 attributeList: computed(_ => store.getters.attributes.filter(a => !a.is_system)),
                 // set values for all attributes to '', so values in <attribute-list> are existant
@@ -181,13 +183,15 @@
                     let data = {};
                     for(let i=0; i<state.attributeList.length; i++) {
                         let a = state.attributeList[i];
-                        data[a.id] = '';
+                        data[a.id] = {
+                            value: getInitialAttributeValue(a, 'datatype'),
+                        };
                     }
                     return data;
                 }),
                 showHiddenAttributes: false,
                 entityTypes: computed(_ => Object.values(store.getters.entityTypes)),
-                selectedEntityType: computed(_ => currentRoute.params.id),
+                selectedEntityType: computed(_ => parseInt(currentRoute.params.id)),
                 selectedEntityTypeAttributeIds: computed(_ => state.selectedEntityType ? getEntityTypeAttributes(state.selectedEntityType).map(a => a.id) : []),
             });
 
@@ -205,7 +209,7 @@
                 onDeleteAttribute,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

@@ -1,8 +1,12 @@
 <template>
     <div class="row">
         <h3>
-            <a href="#" class="text-decoration-none text-muted" @click.prevent="unsetEntityType()" v-show="state.selectedEntityType">
-                <i class="fa fa-fw fa-arrow-turn-up fa-flip-horizontal fa-xs"></i>
+            <a
+                href="#"
+                class="text-decoration-none text-muted"
+                @click.prevent="unsetEntityType()" v-show="state.selectedEntityType"
+            >
+                <i class="fa fa-fw fa-arrow-turn-up fa-flip-horizontal fa-xs" />
             </a>
             Single Search
             <small v-if="state.selectedEntityType">
@@ -12,71 +16,138 @@
         </h3>
     </div>
     <div class="row flex-grow-1 overflow-hidden">
-        <div class="col-12 h-100 overflow-hidden" v-if="!state.selectedEntityType">
+        <div
+            v-if="!state.selectedEntityType"
+            class="col-12 h-100 overflow-hidden"
+        >
             <p class="lead">
                 Please select an entity type first to search through the database
             </p>
             <ul class="list-group">
-                <li class="list-group-item" v-for="entityType in state.availableEntityTypes" :key="entityType.id">
-                    <a href="#" class="text-decoration-none" @click.prevent="selectEntityType(entityType)">
+                <li
+                    v-for="entityType in state.availableEntityTypes"
+                    :key="entityType.id"
+                    class="list-group-item"
+                >
+                    <a
+                        href="#"
+                        class="text-decoration-none"
+                        @click.prevent="selectEntityType(entityType)"
+                    >
                         {{ translateConcept(entityType.thesaurus_url) }}
                     </a>
                 </li>
             </ul>
         </div>
-        <div class="col-8 h-100 overflow-hidden d-flex flex-column" v-if="state.selectedEntityType">
+        <div
+            v-if="state.selectedEntityType"
+            class="col-8 h-100 overflow-hidden d-flex flex-column"
+        >
             <p v-if="state.pages.pagination">
                 Displaying results <span class="fw-bold">{{ state.pages.pagination.from }} - {{ state.pages.pagination.to }}</span> of <span class="fw-bold">{{ state.pages.pagination.total }}</span> in total.
             </p>
-            <div class="scroll-y-auto">
+            <div class="overflow-y-auto">
                 <result-card
+                    v-for="entry in state.pages.data"
+                    :key="entry.id"
                     class="bg-primary text-dark bg-opacity-25"
-                    v-for="entry in state.pages.data" :key="entry.id"
                     :entity="entry"
                 />
             </div>
-            <nav class="mt-2" aria-label="Search result pagination" v-if="state.pages.pagination">
+            <nav
+                v-if="state.pages.pagination"
+                class="mt-2"
+                aria-label="Search result pagination"
+            >
                 <ul class="pagination pagination-sm justify-content-center mb-0">
-                    <li class="page-item" :class="pageClass('first')">
-                        <a class="page-link" href="#" aria-label="First" @click.prevent="gotoPage(1)">
+                    <li
+                        class="page-item"
+                        :class="pageClass('first')"
+                    >
+                        <a
+                            class="page-link"
+                            href="#"
+                            aria-label="First"
+                            @click.prevent="gotoPage(1)"
+                        >
                             <span aria-hidden="true">
-                                <i class="fas fa-fw fa-angle-double-left"></i>
+                                <i class="fas fa-fw fa-angle-double-left" />
                             </span>
                         </a>
                     </li>
-                    <li class="page-item" :class="pageClass('previous')">
-                        <a class="page-link" href="#" aria-label="Previous" @click.prevent="gotoPage(state.pages.pagination.current_page - 1)">
+                    <li
+                        class="page-item"
+                        :class="pageClass('previous')"
+                    >
+                        <a
+                            class="page-link"
+                            href="#"
+                            aria-label="Previous"
+                            @click.prevent="gotoPage(state.pages.pagination.current_page - 1)"
+                        >
                             <span aria-hidden="true">
-                                <i class="fas fa-fw fa-chevron-left"></i>
+                                <i class="fas fa-fw fa-chevron-left" />
                             </span>
                         </a>
                     </li>
-                    <li class="page-item" :class="pageClass(page.label)" v-for="page in state.pages.pagination.cleanLinks" :key="`page-${page.label}`">
-                        <a class="page-link" href="#" @click.prevent="gotoPage(page.label)">
+                    <li
+                        v-for="page in state.pages.pagination.cleanLinks"
+                        :key="`page-${page.label}`"
+                        class="page-item"
+                        :class="pageClass(page.label)"
+                    >
+                        <a
+                            class="page-link"
+                            href="#"
+                            @click.prevent="gotoPage(page.label)"
+                        >
                             {{ page.label }}
                         </a>
                     </li>
-                    <li class="page-item" :class="pageClass('next')">
-                        <a class="page-link" href="#" aria-label="Next" @click.prevent="gotoPage(state.pages.pagination.current_page + 1)">
+                    <li
+                        class="page-item"
+                        :class="pageClass('next')"
+                    >
+                        <a
+                            class="page-link"
+                            href="#"
+                            aria-label="Next"
+                            @click.prevent="gotoPage(state.pages.pagination.current_page + 1)"
+                        >
                             <span aria-hidden="true">
-                                <i class="fas fa-fw fa-chevron-right"></i>
+                                <i class="fas fa-fw fa-chevron-right" />
                             </span>
                         </a>
                     </li>
-                    <li class="page-item" :class="pageClass('last')">
-                        <a class="page-link" href="#" aria-label="Last" @click.prevent="gotoPage(state.pages.pagination.last_page)">
+                    <li
+                        class="page-item"
+                        :class="pageClass('last')"
+                    >
+                        <a
+                            class="page-link"
+                            href="#"
+                            aria-label="Last"
+                            @click.prevent="gotoPage(state.pages.pagination.last_page)"
+                        >
                             <span aria-hidden="true">
-                                <i class="fas fa-fw fa-angle-double-right"></i>
+                                <i class="fas fa-fw fa-angle-double-right" />
                             </span>
                         </a>
                     </li>
                 </ul>
             </nav>
         </div>
-        <div class="col-4 h-100 pe-0 overflow-hidden d-flex flex-column" v-if="state.selectedEntityType">
+        <div
+            v-if="state.selectedEntityType"
+            class="col-4 h-100 pe-0 overflow-hidden d-flex flex-column"
+        >
             <h4>Filters</h4>
-            <div class="d-flex flex-column pe-3 scroll-y-auto flex-grow-1">
-                <div v-for="attribute in state.filterableAttributes.attributes" :key="attribute.id" class="mb-3">
+            <div class="d-flex flex-column pe-3 overflow-y-auto flex-grow-1">
+                <div
+                    v-for="attribute in state.filterableAttributes.attributes"
+                    :key="attribute.id"
+                    class="mb-3"
+                >
                     <h5>
                         {{ translateConcept(attribute.attribute.thesaurus_url) }}
                         <small>
@@ -89,21 +160,26 @@
                         v-model="state.attributeDataModels[attribute.attribute_id]"
                         :disabled="state.filterableAttributes.data_count[attribute.attribute_id] == 0"
                         :label="'key'"
-                        :valueProp="'key'"
+                        :value-prop="'key'"
                         :track-by="'key'"
                         :object="true"
                         :mode="'tags'"
-                        :hideSelected="false"
-                        :closeOnSelect="false"
+                        :hide-selected="false"
+                        :close-on-select="false"
                         :options="state.filterableAttributes.data[attribute.attribute_id]"
                         @change="option => handleFilterChange(attribute.attribute_id, option)"
                     >
-                        <template v-slot:beforelist>
-                            <a href="#" class="py-2 text-reset text-decoration-none" style="padding-left: 0.75rem; padding-right: 0.75rem;" @click.prevent="resetFilter(attribute.attribute_id)">
+                        <template #beforelist>
+                            <a
+                                href="#"
+                                class="py-2 text-reset text-decoration-none"
+                                style="padding-left: 0.75rem; padding-right: 0.75rem;"
+                                @click.prevent="resetFilter(attribute.attribute_id)"
+                            >
                                 All Values
                             </a>
                         </template>
-                        <template v-slot:option="{option}">
+                        <template #option="{option}">
                             <div class="d-flex flex-row w-100 justify-content-between">
                                 <span v-if="attribute.attribute.datatype == 'string-sc'">
                                     {{ translateConcept(option.key) }}
@@ -116,7 +192,7 @@
                                 </span>
                             </div>
                         </template>
-                        <template v-slot:tag="{option, handleTagRemove, disabled}">
+                        <template #tag="{option, handleTagRemove, disabled}">
                             <div class="multiselect-tag">
                                 <span v-if="attribute.attribute.datatype == 'string-sc'">
                                     {{ translateConcept(option.key) }}
@@ -124,8 +200,13 @@
                                 <span v-else>
                                     {{ option.key }}
                                 </span>
-                                <span v-if="!disabled" class="multiselect-tag-remove" @click.prevent @mousedown.prevent.stop="handleTagRemove(option, $event)">
-                                    <span class="multiselect-tag-remove-icon"></span>
+                                <span
+                                    v-if="!disabled"
+                                    class="multiselect-tag-remove"
+                                    @click.prevent
+                                    @mousedown.prevent.stop="handleTagRemove(option, $event)"
+                                >
+                                    <span class="multiselect-tag-remove-icon" />
                                 </span>
                             </div>
                         </template>
@@ -345,5 +426,5 @@
                 state,
             };
         }
-    }
+    };
 </script>

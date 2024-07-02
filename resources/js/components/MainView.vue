@@ -63,7 +63,7 @@
                 </keep-alive>
                 <div
                     v-show="isTab('references') && !!state.entity.id"
-                    class="h-100 scroll-y-auto"
+                    class="h-100 overflow-y-auto"
                 >
                     <p
                         v-if="!state.hasReferences"
@@ -100,30 +100,7 @@
                                             {{ date(reference.updated_at) }}
                                         </span>
                                     </header>
-                                    <div>
-                                        <blockquote class="blockquote fs-09 mb-4">
-                                            <p class="text-muted">
-                                                {{ reference.description }}
-                                            </p>
-                                        </blockquote>
-                                        <figcaption class="blockquote-footer fw-medium mb-0 d-flex gap-1">
-                                            <span>
-                                                {{ reference.bibliography.author }} in <cite
-                                                    :title="reference.bibliography.title"
-                                                >
-                                                    {{ reference.bibliography.title }} ,{{ reference.bibliography.year
-                                                    }}
-                                                </cite>
-                                                <a
-                                                    href="#"
-                                                    class="ms-1"
-                                                    @click.prevent="openLiteratureInfo(reference)"
-                                                >
-                                                    <i class="fas fa-fw fa-info-circle" />
-                                                </a>
-                                            </span>
-                                        </figcaption>
-                                    </div>
+                                    <Quotation :value="reference" />
                                 </div>
                             </div>
                         </div>
@@ -153,22 +130,33 @@
     } from 'vue-router';
 
     import store from '@/bootstrap/store.js';
-    import router from '@/bootstrap/router.js';
-
-    import { useToast } from '@/plugins/toast.js';
+    import router from '%router';
 
     import {
         translateConcept,
     } from '@/helpers/helpers.js';
+
+    import {
+        formatAuthors,
+    } from '@/helpers/bibliography.js';
+
     import {
         date,
     } from '@/helpers/filters.js';
+
     import {
         canShowReferenceModal,
         showLiteratureInfo,
     } from '@/helpers/modal.js';
 
+    import { useToast } from '@/plugins/toast.js';
+
+    import Quotation from '@/components/bibliography/Quotation.vue';
+
     export default {
+        components: {
+            Quotation,
+        },
         setup(props, context) {
             const { t } = useI18n();
             const currentRoute = useRoute();
@@ -236,12 +224,11 @@
 
                     const isEmpty = !Object.keys(state.entity.references).length > 0;
                     if(isEmpty) return false;
-
                     return Object.values(state.entity.references).some(v => v.length > 0);
                 }),
                 entityTypes: computed(_ => store.getters.entityTypes),
                 columnPref: computed(_ => store.getters.preferenceByKey('prefs.columns')),
-                isDetailLoaded: computed(_ => currentRoute.name == 'entitydetail'),
+                isDetailLoaded: computed(_ => store.getters.entity?.id > 0),
                 tabPlugins: computed(_ => store.getters.slotPlugins('tab')),
             });
 
@@ -265,6 +252,7 @@
                 t,
                 // HELPERS
                 translateConcept,
+                formatAuthors,
                 date,
                 // LOCAL
                 setTab,

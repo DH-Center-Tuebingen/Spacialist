@@ -290,7 +290,7 @@
                 <form
                     :id="`entity-attribute-form-${tg.id}`"
                     :name="`entity-attribute-form-${tg.id}`"
-                    class="h-100"
+                    class="h-100 container-fluid"
                     @submit.prevent
                     @keydown.ctrl.s="e => handleSaveOnKey(e, `${tg.id}`)"
                 >
@@ -298,7 +298,7 @@
                         v-if="state.attributesFetched"
                         :ref="el => setAttrRefs(el, tg.id)"
                         v-dcan="'entity_data_read'"
-                        class="pt-2 h-100 scroll-y-auto scroll-x-hidden"
+                        class="pt-2 h-100 overflow-y-auto row"
                         :attributes="tg.data"
                         :hidden-attributes="state.hiddenAttributeList"
                         :show-hidden="state.hiddenAttributeState"
@@ -328,7 +328,7 @@
             >
                 <div
                     v-if="state.entity.comments"
-                    class="mb-auto scroll-y-auto h-100 pe-2"
+                    class="mb-auto overflow-y-auto h-100 pe-2"
                 >
                     <div
                         v-if="state.commentsFetching"
@@ -398,7 +398,7 @@
     } from 'bootstrap';
 
     import store from '@/bootstrap/store.js';
-    import router from '@/bootstrap/router.js';
+    import router from '%router';
 
     import {useToast} from '@/plugins/toast.js';
 
@@ -690,7 +690,7 @@
                     switch(ad.operator) {
                         case '=':
                             if(type == 'string-sc') {
-                                matches = value.id == ad.value;
+                                matches = value?.id == ad.value;
                             } else if(type == 'string-mc') {
                                 matches = value && value.some(mc => mc.id == ad.value);
                             } else {
@@ -699,7 +699,7 @@
                             break;
                         case '!=':
                             if(type == 'string-sc') {
-                                matches = value.id != ad.value;
+                                matches = value?.id != ad.value;
                             } else if(type == 'string-mc') {
                                 matches = value && value.every(mc => mc.id != ad.value);
                             } else {
@@ -714,6 +714,7 @@
                             break;
                     }
                     state.hiddenAttributes[ad.dependant] = {
+                        hide: !matches,
                         hide: matches,
                         by: aid,
                     };
@@ -868,6 +869,7 @@
                 for(let v in dirtyValues) {
                     const aid = v;
                     const data = state.entity.data[aid];
+                    const type = getAttribute(aid)?.datatype;
                     const patch = {
                         op: null,
                         value: null,
@@ -877,7 +879,11 @@
                     };
                     if(data.id) {
                         // if data.id exists, there has been an entry in the database, therefore it is a replace/remove operation
-                        if(dirtyValues[v] && dirtyValues[v] != '') {
+                        if(
+                            (dirtyValues[v] && dirtyValues[v] != '')
+                            ||
+                            (type == 'boolean' && dirtyValues[v] === false)
+                        ) {
                             // value is set, therefore it is a replace
                             patch.op = 'replace';
                             patch.value = dirtyValues[v];
@@ -907,6 +913,7 @@
                         data: dirtyValues,
                         new_data: data.added_attributes,
                         eid: state.entity.id,
+                        sync: !isModerated(),
                     });
                     if(isModerated()) {
                         store.dispatch('updateEntityDataModerations', {
@@ -930,10 +937,21 @@
                         },
                     );
                 }).catch(error => {
-                    const r = error.response;
+                    let response = error.response;
+
+                    if(!response) {
+                        response = {
+                            data: {
+                                error: t('global.errors.unknown')
+                            },
+                            status: 417,
+                            statusText: 'Could not decode response'
+                        };
+                    }
+
                     toast.$toast(
-                        r.data.error,
-                        `${r.status}: ${r.statusText}`, {
+                        response.data.error,
+                        `${response.status}: ${response.statusText}`, {
                         channel: 'error',
                         autohide: true,
                         icon: true,
@@ -998,6 +1016,14 @@
                     if(!newValue || !newValue.id) return;
                     nextTick(_ => {
                         setDetailPanelView(route.query.view);
+                        const eid = state.entity.id;
+                        const treeElem = document.getElementById(`tree-node-${eid}`);
+                        if(treeElem) {
+                            treeElem.scrollIntoView({
+                                behavior: 'smooth',
+                                inline: 'start',
+                            });
+                        }
                     });
                 }
             );

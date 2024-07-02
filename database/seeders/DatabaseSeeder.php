@@ -13,9 +13,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        activity()->disableLogging();
+
         $this->call(RolesPermissionsSeeder::class);
         $this->call(AdminUserSeeder::class);
         $this->call(LanguageTableSeeder::class);
         $this->call(MapSeeder::class);
+
+        activity()->enableLogging();
     }
 }

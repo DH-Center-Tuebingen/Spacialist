@@ -1,5 +1,5 @@
 <template>
-    <div class="list-group scroll-y-auto px-2">
+    <div class="list-group overflow-y-auto px-2">
         <a
             v-for="(entry, i) in state.entries"
             :key="i"
@@ -136,17 +136,17 @@
                 return ['badge', 'rounded-pill', 'bg-light'];
             };
             const selectEntry = entityType => {
-                context.emit('select-element', {type: entityType});
+                context.emit('select-element', { type: entityType });
             };
             const onEdit = entityType => {
-                context.emit('edit-element', {type: entityType});
-            }
+                context.emit('edit-element', { type: entityType });
+            };
             const onDuplicate = entityType => {
-                context.emit('duplicate-element', {id: entityType.id});
-            }
+                context.emit('duplicate-element', { id: entityType.id });
+            };
             const onDelete = entityType => {
-                context.emit('delete-element', {type: entityType});
-            }
+                context.emit('delete-element', { type: entityType });
+            };
 
             // DATA
             const state = reactive({
@@ -178,7 +178,7 @@
                 onDelete,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

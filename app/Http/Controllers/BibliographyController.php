@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use RenanBr\BibTexParser\Listener;
 use RenanBr\BibTexParser\Exception\ParserException;
 use RenanBr\BibTexParser\Parser;
+use RenanBr\BibTexParser\Processor\TagNameCaseProcessor;
 
 class BibliographyController extends Controller
 {
@@ -24,46 +25,6 @@ class BibliographyController extends Controller
         $bibliography = Bibliography::orderBy('id')->get();
 
         return response()->json($bibliography);
-    }
-
-    public function exportBibtex() {
-        $user = auth()->user();
-        if(!$user->can('bibliography_share')) {
-            return response()->json([
-                'error' => __('You do not have the permission to export bibliography')
-            ], 403);
-        }
-
-        $entries = Bibliography::orderBy('author', 'asc')->get();
-        $content = '';
-        foreach($entries as $e) {
-            $content .= '@'.$e->type.'{'.$e->citekey.',';
-            $content .= "\n";
-            $attrs = $e->getAttributes();
-            foreach($attrs as $k => $a) {
-                if(!isset($a)) continue;
-                switch($k) {
-                    case 'id':
-                    case 'type':
-                    case 'created_at':
-                    case 'updated_at':
-                    case 'citekey':
-                    case 'user_id':
-                        break;
-                    default:
-                        $content .= '    '.$k.' = {'.$a.'}';
-                        $content .= "\n";
-                        break;
-                }
-            }
-            $content .= '}';
-            $content .= "\n\n";
-        }
-        return response()->streamDownload(function() use ($content) {
-            echo $content;
-        }, 'export.bib', [
-            'Content-Type' => 'application/x-bibtex'
-        ]);
     }
 
     public function getReferenceCount($id) {
@@ -133,6 +94,12 @@ class BibliographyController extends Controller
         $file = $request->file('file');
         $noOverwriteOnDup = $request->input('no-overwrite', false);
         $listener = new Listener();
+        $listener->addProcessor(new TagNameCaseProcessor(CASE_LOWER));
+        $listener->addProcessor(function($entry) {
+            $entry['_type'] = strtolower($entry['_type']);
+            $entry['type'] = strtolower($entry['type']);
+            return $entry;
+        });
         $parser = new Parser();
         $parser->addListener($listener);
         try {
@@ -217,6 +184,61 @@ class BibliographyController extends Controller
         DB::commit();
 
         return response()->json($newChangedEntries, 201);
+    }
+
+    public function exportBibtex(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('bibliography_share')) {
+            return response()->json([
+                'error' => __('You do not have the permission to export bibliography')
+            ], 403);
+        }
+
+        $this->validate($request, [
+            'selection' => 'nullable|array',
+        ]);
+
+        $query = Bibliography::orderBy('author', 'asc');
+
+        $selection = $request->get('selection', []);
+        if(isset($selection) && !empty($selection)) {
+            $query = $query->whereIn('id', $selection);
+        }
+
+        $entries = $query->get();
+        $content = '';
+        foreach($entries as $e) {
+            $content .= '@'.$e->type.'{'.$e->citekey.',';
+            $content .= "\n";
+            $attrs = $e->getAttributes();
+            foreach($attrs as $k => $a) {
+                if(!isset($a)) continue;
+                switch($k) {
+                    case 'id':
+                    case 'type':
+                    case 'created_at':
+                    case 'updated_at':
+                    case 'citekey':
+                    case 'user_id':
+                        break;
+                    default:
+                        $content .= '    '.$k.' = {'.$a.'}';
+                        $content .= "\n";
+                        break;
+                }
+            }
+            $content .= '}';
+            $content .= "\n\n";
+        }
+
+        // remove new lines at end of file
+        $content = substr($content, 0, -2);
+
+        return response()->streamDownload(function() use ($content) {
+            echo $content;
+        }, 'export.bib', [
+            'Content-Type' => 'application/x-bibtex'
+        ]);
     }
 
     // PATCH

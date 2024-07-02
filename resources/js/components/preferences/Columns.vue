@@ -7,7 +7,7 @@
         <div class="col-md">
             <input
                 id="left-column"
-                v-model="data.left"
+                v-model.number="data.left"
                 class="form-control"
                 type="number"
                 :disabled="readonly"
@@ -26,7 +26,7 @@
         <div class="col-md">
             <input
                 id="center-column"
-                v-model="data.center"
+                v-model.number="data.center"
                 class="form-control"
                 type="number"
                 :disabled="readonly"
@@ -45,7 +45,7 @@
         <div class="col-md">
             <input
                 id="right-column"
-                v-model="data.right"
+                v-model.number="data.right"
                 class="form-control"
                 type="number"
                 :disabled="readonly"

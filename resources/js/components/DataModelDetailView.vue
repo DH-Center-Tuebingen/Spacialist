@@ -116,8 +116,8 @@
                     <h4>Drag attributes here</h4>
                 </div>
                 <attribute-list
-                    class="h-100 scroll-y-auto scroll-x-hidden"
-                    group="attribute-selection"
+                    class="h-100 overflow-y-auto overflow-x-hidden"
+                    :group="{name: 'attribute-selection', pull: false, put: true}"
                     :attributes="state.entityAttributes"
                     :values="state.entityValues"
                     :disable-drag="false"
@@ -267,7 +267,7 @@
                         const curr = state.entityAttributes[i];
                         // several datatypes require a "valid"/non-string v-model
                         data[curr.id] = {
-                            value: getInitialAttributeValue(curr),
+                            value: getInitialAttributeValue(curr, 'datatype'),
                         };
                     }
                     return data;

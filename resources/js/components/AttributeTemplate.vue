@@ -192,6 +192,82 @@
                 />
             </div>
         </div>
+        <template v-if="state.isSiUnit">
+            <div class="mb-3">
+                <label class="col-form-label col-3">
+                    {{ t('global.attributes.si_units.base_unit') }}:
+                </label>
+                <div class="col">
+                    <multiselect
+                        v-model="state.attribute.siGroup"
+                        :mode="'single'"
+                        :options="state.siGroups"
+                        :searchable="true"
+                        :filter-results="false"
+                        :object="false"
+                        :placeholder="t('global.select.placeholder')"
+                        :hide-selected="true"
+                        @select="siGroupSelected"
+                        @search-change="searchInSiGroups"
+                    >
+                        <template #option="{ option }">
+                            {{ t(`global.attributes.si_units.${option.label}.label`) }}
+                        </template>
+                        <template #singlelabel="{ value }">
+                            <div class="multiselect-single-label">
+                                {{ t(`global.attributes.si_units.${value.label}.label`) }}
+                            </div>
+                        </template>
+                    </multiselect>
+                </div>
+            </div>
+            <div
+                v-show="state.attribute.siGroup"
+                class="mb-3"
+            >
+                <label class="col-form-label col-3">
+                    {{ t('global.attributes.si_units.base_unit') }}:
+                </label>
+                <div class="col">
+                    <multiselect
+                        v-model="state.attribute.siGroupUnit"
+                        :classes="multiselectResetClasslist"
+                        :mode="'single'"
+                        :options="state.siGroupUnits"
+                        :track-by="'label'"
+                        :value-prop="'label'"
+                        :object="false"
+                        :placeholder="t('global.select.placeholder')"
+                        :hide-selected="true"
+                        @select="siGroupUnitSelected"
+                    >
+                        <template #option="{ option }">
+                            <div class="d-flex flex-row justify-content-between gap-3">
+                                <span>
+                                    {{ siSymbolToStr(option.symbol) }}
+                                </span>
+                                <span>
+                                    {{ t(`global.attributes.si_units.${state.attribute.siGroup}.units.${option.label}`) }}
+                                </span>
+                            </div>
+                        </template>
+                        <template #singlelabel="{ value }">
+                            <div class="multiselect-single-label">
+                                <div class="d-flex flex-row justify-content-between gap-3">
+                                    <span>
+                                        {{ siSymbolToStr(value.symbol) }}
+                                    </span>
+                                    <span>
+                                        {{ t(`global.attributes.si_units.${state.attribute.siGroup}.units.${value.label}`)
+                                        }}
+                                    </span>
+                                </div>
+                            </div>
+                        </template>
+                    </multiselect>
+                </div>
+            </div>
+        </template>
         <button
             v-show="!external"
             type="submit"
@@ -224,6 +300,8 @@
         translateConcept,
         getConceptLabel,
         getTs,
+        siSymbolToStr,
+        multiselectResetClasslist,
     } from '@/helpers/helpers.js';
 
     export default {
@@ -263,6 +341,9 @@
                 state.attribute.differRoot = false;
                 state.attribute.textContent = '';
                 state.attribute.restrictedTypes = [];
+                state.attribute.siGroup = null;
+                state.attribute.siGroupUnit = null;
+
                 state.searchResetValue = {
                     reset: true,
                     ts: getTs(),
@@ -284,7 +365,7 @@
                 if(!state.canRestrictTypes || state.attribute.restrictedTypes.length == 0) {
                     state.attribute.restrictedTypes = null;
                 }
-                context.emit('created', {...state.attribute});
+                context.emit('created', { ...state.attribute });
                 reset();
             };
             const emitUpdate = _ => {
@@ -313,6 +394,31 @@
             const searchInAttributeTypes = query => {
                 state.query = query ? query.toLowerCase().trim() : null;
             };
+            const siGroupSelected = e => {
+                state.attribute.siGroup = e;
+
+                if(!state.attribute.siGroup) {
+                    state.attribute.siGroupUnit = null;
+                    state.siGroupUnits = null;
+                } else {
+                    const grp = store.getters.datatypeDataOf('si-unit')[state.attribute.siGroup];
+                    const matchUnit = grp.units.find(u => grp.default == u.symbol);
+                    if(matchUnit) {
+                        state.attribute.siGroupUnit = matchUnit.label;
+                    } else {
+                        state.attribute.siGroupUnit = null;
+                    }
+                    state.siGroupUnits = grp.units;
+                }
+                emitUpdate();
+            };
+            const siGroupUnitSelected = e => {
+                state.attribute.siGroupUnit = e;
+                emitUpdate();
+            };
+            const searchInSiGroups = query => {
+                state.siQuery = query ? query.toLowerCase().trim() : null;
+            };
 
             // DATA
             let types = [];
@@ -334,13 +440,27 @@
                     differRoot: false,
                     textContent: '',
                     restrictedTypes: [],
+                    siGroup: null,
+                    siGroupUnit: null,
                 },
                 query: null,
+                siQuery: null,
+                siGroupUnits: null,
                 attributeTypes: computed(_ => {
                     if(!state.query) return types;
 
                     return types.filter(type => {
                         return type.datatype.indexOf(state.query) !== -1 || t(`global.attributes.${type.datatype}`).toLowerCase().indexOf(state.query) !== -1;
+                    });
+                }),
+                siGroups: computed(_ => {
+                    if(!state.isSiUnit) return null;
+
+                    const keys = Object.keys(store.getters.datatypeDataOf('si-unit'));
+                    if(!state.siQuery) return keys;
+
+                    return keys.filter(grp => {
+                        return grp.indexOf(state.siQuery) !== -1 || t(`global.attributes.si_units.${grp}.label`).toLowerCase().indexOf(state.siQuery) !== -1;
                     });
                 }),
                 searchResetValue: null,
@@ -355,7 +475,7 @@
                 label: computed(_ => {
                     return createText.value || t('global.create');
                 }),
-                validated: computed(_ =>  {
+                validated: computed(_ => {
                     let isValid = state.attribute.label &&
                         state.attribute.label.id > 0 &&
                         state.attribute.type &&
@@ -366,22 +486,27 @@
                                 state.needsTextareaElement &&
                                 state.attribute.textContent.length > 0
                             )
+                        ) && (
+                            (state.isSiUnit && state.attribute.siGroup && state.attribute.siGroupUnit) || !state.isSiUnit
                         );
                     context.emit('validation', isValid);
                     return isValid;
                 }),
                 allowsRestriction: computed(_ => {
-                    return  state.attribute.type == 'string-sc' ||
-                            state.attribute.type == 'string-mc' ||
-                            state.attribute.type == 'epoch';
+                    return state.attribute.type == 'string-sc' ||
+                        state.attribute.type == 'string-mc' ||
+                        state.attribute.type == 'epoch';
                 }),
                 isStringSc: computed(_ => {
                     return state.attribute.type == 'string-sc';
                 }),
+                isSiUnit: computed(_ => {
+                    return state.attribute.type == 'si-unit';
+                }),
                 needsRootElement: computed(_ => {
                     return state.attribute.type == 'string-sc' ||
-                            state.attribute.type == 'string-mc' ||
-                            state.attribute.type == 'epoch';
+                        state.attribute.type == 'string-mc' ||
+                        state.attribute.type == 'epoch';
                 }),
                 canRestrictTypes: computed(_ => {
                     return state.attribute.type == 'entity' || state.attribute.type == 'entity-mc';
@@ -399,11 +524,11 @@
                         state.attribute.rootLabel &&
                         state.attribute.rootLabel.id > 0
                     ) || (
-                        state.attribute.type == 'string-sc' &&
-                        state.attribute.differRoot &&
-                        state.attribute.rootAttributeLabel &&
-                        state.attribute.rootAttributeLabel.id > 0
-                    );
+                            state.attribute.type == 'string-sc' &&
+                            state.attribute.differRoot &&
+                            state.attribute.rootAttributeLabel &&
+                            state.attribute.rootAttributeLabel.id > 0
+                        );
                 }),
             });
 
@@ -418,6 +543,8 @@
                 searchAttribute,
                 searchLabel,
                 getConceptLabel,
+                siSymbolToStr,
+                multiselectResetClasslist,
                 translateConcept,
                 // LOCAL
                 create,
@@ -425,6 +552,9 @@
                 typeSelected,
                 getAttributeLabel,
                 searchInAttributeTypes,
+                siGroupSelected,
+                searchInSiGroups,
+                siGroupUnitSelected,
                 // STATE
                 state,
             };

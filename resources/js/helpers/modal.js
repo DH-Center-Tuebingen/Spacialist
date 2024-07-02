@@ -1,5 +1,5 @@
 import store from '@/bootstrap/store.js';
-import router from '@/bootstrap/router.js';
+import router from '%router';
 
 import { addToast } from '@/plugins/toast.js';
 
@@ -108,7 +108,7 @@ export function showDiscard(target, resetData, onBeforeConfirm) {
                 pushRoute();
             },
             onSaveConfirm(e) {
-                if (!!onBeforeConfirm) {
+                if(!!onBeforeConfirm) {
                     onBeforeConfirm().then(_ => {
                         modal.destroy();
                         pushRoute();
@@ -477,7 +477,7 @@ export function showDeleteRole(role, onDeleted) {
             role: role,
             onConfirm(e) {
                 if(!can('users_roles_delete')) return;
-    
+
                 deleteRole(role.id).then(_ => {
                     if(!!onDeleted) {
                         onDeleted();
@@ -515,6 +515,7 @@ export function showBibliographyEntry(data, onSave) {
                             type: e.data.type.name,
                             fields: {
                                 ...e.data.fields,
+                                citekey: reData.citekey,
                                 file: reData.file,
                                 file_url: reData.file_url,
                             },

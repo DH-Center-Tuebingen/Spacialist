@@ -8,8 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
-class ThConcept extends Model
-{
+class ThConcept extends Model {
     use LogsActivity;
 
     protected $table = 'th_concept';
@@ -25,8 +24,7 @@ class ThConcept extends Model
         'user_id',
     ];
 
-    public function getActivitylogOptions() : LogOptions
-    {
+    public function getActivitylogOptions(): LogOptions {
         return LogOptions::defaults()
             ->logOnly(['id'])
             ->logFillable()
@@ -34,12 +32,29 @@ class ThConcept extends Model
             ->logOnlyDirty();
     }
 
+    public static function getLabel($str) {
+        $label = $str;
+        $locale = \App::getLocale();
+        try {
+            $concept = self::getByString($str);
+            $label = ThConceptLabel::selectRaw('label, short_name = ? as is_locale', [$locale])
+                ->join('th_language', 'language_id', '=', 'th_language.id')
+                ->where('concept_id', $concept->id)
+                ->orderBy("is_locale", 'desc')
+                ->orderBy('th_concept_label.id', 'asc')
+                ->firstOrFail()->label;
+        } catch (\Exception $e) {
+            info("Could not find translation for: $str\n" . $e->getMessage());
+        }
+        return $label;
+    }
+
     public static function getByString($str) {
-        if(!isset($str) || $str === '') return null;
+        if (!isset($str) || $str === '') return null;
 
         $concept = ThConcept::where('concept_url', $str)->first();
-        if(!isset($concept)) {
-            $concept = ThConcept::whereHas('labels', function(Builder $query) use ($str) {
+        if (!isset($concept)) {
+            $concept = ThConcept::whereHas('labels', function (Builder $query) use ($str) {
                 $query->where('label', $str);
             })->first();
         }
@@ -48,7 +63,7 @@ class ThConcept extends Model
 
     public static function getMap($lang = 'en') {
         // Some languages use different lang codes (e.g. from weblate) in Spacialist and ThesauRex
-        if($lang == 'ja') {
+        if ($lang == 'ja') {
             $lang = 'jp';
         }
         $concepts = DB::select(DB::raw("
@@ -81,14 +96,14 @@ class ThConcept extends Model
 
     public static function getChildren($url, $recursive = true) {
         $id = self::where('concept_url', $url)->value('id');
-        if(!isset($id)) return [];
+        if (!isset($id)) return [];
 
         $query = "SELECT br.broader_id, br.narrower_id, c.*
         FROM th_broaders br
         JOIN th_concept as c on c.id = br.narrower_id
         WHERE broader_id = $id";
 
-        if($recursive) {
+        if ($recursive) {
             $query = "
                 WITH RECURSIVE
                 top AS (

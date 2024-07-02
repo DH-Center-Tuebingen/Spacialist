@@ -84,9 +84,11 @@ class Plugin extends Model
         $changelog = Str::finish(base_path("app/Plugins/$this->name"), '/') . 'CHANGELOG.md';
         if(!File::isFile($changelog)) return '';
         $changes = file_get_contents($changelog);
-        // if(isset($since)) {
-
-        // }
+        if(isset($since) && preg_match("/\\n#+\s(v\s?)?$since(\s-\s.+)?\\n/i", $changes, $matches, PREG_OFFSET_CAPTURE) !== false) {
+            if(count($matches) > 0) {
+                $changes = substr($changes, 0, $matches[0][1]);
+            }
+        }
         return $changes;
     }
 
@@ -125,7 +127,7 @@ class Plugin extends Model
         $nonExistingPlugins = self::whereNotIn('name', $pluginNames)->get();
 
         foreach($nonExistingPlugins as $removedPlugin) {
-            $removedPlugin->delete();
+            $removedPlugin->handleRemove();
         }
     }
 
@@ -181,6 +183,7 @@ class Plugin extends Model
     }
 
     public function handleUpdate() {
+        $oldVersion = $this->version;
         // TODO is it really the same as install?
         $this->handleInstallation();
 
@@ -189,13 +192,11 @@ class Plugin extends Model
         $this->update_available = null;
         $this->version = $info['version'];
         $this->save();
+        return $oldVersion;
     }
 
     public function handleUninstall() {
-        $this->rollbackMigrations();
         $this->removeScript();
-        $this->removePermissions();
-        $this->uninstallPresets();
 
         $this->installed_at = null;
         $this->save();
@@ -205,9 +206,15 @@ class Plugin extends Model
         // if installed, first rollback migrations and delete all files and presets
         if(isset($this->installed_at)) {
             $this->handleUninstall();
+            $this->rollbackMigrations();
+            $this->removePermissions();
+            $this->uninstallPresets();
         }
 
+        $this->removePreferences();
         sp_remove_dir(base_path("app/Plugins/$this->name"));
+
+        $this->delete();
     }
 
     public function getPermissions() {
@@ -340,5 +347,10 @@ class Plugin extends Model
 
     private function uninstallPresets() {
         RolePresetPlugin::where('from', $this->id)->delete();
+    }
+
+    private function removePreferences() {
+        $id = Str::kebab($this->name);
+        Preference::where('label', 'ilike', "plugin.$id.%")->delete();
     }
 }

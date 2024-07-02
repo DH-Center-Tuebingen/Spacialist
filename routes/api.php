@@ -56,6 +56,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::post('', 'EntityController@addEntity');
     Route::post('/{id}/duplicate', 'EntityController@duplicateEntity')->where('id', '[0-9]+');
     Route::post('/import', 'EntityController@importData')->where('id', '[0-9]+')->where('aid', '[0-9]+');
+    Route::post('/import/validate', 'EntityController@validateImportData');
     Route::post('/{id}/reference/{aid}', 'ReferenceController@addReference')->where('id', '[0-9]+')->where('aid', '[0-9]+');
 
     Route::patch('/{id}/attributes', 'EntityController@patchAttributes')->where('id', '[0-9]+');
@@ -162,17 +163,17 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::get('/{id}', 'PreferenceController@getUserPreferences')->where('id', '[0-9]+');
 
     Route::patch('/', 'PreferenceController@patchPreferences');
-    Route::patch('/{uid}', 'PreferenceController@patchPreferences')->where('uid', '[0-9]+');
 });
 
 // BIBLIOGRAPHY
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/bibliography')->group(function() {
     Route::get('/', 'BibliographyController@getBibliography');
-    Route::get('/export', 'BibliographyController@exportBibtex');
     Route::get('/{id}/ref_count', 'BibliographyController@getReferenceCount')->where('id', '[0-9]+');
-
+    
     Route::post('/', 'BibliographyController@addItem');
     Route::post('/import', 'BibliographyController@importBibtex');
+    Route::post('/export', 'BibliographyController@exportBibtex');
+    
     // form data params are not recognized using patch, thus using post
     Route::post('/{id}', 'BibliographyController@updateItem')->where('id', '[0-9]+');
 

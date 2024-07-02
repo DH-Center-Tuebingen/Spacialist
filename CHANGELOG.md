@@ -8,15 +8,22 @@ All notable changes to this project will be documented in this file.
 - Serif font (Zilla Slab)
 - New Attribute Type: _Richtext_ (A feature-rich alternative to _Textbox_ Attribute; based on Markdown)
 - New Attribute Type: _Date range_
+- New Attribute Type: _URL_
 - New Attribute Type: _Userlist_
 - New Attribute Type: _Attribute Group Separator_ (A separator element to group attributes in tabs)
 - Separate form Save/Reset in Entity Attribute Tabs (when using _Attribute Group Separator_)
 - Additional non-standard bibtex fields to _Bibliography_ (ISBN, ISSN, Language and Abstract)
 - Additional fields in _User profile_ regarding institution
 - Keyboard Shortcut to save Entity (`Ctrl + s` for current open attribute tab, `Ctrl + Shift + s` for entire entity)
+- Show parent entity path in _Move entity_ modal
+- Pasting into _Bibliography Item_ now works without clicking first and display some more info
 - Info on hover to required fields in new/edit bibliography modal
 - Restrict search in _Entity_ attribute to specific entity-types
-- Metadata tab to _Entity Detail_ panel
+- Metadata tab to _Entity Detail_ panel=======
+- Allow _Multiple Choice Dropdown_ in _Table_ attribute
+- Allow _Date Range_ in _Table_ attribute
+- Entities can now be updated using the _Data Importer_
+- Add option to export only search results in _Bibliograpy_
 ### Fixed
 - Error in _Attribute List_ caused by _Entity (Multiple Choice)_ attribute
 - Attribute form Save/Reset handling due to newly introduced _Attribute Group Separator_
@@ -38,8 +45,11 @@ All notable changes to this project will be documented in this file.
 - Mark all notifications as read
 - Unsetting a date value
 - Unsaved changes in _Data Model Editor_ were visible in the UI
+- Trigger event on updating point coordinates in popup
 - Adding bibliography of type _misc_
 - Moving entity in tree created a temporary duplicate
+- Entity Types in Data-Model-Editor not scrollable
+- Scroll to entity in tree after selected (e.g. from a linked geometry on map or _Entity_ attribute)
 - After unset _Single Choice_ attribute value an Entity could not be saved/resetted
 - After unset _Entity_ attribute value an Entity could not be saved/resetted
 - _Parent Attribute_ in _Single Choice_ attribute builder had no effect
@@ -52,6 +62,18 @@ All notable changes to this project will be documented in this file.
 - Remove headings without content from _References_ tab in Main View
 - HTML content in comments
 - Adding comments without content to _Entity_
+- Only first letter/selection/… of values in tables saved to database
+- Dependency state of attributes not persisted
+- Correctly propagate attribute changes to update dependent attributes' visibility
+- Storing _false_ values in _Boolean_ attribute
+- Adding references to a newly added/saved attribute value
+- Empty ORCID or phone number prevented users from saving the profile
+- Generated citation key in Bibliography could contain metadata characters
+- Adding literature entry from clipboard
+- Bibtex type `inbook` could not be added
+- Activity was not shown/blank
+- Adding empty table was possible and error was thrown
+- Bibliography import: files with .bib & .bibtex not visible on Windows and Mac
 ### Changed
 - _Entity tree_ sorting is now accessible through ...-menu
 - Reset Password Workflow
@@ -62,8 +84,15 @@ All notable changes to this project will be documented in this file.
 - Made UI to add new rows to _Table_ attribute clearer
 - Attribute type backend logic moved to separate classes
 - Set default value in parent element in _Add Attribute_ modal
+- Rework System/User Preferences and allow plugins to add their own preferences
 - Values in Dropdown attributes are now sorted alphabetically
 - Values in Dropdown attributes are now searchable
+- Font size in dropdown menus
+- _About_ modal contributors
+- Data Importer: Now supports the Boolean attribute with the value 'x'
+- Append `et al.` to citations in reference tab and modal
+- Do not show "!" for attributes without value & replace initial "!" with "?" for attributes with value, but no certainty set
+- Bibtex import now is case-insensitive for type and keys
 
 ## 0.9.14
 ### Added

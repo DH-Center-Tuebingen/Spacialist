@@ -611,7 +611,7 @@ class SetupTables extends Migration
             ],
             [
                 'label' => 'prefs.tag-root',
-                'default_value' => json_encode(['uri' => 'http://thesaurus.archeoinf.de/lukanien#fototyp']),
+                'default_value' => json_encode(['uri' => '']),
                 'allow_override' => false
             ],
             [
