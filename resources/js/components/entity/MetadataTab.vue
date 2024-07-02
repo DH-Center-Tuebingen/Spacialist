@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="bg-secondary bg-opacity-10 p-3 rounded mt-2">
-            <span v-if="loading">
+            <span v-if="state.loading">
                 <i class="fas fa-fw fa-spinner fa-spin" />
             </span>
             <div
@@ -15,12 +15,12 @@
                         </h6>
 
                         <div
-                            v-if="creatorId"
+                            v-if="state.creatorId"
                             class="d-flex flex-row gap-2 align-items-center"
                         >
                             <UserLabel
-                                :user="creator"
-                                :special-user-id="creatorId"
+                                :user="state.creator"
+                                :special-user-id="state.creator.id"
                             />
                         </div>
                     </div>
@@ -30,11 +30,10 @@
                         </h6>
                         <div class="d-flex flex-row gap-2 align-items-center">
                             <UserLabel
-                                v-for="editor in editors"
+                                v-for="editor in state.editors"
                                 :key="editor.user_id"
                                 :user="editor"
-                                :special-user-id="creatorId"
-                                href="#"
+                                :special-user-id="state.creatorId"
                             />
                         </div>
                     </div>
@@ -43,7 +42,7 @@
                             {{ t('global.licence') }}
                         </h6>
                         <input
-                            v-model="metadata.licence"
+                            v-model="state.metadata.licence"
                             type="text"
                             class="form-control"
                             placeholder="CC-BY 4.0, ..."
@@ -63,7 +62,7 @@
                         <richtext
                             id="entity-metadata-summary"
                             class="bg-white rounded"
-                            :value="metadata.summary"
+                            :value="state.metadata.summary"
                             @change="updateEntitySummary"
                         />
                     </div>
@@ -74,7 +73,7 @@
                 <button
                     type="button"
                     class="btn btn-sm btn-outline-warning mt-2"
-                    :disabled="!isDirty"
+                    :disabled="!state.isDirty"
                     @click="resetForm"
                 >
                     <i class="fas fa-fw fa-undo" />
@@ -83,7 +82,7 @@
                 <button
                     type="button"
                     class="btn btn-sm btn-outline-success mt-2"
-                    :disabled="!isDirty"
+                    :disabled="!state.isDirty"
                     @click="save"
                 >
                     <i class="fas fa-fw fa-save" />
@@ -95,14 +94,27 @@
 </template>
 
 <script>
-    import {computed, onMounted, reactive, ref, watch} from 'vue';
-    import {useI18n} from 'vue-i18n';
-    import {useToast} from '@/plugins/toast.js';
+    import {
+        computed,
+        onMounted,
+        reactive,
+        ref,
+        watch,
+    } from 'vue';
+
+    import {
+        useI18n,
+    } from 'vue-i18n';
+
+    import {
+        useToast,
+    } from '@/plugins/toast.js';
+
     import store from '@/bootstrap/store';
 
     import {
         getUserBy,
-    } from '@/helpers/helpers';
+    } from '@/helpers/helpers.js';
 
     import {
         fetchEntityMetadata,
@@ -116,72 +128,64 @@
             UserLabel,
         },
         setup() {
+            const { t } = useI18n();
             const toast = useToast();
-            const loading = ref(false);
 
-            onMounted(_ => {
-                updateMetaData();
-            });
-
-            const entity = computed(_ => store.getters.entity);
-
-            const loadedMetadata = reactive({
-                summary: '',
-                licence: '',
-            });
-
-            const metadata = reactive({
-                summary: '',
-                licence: '',
-            });
-
-            const resetForm = _ => {
-                metadata.summary = loadedMetadata.summary;
-                metadata.licence = loadedMetadata.licence;
+            const defaultUser = {
+                name: 'N/A',
+                id: 0,
+                avatar: null,
             };
-
-            const creatorId = computed(_ => {
-                if(!entity.value?.metadata?.creator) return 0;
-                return entity.value.metadata.creator;
-            });
-
-            const creator = computed(_ => {
-                if(creatorId.value == -1) return {name: 'N/A', id: -1, avatar: null};
-                const user = getUserBy(creatorId.value);
-                return user || {name: 'N/A', id: 0, avatar: null};
-            });
-
-            const editors = computed(_ => {
-                if(!entity.value?.metadata?.editors) return [];
-                return entity.value.metadata.editors.map(({user_id}) => {
-                    const user = getUserBy(user_id);
-                    return user || {name: 'N/A', id: 0, avatar: null};
-                });
-            });
-
-            const changedMetadata = computed(_ => {
-                let changedMetadata = {};
-                for(const key in metadata) {
-                    if(metadata[key] != loadedMetadata[key]) {
-                        changedMetadata[key] = metadata[key];
+            const state = reactive({
+                loading: false,
+                loadedMetadata: {
+                    summary: '',
+                    licence: '',
+                },
+                metadata: {
+                    summary: '',
+                    licence: '',
+                },
+                entity: computed(_ => store.getters.entity),
+                creatorId: computed(_ => {
+                    if(!state.entity?.metadata?.creator) return 0;
+                    return state.entity.metadata.creator;
+                }),
+                creator: computed(_ => {
+                    if(state.creatorId == -1) {
+                        return defaultUser;
                     }
-                }
-                return changedMetadata;
-            });
 
-            const isDirty = computed(_ => {
-                return Object.keys(changedMetadata.value).length > 0;
+                    const user = getUserBy(state.creatorId);
+                    return user || defaultUser;
+                }),
+                editors: computed(_ => {
+                    if(!state.entity?.metadata?.editors) return [];
+                    return state.entity.metadata.editors.map(u => {
+                        const user = getUserBy(u.user_id);
+                        return user || defaultUser;
+                    });
+                }),
+                changedMetadata: computed(_ => {
+                    let changedMetadata = {};
+                    for(const key in state.metadata) {
+                        if(state.metadata[key] != state.loadedMetadata[key]) {
+                            changedMetadata[key] = state.metadata[key];
+                        }
+                    }
+                    return changedMetadata;
+                }),
+                isDirty: computed(_ => Object.keys(state.changedMetadata).length > 0),
             });
-
 
             const save = async _ => {
-                if(isDirty.value) {
-                    patchEntityMetadata(entity.value.id, changedMetadata.value).then(data => {
+                if(state.isDirty) {
+                    patchEntityMetadata(state.entity.id, state.changedMetadata).then(data => {
 
                         setMetadata({...metadata});
 
                         store.dispatch('updateEntityMetadata', {
-                            eid: entity.value.id,
+                            eid: state.entity.id,
                             data: data,
                         });
 
@@ -194,49 +198,59 @@
                             autohide: true,
                             icon: true,
                         });
-                    }).catch(console.error);
-                } else console.error('No changes to save');
+                    }).catch(e => {
+                        console.error(e);
+                    });
+                } else {
+                    console.error('No changes to save');
+                }
             };
 
-            const setMetadata = (data) => {
-                loadedMetadata.summary = data.summary || '';
-                loadedMetadata.licence = data.licence || '';
-                metadata.summary = data.summary || '';
-                metadata.licence = data.licence || '';
+            const resetForm = _ => {
+                state.metadata.summary = state.loadedMetadata.summary;
+                state.metadata.licence = state.loadedMetadata.licence;
+            };
+
+            const setMetadata = data => {
+                state.loadedMetadata.summary = data.summary || '';
+                state.loadedMetadata.licence = data.licence || '';
+                state.metadata.summary = data.summary || '';
+                state.metadata.licence = data.licence || '';
             };
 
             const updateEntitySummary = e => {
-                metadata.summary = e.value;
+                state.metadata.summary = e.value;
             };
 
-            const updateMetaData = _ => {
-                if(!entity.value?.id) return;
-                loading.value = true;
-                fetchEntityMetadata(entity.value.id).then((value) => {
-                    loading.value = false;
+            const updateMetadata = _ => {
+                if(!state.entity?.id) return;
+                state.loading = true;
+                fetchEntityMetadata(state.entity.id).then(value => {
+                    state.loading = false;
                     setMetadata({...value.metadata});
                 });
             };
 
-            watch(entity, (newVal) => {
-                loading.value = false;
+            onMounted(_ => {
+                updateMetadata();
+            });
+
+            watch(_ => state.entity, (newVal) => {
+                state.loading = false;
                 if(newVal?.id) {
-                    updateMetaData();
+                    updateMetadata();
                 }
             });
 
             return {
-                changedMetadata,
-                creator,
-                creatorId,
-                editors,
-                entity,
-                isDirty,
-                metadata,
-                resetForm,
+                t,
+                // HELPERS
+                // LOCAL
                 save,
-                t: useI18n().t,
+                resetForm,
                 updateEntitySummary,
+                // STATE
+                state,
             };
         }
     };
