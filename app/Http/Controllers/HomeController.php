@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\AttributeTypes\AttributeBase;
 use App\EntityType;
 use App\Plugin;
 use App\Preference;
 use App\ThConcept;
-use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 
 class HomeController extends Controller
 {
@@ -27,20 +28,24 @@ class HomeController extends Controller
 
     public function getGlobalData() {
         if(auth()->check()) {
-            $preferences = Preference::getUserPreferences(auth()->id());
-            $preferenceValues = [];
-            foreach($preferences as $k => $p) {
-                $preferenceValues[$k] = $p->value;
-            }
+            $preferenceValues = Preference::getUserPreferences(auth()->id(), true);
             $locale = auth()->user()->getLanguage();
         } else {
             $preferenceValues = [];
-            $locale = \App::getLocale();
+            $locale = App::getLocale();
         }
 
-        $sysPrefs = Preference::getPreferences();
+        $sysPrefsValues = Preference::getPreferences(true);
 
         $concepts = ThConcept::getMap($locale);
+
+        $datatypes = AttributeBase::getTypes();
+        $datatypeData = [];
+        foreach($datatypes as $key => $datatype) {
+            if(method_exists($datatype, "getGlobalData")) {
+                $datatypeData[$key] = $datatype::getGlobalData();
+            }
+        }
 
         $entityTypes = EntityType::with(['sub_entity_types', 'layer', 'attributes'])
             ->orderBy('id')
@@ -48,10 +53,11 @@ class HomeController extends Controller
         $entityTypeMap = $entityTypes->getDictionary();
 
         return response()->json([
-            'system_preferences' => $sysPrefs,
+            'system_preferences' => $sysPrefsValues,
             'preferences' => $preferenceValues,
             'concepts' => $concepts,
             'entityTypes' => $entityTypeMap,
+            'datatype_data' => $datatypeData,
             'colorsets' => sp_get_themes(),
             'analysis' => sp_has_analysis(),
         ]);

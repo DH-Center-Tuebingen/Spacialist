@@ -26,3 +26,7 @@
 .multiselect-tag-user {
   background-color: rgba(16, 185, 129, var(--bs-bg-opacity, 1));
 }
+
+.multiselect-dropdown.multiselect-modal-dropdown {
+  z-index: calc($zindex-modal + 1);
+}

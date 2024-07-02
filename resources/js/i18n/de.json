@@ -172,6 +172,86 @@
             "sql_info": "Du kannst mit <code class=\"fw-normal\">:entity_id</code> in deiner SQL-Abfrage auf die Entität referenzieren, dem dieses Attribut zugewiesen ist.",
             "iconclass": "Iconclass",
             "rism": "RISM",
+            "si-unit": "SI-Einheit",
+            "si_units": {
+                "base_unit": "Basisgröße",
+                "time": {
+                    "label": "Zeit",
+                    "units": {
+                        "second": "Sekunden",
+                        "minute": "Minuten",
+                        "hour": "Stunden",
+                        "day": "Tage",
+                        "year": "Jahre"
+                    }
+                },
+                "length": {
+                    "label": "Länge",
+                    "units": {
+                        "nanometre": "Nanometer",
+                        "micrometre": "Mikrometer",
+                        "millimetre": "Millimeter",
+                        "centimetre": "Zentimeter",
+                        "decimetre": "Dezimeter",
+                        "metre": "Meter",
+                        "decametre": "Dekameter",
+                        "hectometre": "Hektometer",
+                        "kilometre": "Kilometer",
+                        "inch": "Zoll",
+                        "feet": "Fuß",
+                        "yard": "Yards",
+                        "mile": "Meilen"
+                    }
+                },
+                "area": {
+                    "label": "Fläche",
+                    "units": {
+                        "square_centimetre": "Quadratzentimeter",
+                        "square_metre": "Quadratmeter",
+                        "square_kilometre": "Quadratkilometer",
+                        "square_inch": "Quadratzoll",
+                        "square_feet": "Quadratfuß",
+                        "square_yard": "Quadratyard",
+                        "acre": "Acre",
+                        "square_mile": "Quadratmeile"
+                    }
+                },
+                "volume": {
+                    "label": "Volumen",
+                    "units": {
+                        "millilitre": "Milliliter",
+                        "litre": "Liter",
+                        "cubic_centimetre": "Kubikzentimeter",
+                        "cubic_decimetre": "Liter | Kubikdezimeter",
+                        "cubic_metre": "Kubikmeter",
+                        "cubic_kilometre": "Kubikkilometer",
+                        "fluid_ounce_us": "Flüssigunze (US)",
+                        "pint_us": "Pinte (US)",
+                        "cup_us": "Tasse (US)",
+                        "gallon_us": "Gallone (US)",
+                        "cubic_mile": "Kubikmeile"
+                    }
+                },
+                "mass": {
+                    "label": "Gewicht",
+                    "units": {
+                        "gram": "Gramm",
+                        "kilogram": "Kilogramm",
+                        "ton": "Tonnen",
+                        "ounce": "Unze",
+                        "pound": "Britisches Pfund"
+                    }
+                },
+                "temperature": {
+                    "label": "Temperatur",
+                    "units": {
+                        "degree_celsius": "Celsius",
+                        "degree_kelvin": "Kelvin",
+                        "degree_fahrenheit": "Fahrenheit",
+                        "degree_réaumur": "Réaumur"
+                    }
+                }
+            },
             "restrictions": {
                 "entity_type": "Auf folgende Entitätstypen beschränken"
             }
@@ -236,7 +316,6 @@
         },
         "preference": "Einstellung | Einstellungen",
         "value": "Wert",
-        "allow_override": "Überschreibbar?",
         "tag": "Schlagwort | Schlagworte",
         "set": "Setzen",
         "has_tags": "Hat keine Schlagworte | Hat ein Schlagwort | Hat {cnt} Schlagworte",
@@ -641,6 +720,16 @@
                 "set_to_language": "Auf <span class=\"fw-bold\">{lang}</span> stellen",
                 "columns": "Die Summe der Werte der Spalten darf 12 nicht überschreiten."
             },
+            "categories": {
+                "user": "Benutzer-Einstellungen",
+                "system": "System-Einstellungen",
+                "sub": {
+                    "general": "Allgemein",
+                    "layout": "Layout",
+                    "interface": "Benutzer-Interface"
+                },
+                "is_empty": "Keine Einstellungen in dieser Kategorie"
+            },
             "key": {
                 "language": "Sprache",
                 "password_reset": "Passwort zurücksetzen erlauben",
@@ -749,6 +838,7 @@
             "add": "Neuen Literatur-Eintrag anlegen",
             "import": "BibTeX-Datei importieren",
             "export": "BibTeX-Datei exportieren",
+            "export_search": "Suchtreffer als BibTeX-Datei exportieren",
             "show_all_fields": "Alle Felder anzeigen",
             "column": {
                 "citekey": "Zitations-Schlüssel",

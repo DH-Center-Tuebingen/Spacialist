@@ -58,6 +58,7 @@ export const store = createStore({
                     groups: [],
                     preferences: {},
                     systemPreferences: {},
+                    datatypeData: {},
                     tags: [],
                     roles: [],
                     rolePresets: [],
@@ -75,6 +76,10 @@ export const store = createStore({
                         tab: [],
                         tools: [],
                         settings: [],
+                    },
+                    registeredPluginPreferences: {
+                        user: {},
+                        system: {},
                     },
                     hasAnalysis: false,
                 };
@@ -268,9 +273,9 @@ export const store = createStore({
                                     state.entity.data[k] = data.new_data[k];
                                 }
                             } else {
-                                entity.data[k].value = data.data[k];
+                                entity.data[k] = data.data[k];
                                 if(data.sync) {
-                                    state.entity.data[k].value = data.data[k];
+                                    state.entity.data[k] = data.data[k];
                                 }
                             }
                         }
@@ -626,11 +631,38 @@ export const store = createStore({
                 registerPluginInSlot(state, data) {
                     state.registeredPluginSlots[data.slot].push(data);
                 },
+                registerPluginPreference(state, data) {
+                    const category = state.registeredPluginPreferences[data.category];
+                    if(!category[data.subcategory]) {
+                        category[data.subcategory] = {
+                            preferences: [],
+                        };
+                    }
+                    const pref = {
+                        title: data.label,
+                        label: data.key,
+                        component: data.component,
+                        default_value: data.default_value,
+                    };
+                    if(data.data) {
+                        pref.data = data.data;
+                    }
+                    if(data.custom_subcategory) {
+                        category[data.subcategory].custom = true;
+                        category[data.subcategory].title = data.custom_label;
+                    }
+                    category[data.subcategory].preferences.push(pref);
+                },
                 setColorSets(state, data) {
                     state.colorSets = data;
                 },
                 setAnalysis(state, data) {
                     state.hasAnalysis = data;
+                },
+                setDatatypeData(state, data) {
+                    for(let k in data) {
+                        state.datatypeData[k] = data[k];
+                    }
                 },
             },
             actions: {
@@ -898,11 +930,17 @@ export const store = createStore({
                 registerPluginInSlot({commit}, data) {
                     commit('registerPluginInSlot', data);
                 },
+                registerPluginPreference({commit}, data) {
+                    commit('registerPluginPreference', data);
+                },
                 setColorSets({commit}, data) {
                     commit('setColorSets', data);
                 },
                 setAnalysis({commit}, data) {
                     commit('setAnalysis', data);
+                },
+                setDatatypeData({commit}, data) {
+                    commit('setDatatypeData', data);
                 },
             },
             getters: {
@@ -930,6 +968,8 @@ export const store = createStore({
                 preferenceByKey: state => key => state.preferences[key],
                 preferences: state => state.preferences,
                 systemPreferences: state => state.systemPreferences,
+                datatypeData: state => state.datatypeData,
+                datatypeDataOf: state => key => state.datatypeData[key],
                 tags: state => state.tags,
                 roles: state => noPerms => {
                     return noPerms ? state.roles.map(r => {
@@ -959,6 +999,10 @@ export const store = createStore({
                 slotPlugins: state => slot => {
                     const p = state.registeredPluginSlots;
                     return slot ? p[slot] : p;
+                },
+                pluginPreferences: state => state.registeredPluginPreferences,
+                pluginPreferencesInCategory: state => cat => {
+                    return state.registeredPluginPreferences[cat];
                 },
                 colorSets: state => state.colorSets,
                 hasAnalysis: state => state.hasAnalysis,

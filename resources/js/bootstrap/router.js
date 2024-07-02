@@ -24,7 +24,6 @@ import DataModelDetailView from '@/components/DataModelDetailView.vue';
 import Preferences from '@/components/Preferences.vue';
 // User
 import UserProfile from '@/components/UserProfile.vue';
-import UserPreferences from '@/components/UserPreferences.vue';
 import UserActivity from '@/components/UserActivity.vue';
 import UserNotifications from '@/components/notification/UserNotifications.vue';
 // Open Access Router Pages
@@ -245,6 +244,14 @@ export const router = createRouter({
         },
         {
             path: '/preferences',
+            redirect: _ => {
+                return {
+                    name: 'preferences',
+                };
+            },
+        },
+        {
+            path: '/preferences/system',
             name: 'preferences',
             component: Preferences,
             meta: {
@@ -252,9 +259,9 @@ export const router = createRouter({
             }
         },
         {
-            path: '/preferences/u/:id',
+            path: '/preferences/user',
             name: 'userpreferences',
-            component: UserPreferences,
+            component: Preferences,
             meta: {
                 auth: true
             }

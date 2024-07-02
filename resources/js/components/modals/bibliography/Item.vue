@@ -28,7 +28,6 @@
             <div
                 id="bibtex-item-modal"
                 class="modal-body"
-                :class="state.scrollStateBodyClasses"
             >
                 <alert
                     :message="t('main.bibliography.modal.paste_info')"
@@ -52,13 +51,18 @@
                         <div class="col-md-9">
                             <multiselect
                                 v-model="state.data.type"
-                                :classes="multiselectResetClasslist"
+                                class="multiselect-modal"
+                                :classes="{
+                                    ...multiselectResetClasslist,
+                                    'dropdown': 'multiselect-dropdown multiselect-modal-dropdown'
+                                }"
                                 :label="'name'"
                                 :track-by="'name'"
                                 :object="true"
                                 :value-prop="'id'"
                                 :searchable="true"
                                 :options="bibliographyTypes"
+                                :append-to-body="true"
                                 :placeholder="t('global.select.placeholder')"
                             >
                                 <template #option="{ option }">
@@ -180,6 +184,7 @@
 
     import {
         computed,
+        nextTick,
         onBeforeUnmount,
         onMounted,
         reactive,
@@ -193,6 +198,7 @@
         can,
         getTs,
         multiselectResetClasslist,
+        _cloneDeep,
     } from '@/helpers/helpers.js';
     import {
         bibliographyTypes,
@@ -235,10 +241,14 @@
                     const type = bibliographyTypes.find(t => t.name == entry.type);
                     state.data.type = type;
                     state.data.fields.citekey = entry.key;
-                    for(let k in entry.fields) {
-                        const p = entry.fields[k];
-                        state.data.fields[k] = p.join(', ');
-                    }
+                    nextTick(_ => {
+                        state.fieldData.type = type;
+                        state.fieldData.fields.citekey = entry.key;
+                        for(let k in entry.fields) {
+                            const p = entry.fields[k];
+                            state.fieldData.fields[k] = k == 'author' ? p.join(' and ') : p.join(', ');
+                        }
+                    });
                 } catch(err) {
                 }
             };
@@ -300,7 +310,7 @@
             const state = reactive({
                 id: `bibliography-item-modal-bibtex-code-${getTs()}`,
                 data: data.value,
-                fieldData: { ...data.value },
+                fieldData: _cloneDeep(data.value),
                 error: {},
                 fileContainer: [],
                 scrollStateClasses: computed(_ => {
@@ -308,13 +318,6 @@
                         return ['overflow-y-auto', 'overflow-x-hidden'];
                     } else {
                         return ['overflow-visible'];
-                    }
-                }),
-                scrollStateBodyClasses: computed(_ => {
-                    if(state.data.type) {
-                        return [];
-                    } else {
-                        return ['nonscrollable'];
                     }
                 }),
                 file: computed(_ => state.fileContainer.length > 0 ? state.fileContainer[0] : null),
