@@ -27,4 +27,10 @@ class Geodata
             return null;
         }
     }
+
+    public static function arrayToWkt($arr) {
+        $json = json_encode($arr);
+        return DB::select("SELECT ST_AsText(ST_GeomFromGeoJSON('$json')) AS wkt")[0]->wkt;
+
+    }
 }

@@ -102,14 +102,14 @@
                             <i class="fas fa-fw fa-id-card-clip" />
                         </dt>
                         <dd>
-                            {{ user.metadata.role || t('global.user.not_assigned') }}
+                            {{ (state.hasMetadata && user.metadata.role) || t('global.user.not_assigned') }}
                         </dd>
                         <dt>
                             {{ t('global.user.field') }}
                             <i class="fas fa-fw fa-chalkboard-user" />
                         </dt>
                         <dd>
-                            {{ user.metadata.field || t('global.user.not_assigned') }}
+                            {{ (state.hasMetadata && user.metadata.field) || t('global.user.not_assigned') }}
                         </dd>
                     </dl>
                     <div class="border" />
@@ -119,14 +119,14 @@
                             {{ t('global.user.institution') }}
                         </dt>
                         <dd>
-                            {{ user.metadata.institution || t('global.user.not_assigned') }}
+                            {{ (state.hasMetadata && user.metadata.institution) || t('global.user.not_assigned') }}
                         </dd>
                         <dt>
                             <i class="fas fa-fw fa-users-between-lines" />
                             {{ t('global.user.department') }}
                         </dt>
                         <dd>
-                            {{ user.metadata.department || t('global.user.not_assigned') }}
+                            {{ (state.hasMetadata && user.metadata.department) || t('global.user.not_assigned') }}
                         </dd>
                     </dl>
                 </div>
@@ -174,7 +174,7 @@
             // FUNCTIONS
             const closeModal = _ => {
                 context.emit('closing', false);
-            }
+            };
 
             // DATA
             const state = reactive({
@@ -193,7 +193,7 @@
                 closeModal,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>
