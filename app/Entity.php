@@ -6,7 +6,6 @@ use App\Exceptions\AmbiguousValueException;
 use App\Traits\CommentTrait;
 use Illuminate\Database\Eloquent\Builder;
 use App\AttributeTypes\AttributeBase;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Nicolaslopezj\Searchable\SearchableTrait;
