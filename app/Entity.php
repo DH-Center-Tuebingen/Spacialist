@@ -81,7 +81,7 @@ class Entity extends Model implements Searchable {
     }
 
     public static function getFromPath($path, $delimiter = "\\\\"): ?int {
-        if (!isset($path)) {
+        if(!isset($path)) {
             return null;
         }
 
@@ -101,9 +101,9 @@ class Entity extends Model implements Searchable {
             FROM path
             WHERE pathstr = ?
         ", ["$last", "$delimiter", "$path"]);
-        if (count($res) > 1) {
+        if(count($res) > 1) {
             throw new AmbiguousValueException("Path '$path' is ambiguous");
-        } else if (count($res) === 1) {
+        } else if(count($res) === 1) {
             return $res[0]->final_id;
         } else {
             return null;
@@ -112,11 +112,11 @@ class Entity extends Model implements Searchable {
 
     public static function create($fields, $entityTypeId, $user, $rootEntityId = null) {
         $isChild = isset($rootEntityId);
-        if ($isChild) {
+        if($isChild) {
             $parentCtid = self::find($rootEntityId)->entity_type_id;
             $relation = EntityTypeRelation::where('parent_id', $parentCtid)
                 ->where('child_id', $entityTypeId)->exists();
-            if (!$relation) {
+            if(!$relation) {
                 return [
                     'type' => 'error',
                     'msg' => __('This type is not an allowed sub-type.'),
@@ -124,7 +124,7 @@ class Entity extends Model implements Searchable {
                 ];
             }
         } else {
-            if (!EntityType::find($entityTypeId)->is_root) {
+            if(!EntityType::find($entityTypeId)->is_root) {
                 return [
                     'type' => 'error',
                     'msg' => __('This type is not an allowed root-type.'),
@@ -135,7 +135,7 @@ class Entity extends Model implements Searchable {
 
         $entity = new self();
         $rank;
-        if ($isChild) {
+        if($isChild) {
             $rank = self::where('root_entity_id', $rootEntityId)->max('rank') + 1;
             $entity->root_entity_id = $rootEntityId;
         } else {
@@ -143,7 +143,7 @@ class Entity extends Model implements Searchable {
         }
         $entity->rank = $rank;
 
-        foreach ($fields as $key => $value) {
+        foreach($fields as $key => $value) {
             $entity->{$key} = $value;
         }
         $entity->entity_type_id = $entityTypeId;
@@ -165,7 +165,7 @@ class Entity extends Model implements Searchable {
 
     public static function getEntitiesByParent($id = null) {
         $entities = self::withCount(['child_entities as children_count']);
-        if (!isset($id)) {
+        if(!isset($id)) {
             $entities->whereNull('root_entity_id');
         } else {
             $entities->where('root_entity_id', $id);
@@ -182,20 +182,20 @@ class Entity extends Model implements Searchable {
         $entity->user_id = $user->id;
 
         $query;
-        if (isset($entity->root_entity_id)) {
+        if(isset($entity->root_entity_id)) {
             $query = self::where('root_entity_id', $entity->root_entity_id);
         } else {
             $query = self::whereNull('root_entity_id');
         }
         $oldEntities = $query->where('rank', '>', $oldRank)->get();
 
-        foreach ($oldEntities as $oc) {
+        foreach($oldEntities as $oc) {
             $oc->rank--;
             $oc->saveQuietly();
         }
 
         $query = null;
-        if ($hasParent) {
+        if($hasParent) {
             $entity->root_entity_id = $parent;
             $query = self::where('root_entity_id', $parent);
         } else {
@@ -204,7 +204,7 @@ class Entity extends Model implements Searchable {
         }
         $newEntities = $query->where('rank', '>=', $rank)->get();
 
-        foreach ($newEntities as $nc) {
+        foreach($newEntities as $nc) {
             $nc->rank++;
             $nc->saveQuietly();
         }
@@ -248,15 +248,17 @@ class Entity extends Model implements Searchable {
         $entityMcAttributes = Attribute::where('datatype', 'entity-mc')
             ->get()->pluck('id')->toArray();
         $links = AttributeValue::where('entity_val', $this->id)
-            ->orWhere(function ($query) use ($entityMcAttributes) {
+            ->orWhere(function($query) use($entityMcAttributes) {
                 $query->whereJsonContains('json_val', $this->id)
                     ->whereIn('attribute_id', $entityMcAttributes);
             })
-            ->with('attribute')
+            ->with(['attribute', 'entity' => function($eq) {
+                $eq->without('user');
+            }])
             ->get();
         $entities = [];
-        foreach ($links as $link) {
-            $entity = Entity::find($link->entity_id);
+        foreach($links as $link) {
+            $entity = $link->entity;
             $entities[] = [
                 'id' => $entity->id,
                 'name' => $entity->name,
@@ -280,7 +282,7 @@ class Entity extends Model implements Searchable {
         ");
         $ids = [];
         $names = [];
-        foreach ($res as $path) {
+        foreach($res as $path) {
             $ids[] = $path->path;
             $names[] = $path->pathn;
         }
@@ -340,8 +342,8 @@ class Entity extends Model implements Searchable {
             ->get();
 
         $data = [];
-        foreach ($attributes as $a) {
-            switch ($a->attribute->datatype) {
+        foreach($attributes as $a) {
+            switch($a->attribute->datatype) {
                 case 'string-sc':
                     $a->thesaurus_val = ThConcept::where('concept_url', $a->thesaurus_val)->first();
                     break;
@@ -350,7 +352,7 @@ class Entity extends Model implements Searchable {
                     break;
                 case 'entity-mc':
                     $names = [];
-                    foreach (json_decode($a->json_val) as $dec) {
+                    foreach(json_decode($a->json_val) as $dec) {
                         $names[] = Entity::find($dec)->name;
                     }
                     $a->name = $names;
@@ -359,18 +361,18 @@ class Entity extends Model implements Searchable {
                     break;
             }
             $value = $a->getValue();
-            if ($a->moderation_state == 'pending-delete') {
+            if($a->moderation_state == 'pending-delete') {
                 $a->value = [];
                 $a->original_value = $value;
             } else {
                 $a->value = $value;
             }
-            if (isset($data[$a->attribute_id])) {
+            if(isset($data[$a->attribute_id])) {
                 $oldAttr = $data[$a->attribute_id];
                 // check if stored entry is moderated one
                 // if so, add current value as original value
                 // otherwise, set stored entry as original value
-                if (isset($oldAttr->moderation_state)) {
+                if(isset($oldAttr->moderation_state)) {
                     $oldAttr->original_value = $value;
                     $a = $oldAttr;
                 } else {
