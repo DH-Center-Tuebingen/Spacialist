@@ -50,7 +50,7 @@ class OpenAccessController extends Controller
     // GET
     public function getGlobals(Request $request) {
         if(!Preference::hasPublicAccess()) {
-         return response()->json();
+            return response()->json();
         }
         $locale = App::getLocale();
         $concepts = ThConcept::getMap($locale);
@@ -64,14 +64,14 @@ class OpenAccessController extends Controller
 
     public function getEntityTypes(Request $request) {
         if(!Preference::hasPublicAccess()) {
-         return response()->json();
+            return response()->json();
         }
         return response()->json(EntityType::all());
     }
 
     public function getAttributes(Request $request) {
         if(!Preference::hasPublicAccess()) {
-         return response()->json();
+            return response()->json();
         }
 
         $forEntityType = $request->query('entity_type', null);
@@ -92,10 +92,18 @@ class OpenAccessController extends Controller
         return response()->json($attributes);
     }
 
+    public function getEntity(Request $request, $id) {
+        if(!Preference::hasPublicAccess()) {
+            return response()->json();
+        }
+
+        return response()->json(Entity::find($id));
+    }
+
     // POST
     public function getFilterResults(Request $request, $page = 1) {
         if(!Preference::hasPublicAccess()) {
-         return response()->json();
+            return response()->json();
         }
 
         $types = $request->input('types', []);
@@ -128,7 +136,7 @@ class OpenAccessController extends Controller
 
     public function getFilterResultsForType(Request $request, $id, $page = 1) {
         if(!Preference::hasPublicAccess()) {
-         return response()->json();
+            return response()->json();
         }
 
         $filters = $request->input('filters', []);

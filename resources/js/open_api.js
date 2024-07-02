@@ -28,6 +28,12 @@ export async function fetchAttributes(entityTypeId = null, countData = false) {
     );
 };
 
+export async function getEntity(eid) {
+    return $httpQueue.add(
+        () => http.get(`/entity/${eid}`).then(response => response.data)
+    );
+};
+
 export async function getFilterResults(entityTypeIds, attributeIds, page = 1) {
     const data = {
         types: entityTypeIds,
