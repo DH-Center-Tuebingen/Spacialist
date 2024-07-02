@@ -9,56 +9,6 @@
         </p>
 
         <h4>
-            Access Modules
-        </h4>
-        <div class="row mb-3">
-            <div class="col-sm-6">
-                <div class="card h-100">
-                    <div class="card-body d-flex flex-column justify-content-between">
-                        <div>
-                            <h5 class="card-title fw-medium">
-                                Free Search
-                            </h5>
-                            <p class="card-text">
-                                Let's you search through the complete data with any filter combination of entity types and attributes.
-                            </p>
-                        </div>
-                        <div class="mt-2">
-                            <router-link
-                                class="btn btn-primary"
-                                :to="{name: 'freesearch'}"
-                            >
-                                Start Free Search
-                            </router-link>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6">
-                <div class="card h-100">
-                    <div class="card-body d-flex flex-column justify-content-between">
-                        <div>
-                            <h5 class="card-title fw-medium">
-                                Single Search
-                            </h5>
-                            <p class="card-text">
-                                Let's you search through all entities of a specific entity type.
-                            </p>
-                        </div>
-                        <div class="mt-2">
-                            <router-link
-                                class="btn btn-primary"
-                                :to="{ name: 'singlesearch'}"
-                            >
-                                Start Single Search
-                            </router-link>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <h4>
             Project Description
             <small class="small">
                 <a
@@ -82,9 +32,12 @@
         <p
             v-if="state.prefLoaded"
             v-show="state.showDescription"
-            class="p-4 bg-primary bg-opacity-10 rounded-4 text-start rendered-markdown"
+            class="mb-0 overflow-hidden"
         >
-            <md-viewer :source="state.maintainer.description" />
+            <MdViewer
+                :classes="'milkdown-wrapper p-3 mt-1 h-100 overflow-scroll'"
+                :source="state.maintainer.description"
+            />
         </p>
     </div>
 </template>
@@ -109,7 +62,7 @@
 
             // DATA
             const state = reactive({
-                showDescription: false,
+                showDescription: true,
                 project: computed(_ => getPreference('prefs.project-name')),
                 maintainer: computed(_ => getPreference('prefs.project-maintainer')),
                 prefLoaded: computed(_ => !!state.maintainer),
