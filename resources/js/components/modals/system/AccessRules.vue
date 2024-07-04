@@ -19,8 +19,139 @@
             </div>
             <div class="modal-body">
                 <div
-                    class="d-flex flex-column bg-secondary bg-opacity-10 rounded-4 px-3 py-3 position-relative text-body"
+                    v-if="state.isRestricted"
+                    class="my-2"
                 >
+                    <h5>Access Rules</h5>
+
+                    <h6 class="mt-3">
+                        Add Working group or User
+                    </h6>
+                    <simple-search
+                        :endpoint="searchGroupsAndUsers"
+                        :key-fn="_ => { }"
+                        :filter-fn="preprocessMatches"
+                        :default-value="state.resetValue"
+                        @selected="e => addAccessRule(e)"
+                    >
+                        <template #resultsc="{ value }">
+                            <group-user-item :item="value" />
+                        </template>
+                        <template #optionsc="{ value }">
+                            <group-user-item :item="value" />
+                        </template>
+                    </simple-search>
+
+                    <template v-if="state.accessRules.length > 0">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        User/Working Group
+                                    </th>
+                                    <th>
+                                        <span title="Read-only">
+                                            <i class="fas fa-fw fa-eye" />
+                                        </span>
+                                        /
+                                        <span title="Role-based">
+                                            <i class="fas fa-fw fa-shield-alt" />
+                                        </span>
+                                        /
+                                        <span title="Define matrix">
+                                            <i class="fas fa-fw fa-list-check" />
+                                        </span>
+                                    </th>
+                                    <th class="text-end">
+                                        Remove
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr
+                                    v-for="(item, i) in state.accessRules"
+                                    :key="`dataset-access-rule-${i}`"
+                                >
+                                    <td class="mw-50">
+                                        <group-user-item :item="item" />
+                                    </td>
+                                    <td class="d-flex flex-column">
+                                        <div class="d-flex flex-row gap-2 align-items-center text-muted">
+                                            <template
+                                                v-for="type in ['read', 'role', 'matrix']"
+                                                :key="`access-rule-radio-${i}-${type}`"
+                                            >
+                                                <input
+                                                    v-model="item.rule_type"
+                                                    type="radio"
+                                                    class="form-check-input mt-0"
+                                                    :name="`access-rule-radio-${i}`"
+                                                    :value="type"
+                                                    @click="() => type === 'matrix' ? setMatrixType(item) : null"
+                                                >
+                                                <span v-if="type != 'matrix'">
+                                                    /
+                                                </span>
+                                            </template>
+                                        </div>
+                                        <div
+                                            v-if="item.rule_type == 'matrix'"
+                                            class="d-flex flex-row gap-3"
+                                        >
+                                            <div
+                                                v-for="type in ['write', 'create', 'delete', 'share']"
+                                                :key="`access-rule-matrix-${type}`"
+                                                class="form-check"
+                                            >
+                                                <input
+                                                    :id="`access-rule-matrix-${type}`"
+                                                    v-model="item.rule_values[type]"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                >
+                                                <label
+                                                    class="form-check-label user-select-none"
+                                                    :for="`access-rule-matrix-${type}`"
+                                                >
+                                                    <!-- {{ type[0].toUpperCase() + type.slice(1) }} -->
+                                                    {{ type.charAt(0).toUpperCase() + type.slice(1) }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-end">
+                                        <a
+                                            href="#"
+                                            class="text-reset col-2 text-end"
+                                            @click.prevent="removeAccessRule(i)"
+                                        >
+                                            <i class="fas fa-fw fa-times" />
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <alert
+                            class="mt-3"
+                            :message="`Access Rules for users are having a <span class='fw-bold'>higher priority</span> than group rules! So it is possible to a whole group only read access, but allow a specific user from that group to have advanced access rights.`"
+                            :type="'info'"
+                            :noicon="false"
+                            :icontext="'Note'"
+                            :closeable="true"
+                        />
+                    </template>
+                    <alert
+                        v-else
+                        class="mt-3"
+                        :message="`No Access rules defined. This would equal to Default Access. Please change access type or add your desired users/groups.`"
+                        :type="'warning'"
+                        :noicon="false"
+                    />
+                </div>
+
+                <hr>
+                <div
+                    class="d-flex flex-column bg-secondary bg-opacity-10 rounded-4 px-3 py-3 position-relative text-body">
                     <div class="position-relative m-4">
                         <div
                             class="progress"
@@ -73,16 +204,15 @@
                             <i class="fas fa-unlock-alt fa-sm" />
                         </button>
                     </div>
-                    <div
-                        class="d-flex flex-column bg-info bg-opacity-25 rounded-3 px-3 py-2 mt-3 text-center"
-                    >
+                    <div class="d-flex flex-column bg-info bg-opacity-25 rounded-3 px-3 py-2 mt-3 text-center">
                         <template v-if="state.accessType == 'private'">
                             <h5 class="mb-0">
                                 Private Access
                             </h5>
                             <hr class="my-2 mx-5">
                             <p class="mb-0">
-                                This settings gives only yourself access to this data. All other users can neither see, nor modify.
+                                This settings gives only yourself access to this data. All other users can neither see,
+                                nor modify.
                             </p>
                         </template>
                         <template v-else-if="state.accessType == 'restricted'">
@@ -91,7 +221,9 @@
                             </h5>
                             <hr class="my-2 mx-5">
                             <p class="mb-0">
-                                This settings gives you the possibilities to define which users and/or groups can have access to this data at all. Furthermore, you can decide whether users can have only read access or are allowed to modify and add data.
+                                This settings gives you the possibilities to define which users and/or groups can have
+                                access to this data at all. Furthermore, you can decide whether users can have only read
+                                access or are allowed to modify and add data.
                             </p>
                         </template>
                         <template v-else-if="state.accessType == 'users'">
@@ -100,7 +232,8 @@
                             </h5>
                             <hr class="my-2 mx-5">
                             <p class="mb-0">
-                                This is the default setting. All registered users can view and/or modify data based on their individual roles.
+                                This is the default setting. All registered users can view and/or modify data based on
+                                their individual roles.
                             </p>
                         </template>
                         <template v-else-if="state.accessType == 'open'">
@@ -109,189 +242,21 @@
                             </h5>
                             <hr class="my-2 mx-5">
                             <p class="mb-0">
-                                This gives the public read access to this data through the <span class="fst-italic">Open Access</span> feature. To allow the public to modify data, they still need a user account, so changes are always related to a specific user.
+                                This gives the public read access to this data through the <span class="fst-italic">Open
+                                    Access</span> feature. To allow the public to modify data, they still need a user
+                                account, so changes are always related to a specific user.
                                 <br>
-                                WIP: To allow external users to get read access through the <span class="fst-italic">Open Access</span> feature, but keep the restrictions on modification, use the checkbox in the respective type.
+                                WIP: To allow external users to get read access through the <span
+                                    class="fst-italic">Open Access</span> feature, but keep the restrictions on
+                                modification, use the checkbox in the respective type.
                             </p>
                         </template>
                     </div>
                     <div class="mt-3">
-                        <span class="fw-bold">Note</span>: <span class="fst-italic">data</span> in this context always refers to this entry and all it's (if possible) sub-entries!
+                        <span class="fw-bold">Note</span>: <span class="fst-italic">data</span> in this context always
+                        refers to this entry
+                        and all it's (if possible) sub-entries!
                     </div>
-                </div>
-                <div
-                    v-if="state.isRestricted"
-                    class="mt-2"
-                >
-                    <alert
-                        class="mt-3"
-                        :message="`Access Rules for users are having a <span class='fw-bold'>higher priority</span> than group rules! So it is possible to a whole group only read access, but allow a specific user from that group to have advanced access rights.`"
-                        :type="'info'"
-                        :noicon="false"
-                        :icontext="'Note'"
-                        :closeable="true"
-                    />
-                    <hr>
-                    <h5>Access Rules</h5>
-                    <template v-if="state.accessRules.length > 0">
-                        <table class="table table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>
-                                        User/Working Group
-                                    </th>
-                                    <th>
-                                        <span title="Read-only">
-                                            <i class="fas fa-fw fa-eye" />
-                                        </span>
-                                        /
-                                        <span title="Role-based">
-                                            <i class="fas fa-fw fa-shield-alt" />
-                                        </span>
-                                        /
-                                        <span title="Define matrix">
-                                            <i class="fas fa-fw fa-list-check" />
-                                        </span>
-                                    </th>
-                                    <th class="text-end">
-                                        Remove
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr
-                                    v-for="(item, i) in state.accessRules"
-                                    :key="`dataset-access-rule-${i}`"
-                                >
-                                    <td class="mw-50">
-                                        <group-user-item :item="item" />
-                                    </td>
-                                    <td class="d-flex flex-column">
-                                        <div class="d-flex flex-row gap-2 align-items-center text-muted">
-                                            <input
-                                                v-model="item.rule_type"
-                                                type="radio"
-                                                class="form-check-input mt-0"
-                                                :name="`access-rule-radio-${i}`"
-                                                value="read"
-                                            >
-                                            /
-                                            <input
-                                                v-model="item.rule_type"
-                                                type="radio"
-                                                class="form-check-input mt-0"
-                                                :name="`access-rule-radio-${i}`"
-                                                value="role"
-                                            >
-                                            /
-                                            <input
-                                                v-model="item.rule_type"
-                                                type="radio"
-                                                class="form-check-input mt-0"
-                                                :name="`access-rule-radio-${i}`"
-                                                value="matrix"
-                                                @click="setMatrixType(item)"
-                                            >
-                                        </div>
-                                        <div
-                                            v-if="item.rule_type == 'matrix'"
-                                            class="d-flex flex-row gap-3"
-                                        >
-                                            <div class="form-check">
-                                                <input
-                                                    id="access-rule-matrix-write"
-                                                    v-model="item.rule_values.write"
-                                                    class="form-check-input"
-                                                    type="checkbox"
-                                                >
-                                                <label
-                                                    class="form-check-label"
-                                                    for="access-rule-matrix-write"
-                                                >
-                                                    Write
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input
-                                                    id="access-rule-matrix-create"
-                                                    v-model="item.rule_values.create"
-                                                    class="form-check-input"
-                                                    type="checkbox"
-                                                >
-                                                <label
-                                                    class="form-check-label"
-                                                    for="access-rule-matrix-create"
-                                                >
-                                                    Create
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input
-                                                    id="access-rule-matrix-delete"
-                                                    v-model="item.rule_values.delete"
-                                                    class="form-check-input"
-                                                    type="checkbox"
-                                                >
-                                                <label
-                                                    class="form-check-label"
-                                                    for="access-rule-matrix-delete"
-                                                >
-                                                    Delete
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input
-                                                    id="access-rule-matrix-share"
-                                                    v-model="item.rule_values.share"
-                                                    class="form-check-input"
-                                                    type="checkbox"
-                                                >
-                                                <label
-                                                    class="form-check-label"
-                                                    for="access-rule-matrix-share"
-                                                >
-                                                    Share
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="text-end">
-                                        <a
-                                            href="#"
-                                            class="text-reset col-2 text-end"
-                                            @click.prevent="removeAccessRule(i)"
-                                        >
-                                            <i class="fas fa-fw fa-times" />
-                                        </a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </template>
-                    <alert
-                        v-else
-                        :message="`No Access rules defined. This would equal to Default Access. Please change access type or add your desired users/groups.`"
-                        :type="'warning'"
-                        :noicon="false"
-                    />
-
-                    <h6 class="mt-3">
-                        Add Working group or User
-                    </h6>
-                    <simple-search
-                        :endpoint="searchGroupsAndUsers"
-                        :key-fn="_ => {}"
-                        :filter-fn="preprocessMatches"
-                        :default-value="state.resetValue"
-                        @selected="e => addAccessRule(e)"
-                    >
-                        <template #resultsc="{ value }">
-                            <group-user-item :item="value" />
-                        </template>
-                        <template #optionsc="{ value }">
-                            <group-user-item :item="value" />
-                        </template>
-                    </simple-search>
                 </div>
             </div>
             <div class="modal-footer">
@@ -323,7 +288,7 @@
         toRefs,
         onMounted,
     } from 'vue';
-    import { useI18n } from 'vue-i18n';
+    import {useI18n} from 'vue-i18n';
 
     import store from '@/bootstrap/store.js';
 
@@ -351,7 +316,7 @@
         },
         emits: ['closing', 'confirm'],
         setup(props, context) {
-            const { t } = useI18n();
+            const {t} = useI18n();
             const {
                 id,
             } = toRefs(props);
@@ -380,7 +345,7 @@
                     r2 = {
                         ...r2,
                         ...metadata,
-                    }
+                    };
 
                     return r2;
                 });
@@ -407,7 +372,7 @@
                     classes.push('btn-secondary');
                 }
                 return classes;
-            }
+            };
             const preprocessMatches = (results, query) => {
                 const filtered = [];
                 results.forEach(itm => {
@@ -450,7 +415,7 @@
                 if(state.isRestricted) {
                     if(state.accessRules.length == 0) return false;
 
-                    for(let i=0; i<state.accessRules.length; i++) {
+                    for(let i = 0; i < state.accessRules.length; i++) {
                         const curr = state.accessRules[i];
                         // an access rule requires a rule type...
                         if(!curr.rule_type || curr.rule_type == '') {
@@ -480,7 +445,7 @@
                         };
 
                         if(`${rule.id}`.startsWith('wg_')) {
-                            stripped.id = parseInt(rule.id.substr(3))
+                            stripped.id = parseInt(rule.id.substr(3));
                         } else {
                             stripped.id = rule.id;
                         }
@@ -512,7 +477,7 @@
             onMounted(_ => {
                 state.accessRules = state.entity.access_rules ? convertAccessRules(state.entity.access_rules) : [];
                 state.accessType = state.entity.access_type ? state.entity.access_type.type : 'users';
-            })
+            });
 
             // RETURN
             return {
@@ -530,7 +495,7 @@
                 closeModal,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>
