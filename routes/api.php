@@ -237,6 +237,7 @@ Route::prefix('v1/open')->group(function() {
     Route::get('types', 'OpenAccessController@getEntityTypes');
     Route::get('attributes', 'OpenAccessController@getAttributes');
     Route::get('entity/{id}', 'OpenAccessController@getEntity')->where('id', '[0-9]+');
+    Route::get('entity/{id}/data', 'OpenAccessController@getEntityData')->where('id', '[0-9]+');
 
     Route::post('result', 'OpenAccessController@getFilterResults');
     Route::post('result/by_type/{id}', 'OpenAccessController@getFilterResultsForType')->where('id', '[0-9]+');

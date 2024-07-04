@@ -34,6 +34,12 @@ export async function getEntity(eid) {
     );
 };
 
+export async function getEntityData(eid) {
+    return $httpQueue.add(
+        () => http.get(`/entity/${eid}/data`).then(response => response.data)
+    );
+}
+
 export async function getFilterResults(entityTypeIds, attributeIds, page = 1) {
     const data = {
         types: entityTypeIds,

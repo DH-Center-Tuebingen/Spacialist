@@ -30,6 +30,7 @@ import Landing from '@/components/openaccess/Landing.vue';
 import EntryView from '@/components/openaccess/EntityView.vue';
 import Modules from '@/components/openaccess/Modules.vue';
 import SitesContainer from '@/components/openaccess/SitesContainer.vue';
+import WebGis from '@/components/openaccess/WebGis.vue';
 import FreeSearch from '@/components/openaccess/FreeSearch.vue';
 import SingleSearch from '@/components/openaccess/SingleSearch.vue';
 
@@ -342,7 +343,7 @@ export const openRouter = createRouter({
                 {
                     path: 'webgis',
                     name: 'webgis',
-                    component: FreeSearch,
+                    component: WebGis,
                     meta: {
                         auth: false,
                     },
