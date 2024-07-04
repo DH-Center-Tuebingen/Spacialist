@@ -1,86 +1,39 @@
 <template>
-    <div class="row mb-3">
-        <label
-            for="left-column"
-            class="col-md-2 col-form-label text-end"
-        >{{ t('main.preference.key.columns.left') }}:</label>
-        <div class="col-md">
+    <div class="column-preferences input-group flex-no-wrap">
+        <template
+            v-for="{ id, label } in sections"
+            :key="id"
+        >
+            <span
+                id="addon-wrapping"
+                class="input-group-text"
+            >{{ t(label) }}</span>
             <input
-                id="left-column"
-                v-model.number="data.left"
+                :id="id"
+                v-model="data[id]"
                 class="form-control"
                 type="number"
                 :disabled="readonly"
                 min="0"
-                :max="state.maxLeft"
+                style="min-width:3rem;"
                 :readonly="readonly"
                 @input="onChange"
             >
-        </div>
-    </div>
-    <div class="row mb-3">
-        <label
-            for="center-column"
-            class="col-md-2 col-form-label text-end"
-        >{{ t('main.preference.key.columns.center') }}:</label>
-        <div class="col-md">
-            <input
-                id="center-column"
-                v-model.number="data.center"
-                class="form-control"
-                type="number"
-                :disabled="readonly"
-                min="0"
-                :max="state.maxCenter"
-                :readonly="readonly"
-                @input="onChange"
-            >
-        </div>
-    </div>
-    <div class="row mb-3">
-        <label
-            for="right-column"
-            class="col-md-2 col-form-label text-end"
-        >{{ t('main.preference.key.columns.right') }}:</label>
-        <div class="col-md">
-            <input
-                id="right-column"
-                v-model.number="data.right"
-                class="form-control"
-                type="number"
-                :disabled="readonly"
-                min="0"
-                :max="state.maxRight"
-                :readonly="readonly"
-                @input="onChange"
-            >
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-10 offset-md-2">
-            <div
-                class="alert bg-info mb-0 w-50"
-                role="alert"
-            >
-                {{ t('main.preference.info.columns') }}
-            </div>
-        </div>
+        </template>
     </div>
 </template>
 
 <script>
     import {
-        computed,
-        reactive,
         toRefs,
     } from 'vue';
 
-    import { useI18n } from 'vue-i18n';
+    import {useI18n} from 'vue-i18n';
 
     import {
         _debounce
     } from '@/helpers/helpers.js';
-    
+
     export default {
         props: {
             data: {
@@ -95,28 +48,23 @@
         },
         emits: ['changed'],
         setup(props, context) {
-            const { t } = useI18n();
+            const {t} = useI18n();
             const {
                 data,
                 readonly,
             } = toRefs(props);
 
+            const sections = [
+                {id: 'left', label: t('main.preference.key.columns.left')},
+                {id: 'center', label: t('main.preference.key.columns.center')},
+                {id: 'right', label: t('main.preference.key.columns.right')},
+            ];
+
             // FUNCTIONS
             const onChange = _debounce(e => {
                 if(readonly.value) return;
-                context.emit('changed', {
-                    left: data.value['left'],
-                    center: data.value['center'],
-                    right: data.value['right'],
-                });
+                context.emit('changed', data.value);
             }, 250);
-
-            // DATA
-            const state = reactive({
-                maxLeft: computed(_ => 12 - data.value['center'] - data.value['right']),
-                maxCenter: computed(_ => 12 - data.value['left'] - data.value['right']),
-                maxRight: computed(_ => 12 - data.value['left'] - data.value['center']),
-            });
 
             // RETURN
             return {
@@ -124,8 +72,8 @@
                 // LOCAL
                 onChange,
                 // STATE
-                state,
+                sections,
             };
         }
-    }
+    };
 </script>

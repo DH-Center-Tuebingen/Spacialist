@@ -1,4 +1,4 @@
-import { createI18n } from 'vue-i18n';
+import {createI18n} from 'vue-i18n';
 import * as en from '@/i18n/en.json';
 import * as de from '@/i18n/de.json';
 import * as ja from '@/i18n/ja.json';
@@ -14,7 +14,9 @@ const i18n = createI18n({
     legacy: false,
     locale,
     fallbackLocale: 'en',
-    messages: messages
+    messages: messages,
+    warnHtmlInMessage: 'off',
+    warnHtmlMessage: false,
 });
 
 export function useI18n() {

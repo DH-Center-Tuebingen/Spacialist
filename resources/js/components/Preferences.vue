@@ -51,7 +51,8 @@
                 </span>
                 <button
                     type="button"
-                    class="btn btn-outline-success btn-sm"
+                    class="btn btn-outline-success btn-sm ms-auto"
+                    :disabled="!state.hasDirtyData"
                     @click="savePreferences()"
                 >
                     <i class="fas fa-fw fa-save" />
@@ -68,21 +69,21 @@
                 >
                     <tbody>
                         <tr
-                            v-for="preferencesBlock in state.categoryPreferences"
-                            :key="preferencesBlock.label"
+                            v-for="preference in state.categoryPreferences"
+                            :key="preference.label"
                         >
                             <td>
                                 <strong>
-                                    {{ t(preferencesBlock.title) }}
+                                    {{ t(preference.title) }}
                                 </strong>
                             </td>
                             <td>
                                 <component
-                                    :is="preferencesBlock.component"
-                                    :model-value="(preferencesBlock.data === 'v-model') ? state.preferences[preferencesBlock.label] : null"
-                                    :data="(preferencesBlock.data === undefined) ? state.preferences[preferencesBlock.label] : null"
-                                    @update:model-value="value => updateValue(preferencesBlock, value)"
-                                    @changed="e => trackChanges(preferencesBlock.label, e)"
+                                    :is="preference.component"
+                                    :model-value="(preference.data === 'v-model') ? state.preferences[preference.label] : null"
+                                    :data="(preference.data === undefined) ? state.preferences[preference.label] : null"
+                                    @update:model-value="value => updateValue(preference, value)"
+                                    @changed="e => trackChanges(preference, e)"
                                 />
                             </td>
                         </tr>
@@ -107,10 +108,11 @@
         watch,
     } from 'vue';
 
-    import { useI18n } from 'vue-i18n';
+    import {useI18n} from 'vue-i18n';
     import store from '@/bootstrap/store.js';
-    import { useToast } from '@/plugins/toast.js';
-    import { patchPreferences } from '@/api.js';
+    import {useToast} from '@/plugins/toast.js';
+    import {patchPreferences} from '@/api.js';
+    import router from '@/bootstrap/router.js';
 
     import {
         useRoute,
@@ -143,7 +145,7 @@
             'project-maintainer-preference': ProjectMaintainer,
         },
         setup(props, context) {
-            const { t, locale } = useI18n();
+            const {t, locale} = useI18n();
             const toast = useToast();
             const currentRoute = useRoute();
 
@@ -155,7 +157,12 @@
                     state.category = 'user';
                 }
                 if(route.hash) {
-                    state.subcategory = route.hash.substring(1);
+                    let subcategory = route.hash.substring(1);
+                    if(!state.categories[state.category][subcategory]) {
+                        subcategory = Object.keys(state.categories[state.category])[0];
+                        router.push({path: route.path, hash: `#${subcategory}`}).catch(console.error);
+                    }
+                    state.subcategory = subcategory;
                 }
             };
 
@@ -167,22 +174,24 @@
                 return classes;
             };
 
-            const trackChanges = (label, data) => {
-                const c = state.category;
-                if(!state.dirtyData[c]) {
-                    state.dirtyData[c] = {};
+            const trackChanges = (preference, data) => {
+                const label = preference.label;
+                const category = state.category;
+
+                if(!state.dirtyData[category]) {
+                    state.dirtyData[category] = {};
                 }
-                if(!state.dirtyData[c][label]) {
+                if(!state.dirtyData[category][label]) {
 
                     // The endpoint expect all values to be set. 
                     // If any of those change they will be overwritten.
-                    state.dirtyData[c][label] = {
+                    state.dirtyData[category][label] = {
                         label: label,
-                        value: data,
+                        value: null,
                     };
-                } else {
-                    state.dirtyData[c][label].value = data;
                 }
+
+                state.dirtyData[category][label].value = data;
             };
 
             const updateValue = (preferencesBlock, data) => {
@@ -199,15 +208,22 @@
                     updatedLanguage = state.dirtyData.user['prefs.gui-language'].value;
                 }
                 const changes = [];
-                for(let k in state.dirtyData.user) {
-                    const curr = state.dirtyData.user[k];
-                    curr.user = true;
-                    changes.push(curr);
-                }
-                for(let k in state.dirtyData.system) {
-                    const curr = state.dirtyData.system[k];
-                    changes.push(curr);
-                }
+
+                ['user', 'system'].forEach(category => {
+                    for(let prefLabel in state.dirtyData[category]) {
+                        const curr = state.dirtyData[category][prefLabel];
+                        let preference = getPreferenceCategory(category);
+                        const config = configs[prefLabel];
+                        if(config?.hooks?.onSave) {
+                            curr.value = config.hooks.onSave(curr.value);
+                        }
+
+                        preference[prefLabel] = curr.value;
+                        curr.user = category === 'user';
+                        changes.push(curr);
+                    }
+                });
+
                 const data = {
                     changes: changes,
                 };
@@ -231,7 +247,7 @@
                 for(let k in preferencesConfig[name]) {
                     const subcategory = preferencesConfig[name][k];
                     categories[name][k] = {
-                        preferences: subcategory.preferences.slice(),
+                        preferences: subcategory.slice(),
                     };
                 }
             };
@@ -241,116 +257,140 @@
                     const subcategory = state.pluginPreferences[name][k];
                     if(!categories[name][k]) {
                         categories[name][k] = {
-                            preferences: subcategory.preferences.slice(),
+                            preferences: subcategory.slice(),
                         };
                         if(subcategory.custom) {
                             categories[name][k].custom = true;
                             categories[name][k].title = subcategory.title;
                         }
                     } else {
-                        categories[name][k].preferences = categories[name][k].preferences.concat(subcategory.preferences.slice());
+                        categories[name][k] = categories[name][k].concat(subcategory.slice());
                     }
                 }
             };
 
+
+            const configs = {
+                ['prefs.columns']: {
+                    title: 'main.preference.key.columns.title',
+                    label: 'prefs.columns',
+                    component: 'columns-preference',
+                    hooks: {
+                        onSave() {
+
+                            let data = state.preferences['prefs.columns'];
+
+                            const target = 12;
+                            let total = 0;
+                            for(let key in data) {
+                                total += data[key];
+                            }
+
+                            // If only 0 values are set, set all to 1
+                            // to avoid division by 0.
+                            if(total === 0) {
+                                total = Object.keys(data).length;
+
+                                for(let key in data) {
+                                    data[key] = 1;
+                                }
+                            }
+
+                            let last = null;
+                            let remainder = target;
+                            for(let key in data) {
+                                const colValue = Math.round(data[key] / total * target);
+                                data[key] = colValue;
+                                remainder -= colValue;
+                                last = key;
+                            }
+
+                            if(last) {
+                                data[last] += remainder;
+                            }
+
+                            console.log(data);
+                            return data;
+                        }
+                    }
+                },
+                ['prefs.show-tooltips']: {
+                    title: 'main.preference.key.tooltips',
+                    label: 'prefs.show-tooltips',
+                    component: 'tooltips-preference',
+                },
+                ['prefs.gui-language']: {
+                    title: 'main.preference.key.language',
+                    label: 'prefs.gui-language',
+                    component: 'gui-language-preference',
+                    data: 'v-model'
+                },
+                ['prefs.color']: {
+                    title: 'main.preference.key.color.title',
+                    label: 'prefs.color',
+                    component: 'color-preference',
+                },
+            };
+
+            const layoutPreferences = [
+                configs['prefs.gui-language'],
+                configs['prefs.color'],
+            ];
+
+            const interfacePreferences = [
+                configs['prefs.columns'],
+                configs['prefs.show-tooltips'],
+            ];
+
             // DATA
             const preferencesConfig = {
                 user: {
-                    general: {
-                        preferences: [],
-                    },
-                    layout: {
-                        preferences: [
-                            {
-                                title: 'main.preference.key.language',
-                                label: 'prefs.gui-language',
-                                component: 'gui-language-preference',
-                                data: 'v-model'
-                            },
-                            {
-                                title: 'main.preference.key.color.title',
-                                label: 'prefs.color',
-                                component: 'color-preference',
-                            },
-                        ],
-                    },
-                    interface: {
-                        preferences: [
-                            {
-                                title: 'main.preference.key.columns.title',
-                                label: 'prefs.columns',
-                                component: 'columns-preference',
-                            },
-                            {
-                                title: 'main.preference.key.tooltips',
-                                label: 'prefs.show-tooltips',
-                                component: 'tooltips-preference',
-                            },
-                        ],
-                    },
+                    // general: [],
+                    layout: layoutPreferences,
+                    interface: interfacePreferences,
                 },
                 system: {
-                    general: {
-                        preferences: [
-                            {
-                                title: 'main.preference.key.password_reset',
-                                label: 'prefs.enable-password-reset-link',
-                                component: 'reset-email-preference',
-                            },
-                            {
-                                title: 'main.preference.key.tag_root',
-                                label: 'prefs.tag-root',
-                                component: 'tags-preference',
-                            },
-                            {
-                                title: 'main.preference.key.link_thesaurex',
-                                label: 'prefs.link-to-thesaurex',
-                                component: 'thesaurus-link-preference',
-                            },
-                            {
-                                title: 'main.preference.key.project.name',
-                                label: 'prefs.project-name',
-                                component: 'project-name-preference',
-                                data: 'v-model'
-                            },
-                            {
-                                title: 'main.preference.key.project.maintainer',
-                                label: 'prefs.project-maintainer',
-                                component: 'project-maintainer-preference',
-                            },
-                        ],
-                    },
-                    layout: {
-                        preferences: [
-                            {
-                                title: 'main.preference.key.language',
-                                label: 'prefs.gui-language',
-                                component: 'gui-language-preference',
-                                data: 'v-model'
-                            },
-                            {
-                                title: 'main.preference.key.color.title',
-                                label: 'prefs.color',
-                                component: 'color-preference',
-                            },
-                        ],
-                    },
-                    interface: {
-                        preferences: [
-                            {
-                                title: 'main.preference.key.columns.title',
-                                label: 'prefs.columns',
-                                component: 'columns-preference',
-                            },
-                            {
-                                title: 'main.preference.key.tooltips',
-                                label: 'prefs.show-tooltips',
-                                component: 'tooltips-preference',
-                            },
-                        ],
-                    },
+                    general: [
+                        {
+                            title: 'main.preference.key.password_reset',
+                            label: 'prefs.enable-password-reset-link',
+                            component: 'reset-email-preference',
+                        },
+                        {
+                            title: 'main.preference.key.tag_root',
+                            label: 'prefs.tag-root',
+                            component: 'tags-preference',
+                        },
+                        {
+                            title: 'main.preference.key.link_thesaurex',
+                            label: 'prefs.link-to-thesaurex',
+                            component: 'thesaurus-link-preference',
+                        },
+                        {
+                            title: 'main.preference.key.project.name',
+                            label: 'prefs.project-name',
+                            component: 'project-name-preference',
+                            data: 'v-model'
+                        },
+                        {
+                            title: 'main.preference.key.project.maintainer',
+                            label: 'prefs.project-maintainer',
+                            component: 'project-maintainer-preference',
+                        },
+                    ],
+                    layout: layoutPreferences,
+                    interface: interfacePreferences,
                 },
             };
+
+            const getPreferenceCategory = (category) => {
+                if(category == 'system') {
+                    return state.systemPreferences;
+                } else {
+                    return state.userPreferences;
+                }
+            };
+
             const state = reactive({
                 category: 'system',
                 subcategory: 'general',
@@ -364,13 +404,7 @@
                     const userPrefs = store.getters.preferences;
                     return userPrefs;
                 }),
-                preferences: computed(_ => {
-                    if(state.category == 'system') {
-                        return state.systemPreferences;
-                    } else {
-                        return state.userPreferences;
-                    }
-                }),
+                preferences: computed(_ => getPreferenceCategory(state.category)),
                 pluginPreferences: computed(_ => store.getters.pluginPreferences),
                 categories: computed(_ => {
                     const categories = {
@@ -378,7 +412,7 @@
                         system: {},
                     };
 
-                    for(let category in categories){
+                    for(let category in categories) {
                         setProgramPreferences(categories, category);
                         setPluginPreferences(categories, category);
                     }
@@ -386,7 +420,14 @@
                     return categories;
                 }),
                 categoryPreferences: computed(_ => {
-                    return state.categories[state.category][state.subcategory].preferences;
+                    let category = state.category || 'user';
+
+                    if(!state.categories[category]) {
+                        return [];
+                    }
+
+                    let subcategory = state.categories[category][state.subcategory] ? state.subcategory : Object.keys(state.categories[category])[0];
+                    return state.categories[category][subcategory].preferences;
                 }),
             });
 
