@@ -68,12 +68,18 @@
                 type: String,
                 required: true,
             },
+            classes: {
+                type: String,
+                required: false,
+                default: 'mt-0 bg-none h-100 form-control px-4 py-3',
+            },
         },
         emits: ['change'],
         setup(props, context) {
             const { t } = useI18n();
             const {
                 value: initial,
+                classes,
             } = toRefs(props);
 
             const handleInput = text => {
@@ -109,8 +115,8 @@
             };
 
             const state = reactive({
-                classes: 'mt-0 bg-none h-100 form-control px-4 py-3',
                 hovered: false,
+                classes: classes,
                 onHoverBtnClasses: computed(_ => {
                     if(state.hovered) {
                         return '';
