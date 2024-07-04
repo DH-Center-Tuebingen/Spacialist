@@ -13,6 +13,7 @@ import Alert from '@/components/Alert.vue';
 import NotificationBody from '@/components/notification/NotificationBody.vue';
 import CsvTable from '@/components/CsvTable.vue';
 import Gradient from '@/components/Gradient.vue';
+import Richtext from '@/components/attribute/Richtext.vue';
 import MarkdownViewer from '@/components/mde/Viewer.vue';
 import MarkdownEditor from '@/components/mde/Wrapper.vue';
 import BibtexCode from '@/components/bibliography/BibtexCode.vue';
@@ -41,6 +42,7 @@ export default function initGlobalComponents(app) {
     app.component('NotificationBody', NotificationBody);
     app.component('CsvTable', CsvTable);
     app.component('ColorGradient', Gradient);
+    app.component('Richtext', Richtext);
     app.component('MdViewer', MarkdownViewer);
     app.component('MdEditor', MarkdownEditor);
     app.component('BibtexCode', BibtexCode);

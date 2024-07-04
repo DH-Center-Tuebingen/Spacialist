@@ -8,8 +8,10 @@ import PQueue from 'p-queue';
 // Helpers/Filter
 
 // Reusable Components
+import Alert from  '@/components/Alert.vue';
 import AttributeList from '@/components/AttributeList.vue';
 import ResultCard from '@/components/openaccess/Card.vue';
+import Richtext from '@/components/attribute/Richtext.vue';
 import MarkdownEditor from '@/components/mde/Wrapper.vue';
 import MarkdownViewer from '@/components/mde/Viewer.vue';
 
@@ -43,14 +45,16 @@ app.use(i18n);
 app.use(router);
 app.use(store);
 
+app.component('Alert', Alert);
 app.component('AttributeList', AttributeList);
 app.component('ResultCard', ResultCard);
+app.component('Richtext', Richtext);
+app.component('MdEditor', MarkdownEditor);
+app.component('MdViewer', MarkdownViewer);
 // Third-Party components
 app.component('Multiselect', Multiselect);
 app.component('DatePicker', DatePicker);
 app.component('Draggable', draggable);
-app.component('MdEditor', MarkdownEditor);
-app.component('MdViewer', MarkdownViewer);
 
 // Mount Vue
 app.mount('#app');

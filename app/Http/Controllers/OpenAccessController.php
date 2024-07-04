@@ -9,7 +9,9 @@ use App\EntityAttribute;
 use App\EntityType;
 use App\Preference;
 use App\ThConcept;
+use App\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 
@@ -40,7 +42,6 @@ class OpenAccessController extends Controller
                     $currData[$val] = 0;
                 }
                 $currData[$val]++;
-                
             }
             $attrData[$attr->attribute_id] = $currData;
         }
@@ -55,10 +56,14 @@ class OpenAccessController extends Controller
         $locale = App::getLocale();
         $concepts = ThConcept::getMap($locale);
         $preferences = Preference::getPreferences(true);
+        $users = User::withoutTrashed()->orderBy('id')->get();
+        $delUsers = User::onlyTrashed()->orderBy('id')->get();
 
         return response()->json([
             'concepts' => $concepts,
             'preferences' => $preferences,
+            'users' => $users,
+            'deleted_users' => $delUsers,
         ]);
     }
 
@@ -97,7 +102,67 @@ class OpenAccessController extends Controller
             return response()->json();
         }
 
-        return response()->json(Entity::find($id));
+        try {
+            $entity = Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist')
+            ], 400);
+        }
+
+        $metadata = $entity->getAllMetadata();
+
+        return response()->json([
+            'entity' => $entity,
+            'metadata'=> $metadata,
+        ]);
+    }
+
+    public function getEntityData(Request $request, $id) {
+        if(!Preference::hasPublicAccess()) {
+            return response()->json();
+        }
+
+        try {
+            $entity = Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist')
+            ], 400);
+        }
+
+        $attributes = AttributeValue::whereHas('attribute', function (Builder $q) {
+            $q->where('datatype', '!=', 'sql');
+        })
+            ->where('entity_id', $id)
+            ->withoutModerated()
+            ->get();
+
+        // TODO simplify as soon as 0.10-fix-performance-table is merged!
+        $data = [];
+        foreach($attributes as $a) {
+            switch($a->attribute->datatype) {
+                case 'string-sc':
+                    $a->thesaurus_val = ThConcept::where('concept_url', $a->thesaurus_val)->first();
+                    break;
+                case 'entity':
+                    $a->name = Entity::find($a->entity_val)->name;
+                    break;
+                case 'entity-mc':
+                    $names = [];
+                    foreach(json_decode($a->json_val) as $dec) {
+                        $names[] = Entity::find($dec)->name;
+                    }
+                    $a->name = $names;
+                    break;
+                default:
+                    break;
+            }
+            $a->value = $a->getValue();
+            $data[$a->attribute_id] = $a;
+        }
+
+        return response()->json($data);
     }
 
     // POST
@@ -157,7 +222,7 @@ class OpenAccessController extends Controller
                 });
             }
         }
-        
+
         $results = $query->with('attributes')->paginate();
 
         if($page == 1) {

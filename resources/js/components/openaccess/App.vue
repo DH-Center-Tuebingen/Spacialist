@@ -63,6 +63,10 @@
             fetchGlobals().then(data => {
                 store.commit('setConcepts', data.concepts);
                 store.commit('setPreferences', data.preferences);
+                store.commit('setUsers', {
+                    active: data.users,
+                    deleted: data.deleted_users,
+                });
             });
 
             // DATA
