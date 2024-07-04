@@ -393,7 +393,22 @@
             },
             "modals": {
                 "access": {
-                    "title": "Access Rules"
+                    "add_user_wg": "Add User or Working Group",
+                    "open_access": "Public/Open Access",
+                    "private_access": "Private Access",
+                    "restricted_access": "Restricted Access",
+                    "title": "Access Rules",
+                    "user_wg": "User/Working Group",
+                    "users_access": "User Access (Default)",
+                    "message": {
+                        "data_note": "<span class=\"fw-bold\">Note</span>: <span class=\"fst-italic\">data</span> in this context always refers to this entry and all it's (if possible) sub-entries!",
+                        "explain_open_access": "This gives the public read access to this data through the <span class=\"fst-italic\">Open Access</span> feature. To allow the public to modify data, they still need a user account, so changes are always related to a specific user.",
+                        "explain_private_access": "This settings gives only yourself access to this data. All other users can neither see nor modify the data.",
+                        "explain_restricted_access": "This settings gives you the possibilities to define which users and/or groups can have access to this data at all. Furthermore, you can decide whether users can have only read access or are allowed to modify and add data.",
+                        "explain_users_access": "This is the default setting. All registered users can view and/or modify data based on their individual roles.",
+                        "no_access_rule": "No Access rules defined. This would equal to Default Access. Please change access type or add your desired users/groups.",
+                        "user_priority": "Access Rules for users are having a <span class='fw-bold'>higher priority</span> than group rules! So it is possible to a whole group only read access, but allow a specific user from that group to have advanced access rights."
+                    }
                 }
             },
             "page_access_denied": "You do not have permission(s) to access this page. Missing permissions: {perm}",

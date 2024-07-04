@@ -22,10 +22,10 @@
                     v-if="state.isRestricted"
                     class="my-2"
                 >
-                    <h5>Access Rules</h5>
+                    <h5> {{ t('main.app.modals.access.title') }}</h5>
 
                     <h6 class="mt-3">
-                        Add Working group or User
+                        {{ t('main.app.modals.access.add_user_wg') }}
                     </h6>
                     <simple-search
                         :endpoint="searchGroupsAndUsers"
@@ -47,7 +47,7 @@
                             <thead>
                                 <tr>
                                     <th>
-                                        User/Working Group
+                                        {{ t('main.app.modals.access.user_wg') }}
                                     </th>
                                     <th>
                                         <span title="Read-only">
@@ -63,7 +63,7 @@
                                         </span>
                                     </th>
                                     <th class="text-end">
-                                        Remove
+                                        {{ t('global.remove') }}
                                     </th>
                                 </tr>
                             </thead>
@@ -133,7 +133,7 @@
                         </table>
                         <alert
                             class="mt-3"
-                            :message="`Access Rules for users are having a <span class='fw-bold'>higher priority</span> than group rules! So it is possible to a whole group only read access, but allow a specific user from that group to have advanced access rights.`"
+                            :message="t('main.app.modals.access.message.user_priority')"
                             :type="'info'"
                             :noicon="false"
                             :icontext="'Note'"
@@ -143,7 +143,7 @@
                     <alert
                         v-else
                         class="mt-3"
-                        :message="`No Access rules defined. This would equal to Default Access. Please change access type or add your desired users/groups.`"
+                        :message="t('main.app.modals.access.message.no_access_rule')"
                         :type="'warning'"
                         :noicon="false"
                     />
@@ -205,58 +205,23 @@
                         </button>
                     </div>
                     <div class="d-flex flex-column bg-info bg-opacity-25 rounded-3 px-3 py-2 mt-3 text-center">
-                        <template v-if="state.accessType == 'private'">
-                            <h5 class="mb-0">
-                                Private Access
-                            </h5>
-                            <hr class="my-2 mx-5">
-                            <p class="mb-0">
-                                This settings gives only yourself access to this data. All other users can neither see,
-                                nor modify.
-                            </p>
-                        </template>
-                        <template v-else-if="state.accessType == 'restricted'">
-                            <h5 class="mb-0">
-                                Restricted Access
-                            </h5>
-                            <hr class="my-2 mx-5">
-                            <p class="mb-0">
-                                This settings gives you the possibilities to define which users and/or groups can have
-                                access to this data at all. Furthermore, you can decide whether users can have only read
-                                access or are allowed to modify and add data.
-                            </p>
-                        </template>
-                        <template v-else-if="state.accessType == 'users'">
-                            <h5 class="mb-0">
-                                User Access (Default)
-                            </h5>
-                            <hr class="my-2 mx-5">
-                            <p class="mb-0">
-                                This is the default setting. All registered users can view and/or modify data based on
-                                their individual roles.
-                            </p>
-                        </template>
-                        <template v-else-if="state.accessType == 'open'">
-                            <h5 class="mb-0">
-                                Public/Open Access
-                            </h5>
-                            <hr class="my-2 mx-5">
-                            <p class="mb-0">
-                                This gives the public read access to this data through the <span class="fst-italic">Open
-                                    Access</span> feature. To allow the public to modify data, they still need a user
-                                account, so changes are always related to a specific user.
-                                <br>
-                                WIP: To allow external users to get read access through the <span
-                                    class="fst-italic">Open Access</span> feature, but keep the restrictions on
-                                modification, use the checkbox in the respective type.
-                            </p>
-                        </template>
+                        <h5 class="mb-0">
+                            {{ t(`main.app.modals.access.${state.accessType}_access`) }}
+                        </h5>
+                        <hr class="my-2 mx-5">
+
+                        <!-- eslint-disable vue/no-v-html -->
+                        <p
+                            class="mb-0"
+                            v-html="t(`main.app.modals.access.message.explain_${state.accessType}_access`)"
+                        />
                     </div>
-                    <div class="mt-3">
-                        <span class="fw-bold">Note</span>: <span class="fst-italic">data</span> in this context always
-                        refers to this entry
-                        and all it's (if possible) sub-entries!
-                    </div>
+                    <div
+                        class="mt-3"
+                        v-html="t('main.app.modals.access.message.data_note')"
+                    />
+
+                    <!-- eslint-enable-->
                 </div>
             </div>
             <div class="modal-footer">
