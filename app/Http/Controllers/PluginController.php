@@ -91,7 +91,7 @@ class PluginController extends Controller
         $pluginPath = base_path("app/Plugins/$pluginName");
         if(file_exists($pluginPath)) {
             $installedPlugin = Plugin::where('name', $pluginName)->first();
-            $infoContent = Plugin::getInfO($zipFile->getFromName("{$rootFolder}App/info.xml"), true);
+            $infoContent = Plugin::getInfoFor($zipFile->getFromName("{$rootFolder}App/info.xml"), true);
 
             if($installedPlugin->version >= $infoContent['version']) {
                 return response()->json([
@@ -166,7 +166,7 @@ class PluginController extends Controller
                 'plugin' => $plugin,
                 'uninstall_location' => $plugin->publicName(),
             ]);
-        } catch (ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             // Already uninstalled
             return response()->json([], 204);
         }
@@ -175,7 +175,7 @@ class PluginController extends Controller
     public function removePlugin(Request $request, $id) {
         try {
             $plugin = Plugin::findOrFail($id);
-        } catch (ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This plugin does not exist.')
             ], 403);

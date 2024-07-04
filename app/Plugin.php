@@ -5,7 +5,6 @@ namespace App;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
@@ -25,6 +24,11 @@ class Plugin extends Model
         'licence',
         'title',
     ];
+    
+    public static function getPathFor(string $name){
+        $name = str_replace('/', DIRECTORY_SEPARATOR, $name);
+        return base_path("app" . DIRECTORY_SEPARATOR . "Plugins" . DIRECTORY_SEPARATOR . $name);
+    }
 
     public static function isInstalled($name) {
         return self::whereNotNull('installed_at')->where('name', $name)->exists();
@@ -32,6 +36,15 @@ class Plugin extends Model
 
     public static function getInstalled() {
         return self::whereNotNull('installed_at')->get();
+    }
+    
+    public function getPath(?string $path = null){
+        $pluginPath = $this->name;
+        if(isset($path)) {
+            $pluginPath = $pluginPath . DIRECTORY_SEPARATOR . $path; 
+        }
+        
+        return self::getPathFor($pluginPath);
     }
 
     public function slugName() {
@@ -41,16 +54,16 @@ class Plugin extends Model
     public function publicName($withPath = true) {
         $slug = $this->slugName();
         $uuid = $this->uuid;
-        $name = "${slug}-${uuid}.js";
+        $name = "$slug-$uuid.js";
         if($withPath) {
-            $name = "plugins/$name";
+            $name = "plugins" . DIRECTORY_SEPARATOR . $name;
         }
         return $name;
     }
 
-    public static function getInfo($path, $isString = false) {
+    public static function getInfoFor(string $path, bool $isString = false) {
         if(!$isString) {
-            $infoPath = Str::finish($path, '/') . 'App/info.xml';
+            $infoPath = Str::finish($path, DIRECTORY_SEPARATOR) . 'App' . DIRECTORY_SEPARATOR .'info.xml';
             if(!File::isFile($infoPath)) return false;
             $xmlString = file_get_contents($infoPath);
         } else {
@@ -61,9 +74,13 @@ class Plugin extends Model
         
         return json_decode(json_encode($xmlObject), true);
     }
+    
+    public function getInfo(){
+        return self::getInfoFor($this->getPath());
+    }
 
     public function getMetadata() {
-        $info = self::getInfo(base_path("app/Plugins/$this->name"));
+        $info = $this->getInfo();
         if($info !== false) {
             $metadata = [];
             foreach($this->metadataFields as $field) {
@@ -81,7 +98,7 @@ class Plugin extends Model
     }
 
     public function getChangelog($since = null) {
-        $changelog = Str::finish(base_path("app/Plugins/$this->name"), '/') . 'CHANGELOG.md';
+        $changelog = Str::finish($this->getPath(), DIRECTORY_SEPARATOR) . 'CHANGELOG.md';
         if(!File::isFile($changelog)) return '';
         $changes = file_get_contents($changelog);
         if(isset($since) && preg_match("/\\n#+\s(v\s?)?$since(\s-\s.+)?\\n/i", $changes, $matches, PREG_OFFSET_CAPTURE) !== false) {
@@ -110,7 +127,7 @@ class Plugin extends Model
     }
 
     public static function updateState() : void {
-        $pluginPath = base_path('app/Plugins');
+        $pluginPath = base_path('app'. DIRECTORY_SEPARATOR .'Plugins');
         $availablePlugins = File::directories($pluginPath);
 
         self::discoverPlugins($availablePlugins);
@@ -133,7 +150,7 @@ class Plugin extends Model
 
     public static function discoverPlugins(array $list) : void {
         foreach($list as $ap) {
-            $info = self::getInfo($ap);
+            $info = self::getInfoFor($ap);
             if($info !== false) {
                 self::updateOrCreateFromInfo($info);
             }
@@ -141,8 +158,8 @@ class Plugin extends Model
     }
 
     public static function discoverPluginByName($name) : Plugin|null {
-        $pluginPath = base_path("app/Plugins/$name");
-        $info = self::getInfo($pluginPath);
+        $pluginPath = self::getPathFor($name);
+        $info = self::getInfoFor($pluginPath);
         if($info === false) {
             return null;
         }
@@ -188,7 +205,7 @@ class Plugin extends Model
         $this->handleInstallation();
 
 
-        $info = self::getInfo(base_path("app/Plugins/$this->name"));
+        $info = $this->getInfo();
         $this->update_available = null;
         $this->version = $info['version'];
         $this->save();
@@ -212,13 +229,13 @@ class Plugin extends Model
         }
 
         $this->removePreferences();
-        sp_remove_dir(base_path("app/Plugins/$this->name"));
+        sp_remove_dir($this->getPath());
 
         $this->delete();
     }
 
     public function getPermissions() {
-        $pluginPermissionPath = base_path("app/Plugins/$this->name/App/permissions.json");
+        $pluginPermissionPath = $this->getPath("/App/permissions.json");
         if(!File::isFile($pluginPermissionPath)) {
             return [];
         }
@@ -231,7 +248,7 @@ class Plugin extends Model
     }
 
     public function getRolePresets() {
-        $rolePresets = base_path("app/Plugins/$this->name/App/role-presets.json");
+        $rolePresets = self::getPathFor("$this->name/App/role-presets.json");
         if(!File::isFile($rolePresets)) {
             return [];
         }
@@ -243,9 +260,16 @@ class Plugin extends Model
         return "App\\Plugins\\$this->name\\$path\\$classname";
     }
 
-    private function getMigrationPath() {
-        return base_path("app/Plugins/$this->name/Migration");
+    private function getMigrationPath(?string $migration = null) {
+        $path = "$this->name/Migration";
+        
+        if(isset($migration)) {
+            $path = "$path/$migration";
+        }
+        
+        return self::getPathFor($path);
     }
+    
     private function getSortedMigrations(bool $desc = false) : array {
         $migrationPath = $this->getMigrationPath();
         if(file_exists($migrationPath) && is_dir($migrationPath)) {
@@ -263,36 +287,36 @@ class Plugin extends Model
 
         return [];
     }
+    
+    private function getMigrationClassInstance($migration){
+        preg_match("/^[1-9]\d{3}_\d{2}_\d{2}_\d{6}_(.*)\.php$/", $migration, $matches);
+        if(count($matches) != 2) return null;
+
+        $className = Str::studly($matches[1]);
+        require($this->getMigrationPath($migration));
+        $prefixedClassName = $this->getClassWithPrefix('Migration', $className);
+        return new $prefixedClassName();
+    }
 
     private function runMigrations() {
         foreach($this->getSortedMigrations() as $migration) {
-            preg_match("/^[1-9]\d{3}_\d{2}_\d{2}_\d{6}_(.*)\.php$/", $migration, $matches);
-            if(count($matches) != 2) continue;
-
-            $className = Str::studly($matches[1]);
-            require(base_path("app/Plugins/$this->name/Migration/$migration"));
-            $prefixedClassName = $this->getClassWithPrefix('Migration', $className);
-            $instance = new $prefixedClassName();
+            $instance = $this->getMigrationClassInstance($migration);
+            if($instance === null) continue;
             call_user_func([$instance, 'migrate']);
         }
     }
 
     private function rollbackMigrations() {
         foreach($this->getSortedMigrations(true) as $migration) {
-            preg_match("/^[1-9]\d{3}_\d{2}_\d{2}_\d{6}_(.*)\.php$/", $migration, $matches);
-            if(count($matches) != 2) continue;
-
-            $className = Str::studly($matches[1]);
-            require(base_path("app/Plugins/$this->name/Migration/$migration"));
-            $prefixedClassName = $this->getClassWithPrefix('Migration', $className);
-            $instance = new $prefixedClassName();
+            $instance = $this->getMigrationClassInstance($migration);
+            if($instance === null) continue;
             call_user_func([$instance, 'rollback']);
         }
     }
 
-    private function publishScript() {
+    public function publishScript() {
         $name = $this->name;
-        $scriptPath = base_path("app/Plugins/$name/js/script.js");
+        $scriptPath = $this->getPath("js/script.js");
         if(file_exists($scriptPath)) {
             $filehandle = fopen($scriptPath, 'r');
             Storage::put(
