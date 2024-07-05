@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class Plugin extends Model
 {
@@ -314,8 +315,20 @@ class Plugin extends Model
         }
     }
 
+    public function linkScript() {
+        $scriptPath = $this->getPath("js/script.js");
+        if(file_exists($scriptPath)) {
+            $storageLink = Storage::path($this->publicName());
+            if(file_exists($storageLink)) {
+                unlink($storageLink);
+            }
+            File::link($scriptPath, $storageLink);
+        } else {
+            throw new \Exception("Could not find script file for plugin $this->name");
+        }
+    }
+
     public function publishScript() {
-        $name = $this->name;
         $scriptPath = $this->getPath("js/script.js");
         if(file_exists($scriptPath)) {
             $filehandle = fopen($scriptPath, 'r');
@@ -324,6 +337,8 @@ class Plugin extends Model
                 $filehandle,
             );
             fclose($filehandle);
+        } else {
+            Log::error("Could not find script file for plugin $this->name");
         }
     }
 
