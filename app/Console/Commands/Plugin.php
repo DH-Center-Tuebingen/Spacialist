@@ -2,15 +2,13 @@
 
 namespace App\Console\Commands;
 
-use App\Plugin;
-use App\User;
-use App\Role;
+use App\Plugin as PluginModel;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
 
-class LinkPlugin extends Command
+class Plugin extends Command
 {    
     /**
      * The name and signature of the console command.
@@ -60,7 +58,7 @@ class LinkPlugin extends Command
         // non-existant 'info.xml' at the 'plugins/PLUGIN_NAME/App'
         // directory. So we need to handle this case separately. 
         if($action !== 'link'){
-            $plugin = Plugin::discoverPluginByName($name);
+            $plugin = PluginModel::discoverPluginByName($name);
             if(!$plugin){
                 $this->error('Plugin "'.$name.'" not found!');
                 return 1;
@@ -90,13 +88,13 @@ class LinkPlugin extends Command
     
     // Create symlinks for all directories in the 'lib' directory of the plugin
     private function link($name){
-        $basePath = Plugin::getPathFor($name. '/lib');
+        $basePath = PluginModel::getPathFor($name. '/lib');
         
         if(!File::exists($basePath) || !File::isDirectory($basePath)){
            throw new \Exception("Plugin directory '$name' not found at $basePath");
         }
         foreach(File::directories($basePath) as $dir){
-            $targetPath = Plugin::getPathFor($name) . DIRECTORY_SEPARATOR  . basename($dir);
+            $targetPath = PluginModel::getPathFor($name) . DIRECTORY_SEPARATOR  . basename($dir);
             $this->line($targetPath);
             
             // Clear the cache to ensure accurate results
