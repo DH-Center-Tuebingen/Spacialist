@@ -129,8 +129,7 @@
 
                 event.stopPropagation();
                 event.preventDefault();
-                state.multieditSelected = !state.multieditSelected;
-                if(state.multieditSelected) {
+                if(!state.multieditSelected) {
                     store.dispatch('addToTreeSelection', {
                         id: data.value.id,
                         value: {
@@ -147,7 +146,7 @@
             // DATA
             const state = reactive({
                 ddVisible: false,
-                multieditSelected: false,
+                multieditSelected: computed(_ => store.getters.treeSelection[data.value.id]),
                 colorStyles: computed(_ => getEntityColors(data.value.entity_type_id)),
                 isSelected: computed(_ => store.getters.entity.id === data.value.id),
                 isSelectionMode: computed(_ => store.getters.treeSelectionMode),
@@ -157,14 +156,6 @@
                     }
                     return !hasIntersectionWithEntityAttributes(data.value.entity_type_id, store.getters.treeSelectionTypeIds);
                 }),
-            });
-
-            // WATCHER
-            watch(_ => state.isSelectionMode, (newValue, oldValue) => {
-                // if selection mode got disabled (checkbox not visible)
-                if(!newValue && oldValue) {
-                    state.multieditSelected = false;
-                }
             });
 
             // RETURN
@@ -183,39 +174,5 @@
                 state,
             };
         }
-        // methods: {
-        //     onDragEnter() {
-        //         if(!this.data.dragAllowed()) return;
-        //         this.asyncToggle.cancel();
-        //         this.asyncToggle();
-        //     },
-        //     onDragLeave(item) {
-        //         this.asyncToggle.cancel();
-        //     },
-        //     doToggle() {
-        //         if(!this.data.state.opened && this.data.state.openable) {
-        //             this.data.onToggle({data: this.data});
-        //         }
-        //     }
-        // },
-        // data() {
-        //     return {
-        //     }
-        // },
-        // computed: {
-        //     asyncToggle() {
-        //         return _debounce(this.doToggle, this.data.dragDelay || 500);
-        //     },
-        //     colorStyles() {
-        //         const colors = this.$getEntityColors(this.data.entity_type_id);
-        //         if(this.data.children_count) {
-        //             return colors;
-        //         } else {
-        //             return {
-        //                 color: colors.backgroundColor
-        //             };
-        //         }
-        //     }
-        // }
     };
 </script>

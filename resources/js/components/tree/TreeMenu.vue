@@ -9,7 +9,7 @@
                 {{ data.name }}
             </h6>
         </li>
-        <li>
+        <li v-if="!multiSelectActive">
             <a
                 class="dropdown-item"
                 href="#"
@@ -22,7 +22,7 @@
                 </span>
             </a>
         </li>
-        <li>
+        <li v-if="!multiSelectActive">
             <a
                 class="dropdown-item"
                 href="#"
@@ -35,6 +35,7 @@
                 </span>
             </a>
         </li>
+
         <li>
             <a
                 class="dropdown-item"
@@ -44,11 +45,15 @@
             >
                 <i class="fas fa-fw fa-external-link-alt text-primary" />
                 <span class="ms-2">
-                    {{ t('main.entity.tree.contextmenu.move') }}
+                    {{
+                        (multiSelectActive) ?
+                            t('main.entity.tree.contextmenu.move-selection') :
+                            t('main.entity.tree.contextmenu.move')
+                    }}
                 </span>
             </a>
         </li>
-        <li>
+        <li v-if="!multiSelectActive">
             <a
                 v-if="can('entity_delete')"
                 class="dropdown-item"
@@ -62,6 +67,15 @@
                 </span>
             </a>
         </li>
+        <template v-if="multiSelectActive">
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+            <MultiselectMoveMenu
+                :data="data"
+                @close="close"
+            />
+        </template>
     </ul>
 </template>
 
@@ -91,8 +105,13 @@
     } from '@/helpers/helpers.js';
 
     import store from '@/bootstrap/store.js';
+    import MultiselectMoveMenu from './menu/MultiselectMoveMenu.vue';
+    import {computed} from 'vue';
 
     export default {
+        components: {
+            MultiselectMoveMenu
+        },
         props: {
             data: {
                 type: Object,
@@ -103,8 +122,13 @@
             'close'
         ],
         setup(props, context) {
-            useGlobalClick(function () {
+
+            const close = _ => {
                 context.emit('close');
+            };
+
+            useGlobalClick(function () {
+                close();
             });
 
             const addEntity = _ => {
@@ -113,26 +137,32 @@
             const duplicateEntity = _ => {
                 duplicateEntityApi(props.data).then(data => {
                     store.dispatch('addEntity', data);
-                    context.emit('close');
+                    close();
                 });
             };
             const moveEntity = _ => {
                 ShowMoveEntity(props.data);
-                context.emit('close');
+                close();
             };
 
             const deleteEntity = _ => {
                 if(!can('entity_delete')) return;
                 showDeleteEntity(props.data.id);
-                context.emit('close');
+                close();
             };
+
+            const multiSelectActive = computed(() => {
+                return store.getters.treeSelectionMode;
+            });
 
             return {
                 t: useI18n().t,
                 can,
+                close,
                 addEntity,
                 duplicateEntity,
                 moveEntity,
+                multiSelectActive,
                 deleteEntity,
             };
         }

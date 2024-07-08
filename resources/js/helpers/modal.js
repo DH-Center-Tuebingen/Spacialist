@@ -29,6 +29,7 @@ import {
     patchRoleData,
     deleteRole,
     moveEntity,
+    moveEntities,
 } from '@/api.js';
 
 import {
@@ -345,7 +346,7 @@ export function showResetPassword(id) {
                     addToast(msg, title, {
                         channel: 'success',
                     });
-                })
+                });
             },
             onCancel(e) {
                 modal.destroy();
@@ -370,7 +371,7 @@ export function showConfirmPassword(id) {
                         login_attempts: null,
                     });
                     modal.destroy();
-                })
+                });
             },
             onCancel(e) {
                 modal.destroy();
@@ -398,7 +399,7 @@ export function showDeactivateUser(user, onDeactivated) {
                     }
                     store.dispatch('deactivateUser', data);
                     modal.destroy();
-                })
+                });
             },
             onCancel(e) {
                 modal.destroy();
@@ -618,13 +619,24 @@ export function ShowMoveEntity(entity, onMoved) {
             onCancel(e) {
                 modal.destroy();
             },
-            onConfirm(parentId) {
-                moveEntity(entity.id, parentId).then(data => {
-                    if(!!onMoved) {
-                        onMoved(entity.id, parentId, data);
-                    }
-                    modal.destroy();
-                });
+            onConfirm(parentId, entity_ids = []) {
+                if(entity_ids.length > 0) {
+                    moveEntities(entity_ids, parentId).then(data => {
+                        if(!!onMoved) {
+                            entity_ids.forEach(entity_id => {
+                                onMoved(entity_id, parentId, data);
+                            });
+                        }
+                        modal.destroy();
+                    });
+                } else {
+                    moveEntity(entity.id, parentId).then(data => {
+                        if(!!onMoved) {
+                            onMoved(entity.id, parentId, data);
+                        }
+                        modal.destroy();
+                    });
+                }
             },
         },
     });

@@ -500,14 +500,40 @@ export const store = createStore({
                 sortTree(state, sort) {
                     sortTree(sort.by, sort.dir, state.tree);
                 },
+                resetTreeSelection(state) {
+                    state.treeSelection = {};
+                    state.treeSelectionTypeIds = [];
+                    state.treeSelectionTypeIds = updateSelectionTypeIdList(state.treeSelection);
+                },
                 addToTreeSelection(state, data) {
-                    const addPossible = hasIntersectionWithEntityAttributes(data.value.entity_type_id, state.treeSelectionTypeIds);
-                    if(addPossible || state.treeSelectionTypeIds.length == 0) {
-                        state.treeSelection[data.id] = data.value;
+                    // SO: IMO This should not be handled here.
+                    // If the user selects incopatible entities, he has to remove them manually.
+                    // This is also not reflected in the multiselect in the tree. 
+                    // So it's just an invisible barrier that hides errors.
+                    // Also in conflict with other actions like multi-move I'm working on.
 
-                        state.treeSelectionTypeIds = [];
-                        state.treeSelectionTypeIds = updateSelectionTypeIdList(state.treeSelection);
+                    // const addPossible = hasIntersectionWithEntityAttributes(data.value.entity_type_id, state.treeSelectionTypeIds);
+                    // if(addPossible || state.treeSelectionTypeIds.length == 0) {
+
+                    // The process of adding a lot in a row is really slow.
+                    // So we add all as bulk to only trigger the 'computed' values once.
+                    if(Array.isArray(data)) {
+                        let objs = data.reduce((acc, curr) => {
+                            acc[curr.id] = curr.value;
+                            return acc;
+                        }
+                            , {});
+                        state.treeSelection = {
+                            ...state.treeSelection,
+                            ...objs,
+                        };
+                    } else {
+                        state.treeSelection[data.id] = data.value;
                     }
+
+                    state.treeSelectionTypeIds = [];
+                    state.treeSelectionTypeIds = updateSelectionTypeIdList(state.treeSelection);
+                    // }
                 },
                 removeFromTreeSelection(state, data) {
                     delete state.treeSelection[data.id];
@@ -708,6 +734,9 @@ export const store = createStore({
                 },
                 removeFromTreeSelection({commit}, data) {
                     commit('removeFromTreeSelection', data);
+                },
+                resetTreeSelection({commit}) {
+                    commit('resetTreeSelection');
                 },
                 toggleTreeSelectionMode({commit}) {
                     commit('toggleTreeSelectionMode');
