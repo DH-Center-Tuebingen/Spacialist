@@ -572,7 +572,6 @@ class EntityController extends Controller {
                 $errorResponseData->on_index = $parentIdx + 1;
                 $errorResponseData->on_value = $row[$parentIdx];
 
-            if($hasParent) {
                 try {
                     $parentEntity = Entity::getFromPath($rootEntityPath);
                     if(!isset($parentEntity)) {
@@ -706,6 +705,7 @@ class EntityController extends Controller {
             $attrVal->save();
         }
     }
+
 
     // PATCH
 
