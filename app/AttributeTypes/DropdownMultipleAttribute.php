@@ -22,6 +22,9 @@ class DropdownMultipleAttribute extends AttributeBase
         $parts = explode(';', $data);
         foreach($parts as $part) {
             $trimmedPart = trim($part);
+            if(empty($trimmedPart)) {
+                continue;
+            }
             $concept = ThConcept::getByString($trimmedPart);
             if(isset($concept)) {
                 $convValues[] = [
