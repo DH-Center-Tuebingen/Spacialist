@@ -1,7 +1,9 @@
 <template>
     <div class="d-flex flex-column h-100">
-        <h4>
-            {{ t('main.plugins.title') }}
+        <header class="d-flex align-items-center justify-content-between mb-4">
+            <h1 class="mb-0 fw-bold text-muted">
+                {{ t('main.plugins.title') }}
+            </h1>
             <file-upload
                 ref="upload"
                 v-model="state.files"
@@ -19,7 +21,7 @@
                     <i class="fas fa-fw fa-file-import" /> {{ t('main.plugins.upload') }}
                 </span>
             </file-upload>
-        </h4>
+        </header>
         <div class="row row-cols-3 g-3">
             <div
                 v-for="plugin in state.sortedPlugins"
@@ -28,39 +30,30 @@
             >
                 <div class="card h-100">
                     <div class="card-body d-flex flex-column">
-                        <div class="d-flex flex-row flex-grow-1 mb-3 justify-content-between">
-                            <div class="pe-2">
-                                <h5 class="card-title mb-1">
+                        <header class="d-flex flex-column ">
+                            <div class="d-flex flex-row  justify-content-between align-items-center">
+                                <h5 class="card-title mb-1 fw-bold">
                                     {{ plugin.metadata.title }}
                                 </h5>
-                                <h6 class="card-subtitle mb-2 text-muted">
-                                    <span class="badge bg-dark">
-                                        v{{ plugin.version }}
-                                    </span>
-                                    <span class="badge bg-primary ms-1">
-                                        {{ plugin.metadata.licence }}
-                                    </span>
-                                </h6>
-                                <p class="card-text border-start border-warning border-4 ps-2">
-                                    <md-viewer :source="plugin.metadata.description" />
-                                </p>
+
+                                <span>
+                                    v{{ plugin.version }}
+                                </span>
                             </div>
-                            <div class="border-start ps-2">
-                                <h6 class="mb-0 text-end">
-                                    {{ t('main.plugins.authors') }}
-                                </h6>
-                                <ul class="list-group list-group-flush">
-                                    <li
-                                        v-for="(author, i) in plugin.metadata.authors"
-                                        :key="i"
-                                        class="list-group-item"
-                                    >
-                                        {{ author }}
-                                    </li>
-                                </ul>
+                            <div class="d-flex flex-row gap-2">
+                                <span
+                                    v-for="(author, i) in plugin.metadata.authors"
+                                    :key="i"
+                                    class="text-muted"
+                                >
+                                    {{ author }}
+                                </span>
                             </div>
-                        </div>
-                        <div class="">
+                        </header>
+
+                        <md-viewer :source="plugin.metadata.description" />
+
+                        <!-- <div class="">
                             <button
                                 v-if="isInstalled(plugin)"
                                 type="button"
@@ -90,36 +83,39 @@
                                     @click="update(plugin)"
                                 >
                                     <i class="fas fa-fw fa-download" />
-                                    <!-- eslint-disable-next-line vue/no-v-html -->
-                                    <span v-html="t('main.plugins.update_to', {version: plugin.update_available})" />
-                                </button>
-                                <button
-                                    type="button"
-                                    class="btn btn-sm btn-outline-primary"
-                                    :title="t('main.plugins.changelog_info')"
-                                    @click="showChangelog(plugin)"
-                                >
-                                    <i class="fas fa-fw fa-file-pen" />
-                                </button>
-                            </div>
-                            <button
-                                type="button"
-                                class="btn btn-sm btn-outline-danger ms-2"
-                                @click="remove(plugin)"
-                            >
-                                <i class="fas fa-fw fa-trash" />
-                                {{ t('main.plugins.remove') }}
-                            </button>
-                        </div>
+                        <span v-html="t('main.plugins.update_to', { version: plugin.update_available })" />
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-primary"
+                            :title="t('main.plugins.changelog_info')"
+                            @click="showChangelog(plugin)"
+                        >
+                            <i class="fas fa-fw fa-file-pen" />
+                        </button>
+                    </div>
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-outline-danger ms-2"
+                        @click="remove(plugin)"
+                    >
+                        <i class="fas fa-fw fa-trash" />
+                        {{ t('main.plugins.remove') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <alert
+        v-if="(!state.sortedPlugins || state.sortedPlugins.length == 0)"
+        :message="t('main.plugins.not_found')"
+        :type="'info'"
+        :noicon="false"
+    />
+    </div>-->
                     </div>
                 </div>
             </div>
-            <alert
-                v-if="(!state.sortedPlugins || state.sortedPlugins.length == 0)"
-                :message="t('main.plugins.not_found')"
-                :type="'info'"
-                :noicon="false"
-            />
         </div>
     </div>
 </template>
@@ -130,10 +126,10 @@
         reactive,
     } from 'vue';
 
-    import { useI18n } from 'vue-i18n';
+    import {useI18n} from 'vue-i18n';
     import store from '@/bootstrap/store.js';
 
-    import { useToast } from '@/plugins/toast.js';
+    import {useToast} from '@/plugins/toast.js';
 
     import {
         uploadPlugin,
@@ -158,7 +154,7 @@
 
     export default {
         setup(props) {
-            const { t } = useI18n();
+            const {t} = useI18n();
             const toast = useToast();
 
             // FUNCTIONS
@@ -207,7 +203,7 @@
                 // Enable automatic upload
                 if(!!newFile && (Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error)) {
                     if(!newFile.active) {
-                        newFile.active = true
+                        newFile.active = true;
                     }
                 }
             };
@@ -245,5 +241,5 @@
                 state,
             };
         },
-    }
+    };
 </script>

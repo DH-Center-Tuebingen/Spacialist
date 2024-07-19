@@ -12,7 +12,7 @@ use App\EntityAttribute;
 use App\EntityType;
 use App\EntityTypeRelation;
 use App\Geodata;
-use App\Plugin;
+use App\PluginResources\Plugin;
 use App\ThConcept;
 use App\AttributeTypes\AttributeBase;
 use Illuminate\Support\Arr;
@@ -24,7 +24,7 @@ class EditorController extends Controller {
 
     public function getEntityTypeOccurrenceCount($id) {
         $user = auth()->user();
-        if (!$user->can('entity_read')) {
+        if(!$user->can('entity_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to get an entity type\'s occurrences')
             ], 403);
@@ -35,13 +35,13 @@ class EditorController extends Controller {
 
     public function getAttributeValueOccurrenceCount($aid, $ctid = -1) {
         $user = auth()->user();
-        if (!$user->can('entity_data_read')) {
+        if(!$user->can('entity_data_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to get an attribute value\'s occurrences')
             ], 403);
         }
         $query = AttributeValue::where('attribute_id', $aid);
-        if ($ctid > -1) {
+        if($ctid > -1) {
             $query->where('entity_type_id', $ctid);
             $query->join('entities', 'entities.id', '=', 'entity_id');
         }
@@ -51,14 +51,14 @@ class EditorController extends Controller {
 
     public function getEntityType($id) {
         $user = auth()->user();
-        if (!$user->can('entity_type_read')) {
+        if(!$user->can('entity_type_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to get an entity type\'s data')
             ], 403);
         }
         try {
             $entityType = EntityType::with('sub_entity_types')->findOrFail($id);
-        } catch (ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity-type does not exist')
             ], 400);
@@ -68,7 +68,7 @@ class EditorController extends Controller {
 
     public function getTopEntityTypes() {
         $user = auth()->user();
-        if (!$user->can('entity_type_read')) {
+        if(!$user->can('entity_type_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view entity data')
             ], 403);
@@ -79,20 +79,20 @@ class EditorController extends Controller {
 
     public function getAttributes() {
         $user = auth()->user();
-        if (!$user->can('attribute_read')) {
+        if(!$user->can('attribute_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view entity data')
             ], 403);
         }
         $attributes = Attribute::whereNull('parent_id')->orderBy('id')->get();
         $selections = [];
-        foreach ($attributes as $a) {
+        foreach($attributes as $a) {
             $selection = $a->getSelection();
-            if (isset($selection)) {
+            if(isset($selection)) {
                 // Workaround to check if it is a plain array or a assoc array (table columns)
                 // if assoc array, add each entry to their corresponding id
-                if (!isset($selection[0])) {
-                    foreach ($selection as $id => $sel) {
+                if(!isset($selection[0])) {
+                    foreach($selection as $id => $sel) {
                         $selections[$id] = $sel;
                     }
                 } else {
@@ -100,7 +100,7 @@ class EditorController extends Controller {
                 }
             }
 
-            if ($a->datatype == 'table') {
+            if($a->datatype == 'table') {
                 $a->columns = Attribute::where('parent_id', $a->id)->get()->keyBy('id');
             }
         }
@@ -112,7 +112,7 @@ class EditorController extends Controller {
 
     public function getAttributeTypes() {
         $user = auth()->user();
-        if (!$user->can('attribute_read')) {
+        if(!$user->can('attribute_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to view available attribute types')
             ], 403);
@@ -122,7 +122,7 @@ class EditorController extends Controller {
     }
 
     public function getAvailableGeometryTypes() {
-        if (Plugin::isInstalled('Map')) {
+        if(Plugin::isInstalled('Map')) {
             $types = \App\Plugins\Map\App\Geodata::getAvailableGeometryTypes();
             return response()->json($types);
         } else {
@@ -134,7 +134,7 @@ class EditorController extends Controller {
 
     public function addEntityType(Request $request) {
         $user = auth()->user();
-        if (!$user->can('entity_type_create')) {
+        if(!$user->can('entity_type_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to create a new entity type')
             ], 403);
@@ -171,7 +171,7 @@ class EditorController extends Controller {
 
     public function setRelationInfo(Request $request, $id) {
         $user = auth()->user();
-        if (!$user->can('entity_type_write')) {
+        if(!$user->can('entity_type_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to modify entity relations')
             ], 403);
@@ -182,7 +182,7 @@ class EditorController extends Controller {
         ]);
         try {
             $entityType = EntityType::findOrFail($id);
-        } catch (ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity-type does not exist')
             ], 400);
@@ -195,7 +195,7 @@ class EditorController extends Controller {
 
     public function addAttribute(Request $request) {
         $user = auth()->user();
-        if (!$user->can('attribute_create')) {
+        if(!$user->can('attribute_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to add attributes')
             ], 403);
@@ -220,18 +220,18 @@ class EditorController extends Controller {
         $attr->thesaurus_url = $curl;
         $attr->datatype = $datatype;
         $attr->recursive = $request->has('recursive') && sp_parse_boolean($request->get('recursive'));
-        if ($request->has('root_id')) {
+        if($request->has('root_id')) {
             $pid = $request->get('root_id');
             $purl = ThConcept::find($pid)->concept_url;
             $attr->thesaurus_root_url = $purl;
-        } else if ($request->has('root_attribute_id')) {
+        } else if($request->has('root_attribute_id')) {
             $frid = $request->get('root_attribute_id');
             $attr->root_attribute_id = $frid;
         }
-        if ($request->has('restricted_types')) {
+        if($request->has('restricted_types')) {
             $attr->restrictions = $request->get('restricted_types');
         }
-        if ($request->has('text')) {
+        if($request->has('text')) {
             $attr->text = $request->get('text');
         }
         if($request->has('si_base')) {
@@ -242,16 +242,16 @@ class EditorController extends Controller {
         }
         $attr->save();
 
-        if ($datatype == 'table') {
+        if($datatype == 'table') {
             $cols = $request->input('columns');
-            foreach ($cols as $col) {
-                if (!isset($col['label_id']) && !isset($col['datatype'])) continue;
+            foreach($cols as $col) {
+                if(!isset($col['label_id']) && !isset($col['datatype'])) continue;
                 $curl = ThConcept::find($col['label_id'])->concept_url;
                 $childAttr = new Attribute();
                 $childAttr->thesaurus_url = $curl;
                 $childAttr->datatype = $col['datatype'];
                 $childAttr->recursive = sp_parse_boolean($col['recursive']);
-                if (isset($col['root_id'])) {
+                if(isset($col['root_id'])) {
                     $pid = $col['root_id'];
                     $purl = ThConcept::find($pid)->concept_url;
                     $childAttr->thesaurus_root_url = $purl;
@@ -267,7 +267,7 @@ class EditorController extends Controller {
         $ret = [
             'attribute' => $attr,
         ];
-        if (isset($sel)) {
+        if(isset($sel)) {
             $ret['selection'] = $sel;
         }
         return response()->json($ret, 201);
@@ -275,7 +275,7 @@ class EditorController extends Controller {
 
     public function addAttributeToEntityType(Request $request, $etid) {
         $user = auth()->user();
-        if (!$user->can('attribute_write') || !$user->can('entity_type_write')) {
+        if(!$user->can('attribute_write') || !$user->can('entity_type_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to add attributes to an entity type')
             ], 403);
@@ -287,7 +287,7 @@ class EditorController extends Controller {
 
         try {
             $entityType = EntityType::findOrFail($etid);
-        } catch (ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity-type does not exist')
             ], 400);
@@ -295,14 +295,14 @@ class EditorController extends Controller {
 
         $aid = $request->get('attribute_id');
         $pos = $request->get('position');
-        if (!isset($pos)) {
+        if(!isset($pos)) {
             $attrsCnt = EntityAttribute::where('entity_type_id', '=', $etid)->count();
             $pos = $attrsCnt + 1; // add new attribute to the end
         } else {
             $successors = EntityAttribute::where('entity_type_id', $etid)
                 ->where('position', '>=', $pos)
                 ->get();
-            foreach ($successors as $s) {
+            foreach($successors as $s) {
                 $s->position++;
                 $s->save();
             }
@@ -323,7 +323,7 @@ class EditorController extends Controller {
 
     public function duplicateEntityType(Request $request, $ctid) {
         $user = auth()->user();
-        if (!$user->can('entity_type_create')) {
+        if(!$user->can('entity_type_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to duplicate an entity type')
             ], 403);
@@ -331,7 +331,7 @@ class EditorController extends Controller {
 
         try {
             $entityType = EntityType::findOrFail($ctid);
-        } catch (ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity-type does not exist')
             ], 400);
@@ -345,7 +345,7 @@ class EditorController extends Controller {
         $newLayer->position = AvailableLayer::where('is_overlay', true)->max('position') + 1;
         $newLayer->save();
 
-        foreach ($entityType->attributes as $attribute) {
+        foreach($entityType->attributes as $attribute) {
             $newAttribute = EntityAttribute::where('attribute_id', $attribute->pivot->attribute_id)
                 ->where('entity_type_id', $attribute->pivot->entity_type_id)
                 ->first()
@@ -357,13 +357,13 @@ class EditorController extends Controller {
         $relations = EntityTypeRelation::where('parent_id', $ctid)
             ->orWhere('child_id', $ctid)
             ->get();
-        foreach ($relations as $rel) {
+        foreach($relations as $rel) {
             $newSet = $rel
                 ->replicate();
-            if ($newSet->parent_id == $ctid) {
+            if($newSet->parent_id == $ctid) {
                 $newSet->parent_id = $duplicate->id;
             }
-            if ($newSet->child_id == $ctid) {
+            if($newSet->child_id == $ctid) {
                 $newSet->child_id = $duplicate->id;
             }
             $newSet->save();
@@ -379,7 +379,7 @@ class EditorController extends Controller {
 
     public function patchEntityType(Request $request, $etid) {
         $user = auth()->user();
-        if (!$user->can('entity_type_write')) {
+        if(!$user->can('entity_type_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to modify entity-type labels')
             ], 403);
@@ -390,18 +390,18 @@ class EditorController extends Controller {
 
         try {
             $entityType = EntityType::findOrFail($etid);
-        } catch (ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity-type does not exist')
             ], 400);
         }
         $data = Arr::only($request->get('data'), array_keys(EntityType::patchRules));
-        if (count($data) < 1) {
+        if(count($data) < 1) {
             return response()->json([
                 'error' => __('The given data is invalid')
             ], 400);
         }
-        foreach ($data as $key => $prop) {
+        foreach($data as $key => $prop) {
             $entityType->{$key} = $prop;
         }
         $entityType->save();
@@ -411,7 +411,7 @@ class EditorController extends Controller {
 
     public function reorderAttribute(Request $request, $ctid, $aid) {
         $user = auth()->user();
-        if (!$user->can('entity_type_write')) {
+        if(!$user->can('entity_type_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to reorder attributes')
             ], 403);
@@ -426,23 +426,23 @@ class EditorController extends Controller {
             ['entity_type_id', '=', $ctid]
         ])->first();
 
-        if ($ca === null) {
+        if($ca === null) {
             return response()->json([
                 'error' => __('Entity Attribute not found')
             ], 400);
         }
 
         // Same position, nothing to do
-        if ($ca->position == $pos) {
+        if($ca->position == $pos) {
             return response()->json(null, 204);
         }
-        if ($ca->position < $pos) {
+        if($ca->position < $pos) {
             $successors = EntityAttribute::where([
                 ['position', '>', $ca->position],
                 ['position', '<=', $pos],
                 ['entity_type_id', '=', $ctid]
             ])->get();
-            foreach ($successors as $s) {
+            foreach($successors as $s) {
                 $s->position--;
                 $s->save();
             }
@@ -452,7 +452,7 @@ class EditorController extends Controller {
                 ['position', '>=', $pos],
                 ['entity_type_id', '=', $ctid]
             ])->get();
-            foreach ($predecessors as $p) {
+            foreach($predecessors as $p) {
                 $p->position++;
                 $p->save();
             }
@@ -464,7 +464,7 @@ class EditorController extends Controller {
 
     public function patchDependency(Request $request, $etid, $aid) {
         $user = auth()->user();
-        if (!$user->can('entity_type_write')) {
+        if(!$user->can('entity_type_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to add/modify attribute dependencies')
             ], 403);
@@ -480,7 +480,7 @@ class EditorController extends Controller {
             ['entity_type_id', '=', $etid]
         ])->first();
 
-        if ($entityAttribute === null) {
+        if($entityAttribute === null) {
             return response()->json([
                 'error' => __('Entity Attribute not found')
             ], 400);
@@ -493,13 +493,13 @@ class EditorController extends Controller {
         $allSet = isset($dAttribute) && isset($dOperator) && isset($dValue);
         $noneSet = !isset($dAttribute) && !isset($dOperator) && !isset($dValue);
 
-        if (!($allSet) && !($noneSet)) {
+        if(!($allSet) && !($noneSet)) {
             return response()->json([
                 'error' => __('Please provide either all dependency fields or none')
             ], 400);
         }
 
-        if ($allSet) {
+        if($allSet) {
             $dependsOn = [
                 $dAttribute => [
                     'operator' => $dOperator,
@@ -518,7 +518,7 @@ class EditorController extends Controller {
 
     public function patchSystemAttribute(Request $request, $id) {
         $user = auth()->user();
-        if (!$user->can('entity_type_write')) {
+        if(!$user->can('entity_type_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to edit attribute names')
             ], 403);
@@ -530,7 +530,7 @@ class EditorController extends Controller {
 
         try {
             $entityAttribute = EntityAttribute::findOrFail($id);
-        } catch (ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('Entity Attribute not found')
             ], 400);
@@ -538,11 +538,11 @@ class EditorController extends Controller {
 
         $metadata = json_decode($entityAttribute->metadata) ?? new \stdClass();
 
-        if ($request->has('title')) {
+        if($request->has('title')) {
             $title = $request->get('title');
             $metadata->title = $title;
         }
-        if ($request->has('width')) {
+        if($request->has('width')) {
             $width = $request->get('width');
             $metadata->width = $width;
         }
@@ -557,7 +557,7 @@ class EditorController extends Controller {
 
     public function deleteEntityType($id) {
         $user = auth()->user();
-        if (!$user->can('entity_type_delete')) {
+        if(!$user->can('entity_type_delete')) {
             return response()->json([
                 'error' => __('You do not have the permission to delete entity types')
             ], 403);
@@ -565,7 +565,7 @@ class EditorController extends Controller {
 
         try {
             $entityType = EntityType::findOrFail($id);
-        } catch (ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity-type does not exist')
             ], 400);
@@ -577,7 +577,7 @@ class EditorController extends Controller {
 
     public function deleteAttribute($id) {
         $user = auth()->user();
-        if (!$user->can('attribute_delete')) {
+        if(!$user->can('attribute_delete')) {
             return response()->json([
                 'error' => __('You do not have the permission to delete attributes')
             ], 403);
@@ -585,14 +585,14 @@ class EditorController extends Controller {
 
         try {
             $attribute = Attribute::findOrFail($id);
-        } catch (ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This attribute does not exist')
             ], 400);
         }
 
         $entityAttributes = EntityAttribute::where('attribute_id', $id)->get();
-        foreach ($entityAttributes as $ea) {
+        foreach($entityAttributes as $ea) {
             $ea->removeFromEntityType();
             $ea->delete();
         }
@@ -603,14 +603,14 @@ class EditorController extends Controller {
 
     public function removeAttributeFromEntityType($id) {
         $user = auth()->user();
-        if (!$user->can('entity_type_write')) {
+        if(!$user->can('entity_type_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to remove attributes from entity types')
             ], 403);
         }
         try {
             $ea = EntityAttribute::findOrFail($id);
-        } catch (ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('Entity Attribute not found')
             ], 400);

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Plugin;
+use App\PluginResources\Plugin;
 use App\Preference;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -40,10 +40,11 @@ class PluginController extends Controller
         foreach($plugins as $plugin) {
             $plugin->metadata = $plugin->getMetadata();
             $plugin->changelog = $plugin->getChangelog();
+            $plugin->errors = $plugin->getErrors();
         }
 
         return response()->json($plugins);
-    }
+    }    
 
     public function uploadPlugin(Request $request) {
         $user = auth()->user();
@@ -166,7 +167,7 @@ class PluginController extends Controller
                 'plugin' => $plugin,
                 'uninstall_location' => $plugin->publicName(),
             ]);
-        } catch (ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             // Already uninstalled
             return response()->json([], 204);
         }
@@ -175,7 +176,7 @@ class PluginController extends Controller
     public function removePlugin(Request $request, $id) {
         try {
             $plugin = Plugin::findOrFail($id);
-        } catch (ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This plugin does not exist.')
             ], 403);

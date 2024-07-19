@@ -241,5 +241,22 @@
             "display_name": "Share Thesaurus Concepts",
             "description": "Ability to share and export thesaurus concepts"
         }
+    ],
+    "plugins": [
+        {
+            "name": "create",
+            "display_name": "Add plugins",
+            "description": "Ability to add plugins"
+        },
+        {
+            "name": "write",
+            "display_name": "Manage plugins",
+            "description": "Ability to activate or deactivate plugins"
+        },
+        {
+            "name": "delete",
+            "display_name": "Remove plugins",
+            "description": "Ability to remove plugins"
+        }
     ]
 }

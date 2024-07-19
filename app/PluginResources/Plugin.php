@@ -1,13 +1,15 @@
 <?php
 
-namespace App;
+namespace App\PluginResources;
 
+use App\Permission; 
+use App\PluginResources\Presets\RolePresetPlugin;
+use App\Preference;
 use Carbon\Carbon;
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Plugin extends Model
 {
@@ -25,6 +27,20 @@ class Plugin extends Model
         'licence',
         'title',
     ];
+    
+    private $presets = [];
+    
+    public function __construct($attributes = []) {
+        parent::__construct($attributes);
+        
+        $this->presets = [
+            RolePresetPlugin::class,
+        ];
+        
+        $this->permissions = [
+            
+        ];
+    }
 
     public static function isInstalled($name) {
         return self::whereNotNull('installed_at')->where('name', $name)->exists();
@@ -79,9 +95,18 @@ class Plugin extends Model
             return [];
         }
     }
+    
+    public function getPath(array $parts = []){
+        $path = base_path("app/Plugins/$this->name");
+        if(count($parts) > 0){
+            $path = Str::finish($path, '/');
+            $path .= implode('/', $parts);
+        }
+        return $path;
+    }
 
     public function getChangelog($since = null) {
-        $changelog = Str::finish(base_path("app/Plugins/$this->name"), '/') . 'CHANGELOG.md';
+        $changelog = $this->getPath(['CHANGELOG.md']);
         if(!File::isFile($changelog)) return '';
         $changes = file_get_contents($changelog);
         if(isset($since) && preg_match("/\\n#+\s(v\s?)?$since(\s-\s.+)?\\n/i", $changes, $matches, PREG_OFFSET_CAPTURE) !== false) {
@@ -171,33 +196,36 @@ class Plugin extends Model
             $this->save();
         }
     }
-
-    public function handleInstallation() {
-        $this->runMigrations();
-        $this->publishScript();
+    
+    public function handleAdd(){
+        Migration::use($this)->migrate();
+        
         $this->addPermissions();
-        $this->installPresetsFromFile();
-
+        $this->installPresets();
         $this->installed_at = Carbon::now();
         $this->save();
     }
 
-    public function handleUpdate() {
-        $oldVersion = $this->version;
-        // TODO is it really the same as install?
-        $this->handleInstallation();
-
-
-        $info = self::getInfo(base_path("app/Plugins/$this->name"));
-        $this->update_available = null;
-        $this->version = $info['version'];
-        $this->save();
-        return $oldVersion;
+    public function handleInstallation() {
+        $this->publishScript();
     }
+
+    //TODO:: Reimplement
+    // public function handleUpdate() {
+    //     $oldVersion = $this->version;
+    //     // TODO is it really the same as install?
+    //     $this->handleInstallation();
+
+
+    //     $info = self::getInfo(base_path("app/Plugins/$this->name"));
+    //     $this->update_available = null;
+    //     $this->version = $info['version'];
+    //     $this->save();
+    //     return $oldVersion;
+    // }
 
     public function handleUninstall() {
         $this->removeScript();
-
         $this->installed_at = null;
         $this->save();
     }
@@ -206,13 +234,13 @@ class Plugin extends Model
         // if installed, first rollback migrations and delete all files and presets
         if(isset($this->installed_at)) {
             $this->handleUninstall();
-            $this->rollbackMigrations();
+            Migration::use($this)->rollback();
             $this->removePermissions();
             $this->uninstallPresets();
         }
 
         $this->removePreferences();
-        sp_remove_dir(base_path("app/Plugins/$this->name"));
+        sp_remove_dir($this->getPath());
 
         $this->delete();
     }
@@ -229,65 +257,9 @@ class Plugin extends Model
     public function getPermissionGroups() {
         return array_keys($this->getPermissions());
     }
-
-    public function getRolePresets() {
-        $rolePresets = base_path("app/Plugins/$this->name/App/role-presets.json");
-        if(!File::isFile($rolePresets)) {
-            return [];
-        }
-
-        return json_decode(file_get_contents($rolePresets), true);
-    }
-
-    private function getClassWithPrefix($path, $classname) {
-        return "App\\Plugins\\$this->name\\$path\\$classname";
-    }
-
-    private function getMigrationPath() {
-        return base_path("app/Plugins/$this->name/Migration");
-    }
-    private function getSortedMigrations(bool $desc = false) : array {
-        $migrationPath = $this->getMigrationPath();
-        if(file_exists($migrationPath) && is_dir($migrationPath)) {
-            $migrations = collect(File::files($migrationPath))->map(function($f) {
-                return $f->getFilename();
-            });
-            if($desc) {
-                $migrations = $migrations->sortDesc();
-            } else {
-                $migrations = $migrations->sort();
-            }
-
-            return $migrations->values()->toArray();
-        }
-
-        return [];
-    }
-
-    private function runMigrations() {
-        foreach($this->getSortedMigrations() as $migration) {
-            preg_match("/^[1-9]\d{3}_\d{2}_\d{2}_\d{6}_(.*)\.php$/", $migration, $matches);
-            if(count($matches) != 2) continue;
-
-            $className = Str::studly($matches[1]);
-            require(base_path("app/Plugins/$this->name/Migration/$migration"));
-            $prefixedClassName = $this->getClassWithPrefix('Migration', $className);
-            $instance = new $prefixedClassName();
-            call_user_func([$instance, 'migrate']);
-        }
-    }
-
-    private function rollbackMigrations() {
-        foreach($this->getSortedMigrations(true) as $migration) {
-            preg_match("/^[1-9]\d{3}_\d{2}_\d{2}_\d{6}_(.*)\.php$/", $migration, $matches);
-            if(count($matches) != 2) continue;
-
-            $className = Str::studly($matches[1]);
-            require(base_path("app/Plugins/$this->name/Migration/$migration"));
-            $prefixedClassName = $this->getClassWithPrefix('Migration', $className);
-            $instance = new $prefixedClassName();
-            call_user_func([$instance, 'rollback']);
-        }
+    
+    public function getClassPath(array $parts){
+        return "App\\Plugins\\$this->name\\" . implode('\\', $parts);
     }
 
     private function publishScript() {
@@ -333,24 +305,39 @@ class Plugin extends Model
         }
     }
 
-    private function installPresetsFromFile() {
-        $rolePresets = $this->getRolePresets();
-        foreach($rolePresets as $preset) {
-            $baseRolePreset = RolePreset::where('name', $preset['extends'])->firstOrFail();
-            $pluginPreset = new RolePresetPlugin();
-            $pluginPreset->rule_set = $preset['rule_set'];
-            $pluginPreset->extends = $baseRolePreset->id;
-            $pluginPreset->from = $this->id;
-            $pluginPreset->save();
+    private function installPresets() {
+        foreach($this->presets as $preset) {
+            call_user_func([$preset, 'install'], $this);
         }
     }
 
     private function uninstallPresets() {
-        RolePresetPlugin::where('from', $this->id)->delete();
+        foreach($this->presets as $preset) {
+            call_user_func([$preset, 'uninstall'], $this);
+        }
     }
 
     private function removePreferences() {
         $id = Str::kebab($this->name);
         Preference::where('label', 'ilike', "plugin.$id.%")->delete();
+    }
+    
+    public function getErrors(){
+        
+        $requiredFiles = [
+            'manifest.xml',
+            'README.md',
+            'CHANGELOG.md',
+        ];
+        
+        $errors = [];
+        foreach($requiredFiles as $file){
+            if(!File::isFile($this->getPath([$file]))){
+                $errors[] = "Missing required file: $file";
+            }
+        }
+        
+        return $errors;
+        
     }
 }

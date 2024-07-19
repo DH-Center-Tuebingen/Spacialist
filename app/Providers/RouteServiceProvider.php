@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Plugin;
+use App\PluginResources\Plugin;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;

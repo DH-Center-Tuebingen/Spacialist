@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\AttributeTypes\AttributeBase;
 use App\EntityType;
-use App\Plugin;
+use App\PluginResources\Plugin;
 use App\Preference;
 use App\ThConcept;
 use Illuminate\Http\Request;

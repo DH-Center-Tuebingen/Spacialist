@@ -23,7 +23,7 @@ class RolePreset extends Model
     ];
 
     public function plugin_presets() {
-        return $this->hasMany('App\RolePresetPlugin', 'extends');
+        return $this->hasMany('App\PluginResources\Presets\RolePresetPlugin', 'extends');
     }
 
     public function getFullSetAttribute() {
