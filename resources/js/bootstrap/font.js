@@ -27,6 +27,7 @@ import {
 } from '@fortawesome/free-brands-svg-icons';
 import {
     faCircle as faCircleReg,
+    faCircleUp,
     faClipboard as faClipboardReg,
     faKeyboard,
     faLaugh,
@@ -373,6 +374,7 @@ library.add(
     faCircleNotch,
     faCirclePlus,
     faCircleArrowUp,
+    faCircleUp,
     faO,
     faOutdent,
     faPalette,

@@ -36,10 +36,6 @@ class Plugin extends Model
         $this->presets = [
             RolePresetPlugin::class,
         ];
-        
-        $this->permissions = [
-            
-        ];
     }
 
     public static function isInstalled($name) {
@@ -65,10 +61,26 @@ class Plugin extends Model
     }
 
     public static function getInfo($path, $isString = false) {
+        $xmlString = '';
         if(!$isString) {
-            $infoPath = Str::finish($path, '/') . 'App/info.xml';
-            if(!File::isFile($infoPath)) return false;
-            $xmlString = file_get_contents($infoPath);
+            
+            $manifestLocations = [
+                'App/info.xml', // Legacy location of the 'info.xml' file
+                'manifest.xml', // This is the potential new location of the 'info.xml' file
+            ];
+            
+            while(count($manifestLocations) > 0){
+                $location = array_shift($manifestLocations);
+                $infoPath = Str::finish($path, '/') . $location;
+                if(File::isFile($infoPath)){
+                    $xmlString = file_get_contents($infoPath);
+                    break;
+                }
+            }
+            
+            if($xmlString == ''){
+                return false;
+            }
         } else {
             $xmlString = $path;
         }
@@ -120,6 +132,7 @@ class Plugin extends Model
     public static function updateOrCreateFromInfo(array $info) : Plugin {
         $id = $info['name'];
         $plugin = self::where('name', $id)->first();
+    
         // discovered new Plugin, add it to DB
         if(!isset($plugin)) {
             $plugin = new self();
@@ -199,30 +212,29 @@ class Plugin extends Model
     
     public function handleAdd(){
         Migration::use($this)->migrate();
-        
         $this->addPermissions();
+    }
+
+    public function handleInstallation() {
+        $this->publishScript();
         $this->installPresets();
         $this->installed_at = Carbon::now();
         $this->save();
     }
 
-    public function handleInstallation() {
-        $this->publishScript();
+    //TODO:: Rework
+    public function handleUpdate() {
+        $oldVersion = $this->version;
+        // TODO is it really the same as install?
+        $this->handleInstallation();
+
+
+        $info = self::getInfo(base_path("app/Plugins/$this->name"));
+        $this->update_available = null;
+        $this->version = $info['version'];
+        $this->save();
+        return $oldVersion;
     }
-
-    //TODO:: Reimplement
-    // public function handleUpdate() {
-    //     $oldVersion = $this->version;
-    //     // TODO is it really the same as install?
-    //     $this->handleInstallation();
-
-
-    //     $info = self::getInfo(base_path("app/Plugins/$this->name"));
-    //     $this->update_available = null;
-    //     $this->version = $info['version'];
-    //     $this->save();
-    //     return $oldVersion;
-    // }
 
     public function handleUninstall() {
         $this->removeScript();
@@ -261,17 +273,30 @@ class Plugin extends Model
     public function getClassPath(array $parts){
         return "App\\Plugins\\$this->name\\" . implode('\\', $parts);
     }
+    
+    public function getProblemsAttribute(){
+        $problems = [];
+        
+        if(!$this->hasScript()){
+            $problems[] = "script_missing";
+        }
+        
+        return $problems;
+    }
+    
 
+    private function hasScript(){
+        return Storage::exists($this->publicName());
+    }
+    
     private function publishScript() {
         $name = $this->name;
         $scriptPath = base_path("app/Plugins/$name/js/script.js");
         if(file_exists($scriptPath)) {
-            $filehandle = fopen($scriptPath, 'r');
-            Storage::put(
-                $this->publicName(),
-                $filehandle,
-            );
-            fclose($filehandle);
+            $filepath = Storage::path($this->publicName());
+            File::link($scriptPath, $filepath);
+        } else {
+            throw new \Exception("Script file not found at '$scriptPath'");
         }
     }
 

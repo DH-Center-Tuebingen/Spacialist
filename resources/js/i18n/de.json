@@ -759,6 +759,7 @@
             "deactivate": "Deaktivieren",
             "activate": "Aktivieren",
             "remove": "Löschen",
+            "update_available": "Eine neue Version ist verfügbar. Halten Sie stets Ihre Erweiterungen auf dem neusten Stand!",
             "update_to": "Auf <span class=\"fw-bold\">{ version }</span> aktualisieren",
             "changelog_info": "Änderungen anzeigen",
             "not_found": "Keine Erweiterungen gefunden.",

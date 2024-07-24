@@ -759,6 +759,7 @@
             "deactivate": "Deactivate",
             "activate": "Activate",
             "remove": "Remove",
+            "update_available": "A new version is available. Keep your plugins up-to-date!",
             "update_to": "Update to <span class=\"fw-bold\">{ version }</span>",
             "changelog_info": "Show Changelog",
             "not_found": "No plugins found.",
