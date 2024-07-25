@@ -6,12 +6,13 @@ use App\AttributeTypes\SiUnitAttribute;
 use App\AttributeTypes\Units\Implementations\AreaUnits;
 use App\AttributeTypes\Units\Implementations\LengthUnits;
 use App\AttributeTypes\Units\Implementations\MassUnits;
+use App\AttributeTypes\Units\Implementations\SpeedUnits;
 use App\AttributeTypes\Units\Implementations\TemperatureUnits;
 use App\AttributeTypes\Units\Implementations\TimeUnits;
 use App\AttributeTypes\Units\Implementations\VolumeUnits;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
-
+use Illuminate\Support\Facades\Log;
 
 class SiAttributeTest extends TestCase {
 
@@ -280,6 +281,39 @@ class SiAttributeTest extends TestCase {
         $this->assertEquals('mi³', $cubicMile->getSymbol());
         $this->assertEqualsWithDelta($baseUnit->is(4168181825.44058), $cubicMile->is(1), self::INACCURACY);
     }
+    
+    # Speeds
+    function testSpeedUnits(){
+        Log::channel('test')->info("Hello World");
+        
+        $speedUnits = new SpeedUnits();
+        
+        $baseUnit = $speedUnits->getBaseUnit();
+        
+        $this->assertEquals('m/s', $baseUnit->getLabel());
+        $this->assertEquals('m/s', $baseUnit->getSymbol());
+        $this->assertEquals(1, $baseUnit->is(1));
+        
+        $kmh = $speedUnits->get('km/h');
+        $this->assertEquals('km/h', $kmh->getSymbol());
+        $this->assertEqualsWithDelta(1, $kmh->is(3.6), self::INACCURACY);
+        
+        $timeUnits = new TimeUnits();
+        $lengthUnits = new LengthUnits();
+        
+        $msToKmhFactor = $lengthUnits->get('kilometre')->is(1) / $timeUnits->get('hour')->is(1);
+        $this->assertEqualsWithDelta($kmh->is(1), $msToKmhFactor, self::INACCURACY);
+        
+        $mph = $speedUnits->get('mph');
+        $this->assertEquals('mph', $mph->getSymbol());
+        $this->assertEqualsWithDelta(0.44704, $mph->is(1), self::INACCURACY);
+        
+        $msToMphFactor = $lengthUnits->get('mile')->is(1) / $timeUnits->get('hour')->is(1);
+        $this->assertEqualsWithDelta($mph->is(1), $msToMphFactor, self::INACCURACY);
+        
+        $this->assertEqualsWithDelta($kmh->is(1.609344), $mph->is(1), self::INACCURACY);
+    }
+    
 
     public function testImportErrorWrongValue(){
         $importValue = 10;
