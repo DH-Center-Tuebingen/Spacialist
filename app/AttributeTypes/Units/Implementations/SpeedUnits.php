@@ -8,7 +8,7 @@ use App\AttributeTypes\Units\UnitSystem;
 class SpeedUnits extends UnitSystem {
 
     public function __construct() {
-        parent::__construct('length', [
+        parent::__construct('speed', [
             Unit::createBase(   'm/s'     ,   'm/s'                               ),
             Unit::createUnit(   'km/h' ,   'km/h' , self::factorFromTimeAndLengthUnits('hour', 'kilometre') ),
             Unit::createUnit(   'mph' ,   'mph' , self::factorFromTimeAndLengthUnits('hour', 'mile') ), 

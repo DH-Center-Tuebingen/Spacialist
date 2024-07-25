@@ -9,7 +9,7 @@ use App\AttributeTypes\Units\UnitType;
 
 class ForceUnits extends UnitSystem {
     public function __construct() {
-        parent::__construct('volume', [
+        parent::__construct('force', [
             Unit::createBase( 'newton'      , 'N'),
             Unit::createUnit('kilonewton'   , 'kN', Si::KILO, 1, UnitType::SI),
         ]);
