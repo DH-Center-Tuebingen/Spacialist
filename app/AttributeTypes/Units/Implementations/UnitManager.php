@@ -22,6 +22,7 @@ class UnitManager extends Singleton {
             new ForceUnits(),
             new LengthUnits(),
             new MassUnits(),
+            new PressureUnits(),
             new SpeedUnits(),
             new TemperatureUnits(),
             new TimeUnits(),

@@ -7,6 +7,7 @@ use App\AttributeTypes\Units\Implementations\AreaUnits;
 use App\AttributeTypes\Units\Implementations\ForceUnits;
 use App\AttributeTypes\Units\Implementations\LengthUnits;
 use App\AttributeTypes\Units\Implementations\MassUnits;
+use App\AttributeTypes\Units\Implementations\PressureUnits;
 use App\AttributeTypes\Units\Implementations\SpeedUnits;
 use App\AttributeTypes\Units\Implementations\TemperatureUnits;
 use App\AttributeTypes\Units\Implementations\TimeUnits;
@@ -315,15 +316,60 @@ class SiAttributeTest extends TestCase {
     
     # Force
     public function testForceUnits(){
-        $pressureUnits = new ForceUnits();
+        $forceUnits = new ForceUnits();
         
-        $baseUnit = $pressureUnits->getBaseUnit();
+        $baseUnit = $forceUnits->getBaseUnit();
         $this->assertEquals('newton', $baseUnit->getLabel());
         $this->assertEquals('N', $baseUnit->getSymbol());
         
-        $kN = $pressureUnits->get('kilonewton');
+        $kN = $forceUnits->get('kilonewton');
         $this->assertEquals('kN', $kN->getSymbol());
         $this->assertEquals(1000, $kN->is(1));
+    }
+    
+        
+    # Pressure
+    public function testPressureUnits(){
+        $pressureUnits = new PressureUnits();
+        
+        #Pascal
+        $baseUnit = $pressureUnits->getBaseUnit();
+        $this->assertEquals('pascal', $baseUnit->getLabel());
+        $this->assertEquals('Pa', $baseUnit->getSymbol());
+        
+        $kN = $pressureUnits->get('kilopascal');
+        $this->assertEquals('kPa', $kN->getSymbol());
+        $this->assertEquals(1000, $kN->is(1));
+        
+        $hN = $pressureUnits->get('hectopascal');
+        $this->assertEquals('hPa', $hN->getSymbol());
+        $this->assertEquals(100, $hN->is(1));
+        
+        #Bar
+        $bar = $pressureUnits->get('bar');
+        $this->assertEquals('bar', $bar->getSymbol());
+        $this->assertEquals(100000, $bar->is(1));
+        
+        $decibar = $pressureUnits->get('decibar');
+        $this->assertEquals('dbar', $decibar->getSymbol());
+        $this->assertEquals(10000, $decibar->is(1));
+        
+        $mbar = $pressureUnits->get('millibar');
+        $this->assertEquals('mbar', $mbar->getSymbol());
+        $this->assertEquals(100, $mbar->is(1));
+        
+        #Various
+        $torr = $pressureUnits->get('torr');
+        $this->assertEquals('Torr', $torr->getSymbol());
+        $this->assertEqualsWithDelta(1, $torr->is(0.0075006150504341364), self::INACCURACY);
+        
+        $at = $pressureUnits->get('technical atmosphere');
+        $this->assertEquals('at', $at->getSymbol());
+        $this->assertEqualsWithDelta(1, $at->is(1.019716212977928e-5), self::INACCURACY);
+        
+        $atm = $pressureUnits->get('standard atmosphere');
+        $this->assertEquals('atm', $atm->getSymbol());
+        $this->assertEqualsWithDelta(1, $atm->is(9.869232667160128e-6), self::INACCURACY);
     }
     
 
