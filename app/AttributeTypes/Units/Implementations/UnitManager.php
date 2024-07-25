@@ -19,6 +19,7 @@ class UnitManager extends Singleton {
     public function addAllUnitSystems(): void {
         $this->addUnitSystems([
             new AreaUnits(),
+            new ForceUnits(),
             new LengthUnits(),
             new MassUnits(),
             new SpeedUnits(),

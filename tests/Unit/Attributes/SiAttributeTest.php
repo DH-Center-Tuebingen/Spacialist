@@ -4,6 +4,7 @@ namespace Tests\Unit\Attributes;
 
 use App\AttributeTypes\SiUnitAttribute;
 use App\AttributeTypes\Units\Implementations\AreaUnits;
+use App\AttributeTypes\Units\Implementations\ForceUnits;
 use App\AttributeTypes\Units\Implementations\LengthUnits;
 use App\AttributeTypes\Units\Implementations\MassUnits;
 use App\AttributeTypes\Units\Implementations\SpeedUnits;
@@ -283,9 +284,7 @@ class SiAttributeTest extends TestCase {
     }
     
     # Speeds
-    function testSpeedUnits(){
-        Log::channel('test')->info("Hello World");
-        
+    function testSpeedUnits(){        
         $speedUnits = new SpeedUnits();
         
         $baseUnit = $speedUnits->getBaseUnit();
@@ -312,6 +311,19 @@ class SiAttributeTest extends TestCase {
         $this->assertEqualsWithDelta($mph->is(1), $msToMphFactor, self::INACCURACY);
         
         $this->assertEqualsWithDelta($kmh->is(1.609344), $mph->is(1), self::INACCURACY);
+    }
+    
+    # Force
+    public function testForceUnits(){
+        $pressureUnits = new ForceUnits();
+        
+        $baseUnit = $pressureUnits->getBaseUnit();
+        $this->assertEquals('newton', $baseUnit->getLabel());
+        $this->assertEquals('N', $baseUnit->getSymbol());
+        
+        $kN = $pressureUnits->get('kilonewton');
+        $this->assertEquals('kN', $kN->getSymbol());
+        $this->assertEquals(1000, $kN->is(1));
     }
     
 
