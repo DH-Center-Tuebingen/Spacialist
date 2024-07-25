@@ -11,6 +11,7 @@ use App\AttributeTypes\Units\Implementations\PressureUnits;
 use App\AttributeTypes\Units\Implementations\SpeedUnits;
 use App\AttributeTypes\Units\Implementations\TemperatureUnits;
 use App\AttributeTypes\Units\Implementations\TimeUnits;
+use App\AttributeTypes\Units\Implementations\VolumetricFlowUnits;
 use App\AttributeTypes\Units\Implementations\VolumeUnits;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
@@ -370,6 +371,20 @@ class SiAttributeTest extends TestCase {
         $atm = $pressureUnits->get('standard atmosphere');
         $this->assertEquals('atm', $atm->getSymbol());
         $this->assertEqualsWithDelta(1, $atm->is(9.869232667160128e-6), self::INACCURACY);
+    }
+    
+    
+    # Volumetric Flow Rate
+    public function testVolumetricFlow(){
+        $volumetricFlowUnits = new VolumetricFlowUnits();
+        
+        $baseUnit = $volumetricFlowUnits->getBaseUnit();
+        $this->assertEquals('m³/s', $baseUnit->getLabel());
+        $this->assertEquals('m³/s', $baseUnit->getSymbol());
+        
+        $lps = $volumetricFlowUnits->get('l/s');
+        $this->assertEquals('l/s', $lps->getSymbol());
+        $this->assertEquals(10 ** -3, $lps->is(1));
     }
     
 

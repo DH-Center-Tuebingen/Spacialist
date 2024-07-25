@@ -27,6 +27,7 @@ class UnitManager extends Singleton {
             new TemperatureUnits(),
             new TimeUnits(),
             new VolumeUnits(),
+            new VolumetricFlowUnits(),
         ]);
     }
 
