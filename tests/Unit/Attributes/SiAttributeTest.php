@@ -8,6 +8,7 @@ use App\AttributeTypes\Units\Implementations\ForceUnits;
 use App\AttributeTypes\Units\Implementations\LengthUnits;
 use App\AttributeTypes\Units\Implementations\MassUnits;
 use App\AttributeTypes\Units\Implementations\PressureUnits;
+use App\AttributeTypes\Units\Implementations\QuotientUnits;
 use App\AttributeTypes\Units\Implementations\SpeedUnits;
 use App\AttributeTypes\Units\Implementations\TemperatureUnits;
 use App\AttributeTypes\Units\Implementations\TimeUnits;
@@ -389,6 +390,19 @@ class SiAttributeTest extends TestCase {
         $lps = $volumetricFlowUnits->get('l/s');
         $this->assertEquals('l/s', $lps->getSymbol());
         $this->assertEquals(10 ** -3, $lps->is(1));
+    }
+    
+    public function testQuotients(){
+        $quotientUnits = new QuotientUnits();
+        
+        $baseUnit = $quotientUnits->getBaseUnit();
+        $this->assertEquals('ppm', $baseUnit->getSymbol());
+        $this->assertEquals('parts per million', $baseUnit->getLabel());
+        
+        $percent = $quotientUnits->get('percent');
+        $this->assertEquals('%', $percent->getSymbol());
+        $this->assertEquals(1, $percent->is(1e-4));
+        $this->assertEquals(1e6, $percent->is(100));
     }
     
 
