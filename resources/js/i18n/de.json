@@ -251,10 +251,10 @@
                 "temperature": {
                     "label": "Temperatur",
                     "units": {
-                        "degree_celsius": "Celsius",
-                        "degree_kelvin": "Kelvin",
-                        "degree_fahrenheit": "Fahrenheit",
-                        "degree_réaumur": "Réaumur"
+                        "celsius": "Celsius",
+                        "kelvin": "Kelvin",
+                        "fahrenheit": "Fahrenheit",
+                        "réaumur": "Réaumur"
                     }
                 },
                 "volumetric_flow": {
