@@ -14,6 +14,4 @@ class ForceUnits extends UnitSystem {
             Unit::createUnit('kilonewton'   , 'kN', Si::KILO, 1, UnitType::SI),
         ]);
     }
-
-
 }

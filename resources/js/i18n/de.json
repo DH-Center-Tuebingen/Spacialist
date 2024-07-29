@@ -241,6 +241,13 @@
                         "pound": "Britisches Pfund"
                     }
                 },
+                "force": {
+                    "label": "Kraft",
+                    "units": {
+                        "newton": "Newton",
+                        "kilonewton": "Kilonewton"
+                    }
+                },
                 "temperature": {
                     "label": "Temperatur",
                     "units": {

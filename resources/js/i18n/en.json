@@ -241,6 +241,13 @@
                         "pound": "Pound"
                     }
                 },
+                "force": {
+                    "label": "Force",
+                    "units": {
+                        "newton": "Newton",
+                        "kilonewton": "Kilonewton"
+                    }  
+                },
                 "temperature": {
                     "label": "Temperature",
                     "units": {
