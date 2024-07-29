@@ -292,11 +292,11 @@ class SiAttributeTest extends TestCase {
         
         $baseUnit = $speedUnits->getBaseUnit();
         
-        $this->assertEquals('m/s', $baseUnit->getLabel());
+        $this->assertEquals('metre_per_second', $baseUnit->getLabel());
         $this->assertEquals('m/s', $baseUnit->getSymbol());
         $this->assertEquals(1, $baseUnit->is(1));
         
-        $kmh = $speedUnits->get('km/h');
+        $kmh = $speedUnits->get('kilometre_per_hour');
         $this->assertEquals('km/h', $kmh->getSymbol());
         $this->assertEqualsWithDelta(1, $kmh->is(3.6), self::INACCURACY);
         
@@ -306,7 +306,7 @@ class SiAttributeTest extends TestCase {
         $msToKmhFactor = $lengthUnits->get('kilometre')->is(1) / $timeUnits->get('hour')->is(1);
         $this->assertEqualsWithDelta($kmh->is(1), $msToKmhFactor, self::INACCURACY);
         
-        $mph = $speedUnits->get('mph');
+        $mph = $speedUnits->get('mile_per_hour');
         $this->assertEquals('mph', $mph->getSymbol());
         $this->assertEqualsWithDelta(0.44704, $mph->is(1), self::INACCURACY);
         
@@ -361,7 +361,7 @@ class SiAttributeTest extends TestCase {
         $this->assertEquals(100, $mbar->is(1));
         
         #Various
-        $psi = $pressureUnits->get('pound per square inch');
+        $psi = $pressureUnits->get('pound_per_square_inch');
         $this->assertEquals('psi', $psi->getSymbol());
         $this->assertEqualsWithDelta(1, $psi->is(0.0001450377438972831), self::INACCURACY);
         
@@ -369,11 +369,11 @@ class SiAttributeTest extends TestCase {
         $this->assertEquals('Torr', $torr->getSymbol());
         $this->assertEqualsWithDelta(1, $torr->is(0.0075006150504341364), self::INACCURACY);
         
-        $at = $pressureUnits->get('technical atmosphere');
+        $at = $pressureUnits->get('technical_atmosphere');
         $this->assertEquals('at', $at->getSymbol());
         $this->assertEqualsWithDelta(1, $at->is(1.019716212977928e-5), self::INACCURACY);
         
-        $atm = $pressureUnits->get('standard atmosphere');
+        $atm = $pressureUnits->get('standard_atmosphere');
         $this->assertEquals('atm', $atm->getSymbol());
         $this->assertEqualsWithDelta(1, $atm->is(9.869232667160128e-6), self::INACCURACY);
     }
@@ -384,10 +384,10 @@ class SiAttributeTest extends TestCase {
         $volumetricFlowUnits = new VolumetricFlowUnits();
         
         $baseUnit = $volumetricFlowUnits->getBaseUnit();
-        $this->assertEquals('m³/s', $baseUnit->getLabel());
+        $this->assertEquals('cubic_metre_per_second', $baseUnit->getLabel());
         $this->assertEquals('m³/s', $baseUnit->getSymbol());
         
-        $lps = $volumetricFlowUnits->get('l/s');
+        $lps = $volumetricFlowUnits->get('litre_per_second');
         $this->assertEquals('l/s', $lps->getSymbol());
         $this->assertEquals(10 ** -3, $lps->is(1));
     }

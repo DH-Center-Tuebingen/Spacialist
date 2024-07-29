@@ -276,9 +276,12 @@
                     "label": "Druck",
                     "units": {
                         "pascal": "Pascal",
+                        "kilopascal": "Kilopascal",
+                        "hectopascal": "Hectopascal",
                         "bar": "Bar",
                         "decibar": "Decibar",
                         "millibar": "Millibar",
+                        "torr": "Torr",
                         "technical_atmosphere": "Technische Atmosphäre",
                         "standard_atmosphere": "Physikalische Atmosphäre",
                         "pound_per_square_inch": "Pfund pro Quadratzoll"

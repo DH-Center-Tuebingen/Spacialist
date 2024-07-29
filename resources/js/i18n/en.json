@@ -281,6 +281,7 @@
                         "bar": "Bar",
                         "decibar": "Decibar",
                         "millibar": "Millibar",
+                        "torr": "Torr",
                         "technical_atmosphere": "Technical atmosphere",
                         "standard_atmosphere": "Standard atmosphere",
                         "pound_per_square_inch": "Pound per square inch"
