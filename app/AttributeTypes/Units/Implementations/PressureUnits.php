@@ -27,10 +27,10 @@ class PressureUnits extends UnitSystem {
         
         # Various
         $this->addMultiple([
-            Unit::createUnit('pound per square inch', 'psi', 6894.757),
+            Unit::createUnit('pound_per_square_inch', 'psi', 6894.757),
             Unit::createUnit('torr', 'Torr', 133.3224),
-            Unit::createUnit('technical atmosphere', 'at', 98066.5),
-            Unit::createUnit('standard atmosphere', 'atm', 101325)
+            Unit::createUnit('technical_atmosphere', 'at', 98066.5),
+            Unit::createUnit('standard_atmosphere', 'atm', 101325)
         ]);
     }
 }

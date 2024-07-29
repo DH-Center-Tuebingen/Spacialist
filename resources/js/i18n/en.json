@@ -246,7 +246,7 @@
                     "units": {
                         "newton": "Newton",
                         "kilonewton": "Kilonewton"
-                    }  
+                    }
                 },
                 "temperature": {
                     "label": "Temperature",
@@ -276,6 +276,8 @@
                     "label": "Pressure",
                     "units": {
                         "pascal": "Pascal",
+                        "kilopascal": "Kilopascal",
+                        "hectopascal": "Hectopascal",
                         "bar": "Bar",
                         "decibar": "Decibar",
                         "millibar": "Millibar",
