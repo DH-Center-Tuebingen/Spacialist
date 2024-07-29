@@ -360,6 +360,10 @@ class SiAttributeTest extends TestCase {
         $this->assertEquals(100, $mbar->is(1));
         
         #Various
+        $psi = $pressureUnits->get('pound per square inch');
+        $this->assertEquals('psi', $psi->getSymbol());
+        $this->assertEqualsWithDelta(1, $psi->is(0.0001450377438972831), self::INACCURACY);
+        
         $torr = $pressureUnits->get('torr');
         $this->assertEquals('Torr', $torr->getSymbol());
         $this->assertEqualsWithDelta(1, $torr->is(0.0075006150504341364), self::INACCURACY);
