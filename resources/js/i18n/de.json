@@ -249,6 +249,40 @@
                         "degree_fahrenheit": "Fahrenheit",
                         "degree_réaumur": "Réaumur"
                     }
+                },
+                "volumetric_flow": {
+                    "label": "Volumenstrom",
+                    "units": {
+                        "cubic_metre_per_second": "Kubikmeter pro Sekunde",
+                        "litre_per_second": "Liter pro Sekunde"
+                    }
+                },
+                "speed": {
+                    "label": "Geschwindigkeit",
+                    "units": {
+                        "metre_per_second": "Meter pro Sekunde",
+                        "kilometre_per_hour": "Kilometer pro Stunde",
+                        "mile_per_hour": "Meilen pro Stunde"
+                    }
+                },
+                "pressure": {
+                    "label": "Druck",
+                    "units": {
+                        "pascal": "Pascal",
+                        "bar": "Bar",
+                        "decibar": "Decibar",
+                        "millibar": "Millibar",
+                        "technical_atmosphere": "Technische Atmosphäre",
+                        "standard_atmosphere": "Physikalische Atmosphäre",
+                        "pound_per_square_inch": "Pfund pro Quadratzoll"
+                    }
+                },
+                "quotient": {
+                    "label": "Quotient",
+                    "units": {
+                        "percent": "Prozent",
+                        "parts_per_million": "Parts per million"
+                    }
                 }
             },
             "restrictions": {
