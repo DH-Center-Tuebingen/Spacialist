@@ -29,8 +29,5 @@ class LengthUnits extends UnitSystem {
             Unit::createUnit('yard'      , 'yd', Imperial::YARD_2_M),
             Unit::createUnit('mile'      , 'mi', Imperial::MILE_2_M),
         ]);
-        $this->add(
-            Unit::createUnit('light_year', 'ly', General::LIGHTYEAR),
-        );
     }
 }

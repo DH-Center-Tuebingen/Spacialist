@@ -129,13 +129,6 @@ class SiAttributeTest extends TestCase {
         $this->assertEquals('mile', $mile->getLabel());
         $this->assertEquals('mi', $mile->getSymbol());
         $this->assertEquals(1609.344, $mile->is(1));
-
-        // Others
-        $lightYear = $lengthUnits->get('light_year');
-        $this->assertNotNull($lightYear);
-        $this->assertEquals('light_year', $lightYear->getLabel());
-        $this->assertEquals('ly', $lightYear->getSymbol());
-        $this->assertEquals(9460730472580800, $lightYear->is(1));
     }
 
 
