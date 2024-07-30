@@ -34,7 +34,7 @@ class UnitSystem {
     }
 
     public function addMultiple(array $units) {
-        foreach ($units as $unit) {
+        foreach($units as $unit) {
             if($unit->getBase()) {
                 throw new Exception('Base already defined for this Unit System');
             }
@@ -43,7 +43,7 @@ class UnitSystem {
     }
 
     public function add(Unit $unit) {
-        if (isset($this->labelMap[$unit->getLabel()]) || isset($this->symbolMap[$unit->getSymbol()])) {
+        if(isset($this->labelMap[$unit->getLabel()]) || isset($this->symbolMap[$unit->getSymbol()])) {
             throw new Exception("Unit already exists: {$unit->getLabel()} ({$unit->getSymbol()})");
         }
 
@@ -57,19 +57,22 @@ class UnitSystem {
         return count($this->units);
     }
 
+    /**
+     * Get's a unit by it's label
+     */
     public function get(string $label): ?Unit {
         return $this->getByLabel($label);
     }
 
     public function getByLabel(string $label): ?Unit {
 
-        if (!isset($this->labelMap[$label])) return null;
+        if(!isset($this->labelMap[$label])) return null;
 
         return $this->labelMap[$label];
     }
 
     public function getBySymbol(string $symbol): ?Unit {
-        if (!isset($this->symbolMap[$symbol])) return null;
+        if(!isset($this->symbolMap[$symbol])) return null;
 
         return $this->symbolMap[$symbol];
     }

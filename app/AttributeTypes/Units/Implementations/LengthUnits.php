@@ -13,12 +13,12 @@ class LengthUnits extends UnitSystem {
 
     public function __construct() {
         parent::__construct('length', [
-            Unit::createUnit('nanometre' , 'nm', Si::NANO, 1, UnitType::SI),
-            Unit::createUnit('micrometre', 'µm', Si::MICRO, 1, UnitType::SI),
-            Unit::createUnit('millimetre', 'mm', Si::MILLI, 1, UnitType::SI),
-            Unit::createUnit('centimetre', 'cm', Si::CENTI, 1, UnitType::SI),
-            Unit::createBase( 'metre'     , 'm'),
-            Unit::createUnit('kilometre' , 'km', Si::KILO, 1, UnitType::SI),
+            Unit::createUnit('nanometre' , 'nm' , Si::NANO  , 1, UnitType::SI),
+            Unit::createUnit('micrometre', 'µm' , Si::MICRO , 1, UnitType::SI),
+            Unit::createUnit('millimetre', 'mm' , Si::MILLI , 1, UnitType::SI),
+            Unit::createUnit('centimetre', 'cm' , Si::CENTI , 1, UnitType::SI),
+            Unit::createBase('metre'     , 'm'                               ),
+            Unit::createUnit('kilometre' , 'km' , Si::KILO  , 1, UnitType::SI),
         ]);
 
         $this->addMultiple([
@@ -27,8 +27,5 @@ class LengthUnits extends UnitSystem {
             Unit::createUnit('yard'      , 'yd', Imperial::YARD_2_M),
             Unit::createUnit('mile'      , 'mi', Imperial::MILE_2_M),
         ]);
-        $this->add(
-            Unit::createUnit('light_year', 'ly', General::LIGHTYEAR),
-        );
     }
 }
