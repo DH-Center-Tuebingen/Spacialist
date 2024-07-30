@@ -11,8 +11,8 @@ class QuotientUnits extends UnitSystem
     public function __construct()
     {
         parent::__construct('quotient', [
-            Unit::createUnit('percent', '%', 1e4),
-            Unit::createBase('parts per million'     , 'ppm'),
+            Unit::createUnit('percent'          , '%'  , 1e4),
+            Unit::createBase('parts per million', 'ppm'     ),
         ]);
     }
-} 
+}
