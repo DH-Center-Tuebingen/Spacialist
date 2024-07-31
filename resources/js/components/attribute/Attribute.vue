@@ -343,10 +343,6 @@
                 data,
                 valueWrapper,
                 disabled,
-                reactTo,
-                hideLinks,
-                preview,
-                previewData,
             } = toRefs(props);
             // FETCH
 
@@ -356,7 +352,7 @@
                 disabled: computed(_ => data.value.isDisabled || disabled.value),
                 value: computed(_ => getValueOrDefault()),
                 // TODO check for selection need?
-                selection: computed(_ => getAttributeSelection(data.value.id) || {}),
+                selection: computed(_ => getAttributeSelection(data.value.id) || []),
 
             });
 

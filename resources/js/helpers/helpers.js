@@ -409,12 +409,6 @@ export function getEmptyAttributeValue(type) {
     switch(type) {
         case 'boolean':
             return false;
-        case 'geography':
-        case 'iconclass':
-        case 'string-sc':
-        case 'date':
-        case 'url':
-            return '';
         case 'dimension':
         case 'entity':
         case 'epoch':
@@ -431,15 +425,19 @@ export function getEmptyAttributeValue(type) {
         case 'table':
         case 'userlist':
             return [];
+        case 'serial':
+        case 'sql':
+            return null;
         case 'richtext':
         case 'rism':
         case 'string':
         case 'stringf':
         case 'system-separator':
-            return '';
-        case 'serial':
-        case 'sql':
-            return null;
+        case 'geography':
+        case 'iconclass':
+        case 'string-sc':
+        case 'date':
+        case 'url':
         default:
             return '';
     }

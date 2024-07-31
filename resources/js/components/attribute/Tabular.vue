@@ -43,7 +43,7 @@
                     <td
                         v-if="row.hidden_info"
                         class="text-muted text-center fs-5 p-2 bg-primary-subtle"
-                        :colspan="Object.keys(state.columns).length + 2"
+                        :colspan="state.placeholderWidth"
                         @click="state.showAll = true"
                     >
                         show {{ v.value.length - 20 }} hidden rows…
@@ -66,7 +66,7 @@
                     <td
                         class="text-center"
                         style="--bs-table-striped-bg:248,249,250;"
-                        :colspan="Object.keys(state.columns).length + 2"
+                        :colspan="state.placeholderWidth"
                     >
                         <button
                             type="button"
@@ -512,6 +512,7 @@
             const state = reactive({
                 isPreview: computed(_ => preview.value && previewData.value && Object.keys(previewData.value).length > 0),
                 columns: computed(_ => state.isPreview ? previewData.value : getAttribute(attribute.value.id).columns),
+                placeholderWidth: computed(_ => Object.keys(state.columns).length + 2),
                 selections: computed(_ => {
                     const list = {};
                     if(!state.columns || state.isPreview) return list;
