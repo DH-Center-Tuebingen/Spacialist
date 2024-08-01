@@ -65,7 +65,7 @@
                 <tr v-if="!disabled && !state.isPreview">
                     <td
                         class="text-center"
-                        style="--bs-table-striped-bg:248,249,250;"
+                        style="--bs-table-striped-bg: var(--bs-body-bg);"
                         :colspan="state.placeholderWidth"
                     >
                         <button
