@@ -98,6 +98,16 @@
         @change="updateDirtyState"
     />
 
+    <si-unit-attribute
+        v-else-if="data.datatype == 'si-unit'"
+        :ref="el => setRef(el)"
+        :disabled="state.disabled"
+        :name="`attr-${data.id}`"
+        :value="state.value"
+        :metadata="data.metadata"
+        @change="updateDirtyState"
+    />
+
     <tabular-attribute
         v-else-if="data.datatype == 'table'"
         :ref="el => setRef(el)"
@@ -258,6 +268,7 @@
     import List from '@/components/attribute/List.vue';
     import Epoch from '@/components/attribute/Epoch.vue';
     import Dimension from '@/components/attribute/Dimension.vue';
+    import SiUnit from '@/components/attribute/SiUnit.vue';
     import Tabular from '@/components/attribute/Tabular.vue';
     import Iconclass from '@/components/attribute/Iconclass.vue';
     import RISM from '@/components/attribute/Rism.vue';
@@ -284,6 +295,7 @@
             'percentage-attribute': Percentage,
             'serial-attribute': Serial,
             'dimension-attribute': Dimension,
+            'si-unit-attribute': SiUnit,
             'epoch-attribute': Epoch,
             'list-attribute': List,
             'tabular-attribute': Tabular,
