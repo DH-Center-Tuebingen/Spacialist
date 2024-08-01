@@ -480,6 +480,13 @@ export async function duplicateEntity(entity) {
     );
 }
 
+export async function exportEntityTree(root){
+    console.log('queue export');
+    return $httpQueue.add(
+        () => http.get(`/entity/${root}/exportTree`).then(response => response.data)
+    );
+}
+
 export async function importEntityData(data) {
     return $httpQueue.add(
         () => http.post(`/entity/import`, data).then(response => response.data).catch(e => {throw e;})

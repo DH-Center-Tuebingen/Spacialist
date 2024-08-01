@@ -12,6 +12,7 @@
         "close": "Close",
         "add": "Add",
         "edit": "Edit",
+        "export":"Export",
         "edited": "edited",
         "duplicate": "Duplicate",
         "sort": "Sort",
