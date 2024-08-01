@@ -248,7 +248,9 @@ class EditorController extends Controller {
                     $purl = ThConcept::find($pid)->concept_url;
                     $childAttr->thesaurus_root_url = $purl;
                 }
-                $childAttr->restrictions = $col['restricted_types'];
+                if(array_key_exists('restricted_types', $col)) {
+                    $childAttr->restrictions = $col['restricted_types'];
+                }
                 $childAttr->parent_id = $attr->id;
                 $childAttr->save();
             }

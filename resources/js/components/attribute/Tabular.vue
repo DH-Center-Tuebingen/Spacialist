@@ -279,15 +279,10 @@
                 required: false,
                 default: false,
             },
-            preview: {
-                required: false,
-                type: Boolean,
-                default: false,
-            },
-            previewData: {
+            previewColumns: {
                 required: false,
                 type: Object,
-                default: null,
+                default: _ => new Object(),
             },
         },
         emits: ['change', 'expanded'],
@@ -311,8 +306,7 @@
                 selections,
                 attribute,
                 hideLinks,
-                preview,
-                previewData,
+                previewColumns,
             } = toRefs(props);
 
             // FETCH
@@ -510,9 +504,12 @@
                 initialValue: value.value,
             });
             const state = reactive({
-                isPreview: computed(_ => preview.value && previewData.value && Object.keys(previewData.value).length > 0),
-                columns: computed(_ => state.isPreview ? previewData.value : getAttribute(attribute.value.id).columns),
-                placeholderWidth: computed(_ => Object.keys(state.columns).length + 2),
+                isPreview: computed(_ => previewColumns.value && Object.keys(previewColumns.value).length > 0),
+                columns: computed(_ => state.isPreview ? previewColumns.value : getAttribute(attribute.value.id).columns),
+                placeholderWidth: computed(_ => {
+                    const colCnt = state.columns ? Object.keys(state.columns).length : 0;
+                    return colCnt + 2;
+                }),
                 selections: computed(_ => {
                     const list = {};
                     if(!state.columns || state.isPreview) return list;
