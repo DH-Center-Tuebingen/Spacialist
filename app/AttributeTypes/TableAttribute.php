@@ -14,7 +14,7 @@ class TableAttribute extends AttributeBase
     public static function getSelection(Attribute $a) {
         $types = array_map(function(array $entry) {
             return $entry["datatype"];
-        }, AttributeBase::getTypes(['in_table' => true, 'has_selection' => true]));
+        }, AttributeBase::getTypes(true, ['in_table' => true, 'has_selection' => true]));
 
         $columns = Attribute::where('parent_id', $a->id)
             ->whereIn('datatype', $types)

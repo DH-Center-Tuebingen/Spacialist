@@ -96,6 +96,12 @@ export async function removePlugin(id) {
     );
 }
 
+export async function fetchEntityMetadata(id) {
+    const {data} = await $httpQueue.add(() => http.get(`entity/${id}/metadata`));
+    store.dispatch('updateEntityMetadata', {eid: id, data});
+    return data;
+}
+
 export async function fetchUsers() {
     store.commit('setUser', auth.user());
     await $httpQueue.add(() => http.get('user').then(response => {
@@ -145,6 +151,7 @@ export async function fetchPreData(locale) {
         store.commit('setSystemPreferences', response.data.system_preferences);
         store.dispatch('setColorSets', response.data.colorsets);
         store.dispatch('setAnalysis', response.data.analysis);
+        store.dispatch('setDatatypeData', response.data.datatype_data);
 
         if(auth.ready()) {
             auth.load().then(_ => {
@@ -236,6 +243,12 @@ export async function getEntityReferences(id) {
     );
 }
 
+export async function getEntityTypeAttributes(id) {
+    return await $httpQueue.add(
+        () => http.get(`/editor/entity_type/${id}/attribute`)
+    );
+}
+
 export async function getEntityTypeOccurrenceCount(id) {
     return $httpQueue.add(
         () => http.get(`/editor/dm/entity_type/occurrence_count/${id}`).then(response => response.data)
@@ -257,7 +270,7 @@ async function fetchComments(id, type, aid = null) {
     if(!!aid) {
         endpoint = `${endpoint}&aid=${aid}`;
     }
-    return $httpQueue.add(() => http.get(endpoint).then(response => response.data).catch(error => { throw error; }));
+    return $httpQueue.add(() => http.get(endpoint).then(response => response.data).catch(error => {throw error;}));
 }
 
 export async function exportBibtexFile(selection) {
@@ -345,7 +358,7 @@ export async function resetUserPassword(uid, password) {
 }
 
 export async function confirmUserPassword(uid, password = null) {
-    const data = !!password ? { password: password } : {};
+    const data = !!password ? {password: password} : {};
     return $httpQueue.add(
         () => http.patch(`user/${uid}/password/confirm`, data).then(response => response.data)
     );
@@ -469,7 +482,7 @@ export async function duplicateEntity(entity) {
 
 export async function importEntityData(data) {
     return $httpQueue.add(
-        () => http.post(`/entity/import`, data).then(response => response.data).catch(e => { throw e; })
+        () => http.post(`/entity/import`, data).then(response => response.data).catch(e => {throw e;})
     );
 }
 
@@ -513,7 +526,7 @@ export async function addAttribute(attribute) {
     }
     if(attribute.columns && attribute.columns.length > 0) {
         data.columns = attribute.columns.map(c => {
-            const mappedC = { ...c };
+            const mappedC = {...c};
             if(mappedC.label) {
                 mappedC.label_id = mappedC.label.id;
                 delete mappedC.label;
@@ -533,6 +546,10 @@ export async function addAttribute(attribute) {
     }
     if(attribute.textContent) {
         data.text = attribute.textContent;
+    }
+    if(attribute.siGroup) {
+        data.si_base = attribute.siGroup;
+        data.si_default = attribute.siGroupUnit;
     }
 
     return $httpQueue.add(
@@ -615,6 +632,12 @@ export async function patchEntityName(eid, name) {
     );
 }
 
+export async function patchEntityMetadata(eid, metadata) {
+    return $httpQueue.add(
+        () => http.patch(`entity/${eid}/metadata`, metadata).then(response => response.data).catch(error => {throw error;})
+    );
+}
+
 export async function patchAttribute(entityId, attributeId, data) {
     return $httpQueue.add(
         () => http.patch(`/entity/${entityId}/attribute/${attributeId}`, data).then(response => response.data)
@@ -623,7 +646,7 @@ export async function patchAttribute(entityId, attributeId, data) {
 
 export async function patchAttributes(entityId, data) {
     return $httpQueue.add(
-        () => http.patch(`/entity/${entityId}/attributes`, data).then(response => response.data).catch(error => { throw error; })
+        () => http.patch(`/entity/${entityId}/attributes`, data).then(response => response.data).catch(error => {throw error;})
     );
 }
 
@@ -652,7 +675,7 @@ export async function handleModeration(modAction, entity_id, attribute_id, overw
                 });
             }
             return response.data;
-        }).catch(error => { throw error; })
+        }).catch(error => {throw error;})
     );
 }
 

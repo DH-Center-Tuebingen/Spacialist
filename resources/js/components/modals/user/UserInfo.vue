@@ -174,7 +174,7 @@
             // FUNCTIONS
             const closeModal = _ => {
                 context.emit('closing', false);
-            }
+            };
 
             // DATA
             const state = reactive({
@@ -193,7 +193,7 @@
                 closeModal,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

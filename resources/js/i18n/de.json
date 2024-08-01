@@ -32,7 +32,8 @@
             "nr_of_entries": "Keine Einträge | 1 Eintrag | {cnt} Einträge",
             "no_entries": "Keine Einträge gefunden.",
             "fetch_next_entries": "Weitere Einträge laden",
-            "no_more_entries": "Keine weiteren Einträge"
+            "no_more_entries": "Keine weiteren Einträge",
+            "stats": "Zeige {from}-{to} von {total}"
         },
         "select_all": "Alle auswählen",
         "select_none": "Alle abwählen",
@@ -68,7 +69,7 @@
             "confirm_and_save": "Nein, Speichern und fortfahren"
         },
         "error": {
-            "alert_title": "Fehlermeldung:",
+            "alert_title": "Fehlermeldung",
             "info_issue": "Wenn du denkst, dass diese Fehlermeldung ein Bug ist, schaue in unserem <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues\" target=\"_blank\">Bugtracker</a> auf Github nach, ob der Fehler schon gemeldet wurde oder sogar bereits in einer aktuelleren Version <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues?q=is:issue+is:closed\" target=\"_blank\">geschlossen</a> wurde (Deine aktuelle Version findest du über Einstellungen > <i class=\"fas fa-fw fa-info-circle\"></i> Über). Wenn es weder gemeldet, noch geschlossen ist, kannst du gerne einen <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues/new\" target=\"_blank\">neuen Bug</a> melden.",
             "occur": "Fehler aufgetreten",
             "headers": "Kopfzeilen",
@@ -170,6 +171,130 @@
             "sql_info": "Du kannst mit <code class=\"fw-normal\">:entity_id</code> in deiner SQL-Abfrage auf die Entität referenzieren, dem dieses Attribut zugewiesen ist.",
             "iconclass": "Iconclass",
             "rism": "RISM",
+            "si-unit": "SI-Einheit",
+            "si_units": {
+                "base_unit": "Basisgröße",
+                "time": {
+                    "label": "Zeit",
+                    "units": {
+                        "second": "Sekunden",
+                        "minute": "Minuten",
+                        "hour": "Stunden",
+                        "day": "Tage",
+                        "year": "Jahre"
+                    }
+                },
+                "length": {
+                    "label": "Länge",
+                    "units": {
+                        "nanometre": "Nanometer",
+                        "micrometre": "Mikrometer",
+                        "millimetre": "Millimeter",
+                        "centimetre": "Zentimeter",
+                        "decimetre": "Dezimeter",
+                        "metre": "Meter",
+                        "decametre": "Dekameter",
+                        "hectometre": "Hektometer",
+                        "kilometre": "Kilometer",
+                        "inch": "Zoll",
+                        "feet": "Fuß",
+                        "yard": "Yards",
+                        "mile": "Meilen"
+                    }
+                },
+                "area": {
+                    "label": "Fläche",
+                    "units": {
+                        "square_centimetre": "Quadratzentimeter",
+                        "square_metre": "Quadratmeter",
+                        "square_kilometre": "Quadratkilometer",
+                        "square_inch": "Quadratzoll",
+                        "square_feet": "Quadratfuß",
+                        "square_yard": "Quadratyard",
+                        "acre": "Acre",
+                        "square_mile": "Quadratmeile"
+                    }
+                },
+                "volume": {
+                    "label": "Volumen",
+                    "units": {
+                        "millilitre": "Milliliter",
+                        "litre": "Liter",
+                        "cubic_centimetre": "Kubikzentimeter",
+                        "cubic_decimetre": "Liter | Kubikdezimeter",
+                        "cubic_metre": "Kubikmeter",
+                        "cubic_kilometre": "Kubikkilometer",
+                        "fluid_ounce_us": "Flüssigunze (US)",
+                        "pint_us": "Pinte (US)",
+                        "cup_us": "Tasse (US)",
+                        "gallon_us": "Gallone (US)",
+                        "cubic_mile": "Kubikmeile"
+                    }
+                },
+                "mass": {
+                    "label": "Gewicht",
+                    "units": {
+                        "gram": "Gramm",
+                        "kilogram": "Kilogramm",
+                        "ton": "Tonnen",
+                        "ounce": "Unze",
+                        "pound": "Britisches Pfund"
+                    }
+                },
+                "force": {
+                    "label": "Kraft",
+                    "units": {
+                        "newton": "Newton",
+                        "kilonewton": "Kilonewton"
+                    }
+                },
+                "temperature": {
+                    "label": "Temperatur",
+                    "units": {
+                        "celsius": "Celsius",
+                        "kelvin": "Kelvin",
+                        "fahrenheit": "Fahrenheit",
+                        "réaumur": "Réaumur"
+                    }
+                },
+                "volumetric_flow": {
+                    "label": "Volumenstrom",
+                    "units": {
+                        "cubic_metre_per_second": "Kubikmeter pro Sekunde",
+                        "litre_per_second": "Liter pro Sekunde"
+                    }
+                },
+                "speed": {
+                    "label": "Geschwindigkeit",
+                    "units": {
+                        "metre_per_second": "Meter pro Sekunde",
+                        "kilometre_per_hour": "Kilometer pro Stunde",
+                        "mile_per_hour": "Meilen pro Stunde"
+                    }
+                },
+                "pressure": {
+                    "label": "Druck",
+                    "units": {
+                        "pascal": "Pascal",
+                        "kilopascal": "Kilopascal",
+                        "hectopascal": "Hectopascal",
+                        "bar": "Bar",
+                        "decibar": "Decibar",
+                        "millibar": "Millibar",
+                        "torr": "Torr",
+                        "technical_atmosphere": "Technische Atmosphäre",
+                        "standard_atmosphere": "Physikalische Atmosphäre",
+                        "pound_per_square_inch": "Pfund pro Quadratzoll"
+                    }
+                },
+                "quotient": {
+                    "label": "Quotient",
+                    "units": {
+                        "percent": "Prozent",
+                        "parts_per_million": "Parts per million"
+                    }
+                }
+            },
             "restrictions": {
                 "entity_type": "Auf folgende Entitätstypen beschränken"
             }
@@ -203,6 +328,9 @@
         "confirm_password": "Passwort wiederholen",
         "remember_me": "Eingeloggt bleiben",
         "orcid": "ORCID",
+        "licence": "Lizenz",
+        "licence_default": "Standard-Lizenz",
+        "licence_missing": "Lizenz-Angabe fehlt",
         "description": "Beschreibung",
         "roles": "Rollen",
         "permissions": "Berechtigungen",
@@ -212,6 +340,9 @@
         "deactivated_at": "Deaktiviert",
         "timestamp": "Zeitstempel",
         "options": "Optionen",
+        "summary": "Zusammenfassung",
+        "creator": "Ersteller",
+        "editors": "Bearbeiter",
         "reply_to": "Antworten",
         "replying_to": "Antwort an {name}",
         "type": "Typ",
@@ -328,12 +459,17 @@
         },
         "entity": {
             "title": "Entität | Entitäten",
+            "top_level": "Top-Level-Entität",
             "count": "Keine Top-Level Entitäten | Eine Top-Level Entität | {cnt} Top-Level Entitäten",
             "detail_tab_none_selected": "Keine Entität ausgewählt. Wähle aus dem Baum eine Entität aus um hier Details dazu zu erhalten.",
             "toasts": {
                 "updated": {
                     "title": "Entität aktualisiert",
                     "msg": "Daten von „{name}“ wurden erfolgreich aktualisiert."
+                },
+                "updated_metadata": {
+                    "title": "Metadaten aktualisiert",
+                    "msg": "Metadaten von {name} wurden erfolgreich aktualisiert."
                 },
                 "deleted": {
                     "title": "Entität gelöscht",
@@ -376,6 +512,7 @@
             "tabs": {
                 "default": "Allgemein",
                 "comments": "Kommentare",
+                "metadata": "Metadaten",
                 "untitled_group": "Unbenannt ({cnt})"
             },
             "modals": {
@@ -462,6 +599,10 @@
                         "cancel": "Bearbeitung verwerfen"
                     }
                 }
+            },
+            "metadata": {
+                "save": "Metadaten speichern",
+                "deleted_entity_name": "Gelöschte Entität #{id}"
             }
         },
         "user": {
@@ -699,6 +840,23 @@
                 "project_lead": "Projektleitung"
             }
         },
+        "history": {
+            "title": "Verlauf",
+            "created_as": "Erstellt als:",
+            "no_value": "Kein Wert aufgezeichnet",
+            "entity": {
+                "created_in": "Als Unter-Entität von:",
+                "name_update": "Name aktualisiert:",
+                "name_unknown": "Unbekannte Entität",
+                "name_unknown_info": "Das bedeutet, dass die Entität entweder gelöscht wurde oder du nicht die nötigen Berechtigungen besitzt.",
+                "value_add_attribute": "Wert zu Attribut hinzugefügt:",
+                "value_update_attribute": "Wert von Attribut geändert:",
+                "certainty_update": "Sicherheit aktualisiert:",
+                "certainty_unknown": "Unbekannt",
+                "moved": "Verschoben:",
+                "rank": "Rang"
+            }
+        },
         "bibliography": {
             "title": "Literatur",
             "modal": {
@@ -823,6 +981,12 @@
             "error": {
                 "file_read": "Datei konnte nicht gelesen werden.",
                 "file_read_abort": "Datei-Lesevorgang abgebrochen."
+            },
+            "modal": {
+                "error": {
+                    "msg_detail": "Fehler beim Importieren des Eintrags in Zeile {count} (<span class='fst-italic'>{name}</span>) in Spalte <span class='fw-bold'>{col_name}</span> (#{index}) mit Datentyp <span class='fst-italic'>{datatype}</span> und dem fehlerhaften Wert <span class='fw-bold'>{value}</span>",
+                    "msg": "Fehler beim Importieren des Eintrags in Zeile {count} (<span class='fst-italic'>{name}</span>): <span class='fw-bold'>{value}</span>"
+                }
             }
         },
         "map": {

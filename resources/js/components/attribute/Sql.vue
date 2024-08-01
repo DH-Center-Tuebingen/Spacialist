@@ -58,7 +58,7 @@
                 default: false,
             },
             value: {
-                type: Number,
+                type: [Array, String],
                 required: true,
             },
         },
@@ -85,7 +85,7 @@
                 // LOCAL
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

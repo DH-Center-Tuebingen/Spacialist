@@ -4,17 +4,18 @@ namespace App;
 
 use App\Exceptions\AmbiguousValueException;
 use App\Traits\CommentTrait;
+use Illuminate\Database\Eloquent\Builder;
 use App\AttributeTypes\AttributeBase;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Nicolaslopezj\Searchable\SearchableTrait;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
 
-class Entity extends Model implements Searchable
-{
+class Entity extends Model implements Searchable {
     use CommentTrait;
     use SearchableTrait;
     use LogsActivity;
@@ -39,6 +40,10 @@ class Entity extends Model implements Searchable
         'attributeLinks',
     ];
 
+    protected $casts = [
+        'metadata' => 'json',
+    ];
+
     protected $with = [
         'user',
     ];
@@ -61,8 +66,7 @@ class Entity extends Model implements Searchable
         // 'geodata_id'        => 'integer|exists:geodata,id'
     ];
 
-    public function getActivitylogOptions() : LogOptions
-    {
+    public function getActivitylogOptions(): LogOptions {
         return LogOptions::defaults()
             ->logOnly(['id'])
             ->logFillable()
@@ -77,11 +81,19 @@ class Entity extends Model implements Searchable
         );
     }
 
+    public function getAllMetadata(){
+        return [
+            'creator' => $this->creator,
+            'editors' => $this->editors,
+            'metadata' => $this->metadata,
+        ];
+    }  
+    
     public static function getSearchCols(): array {
         return array_keys(self::searchCols);
     }
 
-    public static function getFromPath($path, $delimiter = "\\\\") {
+    public static function getFromPath($path, $delimiter = "\\\\"): ?int {
         if(!isset($path)) {
             return null;
         }
@@ -153,9 +165,7 @@ class Entity extends Model implements Searchable
 
         // TODO workaround to get all (optional, not part of request) attributes
         $entity = self::find($entity->id);
-
         AttributeBase::onCreateHandler($entity, $user);
-
         $entity->children_count = 0;
 
         return [
@@ -249,7 +259,7 @@ class Entity extends Model implements Searchable
         $entityMcAttributes = Attribute::where('datatype', 'entity-mc')
             ->get()->pluck('id')->toArray();
         $links = AttributeValue::where('entity_val', $this->id)
-            ->orWhere(function($query) use($entityMcAttributes) {
+            ->orWhere(function ($query) use ($entityMcAttributes) {
                 $query->whereJsonContains('json_val', $this->id)
                     ->whereIn('attribute_id', $entityMcAttributes);
             })
@@ -267,6 +277,31 @@ class Entity extends Model implements Searchable
             ];
         }
         return $entities;
+    }
+
+    public function getEditorsAttribute() {
+        $curr = $this;
+        $assocAttrs = AttributeValue::with('attribute')->where('entity_id', $this->id)->get()->pluck('id');
+
+        $causers = Activity::where(function (Builder $query) use ($curr) {
+            $query->where('subject_id', $curr->id)
+                ->where('subject_type', get_class($curr));
+        })->orWhere(function (Builder $query) use ($assocAttrs) {
+            $query->whereIn('subject_id', $assocAttrs)
+                ->where('subject_type', (new AttributeValue())->getMorphClass());
+        })
+            ->groupBy('causer_id')
+            ->select('causer_id as user_id')
+            ->get();
+        return $causers;
+    }
+
+    public function getCreatorAttribute() {
+        $creator = Activity::where('subject_id', $this->id)
+            ->where('subject_type', get_class($this))
+            ->where('description', 'created')
+            ->first();
+        return isset($creator) ? $creator->causer_id : null;
     }
 
     public function parents() {
@@ -309,8 +344,7 @@ class Entity extends Model implements Searchable
         return $this->parents()['ids'];
     }
 
-    public function getParentNamesAttribute()
-    {
+    public function getParentNamesAttribute() {
         // $res = DB::select("
         //     WITH RECURSIVE getpath AS (
         //         SELECT id as path, name as pathn, root_entity_id as parent FROM entities WHERE id = $this->id
@@ -327,10 +361,61 @@ class Entity extends Model implements Searchable
         return $this->parents()['names'];
     }
 
-    public function getAncestorsAttribute()
-    {
+    public function getAncestorsAttribute() {
         $parents = array_reverse($this->getParentNamesAttribute());
         array_pop($parents);
         return $parents;
+    }
+
+    public function getData() {
+        $attributes = AttributeValue::whereHas('attribute', function (Builder $q) {
+            $q->where('datatype', '!=', 'sql');
+        })
+            ->where('entity_id', $this->id)
+            ->withModerated()
+            ->get();
+
+        $data = [];
+        foreach($attributes as $a) {
+            switch($a->attribute->datatype) {
+                case 'string-sc':
+                    $a->thesaurus_val = ThConcept::where('concept_url', $a->thesaurus_val)->first();
+                    break;
+                case 'entity':
+                    $a->name = Entity::find($a->entity_val)->name;
+                    break;
+                case 'entity-mc':
+                    $names = [];
+                    foreach(json_decode($a->json_val) as $dec) {
+                        $names[] = Entity::find($dec)->name;
+                    }
+                    $a->name = $names;
+                    break;
+                default:
+                    break;
+            }
+            $value = $a->getValue();
+            if($a->moderation_state == 'pending-delete') {
+                $a->value = [];
+                $a->original_value = $value;
+            } else {
+                $a->value = $value;
+            }
+            if(isset($data[$a->attribute_id])) {
+                $oldAttr = $data[$a->attribute_id];
+                // check if stored entry is moderated one
+                // if so, add current value as original value
+                // otherwise, set stored entry as original value
+                if(isset($oldAttr->moderation_state)) {
+                    $oldAttr->original_value = $value;
+                    $a = $oldAttr;
+                } else {
+                    $a->original_value = $oldAttr->value;
+                }
+            }
+            $data[$a->attribute_id] = $a;
+        }
+
+        return $data;
     }
 }

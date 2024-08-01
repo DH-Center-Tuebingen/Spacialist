@@ -22,7 +22,10 @@
             {{ translateConcept(option.concept_url) }}
         </template>
         <template #tag="{ option, handleTagRemove, disabled: tagDisabled }">
-            <div class="multiselect-tag">
+            <div
+                class="multiselect-tag"
+                :class="{'pe-2': tagDisabled}"
+            >
                 {{ translateConcept(option.concept_url) }}
                 <span
                     v-if="!tagDisabled"

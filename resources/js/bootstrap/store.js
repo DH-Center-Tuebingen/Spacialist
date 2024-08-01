@@ -1,4 +1,4 @@
-import { createStore } from 'vuex';
+import {createStore} from 'vuex';
 
 import {
     sortTree,
@@ -57,6 +57,7 @@ export const store = createStore({
                     permissions: [],
                     preferences: {},
                     systemPreferences: {},
+                    datatypeData: {},
                     tags: [],
                     roles: [],
                     rolePresets: [],
@@ -281,17 +282,37 @@ export const store = createStore({
                         }
                     }
                 },
+                updateEntityMetadata(state, data) {
+                    let metadata = {};
+                    for(let k in data.data) {
+                        metadata[k] = data.data[k];
+                    }
+
+                    const eid = data.eid;
+                    if(!state.entities?.[eid]) {
+                        return;
+                    }
+
+                    if(state.entities?.[eid].metadata) {
+                        state.entity.metadata = {};
+                    }
+
+                    state.entities[eid].metadata = {
+                        ...state.entities[eid].metadata,
+                        ...metadata,
+                    };
+                },
                 updateEntityDataModerations(state, data) {
                     const entity = state.entities[data.entity_id];
-                    for(let i=0; i<data.attribute_ids.length; i++) {
+                    for(let i = 0; i < data.attribute_ids.length; i++) {
                         const curr = data.attribute_ids[i];
                         entity.data[curr].moderation_state = data.state;
                     }
                 },
                 addEntityTypeAttribute(state, data) {
                     const attrs = state.entityTypeAttributes[data.entity_type_id];
-                    attrs.splice(data.position-1, 0, data);
-                    for(let i=data.position; i<attrs.length; i++) {
+                    attrs.splice(data.position - 1, 0, data);
+                    for(let i = data.position; i < attrs.length; i++) {
                         if(attrs[i].position) {
                             attrs[i].position++;
                         } else if(attrs[i].pivot && attrs[i].pivot.position) {
@@ -305,7 +326,7 @@ export const store = createStore({
                     if(idx > -1) {
                         attrs.splice(idx, 1);
                     }
-                    for(let i=idx; i<attrs.length; i++) {
+                    for(let i = idx; i < attrs.length; i++) {
                         if(attrs[i].position) {
                             attrs[i].position++;
                         } else if(attrs[i].pivot && attrs[i].pivot.position) {
@@ -339,7 +360,7 @@ export const store = createStore({
                     const movedAttrs = attrs.splice(from, 1);
                     attrs.splice(to, 0, ...movedAttrs);
                     if(from < to) {
-                        for(let i=from; i<to; i++) {
+                        for(let i = from; i < to; i++) {
                             if(attrs[i].position) {
                                 attrs[i].position++;
                             } else if(attrs[i].pivot && attrs[i].pivot.position) {
@@ -347,7 +368,7 @@ export const store = createStore({
                             }
                         }
                     } else {
-                        for(let i=to+1; i<=from; i++) {
+                        for(let i = to + 1; i <= from; i++) {
                             if(attrs[i].position) {
                                 attrs[i].position--;
                             } else if(attrs[i].pivot && attrs[i].pivot.position) {
@@ -636,6 +657,11 @@ export const store = createStore({
                 setAnalysis(state, data) {
                     state.hasAnalysis = data;
                 },
+                setDatatypeData(state, data) {
+                    for(let k in data) {
+                        state.datatypeData[k] = data[k];
+                    }
+                },
             },
             actions: {
                 setAppState({commit}, data) {
@@ -790,6 +816,9 @@ export const store = createStore({
                 updateEntityData({commit}, data) {
                     commit('updateEntityData', data);
                 },
+                updateEntityMetadata({commit}, data) {
+                    commit('updateEntityMetadata', data);
+                },
                 updateEntityDataModerations({commit}, data) {
                     commit('updateEntityDataModerations', data);
                 },
@@ -899,6 +928,9 @@ export const store = createStore({
                 setAnalysis({commit}, data) {
                     commit('setAnalysis', data);
                 },
+                setDatatypeData({commit}, data) {
+                    commit('setDatatypeData', data);
+                },
             },
             getters: {
                 appInitialized: state => state.appInitialized,
@@ -910,7 +942,15 @@ export const store = createStore({
                 concepts: state => state.concepts,
                 entities: state => state.entities,
                 entityTypes: state => state.entityTypes,
-                entityTypeAttributes: state => id => state.entityTypeAttributes[id],
+                entityTypeAttributes: state => (id, exclude = false) => {
+                    if(exclude === true) {
+                        return state.entityTypeAttributes[id].filter(a => a.datatype != 'system-separator');
+                    } else if(Array.isArray(exclude)) {
+                        return state.entityTypeAttributes[id].filter(a => !exclude.includes(a.datatype));
+                    }
+
+                    return state.entityTypeAttributes[id];
+                },
                 entityTypeColors: state => id => state.entityTypeColors[id],
                 geometryTypes: state => state.geometryTypes,
                 mainView: state => state.mainView,
@@ -925,6 +965,8 @@ export const store = createStore({
                 preferenceByKey: state => key => state.preferences[key],
                 preferences: state => state.preferences,
                 systemPreferences: state => state.systemPreferences,
+                datatypeData: state => state.datatypeData,
+                datatypeDataOf: state => key => state.datatypeData[key],
                 tags: state => state.tags,
                 roles: state => noPerms => {
                     return noPerms ? state.roles.map(r => {

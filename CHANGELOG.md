@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file.
 - Pasting into _Bibliography Item_ now works without clicking first and display some more info
 - Info on hover to required fields in new/edit bibliography modal
 - Restrict search in _Entity_ attribute to specific entity-types
+- Metadata tab to _Entity Detail_ panel=======
 - Allow _Multiple Choice Dropdown_ in _Table_ attribute
 - Allow _Date Range_ in _Table_ attribute
 - Entities can now be updated using the _Data Importer_

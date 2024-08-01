@@ -60,7 +60,7 @@
                     :classes="'mx-2 py-3 rounded-3 bg-secondary bg-opacity-10'"
                     :attributes="state.systemAttributeList"
                     :values="[]"
-                    :nolabels="true"
+                    :options="{'hide_labels': true}"
                     :selections="{}"
                     :is-source="true"
                 />
@@ -105,6 +105,7 @@
 
     import {
         getEntityTypeAttributes,
+        getInitialAttributeValue,
     } from '@/helpers/helpers.js';
 
     import {
@@ -173,6 +174,7 @@
 
             // DATA
             const state = reactive({
+                siu: computed(_ => store.getters.datatypeDataOf('si-unit')),
                 systemAttributeList: computed(_ => store.getters.attributes.filter(a => a.is_system)),
                 attributeList: computed(_ => store.getters.attributes.filter(a => !a.is_system)),
                 // set values for all attributes to '', so values in <attribute-list> are existant
@@ -181,13 +183,15 @@
                     let data = {};
                     for(let i=0; i<state.attributeList.length; i++) {
                         let a = state.attributeList[i];
-                        data[a.id] = '';
+                        data[a.id] = {
+                            value: getInitialAttributeValue(a, 'datatype'),
+                        };
                     }
                     return data;
                 }),
                 showHiddenAttributes: false,
                 entityTypes: computed(_ => Object.values(store.getters.entityTypes)),
-                selectedEntityType: computed(_ => currentRoute.params.id),
+                selectedEntityType: computed(_ => parseInt(currentRoute.params.id)),
                 selectedEntityTypeAttributeIds: computed(_ => state.selectedEntityType ? getEntityTypeAttributes(state.selectedEntityType).map(a => a.id) : []),
             });
 

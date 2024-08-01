@@ -8,16 +8,14 @@ use Illuminate\Foundation\Testing\WithFaker;
 use App\Role;
 use App\User;
 
-class CommandTest extends TestCase
-{
+class CommandTest extends TestCase {
     /**
      * Test creating role and user
      *
      * @return void
      */
-    public function testSpacialistCreateUserAndRoleCommand()
-    {
-        $this->artisan('spacialist:create --role --user')
+    public function testSpacialistCreateUserAndRoleCommand() {
+        $this->artisan('app:create --role --user')
             ->expectsOutput('Can not create user and role simultaneously!')
             ->assertExitCode(1);
     }
@@ -27,11 +25,10 @@ class CommandTest extends TestCase
      *
      * @return void
      */
-    public function testSpacialistCreateUserCommand()
-    {
+    public function testSpacialistCreateUserCommand() {
         $confirmStr = "Is this correct?\n\tName: New User\n\tNickname: nuser\n\tEmail: user@example.tld\n";
 
-        $this->artisan('spacialist:create')
+        $this->artisan('app:create')
             ->expectsQuestion('Please provide the new user name', 'New User')
             ->expectsQuestion('Please enter your nick name', 'nuser')
             ->expectsQuestion('Please enter your email address', 'user@example.tld')
@@ -51,11 +48,10 @@ class CommandTest extends TestCase
      *
      * @return void
      */
-    public function testSpacialistCreateUserWithFlagCommand()
-    {
+    public function testSpacialistCreateUserWithFlagCommand() {
         $confirmStr = "Is this correct?\n\tName: New User #2\n\tNickname: nuser2\n\tEmail: user2@example.tld\n";
 
-        $this->artisan('spacialist:create --user "New User #2"')
+        $this->artisan('app:create --user "New User #2"')
             ->expectsQuestion('Please enter your nick name', 'nuser2')
             ->expectsQuestion('Please enter your email address', 'user2@example.tld')
             ->expectsQuestion('Please enter your password', 'newpw')
@@ -74,9 +70,8 @@ class CommandTest extends TestCase
      *
      * @return void
      */
-    public function testSpacialistCreateUserWithExistingMailCommand()
-    {
-        $this->artisan('spacialist:create --user "New User"')
+    public function testSpacialistCreateUserWithExistingMailCommand() {
+        $this->artisan('app:create --user "New User"')
             ->expectsQuestion('Please enter your nick name', 'nuser')
             ->expectsQuestion('Please enter your email address', 'admin@localhost')
             ->expectsQuestion('Please enter your password', 'newpw')
@@ -92,9 +87,8 @@ class CommandTest extends TestCase
      *
      * @return void
      */
-    public function testSpacialistCreateUserWithWrongMailCommand()
-    {
-        $this->artisan('spacialist:create --user "New User"')
+    public function testSpacialistCreateUserWithWrongMailCommand() {
+        $this->artisan('app:create --user "New User"')
             ->expectsQuestion('Please enter your nick name', 'nuser')
             ->expectsQuestion('Please enter your email address', 'admin(at)localhost')
             ->expectsQuestion('Please enter your password', 'newpw')
@@ -110,9 +104,8 @@ class CommandTest extends TestCase
      *
      * @return void
      */
-    public function testSpacialistCreateUserWithExistingNickCommand()
-    {
-        $this->artisan('spacialist:create --user "New User"')
+    public function testSpacialistCreateUserWithExistingNickCommand() {
+        $this->artisan('app:create --user "New User"')
             ->expectsQuestion('Please enter your nick name', 'admin')
             ->expectsQuestion('Please enter your email address', 'admin@localhost')
             ->expectsQuestion('Please enter your password', 'newpw')
@@ -128,9 +121,8 @@ class CommandTest extends TestCase
      *
      * @return void
      */
-    public function testSpacialistCreateUserWithWrongNickCommand()
-    {
-        $this->artisan('spacialist:create --user "New User"')
+    public function testSpacialistCreateUserWithWrongNickCommand() {
+        $this->artisan('app:create --user "New User"')
             ->expectsQuestion('Please enter your nick name', 'nickname with spaces')
             ->expectsQuestion('Please enter your email address', 'admin@localhost')
             ->expectsQuestion('Please enter your password', 'newpw')
@@ -146,11 +138,10 @@ class CommandTest extends TestCase
      *
      * @return void
      */
-    public function testSpacialistCreateRoleCommand()
-    {
+    public function testSpacialistCreateRoleCommand() {
         $confirmStr = "Is this correct?\n\tName: new_role\n\tDisplayName: New Role\n\tDescription: Description for new role\n";
 
-        $this->artisan('spacialist:create --role')
+        $this->artisan('app:create --role')
             ->expectsQuestion('Please provide the new role name', 'new_role')
             ->expectsQuestion('Please provide the desired display name', 'New Role')
             ->expectsQuestion('Please provide the desired description', 'Description for new role')
@@ -169,9 +160,8 @@ class CommandTest extends TestCase
      *
      * @return void
      */
-    public function testSpacialistCreateRoleWithExistingNameCommand()
-    {
-        $this->artisan('spacialist:create --role admin')
+    public function testSpacialistCreateRoleWithExistingNameCommand() {
+        $this->artisan('app:create --role admin')
             ->expectsQuestion('Please provide the new role name', 'admin')
             ->expectsQuestion('Please provide the desired display name', 'Admin')
             ->expectsQuestion('Please provide the desired description', 'The new admin')
