@@ -345,7 +345,6 @@
                 }),
                 searchResetValue: null,
                 formId: external.value || 'create-attribute-form',
-                attributeTypes: types,
                 minimalEntityTypes: computed(_ => {
                     return Object.values(store.getters.entityTypes).map(et => ({
                         id: et.id,
