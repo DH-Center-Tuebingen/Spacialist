@@ -430,6 +430,10 @@
                     types = store.getters.attributeTypes;
                     break;
             }
+            types = types.slice().sort((a, b) => {
+                return t(`global.attributes.${a.datatype}`) > t(`global.attributes.${b.datatype}`);
+            });
+
             const state = reactive({
                 attribute: {
                     recursive: false,

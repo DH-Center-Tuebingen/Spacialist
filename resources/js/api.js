@@ -539,6 +539,12 @@ export async function addAttribute(attribute) {
                 mappedC.restricted_types = mappedC.restrictedTypes.map(t => t.id);
                 delete mappedC.restrictedTypes;
             }
+            if(mappedC.siGroup) {
+                mappedC.si_base = mappedC.siGroup;
+                mappedC.si_default = mappedC.siGroupUnit;
+                delete mappedC.siGroup;
+                delete mappedC.siGroupUnit;
+            }
             mappedC.datatype = mappedC.type;
             delete mappedC.type;
             return mappedC;

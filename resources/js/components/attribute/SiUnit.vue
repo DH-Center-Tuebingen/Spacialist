@@ -72,7 +72,7 @@
             },
             metadata: {
                 type: Object,
-                default: _ => new Object(),
+                required: true,
             },
             disabled: {
                 type: Boolean,

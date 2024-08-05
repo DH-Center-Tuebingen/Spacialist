@@ -256,6 +256,12 @@ class EditorController extends Controller {
                     $purl = ThConcept::find($pid)->concept_url;
                     $childAttr->thesaurus_root_url = $purl;
                 }
+                if(isset($col['si_base'])) {
+                    $childAttr->metadata = [
+                        'si_baseunit' => $col['si_base'],
+                        'si_default' => $col['si_default'],
+                    ];
+                }
                 if(array_key_exists('restricted_types', $col)) {
                     $childAttr->restrictions = $col['restricted_types'];
                 }
