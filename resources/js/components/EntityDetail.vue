@@ -401,12 +401,18 @@
     import router from '%router';
 
     import { useToast } from '@/plugins/toast.js';
-    import { ago, date } from '@/helpers/filters.js';
+
+    import {
+        ago,
+        date,
+    } from '@/helpers/filters.js';
+
     import {
         getEntityComments,
         patchAttributes,
         patchEntityName,
     } from '@/api.js';
+
     import {
         can,
         isModerated,
