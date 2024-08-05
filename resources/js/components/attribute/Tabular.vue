@@ -434,7 +434,6 @@
                         
                         rowValue[column] = value;
                         colIdx++;
-                        console.log(column,state.columns, curr);
                         // If less columns selected than exist, stop adding new/non-existing column data
                         if(colIdx == columns.length) break;
                     }
