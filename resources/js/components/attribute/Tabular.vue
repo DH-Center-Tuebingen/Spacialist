@@ -169,7 +169,7 @@
                     @change="updateChart()"
                 >
                 <span>
-                    {{ t('main.entity.attributes.table.chart.number_sets', {cnt: state.chartSetLength}) }}
+                    {{ t('main.entity.attributes.table.chart.number_sets', { cnt: state.chartSetLength }) }}
                 </span>
             </div>
             <canvas :id="state.chartId" />
@@ -221,20 +221,6 @@
     } from '@/helpers/modal.js';
 
     import Row from '@/components/attribute/TabularRow.vue';
-
-    import StringAttr from '@/components/attribute/String.vue';
-    import IntegerAttr from '@/components/attribute/Integer.vue';
-    import FloatAttr from '@/components/attribute/Float.vue';
-    import Bool from '@/components/attribute/Bool.vue';
-    import Iconclass from '@/components/attribute/Iconclass.vue';
-    import RISM from '@/components/attribute/Rism.vue';
-    import Entity from '@/components/attribute/Entity.vue';
-    import DateAttr from '@/components/attribute/Date.vue';
-    import DaterangeAttr from '@/components/attribute/Daterange.vue';
-    import SingleChoice from '@/components/attribute/SingleChoice.vue';
-    import MultiChoice from '@/components/attribute/MultiChoice.vue';
-    import UserList from '@/components/attribute/UserList.vue';
-    import Url from '@/components/attribute/Url.vue';
 
     import * as d3 from 'd3-dsv';
 
@@ -378,6 +364,7 @@
                     case 'csv':
                     default:
                         const data = v.value.map(r => {
+
                             const newR = {};
                             for(let k in r) {
                                 newR[translateConcept(state.columns[k].thesaurus_url)] = getSimpleValue(state.columns[k].datatype, r[k]);
@@ -432,13 +419,22 @@
             };
             const addTableRowFromCsv = (columns, data) => {
                 const rows = [];
-                for(let i=0; i<data.length; i++) {
+                for(let i = 0; i < data.length; i++) {
                     const rowValue = {};
                     const curr = data[i];
                     let colIdx = 0;
-                    for(let k in state.columns) {
-                        rowValue[k] = curr[columns[colIdx]];
+                    for(let column in state.columns) {
+                        
+                        let value = curr[columns[colIdx]];
+                        if(column.datatype == 'si-unit') {
+                            rowValue[column] = curr[columns[colIdx]];
+                            colIdx++;
+                            continue;
+                        }
+                        
+                        rowValue[column] = value;
                         colIdx++;
+                        console.log(column,state.columns, curr);
                         // If less columns selected than exist, stop adding new/non-existing column data
                         if(colIdx == columns.length) break;
                     }
@@ -550,11 +546,11 @@
                 chartAcc: {},
                 chartSetLength: Math.min(7, value.value.length),
                 chartData: computed(_ => {
-                    if(!state.chartShown) return {labels: [], datasets: []};
-                    if(state.chartLabel === -1) return {labels: [], datasets: []};
+                    if(!state.chartShown) return { labels: [], datasets: [] };
+                    if(state.chartLabel === -1) return { labels: [], datasets: [] };
                     const lastValues = value.value.slice(-state.chartSetLength);
                     const datasets = [];
-                    for(let i=0; i<lastValues.length; i++) {
+                    for(let i = 0; i < lastValues.length; i++) {
                         let j = 0;
                         for(let k in state.chartSet) {
                             if(!state.chartSet[k]) continue;
@@ -562,13 +558,13 @@
                             if(!datasets[j]) {
                                 datasets[j] = {
                                     data: [],
-                                    backgroundColor: `rgba(${Math.floor(Math.random()*256)}, ${Math.floor(Math.random()*256)}, ${Math.floor(Math.random()*256)}, 0.25)`,
+                                    backgroundColor: `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, 0.25)`,
                                     label: `${translateConcept(label.thesaurus_url)}`
                                 };
                             }
                             let value;
                             if(state.chartAcc[k]) {
-                                value = i > 0 ? lastValues[i][k] - lastValues[i-1][k] : lastValues[i][k];
+                                value = i > 0 ? lastValues[i][k] - lastValues[i - 1][k] : lastValues[i][k];
                             } else {
                                 value = lastValues[i][k];
                             }

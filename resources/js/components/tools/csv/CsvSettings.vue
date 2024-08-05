@@ -129,18 +129,29 @@
                     {{ t('main.csv.uploader.show_linenumbers') }}
                 </label>
             </div>
+
             <IconButton
                 icon="eye"
                 :model-value="showPreview"
                 alt-icon="eye-slash"
                 @click="$emit('update:showPreview', !showPreview)"
             />
+
+            <button
+                v-if="removable"
+                class="btn btn-outline-danger"
+                type="button"
+                style="border-left-width: 2px;"
+                @click="() => $emit('remove')"
+            >
+                {{ t('global.remove_file') }}
+            </button>
         </div>
     </form>
 </template>
 
 <script>
-    import { computed } from 'vue';
+    import { computed, getCurrentInstance } from 'vue';
     import { useI18n } from 'vue-i18n';
     import { multiselectResetClasslist } from '@/helpers/helpers.js';
     import IconButton from '@/components/forms/IconButton.vue';
@@ -193,7 +204,10 @@
             total: {
                 type: Number,
                 required: true
-            }
+            },
+            removable: {
+                type: Boolean,
+            },
         },
         emits: [
             'update:delimiter',
@@ -203,6 +217,7 @@
             'update:showCount',
             'update:skippedCount',
             'update:showPreview',
+            'remove',
         ],
         setup(props, context) {
             const { t } = useI18n();
