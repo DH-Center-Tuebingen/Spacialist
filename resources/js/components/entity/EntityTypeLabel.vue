@@ -1,5 +1,5 @@
 <template>
-    <div
+    <div 
         class="d-flex flex-row gap-1"
     >
         <span
@@ -15,51 +15,42 @@
 </template>
 
 <script>
-import {
-    computed,
-    reactive,
-    toRefs,
-} from 'vue';
+    import {
+        computed,
+        reactive,
+    } from 'vue';
 
-import {
-    getEntityColors,
-    getEntityTypeName,
-} from '@/helpers/helpers.js';
-export default {
-    props: {
-        type: {
-            required: true,
-            type: Number,
+    import {
+        getEntityColors,
+        getEntityTypeName,
+    } from '@/helpers/helpers.js';
+
+    export default {
+        props: {
+            type: {
+                required: true,
+                type: Number,
+            },
+            iconOnly: {
+                required: false,
+                type: Boolean,
+                default: false,
+            },
         },
-        iconOnly: {
-            required: false,
-            type: Boolean,
-            default: false,
-        },
-    },
-    setup(props) {
-        const {
-            type,
-            iconOnly,
-        } = toRefs(props);
+        setup(props) {
+            const state = reactive({
+                colorStyles: computed(_ => {
+                    const colors = getEntityColors(props.type);
+                    return {
+                        color: colors.backgroundColor,
+                    };
+                }),
+                label: computed(_ => getEntityTypeName(props.type)),
+            });
 
-        const state = reactive({
-            colorStyles: computed(_ => {
-                const colors = getEntityColors(type.value);
-                return {
-                    color: colors.backgroundColor,
-                };
-            }),
-            label: computed(_ => getEntityTypeName(type.value)),
-        });
-
-        return {
-            // HELPERS
-            // LOCAL
-            iconOnly,
-            // STATE
-            state,
+            return {
+                state,
+            };
         }
-    }
-}
+    };
 </script>
