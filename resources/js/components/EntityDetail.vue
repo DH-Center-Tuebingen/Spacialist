@@ -232,6 +232,23 @@
                     </div>
                 </a>
             </li>
+            <template v-if="state?.entity?.data?.tabbedChildren">
+                <li
+                    v-for="child in state.entity.data.tabbedChildren"
+                    :key="child.id"
+                    class="nav nav-item"
+                    role="tablist"
+                >
+                    <a
+                        :id="`active-entity-child-${child.id}-tab`"
+                        class="nav-link active-entity-detail-tab d-flex gap-2 align-items-center"
+                        href="#"
+                        @click.prevent="setDetailPanel(`entity-${child.id}`, child)"
+                    >
+                        {{ child.name }}
+                    </a>
+                </li>
+            </template>
             <!-- empty nav-item to separate metadata and comments from attributes -->
             <li class="nav-item nav-item-list-divider ms-auto" />
             <li
@@ -295,7 +312,6 @@
                     @keydown.ctrl.s="e => handleSaveOnKey(e, `${tg.id}`)"
                 >
                     <attribute-list
-                        v-if="state.attributesFetched"
                         :ref="el => setAttrRefs(el, tg.id)"
                         v-dcan="'entity_data_read'"
                         class="pt-2 h-100 overflow-y-auto row"
@@ -367,10 +383,11 @@
                 </div>
             </div>
         </div>
-        <router-view
-            v-if="state.attributesFetched"
-            :entity="state.entity"
+        <EntityDetail
+            v-if="state.tabType === 'entity' && Boolean(state.activeSubEntity)"
+            :entity="state.activeSubEntity"
         />
+        <router-view :entity="state.entity" />
     </div>
 </template>
 
@@ -435,6 +452,7 @@
 
     import MetadataTab from '@/components/entity/MetadataTab.vue';
     import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
+    import EntityDetailView from './view/EntityDetailView.vue';
 
     export default {
         components: {
@@ -442,6 +460,10 @@
             MetadataTab,
         },
         props: {
+            entity: {
+                required: true,
+                type: Object
+            },
             bibliography: {
                 required: false,
                 type: Array,
@@ -458,16 +480,12 @@
             const route = useRoute();
             const toast = useToast();
 
-            // FETCH
-            store.dispatch('getEntity', route.params.id).then(_ => {
-                getEntityTypeAttributeSelections();
-                state.initFinished = true;
-                updateAllDependencies();
-            });
 
             // DATA
             const attrRefs = ref({});
             const state = reactive({
+                activeSubEntity: null,
+                tabType: 'attribute',
                 colorStyles: computed(_ => {
                     const colors = getEntityColors(state.entity.entity_type_id);
                     return {
@@ -492,7 +510,7 @@
                 hiddenAttributeState: false,
                 attributesInTabs: true,
                 routeQuery: computed(_ => route.query),
-                entity: computed(_ => store.getters.entity),
+                entity: computed(_ => props.entity ?? store.getters.entity),
                 entityUser: computed(_ => state.entity.user),
                 entityAttributes: computed(_ => store.getters.entityTypeAttributes(state.entity.entity_type_id)),
                 entityGroups: computed(_ => {
@@ -554,7 +572,6 @@
                     });
                     return groups;
                 }),
-                attributesFetched: computed(_ => state.initFinished && state.entity.data && !!state.entityAttributes && state.entityAttributes.length > 0),
                 entityTypeLabel: computed(_ => {
                     return getEntityTypeName(state.entity.entity_type_id);
                 }),
@@ -572,31 +589,29 @@
                 hiddenAttributeCount: computed(_ => state.hiddenAttributeList.length),
                 hiddenAttributeListing: computed(_ => {
                     let listing = `<div>`;
-                    if(!!state.attributesFetched) {
-                        const keys = Object.keys(state.hiddenAttributes);
-                        const values = Object.values(state.hiddenAttributes);
-                        const listGroups = {};
-                        for(let i = 0; i < keys.length; i++) {
-                            const k = keys[i];
-                            const v = values[i];
-                            if(v.hide && (!state.hiddenAttributes[v.by] || !state.hiddenAttributes[v.by].hide)) {
-                                if(!listGroups[v.by]) {
-                                    listGroups[v.by] = [];
-                                }
-                                listGroups[v.by].push(k);
+                    const keys = Object.keys(state.hiddenAttributes);
+                    const values = Object.values(state.hiddenAttributes);
+                    const listGroups = {};
+                    for(let i = 0; i < keys.length; i++) {
+                        const k = keys[i];
+                        const v = values[i];
+                        if(v.hide && (!state.hiddenAttributes[v.by] || !state.hiddenAttributes[v.by].hide)) {
+                            if(!listGroups[v.by]) {
+                                listGroups[v.by] = [];
                             }
+                            listGroups[v.by].push(k);
                         }
-                        for(let k in listGroups) {
-                            const grpAttr = getAttribute(k);
-                            listing += `<span class="text-muted fw-light fs-6"># ${translateConcept(grpAttr.thesaurus_url)}</span>`;
-                            listing += `<ol class="mb-0">`;
-                            // const data = state.entity.data[keys[i]];
-                            for(let i = 0; i < listGroups[k].length; i++) {
-                                const attr = getAttribute(listGroups[k][i]);
-                                listing += `<li><span class="fw-bold">${translateConcept(attr.thesaurus_url)}</span></li>`;
-                            }
-                            listing += `</ol>`;
+                    }
+                    for(let k in listGroups) {
+                        const grpAttr = getAttribute(k);
+                        listing += `<span class="text-muted fw-light fs-6"># ${translateConcept(grpAttr.thesaurus_url)}</span>`;
+                        listing += `<ol class="mb-0">`;
+                        // const data = state.entity.data[keys[i]];
+                        for(let i = 0; i < listGroups[k].length; i++) {
+                            const attr = getAttribute(listGroups[k][i]);
+                            listing += `<li><span class="fw-bold">${translateConcept(attr.thesaurus_url)}</span></li>`;
                         }
+                        listing += `</ol>`;
                     }
                     listing += `</div>`;
                     return listing;
@@ -721,14 +736,7 @@
                     };
                 });
             };
-            const updateAllDependencies = _ => {
-                if(!state.entityAttributes) return;
 
-                for(let i = 0; i < state.entityAttributes.length; i++) {
-                    const curr = state.entityAttributes[i];
-                    updateDependencyState(curr.id, state.entity.data[curr.id].value);
-                }
-            };
             const showHiddenAttributes = _ => {
                 state.hiddenAttributeState = true;
             };
@@ -740,7 +748,9 @@
 
                 showDeleteEntity(state.entity.id);
             };
-            const setDetailPanel = tab => {
+            const setDetailPanel = (tab, subEntity = null) => {
+                state.activeSubEntity = subEntity;
+
                 const query = {
                     view: tab,
                 };
@@ -752,7 +762,11 @@
                 });
             };
             const setDetailPanelView = (tab = 'attributes-default') => {
-                const tabId = tab.substring(tab.indexOf('-') + 1);
+
+                const [tabType, tabId] = tab.split('-');
+
+                state.tabType = tabType;
+
                 let newTab, oldTabs, newPanel, oldPanels;
                 if(tab === 'comments') {
                     newTab = document.getElementById('active-entity-comments-tab');
@@ -763,6 +777,9 @@
                 } else if(tab === 'metadata') {
                     newTab = document.getElementById('active-entity-metadata-tab');
                     newPanel = document.getElementById('active-entity-metadata-panel');
+                } else if(tabType === 'entity') {
+                    newTab = document.getElementById(`active-entity-child-${tabId}-tab`);
+                    newPanel = document.getElementById(`active-entity-child-${tabId}`);
                 } else {
                     newTab = document.getElementById(`active-entity-attributes-group-${tabId}-tab`);
                     newPanel = document.getElementById(`active-entity-attributes-panel-${tabId}`);
@@ -999,18 +1016,6 @@
                 }
             );
 
-            watch(_ => route.params,
-                async (newParams, oldParams) => {
-                    if(newParams.id == oldParams.id) return;
-                    if(!newParams.id) return;
-                    state.initFinished = false;
-                    store.dispatch('getEntity', newParams.id).then(_ => {
-                        getEntityTypeAttributeSelections();
-                        state.initFinished = true;
-                        updateAllDependencies();
-                    });
-                }
-            );
 
             watch(_ => state.entity,
                 async (newValue, oldValue) => {

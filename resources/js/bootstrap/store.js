@@ -745,6 +745,8 @@ export const store = createStore({
                         commit('setEntity', hiddenEntity);
                     } else {
                         entity.data = await getEntityData(entityId);
+                        
+                        
                         fillEntityData(entity.data, entity.entity_type_id);
                         entity.references = await getEntityReferences(entityId) || {};
                         for(let k in entity.data) {
@@ -756,6 +758,7 @@ export const store = createStore({
                                 }
                             }
                         }
+                        
                         commit('setEntity', entity);
                         return;
                     }

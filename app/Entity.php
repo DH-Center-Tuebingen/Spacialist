@@ -122,6 +122,11 @@ class Entity extends Model implements Searchable {
             return null;
         }
     }
+    
+    public function findChildren(){
+        $children = Entity::where('root_entity_id', $this->id)->get();
+        return $children;
+    }
 
     public static function create($fields, $entityTypeId, $user, $rootEntityId = null) {
         $isChild = isset($rootEntityId);
