@@ -10,11 +10,11 @@
         @entry-click="e => entryClicked(e)"
     />
     <router-link
-        v-if="!hideLink && !multiple && Object.keys(v.value).length > 0 && v.fieldValue.name != 'error.deleted_entity'"
-        :to="{name: 'entitydetail', params: {id: v.fieldValue.id}, query: state.query}"
+        v-if="canShowLink"
+        :to="{ name: 'entitydetail', params: { id: v.fieldValue?.id }, query: state.query }"
         class="btn btn-outline-secondary btn-sm mt-2"
     >
-        {{ t('main.entity.attributes.entity.go_to', {name: v.fieldValue.name}) }}
+        {{ t('main.entity.attributes.entity.go_to', { name: v.fieldValue.name }) }}
     </router-link>
 </template>
 
@@ -82,12 +82,7 @@
             const { t } = useI18n();
             const route = useRoute();
             const {
-                name,
-                multiple,
-                disabled,
-                hideLink,
                 value,
-                searchIn,
             } = toRefs(props);
             // FETCH
 
@@ -100,13 +95,13 @@
                 } = e;
                 let data;
                 if(removed) {
-                    if(multiple.value) {
+                    if(props.multiple) {
                         data = entity.values;
                     } else {
                         data = null;
                     }
                 } else if(added) {
-                    if(multiple.value) {
+                    if(props.multiple) {
                         data = entity.values;
                     } else {
                         data = entity;
@@ -131,7 +126,7 @@
             };
             const resetFieldState = _ => {
                 v.resetField({
-                    value: value.value || (multiple.value ? [] : {})
+                    value: value.value || (props.multiple ? [] : {})
                 });
             };
             const undirtyField = _ => {
@@ -139,7 +134,12 @@
                     value: v.fieldValue,
                 });
             };
-            const searchWrapper = query => searchEntityInTypes(query, searchIn.value || []);
+            const searchWrapper = query => searchEntityInTypes(query, props.searchIn || []);
+
+            const canShowLink = computed(_ => {
+                if(props.hideLink || !v.fieldValue?.name) return false;
+                return !props.multiple && v.fieldValue.name != 'error.deleted_entity';
+            });
 
             // DATA
             const {
@@ -147,12 +147,12 @@
                 value: fieldValue,
                 meta,
                 resetField,
-            } = useField(`entity_${name.value}`, yup.mixed().nullable(), {
-                initialValue: value.value || (multiple.value ? [] : null),
+            } = useField(`entity_${props.name}`, yup.mixed().nullable(), {
+                initialValue: value.value || (props.multiple ? [] : null),
             });
             const state = reactive({
                 query: computed(_ => route.query),
-                mode: computed(_ => multiple.value ? 'tags' : 'single'),
+                mode: computed(_ => props.multiple ? 'tags' : 'single'),
             });
             const v = reactive({
                 fieldValue,
@@ -160,9 +160,11 @@
                 meta,
                 resetField,
                 value: computed(_ => {
+                    if(!v.fieldValue) return null;
+
                     let value = null;
                     if(v.fieldValue) {
-                        if(multiple.value) {
+                        if(props.multiple) {
                             value = v.fieldValue.map(fv => only(fv, ['id', 'name']));
                         } else {
                             value = only(v.fieldValue, ['id', 'name']);
@@ -189,15 +191,14 @@
             // RETURN
             return {
                 t,
-                // HELPERS
                 // LOCAL
+                canShowLink,
                 entitySelected,
                 entryClicked,
                 handleDisplayResult,
                 resetFieldState,
                 undirtyField,
                 searchWrapper,
-                // PROPS
                 // STATE
                 state,
                 v,

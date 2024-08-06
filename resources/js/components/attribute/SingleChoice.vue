@@ -174,6 +174,7 @@
             };
 
             const formatValue = value => {
+                if(!value) return null;
                 return only(value, ['id', 'concept_url']);
             };
 
