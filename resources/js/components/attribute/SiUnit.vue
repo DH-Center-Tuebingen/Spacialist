@@ -97,7 +97,7 @@
 
             // DATA
             const state = reactive({
-                unitGrp: metadataProp.value.si_baseunit,
+                unitGrp: metadataProp.value?.si_baseunit,
                 groupUnits: computed(_ => {
                     if(!state.unitGrp) return [];
                     let groupName = state.unitGrp;
@@ -127,7 +127,7 @@
                 meta: unitMeta,
                 resetField: resetUnitField,
             } = useField(`unit_${props.name}`, yup.string(), {
-                initialValue: getUnitFromLabel(valueProp.value.unit || metadataProp.value.si_default),
+                initialValue: getUnitFromLabel(valueProp.value.unit || metadataProp.value?.si_default),
             });
 
             const v = reactive({

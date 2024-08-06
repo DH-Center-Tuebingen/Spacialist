@@ -195,7 +195,7 @@
         <template v-if="state.isSiUnit">
             <div class="mb-3">
                 <label class="col-form-label col-3">
-                    {{ t('global.attributes.si_units.base_unit') }}:
+                    {{ t('global.attributes.si_units.unit_type') }}:
                 </label>
                 <div class="col">
                     <multiselect

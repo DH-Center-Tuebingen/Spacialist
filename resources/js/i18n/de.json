@@ -173,6 +173,7 @@
             "rism": "RISM",
             "si-unit": "SI-Einheit",
             "si_units": {
+                "unit_type": "Einheit",
                 "base_unit": "Basisgröße",
                 "time": {
                     "label": "Zeit",
