@@ -255,6 +255,7 @@
     import {
         getAttributeSelection,
         getEmptyAttributeValue,
+        _cloneDeep,
     } from '@/helpers/helpers.js';
 
     import StringAttr from '@/components/attribute/String.vue';
@@ -357,12 +358,16 @@
                 disabled,
             } = toRefs(props);
             // FETCH
+            
+            const getValueOrDefault = _ => {
+                return valueWrapper.value.value || getEmptyAttributeValue(data.value.datatype);
+            };
 
             const attrRef = ref({});
             const state = reactive({
                 type: computed(_ => data.value.datatype),
                 disabled: computed(_ => data.value.isDisabled || disabled.value),
-                value: computed(_ => getValueOrDefault()),
+                value: _cloneDeep(getValueOrDefault()),
                 // TODO check for selection need?
                 selection: computed(_ => getAttributeSelection(data.value.id) || []),
 
@@ -395,10 +400,6 @@
                 } else {
                     return null;
                 }
-            };
-
-            const getValueOrDefault = _ => {
-                return valueWrapper.value.value || getEmptyAttributeValue(state.type);
             };
 
             const undirtyField = _ => {

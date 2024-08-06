@@ -8,6 +8,7 @@
         :disabled="disabled"
         @selected="e => entitySelected(e)"
         @entry-click="e => entryClicked(e)"
+        @deselect="v.handleChange(null)"
     />
     <router-link
         v-if="canShowLink"

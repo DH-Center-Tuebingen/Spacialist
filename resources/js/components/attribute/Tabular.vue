@@ -226,19 +226,6 @@
 
     export default {
         components: {
-            // 'string-attribute': StringAttr,
-            // 'integer-attribute': IntegerAttr,
-            // 'float-attribute': FloatAttr,
-            // 'bool-attribute': Bool,
-            // 'iconclass-attribute': Iconclass,
-            // 'rism-attribute': RISM,
-            // 'entity-attribute': Entity,
-            // 'date-attribute': DateAttr,
-            // 'daterange-attribute': DaterangeAttr,
-            // 'singlechoice-attribute': SingleChoice,
-            // 'multichoice-attribute': MultiChoice,
-            // 'userlist-attribute': UserList,
-            // 'url-attribute': Url,
             Row,
         },
         props: {
@@ -305,7 +292,7 @@
                 return idx;
                 // return hash(JSON.stringify(row)) + idx;
             };
-            const resetFieldState = _ => {
+            const resetFieldState = _ => {                
                 v.resetField({
                     value: value.value
                 });
