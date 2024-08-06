@@ -22,24 +22,20 @@ class EntityMultipleAttribute extends AttributeBase
 
     public static function unserialize(mixed $data) : mixed {
         $result = [];
-        foreach($data as $entry) {
-            if($entry["name"] == "error.deleted_entity") {
-                continue;
+        foreach($data as $entry) {       
+            $id = EntityAttribute::unserialize($entry);
+            if($id !== null) {
+                $result[] =  $id;
             }
-
-            $result[] = $entry["id"];
         }
         return json_encode($result);
     }
 
-    public static function serialize(mixed $data) : mixed {
-        $decodedData = json_decode($data);
-        $entityList = Entity::without(['user'])->whereIn('id', $decodedData)->pluck('name', 'id');
-        return array_map(function($value) use ($entityList) {
-            return [
-                "id" => $value,
-                "name" => $entityList[$value] ?? "error.deleted_entity",
-            ];
+    public static function serialize(mixed $ids) : mixed {
+        $decodedData = json_decode($ids);
+        $entityList = Entity::without(['user'])->whereIn('id', $decodedData)->get()->keyBy('id');
+        return array_map(function($id) use ($entityList) {
+            return EntityAttribute::serializeFromEntity($id, $entityList[$id]);
         }, $decodedData);
     }
 }
