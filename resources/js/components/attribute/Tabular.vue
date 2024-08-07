@@ -448,7 +448,9 @@
                 if(curr?.resetFieldState) {
                     curr.resetFieldState();
                 }
-                restoreTableRow(rowIdx);
+                if(v.value[actualRow].mark_deleted) {
+                    restoreTableRow(rowIdx);
+                }
             };
             const getActualRowIndex = idx => {
                 if(state.showAll || !state.needsCut) return idx;

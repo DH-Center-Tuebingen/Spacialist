@@ -142,6 +142,22 @@
                 return !props.multiple && v.fieldValue.name != 'error.deleted_entity';
             });
 
+            const valueHasChanged = (v1, v2) => {
+                if(!v1 && !v2) return false;
+                if(!v1 || !v2) return true;
+                if(v1.length != v2.length) return true;
+                if(props.multiple) {
+                    const l2 = v2.map(itm => itm.id);
+                    for(let i=0; i<v1.length; i++) {
+                        const itm1 = v1[i];
+                        if(!l2.includes(itm1)) return true;
+                    }
+                    return false;
+                } else {
+                    return v1.id != v2.id;
+                }
+            };
+
             // DATA
             const {
                 handleChange,
@@ -182,6 +198,7 @@
                 // only emit @change event if field is validated (required because Entity.vue components)
                 // trigger this watcher several times even if another component is updated/validated
                 if(!v.meta.validated) return;
+                if(!valueHasChanged(oldValue, newValue)) return;
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
