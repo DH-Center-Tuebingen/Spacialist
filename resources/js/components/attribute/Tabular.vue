@@ -292,7 +292,7 @@
                 return idx;
                 // return hash(JSON.stringify(row)) + idx;
             };
-            const resetFieldState = _ => {                
+            const resetFieldState = _ => {
                 v.resetField({
                     value: value.value
                 });
@@ -411,14 +411,12 @@
                     const curr = data[i];
                     let colIdx = 0;
                     for(let column in state.columns) {
-                        
                         let value = curr[columns[colIdx]];
                         if(column.datatype == 'si-unit') {
                             rowValue[column] = curr[columns[colIdx]];
                             colIdx++;
                             continue;
                         }
-                        
                         rowValue[column] = value;
                         colIdx++;
                         // If less columns selected than exist, stop adding new/non-existing column data

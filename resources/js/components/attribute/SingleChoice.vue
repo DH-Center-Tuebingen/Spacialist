@@ -1,4 +1,4 @@
-f<template>
+<template>
     <multiselect
         v-model="v.value"
         :classes="multiselectResetClasslist"
@@ -179,8 +179,9 @@ f<template>
             };
 
             const formatAndHandleChange = value => {
-                if(value != null)
+                if(value != null) {
                     value = formatValue(value);
+                }
                 return veeHandleChange(value);
             };
 
