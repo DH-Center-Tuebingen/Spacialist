@@ -33,18 +33,18 @@ class TableAttribute extends AttributeBase
     public static function unserialize(mixed $data) : mixed {
         $attributeTypes = Attribute::whereNotNull('parent_id')
             ->whereIn('datatype', ['entity', 'entity-mc'])
-            ->pluck('id', 'datatype')
+            ->pluck('datatype', 'id')
             ->toArray();
         foreach($data as $rowId => $row) {
             // skip empty rows
             if(count($row) === 0) continue;
             foreach($row as $aid => $colValue) {
-                foreach($attributeTypes as $type => $tid) {
+                foreach($attributeTypes as $tid => $type) {
                     if($aid == $tid) {
                         if($type == 'entity') {
-                            $data[$rowId][$aid] = EntityAttribute::unserialize(($colValue));
+                            $data[$rowId][$aid] = EntityAttribute::unserialize($colValue);
                         } else if($type == 'entity-mc') {
-                            $data[$rowId][$aid] = EntityMultipleAttribute::unserialize(($colValue));
+                            $data[$rowId][$aid] = EntityMultipleAttribute::unserialize($colValue);
                         }
                     }
                 }

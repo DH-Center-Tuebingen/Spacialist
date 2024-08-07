@@ -16,19 +16,22 @@ class EntityAttribute extends AttributeBase
     }
 
     public static function unserialize(mixed $data) : mixed {
-        if($data["name"] == self::$deleted_string) {
-            return null;
-        } else {
-            return $data["id"];
-        }
+        // if($data["name"] == self::$deleted_string) {
+        //     return null;
+        // } else {
+        //     return $data["id"];
+        // }
+
+        // Always return id prop, even if entity is deleted. Otherwise it wouldn't be visible in the frontend
+        return $data["id"];
     }
 
-    public static function serialize(mixed $id) : mixed {
-        $entity = Entity::without(['user'])->find($id);
-        return self::serializeFromEntity($id, $entity);
+    public static function serialize(mixed $data) : mixed {
+        $entity = Entity::without(['user'])->find($data);
+        return self::serializeFromEntity($data, $entity);
     }
-    
-    public static function serializeFromEntity($id, $entity){
+
+    public static function serializeFromEntity(int $id, ?Entity $entity) : array {
        return [
             "id" => $id,
             "name" => isset($entity) ? $entity->name : self::$deleted_string,

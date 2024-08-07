@@ -22,7 +22,7 @@ class EntityMultipleAttribute extends AttributeBase
 
     public static function unserialize(mixed $data) : mixed {
         $result = [];
-        foreach($data as $entry) {       
+        foreach($data as $entry) {
             $id = EntityAttribute::unserialize($entry);
             if($id !== null) {
                 $result[] =  $id;
