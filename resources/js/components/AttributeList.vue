@@ -124,6 +124,7 @@
                             :preview-data="previewData"
                             @change="updateDirtyState"
                             @update-selection="handleSelectionUpdate"
+                            @expanded="e => onAttributeExpand(e, index)"
                         />
 
                         <attribute-moderation-panel

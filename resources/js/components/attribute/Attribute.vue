@@ -116,7 +116,7 @@
         :value="state.value"
         :attribute="data"
         :preview-columns="preview ? previewData[data.id] : null"
-        @expanded="e => onAttributeExpand(e, index)"
+        @expanded="e => $emit('expanded', e)"
         @change="updateDirtyState"
     />
 
@@ -350,7 +350,7 @@
                 default: _ => new Object(),
             },
         },
-        emits: ['change', 'update-selection'],
+        emits: ['expanded','change', 'update-selection'],
         setup(props, context) {
             const {
                 data,
