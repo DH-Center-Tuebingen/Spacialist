@@ -156,6 +156,7 @@
                 columnRefs.value[idx] = el;
             };
             const resetFieldState = _ => {
+                state.currentValue = _cloneDeep(state.initialValue);
                 for(let k in columnRefs.value) {
                     const curr = columnRefs.value[k];
                     if(curr?.v?.meta?.dirty && !!curr.resetFieldState) {
@@ -164,6 +165,7 @@
                 }
             };
             const undirtyField = _ => {
+                state.initialValue = _cloneDeep(state.currentValue);
                 for(let k in columnRefs.value) {
                     const curr = columnRefs.value[k];
                     if(curr?.v?.meta?.dirty && !!curr.undirtyField) {
@@ -198,6 +200,7 @@
             // DATA
             const columnRefs = ref({});
             const state = reactive({
+                initialValue: _cloneDeep(data.value),
                 currentValue: _cloneDeep(data.value),
                 isHovered: false,
                 rootAttributeValues: {},
