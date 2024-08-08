@@ -345,7 +345,7 @@ export function showResetPassword(id) {
                     addToast(msg, title, {
                         channel: 'success',
                     });
-                })
+                });
             },
             onCancel(e) {
                 modal.destroy();
@@ -370,7 +370,7 @@ export function showConfirmPassword(id) {
                         login_attempts: null,
                     });
                     modal.destroy();
-                })
+                });
             },
             onCancel(e) {
                 modal.destroy();
@@ -398,7 +398,7 @@ export function showDeactivateUser(user, onDeactivated) {
                     }
                     store.dispatch('deactivateUser', data);
                     modal.destroy();
-                })
+                });
             },
             onCancel(e) {
                 modal.destroy();
