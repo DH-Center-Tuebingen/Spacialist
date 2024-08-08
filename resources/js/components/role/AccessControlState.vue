@@ -1,13 +1,13 @@
 <template>
     <div>
-        <span v-show="state.hasUnknownState">
-            <i class="fas fa-fw fa-minus" />
+        <span v-show="hasUnknownState">
+            <i class="fas fa-fw fa-minus text-muted" />
         </span>
-        <span v-show="state.hasAcceptState">
-            <i class="fas fa-fw fa-check" />
+        <span v-show="hasAcceptState">
+            <i class="fas fa-fw fa-check text-success" />
         </span>
-        <span v-show="state.hasNonAcceptState">
-            <i class="fas fa-fw fa-ban" />
+        <span v-show="hasNonAcceptState">
+            <i class="fas fa-fw fa-ban text-danger" />
         </span>
     </div>
 </template>
@@ -15,8 +15,6 @@
 <script>
     import {
         computed,
-        reactive,
-        toRefs,
     } from 'vue';
 
     export default {
@@ -26,27 +24,16 @@
                 required: true,
             }
         },
-        setup(props, context) {
-            const {
-                status,
-            } = toRefs(props);
+        setup(props) {
+            const hasUnknownState = computed(_ => props.status > 1);
+            const hasAcceptState = computed(_ => props.status === 1);
+            const hasNonAcceptState = computed(_ => props.status === 0);
 
-            // FUNCTIONS
-
-            // DATA
-            const state = reactive({
-                hasUnknownState: computed(_ => status.value > 1),
-                hasAcceptState: computed(_ => status.value === 1),
-                hasNonAcceptState: computed(_ => status.value === 0),
-            });
-
-            // RETURN
             return {
-                // HELPERS
-                // LOCAL
-                // STATE
-                state,
-            }
+                hasUnknownState,
+                hasAcceptState,
+                hasNonAcceptState,
+            };
         },
-    }
+    };
 </script>
