@@ -1,10 +1,15 @@
 <template>
-    <div>
-        <h1>Entity: {{ entity.id }}</h1>
+    <div class="h-100 d-flex flex-column">
+        <entity-breadcrumbs
+            v-if="showBreadcrumb"
+            class="mb-2 small"
+            :entity="entity"
+        />
         <EntityDetail
             v-if="entity"
             :entity="entity"
             :user="user"
+            @request-entity="requestEntity"
         />
     </div>
 </template>
@@ -90,6 +95,10 @@
                 });
             };
 
+            const showBreadcrumb = computed(_ => {
+                return entity.value.parentIds && entity.value.parentIds.length > 1;
+            });
+
             const updateAllDependencies = _ => {
                 if(!entityAttributes.value) return;
 
@@ -107,7 +116,8 @@
             });
 
             return {
-                entity
+                entity,
+                showBreadcrumb,
             };
         },
     };

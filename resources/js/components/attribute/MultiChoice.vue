@@ -126,7 +126,7 @@
                 }),
             });
             const v = reactive({
-                value: fieldValue,
+                value: fieldValue || [],
                 handleChange,
                 meta,
                 resetField,

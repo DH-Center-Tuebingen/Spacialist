@@ -118,7 +118,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -127,7 +127,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -136,7 +136,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -145,7 +145,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -154,7 +154,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -163,7 +163,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -172,7 +172,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -180,7 +180,7 @@
                             v-else-if="element.datatype == 'serial'"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                         />
 
                         <list-attribute
@@ -188,7 +188,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :entries="state.attributeValues[element.id].value || []"
+                            :entries="fixedValue(element) || []"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -197,7 +197,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                             :epochs="selections[element.id] || []"
                             :type="element.datatype"
                             @change="e => updateDirtyState(e, element.id)"
@@ -208,7 +208,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value || {}"
+                            :value="fixedValue(element) || {}"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -217,7 +217,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                             :metadata="element.metadata"
                             @change="e => updateDirtyState(e, element.id)"
                         />
@@ -227,7 +227,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                             :attribute="element"
                             :selections="selections"
                             :preview-columns="preview ? previewData[element.id] : null"
@@ -240,7 +240,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                             :attribute="element"
                             @change="e => updateDirtyState(e, element.id)"
                         />
@@ -250,7 +250,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                             :attribute="element"
                             @change="e => updateDirtyState(e, element.id)"
                         />
@@ -260,7 +260,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                             :attribute="element"
                             @change="e => updateDirtyState(e, element.id)"
                         />
@@ -282,7 +282,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -291,7 +291,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -300,7 +300,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                             :selections="selections[element.id] || []"
                             :selection-from="element.root_attribute_id"
                             :selection-from-value="state.rootAttributeValues[element.root_attribute_id]"
@@ -313,7 +313,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixMultiChoice(element)"
                             :selections="selections[element.id] || []"
                             @change="e => updateDirtyState(e, element.id)"
                         />
@@ -323,7 +323,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -332,7 +332,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -340,7 +340,7 @@
                             v-else-if="element.datatype == 'sql'"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                         />
 
                         <system-separator-attribute
@@ -354,7 +354,7 @@
                             :ref="el => setRef(el, element.id)"
                             :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
                             :name="`attr-${element.id}`"
-                            :value="state.attributeValues[element.id].value"
+                            :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
                         />
 
@@ -581,7 +581,7 @@
                         expClasses[itm] = true;
                     });
                 }
-                
+
                 return expClasses;
             };
             const onAttributeExpand = (e, i) => {
@@ -789,6 +789,8 @@
             };
 
             const hasComment = attribute => {
+                if(!state.attributeValues[attribute.id]) return false;
+
                 return state.attributeValues[attribute.id].comments_count > 0;
             };
             const hasBookmarks = attribute => {
@@ -830,6 +832,7 @@
                 }
             };
 
+
             const attrs = context.attrs;
             // DATA
             const attrRefs = ref({});
@@ -868,6 +871,17 @@
                 ignoreMetadata: computed(_ => options.value.ignore_metadata),
                 itemClasses: computed(_ => options.value.item_classes),
             });
+            
+            const fixedValue = (element, defaultValue = null) => {
+                return state.attributeValues[element.id]?.value ?? defaultValue;
+            };
+            
+            const fixMultiChoice = element => {
+                const value = fixedValue(element);
+                if(!value || value === '') return [];
+                return value;
+            };
+
 
             // ON MOUNTED
             onMounted(_ => {
@@ -889,6 +903,8 @@
                 translateConcept,
                 // LOCAL
                 certainty,
+                fixedValue,
+                fixMultiChoice,
                 handleSelectionUpdate,
                 clFromMetadata,
                 attributeClasses,

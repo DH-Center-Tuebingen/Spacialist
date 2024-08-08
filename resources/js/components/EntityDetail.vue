@@ -1,303 +1,331 @@
 <template>
-    <div class="h-100 d-flex flex-column">
-        <entity-breadcrumbs
-            v-if="state.showBreadcrumb"
-            class="mb-2 small"
-            :entity="state.entity"
-        />
-        <div class="d-flex align-items-center justify-content-between">
-            <h3
-                class="mb-0"
-                @mouseenter="onEntityHeaderHover(true)"
-                @mouseleave="onEntityHeaderHover(false)"
-            >
-                <span v-if="!state.entity.editing">
-                    {{ state.entity.name }}
-                    <small class="d-inline-flex gap-1">
-                        <button
-                            v-show="state.hiddenAttributeCount > 0"
-                            id="hidden-attributes-icon"
-                            class="border-0 bg-body text-secondary p-0"
-                            data-bs-container="body"
-                            data-bs-toggle="popover"
-                            data-bs-trigger="hover"
-                            data-bs-placement="bottom"
-                            :data-bs-content="state.hiddenAttributeListing"
-                            data-bs-html="true"
-                            data-bs-custom-class="popover-p-2"
-                            @mousedown="showHiddenAttributes()"
-                            @mouseup="hideHiddenAttributes()"
-                        >
-                            <span v-show="state.hiddenAttributeState">
-                                <span class="fa-layers fa-fw">
-                                    <i class="fas fa-eye fa-xs" />
-                                    <span
-                                        class="fa-layers-counter fa-counter-lg"
-                                        style="background:Tomato"
-                                    >
-                                        {{ state.hiddenAttributeCount }}
-                                    </span>
-                                </span>
-                            </span>
-                            <span v-show="!state.hiddenAttributeState">
-                                <span class="fa-layers fa-fw">
-                                    <i class="fas fa-eye-slash fa-xs" />
-                                    <span
-                                        class="fa-layers-counter fa-counter-lg"
-                                        style="background:Tomato"
-                                    >
-                                        {{ state.hiddenAttributeCount }}
-                                    </span>
-                                </span>
-                            </span>
-                        </button>
-                        <span
-                            v-if="state.hasAttributeLinks"
-                            class="dropdown bg-body text-secondary clickable me-1"
-                        >
-                            <span
-                                class="fa-layers fa-fw"
-                                data-bs-toggle="dropdown"
-                            >
-                                <i class="fas fa-fw fa-xs fa-link fa-xs" />
+    <div class="d-flex align-items-center justify-content-between">
+        <h3
+            class="mb-0"
+            @mouseenter="onEntityHeaderHover(true)"
+            @mouseleave="onEntityHeaderHover(false)"
+        >
+            <span v-if="!state.entity.editing">
+                {{ state.entity.name }}
+                <small class="d-inline-flex gap-1">
+                    <button
+                        v-show="state.hiddenAttributeCount > 0"
+                        id="hidden-attributes-icon"
+                        class="border-0 bg-body text-secondary p-0"
+                        data-bs-container="body"
+                        data-bs-toggle="popover"
+                        data-bs-trigger="hover"
+                        data-bs-placement="bottom"
+                        :data-bs-content="state.hiddenAttributeListing"
+                        data-bs-html="true"
+                        data-bs-custom-class="popover-p-2"
+                        @mousedown="showHiddenAttributes()"
+                        @mouseup="hideHiddenAttributes()"
+                    >
+                        <span v-show="state.hiddenAttributeState">
+                            <span class="fa-layers fa-fw">
+                                <i class="fas fa-eye fa-xs" />
                                 <span
                                     class="fa-layers-counter fa-counter-lg"
                                     style="background:Tomato"
                                 >
-                                    {{ state.entity.attributeLinks.length }}
+                                    {{ state.hiddenAttributeCount }}
                                 </span>
                             </span>
-                            <ul class="dropdown-menu">
-                                <li
-                                    v-for="link in state.groupedAttributeLinks"
-                                    :key="link.id"
-                                >
-                                    <router-link
-                                        :to="{ name: 'entitydetail', params: { id: link.id }, query: state.routeQuery }"
-                                        class="dropdown-item d-flex align-items-center gap-1"
-                                        :title="link.path.join(' / ')"
-                                    >
-                                        <entity-type-label
-                                            :type="link.entity_type_id"
-                                            :icon-only="true"
-                                        />
-                                        {{ link.name }}
-                                        <span class="text-muted small">{{ link.attribute_urls.join(', ') }}</span>
-                                    </router-link>
-                                </li>
-                            </ul>
                         </span>
-                        <a
-                            v-if="state.entityHeaderHovered && can('entity_write')"
-                            href="#"
-                            class="text-secondary"
-                            @click.prevent="editEntityName()"
+                        <span v-show="!state.hiddenAttributeState">
+                            <span class="fa-layers fa-fw">
+                                <i class="fas fa-eye-slash fa-xs" />
+                                <span
+                                    class="fa-layers-counter fa-counter-lg"
+                                    style="background:Tomato"
+                                >
+                                    {{ state.hiddenAttributeCount }}
+                                </span>
+                            </span>
+                        </span>
+                    </button>
+                    <span
+                        v-if="state.hasAttributeLinks"
+                        class="dropdown bg-body text-secondary clickable me-1"
+                    >
+                        <span
+                            class="fa-layers fa-fw"
+                            data-bs-toggle="dropdown"
                         >
-                            <i class="fas fa-fw fa-edit fa-xs" />
-                        </a>
-                    </small>
-                </span>
-                <form
-                    v-else
-                    class="d-flex flex-row"
-                    @submit.prevent="updateEntityName()"
+                            <i class="fas fa-fw fa-xs fa-link fa-xs" />
+                            <span
+                                class="fa-layers-counter fa-counter-lg"
+                                style="background:Tomato"
+                            >
+                                {{ state.entity.attributeLinks.length }}
+                            </span>
+                        </span>
+                        <ul class="dropdown-menu">
+                            <li
+                                v-for="link in state.groupedAttributeLinks"
+                                :key="link.id"
+                            >
+                                <router-link
+                                    :to="{ name: 'entitydetail', params: { id: link.id }, query: state.routeQuery }"
+                                    class="dropdown-item d-flex align-items-center gap-1"
+                                    :title="link.path.join(' / ')"
+                                >
+                                    <entity-type-label
+                                        :type="link.entity_type_id"
+                                        :icon-only="true"
+                                    />
+                                    {{ link.name }}
+                                    <span class="text-muted small">{{ link.attribute_urls.join(', ') }}</span>
+                                </router-link>
+                            </li>
+                        </ul>
+                    </span>
+                    <a
+                        v-if="state.entityHeaderHovered && can('entity_write')"
+                        href="#"
+                        class="text-secondary"
+                        @click.prevent="editEntityName()"
+                    >
+                        <i class="fas fa-fw fa-edit fa-xs" />
+                    </a>
+                </small>
+            </span>
+            <form
+                v-else
+                class="d-flex flex-row"
+                @submit.prevent="updateEntityName()"
+            >
+                <input
+                    v-model="state.editedEntityName"
+                    type="text"
+                    class="form-control form-control-sm me-2"
                 >
-                    <input
-                        v-model="state.editedEntityName"
-                        type="text"
-                        class="form-control form-control-sm me-2"
-                    >
-                    <button
-                        type="submit"
-                        class="btn btn-outline-success btn-sm me-2"
-                    >
-                        <i class="fas fa-fw fa-check" />
-                    </button>
-                    <button
-                        type="reset"
-                        class="btn btn-outline-danger btn-sm"
-                        @click="cancelEditEntityName()"
-                    >
-                        <i class="fas fa-fw fa-ban" />
-                    </button>
-                </form>
-            </h3>
-            <div class="d-flex flex-row gap-2">
                 <button
                     type="submit"
-                    form="entity-attribute-form"
-                    class="btn btn-outline-success btn-sm"
-                    :disabled="!state.formDirty || !can('entity_data_write')"
-                    @click.prevent="saveEntity()"
+                    class="btn btn-outline-success btn-sm me-2"
                 >
-                    <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
+                    <i class="fas fa-fw fa-check" />
                 </button>
                 <button
-                    type="button"
-                    class="btn btn-outline-warning btn-sm"
-                    :disabled="!state.formDirty"
-                    @click="resetForm()"
-                >
-                    <i class="fas fa-fw fa-undo" /> {{ t('global.reset') }}
-                </button>
-                <button
-                    type="button"
+                    type="reset"
                     class="btn btn-outline-danger btn-sm"
-                    :disabled="!can('entity_delete')"
-                    @click="confirmDeleteEntity()"
+                    @click="cancelEditEntityName()"
                 >
-                    <i class="fas fa-fw fa-trash" /> {{ t('global.delete') }}
+                    <i class="fas fa-fw fa-ban" />
                 </button>
-            </div>
+            </form>
+        </h3>
+        <div class="d-flex flex-row gap-2">
+            <button
+                type="submit"
+                form="entity-attribute-form"
+                class="btn btn-outline-success btn-sm"
+                :disabled="!state.formDirty || !can('entity_data_write')"
+                @click.prevent="saveEntity()"
+            >
+                <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
+            </button>
+            <button
+                type="button"
+                class="btn btn-outline-warning btn-sm"
+                :disabled="!state.formDirty"
+                @click="resetForm()"
+            >
+                <i class="fas fa-fw fa-undo" /> {{ t('global.reset') }}
+            </button>
+            <button
+                type="button"
+                class="btn btn-outline-danger btn-sm"
+                :disabled="!can('entity_delete')"
+                @click="confirmDeleteEntity()"
+            >
+                <i class="fas fa-fw fa-trash" /> {{ t('global.delete') }}
+            </button>
         </div>
-        <div class="d-flex justify-content-between my-2">
-            <entity-type-label
-                :type="state.entity.entity_type_id"
-                :icon-only="false"
-            />
-            <div>
-                <i class="fas fa-fw fa-user-edit" />
-                <span
-                    class="ms-1"
-                    :title="date(state.lastModified, undefined, true, true)"
-                >
-                    {{ ago(state.lastModified) }}
+    </div>
+    <div class="d-flex justify-content-between my-2">
+        <entity-type-label
+            :type="state.entity.entity_type_id"
+            :icon-only="false"
+        />
+        <div>
+            <i class="fas fa-fw fa-user-edit" />
+            <span
+                class="ms-1"
+                :title="date(state.lastModified, undefined, true, true)"
+            >
+                {{ ago(state.lastModified) }}
+            </span>
+            -
+            <a
+                v-if="state.entity.user"
+                href="#"
+                class="fw-medium"
+                @click.prevent="showUserInfo(state.entityUser)"
+            >
+                {{ state.entityUser.name }}
+                <user-avatar
+                    :user="state.entityUser"
+                    :size="20"
+                    class="align-middle"
+                />
+            </a>
+        </div>
+    </div>
+    <ul
+        id="entity-detail-tabs"
+        class="nav nav-tabs"
+        role="tablist"
+    >
+        <li
+            v-for="(tg, key) in state.entityGroups"
+            :key="`attribute-group-${tg.id}-tab`"
+            class="nav-item"
+            role="presentation"
+        >
+            <a
+                :id="`active-entity-attributes-group-${tg.id}-tab`"
+                class="nav-link active-entity-attributes-tab active-entity-detail-tab d-flex gap-2 align-items-center"
+                href="#"
+                @click.prevent="setView(`attributes-${key}`)"
+            >
+                <span class="fa-layers fa-fw">
+                    <i class="fas fa-fw fa-layer-group" />
+                    <span class="fa-layers-counter fa-counter-lg bg-secondary-subtle text-reset">
+                        {{ tg.data.length }}
+                    </span>
                 </span>
-                -
-                <a
-                    v-if="state.entity.user"
-                    href="#"
-                    class="fw-medium"
-                    @click.prevent="showUserInfo(state.entityUser)"
+                <span v-if="key == 'default'">
+                    {{ t('main.entity.tabs.default') }}
+                </span>
+                <span v-else>
+                    {{ translateConcept(key) }}
+                </span>
+                <div
+                    v-if="state.dirtyStates[tg.id]"
+                    class="d-flex flex-row gap-2 align-items-center"
+                    @mouseover="showTabActions(tg.id, true)"
+                    @mouseleave="showTabActions(tg.id, false)"
                 >
-                    {{ state.entityUser.name }}
-                    <user-avatar
-                        :user="state.entityUser"
-                        :size="20"
-                        class="align-middle"
-                    />
-                </a>
-            </div>
-        </div>
-        <ul
-            id="entity-detail-tabs"
-            class="nav nav-tabs"
-            role="tablist"
-        >
-            <li
-                v-for="(tg, key) in state.entityGroups"
-                :key="`attribute-group-${tg.id}-tab`"
-                class="nav-item"
-                role="presentation"
-            >
-                <a
-                    :id="`active-entity-attributes-group-${tg.id}-tab`"
-                    class="nav-link active-entity-attributes-tab active-entity-detail-tab d-flex gap-2 align-items-center"
-                    href="#"
-                    @click.prevent="setDetailPanel(`attributes-${tg.id}`)"
-                >
-                    <span class="fa-layers fa-fw">
-                        <i class="fas fa-fw fa-layer-group" />
-                        <span class="fa-layers-counter fa-counter-lg bg-secondary-subtle text-reset">
-                            {{ tg.data.length }}
-                        </span>
-                    </span>
-                    <span v-if="key == 'default'">
-                        {{ t('main.entity.tabs.default') }}
-                    </span>
-                    <span v-else>
-                        {{ translateConcept(key) }}
-                    </span>
-                    <div
-                        v-if="state.dirtyStates[tg.id]"
-                        class="d-flex flex-row gap-2 align-items-center"
-                        @mouseover="showTabActions(tg.id, true)"
-                        @mouseleave="showTabActions(tg.id, false)"
-                    >
-                        <i class="fas fa-fw fa-2xs fa-circle text-warning" />
-                        <div v-show="state.attributeGrpHovered == tg.id">
-                            <a
-                                href="#"
-                                @click.prevent.stop="saveEntity(`${tg.id}`)"
-                            >
-                                <i class="fas fa-fw fa-save text-success" />
-                            </a>
-                            <a
-                                href="#"
-                                @click.prevent.stop="resetForm(`${tg.id}`)"
-                            >
-                                <i class="fas fa-fw fa-undo text-warning" />
-                            </a>
-                        </div>
+                    <i class="fas fa-fw fa-2xs fa-circle text-warning" />
+                    <div v-show="state.attributeGrpHovered == tg.id">
+                        <a
+                            href="#"
+                            @click.prevent.stop="saveEntity(`${tg.id}`)"
+                        >
+                            <i class="fas fa-fw fa-save text-success" />
+                        </a>
+                        <a
+                            href="#"
+                            @click.prevent.stop="resetForm(`${tg.id}`)"
+                        >
+                            <i class="fas fa-fw fa-undo text-warning" />
+                        </a>
                     </div>
-                </a>
-            </li>
-            <template v-if="state?.entity?.data?.tabbedChildren">
-                <li
-                    v-for="child in state.entity.data.tabbedChildren"
-                    :key="child.id"
-                    class="nav nav-item"
-                    role="tablist"
-                >
-                    <a
-                        :id="`active-entity-child-${child.id}-tab`"
-                        class="nav-link active-entity-detail-tab d-flex gap-2 align-items-center"
-                        href="#"
-                        @click.prevent="setDetailPanel(`entity-${child.id}`, child)"
-                    >
-                        {{ child.name }}
-                    </a>
-                </li>
-            </template>
-            <!-- empty nav-item to separate metadata and comments from attributes -->
-            <li class="nav-item nav-item-list-divider ms-auto" />
+                </div>
+            </a>
+        </li>
+        <template v-if="state?.entity?.data?.tabbedChildren">
             <li
-                v-show="can('entity_read')"
-                class="nav-item"
-                role="presentation"
+                v-for="child in state.entity.data.tabbedChildren"
+                :key="child.id"
+                class="nav nav-item"
+                role="tablist"
             >
                 <a
-                    id="active-entity-metadata-tab"
+                    :id="`active-entity-child-${child.id}-tab`"
                     class="nav-link active-entity-detail-tab d-flex gap-2 align-items-center"
                     href="#"
-                    @click.prevent="setDetailPanel('metadata')"
+                    @click.prevent="setEntityView(child)"
                 >
-                    <i class="fas fa-fw fa-file-shield" />
-                    {{ t('main.entity.tabs.metadata') }}
-                    <span
-                        v-if="!state.entity.metadata || !state.entity.metadata.licence"
-                        :title="t('global.licence_missing')"
-                    >
-                        <i class="fas fa-exclamation text-warning" />
-                    </span>
+                    <i class="fas fa-fw fa-cube" />
+                    {{ child.name }}
                 </a>
             </li>
-            <li
-                v-show="can('comments_read')"
-                class="nav-item"
-                role="presentation"
-            >
-                <a
-                    id="active-entity-comments-tab"
-                    class="nav-link active-entity-detail-tab d-flex gap-2 align-items-center"
-                    href="#"
-                    @click.prevent="setDetailPanel('comments')"
-                >
-                    <span class="fa-layers fa-fw">
-                        <i class="fas fa-fw fa-comments" />
-                        <span class="fa-layers-counter fa-counter-lg bg-secondary-subtle text-reset">
-                            {{ state.entity.comments_count }}
-                        </span>
-                    </span>
-                    {{ t('main.entity.tabs.comments') }}
-                </a>
-            </li>
-        </ul>
-        <div
-            id="entity-detail-tab-content"
-            class="tab-content col ps-0 pe-0 overflow-hidden"
+        </template>
+        <!-- empty nav-item to separate metadata and comments from attributes -->
+        <li class="nav-item nav-item-list-divider ms-auto" />
+        <li
+            v-show="can('entity_read')"
+            class="nav-item"
+            role="presentation"
         >
-            <div
+            <a
+                id="active-entity-metadata-tab"
+                class="nav-link active-entity-detail-tab d-flex gap-2 align-items-center"
+                href="#"
+                @click.prevent="setView('metadata')"
+            >
+                <i class="fas fa-fw fa-file-shield" />
+                {{ t('main.entity.tabs.metadata') }}
+                <span
+                    v-if="!state.entity.metadata || !state.entity.metadata.licence"
+                    :title="t('global.licence_missing')"
+                >
+                    <i class="fas fa-exclamation text-warning" />
+                </span>
+            </a>
+        </li>
+        <li
+            v-show="can('comments_read')"
+            class="nav-item"
+            role="presentation"
+        >
+            <a
+                id="active-entity-comments-tab"
+                class="nav-link active-entity-detail-tab d-flex gap-2 align-items-center"
+                href="#"
+                @click.prevent="setView('comments')"
+            >
+                <span class="fa-layers fa-fw">
+                    <i class="fas fa-fw fa-comments" />
+                    <span class="fa-layers-counter fa-counter-lg bg-secondary-subtle text-reset">
+                        {{ state.entity.comments_count }}
+                    </span>
+                </span>
+                {{ t('main.entity.tabs.comments') }}
+            </a>
+        </li>
+    </ul>
+
+
+
+    <div
+        id="entity-detail-tab-content"
+        class="tab-content col ps-0 pe-0 overflow-hidden"
+    >
+        <!-- ATTRIBUTES VIEW -->
+
+        <div
+            v-if="isAttributeView"
+            class="tab-pane fade h-100 active-entity-detail-panel active-entity-attributes-panel show active"
+            role="tabpanel"
+        >
+            <form
+                v-if="tabName"
+                class="h-100 container-fluid"
+                @submit.prevent
+                @keydown.ctrl.s="e => handleSaveOnKey(e, `${tabName.id}`)"
+            >
+                <attribute-list
+                    v-dcan="'entity_data_read'"
+                    class="pt-2 h-100 overflow-y-auto row"
+                    :attributes="tabName.data"
+                    :hidden-attributes="state.hiddenAttributeList"
+                    :show-hidden="state.hiddenAttributeState"
+                    :disable-drag="true"
+                    :metadata-addon="hasReferenceGroup"
+                    :selections="state.entityTypeSelections"
+                    :values="state.entity.data"
+                    @dirty="e => setFormState(e, tabName.id)"
+                    @metadata="showMetadata"
+                />
+            </form>
+        </div>
+
+
+        <!-- <div
                 v-for="tg in state.entityGroups"
                 :id="`active-entity-attributes-panel-${tg.id}`"
                 :key="`attribute-group-${tg.id}-panel`"
@@ -326,69 +354,74 @@
                         @metadata="showMetadata"
                     />
                 </form>
-            </div>
-            <div
+            </div> -->
+
+        <!-- METADATA VIEW -->
+        <!-- <div
+                v-if="view === 'metadata'"
                 v-show="can('entity_read')"
                 id="active-entity-metadata-panel"
                 class="tab-pane fade h-100 active-entity-detail-panel overflow-hidden"
                 role="tabpanel"
             >
                 <MetadataTab class="mb-auto scroll-y-auto h-100 pe-2" />
-            </div>
+            </div> -->
 
+        <!-- COMMENTS VIEW -->
+        <div
+            v-if="view === 'comments'"
+            v-show="can('comments_read')"
+            id="active-entity-comments-panel"
+            class="tab-pane fade h-100 active-entity-detail-panel"
+            role="tabpanel"
+        >
             <div
-                v-show="can('comments_read')"
-                id="active-entity-comments-panel"
-                class="tab-pane fade h-100 active-entity-detail-panel"
-                role="tabpanel"
+                v-if="state.entity.comments"
+                class="mb-auto overflow-y-auto h-100 pe-2"
             >
                 <div
-                    v-if="state.entity.comments"
-                    class="mb-auto overflow-y-auto h-100 pe-2"
+                    v-if="state.commentsFetching"
+                    class="mt-2"
                 >
-                    <div
-                        v-if="state.commentsFetching"
-                        class="mt-2"
-                    >
-                        <alert
-                            class="mb-0"
-                            type="info"
-                            :message="t('global.comments.fetching')"
-                        />
-                    </div>
-                    <div
-                        v-else-if="state.commentFetchFailed"
-                        class="mt-2"
-                    >
-                        <p class="alert alert-danger mb-0">
-                            {{ t('global.comments.fetching_failed') }}
-                            <button
-                                type="button"
-                                class="d-block mt-2 btn btn-sm btn-outline-success"
-                                @click="fetchComments"
-                            >
-                                <i class="fas fa-fw fa-sync" />
-                                {{ t('global.comments.retry_failed') }}
-                            </button>
-                        </p>
-                    </div>
-                    <comment-list
-                        v-else
-                        :avatar="48"
-                        :comments="state.entity.comments"
-                        :hide-button="false"
-                        :resource="state.resourceInfo"
-                        @added="addComment"
+                    <alert
+                        class="mb-0"
+                        type="info"
+                        :message="t('global.comments.fetching')"
                     />
                 </div>
+                <div
+                    v-else-if="state.commentFetchFailed"
+                    class="mt-2"
+                >
+                    <p class="alert alert-danger mb-0">
+                        {{ t('global.comments.fetching_failed') }}
+                        <button
+                            type="button"
+                            class="d-block mt-2 btn btn-sm btn-outline-success"
+                            @click="fetchComments"
+                        >
+                            <i class="fas fa-fw fa-sync" />
+                            {{ t('global.comments.retry_failed') }}
+                        </button>
+                    </p>
+                </div>
+                <comment-list
+                    v-else
+                    :avatar="48"
+                    :comments="state.entity.comments"
+                    :hide-button="false"
+                    :resource="state.resourceInfo"
+                    @added="addComment"
+                />
             </div>
         </div>
         <EntityDetail
-            v-if="state.tabType === 'entity' && Boolean(state.activeSubEntity)"
+            v-if="isEntityView"
+            class="ps-2 pt-2"
             :entity="state.activeSubEntity"
         />
-        <router-view :entity="state.entity" />
     </div>
+    <!-- <router-view :entity="state.entity" /> -->
 </template>
 
 <script>
@@ -411,6 +444,7 @@
     import { useI18n } from 'vue-i18n';
 
     import {
+        Alert,
         Popover,
     } from 'bootstrap';
 
@@ -420,6 +454,8 @@
     import { useToast } from '@/plugins/toast.js';
     import { ago, date } from '@/helpers/filters.js';
     import {
+        getEntityData,
+        getEntityReferences,
         getEntityComments,
         patchAttributes,
         patchEntityName,
@@ -438,6 +474,7 @@
         getEntityTypeAttributeSelections,
         getEntityTypeDependencies,
         getConcept,
+        fillEntityData,
         translateConcept,
         _cloneDeep,
     } from '@/helpers/helpers.js';
@@ -624,9 +661,6 @@
                         type: 'entity',
                     };
                 }),
-                showBreadcrumb: computed(_ => {
-                    return state.entity.parentIds && state.entity.parentIds.length > 1;
-                }),
                 lastModified: computed(_ => {
                     return state.entity.updated_at || state.entity.created_at;
                 }),
@@ -748,50 +782,86 @@
 
                 showDeleteEntity(state.entity.id);
             };
-            const setDetailPanel = (tab, subEntity = null) => {
+
+
+            const view = ref('attributes-default');
+
+            const setEntityView = async (subEntity) => {
+                view.value = 'entity';
                 state.activeSubEntity = subEntity;
 
-                const query = {
-                    view: tab,
-                };
-                router.push({
-                    query: {
-                        ...route.query,
-                        ...query,
+                if(!subEntity.data) {
+                    state.activeSubEntity.data = await getEntityData(subEntity.id);
+
+                    // LAZYLY COPIED FROM THE STORE, AS THE STOER HAS SIDEEFFECTS
+                    fillEntityData(state.activeSubEntitydata, state.activeSubEntityentity_type_id);
+                    state.activeSubEntityreferences = await getEntityReferences(subEntity.id) || {};
+                    for(let k in state.activeSubEntitydata) {
+                        const curr = state.activeSubEntitydata[k];
+                        if(curr.attribute) {
+                            const key = curr.attribute.thesaurus_url;
+                            if(!state.activeSubEntityreferences[key]) {
+                                state.activeSubEntityreferences[key] = [];
+                            }
+                        }
                     }
-                });
-            };
-            const setDetailPanelView = (tab = 'attributes-default') => {
-
-                const [tabType, tabId] = tab.split('-');
-
-                state.tabType = tabType;
-
-                let newTab, oldTabs, newPanel, oldPanels;
-                if(tab === 'comments') {
-                    newTab = document.getElementById('active-entity-comments-tab');
-                    newPanel = document.getElementById('active-entity-comments-panel');
-                    if(!state.commentsFetched) {
-                        fetchComments();
-                    }
-                } else if(tab === 'metadata') {
-                    newTab = document.getElementById('active-entity-metadata-tab');
-                    newPanel = document.getElementById('active-entity-metadata-panel');
-                } else if(tabType === 'entity') {
-                    newTab = document.getElementById(`active-entity-child-${tabId}-tab`);
-                    newPanel = document.getElementById(`active-entity-child-${tabId}`);
-                } else {
-                    newTab = document.getElementById(`active-entity-attributes-group-${tabId}-tab`);
-                    newPanel = document.getElementById(`active-entity-attributes-panel-${tabId}`);
                 }
-                oldTabs = document.getElementsByClassName('active-entity-detail-tab');
-                oldPanels = document.getElementsByClassName('active-entity-detail-panel');
-
-                oldTabs.forEach(t => t.classList.remove('active'));
-                if(newTab) newTab.classList.add('active');
-                oldPanels.forEach(p => p.classList.remove('show', 'active'));
-                if(newPanel) newPanel.classList.add('show', 'active');
             };
+
+            const setView = (_view) => {
+                view.value = _view;
+            };
+
+            const isEntityView = computed(() => {
+                return view.value.startsWith('entity');
+            });
+
+            const isAttributeView = computed(() => {
+                return view.value.startsWith('attributes');
+            });
+
+            const tabName = computed(() => {
+                if(!state.entityGroups) return null;
+                return state.entityGroups[view.value.split('-')[1]];
+            });
+
+            // const setView = view => {
+            //     $emit("update:view", view);
+            // };
+
+
+            // const setViewView = (tab = 'attributes-default') => {
+
+            //     const [tabType, tabId] = tab.split('-');
+
+            //     state.tabType = tabType;
+
+            //     let newTab, oldTabs, newPanel, oldPanels;
+            //     if(tab === 'comments') {
+            //         newTab = document.getElementById('active-entity-comments-tab');
+            //         newPanel = document.getElementById('active-entity-comments-panel');
+            //         if(!state.commentsFetched) {
+            //             fetchComments();
+            //         }
+            //     } else if(tab === 'metadata') {
+            //         newTab = document.getElementById('active-entity-metadata-tab');
+            //         newPanel = document.getElementById('active-entity-metadata-panel');
+            //     } else if(tabType === 'entity') {
+            //         newTab = document.getElementById(`active-entity-child-${tabId}-tab`);
+            //         newPanel = document.getElementById(`active-entity-child-${tabId}`);
+            //     } else {
+            //         newTab = document.getElementById(`active-entity-attributes-group-${tabId}-tab`);
+            //         newPanel = document.getElementById(`active-entity-attributes-panel-${tabId}`);
+            //     }
+            //     oldTabs = document.getElementsByClassName('active-entity-detail-tab');
+            //     oldPanels = document.getElementsByClassName('active-entity-detail-panel');
+
+            //     oldTabs.forEach(t => t.classList.remove('active'));
+            //     if(newTab) newTab.classList.add('active');
+            //     oldPanels.forEach(p => p.classList.remove('show', 'active'));
+            //     if(newPanel) newPanel.classList.add('show', 'active');
+            // };
+
             const onEntityHeaderHover = hoverState => {
                 state.entityHeaderHovered = hoverState;
             };
@@ -1021,7 +1091,7 @@
                 async (newValue, oldValue) => {
                     if(!newValue || !newValue.id) return;
                     nextTick(_ => {
-                        setDetailPanelView(route.query.view);
+                        // setViewView(route.query.view);
                         const eid = state.entity.id;
                         const treeElem = document.getElementById(`tree-node-${eid}`);
                         if(treeElem) {
@@ -1039,9 +1109,9 @@
                     if(route.name != 'entitydetail') return;
                     if(newValue == oldValue) return;
 
-                    nextTick(_ => {
-                        setDetailPanelView(newValue);
-                    });
+                    // nextTick(_ => {
+                    //     setViewView(newValue);
+                    // });
                 }
             );
 
@@ -1096,7 +1166,11 @@
                 showHiddenAttributes,
                 hideHiddenAttributes,
                 confirmDeleteEntity,
-                setDetailPanel,
+                setView,
+                setEntityView,
+                isAttributeView,
+                isEntityView,
+                tabName,
                 onEntityHeaderHover,
                 showTabActions,
                 setFormState,
@@ -1109,6 +1183,7 @@
                 // STATE
                 attrRefs,
                 state,
+                view,
             };
         }
     };
