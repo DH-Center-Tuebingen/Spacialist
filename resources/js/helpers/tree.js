@@ -1,6 +1,9 @@
 import TreeNode from '@/components/tree/Node.vue';
 
-import { ref } from 'vue';
+import {
+    markRaw,
+    ref,
+ } from 'vue';
 import store from '@/bootstrap/store.js';
 import { getNodeFromPath } from 'tree-component';
 import {
@@ -125,7 +128,7 @@ export class Node {
         this.children = ref([]);
         this.childrenLoaded = ref(this.children.length == this.children_count);
         this.children_count = ref(this.children_count);
-        this.component = component || TreeNode;
+        this.component = component || markRaw(TreeNode);
         // this.dragDelay = vm.dragDelay;
         // this.dragAllowed = _ => vm.isDragAllowed;
         // this.onToggle = vm.itemToggle;

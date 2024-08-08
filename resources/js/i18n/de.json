@@ -173,6 +173,7 @@
             "rism": "RISM",
             "si-unit": "SI-Einheit",
             "si_units": {
+                "unit_type": "Einheit",
                 "base_unit": "Basisgröße",
                 "time": {
                     "label": "Zeit",
@@ -573,6 +574,9 @@
                 },
                 "table": {
                     "add_row": "Neue Zeile hinzufügen",
+                    "error": {
+                        "deleted_entity": "Gelöschte Entität"
+                    },
                     "chart": {
                         "number_sets": "Die letzten {cnt} Datensätze",
                         "include_in": "Verwenden",

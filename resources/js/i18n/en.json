@@ -173,6 +173,7 @@
             "rism": "RISM",
             "si-unit": "SI-Unit",
             "si_units": {
+                "unit_type": "Unit Type",
                 "base_unit": "Base Unit",
                 "time": {
                     "label": "Time",
@@ -573,6 +574,9 @@
                 },
                 "table": {
                     "add_row": "Add row",
+                    "error": {
+                        "deleted_entity": "Deleted Entity"
+                    },
                     "chart": {
                         "number_sets": "Last {cnt} data sets",
                         "include_in": "Use in chart",

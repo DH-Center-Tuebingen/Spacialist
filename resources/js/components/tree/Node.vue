@@ -94,7 +94,7 @@
             data: {
                 required: true,
                 type: Object
-            }
+            },
         },
         setup(props) {
             const { t } = useI18n();
