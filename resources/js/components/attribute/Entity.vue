@@ -177,7 +177,7 @@
                 meta,
                 resetField,
                 value: computed(_ => {
-                    if(!v.fieldValue) return null;
+                    if(!v.fieldValue) return (props.multiple ? [] : null);
 
                     let value = null;
                     if(v.fieldValue) {
