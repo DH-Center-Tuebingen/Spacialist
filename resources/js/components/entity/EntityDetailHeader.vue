@@ -1,33 +1,4 @@
 <template>
-    <div class="d-flex justify-content-between my-2">
-        <entity-type-label
-            :type="entity.entity_type_id"
-            :icon-only="false"
-        />
-        <div>
-            <i class="fas fa-fw fa-user-edit" />
-            <span
-                class="ms-1"
-                :title="date(lastModified, undefined, true, true)"
-            >
-                {{ ago(lastModified) }}
-            </span>
-            -
-            <a
-                v-if="entity.user"
-                href="#"
-                class="fw-medium"
-                @click.prevent="showUserInfo(entityUser)"
-            >
-                {{ entityUser.name }}
-                <user-avatar
-                    :user="entityUser"
-                    :size="20"
-                    class="align-middle"
-                />
-            </a>
-        </div>
-    </div>
     <div class="d-flex align-items-center justify-content-between">
         <!-- TODO: Replace with Editable Field -->
         <EditableField
@@ -119,6 +90,7 @@
                 </a>
             </small> -->
 
+
         <div class="d-flex flex-row gap-2">
             <button
                 type="submit"
@@ -145,6 +117,35 @@
             >
                 <i class="fas fa-fw fa-trash" /> {{ t('global.delete') }}
             </button>
+        </div>
+    </div>
+    <div class="d-flex justify-content-between my-2">
+        <entity-type-label
+            :type="entity.entity_type_id"
+            :icon-only="false"
+        />
+        <div>
+            <i class="fas fa-fw fa-user-edit" />
+            <span
+                class="ms-1"
+                :title="date(lastModified, undefined, true, true)"
+            >
+                {{ ago(lastModified) }}
+            </span>
+            -
+            <a
+                v-if="entity.user"
+                href="#"
+                class="fw-medium"
+                @click.prevent="showUserInfo(entityUser)"
+            >
+                {{ entityUser.name }}
+                <user-avatar
+                    :user="entityUser"
+                    :size="20"
+                    class="align-middle"
+                />
+            </a>
         </div>
     </div>
 </template>
