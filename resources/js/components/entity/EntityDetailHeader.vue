@@ -3,6 +3,7 @@
         <!-- TODO: Replace with Editable Field -->
         <EditableField
             :value="entity.name"
+            :loading="true"
             @change="updateEntityName"
         />
         <!-- TODO: THE FOLLOWING WAS INSIDE THE HEADER ON HOVER - I DONT KNOW WHAT IT IS AND IF IT IS OBSOLETE OR NOT -->

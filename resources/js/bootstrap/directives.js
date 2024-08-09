@@ -140,4 +140,19 @@ export default function initDirectives(app) {
             el.onscroll = null;
         }
     });
+
+
+    function updateVisibility (el, binding) {
+        el.style.opacity = binding.value ? '1.0' : '0.0';
+    }
+    app.directive('visible', {
+        mounted(el, binding, vnode) {
+            const transition = 'opacity 0.3s';
+            if(!el.style.transition) el.style.transition = transition;
+            updateVisibility(el, binding);
+        },
+        updated(el, binding, vnode, prevVnode) {
+            updateVisibility(el, binding);
+        },
+    });
 }

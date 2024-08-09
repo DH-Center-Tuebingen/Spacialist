@@ -1,31 +1,53 @@
 <template>
-    <div class="editable-field d-flex gap-2">
-        <h3
-            class="mb-0 cursor-pointer"
-            :contenteditable="editing"
-            @click="edit()"
-            @input="updateValue"
-        >
-            {{ editedValue }}
-        </h3>
+    <div
+        class="editable-field d-flex gap-2 position-relative"
+        @click.stop
+        @mousedown.stop
+    >
         <form
-            v-if="editing"
-            class="d-flex flex-row"
+            class="d-flex flex-row input-group bg-white rounded"
             @submit.prevent="submit"
         >
-            <button
-                :disabled="editedValue === ''"
-                type="submit"
-                class="btn btn-outline-success btn-sm"
+            <div
+                v-if="!editing"
+                class="form-control  bg-white cursor-pointer"
+                :style="inputStyle"
+                @click.stop="edit()"
+                @mousedown.stop
             >
-                <i class="fas fa-fw fa-check" />
+                {{ value }}
+            </div>
+            <input
+                v-else
+                ref="inputRef"
+                v-model="editedValue"
+                class="form-control"
+                :style="inputStyle"
+                @click.stop
+                @mousedown.stop
+            >
+            <button
+                v-visible="!editing"
+                :disabled="true"
+                class="btn position-absolute end-0 border-0"
+            >
+                <i class="fas fa-fw fa-pencil" />
             </button>
             <button
+                v-visible="editing"
                 type="reset"
-                class="btn btn-outline-danger btn-sm"
+                class="btn btn-outline-secondary"
                 @click.prevent="cancelEditing()"
             >
-                <i class="fas fa-fw fa-ban" />
+                <i class="fas fa-fw fa-times" />
+            </button>
+            <button
+                v-visible="editing"
+                :disabled="editedValue === ''"
+                type="submit"
+                class="btn btn-outline-success"
+            >
+                <i class="fas fa-fw fa-check" />
             </button>
         </form>
     </div>
@@ -36,6 +58,11 @@
         ref,
         watch,
     } from 'vue';
+
+    import {
+        useGlobalClick
+    } from '@/composables/global-click';
+    import { nextTick } from 'process';
 
     export default {
         props: {
@@ -49,6 +76,11 @@
 
             const editedValue = ref(props.value);
             const editing = ref(false);
+            const inputRef = ref(null);
+
+            useGlobalClick(() => {
+                editing.value = false;
+            }, 'mousedown');
 
             watch(() => props.value, (newValue, oldValue) => {
                 editedValue.value = newValue;
@@ -57,32 +89,34 @@
             const edit = _ => {
                 editing.value = true;
                 editedValue.value = props.value;
-            };
-
-            const updateValue = event => {
-                editedValue.value = event.target.innerText;
+                nextTick(_ => inputRef.value.focus());
             };
 
             const submit = _ => {
+                console.log('submitting: ', editedValue.value);
                 if(editedValue.value === '') return;
 
+                editing.value = false;
                 if(editedValue.value === props.value) {
-                    editing.value = false;
                     return;
+                } else {
+                    context.emit('change', editedValue.value);
                 }
-                context.emit('change', editedValue.value);
             };
             const cancelEditing = _ => {
                 editedValue.value = props.value;
                 editing.value = false;
             };
+            
+            const inputStyle = `width: 200px; border-color: transparent`;
 
             return {
                 cancelEditing,
-                updateValue,
                 edit,
                 editing,
                 editedValue,
+                inputRef,
+                inputStyle,
                 submit,
             };
         },
