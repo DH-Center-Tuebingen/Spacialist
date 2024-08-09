@@ -1,19 +1,18 @@
 <template>
     <div
-        class="editable-field d-flex gap-2 position-relative"
-        @click.stop
+        class="editable-field d-flex gap-2 position-relative overflow-hidden rounded"
+        style=""
+        @click="edit"
         @mousedown.stop
     >
         <form
-            class="d-flex flex-row input-group bg-white rounded"
+            class="d-flex flex-row flex-nowrap input-group rounded"
             @submit.prevent="submit"
         >
             <div
                 v-if="!editing"
-                class="form-control  bg-white cursor-pointer"
+                class="form-control cursor-pointer text-truncate"
                 :style="inputStyle"
-                @click.stop="edit()"
-                @mousedown.stop
             >
                 {{ value }}
             </div>
@@ -21,40 +20,43 @@
                 v-else
                 ref="inputRef"
                 v-model="editedValue"
-                class="form-control"
+                class="form-control text-truncate shadow-none"
                 :style="inputStyle"
-                @click.stop
-                @mousedown.stop
             >
             <button
                 v-visible="!editing"
                 :disabled="true"
-                class="btn position-absolute end-0 border-0"
+                class="btn position-absolute end-0 border-0 pointer-events-none"
             >
                 <i class="fas fa-fw fa-pencil" />
             </button>
             <button
                 v-visible="editing"
-                type="reset"
-                class="btn btn-outline-secondary"
-                @click.prevent="cancelEditing()"
+                :disabled="!editing"
+                type="submit"
+                class="btn btn-outline-success border-0"
             >
-                <i class="fas fa-fw fa-times" />
+                <i class="fas fa-fw fa-check" />
             </button>
             <button
                 v-visible="editing"
-                :disabled="editedValue === ''"
-                type="submit"
-                class="btn btn-outline-success"
+                :disabled="!editing"
+                type="reset"
+                class="btn btn-outline-secondary border-0"
+                @click.stop.prevent="cancelEditing()"
             >
-                <i class="fas fa-fw fa-check" />
+                <i class="fas fa-fw fa-times" />
             </button>
         </form>
     </div>
 </template>
 
 <script>
+
+    // OUTSOURCE - TODO - Move to dhc-components
+
     import {
+        computed,
         ref,
         watch,
     } from 'vue';
@@ -63,6 +65,7 @@
         useGlobalClick
     } from '@/composables/global-click';
     import { nextTick } from 'process';
+    import { disable } from 'ol/rotationconstraint';
 
     export default {
         props: {
@@ -89,7 +92,10 @@
             const edit = _ => {
                 editing.value = true;
                 editedValue.value = props.value;
-                nextTick(_ => inputRef.value.focus());
+                nextTick(_ => {
+                    if(inputRef.value)
+                        inputRef.value.focus();
+                });
             };
 
             const submit = _ => {
@@ -107,8 +113,34 @@
                 editedValue.value = props.value;
                 editing.value = false;
             };
-            
-            const inputStyle = `width: 200px; border-color: transparent`;
+
+            // The input field cannot be dynamically be sized to the content, so we set a calculated value here.
+            // Note: A contenteditable was considered, but it's quite a hassle to have it work properly in vue (jumping cursor problem)
+            //       that's why we stick with the input field.
+            const inputStyle = computed(() => {
+
+                let paddingLeft = 0;
+                let paddingRight = 0;
+                if(inputRef.value) {
+                    const computedStyle = window.getComputedStyle(inputRef.value);
+                    paddingLeft = computedStyle.paddingLeft;
+                    paddingRight = computedStyle.paddingRight;
+                }
+
+                console.log(`calc(${editedValue.value.length}ch +${paddingLeft} + ${paddingRight})`);
+
+                return {
+                    'min-width': '7ch',
+                    // The sizing is on non-mono fonts not perfect, but it's good enough for now.
+                    'width': `calc(${Math.ceil(editedValue.value.length * 1.2)}ch + ${paddingLeft})`, 
+                    'border-color': 'transparent',
+                    'background-color': 'transparent',
+                    'overflow': 'hidden',
+                    'text-overflow': 'ellipsis',
+                    'white-space': 'nowrap',
+                    'outline-offset': '-3px'
+                };
+            });
 
             return {
                 cancelEditing,

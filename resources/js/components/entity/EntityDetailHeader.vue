@@ -2,6 +2,7 @@
     <div class="d-flex align-items-center justify-content-between">
         <!-- TODO: Replace with Editable Field -->
         <EditableField
+            style="flex-shrink: 1;"
             :value="entity.name"
             :loading="true"
             @change="updateEntityName"
