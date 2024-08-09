@@ -132,7 +132,7 @@
                 return {
                     'min-width': '7ch',
                     // The sizing is on non-mono fonts not perfect, but it's good enough for now.
-                    'width': `calc(${Math.ceil(editedValue.value.length * 1.2)}ch + ${paddingLeft})`, 
+                    'width': `calc(${editedValue.value.length + 2}ch + ${paddingLeft} + ${paddingLeft})`, 
                     'border-color': 'transparent',
                     'background-color': 'transparent',
                     'overflow': 'hidden',

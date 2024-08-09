@@ -97,7 +97,7 @@
             <button
                 type="submit"
                 form="entity-attribute-form"
-                class="btn btn-outline-success btn-sm"
+                class="btn btn-outline-success btn-sm text-nowrap"
                 :disabled="!dirty || !can('entity_data_write')"
                 @click.prevent="_ => $emit('save', entity)"
             >
@@ -105,7 +105,7 @@
             </button>
             <button
                 type="button"
-                class="btn btn-outline-warning btn-sm"
+                class="btn btn-outline-warning btn-sm text-nowrap"
                 :disabled="!dirty"
                 @click="_ => $emit('reset', entity)"
             >
@@ -113,7 +113,7 @@
             </button>
             <button
                 type="button"
-                class="btn btn-outline-danger btn-sm"
+                class="btn btn-outline-danger btn-sm text-nowrap"
                 :disabled="!can('entity_delete')"
                 @click="_ => $emit('delete', entity)"
             >
@@ -169,11 +169,13 @@
 
     import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
     import EditableField from '../forms/EditableField.vue';
+    import IconButton from '../forms/IconButton.vue';
 
     export default {
         components: {
             EditableField,
             EntityTypeLabel,
+            IconButton,
         },
         props: {
             entity: {
