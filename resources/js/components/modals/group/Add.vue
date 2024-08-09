@@ -8,7 +8,7 @@
             <div class="modal-header">
                 <h5 class="modal-title">
                     {{
-                        t('main.role.modal.new.title')
+                        t('main.group.modal.new.title')
                     }}
                 </h5>
                 <button
@@ -21,8 +21,8 @@
             </div>
             <div class="modal-body">
                 <form
-                    id="newRoleForm"
-                    name="newRoleForm"
+                    id="newGroupForm"
+                    name="newGroupForm"
                     role="form"
                     @submit.prevent="onAdd()"
                 >
@@ -113,37 +113,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label
-                            class="col-form-label col-12"
-                            for="derive-from"
-                        >
-                            {{ t('main.role.preset.derive_from_preset') }}:
-                        </label>
-                        <div class="col-12">
-                            <multiselect
-                                id="derive-from"
-                                v-model="v.fields.derived_from.value"
-                                :classes="multiselectResetClasslist"
-                                :object="true"
-                                :label="'name'"
-                                :track-by="'id'"
-                                :value-prop="'id'"
-                                :mode="'single'"
-                                :options="state.rolePresets"
-                                :placeholder="t('main.role.add_permission_placeholder')"
-                            >
-                                <template #option="{ option }">
-                                    {{ t(`main.role.preset.${option.name}`) }}
-                                </template>
-                                <template #singlelabel="{ value }">
-                                    <div class="multiselect-single-label">
-                                        {{ t(`main.role.preset.${value.name}`) }}
-                                    </div>
-                                </template>
-                            </multiselect>
-                        </div>
-                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -151,7 +120,7 @@
                     type="submit"
                     class="btn btn-outline-success"
                     :disabled="!state.form.dirty || !state.form.valid"
-                    form="newRoleForm"
+                    form="newGroupForm"
                 >
                     <i class="fas fa-fw fa-plus" /> {{ t('global.add') }}
                 </button>
@@ -198,15 +167,12 @@
                 context.emit('cancel', false);
             };
             const onAdd = _ => {
-                const role = {
+                const group = {
                     name: v.fields.name.value,
                     display_name: v.fields.display_name.value,
                     description: v.fields.description.value,
                 };
-                if(v.fields.derived_from.vale) {
-                    role.derived_from = v.fields.derived_from.value.id;
-                }
-                context.emit('add', role);
+                context.emit('add', group);
             };
 
             // DATA
@@ -241,7 +207,6 @@
 
             const state = reactive({
                 form: formMeta,
-                rolePresets: computed(_ => store.getters.rolePresets),
             });
             const v = reactive({
                 fields: {
@@ -262,9 +227,6 @@
                         meta: md,
                         value: vd,
                         handleChange: hcd,
-                    },
-                    derived_from: {
-                        value: null,
                     },
                 },
                 schema: schema,

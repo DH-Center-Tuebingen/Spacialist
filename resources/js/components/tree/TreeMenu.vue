@@ -9,7 +9,7 @@
                 {{ data.name }}
             </h6>
         </li>
-        <li>
+        <li v-if="can('entity_create') && canCreate(data)">
             <a
                 class="dropdown-item"
                 href="#"
@@ -22,7 +22,7 @@
                 </span>
             </a>
         </li>
-        <li>
+        <li v-if="can('entity_create') && canCreate(data)">
             <a
                 class="dropdown-item"
                 href="#"
@@ -35,7 +35,7 @@
                 </span>
             </a>
         </li>
-        <li>
+        <li v-if="can('entity_write') && canWrite(data)">
             <a
                 class="dropdown-item"
                 href="#"
@@ -48,9 +48,8 @@
                 </span>
             </a>
         </li>
-        <li>
+        <li v-if="can('entity_delete') && canDelete(data)">
             <a
-                v-if="can('entity_delete')"
                 class="dropdown-item"
                 href="#"
                 @click.stop.prevent="deleteEntity"
@@ -69,7 +68,7 @@
 
     import {
         useGlobalClick
-    } from '@/composables/global-click';
+    } from '@/composables/global-click.js';
 
 
     import {
@@ -88,6 +87,9 @@
 
     import {
         can,
+        canWrite,
+        canCreate,
+        canDelete,
     } from '@/helpers/helpers.js';
 
     import store from '@/bootstrap/store.js';
@@ -103,37 +105,53 @@
             'close'
         ],
         setup(props, context) {
+            const { t } = useI18n();
+
             useGlobalClick(function () {
                 context.emit('close');
             });
 
             const addEntity = _ => {
+                if(!can('entity_create') || !canCreate(props.data)) return;
+
                 showAddEntity(props.data);
             };
             const duplicateEntity = _ => {
+                if(!can('entity_create') || !canCreate(props.data)) return;
+
                 duplicateEntityApi(props.data).then(data => {
-                    store.dispatch('addEntity', data);
+                    store.dispatch('addEntity', props.data);
                     context.emit('close');
                 });
             };
             const moveEntity = _ => {
+                if(!can('entity_write') || !canWrite(props.data)) return;
+
                 ShowMoveEntity(props.data);
                 context.emit('close');
             };
 
             const deleteEntity = _ => {
-                if(!can('entity_delete')) return;
+                if(!can('entity_delete') || !canDelete(props.data)) return;
+
                 showDeleteEntity(props.data.id);
                 context.emit('close');
             };
 
+            // RETURN
             return {
-                t: useI18n().t,
+                t,
+                // HELPERS
                 can,
+                canWrite,
+                canCreate,
+                canDelete,
+                // LOCAL
                 addEntity,
                 duplicateEntity,
                 moveEntity,
                 deleteEntity,
+                // STATE
             };
         }
     };

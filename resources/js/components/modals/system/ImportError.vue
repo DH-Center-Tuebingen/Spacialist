@@ -49,7 +49,7 @@
         toRefs,
     } from 'vue';
 
-    import { useI18n } from 'vue-i18n';
+    import {useI18n} from 'vue-i18n';
 
     export default {
         props: {
@@ -60,7 +60,7 @@
         },
         emits: ['closing'],
         setup(props, context) {
-            const { t } = useI18n();
+            const {t} = useI18n();
 
             // FUNCTIONS
             const closeModal = _ => {
@@ -70,7 +70,6 @@
             // DATA
             const state = reactive({
                 htmlMessage: computed(_ => {
-
                     const data = props.data;
                     const isRowError = data?.data?.on_index && data?.data?.on_value;
 

@@ -55,6 +55,7 @@ export const store = createStore({
                         tab: 'references',
                     },
                     permissions: [],
+                    groups: [],
                     preferences: {},
                     systemPreferences: {},
                     datatypeData: {},
@@ -395,7 +396,7 @@ export const store = createStore({
                 updateUser(state, data) {
                     const index = state.users.findIndex(u => u.id == data.id);
                     if(index > -1) {
-                        const cleanData = only(data, ['email', 'roles', 'updated_at', 'deleted_at', 'login_attempts',]);
+                        const cleanData = only(data, ['email', 'roles', 'groups', 'updated_at', 'deleted_at', 'login_attempts',]);
                         const currentData = state.users[index];
                         state.users[index] = {
                             ...currentData,
@@ -436,6 +437,26 @@ export const store = createStore({
                     const index = state.roles.findIndex(r => r.id == data.id);
                     if(index > -1) {
                         state.roles.splice(index, 1);
+                    }
+                },
+                addGroup(state, data) {
+                    state.groups.push(data);
+                },
+                updateGroup(state, data) {
+                    const index = state.groups.findIndex(g => g.id == data.id);
+                    if(index > -1) {
+                        const cleanData = only(data, ['display_name', 'description', 'updated_at',]);
+                        const currentData = state.groups[index];
+                        state.groups[index] = {
+                            ...currentData,
+                            ...cleanData,
+                        };
+                    }
+                },
+                deleteGroup(state, data) {
+                    const index = state.groups.findIndex(g => g.id == data.id);
+                    if(index > -1) {
+                        state.groups.splice(index, 1);
                     }
                 },
                 deleteEntityType(state, data) {
@@ -553,6 +574,9 @@ export const store = createStore({
                 },
                 setPermissions(state, data) {
                     state.permissions = data;
+                },
+                setGroups(state, data) {
+                    state.groups = data;
                 },
                 setUsers(state, data) {
                     state.users = data.active;
@@ -698,6 +722,9 @@ export const store = createStore({
                     commit('setRoles', data.roles);
                     commit('setPermissions', data.permissions);
                     commit('setRolePresets', data.presets);
+                },
+                setGroups({commit}, data) {
+                    commit('setGroups', data.groups);
                 },
                 setUsers({commit}, data) {
                     commit('setUsers', data);
@@ -858,6 +885,15 @@ export const store = createStore({
                 deleteRole({commit}, data) {
                     commit('deleteRole', data);
                 },
+                addGroup({commit}, data) {
+                    commit('addGroup', data);
+                },
+                updateGroup({commit}, data) {
+                    commit('updateGroup', data);
+                },
+                deleteGroup({commit}, data) {
+                    commit('deleteGroup', data);
+                },
                 setEntityTypes({commit, state}, data) {
                     state.entityTypes = {};
                     state.entityTypeAttributes = {};
@@ -977,6 +1013,7 @@ export const store = createStore({
                 },
                 rolePresets: state => state.rolePresets,
                 permissions: state => state.permissions,
+                groups: state => state.groups,
                 allUsers: state => {
                     return [
                         ...state.users,

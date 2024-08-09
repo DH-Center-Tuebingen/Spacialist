@@ -5,6 +5,7 @@
         "restore": "Wiederherstellen",
         "deactivate": "Deaktivieren",
         "reactivate": "Reaktivieren",
+        "access": "Zugriff",
         "remove": "Entfernen",
         "reset": "Zurücksetzen",
         "reset_password": "Passwort zurücksetzen",
@@ -111,6 +112,7 @@
             "title": "Einstellungen",
             "users": "Benutzerverwaltung",
             "roles": "Rollenverwaltung",
+            "groups": "Arbeitsgruppenverwaltung",
             "plugins": "Erweiterungen",
             "datamodel": "Datenmodell-Editor",
             "system": "System-Einstellungen",
@@ -335,6 +337,7 @@
         "description": "Beschreibung",
         "roles": "Rollen",
         "permissions": "Berechtigungen",
+        "groups": "Arbeitsgruppen",
         "added_at": "Hinzugefügt",
         "created_at": "Erstellt",
         "updated_at": "Aktualisert",
@@ -440,7 +443,28 @@
                     }
                 }
             },
-            "page_access_denied": "Du hast nicht die nötigen Berechtigungen um diese Seite zu sehen. Fehlende Berechtigungen: {perm}"
+            "modals": {
+                "access": {
+                    "add_user_wg": "Benutzer/Arbeitsgruppe hinzufügen",
+                    "open_access": "Öffentlicher Zugriff",
+                    "private_access": "Privater Zugriff",
+                    "restricted_access": "Eingeschränkter Zugriff",
+                    "title": "Zugriffseinstellungen",
+                    "user_wg": "Benutzer/Arbeitsgruppe",
+                    "users_access": "Benutzer-Zugriff (Standard)",
+                    "message": {
+                        "data_note": "<span class=\"fw-bold\">Notiz</span>: <span class=\"fst-italic\">Daten</span> beziehen sich in diesem Kontext auf diesen Eintrag und (wenn möglich) dessen Unter-Entitäten.",
+                        "explain_open_access": "Dieser Zugriffstyp gibt der Öffentlichkeit Lesezugriff auf diese Daten durch die <span class=\"fst-italic\">Open Access</span>-Funktion. Um der Öffentlichkeit zu erlauben, Daten zu ändern, benötigen sie dennoch ein Benutzerkonto, sodass Änderungen immer einem bestimmten Benutzer zugeordnet sind.",
+                        "explain_private_access": "Dieser Zugriffstyp gibt nur dir selbst Zugriff auf diese Daten. Alle anderen Benutzer können die Daten weder sehen noch ändern.",
+                        "explain_restricted_access": "Dieser Zugriffstyp gibt dir die Möglichkeit zu definieren, welche Benutzer und/oder Gruppen überhaupt Zugriff auf diese Daten haben können. Darüber hinaus kannst du entscheiden, ob Benutzer nur Lesezugriff haben oder Daten ändern und hinzufügen dürfen.",
+                        "explain_users_access": "Dies ist die Standardeinstellung. Alle registrierten Benutzer können Daten basierend auf ihren individuellen Rollen anzeigen und/oder bearbeiten.",
+                        "no_access_rule": "Keine Zugriffsregeln definiert. Dies entspricht dem Standardzugriff. Bitte ändere den Zugriffstyp oder füge die gewünschten Benutzer/Gruppen hinzu.",
+                        "user_priority": "Zugriffsregeln für Benutzer haben eine <span class='fw-bold'>höhere Priorität</span> als Gruppenregeln! Es ist also möglich, einer ganzen Gruppe nur Lesezugriff zu geben, aber einem bestimmten Benutzer aus dieser Gruppe erweiterte Zugriffsrechte zu gewähren."
+                    }
+                }
+            },
+            "page_access_denied": "Du hast nicht die nötigen Berechtigungen um diese Seite zu sehen. Fehlende Berechtigungen: {perm}",
+            "alert_hidden": "Inhalt anzeigen…"
         },
         "csv": {
             "uploader": {
@@ -462,7 +486,10 @@
             "title": "Entität | Entitäten",
             "top_level": "Top-Level-Entität",
             "count": "Keine Top-Level Entitäten | Eine Top-Level Entität | {cnt} Top-Level Entitäten",
-            "detail_tab_none_selected": "Keine Entität ausgewählt. Wähle aus dem Baum eine Entität aus um hier Details dazu zu erhalten.",
+            "detail": {
+                "no_attributes": "This entity group has no attributes.",
+                "no_entity_selected": "Keine Entität ausgewählt. Wähle aus dem Baum eine Entität aus um hier Details dazu zu erhalten."
+            },
             "toasts": {
                 "updated": {
                     "title": "Entität aktualisiert",
@@ -633,7 +660,10 @@
                     "message": "Dein Passwort wurde geändert. Du musst entweder dieses neue Passwort akzeptieren oder selbst ein neues vergeben. Dafür hast du nur noch einen weiteren Login übrig! | Dein Passwort wurde geändert. Du musst entweder dieses neue Passwort akzeptieren oder selbst ein neues vergeben. Dafür hast du noch {attempts} weitere Logins übrig."
                 }
             },
-            "add_role_placeholder": "Rollen hinzufügen"
+            "add_role_placeholder": "Rollen hinzufügen",
+            "add_group_placeholder": "Arbeitsgruppen hizufügen",
+            "deactivated_role_placeholder": "Keine Rollen zugeordnet",
+            "deactivated_group_placeholder": "Keine Gruppen zugeordnet"
         },
         "role": {
             "add_button": "Neue Rolle hinzufügen",
@@ -686,6 +716,20 @@
                 }
             },
             "add_permission_placeholder": "Berechtigungen hinzufügen"
+        },
+        "group": {
+            "add_button": "Arbeitsgruppe hinzufügen",
+            "toasts": {
+                "updated": {
+                    "title": "Arbeitsgruppe aktualisiert",
+                    "msg": "{name} wurde erfolgreich aktualisiert."
+                }
+            },
+            "modal": {
+                "new": {
+                    "title": "Neue Arbeitsgruppe"
+                }
+            }
         },
         "activity": {
             "title_project": "Projekt-Aktivität | Projekt-Aktivitäten",

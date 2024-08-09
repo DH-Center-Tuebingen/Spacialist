@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Traits\SoftDeletesWithTrashed;
+use App\Traits\GuardableTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -21,6 +22,7 @@ class User extends Authenticatable implements JWTSubject
     use LogsActivity;
     use SoftDeletesWithTrashed;
     use HasFactory;
+    use GuardableTrait;
     // use Authenticatable;
 
     protected $guard_name = 'web';
@@ -119,6 +121,10 @@ class User extends Authenticatable implements JWTSubject
 
     public function preferences() {
         return $this->hasMany('App\UserPreference');
+    }
+
+    public function groups() {
+        return $this->belongsToMany('App\Group', 'user_groups', 'user_id', 'group_id')->orderBy('user_groups.group_id');
     }
 
     // public function roles() {

@@ -127,7 +127,7 @@
                     type="submit"
                     form="entity-attribute-form"
                     class="btn btn-outline-success btn-sm"
-                    :disabled="!state.formDirty || !can('entity_data_write')"
+                    :disabled="!state.formDirty || !can('entity_data_write') || !canWrite(state.entity)"
                     @click.prevent="saveEntity()"
                 >
                     <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
@@ -143,10 +143,24 @@
                 <button
                     type="button"
                     class="btn btn-outline-danger btn-sm"
-                    :disabled="!can('entity_delete')"
+                    :disabled="!can('entity_delete') || !canDelete(state.entity)"
                     @click="confirmDeleteEntity()"
                 >
                     <i class="fas fa-fw fa-trash" /> {{ t('global.delete') }}
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    :disabled="!can('entity_write')"
+                    @click="openWorkingGroups()"
+                >
+                    <i class="fas fa-fw fa-unlock-alt" /> {{ t('global.access') }}
+                    <span
+                        v-if="state.hasAccessRules"
+                        class="badge text-bg-primary"
+                    >
+                        {{ state.accessRuleCount }}
+                    </span>
                 </button>
             </div>
         </div>
@@ -217,6 +231,7 @@
                         <i class="fas fa-fw fa-2xs fa-circle text-warning" />
                         <div v-show="state.attributeGrpHovered == tg.id">
                             <a
+                                v-if="canWrite(state.entity)"
                                 href="#"
                                 @click.prevent.stop="saveEntity(`${tg.id}`)"
                             >
@@ -287,6 +302,13 @@
                 class="tab-pane fade h-100 active-entity-detail-panel active-entity-attributes-panel show active"
                 role="tabpanel"
             >
+                <Alert
+                    v-if="isEmpty(tg)"
+                    type="info"
+                    :noicon="false"
+                    :message="t('main.entity.detail.no_attributes')"
+                    class="mt-2"
+                />
                 <form
                     :id="`entity-attribute-form-${tg.id}`"
                     :name="`entity-attribute-form-${tg.id}`"
@@ -391,7 +413,7 @@
         onBeforeRouteUpdate,
     } from 'vue-router';
 
-    import { useI18n } from 'vue-i18n';
+    import {useI18n} from 'vue-i18n';
 
     import {
         Popover,
@@ -400,21 +422,23 @@
     import store from '@/bootstrap/store.js';
     import router from '%router';
 
-    import { useToast } from '@/plugins/toast.js';
+    import {useToast} from '@/plugins/toast.js';
 
     import {
         ago,
         date,
     } from '@/helpers/filters.js';
-
     import {
         getEntityComments,
         patchAttributes,
         patchEntityName,
+        restrictEntityAccess,
     } from '@/api.js';
 
     import {
         can,
+        canWrite,
+        canDelete,
         isModerated,
         isArray,
         userId,
@@ -433,17 +457,21 @@
     import {
         showDiscard,
         showDeleteEntity,
+        showAccessRules,
         showUserInfo,
         canShowReferenceModal,
     } from '@/helpers/modal.js';
 
-    import { usePreventNavigation } from '@/helpers/form.js';
+    import {usePreventNavigation} from '@/helpers/form.js';
+
+    import Alert from './Alert.vue';
 
     import MetadataTab from '@/components/entity/MetadataTab.vue';
     import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
 
     export default {
         components: {
+            Alert,
             EntityTypeLabel,
             MetadataTab,
         },
@@ -460,7 +488,7 @@
             }
         },
         setup(props) {
-            const { t } = useI18n();
+            const {t} = useI18n();
             const route = useRoute();
             const toast = useToast();
 
@@ -480,6 +508,29 @@
                         color: colors.backgroundColor
                     };
                 }),
+                hasAccessRules: computed(_ => {
+                    return (state.entity && state.entity.access_rules && state.entity.access_rules.length > 0);
+                }),
+                accessRuleCount: computed(_ => state.hasAccessRules ? state.entity.access_rules.length : 0),
+                entityTypeSelections: computed(_ => getEntityTypeAttributeSelections(state.entity.entity_type_id)),
+                entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
+                hasAttributeLinks: computed(_ => state.entity.attributeLinks && state.entity.attributeLinks.length > 0),
+                groupedAttributeLinks: computed(_ => {
+                    if(!state.hasAttributeLinks) return {};
+
+                    const groups = {};
+                    state.entity.attributeLinks.forEach(l => {
+                        if(!groups[l.id]) {
+                            groups[l.id] = {
+                                ...l,
+                                attribute_urls: [translateConcept(l.attribute_url)],
+                            };
+                        } else {
+                            groups[l.id].attribute_urls.push(translateConcept(l.attribute_url));
+                        }
+                    });
+                    return groups;
+                }),
                 formDirty: computed(_ => {
                     for(let k in state.dirtyStates) {
                         if(state.dirtyStates[k]) return true;
@@ -496,50 +547,47 @@
                 commentLoadingState: 'not',
                 metadataTabLoaded: false,
                 hiddenAttributeState: false,
-                attributesInTabs: true,
                 routeQuery: computed(_ => route.query),
                 entity: computed(_ => store.getters.entity),
                 entityUser: computed(_ => state.entity.user),
                 entityAttributes: computed(_ => store.getters.entityTypeAttributes(state.entity.entity_type_id)),
                 entityGroups: computed(_ => {
-                    if(!state.entityAttributes) {
-                        return state.entityAttributes;
+
+                    const tabGroups = {};
+                    let currentGroup = 'default';
+                    let currentGroupId = 'default';
+                    let currentUnnamedGroupCntr = 1;
+
+                    function addCurrentGroupIfNotExists() {
+                        if(!tabGroups[currentGroup]) {
+                            tabGroups[currentGroup] = {
+                                id: currentGroupId,
+                                data: [],
+                            };
+                        }
                     }
 
-                    if(state.attributesInTabs) {
-                        const tabGroups = {};
-                        let currentGroup = 'default';
-                        let currentGroupId = 'default';
-                        let currentUnnamedGroupCntr = 1;
+                    addCurrentGroupIfNotExists();
+
+                    if(state.entityAttributes && state.entityAttributes.length > 0) {
                         state.entityAttributes.forEach(a => {
                             if(a.is_system && a.datatype == 'system-separator') {
                                 if(!a.pivot.metadata || !a.pivot.metadata.title) {
-                                    currentGroup = t(`main.entity.tabs.untitled_group`, { cnt: currentUnnamedGroupCntr });
+                                    currentGroup = t(`main.entity.tabs.untitled_group`, {cnt: currentUnnamedGroupCntr});
                                     currentUnnamedGroupCntr++;
                                 } else {
                                     currentGroup = translateConcept(a.pivot.metadata.title);
                                 }
                                 currentGroupId = a.pivot.id;
+                                addCurrentGroupIfNotExists();
                                 return;
                             }
-                            if(!tabGroups[currentGroup]) {
-                                tabGroups[currentGroup] = {
-                                    id: currentGroupId,
-                                    data: []
-                                };
-                            }
+
                             tabGroups[currentGroup].data.push(a);
                         });
-
-                        return tabGroups;
-                    } else {
-                        return {
-                            default: {
-                                id: 'default',
-                                data: state.entityAttributes,
-                            },
-                        };
                     }
+
+                    return tabGroups;
                 }),
                 entityTypeSelections: computed(_ => getEntityTypeAttributeSelections(state.entity.entity_type_id)),
                 entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
@@ -746,6 +794,9 @@
 
                 showDeleteEntity(state.entity.id);
             };
+            const openWorkingGroups = _ => {
+                showAccessRules(state.entity.id, restrictEntityAccess);
+            };
             const setDetailPanel = tab => {
                 const query = {
                     view: tab,
@@ -822,6 +873,10 @@
                 });
             };
 
+            const isEmpty = group => {
+                return state.initFinished && group.data.length == 0;
+            };
+
             const fetchComments = _ => {
                 if(!can('comments_read')) return;
 
@@ -867,7 +922,7 @@
             };
 
             const saveEntity = grps => {
-                if(!can('entity_data_write')) return;
+                if(!can('entity_data_write') || !canWrite(state.entity)) return;
 
                 const dirtyValues = getDirtyValues(grps);
                 const patches = [];
@@ -981,7 +1036,7 @@
                 let hiddenAttrElem = document.getElementById('hidden-attributes-icon');
                 if(!!hiddenAttrElem) {
                     new Popover(hiddenAttrElem, {
-                        title: _ => t('main.entity.attributes.hidden', { cnt: state.hiddenAttributeCount }, state.hiddenAttributeCount),
+                        title: _ => t('main.entity.attributes.hidden', {cnt: state.hiddenAttributeCount}, state.hiddenAttributeCount),
                         content: state.hiddenAttributeListing,
                     });
                 }
@@ -997,7 +1052,7 @@
                         let hiddenAttrElem = document.getElementById('hidden-attributes-icon');
                         if(!!hiddenAttrElem) {
                             new Popover(hiddenAttrElem, {
-                                title: _ => t('main.entity.attributes.hidden', { cnt: state.hiddenAttributeCount }, state.hiddenAttributeCount),
+                                title: _ => t('main.entity.attributes.hidden', {cnt: state.hiddenAttributeCount}, state.hiddenAttributeCount),
                                 content: state.hiddenAttributeListing,
                             });
                         }
@@ -1078,6 +1133,8 @@
                 route,
                 // HELPERS
                 can,
+                canWrite,
+                canDelete,
                 ago,
                 date,
                 userId,
@@ -1090,6 +1147,7 @@
                 getEntity,
                 // LOCAL
                 hasReferenceGroup,
+                isEmpty,
                 showMetadata,
                 editEntityName,
                 updateEntityName,
@@ -1097,6 +1155,7 @@
                 showHiddenAttributes,
                 hideHiddenAttributes,
                 confirmDeleteEntity,
+                openWorkingGroups,
                 setDetailPanel,
                 onEntityHeaderHover,
                 showTabActions,

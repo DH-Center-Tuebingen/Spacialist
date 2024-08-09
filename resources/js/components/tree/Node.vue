@@ -116,7 +116,6 @@
                     showPopup();
                 }
             };
-
             const onDragEnter = _ => {
 
             };
@@ -156,6 +155,12 @@
                         return false;
                     }
                     return !hasIntersectionWithEntityAttributes(data.value.entity_type_id, store.getters.treeSelectionTypeIds);
+                }),
+                hasRestrictedAccess: computed(_ => {
+                    return data.value.access_type && data.value.access_type.type == 'restricted' && data.value.access_rules.length > 0;
+                }),
+                hasOpenAccess: computed(_ => {
+                    return data.value.access_type && data.value.access_type.type == 'open';
                 }),
             });
 

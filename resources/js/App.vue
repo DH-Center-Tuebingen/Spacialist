@@ -262,6 +262,13 @@
                                     {{ t('global.settings.roles') }}
                                 </router-link>
                                 <router-link
+                                    :to="{name: 'groups'}"
+                                    class="dropdown-item"
+                                >
+                                    <i class="fas fa-fw fa-users-between-lines" />
+                                    {{ t('global.settings.groups') }}
+                                </router-link>
+                                <router-link
                                     :to="{ name: 'plugins' }"
                                     class="dropdown-item"
                                 >

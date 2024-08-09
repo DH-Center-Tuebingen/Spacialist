@@ -5,6 +5,7 @@
         "restore": "Restore",
         "deactivate": "Deactivate",
         "reactivate": "Reactivate",
+        "access": "Access",
         "remove": "Remove",
         "reset": "Reset",
         "reset_password": "Reset Password",
@@ -111,6 +112,7 @@
             "title": "Settings",
             "users": "User Management",
             "roles": "Role Management",
+            "groups": "Working Group Management",
             "plugins": "Plugins",
             "datamodel": "Data-Model-Editor",
             "system": "System Preferences",
@@ -335,6 +337,7 @@
         "description": "Description",
         "roles": "Roles",
         "permissions": "Permissions",
+        "groups": "Working Groups",
         "added_at": "Added",
         "created_at": "Created",
         "updated_at": "Updated",
@@ -440,7 +443,28 @@
                     }
                 }
             },
-            "page_access_denied": "You do not have permission(s) to access this page. Missing permissions: {perm}"
+            "modals": {
+                "access": {
+                    "add_user_wg": "Add User or Working Group",
+                    "open_access": "Public/Open Access",
+                    "private_access": "Private Access",
+                    "restricted_access": "Restricted Access",
+                    "title": "Access Rules",
+                    "user_wg": "User/Working Group",
+                    "users_access": "User Access (Default)",
+                    "message": {
+                        "data_note": "<span class=\"fw-bold\">Note</span>: <span class=\"fst-italic\">data</span> in this context always refers to this entry and all it's (if possible) sub-entries!",
+                        "explain_open_access": "This gives the public read access to this data through the <span class=\"fst-italic\">Open Access</span> feature. To allow the public to modify data, they still need a user account, so changes are always related to a specific user.",
+                        "explain_private_access": "This settings gives only yourself access to this data. All other users can neither see nor modify the data.",
+                        "explain_restricted_access": "This settings gives you the possibilities to define which users and/or groups can have access to this data at all. Furthermore, you can decide whether users can have only read access or are allowed to modify and add data.",
+                        "explain_users_access": "This is the default setting. All registered users can view and/or modify data based on their individual roles.",
+                        "no_access_rule": "No Access rules defined. This would equal to Default Access. Please change access type or add your desired users/groups.",
+                        "user_priority": "Access Rules for users are having a <span class='fw-bold'>higher priority</span> than group rules! So it is possible to a whole group only read access, but allow a specific user from that group to have advanced access rights."
+                    }
+                }
+            },
+            "page_access_denied": "You do not have permission(s) to access this page. Missing permissions: {perm}",
+            "alert_hidden": "Show content…"
         },
         "csv": {
             "uploader": {
@@ -462,7 +486,10 @@
             "title": "Entity | Entities",
             "top_level": "Top-Level-Entity",
             "count": "No Top-Level-Entities | One Top-Level-Entity | {cnt} Top-Level-Entities",
-            "detail_tab_none_selected": "No Entity selected. Select an Entity from the tree to see the details in this tab.",
+            "detail": {
+                "no_attributes": "This entity group has no attributes.",
+                "no_entity_selected": "No Entity selected. Select an Entity from the tree to see the details in this tab."
+            },
             "toasts": {
                 "updated": {
                     "title": "Entity updated",
@@ -633,7 +660,10 @@
                     "message": "Your password has been changed recently. You either have to accept that new password or set one yourself. To do so you have only one additional login left! | Your password has been changed recently. You either have to accept that new password or set one yourself. To do so you have {attempts} additional logins left."
                 }
             },
-            "add_role_placeholder": "Add roles"
+            "add_role_placeholder": "Add roles",
+            "add_group_placeholder": "Add group",
+            "deactivated_role_placeholder": "No roles assigned",
+            "deactivated_group_placeholder": "No groups assigned"
         },
         "role": {
             "add_button": "Add new Role",
@@ -686,6 +716,20 @@
                 }
             },
             "add_permission_placeholder": "Add permissions"
+        },
+        "group": {
+            "add_button": "Add Working Group",
+            "toasts": {
+                "updated": {
+                    "title": "Working Group updated",
+                    "msg": "{name} successfully updated."
+                }
+            },
+            "modal": {
+                "new": {
+                    "title": "New Working Group"
+                }
+            }
         },
         "activity": {
             "title_project": "Project Activity | Project Activities",

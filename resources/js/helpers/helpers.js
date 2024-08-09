@@ -39,6 +39,10 @@ export async function initApp(locale) {
     return new Promise(r => r(null));
 }
 
+function hasUserAccess(model) {
+    return model.user_access;
+}
+
 export function can(permissionString, oneOf) {
     oneOf = oneOf || false;
     const user = store.getters.user;
@@ -53,6 +57,22 @@ export function can(permissionString, oneOf) {
     } else {
         return permissions.every(hasPermission);
     }
+}
+
+export function canWrite(model) {
+    return hasUserAccess(model) && model.user_access.write;
+}
+
+export function canCreate(model) {
+    return hasUserAccess(model) && model.user_access.create;
+}
+
+export function canDelete(model) {
+    return hasUserAccess(model) && model.user_access.delete;
+}
+
+export function canShare(model) {
+    return hasUserAccess(model) && model.user_access.share;
 }
 
 export function hasPlugin(id) {
@@ -619,16 +639,32 @@ export function getRoles(withPermissions = false) {
     }
 }
 
-export function getUserBy(value, attr = 'id') {
+export function getGroups() {
+    const fallback = [];
+    if(isLoggedIn()) {
+        return store.getters.groups || fallback;
+    } else {
+        return fallback;
+    }
+}
+
+export function getUserBy(value, attr = 'id', noMgmt = false) {
     if(!value) return null;
 
     if(isLoggedIn()) {
+        let user = null;
         const isNum = !isNaN(value);
         const lValue = isNum ? value : value.toLowerCase();
         if(attr == 'id' && value == userId()) {
-            return getUser();
+            user = getUser();
         } else {
-            return getUsers().find(u => isNum ? (u[attr] == lValue) : (u[attr].toLowerCase() == lValue));
+            user = getUsers().find(u => isNum ? (u[attr] == lValue) : (u[attr].toLowerCase() == lValue));
+        }
+
+        if(noMgmt) {
+            return except(user, ['roles', 'groups', 'access_rules']);
+        } else {
+            return user;
         }
     } else {
         return null;
@@ -640,6 +676,18 @@ export function getRoleBy(value, attr = 'id', withPermissions = false) {
         const isNum = !isNaN(value);
         const lValue = isNum ? value : value.toLowerCase();
         return getRoles(withPermissions).find(r => isNum ? (r[attr] == lValue) : (r[attr].toLowerCase() == lValue));
+    } else {
+        return null;
+    }
+}
+
+export function getGroupBy(value, attr = 'id') {
+    if(!value) return null;
+
+    if(isLoggedIn()) {
+        const isNum = !isNaN(value);
+        const lValue = isNum ? value : value.toLowerCase();
+        return getGroups().find(g => isNum ? (g[attr] == lValue) : (g[attr].toLowerCase() == lValue));
     } else {
         return null;
     }
