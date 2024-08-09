@@ -27,6 +27,12 @@ if(!function_exists('sp_slug')) {
     }
 }
 
+if(!function_exists('sp_trim_array')) {
+    function sp_trim_array(array $arr) : array {
+        return array_map(fn($elem) => trim($elem), $arr);
+    }
+}
+
 if(!function_exists('sp_get_permission_groups')) {
     function sp_get_permission_groups($onlyGroups = false) {
         $corePermissionPath = base_path("storage/framework/App/core-permissions.json");

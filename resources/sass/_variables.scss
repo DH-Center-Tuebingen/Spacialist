@@ -18,6 +18,7 @@ $navbar-default-bg: #fff !default;
 // Panels
 $panel-default-heading-bg: #fff !default;
 $enable-rounded: true !default;
+$enable-negative-margins: true !default;
 
 // Borders
 $laravel-border-color: darken($body-bg, 10%);

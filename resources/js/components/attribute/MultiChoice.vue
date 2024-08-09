@@ -10,6 +10,8 @@
         :options="state.filteredSelections"
         :name="name"
         :searchable="true"
+        :infinite="true"
+        :limit="15"
         :filter-results="false"
         :close-on-select="false"
         :placeholder="t('global.select.placeholder')"
@@ -20,7 +22,10 @@
             {{ translateConcept(option.concept_url) }}
         </template>
         <template #tag="{ option, handleTagRemove, disabled: tagDisabled }">
-            <div class="multiselect-tag">
+            <div
+                class="multiselect-tag"
+                :class="{'pe-2': tagDisabled}"
+            >
                 {{ translateConcept(option.concept_url) }}
                 <span
                     v-if="!tagDisabled"
@@ -51,6 +56,7 @@
 
     import {
         translateConcept,
+        only,
     } from '@/helpers/helpers.js';
 
     export default {
@@ -115,11 +121,16 @@
             const state = reactive({
                 query: null,
                 filteredSelections: computed(_ => {
-                    if(!state.query) return selections.value;
+                    let selection = null;
+                    if(!state.query) {
+                        selection = selections.value;
+                    } else {
+                        selection = selections.value.filter(concept => {
+                            return concept.concept_url.toLowerCase().indexOf(state.query) !== -1 || translateConcept(concept.concept_url).toLowerCase().indexOf(state.query) !== -1;
+                        });
+                    }
 
-                    return selections.value.filter(concept => {
-                        return concept.concept_url.toLowerCase().indexOf(state.query) !== -1 || translateConcept(concept.concept_url).toLowerCase().indexOf(state.query) !== -1;
-                    });
+                    return selection.map(s => only(s, ['id', 'concept_url']));
                 }),
             });
             const v = reactive({

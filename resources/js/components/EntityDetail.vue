@@ -77,14 +77,10 @@
                                         class="dropdown-item d-flex align-items-center gap-1"
                                         :title="link.path.join(' / ')"
                                     >
-                                        <span
-                                            class="badge rounded-pill"
-                                            style="font-size: 8px;"
-                                            :style="getEntityColors(link.entity_type_id)"
-                                            :title="getEntityTypeName(link.entity_type_id)"
-                                        >
-                                            &nbsp;&nbsp;
-                                        </span>
+                                        <entity-type-label
+                                            :type="link.entity_type_id"
+                                            :icon-only="true"
+                                        />
                                         {{ link.name }}
                                         <span class="text-muted small">{{ link.attribute_urls.join(', ') }}</span>
                                     </router-link>
@@ -169,18 +165,17 @@
             </div>
         </div>
         <div class="d-flex justify-content-between my-2">
-            <div class="d-flex flex-row gap-1">
-                <span :style="state.colorStyles">
-                    <i class="fas fa-fw fa-circle" />
-                </span>
-                <span>
-                    {{ state.entityTypeLabel }}
-                </span>
-            </div>
+            <entity-type-label
+                :type="state.entity.entity_type_id"
+                :icon-only="false"
+            />
             <div>
                 <i class="fas fa-fw fa-user-edit" />
-                <span class="ms-1">
-                    {{ date(state.lastModified, undefined, true, true) }}
+                <span
+                    class="ms-1"
+                    :title="date(state.lastModified, undefined, true, true)"
+                >
+                    {{ ago(state.lastModified) }}
                 </span>
                 -
                 <a
@@ -199,8 +194,7 @@
             </div>
         </div>
         <ul
-            v-show="can('comments_read')"
-            id="myTab"
+            id="entity-detail-tabs"
             class="nav nav-tabs"
             role="tablist"
         >
@@ -253,7 +247,31 @@
                     </div>
                 </a>
             </li>
+            <!-- empty nav-item to separate metadata and comments from attributes -->
+            <li class="nav-item nav-item-list-divider ms-auto" />
             <li
+                v-show="can('entity_read')"
+                class="nav-item"
+                role="presentation"
+            >
+                <a
+                    id="active-entity-metadata-tab"
+                    class="nav-link active-entity-detail-tab d-flex gap-2 align-items-center"
+                    href="#"
+                    @click.prevent="setDetailPanel('metadata')"
+                >
+                    <i class="fas fa-fw fa-file-shield" />
+                    {{ t('main.entity.tabs.metadata') }}
+                    <span
+                        v-if="!state.entity.metadata || !state.entity.metadata.licence"
+                        :title="t('global.licence_missing')"
+                    >
+                        <i class="fas fa-exclamation text-warning" />
+                    </span>
+                </a>
+            </li>
+            <li
+                v-show="can('comments_read')"
                 class="nav-item"
                 role="presentation"
             >
@@ -316,9 +334,18 @@
                 </form>
             </div>
             <div
+                v-show="can('entity_read')"
+                id="active-entity-metadata-panel"
+                class="tab-pane fade h-100 active-entity-detail-panel overflow-hidden"
+                role="tabpanel"
+            >
+                <MetadataTab class="mb-auto scroll-y-auto h-100 pe-2" />
+            </div>
+
+            <div
                 v-show="can('comments_read')"
                 id="active-entity-comments-panel"
-                class="tab-pane fade h-100 active-entity-detail-panel d-flex flex-column"
+                class="tab-pane fade h-100 active-entity-detail-panel"
                 role="tabpanel"
             >
                 <div
@@ -397,24 +424,35 @@
 
     import {useToast} from '@/plugins/toast.js';
 
-    import {date} from '@/helpers/filters.js';
+    import {
+        ago,
+        date,
+    } from '@/helpers/filters.js';
     import {
         getEntityComments,
         patchAttributes,
         patchEntityName,
         restrictEntityAccess,
     } from '@/api.js';
+
     import {
         can,
         canWrite,
         canDelete,
         isModerated,
+        isArray,
+        userId,
         getAttribute,
+        getAttributeName,
+        getUserBy,
+        getEntity,
         getEntityColors,
         getEntityTypeName,
         getEntityTypeAttributeSelections,
         getEntityTypeDependencies,
+        getConcept,
         translateConcept,
+        _cloneDeep,
     } from '@/helpers/helpers.js';
     import {
         showDiscard,
@@ -428,9 +466,14 @@
 
     import Alert from './Alert.vue';
 
+    import MetadataTab from '@/components/entity/MetadataTab.vue';
+    import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
+
     export default {
         components: {
             Alert,
+            EntityTypeLabel,
+            MetadataTab,
         },
         props: {
             bibliography: {
@@ -499,8 +542,10 @@
                 hiddenAttributes: {},
                 entityHeaderHovered: false,
                 editedEntityName: '',
+                entityMetadata: {},
                 initFinished: false,
                 commentLoadingState: 'not',
+                metadataTabLoaded: false,
                 hiddenAttributeState: false,
                 routeQuery: computed(_ => route.query),
                 entity: computed(_ => store.getters.entity),
@@ -634,7 +679,6 @@
                     return state.commentLoadingState === 'failed';
                 }),
             });
-
 
             usePreventNavigation(_ => state.formDirty);
 
@@ -770,17 +814,18 @@
                 if(tab === 'comments') {
                     newTab = document.getElementById('active-entity-comments-tab');
                     newPanel = document.getElementById('active-entity-comments-panel');
-                    oldTabs = document.getElementsByClassName('active-entity-attributes-tab');
-                    oldPanels = document.getElementsByClassName('active-entity-attributes-panel');
                     if(!state.commentsFetched) {
                         fetchComments();
                     }
+                } else if(tab === 'metadata') {
+                    newTab = document.getElementById('active-entity-metadata-tab');
+                    newPanel = document.getElementById('active-entity-metadata-panel');
                 } else {
                     newTab = document.getElementById(`active-entity-attributes-group-${tabId}-tab`);
                     newPanel = document.getElementById(`active-entity-attributes-panel-${tabId}`);
-                    oldTabs = document.getElementsByClassName('active-entity-detail-tab');
-                    oldPanels = document.getElementsByClassName('active-entity-detail-panel');
                 }
+                oldTabs = document.getElementsByClassName('active-entity-detail-tab');
+                oldPanels = document.getElementsByClassName('active-entity-detail-panel');
 
                 oldTabs.forEach(t => t.classList.remove('active'));
                 if(newTab) newTab.classList.add('active');
@@ -790,6 +835,7 @@
             const onEntityHeaderHover = hoverState => {
                 state.entityHeaderHovered = hoverState;
             };
+
             const showTabActions = (grp, status) => {
                 state.attributeGrpHovered = status ? grp : null;
             };
@@ -995,7 +1041,6 @@
                     });
                 }
             });
-
             onBeforeUpdate(_ => {
                 attrRefs.value = {};
                 state.commentLoadingState = 'not';
@@ -1085,15 +1130,21 @@
             // RETURN
             return {
                 t,
+                route,
                 // HELPERS
                 can,
                 canWrite,
                 canDelete,
+                ago,
                 date,
+                userId,
+                getUserBy,
                 showUserInfo,
+                getAttributeName,
                 getEntityTypeName,
                 getEntityColors,
                 translateConcept,
+                getEntity,
                 // LOCAL
                 hasReferenceGroup,
                 isEmpty,
@@ -1109,6 +1160,7 @@
                 onEntityHeaderHover,
                 showTabActions,
                 setFormState,
+                fetchComments,
                 addComment,
                 handleSaveOnKey,
                 saveEntity,

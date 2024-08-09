@@ -14,9 +14,11 @@
                 v-model:show-preview="csvSettings.showPreview"
                 class="d-flex"
                 :total="state.rows"
+                :removable="removable"
+                @remove="$emit('remove')"
             />
         </header>
-        <div class="table-responsive position-relative flex-grow-1 overflow-y-auto overflow-x-auto">
+        <div class="table-responsive position-relative overflow-y-auto overflow-x-auto">
             <table
                 v-show="csvSettings.showPreview"
                 class="table table-bordered table-striped table-hover "
@@ -113,8 +115,14 @@
                 required: false,
                 default: false,
             },
+            removable: {
+                type: Boolean,
+            }
         },
-        emits: ['parse'],
+        emits: [
+            'parse',
+            'remove'
+        ],
         setup(props, context) {
             const { t } = useI18n();
             // FETCH
@@ -243,6 +251,7 @@
 </script>
 
 <style scoped>
+
     /* 
         Bootstrap sets the sticky-top to z-index: 1020, which is the same level
         as the modals, which doesn't make sense in the table context.

@@ -47,10 +47,11 @@
         watch,
     } from 'vue';
 
+    import { useI18n } from 'vue-i18n';
+
     import {
         showMarkdownEditor,
     } from '@/helpers/modal.js';
-    import { useI18n } from 'vue-i18n';
 
     export default {
         props: {
@@ -140,8 +141,8 @@
 
             // RETURN
             return {
-                // FUNCTIONS
                 t,
+                // FUNCTIONS
                 resetFieldState,
                 undirtyField,
                 openMdEditor,
@@ -151,5 +152,5 @@
                 v,
             };
         },
-    }
+    };
 </script>

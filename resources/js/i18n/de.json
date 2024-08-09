@@ -33,7 +33,8 @@
             "nr_of_entries": "Keine Einträge | 1 Eintrag | {cnt} Einträge",
             "no_entries": "Keine Einträge gefunden.",
             "fetch_next_entries": "Weitere Einträge laden",
-            "no_more_entries": "Keine weiteren Einträge"
+            "no_more_entries": "Keine weiteren Einträge",
+            "stats": "Zeige {from}-{to} von {total}"
         },
         "select_all": "Alle auswählen",
         "select_none": "Alle abwählen",
@@ -69,7 +70,7 @@
             "confirm_and_save": "Nein, Speichern und fortfahren"
         },
         "error": {
-            "alert_title": "Fehlermeldung:",
+            "alert_title": "Fehlermeldung",
             "info_issue": "Wenn du denkst, dass diese Fehlermeldung ein Bug ist, schaue in unserem <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues\" target=\"_blank\">Bugtracker</a> auf Github nach, ob der Fehler schon gemeldet wurde oder sogar bereits in einer aktuelleren Version <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues?q=is:issue+is:closed\" target=\"_blank\">geschlossen</a> wurde (Deine aktuelle Version findest du über Einstellungen > <i class=\"fas fa-fw fa-info-circle\"></i> Über). Wenn es weder gemeldet, noch geschlossen ist, kannst du gerne einen <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues/new\" target=\"_blank\">neuen Bug</a> melden.",
             "occur": "Fehler aufgetreten",
             "headers": "Kopfzeilen",
@@ -174,6 +175,7 @@
             "rism": "RISM",
             "si-unit": "SI-Einheit",
             "si_units": {
+                "unit_type": "Einheit",
                 "base_unit": "Basisgröße",
                 "time": {
                     "label": "Zeit",
@@ -242,13 +244,57 @@
                         "pound": "Britisches Pfund"
                     }
                 },
+                "force": {
+                    "label": "Kraft",
+                    "units": {
+                        "newton": "Newton",
+                        "kilonewton": "Kilonewton"
+                    }
+                },
                 "temperature": {
                     "label": "Temperatur",
                     "units": {
-                        "degree_celsius": "Celsius",
-                        "degree_kelvin": "Kelvin",
-                        "degree_fahrenheit": "Fahrenheit",
-                        "degree_réaumur": "Réaumur"
+                        "celsius": "Celsius",
+                        "kelvin": "Kelvin",
+                        "fahrenheit": "Fahrenheit",
+                        "réaumur": "Réaumur"
+                    }
+                },
+                "volumetric_flow": {
+                    "label": "Volumenstrom",
+                    "units": {
+                        "cubic_metre_per_second": "Kubikmeter pro Sekunde",
+                        "litre_per_second": "Liter pro Sekunde"
+                    }
+                },
+                "speed": {
+                    "label": "Geschwindigkeit",
+                    "units": {
+                        "metre_per_second": "Meter pro Sekunde",
+                        "kilometre_per_hour": "Kilometer pro Stunde",
+                        "mile_per_hour": "Meilen pro Stunde"
+                    }
+                },
+                "pressure": {
+                    "label": "Druck",
+                    "units": {
+                        "pascal": "Pascal",
+                        "kilopascal": "Kilopascal",
+                        "hectopascal": "Hectopascal",
+                        "bar": "Bar",
+                        "decibar": "Decibar",
+                        "millibar": "Millibar",
+                        "torr": "Torr",
+                        "technical_atmosphere": "Technische Atmosphäre",
+                        "standard_atmosphere": "Physikalische Atmosphäre",
+                        "pound_per_square_inch": "Pfund pro Quadratzoll"
+                    }
+                },
+                "quotient": {
+                    "label": "Quotient",
+                    "units": {
+                        "percent": "Prozent",
+                        "parts_per_million": "Parts per million"
                     }
                 }
             },
@@ -285,6 +331,9 @@
         "confirm_password": "Passwort wiederholen",
         "remember_me": "Eingeloggt bleiben",
         "orcid": "ORCID",
+        "licence": "Lizenz",
+        "licence_default": "Standard-Lizenz",
+        "licence_missing": "Lizenz-Angabe fehlt",
         "description": "Beschreibung",
         "roles": "Rollen",
         "permissions": "Berechtigungen",
@@ -295,6 +344,9 @@
         "deactivated_at": "Deaktiviert",
         "timestamp": "Zeitstempel",
         "options": "Optionen",
+        "summary": "Zusammenfassung",
+        "creator": "Ersteller",
+        "editors": "Bearbeiter",
         "reply_to": "Antworten",
         "replying_to": "Antwort an {name}",
         "type": "Typ",
@@ -432,6 +484,7 @@
         },
         "entity": {
             "title": "Entität | Entitäten",
+            "top_level": "Top-Level-Entität",
             "count": "Keine Top-Level Entitäten | Eine Top-Level Entität | {cnt} Top-Level Entitäten",
             "detail": {
                 "no_attributes": "This entity group has no attributes.",
@@ -441,6 +494,10 @@
                 "updated": {
                     "title": "Entität aktualisiert",
                     "msg": "Daten von „{name}“ wurden erfolgreich aktualisiert."
+                },
+                "updated_metadata": {
+                    "title": "Metadaten aktualisiert",
+                    "msg": "Metadaten von {name} wurden erfolgreich aktualisiert."
                 },
                 "deleted": {
                     "title": "Entität gelöscht",
@@ -483,6 +540,7 @@
             "tabs": {
                 "default": "Allgemein",
                 "comments": "Kommentare",
+                "metadata": "Metadaten",
                 "untitled_group": "Unbenannt ({cnt})"
             },
             "modals": {
@@ -543,6 +601,9 @@
                 },
                 "table": {
                     "add_row": "Neue Zeile hinzufügen",
+                    "error": {
+                        "deleted_entity": "Gelöschte Entität"
+                    },
                     "chart": {
                         "number_sets": "Die letzten {cnt} Datensätze",
                         "include_in": "Verwenden",
@@ -566,6 +627,10 @@
                         "cancel": "Bearbeitung verwerfen"
                     }
                 }
+            },
+            "metadata": {
+                "save": "Metadaten speichern",
+                "deleted_entity_name": "Gelöschte Entität #{id}"
             }
         },
         "user": {
@@ -820,6 +885,23 @@
                 "project_lead": "Projektleitung"
             }
         },
+        "history": {
+            "title": "Verlauf",
+            "created_as": "Erstellt als:",
+            "no_value": "Kein Wert aufgezeichnet",
+            "entity": {
+                "created_in": "Als Unter-Entität von:",
+                "name_update": "Name aktualisiert:",
+                "name_unknown": "Unbekannte Entität",
+                "name_unknown_info": "Das bedeutet, dass die Entität entweder gelöscht wurde oder du nicht die nötigen Berechtigungen besitzt.",
+                "value_add_attribute": "Wert zu Attribut hinzugefügt:",
+                "value_update_attribute": "Wert von Attribut geändert:",
+                "certainty_update": "Sicherheit aktualisiert:",
+                "certainty_unknown": "Unbekannt",
+                "moved": "Verschoben:",
+                "rank": "Rang"
+            }
+        },
         "bibliography": {
             "title": "Literatur",
             "modal": {
@@ -944,6 +1026,12 @@
             "error": {
                 "file_read": "Datei konnte nicht gelesen werden.",
                 "file_read_abort": "Datei-Lesevorgang abgebrochen."
+            },
+            "modal": {
+                "error": {
+                    "msg_detail": "Fehler beim Importieren des Eintrags in Zeile {count} (<span class='fst-italic'>{name}</span>) in Spalte <span class='fw-bold'>{col_name}</span> (#{index}) mit Datentyp <span class='fst-italic'>{datatype}</span> und dem fehlerhaften Wert <span class='fw-bold'>{value}</span>",
+                    "msg": "Fehler beim Importieren des Eintrags in Zeile {count} (<span class='fst-italic'>{name}</span>): <span class='fw-bold'>{value}</span>"
+                }
             }
         },
         "map": {

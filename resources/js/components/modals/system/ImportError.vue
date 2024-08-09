@@ -24,7 +24,7 @@
                     :message="state.htmlMessage"
                     :type="'error'"
                     :noicon="false"
-                    :icontext="'Error Message'"
+                    :icontext="t('global.error.alert_title')"
                 />
             </div>
             <div class="modal-footer">
@@ -62,10 +62,6 @@
         setup(props, context) {
             const {t} = useI18n();
 
-            const {
-                data,
-            } = toRefs(props);
-
             // FUNCTIONS
             const closeModal = _ => {
                 context.emit('closing', false);
@@ -74,27 +70,44 @@
             // DATA
             const state = reactive({
                 htmlMessage: computed(_ => {
+                    const data = props.data;
+                    const isRowError = data?.data?.on_index && data?.data?.on_value;
 
-                    const message = data?.value?.message || 'Unknown error';
-                    const on_index = data?.value?.data?.on_index || null;
-                    const on = data?.value?.data?.on || '"unknown"';
-                    const on_value = data?.value?.data?.on_value || null;
-                    const count = data?.value?.data?.count || '"unknown"';
-                    const entry = data?.value?.data?.entry || '"unknown"';
+                    const onIndex = data?.data?.on_index || 'N/A';
+                    const onValue = data?.data?.on_value || 'N/A';
+                    const onName = data?.data?.on_name || 'N/A';
+                    const on = data?.data?.on || 'N/A';
+                    const count = data?.data?.count || 'N/A';
+                    const entry = data?.data?.entry || 'N/A';
 
-                    let msg = `<div class='lead'>
-                        ${message}
+
+                    const i18nMsg =
+                        isRowError
+                            ?
+                            t('main.importer.modal.error.msg_detail', {
+                                count: count,
+                                name: entry,
+                                index: onIndex,
+                                col_name: onName,
+                                datatype: on,
+                                value: onValue,
+                            })
+                            :
+                            t('main.importer.modal.error.msg_detail', {
+                                count: count,
+                                name: entry,
+                                value: on,
+                            });
+
+                    const msg =
+                        `<div class='lead'>
+                        ${data.message}
                     </div>
-                    <hr/>`;
-                    if(on_index && on_value) {
-                        msg += `<div>
-                            Error while importing entry in line ${count} (<span class='fst-italic'>${entry}</span>) while parsing column ${on_index} (<span class='fst-italic'>${on}</span>) with invalid value <span class='fw-bold'>${on_value}</span>
-                        </div>`;
-                    } else {
-                        msg += `<div>
-                            Error while importing entry in line ${count} (<span class='fst-italic'>${entry}</span>): <span class='fw-bold'>${on}</span>
-                        </div>`;
-                    }
+                    <hr/>
+                    <div>
+                        ${i18nMsg}
+                    </div>
+                    `;
                     return msg;
                 })
             });

@@ -66,6 +66,7 @@
                             :update="state.validationData.update"
                             :create="state.validationData.create"
                             :imported="state.imported"
+                            :errors="state.validationErrors"
                         />
                         <Alert
                             v-else
@@ -193,6 +194,10 @@
     import {
         translateConcept,
     } from '@/helpers/helpers.js';
+
+    import {
+        handleUnhandledErrors
+    } from '../../bootstrap/http';
 
 
     export default {
@@ -349,7 +354,7 @@
                     state.availableAttributes = [];
                     return;
                 } else {
-                    state.availableAttributes = store.getters.entityTypeAttributes(e.id) || [];
+                    state.availableAttributes = store.getters.entityTypeAttributes(e.id, true) || [];
                 }
                 guessAttributeMapping();
             };
@@ -411,13 +416,11 @@
                     .then(data => {
                         state.validated = true;
                         state.error = '';
-                        state.validationData = data;
+                        state.validationData = data.summary;
+                        state.validationErrors = data.errors;
                     })
-                    .catch(e => {
-                        showImportError({
-                            message: e.response.data.error,
-                            data: e.response.data.data,
-                        });
+                    .catch(axiosError => {
+                        console.error(axiosError);
                     })
                     .finally(_ => state.validating = false);
             };
@@ -440,10 +443,12 @@
                         icon: true,
                         simple: true,
                     });
-                }).catch(e => {
-                    showImportError({
-                        message: e.response.data.error,
-                        data: e.response.data.data,
+                }).catch(axiosError => {
+                    handleUnhandledErrors(axiosError, (e) => {
+                        showImportError({
+                            message: e.response.data.error,
+                            data: e.response.data.data,
+                        });
                     });
                 }).finally(_ => {
                     state.uploading = false;
@@ -500,9 +505,9 @@
                 state.validating = false;
                 state.validated = false;
                 state.validationData = {
-                    none: 0,
-                    exist: 0,
-                    multiple: 0,
+                    create: 0,
+                    update: 0,
+                    conflict: 0,
                     total: 0
                 };
 
@@ -557,6 +562,7 @@
                 imported: false,
                 validating: false,
                 validated: false,
+                validationErrors: [],
                 validationData: {
                     create: 0,
                     update: 0,
@@ -625,6 +631,7 @@
 
 <style>
     .data-importer {
+
         th,
         td {
             white-space: nowrap;
@@ -646,50 +653,57 @@
 
 
 
-<style scoped lang="scss">
-.controls {
-    display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
-    gap: 1rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.layout {
-    display: grid;
-    grid-template-rows: 1fr min-content;
-    gap: 1rem;
-
-    &.limited {
-        grid-template-rows: fit-content(50%) minmax(min-content, 1fr);
-    }
-}
-
-.entity-attribute-mapping {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr 1fr;
-    align-items: flex-end;
-}
-
-@media screen and (max-width: 1920px) {
-    .entity-attribute-mapping {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-@media (max-width: 768px) {
-
-    .file-preview,
+<style
+    scoped
+    lang="scss"
+>
     .controls {
-        grid-template-columns: 1fr;
-        overflow-y: auto;
-        padding: 1rem;
-        border: 1px solid var(--bs-border-color-translucent);
-        border-radius: var(--bs-border-radius);
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+        gap: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .layout {
+        display: grid;
+        grid-template-rows: 1fr min-content;
+        gap: 1rem;
+
+        &.limited {
+            grid-template-rows: fit-content(50%) minmax(min-content, 1fr);
+        }
     }
 
     .entity-attribute-mapping {
-        grid-template-columns: 1fr;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 1fr;
+        align-items: flex-end;
     }
-}
+
+    @media screen and (max-width: 1920px) {
+        .entity-attribute-mapping {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+
+        .card {
+            overflow-y: visible !important;
+        }
+
+        .file-preview,
+        .controls {
+            grid-template-columns: 1fr;
+            overflow-y: auto;
+            padding: 1rem;
+            border: 1px solid var(--bs-border-color-translucent);
+            border-radius: var(--bs-border-radius);
+        }
+
+        .entity-attribute-mapping {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>

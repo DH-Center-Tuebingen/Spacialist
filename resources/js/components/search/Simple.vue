@@ -21,6 +21,7 @@
         :delay="delay"
         :limit="limit"
         :placeholder="t('global.search')"
+        :disabled="disabled"
         @change="handleSelection"
     >
         <template #singlelabel="{ value }">
@@ -32,13 +33,16 @@
                 />
             </div>
         </template>
-        <template #tag="{ option, handleTagRemove, disabled }">
-            <div class="multiselect-tag">
+        <template #tag="{ option, handleTagRemove, disabled: tagDisabled }">
+            <div
+                class="multiselect-tag"
+                :class="{'pe-2': tagDisabled}"
+            >
                 <span @click.prevent="handleTagClick(option)">
                     {{ displayResult(option) }}
                 </span>
                 <span
-                    v-if="!disabled"
+                    v-if="!tagDisabled"
                     class="multiselect-tag-remove"
                     @click.prevent
                     @mousedown.prevent.stop="handleTagRemove(option, $event)"
@@ -157,6 +161,11 @@
                 required: false,
                 default: _ => new Object(),
             },
+            disabled: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
         },
         emits: ['selected', 'entry-click'],
         setup(props, context) {
@@ -172,6 +181,7 @@
                 chain,
                 mode,
                 defaultValue,
+                disabled,
             } = toRefs(props);
             
             if(!keyText.value && !keyFn.value) {
