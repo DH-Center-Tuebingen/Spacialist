@@ -149,8 +149,6 @@
                     "add": "新規参考文献を追加する",
                     "comment": "コメント",
                     "add_button": "参考文献を追加する"
-                },
-                "toasts": {
                 }
             },
             "attributes": {
