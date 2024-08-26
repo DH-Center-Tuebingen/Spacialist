@@ -2,7 +2,8 @@
     <vue-final-modal
         class="modal-container modal"
         content-class="sp-modal-content sp-modal-content-sm"
-        name="error-modal">
+        name="error-modal"
+    >
         <div class="sp-modal-content sp-modal-content-sm">
             <div class="modal-header">
                 <h5 class="modal-title">
@@ -10,35 +11,55 @@
                         t('global.error.occur')
                     }}
                 </h5>
-                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-                </button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                />
             </div>
             <div class="modal-body my-3">
-                <p v-if="state.hasRequest" v-html="t('global.error.request_failed', {method: data.request.method, url: data.request.url, status: data.request.status})">
-                </p>
+                <!-- eslint-disable vue/no-v-html -->
+                <p
+                    v-if="state.hasRequest"
+                    v-html="t('global.error.request_failed', {method: data.request.method, url: data.request.url, status: data.request.status})"
+                />
+                <!-- eslint-enable vue/no-v-html -->
                 <alert
                     :message="`<span class='fw-light fst-italic'>${data.msg.error || JSON.stringify(data.msg)}</span>`"
                     :type="'error'"
                     :noicon="false"
-                    :icontext="t('global.error.alert_title')" />
+                    :icontext="t('global.error.alert_title')"
+                />
                 <alert
                     :message="t('global.error.info_issue')"
                     :type="'info'"
                     :noicon="false"
-                    :icontext="'&nbsp;'" />
+                    :icontext="'&nbsp;'"
+                />
                 <h6 v-if="data.headers">
                     {{ t('global.error.headers') }}
-                    <span class="clickable" @click="state.showHeaders = !state.showHeaders">
+                    <span
+                        class="clickable"
+                        @click="state.showHeaders = !state.showHeaders"
+                    >
                         <span v-show="state.showHeaders">
-                            <i class="fas fa-fw fa-caret-up"></i>
+                            <i class="fas fa-fw fa-caret-up" />
                         </span>
                         <span v-show="!state.showHeaders">
-                            <i class="fas fa-fw fa-caret-down"></i>
+                            <i class="fas fa-fw fa-caret-down" />
                         </span>
                     </span>
                 </h6>
-                <dl class="row text-break" v-show="state.showHeaders">
-                    <template v-for="(header, name) in data.headers" :key="name">
+                <dl
+                    v-show="state.showHeaders"
+                    class="row text-break"
+                >
+                    <template
+                        v-for="(header, name) in data.headers"
+                        :key="name"
+                    >
                         <dt class="col-md-3 text-end">
                             {{ name }}
                         </dt>
@@ -49,8 +70,13 @@
                 </dl>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                    <i class="fas fa-fw fa-times"></i> {{ t('global.close') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                >
+                    <i class="fas fa-fw fa-times" /> {{ t('global.close') }}
                 </button>
             </div>
         </div>
@@ -96,8 +122,6 @@
             return {
                 t,
                 // HELPERS
-                // PROPS
-                data,
                 // LOCAL
                 closeModal,
                 // STATE

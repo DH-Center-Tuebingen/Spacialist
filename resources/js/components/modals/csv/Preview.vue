@@ -2,7 +2,8 @@
     <vue-final-modal
         class="modal-container modal"
         content-class="sp-modal-content sp-modal-content-lg"
-        name="csv-uploader-modal">
+        name="csv-uploader-modal"
+    >
         <div class="sp-modal-content sp-modal-content-lg">
             <div class="modal-header">
                 <h5 class="modal-title">
@@ -10,35 +11,60 @@
                         t('main.csv.uploader.title')
                     }}
                 </h5>
-                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-                </button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                />
             </div>
             <div class="modal-body">
                 <file-upload
-                    accept="text/csv"
-                    class="w-100"
+                    v-if="state.fileContent === ''"
                     ref="upload"
                     v-model="state.fileQueue"
+                    accept="text/csv"
+                    class="w-100"
                     :directory="false"
                     :drop="true"
                     :multiple="false"
-                    @input-file="inputFile">
-                        <div class="d-flex flex-row justify-content-center align-items-center border border-success border-3 rounded-3" style="height: 150px; border-style: dashed !important;">
-                            <i class="fas fa-fw fa-file-upload fa-3x"></i>
-                        </div>
+                    @input-file="inputFile"
+                >
+                    <div
+                        class="d-flex flex-row justify-content-center align-items-center border border-success border-3 rounded-3"
+                        style="height: 150px; border-style: dashed !important;"
+                    >
+                        <i class="fas fa-fw fa-file-upload fa-3x" />
+                    </div>
                 </file-upload>
                 <csv-table
+                    v-else
                     :content="state.fileContent"
                     :small="true"
                     :options="true"
-                    @parse="getParsedData" />
+                    :removable="true"
+                    @parse="getParsedData"
+                    @remove="state.fileContent = ''"
+                />
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-success" data-bs-dismiss="modal" :disabled="!state.canConfirm" @click="confirmCsv()">
-                    <i class="fas fa-fw fa-check"></i> {{ t('global.create') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-success"
+                    data-bs-dismiss="modal"
+                    :disabled="!state.canConfirm"
+                    @click="confirmCsv()"
+                >
+                    <i class="fas fa-fw fa-check" /> {{ t('global.create') }}
                 </button>
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                    <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                >
+                    <i class="fas fa-fw fa-times" /> {{ t('global.cancel') }}
                 </button>
             </div>
         </div>
@@ -51,7 +77,7 @@
         onMounted,
         reactive,
     } from 'vue';
-    
+
     import { useI18n } from 'vue-i18n';
 
     export default {
@@ -66,7 +92,7 @@
                 }
             };
             const parseFile = (file, component) => {
-                    state.fileReader.readAsText(file.file);
+                state.fileReader.readAsText(file.file);
             };
             const getParsedData = e => {
                 state.parsedCsv = e;
@@ -91,7 +117,7 @@
             onMounted(_ => {
                 state.fileReader.onload = e => {
                     state.fileContent = e.target.result;
-                }
+                };
             });
 
             // RETURN
@@ -107,7 +133,7 @@
                 closeModal,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

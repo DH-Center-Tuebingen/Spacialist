@@ -35,7 +35,33 @@ class EntityAttribute extends Model
             ->logOnlyDirty();
     }
 
+    public function removeFromEntityType() {
+        $pos = $this->position;
+        $aid = $this->attribute_id;
+        $etid = $this->entity_type_id;
+
+        $successors = EntityAttribute::where([
+                ['position', '>', $pos],
+                ['entity_type_id', '=', $etid]
+            ])->get();
+        foreach($successors as $s) {
+            $s->position--;
+            $s->save();
+        }
+
+        $entityIds = Entity::where('entity_type_id', $etid)
+            ->pluck('id')
+            ->toArray();
+        AttributeValue::where('attribute_id', $aid)
+            ->whereIn('entity_id', $entityIds)
+            ->delete();
+    }
+
     public function attribute() {
         return $this->belongsTo('App\Attribute');
+    }
+
+    public function entity_type() {
+        return $this->belongsTo('App\EntityType');
     }
 }

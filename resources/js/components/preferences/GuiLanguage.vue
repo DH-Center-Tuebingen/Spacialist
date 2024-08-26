@@ -1,20 +1,30 @@
 <template>
     <div class="row">
-        <label class="col-md-2 form-label"></label>
+        <label class="col-md-2 form-label" />
         <div class="col-md-10">
             <multiselect
-                v-model="data"
                 id="language-search"
-                :hideSelected="true"
+                :value="modelValue"
+                :hide-selected="true"
                 :mode="'single'"
                 :filterResults="true"
                 :options="state.languageList"
                 :searchable="true"
+                :disabled="readonly"
                 :readonly="readonly"
                 :placeholder="t('global.select.placeholder')"
-                @change="onChange">
-            </multiselect>
-            <button type="button" class="btn btn-outline-primary mt-2" @click="setBrowserLanguage()" :disabled="readonly" v-if="state.showSetButton" v-html="t('main.preference.info.set_to_language', {lang: state.browserLanguage})" />
+                @change="onChange"
+            />
+            <!-- eslint-disable -->
+            <button
+                v-if="state.showSetButton"
+                type="button"
+                class="btn btn-outline-primary mt-2"
+                :disabled="readonly"
+                @click="setBrowserLanguage()"
+                v-html="t('main.preference.info.set_to_language', {lang: state.browserLanguage})"
+            />
+            <!-- eslint-enable -->
         </div>
     </div>
 </template>
@@ -34,7 +44,7 @@
 
     export default {
         props: {
-            data: {
+            modelValue: {
                 required: true,
                 type: String,
             },
@@ -49,11 +59,10 @@
                 default: false,
             },
         },
-        emits: ['changed'],
+        emits: ['changed', 'upadte:modelValue'],
         setup(props, context) {
             const { t } = useI18n();
             const {
-                data,
                 readonly,
                 browserDefault,
             } = toRefs(props);
@@ -61,10 +70,9 @@
             // FUNCTIONS
             const onChange = value => {
                 if(readonly.value) return;
-                context.emit('changed', {
-                    value: value
-                });
+                context.emit('changed',  value );
             };
+
             const setBrowserLanguage = _ => {
                 if(!browserDefault.value || readonly.value) return;
 
@@ -76,7 +84,7 @@
                 languageList: getSupportedLanguages(),
                 browserLanguage: computed(_ => navigator.language ? navigator.language.split('-')[0] : 'en'),
                 showSetButton: computed(_ => {
-                    return browserDefault.value && state.browserLanguage != data.value && state.languageList.includes(state.browserLanguage);
+                    return browserDefault.value && state.browserLanguage != props.modelValue && state.languageList.includes(state.browserLanguage);
                 }),
             });
 
@@ -86,9 +94,6 @@
                 // LOCAL
                 onChange,
                 setBrowserLanguage,
-                // PROPS
-                data,
-                readonly,
                 // STATE
                 state,
             };

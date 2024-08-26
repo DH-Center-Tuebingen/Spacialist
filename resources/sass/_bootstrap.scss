@@ -1,5 +1,6 @@
 .breadcrumb {
     background-color: $gray-200;
+
     @if $enable-rounded {
         border-radius: $border-radius;
     }
@@ -12,10 +13,21 @@
 .submenu {
     display: none;
     position: absolute;
-    left:100%;
-    top:-7px;
+    left: 100%;
+    top: -7px;
+}
+
+.submenu-end {
+    left: -100%;
+    top: 0;
+    margin-left: -(map-get($spacers, 4));
 }
 
 .dropdown-item:hover > .submenu {
     display: block;
+}
+
+.badge {
+    /* The badge with the 'Raleway' font is not vertically centered. This fixes it. */
+    padding-top: calc(var(--bs-badge-padding-y) + .15em);
 }

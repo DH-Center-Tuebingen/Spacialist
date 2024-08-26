@@ -1,6 +1,9 @@
 <template>
     <div class="d-flex justify-content-start align-items-center">
-        <div :style="state.style" class="color-gradient"></div>
+        <div
+            :style="state.style"
+            class="color-gradient"
+        />
         <span>{{ label }}</span>
     </div>
 </template>
@@ -52,8 +55,6 @@
                 t,
                 // HELPERS
                 // LOCAL
-                // PROPS
-                label,
                 // STATE
                 state,
             };

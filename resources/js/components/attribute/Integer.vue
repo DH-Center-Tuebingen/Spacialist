@@ -1,14 +1,14 @@
 <template>
     <input
+        :id="name"
+        v-model.number="v.value"
         class="form-control"
         type="number"
         step="1"
         placeholder="0"
         :disabled="disabled"
-        :id="name"
         :name="name"
-        v-model.number="v.value"
-        @input="v.handleInput" />
+    >
 </template>
 
 <script>
@@ -61,7 +61,6 @@
 
             // DATA
             const {
-                handleInput,
                 value: fieldValue,
                 meta,
                 resetField,
@@ -73,12 +72,18 @@
             });
             const v = reactive({
                 value: fieldValue,
-                handleInput,
                 meta,
                 resetField,
             });
 
-            watch(v.meta, (newValue, oldValue) => {
+
+            watch(_ => value, (newValue, oldValue) => {
+                resetFieldState();
+            });
+            watch(_ => v.value, (newValue, oldValue) => {
+                // only emit @change event if field is validated (required because Entity.vue components)
+                // trigger this watcher several times even if another component is updated/validated
+                if(!v.meta.validated) return;
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
@@ -92,14 +97,10 @@
                 // LOCAL
                 resetFieldState,
                 undirtyField,
-                // PROPS
-                name,
-                disabled,
-                value,
                 // STATE
                 state,
                 v,
-            }
+            };
         },
-    }
+    };
 </script>

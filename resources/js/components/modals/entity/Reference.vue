@@ -1,12 +1,13 @@
 <template>
     <vue-final-modal
+        v-model="state.show"
         class="modal-container modal"
         content-class="sp-modal-content"
-        v-model="state.show"
         name="entity-reference-modal"
         :esc-to-close="true"
         :click-to-close="true"
-        @closed="closeModal()">
+        @closed="closeModal()"
+    >
         <div class="sp-modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
@@ -16,22 +17,38 @@
                         {{ translateConcept(state.attribute.thesaurus_url) }}
                     </small>
                 </h5>
-                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-                </button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                />
             </div>
             <div class="modal-body my-2">
                 <h5>
                     {{ t('main.entity.references.certainty') }}
                 </h5>
-                <div class="progress mb-3" @click="setCertainty">
-                    <div class="progress-bar" role="progressbar" :class="getCertaintyClass(state.certainty)" :aria-valuenow="state.certainty" aria-valuemin="0" aria-valuemax="100" :style="{width: state.certainty+'%'}">
+                <div
+                    class="progress mb-3"
+                    @click="setCertainty"
+                >
+                    <div
+                        class="progress-bar"
+                        role="progressbar"
+                        :class="getCertaintyClass(state.certainty)"
+                        :aria-valuenow="state.certainty"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        :style="{ width: state.certainty + '%' }"
+                    >
                         <span class="sr-only">
                             {{ state.certainty }}% certainty
                         </span>
                         {{ state.certainty }}%
                     </div>
                 </div>
-                <div v-dcan="'comments_read'"></div>
+                <div v-dcan="'comments_read'" />
                 <comment-list
                     v-if="can('comments_read')"
                     :avatar="48"
@@ -41,45 +58,66 @@
                     :list-classes="''"
                     :resource="state.resourceInfo"
                     :metadata="state.commentMetadata"
-                    @added="onUpdateCertainty">
-                        <template v-slot:metadata="data">
-                            <span class="me-1 small" v-if="Object.keys(data.comment.metadata).length > 0">
-                                <span class="badge" :class="getCertaintyClass(data.comment.metadata.certainty_from)">
-                                    {{ data.comment.metadata.certainty_from || '???' }}
-                                </span>
-                                &rarr;
-                                <span class="badge" :class="getCertaintyClass(data.comment.metadata.certainty_to)">
-                                    {{ data.comment.metadata.certainty_to || '???' }}
-                                </span>
+                    @added="onUpdateCertainty"
+                >
+                    <template #metadata="data">
+                        <span
+                            v-if="Object.keys(data.comment.metadata).length > 0"
+                            class="me-1 small"
+                        >
+                            <span
+                                class="badge"
+                                :class="getCertaintyClass(data.comment.metadata.certainty_from)"
+                            >
+                                {{ data.comment.metadata.certainty_from || '???' }}
                             </span>
-                        </template>
+                            &rarr;
+                            <span
+                                class="badge"
+                                :class="getCertaintyClass(data.comment.metadata.certainty_to)"
+                            >
+                                {{ data.comment.metadata.certainty_to || '???' }}
+                            </span>
+                        </span>
+                    </template>
                 </comment-list>
-                <hr />
+                <hr>
                 <h5>
                     {{ t('main.entity.references.bibliography.title') }}
                 </h5>
                 <ul class="list-group">
-                    <li class="list-group-item d-flex flex-row justify-content-between" v-for="reference in state.references" :key="reference.id">
+                    <li
+                        v-for="reference in state.references"
+                        :key="reference.id"
+                        class="list-group-item d-flex flex-row justify-content-between"
+                    >
                         <div class="flex-grow-1">
-                            <div v-if="state.editItem.id !== reference.id">
-                                <blockquote class="blockquote fs-09">
-                                    <p class="text-muted">
-                                        {{ reference.description }}
-                                    </p>
-                                </blockquote>
-                                <figcaption class="blockquote-footer fw-medium mb-0">
-                                    {{ reference.bibliography.author }} in <cite :title="reference.bibliography.title">
-                                        {{ reference.bibliography.title }} ,{{ reference.bibliography.year }}
-                                    </cite>
-                                </figcaption>
-                            </div>
-                            <div class="d-flex align-items-center" v-else>
-                                <input type="text" class="form-control me-1" v-model="state.editItem.description" />
-                                <button type="button" class="btn btn-outline-success btn-sm me-1" @click.prevent="onUpdateReference(state.editItem)">
-                                    <i class="fas fa-fw fa-check"></i>
+                            <Quotation
+                                v-if="state.editItem.id !== reference.id"
+                                :value="reference"
+                            />
+                            <div
+                                v-else
+                                class="d-flex align-items-center"
+                            >
+                                <input
+                                    v-model="state.editItem.description"
+                                    type="text"
+                                    class="form-control me-1"
+                                >
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-success btn-sm me-1"
+                                    @click.prevent="onUpdateReference(state.editItem)"
+                                >
+                                    <i class="fas fa-fw fa-check" />
                                 </button>
-                                <button type="button" class="btn btn-outline-danger btn-sm" @click.prevent="cancelEditReference()">
-                                    <i class="fas fa-fw fa-times"></i>
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-danger btn-sm"
+                                    @click.prevent="cancelEditReference()"
+                                >
+                                    <i class="fas fa-fw fa-times" />
                                 </button>
                             </div>
                         </div>
@@ -88,15 +126,32 @@
                                 {{ date(reference.updated_at) }}
                             </span>
                             <div class="dropdown ms-1">
-                                <span :id="`edit-reference-dropdown-${reference.id}`" class="clickable text-muted" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fas fa-fw fa-ellipsis-h"></i>
+                                <span
+                                    :id="`edit-reference-dropdown-${reference.id}`"
+                                    class="clickable text-muted"
+                                    data-bs-toggle="dropdown"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                >
+                                    <i class="fas fa-fw fa-ellipsis-h" />
                                 </span>
-                                <div class="dropdown-menu" :aria-labelledby="`edit-reference-dropdown-${reference.id}`">
-                                    <a class="dropdown-item" href="#" @click.prevent="enableEditReference(reference)">
-                                        <i class="fas fa-fw fa-edit text-info"></i> {{ t('global.edit') }}
+                                <div
+                                    class="dropdown-menu"
+                                    :aria-labelledby="`edit-reference-dropdown-${reference.id}`"
+                                >
+                                    <a
+                                        class="dropdown-item"
+                                        href="#"
+                                        @click.prevent="enableEditReference(reference)"
+                                    >
+                                        <i class="fas fa-fw fa-edit text-info" /> {{ t('global.edit') }}
                                     </a>
-                                    <a class="dropdown-item" href="#" @click.prevent="onDeleteReference(reference)">
-                                        <i class="fas fa-fw fa-trash text-danger"></i> {{ t('global.delete') }}
+                                    <a
+                                        class="dropdown-item"
+                                        href="#"
+                                        @click.prevent="onDeleteReference(reference)"
+                                    >
+                                        <i class="fas fa-fw fa-trash text-danger" /> {{ t('global.delete') }}
                                     </a>
                                 </div>
                             </div>
@@ -106,62 +161,82 @@
                 <h6 class="mt-2">
                     {{ t('main.entity.references.bibliography.add') }}
                 </h6>
-                <form role="form" @submit.prevent="onAddReference()" v-dcan="'bibliography_read|entity_data_write'">
+                <form
+                    v-dcan="'bibliography_read|entity_data_write'"
+                    role="form"
+                    @submit.prevent="onAddReference()"
+                >
                     <div class="d-flex flex-row">
                         <div class="flex-grow-1">
                             <multiselect
-                                v-model="state.newItem.bibliography"
                                 id="bibliography-search"
+                                v-model="state.newItem.bibliography"
                                 :object="true"
                                 :label="'title'"
                                 :track-by="'id'"
-                                :hideSelected="true"
+                                :hide-selected="true"
                                 :value-prop="'id'"
                                 :mode="'single'"
                                 :delay="0"
-                                :minChars="0"
-                                :resolveOnLoad="true"
+                                :min-chars="0"
+                                :resolve-on-load="true"
                                 :filterResults="false"
                                 :options="async query => await filterBibliographyList(query)"
                                 :searchable="true"
-                                :placeholder="t('global.select.placeholder')">
-                                <template v-slot:singlelabel="{ value }">
+                                :placeholder="t('global.select.placeholder')"
+                            >
+                                <template #singlelabel="{ value }">
                                     <div class="multiselect-single-label">
                                         <div>
                                             <span class="fw-medium">{{ value.title }}</span>
                                             -
                                             <cite class="small">
-                                                {{ value.author }} ({{ value.year }})
+                                                {{ formatAuthors(value.author) }} ({{ value.year }})
                                             </cite>
                                         </div>
                                     </div>
                                 </template>
-                                <template v-slot:option="{ option }">
+                                <template #option="{ option }">
                                     <div>
                                         <div>
                                             <span class="fw-medium">{{ option.title }}</span>
                                         </div>
                                         <cite class="small">
-                                            {{ option.author }} <span class="fw-light">({{ option.year }})</span>
+                                            {{ formatAuthors(option.author) }} <span class="fw-light">({{ option.year
+                                            }})</span>
                                         </cite>
                                     </div>
                                 </template>
                             </multiselect>
                         </div>
                         <div class="flex-grow-1 ms-1">
-                            <textarea class="form-control" v-model="state.newItem.description" :placeholder="t('main.entity.references.bibliography.comment')"></textarea>
+                            <textarea
+                                v-model="state.newItem.description"
+                                class="form-control"
+                                :placeholder="t('main.entity.references.bibliography.comment')"
+                            />
                         </div>
                         <div class="ms-1 mt-auto">
-                            <button type="submit" class="btn btn-outline-success btn-sm px-1 py-05" :disabled="state.addReferenceDisabled" :title="t('main.entity.references.bibliography.add_button')">
-                                <i class="fas fa-fw fa-plus"></i>
+                            <button
+                                type="submit"
+                                class="btn btn-outline-success btn-sm px-1 py-05"
+                                :disabled="state.addReferenceDisabled"
+                                :title="t('main.entity.references.bibliography.add_button')"
+                            >
+                                <i class="fas fa-fw fa-plus" />
                             </button>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                    <i class="fas fa-fw fa-times"></i> {{ t('global.close') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                >
+                    <i class="fas fa-fw fa-times" /> {{ t('global.close') }}
                 </button>
             </div>
         </div>
@@ -175,15 +250,18 @@
         reactive,
         toRefs,
     } from 'vue';
+
     import { useI18n } from 'vue-i18n';
-    import router from '@/bootstrap/router.js';
+    import router from '%router';
     import store from '@/bootstrap/store.js';
 
     import {
         can,
+        getAttribute,
         getCertaintyClass,
         translateConcept,
     } from '@/helpers/helpers.js';
+
     import {
         patchAttribute,
         getAttributeValueComments,
@@ -191,11 +269,21 @@
         updateReference,
         addReference,
     } from '@/api.js';
+
+    import {
+        formatAuthors,
+    } from '@/helpers/bibliography.js';
+
     import {
         date,
     } from '@/helpers/filters.js';
 
+    import Quotation from '@/components/bibliography/Quotation.vue';
+
     export default {
+        components: {
+            Quotation,
+        },
         props: {
             entity: {
                 required: true,
@@ -220,17 +308,19 @@
             const setCertainty = event => {
                 const maxSize = event.target.parentElement.scrollWidth; // progress bar width in px
                 const clickPos = event.layerX; // in px
+                const finalPos = Math.max(0, Math.min(clickPos, maxSize)); // clamp cursor pos to progress bar size
+
                 const currentValue = state.certainty;
-                let value = parseInt(clickPos/maxSize*100);
-                const diff = Math.abs(value-currentValue);
+                let value = parseInt(finalPos / maxSize * 100);
+                const diff = Math.abs(value - currentValue);
                 if(diff < 10) {
                     if(value > currentValue) {
-                        value = parseInt((value+10)/10)*10;
+                        value = parseInt((value + 10) / 10) * 10;
                     } else {
-                        value = parseInt(value/10)*10;
+                        value = parseInt(value / 10) * 10;
                     }
                 } else {
-                    value = parseInt((value+5)/10)*10;
+                    value = parseInt((value + 5) / 10) * 10;
                 }
 
                 state.certainty = value;
@@ -241,6 +331,14 @@
                 };
                 patchAttribute(entity.value.id, aid, data).then(data => {
                     state.comments.push(event.comment);
+
+                    const dataRow = { [aid]: data };
+                    store.commit('updateEntityData', {
+                        eid: entity.value.id,
+                        data: dataRow,
+                        new_data: dataRow,
+                        sync: true,
+                    });
                     // set startCertainty to new, stored value
                     state.startCertainty = state.certainty;
                 });
@@ -335,7 +433,7 @@
                     );
                 }),
                 editItem: {},
-                attribute: entity.value.data[aid].attribute,
+                attribute: getAttribute(aid),
                 references: computed(_ => entity.value.references[state.attribute.thesaurus_url]),
                 bibliography: computed(_ => store.getters.bibliography),
                 startCertainty: entity.value.data[aid].certainty,
@@ -372,6 +470,7 @@
                 can,
                 getCertaintyClass,
                 translateConcept,
+                formatAuthors,
                 date,
                 // PROPS
                 // LOCAL
@@ -386,8 +485,8 @@
                 closeModal,
                 // STATE
                 state,
-            }
+            };
 
         },
-    }
+    };
 </script>

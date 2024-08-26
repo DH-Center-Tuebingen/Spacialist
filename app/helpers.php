@@ -1,6 +1,8 @@
 <?php
 
+use App\Plugin;
 use App\ThConcept;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Schema;
@@ -22,6 +24,12 @@ if(!function_exists('sp_remove_dir')) {
 if(!function_exists('sp_slug')) {
     function sp_slug($str) {
         return Str::slug($str);
+    }
+}
+
+if(!function_exists('sp_trim_array')) {
+    function sp_trim_array(array $arr) : array {
+        return array_map(fn($elem) => trim($elem), $arr);
     }
 }
 
@@ -62,6 +70,17 @@ if(!function_exists('sp_get_themes')) {
             $themes[] = $theme;
         }
         return $themes;
+    }
+}
+
+if(!function_exists('sp_has_plugin')) {
+    function sp_has_plugin($name) {
+        try {
+            Plugin::where('name', $name)->whereNotNull('installed_at')->firstOrFail();
+            return true;
+        } catch(ModelNotFoundException $e) {
+            return false;
+        }
     }
 }
 

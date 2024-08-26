@@ -2,7 +2,8 @@
     <vue-final-modal
         class="modal-container modal"
         content-class="sp-modal-content sp-modal-content-sm"
-        name="move-entity-modal">
+        name="move-entity-modal"
+    >
         <div class="sp-modal-content sp-modal-content-sm">
             <div class="modal-header">
                 <h5 class="modal-title">
@@ -11,19 +12,43 @@
                         {{ entity.name }}
                     </small>
                 </h5>
-                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-                </button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                />
             </div>
             <div class="modal-body nonscrollable">
-                <form name="moveEntityForm" id="moveEntityForm" role="form" @submit.prevent="move()">
-                    <div class="form-check form-switch" v-if="state.hasParent">
-                        <input class="form-check-input" type="checkbox" id="move-to-root" v-model="state.moveToRoot">
-                        <label class="form-check-label" for="move-to-root">
+                <form
+                    id="moveEntityForm"
+                    name="moveEntityForm"
+                    role="form"
+                    @submit.prevent="move()"
+                >
+                    <div
+                        v-if="state.hasParent"
+                        class="form-check form-switch"
+                    >
+                        <input
+                            id="move-to-root"
+                            v-model="state.moveToRoot"
+                            class="form-check-input"
+                            type="checkbox"
+                        >
+                        <label
+                            class="form-check-label"
+                            for="move-to-root"
+                        >
                             {{ t('main.entity.modals.move.to_root') }}
                         </label>
                     </div>
                     <div v-show="!state.moveToRoot">
-                        <label class="col-form-label col-md-3" for="parent-entity">
+                        <label
+                            class="col-form-label col-md-3"
+                            for="parent-entity"
+                        >
                             {{ t('global.parent_entity') }}:
                         </label>
                         <div class="col-md-9">
@@ -32,17 +57,29 @@
                                 :endpoint="searchEntity"
                                 :filter-fn="filterEntityResults"
                                 :key-text="'name'"
-                                @selected="e => entitySelected(e)" />
+                                :chain="'ancestors'"
+                                @selected="e => entitySelected(e)"
+                            />
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-outline-success" form="moveEntityForm" :disabled="state.dataMissing">
-                    <i class="fas fa-fw fa-long-arrow-alt-right"></i> {{ t('global.move') }}
+                <button
+                    type="submit"
+                    class="btn btn-outline-success"
+                    form="moveEntityForm"
+                    :disabled="state.dataMissing"
+                >
+                    <i class="fas fa-fw fa-long-arrow-alt-right" /> {{ t('global.move') }}
                 </button>
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                    <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                >
+                    <i class="fas fa-fw fa-times" /> {{ t('global.cancel') }}
                 </button>
             </div>
         </div>
@@ -125,8 +162,6 @@
                 t,
                 // HELPERS
                 searchEntity,
-                // PROPS
-                entity,
                 // LOCAL
                 entitySelected,
                 filterEntityResults,

@@ -12,6 +12,7 @@
 */
 
 Route::get('/welcome', 'HomeController@welcome')->name('welcome');
+Route::get('/open', 'HomeController@external')->name('external');
 
 Auth::routes();
 

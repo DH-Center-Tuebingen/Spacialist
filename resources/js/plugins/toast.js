@@ -49,7 +49,7 @@ export function addToast(message, title, config) {
     });
     const bsToast = new Toast(toastElem);
     bsToast.show();
-};
+}
 
 function initializeWrapper(config) {
     let wrapper;
@@ -70,15 +70,15 @@ function initializeWrapper(config) {
     }
     wrapper.classList.add(...config.container_classes.split(' '));
     store.wrapper = wrapper;
-};
+}
 
 function reduceGlobalConfig(config) {
     return only(config, Object.keys(defaultConfig));
-};
+}
 
 function reduceToastConfig(config) {
     return only(config, perToastConfig);
-};
+}
 
 const createToast = config => ({
     config: config,
@@ -102,7 +102,7 @@ export function provideToast(toastConfig = {}) {
 export function useToast() {
     // const toast = inject(toastSymbol);
     const toast = toastInstance;
-    if (!toast) throw new Error("No toast provided!");
+    if (!toast) throw new Error('No toast provided!');
 
     if(!store.wrapper) {
         initializeWrapper(toast.config);

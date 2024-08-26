@@ -10,12 +10,12 @@
     "require": {
         "php": ">=8.1.0",
         "bosnadev/database": "dev-master as 0.21.1",
+        "fileeye/pel": "^0.9.20",
         "guzzlehttp/guzzle": "^7.4",
         "laravel-lang/lang": "^12.21.1",
         "laravel/framework": "^10.0",
         "laravel/tinker": "~2.0",
         "laravel/ui": "^4.2",
-        "lsolesen/pel": "^0.9.12",
         "mstaack/laravel-postgis": "^6.1",
         "nicolaslopezj/searchable": "^1.13.0",
         "php-open-source-saver/jwt-auth": "^2.1.0",
@@ -32,12 +32,12 @@
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",
-        "dms/phpunit-arraysubset-asserts": "^0.2.1",
+        "dms/phpunit-arraysubset-asserts": "^0.5.0",
         "filp/whoops": "~2.0",
         "fzaninotto/faker": "~1.4",
         "mockery/mockery": "~1.0",
         "nunomaduro/collision": "^7.0",
-        "phpunit/phpunit": "~9.0"
+        "phpunit/phpunit": "^10.0"
     },
     "autoload": {
         "files": [

@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Sleep;
 use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
@@ -159,23 +160,31 @@ class UserController extends Controller
         $creds = ['password'];
         if($request->has('nickname')) {
             $creds[] = 'nickname';
-            if(!User::where('nickname', $request->get('nickname'))->withoutTrashed()->exists()) {
-                return response()->json([
-                    'error' => __('Invalid Credentials')
-                ], 400);
-            }
+            $user = User::where('nickname', $request->get('nickname'))->withoutTrashed()->first();
         } else {
             $creds[] = 'email';
-            if(!User::where('email', $request->get('email'))->withoutTrashed()->exists()) {
-                return response()->json([
-                    'error' => __('Invalid Credentials')
-                ], 400);
-            }
+            $user = User::where('email', $request->get('email'))->withoutTrashed()->first();
+        }
+        if(!isset($user)) {
+            Sleep::for(2)->seconds();
+            return response()->json([
+                'error' => __('Invalid Credentials')
+            ], 400);
+        }
+        if($user->login_attempts === 0) {
+            return response()->json([
+                'error' => __('Password confirmation expired')
+            ], 400);
         }
         $credentials = request($creds);
 
         if(!$token = auth()->attempt($credentials)) {
             return response()->json(['error' => __('Invalid Credentials')], 400);
+        }
+
+        if($user->login_attempts > 0) {
+            $user->login_attempts--;
+            $user->save();
         }
 
         return response()
@@ -194,7 +203,7 @@ class UserController extends Controller
             'email' => 'required_without:nickname|email|max:255|unique:users,email',
             'nickname' => 'required_without:email|alpha_dash|max:255|unique:users,nickname',
             'name' => 'required|string|max:255',
-            'password' => 'required',
+            'password' => 'required|min:6',
         ]);
 
         $name = $request->get('name');
@@ -287,6 +296,10 @@ class UserController extends Controller
             'name' => 'string|max:255',
             'nickname' => 'alpha_dash|max:255|unique:users,nickname',
             'phonenumber' => 'nullable|string|max:255',
+            'role' => 'nullable|string|max:255',
+            'field' => 'nullable|string|max:255',
+            'institution' => 'nullable|string|max:255',
+            'department' => 'nullable|string|max:255',
             'orcid' => 'nullable|orcid',
         ]);
 
@@ -334,12 +347,9 @@ class UserController extends Controller
             $user->nickname = Str::lower($request->get('nickname'));
             $user->save();
         }
-        if($request->has('phonenumber')) {
-            $user->setMetadata(['phonenumber' => $request->get('phonenumber')]);
-        }
-        if($request->has('orcid')) {
-            $user->setMetadata(['orcid' => $request->get('orcid')]);
-        }
+        $user->setMetadata(
+            $request->only('phonenumber', 'orcid', 'role', 'field', 'institution', 'department')
+        );
 
         // return user without roles relation
         $user->unsetRelation('roles');
@@ -377,6 +387,7 @@ class UserController extends Controller
         }
         $this->validate($request, [
             'permissions' => 'array',
+            'is_moderated' => 'boolean',
             'display_name' => 'string',
             'description' => 'string'
         ]);
@@ -401,6 +412,9 @@ class UserController extends Controller
             // Update updated_at column
             $role->touch();
         }
+        if($request->has('is_moderated')) {
+            $role->is_moderated = $request->get('is_moderated');
+        }
         if($request->has('display_name')) {
             $role->display_name = $request->get('display_name');
         }
@@ -410,6 +424,70 @@ class UserController extends Controller
         $role->save();
 
         return response()->json($role);
+    }
+
+    public function resetPassword(Request $request, $id) {
+        $user = auth()->user();
+        if($user->id != $id && !$user->can('users_roles_write')) {
+            return response()->json([
+                'error' => __('You do not have the permission to reset user password')
+            ], 403);
+        }
+
+        $this->validate($request, [
+            'password' => 'required|min:6',
+        ]);
+
+        try {
+            $pUser = User::withoutTrashed()->findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This user does not exist')
+            ], 400);
+        }
+
+        $password = Hash::make($request->get('password'));
+
+        $pUser->password = $password;
+
+        if($user->id != $id) {
+            $pUser->login_attempts = 3;
+        }
+
+        $pUser->save();
+
+        return response()->json(null, 204);
+    }
+
+    public function confirmPassword(Request $request, $id) {
+        $user = auth()->user();
+        if($user->id != $id) {
+            return response()->json([
+                'error' => __('You do not have the permission to confirm an other user\'s password')
+            ], 403);
+        }
+
+        $this->validate($request, [
+            'password' => 'min:6',
+        ]);
+
+        try {
+            $pUser = User::withoutTrashed()->findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This user does not exist')
+            ], 400);
+        }
+
+        if($request->has('password')) {
+            $password = Hash::make($request->get('password'));
+            $pUser->password = $password;
+        }
+        
+        $pUser->login_attempts = null;
+        $pUser->save();
+
+        return response()->json(null, 204);
     }
 
     // PUT

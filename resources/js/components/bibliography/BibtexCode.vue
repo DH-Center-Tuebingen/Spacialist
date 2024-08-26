@@ -2,19 +2,31 @@
     <div>
         <h5 class="mt-3 d-flex gap-1">
             {{ t('main.bibliography.modal.bibtex_code') }}
-            <small class="clickable" @click="toggle()">
+            <small
+                class="clickable"
+                @click="toggle()"
+            >
                 <span v-show="state.show">
-                    <i class="fas fa-fw fa-caret-up"></i>
+                    <i class="fas fa-fw fa-caret-up" />
                 </span>
                 <span v-show="!state.show">
-                    <i class="fas fa-fw fa-caret-down"></i>
+                    <i class="fas fa-fw fa-caret-down" />
                 </span>
             </small>
-            <small class="clickable text-primary" @click="codeToClipboard()">
-                <i class="fas fa-fw fa-copy"></i>
+            <small
+                class="clickable text-primary"
+                @click="codeToClipboard()"
+            >
+                <i class="fas fa-fw fa-copy" />
             </small>
         </h5>
-        <span v-show="state.show" :id="state.id" v-html="bibtexify(code, type)" />
+        <!-- eslint-disable vue/no-v-html -->
+        <span
+            v-show="state.show"
+            :id="state.id"
+            v-html="bibtexify(code, type)"
+        />
+        <!-- eslint-enable vue/no-v-html -->
     </div>
 </template>
 
@@ -87,9 +99,6 @@
                 // HELPERS
                 codeToClipboard,
                 bibtexify,
-                // PROPS
-                code,
-                type,
                 // LOCAL
                 toggle,
                 //STATE

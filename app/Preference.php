@@ -4,6 +4,7 @@ namespace App;
 
 use App\UserPreference;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Preference extends Model
 {
@@ -13,16 +14,18 @@ class Preference extends Model
      * @var array
      */
     protected $fillable = [
+        'label',
+        'default_value',
     ];
 
 
-    public static function getPreferences() {
+    public static function getPreferences($simple = false) {
         $prefs = self::orderBy('id')->get();
-        $prefObj = self::decodePreferences($prefs);
+        $prefObj = self::decodePreferences($prefs, $simple);
         return $prefObj;
     }
 
-    public static function getUserPreferences($id) {
+    public static function getUserPreferences($id, $simple = false) {
         $userPrefs = UserPreference::select('user_preferences.*', 'preferences.*', 'value as default_value')
             ->join('preferences', 'user_preferences.pref_id', 'preferences.id')
             ->where('user_id', $id)
@@ -30,7 +33,7 @@ class Preference extends Model
         $systemPrefs = self::whereNotIn('id', $userPrefs->pluck('pref_id')->toArray())
             ->get();
         $prefs = $systemPrefs->merge($userPrefs);
-        $prefObj = self::decodePreferences($prefs);
+        $prefObj = self::decodePreferences($prefs, $simple);
         return $prefObj;
     }
 
@@ -75,7 +78,7 @@ class Preference extends Model
             case 'prefs.project-maintainer':
                 return $value;
             case 'prefs.map-projection':
-                $proj4 = \DB::table('spatial_ref_sys')
+                $proj4 = DB::table('spatial_ref_sys')
                     ->where('auth_srid', $value->epsg)
                     ->value('proj4text');
                 return [
@@ -87,7 +90,7 @@ class Preference extends Model
     }
 
     public static function encodePreference($label, $decodedValue) {
-        $value;
+        $value = $decodedValue;
         switch($label) {
             case 'prefs.gui-language':
                 $value = json_encode(['language_key' => $decodedValue]);
@@ -123,13 +126,18 @@ class Preference extends Model
         return $value;
     }
 
-    private static function decodePreferences($prefs) {
+    private static function decodePreferences($prefs, $simple = false) {
         $prefObj = [];
         foreach($prefs as $p) {
             $decoded = json_decode($p->default_value);
             unset($p->default_value);
             $p->value = self::decodePreference($p->label, $decoded);
-            $prefObj[$p->label] = $p;
+            if($simple) {
+                $data = $p->value;
+            } else {
+                $data = $p;
+            }
+            $prefObj[$p->label] = $data;
         }
         return $prefObj;
     }

@@ -13,7 +13,7 @@ import EntityReferenceModal from '@/components/modals/entity/Reference.vue';
 // Tools
 import Bibliography from '@/components/BibliographyTable.vue';
 import GlobalActivity from '@/components/GlobalActivity.vue';
-import DataImporter from '@/components/DataImporter.vue';
+import DataImporter from '@/components/view/DataImporter.vue';
 // Settings
 import Users from '@/components/Users.vue';
 import Roles from '@/components/Roles.vue';
@@ -23,9 +23,12 @@ import DataModelDetailView from '@/components/DataModelDetailView.vue';
 import Preferences from '@/components/Preferences.vue';
 // User
 import UserProfile from '@/components/UserProfile.vue';
-import UserPreferences from '@/components/UserPreferences.vue';
 import UserActivity from '@/components/UserActivity.vue';
 import UserNotifications from '@/components/notification/UserNotifications.vue';
+// Open Access Router Pages
+import Landing from '@/components/openaccess/Landing.vue';
+import FreeSearch from '@/components/openaccess/FreeSearch.vue';
+import SingleSearch from '@/components/openaccess/SingleSearch.vue';
 
 import DummyComponent from '@/components/DummyComponent.vue';
 import NotFound from '@/components/NotFound.vue';
@@ -232,6 +235,14 @@ export const router = createRouter({
         },
         {
             path: '/preferences',
+            redirect: _ => {
+                return {
+                    name: 'preferences',
+                };
+            },
+        },
+        {
+            path: '/preferences/system',
             name: 'preferences',
             component: Preferences,
             meta: {
@@ -239,9 +250,9 @@ export const router = createRouter({
             }
         },
         {
-            path: '/preferences/u/:id',
+            path: '/preferences/user',
             name: 'userpreferences',
-            component: UserPreferences,
+            component: Preferences,
             meta: {
                 auth: true
             }
@@ -283,3 +294,51 @@ export function useRouter() {
 }
 
 export default router;
+
+export const openRouter = createRouter({
+    history: createWebHashHistory(),
+    scrollBehavior(to, from, savedPosition) {
+        return {
+            x: 0,
+            y: 0,
+        };
+    },
+    routes: [
+        {
+            path: '/',
+            name: 'landing',
+            component: Landing,
+            meta: {
+                auth: false,
+            },
+        },
+        {
+            path: '/free',
+            name: 'freesearch',
+            component: FreeSearch,
+            meta: {
+                auth: false,
+            },
+        },
+        {
+            path: '/single',
+            name: 'singlesearch',
+            component: SingleSearch,
+            meta: {
+                auth: false,
+            },
+        },
+        {
+            path: '/:pathMatch(.*)',
+            name: 'not-found',
+            component: NotFound,
+            meta: {
+                auth: false,
+            },
+        },
+    ],
+});
+
+export function useOpenRouter() {
+    return openRouter;
+}

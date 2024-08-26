@@ -1,3 +1,7 @@
+.multiselect {
+  --ms-font-size: #{$input-btn-font-size};
+}
+
 .multiselect-clear {
   margin-right: auto !important;
 }
@@ -10,10 +14,19 @@
   position: relative !important;
 }
 
-.multiselect-wide > .multiselect-dropdown {
+.multiselect-wide>.multiselect-dropdown {
   width: 20vw;
 }
 
 .multiselect-option {
   --ms-option-bg-selected: #{$green};
+}
+
+// User list tag item
+.multiselect-tag-user {
+  background-color: rgba(16, 185, 129, var(--bs-bg-opacity, 1));
+}
+
+.multiselect-dropdown.multiselect-modal-dropdown {
+  z-index: calc($zindex-modal + 1);
 }

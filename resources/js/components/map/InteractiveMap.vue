@@ -1,54 +1,165 @@
 <template>
     <div class="h-100"> 
-        <div :id="state.mapId" class="map h-100">
+        <div
+            :id="state.mapId"
+            class="map h-100"
+        >
             <div class="d-flex flex-column ol-bar ol-right ol-bottom">
-                <div v-if="drawing" class="d-flex flex-column align-items-end">
-                    <button type="button" class="btn btn-fab rounded-circle" :class="{'btn-primary': actionState.drawType == 'Point', 'btn-outline-primary': actionState.drawType != 'Point'}" data-bs-toggle="popover" :data-content="t('main.map.draw.point.desc')" data-trigger="hover" data-placement="bottom" @click="toggleDrawType('Point')">
-                        <i class="fas fa-fw fa-map-marker-alt"></i>
+                <div
+                    v-if="drawing"
+                    class="d-flex flex-column align-items-end"
+                >
+                    <button
+                        type="button"
+                        class="btn btn-fab rounded-circle"
+                        :class="{'btn-primary': actionState.drawType == 'Point', 'btn-outline-primary': actionState.drawType != 'Point'}"
+                        data-bs-toggle="popover"
+                        :data-content="t('main.map.draw.point.desc')"
+                        data-trigger="hover"
+                        data-placement="bottom"
+                        @click="toggleDrawType('Point')"
+                    >
+                        <i class="fas fa-fw fa-map-marker-alt" />
                     </button>
-                    <button type="button" class="btn btn-fab rounded-circle" :class="{'btn-primary': actionState.drawType == 'LineString', 'btn-outline-primary': actionState.drawType != 'LineString'}" data-bs-toggle="popover" :data-content="t('main.map.draw.linestring.desc')" data-trigger="hover" data-placement="bottom" @click="toggleDrawType('LineString')">
-                        <i class="fas fa-fw fa-road"></i>
+                    <button
+                        type="button"
+                        class="btn btn-fab rounded-circle"
+                        :class="{'btn-primary': actionState.drawType == 'LineString', 'btn-outline-primary': actionState.drawType != 'LineString'}"
+                        data-bs-toggle="popover"
+                        :data-content="t('main.map.draw.linestring.desc')"
+                        data-trigger="hover"
+                        data-placement="bottom"
+                        @click="toggleDrawType('LineString')"
+                    >
+                        <i class="fas fa-fw fa-road" />
                     </button>
-                    <button type="button" class="btn btn-fab rounded-circle" :class="{'btn-primary': actionState.drawType == 'Polygon', 'btn-outline-primary': actionState.drawType != 'Polygon'}" data-bs-toggle="popover" :data-content="t('main.map.draw.polygon.desc')" data-trigger="hover" data-placement="bottom" @click="toggleDrawType('Polygon')">
-                        <i class="fas fa-fw fa-draw-polygon"></i>
+                    <button
+                        type="button"
+                        class="btn btn-fab rounded-circle"
+                        :class="{'btn-primary': actionState.drawType == 'Polygon', 'btn-outline-primary': actionState.drawType != 'Polygon'}"
+                        data-bs-toggle="popover"
+                        :data-content="t('main.map.draw.polygon.desc')"
+                        data-trigger="hover"
+                        data-placement="bottom"
+                        @click="toggleDrawType('Polygon')"
+                    >
+                        <i class="fas fa-fw fa-draw-polygon" />
                     </button>
-                    <button type="button" class="btn btn-fab rounded-circle btn-outline-info" v-show="actionState.interactionMode != 'modify'" data-bs-toggle="popover" :data-content="t('main.map.draw.modify.desc')" data-trigger="hover" data-placement="bottom" @click="setInteractionMode('modify')">
-                        <i class="fas fa-fw fa-edit"></i>
+                    <button
+                        v-show="actionState.interactionMode != 'modify'"
+                        type="button"
+                        class="btn btn-fab rounded-circle btn-outline-info"
+                        data-bs-toggle="popover"
+                        :data-content="t('main.map.draw.modify.desc')"
+                        data-trigger="hover"
+                        data-placement="bottom"
+                        @click="setInteractionMode('modify')"
+                    >
+                        <i class="fas fa-fw fa-edit" />
                     </button>
-                    <button type="button" class="btn btn-fab rounded-circle btn-outline-success" v-show="actionState.interactionMode == 'modify'" data-bs-toggle="popover" :data-content="t('main.map.draw.modify.pos_desc')" data-trigger="hover" data-placement="bottom" @click="updateFeatures()">
-                        <i class="fas fa-fw fa-check"></i>
+                    <button
+                        v-show="actionState.interactionMode == 'modify'"
+                        type="button"
+                        class="btn btn-fab rounded-circle btn-outline-success"
+                        data-bs-toggle="popover"
+                        :data-content="t('main.map.draw.modify.pos_desc')"
+                        data-trigger="hover"
+                        data-placement="bottom"
+                        @click="updateFeatures()"
+                    >
+                        <i class="fas fa-fw fa-check" />
                     </button>
-                    <button type="button" class="btn btn-fab rounded-circle btn-outline-danger" v-show="actionState.interactionMode == 'modify'" data-bs-toggle="popover" :data-content="t('main.map.draw.modify.neg_desc')" data-trigger="hover" data-placement="bottom" @click="updateFeatures(false)">
-                        <i class="fas fa-fw fa-times"></i>
+                    <button
+                        v-show="actionState.interactionMode == 'modify'"
+                        type="button"
+                        class="btn btn-fab rounded-circle btn-outline-danger"
+                        data-bs-toggle="popover"
+                        :data-content="t('main.map.draw.modify.neg_desc')"
+                        data-trigger="hover"
+                        data-placement="bottom"
+                        @click="updateFeatures(false)"
+                    >
+                        <i class="fas fa-fw fa-times" />
                     </button>
-                    <button type="button" class="btn btn-fab rounded-circle btn-outline-danger" v-show="actionState.interactionMode != 'delete'" data-bs-toggle="popover" :data-content="t('main.map.draw.delete.desc')" data-trigger="hover" data-placement="bottom" @click="setInteractionMode('delete')">
-                        <i class="fas fa-fw fa-trash"></i>
+                    <button
+                        v-show="actionState.interactionMode != 'delete'"
+                        type="button"
+                        class="btn btn-fab rounded-circle btn-outline-danger"
+                        data-bs-toggle="popover"
+                        :data-content="t('main.map.draw.delete.desc')"
+                        data-trigger="hover"
+                        data-placement="bottom"
+                        @click="setInteractionMode('delete')"
+                    >
+                        <i class="fas fa-fw fa-trash" />
                     </button>
-                    <button type="button" class="btn btn-fab rounded-circle btn-outline-success" v-show="actionState.interactionMode == 'delete'" data-bs-toggle="popover" :data-content="t('main.map.draw.delete.pos_desc')" data-trigger="hover" data-placement="bottom" @click="deleteFeatures()">
-                        <i class="fas fa-fw fa-check"></i>
+                    <button
+                        v-show="actionState.interactionMode == 'delete'"
+                        type="button"
+                        class="btn btn-fab rounded-circle btn-outline-success"
+                        data-bs-toggle="popover"
+                        :data-content="t('main.map.draw.delete.pos_desc')"
+                        data-trigger="hover"
+                        data-placement="bottom"
+                        @click="deleteFeatures()"
+                    >
+                        <i class="fas fa-fw fa-check" />
                     </button>
-                    <button type="button" class="btn btn-fab rounded-circle btn-outline-danger" v-show="actionState.interactionMode == 'delete'" data-bs-toggle="popover" :data-content="t('main.map.draw.delete.neg_desc')" data-trigger="hover" data-placement="bottom" @click="deleteFeatures(false)">
-                        <i class="fas fa-fw fa-times"></i>
+                    <button
+                        v-show="actionState.interactionMode == 'delete'"
+                        type="button"
+                        class="btn btn-fab rounded-circle btn-outline-danger"
+                        data-bs-toggle="popover"
+                        :data-content="t('main.map.draw.delete.neg_desc')"
+                        data-trigger="hover"
+                        data-placement="bottom"
+                        @click="deleteFeatures(false)"
+                    >
+                        <i class="fas fa-fw fa-times" />
                     </button>
-                    <button type="button" class="btn btn-fab rounded-circle" :class="{'btn-primary': actionState.measure.active, 'btn-outline-primary': !actionState.measure.active}" data-bs-toggle="popover" :data-content="t('main.map.draw.measure.desc')" data-trigger="hover" data-placement="bottom" @click="toggleMeasurements()">
-                        <i class="fas fa-fw fa-ruler-combined"></i>
+                    <button
+                        type="button"
+                        class="btn btn-fab rounded-circle"
+                        :class="{'btn-primary': actionState.measure.active, 'btn-outline-primary': !actionState.measure.active}"
+                        data-bs-toggle="popover"
+                        :data-content="t('main.map.draw.measure.desc')"
+                        data-trigger="hover"
+                        data-placement="bottom"
+                        @click="toggleMeasurements()"
+                    >
+                        <i class="fas fa-fw fa-ruler-combined" />
                     </button>
                 </div>
             </div>
         </div>
     </div>
-    <div :id="actionState.popupIds.p" class="popup popover ol-popover bs-popover-top" role="tooltip">
+    <div
+        :id="actionState.popupIds.p"
+        class="popup popover ol-popover bs-popover-top"
+        role="tooltip"
+    >
         <h4 class="popover-header d-flex flex-row gap-2 justify-content-between align-items-center">
             <div>
-                <span class="fw-medium">
-                    {{ actionState.overlayData.title }}
-                </span>
-                <span v-if="actionState.overlayData.subtitle">
-                    ({{ actionState.overlayData.subtitle }})
-                </span>
+                <slot
+                    name="title"
+                    :feature="actionState.overlayData.feature"
+                    :default-title="actionState.overlayData.title"
+                    :default-subtitle="actionState.overlayData.subtitle"
+                >
+                    <span class="fw-medium">
+                        {{ actionState.overlayData.title }}
+                    </span>
+                    <span v-if="actionState.overlayData.subtitle">
+                        ({{ actionState.overlayData.subtitle }})
+                    </span>
+                </slot>
             </div>
             <div>
-                <slot name="action" :post-action-hook="data => postAction(data, actionState.overlayData.feature)"></slot>
+                <slot
+                    name="action"
+                    :post-action-hook="data => postAction(data, actionState.overlayData.feature)"
+                    :feature="actionState.overlayData.feature"
+                />
             </div>
         </h4>
         <div class="popover-body">
@@ -69,12 +180,18 @@
                         </span>
                     </dt>
                     <dd>
-                        <span data-bs-toggle="tooltip" :title="`${actionState.overlayData.size.in_m}${actionState.overlayData.size.unit}`">
+                        <span
+                            data-bs-toggle="tooltip"
+                            :title="`${actionState.overlayData.size.in_m}${actionState.overlayData.size.unit}`"
+                        >
                             {{ actionState.overlayData.size.combined }}
                         </span>
                     </dd>
                 </template>
-                <dt class="clickable" @click="actionState.overlayData.showCoordinates = !actionState.overlayData.showCoordinates">
+                <dt
+                    class="clickable"
+                    @click="actionState.overlayData.showCoordinates = !actionState.overlayData.showCoordinates"
+                >
                     {{
                         t('main.map.coords_in_epsg', {
                             epsg: state.epsgCode
@@ -84,40 +201,71 @@
                         ({{ actionState.overlayCoordinatesAsList.length }})
                     </span>
                     <span v-show="actionState.overlayData.showCoordinates">
-                        <i class="fas fa-fw fa-caret-up"></i>
+                        <i class="fas fa-fw fa-caret-up" />
                     </span>
                     <span v-show="!actionState.overlayData.showCoordinates">
-                        <i class="fas fa-fw fa-caret-down"></i>
+                        <i class="fas fa-fw fa-caret-down" />
                     </span>
                 </dt>
-                <dd class="mb-0 mh-300p scroll-y-auto">
+                <dd class="mb-0 mh-300p overflow-y-auto">
                     <div v-if="actionState.overlayData.showCoordinates">
                         <table class="table table-striped table-borderless table-sm mb-0">
                             <tbody>
-                                <tr v-for="(c, i) in actionState.overlayCoordinatesAsList" :key="i">
+                                <tr
+                                    v-for="(c, i) in actionState.overlayCoordinatesAsList"
+                                    :key="i"
+                                >
                                     <td class="text-start">
-                                        <input type="number" class="form-control form-control-sm" step="0.000001" v-model.number="actionState.overlayCoordinateEdit[0]" v-if="actionState.coordinateEditMode" />
+                                        <input
+                                            v-if="actionState.coordinateEditMode"
+                                            v-model.number="actionState.overlayCoordinateEdit[0]"
+                                            type="number"
+                                            class="form-control form-control-sm"
+                                            step="0.000001"
+                                        >
                                         <span v-else>
                                             {{ toFixed(c.x, 4) }}
                                         </span>
                                     </td>
                                     <td class="text-end">
-                                        <input type="number" class="form-control form-control-sm" step="0.000001" v-model.number="actionState.overlayCoordinateEdit[1]" v-if="actionState.coordinateEditMode" />
+                                        <input
+                                            v-if="actionState.coordinateEditMode"
+                                            v-model.number="actionState.overlayCoordinateEdit[1]"
+                                            type="number"
+                                            class="form-control form-control-sm"
+                                            step="0.000001"
+                                        >
                                         <span v-else>
                                             {{ toFixed(c.y, 4) }}
                                         </span>
                                     </td>
-                                    <td class="text-end clickable" v-if="actionState.overlayIsPoint">
-                                        <div class="d-flex flex-row gap-1" v-if="actionState.coordinateEditMode">
-                                            <a href="" @click.prevent="confirmOverlayCoordinateEditing()">
-                                                <i class="fas fa-fw fa-check" ></i>
+                                    <td
+                                        v-if="actionState.overlayIsPoint"
+                                        class="text-end clickable"
+                                    >
+                                        <div
+                                            v-if="actionState.coordinateEditMode"
+                                            class="d-flex flex-row gap-1"
+                                        >
+                                            <a
+                                                href=""
+                                                @click.prevent="confirmOverlayCoordinateEditing(true, actionState.overlayData.feature)"
+                                            >
+                                                <i class="fas fa-fw fa-check" />
                                             </a>
-                                            <a href="" @click.prevent="confirmOverlayCoordinateEditing(false)">
-                                                <i class="fas fa-fw fa-times" ></i>
+                                            <a
+                                                href=""
+                                                @click.prevent="confirmOverlayCoordinateEditing(false)"
+                                            >
+                                                <i class="fas fa-fw fa-times" />
                                             </a>
                                         </div>
-                                        <a href="" @click.prevent="enableOverlayCoordinateEditing(c)" v-else>
-                                            <i class="fas fa-fw fa-edit" ></i>
+                                        <a
+                                            v-else
+                                            href=""
+                                            @click.prevent="enableOverlayCoordinateEditing(c)"
+                                        >
+                                            <i class="fas fa-fw fa-edit" />
                                         </a>
                                     </td>
                                 </tr>
@@ -127,12 +275,19 @@
                 </dd>
             </dl>
         </div>
-        <div class="arrow ol-arrow"></div>
+        <div class="arrow ol-arrow" />
     </div>
-    <div :id="actionState.popupIds.h" class="tooltip" role="tooltip">
-    </div>
-    <div :id="actionState.popupIds.m" class="tooltip tooltip-measure bs-tooltip-bottom" role="tooltip">
-        <div class="tooltip-arrow"></div>
+    <div
+        :id="actionState.popupIds.h"
+        class="tooltip"
+        role="tooltip"
+    />
+    <div
+        :id="actionState.popupIds.m"
+        class="tooltip tooltip-measure bs-tooltip-bottom"
+        role="tooltip"
+    >
+        <div class="tooltip-arrow" />
         <div class="tooltip-inner">
             {{ actionState.measure.length }}
         </div>
@@ -219,6 +374,7 @@
             selection: {
                 type: Number,
                 required: false,
+                default: null,
             },
             layers: {
                 type: Object,
@@ -232,7 +388,7 @@
             data: {
                 type: Object,
                 required: false,
-                default: {},
+                default: () => ({}),
             },
             projection: {
                 type: Number,
@@ -257,7 +413,7 @@
             extent: {
                 type: Object,
                 required: false,
-                default: {}
+                default: () => ({}),
             },
             provider: {
                 type: String,
@@ -267,9 +423,20 @@
             triggerDataRescan: {
                 type: String,
                 required: false,
+                default: null,
+            },
+            titleFn: {
+                type: Function,
+                required: false,
+                default: null,
             },
         },
-        emits: ['added', 'select'],
+        emits: [
+            'added', 
+            'deleted',
+            'modified',
+            'select',
+        ],
         setup(props, context) {
             const { t } = useI18n();
 
@@ -284,6 +451,7 @@
                 extent,
                 drawing,
                 triggerDataRescan,
+                titleFn,
             } = toRefs(props);
 
             // FUNCTIONS
@@ -334,7 +502,7 @@
             const transformCoordinates = (c, clist, rev = false) => {
                 if(!c[0] || !c[1]) {
                     return null;
-                };
+                }
                 let fromEpsg = rev ? state.epsgCode : 'EPSG:3857';
                 let toEpsg = rev ? 'EPSG:3857' : state.epsgCode;
                 const transCoord = transformProj(c, fromEpsg, toEpsg);
@@ -543,7 +711,7 @@
                         styleOptions.labelStyle = p.label;
                     }
                     if(p.charts) {
-                        console.log("should load charts");
+                        console.log('should load charts');
                     }
                     finalStyle = createStyle(color, 2, styleOptions);
                 }
@@ -666,8 +834,15 @@
                         actionState.popup.setPosition(coords);
 
                         let title = t('main.map.geometry_name', {id: props.id});
-                        if(props.entity) {
-                            title = `${props.entity_name} (${title})`;
+                        if(titleFn.value) {
+                            const fromFn = titleFn.value(feature);
+                            if(fromFn) {
+                                title = fromFn;
+                            }
+                        } else {
+                            if(props.entity) {
+                                title = `${props.entity_name} (${title})`;
+                            }
                         }
 
                         actionState.bsPopup = new Tooltip(actionState.popup.getElement(), {
@@ -739,7 +914,7 @@
                 actionState.measure.tooltipElement = document.getElementById(actionState.popupIds.m);
                 actionState.measure.tooltip = new Overlay({
                     element: actionState.measure.tooltipElement,
-                    offset: [0, 5]
+                    offset: [0, -10]
                 });
                 state.map.addOverlay(actionState.measure.tooltip);
             };
@@ -965,14 +1140,21 @@
                     drawFeature(event.feature);
                 });
             };
-            const confirmOverlayCoordinateEditing = (confirm = true) => {
+            const confirmOverlayCoordinateEditing = (confirm, feature) => {
                 if(confirm) {
-                    // update coords
+                    const geom = feature.getGeometry();
+                    geom.setCoordinates(actionState.overlayCoordinateEdit);
+                    feature.setGeometry(geom);
+                    actionState.overlayData.coordinates = geom.getCoordinates();
+                    context.emit('modified', {
+                        features: [feature],
+                    });
+                    setOverlay(feature);
                 } else {
                     // cancel
-                    actionState.overlayCoordinateEdit = [];
                 }
                 actionState.coordinateEditMode = false;
+                actionState.overlayCoordinateEdit = [];
             };
             const getFeaturesInExtent = layer => {
                 const allLayers = !layer;
@@ -1153,7 +1335,7 @@
                         p: `${state.mapId}-popup`,
                         h: `${state.mapId}-hover-popup`,
                         m: `${state.mapId}-measure-popup`,
-                    }
+                    };
                 }),
                 overlayOpen: computed(_ => Object.keys(actionState.overlayData).length > 0),
                 overlayIsPoint: computed(_ => {
@@ -1211,7 +1393,7 @@
 
                     return coordList;
                 }),
-            })
+            });
 
             // ON MOUNTED
             onMounted(async _ => {
@@ -1267,6 +1449,7 @@
                     actionState.overlay = new Overlay({
                         element: overlayElem,
                         positioning: 'bottom-center',
+                        offset: [0, -10],
                         autoPan: true,
                         autoPanAnimation: {
                             duration: 250,
@@ -1323,7 +1506,7 @@
                         }
                         break;
                     case 'layer_by_feature':
-                        const found = false;
+                        let found = false;
 
                         for(let i=0; i<layers.length; i++) {
                             const l = layers[i];
@@ -1367,8 +1550,6 @@
                 t,
                 // HELPERS
                 toFixed,
-                // PROPS
-                drawing,
                 // LOCAL
                 confirmOverlayCoordinateEditing,
                 enableOverlayCoordinateEditing,
@@ -1381,8 +1562,8 @@
                 // STATE
                 state,
                 actionState,
-            }
+            };
             
         },
-    }
+    };
 </script>

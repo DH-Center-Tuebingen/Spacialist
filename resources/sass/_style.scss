@@ -15,13 +15,13 @@ body, #app {
 }
 
 code {
-    font-size: 1.2em !important;
+    font-size: $font-size-base !important;
+    line-height: $line-height-base !important;
     font-weight: 500 !important;
 }
 
-code.normal {
-    font-size: 100% !important;
-    font-weight: 400 !important;
+.font-serif {
+    font-family: $font-family-serif;
 }
 
 .form-range::-moz-range-track, .form-range::-webkit-slider-runnable-track {

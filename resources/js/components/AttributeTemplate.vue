@@ -1,5 +1,10 @@
 <template>
-    <form :id="state.formId" :name="state.formId" role="form" @submit.prevent="create()">
+    <form
+        :id="state.formId"
+        :name="state.formId"
+        role="form"
+        @submit.prevent="create()"
+    >
         <div class="mb-3">
             <label class="col-form-label col-3">
                 {{ t('global.label') }}:
@@ -8,7 +13,9 @@
                 <simple-search
                     :endpoint="searchLabel"
                     :key-fn="getConceptLabel"
-                    @selected="e => labelSelected(e, 'label')" />
+                    :default-value="state.searchResetValue"
+                    @selected="e => labelSelected(e, 'label')"
+                />
             </div>
         </div>
         <div class="mb-3">
@@ -21,31 +28,48 @@
                     :mode="'single'"
                     :options="state.attributeTypes"
                     :searchable="true"
-                    :valueProp="'datatype'"
-                    :trackBy="'datatype'"
+                    :filter-results="false"
+                    :value-prop="'datatype'"
+                    :track-by="'datatype'"
                     :placeholder="t('global.select.placeholder')"
-                    :hideSelected="true"
-                    @select="typeSelected">
-                        <template v-slot:option="{ option }">
-                            {{ t(`global.attributes.${option.datatype}`) }}
-                        </template>
-                        <template v-slot:singlelabel="{ value }">
-                            <div class="multiselect-single-label">
-                                {{ t(`global.attributes.${value.datatype}`) }}
-                            </div>
-                        </template>
+                    :hide-selected="true"
+                    @select="typeSelected"
+                    @search-change="searchInAttributeTypes"
+                >
+                    <template #option="{ option }">
+                        {{ t(`global.attributes.${option.datatype}`) }}
+                    </template>
+                    <template #singlelabel="{ value }">
+                        <div class="multiselect-single-label">
+                            {{ t(`global.attributes.${value.datatype}`) }}
+                        </div>
+                    </template>
                 </multiselect>
             </div>
         </div>
-        <div class="mb-3" v-if="state.isStringSc">
+        <div
+            v-if="state.isStringSc"
+            class="mb-3"
+        >
             <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="root-type-toggle" v-model="state.attribute.differRoot">
-                <label class="form-check-label" for="root-type-toggle">
+                <input
+                    id="root-type-toggle"
+                    v-model="state.attribute.differRoot"
+                    class="form-check-input"
+                    type="checkbox"
+                >
+                <label
+                    class="form-check-label"
+                    for="root-type-toggle"
+                >
                     {{ t('global.root_attribute_toggle') }}
                 </label>
             </div>
         </div>
-        <div class="mb-3" v-show="state.isStringSc && state.attribute.differRoot">
+        <div
+            v-show="state.isStringSc && state.attribute.differRoot"
+            class="mb-3"
+        >
             <label class="col-form-label col-3">
                 {{ t('global.root_attribute') }}:
             </label>
@@ -53,10 +77,14 @@
                 <simple-search
                     :endpoint="searchAttribute"
                     :key-fn="getAttributeLabel"
-                    @selected="e => labelSelected(e, 'rootAttributeLabel')" />
+                    @selected="e => labelSelected(e, 'rootAttributeLabel')"
+                />
             </div>
         </div>
-        <div class="mb-3" v-show="state.needsRootElement && !state.attribute.differRoot">
+        <div
+            v-show="state.needsRootElement && !state.attribute.differRoot"
+            class="mb-3"
+        >
             <label class="col-form-label col-3">
                 {{ t('global.root_element') }}:
             </label>
@@ -64,29 +92,91 @@
                 <simple-search
                     :endpoint="searchLabel"
                     :key-fn="getConceptLabel"
-                    @selected="e => labelSelected(e, 'rootLabel')" />
+                    :default-value="state.attribute.label"
+                    @selected="e => labelSelected(e, 'rootLabel')"
+                />
             </div>
         </div>
-        <div class="mb-3 form-check form-switch" v-show="state.allowsRestriction && !state.attribute.differRoot">
-            <input class="form-check-input" type="checkbox" id="recursive-attribute-toggle" v-model="state.attribute.recursive">
-            <label class="form-check-label" for="recursive-attribute-toggle">
+        <div
+            v-show="state.allowsRestriction && !state.attribute.differRoot"
+            class="mb-3 form-check form-switch"
+        >
+            <input
+                id="recursive-attribute-toggle"
+                v-model="state.attribute.recursive"
+                class="form-check-input"
+                type="checkbox"
+            >
+            <label
+                class="form-check-label"
+                for="recursive-attribute-toggle"
+            >
                 {{ t('global.recursive') }}
             </label>
         </div>
-        <div class="mb-3" v-show="state.needsTextElement">
+        <div
+            v-show="state.canRestrictTypes"
+            class="mb-3"
+        >
+            <label class="col-form-label col">
+                {{ t('global.attributes.restrictions.entity_type') }}:
+            </label>
+            <multiselect
+                v-model="state.attribute.restrictedTypes"
+                class="col"
+                :object="true"
+                :mode="'tags'"
+                :label="'thesaurus_url'"
+                :track-by="'thesaurus_url'"
+                :value-prop="'id'"
+                :options="state.minimalEntityTypes"
+                :close-on-select="false"
+                :close-on-deelect="false"
+                :placeholder="t('global.select.placeholder')"
+            >
+                <template #option="{ option }">
+                    {{ translateConcept(option.thesaurus_url) }}
+                </template>
+                <template #tag="{ option, handleTagRemove, disabled }">
+                    <div class="multiselect-tag">
+                        {{ translateConcept(option.thesaurus_url) }}
+                        <span
+                            v-if="!disabled"
+                            class="multiselect-tag-remove"
+                            @click.prevent
+                            @mousedown.prevent.stop="handleTagRemove(option, $event)"
+                        >
+                            <span class="multiselect-tag-remove-icon" />
+                        </span>
+                    </div>
+                </template>
+            </multiselect>
+        </div>
+        <div
+            v-show="state.needsTextElement"
+            class="mb-3"
+        >
             <alert
                 v-if="state.attribute.type == 'serial'"
                 :message="t('global.attributes.serial_info')"
                 :type="'note'"
-                :noicon="false" />
+                :noicon="false"
+            />
             <label class="col-form-label col-3">
                 {{ t('global.content') }}:
             </label>
             <div class="col">
-                <input type="text" class="form-control" v-model="state.attribute.textContent" />
+                <input
+                    v-model="state.attribute.textContent"
+                    type="text"
+                    class="form-control"
+                >
             </div>
         </div>
-        <div class="mb-3" v-show="state.needsTextareaElement">
+        <div
+            v-show="state.needsTextareaElement"
+            class="mb-3"
+        >
             <label class="col-form-label col-3">
                 {{ t('global.content') }}:
             </label>
@@ -94,12 +184,97 @@
                 <alert
                     :message="t('global.attributes.sql_info')"
                     :type="'note'"
-                    :noicon="false" />
-                <textarea class="form-control" v-model="state.attribute.textContent"></textarea>
+                    :noicon="false"
+                />
+                <textarea
+                    v-model="state.attribute.textContent"
+                    class="form-control"
+                />
             </div>
         </div>
-        <button v-show="!external" type="submit" class="btn btn-outline-success" :disabled="!state.validated">
-            <i class="fas fa-fw fa-plus"></i>
+        <template v-if="state.isSiUnit">
+            <div class="mb-3">
+                <label class="col-form-label col-3">
+                    {{ t('global.attributes.si_units.unit_type') }}:
+                </label>
+                <div class="col">
+                    <multiselect
+                        v-model="state.attribute.siGroup"
+                        :mode="'single'"
+                        :options="state.siGroups"
+                        :searchable="true"
+                        :filter-results="false"
+                        :object="false"
+                        :placeholder="t('global.select.placeholder')"
+                        :hide-selected="true"
+                        @select="siGroupSelected"
+                        @search-change="searchInSiGroups"
+                    >
+                        <template #option="{ option }">
+                            {{ t(`global.attributes.si_units.${option.label}.label`) }}
+                        </template>
+                        <template #singlelabel="{ value }">
+                            <div class="multiselect-single-label">
+                                {{ t(`global.attributes.si_units.${value.label}.label`) }}
+                            </div>
+                        </template>
+                    </multiselect>
+                </div>
+            </div>
+            <div
+                v-show="state.attribute.siGroup"
+                class="mb-3"
+            >
+                <label class="col-form-label col-3">
+                    {{ t('global.attributes.si_units.base_unit') }}:
+                </label>
+                <div class="col">
+                    <multiselect
+                        v-model="state.attribute.siGroupUnit"
+                        :classes="multiselectResetClasslist"
+                        :mode="'single'"
+                        :options="state.siGroupUnits"
+                        :track-by="'label'"
+                        :value-prop="'label'"
+                        :object="false"
+                        :placeholder="t('global.select.placeholder')"
+                        :hide-selected="true"
+                        @select="siGroupUnitSelected"
+                    >
+                        <template #option="{ option }">
+                            <div class="d-flex flex-row justify-content-between gap-3">
+                                <span>
+                                    {{ siSymbolToStr(option.symbol) }}
+                                </span>
+                                <span>
+                                    {{ t(`global.attributes.si_units.${state.attribute.siGroup}.units.${option.label}`) }}
+                                </span>
+                            </div>
+                        </template>
+                        <template #singlelabel="{ value }">
+                            <div class="multiselect-single-label">
+                                <div class="d-flex flex-row justify-content-between gap-3">
+                                    <span>
+                                        {{ siSymbolToStr(value.symbol) }}
+                                    </span>
+                                    <span>
+                                        {{ t(`global.attributes.si_units.${state.attribute.siGroup}.units.${value.label}`)
+                                        }}
+                                    </span>
+                                </div>
+                            </div>
+                        </template>
+                    </multiselect>
+                </div>
+            </div>
+        </template>
+        <button
+            v-show="!external"
+            type="submit"
+            class="btn btn-outline-success"
+            :disabled="!state.validated"
+        >
+            <i class="fas fa-fw fa-plus" />
             {{ state.label }}
         </button>
     </form>
@@ -124,6 +299,9 @@
     import {
         translateConcept,
         getConceptLabel,
+        getTs,
+        siSymbolToStr,
+        multiselectResetClasslist,
     } from '@/helpers/helpers.js';
 
     export default {
@@ -162,6 +340,14 @@
                 state.attribute.rootAttributeLabel = null;
                 state.attribute.differRoot = false;
                 state.attribute.textContent = '';
+                state.attribute.restrictedTypes = [];
+                state.attribute.siGroup = null;
+                state.attribute.siGroupUnit = null;
+
+                state.searchResetValue = {
+                    reset: true,
+                    ts: getTs(),
+                };
             };
             const create = _ => {
                 if(!state.attribute.differRoot) {
@@ -170,13 +356,16 @@
                 if(!state.allowsRestriction || state.attribute.differRoot) {
                     state.attribute.recursive = false;
                 }
-                if(!state.needsRootElement) {
+                if(!state.needsRootElement || state.attribute.rootAttributeLabel) {
                     state.attribute.rootLabel = null;
                 }
                 if(!state.needsTextElement && !state.needsTextareaElement) {
                     state.attribute.textContent = '';
                 }
-                context.emit('created', {...state.attribute});
+                if(!state.canRestrictTypes || state.attribute.restrictedTypes.length == 0) {
+                    state.attribute.restrictedTypes = null;
+                }
+                context.emit('created', { ...state.attribute });
                 reset();
             };
             const emitUpdate = _ => {
@@ -202,6 +391,34 @@
             const getAttributeLabel = attribute => {
                 return translateConcept(attribute.thesaurus_url);
             };
+            const searchInAttributeTypes = query => {
+                state.query = query ? query.toLowerCase().trim() : null;
+            };
+            const siGroupSelected = e => {
+                state.attribute.siGroup = e;
+
+                if(!state.attribute.siGroup) {
+                    state.attribute.siGroupUnit = null;
+                    state.siGroupUnits = null;
+                } else {
+                    const grp = store.getters.datatypeDataOf('si-unit')[state.attribute.siGroup];
+                    const matchUnit = grp.units.find(u => grp.default == u.symbol);
+                    if(matchUnit) {
+                        state.attribute.siGroupUnit = matchUnit.label;
+                    } else {
+                        state.attribute.siGroupUnit = null;
+                    }
+                    state.siGroupUnits = grp.units;
+                }
+                emitUpdate();
+            };
+            const siGroupUnitSelected = e => {
+                state.attribute.siGroupUnit = e;
+                emitUpdate();
+            };
+            const searchInSiGroups = query => {
+                state.siQuery = query ? query.toLowerCase().trim() : null;
+            };
 
             // DATA
             let types = [];
@@ -213,6 +430,10 @@
                     types = store.getters.attributeTypes;
                     break;
             }
+            types = types.slice().sort((a, b) => {
+                return t(`global.attributes.${a.datatype}`) > t(`global.attributes.${b.datatype}`);
+            });
+
             const state = reactive({
                 attribute: {
                     recursive: false,
@@ -222,13 +443,42 @@
                     rootAttributeLabel: null,
                     differRoot: false,
                     textContent: '',
+                    restrictedTypes: [],
+                    siGroup: null,
+                    siGroupUnit: null,
                 },
+                query: null,
+                siQuery: null,
+                siGroupUnits: null,
+                attributeTypes: computed(_ => {
+                    if(!state.query) return types;
+
+                    return types.filter(type => {
+                        return type.datatype.indexOf(state.query) !== -1 || t(`global.attributes.${type.datatype}`).toLowerCase().indexOf(state.query) !== -1;
+                    });
+                }),
+                siGroups: computed(_ => {
+                    if(!state.isSiUnit) return null;
+
+                    const keys = Object.keys(store.getters.datatypeDataOf('si-unit'));
+                    if(!state.siQuery) return keys;
+
+                    return keys.filter(grp => {
+                        return grp.indexOf(state.siQuery) !== -1 || t(`global.attributes.si_units.${grp}.label`).toLowerCase().indexOf(state.siQuery) !== -1;
+                    });
+                }),
+                searchResetValue: null,
                 formId: external.value || 'create-attribute-form',
-                attributeTypes: types,
+                minimalEntityTypes: computed(_ => {
+                    return Object.values(store.getters.entityTypes).map(et => ({
+                        id: et.id,
+                        thesaurus_url: et.thesaurus_url
+                    }));
+                }),
                 label: computed(_ => {
                     return createText.value || t('global.create');
                 }),
-                validated: computed(_ =>  {
+                validated: computed(_ => {
                     let isValid = state.attribute.label &&
                         state.attribute.label.id > 0 &&
                         state.attribute.type &&
@@ -239,22 +489,30 @@
                                 state.needsTextareaElement &&
                                 state.attribute.textContent.length > 0
                             )
+                        ) && (
+                            (state.isSiUnit && state.attribute.siGroup && state.attribute.siGroupUnit) || !state.isSiUnit
                         );
                     context.emit('validation', isValid);
                     return isValid;
                 }),
                 allowsRestriction: computed(_ => {
-                    return  state.attribute.type == 'string-sc' ||
-                            state.attribute.type == 'string-mc' ||
-                            state.attribute.type == 'epoch';
+                    return state.attribute.type == 'string-sc' ||
+                        state.attribute.type == 'string-mc' ||
+                        state.attribute.type == 'epoch';
                 }),
                 isStringSc: computed(_ => {
                     return state.attribute.type == 'string-sc';
                 }),
+                isSiUnit: computed(_ => {
+                    return state.attribute.type == 'si-unit';
+                }),
                 needsRootElement: computed(_ => {
                     return state.attribute.type == 'string-sc' ||
-                            state.attribute.type == 'string-mc' ||
-                            state.attribute.type == 'epoch';
+                        state.attribute.type == 'string-mc' ||
+                        state.attribute.type == 'epoch';
+                }),
+                canRestrictTypes: computed(_ => {
+                    return state.attribute.type == 'entity' || state.attribute.type == 'entity-mc';
                 }),
                 needsTextElement: computed(_ => {
                     return state.attribute.type == 'serial';
@@ -269,11 +527,11 @@
                         state.attribute.rootLabel &&
                         state.attribute.rootLabel.id > 0
                     ) || (
-                        state.attribute.type == 'string-sc' &&
-                        state.attribute.differRoot &&
-                        state.attribute.rootAttributeLabel &&
-                        state.attribute.rootAttributeLabel.id > 0
-                    );
+                            state.attribute.type == 'string-sc' &&
+                            state.attribute.differRoot &&
+                            state.attribute.rootAttributeLabel &&
+                            state.attribute.rootAttributeLabel.id > 0
+                        );
                 }),
             });
 
@@ -288,16 +546,21 @@
                 searchAttribute,
                 searchLabel,
                 getConceptLabel,
-                // PROPS
-                external,
+                siSymbolToStr,
+                multiselectResetClasslist,
+                translateConcept,
                 // LOCAL
                 create,
                 labelSelected,
                 typeSelected,
                 getAttributeLabel,
+                searchInAttributeTypes,
+                siGroupSelected,
+                searchInSiGroups,
+                siGroupUnitSelected,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

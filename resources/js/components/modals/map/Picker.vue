@@ -2,7 +2,8 @@
     <vue-final-modal
         class="modal-container modal"
         content-class="sp-modal-content sp-modal-content-xl h-100"
-        name="map-picker-modal">
+        name="map-picker-modal"
+    >
         <div class="sp-modal-content sp-modal-content-xl h-100">
             <div class="modal-header">
                 <h5 class="modal-title">
@@ -10,18 +11,25 @@
                         t('main.entity.attributes.set_location')
                     }}
                 </h5>
-                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-                </button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                />
             </div>
             <div class="modal-body d-flex flex-column">
-                <sp-map class="flex-grow-1 overflow-hidden"
+                <sp-map
                     v-if="state.layersFetched"
+                    class="flex-grow-1 overflow-hidden"
                     :layers="state.layers"
                     :data="state.wktData"
                     :projection="4326"
                     :input-projection="4326"
                     :reset-each="true"
-                    @added="updateData" />
+                    @added="updateData"
+                />
                 <!-- <sp-map class="flex-grow-1 overflow-hidden"
                     :epsg="{epsg: '4326'}"
                     :layers="wktLayers"
@@ -32,15 +40,25 @@
                     :on-modifyend="onGeoFeaturesUpdated"
                     :reset="true" /> -->
                 <div class="mt-2">
-                    WKT: <pre class="m-0"><code>{{ state.wktValue }}</code></pre>
+                    WKT: <pre class="m-0"><code class="fs-1r">{{ state.wktValue }}</code></pre>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-success" data-bs-dismiss="modal" @click="confirmLocation()">
-                    <i class="fas fa-fw fa-times"></i> {{ t('global.set') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-success"
+                    data-bs-dismiss="modal"
+                    @click="confirmLocation()"
+                >
+                    <i class="fas fa-fw fa-times" /> {{ t('global.set') }}
                 </button>
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                    <i class="fas fa-fw fa-times"></i> {{ t('global.close') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                >
+                    <i class="fas fa-fw fa-times" /> {{ t('global.close') }}
                 </button>
             </div>
         </div>
@@ -115,8 +133,6 @@
             return {
                 t,
                 // HELPERS
-                // PROPS
-                data,
                 // LOCAL
                 updateData,
                 confirmLocation,

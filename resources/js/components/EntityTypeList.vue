@@ -1,21 +1,68 @@
 <template>
-    <div class="list-group scroll-y-auto px-2">
-        <a href="#" @click.prevent="selectEntry(entry)" v-for="(entry, i) in state.entries" class="list-group-item list-group-item-action d-flex flex-row align-items-center" :class="{ 'active': entry.id == selectedId }" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)" :key="i">
+    <div class="list-group overflow-y-auto px-2">
+        <a
+            v-for="(entry, i) in state.entries"
+            :key="i"
+            href="#"
+            class="list-group-item list-group-item-action d-flex flex-row align-items-center"
+            :class="{ 'active': entry.id == selectedId }"
+            @click.prevent="selectEntry(entry)"
+            @mouseenter="onEnter(i)"
+            @mouseleave="onLeave(i)"
+        >
             <div>
-                <i class="fas fa-fw fa-monument"></i>
+                <i class="fas fa-fw fa-monument" />
                 <span class="p-1">
                     {{ translateConcept(entry.thesaurus_url) }}
                 </span>
             </div>
-            <div class="ms-auto btn-fab-list" v-if="state.hasOnHoverListener" v-show="state.hoverStates[i]" :class="activeClasses(entry)">
-                <button class="btn btn-outline-info btn-fab-sm rounded-circle" v-if="state.hasEditListener" @click="onEdit(entry)" data-bs-toggle="popover" :data-content="t('global.edit')" data-trigger="hover" data-placement="bottom">
-                    <i class="fas fa-fw fa-xs fa-edit" style="vertical-align: 0;"></i>
+            <div
+                v-if="state.hasOnHoverListener"
+                v-show="state.hoverStates[i]"
+                class="ms-auto btn-fab-list"
+                :class="activeClasses(entry)"
+            >
+                <button
+                    v-if="state.hasEditListener"
+                    class="btn btn-outline-info btn-fab-sm rounded-circle"
+                    data-bs-toggle="popover"
+                    :data-content="t('global.edit')"
+                    data-trigger="hover"
+                    data-placement="bottom"
+                    @click="onEdit(entry)"
+                >
+                    <i
+                        class="fas fa-fw fa-xs fa-edit"
+                        style="vertical-align: 0;"
+                    />
                 </button>
-                <button class="btn btn-outline-primary btn-fab-sm rounded-circle" v-if="state.hasDuplicateListener" @click="onDuplicate(entry)" data-bs-toggle="popover" :data-content="t('global.duplicate')" data-trigger="hover" data-placement="bottom">
-                    <i class="fas fa-fw fa-xs fa-clone" style="vertical-align: 0;"></i>
+                <button
+                    v-if="state.hasDuplicateListener"
+                    class="btn btn-outline-primary btn-fab-sm rounded-circle"
+                    data-bs-toggle="popover"
+                    :data-content="t('global.duplicate')"
+                    data-trigger="hover"
+                    data-placement="bottom"
+                    @click="onDuplicate(entry)"
+                >
+                    <i
+                        class="fas fa-fw fa-xs fa-clone"
+                        style="vertical-align: 0;"
+                    />
                 </button>
-                <button class="btn btn-outline-danger btn-fab-sm rounded-circle" v-if="state.hasDeleteListener" @click="onDelete(entry)" data-bs-toggle="popover" :data-content="t('global.delete')" data-trigger="hover" data-placement="bottom">
-                    <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
+                <button
+                    v-if="state.hasDeleteListener"
+                    class="btn btn-outline-danger btn-fab-sm rounded-circle"
+                    data-bs-toggle="popover"
+                    :data-content="t('global.delete')"
+                    data-trigger="hover"
+                    data-placement="bottom"
+                    @click="onDelete(entry)"
+                >
+                    <i
+                        class="fas fa-fw fa-xs fa-trash"
+                        style="vertical-align: 0;"
+                    />
                 </button>
             </div>
         </a>
@@ -46,14 +93,34 @@
                 type: Number,
                 required: false,
                 default: -1,
-            }
+            },
+            onDeleteElement: {
+                type: Function,
+                required: false,
+            },
+            onDuplicateElement: {
+                type: Function,
+                required: false,
+            },
+            onEditElement: {
+                type: Function,
+                required: false,
+            },
+            onSelectElement: {
+                type: Function,
+                required: false,
+            },
         },
         setup(props, context) {
             const { t } = useI18n();
             const {
                 data,
                 selectedId,
+                onDeleteElement,
+                onDuplicateElement,
+                onEditElement,
             } = toRefs(props);
+
             // FETCH
 
             // FUNCTIONS
@@ -69,25 +136,25 @@
                 return ['badge', 'rounded-pill', 'bg-light'];
             };
             const selectEntry = entityType => {
-                context.emit('select-element', {type: entityType});
+                context.emit('select-element', { type: entityType });
             };
             const onEdit = entityType => {
-                context.emit('edit-element', {type: entityType});
-            }
+                context.emit('edit-element', { type: entityType });
+            };
             const onDuplicate = entityType => {
-                context.emit('duplicate-element', {id: entityType.id});
-            }
+                context.emit('duplicate-element', { id: entityType.id });
+            };
             const onDelete = entityType => {
-                context.emit('delete-element', {type: entityType});
-            }
+                context.emit('delete-element', { type: entityType });
+            };
 
             // DATA
             const state = reactive({
                 hoverStates: new Array(data.value.length).fill(false),
                 entries: computed(_ => data.value.slice()),
-                hasDeleteListener: !!context.attrs.onDeleteElement,
-                hasDuplicateListener: !!context.attrs.onDuplicateElement,
-                hasEditListener: !!context.attrs.onEditElement,
+                hasDeleteListener: !!onDeleteElement.value,
+                hasDuplicateListener: !!onDuplicateElement.value,
+                hasEditListener: !!onEditElement.value,
                 hasOnHoverListener: computed(_ => state.hasDeleteListener || state.hasDuplicateListener || state.hasEditListener),
             });
 
@@ -109,11 +176,9 @@
                 onEdit,
                 onDuplicate,
                 onDelete,
-                // PROPS
-                selectedId,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

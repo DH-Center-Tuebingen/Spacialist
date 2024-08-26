@@ -1,76 +1,110 @@
 <template>
     <div class="row h-100 overflow-hidden">
-        <div :class="`h-100 d-flex flex-column col-md-${state.columnPref.left}`" id="tree-container" v-dcan="'entity_read'" v-if="state.columnPref.left > 0">
-            <entity-tree
-                class="col px-0 h-100">
-            </entity-tree>
+        <div
+            v-if="state.columnPref.left > 0"
+            id="tree-container"
+            v-dcan="'entity_read'"
+            :class="`h-100 d-flex flex-column col-md-${state.columnPref.left}`"
+        >
+            <entity-tree class="col px-0 h-100" />
         </div>
-        <div :class="`h-100 border-start border-end col-md-${state.columnPref.center}`" id="attribute-container" v-dcan="'entity_read|entity_data_read'" v-if="state.columnPref.center > 0">
-            <router-view>
-            </router-view>
+        <div
+            v-if="state.columnPref.center > 0"
+            id="attribute-container"
+            v-dcan="'entity_read|entity_data_read'"
+            :class="`h-100 border-start border-end col-md-${state.columnPref.center}`"
+        >
+            <router-view />
             <alert
                 v-if="!state.isDetailLoaded"
                 :message="t('main.entity.detail_tab_none_selected')"
                 :type="'info'"
                 :noicon="false"
-                :icontext="t('global.information')"/>
+                :icontext="t('global.information')"
+            />
         </div>
-        <div :class="`h-100 d-flex flex-column col-md-${state.columnPref.right}`" id="addon-container" v-if="state.columnPref.right > 0">
+        <div
+            v-if="state.columnPref.right > 0"
+            id="addon-container"
+            :class="`h-100 d-flex flex-column col-md-${state.columnPref.right}`"
+        >
             <ul class="nav nav-tabs">
-                <li class="nav-item" v-for="(plugin, i) in state.tabPlugins" :key="i">
-                    <router-link class="nav-link" :class="{active: state.tab == plugin.key}" :to="{ query: { tab: plugin.key }}" append>
-                        <i class="fas fa-fw" :class="plugin.icon"></i> {{ t(plugin.label) }}
+                <li
+                    v-for="(plugin, i) in state.tabPlugins"
+                    :key="i"
+                    class="nav-item"
+                >
+                    <router-link
+                        class="nav-link"
+                        :class="{ active: state.tab == plugin.key }"
+                        :to="{ query: { tab: plugin.key } }"
+                        append
+                    >
+                        <i
+                            class="fas fa-fw"
+                            :class="plugin.icon"
+                        /> {{ t(plugin.label) }}
                     </router-link>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link" :class="{active: state.tab == 'references', disabled: !state.entity.id}" @click.prevent="setTab('references')">
-                        <i class="fas fa-fw fa-bookmark"></i> {{ t('main.entity.references.title') }}
+                    <a
+                        href="#"
+                        class="nav-link"
+                        :class="{ active: state.tab == 'references', disabled: !state.entity.id }"
+                        @click.prevent="setTab('references')"
+                    >
+                        <i class="fas fa-fw fa-bookmark" /> {{ t('main.entity.references.title') }}
                     </a>
                 </li>
             </ul>
             <div class="mt-2 col px-0 overflow-hidden">
                 <keep-alive>
-                    <component
-                        :is="state.tabComponent">
-                    </component>
+                    <component :is="state.tabComponent" />
                 </keep-alive>
-                <div v-show="isTab('references') && !!state.entity.id" class="h-100 scroll-y-auto">
-                    <p class="alert alert-info" v-if="!state.hasReferences">
+                <div
+                    v-show="isTab('references') && !!state.entity.id"
+                    class="h-100 overflow-y-auto"
+                >
+                    <p
+                        v-if="!state.hasReferences"
+                        class="alert alert-info"
+                    >
                         {{ t('main.entity.references.empty') }}
                     </p>
-                    <div v-else v-for="(referenceGroup, key) in state.entity.references" class="reference-group" :key="key">
-                        <h5 class="mb-1 fw-medium">
-                            <a href="#" class="text-decoration-none" @click.prevent="showMetadataForReferenceGroup(referenceGroup)">
-                                {{ translateConcept(key) }}
-                            </a>
-                        </h5>
-                        <div class="list-group ps-2 w-90">
-                            <a class="list-group-item list-group-item-action d-flex flex-row" v-for="(reference, i) in referenceGroup" :key="i">
-                                <div class="flex-grow-1">
-                                    <blockquote class="blockquote fs-09">
-                                        <p class="text-muted">
-                                            {{ reference.description }}
-                                        </p>
-                                    </blockquote>
-                                    <figcaption class="blockquote-footer fw-medium mb-0 d-flex gap-1">
-                                        <span>
-                                            {{ reference.bibliography.author }} in <cite :title="reference.bibliography.title">
-                                                {{ reference.bibliography.title }} ,{{ reference.bibliography.year }}
-                                            </cite>
+                    <template
+                        v-for="(referenceGroup, key) in state.entity.references"
+                        v-else
+                        :key="key"
+                    >
+                        <div
+                            v-if="referenceGroup.length > 0"
+                            class="reference-group"
+                        >
+                            <h5 class="mb-2 fw-medium">
+                                <a
+                                    href="#"
+                                    class="text-decoration-none"
+                                    @click.prevent="showMetadataForReferenceGroup(referenceGroup)"
+                                >
+                                    {{ translateConcept(key) }}
+                                </a>
+                            </h5>
+                            <div class="list-group w-90">
+                                <div
+                                    v-for="(reference, i) in referenceGroup"
+                                    :key="i"
+                                    class="list-group-item pt-0"
+                                >
+                                    <header class="text-end">
+                                        <span class="text-muted fw-light small">
+                                            {{ date(reference.updated_at) }}
                                         </span>
-                                        <a href="#" @click.prevent="openLiteratureInfo(reference)">
-                                            <i class="fas fa-fw fa-info-circle"></i>
-                                        </a>
-                                    </figcaption>
+                                    </header>
+                                    <Quotation :value="reference" />
                                 </div>
-                                <div>
-                                    <span class="text-muted fw-light small">
-                                        {{ date(reference.updated_at) }}
-                                    </span>
-                                </div>
-                            </a>
+                            </div>
                         </div>
-                    </div>
+                    </template>
                 </div>
             </div>
         </div>
@@ -83,7 +117,7 @@
         onMounted,
         reactive,
     } from 'vue';
-    
+
     import {
         onBeforeRouteUpdate,
         onBeforeRouteLeave,
@@ -96,22 +130,33 @@
     } from 'vue-router';
 
     import store from '@/bootstrap/store.js';
-    import router from '@/bootstrap/router.js';
-
-    import { useToast } from '@/plugins/toast.js';
+    import router from '%router';
 
     import {
         translateConcept,
     } from '@/helpers/helpers.js';
+
+    import {
+        formatAuthors,
+    } from '@/helpers/bibliography.js';
+
     import {
         date,
     } from '@/helpers/filters.js';
+
     import {
         canShowReferenceModal,
         showLiteratureInfo,
     } from '@/helpers/modal.js';
 
+    import { useToast } from '@/plugins/toast.js';
+
+    import Quotation from '@/components/bibliography/Quotation.vue';
+
     export default {
+        components: {
+            Quotation,
+        },
         setup(props, context) {
             const { t } = useI18n();
             const currentRoute = useRoute();
@@ -173,16 +218,23 @@
                 }),
                 concepts: computed(_ => store.getters.concepts),
                 entity: computed(_ => store.getters.entity),
-                hasReferences: computed(_ => !!state.entity.references && Object.keys(state.entity.references).length > 0),
+                hasReferences: computed(_ => {
+                    const isNotSet = !state.entity.references;
+                    if(isNotSet) return false;
+
+                    const isEmpty = !Object.keys(state.entity.references).length > 0;
+                    if(isEmpty) return false;
+                    return Object.values(state.entity.references).some(v => v.length > 0);
+                }),
                 entityTypes: computed(_ => store.getters.entityTypes),
                 columnPref: computed(_ => store.getters.preferenceByKey('prefs.columns')),
-                isDetailLoaded: computed(_ => currentRoute.name == 'entitydetail'),
+                isDetailLoaded: computed(_ => store.getters.entity?.id > 0),
                 tabPlugins: computed(_ => store.getters.slotPlugins('tab')),
             });
 
             // ON MOUNTED
             onMounted(_ => {
-                console.log("mainview component mounted");
+                console.log('mainview component mounted');
                 store.dispatch('setMainViewTab', currentRoute.query.tab);
             });
 
@@ -200,6 +252,7 @@
                 t,
                 // HELPERS
                 translateConcept,
+                formatAuthors,
                 date,
                 // LOCAL
                 setTab,
@@ -268,5 +321,5 @@
         //         }
         //     }
         // }
-    }
+    };
 </script>

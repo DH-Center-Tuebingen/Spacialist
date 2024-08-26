@@ -20,7 +20,8 @@
 .sp-modal-content {
     @extend .modal-content;
     max-height: 80vh;
-    max-width: 50vw;
+    width: 960px;
+    max-width: 95%;
 }
 
 .sp-modal-content-xl {
@@ -32,11 +33,13 @@
 }
 
 .sp-modal-content-sm {
-    max-width: 30vw;
+    width: 600px;
+    max-width: 95%;
 }
 
 .sp-modal-content-xs {
-    max-width: 20vw;
+    width: 420px;
+    max-width: 95%;
 }
 
 .modal-image {
@@ -45,7 +48,7 @@
 }
 
 .atom-label {
-    text-shadow: -1px 1px 1px rgb(0,0,0);
+    text-shadow: -1px 1px 1px rgb(0, 0, 0);
     margin-left: 25px;
 }
 

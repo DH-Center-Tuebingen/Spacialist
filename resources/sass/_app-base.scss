@@ -1,16 +1,16 @@
 // Bootstrap
-@import "~bootstrap/scss/bootstrap";
+@import "/node_modules/bootstrap/scss/bootstrap";
 @import "bootstrap";
 
 // tree-component
-@import "~tree-component/dist/tree.min.css";
+@import "/node_modules/tree-component/dist/tree.min.css";
 @import "tree";
 
 // vue-upload-component
 @import "upload";
 
 // multiselect
-@import "~@vueform/multiselect/themes/default";
+@import "/node_modules/@vueform/multiselect/themes/default";
 @import "multiselect";
 
 // code highlighting
@@ -28,11 +28,14 @@
 // color gradient
 @import "gradient";
 
+// general dropdown
+@import "dropdown";
+
 // Search components
 @import "search";
 
 // Datepicker
-@import "~vue-datepicker-next/scss/index";
+@import "/node_modules/vue-datepicker-next/scss/index";
 @import "datepicker";
 
 // Popover
@@ -40,6 +43,9 @@
 
 // Markdown Editor (based on Milkdown)
 @import "markdown";
+
+// Spacialist attribute types classes
+@import "attributes";
 
 // Spacialist utility classes
 @import "utilities";

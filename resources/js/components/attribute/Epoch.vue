@@ -1,39 +1,91 @@
 <template>
     <div>
         <div class="input-group">
-            <button type="button" class="btn btn-outline-secondary dropdown-toggle" :disabled="disabled" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <button
+                type="button"
+                class="btn btn-outline-secondary dropdown-toggle"
+                :disabled="disabled"
+                data-bs-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+            >
                 <span v-if="v.startLabel.value">
                     {{ t(`main.entity.attributes.${v.startLabel.value}`) }}
                 </span>
                 <span v-else>
+                    <!-- TODO: Check if this else is required -->
                 </span>
             </button>
             <ul class="dropdown-menu">
-                <a class="dropdown-item" href="#" v-for="(label, i) in timeLabels" @click.prevent="setLabel('startLabel', label)" :key="i">
+                <a
+                    v-for="(label, i) in timeLabels"
+                    :key="i"
+                    class="dropdown-item"
+                    href="#"
+                    @click.prevent="setLabel('startLabel', label)"
+                >
                     {{ t(`main.entity.attributes.${label}`) }}
                 </a>
             </ul>
-            <input type="number" step="1" min="0" pattern="[0-9]+" class="form-control text-center" :disabled="disabled" aria-label="" @input="v.start.handleInput" v-model.number="v.start.value">
-                <span class="input-group-text">-</span>
-            <input type="number" step="1" min="0" pattern="[0-9]+" class="form-control text-center" :disabled="disabled" aria-label="" @input="v.end.handleInput" v-model.number="v.end.value">
-            <button type="button" class="btn btn-outline-secondary dropdown-toggle" :disabled="disabled" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <input
+                v-model.number="v.start.value"
+                type="number"
+                step="1"
+                min="0"
+                pattern="[0-9]+"
+                class="form-control text-center"
+                :disabled="disabled"
+                aria-label=""
+                @input="v.start.handleInput"
+            >
+            <span class="input-group-text">-</span>
+            <input
+                v-model.number="v.end.value"
+                type="number"
+                step="1"
+                min="0"
+                pattern="[0-9]+"
+                class="form-control text-center"
+                :disabled="disabled"
+                aria-label=""
+                @input="v.end.handleInput"
+            >
+            <button
+                type="button"
+                class="btn btn-outline-secondary dropdown-toggle"
+                :disabled="disabled"
+                data-bs-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+            >
                 <span v-if="v.endLabel.value">
                     {{ t(`main.entity.attributes.${v.endLabel.value}`) }}
                 </span>
                 <span v-else>
+                    <!-- TODO: Check if this else is required -->
                 </span>
             </button>
-            <ul uib-dropdown-menu class="dropdown-menu">
-                <a class="dropdown-item" href="#" v-for="(label, i) in timeLabels" @click.prevent="setLabel('endLabel', label)" :key="i">
+            <ul
+                uib-dropdown-menu
+                class="dropdown-menu"
+            >
+                <a
+                    v-for="(label, i) in timeLabels"
+                    :key="i"
+                    class="dropdown-item"
+                    href="#"
+                    @click.prevent="setLabel('endLabel', label)"
+                >
                     {{ t(`main.entity.attributes.${label}`) }}
                 </a>
             </ul>
         </div>
         <multiselect
-            class="mt-2"
             v-if="state.hasEpochList"
+            v-model="v.epoch.value"
+            class="mt-2"
             :classes="multiselectResetClasslist"
-            :valueProp="'concept_url'"
+            :value-prop="'concept_url'"
             :label="'concept_url'"
             :track-by="'concept_url'"
             :object="true"
@@ -42,14 +94,14 @@
             :options="epochs"
             :name="name"
             :placeholder="t('global.select.placeholder')"
-            v-model="v.epoch.value"
-            @change="value => v.epoch.handleChange(value)">
-            <template v-slot:option="{ option }">
+            @change="handleEpochChange"
+        >
+            <template #option="{ option }">
                 {{ translateConcept(option.concept_url) }}
             </template>
-            <template v-slot:singlelabel="{ value }">
+            <template #singlelabel="{ value: singlelabelValue }">
                 <div class="multiselect-single-label">
-                    {{ translateConcept(value.concept_url) }}
+                    {{ translateConcept(singlelabelValue.concept_url) }}
                 </div>
             </template>
         </multiselect>
@@ -77,7 +129,10 @@
 
     export default {
         props: {
-            name: String,
+            name: {
+                type: String,
+                required: true,
+            },
             value: {
                 required: false,
                 type: Object,
@@ -146,6 +201,9 @@
             };
             const setLabel = (field, value) => {
                 v[field].handleChange(value);
+            };
+            const handleEpochChange = option => {
+                v.epoch.handleChange(option);
             };
 
             // DATA
@@ -251,7 +309,11 @@
                 },
             });
 
-            watch(_ => v.meta, (newValue, oldValue) => {
+
+            watch(_ => value, (newValue, oldValue) => {
+                resetFieldState();
+            });
+            watch(_ => v.value, (newValue, oldValue) => {
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
@@ -270,17 +332,11 @@
                 undirtyField,
                 setLabel,
                 timeLabels,
-                // PROPS
-                name,
-                epochs,
-                disabled,
+                handleEpochChange,
                 // STATE
                 state,
                 v,
-            }
+            };
         },
-        // mounted () {
-        //     this.$el.value = this.value;
-        // },
-    }
+    };
 </script>

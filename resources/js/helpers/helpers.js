@@ -1,6 +1,6 @@
 import auth from '@/bootstrap/auth.js';
-import store from '@/bootstrap/store.js';
-import router from '@/bootstrap/router.js';
+import store from '%store';
+import router from '%router';
 
 import {
     fetchAttributes,
@@ -74,19 +74,35 @@ export function getErrorMessages(error, suffix = '') {
     return msgObject;
 }
 
-export function getCertaintyClass(certainty, prefix = 'bg') {
-    let classes = {};
 
-    if(certainty <= 25) {
-        classes[`${prefix}-danger`] = true;
-    } else if(certainty <= 50) {
-        classes[`${prefix}-warning`] = true;
-    } else if(certainty <= 75) {
-        classes[`${prefix}-info`] = true;
-    } else {
-        classes[`${prefix}-success`] = true;
+const UNSET_CERTAINTY = {type: 'unset', icon: 'fas fa-fw fa-question', rangeFunction: (certainty) => certainty == null || certainty < 0 || certainty > 100};
+export function getCertainties() {
+    function inRangeOf(lowIn, highEx) {
+        return (certainty) => parseFloat(certainty) >= lowIn && parseFloat(certainty) < highEx;
+    }
+    return [
+        {type: 'danger', icon: 'fas fa-fw fa-exclamation', rangeFunction: inRangeOf(0, 25)},
+        {type: 'warning', icon: 'fas fa-fw fa-exclamation', rangeFunction: inRangeOf(25, 50)},
+        {type: 'info', icon: 'fas fa-fw fa-exclamation', rangeFunction: inRangeOf(50, 100)},
+        {type: 'success', icon: 'fas fa-fw fa-check', rangeFunction: (certainty) => certainty === 100},
+        UNSET_CERTAINTY,
+    ];
+}
+
+export function getCertainty(value) {
+    for(const certainty of getCertainties()) {
+        if(certainty.rangeFunction(value)) {
+            return certainty;
+        }
     }
 
+    return UNSET_CERTAINTY;
+}
+
+export function getCertaintyClass(certainty, prefix = 'bg') {
+    const classes = [];
+    const cert = getCertainty(certainty);
+    classes.push(`${prefix}-${cert.type}`);
     return classes;
 }
 
@@ -102,7 +118,7 @@ export function getInputCursorPosition(input) {
     div.textContent = input.value.substr(0, input.selectionStart);
 
     const span = document.createElement('span');
-    span.textContent = input.value.substr(input.selectionStart) || '.'
+    span.textContent = input.value.substr(input.selectionStart) || '.';
     div.appendChild(span);
     document.body.appendChild(div);
     const offsetX = span.offsetLeft + input.offsetLeft;
@@ -133,6 +149,12 @@ export function getOrderedDate(short = false, withTime = false) {
             return woTime;
         }
     }
+}
+
+export function randomId(min = 0, max = 100) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min);
 }
 
 export function getConcept(url) {
@@ -190,11 +212,18 @@ export async function handleDeletedEntity(entity) {
         }
     }
     return new Promise(r => r(null));
-};
+}
 
 export function getAttribute(id) {
     if(!id) return {};
     return store.getters.attributes.find(a => a.id == id) || {};
+}
+
+export function getAttributeName(id) {
+    const attr = getAttribute(id);
+    if(!attr || !attr.thesaurus_url) return '';
+
+    return translateConcept(attr.thesaurus_url);
 }
 
 export function translateEntityType(id) {
@@ -233,7 +262,7 @@ export function getEntityTypeDependencies(id, aid) {
     if(!attrs) return {};
     if(!!aid) {
         const attr = attrs.find(a => a.id == aid);
-        return !!attr ? attr.pivot.depends_on : {};
+        return attr?.pivot?.depends_on || {};
     } else {
         const dependencies = {};
         attrs.forEach(a => {
@@ -241,7 +270,7 @@ export function getEntityTypeDependencies(id, aid) {
                 const deps = a.pivot.depends_on;
                 const keys = Object.keys(deps);
                 const values = Object.values(deps);
-                for(let i=0; i<keys.length; i++) {
+                for(let i = 0; i < keys.length; i++) {
                     const currKey = keys[i];
                     const currValue = values[i];
                     if(!dependencies[currKey]) {
@@ -253,21 +282,59 @@ export function getEntityTypeDependencies(id, aid) {
         });
         return dependencies;
     }
+}
 
+export function getAttributeSelection(aid) {
+    return store.getters.attributeSelections[aid];
+}
+
+export function getAttributeSelections(attributes) {
+    const sel = store.getters.attributeSelections;
+    let filteredSel = {};
+    for(let k in sel) {
+        if(attributes.findIndex(a => a.id == k) > -1) {
+            filteredSel[k] = sel[k];
+        }
+    }
+    return filteredSel;
 }
 
 export function getEntityTypeAttributeSelections(id) {
     const attrs = getEntityTypeAttributes(id);
     if(!attrs) return {};
-    const attrIds = attrs.map(a => a.id);
-    const sel = store.getters.attributeSelections;
-    let filteredSel = {};
-    for(let k in sel) {
-        if(attrIds.findIndex(aid => aid == k) > -1) {
-            filteredSel[k] = sel[k];
-        }
+    return getAttributeSelections(attrs);
+}
+
+export function getIntersectedEntityAttributes(entityTypeLists) {
+    if(entityTypeLists.length == 0) return [];
+
+    let compArr = getEntityTypeAttributes(entityTypeLists[0]);
+
+    if(entityTypeLists.length == 1) {
+        return compArr;
     }
-    return filteredSel;
+
+    let intersections = [];
+    for(let i = 1; i < entityTypeLists.length; i++) {
+        intersections = [];
+        const attrN = getEntityTypeAttributes(entityTypeLists[i]);
+        for(let j = 0; j < compArr.length; j++) {
+            for(let k = 0; k < attrN.length; k++) {
+                const a1 = compArr[j];
+                const a2 = attrN[k];
+                if(a1.id == a2.id) {
+                    intersections.push(a1);
+                }
+            }
+        }
+        compArr = intersections;
+    }
+
+    return intersections;
+}
+
+export function hasIntersectionWithEntityAttributes(etid, entityTypeList) {
+    return getIntersectedEntityAttributes([etid, ...entityTypeList]).length > 0;
 }
 
 export function isAllowedSubEntityType(parentId, id) {
@@ -276,25 +343,116 @@ export function isAllowedSubEntityType(parentId, id) {
     return parent.sub_entity_types.some(et => et.id == id);
 }
 
-export function defaultAttributeValue(datatype) {
-    const val = {};
-    switch(datatype) {
+export function getInitialAttributeValue(attribute, typeAttr = 'type') {
+    switch(attribute[typeAttr]) {
+        case 'string':
+        case 'stringf':
+        case 'richtext':
+        case 'iconclass':
+        case 'rism':
+        case 'geography':
+        case 'date':
+        case 'url':
+            return '';
+        case 'integer':
+        case 'double':
+        case 'boolean':
+            return 0;
+        case 'percentage':
+            return 50;
+        case 'serial':
+            let str = attribute.textContent;
+            let toRepl = '%d';
+            let ctr = '1954';
+            if(!str) {
+                str = 'Find_%05d_Placeholder';
+            }
+            let hasIdentifier = false;
+            let isSimple = true;
+            let matches = str.match(/.*(%d).*/);
+            if(matches && matches[1]) {
+                hasIdentifier = true;
+                isSimple = true;
+            } else {
+                matches = str.match(/.*(%\d*d).*/);
+                if(matches && matches[1]) {
+                    hasIdentifier = true;
+                    isSimple = false;
+                }
+            }
+            if(hasIdentifier && !isSimple) {
+                toRepl = matches[1];
+                let pad = parseInt(toRepl.substring(1, toRepl.length - 1));
+                ctr = ctr.padStart(pad, '0');
+            }
+            return str.replaceAll(toRepl, ctr);
+        case 'list':
+        case 'string-mc':
+        case 'entity-mc':
+        case 'userlist':
+        case 'daterange':
+        case 'table':
+            return [];
+        case 'sql':
+            return t('global.preview_not_available');
+        case 'epoch':
         case 'dimension':
+        case 'entity':
+        case 'string-sc':
+            return {};
+        case 'si-unit':
+            if(!attribute.siGroup) {
+                return { value: 0 };
+            } else {
+                return {
+                    value: 0,
+                    unit: attribute.siGroup,
+                    default: attribute.siGroupUnit,
+                };
+            }
+        default:
+            return '';
+    }
+}
+
+export function getEmptyAttributeValue(type) {
+    if(!type) return null;
+
+    switch(type) {
+        case 'boolean':
+            return false;
+        case 'dimension':
+        case 'entity':
         case 'epoch':
         case 'timeperiod':
-            val.value = {};
-            break;
+            return {};
+        case 'float':
+        case 'integer':
+        case 'percentage':
+            return;
+        case 'list':
+        case 'daterange':
         case 'string-mc':
         case 'entity-mc':
         case 'table':
-        case 'list':
-            val.value = [];
-            break;
+        case 'userlist':
+            return [];
+        case 'serial':
+        case 'sql':
+            return null;
+        case 'richtext':
+        case 'rism':
+        case 'string':
+        case 'stringf':
+        case 'system-separator':
+        case 'geography':
+        case 'iconclass':
+        case 'string-sc':
+        case 'date':
+        case 'url':
         default:
-            val.value = '';
-            break;
+            return '';
     }
-    return val;
 }
 
 export function getAttributeValueAsString(rawValue, datatype) {
@@ -307,6 +465,7 @@ export function getAttributeValueAsString(rawValue, datatype) {
     switch(datatype) {
         case 'string':
         case 'stringf':
+        case 'richtext':
         case 'double':
         case 'integer':
         case 'boolean':
@@ -335,6 +494,7 @@ export function getAttributeValueAsString(rawValue, datatype) {
         case 'string-mc':
         case 'entity':
         case 'entity-mc':
+        case 'userlist':
         case 'table':
         case 'sql':
             strValue = `TODO: ${datatype}`;
@@ -347,10 +507,12 @@ export function getAttributeValueAsString(rawValue, datatype) {
 // Fills non-present attribute values to be used in draggable components (e.g. attribute-list)
 export function fillEntityData(data, etid) {
     const attrs = getEntityTypeAttributes(etid);
-    for(let i=0; i<attrs.length; i++) {
+    for(let i = 0; i < attrs.length; i++) {
         const currAttr = attrs[i];
         if(!data[currAttr.id]) {
-            data[currAttr.id] = defaultAttributeValue(currAttr.datatype);
+            data[currAttr.id] = {
+                value: getInitialAttributeValue(currAttr),
+            };
         }
     }
     return data;
@@ -365,11 +527,11 @@ export function calculateEntityColors(id, alpha = 0.5) {
     const cs = [r, g, b].map(c => {
         c /= 255.0;
         if(c <= 0.03928) c /= 12.92;
-        else c = Math.pow(((c+0.055)/1.055), 2.4);
+        else c = Math.pow(((c + 0.055) / 1.055), 2.4);
         return c;
     });
     // let cont = r*0.299 + g*0.587 + b*0.114;
-    const l = cs[0]*0.2126 + cs[1]*0.7152 + cs[2]*0.0722;
+    const l = cs[0] * 0.2126 + cs[1] * 0.7152 + cs[2] * 0.0722;
 
     // const textColor = cont > 150 ? '#000000' : '#ffffff';
     const textColor = l > 0.179 ? '#000000' : '#ffffff';
@@ -378,6 +540,10 @@ export function calculateEntityColors(id, alpha = 0.5) {
         color: textColor,
         backgroundColor: color
     };
+}
+
+export function getEntity(id) {
+    return store.getters.entities[id] || {};
 }
 
 export function getEntityColors(id) {
@@ -394,6 +560,16 @@ export function getEntityColors(id) {
     return colors;
 }
 
+export function siSymbolToStr(symbol) {
+    if(!symbol) return '';
+
+    if(Array.isArray(symbol)) {
+        return symbol[0];
+    } else {
+        return symbol;
+    }
+}
+
 export function isLoggedIn() {
     return auth.check();
 }
@@ -402,9 +578,13 @@ export function getUser() {
     return isLoggedIn() ? auth.user() : {};
 }
 
+export function isModerated() {
+    return isLoggedIn() ? store.getters.isModerated : true;
+}
+
 export function userId() {
     return getUser().id || -1;
-};
+}
 
 export function getUsers() {
     const fallback = [];
@@ -413,10 +593,10 @@ export function getUsers() {
     } else {
         return fallback;
     }
-};
+}
 
 // where can be any of 'start', 'end', 'whole' (default)
-export function filterUsers(term, ci=true, where='whole') {
+export function filterUsers(term, ci = true, where = 'whole') {
     const flags = ci ? 'i' : '';
     let pattern = term;
     if(where == 'start') {
@@ -428,7 +608,7 @@ export function filterUsers(term, ci=true, where='whole') {
     return getUsers().filter(u => {
         return regex.test(u.name) || regex.test(u.nickname);
     });
-};
+}
 
 export function getRoles(withPermissions = false) {
     const fallback = [];
@@ -437,7 +617,7 @@ export function getRoles(withPermissions = false) {
     } else {
         return fallback;
     }
-};
+}
 
 export function getUserBy(value, attr = 'id') {
     if(!value) return null;
@@ -453,7 +633,7 @@ export function getUserBy(value, attr = 'id') {
     } else {
         return null;
     }
-};
+}
 
 export function getRoleBy(value, attr = 'id', withPermissions = false) {
     if(isLoggedIn()) {
@@ -463,10 +643,10 @@ export function getRoleBy(value, attr = 'id', withPermissions = false) {
     } else {
         return null;
     }
-};
+}
 
 export function throwError(error) {
-    if (error.response) {
+    if(error.response) {
         const r = error.response;
         const req = {
             status: r.status,
@@ -474,12 +654,12 @@ export function throwError(error) {
             method: r.config.method.toUpperCase()
         };
         showErrorModal(r.data, r.headers, req);
-    } else if (error.request) {
+    } else if(error.request) {
         showErrorModal(error.request);
     } else {
         showErrorModal(error.message || error);
     }
-};
+}
 
 export function simpleResourceType(resource) {
     switch(resource) {
@@ -493,41 +673,41 @@ export function simpleResourceType(resource) {
         default:
             return resource;
     }
-};
+}
 
 export function findInList(list, searchValue, searchKey = 'id', recKey = 'children') {
     if(!list || list.length == 0) return;
 
-    for(let i=0; i<list.length; i++) {
+    for(let i = 0; i < list.length; i++) {
         if(list[i][searchKey] == searchValue) {
             return list[i];
         }
         const gotIt = findInList(list[i][recKey], searchValue, searchKey, recKey);
         if(gotIt) return gotIt;
     }
-};
+}
 
 export function only(object, allows = []) {
     return Object.keys(object)
         .filter(key => allows.includes(key))
         .reduce((obj, key) => {
             return {
-            ...obj,
-            [key]: object[key]
+                ...obj,
+                [key]: object[key]
             };
         }, {});
-};
+}
 
 export function except(object, excepts = []) {
     return Object.keys(object)
         .filter(key => !excepts.includes(key))
         .reduce((obj, key) => {
             return {
-            ...obj,
-            [key]: object[key]
+                ...obj,
+                [key]: object[key]
             };
         }, {});
-};
+}
 
 export function getElementAttribute(el, attribute, defaultValue, type = 'string') {
     let value = el.getAttribute(attribute);
@@ -543,12 +723,12 @@ export function getElementAttribute(el, attribute, defaultValue, type = 'string'
 
 export function isArray(arr) {
     return Array.isArray(arr);
-};
+}
 
-export const _cloneDeep = require('lodash/cloneDeep');
-export const _debounce = require('lodash/debounce');
-export const _throttle = require('lodash/throttle');
-export const _orderBy = require('lodash/orderBy');
+export { default as _cloneDeep } from 'lodash/cloneDeep';
+export { default as _debounce } from 'lodash/debounce';
+export { default as _throttle } from 'lodash/throttle';
+export { default as _orderBy } from 'lodash/orderBy';
 
 export function showErrorModal(errorMsg, headers, request) {
     showError({
@@ -556,12 +736,12 @@ export function showErrorModal(errorMsg, headers, request) {
         headers: headers,
         request: request,
     });
-};
+}
 
 export function getValidClass(msgObject, field) {
     let isInvalid = false;
     field.split('|').forEach(f => {
-        if (!!msgObject[f]) {
+        if(!!msgObject[f]) {
             isInvalid = true;
         }
     });
@@ -570,37 +750,37 @@ export function getValidClass(msgObject, field) {
         // 'is-valid': !msgObject[field],
         'is-invalid': isInvalid
     };
-};
+}
 
 export function getClassByValidation(errorList) {
     return {
         // 'is-valid': !msgObject[field],
         'is-invalid': !!errorList && errorList.length > 0,
     };
-};
+}
 
 export function createAnchorFromUrl(url) {
     if(!url) return url;
     if(typeof url != 'string' || !url.replace) return url;
     const urlRegex = /(\b(https?):\/\/[-A-Z0-9+#&=?@%_.]*[-A-Z0-9+#&=?@%_\/])/ig;
     return url.replace(urlRegex, match => `<a href="${match}" target="_blank">${match}</a>`);
-};
+}
 
 export function hasPreference(prefKey, prop) {
     const ps = store.getters.preferenceByKey(prefKey);
-    if (ps) {
+    if(ps) {
         return ps[prop] || ps;
     }
-};
+}
 
 export function getPreference(prefKey) {
     return store.getters.preferenceByKey(prefKey);
-};
+}
 
 export function getProjectName(slug = false) {
     const name = getPreference('prefs.project-name');
     return slug ? slugify(name) : name;
-};
+}
 
 export function slugify(s, delimiter = '-') {
     var char_map = {
@@ -671,7 +851,7 @@ export function slugify(s, delimiter = '-') {
     };
 
     // Transliterate characters to ASCII
-    for (var k in char_map) {
+    for(var k in char_map) {
         s = s.replace(RegExp(k, 'g'), char_map[k]);
     }
 
@@ -690,7 +870,7 @@ export function slugify(s, delimiter = '-') {
 
 export function hash(str) {
     let hash = 0;
-    for(let i=0; i<str.length; i++) {
+    for(let i = 0; i < str.length; i++) {
         hash = ((hash << 5) - hash) + str.charCodeAt(i);
         hash |= 0;
     }
@@ -739,29 +919,29 @@ export function getNotificationSourceLink(notification) {
             }
         };
     }
-};
+}
 
 export function userNotifications() {
     return getUser().notifications || [];
-};
+}
 
 export async function asyncFor(arr, callback) {
-    for(let i=0; i<arr.length; i++) {
+    for(let i = 0; i < arr.length; i++) {
         await callback(arr[i]);
     }
-};
+}
 
 export function createDownloadLink(content, filename, base64 = false, contentType = 'text/plain') {
-    var link = document.createElement("a");
+    var link = document.createElement('a');
     let url;
     if(base64) {
         url = `data:${contentType};base64,${content}`;
     } else {
         url = window.URL.createObjectURL(new Blob([content]));
     }
-    link.setAttribute("href", url);
-    link.setAttribute("type", contentType);
-    link.setAttribute("download", filename);
+    link.setAttribute('href', url);
+    link.setAttribute('type', contentType);
+    link.setAttribute('download', filename);
     document.body.appendChild(link);
     link.click();
 }
@@ -774,13 +954,13 @@ export function copyToClipboard(elemId) {
     selection.removeAllRanges();
     selection.addRange(range);
     try {
-        document.execCommand("copy");
+        document.execCommand('copy');
         selection.removeAllRanges();
     } catch(err) {
         console.log(err);
     }
-};
+}
 
-export function setPreference(prefKey, value) {
-    this.state.preferences[prefKey] = value;
+export function sortConcepts(ca, cb) {
+    return translateConcept(ca.concept_url).localeCompare(translateConcept(cb.concept_url));
 }

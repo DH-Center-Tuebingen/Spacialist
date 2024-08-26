@@ -7,13 +7,14 @@
         "reactivate": "Reaktivieren",
         "remove": "Entfernen",
         "reset": "Zurücksetzen",
-        "send_reset_mail": "E-Mail zum Zurücksetzen des Passworts senden",
+        "reset_password": "Passwort zurücksetzen",
         "cancel": "Abbrechen",
         "close": "Schließen",
         "add": "Hinzufügen",
-        "edit": "Editieren",
-        "edited": "editiert",
+        "edit": "Bearbeiten",
+        "edited": "bearbeitet",
         "duplicate": "Duplizieren",
+        "sort": "Sortieren",
         "resort": "Umsortieren",
         "update": "Aktualisieren",
         "replace": "Ersetzen",
@@ -23,6 +24,7 @@
         "create": "Anlegen",
         "move": "Verschieben",
         "parse": "Parsen",
+        "conflict": "Konflikt",
         "file": "Datei",
         "remove_file": "Datei entfernen",
         "no_file": "Keine Datei vorhanden",
@@ -30,7 +32,8 @@
             "nr_of_entries": "Keine Einträge | 1 Eintrag | {cnt} Einträge",
             "no_entries": "Keine Einträge gefunden.",
             "fetch_next_entries": "Weitere Einträge laden",
-            "no_more_entries": "Keine weiteren Einträge"
+            "no_more_entries": "Keine weiteren Einträge",
+            "stats": "Zeige {from}-{to} von {total}"
         },
         "select_all": "Alle auswählen",
         "select_none": "Alle abwählen",
@@ -60,20 +63,21 @@
         "has_links": "Hat keine Verknüpfungen | Hat eine Verknüpfung | Hat {cnt} Verknüpfungen",
         "discard": {
             "title": "Ungespeicherte Änderungen",
+            "changes": "Änderungen verwerfen",
             "msg": "Es gibt ungespeicherte Änderungen auf der aktuellen Seite. Willst du wirklich fortfahren und die Änderungen verwerfen?",
             "confirm": "Ja, Änderungen verwerfen",
             "confirm_and_save": "Nein, Speichern und fortfahren"
         },
         "error": {
-            "alert_title": "Fehlermeldung:",
+            "alert_title": "Fehlermeldung",
             "info_issue": "Wenn du denkst, dass diese Fehlermeldung ein Bug ist, schaue in unserem <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues\" target=\"_blank\">Bugtracker</a> auf Github nach, ob der Fehler schon gemeldet wurde oder sogar bereits in einer aktuelleren Version <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues?q=is:issue+is:closed\" target=\"_blank\">geschlossen</a> wurde (Deine aktuelle Version findest du über Einstellungen > <i class=\"fas fa-fw fa-info-circle\"></i> Über). Wenn es weder gemeldet, noch geschlossen ist, kannst du gerne einen <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues/new\" target=\"_blank\">neuen Bug</a> melden.",
             "occur": "Fehler aufgetreten",
             "headers": "Kopfzeilen",
-            "request_failed": "<code class=\"normal\">{method}</code>-Anfrage an den Endpunkt <code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code> ist mit Statuscode <span class=\"fw-medium\">{status}</span> fehlgeschlagen."
+            "request_failed": "<code class=\"fw-normal\">{method}</code>-Anfrage an den Endpunkt <code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code> ist mit Statuscode <span class=\"fw-medium\">{status}</span> fehlgeschlagen."
         },
         "search": "Suche…",
         "search_no_results": "Keine Suchergebnisse",
-        "search_no_results_for": "Keine Ergebnisse für den Begriff <span class=\"fst-italic fw-bold\">{term}</span>",
+        "search_no_results_for": "Keine Ergebnisse für den Begriff:",
         "search_no_term_info": "Gib einen Suchbegriff ein",
         "search_no_term_info_global": "Gib einen Suchbegriff ein um das gesamte System zu durchsuchen",
         "login": "Einloggen",
@@ -98,6 +102,11 @@
                 "stop": "Aufnahme beenden"
             }
         },
+        "paginator": {
+            "count": "Anzahl",
+            "of": "von",
+            "skip": "Ab"
+        },
         "settings": {
             "title": "Einstellungen",
             "users": "Benutzerverwaltung",
@@ -107,6 +116,9 @@
             "system": "System-Einstellungen",
             "about": "Über"
         },
+        "missing": {
+            "content": "Kein Inhalt vorhanden."
+        },
         "user": {
             "settings": "Einstellungen",
             "profile": "Profil",
@@ -115,6 +127,11 @@
             "personal_info_title": "Persönliche Informationen",
             "member_since": "Mitglied seit",
             "deactivated_since": "<span class=\"fw-bold\">Deaktiviert</span> seit {dt}",
+            "role": "Rolle",
+            "field": "Fachgebiet",
+            "institution": "Einrichtung",
+            "department": "Abteilung",
+            "not_assigned": "Nicht angegeben",
             "contact": "Kontakt",
             "avatar": "Avatar",
             "invalid_orcid": "Die eigegebene ORCID ist ungültig"
@@ -128,6 +145,7 @@
         "attributes": {
             "string": "Textfeld",
             "stringf": "Textbox",
+            "richtext": "Rich-Text",
             "string-sc": "Einfachauswahl-Dropdown",
             "string-mc": "Mehrfachauswahl-Dropdown",
             "double": "Gleitkommazahl",
@@ -136,9 +154,12 @@
             "percentage": "Prozentangabe",
             "entity": "Entität",
             "entity-mc": "Entität (Mehrfachauswahl)",
+            "userlist": "Benutzerliste",
+            "url": "URL/Webseite",
             "epoch": "Zeitspanne & Epoche",
             "timeperiod": "Zeitspanne",
             "date": "Datum",
+            "daterange": "Datumsspanne",
             "dimension": "Abmessungen (BxHxT)",
             "list": "Liste",
             "geography": "WKT (Well-Known-Binary)",
@@ -146,10 +167,138 @@
             "sql": "SQL-Abfrage",
             "system-separator": "Gruppen-Trenner",
             "serial": "Fortlaufende ID",
-            "serial_info": "<i class=\"fas fa-lightbulb me-1\"></i><br />Alle Instanzen teilen diesen Identifier als Attribut. Benutze <code class=\"normal\">%d</code> als Zähler.<br /><span class=\"fw-medium mt-2\">Beispiel:</span><br /><code class=\"normal\">Fund_%d_Stein</code> würde zu Fund_1_Stein, Fund_2_Stein, &hellip; führen.<br />Um eine feste Breite (z.B. 3 für 002 anstatt 2) zu erzwingen, benutze <code class=\"normal\">%03d</code>.",
-            "sql_info": "Du kannst mit <code class=\"normal\">:entity_id</code> in deiner SQL-Abfrage auf die Entität referenzieren, dem dieses Attribut zugewiesen ist.",
+            "serial_info": "<i class=\"fas fa-lightbulb me-1\"></i><br />Alle Instanzen teilen diesen Identifier als Attribut. Benutze <code class=\"fw-normal\">%d</code> als Zähler.<br /><span class=\"fw-medium mt-2\">Beispiel:</span><br /><code class=\"fw-normal\">Fund_%d_Stein</code> würde zu Fund_1_Stein, Fund_2_Stein, &hellip; führen.<br />Um eine feste Breite (z.B. 3 für 002 anstatt 2) zu erzwingen, benutze <code class=\"fw-normal\">%03d</code>.",
+            "sql_info": "Du kannst mit <code class=\"fw-normal\">:entity_id</code> in deiner SQL-Abfrage auf die Entität referenzieren, dem dieses Attribut zugewiesen ist.",
             "iconclass": "Iconclass",
-            "rism": "RISM"
+            "rism": "RISM",
+            "si-unit": "SI-Einheit",
+            "si_units": {
+                "unit_type": "Einheit",
+                "base_unit": "Basisgröße",
+                "time": {
+                    "label": "Zeit",
+                    "units": {
+                        "second": "Sekunden",
+                        "minute": "Minuten",
+                        "hour": "Stunden",
+                        "day": "Tage",
+                        "year": "Jahre"
+                    }
+                },
+                "length": {
+                    "label": "Länge",
+                    "units": {
+                        "nanometre": "Nanometer",
+                        "micrometre": "Mikrometer",
+                        "millimetre": "Millimeter",
+                        "centimetre": "Zentimeter",
+                        "decimetre": "Dezimeter",
+                        "metre": "Meter",
+                        "decametre": "Dekameter",
+                        "hectometre": "Hektometer",
+                        "kilometre": "Kilometer",
+                        "inch": "Zoll",
+                        "feet": "Fuß",
+                        "yard": "Yards",
+                        "mile": "Meilen"
+                    }
+                },
+                "area": {
+                    "label": "Fläche",
+                    "units": {
+                        "square_centimetre": "Quadratzentimeter",
+                        "square_metre": "Quadratmeter",
+                        "square_kilometre": "Quadratkilometer",
+                        "square_inch": "Quadratzoll",
+                        "square_feet": "Quadratfuß",
+                        "square_yard": "Quadratyard",
+                        "acre": "Acre",
+                        "square_mile": "Quadratmeile"
+                    }
+                },
+                "volume": {
+                    "label": "Volumen",
+                    "units": {
+                        "millilitre": "Milliliter",
+                        "litre": "Liter",
+                        "cubic_centimetre": "Kubikzentimeter",
+                        "cubic_decimetre": "Liter | Kubikdezimeter",
+                        "cubic_metre": "Kubikmeter",
+                        "cubic_kilometre": "Kubikkilometer",
+                        "fluid_ounce_us": "Flüssigunze (US)",
+                        "pint_us": "Pinte (US)",
+                        "cup_us": "Tasse (US)",
+                        "gallon_us": "Gallone (US)",
+                        "cubic_mile": "Kubikmeile"
+                    }
+                },
+                "mass": {
+                    "label": "Gewicht",
+                    "units": {
+                        "gram": "Gramm",
+                        "kilogram": "Kilogramm",
+                        "ton": "Tonnen",
+                        "ounce": "Unze",
+                        "pound": "Britisches Pfund"
+                    }
+                },
+                "force": {
+                    "label": "Kraft",
+                    "units": {
+                        "newton": "Newton",
+                        "kilonewton": "Kilonewton"
+                    }
+                },
+                "temperature": {
+                    "label": "Temperatur",
+                    "units": {
+                        "celsius": "Celsius",
+                        "kelvin": "Kelvin",
+                        "fahrenheit": "Fahrenheit",
+                        "réaumur": "Réaumur"
+                    }
+                },
+                "volumetric_flow": {
+                    "label": "Volumenstrom",
+                    "units": {
+                        "cubic_metre_per_second": "Kubikmeter pro Sekunde",
+                        "litre_per_second": "Liter pro Sekunde"
+                    }
+                },
+                "speed": {
+                    "label": "Geschwindigkeit",
+                    "units": {
+                        "metre_per_second": "Meter pro Sekunde",
+                        "kilometre_per_hour": "Kilometer pro Stunde",
+                        "mile_per_hour": "Meilen pro Stunde"
+                    }
+                },
+                "pressure": {
+                    "label": "Druck",
+                    "units": {
+                        "pascal": "Pascal",
+                        "kilopascal": "Kilopascal",
+                        "hectopascal": "Hectopascal",
+                        "bar": "Bar",
+                        "decibar": "Decibar",
+                        "millibar": "Millibar",
+                        "torr": "Torr",
+                        "technical_atmosphere": "Technische Atmosphäre",
+                        "standard_atmosphere": "Physikalische Atmosphäre",
+                        "pound_per_square_inch": "Pfund pro Quadratzoll"
+                    }
+                },
+                "quotient": {
+                    "label": "Quotient",
+                    "units": {
+                        "percent": "Prozent",
+                        "parts_per_million": "Parts per million"
+                    }
+                }
+            },
+            "restrictions": {
+                "entity_type": "Auf folgende Entitätstypen beschränken"
+            }
         },
         "activity": "Aktivitäten",
         "action": "Aktion",
@@ -180,6 +329,9 @@
         "confirm_password": "Passwort wiederholen",
         "remember_me": "Eingeloggt bleiben",
         "orcid": "ORCID",
+        "licence": "Lizenz",
+        "licence_default": "Standard-Lizenz",
+        "licence_missing": "Lizenz-Angabe fehlt",
         "description": "Beschreibung",
         "roles": "Rollen",
         "permissions": "Berechtigungen",
@@ -189,6 +341,9 @@
         "deactivated_at": "Deaktiviert",
         "timestamp": "Zeitstempel",
         "options": "Optionen",
+        "summary": "Zusammenfassung",
+        "creator": "Ersteller",
+        "editors": "Bearbeiter",
         "reply_to": "Antworten",
         "replying_to": "Antwort an {name}",
         "type": "Typ",
@@ -201,11 +356,15 @@
         "column": "Spalte | Spalten",
         "add_column": "Spalte hinzufügen",
         "geometry_type": "Geometrietyp",
-        "dependency": "Abhängigkeiten",
-        "depends_on": "Hängt ab von",
+        "dependency": {
+            "title": "Abhängigkeiten",
+            "depends_on": {
+                "title": "Hängt ab von",
+                "desc": "Sichtbarkeit hängt von einem anderen Attribut(wert) ab"
+            }
+        },
         "preference": "Einstellung | Einstellungen",
         "value": "Wert",
-        "allow_override": "Überschreibbar?",
         "tag": "Schlagwort | Schlagworte",
         "set": "Setzen",
         "has_tags": "Hat keine Schlagworte | Hat ein Schlagwort | Hat {cnt} Schlagworte",
@@ -215,10 +374,10 @@
             "empty_list": "Bisher keine Kommentare hinzugefügt.",
             "hide": "Kommentare ausblenden",
             "show": "Kommentare anzeigen",
-            "submit": "Kommtentar abschicken",
+            "submit": "Kommentar abschicken",
             "text_placeholder": "Kommentar eingeben",
-            "hide_reply": "<span class=\"fw-bold\">Eine</span> Antwort ausblenden | <span class=\"fw-bold\">{cnt}</span> Antworten ausblenden",
-            "show_reply": "<span class=\"fw-bold\">Eine</span> Antwort anzeigen | <span class=\"fw-bold\">{cnt}</span> Antworten anzeigen",
+            "hide_reply": "Eine Antwort ausblenden | {cnt} Antworten ausblenden",
+            "show_reply": "Eine Antwort anzeigen | {cnt} Antworten anzeigen",
             "fetching": "Lade Kommentare&hellip;",
             "fetching_failed": "Laden der Kommentare fehlgeschlagen!",
             "retry_failed": "Wiederholen"
@@ -255,7 +414,8 @@
             }
         },
         "markdown_editor": {
-            "title": "Markdown-Editor"
+            "title": "Markdown-Editor",
+            "edit": "Als Markdown bearbeiten"
         }
     },
     "main": {
@@ -285,12 +445,14 @@
         "csv": {
             "uploader": {
                 "title": "CSV-Uploader",
+                "settings_title": "CSV-Einstellungen",
                 "delimiter": "Trennzeichen",
                 "delimiter_with_info": "Trennzeichen (',', ';', …)",
-                "has_header": "Hat eine Kopfzeile?",
+                "has_header": "Kopfzeile",
                 "show_linenumbers": "Zeilennummern anzeigen",
                 "nr_of_shown_rows": "Anzahl der angezeigten Zeilen",
-                "nr_of_skipped_rows": "Anzahl der übersprungenen Zeilen"
+                "nr_of_skipped_rows": "Anzahl der übersprungenen Zeilen",
+                "eof": "Ende der Datei"
             },
             "picker": {
                 "title": "CSV-Auswahl"
@@ -298,12 +460,17 @@
         },
         "entity": {
             "title": "Entität | Entitäten",
+            "top_level": "Top-Level-Entität",
             "count": "Keine Top-Level Entitäten | Eine Top-Level Entität | {cnt} Top-Level Entitäten",
             "detail_tab_none_selected": "Keine Entität ausgewählt. Wähle aus dem Baum eine Entität aus um hier Details dazu zu erhalten.",
             "toasts": {
                 "updated": {
                     "title": "Entität aktualisiert",
-                    "msg": "Daten von {name} wurden erfolgreich aktualisiert."
+                    "msg": "Daten von „{name}“ wurden erfolgreich aktualisiert."
+                },
+                "updated_metadata": {
+                    "title": "Metadaten aktualisiert",
+                    "msg": "Metadaten von {name} wurden erfolgreich aktualisiert."
                 },
                 "deleted": {
                     "title": "Entität gelöscht",
@@ -331,11 +498,22 @@
                         "children": "Anzahl Unter-Entitäten - Absteigend",
                         "type": "Entitätstyp - Absteigend"
                     }
+                },
+                "multiedit": {
+                    "title": "Mehrfachauswahl umschalten",
+                    "open": "Mehrfach-Bearbeitungs-Werkzeug öffnen",
+                    "toast": {
+                        "saved": {
+                            "title": "Mehrfach-Bearbeitung erfolgreich",
+                            "msg": "Die Werte von {attr_cnt} Attributen in {ent_cnt} Entitäten erfolgreich bearbeitet."
+                        }
+                    }
                 }
             },
             "tabs": {
                 "default": "Allgemein",
                 "comments": "Kommentare",
+                "metadata": "Metadaten",
                 "untitled_group": "Unbenannt ({cnt})"
             },
             "modals": {
@@ -349,6 +527,9 @@
                 "edit": {
                     "title_type": "Entitätstyp editieren - {name}",
                     "title_attribute": "Attribut editieren - {name}"
+                },
+                "multiedit": {
+                    "title": "Mehrfach-Attribut-Bearbeitung"
                 },
                 "delete": {
                     "alert": "Wenn du <span class=\"fw-bold\">{name}</span> löschst, wird mindestens eine Entität ebenfalls gelöscht. | Wenn du <span class=\"fw-bold\">{name}</span> löschst, werden mindestens {cnt} Entitäten ebenfalls gelöscht."
@@ -382,6 +563,7 @@
                 "entity": {
                     "go_to": "Springe zu {name}"
                 },
+                "root_attribute_info": "Die verfügbaren Werte dieses Attributes werden vom Attribut „{name}“ bestimmt.",
                 "iconclass": {
                     "cite_info": "Infos von <cite title=\"Iconclass\"><a href=\"http://iconclass.org/{class}.json\" target=\"_blank\">http://iconclass.org/{class}.json</a></cite>",
                     "doesnt_exist": "Diese Iconclass existiert nicht"
@@ -391,13 +573,37 @@
                     "doesnt_exist": "Dieser RSIM-Eintrag existiert nicht"
                 },
                 "table": {
+                    "add_row": "Neue Zeile hinzufügen",
+                    "error": {
+                        "deleted_entity": "Gelöschte Entität"
+                    },
                     "chart": {
                         "number_sets": "Die letzten {cnt} Datensätze",
                         "include_in": "Verwenden",
                         "use_difference": "Differenz verwenden",
                         "use_as_label": "Als Beschriftung verwenden"
                     }
+                },
+                "moderation": {
+                    "locked_state_info": "Dieses Attribute ist gesperrt, da die Änderungen moderiert werden müssen und noch nicht von einem berechtigten Benutzer angenommen oder abgelehnt wurden.",
+                    "view_modified_data": "Geänderte Daten anzeigen",
+                    "view_original_data": "Originaldaten anzeigen",
+                    "accept_changes": "Änderungen annehmen",
+                    "deny_changes": "Änderungen ablehnen",
+                    "deleted_by": "<i class=\"fas fa-fw fa-trash\"></i> gelöscht {ts}",
+                    "modified_by": "<i class=\"fas fa-fw fa-edit\"></i> geändert {ts}",
+                    "edit_moderated_value": {
+                        "title": "Änderung bearbeiten",
+                        "accept": "Bearbeitete Änderung annehmen",
+                        "enable": "Bearbeitungsmodus aktivieren",
+                        "reset": "Bearbeitete Änderung zurücksetzen",
+                        "cancel": "Bearbeitung verwerfen"
+                    }
                 }
+            },
+            "metadata": {
+                "save": "Metadaten speichern",
+                "deleted_entity_name": "Gelöschte Entität #{id}"
             }
         },
         "user": {
@@ -409,11 +615,22 @@
                 "updated": {
                     "title": "Benutzer aktualisiert",
                     "msg": "{name} wurde erfolgreich aktualisiert."
+                },
+                "reset_password": {
+                    "title": "Passwort aktualisiert",
+                    "message": "Passwort für Benutzer {name} ({nickname}) wurde erfolgreich aktualisiert."
                 }
             },
             "modal": {
                 "new": {
                     "title": "Neuer Benutzer"
+                },
+                "reset_password": {
+                    "title": "Passwort zurücksetzen"
+                },
+                "confirm_password": {
+                    "title": "Passwort bestätigen",
+                    "message": "Dein Passwort wurde geändert. Du musst entweder dieses neue Passwort akzeptieren oder selbst ein neues vergeben. Dafür hast du nur noch einen weiteren Login übrig! | Dein Passwort wurde geändert. Du musst entweder dieses neue Passwort akzeptieren oder selbst ein neues vergeben. Dafür hast du noch {attempts} weitere Logins übrig."
                 }
             },
             "add_role_placeholder": "Rollen hinzufügen"
@@ -443,6 +660,9 @@
                     "preferences": "Einstellungen",
                     "thesaurus": "Thesaurus",
                     "is_plugin": "Erweiterung"
+                },
+                "moderation": {
+                    "required": "Moderation notwendig"
                 }
             },
             "preset": {
@@ -537,12 +757,21 @@
             },
             "info": {
                 "set_to_language": "Auf <span class=\"fw-bold\">{lang}</span> stellen",
-                "password_reset_link": "Damit diese Funktion genutzt werden kann, müssen die <code>MAIL_*</code>-Werte in der <code>.env</code>-Datei gesetzt sein. <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/blob/master/INSTALL.md#send-mails\" target=\"_blank\">Weitere Informationen</a>.",
                 "columns": "Die Summe der Werte der Spalten darf 12 nicht überschreiten."
+            },
+            "categories": {
+                "user": "Benutzer-Einstellungen",
+                "system": "System-Einstellungen",
+                "sub": {
+                    "general": "Allgemein",
+                    "layout": "Layout",
+                    "interface": "Benutzer-Interface"
+                },
+                "is_empty": "Keine Einstellungen in dieser Kategorie"
             },
             "key": {
                 "language": "Sprache",
-                "password_reset_link": "Passwort per Link zurücksetzen",
+                "password_reset": "Passwort zurücksetzen erlauben",
                 "color": {
                     "title": "Design",
                     "style": {
@@ -599,16 +828,34 @@
                 "time": "Datum der Veröffentlichung",
                 "full_name": "Vollständiger Name"
             },
-            "build_info": "Mit <i class=\"fab fa-fw fa-laravel\"></i> & <i class=\"fab fa-fw fa-vuejs\"></i> erstellt!",
+            "build_info": "Erstellt mit <i class=\"fab fa-fw fa-laravel\"></i> & <i class=\"fab fa-fw fa-vuejs\"></i>!",
             "contributor": "Mitwirkender | Mitwirkende",
+            "former_contributor": "Ehemaliger | Ehemalige",
             "roles": {
                 "development": "Entwicklung",
                 "development_lead": "Entwicklungsleiter",
+                "support": "Allgemeine Unterstützung",
                 "support_development": "Entwicklungsunterstützung",
                 "support_database": "Datenbankunterstützung",
                 "support_archaeology": "Archäologische Unterstützung",
-                "project_lead": "Projektleitung",
-                "project_lead_former": "Ehemalige Projektleitung"
+                "project_lead": "Projektleitung"
+            }
+        },
+        "history": {
+            "title": "Verlauf",
+            "created_as": "Erstellt als:",
+            "no_value": "Kein Wert aufgezeichnet",
+            "entity": {
+                "created_in": "Als Unter-Entität von:",
+                "name_update": "Name aktualisiert:",
+                "name_unknown": "Unbekannte Entität",
+                "name_unknown_info": "Das bedeutet, dass die Entität entweder gelöscht wurde oder du nicht die nötigen Berechtigungen besitzt.",
+                "value_add_attribute": "Wert zu Attribut hinzugefügt:",
+                "value_update_attribute": "Wert von Attribut geändert:",
+                "certainty_update": "Sicherheit aktualisiert:",
+                "certainty_unknown": "Unbekannt",
+                "moved": "Verschoben:",
+                "rank": "Rang"
             }
         },
         "bibliography": {
@@ -647,6 +894,7 @@
             "add": "Neuen Literatur-Eintrag anlegen",
             "import": "BibTeX-Datei importieren",
             "export": "BibTeX-Datei exportieren",
+            "export_search": "Suchtreffer als BibTeX-Datei exportieren",
             "show_all_fields": "Alle Felder anzeigen",
             "column": {
                 "citekey": "Zitations-Schlüssel",
@@ -692,23 +940,55 @@
                 "techreport": "Bericht einer Hochschule oder anderen Institution",
                 "unpublished": "Nicht veröffentlicht",
                 "validation": {
-                    "required": "@:main.bibliography.column.{col} ist ein Pflichtfeld",
-                    "required_one_of": "Entweder @:main.bibliography.column.{col} oder @:main.bibliography.column.{ref} muss gesetzt sein"
+                    "required": "„{field}“ ist ein Pflichtfeld",
+                    "required_if": "Pflichtfeld, falls „{col}“ nicht angegeben ist",
+                    "required_one_of": "Entweder „{eitherField}“ oder „{orField}“ muss angegeben sein"
                 }
             }
         },
         "importer": {
             "title": "Daten-Importer",
+            "entity_settings": "Entitätseinstellungen",
+            "attribute_mapping": "Attribut-Zuordnung",
+            "import_settings": "Import-Einstellungen",
             "upload_csv_info": "Wähle eine CSV-Datei aus um Daten zum importieren.",
             "drop_csv_file": "CSV-Datei hier ablegen",
             "selected_entity_type": "Entitätstyp",
             "column_entity_name": "Entitätsname-Spalte",
             "column_entity_parent": "Übergeordnete Entität-Spalte",
             "import_btn": "Starte Datenimport",
-            "no_missing_values": "Keine fehlenden Werte. Du kannst loslegen!",
-            "missing_required_values": "{miss} von 1 Eintrag ist leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das. | {miss} von {total} Einträgen sind leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das.",
-            "missing_non_required_values": "{miss} von 1 Eintrag ist leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen. | {miss} von {total} Einträgen sind leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen.",
-            "success": "Import von 1 Eintrag abgeschlossen | Import von {cnt} Einträgen abgeschlossen"
+            "validate": "Validieren",
+            "success": "Import von 1 Eintrag abgeschlossen | Import von {cnt} Einträgen abgeschlossen",
+            "validation": {
+                "title": "Validierung",
+                "waiting": "Validierung ausstehend",
+                "mixed": "Einige Entitäten existieren bereits und werden aktualisieren, die anderen werden neu erzeugt!",
+                "create": "Keine Überschneidung, alle Entitäten werden neu erzeugt!",
+                "update": "Alle Entitäten existieren bereits und werden aktualisiert!",
+                "imported": "Alle Daten wurden erfolgreich importiert!",
+                "multiple_error": "Manche Pfade existieren mehrfach, daher kann der Import nicht ausgeführt werden!",
+                "no_items": "Es gibt keine Werte zum importieren!"
+            },
+            "indicator": {
+                "missing_value": "Kein Wert gesetzt",
+                "no_missing_values": "Keine fehlenden Werte. Du kannst loslegen!",
+                "missing_required_values": "{miss} von 1 Eintrag ist leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das. | {miss} von {total} Einträgen sind leer! Diese Option erlaubt keine leeren Einträge. Bitte ändere das.",
+                "missing_non_required_values": "{miss} von 1 Eintrag ist leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen. | {miss} von {total} Einträgen sind leer! Ausgefüllte Einträge sind für diese Option nicht notwendig, aber du möchtest sie vielleicht nochmal überprüfen."
+            },
+            "info": {
+                "entity_settings_require_file": "Noch keine Datei hochgeladen",
+                "entity_type_has_no_attributes": "Keine Attribute vorhanden. Bitte wählen Sie einen passenden Entitätstyp aus."
+            },
+            "error": {
+                "file_read": "Datei konnte nicht gelesen werden.",
+                "file_read_abort": "Datei-Lesevorgang abgebrochen."
+            },
+            "modal": {
+                "error": {
+                    "msg_detail": "Fehler beim Importieren des Eintrags in Zeile {count} (<span class='fst-italic'>{name}</span>) in Spalte <span class='fw-bold'>{col_name}</span> (#{index}) mit Datentyp <span class='fst-italic'>{datatype}</span> und dem fehlerhaften Wert <span class='fw-bold'>{value}</span>",
+                    "msg": "Fehler beim Importieren des Eintrags in Zeile {count} (<span class='fst-italic'>{name}</span>): <span class='fw-bold'>{value}</span>"
+                }
+            }
         },
         "map": {
             "init_error": "Mehrere init-*-Attribute gesetzt. Es darf nur eines gesetzt sein.",
@@ -746,5 +1026,9 @@
                 }
             }
         }
+    },
+    "keyboard": {
+        "tab": "Tab",
+        "space": "Leertaste"
     }
 }

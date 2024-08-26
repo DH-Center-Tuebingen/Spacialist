@@ -1,12 +1,39 @@
 <template>
-    <div class="alert" :class="state.classes" role="alert">
-        <div v-if="state.hasIcon" :class="state.iconWrapperClasses">
-            <i class="fas" :class="state.iconClasses"></i>
-            <span class="fw-medium">
+    <div
+        class="alert"
+        :class="state.classes"
+        role="alert"
+    >
+        <div
+            v-if="state.hasIcon"
+            :class="state.iconWrapperClasses"
+        >
+            <span v-show="type == 'success'">
+                <i class="fas fa-fw fa-check" />
+            </span>
+            <span v-show="type == 'note'">
+                <i class="fas fa-fw fa-lightbulb" />
+            </span>
+            <span v-show="type == 'info'">
+                <i class="fas fa-fw fa-info-circle" />
+            </span>
+            <span v-show="type == 'warning'">
+                <i class="fas fa-fw fa-exclamation-triangle" />
+            </span>
+            <span v-show="type == 'error'">
+                <i class="fas fa-fw fa-times" />
+            </span>
+            <span
+                v-if="icontext"
+                class="fw-medium ms-2"
+            >
                 {{ icontext }}
             </span>
         </div>
-        <div v-html="message"></div>
+        <!-- We disable the v-html as there is no user data that get's inserted into the alerts. -->
+        <!-- eslint-disable-next-line vue/no-v-html -->
+        <div v-html="message" />
+        <slot name="addon" />
     </div>
 </template>
 
@@ -36,6 +63,7 @@
             icontext: {
                 required: false,
                 type: String,
+                default: null
             }
         },
         setup(props, context) {
@@ -54,7 +82,7 @@
                     return !noicon.value && state.supportsIcon;
                 }),
                 hasIconText: computed(_ => {
-                    return state.hasIcon && (!!icontext && !!icontext.value);
+                    return state.hasIcon &&  !!icontext.value;
                 }),
                 supportsIcon: computed(_ => {
                     switch(type.value) {
@@ -104,31 +132,6 @@
 
                     return classes;
                 }),
-                iconClasses: computed(_ => {
-                    let classes = [];
-                    if(!state.hasIcon) return classes;
-                    switch(type.value) {
-                        case 'success':
-                            classes.push('fa-check');
-                            break;
-                        case 'note':
-                            classes.push('fa-lightbulb');
-                            break;
-                        case 'info':
-                            classes.push('fa-info-circle');
-                            break;
-                        case 'warning':
-                            classes.push('fa-exclamation-triangle');
-                            break;
-                        case 'error':
-                            classes.push('fa-times');
-                            break;
-                    }
-                    if(state.hasIconText) {
-                        classes.push('me-2');
-                    }
-                    return classes;
-                }),
                 iconWrapperClasses: computed(_ => {
                     let classes = [];
                     if(!state.hasIcon) return classes;
@@ -142,13 +145,10 @@
             // RETURN
             return {
                 // HELPERS
-                // PROPS
-                message,
-                icontext,
                 // LOCAL
                 // STATE
                 state,
-            }
+            };
         },
     }
 </script>

@@ -2,7 +2,8 @@
     <vue-final-modal
         class="modal-container modal"
         content-class="sp-modal-content sp-modal-content-sm"
-        name="edit-attribute-modal">
+        name="edit-attribute-modal"
+    >
         <div class="sp-modal-content sp-modal-content-sm">
             <div class="modal-header">
                 <h5 class="modal-title">
@@ -12,19 +13,29 @@
                         })
                     }}
                 </h5>
-                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-                </button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                />
             </div>
             <div class="modal-body nonscrollable">
                 <h5 class="text-center">
-                    {{ t('global.dependency') }}
+                    {{ t('global.dependency.title') }}
                 </h5>
                 <div class="mb-3 row">
                     <label class="col-form-label text-end col-md-2">
                         {{ t('global.label') }}:
                     </label>
                     <div class="col-md-10">
-                        <input type="text" class="form-control" :value="translateConcept(state.attribute.thesaurus_url)" disabled />
+                        <input
+                            type="text"
+                            class="form-control"
+                            :value="translateConcept(state.attribute.thesaurus_url)"
+                            disabled
+                        >
                     </div>
                 </div>
                 <div class="mb-3 row">
@@ -32,30 +43,36 @@
                         {{ t('global.type') }}:
                     </label>
                     <div class="col-md-10">
-                        <input type="text" class="form-control" :value="t(`global.attributes.${state.attribute.datatype}`)" disabled />
+                        <input
+                            type="text"
+                            class="form-control"
+                            :value="t(`global.attributes.${state.attribute.datatype}`)"
+                            disabled
+                        >
                     </div>
                 </div>
                 <div class="mb-3 row">
                     <label class="col-form-label col-md-2">
-                        {{ t('global.depends_on') }}:
+                        {{ t('global.dependency.depends_on.title') }}:
                     </label>
                     <div class="col-md-10">
                         <multiselect
+                            v-model="state.dependency.attribute"
                             :classes="multiselectResetClasslist"
-                            :valueProp="'id'"
+                            :value-prop="'id'"
                             :label="'thesaurus_url'"
                             :track-by="'id'"
                             :object="true"
                             :mode="'single'"
-                            :hideSelected="true"
+                            :hide-selected="true"
                             :options="state.selection"
                             :placeholder="t('global.select.placeholder')"
-                            v-model="state.dependency.attribute"
-                            @change="dependantSelected">
-                            <template v-slot:option="{ option }">
+                            @change="dependantSelected"
+                        >
+                            <template #option="{ option }">
                                 {{ translateConcept(option.thesaurus_url) }}
                             </template>
-                            <template v-slot:singlelabel="{ value }">
+                            <template #singlelabel="{ value }">
                                 <div class="multiselect-single-label">
                                     {{ translateConcept(value.thesaurus_url) }}
                                 </div>
@@ -63,51 +80,72 @@
                         </multiselect>
                         <multiselect
                             v-if="state.attributeSelected"
+                            v-model="state.dependency.operator"
                             class="mt-2"
                             :classes="multiselectResetClasslist"
-                            :valueProp="'id'"
+                            :value-prop="'id'"
                             :label="'label'"
                             :track-by="'id'"
                             :mode="'single'"
                             :object="true"
-                            :hideSelected="true"
+                            :hide-selected="true"
                             :options="state.operatorList"
                             :placeholder="t('global.select.placeholder')"
-                            v-model="state.dependency.operator"
-                            @change="operatorSelected">
-                        </multiselect>
+                            @change="operatorSelected"
+                        />
                         <div
                             v-if="state.attributeSelected && state.operatorSelected"
-                            class="mt-2">
-                            <div class="form-check form-switch" v-if="state.inputType == 'boolean'">
-                                <input type="checkbox" class="form-check-input" id="dependency-boolean-value" v-model="state.dependency.value" />
+                            class="mt-2"
+                        >
+                            <div
+                                v-if="state.inputType == 'boolean'"
+                                class="form-check form-switch"
+                            >
+                                <input
+                                    id="dependency-boolean-value"
+                                    v-model="state.dependency.value"
+                                    type="checkbox"
+                                    class="form-check-input"
+                                >
                             </div>
-                            <input type="number" class="form-control" :step="state.dependency.attribute.datatype == 'double' ? 0.01 : 1" v-else-if="state.inputType == 'number'" v-model.number="state.dependency.value" />
+                            <input
+                                v-else-if="state.inputType == 'number'"
+                                v-model.number="state.dependency.value"
+                                type="number"
+                                class="form-control"
+                                :step="state.dependency.attribute.datatype == 'double' ? 0.01 : 1"
+                            >
                             <multiselect
                                 v-else-if="state.inputType == 'select'"
+                                v-model="state.dependency.value"
                                 :classes="multiselectResetClasslist"
-                                :valueProp="'id'"
+                                :value-prop="'id'"
                                 :label="'concept_url'"
                                 :track-by="'id'"
-                                :hideSelected="true"
+                                :hide-selected="true"
                                 :mode="'single'"
                                 :options="state.dependantOptions"
                                 :placeholder="t('global.select.placeholder')"
-                                v-model="state.dependency.value">
-                                <template v-slot:option="{ option }">
+                            >
+                                <template #option="{ option }">
                                     {{ translateConcept(option.concept_url) }}
                                 </template>
-                                <template v-slot:singlelabel="{ value }">
+                                <template #singlelabel="{ value }">
                                     <div class="multiselect-single-label">
                                         {{ translateConcept(value.concept_url) }}
                                     </div>
                                 </template>
                             </multiselect>
-                            <input type="text" class="form-control" v-else v-model="state.dependency.value" />
+                            <input
+                                v-else
+                                v-model="state.dependency.value"
+                                type="text"
+                                class="form-control"
+                            >
                         </div>
                     </div>
                 </div>
-                <hr/>
+                <hr>
                 <div class="row">
                     <h5 class="text-center">
                         {{ t('global.width') }}
@@ -116,15 +154,33 @@
                         <span>50%</span>
                         <span>100%</span>
                     </div>
-                    <input type="range" class="form-range px-3" id="attribute-width-slider" v-model.number="state.width" min="50" max="100" step="50" />
+                    <input
+                        id="attribute-width-slider"
+                        v-model.number="state.width"
+                        type="range"
+                        class="form-range px-3"
+                        min="50"
+                        max="100"
+                        step="50"
+                    >
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-outline-success" :disabled="!state.isValid" @click="confirmEdit()">
-                    <i class="fas fa-fw fa-save"></i> {{ t('global.update') }}
+                <button
+                    type="submit"
+                    class="btn btn-outline-success"
+                    :disabled="!state.isValid"
+                    @click="confirmEdit()"
+                >
+                    <i class="fas fa-fw fa-save" /> {{ t('global.update') }}
                 </button>
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                    <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                >
+                    <i class="fas fa-fw fa-times" /> {{ t('global.cancel') }}
                 </button>
             </div>
         </div>
@@ -140,7 +196,7 @@
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
-    import store from "@/bootstrap/store.js";
+    import store from '@/bootstrap/store.js';
 
     import {
         getAttribute,
@@ -203,7 +259,7 @@
                     (!oldDep.attribute && currDep.attribute)
                 ) {
                     data.dependency = state.dependency;
-                } else if(oldDep.attribute && currDep.dependency) {
+                } else if(oldDep.attribute && currDep.attribute) {
                     // or else check if dep is set, but has different values
                     if(
                         oldDep.attribute.id != currDep.attribute.id ||
@@ -236,6 +292,7 @@
                 switch(datatype) {
                         case 'string':
                         case 'stringf':
+                        case 'richtext':
                         case 'geography':
                         case 'iconclass':
                         case 'rism':
@@ -256,6 +313,7 @@
                         case 'entity':
                         case 'entity-mc':
                             // return 'entity';
+                        case 'userlist':
                         case 'epoch':
                         case 'timeperiod':
                         case 'dimension':
@@ -309,8 +367,8 @@
                 }),
                 operatorList: computed(_ => {
                     if(!state.attributeSelected) return [];
-
-                    switch(state.dependency.attribute.datatype) {
+                    const datatype = state.dependency.attribute.datatype
+                    switch(datatype) {
                         case 'epoch':
                         case 'timeperiod':
                         case 'dimension':
@@ -321,9 +379,11 @@
                         // TODO handle entity attributes
                         case 'entity':
                         case 'entity-mc':
+                        case 'userlist':
                             return [];
                         case 'string':
                         case 'stringf':
+                        case 'richtext':
                         case 'string-sc':
                         case 'string-mc':
                         case 'geography':
@@ -363,6 +423,8 @@
                                         return false;
                                 }
                             });
+                        default:
+                            throw new Error(`Unsupported datatype ${datatype}`);
                     }
                 }),
                 inputType: computed(_ => {

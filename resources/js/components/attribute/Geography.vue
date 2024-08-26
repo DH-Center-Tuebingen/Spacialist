@@ -1,19 +1,24 @@
 <template>
     <div>
         <input
+            :id="name"
+            v-model="v.value"
             class="form-control"
             :disabled="disabled"
             type="text"
-            :id="name"
             :name="name"
             :placeholder="t('main.entity.attributes.add_wkt')"
-            v-model="v.value"
-            @input="v.handleInput" />
+        >
 
-            <button type="button" class="btn btn-outline-secondary mt-2" :disabled="disabled" @click="openGeographyModal()">
-                <i class="fas fa-fw fa-map-marker-alt"></i>
-                {{ t('main.entity.attributes.open_map') }}
-            </button>
+        <button
+            type="button"
+            class="btn btn-outline-secondary mt-2"
+            :disabled="disabled"
+            @click="openGeographyModal()"
+        >
+            <i class="fas fa-fw fa-map-marker-alt" />
+            {{ t('main.entity.attributes.open_map') }}
+        </button>
     </div>
 </template>
 
@@ -88,7 +93,6 @@
             // DATA
             const {
                 handleChange,
-                handleInput,
                 value: fieldValue,
                 meta,
                 resetField,
@@ -100,13 +104,19 @@
             });
             const v = reactive({
                 handleChange,
-                handleInput,
                 value: fieldValue,
                 meta,
                 resetField,
             });
 
-            watch(v.meta, (newValue, oldValue) => {
+
+            watch(_ => value, (newValue, oldValue) => {
+                resetFieldState();
+            });
+            watch(_ => v.value, (newValue, oldValue) => {
+                // only emit @change event if field is validated (required because Entity.vue components)
+                // trigger this watcher several times even if another component is updated/validated
+                if(!v.meta.validated) return;
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
@@ -122,15 +132,10 @@
                 openGeographyModal,
                 resetFieldState,
                 undirtyField,
-                // PROPS
-                name,
-                disabled,
-                value,
-                attribute,
                 // STATE
                 state,
                 v,
-            }
+            };
         },
-    }
+    };
 </script>

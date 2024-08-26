@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 use App\Bibliography;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use RenanBr\BibTexParser\Listener;
 use RenanBr\BibTexParser\Exception\ParserException;
 use RenanBr\BibTexParser\Parser;
+use RenanBr\BibTexParser\Processor\TagNameCaseProcessor;
 
 class BibliographyController extends Controller
 {
@@ -24,46 +25,6 @@ class BibliographyController extends Controller
         $bibliography = Bibliography::orderBy('id')->get();
 
         return response()->json($bibliography);
-    }
-
-    public function exportBibtex() {
-        $user = auth()->user();
-        if(!$user->can('bibliography_share')) {
-            return response()->json([
-                'error' => __('You do not have the permission to export bibliography')
-            ], 403);
-        }
-
-        $entries = Bibliography::orderBy('author', 'asc')->get();
-        $content = '';
-        foreach($entries as $e) {
-            $content .= '@'.$e->type.'{'.$e->citekey.',';
-            $content .= "\n";
-            $attrs = $e->getAttributes();
-            foreach($attrs as $k => $a) {
-                if(!isset($a)) continue;
-                switch($k) {
-                    case 'id':
-                    case 'type':
-                    case 'created_at':
-                    case 'updated_at':
-                    case 'citekey':
-                    case 'user_id':
-                        break;
-                    default:
-                        $content .= '    '.$k.': {'.$a.'}';
-                        $content .= "\n";
-                        break;
-                }
-            }
-            $content .= '}';
-            $content .= "\n\n";
-        }
-        return response()->streamDownload(function() use ($content) {
-            echo $content;
-        }, 'export.bib', [
-            'Content-Type' => 'application/x-bibtex'
-        ]);
     }
 
     public function getReferenceCount($id) {
@@ -131,7 +92,14 @@ class BibliographyController extends Controller
         ]);
 
         $file = $request->file('file');
+        $noOverwriteOnDup = $request->input('no-overwrite', false);
         $listener = new Listener();
+        $listener->addProcessor(new TagNameCaseProcessor(CASE_LOWER));
+        $listener->addProcessor(function($entry) {
+            $entry['_type'] = strtolower($entry['_type']);
+            $entry['type'] = strtolower($entry['type']);
+            return $entry;
+        });
         $parser = new Parser();
         $parser->addListener($listener);
         try {
@@ -143,32 +111,134 @@ class BibliographyController extends Controller
         }
         $entries = $listener->export();
         $newChangedEntries = [];
+        $errored = null;
+
+        DB::beginTransaction();
+
         foreach($entries as $entry) {
-            $insArray = array_intersect_key($entry, Bibliography::patchRules);
+            $isValid = Bibliography::validateMandatory($entry, $entry['type']);
+            if(!$isValid) {
+                $errored = [
+                    'type' => 'validation',
+                    'on' => $entry['_original'],
+                ];
+                break;
+            }
+
+            $insArray = Bibliography::stripDisallowed($entry, $entry['type']);
+            // unset file, because file upload is (currently) not possible in import
+            $insArray['file'] = null;
+
             // set citation key if none is present
+            $useKeyInDupCheck = false;
             if(!array_key_exists('citation-key', $entry) || $entry['citation-key'] == '') {
                 $ckey = Bibliography::computeCitationKey($insArray);
             } else {
                 $ckey = $entry['citation-key'];
+                // if key is provided by uploaded file, use it to determine if entry already exists in db
+                $useKeyInDupCheck = true;
             }
+            $insArray['citekey'] = $ckey;
             $insArray['user_id'] = $user->id;
-            $bibliography = Bibliography::updateOrCreate(
-                ['citekey' => $ckey],
-                $insArray
-            );
-            if($bibliography->wasRecentlyCreated) {
+
+            $duplicate = Bibliography::duplicateCheck($insArray, $useKeyInDupCheck);
+            // if it is not a duplicate, create a new entry
+            if($duplicate === false) {
+                $bibliography = Bibliography::create($insArray);
                 $newChangedEntries[] = [
                     'entry' => Bibliography::find($bibliography->id),
                     'added' => true,
                 ];
-            } else if($bibliography->wasChanged()) {
-                $newChangedEntries[] = [
-                    'entry' => Bibliography::find($bibliography->id),
-                    'added' => false,
-                ];
+            } else {
+                if($noOverwriteOnDup) {
+                    $errored = [
+                        'type' => 'duplicate',
+                        'on' => $entry['_original'],
+                    ];
+                    break;
+                } else {
+                    foreach($insArray as $key => $value) {
+                        $duplicate->{$key} = $value;
+                    }
+                    $duplicate->save();
+                    $newChangedEntries[] = [
+                        'entry' => Bibliography::find($duplicate->id),
+                        'added' => false,
+                    ];
+                }
             }
         }
+
+        if(isset($errored)) {
+            DB::rollBack();
+            if($errored['type'] == 'duplicate') {
+                $msg = 'Overwrite parameter not set! Existing entry is matching ' . $errored['on'];
+            } else if($errored['type'] == 'validation') {
+                $msg = 'Validation failed for ' . $errored['on'];
+            }
+            return response()->json([
+                'error' => $msg,
+            ], 400);
+        }
+
+        DB::commit();
+
         return response()->json($newChangedEntries, 201);
+    }
+
+    public function exportBibtex(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('bibliography_share')) {
+            return response()->json([
+                'error' => __('You do not have the permission to export bibliography')
+            ], 403);
+        }
+
+        $this->validate($request, [
+            'selection' => 'nullable|array',
+        ]);
+
+        $query = Bibliography::orderBy('author', 'asc');
+
+        $selection = $request->get('selection', []);
+        if(isset($selection) && !empty($selection)) {
+            $query = $query->whereIn('id', $selection);
+        }
+
+        $entries = $query->get();
+        $content = '';
+        foreach($entries as $e) {
+            $content .= '@'.$e->type.'{'.$e->citekey.',';
+            $content .= "\n";
+            $attrs = $e->getAttributes();
+            foreach($attrs as $k => $a) {
+                if(!isset($a)) continue;
+                switch($k) {
+                    case 'id':
+                    case 'type':
+                    case 'created_at':
+                    case 'updated_at':
+                    case 'citekey':
+                    case 'user_id':
+                        break;
+                    default:
+                        $content .= '    '.$k.' = {'.$a.'}';
+                        $content .= "\n";
+                        break;
+                }
+            }
+            $content .= '}';
+            $content .= "\n\n";
+        }
+
+        // remove new lines at end of file
+        $content = substr($content, 0, -2);
+
+        return response()->streamDownload(function() use ($content) {
+            echo $content;
+        }, 'export.bib', [
+            'Content-Type' => 'application/x-bibtex'
+        ]);
     }
 
     // PATCH

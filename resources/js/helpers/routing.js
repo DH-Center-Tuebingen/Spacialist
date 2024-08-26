@@ -1,4 +1,4 @@
-import router from '@/bootstrap/router.js';
+import router from '%router';
 
 export function routeToEntity(id) {
     const currentRoute = router.currentRoute.value;
@@ -16,7 +16,7 @@ export function routeToEntity(id) {
         },
         query: currentRoute.query,
     });
-};
+}
 
 export function routeToFile(id) {
     const currentRoute = router.currentRoute.value;
@@ -33,7 +33,7 @@ export function routeToFile(id) {
             id: id,
         },
     });
-};
+}
 
 export function routeToBibliography(id) {
     const currentRoute = router.currentRoute.value;
@@ -50,7 +50,7 @@ export function routeToBibliography(id) {
             id: id,
         },
     });
-};
+}
 
 export function routeToGeodata(id) {
     const currentRoute = router.currentRoute.value;
@@ -68,7 +68,7 @@ export function routeToGeodata(id) {
     //         id: id,
     //     },
     // });
-};
+}
 
 export function searchParamsToObject(path) {
     let fullPath = path;
@@ -86,4 +86,4 @@ export function searchParamsToObject(path) {
         params[k] = v;
     });
     return params;
-};
+}

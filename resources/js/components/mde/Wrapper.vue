@@ -1,19 +1,25 @@
 <template>
     <MilkdownProvider>
-        <MilkdownEditor class="milkdown-wrapper h-100" :ref="el => editorRef = el" :data="data" />
+        <MilkdownEditor
+            ref="editorRef"
+            :class="classes"
+            :data="data"
+            :readonly="readonly"
+            @update="emitUpdate"
+        />
     </MilkdownProvider>
 </template>
   
 <script>
     import {
         ref,
-        toRefs,
+        watch,
     } from 'vue';
-    import MilkdownEditor from "./Main.vue";
-    import { MilkdownProvider } from "@milkdown/vue";
-    
+    import MilkdownEditor from './Main.vue';
+    import { MilkdownProvider } from '@milkdown/vue';
+
     export default {
-        name: "MilkdownEditorWrapper",
+        name: 'MilkdownEditorWrapper',
         components: {
             MilkdownProvider,
             MilkdownEditor,
@@ -23,26 +29,38 @@
                 required: true,
                 type: String,
             },
+            classes: {
+                required: false,
+                type: String,
+                default: 'milkdown-wrapper p-3 mt-1 h-100',
+            },
+            readonly: {
+                required: false,
+                type: Boolean,
+                default: false,
+            },
         },
-        setup(props) {
-            const {
-                data,
-            } = toRefs(props);
-
+        emits: ['update'],
+        setup(props, context) {
             const getEditorMarkdown = _ => {
                 return editorRef.value.getMarkdown();
             };
 
+            const emitUpdate = data => {
+                context.emit('update', data);
+            };
+
             const editorRef = ref({});
+            watch(_ => props.data, (newData, oldData) => {
+                if(editorRef.value && editorRef.value.setMarkdown) {
+                    editorRef.value.setMarkdown(newData);
+                }
+            });
 
             return {
-                // HELPERS
-                // PROPS
-                data,
-                // LOCAL
-                getEditorMarkdown,
-                // STATE
                 editorRef,
+                getEditorMarkdown,
+                emitUpdate,
             };
         },
     };

@@ -1,104 +1,171 @@
 <template>
-  <vue-final-modal
-    class="modal-container modal"
-    content-class="sp-modal-content sp-modal-content-xs"
-    name="add-role-modal">
-    <div class="sp-modal-content sp-modal-content-xs">
-        <div class="modal-header">
-            <h5 class="modal-title">
-                {{
-                    t('main.role.modal.new.title')
-                }}
-            </h5>
-            <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" @click="closeModal()">
-            </button>
-        </div>
-        <div class="modal-body">
-            <form id="newRoleForm" name="newUserForm" role="form" @submit.prevent="onAdd()">
-                <div class="mb-3">
-                    <label class="col-form-label col-12" for="name">
-                        {{ t('global.name') }}
-                        <span class="text-danger">*</span>:
-                    </label>
-                    <div class="col-12">
-                        <input class="form-control" :class="getClassByValidation(v.fields.name.errors)" type="text" id="name" v-model="v.fields.name.value" @input="v.fields.name.handleInput" required />
+    <vue-final-modal
+        class="modal-container modal"
+        content-class="sp-modal-content sp-modal-content-xs"
+        name="add-role-modal"
+    >
+        <div class="sp-modal-content sp-modal-content-xs">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {{
+                        t('main.role.modal.new.title')
+                    }}
+                </h5>
+                <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                />
+            </div>
+            <div class="modal-body">
+                <form
+                    id="newRoleForm"
+                    name="newUserForm"
+                    role="form"
+                    @submit.prevent="onAdd()"
+                >
+                    <div class="mb-3">
+                        <label
+                            class="col-form-label col-12"
+                            for="name"
+                        >
+                            {{ t('global.name') }}
+                            <span class="text-danger">*</span>:
+                        </label>
+                        <div class="col-12">
+                            <input
+                                id="name"
+                                v-model="v.fields.name.value"
+                                class="form-control"
+                                :class="getClassByValidation(v.fields.name.errors)"
+                                type="text"
+                                required
+                                @input="v.fields.name.handleInput"
+                            >
     
-                        <div class="invalid-feedback">
-                            <span v-for="(msg, i) in v.fields.name.errors" :key="i">
-                                {{ msg }}
-                            </span>
+                            <div class="invalid-feedback">
+                                <span
+                                    v-for="(msg, i) in v.fields.name.errors"
+                                    :key="i"
+                                >
+                                    {{ msg }}
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="mb-3">
-                    <label class="col-form-label col-12" for="display-name">
-                        {{ t('global.display_name') }}
-                        <span class="text-danger">*</span>:
-                    </label>
-                    <div class="col-12">
-                        <input class="form-control" :class="getClassByValidation(v.fields.display_name.errors)" type="text" id="display-name" v-model="v.fields.display_name.value" @input="v.fields.display_name.handleInput" required />
+                    <div class="mb-3">
+                        <label
+                            class="col-form-label col-12"
+                            for="display-name"
+                        >
+                            {{ t('global.display_name') }}
+                            <span class="text-danger">*</span>:
+                        </label>
+                        <div class="col-12">
+                            <input
+                                id="display-name"
+                                v-model="v.fields.display_name.value"
+                                class="form-control"
+                                :class="getClassByValidation(v.fields.display_name.errors)"
+                                type="text"
+                                required
+                                @input="v.fields.display_name.handleInput"
+                            >
     
-                        <div class="invalid-feedback">
-                            <span v-for="(msg, i) in v.fields.display_name.errors" :key="i">
-                                {{ msg }}
-                            </span>
+                            <div class="invalid-feedback">
+                                <span
+                                    v-for="(msg, i) in v.fields.display_name.errors"
+                                    :key="i"
+                                >
+                                    {{ msg }}
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="mb-3">
-                    <label class="col-form-label col-12" for="description">
-                        {{ t('global.description') }}
-                        <span class="text-danger">*</span>:
-                    </label>
-                    <div class="col-12">
-                        <input class="form-control" :class="getClassByValidation(v.fields.description.errors)" type="text" id="description" v-model="v.fields.description.value" @input="v.fields.description.handleInput" required />
+                    <div class="mb-3">
+                        <label
+                            class="col-form-label col-12"
+                            for="description"
+                        >
+                            {{ t('global.description') }}
+                            <span class="text-danger">*</span>:
+                        </label>
+                        <div class="col-12">
+                            <input
+                                id="description"
+                                v-model="v.fields.description.value"
+                                class="form-control"
+                                :class="getClassByValidation(v.fields.description.errors)"
+                                type="text"
+                                required
+                                @input="v.fields.description.handleInput"
+                            >
     
-                        <div class="invalid-feedback">
-                            <span v-for="(msg, i) in v.fields.description.errors" :key="i">
-                                {{ msg }}
-                            </span>
+                            <div class="invalid-feedback">
+                                <span
+                                    v-for="(msg, i) in v.fields.description.errors"
+                                    :key="i"
+                                >
+                                    {{ msg }}
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="mb-3">
-                    <label class="col-form-label col-12" for="derive-from">
-                        {{ t('main.role.preset.derive_from_preset') }}:
-                    </label>
-                    <div class="col-12">
-                        <multiselect
-                            id="derive-from"
-                            v-model="v.fields.derived_from.value"
-                            :classes="multiselectResetClasslist"
-                            :object="true"
-                            :label="'name'"
-                            :track-by="'id'"
-                            :valueProp="'id'"
-                            :mode="'single'"
-                            :options="state.rolePresets"
-                            :placeholder="t('main.role.add_permission_placeholder')">
-                                <template v-slot:option="{ option }">
+                    <div class="mb-3">
+                        <label
+                            class="col-form-label col-12"
+                            for="derive-from"
+                        >
+                            {{ t('main.role.preset.derive_from_preset') }}:
+                        </label>
+                        <div class="col-12">
+                            <multiselect
+                                id="derive-from"
+                                v-model="v.fields.derived_from.value"
+                                :classes="multiselectResetClasslist"
+                                :object="true"
+                                :label="'name'"
+                                :track-by="'id'"
+                                :value-prop="'id'"
+                                :mode="'single'"
+                                :options="state.rolePresets"
+                                :placeholder="t('main.role.add_permission_placeholder')"
+                            >
+                                <template #option="{ option }">
                                     {{ t(`main.role.preset.${option.name}`) }}
                                 </template>
-                                <template v-slot:singlelabel="{ value }">
+                                <template #singlelabel="{ value }">
                                     <div class="multiselect-single-label">
                                         {{ t(`main.role.preset.${value.name}`) }}
                                     </div>
                                 </template>
-                        </multiselect>
+                            </multiselect>
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="submit"
+                    class="btn btn-outline-success"
+                    :disabled="!state.form.dirty || !state.form.valid"
+                    form="newRoleForm"
+                >
+                    <i class="fas fa-fw fa-plus" /> {{ t('global.add') }}
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                    @click="closeModal()"
+                >
+                    <i class="fas fa-fw fa-times" /> {{ t('global.cancel') }}
+                </button>
+            </div>
         </div>
-        <div class="modal-footer">
-            <button type="submit" class="btn btn-outline-success" :disabled="!state.form.dirty || !state.form.valid" form="newRoleForm">
-                <i class="fas fa-fw fa-plus"></i> {{ t('global.add') }}
-            </button>
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal()">
-                <i class="fas fa-fw fa-times"></i> {{ t('global.cancel') }}
-            </button>
-        </div>
-    </div>
-  </vue-final-modal>
+    </vue-final-modal>
 </template>
 
 <script>
@@ -135,8 +202,10 @@
                     name: v.fields.name.value,
                     display_name: v.fields.display_name.value,
                     description: v.fields.description.value,
-                    derived_from: v.fields.derived_from.value ? v.fields.derived_from.value.id : null,
                 };
+                if(v.fields.derived_from.vale) {
+                    role.derived_from = v.fields.derived_from.value.id;
+                }
                 context.emit('add', role);
             };
 

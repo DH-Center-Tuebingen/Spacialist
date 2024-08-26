@@ -92,7 +92,14 @@ class SearchController extends Controller {
             ], 403);
         }
         $q = $request->query('q');
-        $matches = Entity::where('name', 'ilike', '%'.$q.'%')
+        $t = $request->query('t');
+
+        $matches = Entity::where('name', 'ilike', '%'.$q.'%');
+        if(isset($t)) {
+            $types = explode(',', $t);
+            $matches->whereIn('entity_type_id', $types);
+        }
+        $matches = $matches
             ->orderBy('name')
             ->get();
         $matches->each->append(['ancestors']);
@@ -169,7 +176,7 @@ class SearchController extends Controller {
 
     public function searchInAttributes(Request $request) {
         $user = auth()->user();
-        if(!$user->can('thesaurus_read') || !$user->can('attributes_read')) {
+        if(!$user->can('thesaurus_read') || !$user->can('attribute_read')) {
             return response()->json([
                 'error' => __('You do not have the permission to search for attributes')
             ], 403);

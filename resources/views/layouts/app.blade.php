@@ -11,21 +11,22 @@
 
     <title>{{ $p['prefs.project-name'] }}</title>
 
-    <!-- Styles -->
-    <link href="css/vue-multiselect.min.css" rel="stylesheet">
-    <link href="css/modal.css" rel="stylesheet">
-    <link href="css/app{{$p['prefs.color']}}.css" rel="stylesheet">
+    @php
+        $color = $p['prefs.color'] ?? '';
+    @endphp
+
+    @vite([
+        'resources/js/app.js',
+        'resources/sass/app' . $color . '.scss',
+    ])
+
+
+    @foreach($plugins as $plugin)
+        <script src="storage/plugins/{!! sp_slug($plugin->name) !!}-{!! $plugin->uuid !!}.js" defer> 
+        </script>
+    @endforeach
 </head>
 <body>
     <div id="app" class="d-flex flex-column"></div>
-
-    <!-- Scripts -->
-    <script src="js/manifest.js"></script>
-    <script src="js/vendor.js"></script>
-    <script src="js/app.js"></script>
-    @foreach($plugins as $plugin)
-        <script src="storage/plugins/{!! sp_slug($plugin->name) !!}-{!! $plugin->uuid !!}.js">
-        </script>
-    @endforeach
 </body>
 </html>

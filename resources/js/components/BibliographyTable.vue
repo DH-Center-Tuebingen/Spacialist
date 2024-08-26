@@ -10,11 +10,20 @@
                         }, state.allEntries.length) }}
                     </span>
                 </h3>
-                <form class="ms-3" id="bibliography-search-form" @submit.prevent>
+                <form
+                    id="bibliography-search-form"
+                    class="ms-3"
+                    @submit.prevent
+                >
                     <div class="input-group">
-                        <input type="text" class="form-control" @input="debouncedSearch($event)" :placeholder="t('global.search')">
+                        <input
+                            type="text"
+                            class="form-control"
+                            :placeholder="t('global.search')"
+                            @input="debouncedSearch($event)"
+                        >
                         <span class="input-group-text">
-                            <i class="fas fa-fw fa-search"></i>
+                            <i class="fas fa-fw fa-search" />
                         </span>
                     </div>
                 </form>
@@ -23,39 +32,84 @@
                 <ul class="list-inline mb-0">
                     <li class="list-inline-item">
                         <div class="form-check form-switch">
-                            <input type="checkbox" class="form-check-input" id="show-all-fields-toggle" v-model="state.showAllFields" />
-                            <label class="form-check-label" for="show-all-fields-toggle">
+                            <input
+                                id="show-all-fields-toggle"
+                                v-model="state.showAllFields"
+                                type="checkbox"
+                                class="form-check-input"
+                            >
+                            <label
+                                class="form-check-label"
+                                for="show-all-fields-toggle"
+                            >
                                 {{ t('main.bibliography.show_all_fields') }}
                             </label>
                         </div>
                     </li>
                     <li class="list-inline-item">
-                        <button type="button" class="btn btn-sm btn-outline-success" id="bibliography-add-button" @click="showNewItemModal()" :disabled="!can('bibliography_create')">
-                            <i class="fas fa-fw fa-plus"></i> {{ t('main.bibliography.add') }}
+                        <button
+                            id="bibliography-add-button"
+                            type="button"
+                            class="btn btn-sm btn-outline-success"
+                            :disabled="!can('bibliography_create')"
+                            @click="showNewItemModal()"
+                        >
+                            <i class="fas fa-fw fa-plus" /> {{ t('main.bibliography.add') }}
                         </button>
                     </li>
                     <li class="list-inline-item">
                         <file-upload
-                            class="btn btn-sm btn-outline-primary clickable"
-                            accept="application/x-bibtex,text/x-bibtex,text/plain"
-                            extensions="bib,bibtex"
                             ref="upload"
                             v-model="state.files"
+                            class="btn btn-sm btn-outline-primary clickable"
+                            accept=".bib,.bibtex,application/x-bibtex,text/x-bibtex,text/plain"
+                            extensions="bib,bibtex"
                             :custom-action="importFile"
                             :directory="false"
                             :disabled="!can('bibliography_write|bibliography_create')"
                             :multiple="false"
                             :drop="true"
-                            @input-file="inputFile">
-                                <span>
-                                    <i class="fas fa-fw fa-file-import"></i> {{ t('main.bibliography.import') }}
-                                </span>
+                            @input-file="inputFile"
+                        >
+                            <span>
+                                <i class="fas fa-fw fa-file-import" /> {{ t('main.bibliography.import') }}
+                            </span>
                         </file-upload>
                     </li>
                     <li class="list-inline-item">
-                        <button type="button" class="btn btn-sm btn-outline-primary" @click="exportFile()">
-                            <i class="fas fa-fw fa-file-export"></i> {{ t('main.bibliography.export') }}
-                        </button>
+                        <div
+                            class="btn-group"
+                            role="group"
+                        >
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-primary"
+                                @click="exportFile()"
+                            >
+                                <i class="fas fa-fw fa-file-export" /> {{ t('main.bibliography.export') }}
+                            </button>
+                            <div
+                                class="btn-group"
+                                role="group"
+                            >
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-primary dropdown-toggle"
+                                    data-bs-toggle="dropdown"
+                                />
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a
+                                            class="dropdown-item"
+                                            href="#"
+                                            @click.prevent="exportFile('search')"
+                                        >
+                                            <i class="fas fa-fw fa-file-export" /> {{ t('main.bibliography.export_search') }}
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </li>
                 </ul>
             </div>
@@ -68,40 +122,52 @@
                             #
                         </th>
                         <th>
-                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('type')">
+                            <a
+                                href="#"
+                                class="text-nowrap"
+                                @click.prevent="setOrderColumn('type')"
+                            >
                                 {{ t('global.type') }}
                                 <span v-show="state.orderColumn == 'type'">
                                     <span v-show="state.orderType == 'asc'">
-                                        <i class="fas fa-fw fa-sort-down"></i>
+                                        <i class="fas fa-fw fa-sort-down" />
                                     </span>
                                     <span v-show="state.orderType == 'desc'">
-                                        <i class="fas fa-fw fa-sort-up"></i>
+                                        <i class="fas fa-fw fa-sort-up" />
                                     </span>
                                 </span>
                             </a>
                         </th>
                         <th>
-                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('citekey')">
+                            <a
+                                href="#"
+                                class="text-nowrap"
+                                @click.prevent="setOrderColumn('citekey')"
+                            >
                                 {{ t('main.bibliography.column.citekey') }}
                                 <span v-show="state.orderColumn == 'citekey'">
                                     <span v-show="state.orderType == 'asc'">
-                                        <i class="fas fa-fw fa-sort-down"></i>
+                                        <i class="fas fa-fw fa-sort-down" />
                                     </span>
                                     <span v-show="state.orderType == 'desc'">
-                                        <i class="fas fa-fw fa-sort-up"></i>
+                                        <i class="fas fa-fw fa-sort-up" />
                                     </span>
                                 </span>
                             </a>
                         </th>
                         <th>
-                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('author')">
+                            <a
+                                href="#"
+                                class="text-nowrap"
+                                @click.prevent="setOrderColumn('author')"
+                            >
                                 {{ t('main.bibliography.column.author') }}
                                 <span v-show="state.orderColumn == 'author'">
                                     <span v-show="state.orderType == 'asc'">
-                                        <i class="fas fa-fw fa-sort-down"></i>
+                                        <i class="fas fa-fw fa-sort-down" />
                                     </span>
                                     <span v-show="state.orderType == 'desc'">
-                                        <i class="fas fa-fw fa-sort-up"></i>
+                                        <i class="fas fa-fw fa-sort-up" />
                                     </span>
                                 </span>
                             </a>
@@ -110,53 +176,69 @@
                             {{ t('main.bibliography.column.email') }}
                         </th>
                         <th>
-                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('year')">
+                            <a
+                                href="#"
+                                class="text-nowrap"
+                                @click.prevent="setOrderColumn('year')"
+                            >
                                 {{ t('main.bibliography.column.year') }}
                                 <span v-show="state.orderColumn == 'year'">
                                     <span v-show="state.orderType == 'asc'">
-                                        <i class="fas fa-fw fa-sort-down"></i>
+                                        <i class="fas fa-fw fa-sort-down" />
                                     </span>
                                     <span v-show="state.orderType == 'desc'">
-                                        <i class="fas fa-fw fa-sort-up"></i>
+                                        <i class="fas fa-fw fa-sort-up" />
                                     </span>
                                 </span>
                             </a>
                         </th>
                         <th>
-                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('title')">
+                            <a
+                                href="#"
+                                class="text-nowrap"
+                                @click.prevent="setOrderColumn('title')"
+                            >
                                 {{ t('main.bibliography.column.title') }}
                                 <span v-show="state.orderColumn == 'title'">
                                     <span v-show="state.orderType == 'asc'">
-                                        <i class="fas fa-fw fa-sort-down"></i>
+                                        <i class="fas fa-fw fa-sort-down" />
                                     </span>
                                     <span v-show="state.orderType == 'desc'">
-                                        <i class="fas fa-fw fa-sort-up"></i>
+                                        <i class="fas fa-fw fa-sort-up" />
                                     </span>
                                 </span>
                             </a>
                         </th>
                         <th>
-                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('booktitle')">
+                            <a
+                                href="#"
+                                class="text-nowrap"
+                                @click.prevent="setOrderColumn('booktitle')"
+                            >
                                 {{ t('main.bibliography.column.booktitle') }}
                                 <span v-show="state.orderColumn == 'booktitle'">
                                     <span v-show="state.orderType == 'asc'">
-                                        <i class="fas fa-fw fa-sort-down"></i>
+                                        <i class="fas fa-fw fa-sort-down" />
                                     </span>
                                     <span v-show="state.orderType == 'desc'">
-                                        <i class="fas fa-fw fa-sort-up"></i>
+                                        <i class="fas fa-fw fa-sort-up" />
                                     </span>
                                 </span>
                             </a>
                         </th>
                         <th>
-                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('publisher')">
+                            <a
+                                href="#"
+                                class="text-nowrap"
+                                @click.prevent="setOrderColumn('publisher')"
+                            >
                                 {{ t('main.bibliography.column.publisher') }}
                                 <span v-show="state.orderColumn == 'publisher'">
                                     <span v-show="state.orderType == 'asc'">
-                                        <i class="fas fa-fw fa-sort-down"></i>
+                                        <i class="fas fa-fw fa-sort-down" />
                                     </span>
                                     <span v-show="state.orderType == 'desc'">
-                                        <i class="fas fa-fw fa-sort-up"></i>
+                                        <i class="fas fa-fw fa-sort-up" />
                                     </span>
                                 </span>
                             </a>
@@ -165,27 +247,35 @@
                             {{ t('main.bibliography.column.pages') }}
                         </th>
                         <th>
-                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('editor')">
+                            <a
+                                href="#"
+                                class="text-nowrap"
+                                @click.prevent="setOrderColumn('editor')"
+                            >
                                 {{ t('main.bibliography.column.editor') }}
                                 <span v-show="state.orderColumn == 'editor'">
                                     <span v-show="state.orderType == 'asc'">
-                                        <i class="fas fa-fw fa-sort-down"></i>
+                                        <i class="fas fa-fw fa-sort-down" />
                                     </span>
                                     <span v-show="state.orderType == 'desc'">
-                                        <i class="fas fa-fw fa-sort-up"></i>
+                                        <i class="fas fa-fw fa-sort-up" />
                                     </span>
                                 </span>
                             </a>
                         </th>
                         <th>
-                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('journal')">
+                            <a
+                                href="#"
+                                class="text-nowrap"
+                                @click.prevent="setOrderColumn('journal')"
+                            >
                                 {{ t('main.bibliography.column.journal') }}
                                 <span v-show="state.orderColumn == 'journal'">
                                     <span v-show="state.orderType == 'asc'">
-                                        <i class="fas fa-fw fa-sort-down"></i>
+                                        <i class="fas fa-fw fa-sort-down" />
                                     </span>
                                     <span v-show="state.orderType == 'desc'">
-                                        <i class="fas fa-fw fa-sort-up"></i>
+                                        <i class="fas fa-fw fa-sort-up" />
                                     </span>
                                 </span>
                             </a>
@@ -209,14 +299,18 @@
                             {{ t('main.bibliography.column.series') }}
                         </th>
                         <th>
-                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('address')">
+                            <a
+                                href="#"
+                                class="text-nowrap"
+                                @click.prevent="setOrderColumn('address')"
+                            >
                                 {{ t('main.bibliography.column.address') }}
                                 <span v-show="state.orderColumn == 'address'">
                                     <span v-show="state.orderType == 'asc'">
-                                        <i class="fas fa-fw fa-sort-down"></i>
+                                        <i class="fas fa-fw fa-sort-down" />
                                     </span>
                                     <span v-show="state.orderType == 'desc'">
-                                        <i class="fas fa-fw fa-sort-up"></i>
+                                        <i class="fas fa-fw fa-sort-up" />
                                     </span>
                                 </span>
                             </a>
@@ -234,27 +328,35 @@
                             {{ t('main.bibliography.column.subtype') }}
                         </th>
                         <th>
-                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('misc')">
+                            <a
+                                href="#"
+                                class="text-nowrap"
+                                @click.prevent="setOrderColumn('misc')"
+                            >
                                 {{ t('main.bibliography.column.misc') }}
                                 <span v-show="state.orderColumn == 'misc'">
                                     <span v-show="state.orderType == 'asc'">
-                                        <i class="fas fa-fw fa-sort-down"></i>
+                                        <i class="fas fa-fw fa-sort-down" />
                                     </span>
                                     <span v-show="state.orderType == 'desc'">
-                                        <i class="fas fa-fw fa-sort-up"></i>
+                                        <i class="fas fa-fw fa-sort-up" />
                                     </span>
                                 </span>
                             </a>
                         </th>
                         <th>
-                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('howpublished')">
+                            <a
+                                href="#"
+                                class="text-nowrap"
+                                @click.prevent="setOrderColumn('howpublished')"
+                            >
                                 {{ t('main.bibliography.column.howpublished') }}
                                 <span v-show="state.orderColumn == 'howpublished'">
                                     <span v-show="state.orderType == 'asc'">
-                                        <i class="fas fa-fw fa-sort-down"></i>
+                                        <i class="fas fa-fw fa-sort-down" />
                                     </span>
                                     <span v-show="state.orderType == 'desc'">
-                                        <i class="fas fa-fw fa-sort-up"></i>
+                                        <i class="fas fa-fw fa-sort-up" />
                                     </span>
                                 </span>
                             </a>
@@ -283,25 +385,32 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(entry, i) in state.orderedBibliography" :key="entry.id">
+                    <!-- eslint-disable vue/no-v-html -->
+                    <tr
+                        v-for="(entry, i) in state.orderedBibliography"
+                        :key="entry.id"
+                    >
                         <td class="fw-bold">
                             {{ i+1 }}
                         </td>
                         <td>
                             {{ entry.type }}
                         </td>
-                        <td v-html="highlight(entry.citekey, state.query)" />
-                        <td v-html="highlight(entry.author, state.query)" />
-                        <td v-if="state.showAllFields" v-html="highlight(entry.email, state.query)" />
-                        <td v-html="highlight(entry.year, state.query)" />
-                        <td v-html="highlight(entry.title, state.query)" />
-                        <td v-html="highlight(entry.booktitle, state.query)" />
-                        <td v-html="highlight(entry.publisher, state.query)" />
+                        <td v-html="formatBibtexAndShowHighlight(entry.citekey)" />
+                        <td v-html="formatBibtexAndShowHighlight(entry.author)" />
+                        <td
+                            v-if="state.showAllFields"
+                            v-html="formatBibtexAndShowHighlight(entry.email)"
+                        />
+                        <td v-html="formatBibtexAndShowHighlight(entry.year)" />
+                        <td v-html="formatBibtexAndShowHighlight(entry.title)" />
+                        <td v-html="formatBibtexAndShowHighlight(entry.booktitle)" />
+                        <td v-html="formatBibtexAndShowHighlight(entry.publisher)" />
                         <td>
                             {{ entry.pages }}
                         </td>
-                        <td v-html="highlight(entry.editor, state.query)" />
-                        <td v-html="highlight(entry.journal, state.query)" />
+                        <td v-html="formatBibtexAndShowHighlight(entry.editor)" />
+                        <td v-html="formatBibtexAndShowHighlight(entry.journal)" />
                         <td v-if="state.showAllFields">
                             {{ entry.month }}
                         </td>
@@ -326,19 +435,33 @@
                         <td v-if="state.showAllFields">
                             {{ entry.note }}
                         </td>
-                        <td v-if="state.showAllFields" v-html="highlight(entry.doi, state.query)" />
-                        <td v-if="state.showAllFields" v-html="highlight(entry.url, state.query)" />
+                        <td
+                            v-if="state.showAllFields"
+                            v-html="formatBibtexAndShowHighlight(entry.doi)"
+                        />
+                        <td
+                            v-if="state.showAllFields"
+                            v-html="formatBibtexAndShowHighlight(entry.url)"
+                        />
                         <td v-if="state.showAllFields">
                             {{ entry.subtype }}
                         </td>
                         <td>
                             {{ entry.misc }}
                         </td>
-                        <td v-html="createAnchorFromUrl(entry.howpublished)">
-                        </td>
-                        <td v-if="state.showAllFields" v-html="highlight(entry.institution, state.query)" />
-                        <td v-if="state.showAllFields" v-html="highlight(entry.organization, state.query)" />
-                        <td v-if="state.showAllFields" v-html="highlight(entry.school, state.query)" />
+                        <td v-html="createAnchorFromUrl(entry.howpublished)" />
+                        <td
+                            v-if="state.showAllFields"
+                            v-html="formatBibtexAndShowHighlight(entry.institution)"
+                        />
+                        <td
+                            v-if="state.showAllFields"
+                            v-html="formatBibtexAndShowHighlight(entry.organization)"
+                        />
+                        <td
+                            v-if="state.showAllFields"
+                            v-html="formatBibtexAndShowHighlight(entry.school)"
+                        />
                         <td v-if="state.showAllFields">
                             {{ entry.created_at }}
                         </td>
@@ -346,40 +469,73 @@
                             {{ entry.updated_at }}
                         </td>
                         <td>
-                            <span class="text-muted" v-show="!entry.file" :title="t('global.no_file')">
-                                <i class="fas fa-fw fa-times"></i>
+                            <span
+                                v-show="!entry.file"
+                                class="text-muted"
+                                :title="t('global.no_file')"
+                            >
+                                <i class="fas fa-fw fa-times" />
                             </span>
                             <span v-show="entry.file">
-                                <a :href="entry.file_url" target="_blank">
-                                    <i class="fas fa-fw fa-search"></i>
+                                <a
+                                    :href="entry.file_url"
+                                    target="_blank"
+                                >
+                                    <i class="fas fa-fw fa-search" />
                                 </a>
                             </span>
                         </td>
                         <td>
                             <div class="dropdown">
-                                <span id="dropdownMenuButton" class="clickable" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fas fa-fw fa-ellipsis-h"></i>
+                                <span
+                                    id="dropdownMenuButton"
+                                    class="clickable"
+                                    data-bs-toggle="dropdown"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                >
+                                    <i class="fas fa-fw fa-ellipsis-vertical" />
                                 </span>
-                                <div class="dropdown-menu overlay-all" aria-labelledby="dropdownMenuButton">
-                                    <a class="dropdown-item" href="#" @click.prevent="editItem(entry)" :disabled="!can('bibliography_write')">
-                                        <i class="fas fa-fw fa-edit text-info"></i> {{ t('global.edit') }}
+                                <div
+                                    class="dropdown-menu overlay-all"
+                                    aria-labelledby="dropdownMenuButton"
+                                >
+                                    <a
+                                        class="dropdown-item"
+                                        href="#"
+                                        :disabled="!can('bibliography_write')"
+                                        @click.prevent="editItem(entry)"
+                                    >
+                                        <i class="fas fa-fw fa-edit text-info" /> {{ t('global.edit') }}
                                     </a>
-                                    <a class="dropdown-item" href="#" @click.prevent="openDeleteEntryModal(entry)" :disabled="!can('bibliography_delete')">
-                                        <i class="fas fa-fw fa-trash text-danger"></i> {{ t('global.delete') }}
+                                    <a
+                                        class="dropdown-item"
+                                        href="#"
+                                        :disabled="!can('bibliography_delete')"
+                                        @click.prevent="openDeleteEntryModal(entry)"
+                                    >
+                                        <i class="fas fa-fw fa-trash text-danger" /> {{ t('global.delete') }}
                                     </a>
                                 </div>
                             </div>
                         </td>
                     </tr>
+                    <!-- eslint-enable vue/no-v-html -->
+
                     <tr>
                         <td :colspan="state.maxTableCols">
-                            <button type="button" class="btn btn-outline-secondary btn-sm" @click="getNextEntries()" :disabled="state.allLoaded">
+                            <button
+                                type="button"
+                                class="btn btn-outline-secondary btn-sm"
+                                :disabled="state.allLoaded"
+                                @click="getNextEntries()"
+                            >
                                 <span v-if="!state.allLoaded">
-                                    <i class="fas fa-fw fa-sync"></i>
+                                    <i class="fas fa-fw fa-sync" />
                                     {{ t('global.list.fetch_next_entries') }}
                                 </span>
                                 <span v-else>
-                                    <i class="fas fa-fw fa-ban"></i>
+                                    <i class="fas fa-fw fa-ban" />
                                     {{ t('global.list.no_more_entries') }}
                                 </span>
                             </button>
@@ -408,7 +564,7 @@
     } from '@/helpers/bibliography.js';
 
     import {
-        getBibtexFile,
+        exportBibtexFile,
         updateBibliography,
     } from '@/api.js';
     import {
@@ -416,6 +572,7 @@
         createDownloadLink,
         createAnchorFromUrl,
         getProjectName,
+        throwError,
         _debounce,
         _orderBy,
     } from '@/helpers/helpers.js';
@@ -433,6 +590,8 @@
             const toast = useToast();
             // FETCH
 
+            const chunkSize = 20;
+
             // FUNCTIONS
             const setOrderColumn = column => {
                 if(state.orderColumn == column) {
@@ -449,13 +608,13 @@
             const getNextEntries = _ => {
                 if(state.entriesLoaded === state.allEntries.length) return;
 
-                state.entriesLoaded = Math.min(state.entriesLoaded + state.chunkSize, state.allEntries.length);
+                state.entriesLoaded = Math.min(state.entriesLoaded + chunkSize, state.allEntries.length);
             };
             const showNewItemModal = _ => {
                 if(!can('bibliography_create')) return;
                 
                 showBibliographyEntry({fields: {}}, _ => {
-                    if(state.allEntries.length < state.chunkSize) {
+                    if(state.allEntries.length < chunkSize) {
                         state.entriesLoaded++;
                     }
                 });
@@ -473,7 +632,7 @@
                 // Enable automatic upload
                 if(!!newFile && (Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error)) {
                     if(!newFile.active) {
-                        newFile.active = true
+                        newFile.active = true;
                     }
                 }
             };
@@ -489,12 +648,19 @@
                         channel: 'success',
                         duration: 10000,
                     });
+                }).catch(error => {
+                    throwError(error);
                 });
             };
-            const exportFile = _ => {
+            const exportFile = type => {
                 if(!can('bibliography_share')) return;
 
-                getBibtexFile().then(data => {
+                let selection = null;
+                if(type == 'search' && state.query.length > 0) {
+                    selection = state.filteredEntries.map(e => e.id);
+                }
+
+                exportBibtexFile(selection).then(data => {
                     const filename = getProjectName(true) + '.bibtex';
                     createDownloadLink(data, filename, false, 'application/x-bibtex');
                 });
@@ -520,15 +686,13 @@
             };
             const openDeleteEntryModal = entry => {
                 if(!can('bibliography_delete')) return;
-
                 showDeleteBibliographyEntry(entry, onEntryDeleted);
             };
 
             // DATA
             const state = reactive({
                 allEntries: computed(_ => store.getters.bibliography),
-                entriesLoaded: 0,
-                chunkSize: 20,
+                entriesLoaded: Math.min(chunkSize, store.getters.bibliography.length),
                 orderColumn: 'author',
                 orderType: 'asc',
                 query: '',
@@ -547,7 +711,7 @@
                         return 0;
                     }
                 }),
-                orderedBibliography: computed(_ => {
+                filteredEntries: computed(_ => {
                     const query = state.query.toLowerCase();
                     let filteredEntries = [];
                     if(!query.length) {
@@ -567,11 +731,11 @@
                             return false;
                         });
                     }
-                    if(state.entriesLoaded === 0) {
-                        state.entriesLoaded = state.chunkSize;
-                    }
-                    const size = Math.min(state.entriesLoaded, filteredEntries.length);
-                    return _orderBy(filteredEntries, state.orderColumn, state.orderType).slice(0, size);
+                    return filteredEntries;
+                }),
+                orderedBibliography: computed(_ => {
+                    const size = Math.min(state.entriesLoaded, state.filteredEntries.length);
+                    return _orderBy(state.filteredEntries, state.orderColumn, state.orderType).slice(0, size);
                 })
             });
 
@@ -579,27 +743,38 @@
                 state.query = e.target.value;
             }, state.debounceTimeout);
 
+            const formatBibtexText = text => {
+                if(!text) return '';
+                return text.replace(/[\{\}]/g, '');
+            };
+
+            const formatBibtexAndShowHighlight = text => {
+                if(!text) return '';
+                text = formatBibtexText(text);
+                return highlight(text, state.query);
+            };
+
             // RETURN
             return {
                 t,
                 // HELPERS
                 can,
                 createAnchorFromUrl,
-                highlight,
                 // LOCAL
                 debouncedSearch,
-                setOrderColumn,
-                getNextEntries,
-                showNewItemModal,
                 editItem,
-                openDeleteEntryModal,
-                inputFile,
-                importFile,
                 exportFile,
+                formatBibtexAndShowHighlight,
+                getNextEntries,
+                importFile,
+                inputFile,
+                openDeleteEntryModal,
+                setOrderColumn,
+                showNewItemModal,
                 // PROPS
                 // STATE
                 state,
             };
         },
-    }
+    };
 </script>

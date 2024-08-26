@@ -1,11 +1,11 @@
-import { only } from "@/helpers/helpers";
-import store from "./store.js";
-import i18n from "./i18n.js";
+import { only } from '@/helpers/helpers';
+import store from './store.js';
+import i18n from './i18n.js';
 import {
     router,
     onBeforeRouteLeave,
     onBeforeRouteUpdate,
-} from "./router.js";
+} from './router.js';
 import {
     global_api,
     api_base,
@@ -47,7 +47,7 @@ const defaultPluginOptions = {
     routes: {},
     store: null,
     api: null,
-}
+};
 const defaultSlotOptions = {
     of: null, // id of registered plugin
     slot: 'tab', // one of 'tab', 'tools' or 'settings'
@@ -57,14 +57,27 @@ const defaultSlotOptions = {
     component: null,
     componentTag: null,
     href: '', // for 'tools' and 'settings'
-}
+};
+const defaultDatatypeOptions = {
+    of: null, // id of registered plugin
+    category: 'system',
+    subcategory: 'general',
+    custom_subcategory: false,
+    custom_label: null,
+    label: null,
+    key: null,
+    component: null,
+    componentTag: null,
+    data: null,
+    default_value: null,
+};
 
 const {
     currentRoute,
     push,
 } = router;
 
-global.Vue = Vue;
+window.Vue = Vue;
 window.Buffer = buffer.Buffer;
 
 export const SpPS = {
@@ -108,8 +121,8 @@ export const SpPS = {
         t: null,
     },
     initialize: (app, t) => {
-        global.SpPS = SpPS;
-        global.t = t;
+        window.SpPS = SpPS;
+        window.t = t;
         SpPS.data.app = app;
         SpPS.data.t = t;
     },
@@ -208,6 +221,45 @@ export const SpPS = {
             }
         }
         store.dispatch('registerPluginInSlot', mergedOptions);
+    },
+    registerPreference: (options) => {
+        if(!options.of || !SpPS.data.plugins[options.of]) {
+            throw new Error('This plugin preference has no associated plugin or that plugin is not installed!');
+        }
+        if(!options.label) {
+            throw new Error('No label for preference provided!');
+        }
+        if(!options.key) {
+            throw new Error('No key for preference provided!');
+        }
+        if(!options.category) {
+            throw new Error('No category for preference provided!');
+        }
+        if(options.category != 'user' && options.category != 'system') {
+            throw new Error('Invalid category for preference provided! \'user\' or \'system\' are valid categories.');
+        }
+        if(!options.subcategory) {
+            throw new Error('No subcategory for preference provided!');
+        }
+        if(options.custom_subcategory && !options.custom_label) {
+            throw new Error('No label for custom preference provided!');
+        }
+        const mergedOptions = {
+            ...defaultDatatypeOptions,
+            ...only(options, Object.keys(defaultDatatypeOptions)),
+        };
+        mergedOptions.key = `plugin.${mergedOptions.of}.${mergedOptions.key}`;
+        mergedOptions.componentTag = `sp-${mergedOptions.of}-pref-${mergedOptions.componentTag}`;
+        if(!!mergedOptions.component) {
+            if(typeof mergedOptions.component == 'string') {
+                SpPS.data.app.component(mergedOptions.componentTag, {
+                    template: mergedOptions.component,
+                });
+            } else {
+                SpPS.data.app.component(mergedOptions.componentTag, mergedOptions.component);
+            }
+        }
+        store.dispatch('registerPluginPreference', mergedOptions);
     },
 }
 

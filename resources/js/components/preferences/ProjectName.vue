@@ -1,8 +1,15 @@
 <template>
     <div class="row">
-        <label class="col-md-2 form-label"></label>
+        <label class="col-md-2 form-label" />
         <div class="col-md-10">
-            <input class="form-control" type="text" v-model="data" :readonly="readonly" @input="onChange" />
+            <input
+                :value="modelValue"
+                class="form-control"
+                type="text"
+                :disabled="readonly"
+                :readonly="readonly"
+                @input="onInput"
+            >
         </div>
     </div>
 </template>
@@ -18,7 +25,7 @@
 
     export default {
         props: {
-            data: {
+            modelValue: {
                 required: true,
                 type: String,
             },
@@ -28,7 +35,7 @@
                 default: false,
             },
         },
-        emits: ['changed'],
+        emits: ['changed', 'update:modelValue'],
         setup(props, context) {
             const {
                 data,
@@ -38,18 +45,21 @@
             // FUNCTIONS
             const onChange = _debounce(e => {
                 if(readonly.value) return;
-                context.emit('changed', {
-                    value: e.target.value
-                });
+                context.emit('changed',  e.target.value);
+
             }, 250);
+
+            const onInput = (e)=> {
+                if(readonly.value) return;
+                context.emit('update:modelValue', e.target.value);
+                onChange(e)
+            }
 
             // RETURN
             return {
                 // LOCAL
                 onChange,
-                // PROPS
-                data,
-                readonly,
+                onInput,
                 // STATE
             };
         }
