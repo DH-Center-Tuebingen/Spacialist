@@ -28,12 +28,12 @@ class GeodataTest extends TestCase
      *
      * @return void
      */
-    public function testParseWkt()
+    public function testFromWKT()
     {
-        $data = Geodata::parseWkt('PIONT(1 2)');
+        $data = Geodata::fromWKT('PIONT(1 2)');
         $this->assertNull($data);
 
-        $data = Geodata::parseWkt('POINT Z(1 2 3)');
+        $data = Geodata::fromWKT('POINT Z(1 2 3)');
         $this->assertEquals(2, $data->getLat());
         $this->assertEquals(1, $data->getLng());
         $this->assertEquals(3, $data->getAlt());
