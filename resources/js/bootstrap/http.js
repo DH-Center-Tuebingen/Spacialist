@@ -90,7 +90,7 @@ export function useHttp() {
 
 export const open = axios.create();
 
-open.defaults.baseURL = '/api/v1/open';
+open.defaults.baseURL = 'api/v1/open';
 open.defaults.withCredentials = false;
 
 export function useOpenHttp() {
