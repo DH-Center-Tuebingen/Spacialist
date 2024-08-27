@@ -20,7 +20,7 @@ export function isUnhandledError(axiosError) {
 
 // Some errors are handled by the system.
 // If we handle those again, we have e.g. multiple error popups.
-// This allows us to just catch the errors that are not handled by 
+// This allows us to just catch the errors that are not handled by
 // the system.
 export function handleUnhandledErrors(axiosError, callback) {
     if(isUnhandledError(axiosError)) {
@@ -72,7 +72,7 @@ export function useHttp() {
 
 export const open = axios.create();
 
-open.defaults.baseURL = '/api/v1/open';
+open.defaults.baseURL = 'api/v1/open';
 open.defaults.withCredentials = false;
 
 export function useOpenHttp() {

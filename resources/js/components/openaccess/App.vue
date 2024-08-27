@@ -8,7 +8,7 @@
                     class="navbar-brand"
                 >
                     <img
-                        src="/favicon.png"
+                        src="favicon.png"
                         class="logo"
                         alt="spacialist logo"
                     >
