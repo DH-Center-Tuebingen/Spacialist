@@ -6,13 +6,13 @@ export async function fetchGlobals() {
     return $httpQueue.add(
         () => http.get('/global').then(response => response.data)
     );
-};
+}
 
 export async function fetchEntityTypes() {
     return $httpQueue.add(
         () => http.get('/types').then(response => response.data)
     );
-};
+}
 
 export async function fetchAttributes(entityTypeId = null, countData = false) {
     let url = '/attributes';
@@ -26,13 +26,13 @@ export async function fetchAttributes(entityTypeId = null, countData = false) {
     return $httpQueue.add(
         () => http.get(url).then(response => response.data)
     );
-};
+}
 
 export async function getEntity(eid) {
     return $httpQueue.add(
         () => http.get(`/entity/${eid}`).then(response => response.data)
     );
-};
+}
 
 export async function getEntityData(eid) {
     return $httpQueue.add(
@@ -49,7 +49,7 @@ export async function getFilterResults(entityTypeIds, attributeIds, page = 1) {
     return $httpQueue.add(
         () => http.post(`/result?page=${page}`, data).then(response => response.data)
     );
-};
+}
 
 export async function getFilterResultsForType(entityTypeId, filters = [], page = 1, or = false) {
     const data = {
@@ -60,4 +60,4 @@ export async function getFilterResultsForType(entityTypeId, filters = [], page =
     return $httpQueue.add(
         () => http.post(`/result/by_type/${entityTypeId}?page=${page}`, data).then(response => response.data)
     );
-};
+}

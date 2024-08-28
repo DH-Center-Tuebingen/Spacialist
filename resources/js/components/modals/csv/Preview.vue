@@ -21,6 +21,7 @@
             </div>
             <div class="modal-body">
                 <file-upload
+                    v-if="state.fileContent === ''"
                     ref="upload"
                     v-model="state.fileQueue"
                     accept="text/csv"
@@ -38,10 +39,13 @@
                     </div>
                 </file-upload>
                 <csv-table
+                    v-else
                     :content="state.fileContent"
                     :small="true"
                     :options="true"
+                    :removable="true"
                     @parse="getParsedData"
+                    @remove="state.fileContent = ''"
                 />
             </div>
             <div class="modal-footer">
@@ -73,7 +77,7 @@
         onMounted,
         reactive,
     } from 'vue';
-    
+
     import { useI18n } from 'vue-i18n';
 
     export default {
@@ -88,7 +92,7 @@
                 }
             };
             const parseFile = (file, component) => {
-                    state.fileReader.readAsText(file.file);
+                state.fileReader.readAsText(file.file);
             };
             const getParsedData = e => {
                 state.parsedCsv = e;
@@ -113,7 +117,7 @@
             onMounted(_ => {
                 state.fileReader.onload = e => {
                     state.fileContent = e.target.result;
-                }
+                };
             });
 
             // RETURN
@@ -129,7 +133,7 @@
                 closeModal,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

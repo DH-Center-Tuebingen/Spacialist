@@ -10,6 +10,8 @@
         :options="state.filteredSelections"
         :name="name"
         :searchable="true"
+        :infinite="true"
+        :limit="15"
         :filter-results="false"
         :close-on-select="false"
         :placeholder="t('global.select.placeholder')"
@@ -54,6 +56,7 @@
 
     import {
         translateConcept,
+        only,
     } from '@/helpers/helpers.js';
 
     export default {
@@ -118,11 +121,16 @@
             const state = reactive({
                 query: null,
                 filteredSelections: computed(_ => {
-                    if(!state.query) return selections.value;
+                    let selection = null;
+                    if(!state.query) {
+                        selection = selections.value;
+                    } else {
+                        selection = selections.value.filter(concept => {
+                            return concept.concept_url.toLowerCase().indexOf(state.query) !== -1 || translateConcept(concept.concept_url).toLowerCase().indexOf(state.query) !== -1;
+                        });
+                    }
 
-                    return selections.value.filter(concept => {
-                        return concept.concept_url.toLowerCase().indexOf(state.query) !== -1 || translateConcept(concept.concept_url).toLowerCase().indexOf(state.query) !== -1;
-                    });
+                    return selection.map(s => only(s, ['id', 'concept_url']));
                 }),
             });
             const v = reactive({

@@ -97,8 +97,8 @@ export async function removePlugin(id) {
 }
 
 export async function fetchEntityMetadata(id) {
-    const {data} = await $httpQueue.add(() => http.get(`entity/${id}/metadata`));
-    store.dispatch('updateEntityMetadata', {eid: id, data});
+    const { data } = await $httpQueue.add(() => http.get(`entity/${id}/metadata`));
+    store.dispatch('updateEntityMetadata', { eid: id, data });
     return data;
 }
 
@@ -270,7 +270,7 @@ async function fetchComments(id, type, aid = null) {
     if(!!aid) {
         endpoint = `${endpoint}&aid=${aid}`;
     }
-    return $httpQueue.add(() => http.get(endpoint).then(response => response.data).catch(error => {throw error;}));
+    return $httpQueue.add(() => http.get(endpoint).then(response => response.data).catch(error => { throw error; }));
 }
 
 export async function exportBibtexFile(selection) {
@@ -358,7 +358,7 @@ export async function resetUserPassword(uid, password) {
 }
 
 export async function confirmUserPassword(uid, password = null) {
-    const data = !!password ? {password: password} : {};
+    const data = !!password ? { password: password } : {};
     return $httpQueue.add(
         () => http.patch(`user/${uid}/password/confirm`, data).then(response => response.data)
     );
@@ -482,7 +482,7 @@ export async function duplicateEntity(entity) {
 
 export async function importEntityData(data) {
     return $httpQueue.add(
-        () => http.post(`/entity/import`, data).then(response => response.data).catch(e => {throw e;})
+        () => http.post(`/entity/import`, data).then(response => response.data).catch(e => { throw e; })
     );
 }
 
@@ -525,19 +525,29 @@ export async function addAttribute(attribute) {
         data.restricted_types = attribute.restrictedTypes.map(t => t.id);
     }
     if(attribute.columns && attribute.columns.length > 0) {
-        data.columns = attribute.columns.map(c => {
-            const mappedC = {...c};
-            if(mappedC.label) {
-                mappedC.label_id = mappedC.label.id;
-                delete mappedC.label;
+        data.columns = attribute.columns.map(column => {
+            const mappedColumn = { ...column };
+            if(mappedColumn.label) {
+                mappedColumn.label_id = mappedColumn.label.id;
+                delete mappedColumn.label;
             }
-            if(mappedC.rootLabel) {
-                mappedC.root_id = mappedC.rootLabel.id;
-                delete mappedC.rootLabel;
+            if(mappedColumn.rootLabel) {
+                mappedColumn.root_id = mappedColumn.rootLabel.id;
+                delete mappedColumn.rootLabel;
             }
-            mappedC.datatype = mappedC.type;
-            delete mappedC.type;
-            return mappedC;
+            if(mappedColumn.restrictedTypes) {
+                mappedColumn.restricted_types = mappedColumn.restrictedTypes.map(t => t.id);
+                delete mappedColumn.restrictedTypes;
+            }
+            if(mappedColumn.siGroup) {
+                mappedColumn.si_base = mappedColumn.siGroup;
+                mappedColumn.si_default = mappedColumn.siGroupUnit;
+                delete mappedColumn.siGroup;
+                delete mappedColumn.siGroupUnit;
+            }
+            mappedColumn.datatype = mappedColumn.type;
+            delete mappedColumn.type;
+            return mappedColumn;
         });
     }
     if(attribute.textContent) {
@@ -630,7 +640,7 @@ export async function patchEntityName(eid, name) {
 
 export async function patchEntityMetadata(eid, metadata) {
     return $httpQueue.add(
-        () => http.patch(`entity/${eid}/metadata`, metadata).then(response => response.data).catch(error => {throw error;})
+        () => http.patch(`entity/${eid}/metadata`, metadata).then(response => response.data).catch(error => { throw error; })
     );
 }
 
@@ -671,7 +681,7 @@ export async function handleModeration(modAction, entity_id, attribute_id, overw
                 });
             }
             return response.data;
-        }).catch(error => {throw error;})
+        }).catch(error => { throw error; })
     );
 }
 

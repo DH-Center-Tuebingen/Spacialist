@@ -222,7 +222,6 @@ class OpenAccessController extends Controller
                 });
             }
         }
-
         $results = $query->with('attributes')->paginate();
 
         if($page == 1) {

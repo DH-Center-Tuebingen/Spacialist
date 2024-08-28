@@ -135,6 +135,15 @@
                 alt-icon="eye-slash"
                 @click="$emit('update:showPreview', !showPreview)"
             />
+            <button
+                v-if="removable"
+                class="btn btn-outline-danger"
+                type="button"
+                style="border-left-width: 2px;"
+                @click="() => $emit('remove')"
+            >
+                {{ t('global.remove_file') }}
+            </button>
         </div>
     </form>
 </template>
@@ -193,7 +202,10 @@
             total: {
                 type: Number,
                 required: true
-            }
+            },
+            removable: {
+                type: Boolean,
+            },
         },
         emits: [
             'update:delimiter',
@@ -203,6 +215,7 @@
             'update:showCount',
             'update:skippedCount',
             'update:showPreview',
+            'remove',
         ],
         setup(props, context) {
             const { t } = useI18n();

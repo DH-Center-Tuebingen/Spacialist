@@ -15,8 +15,6 @@ use App\Exceptions\Structs\ImportExceptionStruct;
 use App\Exceptions\InvalidDataException;
 use App\Exceptions\Structs\AttributeImportExceptionStruct;
 use App\Import\EntityImporter;
-use App\Import\ImportResolution;
-use App\Import\ImportResolutionType;
 use App\Reference;
 use App\ThConcept;
 use Exception;
@@ -985,7 +983,7 @@ class EntityController extends Controller {
 
     public function patchName($id, Request $request) {
         $user = auth()->user();
-        if(!$user->can('entity_write')) {
+        if(!$user->can('entity_data_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to modify an entity\'s data'),
             ], 403);

@@ -3,7 +3,7 @@
 namespace App\AttributeTypes;
 
 use App\Geodata;
-use Clickbar\Magellan\IO\Generator\WKT\WKTGenerator;
+// use Clickbar\Magellan\IO\Generator\WKT\WKTGenerator;
 
 class GeographyAttribute extends AttributeBase
 {
