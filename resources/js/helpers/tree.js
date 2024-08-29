@@ -1,6 +1,9 @@
 import TreeNode from '@/components/tree/Node.vue';
 
-import { ref } from 'vue';
+import {
+    markRaw,
+    ref,
+ } from 'vue';
 import store from '@/bootstrap/store.js';
 import { getNodeFromPath } from 'tree-component';
 import {
@@ -8,7 +11,7 @@ import {
 } from '@/api.js';
 
 import {
-    translateEntityType,
+    getEntityTypeName,
 } from '@/helpers/helpers.js';
 
 export async function fetchChildren(id, sort = {by: 'rank', dir: 'asc'}) {
@@ -56,8 +59,8 @@ export function sortTree(by, dir, tree) {
             break;
         case 'type':
             sortFn = (a, b) => {
-                const aurl = translateEntityType(a.entity_type_id);
-                const burl = translateEntityType(b.entity_type_id);
+                const aurl = getEntityTypeName(a.entity_type_id);
+                const burl = getEntityTypeName(b.entity_type_id);
                 let value = 0;
                 if(aurl < burl) value = -1;
                 if(aurl > burl) value = 1;
@@ -125,7 +128,7 @@ export class Node {
         this.children = ref([]);
         this.childrenLoaded = ref(this.children.length == this.children_count);
         this.children_count = ref(this.children_count);
-        this.component = component || TreeNode;
+        this.component = component || markRaw(TreeNode);
         // this.dragDelay = vm.dragDelay;
         // this.dragAllowed = _ => vm.isDragAllowed;
         // this.onToggle = vm.itemToggle;

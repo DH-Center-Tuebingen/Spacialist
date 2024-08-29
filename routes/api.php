@@ -49,6 +49,7 @@ Route::middleware('auth:sanctum')->prefix('v1/entity')->group(function() {
     Route::get('/entity_type/{etid}/data/{aid}', 'EntityController@getDataForEntityType')->where('etid', '[0-9]+')->where('aid', '[0-9]+');
     Route::get('/{id}/data', 'EntityController@getData')->where('id', '[0-9]+');
     Route::get('/{id}/data/{aid}', 'EntityController@getData')->where('id', '[0-9]+')->where('aid', '[0-9]+');
+    Route::get('/{id}/metadata', 'EntityController@getMetadata')->where('id', '[0-9]+');
     Route::get('/{id}/reference', 'ReferenceController@getByEntity')->where('id', '[0-9]+');
     Route::get('/{id}/parentIds', 'EntityController@getParentIds')->where('id', '[0-9]+');
     Route::get('/byParent/{id}', 'EntityController@getEntitiesByParent')->where('id', '[0-9]+');
@@ -64,6 +65,7 @@ Route::middleware('auth:sanctum')->prefix('v1/entity')->group(function() {
     Route::patch('/multiedit', 'EntityController@multieditAttributes');
     Route::patch('/{id}/attribute/{aid}/moderate', 'EntityController@handleModeration')->where('id', '[0-9]+')->where('aid', '[0-9]+');
     Route::patch('/{id}/name', 'EntityController@patchName')->where('id', '[0-9]+');
+    Route::patch('/{id}/metadata', 'EntityController@patchMetadata')->where('id', '[0-9]+');
     Route::patch('/{id}/rank', 'EntityController@moveEntity')->where('id', '[0-9]+');
     Route::patch('/reference/{id}', 'ReferenceController@patchReference')->where('id', '[0-9]+');
 

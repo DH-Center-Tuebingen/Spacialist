@@ -4,7 +4,7 @@ namespace App;
 
 use Clickbar\Magellan\Data\Geometries\Geometry;
 use Clickbar\Magellan\Database\Eloquent\HasPostgisColumns;
-use MStaack\LaravelPostgis\Exceptions\UnknownWKTTypeException;
+use Illuminate\Support\Facades\DB;
 
 class Geodata
 {
@@ -19,12 +19,15 @@ class Geodata
     }
 
     public static function parseWkt($wkt) {
-        try {
-            $geom = Geometry::getWKTClass($wkt);
-            $parsed = $geom::fromWKT($wkt);
-            return $parsed;
-        } catch(UnknownWKTTypeException $e) {
-            return null;
-        }
+        // Fixed version in 0.11-feat-showcase
+        $geom = Geometry::getWKTClass($wkt);
+        $parsed = $geom::fromWKT($wkt);
+        return $parsed;
+    }
+
+    public static function arrayToWkt($arr) {
+        $json = json_encode($arr);
+        return DB::select("SELECT ST_AsText(ST_GeomFromGeoJSON('$json')) AS wkt")[0]->wkt;
+
     }
 }

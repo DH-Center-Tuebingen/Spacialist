@@ -448,7 +448,7 @@
             };
             const uploadFile = (file, component) => {
                 return setUserAvatar(file.file).then(data => {
-                    updateUserObjects(data)
+                    updateUserObjects(data);
                 });
             };
             const inputFile = (newFile, oldFile) => {
@@ -459,12 +459,12 @@
                 // Enable automatic upload
                 if(!!newFile && (Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error)) {
                     if(!newFile.active) {
-                        newFile.active = true
+                        newFile.active = true;
                     }
                 }
             };
             const appliedMetadata = u => {
-                const nu = _cloneDeep(u)
+                const nu = _cloneDeep(u);
                 return u.metadata ? nu : {...nu, ...{metadata: {}}};
             };
 
@@ -528,5 +528,5 @@
                 v,
             };
         },
-    }
+    };
 </script>

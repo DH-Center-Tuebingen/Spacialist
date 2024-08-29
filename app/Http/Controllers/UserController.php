@@ -488,7 +488,6 @@ class UserController extends Controller
             $password = Hash::make($request->get('password'));
             $pUser->password = $password;
         }
-
         $pUser->login_attempts = null;
         $pUser->save();
 

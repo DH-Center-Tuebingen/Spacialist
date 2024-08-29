@@ -30,6 +30,7 @@
                 <a
                     href="#"
                     class="text-nowrap text-reset text-decoration-none"
+                    :title="option.nickname"
                     @click.prevent="showUserInfo(option)"
                 >
                     <user-avatar

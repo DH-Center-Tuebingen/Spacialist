@@ -2,7 +2,6 @@
 import store from '%store';
 import router from '%router';
 
-
 import {
     fetchAttributes,
     fetchBibliography,
@@ -288,6 +287,10 @@ export function getEntityTypeDependencies(id, aid) {
     }
 }
 
+export function getAttributeSelection(aid) {
+    return store.getters.attributeSelections[aid];
+}
+
 export function getAttributeSelections(attributes) {
     const sel = store.getters.attributeSelections;
     let filteredSel = {};
@@ -415,6 +418,48 @@ export function getInitialAttributeValue(attribute, typeAttr = 'type') {
     }
 }
 
+export function getEmptyAttributeValue(type) {
+    if(!type) return null;
+
+    switch(type) {
+        case 'boolean':
+            return false;
+        case 'dimension':
+        case 'entity':
+        case 'epoch':
+        case 'timeperiod':
+            return {};
+        case 'float':
+        case 'integer':
+        case 'percentage':
+            return;
+        case 'list':
+        case 'daterange':
+        case 'string-mc':
+        case 'entity-mc':
+        case 'userlist':
+        case 'daterange':
+        case 'table':
+        case 'userlist':
+            return [];
+        case 'serial':
+        case 'sql':
+            return null;
+        case 'richtext':
+        case 'rism':
+        case 'string':
+        case 'stringf':
+        case 'system-separator':
+        case 'geography':
+        case 'iconclass':
+        case 'string-sc':
+        case 'date':
+        case 'url':
+        default:
+            return '';
+    }
+}
+
 export function getAttributeValueAsString(rawValue, datatype) {
     if(!rawValue || !datatype) {
         return null;
@@ -502,6 +547,10 @@ export function calculateEntityColors(id, alpha = 0.5) {
     };
 }
 
+export function getEntity(id) {
+    return store.getters.entities[id] || {};
+}
+
 export function getEntityColors(id) {
     let colors = store.getters.entityTypeColors(id);
     if(!colors) {
@@ -532,6 +581,10 @@ export function isLoggedIn() {
 
 export function getUser() {
     return isLoggedIn() ? store.getters.user : {};
+}
+
+export function isModerated() {
+    return isLoggedIn() ? store.getters.isModerated : true;
 }
 
 export function isModerated() {

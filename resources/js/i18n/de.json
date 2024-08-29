@@ -32,7 +32,8 @@
             "nr_of_entries": "Keine Einträge | 1 Eintrag | {cnt} Einträge",
             "no_entries": "Keine Einträge gefunden.",
             "fetch_next_entries": "Weitere Einträge laden",
-            "no_more_entries": "Keine weiteren Einträge"
+            "no_more_entries": "Keine weiteren Einträge",
+            "stats": "Zeige {from}-{to} von {total}"
         },
         "select_all": "Alle auswählen",
         "select_none": "Alle abwählen",
@@ -172,6 +173,7 @@
             "rism": "RISM",
             "si-unit": "SI-Einheit",
             "si_units": {
+                "unit_type": "Einheit",
                 "base_unit": "Basisgröße",
                 "time": {
                     "label": "Zeit",
@@ -240,13 +242,57 @@
                         "pound": "Britisches Pfund"
                     }
                 },
+                "force": {
+                    "label": "Kraft",
+                    "units": {
+                        "newton": "Newton",
+                        "kilonewton": "Kilonewton"
+                    }
+                },
                 "temperature": {
                     "label": "Temperatur",
                     "units": {
-                        "degree_celsius": "Celsius",
-                        "degree_kelvin": "Kelvin",
-                        "degree_fahrenheit": "Fahrenheit",
-                        "degree_réaumur": "Réaumur"
+                        "celsius": "Celsius",
+                        "kelvin": "Kelvin",
+                        "fahrenheit": "Fahrenheit",
+                        "réaumur": "Réaumur"
+                    }
+                },
+                "volumetric_flow": {
+                    "label": "Volumenstrom",
+                    "units": {
+                        "cubic_metre_per_second": "Kubikmeter pro Sekunde",
+                        "litre_per_second": "Liter pro Sekunde"
+                    }
+                },
+                "speed": {
+                    "label": "Geschwindigkeit",
+                    "units": {
+                        "metre_per_second": "Meter pro Sekunde",
+                        "kilometre_per_hour": "Kilometer pro Stunde",
+                        "mile_per_hour": "Meilen pro Stunde"
+                    }
+                },
+                "pressure": {
+                    "label": "Druck",
+                    "units": {
+                        "pascal": "Pascal",
+                        "kilopascal": "Kilopascal",
+                        "hectopascal": "Hectopascal",
+                        "bar": "Bar",
+                        "decibar": "Decibar",
+                        "millibar": "Millibar",
+                        "torr": "Torr",
+                        "technical_atmosphere": "Technische Atmosphäre",
+                        "standard_atmosphere": "Physikalische Atmosphäre",
+                        "pound_per_square_inch": "Pfund pro Quadratzoll"
+                    }
+                },
+                "quotient": {
+                    "label": "Quotient",
+                    "units": {
+                        "percent": "Prozent",
+                        "parts_per_million": "Parts per million"
                     }
                 }
             },
@@ -283,6 +329,9 @@
         "confirm_password": "Passwort wiederholen",
         "remember_me": "Eingeloggt bleiben",
         "orcid": "ORCID",
+        "licence": "Lizenz",
+        "licence_default": "Standard-Lizenz",
+        "licence_missing": "Lizenz-Angabe fehlt",
         "description": "Beschreibung",
         "roles": "Rollen",
         "permissions": "Berechtigungen",
@@ -292,6 +341,9 @@
         "deactivated_at": "Deaktiviert",
         "timestamp": "Zeitstempel",
         "options": "Optionen",
+        "summary": "Zusammenfassung",
+        "creator": "Ersteller",
+        "editors": "Bearbeiter",
         "reply_to": "Antworten",
         "replying_to": "Antwort an {name}",
         "type": "Typ",
@@ -408,12 +460,17 @@
         },
         "entity": {
             "title": "Entität | Entitäten",
+            "top_level": "Top-Level-Entität",
             "count": "Keine Top-Level Entitäten | Eine Top-Level Entität | {cnt} Top-Level Entitäten",
             "detail_tab_none_selected": "Keine Entität ausgewählt. Wähle aus dem Baum eine Entität aus um hier Details dazu zu erhalten.",
             "toasts": {
                 "updated": {
                     "title": "Entität aktualisiert",
                     "msg": "Daten von „{name}“ wurden erfolgreich aktualisiert."
+                },
+                "updated_metadata": {
+                    "title": "Metadaten aktualisiert",
+                    "msg": "Metadaten von {name} wurden erfolgreich aktualisiert."
                 },
                 "deleted": {
                     "title": "Entität gelöscht",
@@ -456,6 +513,7 @@
             "tabs": {
                 "default": "Allgemein",
                 "comments": "Kommentare",
+                "metadata": "Metadaten",
                 "untitled_group": "Unbenannt ({cnt})"
             },
             "modals": {
@@ -516,6 +574,9 @@
                 },
                 "table": {
                     "add_row": "Neue Zeile hinzufügen",
+                    "error": {
+                        "deleted_entity": "Gelöschte Entität"
+                    },
                     "chart": {
                         "number_sets": "Die letzten {cnt} Datensätze",
                         "include_in": "Verwenden",
@@ -539,6 +600,10 @@
                         "cancel": "Bearbeitung verwerfen"
                     }
                 }
+            },
+            "metadata": {
+                "save": "Metadaten speichern",
+                "deleted_entity_name": "Gelöschte Entität #{id}"
             }
         },
         "user": {
@@ -774,6 +839,23 @@
                 "support_database": "Datenbankunterstützung",
                 "support_archaeology": "Archäologische Unterstützung",
                 "project_lead": "Projektleitung"
+            }
+        },
+        "history": {
+            "title": "Verlauf",
+            "created_as": "Erstellt als:",
+            "no_value": "Kein Wert aufgezeichnet",
+            "entity": {
+                "created_in": "Als Unter-Entität von:",
+                "name_update": "Name aktualisiert:",
+                "name_unknown": "Unbekannte Entität",
+                "name_unknown_info": "Das bedeutet, dass die Entität entweder gelöscht wurde oder du nicht die nötigen Berechtigungen besitzt.",
+                "value_add_attribute": "Wert zu Attribut hinzugefügt:",
+                "value_update_attribute": "Wert von Attribut geändert:",
+                "certainty_update": "Sicherheit aktualisiert:",
+                "certainty_unknown": "Unbekannt",
+                "moved": "Verschoben:",
+                "rank": "Rang"
             }
         },
         "bibliography": {

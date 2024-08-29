@@ -157,13 +157,13 @@
                     if(state.infoLoaded) {
                         return state.info.kw[state.language] ? state.info.kw[state.language] : state.info.kw['en'];
                     }
-                    return []
+                    return [];
                 }),
                 text: computed(_ => {
                     if(state.infoLoaded) {
                         return state.info.txt[state.language] ? state.info.txt[state.language] : state.info.txt['en'];
                     }
-                    return ''
+                    return '';
                 }),
             });
             const v = reactive({

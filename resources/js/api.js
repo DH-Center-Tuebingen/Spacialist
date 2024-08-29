@@ -108,6 +108,12 @@ export async function removePlugin(id) {
     );
 }
 
+export async function fetchEntityMetadata(id) {
+    const { data } = await $httpQueue.add(() => http.get(`entity/${id}/metadata`));
+    store.dispatch('updateEntityMetadata', { eid: id, data });
+    return data;
+}
+
 export async function fetchUser() {
     await $httpQueue.add(() => http.get('/auth/user').then(response => {
         const data = response.data;
@@ -256,6 +262,12 @@ export async function getEntityReferences(id) {
                 }
                 return response.data;
             })
+    );
+}
+
+export async function getEntityTypeAttributes(id) {
+    return await $httpQueue.add(
+        () => http.get(`/editor/entity_type/${id}/attribute`)
     );
 }
 
@@ -541,19 +553,29 @@ export async function addAttribute(attribute) {
         data.restricted_types = attribute.restrictedTypes.map(t => t.id);
     }
     if(attribute.columns && attribute.columns.length > 0) {
-        data.columns = attribute.columns.map(c => {
-            const mappedC = { ...c };
-            if(mappedC.label) {
-                mappedC.label_id = mappedC.label.id;
-                delete mappedC.label;
+        data.columns = attribute.columns.map(column => {
+            const mappedColumn = { ...column };
+            if(mappedColumn.label) {
+                mappedColumn.label_id = mappedColumn.label.id;
+                delete mappedColumn.label;
             }
-            if(mappedC.rootLabel) {
-                mappedC.root_id = mappedC.rootLabel.id;
-                delete mappedC.rootLabel;
+            if(mappedColumn.rootLabel) {
+                mappedColumn.root_id = mappedColumn.rootLabel.id;
+                delete mappedColumn.rootLabel;
             }
-            mappedC.datatype = mappedC.type;
-            delete mappedC.type;
-            return mappedC;
+            if(mappedColumn.restrictedTypes) {
+                mappedColumn.restricted_types = mappedColumn.restrictedTypes.map(t => t.id);
+                delete mappedColumn.restrictedTypes;
+            }
+            if(mappedColumn.siGroup) {
+                mappedColumn.si_base = mappedColumn.siGroup;
+                mappedColumn.si_default = mappedColumn.siGroupUnit;
+                delete mappedColumn.siGroup;
+                delete mappedColumn.siGroupUnit;
+            }
+            mappedColumn.datatype = mappedColumn.type;
+            delete mappedColumn.type;
+            return mappedColumn;
         });
     }
     if(attribute.textContent) {
@@ -641,6 +663,12 @@ export async function patchEntityName(eid, name) {
     };
     return $httpQueue.add(
         () => http.patch(`entity/${eid}/name`, data).then(response => response.data)
+    );
+}
+
+export async function patchEntityMetadata(eid, metadata) {
+    return $httpQueue.add(
+        () => http.patch(`entity/${eid}/metadata`, metadata).then(response => response.data).catch(error => { throw error; })
     );
 }
 

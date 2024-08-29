@@ -3,7 +3,6 @@
 namespace App\AttributeTypes;
 
 use App\Attribute;
-use App\ThConcept;
 
 class TableAttribute extends AttributeBase
 {
@@ -32,10 +31,49 @@ class TableAttribute extends AttributeBase
     }
 
     public static function unserialize(mixed $data) : mixed {
-        return json_encode($data);
+        $attributeTypes = Attribute::whereNotNull('parent_id')
+            ->whereIn('datatype', ['entity', 'entity-mc'])
+            ->pluck('datatype', 'id')
+            ->toArray();
+        foreach($data as $rowId => $row) {
+            // skip empty rows
+            if(count($row) === 0) continue;
+            foreach($row as $aid => $colValue) {
+                foreach($attributeTypes as $tid => $type) {
+                    if($aid == $tid) {
+                        if($type == 'entity') {
+                            $data[$rowId][$aid] = EntityAttribute::unserialize($colValue);
+                        } else if($type == 'entity-mc') {
+                            $data[$rowId][$aid] = EntityMultipleAttribute::unserialize($colValue);
+                        }
+                    }
+                }
+            }
+        }
+        // array_filter with one argument (no callback) filters all empty (`empty()`) values
+        $cleanData = array_values(array_filter($data));
+        return json_encode($cleanData);
     }
 
     public static function serialize(mixed $data) : mixed {
-        return json_decode($data);
+        $attributeTypes = Attribute::whereNotNull('parent_id')
+            ->whereIn('datatype', ['entity', 'entity-mc'])
+            ->select('id', 'datatype')
+            ->get();
+        $decodedData = json_decode($data);
+        foreach($decodedData as $rowId => $row) {
+            foreach($row as $aid => $colValue) {
+                foreach($attributeTypes as $type) {
+                    if($aid == $type["id"]) {
+                        if($type["datatype"] == 'entity') {
+                            $decodedData[$rowId]->{$aid} = EntityAttribute::serialize($colValue);
+                        } else if($type["datatype"] == 'entity-mc') {
+                            $decodedData[$rowId]->{$aid} = EntityMultipleAttribute::serialize($colValue);
+                        }
+                    }
+                }
+            }
+        }
+        return $decodedData;
     }
 }

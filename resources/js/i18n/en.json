@@ -32,7 +32,8 @@
             "nr_of_entries": "No Entries | 1 Entry | {cnt} Entries",
             "no_entries": "No entries found.",
             "fetch_next_entries": "Fetch next entries",
-            "no_more_entries": "No more entries"
+            "no_more_entries": "No more entries",
+            "stats": "Displaying {from}-{to} of {total}"
         },
         "select_all": "Select All",
         "select_none": "Deselect All",
@@ -172,6 +173,7 @@
             "rism": "RISM",
             "si-unit": "SI-Unit",
             "si_units": {
+                "unit_type": "Unit Type",
                 "base_unit": "Base Unit",
                 "time": {
                     "label": "Time",
@@ -240,13 +242,57 @@
                         "pound": "Pound"
                     }
                 },
+                "force": {
+                    "label": "Force",
+                    "units": {
+                        "newton": "Newton",
+                        "kilonewton": "Kilonewton"
+                    }
+                },
                 "temperature": {
                     "label": "Temperature",
                     "units": {
-                        "degree_celsius": "Celsius",
-                        "degree_kelvin": "Kelvin",
-                        "degree_fahrenheit": "Fahrenheit",
-                        "degree_réaumur": "Réaumur"
+                        "celsius": "Celsius",
+                        "kelvin": "Kelvin",
+                        "fahrenheit": "Fahrenheit",
+                        "réaumur": "Réaumur"
+                    }
+                },
+                "volumetric_flow": {
+                    "label": "Volumetric Flow",
+                    "units": {
+                        "cubic_metre_per_second": "Cubic metre per second",
+                        "litre_per_second": "Litre per second"
+                    }
+                },
+                "speed": {
+                    "label": "Speed",
+                    "units": {
+                        "metre_per_second": "Metre per second",
+                        "kilometre_per_hour": "Kilometre per hour",
+                        "mile_per_hour": "Mile per hour"
+                    }
+                },
+                "pressure": {
+                    "label": "Pressure",
+                    "units": {
+                        "pascal": "Pascal",
+                        "kilopascal": "Kilopascal",
+                        "hectopascal": "Hectopascal",
+                        "bar": "Bar",
+                        "decibar": "Decibar",
+                        "millibar": "Millibar",
+                        "torr": "Torr",
+                        "technical_atmosphere": "Technical atmosphere",
+                        "standard_atmosphere": "Standard atmosphere",
+                        "pound_per_square_inch": "Pound per square inch"
+                    }
+                },
+                "quotient": {
+                    "label": "Quotient",
+                    "units": {
+                        "percent": "Percent",
+                        "parts_per_million": "Parts per million"
                     }
                 }
             },
@@ -283,6 +329,9 @@
         "confirm_password": "Repeat Password",
         "remember_me": "Remember me",
         "orcid": "ORCID",
+        "licence": "Licence",
+        "licence_default": "Default Licence",
+        "licence_missing": "Licence missing",
         "description": "Description",
         "roles": "Roles",
         "permissions": "Permissions",
@@ -292,6 +341,9 @@
         "timestamp": "Timestamp",
         "deactivated_at": "Deactivated",
         "options": "Options",
+        "summary": "Summary",
+        "creator": "Creator",
+        "editors": "Editors",
         "reply_to": "Reply",
         "replying_to": "In reply to {name}",
         "type": "Type",
@@ -408,12 +460,17 @@
         },
         "entity": {
             "title": "Entity | Entities",
+            "top_level": "Top-Level-Entity",
             "count": "No Top-Level-Entities | One Top-Level-Entity | {cnt} Top-Level-Entities",
             "detail_tab_none_selected": "No Entity selected. Select an Entity from the tree to see the details in this tab.",
             "toasts": {
                 "updated": {
                     "title": "Entity updated",
                     "msg": "Data of ‚{name}‘ successfully updated."
+                },
+                "updated_metadata": {
+                    "title": "Metadata updated",
+                    "msg": "Metadata of {name} successfully updated."
                 },
                 "deleted": {
                     "title": "Entity deleted",
@@ -456,6 +513,7 @@
             "tabs": {
                 "default": "Default",
                 "comments": "Comments",
+                "metadata": "Metadata",
                 "untitled_group": "Untitled ({cnt})"
             },
             "modals": {
@@ -516,6 +574,9 @@
                 },
                 "table": {
                     "add_row": "Add row",
+                    "error": {
+                        "deleted_entity": "Deleted Entity"
+                    },
                     "chart": {
                         "number_sets": "Last {cnt} data sets",
                         "include_in": "Use in chart",
@@ -539,6 +600,10 @@
                         "cancel": "Cancel editing"
                     }
                 }
+            },
+            "metadata": {
+                "save": "Save Metadata",
+                "deleted_entity_name": "Deleted Entity #{id}"
             }
         },
         "user": {
@@ -774,6 +839,23 @@
                 "support_database": "Database Support",
                 "support_archaeology": "Archaeological Support",
                 "project_lead": "Project Lead"
+            }
+        },
+        "history": {
+            "title": "History",
+            "created_as": "Created as:",
+            "no_value": "No value recorded",
+            "entity": {
+                "created_in": "As Sub-Entity of:",
+                "name_update": "Updated name:",
+                "name_unknown": "Unknown Entity",
+                "name_unknown_info": "This means either that this Entity is deleted or you do not have the required access rights for it.",
+                "value_add_attribute": "Added value to attribute:",
+                "value_update_attribute": "Updated value of attribute:",
+                "certainty_update": "Cerntainty updated:",
+                "certainty_unknown": "Unknown",
+                "moved": "Moved:",
+                "rank": "Rank"
             }
         },
         "bibliography": {
