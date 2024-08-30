@@ -12,7 +12,7 @@ use Illuminate\Queue\SerializesModels;
 use App\Entity;
 use App\User;
 
-class EntityUpdated implements ShouldBroadcast
+class SomethingChanged implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -22,12 +22,10 @@ class EntityUpdated implements ShouldBroadcast
     public function __construct(
         public Entity $entity,
         public User $user,
-        public ?string $status = null,
     )
     {
         $this->entity = $entity;
         $this->user = $user;
-        $this->status = $status ?? "$entity->name updated";
     }
 
     /**
@@ -38,6 +36,7 @@ class EntityUpdated implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
+            new PresenceChannel('entity.' . $this->entity->id),
             new PrivateChannel('entity_updates'),
         ];
     }

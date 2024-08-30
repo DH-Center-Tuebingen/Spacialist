@@ -15,8 +15,6 @@ use App\Exceptions\Structs\ImportExceptionStruct;
 use App\Exceptions\InvalidDataException;
 use App\Exceptions\Structs\AttributeImportExceptionStruct;
 use App\Import\EntityImporter;
-use App\Import\ImportResolution;
-use App\Import\ImportResolutionType;
 use App\Reference;
 use App\ThConcept;
 use Exception;

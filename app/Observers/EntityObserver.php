@@ -3,12 +3,12 @@
 namespace App\Observers;
 
 use App\Entity;
+use App\Events\SomethingChanged;
+use App\Events\EntityUpdated as EntityUpdatedEvent;
 use App\Notification;
 use App\Notifications\EntityUpdated;
-use App\Events\EntityUpdated as EntityUpdatedEvent;
 use App\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Spatie\Activitylog\Models\Activity;
 
 class EntityObserver
 {
@@ -40,11 +40,13 @@ class EntityObserver
      * 
      */    
     public function saved(Entity $entity) {
+        $user = auth()->user();
         if($entity->wasRecentlyCreated) {
-            EntityUpdatedEvent::dispatch($entity, "added");
+            EntityUpdatedEvent::dispatch($entity, $user, "added");
         } else {
-            EntityUpdatedEvent::dispatch($entity, "updated");
+            EntityUpdatedEvent::dispatch($entity, $user, "updated");
         }
+        broadcast(new SomethingChanged($entity, $user))->toOthers();
     }
 
     /**

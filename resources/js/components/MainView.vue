@@ -130,6 +130,7 @@
     } from 'vue-router';
 
     import store from '@/bootstrap/store.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
     import router from '%router';
 
     import {
@@ -148,6 +149,10 @@
         canShowReferenceModal,
         showLiteratureInfo,
     } from '@/helpers/modal.js';
+    import {
+        subscribeTo,
+        unsubscribeFrom,
+    } from '@/helpers/websocket.js';
 
     import { useToast } from '@/plugins/toast.js';
 
@@ -161,6 +166,7 @@
             const { t } = useI18n();
             const currentRoute = useRoute();
             const toast = useToast();
+            const entityStore = useEntityStore();
 
             // FUNCTIONS
             const setTab = to => {
@@ -236,6 +242,29 @@
             onMounted(_ => {
                 console.log('mainview component mounted');
                 store.dispatch('setMainViewTab', currentRoute.query.tab);
+                subscribeTo(`entity_updates`, 'EntityUpdated', e => {
+                    // Only handle event if from different user
+                    if(e.user.id == store.getters.user.id) return;
+                    console.log("Entity created/updated by a user", e);
+                    let message = null;
+                    if(e.status == 'added') {
+                        message = `A new Entity '${e.entity.name}' has been added by '${e.user.nickname}'!`;
+                        entityStore.add(e.entity);
+                    } else if(e.status == 'updated') {
+                        message = `Entity '${e.entity.name}' has been updated by '${e.user.nickname}'!`;
+                        // entityStore.update(e.entity);
+                    }
+
+                    if(message) {
+                        toast.$toast(message, '', {
+                            duration: 2500,
+                            autohide: true,
+                            channel: 'info',
+                            icon: true,
+                            simple: true,
+                        });
+                    }
+                }, true);
             });
 
             onBeforeRouteUpdate(async (to, from) => {
@@ -245,6 +274,7 @@
             });
             onBeforeRouteLeave((to, from) => {
                 store.dispatch('setMainViewTab', null);
+                unsubscribeFrom(`entity_updates`);
             });
 
             // RETURN

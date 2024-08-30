@@ -155,28 +155,56 @@
                 :type="state.entity.entity_type_id"
                 :icon-only="false"
             />
-            <div>
-                <i class="fas fa-fw fa-user-edit" />
-                <span
-                    class="ms-1"
-                    :title="date(state.lastModified, undefined, true, true)"
+            <div class="d-flex flex-row gap-2">
+                <div
+                    v-if="state.activeUsers.length > 0"
+                    class="d-flex flex-row gap-1 align-items-center"
                 >
-                    {{ ago(state.lastModified) }}
-                </span>
-                -
-                <a
-                    v-if="state.entity.user"
-                    href="#"
-                    class="fw-medium"
-                    @click.prevent="showUserInfo(state.entityUser)"
-                >
-                    {{ state.entityUser.name }}
-                    <user-avatar
-                        :user="state.entityUser"
-                        :size="20"
-                        class="align-middle"
+                    <div
+                        class="avatar-list"
+                    >
+                        <a
+                            v-for="user in state.activeUsers"
+                            :key="user.id"
+                            href="#"
+                            class="avatar-list-item"
+                            @click.prevent="showUserInfo(user)"
+                        >
+                            <user-avatar
+                                :user="user"
+                                :size="20"
+                                class="align-middle"
+                            />
+                        </a>
+                    </div>
+                    <!-- TODO move to component -->
+                    <div
+                        class="bg-success bg-opacity-75 rounded-circle"
+                        style="width: 0.6rem; aspect-ratio: 1 / 1;"
                     />
-                </a>
+                </div>
+                <div class="d-flex flex-row gap-1 align-items-center">
+                    <i class="fas fa-fw fa-user-edit" />
+                    <span
+                        :title="date(state.lastModified, undefined, true, true)"
+                    >
+                        {{ ago(state.lastModified) }}
+                    </span>
+                    -
+                    <a
+                        v-if="state.entity.user"
+                        href="#"
+                        class="fw-medium"
+                        @click.prevent="showUserInfo(state.entityUser)"
+                    >
+                        {{ state.entityUser.name }}
+                        <user-avatar
+                            :user="state.entityUser"
+                            :size="20"
+                            class="align-middle"
+                        />
+                    </a>
+                </div>
             </div>
         </div>
         <ul
@@ -436,6 +464,11 @@
         showUserInfo,
         canShowReferenceModal,
     } from '@/helpers/modal.js';
+    import {
+        join,
+        unsubscribeFrom,
+        listenTo,
+    } from '@/helpers/websocket.js';
 
     import { usePreventNavigation } from '@/helpers/form.js';
 
@@ -629,6 +662,12 @@
                 }),
                 commentFetchFailed: computed(_ => {
                     return state.commentLoadingState === 'failed';
+                }),
+                activeUserIds: [],
+                activeUsers: computed(_ => {
+                    return state.activeUserIds.map(user => {
+                        return getUserBy(user.id);
+                    });
                 }),
             });
 
@@ -973,9 +1012,34 @@
                 attrRefs.value[grp] = el;
             };
 
+            const entityChangeCallback = e => {
+                console.log("Entity changed by user!", e);
+            }
+            const wsCallbacks = {
+                init: users => {
+                    state.activeUserIds = [];
+                    state.activeUserIds = users;
+                },
+                join: user => {
+                    state.activeUserIds.push(user);
+                },
+                leave: user => {
+                    const idx = state.activeUserIds.findIndex(u => u.id == user.id);
+                    if(idx > -1) {
+                        state.activeUserIds.splice(idx, 1);
+                    }
+                },
+                error: error => {
+                    console.error("[WS] Error occured!", error);
+                },
+            };
+
             // ON MOUNTED
             onMounted(_ => {
                 console.log('entity detail component mounted');
+                join(`entity.${route.params.id}`, wsCallbacks);
+                listenTo(`entity.${route.params.id}`, 'SomethingChanged', entityChangeCallback);
+
                 let hiddenAttrElem = document.getElementById('hidden-attributes-icon');
                 if(!!hiddenAttrElem) {
                     new Popover(hiddenAttrElem, {
@@ -1051,6 +1115,7 @@
                     showDiscard(to, resetDirtyStates, saveEntity);
                     return false;
                 } else {
+                    unsubscribeFrom(`entity.${state.entity.id}`);
                     store.dispatch('resetEntity');
                     return true;
                 }
@@ -1063,6 +1128,9 @@
                     } else {
                         state.hiddenAttributes = {};
                         // store.dispatch('resetEntity');
+                        unsubscribeFrom(`entity.${route.params.id}`);
+                        join(`entity.${to.params.id}`, wsCallbacks);
+                        listenTo(`entity.${to.params.id}`, 'SomethingChanged', testCallback);
                         return true;
                     }
                 } else {

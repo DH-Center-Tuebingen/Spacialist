@@ -22,6 +22,15 @@ Broadcast::channel('entity_updates', function (User $user) {
     return $user->can('entity_read');
 });
 
+Broadcast::channel('entity.{entityId}', function (User $user, int $entityId) {
+    // TODO also check for $entityId
+    if($user->can('entity_read')) {
+        return [
+            'id' => $user->id,
+        ];
+    }
+});
+
 Broadcast::channel('private_testchannel', function (User $user) {
     return true;
 });
