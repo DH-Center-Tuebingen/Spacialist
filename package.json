@@ -87,6 +87,7 @@
         "ol-ext": "^4.0.10",
         "p-queue": "^8.0.1",
         "picmo": "^5.8.2",
+        "pinia": "^2.2.2",
         "process": "^0.11.10",
         "proj4": "^2.9.0",
         "string-similarity-js": "^2.1.4",

@@ -180,7 +180,7 @@
             <tree
                 id="entity-tree"
                 class="col px-0 overflow-y-auto"
-                :data="state.tree"
+                :data="entityStore.tree"
                 size="small"
                 preid=""
                 :draggable="state.isDragAllowed"
@@ -215,6 +215,7 @@
 
     import store from '@/bootstrap/store.js';
     import router from '%router';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import {
         moveEntity,
@@ -251,6 +252,7 @@
         setup(props) {
             const { t } = useI18n();
             const currentRoute = useRoute();
+            const entityStore = useEntityStore();
 
             // FETCH
 
@@ -489,6 +491,7 @@
                 searchResultSelected,
                 // STATE
                 state,
+                entityStore,
             };
         }
     };

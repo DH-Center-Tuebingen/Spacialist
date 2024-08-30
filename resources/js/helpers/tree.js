@@ -9,14 +9,16 @@ import { getNodeFromPath } from 'tree-component';
 import {
     fetchChildren as fetchChildrenApi,
 } from '@/api.js';
+import useEntityStore from '@/bootstrap/stores/entity.js';
 
 import {
     getEntityTypeName,
 } from '@/helpers/helpers.js';
 
 export async function fetchChildren(id, sort = {by: 'rank', dir: 'asc'}) {
+    const entityStore = useEntityStore();
     return fetchChildrenApi(id).then(data => {
-        return store.dispatch('loadEntities', {
+        return entityStore.setDescendants({
             entities: data,
             sort: sort,
         });

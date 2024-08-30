@@ -4,6 +4,7 @@ import {
     web_http,
 } from '@/bootstrap/http.js';
 import store from '@/bootstrap/store.js';
+import useEntityStore from '@/bootstrap/stores/entity.js';
 import {
     only,
     simpleResourceType,
@@ -141,8 +142,9 @@ export async function fetchUsers() {
 }
 
 export async function fetchTopEntities() {
+    const entityStore = useEntityStore();
     await $httpQueue.add(() => http.get('/entity/top').then(response => {
-        store.dispatch('setInitialEntities', response.data);
+        entityStore.initialize(response.data);
     }));
 }
 

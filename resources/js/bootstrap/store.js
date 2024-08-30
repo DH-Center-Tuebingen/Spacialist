@@ -1,3 +1,4 @@
+import { createPinia } from 'pinia';
 import {createStore} from 'vuex';
 
 import {
@@ -30,6 +31,8 @@ function updateSelectionTypeIdList(selection) {
     }
     return Object.keys(tmpDict).map(tdk => parseInt(tdk));
 }
+
+export const pinia = createPinia();
 
 export const store = createStore({
     modules: {

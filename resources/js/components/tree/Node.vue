@@ -154,7 +154,7 @@
             const state = reactive({
                 ddVisible: false,
                 multieditSelected: false,
-                modificationState: computed(_ => store.getters.entities[data.value.id].reverb_state),
+                modificationState: computed(_ => false), //store.getters.entities[data.value.id].reverb_state),
                 colorStyles: computed(_ => getEntityColors(data.value.entity_type_id)),
                 isSelected: computed(_ => store.getters.entity.id === data.value.id),
                 isSelectionMode: computed(_ => store.getters.treeSelectionMode),

@@ -19,6 +19,7 @@ import App from '@/App.vue';
 // Init required libs
 // Vuex
 import store from '@/bootstrap/store.js';
+import { pinia } from '@/bootstrap/store.js';
 // Vue-Router
 import router from '%router';
 // Axios
@@ -42,6 +43,7 @@ const app = createApp(App);
 app.use(i18n);
 app.use(router);
 app.use(store);
+app.use(pinia);
 // app.use(vueAuth);
 app.use(createVfm());
 
