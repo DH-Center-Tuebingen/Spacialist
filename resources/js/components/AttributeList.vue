@@ -165,11 +165,13 @@
 
     import store from '@/bootstrap/store.js';
 
+    import Attribute from '@/components/attribute/Attribute.vue';
     import ModerationPanel from '@/components/moderation/Panel.vue';
     import ValidityIndicator from './forms/indicators/ValidityIndicator.vue';
 
     export default {
         components: {
+            Attribute,
             'attribute-moderation-panel': ModerationPanel,
             'validity-indicator': ValidityIndicator,
         },
