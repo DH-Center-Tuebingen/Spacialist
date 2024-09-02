@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.10.1 - Dayjs Hotfix
+### Fixed
+- Frontend errors due to wrong dayjs import
+
 ## 0.10 - Jelling
 ### Added
 - Support Multiediting attributes across multiple entities (through ...-menu in entity tree)
