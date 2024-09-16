@@ -170,9 +170,9 @@
     } from 'vue';
 
     import store from '%store';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import { stringSimilarity } from 'string-similarity-js';
-
 
     import EntityAttributeMapping from '@/components/tools/importer/EntityAttributeMapping.vue';
     import EntityImporterSettings from '@/components/tools/importer/EntityImporterSettings.vue';
@@ -209,6 +209,7 @@
         },
         setup(props, context) {
             const { t } = useI18n();
+            const entityStore = useEntityStore();
 
             const csvTableRef = ref(null);
 
@@ -354,7 +355,7 @@
                     state.availableAttributes = [];
                     return;
                 } else {
-                    state.availableAttributes = store.getters.entityTypeAttributes(e.id, true) || [];
+                    state.availableAttributes = entityStore.getEntityTypeAttributes(e.id, true) || [];
                 }
                 guessAttributeMapping();
             };
@@ -485,7 +486,7 @@
                 attributeSettings.mapping = {};
             }
 
-            // 
+            //
             const resetImportState = _ => {
                 resetValidation();
                 resetImport();

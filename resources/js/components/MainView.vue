@@ -223,7 +223,7 @@
                     }
                 }),
                 concepts: computed(_ => store.getters.concepts),
-                entity: computed(_ => store.getters.entity),
+                entity: computed(_ => entityStore.selectedEntity),
                 hasReferences: computed(_ => {
                     const isNotSet = !state.entity.references;
                     if(isNotSet) return false;
@@ -234,7 +234,7 @@
                 }),
                 entityTypes: computed(_ => store.getters.entityTypes),
                 columnPref: computed(_ => store.getters.preferenceByKey('prefs.columns')),
-                isDetailLoaded: computed(_ => store.getters.entity?.id > 0),
+                isDetailLoaded: computed(_ => state.entity?.id > 0),
                 tabPlugins: computed(_ => store.getters.slotPlugins('tab')),
             });
 
@@ -249,10 +249,10 @@
                     let message = null;
                     if(e.status == 'added') {
                         message = `A new Entity '${e.entity.name}' has been added by '${e.user.nickname}'!`;
-                        entityStore.add(e.entity);
+                        entityStore.add(e.entity, true);
                     } else if(e.status == 'updated') {
                         message = `Entity '${e.entity.name}' has been updated by '${e.user.nickname}'!`;
-                        // entityStore.update(e.entity);
+                        entityStore.add(e.entity, true);
                     }
 
                     if(message) {

@@ -456,9 +456,9 @@
                 selectMode: computed(_ => store.getters.treeSelectionMode),
                 canOpenMultiEditModal: computed(_ => store.getters.treeSelectionCount >= 2),
                 highlightedItems: [],
-                tree: computed(_ => store.getters.tree),
-                entity: computed(_ => store.getters.entity),
-                entities: computed(_ => store.getters.entities),
+                tree: computed(_ => entityStore.tree),
+                entity: computed(_ => entityStore.selectedEntity),
+                entities: computed(_ => entityStore.entities),
                 topLevelCount: computed(_ => state.tree.length || 0),
                 isDragAllowed: computed(_ => state.sort.by == 'rank' && state.sort.dir == 'asc'),
                 sort: {

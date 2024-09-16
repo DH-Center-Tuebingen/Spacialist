@@ -1,6 +1,7 @@
 // import auth from '@/bootstrap/auth.js';
 import store from '%store';
 import router from '%router';
+import { useGlobalEntityStore } from '@/bootstrap/stores/entity.js';
 
 import {
     fetchAttributes,
@@ -24,6 +25,14 @@ import {
 import {
     splitColor,
 } from '@/helpers/colors.js';
+
+const s = {
+    entityStore: null,
+};
+
+export function init() {
+    s.entityStore = useGlobalEntityStore();
+}
 
 export async function initApp(locale) {
     store.dispatch('setAppState', false);
@@ -245,23 +254,23 @@ export function getEntityTypeName(id) {
 }
 
 export function getEntityTypes() {
-    return store.getters.entityTypes || {};
+    return s.entityStore.entityTypes || {};
 }
 
-export function getEntityTypeAttribute(etid, aid) {
-    if(!etid || !aid) return null;
-    const attributes = store.getters.entityTypeAttributes(etid);
-    return attributes ? attributes.find(a => a.id == aid) : null;
-}
-
-export function getEntityTypeAttributes(id) {
+export function getEntityTypeAttributes(id, exclude = false) {
     if(!id) return [];
-    return store.getters.entityTypeAttributes(id) || [];
+    return s.entityStore.getEntityTypeAttributes(id, exclude) || [];
+}
+
+export function getEntityTypeAttribute(etid, aid, exclude = false) {
+    if(!etid || !aid) return null;
+    const attributes = getEntityTypeAttributes(etid, exclude);
+    return attributes ? attributes.find(a => a.id == aid) : null;
 }
 
 export function getEntityTypeDependencies(id, aid) {
     if(!id) return {};
-    const attrs = store.getters.entityTypeAttributes(id);
+    const attrs = getEntityTypeAttributes(id);
     if(!attrs) return {};
     if(!!aid) {
         const attr = attrs.find(a => a.id == aid);
@@ -548,7 +557,7 @@ export function calculateEntityColors(id, alpha = 0.5) {
 }
 
 export function getEntity(id) {
-    return store.getters.entities[id] || {};
+    return s.entityStore.entities[id] || {};
 }
 
 export function getEntityColors(id) {

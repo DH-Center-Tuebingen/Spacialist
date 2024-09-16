@@ -51,11 +51,11 @@
                 </span>
                 <span :class="{ 'fw-bold': state.isSelected }">
                     {{ data.name }}
-                    <span v-if="state.modificationState == 'updated'">
-                        *
-                    </span>
-                    <span v-if="state.modificationState == 'added'">
-                        +
+                    <span
+                        v-if="state.receivedWsUpdate"
+                        :title="`${data.user.name}`"
+                    >
+                        <i class="fas fa-fw fa-asterisk" />
                     </span>
                 </span>
             </a>
@@ -79,6 +79,7 @@
     import { useI18n } from 'vue-i18n';
 
     import store from '@/bootstrap/store.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import {
         can,
@@ -104,6 +105,7 @@
         },
         setup(props) {
             const { t } = useI18n();
+            const entityStore = useEntityStore();
             const {
                 data,
             } = toRefs(props);
@@ -156,7 +158,7 @@
                 multieditSelected: false,
                 modificationState: computed(_ => false), //store.getters.entities[data.value.id].reverb_state),
                 colorStyles: computed(_ => getEntityColors(data.value.entity_type_id)),
-                isSelected: computed(_ => store.getters.entity.id === data.value.id),
+                isSelected: computed(_ => entityStore.selectedEntity.id === data.value.id),
                 isSelectionMode: computed(_ => store.getters.treeSelectionMode),
                 isSelectionDisabled: computed(_ => {
                     if(store.getters.treeSelectionTypeIds.length == 0 || state.multieditSelected) {
@@ -164,6 +166,7 @@
                     }
                     return !hasIntersectionWithEntityAttributes(data.value.entity_type_id, store.getters.treeSelectionTypeIds);
                 }),
+                receivedWsUpdate: computed(_ => !!entityStore.backup[data.value.id]),
             });
 
             // WATCHER

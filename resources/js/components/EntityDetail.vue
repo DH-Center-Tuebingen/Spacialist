@@ -426,6 +426,7 @@
     } from 'bootstrap';
 
     import store from '@/bootstrap/store.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
     import router from '%router';
 
     import { useToast } from '@/plugins/toast.js';
@@ -496,9 +497,10 @@
             const { t } = useI18n();
             const route = useRoute();
             const toast = useToast();
+            const entityStore = useEntityStore();
 
             // FETCH
-            store.dispatch('getEntity', route.params.id).then(_ => {
+            entityStore.setById(route.params.id).then(_ => {
                 getEntityTypeAttributeSelections();
                 state.initFinished = true;
                 updateAllDependencies();
@@ -507,18 +509,6 @@
             // DATA
             const attrRefs = ref({});
             const state = reactive({
-                colorStyles: computed(_ => {
-                    const colors = getEntityColors(state.entity.entity_type_id);
-                    return {
-                        color: colors.backgroundColor
-                    };
-                }),
-                formDirty: computed(_ => {
-                    for(let k in state.dirtyStates) {
-                        if(state.dirtyStates[k]) return true;
-                    }
-                    return false;
-                }),
                 dirtyStates: {},
                 attributeGrpHovered: null,
                 hiddenAttributes: {},
@@ -531,9 +521,22 @@
                 hiddenAttributeState: false,
                 attributesInTabs: true,
                 routeQuery: computed(_ => route.query),
-                entity: computed(_ => store.getters.entity),
+                entity: computed(_ => entityStore.selectedEntity),
                 entityUser: computed(_ => state.entity.user),
-                entityAttributes: computed(_ => store.getters.entityTypeAttributes(state.entity.entity_type_id)),
+                entityAttributes: computed(_ => entityStore.getEntityTypeAttributes(state.entity.entity_type_id)),
+                colorStyles: computed(_ => {
+                    const colors = getEntityColors(state.entity.entity_type_id);
+                    return {
+                        color: colors.backgroundColor
+                    };
+                }),
+                formDirty: computed(_ => {
+                    for(let k in state.dirtyStates) {
+                        if(state.dirtyStates[k]) return true;
+                    }
+                    return false;
+                }),
+                // TODO
                 entityGroups: computed(_ => {
                     if(!state.entityAttributes) {
                         return state.entityAttributes;
@@ -715,7 +718,7 @@
                     cancelUpdateEntityName();
                 } else {
                     patchEntityName(state.entity.id, state.editedEntityName).then(data => {
-                        store.dispatch('updateEntity', {
+                        entityStore.update({
                             ...data,
                             name: state.editedEntityName,
                         });
@@ -952,7 +955,7 @@
                 }
                 return patchAttributes(state.entity.id, patches).then(data => {
                     undirtyList(grps);
-                    store.dispatch('updateEntity', data.entity);
+                    entityStore.update(data.entity);
                     store.dispatch('updateEntityData', {
                         data: dirtyValues,
                         new_data: data.added_attributes,
@@ -1073,11 +1076,16 @@
                     if(newParams.id == oldParams.id) return;
                     if(!newParams.id) return;
                     state.initFinished = false;
-                    store.dispatch('getEntity', newParams.id).then(_ => {
+                    entityStore.setById(newParams.id).then(_ => {
                         getEntityTypeAttributeSelections();
                         state.initFinished = true;
                         updateAllDependencies();
-                    });
+                    })
+                    // store.dispatch('getEntity', newParams.id).then(_ => {
+                    //     getEntityTypeAttributeSelections();
+                    //     state.initFinished = true;
+                    //     updateAllDependencies();
+                    // });
                 }
             );
 
@@ -1116,7 +1124,8 @@
                     return false;
                 } else {
                     unsubscribeFrom(`entity.${state.entity.id}`);
-                    store.dispatch('resetEntity');
+                    // store.dispatch('resetEntity');
+                    entityStore.unset();
                     return true;
                 }
             });
@@ -1128,9 +1137,11 @@
                     } else {
                         state.hiddenAttributes = {};
                         // store.dispatch('resetEntity');
+                        entityStore.unset();
                         unsubscribeFrom(`entity.${route.params.id}`);
                         join(`entity.${to.params.id}`, wsCallbacks);
-                        listenTo(`entity.${to.params.id}`, 'SomethingChanged', testCallback);
+                        listenTo(`entity.${to.params.id}`, 'SomethingChanged', entityChangeCallback);
+                        await entityStore.setById(route.params.id);
                         return true;
                     }
                 } else {

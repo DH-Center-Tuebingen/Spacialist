@@ -1,4 +1,5 @@
 import store from '@/bootstrap/store.js';
+import { useGlobalEntityStore } from '@/bootstrap/stores/entity.js';
 import router from '%router';
 
 import { addToast } from '@/plugins/toast.js';
@@ -74,6 +75,14 @@ import EditAttribute from '@/components/modals/attribute/Edit.vue';
 import MultiEditAttribute from '@/components/modals/attribute/MultiEdit.vue';
 import EditSystemAttribute from '@/components/modals/attribute/EditSystem.vue';
 import DeleteAttribute from '@/components/modals/attribute/Delete.vue';
+
+const s = {
+    entityStore: null,
+};
+
+export function init() {
+    s.entityStore = useGlobalEntityStore();
+}
 
 export function showAbout() {
     const uid = `AboutModal-${getTs()}`;
@@ -345,7 +354,7 @@ export function showResetPassword(id) {
                     addToast(msg, title, {
                         channel: 'success',
                     });
-                })
+                });
             },
             onCancel(e) {
                 modal.destroy();
@@ -370,7 +379,7 @@ export function showConfirmPassword(id) {
                         login_attempts: null,
                     });
                     modal.destroy();
-                })
+                });
             },
             onCancel(e) {
                 modal.destroy();
@@ -398,7 +407,7 @@ export function showDeactivateUser(user, onDeactivated) {
                     }
                     store.dispatch('deactivateUser', data);
                     modal.destroy();
-                })
+                });
             },
             onCancel(e) {
                 modal.destroy();
@@ -595,8 +604,10 @@ export function showAddEntity(parent = null, onAdded) {
                     parent_id: entity.parent_id,
                     name: entity.name,
                 };
+
                 addEntity(entityData).then(data => {
-                    const node = store.dispatch('addEntity', data);
+                    // const node = store.dispatch('addEntity', data);
+                    const node = s.entityStore.add(data);
                     if(!!onAdded) {
                         onAdded(node);
                     }

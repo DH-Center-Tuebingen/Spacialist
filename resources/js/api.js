@@ -4,12 +4,20 @@ import {
     web_http,
 } from '@/bootstrap/http.js';
 import store from '@/bootstrap/store.js';
-import useEntityStore from '@/bootstrap/stores/entity.js';
+import { useGlobalEntityStore } from '@/bootstrap/stores/entity.js';
 import {
     only,
     simpleResourceType,
     getEntityTypeAttributes as storedEntityTypeAttributes,
 } from '@/helpers/helpers.js';
+
+const s = {
+    entityStore: null,
+};
+
+export function init() {
+    s.entityStore = useGlobalEntityStore();
+}
 
 // GET AND STORE (FETCH)
 export async function logout() {
@@ -142,9 +150,8 @@ export async function fetchUsers() {
 }
 
 export async function fetchTopEntities() {
-    const entityStore = useEntityStore();
     await $httpQueue.add(() => http.get('/entity/top').then(response => {
-        entityStore.initialize(response.data);
+        s.entityStore.initialize(response.data);
     }));
 }
 
@@ -169,7 +176,7 @@ export async function fetchTags() {
 export async function fetchPreData(locale) {
     return $httpQueue.add(() => http.get('pre').then(response => {
         store.commit('setConcepts', response.data.concepts);
-        store.dispatch('setEntityTypes', response.data.entityTypes);
+        s.entityStore.initializeEntityTypes(response.data.entityTypes);
         store.commit('setPreferences', response.data.preferences);
         store.commit('setSystemPreferences', response.data.system_preferences);
         store.dispatch('setColorSets', response.data.colorsets);

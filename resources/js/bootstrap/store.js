@@ -45,14 +45,10 @@ export const store = createStore({
                     attributes: [],
                     attributeTypes: [],
                     attributeSelections: {},
-                    entityTypeAttributes: {},
                     entityTypeColors: {},
                     bibliography: [],
                     concepts: {},
                     deletedUsers: [],
-                    entity: {},
-                    entityTypes: {},
-                    entities: {},
                     file: {},
                     geometryTypes: [],
                     mainView: {
@@ -154,15 +150,6 @@ export const store = createStore({
                 addRootEntity(state, n) {
                     state.entities[n.id] = n;
                     state.tree.push(n);
-                },
-                updateEntity(state, data) {
-                    const entity = state.entities[data.id];
-                    entity.updated_at = data.updated_at;
-                    entity.user_id = data.user_id;
-                    entity.user = data.user;
-                    if(!!data.name) {
-                        entity.name = data.name;
-                    }
                 },
                 updateEntityModificationState(state, data) {
                     const entity = state.entities[data.id];
@@ -516,14 +503,6 @@ export const store = createStore({
                 setMainViewTab(state, data) {
                     state.mainView.tab = data;
                 },
-                setEntityTypes(state, data) {
-                    for(let k in data) {
-                        const et = data[k];
-                        state.entityTypeAttributes[et.id] = et.attributes.slice();
-                        delete et.attributes;
-                    }
-                    state.entityTypes = data;
-                },
                 setGeometryTypes(state, data) {
                     state.geometryTypes = [];
                     state.geometryTypes = data;
@@ -761,42 +740,42 @@ export const store = createStore({
                 setMainViewTab({commit}, data) {
                     commit('setMainViewTab', data);
                 },
-                async getEntity({commit, state}, entityId) {
-                    let entity = state.entities[entityId];
-                    if(!entity) {
-                        const ids = await getEntityParentIds(entityId);
-                        await openPath(ids);
-                        entity = state.entities[entityId];
-                    }
-                    if(!can('entity_data_read')) {
-                        const hiddenEntity = {
-                            ...entity,
-                            data: {},
-                            attributes: [],
-                            selections: {},
-                            dependencies: [],
-                            references: [],
-                            comments: [],
-                        };
-                        fillEntityData(entity.data, entity.entity_type_id);
-                        commit('setEntity', hiddenEntity);
-                    } else {
-                        entity.data = await getEntityData(entityId);
-                        fillEntityData(entity.data, entity.entity_type_id);
-                        entity.references = await getEntityReferences(entityId) || {};
-                        for(let k in entity.data) {
-                            const curr = entity.data[k];
-                            if(curr.attribute) {
-                                const key = curr.attribute.thesaurus_url;
-                                if(!entity.references[key]) {
-                                    entity.references[key] = [];
-                                }
-                            }
-                        }
-                        commit('setEntity', entity);
-                        return;
-                    }
-                },
+                // async getEntity({commit, state}, entityId) {
+                //     let entity = state.entities[entityId];
+                //     if(!entity) {
+                //         const ids = await getEntityParentIds(entityId);
+                //         await openPath(ids);
+                //         entity = state.entities[entityId];
+                //     }
+                //     if(!can('entity_data_read')) {
+                //         const hiddenEntity = {
+                //             ...entity,
+                //             data: {},
+                //             attributes: [],
+                //             selections: {},
+                //             dependencies: [],
+                //             references: [],
+                //             comments: [],
+                //         };
+                //         fillEntityData(entity.data, entity.entity_type_id);
+                //         commit('setEntity', hiddenEntity);
+                //     } else {
+                //         entity.data = await getEntityData(entityId);
+                //         fillEntityData(entity.data, entity.entity_type_id);
+                //         entity.references = await getEntityReferences(entityId) || {};
+                //         for(let k in entity.data) {
+                //             const curr = entity.data[k];
+                //             if(curr.attribute) {
+                //                 const key = curr.attribute.thesaurus_url;
+                //                 if(!entity.references[key]) {
+                //                     entity.references[key] = [];
+                //                 }
+                //             }
+                //         }
+                //         commit('setEntity', entity);
+                //         return;
+                //     }
+                // },
                 setEntityComments({commit}, data) {
                     commit('setEntityComments', data);
                 },
@@ -835,9 +814,6 @@ export const store = createStore({
                         commit('addRootEntity', n);
                     }
                     return n;
-                },
-                updateEntity({commit}, data) {
-                    commit('updateEntity', data);
                 },
                 updateEntityModificationState({commit}, data) {
                     if(data.status == 'added') {
@@ -910,11 +886,6 @@ export const store = createStore({
                 },
                 deleteRole({commit}, data) {
                     commit('deleteRole', data);
-                },
-                setEntityTypes({commit, state}, data) {
-                    state.entityTypes = {};
-                    state.entityTypeAttributes = {};
-                    commit('setEntityTypes', data);
                 },
                 setEntityTypeColors({commit}, data) {
                     commit('setEntityTypeColors', data);
@@ -994,17 +965,6 @@ export const store = createStore({
                 attributeSelections: state => state.attributeSelections,
                 bibliography: state => state.bibliography,
                 concepts: state => state.concepts,
-                entities: state => state.entities,
-                entityTypes: state => state.entityTypes,
-                entityTypeAttributes: state => (id, exclude = false) => {
-                    if(exclude === true) {
-                        return state.entityTypeAttributes[id].filter(a => a.datatype != 'system-separator');
-                    } else if(Array.isArray(exclude)) {
-                        return state.entityTypeAttributes[id].filter(a => !exclude.includes(a.datatype));
-                    }
-
-                    return state.entityTypeAttributes[id];
-                },
                 entityTypeColors: state => id => state.entityTypeColors[id],
                 geometryTypes: state => state.geometryTypes,
                 mainView: state => state.mainView,

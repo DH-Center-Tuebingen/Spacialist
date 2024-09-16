@@ -440,14 +440,16 @@ import { useI18n } from 'vue-i18n';
 import { provideToast, useToast } from '@/plugins/toast.js';
 
 import {
+    init as initApi,
     logout as apiLogout,
 } from '@/api.js';
 
 import {
+    init as initHelpers,
+    initApp,
     getPreference,
     getProjectName,
     hasPreference,
-    initApp,
     throwError,
     userNotifications,
 } from '@/helpers/helpers.js';
@@ -458,6 +460,7 @@ import {
     deleteNotification as deleteNotificationHelper,
 } from '@/api/notification.js';
 import {
+    init as initModals,
     showAbout,
     showSaveScreencast,
 } from '@/helpers/modal.js';
@@ -473,7 +476,12 @@ export default {
         const { t, locale } = useI18n();
 
         // FETCH
+        // set stores in helper files
+        initHelpers();
+        initModals();
+        initApi();
         initApp(locale).catch(e => {
+            console.log(e);
             if(e.response.status == 401) {
                 store.dispatch('setAppState', true);
             } else {
