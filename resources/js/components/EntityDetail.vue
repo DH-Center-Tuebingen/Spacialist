@@ -1,13 +1,21 @@
 <template>
-    <div class="entity-details">
+    <div class="entity-details d-flex flex-column overflow-hidden">
         <EntityDetailHeader
             :entity="state.entity"
             :entity-user="state.entityUser"
             :dirty="formDirty"
+            :read-only="readOnly"
             @save="saveEntity"
             @reset="resetForm"
             @delete="confirmDeleteEntity"
-        />
+        >
+            <template
+                v-if="$slots.controls"
+                #controls
+            >
+                <slot name="controls" />
+            </template>
+        </EntityDetailHeader>
         <ul
             id="entity-detail-tabs"
             class="nav nav-tabs"
@@ -126,7 +134,7 @@
 
         <div
             id="entity-detail-tab-content"
-            class="tab-content col ps-0 pe-0"
+            class="tab-content col ps-0 pe-0 overflow-y-auto"
         >
             <!-- ATTRIBUTES VIEW -->
 
@@ -151,43 +159,13 @@
                         :metadata-addon="hasReferenceGroup"
                         :selections="state.entityTypeSelections"
                         :values="state.entity.data"
+                        :read-only="readOnly"
                         @dirty="e => setFormState(e, tabName.id)"
                         @metadata="showMetadata"
                     />
                 </form>
             </div>
 
-
-            <!-- <div
-                v-for="tg in state.entityGroups"
-                :id="`active-entity-attributes-panel-${tg.id}`"
-                :key="`attribute-group-${tg.id}-panel`"
-                class="tab-pane fade h-100 active-entity-detail-panel active-entity-attributes-panel show active"
-                role="tabpanel"
-            >
-                <form
-                    :id="`entity-attribute-form-${tg.id}`"
-                    :name="`entity-attribute-form-${tg.id}`"
-                    class="h-100 container-fluid"
-                    @submit.prevent
-                    @keydown.ctrl.s="e => handleSaveOnKey(e, `${tg.id}`)"
-                >
-                    <attribute-list
-                        :ref="el => setAttrRefs(el, tg.id)"
-                        v-dcan="'entity_data_read'"
-                        class="pt-2 h-100 overflow-y-auto row"
-                        :attributes="tg.data"
-                        :hidden-attributes="state.hiddenAttributeList"
-                        :show-hidden="state.hiddenAttributeState"
-                        :disable-drag="true"
-                        :metadata-addon="hasReferenceGroup"
-                        :selections="state.entityTypeSelections"
-                        :values="state.entity.data"
-                        @dirty="e => setFormState(e, tg.id)"
-                        @metadata="showMetadata"
-                    />
-                </form>
-            </div> -->
 
             <!-- METADATA VIEW -->
             <!-- <div
@@ -251,8 +229,20 @@
             <EntityDetail
                 v-if="isEntityView"
                 class="ps-5 pt-2"
+                :read-only="true"
                 :entity="state.activeSubEntity"
-            />
+            >
+                <template #controls>
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary btn-sm"
+                        @click="_ => setEntity(state.activeSubEntity)"
+                    >
+                        <i class="fas fa-fw fa-arrow-up-right-from-square" />
+                        {{ t('global.notifications.body.goto_entity') }}
+                    </button>
+                </template>
+            </EntityDetail>
         </div>
     </div>
 </template>
@@ -337,7 +327,12 @@
             onDelete: {
                 required: false,
                 type: Function,
-                default: () => {}
+                default: () => { }
+            },
+            readOnly: {
+                required: false,
+                type: Boolean,
+                default: false
             }
         },
         setup(props) {
@@ -584,6 +579,10 @@
 
             const view = ref('attributes-default');
 
+            const setEntity = async (entity) => {
+                store.commit('setEntity', entity);
+            };
+
             const setEntityView = async (subEntity) => {
                 view.value = 'entity';
                 state.activeSubEntity = subEntity;
@@ -606,7 +605,7 @@
                 }
             };
 
-            const setView = (_view) => {
+            const setView = (_view = 'attributes-default') => {
                 view.value = _view;
             };
 
@@ -889,7 +888,8 @@
                 async (newValue, oldValue) => {
                     if(!newValue || !newValue.id) return;
                     nextTick(_ => {
-                        // setViewView(route.query.view);
+                        setView(route.query.view);
+                        state.activeSubEntity = null;
                         const eid = state.entity.id;
                         const treeElem = document.getElementById(`tree-node-${eid}`);
                         if(treeElem) {
@@ -960,6 +960,7 @@
                 hideHiddenAttributes,
                 confirmDeleteEntity,
                 setView,
+                setEntity,
                 setEntityView,
                 isAttributeView,
                 isEntityView,

@@ -116,7 +116,7 @@
                         <string-attribute
                             v-if="element.datatype == 'string'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
@@ -125,7 +125,7 @@
                         <stringfield-attribute
                             v-else-if="element.datatype == 'stringf'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
@@ -134,7 +134,7 @@
                         <richtext
                             v-else-if="element.datatype == 'richtext'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
@@ -143,7 +143,7 @@
                         <integer-attribute
                             v-else-if="element.datatype == 'integer'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
@@ -152,7 +152,7 @@
                         <float-attribute
                             v-else-if="element.datatype == 'double'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
@@ -161,7 +161,7 @@
                         <bool-attribute
                             v-else-if="element.datatype == 'boolean'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
@@ -170,7 +170,7 @@
                         <percentage-attribute
                             v-else-if="element.datatype == 'percentage'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
@@ -178,7 +178,7 @@
 
                         <serial-attribute
                             v-else-if="element.datatype == 'serial'"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                         />
@@ -186,7 +186,7 @@
                         <list-attribute
                             v-else-if="element.datatype == 'list'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :entries="fixedValue(element) || []"
                             @change="e => updateDirtyState(e, element.id)"
@@ -195,7 +195,7 @@
                         <epoch-attribute
                             v-else-if="element.datatype == 'epoch' || element.datatype == 'timeperiod'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                             :epochs="selections[element.id] || []"
@@ -206,7 +206,7 @@
                         <dimension-attribute
                             v-else-if="element.datatype == 'dimension'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element) || {}"
                             @change="e => updateDirtyState(e, element.id)"
@@ -215,7 +215,7 @@
                         <si-unit-attribute
                             v-else-if="element.datatype == 'si-unit'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                             :metadata="element.metadata"
@@ -225,7 +225,7 @@
                         <tabular-attribute
                             v-else-if="element.datatype == 'table'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                             :attribute="element"
@@ -238,7 +238,7 @@
                         <iconclass-attribute
                             v-else-if="element.datatype == 'iconclass'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                             :attribute="element"
@@ -248,7 +248,7 @@
                         <rism-attribute
                             v-else-if="element.datatype == 'rism'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                             :attribute="element"
@@ -258,7 +258,7 @@
                         <geography-attribute
                             v-else-if="element.datatype == 'geography'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                             :attribute="element"
@@ -268,7 +268,7 @@
                         <entity-attribute
                             v-else-if="element.datatype == 'entity' || element.datatype == 'entity-mc'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :multiple="element.datatype == 'entity-mc'"
                             :hide-link="state.hideEntityLink"
@@ -280,7 +280,7 @@
                         <date-attribute
                             v-else-if="element.datatype == 'date'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
@@ -289,7 +289,7 @@
                         <daterange-attribute
                             v-else-if="element.datatype == 'daterange'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
@@ -298,7 +298,7 @@
                         <singlechoice-attribute
                             v-else-if="element.datatype == 'string-sc'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                             :selections="selections[element.id] || []"
@@ -311,7 +311,7 @@
                         <multichoice-attribute
                             v-else-if="element.datatype == 'string-mc'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixMultiChoice(element)"
                             :selections="selections[element.id] || []"
@@ -321,7 +321,7 @@
                         <userlist-attribute
                             v-else-if="element.datatype == 'userlist'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
@@ -330,7 +330,7 @@
                         <url-attribute
                             v-else-if="element.datatype == 'url'"
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
@@ -338,7 +338,7 @@
 
                         <sql-attribute
                             v-else-if="element.datatype == 'sql'"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                         />
@@ -352,7 +352,7 @@
                         <default-attribute
                             v-else
                             :ref="el => setRef(el, element.id)"
-                            :disabled="element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                            :disabled="isDisabled(element)"
                             :name="`attr-${element.id}`"
                             :value="fixedValue(element)"
                             @change="e => updateDirtyState(e, element.id)"
@@ -516,6 +516,11 @@
                 required: false,
                 type: Object,
                 default: _ => new Object(),
+            },
+            readOnly: {
+                required: false,
+                type: Boolean,
+                default: false,
             },
         },
         emits: ['dirty'],
@@ -871,17 +876,23 @@
                 ignoreMetadata: computed(_ => options.value.ignore_metadata),
                 itemClasses: computed(_ => options.value.item_classes),
             });
-            
+
             const fixedValue = (element, defaultValue = null) => {
                 return state.attributeValues[element.id]?.value ?? defaultValue;
             };
-            
+
             const fixMultiChoice = element => {
                 const value = fixedValue(element);
                 if(!value || value === '') return [];
                 return value;
             };
 
+            const isDisabled = (element) => {
+                if(props.readOnly === true) {
+                    return true;
+                }
+                return element.isDisabled || state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id);
+            };
 
             // ON MOUNTED
             onMounted(_ => {
@@ -911,7 +922,7 @@
                 expandedClasses,
                 onAttributeExpand,
                 isInModeration,
-                isDisabledInModeration,
+                isDisabled,
                 addModerationStateClasses,
                 toggleAttributeValue,
                 handleModeration,

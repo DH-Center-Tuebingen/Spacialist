@@ -2,9 +2,11 @@
     <div class="d-flex align-items-center justify-content-between">
         <!-- TODO: Replace with Editable Field -->
         <EditableField
+            class="fs-3"
             style="flex-shrink: 1;"
             :value="entity.name"
             :loading="true"
+            :disabled="readOnly || !can('entity_data_write')"
             @change="updateEntityName"
         />
         <!-- TODO: THE FOLLOWING WAS INSIDE THE HEADER ON HOVER - I DONT KNOW WHAT IT IS AND IF IT IS OBSOLETE OR NOT -->
@@ -91,34 +93,35 @@
                     <i class="fas fa-fw fa-edit fa-xs" />
                 </a>
             </small> -->
-
-
         <div class="d-flex flex-row gap-2">
-            <button
-                type="submit"
-                form="entity-attribute-form"
-                class="btn btn-outline-success btn-sm text-nowrap"
-                :disabled="!dirty || !can('entity_data_write')"
-                @click.prevent="_ => $emit('save', entity)"
-            >
-                <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
-            </button>
-            <button
-                type="button"
-                class="btn btn-outline-warning btn-sm text-nowrap"
-                :disabled="!dirty"
-                @click="_ => $emit('reset', entity)"
-            >
-                <i class="fas fa-fw fa-undo" /> {{ t('global.reset') }}
-            </button>
-            <button
-                type="button"
-                class="btn btn-outline-danger btn-sm text-nowrap"
-                :disabled="!can('entity_delete')"
-                @click="_ => $emit('delete', entity)"
-            >
-                <i class="fas fa-fw fa-trash" /> {{ t('global.delete') }}
-            </button>
+            <template v-if="!readOnly">
+                <button
+                    type="submit"
+                    form="entity-attribute-form"
+                    class="btn btn-outline-success btn-sm text-nowrap"
+                    :disabled="!dirty || !can('entity_data_write')"
+                    @click.prevent="_ => $emit('save', entity)"
+                >
+                    <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-outline-warning btn-sm text-nowrap"
+                    :disabled="!dirty"
+                    @click="_ => $emit('reset', entity)"
+                >
+                    <i class="fas fa-fw fa-undo" /> {{ t('global.reset') }}
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-outline-danger btn-sm text-nowrap"
+                    :disabled="!can('entity_delete')"
+                    @click="_ => $emit('delete', entity)"
+                >
+                    <i class="fas fa-fw fa-trash" /> {{ t('global.delete') }}
+                </button>
+            </template>
+            <slot name="controls" />
         </div>
     </div>
     <div class="d-flex justify-content-between my-2">
@@ -191,6 +194,11 @@
                 default: false,
                 required: true
             },
+            readOnly: {
+                type: Boolean,
+                default: false,
+                required: false
+            }
         },
         emits: ['delete', 'reset', 'save'],
         setup(props) {

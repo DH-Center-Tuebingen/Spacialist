@@ -11,7 +11,7 @@
         >
             <div
                 v-if="!editing"
-                class="form-control cursor-pointer text-truncate"
+                class="cursor-pointer text-truncate"
                 :style="inputStyle"
             >
                 {{ value }}
@@ -20,33 +20,35 @@
                 v-else
                 ref="inputRef"
                 v-model="editedValue"
-                class="form-control text-truncate shadow-none"
+                class="text-truncate shadow-none"
                 :style="inputStyle"
             >
-            <button
-                v-visible="!editing"
-                :disabled="true"
-                class="btn position-absolute end-0 border-0 pointer-events-none"
-            >
-                <i class="fas fa-fw fa-pencil" />
-            </button>
-            <button
-                v-visible="editing"
-                :disabled="!editing"
-                type="submit"
-                class="btn btn-outline-success border-0"
-            >
-                <i class="fas fa-fw fa-check" />
-            </button>
-            <button
-                v-visible="editing"
-                :disabled="!editing"
-                type="reset"
-                class="btn btn-outline-secondary border-0"
-                @click.stop.prevent="cancelEditing()"
-            >
-                <i class="fas fa-fw fa-times" />
-            </button>
+            <template v-if="!disabled">
+                <button
+                    v-visible="!editing"
+                    :disabled="true"
+                    class="btn position-absolute end-0 border-0 pointer-events-none"
+                >
+                    <i class="fas fa-fw fa-pencil" />
+                </button>
+                <button
+                    v-visible="editing"
+                    :disabled="!editing"
+                    type="submit"
+                    class="btn btn-outline-success border-0"
+                >
+                    <i class="fas fa-fw fa-check" />
+                </button>
+                <button
+                    v-visible="editing"
+                    :disabled="!editing"
+                    type="reset"
+                    class="btn btn-outline-secondary border-0"
+                    @click.stop.prevent="cancelEditing()"
+                >
+                    <i class="fas fa-fw fa-times" />
+                </button>
+            </template>
         </form>
     </div>
 </template>
@@ -57,6 +59,7 @@
 
     import {
         computed,
+        readonly,
         ref,
         watch,
     } from 'vue';
@@ -65,7 +68,6 @@
         useGlobalClick
     } from '@/composables/global-click';
     import { nextTick } from 'process';
-    import { disable } from 'ol/rotationconstraint';
 
     export default {
         props: {
@@ -73,11 +75,15 @@
                 type: String,
                 required: true,
             },
+            disabled: {
+                type: Boolean,
+                default: false,
+            },
         },
         emits: ['change'],
         setup(props, context) {
 
-            const editedValue = ref(props.value);
+            const editedValue = ref(props.value == '');
             const editing = ref(false);
             const inputRef = ref(null);
 
@@ -86,10 +92,11 @@
             }, 'mousedown');
 
             watch(() => props.value, (newValue, oldValue) => {
-                editedValue.value = newValue;
+                editedValue.value = newValue ?? '';
             });
 
             const edit = _ => {
+                if(props.disabled) return;
                 editing.value = true;
                 editedValue.value = props.value;
                 nextTick(_ => {
@@ -99,7 +106,6 @@
             };
 
             const submit = _ => {
-                console.log('submitting: ', editedValue.value);
                 if(editedValue.value === '') return;
 
                 editing.value = false;
@@ -127,12 +133,10 @@
                     paddingRight = computedStyle.paddingRight;
                 }
 
-                console.log(`calc(${editedValue.value.length}ch +${paddingLeft} + ${paddingRight})`);
-
                 return {
                     'min-width': '7ch',
                     // The sizing is on non-mono fonts not perfect, but it's good enough for now.
-                    'width': `calc(${editedValue.value.length + 2}ch + ${paddingLeft} + ${paddingLeft})`, 
+                    'width': `calc(${editedValue.value.length + 2}ch + ${paddingLeft} + ${paddingLeft})`,
                     'border-color': 'transparent',
                     'background-color': 'transparent',
                     'overflow': 'hidden',

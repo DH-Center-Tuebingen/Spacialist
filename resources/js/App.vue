@@ -366,7 +366,7 @@
                 </div>
             </div>
         </nav>
-        <div class="container-fluid my-3 col">
+        <div class="container-fluid my-3 col overflow-hidden">
             <template v-if="state.init">
                 <router-view />
             </template>
