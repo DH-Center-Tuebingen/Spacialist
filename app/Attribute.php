@@ -4,7 +4,6 @@ namespace App;
 
 use App\AttributeTypes\AttributeBase;
 use Illuminate\Database\Eloquent\Model;
-use MStaack\LaravelPostgis\Geometries\Geometry;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
