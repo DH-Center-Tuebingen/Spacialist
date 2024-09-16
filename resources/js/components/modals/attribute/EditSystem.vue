@@ -73,7 +73,12 @@
         getConceptLabel,
     } from '@/helpers/helpers.js';
 
+    import SimpleSearch from '@/components/search/Simple.vue';
+
     export default {
+        components: {
+            SimpleSearch,
+        },
         props: {
             metadata: {
                 required: true,
@@ -89,7 +94,7 @@
 
             // FUNCTIONS
             const confirmEdit = _ => {
-                context.emit('confirm', {title: state.title});
+                context.emit('confirm', { title: state.title });
             };
             const closeModal = _ => {
                 context.emit('closing', false);
@@ -128,7 +133,7 @@
                 handleSeparatorRename,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

@@ -15,8 +15,13 @@
     import {
         searchEntity,
     } from '@/api.js';
+    
+    import SimpleSearch from '@/components/search/Simple.vue';
 
     export default {
+        components: {
+            SimpleSearch,
+        },
         props: {
 
         },
@@ -68,5 +73,5 @@
             };
 
         },
-    }
+    };
 </script>

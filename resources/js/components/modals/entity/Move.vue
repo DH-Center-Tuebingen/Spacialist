@@ -101,8 +101,13 @@
     import {
         isAllowedSubEntityType,
     } from '@/helpers/helpers.js';
+    
+    import SimpleSearch from '@/components/search/Simple.vue';
 
     export default {
+        components: {
+            SimpleSearch,
+        },
         props: {
             entity: {
                 required: true,
@@ -169,7 +174,7 @@
                 closeModal,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

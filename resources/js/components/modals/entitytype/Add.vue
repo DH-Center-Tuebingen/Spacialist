@@ -116,8 +116,14 @@
         getConceptLabel,
         multiselectResetClasslist,
     } from '@/helpers/helpers.js';
+    
+    import SimpleSearch from '@/components/search/Simple.vue';
+    
 
     export default {
+        components: {
+            SimpleSearch,
+        },
         props: {
         },
         emits: ['closing', 'confirm'],
@@ -172,7 +178,7 @@
                 labelSelected,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

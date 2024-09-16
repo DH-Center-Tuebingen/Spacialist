@@ -86,8 +86,13 @@
         getConceptLabel,
         getConcept,
     } from '@/helpers/helpers.js';
+    
+    import SimpleSearch from '@/components/search/Simple.vue';
 
     export default {
+        components: {
+            SimpleSearch,
+        },
         props: {
             entityType: {
                 required: true,
@@ -133,7 +138,7 @@
                     }];
                 }
                 return concept;
-            }
+            };
 
             // DATA
             const state = reactive({
@@ -176,7 +181,7 @@
                 labelSelected,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

@@ -10,7 +10,7 @@
                 {{ t('global.label') }}:
             </label>
             <div class="col">
-                <simple-search
+                <SimpleSearch
                     :endpoint="searchLabel"
                     :key-fn="getConceptLabel"
                     :default-value="state.searchResetValue"
@@ -74,7 +74,7 @@
                 {{ t('global.root_attribute') }}:
             </label>
             <div class="col">
-                <simple-search
+                <SimpleSearch
                     :endpoint="searchAttribute"
                     :key-fn="getAttributeLabel"
                     @selected="e => labelSelected(e, 'rootAttributeLabel')"
@@ -89,7 +89,7 @@
                 {{ t('global.root_element') }}:
             </label>
             <div class="col">
-                <simple-search
+                <SimpleSearch
                     :endpoint="searchLabel"
                     :key-fn="getConceptLabel"
                     :default-value="state.attribute.label"
@@ -303,8 +303,13 @@
         siSymbolToStr,
         multiselectResetClasslist,
     } from '@/helpers/helpers.js';
+    
+    import SimpleSearch from '@/components/search/Simple.vue';
 
     export default {
+        components: {
+            SimpleSearch,
+        },
         props: {
             type: {
                 required: false,
