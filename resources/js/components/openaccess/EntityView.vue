@@ -103,7 +103,11 @@
                         :key="`attribute-data-${aid}`"
                     >
                         {{ translateConcept(dataset.attribute.thesaurus_url) }}
-                        {{ dataset.value }}
+                        <attribute
+                            :data="dataset.attribute"
+                            :value-wrapper="dataset"
+                            :disabled="true"
+                        />
                         <div
                             class="progress"
                             role="progressbar"
@@ -141,7 +145,7 @@
                     Summary/Description
                 </h4>
                 <Richtext
-                    v-if="state.metadata.metadata.summary"
+                    v-if="state.metadata?.metadata?.summary"
                     class="bg-secondary bg-opacity-10 rounded font-serif"
                     :classes="'mt-2 px-2 py-1 rounded text-body'"
                     :disabled="true"
@@ -191,8 +195,13 @@
     } from '@/open_api.js';
 
     import { useI18n } from 'vue-i18n';
+    
+    import Attribute from '@/components/attribute/Attribute.vue';
 
     export default {
+        components: {
+            Attribute,
+        },
         setup(props) {
             const { t } = useI18n();
             const route = useRoute();
