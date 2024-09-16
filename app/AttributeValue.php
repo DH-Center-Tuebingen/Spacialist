@@ -6,7 +6,7 @@ use App\Exceptions\InvalidDataException;
 use App\Plugins\Map\App\Geodata;
 use App\AttributeTypes\AttributeBase;
 use Illuminate\Database\Eloquent\Model;
-use MStaack\LaravelPostgis\Eloquent\PostgisTrait;
+use Clickbar\Magellan\Database\Eloquent\HasPostgisColumns;
 use App\Traits\CommentTrait;
 use App\Traits\ModerationTrait;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -17,7 +17,7 @@ use stdClass;
 
 class AttributeValue extends Model implements Searchable
 {
-    use PostgisTrait;
+    use HasPostgisColumns;
     use CommentTrait;
     use ModerationTrait;
     use LogsActivity;
@@ -56,7 +56,7 @@ class AttributeValue extends Model implements Searchable
         'thesaurus_val'
     ];
 
-    protected $postgisFields = [
+    protected $postgisColumns = [
         'geography_val',
     ];
 
