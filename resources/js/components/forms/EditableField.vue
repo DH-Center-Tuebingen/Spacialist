@@ -1,41 +1,71 @@
 <template>
-    <div class="editable-field d-flex gap-2">
-        <h3
-            class="mb-0 cursor-pointer"
-            :contenteditable="editing"
-            @click="edit()"
-            @input="updateValue"
-        >
-            {{ editedValue }}
-        </h3>
+    <div
+        class="editable-field d-flex gap-2 position-relative overflow-hidden rounded"
+        style=""
+        @click="edit"
+        @mousedown.stop
+    >
         <form
-            v-if="editing"
-            class="d-flex flex-row"
+            class="d-flex flex-row flex-nowrap input-group rounded"
             @submit.prevent="submit"
         >
+            <div
+                v-if="!editing"
+                class="form-control cursor-pointer text-truncate"
+                :style="inputStyle"
+            >
+                {{ value }}
+            </div>
+            <input
+                v-else
+                ref="inputRef"
+                v-model="editedValue"
+                class="form-control text-truncate shadow-none"
+                :style="inputStyle"
+            >
             <button
-                :disabled="editedValue === ''"
+                v-visible="!editing"
+                :disabled="true"
+                class="btn position-absolute end-0 border-0 pointer-events-none"
+            >
+                <i class="fas fa-fw fa-pencil" />
+            </button>
+            <button
+                v-visible="editing"
+                :disabled="!editing"
                 type="submit"
-                class="btn btn-outline-success btn-sm"
+                class="btn btn-outline-success border-0"
             >
                 <i class="fas fa-fw fa-check" />
             </button>
             <button
+                v-visible="editing"
+                :disabled="!editing"
                 type="reset"
-                class="btn btn-outline-danger btn-sm"
-                @click.prevent="cancelEditing()"
+                class="btn btn-outline-secondary border-0"
+                @click.stop.prevent="cancelEditing()"
             >
-                <i class="fas fa-fw fa-ban" />
+                <i class="fas fa-fw fa-times" />
             </button>
         </form>
     </div>
 </template>
 
 <script>
+
+    // OUTSOURCE - TODO - Move to dhc-components
+
     import {
+        computed,
         ref,
         watch,
     } from 'vue';
+
+    import {
+        useGlobalClick
+    } from '@/composables/global-click';
+    import { nextTick } from 'process';
+    import { disable } from 'ol/rotationconstraint';
 
     export default {
         props: {
@@ -49,6 +79,11 @@
 
             const editedValue = ref(props.value);
             const editing = ref(false);
+            const inputRef = ref(null);
+
+            useGlobalClick(() => {
+                editing.value = false;
+            }, 'mousedown');
 
             watch(() => props.value, (newValue, oldValue) => {
                 editedValue.value = newValue;
@@ -57,32 +92,63 @@
             const edit = _ => {
                 editing.value = true;
                 editedValue.value = props.value;
-            };
-
-            const updateValue = event => {
-                editedValue.value = event.target.innerText;
+                nextTick(_ => {
+                    if(inputRef.value)
+                        inputRef.value.focus();
+                });
             };
 
             const submit = _ => {
+                console.log('submitting: ', editedValue.value);
                 if(editedValue.value === '') return;
 
+                editing.value = false;
                 if(editedValue.value === props.value) {
-                    editing.value = false;
                     return;
+                } else {
+                    context.emit('change', editedValue.value);
                 }
-                context.emit('change', editedValue.value);
             };
             const cancelEditing = _ => {
                 editedValue.value = props.value;
                 editing.value = false;
             };
 
+            // The input field cannot be dynamically be sized to the content, so we set a calculated value here.
+            // Note: A contenteditable was considered, but it's quite a hassle to have it work properly in vue (jumping cursor problem)
+            //       that's why we stick with the input field.
+            const inputStyle = computed(() => {
+
+                let paddingLeft = 0;
+                let paddingRight = 0;
+                if(inputRef.value) {
+                    const computedStyle = window.getComputedStyle(inputRef.value);
+                    paddingLeft = computedStyle.paddingLeft;
+                    paddingRight = computedStyle.paddingRight;
+                }
+
+                console.log(`calc(${editedValue.value.length}ch +${paddingLeft} + ${paddingRight})`);
+
+                return {
+                    'min-width': '7ch',
+                    // The sizing is on non-mono fonts not perfect, but it's good enough for now.
+                    'width': `calc(${editedValue.value.length + 2}ch + ${paddingLeft} + ${paddingLeft})`, 
+                    'border-color': 'transparent',
+                    'background-color': 'transparent',
+                    'overflow': 'hidden',
+                    'text-overflow': 'ellipsis',
+                    'white-space': 'nowrap',
+                    'outline-offset': '-3px'
+                };
+            });
+
             return {
                 cancelEditing,
-                updateValue,
                 edit,
                 editing,
                 editedValue,
+                inputRef,
+                inputStyle,
                 submit,
             };
         },

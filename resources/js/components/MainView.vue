@@ -1,5 +1,5 @@
 <template>
-    <div class="row h-100 overflow-hidden">
+    <div class="row h-100">
         <div
             v-if="state.columnPref.left > 0"
             id="tree-container"

@@ -3,6 +3,7 @@
         <EntityDetailHeader
             :entity="state.entity"
             :entity-user="state.entityUser"
+            :dirty="formDirty"
             @save="saveEntity"
             @reset="resetForm"
             @delete="confirmDeleteEntity"
@@ -123,11 +124,9 @@
             </li>
         </ul>
 
-
-
         <div
             id="entity-detail-tab-content"
-            class="tab-content col ps-0 pe-0 overflow-hidden"
+            class="tab-content col ps-0 pe-0"
         >
             <!-- ATTRIBUTES VIEW -->
 
@@ -144,7 +143,7 @@
                 >
                     <attribute-list
                         v-dcan="'entity_data_read'"
-                        class="pt-2 h-100 overflow-y-auto row"
+                        class="pt-2 h-100 row"
                         :attributes="tabName.data"
                         :hidden-attributes="state.hiddenAttributeList"
                         :show-hidden="state.hiddenAttributeState"
@@ -319,15 +318,11 @@
 
     import { usePreventNavigation } from '@/helpers/form.js';
 
-    import MetadataTab from '@/components/entity/MetadataTab.vue';
-    import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
     import EntityDetailHeader from './entity/EntityDetailHeader.vue';
 
     export default {
         components: {
             EntityDetailHeader,
-            EntityTypeLabel,
-            MetadataTab,
         },
         props: {
             entity: {
@@ -342,7 +337,7 @@
             onDelete: {
                 required: false,
                 type: Function,
-                default: () => { }
+                default: () => {}
             }
         },
         setup(props) {
@@ -440,9 +435,6 @@
                         }
                     });
                     return groups;
-                }),
-                entityTypeLabel: computed(_ => {
-                    return getEntityTypeName(state.entity.entity_type_id);
                 }),
                 hiddenAttributeList: computed(_ => {
                     const keys = Object.keys(state.hiddenAttributes);

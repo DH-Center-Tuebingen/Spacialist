@@ -1,11 +1,11 @@
 import { onBeforeUnmount, onMounted } from 'vue';
 
-export function useGlobalClick(func) {
+export function useGlobalClick(func, eventType = 'click') {
     onMounted(() => {
-        window.addEventListener('click', func);
+        window.addEventListener(eventType, func);
     });
 
     onBeforeUnmount(() => {
-        window.removeEventListener('click', func);
+        window.removeEventListener(eventType, func);
     });
 }

@@ -366,7 +366,7 @@
                 </div>
             </div>
         </nav>
-        <div class="container-fluid my-3 col overflow-hidden">
+        <div class="container-fluid my-3 col">
             <template v-if="state.init">
                 <router-view />
             </template>
@@ -612,7 +612,7 @@ export default {
                 container: 'toast-container',
             });
             useToast();
-            // if (adapter.browserDetails.browser == 'firefox') {
+            // if(adapter.browserDetails.browser == 'firefox') {
             //     adapter.browserShim.shimGetDisplayMedia(window, 'window');
             // }
             rtc.player = videojs('#rtc-sharing-container', rtc.options);

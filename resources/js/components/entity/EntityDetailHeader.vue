@@ -1,37 +1,10 @@
 <template>
-    <div class="d-flex justify-content-between my-2">
-        <entity-type-label
-            :type="entity.entity_type_id"
-            :icon-only="false"
-        />
-        <div>
-            <i class="fas fa-fw fa-user-edit" />
-            <span
-                class="ms-1"
-                :title="date(lastModified, undefined, true, true)"
-            >
-                {{ ago(lastModified) }}
-            </span>
-            -
-            <a
-                v-if="entity.user"
-                href="#"
-                class="fw-medium"
-                @click.prevent="showUserInfo(entityUser)"
-            >
-                {{ entityUser.name }}
-                <user-avatar
-                    :user="entityUser"
-                    :size="20"
-                    class="align-middle"
-                />
-            </a>
-        </div>
-    </div>
     <div class="d-flex align-items-center justify-content-between">
         <!-- TODO: Replace with Editable Field -->
         <EditableField
+            style="flex-shrink: 1;"
             :value="entity.name"
+            :loading="true"
             @change="updateEntityName"
         />
         <!-- TODO: THE FOLLOWING WAS INSIDE THE HEADER ON HOVER - I DONT KNOW WHAT IT IS AND IF IT IS OBSOLETE OR NOT -->
@@ -119,11 +92,12 @@
                 </a>
             </small> -->
 
+
         <div class="d-flex flex-row gap-2">
             <button
                 type="submit"
                 form="entity-attribute-form"
-                class="btn btn-outline-success btn-sm"
+                class="btn btn-outline-success btn-sm text-nowrap"
                 :disabled="!dirty || !can('entity_data_write')"
                 @click.prevent="_ => $emit('save', entity)"
             >
@@ -131,7 +105,7 @@
             </button>
             <button
                 type="button"
-                class="btn btn-outline-warning btn-sm"
+                class="btn btn-outline-warning btn-sm text-nowrap"
                 :disabled="!dirty"
                 @click="_ => $emit('reset', entity)"
             >
@@ -139,12 +113,41 @@
             </button>
             <button
                 type="button"
-                class="btn btn-outline-danger btn-sm"
+                class="btn btn-outline-danger btn-sm text-nowrap"
                 :disabled="!can('entity_delete')"
                 @click="_ => $emit('delete', entity)"
             >
                 <i class="fas fa-fw fa-trash" /> {{ t('global.delete') }}
             </button>
+        </div>
+    </div>
+    <div class="d-flex justify-content-between my-2">
+        <entity-type-label
+            :type="entity.entity_type_id"
+            :icon-only="false"
+        />
+        <div>
+            <i class="fas fa-fw fa-user-edit" />
+            <span
+                class="ms-1"
+                :title="date(lastModified, undefined, true, true)"
+            >
+                {{ ago(lastModified) }}
+            </span>
+            -
+            <a
+                v-if="entity.user"
+                href="#"
+                class="fw-medium"
+                @click.prevent="showUserInfo(entityUser)"
+            >
+                {{ entityUser.name }}
+                <user-avatar
+                    :user="entityUser"
+                    :size="20"
+                    class="align-middle"
+                />
+            </a>
         </div>
     </div>
 </template>
@@ -166,11 +169,13 @@
 
     import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
     import EditableField from '../forms/EditableField.vue';
+    import IconButton from '../forms/IconButton.vue';
 
     export default {
         components: {
             EditableField,
             EntityTypeLabel,
+            IconButton,
         },
         props: {
             entity: {
