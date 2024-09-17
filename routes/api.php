@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\PluginHook;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1')->group(function() {
-    Route::get('/pre', 'HomeController@getGlobalData');
+    Route::get('/pre', 'HomeController@getGlobalData')->middleware(PluginHook::class);
     Route::get('/version', function() {
         $versionInfo = new App\VersionInfo();
         return response()->json([
@@ -90,11 +91,11 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::get('/dm/entity_type/top', 'EditorController@getTopEntityTypes');
     Route::get('/dm/attribute', 'EditorController@getAttributes');
     Route::get('/dm/attribute_types', 'EditorController@getAttributeTypes');
-    Route::get('/entity_type/{id}', 'EditorController@getEntityType')->where('id', '[0-9]+');
+    Route::get('/entity_type/{id}', 'EditorController@getEntityType')->where('id', '[0-9]+')->middleware(PluginHook::class);
     Route::get('/dm/geometry', 'EditorController@getAvailableGeometryTypes');
 
     Route::post('/dm/entity_type', 'EditorController@addEntityType');
-    Route::post('/dm/{id}/relation', 'EditorController@setRelationInfo')->where('id', '[0-9]+');
+    Route::post('/dm/{id}/relation', 'EditorController@setRelationInfo')->where('id', '[0-9]+')->middleware(PluginHook::class);
     Route::post('/dm/attribute', 'EditorController@addAttribute');
     Route::post('/dm/entity_type/{etid}/attribute', 'EditorController@addAttributeToEntityType')->where('etid', '[0-9]+');
     Route::post('/dm/entity_type/{ctid}/duplicate', 'EditorController@duplicateEntityType')->where('ctid', '[0-9]+');

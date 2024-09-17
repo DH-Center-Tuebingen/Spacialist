@@ -110,10 +110,21 @@ class Plugin extends Model
     }
 
     public static function updateState() : void {
-        $pluginPath = base_path('app/Plugins');
+        $pluginPath = base_path('app' . DIRECTORY_SEPARATOR . 'Plugins');
         $availablePlugins = File::directories($pluginPath);
 
-        self::discoverPlugins($availablePlugins);
+        $activePlugins = self::discoverPlugins($availablePlugins);
+        
+        
+        $activePluginNamespaces = array_map(function($fullPath) use ($pluginPath){  
+            $fullPath = str_replace(DIRECTORY_SEPARATOR, '\\', $fullPath);
+            $pluginName = File::basename($fullPath);
+            $baseNamespace = 'App\\Plugins';
+            $namespacePart = str_replace($pluginPath, $baseNamespace , $fullPath);
+            return $namespacePart . '\\App\\Plugin';
+        }, $activePlugins);
+        
+        self::initializePlugins($activePluginNamespaces);
         self::cleanupPlugins($availablePlugins);
     }
 
@@ -131,12 +142,30 @@ class Plugin extends Model
         }
     }
 
-    public static function discoverPlugins(array $list) : void {
+    public static function discoverPlugins(array $list) : array {
+        $activePlugins = [];
         foreach($list as $ap) {
             $info = self::getInfo($ap);
             if($info !== false) {
-                self::updateOrCreateFromInfo($info);
+                $plugin = self::updateOrCreateFromInfo($info);
+                
+                if($plugin->isActive()){
+                    $activePlugins[] = $ap;
+                }
             }
+        }
+        return $activePlugins;
+    }
+    
+    public static function initializePlugins(array $namespaceList){
+        foreach($namespaceList as $pluginNamespace) {
+            
+            if(!class_exists($pluginNamespace)) {
+                info("Plugin not found @ $pluginNamespace");
+                continue;
+            }
+            
+            new $pluginNamespace();
         }
     }
 
@@ -170,6 +199,10 @@ class Plugin extends Model
             }
             $this->save();
         }
+    }
+    
+    public function isActive(){
+        return isset($this->installed_at);
     }
 
     public function handleInstallation() {

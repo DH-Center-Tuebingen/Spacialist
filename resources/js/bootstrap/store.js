@@ -159,7 +159,7 @@ export const store = createStore({
                 },
                 updateEntityType(state, data) {
                     const entityType = state.entityTypes[data.id];
-                    const values = only(data, ['thesaurus_url', 'updated_at', 'is_root', 'sub_entity_types']);
+                    const values = only(data, ['thesaurus_url', 'updated_at', 'is_root', 'sub_entity_types', 'plugin_data']);
                     for(let k in values) {
                         entityType[k] = values[k];
                     }
@@ -949,6 +949,7 @@ export const store = createStore({
 
                     return state.entityTypeAttributes[id];
                 },
+                entityTypeUsesTabbedChildEntities: state => id => state.entityTypes[id]?.plugin_data?.tabbed_child_entities?.tabbed ?? false,
                 entityTypeColors: state => id => state.entityTypeColors[id],
                 geometryTypes: state => state.geometryTypes,
                 mainView: state => state.mainView,
