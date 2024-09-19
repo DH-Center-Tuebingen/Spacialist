@@ -21,10 +21,21 @@ class EntityMultipleAttribute extends AttributeBase
     }
 
     public static function unserialize(mixed $data) : mixed {
-        return json_encode($data);
+        $result = [];
+        foreach($data as $entry) {
+            $id = EntityAttribute::unserialize($entry);
+            if($id !== null) {
+                $result[] =  $id;
+            }
+        }
+        return json_encode($result);
     }
 
-    public static function serialize(mixed $data) : mixed {
-        return json_decode($data);
+    public static function serialize(mixed $ids) : mixed {
+        $decodedData = json_decode($ids);
+        $entityList = Entity::without(['user'])->whereIn('id', $decodedData)->get()->keyBy('id');
+        return array_map(function($id) use ($entityList) {
+            return EntityAttribute::serializeFromEntity($id, $entityList[$id]);
+        }, $decodedData);
     }
 }

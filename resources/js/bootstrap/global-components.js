@@ -1,4 +1,5 @@
 import AttributeList from '@/components/AttributeList.vue';
+import Attribute from '@/components/attribute/Attribute.vue';
 import EntityTypeList from '@/components/EntityTypeList.vue';
 import EntityTree from '@/components/tree/Entity.vue';
 import EntityBreadcrumbs from '@/components/EntityBreadcrumbs.vue';
@@ -13,6 +14,7 @@ import Alert from '@/components/Alert.vue';
 import NotificationBody from '@/components/notification/NotificationBody.vue';
 import CsvTable from '@/components/CsvTable.vue';
 import Gradient from '@/components/Gradient.vue';
+import Richtext from '@/components/attribute/Richtext.vue';
 import MarkdownViewer from '@/components/mde/Viewer.vue';
 import MarkdownEditor from '@/components/mde/Wrapper.vue';
 import BibtexCode from '@/components/bibliography/BibtexCode.vue';
@@ -27,6 +29,7 @@ import { Tree, Node, } from 'tree-vue-component';
 export default function initGlobalComponents(app) {
     // Components
     app.component('AttributeList', AttributeList);
+    app.component('Attribute', Attribute);
     app.component('EntityTypeList', EntityTypeList);
     app.component('EntityTree', EntityTree);
     app.component('EntityBreadcrumbs', EntityBreadcrumbs);
@@ -41,6 +44,7 @@ export default function initGlobalComponents(app) {
     app.component('NotificationBody', NotificationBody);
     app.component('CsvTable', CsvTable);
     app.component('ColorGradient', Gradient);
+    app.component('Richtext', Richtext);
     app.component('MdViewer', MarkdownViewer);
     app.component('MdEditor', MarkdownEditor);
     app.component('BibtexCode', BibtexCode);

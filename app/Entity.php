@@ -259,7 +259,7 @@ class Entity extends Model implements Searchable {
         $entityMcAttributes = Attribute::where('datatype', 'entity-mc')
             ->get()->pluck('id')->toArray();
         $links = AttributeValue::where('entity_val', $this->id)
-            ->orWhere(function($query) use($entityMcAttributes) {
+            ->orWhere(function ($query) use ($entityMcAttributes) {
                 $query->whereJsonContains('json_val', $this->id)
                     ->whereIn('attribute_id', $entityMcAttributes);
             })

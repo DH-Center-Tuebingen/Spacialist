@@ -1,12 +1,11 @@
 <template>
     <div class="input-group">
         <input
-            v-model="valueValue"
+            v-model="valueFieldValue"
             type="number"
             class="form-control text-center"
             :disabled="disabled"
             step="0.01"
-            @input="handleValueInput"
         >
         <button
             class="btn btn-outline-secondary dropdown-toggle"
@@ -72,7 +71,7 @@
             },
             metadata: {
                 type: Object,
-                default: _ => new Object(),
+                required: true,
             },
             disabled: {
                 type: Boolean,
@@ -81,11 +80,11 @@
         emits: ['change'],
         setup(props, context) {
             const { t } = useI18n();
+    
+            // We need the toRefs for the vee-validate fields
             const {
-                name,
-                value,
-                metadata,
-                disabled,
+                value: valueProp, 
+                metadata: metadataProp,
             } = toRefs(props);
 
             // FUNCTIONS
@@ -98,7 +97,7 @@
 
             // DATA
             const state = reactive({
-                unitGrp: metadata.value.si_baseunit,
+                unitGrp: metadataProp.value?.si_baseunit,
                 groupUnits: computed(_ => {
                     if(!state.unitGrp) return [];
                     let groupName = state.unitGrp;
@@ -115,11 +114,11 @@
 
             const {
                 handleInput: handleValueInput,
-                value: valueValue,
-                meta: valueMeta,
+                value: valueFieldValue,
+                meta: valueFieldMeta,
                 resetField: resetValueField,
-            } = useField(`value_${name.value}`, yup.number(), {
-                initialValue: value.value.value,
+            } = useField(`value_${props.name}`, yup.number(), {
+                initialValue: valueProp.value.value,
             });
 
             const {
@@ -127,21 +126,21 @@
                 value: unitValue,
                 meta: unitMeta,
                 resetField: resetUnitField,
-            } = useField(`unit_${name.value}`, yup.string(), {
-                initialValue: getUnitFromLabel(value.value.unit || metadata.value.si_default),
+            } = useField(`unit_${props.name}`, yup.string(), {
+                initialValue: getUnitFromLabel(valueProp.value.unit || metadataProp.value?.si_default),
             });
 
             const v = reactive({
                 value: computed(_ => {
                     return {
-                        value: valueValue.value,
+                        value: valueFieldValue.value,
                         unit: unitValue.value?.label || '',
                     };
                 }),
                 meta: computed(_ => {
                     return {
-                        dirty: valueMeta.dirty || unitMeta.dirty,
-                        valid: ((valueMeta.dirty && valueMeta.valid) || !valueMeta.dirty)
+                        dirty: valueFieldMeta.dirty || unitMeta.dirty,
+                        valid: ((valueFieldMeta.dirty && valueFieldMeta.valid) || !valueFieldMeta.dirty)
                     };
                 }),
             });
@@ -153,7 +152,7 @@
 
             const undirtyField = _ => {
                 resetValueField({
-                    value: valueValue.value,
+                    value: valueFieldValue.value,
                 });
 
                 resetUnitField({
@@ -161,21 +160,23 @@
                 });
             };
 
-            watch(_ => value, (newValue, oldValue) => {
+            watch(_ => valueProp, (newValue, oldValue) => {
                 resetFieldState();
             });
 
-            watch(_ => v.meta, (newValue, oldValue) => {
+            watch(_ => v, (newValue, oldValue) => {
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
                     value: v.value,
                 });
+            }, {
+                deep: true,
             });
 
             // only needed for preview, otherwise unit can not change
             // this is not yet working properly.
-            // watch(_ => props.metadata, (newValue, oldValue) => {
+            // watch(_ => metadataProp.value, (newValue, oldValue) => {
             //     state.unitGrp = newValue;
             //     console.log('unitGrp', state.unitGrp);
             // }, {
@@ -183,7 +184,7 @@
 
             // });
 
-            watch(_ => value.value.default, (newValue, oldValue) => {
+            watch(_ => valueProp.value.default, (newValue, oldValue) => {
                 if(!newValue) {
                     handleUnitChange(null);
                 } else {
@@ -205,7 +206,7 @@
                 // STATE
                 state,
                 v,
-                valueValue,
+                valueFieldValue,
                 unitValue,
 
             };

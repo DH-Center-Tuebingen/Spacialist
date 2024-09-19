@@ -173,6 +173,7 @@
             "rism": "RISM",
             "si-unit": "SI-Unit",
             "si_units": {
+                "unit_type": "Unit Type",
                 "base_unit": "Base Unit",
                 "time": {
                     "label": "Time",
@@ -241,13 +242,57 @@
                         "pound": "Pound"
                     }
                 },
+                "force": {
+                    "label": "Force",
+                    "units": {
+                        "newton": "Newton",
+                        "kilonewton": "Kilonewton"
+                    }
+                },
                 "temperature": {
                     "label": "Temperature",
                     "units": {
-                        "degree_celsius": "Celsius",
-                        "degree_kelvin": "Kelvin",
-                        "degree_fahrenheit": "Fahrenheit",
-                        "degree_réaumur": "Réaumur"
+                        "celsius": "Celsius",
+                        "kelvin": "Kelvin",
+                        "fahrenheit": "Fahrenheit",
+                        "réaumur": "Réaumur"
+                    }
+                },
+                "volumetric_flow": {
+                    "label": "Volumetric Flow",
+                    "units": {
+                        "cubic_metre_per_second": "Cubic metre per second",
+                        "litre_per_second": "Litre per second"
+                    }
+                },
+                "speed": {
+                    "label": "Speed",
+                    "units": {
+                        "metre_per_second": "Metre per second",
+                        "kilometre_per_hour": "Kilometre per hour",
+                        "mile_per_hour": "Mile per hour"
+                    }
+                },
+                "pressure": {
+                    "label": "Pressure",
+                    "units": {
+                        "pascal": "Pascal",
+                        "kilopascal": "Kilopascal",
+                        "hectopascal": "Hectopascal",
+                        "bar": "Bar",
+                        "decibar": "Decibar",
+                        "millibar": "Millibar",
+                        "torr": "Torr",
+                        "technical_atmosphere": "Technical atmosphere",
+                        "standard_atmosphere": "Standard atmosphere",
+                        "pound_per_square_inch": "Pound per square inch"
+                    }
+                },
+                "quotient": {
+                    "label": "Quotient",
+                    "units": {
+                        "percent": "Percent",
+                        "parts_per_million": "Parts per million"
                     }
                 }
             },
@@ -529,6 +574,9 @@
                 },
                 "table": {
                     "add_row": "Add row",
+                    "error": {
+                        "deleted_entity": "Deleted Entity"
+                    },
                     "chart": {
                         "number_sets": "Last {cnt} data sets",
                         "include_in": "Use in chart",

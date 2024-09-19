@@ -22,11 +22,15 @@ class UnitManager extends Singleton {
     public function addAllUnitSystems(): void {
         $this->addUnitSystems([
             new AreaUnits(),
+            new ForceUnits(),
             new LengthUnits(),
             new MassUnits(),
+            new PressureUnits(),
+            new SpeedUnits(),
             new TemperatureUnits(),
             new TimeUnits(),
             new VolumeUnits(),
+            new VolumetricFlowUnits(),
         ]);
     }
 
