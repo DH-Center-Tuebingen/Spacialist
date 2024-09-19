@@ -13,13 +13,8 @@
         <template #item="{ element, index }">
             <div
                 v-if="!state.hiddenAttributeList[element.id] || showHidden"
-                <<<<<<<
-                HEAD
-                class="mb-3"
-                =="====="
                 class="mb-3 px-2"
             >
-                >>>>>> master
                 :class="clFromMetadata(element)"
                 @mouseenter="onEnter(index)"
                 @mouseleave="onLeave(index)"
