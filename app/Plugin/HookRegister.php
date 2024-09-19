@@ -17,6 +17,7 @@ class HookRegister extends Singleton {
         if(!isset($this->hooks[$hook->value])) {
             $this->hooks[$hook->value] = [];
         }
+        
         $this->hooks[$hook->value][] = ['plugin' => $pluginName, 'callback' => $callback];
     }
     
@@ -34,5 +35,9 @@ class HookRegister extends Singleton {
         }
         
         return $response;
+    }
+    
+    public function count(string $name):int {
+        return isset($this->hooks[$name]) ? count($this->hooks[$name]) : 0;
     }
 }

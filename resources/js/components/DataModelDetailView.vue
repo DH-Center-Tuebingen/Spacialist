@@ -21,7 +21,7 @@
                     <div class="form-check form-switch">
                         <input
                             id="entity-type-root-toggle"
-                            v-model="state.entityType.is_root"
+                            v-model="formData.is_root"
                             class="form-check-input"
                             type="checkbox"
                         >
@@ -48,10 +48,11 @@
                     </div>
                 </div>
                 <div class="mb-3 row">
-                    <label class="col-form-label col-md-3 text-end">{{ t('main.datamodel.detail.properties.sub_types') }}</label>
+                    <label class="col-form-label col-md-3 text-end">{{ t('main.datamodel.detail.properties.sub_types')
+                    }}</label>
                     <div class="col-md-9">
                         <multiselect
-                            v-model="state.entityType.sub_entity_types"
+                            v-model="formData.sub_entity_types"
                             :object="true"
                             :mode="'tags'"
                             :label="'thesaurus_url'"
@@ -79,6 +80,9 @@
                                 </div>
                             </template>
                         </multiselect>
+
+
+
                         <div class="mt-2 d-flex flex-row gap-2">
                             <button
                                 type="button"
@@ -96,6 +100,23 @@
                             </button>
                         </div>
                     </div>
+                </div>
+                <!-- PLUGINS -->
+
+                <div
+                    v-for="pluginSlot in pluginSlots "
+                    :key="pluginSlot.key"
+                    class="d-flex gap-2 align-items-center mb-3 offset-3 ps-2"
+                >
+                    <component
+                        :is="pluginSlot.component"
+                        v-bind="pluginSlot.vBind"
+                        v-on="pluginSlot.vOn"
+                    />
+                    <i
+                        class="fas fa-fw fa-info-circle"
+                        :title="'Plugin: ' + pluginSlot.key"
+                    />
                 </div>
                 <div class="offset-3 ps-2">
                     <button
@@ -117,7 +138,7 @@
                 </div>
                 <attribute-list
                     class="h-100 overflow-y-auto overflow-x-hidden"
-                    :group="{name: 'attribute-selection', pull: false, put: true}"
+                    :group="{ name: 'attribute-selection', pull: false, put: true }"
                     :attributes="state.entityAttributes"
                     :values="state.entityValues"
                     :disable-drag="false"
@@ -136,7 +157,10 @@
 <script>
     import {
         computed,
+        onMounted,
         reactive,
+        ref,
+        watch,
     } from 'vue';
 
     import {
@@ -166,9 +190,10 @@
     } from '@/api.js';
 
     import {
-      showEditAttribute,
+        showEditAttribute,
         showRemoveAttribute,
     } from '@/helpers/modal.js';
+    import { plugins } from 'chart.js';
 
     export default {
         setup(props, context) {
@@ -177,29 +202,8 @@
             const toast = useToast();
             // FETCH
 
+
             // FUNCTIONS
-            const updateEntityType = _ => {
-                if(!state.entityType.id) return;
-
-                const et = state.entityType;
-                const data = {
-                    'is_root': et.is_root || false,
-                    'sub_entity_types': et.sub_entity_types || [],
-                };
-
-                updateEntityTypeRelation(et.id, data).then(_ => {
-                    const name = translateConcept(state.entityType.thesaurus_url);
-                    toast.$toast(
-                        t('main.datamodel.toasts.updated_type.msg', {
-                            name: name
-                        }),
-                        t('main.datamodel.toasts.updated_type.title'),
-                        {
-                            channel: 'success',
-                        }
-                    );
-                });
-            };
             const addAllEntityTypes = _ => {
                 state.entityType.sub_entity_types = [];
                 state.entityType.sub_entity_types = state.minimalEntityTypes.slice();
@@ -263,7 +267,7 @@
                 entityValues: computed(_ => {
                     let data = {};
                     if(!state.entityAttributes) return data;
-                    for(let i=0; i<state.entityAttributes.length; i++) {
+                    for(let i = 0; i < state.entityAttributes.length; i++) {
                         const curr = state.entityAttributes[i];
                         // several datatypes require a "valid"/non-string v-model
                         data[curr.id] = {
@@ -299,20 +303,20 @@
                     switch(state.selectedDependency.attribute.datatype) {
                         case 'boolean':
                             return [
-                                {id: '='}
+                                { id: '=' }
                             ];
                         case 'double':
                         case 'integer':
                         case 'date':
                         case 'percentage':
                             return [
-                                {id: '<'},
-                                {id: '>'},
-                                {id: '='},
+                                { id: '<' },
+                                { id: '>' },
+                                { id: '=' },
                             ];
                         default:
                             return [
-                                {id: '='}
+                                { id: '=' }
                             ];
                     }
                 }),
@@ -344,23 +348,97 @@
                                 state.selectedDependency.operator &&
                                 state.selectedDependency.operator.id &&
                                 state.selectedDependency.value
-                                )
-                                ||
+                            )
+                            ||
+                            (
                                 (
-                                    (
-                                        !state.selectedDependency.attribute ||
-                                        !state.selectedDependency.attribute.id
-                                    ) &&
+                                    !state.selectedDependency.attribute ||
+                                    !state.selectedDependency.attribute.id
+                                ) &&
                                 (
                                     !state.selectedDependency.operator ||
                                     !state.selectedDependency.operator.id
                                 ) &&
                                 !state.selectedDependency.value
-                                )
                             )
-                            ;
+                        )
+                        ;
                 }),
             });
+
+
+            // When using the states objects for the form, 
+            // we change the values even when not saved. 
+            // Therefore, we need to create a separate object for the form.
+            const formData = reactive({
+                is_root: state.entityType.is_root || false,
+                sub_entity_types: _cloneDeep(state.entityType.sub_entity_types) || [],
+            });
+
+            function setPluginData() {
+                if(!state.entityType.plugin_data) {
+                    console.error(`Entity type does not have a 'plugin_data' property.`);
+                    return;
+                }
+
+                for(const pluginSlot of store.getters.slotPlugins('dataModelOptions')) {
+                    const value = state.entityType.plugin_data[pluginSlot.key];
+                    if(!pluginSlot.methods?.setData)
+                        console.error(`Plugin '${pluginSlot.key}' does not has a 'setData' method.`);
+                    else
+                        pluginSlot.methods.setData(value);
+                }
+            }
+
+            onMounted(() => {
+                setPluginData();
+            });
+
+
+            // If the active enttiy type changes, we need to update the form data
+            watch(() => state.entityType, (id) => {
+                formData.is_root = state.entityType.is_root || false;
+                formData.sub_entity_types = _cloneDeep(state.entityType.sub_entity_types) || [];
+                setPluginData();
+            });
+
+            const updateEntityType = event => {
+                if(!state.entityType.id) return;
+
+                const pluginData = {};
+                for(const pluginSlot of store.getters.slotPlugins('dataModelOptions')) {
+                    if(!pluginSlot.getData) console.error(`Plugin '${pluginSlot.key}' does not have a 'getData' method.`);
+                    const name = pluginSlot.key;
+
+                    if(!pluginSlot.methods?.getData)
+                        console.error(`Plugin '${pluginSlot.key}' does not have a 'getData' method.`);
+                    else
+                        pluginData[name] = pluginSlot.methods.getData();
+                }
+
+                const data = {
+                    'is_root': formData.is_root || false,
+                    'sub_entity_types': formData.sub_entity_types || [],
+                    'plugin_data': pluginData
+                };
+
+                updateEntityTypeRelation(state.entityType.id, data).then(_ => {
+                    const name = translateConcept(state.entityType.thesaurus_url);
+                    toast.$toast(
+                        t('main.datamodel.toasts.updated_type.msg', {
+                            name: name
+                        }),
+                        t('main.datamodel.toasts.updated_type.title'),
+                        {
+                            channel: 'success',
+                        }
+                    );
+                });
+            };
+
+            const pluginSlots = store.getters.slotPlugins('dataModelOptions');
+
+            console.log(pluginSlots);
 
             // RETURN
             return {
@@ -375,110 +453,12 @@
                 onEditEntityAttribute,
                 onRemoveAttributeFromEntityType,
                 reorderEntityAttribute,
+                formData,
+                pluginSlots,
                 // PROPS
                 // STATE
                 state,
             };
-        },
-        // methods: {
-        //     editEntityAttribute(attribute, options) {
-        //         const vm = this;
-        //         if(vm.editEntityAttributeDisabled) return;
-        //         const aid = attribute.id;
-        //         const ctid = attribute.entity_type_id;
-        //         let data = {
-        //             d_attribute: options.attribute.id,
-        //             d_operator: options.operator.id
-        //         };
-        //         data.d_value = vm.getDependencyValue(options.value, options.attribute.datatype);
-        //         $httpQueue.add(() => vm.$http.patch(`/editor/dm/entity_type/${ctid}/attribute/${aid}/dependency`, data).then(function(response) {
-        //             vm.hideEditEntityAttributeModal();
-        //         }));
-        //     },
-        //     onEditEntityAttribute(attribute) {
-        //         const ctid = this.entityType.id;
-        //         this.depends.attributes = this.entityAttributes.filter(function(a) {
-        //             return a.id != attribute.id;
-        //         });
-        //         let attrDependency = {};
-        //         for(let k in this.entityDependencies) {
-        //             const attrDeps = this.entityDependencies[k];
-        //             const dep = attrDeps.find(function(ad) {
-        //                 return ad.dependant == attribute.id;
-        //             });
-        //             if(dep) {
-        //                 attrDependency[k] = dep;
-        //             }
-        //         }
-        //         this.setModalSelectedAttribute(attribute);
-        //         if(Object.keys(attrDependency).length) {
-        //             this.setSelectedDependency(attrDependency);
-        //         }
-        //         this.openedModal = 'edit-entity-attribute-modal';
-        //         this.$modal.show('edit-entity-attribute-modal');
-        //     },
-        //     dependencyAttributeSelected(attribute) {
-        //         const vm = this;
-        //         if(!attribute) {
-        //             vm.depends.values = [];
-        //             return;
-        //         }
-        //         const id = attribute.id;
-        //         switch(attribute.datatype) {
-        //             case 'string-sc':
-        //             case 'string-mc':
-        //                 $httpQueue.add(() => vm.$http.get(`/editor/attribute/${id}/selection`).then(function(response) {
-        //                     vm.depends.values = [];
-        //                     const selections = response.data;
-        //                     if(selections) {
-        //                         for(let i=0; i<selections.length; i++) {
-        //                             vm.depends.values.push(selections[i]);
-        //                         }
-        //                     }
-        //                 }));
-        //                 break;
-        //             default:
-        //                 vm.depends.values = [];
-        //                 break;
-        //         }
-        //     },
-        //     getDependencyValue(valObject, type) {
-        //         switch(type) {
-        //             case 'string-sc':
-        //             case 'string-mc':
-        //                 return valObject.concept_url;
-        //             default:
-        //                 return valObject;
-        //         }
-        //     },
-        //     // Modal Methods
-        //     setSelectedDependency(values) {
-        //         if(!values) return;
-        //         let aid;
-        //         // We have an object with only one key
-        //         // Hacky way to get that key
-        //         for(let k in values) {
-        //             aid = k;
-        //             break;
-        //         }
-        //         this.selectedDependency.attribute = this.entityAttributes.find(function(a) {
-        //             return a.id == aid;
-        //         });
-        //         this.selectedDependency.operator = {id: values[aid].operator};
-        //         if(this.selectedDependency.attribute) {
-        //             switch(this.selectedDependency.attribute.datatype) {
-        //                 case 'string-sc':
-        //                 case 'string-mc':
-        //                     this.selectedDependency.value = {
-        //                         concept_url: values[aid].value
-        //                     };
-        //                     break;
-        //                 default:
-        //                     this.selectedDependency.value = values[aid].value;
-        //                     break;
-        //             }
-        //         }
-        //     },
-        // },
+        }
     };
 </script>

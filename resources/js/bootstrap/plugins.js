@@ -56,7 +56,10 @@ const defaultSlotOptions = {
     key: null,
     component: null,
     componentTag: null,
-    href: '', // for 'tools' and 'settings'
+    href: '', // for 'tools' and 'settings',
+    vBind: {},
+    vOn: {},
+    methods: {}
 };
 const defaultDatatypeOptions = {
     of: null, // id of registered plugin
@@ -220,6 +223,7 @@ export const SpPS = {
                 SpPS.data.app.component(mergedOptions.componentTag, mergedOptions.component);
             }
         }
+
         store.dispatch('registerPluginInSlot', mergedOptions);
     },
     registerPreference: (options) => {
@@ -261,6 +265,6 @@ export const SpPS = {
         }
         store.dispatch('registerPluginPreference', mergedOptions);
     },
-}
+};
 
 export default SpPS;

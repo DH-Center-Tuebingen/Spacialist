@@ -14,3 +14,17 @@ export const removeScript = location => {
         document.body.removeChild(oldScript);
     }
 };
+
+export const isSlotValid = name => {
+    return availableSlots().includes(name);
+};
+
+export const availableSlots = () => {
+    return [
+        'tab',
+        'tools',
+        'settings',
+        'entityDetailTab',
+        'dataModelOptions',
+    ];
+};

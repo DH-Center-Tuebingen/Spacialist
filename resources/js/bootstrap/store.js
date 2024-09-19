@@ -1,4 +1,4 @@
-import {createStore} from 'vuex';
+import { createStore } from 'vuex';
 
 import {
     sortTree,
@@ -19,6 +19,7 @@ import {
     getEntityParentIds,
     getEntityReferences,
 } from '@/api.js';
+import { isSlotValid } from '../helpers/plugins';
 
 function updateSelectionTypeIdList(selection) {
     const tmpDict = {};
@@ -75,6 +76,8 @@ export const store = createStore({
                         tab: [],
                         tools: [],
                         settings: [],
+                        entityDetailTab: [],
+                        dataModelOptions: []
                     },
                     registeredPluginPreferences: {
                         user: {},
@@ -627,7 +630,12 @@ export const store = createStore({
                     }
                 },
                 registerPluginInSlot(state, data) {
-                    state.registeredPluginSlots[data.slot].push(data);
+                    console.log(data);
+                    if(isSlotValid(data.slot)) {
+                        state.registeredPluginSlots[data.slot].push(data);
+                    } else {
+                        console.error(`Plugin "${data.of}" Requested an invalid plugin slot "${data.slot}"`);
+                    }
                 },
                 registerPluginPreference(state, data) {
                     const category = state.registeredPluginPreferences[data.category];
@@ -664,13 +672,13 @@ export const store = createStore({
                 },
             },
             actions: {
-                setAppState({commit}, data) {
+                setAppState({ commit }, data) {
                     commit('setAppInitialized', data);
                 },
-                setBibliography({commit}, data) {
+                setBibliography({ commit }, data) {
                     commit('setBibliography', data);
                 },
-                updateBibliography({commit}, data) {
+                updateBibliography({ commit }, data) {
                     data.forEach(itemWrap => {
                         if(itemWrap.added) {
                             commit('addBibliographyItem', itemWrap.entry);
@@ -679,54 +687,54 @@ export const store = createStore({
                         }
                     });
                 },
-                addBibliographyItem({commit}, data) {
+                addBibliographyItem({ commit }, data) {
                     commit('addBibliographyItem', data);
                 },
-                updateBibliographyItem({commit}, data) {
+                updateBibliographyItem({ commit }, data) {
                     commit('updateBibliographyItem', data);
                 },
-                deleteBibliographyItem({commit}, data) {
+                deleteBibliographyItem({ commit }, data) {
                     commit('deleteBibliographyItem', data);
                 },
-                setGeometryTypes({commit}, data) {
+                setGeometryTypes({ commit }, data) {
                     commit('setGeometryTypes', data);
                 },
-                setTags({commit}, data) {
+                setTags({ commit }, data) {
                     commit('setTags', data);
                 },
-                setRoles({commit}, data) {
+                setRoles({ commit }, data) {
                     commit('setRoles', data.roles);
                     commit('setPermissions', data.permissions);
                     commit('setRolePresets', data.presets);
                 },
-                setUsers({commit}, data) {
+                setUsers({ commit }, data) {
                     commit('setUsers', data);
                 },
-                sortTree({commit}, sort) {
+                sortTree({ commit }, sort) {
                     commit('sortTree', sort);
                 },
-                addToTreeSelection({commit}, data) {
+                addToTreeSelection({ commit }, data) {
                     commit('addToTreeSelection', data);
                 },
-                removeFromTreeSelection({commit}, data) {
+                removeFromTreeSelection({ commit }, data) {
                     commit('removeFromTreeSelection', data);
                 },
-                toggleTreeSelectionMode({commit}) {
+                toggleTreeSelectionMode({ commit }) {
                     commit('toggleTreeSelectionMode');
                 },
-                setTreeSelectionMode({commit}) {
+                setTreeSelectionMode({ commit }) {
                     commit('setTreeSelectionMode', true);
                 },
-                unsetTreeSelectionMode({commit}) {
+                unsetTreeSelectionMode({ commit }) {
                     commit('setTreeSelectionMode', false);
                 },
-                setCachedConceptSelection({commit}, data) {
+                setCachedConceptSelection({ commit }, data) {
                     commit('setCachedConceptSelection', data);
                 },
-                setMainViewTab({commit}, data) {
+                setMainViewTab({ commit }, data) {
                     commit('setMainViewTab', data);
                 },
-                async getEntity({commit, state}, entityId) {
+                async getEntity({ commit, state }, entityId) {
                     let entity = state.entities[entityId];
                     if(!entity) {
                         const ids = await getEntityParentIds(entityId);
@@ -762,13 +770,13 @@ export const store = createStore({
                         return;
                     }
                 },
-                setEntityComments({commit}, data) {
+                setEntityComments({ commit }, data) {
                     commit('setEntityComments', data);
                 },
-                resetEntity({commit}) {
+                resetEntity({ commit }) {
                     commit('setEntity', {});
                 },
-                setInitialEntities({commit, state}, data) {
+                setInitialEntities({ commit, state }, data) {
                     state.tree = [];
                     state.entities = {};
 
@@ -778,7 +786,7 @@ export const store = createStore({
                     });
                     sortTree('rank', 'asc', state.tree);
                 },
-                loadEntities({commit}, data) {
+                loadEntities({ commit }, data) {
                     let nodes = [];
                     data.entities.forEach(e => {
                         const n = new Node(e);
@@ -792,7 +800,7 @@ export const store = createStore({
                     sortTree(data.sort.by, data.sort.dir, nodes);
                     return nodes;
                 },
-                addEntity({commit}, data) {
+                addEntity({ commit }, data) {
                     const n = new Node(data);
                     if(!!data.root_entity_id) {
                         commit('addEntity', n);
@@ -801,96 +809,96 @@ export const store = createStore({
                     }
                     return n;
                 },
-                updateEntity({commit}, data) {
+                updateEntity({ commit }, data) {
                     commit('updateEntity', data);
                 },
-                updateEntityType({commit}, data) {
+                updateEntityType({ commit }, data) {
                     commit('updateEntityType', data);
                 },
-                moveEntity({commit}, data) {
+                moveEntity({ commit }, data) {
                     commit('moveEntity', data);
                 },
-                deleteEntity({commit}, data) {
+                deleteEntity({ commit }, data) {
                     commit('deleteEntity', data);
                 },
-                updateEntityData({commit}, data) {
+                updateEntityData({ commit }, data) {
                     commit('updateEntityData', data);
                 },
-                updateEntityMetadata({commit}, data) {
+                updateEntityMetadata({ commit }, data) {
                     commit('updateEntityMetadata', data);
                 },
-                updateEntityDataModerations({commit}, data) {
+                updateEntityDataModerations({ commit }, data) {
                     commit('updateEntityDataModerations', data);
                 },
-                addEntityTypeAttribute({commit}, data) {
+                addEntityTypeAttribute({ commit }, data) {
                     commit('addEntityTypeAttribute', data);
                 },
-                removeEntityTypeAttribute({commit}, data) {
+                removeEntityTypeAttribute({ commit }, data) {
                     commit('removeEntityTypeAttribute', data);
                 },
-                deleteAttribute({commit}, data) {
+                deleteAttribute({ commit }, data) {
                     commit('deleteAttribute', data);
                 },
-                reorderAttributes({commit}, data) {
+                reorderAttributes({ commit }, data) {
                     commit('reorderAttributes', data);
                 },
-                addEntityType({commit}, data) {
+                addEntityType({ commit }, data) {
                     commit('addEntityType', data);
                 },
-                addUser({commit}, data) {
+                addUser({ commit }, data) {
                     commit('addUser', data);
                 },
-                updateUser({commit}, data) {
+                updateUser({ commit }, data) {
                     commit('updateUser', data);
                 },
-                deactivateUser({commit}, data) {
+                deactivateUser({ commit }, data) {
                     commit('deactivateUser', data);
                 },
-                reactivateUser({commit}, data) {
+                reactivateUser({ commit }, data) {
                     commit('reactivateUser', data);
                 },
-                addRole({commit}, data) {
+                addRole({ commit }, data) {
                     commit('addRole', data);
                 },
-                updateRole({commit}, data) {
+                updateRole({ commit }, data) {
                     commit('updateRole', data);
                 },
-                deleteRole({commit}, data) {
+                deleteRole({ commit }, data) {
                     commit('deleteRole', data);
                 },
-                setEntityTypes({commit, state}, data) {
+                setEntityTypes({ commit, state }, data) {
                     state.entityTypes = {};
                     state.entityTypeAttributes = {};
                     commit('setEntityTypes', data);
                 },
-                setEntityTypeColors({commit}, data) {
+                setEntityTypeColors({ commit }, data) {
                     commit('setEntityTypeColors', data);
                 },
-                deleteEntityType({commit}, data) {
+                deleteEntityType({ commit }, data) {
                     commit('deleteEntityType', data);
                 },
-                updateDependency({commit}, data) {
+                updateDependency({ commit }, data) {
                     commit('updateDependency', data);
                 },
-                updateAttributeMetadata({commit}, data) {
+                updateAttributeMetadata({ commit }, data) {
                     commit('updateAttributeMetadata', data);
                 },
-                addReference({commit}, data) {
+                addReference({ commit }, data) {
                     commit('addReference', data);
                 },
-                updateReference({commit}, data) {
+                updateReference({ commit }, data) {
                     commit('updateReference', data);
                 },
-                removeReferenceFromEntity({commit}, data) {
+                removeReferenceFromEntity({ commit }, data) {
                     commit('removeReferenceFromEntity', data);
                 },
-                setAttributes({commit, state}, data) {
+                setAttributes({ commit, state }, data) {
                     state.attributes = [];
                     state.attributeSelections = {};
                     commit('setAttributes', data.attributes);
                     commit('setAttributeSelections', data.selections);
                 },
-                addAttribute({commit}, data) {
+                addAttribute({ commit }, data) {
                     commit('addAttribute', data.attribute);
                     if(data.selection) {
                         commit('setAttributeSelection', {
@@ -900,35 +908,35 @@ export const store = createStore({
                         });
                     }
                 },
-                setAttributeTypes({commit, state}, data) {
+                setAttributeTypes({ commit, state }, data) {
                     state.attributeTypes = [];
                     commit('setAttributeTypes', data);
                 },
-                setVersion({commit}, data) {
+                setVersion({ commit }, data) {
                     commit('setVersion', data);
                 },
-                setPlugins({commit}, data) {
+                setPlugins({ commit }, data) {
                     commit('setPlugins', data);
                 },
-                addPlugin({commit}, data) {
+                addPlugin({ commit }, data) {
                     commit('addPlugin', data);
                 },
-                updatePlugin({commit}, data) {
+                updatePlugin({ commit }, data) {
                     commit('updatePlugin', data);
                 },
-                registerPluginInSlot({commit}, data) {
+                registerPluginInSlot({ commit }, data) {
                     commit('registerPluginInSlot', data);
                 },
-                registerPluginPreference({commit}, data) {
+                registerPluginPreference({ commit }, data) {
                     commit('registerPluginPreference', data);
                 },
-                setColorSets({commit}, data) {
+                setColorSets({ commit }, data) {
                     commit('setColorSets', data);
                 },
-                setAnalysis({commit}, data) {
+                setAnalysis({ commit }, data) {
                     commit('setAnalysis', data);
                 },
-                setDatatypeData({commit}, data) {
+                setDatatypeData({ commit }, data) {
                     commit('setDatatypeData', data);
                 },
             },
@@ -951,7 +959,6 @@ export const store = createStore({
 
                     return state.entityTypeAttributes[id];
                 },
-                entityTypeUsesTabbedChildEntities: state => id => state.entityTypes[id]?.plugin_data?.tabbed_child_entities?.tabbed ?? false,
                 entityTypeColors: state => id => state.entityTypeColors[id],
                 geometryTypes: state => state.geometryTypes,
                 mainView: state => state.mainView,
@@ -972,7 +979,7 @@ export const store = createStore({
                 roles: state => noPerms => {
                     return noPerms ? state.roles.map(r => {
                         // Remove permissions from role
-                        let {permissions, ...role} = r;
+                        let { permissions, ...role } = r;
                         return role;
                     }) : state.roles;
                 },

@@ -13,12 +13,11 @@
         <template #item="{ element, index }">
             <div
                 v-if="!state.hiddenAttributeList[element.id] || showHidden"
-                class="mb-3 px-2"
-            >
+                class="mb-2 px-2"
                 :class="clFromMetadata(element)"
                 @mouseenter="onEnter(index)"
                 @mouseleave="onLeave(index)"
-                >
+            >
                 <div
                     class="row"
                     :class="addModerationStateClasses(element.id)"
@@ -303,7 +302,7 @@
                         expClasses[itm] = true;
                     });
                 }
-                
+
                 return expClasses;
             };
             const onAttributeExpand = (e, i) => {

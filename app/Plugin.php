@@ -5,12 +5,14 @@ namespace App;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 class Plugin extends Model
 {
+    
+    static $instantiated = false;
+    
     /**
      * The attributes that are assignable.
      *
@@ -46,6 +48,10 @@ class Plugin extends Model
             $name = "plugins/$name";
         }
         return $name;
+    }
+    
+    public function getPath(){
+        return base_path("app/Plugins/$this->name");
     }
 
     public static function getInfo($path, $isString = false) {
@@ -112,20 +118,9 @@ class Plugin extends Model
     public static function updateState() : void {
         $pluginPath = base_path('app' . DIRECTORY_SEPARATOR . 'Plugins');
         $availablePlugins = File::directories($pluginPath);
-
         $activePlugins = self::discoverPlugins($availablePlugins);
-        
-        
-        $activePluginNamespaces = array_map(function($fullPath) use ($pluginPath){  
-            $fullPath = str_replace(DIRECTORY_SEPARATOR, '\\', $fullPath);
-            $pluginName = File::basename($fullPath);
-            $baseNamespace = 'App\\Plugins';
-            $namespacePart = str_replace($pluginPath, $baseNamespace , $fullPath);
-            return $namespacePart . '\\App\\Plugin';
-        }, $activePlugins);
-        
-        self::initializePlugins($activePluginNamespaces);
-        self::cleanupPlugins($availablePlugins);
+        self::initializePlugins($activePlugins);
+        // self::cleanupPlugins($availablePlugins);
     }
 
     public static function cleanupPlugins(array $list) : void {
@@ -150,23 +145,36 @@ class Plugin extends Model
                 $plugin = self::updateOrCreateFromInfo($info);
                 
                 if($plugin->isActive()){
-                    $activePlugins[] = $ap;
+                    $activePlugins[] = $plugin;
                 }
             }
         }
         return $activePlugins;
     }
     
-    public static function initializePlugins(array $namespaceList){
-        foreach($namespaceList as $pluginNamespace) {
-            
-            if(!class_exists($pluginNamespace)) {
-                info("Plugin not found @ $pluginNamespace");
-                continue;
-            }
-            
-            new $pluginNamespace();
+    public static function init(){
+        if(!self::$instantiated){
+            self::updateState();
+            self::$instantiated = true;
         }
+    }
+    
+    private static function initializePlugins(array $plugins){   
+        foreach($plugins as $plugin) {       
+            self::initializePluginHooks($plugin);
+            self::verifyScriptIsPublished($plugin);
+        }
+    }
+    
+    private static function initializePluginHooks(Plugin $plugin) {
+        $path = $plugin->getPath();
+        $fullPath = str_replace(DIRECTORY_SEPARATOR, '\\', $path);
+        $namespacePart = str_replace($path, 'App\\Plugins' , $fullPath);
+        $pluginHookNamespace = $namespacePart . "\\$plugin->name\\App\\Hooks";
+        
+        if(class_exists($pluginHookNamespace)) {
+            return new $pluginHookNamespace();
+        }        
     }
 
     public static function discoverPluginByName($name) : Plugin|null {
@@ -322,17 +330,41 @@ class Plugin extends Model
             call_user_func([$instance, 'rollback']);
         }
     }
+    
+    private static function verifyScriptIsPublished($plugin){
+        $path = $plugin->publicName();
+        if(!Storage::exists($path)) {
+            $plugin->publishScript();
+        }
+    }
 
     private function publishScript() {
         $name = $this->name;
-        $scriptPath = base_path("app/Plugins/$name/js/script.js");
-        if(file_exists($scriptPath)) {
-            $filehandle = fopen($scriptPath, 'r');
-            Storage::put(
-                $this->publicName(),
-                $filehandle,
-            );
-            fclose($filehandle);
+        $scriptPath = null;
+        
+        
+        $legacyPath = base_path("app/Plugins/$name/js/script.js");
+        $newPath = base_path("app/Plugins/$name/dist/script.umd.js");
+        if(file_exists($legacyPath)) {
+            $scriptPath = $scriptPath;
+        }else if(file_exists($newPath)) {
+            $scriptPath = $newPath;
+        }
+        
+        if($scriptPath === null) {
+            info("No script found for plugin $name");
+            return;
+        } else {
+            
+            $localPath = $this->publicName(true);
+            $storagePath = storage_path("app/public/$localPath");
+            
+            info("Publishing script for plugin $name to $storagePath");
+            try{
+                File::link($scriptPath, $storagePath);
+            }catch(\Exception $e){
+                info("Failed to link script for plugin $name");
+            }
         }
     }
 
