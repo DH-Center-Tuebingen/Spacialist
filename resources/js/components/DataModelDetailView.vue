@@ -104,7 +104,7 @@
                 <!-- PLUGINS -->
 
                 <div
-                    v-for="pluginSlot in pluginSlots "
+                    v-for="pluginSlot in pluginSlots"
                     :key="pluginSlot.key"
                     class="d-flex gap-2 align-items-center mb-3 offset-3 ps-2"
                 >
@@ -194,6 +194,7 @@
         showRemoveAttribute,
     } from '@/helpers/modal.js';
     import { plugins } from 'chart.js';
+    import { usePluginSlot } from '../composables/plugin-slot';
 
     export default {
         setup(props, context) {
@@ -375,23 +376,14 @@
                 sub_entity_types: _cloneDeep(state.entityType.sub_entity_types) || [],
             });
 
-            function setPluginData() {
-                if(!state.entityType.plugin_data) {
-                    console.error(`Entity type does not have a 'plugin_data' property.`);
-                    return;
-                }
 
-                for(const pluginSlot of store.getters.slotPlugins('dataModelOptions')) {
-                    const value = state.entityType.plugin_data[pluginSlot.key];
-                    if(!pluginSlot.methods?.setData)
-                        console.error(`Plugin '${pluginSlot.key}' does not has a 'setData' method.`);
-                    else
-                        pluginSlot.methods.setData(value);
-                }
-            }
+            const { 
+                setPluginData, 
+                pluginSlots,
+            } = usePluginSlot('dataModelOptions');
 
             onMounted(() => {
-                setPluginData();
+                setPluginData(state.entityType);
             });
 
 
@@ -399,7 +391,7 @@
             watch(() => state.entityType, (id) => {
                 formData.is_root = state.entityType.is_root || false;
                 formData.sub_entity_types = _cloneDeep(state.entityType.sub_entity_types) || [];
-                setPluginData();
+                setPluginData(state.entityType);
             });
 
             const updateEntityType = event => {
@@ -436,9 +428,6 @@
                 });
             };
 
-            const pluginSlots = store.getters.slotPlugins('dataModelOptions');
-
-            console.log(pluginSlots);
 
             // RETURN
             return {

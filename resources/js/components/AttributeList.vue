@@ -236,6 +236,11 @@
                 type: Object,
                 default: _ => new Object(),
             },
+            readOnly: {
+                required: false,
+                type: Boolean,
+                default: false,
+            },
         },
         emits: ['dirty'],
         setup(props, context) {

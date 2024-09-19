@@ -20,6 +20,7 @@ import {
     getEntityReferences,
 } from '@/api.js';
 import { isSlotValid } from '../helpers/plugins';
+import { fetchChildren } from '../api';
 
 function updateSelectionTypeIdList(selection) {
     const tmpDict = {};
@@ -76,17 +77,31 @@ export const store = createStore({
                         tab: [],
                         tools: [],
                         settings: [],
-                        entityDetailTab: [],
                         dataModelOptions: []
                     },
                     registeredPluginPreferences: {
                         user: {},
                         system: {},
                     },
+                    registeredPluginSubscriptions: {
+                        entityDetail: [],
+                    },
                     hasAnalysis: false,
                 };
             },
             mutations: {
+                registerPluginSubscription(state, data) {
+                    if(!state.registeredPluginSubscriptions[data.topic]) {
+                        state.registeredPluginSubscriptions[data.topic] = {};
+                    }
+
+                    if(!state.registeredPluginSubscriptions[data.topic][data.of]) {
+                        console.log('REgistering plugin subscription', data);
+                        state.registeredPluginSubscriptions[data.topic][data.of] = data;
+                    }else{
+                        console.error(`Plugin "${data.of}" already subscribed to topic "${data.topic}"`);
+                    }
+                },
                 setAppInitialized(state, data) {
                     state.appInitialized = data;
                 },
@@ -770,6 +785,11 @@ export const store = createStore({
                         return;
                     }
                 },
+                async fetchEntityChildren({ commit, state }, entityId) {
+                    const children = await fetchChildren(entityId);
+                    return children;
+                    
+                },
                 setEntityComments({ commit }, data) {
                     commit('setEntityComments', data);
                 },
@@ -1004,6 +1024,7 @@ export const store = createStore({
                     const p = state.registeredPluginSlots;
                     return slot ? p[slot] : p;
                 },
+                pluginSubscription: state => topic => state.registeredPluginSubscriptions[topic],
                 pluginPreferences: state => state.registeredPluginPreferences,
                 pluginPreferencesInCategory: state => cat => {
                     return state.registeredPluginPreferences[cat];

@@ -40,6 +40,7 @@ import {
 
 import RouteRootDummy from '@/components/plugins/RouteRootDummy.vue';
 import * as buffer from 'buffer';
+import { validateSubscription } from '../helpers/plugins.js';
 
 const defaultPluginOptions = {
     id: null,
@@ -223,8 +224,12 @@ export const SpPS = {
                 SpPS.data.app.component(mergedOptions.componentTag, mergedOptions.component);
             }
         }
-
-        store.dispatch('registerPluginInSlot', mergedOptions);
+        
+        store.commit('registerPluginInSlot', mergedOptions);
+    },
+    subscribe:(options) => {
+        validateSubscription(options);
+        store.commit('registerPluginSubscription', options);
     },
     registerPreference: (options) => {
         if(!options.of || !SpPS.data.plugins[options.of]) {
