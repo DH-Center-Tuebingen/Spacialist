@@ -182,6 +182,7 @@
                 class="col px-0 overflow-y-auto"
                 :data="state.tree"
                 size="small"
+                preid=""
                 :draggable="state.isDragAllowed"
                 :drop-allowed="isDropAllowed"
                 @change="itemClick"
@@ -382,7 +383,7 @@
                     newParent = treeUtility.getNodeFromPath(state.tree, dropData.targetPath.slice(0, dropData.targetPath.length - 1));
                 }
 
-                if (newParent == oldParent && newRank == oldRank) {
+                if(newParent == oldParent && newRank == oldRank) {
                     return;
                 }
 

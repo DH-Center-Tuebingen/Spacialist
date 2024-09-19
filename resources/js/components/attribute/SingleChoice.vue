@@ -10,6 +10,8 @@
         :options="state.filteredSelections"
         :name="name"
         :searchable="true"
+        :infinite="true"
+        :limit="15"
         :filter-results="false"
         :placeholder="t('global.select.placeholder')"
         @select="value => v.handleChange(value)"
@@ -61,6 +63,7 @@
         getAttributeName,
         translateConcept,
         multiselectResetClasslist,
+        only,
     } from '@/helpers/helpers.js';
 
     export default {
@@ -89,9 +92,9 @@
                 default: 0,
             },
             selectionFromValue: {
-                type: Object,
+                type: Number,
                 required: false,
-                default: _ => new Object(),
+                default: -1,
             },
         },
         emits: ['change', 'update-selection'],
@@ -119,7 +122,7 @@
             // FUNCTIONS
             const handleUpdateForSelections = value => {
                 context.emit('update-selection', value?.id);
-                veeHandleChange(value);
+                formatAndHandleChange(value);
             };
 
             const updateCurrentValue = _ => {
@@ -170,6 +173,18 @@
                 });
             };
 
+            const formatValue = value => {
+                if(!value) return null;
+                return only(value, ['id', 'concept_url']);
+            };
+
+            const formatAndHandleChange = value => {
+                if(value != null) {
+                    value = formatValue(value);
+                }
+                return veeHandleChange(value);
+            };
+
             const setSearchQuery = query => {
                 state.query = query ? query.toLowerCase().trim() : null;
             };
@@ -215,12 +230,12 @@
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
-                    value: v.value,
+                    value: formatValue(v.value),
                 });
             });
             if(state.hasRootAttribute) {
                 watch(selectionFromValue, (newValue, oldValue) => {
-                    if(typeof newValue == 'object') {
+                    if(typeof newValue == 'object' || newValue == -1) {
                         newValue = null;
                     }
                     handleSelectionUpdate(newValue);

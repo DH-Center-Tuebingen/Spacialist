@@ -402,12 +402,17 @@
 
     import {useToast} from '@/plugins/toast.js';
 
-    import {ago, date} from '@/helpers/filters.js';
+    import {
+        ago,
+        date,
+    } from '@/helpers/filters.js';
+
     import {
         getEntityComments,
         patchAttributes,
         patchEntityName,
     } from '@/api.js';
+
     import {
         can,
         isModerated,
@@ -421,7 +426,6 @@
         getEntityTypeName,
         getEntityTypeAttributeSelections,
         getEntityTypeDependencies,
-        getConcept,
         translateConcept,
         _cloneDeep,
     } from '@/helpers/helpers.js';
@@ -432,12 +436,14 @@
         canShowReferenceModal,
     } from '@/helpers/modal.js';
 
-    import {usePreventNavigation} from '@/helpers/form.js';
+    import { usePreventNavigation } from '@/helpers/form.js';
 
     import MetadataTab from '@/components/entity/MetadataTab.vue';
+    import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
 
     export default {
         components: {
+            EntityTypeLabel,
             MetadataTab,
         },
         props: {
@@ -507,7 +513,7 @@
                         state.entityAttributes.forEach(a => {
                             if(a.is_system && a.datatype == 'system-separator') {
                                 if(!a.pivot.metadata || !a.pivot.metadata.title) {
-                                    currentGroup = t(`main.entity.tabs.untitled_group`, {cnt: currentUnnamedGroupCntr});
+                                    currentGroup = t(`main.entity.tabs.untitled_group`, { cnt: currentUnnamedGroupCntr });
                                     currentUnnamedGroupCntr++;
                                 } else {
                                     currentGroup = translateConcept(a.pivot.metadata.title);
@@ -974,7 +980,7 @@
                 let hiddenAttrElem = document.getElementById('hidden-attributes-icon');
                 if(!!hiddenAttrElem) {
                     new Popover(hiddenAttrElem, {
-                        title: _ => t('main.entity.attributes.hidden', {cnt: state.hiddenAttributeCount}, state.hiddenAttributeCount),
+                        title: _ => t('main.entity.attributes.hidden', { cnt: state.hiddenAttributeCount }, state.hiddenAttributeCount),
                         content: state.hiddenAttributeListing,
                     });
                 }
@@ -990,7 +996,7 @@
                         let hiddenAttrElem = document.getElementById('hidden-attributes-icon');
                         if(!!hiddenAttrElem) {
                             new Popover(hiddenAttrElem, {
-                                title: _ => t('main.entity.attributes.hidden', {cnt: state.hiddenAttributeCount}, state.hiddenAttributeCount),
+                                title: _ => t('main.entity.attributes.hidden', { cnt: state.hiddenAttributeCount }, state.hiddenAttributeCount),
                                 content: state.hiddenAttributeListing,
                             });
                         }

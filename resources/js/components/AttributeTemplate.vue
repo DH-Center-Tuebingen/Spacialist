@@ -195,7 +195,7 @@
         <template v-if="state.isSiUnit">
             <div class="mb-3">
                 <label class="col-form-label col-3">
-                    {{ t('global.attributes.si_units.base_unit') }}:
+                    {{ t('global.attributes.si_units.unit_type') }}:
                 </label>
                 <div class="col">
                     <multiselect
@@ -430,6 +430,10 @@
                     types = store.getters.attributeTypes;
                     break;
             }
+            types = types.slice().sort((a, b) => {
+                return t(`global.attributes.${a.datatype}`) > t(`global.attributes.${b.datatype}`);
+            });
+
             const state = reactive({
                 attribute: {
                     recursive: false,
@@ -465,7 +469,6 @@
                 }),
                 searchResetValue: null,
                 formId: external.value || 'create-attribute-form',
-                attributeTypes: types,
                 minimalEntityTypes: computed(_ => {
                     return Object.values(store.getters.entityTypes).map(et => ({
                         id: et.id,

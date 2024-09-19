@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.10.1 - Dayjs Hotfix
+### Fixed
+- Frontend errors due to wrong dayjs import
+
 ## 0.10 - Jelling
 ### Added
 - Support Multiediting attributes across multiple entities (through ...-menu in entity tree)
@@ -93,6 +97,10 @@ All notable changes to this project will be documented in this file.
 - Append `et al.` to citations in reference tab and modal
 - Do not show "!" for attributes without value & replace initial "!" with "?" for attributes with value, but no certainty set
 - Bibtex import now is case-insensitive for type and keys
+- Display only the first and last 10 rows of a table that has more than 25 rows
+  - Click on _show hidden_ text to display all rows
+- Only load first 15 elements in dropdown attributes and load more elements on scroll/search (due to bad performance if an entity has a lot of dropdowns)
+- Reworked attribute list logic for a more consistent data management in the background
 
 ## 0.9.14
 ### Added
