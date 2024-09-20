@@ -48,7 +48,7 @@ export const store = createStore({
                     bibliography: [],
                     concepts: {},
                     deletedUsers: [],
-                    entity: {},
+                    entity: null,
                     entityTypes: {},
                     entities: {},
                     file: {},
@@ -767,7 +767,6 @@ export const store = createStore({
                             comments: [],
                         };
                         fillEntityData(entity.data, entity.entity_type_id);
-                        commit('setEntity', hiddenEntity);
                     } else {
                         entity.data = await getEntityData(entityId);
                         fillEntityData(entity.data, entity.entity_type_id);
@@ -781,12 +780,16 @@ export const store = createStore({
                                 }
                             }
                         }
-                        commit('setEntity', entity);
                         return;
                     }
                 },
-                async fetchEntityChildren({ commit, state }, entityId) {
+                async fetchEntityChildren({ }, entityId) {
                     const children = await fetchChildren(entityId);
+
+                    for(let i = 0; i < children.length; i++) {
+                        children[i].data = await getEntityData(entityId);
+                    }
+
                     return children;
                     
                 },

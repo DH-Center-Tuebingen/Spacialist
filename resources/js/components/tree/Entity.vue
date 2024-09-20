@@ -251,7 +251,7 @@
         setup(props) {
             const { t } = useI18n();
             const currentRoute = useRoute();
-
+            
             // FETCH
 
             // FUNCTIONS
@@ -354,6 +354,8 @@
                         query: currentRoute.query
                     });
                 }
+
+                store.commit('setEntity', item.data);
             };
             const itemToggle = eventData => {
                 const item = eventData.data;
@@ -466,9 +468,17 @@
             });
 
             // ON MOUNTED
-            onMounted(_ => {
-                console.log('entity tree component mounted');
+            onMounted(async _ => {
                 // document.addEventListener('click', check)
+
+                currentRoute.query.view;
+
+                console.log(currentRoute.params?.id );
+
+                if(currentRoute.params?.id){
+                    const entity = await store.dispatch('getEntity', currentRoute.params?.id);
+                    await store.commit('setEntity', entity);
+                }
             });
             onUnmounted(_ => {
 

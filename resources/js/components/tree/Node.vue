@@ -149,7 +149,7 @@
                 ddVisible: false,
                 multieditSelected: false,
                 colorStyles: computed(_ => getEntityColors(data.value.entity_type_id)),
-                isSelected: computed(_ => store.getters.entity.id === data.value.id),
+                isSelected: computed(_ => store.getters.entity?.id === data.value.id),
                 isSelectionMode: computed(_ => store.getters.treeSelectionMode),
                 isSelectionDisabled: computed(_ => {
                     if(store.getters.treeSelectionTypeIds.length == 0 || state.multieditSelected) {

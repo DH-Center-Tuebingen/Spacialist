@@ -24,6 +24,7 @@ import VueUploadComponent from 'vue-upload-component';
 import DatePicker from 'vue-datepicker-next';
 import draggable from 'vuedraggable';
 import { Tree, Node, } from 'tree-vue-component';
+import EntityDetail from '../components/EntityDetail.vue';
 
 
 export default function initGlobalComponents(app) {
@@ -48,6 +49,7 @@ export default function initGlobalComponents(app) {
     app.component('MdViewer', MarkdownViewer);
     app.component('MdEditor', MarkdownEditor);
     app.component('BibtexCode', BibtexCode);
+    app.component('EntityDetail', EntityDetail);
     // Third-Party components
     app.component('Multiselect', Multiselect);
     app.component('FileUpload', VueUploadComponent);

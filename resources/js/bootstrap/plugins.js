@@ -224,10 +224,10 @@ export const SpPS = {
                 SpPS.data.app.component(mergedOptions.componentTag, mergedOptions.component);
             }
         }
-        
+
         store.commit('registerPluginInSlot', mergedOptions);
     },
-    subscribe:(options) => {
+    subscribe: (options) => {
         validateSubscription(options);
         store.commit('registerPluginSubscription', options);
     },
@@ -270,6 +270,22 @@ export const SpPS = {
         }
         store.dispatch('registerPluginPreference', mergedOptions);
     },
+};
+
+SpPS.get = {
+    component(name) {
+        if(SpPS.get.components[name]) {
+            return SpPS.get.components[name];
+        } else
+            throw new Error(`Component "${name}" not found`);
+    },
+    get components() {
+        if(SpPS.data?.app?._context?.components) {
+            return SpPS.data.app._context.components;
+        } else {
+            throw new Error('No components found');
+        }
+    }
 };
 
 export default SpPS;

@@ -70,24 +70,26 @@
                 </a>
             </li>
 
-            <template
-                v-for="tab in pluginTabs"
-                :key="`subscription-group-${tab}`"
-            >
-                <li
-                    class="nav-item"
-                    role="presentation"
+            <template v-if="allowPluginSlot">
+                <template
+                    v-for="tab in pluginTabs"
+                    :key="`subscription-group-${tab}`"
                 >
-                    <a
-                        :id="`active-entity-attributes-group-${tab}`"
-                        class="nav-link d-flex gap-2 align-items-center"
-                        href="#"
-                        draggable="false"
-                        @click.prevent="setView(tab.view)"
+                    <li
+                        class="nav-item"
+                        role="presentation"
                     >
-                        <component :is="tab.component" />
-                    </a>
-                </li>
+                        <a
+                            :id="`active-entity-attributes-group-${tab}`"
+                            class="nav-link d-flex gap-2 align-items-center"
+                            href="#"
+                            draggable="false"
+                            @click.prevent="setView(tab.view)"
+                        >
+                            <component :is="tab.component" />
+                        </a>
+                    </li>
+                </template>
             </template>
 
             <!-- empty nav-item to separate metadata and comments from attributes -->
@@ -158,6 +160,7 @@
                         @submit.prevent
                         @keydown.ctrl.s="e => handleSaveOnKey(e, `${tg.id}`)"
                     >
+                        <pre>{{ state.attributesFetched }}</pre>
                         <template v-if="state.attributesFetched">
                             <attribute-list
                                 :ref="el => setAttrRefs(el, tg.id)"
@@ -234,17 +237,23 @@
                 </div>
             </div>
 
-            <template
-                v-for="panel in pluginPanels"
-                :key="`plugin-panel-${panel.view}`"
-            >
-                <div
-                    class="tab-pane fade h-100"
-                    :class="{ 'active': isActive(panel.view), 'show': isActive(panel.view) }"
-                    role="tabpanel"
+            <template v-if="allowPluginSlot">
+                <template
+                    v-for="panel in pluginPanels"
+                    :key="`plugin-panel-${panel.view}`"
                 >
-                    <component :is="panel.component" />
-                </div>
+                    <div
+                        class="tab-pane fade h-100"
+                        :class="{ 'active': isActive(panel.view), 'show': isActive(panel.view) }"
+                        role="tabpanel"
+                    >
+                        <component
+                            :is="panel.component"
+                            v-bind="panel.vBind ?? {}"
+                            v-on="panel.vOn ?? {}"
+                        />
+                    </div>
+                </template>
             </template>
         </div>
         <router-view
@@ -262,6 +271,7 @@
         onMounted,
         reactive,
         ref,
+        useSlots,
         watch,
     } from 'vue';
 
@@ -320,7 +330,6 @@
 
     import MetadataTab from '@/components/entity/MetadataTab.vue';
     import EntityDetailHeader from './entity/EntityDetailHeader.vue';
-    import { usePluginSlot } from '../composables/plugin-slot';
 
     export default {
         components: {
@@ -328,6 +337,11 @@
             MetadataTab,
         },
         props: {
+            entity: {
+                required: false,
+                type: Object,
+                default: () => null,
+            },
             bibliography: {
                 required: false,
                 type: Array,
@@ -336,13 +350,23 @@
             onDelete: {
                 required: false,
                 type: Function,
-                default: () => { }
+                default: () => {}
             },
             readOnly: {
                 required: false,
                 type: Boolean,
                 default: false
-            }
+            },
+            allowPluginSlot: {
+                required: false,
+                type: Boolean,
+                default: true
+            },
+            applyViewToQueryString: {
+                required: false,
+                type: Boolean,
+                default: true
+            },
         },
         setup(props) {
             const { t } = useI18n();
@@ -380,9 +404,9 @@
                 commentLoadingState: 'not',
                 hiddenAttributeState: false,
                 attributesInTabs: true,
-                entity: computed(_ => store.getters.entity),
-                entityUser: computed(_ => state.entity.user),
-                entityAttributes: computed(_ => store.getters.entityTypeAttributes(state.entity.entity_type_id)),
+                entity: computed(_ => props.entity ?? store.getters.entity ?? {}),
+                entityUser: computed(_ => state.entity?.user ),
+                entityAttributes: computed(_ => store.getters.entityTypeAttributes(state.entity?.entity_type_id)),
                 entityGroups: computed(_ => {
                     if(!state.entityAttributes) {
                         return {};
@@ -612,9 +636,10 @@
             const updateAllDependencies = _ => {
                 if(!state.entityAttributes) return;
 
+                console.log(state.entity.name, state.entityAttributes);
                 for(let i = 0; i < state.entityAttributes.length; i++) {
                     const curr = state.entityAttributes[i];
-                    updateDependencyState(curr.id, state.entity.data[curr.id].value);
+                    // updateDependencyState(curr.id, state.entity.data[curr.id].value);
                 }
             };
             const showHiddenAttributes = _ => {
@@ -632,24 +657,27 @@
             const view = ref('attributes-default');
 
             const setView = (_view = 'attributes-default') => {
-                view.value = _view;
+
 
                 if(_view === 'comments') {
                     if(!state.commentsFetched) {
                         fetchComments();
                     }
                 }
+                view.value = _view;
 
-                const query = {
-                    view: _view,
-                };
+                if(props.applyViewToQueryString) {
+                    const query = {
+                        view: _view,
+                    };
 
-                router.push({
-                    query: {
-                        ...route.query,
-                        ...query,
-                    }
-                });
+                    router.push({
+                        query: {
+                            ...route.query,
+                            ...query,
+                        }
+                    });
+                }
             };
 
 
@@ -890,25 +918,9 @@
                 }
                 return panels;
             });
-            
+
             watch(_ => pluginTabs, (newTabs, oldTabs) => {
                 console.log('plugin tabs changed', newTabs);
-            });
-
-            // ON MOUNTED
-            onMounted(_ => {
-                console.log('entity detail component mounted');
-                let hiddenAttrElem = document.getElementById('hidden-attributes-icon');
-                if(!!hiddenAttrElem) {
-                    new Popover(hiddenAttrElem, {
-                        title: _ => t('main.entity.attributes.hidden', { cnt: state.hiddenAttributeCount }, state.hiddenAttributeCount),
-                        content: state.hiddenAttributeListing,
-                    });
-                }
-            });
-            onBeforeUpdate(_ => {
-                attrRefs.value = {};
-                state.commentLoadingState = 'not';
             });
 
             watch(_ => state.hiddenAttributeCount,
@@ -925,31 +937,11 @@
                 }
             );
 
-            watch(_ => route.params,
-                async (newParams, oldParams) => {
-                    if(newParams.id == oldParams.id) return;
-                    if(!newParams.id) return;
-                    state.initFinished = false;
-                    store.dispatch('getEntity', newParams.id).then(_ => {
-                        getEntityTypeAttributeSelections();
-                        state.initFinished = true;
-                        updateAllDependencies();
-                    });
-                }
-            );
-
-
 
             watch(_ => state.entity,
                 async (newValue, oldValue) => {
                     if(!newValue || !newValue.id) return;
                     nextTick(_ => {
-                        setView(route.query.view);
-                        
-                        for(const sub of Object.values(subscriptions)){
-                            sub.update(newValue);
-                        }
-
                         const eid = state.entity.id;
                         const treeElem = document.getElementById(`tree-node-${eid}`);
                         if(treeElem) {
@@ -958,20 +950,82 @@
                                 inline: 'start',
                             });
                         }
+
+                        for(const sub of Object.values(subscriptions)) {
+                            sub.update(newValue);
+                        }
+
+                        if(props.applyViewToQueryString) {
+                            setView(route.query.view);
+                        } else {
+                            setView();
+                        }
+
                     });
                 }
             );
 
-            watch(_ => route.query.view,
-                async (newValue, oldValue) => {
-                    if(route.name != 'entitydetail') return;
-                    if(newValue == oldValue) return;
 
-                    nextTick(_ => {
-                        setView(newValue);
+           async function  initializeIfNecessary(id = null) {
+                if(id == null) return;
+
+                if(!state.initFinished) {
+                    if(props.applyViewToQueryString) {
+                        const entity = await store.dispatch('getEntity', id);
+                        await store.commit('setEntity', entity);
+                        state.initFinished = true;
+                        updateAllDependencies();
+                    }
+                }
+            }
+
+            onMounted(_ => {
+                initializeIfNecessary(props.entity?.id);
+
+                let hiddenAttrElem = document.getElementById('hidden-attributes-icon');
+                if(!!hiddenAttrElem) {
+                    new Popover(hiddenAttrElem, {
+                        title: _ => t('main.entity.attributes.hidden', { cnt: state.hiddenAttributeCount }, state.hiddenAttributeCount),
+                        content: state.hiddenAttributeListing,
                     });
                 }
-            );
+            });
+            onBeforeUpdate(_ => {
+                attrRefs.value = {};
+                state.commentLoadingState = 'not';
+            });
+
+
+            // watch(_ => route.params,
+            //     async (newParams, oldParams) => {
+            //         if(newParams.id == oldParams.id) return;
+            //         if(!newParams.id) return;
+            //         state.initFinished = false;
+
+            //         initializeIfNecessary(newParams.id);
+
+
+            //         // state.initFinished = false;
+            //         // store.dispatch('getEntity', newParams.id).then(_ => {
+            //         //     getEntityTypeAttributeSelections();
+            //         //     state.initFinished = true;
+            //         //     updateAllDependencies();
+            //         // });
+            //     }
+            // );
+
+            if(props.applyViewToQueryString) {
+                watch(_ => route.query.view,
+                    async (newValue, oldValue) => {
+                        if(route.name != 'entitydetail') return;
+                        if(newValue == oldValue) return;
+
+                        nextTick(_ => {
+                            setView(newValue);
+                        });
+                    }
+                );
+            }
 
             // ON BEFORE LEAVE
             onBeforeRouteLeave(async (to, from) => {

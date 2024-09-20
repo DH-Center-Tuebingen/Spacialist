@@ -505,6 +505,11 @@
             };
 
             const hasComment = attribute => {
+                if(!state.attributeValues[attribute.id]?.comments_count) {
+                    console.error('Did not load comments for attribute', attribute);
+                    return 0;
+                }
+
                 return state.attributeValues[attribute.id].comments_count > 0;
             };
             const hasBookmarks = attribute => {
