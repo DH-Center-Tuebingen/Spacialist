@@ -309,7 +309,7 @@
                 if(!type) {
                     if(name != null) {
                         console.error('Try getting invalid object type', n);
-                        return info;
+                        return name;
                     }else{
                         console.error('Try getting invalid object type', n);
                         return '';
