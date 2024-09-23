@@ -275,11 +275,11 @@
                     if(smallText.value) {
                         return {
                             'mt-1': true,
-                        }
+                        };
                     } else {
                         return {
                             'mt-2': true,
-                        }
+                        };
                     }
                 }),
                 notificationType: computed(_ => {
@@ -289,7 +289,7 @@
                         case 'App\\Notifications\\EntityUpdated':
                             return 'entity';
                         default:
-                            throw new Error(`Unknown notification type: ${type}`)
+                            throw new Error(`Unknown notification type: ${type}`);
                     }
                 }),
                 canReply: computed(_ => {
@@ -302,13 +302,27 @@
 
             // FUNCTIONS
             const getCommentedObjectName = n => {
+                
+                const type = n?.data?.resource?.type ?? null;
+                const name = n?.info?.name ?? null;
+
+                if(!type) {
+                    if(name != null) {
+                        console.error('Try getting invalid object type', n);
+                        return info;
+                    }else{
+                        console.error('Try getting invalid object type', n);
+                        return '';
+                    }
+                }
+                
                 switch(simpleResourceType(n.data.resource.type)) {
                     case 'entity':
-                        return n.info.name;
+                        return name;
                     case 'attribute_value':
-                        return `${translateConcept(n.info.attribute_url)} (${n.info.name})`;
+                        return `${translateConcept(n.info.attribute_url)} (${name})`;
                     default:
-                        return n.info.name;
+                        return name;
                 }
             };
             const markNotificationAsRead = _ => {
@@ -330,7 +344,7 @@
                     this.$emit('posted', {
                         comment: comment
                     });
-                })
+                });
             };
 
             // RETURN
@@ -351,5 +365,5 @@
                 state,
             };
         },
-    }
+    };
 </script>
