@@ -1,5 +1,5 @@
 import { only } from '@/helpers/helpers';
-import store from './store.js';
+import useSystemStore from './stores/system.js';
 import i18n from './i18n.js';
 import {
     router,
@@ -98,7 +98,7 @@ export const SpPS = {
         searches: {
             entity: searchEntity,
         },
-        store: store,
+        store: {},
         router: {
             currentRoute,
             onBeforeRouteLeave,
@@ -125,6 +125,7 @@ export const SpPS = {
         window.t = t;
         SpPS.data.app = app;
         SpPS.data.t = t;
+        SpPS.api.store.systemStore = useSystemStore();
     },
     registerI18n: (id, messages) => {
         for(let k in messages) {
@@ -189,7 +190,7 @@ export const SpPS = {
             SpPS.registerRoutes(mergedOptions.id, mergedOptions.routes);
         }
         if(mergedOptions.store) {
-            store.registerModule(`pluginstore/${mergedOptions.id}`, mergedOptions.store);
+            SpPS.api.store.systemStore.addPluginStore(mergedOptions.id, mergedOptions.store);
         }
         SpPS.data.plugins[options.id] = mergedOptions;
     },
@@ -220,7 +221,7 @@ export const SpPS = {
                 SpPS.data.app.component(mergedOptions.componentTag, mergedOptions.component);
             }
         }
-        store.dispatch('registerPluginInSlot', mergedOptions);
+        SpPS.api.store.systemStore.registerPluginInSlot(mergedOptions);
     },
     registerPreference: (options) => {
         if(!options.of || !SpPS.data.plugins[options.of]) {
@@ -259,7 +260,7 @@ export const SpPS = {
                 SpPS.data.app.component(mergedOptions.componentTag, mergedOptions.component);
             }
         }
-        store.dispatch('registerPluginPreference', mergedOptions);
+        SpPS.api.store.systemStore.registerPluginPreference(mergedOptions);
     },
 }
 

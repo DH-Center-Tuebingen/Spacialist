@@ -1,3 +1,4 @@
+import useUserStore from '@/bootstrap/stores/user.js';
 // import { createAuth } from '@websanova/vue-auth';
 // import driverAuthBearer from '@websanova/vue-auth/dist/drivers/auth/bearer.esm.js';
 // import driverHttpAxios from '@websanova/vue-auth/dist/drivers/http/axios.1.x.esm.js';
@@ -16,7 +17,7 @@
 // const appName = slugify(import.meta.env.VITE_APP_NAME, '_');
 
 export const loggedIn = _ => {
-    return store.getters.loggedIn;
+    return useUserStore().userLoggedIn;
 }
 
 // export const vueAuth = createAuth({

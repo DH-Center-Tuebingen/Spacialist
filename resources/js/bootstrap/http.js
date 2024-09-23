@@ -50,15 +50,11 @@ instance.interceptors.response.use(response => {
             // Only append redirect query if from another route than login
             // to prevent recursivly appending current route's full path
             // on reloading login page
-            if(router.currentRoute.name != 'login') {
-                let query = router.currentRoute.value.query;
-                if(!!router.currentRoute.value.redirectedFrom) {
-                    const redirectPath = router.currentRoute.value.redirectedFrom.fullPath;
-                    query = {
-                        ...query,
-                        redirect: redirectPath,
-                    };
-                }
+            if(router.currentRoute.value.name != 'login') {
+                const redirectPath = router.currentRoute.value.fullPath;
+                const query = {
+                    redirectTo: redirectPath,
+                };
                 router.push({
                     name: 'login',
                     query: query,

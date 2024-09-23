@@ -12,7 +12,7 @@
                         class="logo"
                         alt="spacialist logo"
                     >
-                    {{ getPreference('prefs.project-name') }}
+                    {{ state.appName }}
                 </router-link>
                 <button
                     class="navbar-toggler"
@@ -208,9 +208,9 @@
                                     />
                                 </h6>
                                 <a
-                                    v-if="hasPreference('prefs.link-to-thesaurex')"
+                                    v-if="state.hasThesaurexLink"
                                     class="dropdown-item"
-                                    :href="getPreference('prefs.link-to-thesaurex')"
+                                    :href="state.thesaurexLink"
                                     target="_blank"
                                 >
                                     <i class="fas fa-fw fa-paw" />
@@ -435,21 +435,12 @@ import videojs from 'video.js';
 // import adapter from 'webrtc-adapter';
 import Record from 'videojs-record';
 
-import store from '@/bootstrap/store.js';
+import useSystemStore from '@/bootstrap/stores/system.js';
+import useUserStore from '@/bootstrap/stores/user.js';
 import { useI18n } from 'vue-i18n';
 import { provideToast, useToast } from '@/plugins/toast.js';
 
 import {
-    init as initApi,
-    logout as apiLogout,
-} from '@/api.js';
-
-import {
-    init as initHelpers,
-    initApp,
-    getPreference,
-    getProjectName,
-    hasPreference,
     throwError,
     userNotifications,
 } from '@/helpers/helpers.js';
@@ -460,13 +451,10 @@ import {
     deleteNotification as deleteNotificationHelper,
 } from '@/api/notification.js';
 import {
-    init as initModals,
     showAbout,
     showSaveScreencast,
+    showConfirmPassword,
 } from '@/helpers/modal.js';
-import {
-    searchParamsToObject
-} from '@/helpers/routing.js';
 
 export default {
     components: {
@@ -474,16 +462,13 @@ export default {
     },
     setup(props) {
         const { t, locale } = useI18n();
+        const systemStore = useSystemStore();
+        const userStore = useUserStore();
 
         // FETCH
-        // set stores in helper files
-        initHelpers();
-        initModals();
-        initApi();
-        initApp(locale).catch(e => {
-            console.log(e);
+        systemStore.initialize(locale).catch(e => {
             if(e.response.status == 401) {
-                store.dispatch('setAppState', true);
+                systemStore.setAppState(true);
             } else {
                 throwError(e);
             }
@@ -511,13 +496,21 @@ export default {
         const state = reactive({
             recordingTimeout: 0,
             isRecording: false,
-            plugins: computed(_ => store.getters.slotPlugins()),
-            hasAnalysis: computed(_ => store.getters.hasAnalysis),
-            appName: computed(_ => getProjectName()),
-            init: computed(_ => store.getters.appInitialized),
-            loggedIn: computed(_ => store.getters.isLoggedIn),
+            plugins: computed(_ => systemStore.getSlotPlugins()),
+            hasAnalysis: computed(_ => systemStore.hasAnalysis),
+            appName: computed(_ => systemStore.getProjectName()),
+            hasThesaurexLink: computed(_ => systemStore.hasPreference('prefs.link-to-thesaurex')),
+            thesaurexLink: computed(_ => {
+                if(state.hasThesaurexLink) {
+                    return systemStore.getPreference('prefs.link-to-thesaurex');
+                } else {
+                    return '';
+                }
+            }),
+            init: computed(_ => systemStore.appInitialized),
+            loggedIn: computed(_ => userStore.userLoggedIn),
             ready: computed(_ => state.loggedIn && state.init),
-            authUser: computed(_ => store.getters.user),
+            authUser: computed(_ => userStore.user),
             notifications: computed(_ => {
                 return userNotifications();
             }),
@@ -572,7 +565,7 @@ export default {
             deleteNotificationHelper(event);
         };
         const logout = _ => {
-            apiLogout().then(_ => {
+            userStore.logout().then(_ => {
                 router.push({
                     name: 'login'
                 });
@@ -589,16 +582,8 @@ export default {
         // });
         watch(_ => state.loggedIn, (newValue, oldValue) => {
             if(newValue && !oldValue) {
-                const route = router.currentRoute.value;
-                if(route.query.redirect) {
-                    // get path without potential query params
-                    const path = route.query.redirect.split('?')[0];
-                    // extract query params to explicitly set in new route
-                    const query = searchParamsToObject(route.query.redirect);
-                    router.push({
-                        path: path,
-                        query: query,
-                    });
+                if(state.authUser.login_attempts > 0 || state.authUser.login_attempts === 0) {
+                    showConfirmPassword(state.authUser.id);
                 }
                 // prevent notification dropdown from close on click
                 // this.$nextTick(_ => {
@@ -659,8 +644,6 @@ export default {
         return {
             t,
             // HELPERS
-            getPreference,
-            hasPreference,
             // LOCAL
             startRecording,
             stopRecording,

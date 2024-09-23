@@ -169,7 +169,6 @@
         watch,
     } from 'vue';
 
-    import store from '%store';
     import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import { stringSimilarity } from 'string-similarity-js';
@@ -197,7 +196,7 @@
 
     import {
         handleUnhandledErrors
-    } from '../../bootstrap/http';
+    } from '@/bootstrap/http.js';
 
 
     export default {
@@ -433,7 +432,7 @@
                 importEntityData(formData).then(data => {
                     state.imported = true;
                     for(let i = 0; i < data.length; i++) {
-                        store.dispatch('addEntity', data[i]);
+                        entityStore.add(data[i]);
                     }
                     toast.$toast(t('main.importer.success', {
                         cnt: data.length
@@ -535,7 +534,7 @@
                 cancelImport();
             };
 
-            const availableEntityTypes = computed(() => Object.values(store.getters.entityTypes));
+            const availableEntityTypes = computed(_ => Object.values(entityStore.entityTypes));
             const state = reactive({
                 files: [],
                 fileData: [],
@@ -558,7 +557,7 @@
                 inputsDissabled: computed(_ => {
                     return state.validated || state.uploading || state.imported;
                 }),
-                csvTableCollapsed: computed(() => state.fileLoaded && !csvTableRef.value?.csvSettings?.showPreview),
+                csvTableCollapsed: computed(_ => state.fileLoaded && !csvTableRef.value?.csvSettings?.showPreview),
                 uploading: false,
                 imported: false,
                 validating: false,

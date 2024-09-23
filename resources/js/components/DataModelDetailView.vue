@@ -145,34 +145,30 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import store from '@/bootstrap/store.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import { useToast } from '@/plugins/toast.js';
 
     import {
         getInitialAttributeValue,
-        getEntityType,
         getEntityTypeAttributes,
         translateConcept,
         _cloneDeep,
     } from '@/helpers/helpers.js';
 
     import {
-        reorderEntityAttributes,
-        addEntityTypeAttribute,
-        updateEntityTypeRelation,
         getAttributeOccurrenceCount,
-        removeEntityTypeAttribute,
     } from '@/api.js';
 
     import {
-      showEditAttribute,
+        showEditAttribute,
         showRemoveAttribute,
     } from '@/helpers/modal.js';
 
     export default {
         setup(props, context) {
             const { t } = useI18n();
+            const entityStore = useEntityStore();
             const currentRoute = useRoute();
             const toast = useToast();
             // FETCH
@@ -187,7 +183,7 @@
                     'sub_entity_types': et.sub_entity_types || [],
                 };
 
-                updateEntityTypeRelation(et.id, data).then(_ => {
+                entityStore.updateEntityType(et.id, data).then(_ => {
                     const name = translateConcept(state.entityType.thesaurus_url);
                     toast.$toast(
                         t('main.datamodel.toasts.updated_type.msg', {
@@ -208,7 +204,7 @@
                 state.entityType.sub_entity_types = [];
             };
             const addAttributeToEntityType = e => {
-                addEntityTypeAttribute(currentRoute.params.id, e.element.id, e.to).then(data => {
+                entityStore.addEntityTypeAttribute(currentRoute.params.id, e.element.id, e.to + 1).then(data => {console.log()
                     if(e.element.is_system && e.element.datatype == 'system-separator') {
                         showEditAttribute(data.id, currentRoute.params.id, {
                             is_system: e.element.is_system,
@@ -244,21 +240,16 @@
                         });
                     }
                 } else {
-                    removeEntityTypeAttribute(id).then(_ => {
-                        store.dispatch('removeEntityTypeAttribute', {
-                            entity_type_id: etid,
-                            attribute_id: id,
-                        });
-                    });
+                    entityStore.removeEntityTypeAttribute(id, etid);
                 }
             };
             const reorderEntityAttribute = e => {
-                reorderEntityAttributes(currentRoute.params.id, e.element.id, e.from, e.to);
+                entityStore.reorderAttributes(currentRoute.params.id, e.element.id, e.from, e.to);
             };
 
             // DATA
             const state = reactive({
-                entityType: computed(_ => _cloneDeep(getEntityType(currentRoute.params.id))),
+                entityType: computed(_ => _cloneDeep(entityStore.getEntityType(currentRoute.params.id))),
                 entityAttributes: computed(_ => getEntityTypeAttributes(currentRoute.params.id)),
                 entityValues: computed(_ => {
                     let data = {};
@@ -285,7 +276,7 @@
                     values: []
                 },
                 minimalEntityTypes: computed(_ => {
-                    return Object.values(store.getters.entityTypes).map(et => ({
+                    return Object.values(entityStore.entityTypes).map(et => ({
                         id: et.id,
                         thesaurus_url: et.thesaurus_url
                     }));

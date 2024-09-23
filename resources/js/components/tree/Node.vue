@@ -78,13 +78,10 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import store from '@/bootstrap/store.js';
     import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import {
         can,
-        getEntityColors,
-        hasIntersectionWithEntityAttributes,
     } from '@/helpers/helpers.js';
 
     import {
@@ -139,16 +136,14 @@
                 event.preventDefault();
                 state.multieditSelected = !state.multieditSelected;
                 if(state.multieditSelected) {
-                    store.dispatch('addToTreeSelection', {
+                    entityStore.addToTreeSelection({
                         id: data.value.id,
                         value: {
                             entity_type_id: data.value.entity_type_id,
                         },
                     });
                 } else {
-                    store.dispatch('removeFromTreeSelection', {
-                        id: data.value.id,
-                    });
+                    entityStore.removeFromTreeSelection(data.value.id);
                 }
             };
 
@@ -157,14 +152,14 @@
                 ddVisible: false,
                 multieditSelected: false,
                 modificationState: computed(_ => false), //store.getters.entities[data.value.id].reverb_state),
-                colorStyles: computed(_ => getEntityColors(data.value.entity_type_id)),
+                colorStyles: computed(_ => entityStore.getEntityTypeColors(data.value.entity_type_id)),
                 isSelected: computed(_ => entityStore.selectedEntity.id === data.value.id),
-                isSelectionMode: computed(_ => store.getters.treeSelectionMode),
+                isSelectionMode: computed(_ => entityStore.treeSelectionMode),
                 isSelectionDisabled: computed(_ => {
-                    if(store.getters.treeSelectionTypeIds.length == 0 || state.multieditSelected) {
+                    if(entityStore.treeSelectionTypeIds.length == 0 || state.multieditSelected) {
                         return false;
                     }
-                    return !hasIntersectionWithEntityAttributes(data.value.entity_type_id, store.getters.treeSelectionTypeIds);
+                    return !entityStore.hasIntersectionWithEntityAttributes(data.value.entity_type_id, entityStore.treeSelectionTypeIds);
                 }),
                 receivedWsUpdate: computed(_ => !!entityStore.backup[data.value.id]),
             });

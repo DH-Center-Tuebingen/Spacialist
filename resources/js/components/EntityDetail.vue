@@ -425,8 +425,9 @@
         Popover,
     } from 'bootstrap';
 
-    import store from '@/bootstrap/store.js';
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
     import useEntityStore from '@/bootstrap/stores/entity.js';
+    import useUserStore from '@/bootstrap/stores/user.js';
     import router from '%router';
 
     import { useToast } from '@/plugins/toast.js';
@@ -437,25 +438,14 @@
     } from '@/helpers/filters.js';
 
     import {
-        getEntityComments,
         patchAttributes,
         patchEntityName,
     } from '@/api.js';
 
     import {
         can,
-        isModerated,
-        isArray,
         userId,
-        getAttribute,
-        getAttributeName,
-        getUserBy,
-        getEntity,
-        getEntityColors,
-        getEntityTypeName,
-        getEntityTypeAttributeSelections,
         getEntityTypeDependencies,
-        getConcept,
         translateConcept,
         _cloneDeep,
     } from '@/helpers/helpers.js';
@@ -497,11 +487,13 @@
             const { t } = useI18n();
             const route = useRoute();
             const toast = useToast();
+            const attributeStore = useAttributeStore();
             const entityStore = useEntityStore();
+            const userStore = useUserStore();
 
             // FETCH
             entityStore.setById(route.params.id).then(_ => {
-                getEntityTypeAttributeSelections();
+                entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id);
                 state.initFinished = true;
                 updateAllDependencies();
             });
@@ -525,7 +517,7 @@
                 entityUser: computed(_ => state.entity.user),
                 entityAttributes: computed(_ => entityStore.getEntityTypeAttributes(state.entity.entity_type_id)),
                 colorStyles: computed(_ => {
-                    const colors = getEntityColors(state.entity.entity_type_id);
+                    const colors = entityStore.getEntityTypeColors(state.entity.entity_type_id);
                     return {
                         color: colors.backgroundColor
                     };
@@ -577,7 +569,7 @@
                         };
                     }
                 }),
-                entityTypeSelections: computed(_ => getEntityTypeAttributeSelections(state.entity.entity_type_id)),
+                entityTypeSelections: computed(_ => entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id)),
                 entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
                 hasAttributeLinks: computed(_ => state.entity.attributeLinks && state.entity.attributeLinks.length > 0),
                 groupedAttributeLinks: computed(_ => {
@@ -598,7 +590,7 @@
                 }),
                 attributesFetched: computed(_ => state.initFinished && state.entity.data && !!state.entityAttributes && state.entityAttributes.length > 0),
                 entityTypeLabel: computed(_ => {
-                    return getEntityTypeName(state.entity.entity_type_id);
+                    return entityStore.getEntityTypeName(state.entity.entity_type_id);
                 }),
                 hiddenAttributeList: computed(_ => {
                     const keys = Object.keys(state.hiddenAttributes);
@@ -629,12 +621,12 @@
                             }
                         }
                         for(let k in listGroups) {
-                            const grpAttr = getAttribute(k);
+                            const grpAttr = attributeStore.getAttribute(k);
                             listing += `<span class="text-muted fw-light fs-6"># ${translateConcept(grpAttr.thesaurus_url)}</span>`;
                             listing += `<ol class="mb-0">`;
                             // const data = state.entity.data[keys[i]];
                             for(let i = 0; i < listGroups[k].length; i++) {
-                                const attr = getAttribute(listGroups[k][i]);
+                                const attr = attributeStore.getAttribute(listGroups[k][i]);
                                 listing += `<li><span class="fw-bold">${translateConcept(attr.thesaurus_url)}</span></li>`;
                             }
                             listing += `</ol>`;
@@ -669,7 +661,7 @@
                 activeUserIds: [],
                 activeUsers: computed(_ => {
                     return state.activeUserIds.map(user => {
-                        return getUserBy(user.id);
+                        return userStore.getUserBy(user.id);
                     });
                 }),
             });
@@ -733,7 +725,7 @@
             const updateDependencyState = (aid, value) => {
                 const attrDeps = state.entityTypeDependencies[aid];
                 if(!attrDeps) return;
-                const type = getAttribute(aid).datatype;
+                const type = attributeStore.getAttribute(aid).datatype;
                 attrDeps.forEach(ad => {
                     let matches = false;
                     switch(ad.operator) {
@@ -866,8 +858,7 @@
                 if(!can('comments_read')) return;
 
                 state.commentLoadingState = 'fetching';
-                getEntityComments(state.entity.id).then(comments => {
-                    store.dispatch('setEntityComments', comments);
+                entityStore.fetchEntityComments(state.entity.id).then(_ => {
                     state.commentLoadingState = 'fetched';
                 }).catch(e => {
                     state.commentLoadingState = 'failed';
@@ -916,7 +907,7 @@
                 for(let v in dirtyValues) {
                     const aid = v;
                     const data = state.entity.data[aid];
-                    const type = getAttribute(aid)?.datatype;
+                    const type = attributeStore.getAttribute(aid)?.datatype;
                     const patch = {
                         op: null,
                         value: null,
@@ -953,23 +944,8 @@
                     patches.push(patch);
                     moderations.push(aid);
                 }
-                return patchAttributes(state.entity.id, patches).then(data => {
+                return entityStore.patchAttributes(state.entity.id, patches, dirtyValues, moderations).then(data => {
                     undirtyList(grps);
-                    entityStore.update(data.entity);
-                    store.dispatch('updateEntityData', {
-                        data: dirtyValues,
-                        new_data: data.added_attributes,
-                        eid: state.entity.id,
-                        sync: !isModerated(),
-                    });
-                    if(isModerated()) {
-                        store.dispatch('updateEntityDataModerations', {
-                            entity_id: state.entity.id,
-                            attribute_ids: moderations,
-                            state: 'pending',
-                        });
-                    }
-
                     resetDirtyStates(grps);
 
                     toast.$toast(
@@ -1077,12 +1053,12 @@
                     if(!newParams.id) return;
                     state.initFinished = false;
                     entityStore.setById(newParams.id).then(_ => {
-                        getEntityTypeAttributeSelections();
+                        entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id);
                         state.initFinished = true;
                         updateAllDependencies();
                     })
                     // store.dispatch('getEntity', newParams.id).then(_ => {
-                    //     getEntityTypeAttributeSelections();
+                    //     entityStore.getEntityTypeAttributeSelections();
                     //     state.initFinished = true;
                     //     updateAllDependencies();
                     // });
@@ -1124,7 +1100,6 @@
                     return false;
                 } else {
                     unsubscribeFrom(`entity.${state.entity.id}`);
-                    // store.dispatch('resetEntity');
                     entityStore.unset();
                     return true;
                 }
@@ -1136,7 +1111,6 @@
                         return false;
                     } else {
                         state.hiddenAttributes = {};
-                        // store.dispatch('resetEntity');
                         entityStore.unset();
                         unsubscribeFrom(`entity.${route.params.id}`);
                         join(`entity.${to.params.id}`, wsCallbacks);
@@ -1159,13 +1133,8 @@
                 ago,
                 date,
                 userId,
-                getUserBy,
                 showUserInfo,
-                getAttributeName,
-                getEntityTypeName,
-                getEntityColors,
                 translateConcept,
-                getEntity,
                 // LOCAL
                 hasReferenceGroup,
                 showMetadata,

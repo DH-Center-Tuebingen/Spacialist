@@ -46,8 +46,7 @@
         "vite": "^5.0.10",
         "vue": "^3.3.4",
         "vue-loader": "^17.2.2",
-        "vue-router": "^4.2.2",
-        "vuex": "4.0.2"
+        "vue-router": "^4.2.2"
     },
     "dependencies": {
         "@f3ve/vue-markdown-it": "^0.2.0",

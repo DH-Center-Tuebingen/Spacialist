@@ -342,22 +342,18 @@
         orcid as vOrcid,
     } from '@/bootstrap/validation.js';
 
-    import store from '%store';
+    import useUserStore from '@/bootstrap/stores/user.js';
 
     import {
         getUser,
         getClassByValidation,
         _cloneDeep,
     } from '@/helpers/helpers.js';
-    import {
-        setUserAvatar,
-        patchUserData,
-        deleteUserAvatar,
-    } from '@/api.js';
 
     export default {
         setup(props) {
             const { t } = useI18n();
+            const userStore = useUserStore();
 
             // FETCH
 
@@ -411,8 +407,7 @@
                 // No changes, no update
                 if(Object.keys(data).length === 0) return;
 
-                patchUserData(state.user.id, data).then(data => {
-                    updateUserObjects(data);
+                userStore.updateUser(state.user.id, data, true).then(d2 => {
                     resetDirty();
                 });
             };
@@ -431,25 +426,10 @@
                 }
             };
             const deleteAvatar = _ => {
-                deleteUserAvatar().then(data => {
-                    updateUserObjects({
-                        avatar: false,
-                        avatar_url: '',
-                    });
-                });
-            };
-            const updateUserObjects = data => {
-                // Workaround to update avatar image, because url may not change
-                data.avatar_url += `#${Date.now()}`;
-                store.dispatch('updateUserProfile', {
-                    ...getUser(),
-                    ...data,
-                });
+                userStore.deleteAvatar();
             };
             const uploadFile = (file, component) => {
-                return setUserAvatar(file.file).then(data => {
-                    updateUserObjects(data);
-                });
+                return userStore.setAvatar(file.file);
             };
             const inputFile = (newFile, oldFile) => {
                 // Wait for response

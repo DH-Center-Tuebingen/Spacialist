@@ -60,11 +60,13 @@
         ref,
         toRefs,
     } from 'vue';
+
     import { useI18n } from 'vue-i18n';
+
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
 
     import {
         can,
-        getAttributeSelections,
         getInitialAttributeValue,
     } from '@/helpers/helpers.js';
 
@@ -82,6 +84,7 @@
         emits: ['closing', 'confirm'],
         setup(props, context) {
             const { t } = useI18n();
+            const attributeStore = useAttributeStore();
             const {
                 attributes,
             } = toRefs(props);
@@ -115,13 +118,15 @@
 
             // ON MOUNTED
             onMounted(_ => {
+                console.log("mounted!")
+
                 for(let i=0; i<state.sortedAttributes.length; i++) {
                     const curr = state.sortedAttributes[i];
                     state.defaultValues[curr.id] = {
                         value: getInitialAttributeValue(curr),
                     };
                 }
-                state.attributeSelections = getAttributeSelections(state.sortedAttributes);
+                state.attributeSelections = attributeStore.getAttributeSelections(state.sortedAttributes);
                 state.attributesInitialized = true;
             });
 

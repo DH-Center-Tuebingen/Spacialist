@@ -111,28 +111,20 @@
 
         import { useI18n } from 'vue-i18n';
         import { useRoute } from 'vue-router';
-        import store from '%store';
+        import useUserStore from '@/bootstrap/stores/user.js';
         import router from '%router';
 
         import {
-            initApp,
             getErrorMessages,
             getValidClass,
             getUser,
         } from '@/helpers/helpers.js';
 
-        import {
-            showConfirmPassword,
-        } from '@/helpers/modal.js';
-
-        import {
-            getCsrfCookie,
-            login as apiLogin,
-        } from '@/api.js';
-
         export default {
             setup() {
                 const { t, locale } = useI18n();
+                const route = useRoute();
+                const userStore = useUserStore();
                 // DATA
                 const state = reactive({
                     user: {},
@@ -147,47 +139,39 @@
                 const login = async _ => {
                     state.submitting = true;
                     state.error = {};
-                    let data = {
+                    const credentials = {
                         password: state.user.password
                     };
                     // dirty check if email field should be treated
                     // as actual email address or nickname
                     if(state.user.email.includes('@')) {
-                        data.email = state.user.email;
+                        credentials.email = state.user.email;
                     } else {
-                        data.nickname = state.user.email;
+                        credentials.nickname = state.user.email;
                     }
-                    await getCsrfCookie();
-                    apiLogin(data)
-                    // auth.login({
-                    //     data: data,
-                    //     staySignedIn: state.user.remember,
-                    //     redirect: state.redirect,
-                    //     fetchUser: true
-                    // })
-                    .then(userData => {
-                        state.submitting = false;
-                        return initApp(locale);
-                    })
-                    .catch(e => {
-                        state.submitting = false;
-                        store.dispatch('setUserLogin', false);
-                        store.dispatch('setUser', {});
-                        state.error = getErrorMessages(e);
-                        return Promise.reject();
-                    })
-                    .then(_ => {
-                        state.error = {};
-                        const currUser = getUser();
-                        if(currUser.login_attempts > 0 || currUser.login_attempts === 0) {
-                            showConfirmPassword(currUser.id);
-                        }
-                    });
+                    await userStore.login(credentials)
+                        .then(_ => {
+                            state.submitting = false;
+                            state.error = {};
+                            if(route.query.redirectTo) {
+                                router.push(route.query.redirectTo);
+                            } else {
+                                router.push({
+                                    name: 'home',
+                                });
+                            }
+                        })
+                        .catch(e => {
+                            state.submitting = false;
+                            userStore.logout();
+                            state.error = getErrorMessages(e);
+                            return Promise.reject();
+                        });
                 };
 
                 // ON MOUNTED
                 onMounted(_ => {
-                    if(store.getters.loggedIn) {
+                    if(userStore.userLoggedIn) {
                         router.push({
                             name: 'home'
                         });

@@ -94,7 +94,9 @@
         useRoute,
     } from 'vue-router';
 
-    import store from '@/bootstrap/store.js';
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
+    import useSystemStore from '@/bootstrap/stores/system.js';
     import router from '%router';
 
     import {
@@ -120,6 +122,9 @@
         setup(props, context) {
             const { t } = useI18n();
             const currentRoute = useRoute();
+            const attributeStore = useAttributeStore();
+            const entityStore = useEntityStore();
+            const systemStore = useSystemStore();
 
             // FETCH
 
@@ -136,11 +141,7 @@
                 showAddEntityType();
             };
             const duplicateEntityType = event => {
-                const attrs = getEntityTypeAttributes(event.id).slice();
-                duplicateEntityTypeApi(event.id).then(data => {
-                    data.attributes = attrs;
-                    store.dispatch('addEntityType', data);
-                });
+                entityStore.duplicateEntityType(event.id);
             };
             const editEntityType = e => {
                 showEditEntityType(e.type);
@@ -174,9 +175,9 @@
 
             // DATA
             const state = reactive({
-                siu: computed(_ => store.getters.datatypeDataOf('si-unit')),
-                systemAttributeList: computed(_ => store.getters.attributes.filter(a => a.is_system)),
-                attributeList: computed(_ => store.getters.attributes.filter(a => !a.is_system)),
+                siu: computed(_ => systemStore.getDatatypeDataOf('si-unit')),
+                systemAttributeList: computed(_ => attributeStore.getAttributeListBy('system')),
+                attributeList: computed(_ => attributeStore.getAttributeListBy()),
                 // set values for all attributes to '', so values in <attribute-list> are existant
                 attributeListValues: computed(_ => {
                     if(!state.attributeList) return;
@@ -190,7 +191,7 @@
                     return data;
                 }),
                 showHiddenAttributes: false,
-                entityTypes: computed(_ => Object.values(store.getters.entityTypes)),
+                entityTypes: computed(_ => Object.values(entityStore.entityTypes)),
                 selectedEntityType: computed(_ => parseInt(currentRoute.params.id)),
                 selectedEntityTypeAttributeIds: computed(_ => state.selectedEntityType ? getEntityTypeAttributes(state.selectedEntityType).map(a => a.id) : []),
             });

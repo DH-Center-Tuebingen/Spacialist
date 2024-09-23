@@ -10,10 +10,6 @@ import {
     fetchChildren as fetchChildrenApi,
 } from '@/api.js';
 
-import {
-    getEntityTypeName,
-} from '@/helpers/helpers.js';
-
 export async function fetchChildren(id, sort = {by: 'rank', dir: 'asc'}) {
     const entityStore = useEntityStore();
     return fetchChildrenApi(id).then(data => {
@@ -22,10 +18,11 @@ export async function fetchChildren(id, sort = {by: 'rank', dir: 'asc'}) {
             sort: sort,
         });
     });
-    
+
 }
 
 export function sortTree(by, dir, tree) {
+    const entityStore = useEntityStore();
     dir = dir == 'desc' ? dir : 'asc';
     let sortFn;
     switch(by) {
@@ -60,8 +57,8 @@ export function sortTree(by, dir, tree) {
             break;
         case 'type':
             sortFn = (a, b) => {
-                const aurl = getEntityTypeName(a.entity_type_id);
-                const burl = getEntityTypeName(b.entity_type_id);
+                const aurl = entityStore.getEntityTypeName(a.entity_type_id);
+                const burl = entityStore.getEntityTypeName(b.entity_type_id);
                 let value = 0;
                 if(aurl < burl) value = -1;
                 if(aurl > burl) value = 1;

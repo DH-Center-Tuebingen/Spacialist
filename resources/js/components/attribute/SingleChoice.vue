@@ -53,14 +53,10 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import store from '@/bootstrap/store.js';
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
+    import useSystemStore from '@/bootstrap/stores/system.js';
 
     import {
-        searchConceptSelection,
-    } from '@/api.js';
-
-    import {
-        getAttributeName,
         translateConcept,
         multiselectResetClasslist,
         only,
@@ -100,6 +96,8 @@
         emits: ['change', 'update-selection'],
         setup(props, context) {
             const { t } = useI18n();
+            const attributeStore = useAttributeStore();
+            const systemStore = useSystemStore();
             const {
                 name,
                 disabled,
@@ -120,6 +118,10 @@
             // FETCH
 
             // FUNCTIONS
+            const getAttributeName = attributeId => {
+                return attributeStore.getAttributeName(attributeId);
+            };
+
             const handleUpdateForSelections = value => {
                 context.emit('update-selection', value?.id);
                 formatAndHandleChange(value);
@@ -136,7 +138,7 @@
                 }
             };
 
-            const handleSelectionUpdate = conceptId => {
+            const handleSelectionUpdate = async conceptId => {
                 if(!state.hasRootAttribute) return;
 
                 if(!conceptId) {
@@ -145,21 +147,9 @@
                     return;
                 }
 
-                const cachedSelection = store.getters.cachedConceptSelection(conceptId);
-                if(!cachedSelection) {
-                    searchConceptSelection(conceptId).then(selection => {
-                        store.dispatch('setCachedConceptSelection', {
-                            id: conceptId,
-                            selection: selection,
-                        });
-
-                        state.localSelection = selection;
-                        updateCurrentValue();
-                    });
-                } else {
-                    state.localSelection = cachedSelection;
-                    updateCurrentValue();
-                }
+                const cachedSelection = await systemStore.fetchCachedConceptSelection(conceptId);
+                state.localSelection = cachedSelection;
+                updateCurrentValue();
             };
 
             const resetFieldState = _ => {
@@ -246,10 +236,10 @@
             return {
                 t,
                 // HELPERS
-                getAttributeName,
                 translateConcept,
                 multiselectResetClasslist,
                 // LOCAL
+                getAttributeName,
                 resetFieldState,
                 undirtyField,
                 setSearchQuery,

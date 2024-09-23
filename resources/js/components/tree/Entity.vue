@@ -213,23 +213,13 @@
 
     import TreeSearch from '@/components/tree/Search.vue';
 
-    import store from '@/bootstrap/store.js';
     import router from '%router';
     import useEntityStore from '@/bootstrap/stores/entity.js';
-
-    import {
-        moveEntity,
-    } from '@/api.js';
 
     import {
         fetchChildren,
         openPath,
     } from '@/helpers/tree.js';
-
-    import {
-        getEntityType,
-        getEntityTypes,
-    } from '@/helpers/helpers.js';
 
     import {
         showAddEntity,
@@ -258,7 +248,7 @@
 
             // FUNCTIONS
             // Drag & Drop helpers
-            const entityTypesAsArray = Object.values(getEntityTypes());
+            const entityTypesAsArray = Object.values(entityStore.entityTypes);
             const droppedToRootLevel = (tgt, tgtPath) => {
                 return tgt.state.dropPosition != DropPosition.inside && tgtPath.length == 1;
             };
@@ -297,7 +287,7 @@
             const isDropAllowed = dropData => {
                 const item = dropData.sourceData;
                 const target = dropData.targetData;
-                const dragEntityType = getEntityType(item.entity_type_id);
+                const dragEntityType = entityStore.getEntityType(item.entity_type_id);
 
                 if(target.parentIds.indexOf(item.id) != -1 ||
                     (target.state.dropPosition == DropPosition.inside && target.id == item.root_entity_id)) {
@@ -326,7 +316,7 @@
                 if(!realTarget) {
                     index = entityTypesAsArray.findIndex(et => et.is_root && et.id == dragEntityType.id);
                 } else {
-                    index = getEntityType(realTarget.entity_type_id).sub_entity_types.findIndex(et => et.id == dragEntityType.id);
+                    index = entityStore.getEntityType(realTarget.entity_type_id).sub_entity_types.findIndex(et => et.id == dragEntityType.id);
                 }
                 if(index == -1) {
                     return false;
@@ -392,14 +382,14 @@
                 const eid = node.id;
                 const pid = newParent ? newParent.id : null;
 
-                moveEntity(eid, pid, newRank);
+                entityStore.move(eid, pid, newRank);
             };
             const toggleSelectMode = _ => {
-                store.dispatch('toggleTreeSelectionMode');
+                entityStore.toggleTreeSelectionMode();
             };
             const openMultieditModal = _ => {
-                const entityIds = Object.keys(store.getters.treeSelection).map(id => parseInt(id));
-                const attributes = store.getters.treeSelectionIntersection;
+                const entityIds = Object.keys(entityStore.treeSelection).map(id => parseInt(id));
+                const attributes = entityStore.getTreeSelectionIntersection;
                 showMultiEditAttribute(entityIds, attributes);
             };
             const getSortingStateClass = (attr, dir) => {
@@ -414,10 +404,7 @@
             const setSort = (attr, dir) => {
                 state.sort.by = attr;
                 state.sort.dir = dir;
-                store.dispatch('sortTree', {
-                    by: attr,
-                    dir: dir
-                });
+                entityStore.sortTree(state.sort);
             };
             const openAddEntityDialog = _ => {
                 showAddEntity(null);
@@ -453,8 +440,8 @@
 
             // DATA
             const state = reactive({
-                selectMode: computed(_ => store.getters.treeSelectionMode),
-                canOpenMultiEditModal: computed(_ => store.getters.treeSelectionCount >= 2),
+                selectMode: computed(_ => entityStore.treeSelectionMode),
+                canOpenMultiEditModal: computed(_ => entityStore.getTreeSelectionCount >= 2),
                 highlightedItems: [],
                 tree: computed(_ => entityStore.tree),
                 entity: computed(_ => entityStore.selectedEntity),

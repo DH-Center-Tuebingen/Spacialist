@@ -95,7 +95,6 @@ Route::middleware('auth:sanctum')->prefix('v1/editor')->group(function() {
     Route::get('/dm/geometry', 'EditorController@getAvailableGeometryTypes');
 
     Route::post('/dm/entity_type', 'EditorController@addEntityType');
-    Route::post('/dm/{id}/relation', 'EditorController@setRelationInfo')->where('id', '[0-9]+');
     Route::post('/dm/attribute', 'EditorController@addAttribute');
     Route::post('/dm/entity_type/{etid}/attribute', 'EditorController@addAttributeToEntityType')->where('etid', '[0-9]+');
     Route::post('/dm/entity_type/{ctid}/duplicate', 'EditorController@duplicateEntityType')->where('ctid', '[0-9]+');
@@ -173,11 +172,11 @@ Route::middleware('auth:sanctum')->prefix('v1/preference')->group(function() {
 Route::middleware('auth:sanctum')->prefix('v1/bibliography')->group(function() {
     Route::get('/', 'BibliographyController@getBibliography');
     Route::get('/{id}/ref_count', 'BibliographyController@getReferenceCount')->where('id', '[0-9]+');
-    
+
     Route::post('/', 'BibliographyController@addItem');
     Route::post('/import', 'BibliographyController@importBibtex');
     Route::post('/export', 'BibliographyController@exportBibtex');
-    
+
     // form data params are not recognized using patch, thus using post
     Route::post('/{id}', 'BibliographyController@updateItem')->where('id', '[0-9]+');
 

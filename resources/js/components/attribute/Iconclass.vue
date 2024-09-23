@@ -58,6 +58,8 @@
         watch,
     } from 'vue';
 
+    import useUserStore from '@/bootstrap/stores/user.js';
+
     import { useField } from 'vee-validate';
 
     import * as yup from 'yup';
@@ -68,14 +70,10 @@
         getIconClassInfo,
     } from '@/api.js';
 
-    import {
-        getPreference,
-    } from '@/helpers/helpers.js';
-
     export default {
         props: {
             name: {
-                type:String , 
+                type:String ,
                 required: true
             },
             value: {
@@ -91,6 +89,7 @@
         emits: ['change'],
         setup(props, context) {
             const { t } = useI18n();
+            const userStore = useUserStore();
 
             const {
                 name,
@@ -150,7 +149,7 @@
             const state = reactive({
                 info: null,
                 requestState: 'not',
-                language: getPreference('prefs.gui-language'),
+                language: userStore.getPreferenceByKey('prefs.gui-language'),
                 infoLoaded: computed(_ => state.requestState == 'success' && !!state.info),
                 infoErrored: computed(_ => state.requestState == 'failed'),
                 keywords: computed(_ => {
@@ -193,7 +192,6 @@
             return {
                 t,
                 // HELPERS
-                getPreference,
                 // LOCAL
                 resetFieldState,
                 closeInfoBox,

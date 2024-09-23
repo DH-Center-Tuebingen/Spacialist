@@ -154,16 +154,12 @@
 
     import { useI18n } from 'vue-i18n';
 
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
+
     import {
-        getAttribute,
         translateConcept,
     } from '@/helpers/helpers.js';
-
-    import {
-        handleModeration as handleModerationApi,
-    } from '@/api.js';
-
-    import store from '@/bootstrap/store.js';
 
     import ModerationPanel from '@/components/moderation/Panel.vue';
     import ValidityIndicator from './forms/indicators/ValidityIndicator.vue';
@@ -240,6 +236,8 @@
         emits: ['dirty'],
         setup(props, context) {
             const { t } = useI18n();
+            const attributeStore = useAttributeStore();
+            const entityStore = useEntityStore();
             const {
                 classes,
                 attributes,
@@ -302,7 +300,7 @@
                         expClasses[itm] = true;
                     });
                 }
-                
+
                 return expClasses;
             };
             const onAttributeExpand = (e, i) => {
@@ -345,7 +343,7 @@
                 ) {
                     toggleAttributeValue(aid);
                 }
-                handleModerationApi(action, entity_id, aid, overwrite_value);
+                entityStore.patchEntityDataModerations(action, entity_id, aid, overwrite_value);
             };
             const handleEditModeration = (aid, e) => {
                 const attr = state.attributeValues[aid];
@@ -414,16 +412,16 @@
                         currValue = curr.v.value;
                         if(currValue !== null) {
                             // filter out deleted table rows
-                            if(getAttribute(k).datatype == 'table') {
+                            if(attributeStore.getAttribute(k).datatype == 'table') {
                                 currValue = currValue.filter(cv => !cv.mark_deleted);
                             }
                             values[k] = currValue;
                         } else {
                             // null is allowed for date, string-sc, entity
                             if(
-                                getAttribute(k).datatype == 'date' ||
-                                getAttribute(k).datatype == 'string-sc' ||
-                                getAttribute(k).datatype == 'entity'
+                                attributeStore.getAttribute(k).datatype == 'date' ||
+                                attributeStore.getAttribute(k).datatype == 'string-sc' ||
+                                attributeStore.getAttribute(k).datatype == 'entity'
                             ) {
                                 values[k] = currValue;
                             }
@@ -548,7 +546,7 @@
                 attributeList: attributes,
                 attributeValues: values,
                 rootAttributeValues: {},
-                entity: computed(_ => store.getters.entity),
+                entity: computed(_ => entityStore.selectedEntity),
                 dynamicSelectionList: computed(_ => {
                     const list = [];
                     state.attributeList.forEach(a => {
