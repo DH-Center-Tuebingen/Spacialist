@@ -212,7 +212,7 @@ class Plugin extends Model
         }
 
         $this->removePreferences();
-        sp_remove_dir(base_path("app/Plugins/$this->name"));
+        // sp_remove_dir(base_path("app/Plugins/$this->name"));
 
         $this->delete();
     }

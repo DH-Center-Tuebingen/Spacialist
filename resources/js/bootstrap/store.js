@@ -627,7 +627,10 @@ export const store = createStore({
                     }
                 },
                 registerPluginInSlot(state, data) {
-                    state.registeredPluginSlots[data.slot].push(data);
+                    if(!state.registeredPluginSlots[data.slot]) {
+                        console.warning('Slot does not exist:', data.slot);   
+                    }else
+                        state.registeredPluginSlots[data.slot].push(data);
                 },
                 registerPluginPreference(state, data) {
                     const category = state.registeredPluginPreferences[data.category];
