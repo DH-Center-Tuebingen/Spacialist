@@ -1,9 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 0.10.1 - Dayjs Hotfix
+## 0.10.1
 ### Fixed
 - Frontend errors due to wrong dayjs import
+- Entity search now allows to display more than first 10 results
+  - `^` and `$` can be used in search query to match query only at the beginning/end of entity name
 
 ## 0.10 - Jelling
 ### Added

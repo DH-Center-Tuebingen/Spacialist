@@ -9,7 +9,7 @@
         :track-by="'id'"
         :value-prop="'id'"
         :mode="mode"
-        :options="query => search(query)"
+        :options="state.searchResults"
         :hide-selected="false"
         :filterResults="false"
         :resolve-on-load="false"
@@ -18,11 +18,10 @@
         :caret="false"
         :min-chars="0"
         :searchable="true"
-        :delay="delay"
-        :limit="limit"
         :placeholder="t('global.search')"
         :disabled="disabled"
         @change="handleSelection"
+        @search-change="search"
     >
         <template #singlelabel="{ value }">
             <div class="multiselect-single-label">
@@ -90,6 +89,20 @@
                 {{ t('global.search_no_term_info') }}
             </div>
         </template>
+        <template
+            v-if="infinite && canFetchMore && state.hasResults"
+            #afterlist=""
+        >
+            <div class="p-2">
+                <a
+                    class="text-decoration-none text-reset"
+                    href="#"
+                    @click.prevent="search(state.query)"
+                >
+                    {{ t('global.search_load_n_more', {n: limit}) }}
+                </a>
+            </div>
+        </template>
     </multiselect>
 </template>
 
@@ -104,7 +117,8 @@
     import { useI18n } from 'vue-i18n';
 
     import {
-        getTs
+        _debounce,
+        getTs,
     } from '@/helpers/helpers.js';
 
     export default {
@@ -158,6 +172,16 @@
                 required: false,
                 default: false,
             },
+            infinite: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
+            canFetchMore: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
         },
         emits: ['selected', 'entry-click'],
         setup(props, context) {
@@ -174,26 +198,41 @@
                 mode,
                 defaultValue,
                 disabled,
+                infinite,
             } = toRefs(props);
-            
+
             if(!keyText.value && !keyFn.value) {
                 throw new Error('You have to either provide a key or key function for your search component!');
             }
             // FETCH
 
             // FUNCTIONS
-            const search = async (query) => {
+            const search = _debounce(async query => {
+                const queryChanged = state.query != query;
                 state.query = query;
                 if(!query) {
-                    return await new Promise(r => r([]));
+                    state.hasResults = false;
+                    state.searchResults = [];
+                    return;
                 }
                 const results = await endpoint.value(query);
-                if(!!filterFn.value && !!filterFn.value) {
-                    return filterFn.value(results, query);
+
+                let filteredResults;
+                if(!!filterFn.value) {
+                    filteredResults = filterFn.value(results, query);
                 } else {
-                    return results;
+                    filteredResults = results;
                 }
-            };
+                state.hasResults = results.length > 0;
+                if(queryChanged) {
+                    state.searchResults = filteredResults;
+                } else {
+                    state.searchResults = [
+                        ...state.searchResults,
+                        ...filteredResults
+                    ];
+                }
+            }, 250);
             const displayResult = result => {
                 if(!!keyText.value) {
                     return result[keyText.value];
@@ -231,9 +270,9 @@
             const getBaseValue = _ => {
                     return mode.value == 'single' ? {} : [];
             };
-            
+
             const getDefaultValue = _ => {
-                if(defaultValue.value) 
+                if(defaultValue.value)
                     return defaultValue.value;
                 else
                     return getBaseValue();
@@ -244,6 +283,8 @@
                 id: `multiselect-search-${getTs()}`,
                 entry: getDefaultValue(),
                 query: '',
+                searchResults: [],
+                hasResults: false,
                 enableChain: computed(_ => chain.value && chain.value.length > 0),
             });
 
