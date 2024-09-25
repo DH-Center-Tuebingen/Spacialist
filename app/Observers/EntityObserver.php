@@ -34,18 +34,20 @@ class EntityObserver
     /**
      * Handle the Entity "saved" event.
      * dispatching update events require persisted new entity data
-     * 
+     *
      * @param \App\Entity $entity
      * @return void
-     * 
-     */    
+     *
+     */
     public function saved(Entity $entity) {
         $user = auth()->user();
+        $action = '';
         if($entity->wasRecentlyCreated) {
-            EntityUpdatedEvent::dispatch($entity, $user, "added");
+            $action = "added";
         } else {
-            EntityUpdatedEvent::dispatch($entity, $user, "updated");
+            $action = "updated";
         }
+        broadcast(new EntityUpdatedEvent($entity, $user, $action))->toOthers();
         broadcast(new SomethingChanged($entity, $user))->toOthers();
     }
 
