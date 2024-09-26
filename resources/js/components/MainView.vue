@@ -217,7 +217,7 @@
                     }
                 }),
                 concepts: computed(_ => store.getters.concepts),
-                entity: computed(_ => store.getters.entity),
+                entity: computed(_ => store.getters.entity ),
                 hasReferences: computed(_ => {
                     const isNotSet = !state.entity.references;
                     if(isNotSet) return false;

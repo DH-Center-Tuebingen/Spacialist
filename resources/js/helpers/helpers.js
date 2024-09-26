@@ -39,8 +39,18 @@ export async function initApp(locale) {
     return new Promise(r => r(null));
 }
 
-export function can(permissionString, oneOf) {
-    oneOf = oneOf || false;
+
+/**
+ * Checks if the current user has the given permission(s)
+ * 
+ * @param {string} permissionString -   String of a single permission or multiple permissions separated by '|'.
+ *                                      The permissions have normally the form of [permission_name]_[permission_action].
+ *                                      The permission_action can be one of 'read', 'write', 'create', 'delete', 'share'.
+ * 
+ * @param {?boolean} [oneOf=false] - If true, only one of the permissions is required to return true.
+ * @returns 
+ */
+export function can(permissionString, oneOf = false) {
     const user = store.getters.user;
     if(!user) return false;
     const permissions = permissionString.split('|');

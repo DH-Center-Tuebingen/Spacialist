@@ -1,11 +1,9 @@
 <template>
-    <div
-        v-if="entity != null"
-        class="entity-details d-flex flex-column overflow-hidden h-100"
-    >
+    <div class="entity-details d-flex flex-column overflow-hidden">
         <EntityDetailHeader
-            :entity="entity"
+            :entity="state.entity"
             :entity-user="state.entityUser"
+            :dirty="formDirty"
             :read-only="readOnly"
             @save="saveEntity"
             @reset="resetForm"
@@ -31,10 +29,9 @@
             >
                 <a
                     :id="`active-entity-attributes-group-${tg.id}-tab`"
-                    class="nav-link d-flex gap-2 align-items-center"
+                    class="nav-link active-entity-attributes-tab active-entity-detail-tab d-flex gap-2 align-items-center"
                     href="#"
-                    draggable="false"
-                    @click.prevent="setView(`attributes-${tg.id}`)"
+                    @click.prevent="setView(`attributes-${key}`)"
                 >
                     <span class="fa-layers fa-fw">
                         <i class="fas fa-fw fa-layer-group" />
@@ -72,29 +69,24 @@
                     </div>
                 </a>
             </li>
-
-            <template v-if="allowPluginSlot">
-                <template
-                    v-for="tab in pluginTabs"
-                    :key="`subscription-group-${tab}`"
+            <template v-if="state?.entity?.data?.tabbedChildren">
+                <li
+                    v-for="child in state.entity.data.tabbedChildren"
+                    :key="child.id"
+                    class="nav nav-item"
+                    role="tablist"
                 >
-                    <li
-                        class="nav-item"
-                        role="presentation"
+                    <a
+                        :id="`active-entity-child-${child.id}-tab`"
+                        class="nav-link active-entity-detail-tab d-flex gap-2 align-items-center"
+                        href="#"
+                        @click.prevent="setEntityView(child)"
                     >
-                        <a
-                            :id="`active-entity-attributes-group-${tab}`"
-                            class="nav-link d-flex gap-2 align-items-center"
-                            href="#"
-                            draggable="false"
-                            @click.prevent="setView(tab.view)"
-                        >
-                            <component :is="tab.component" />
-                        </a>
-                    </li>
-                </template>
+                        <i class="fas fa-fw fa-cube" />
+                        {{ child.name }}
+                    </a>
+                </li>
             </template>
-
             <!-- empty nav-item to separate metadata and comments from attributes -->
             <li class="nav-item nav-item-list-divider ms-auto" />
             <li
@@ -104,15 +96,14 @@
             >
                 <a
                     id="active-entity-metadata-tab"
-                    class="nav-link d-flex gap-2 align-items-center"
+                    class="nav-link active-entity-detail-tab d-flex gap-2 align-items-center"
                     href="#"
-                    draggable="false"
                     @click.prevent="setView('metadata')"
                 >
                     <i class="fas fa-fw fa-file-shield" />
                     {{ t('main.entity.tabs.metadata') }}
                     <span
-                        v-if="!entity.metadata || !entity.metadata.licence"
+                        v-if="!state.entity.metadata || !state.entity.metadata.licence"
                         :title="t('global.licence_missing')"
                     >
                         <i class="fas fa-exclamation text-warning" />
@@ -126,15 +117,14 @@
             >
                 <a
                     id="active-entity-comments-tab"
-                    class="nav-link d-flex gap-2 align-items-center"
+                    class="nav-link active-entity-detail-tab d-flex gap-2 align-items-center"
                     href="#"
-                    draggable="false"
                     @click.prevent="setView('comments')"
                 >
                     <span class="fa-layers fa-fw">
                         <i class="fas fa-fw fa-comments" />
                         <span class="fa-layers-counter fa-counter-lg bg-secondary-subtle text-reset">
-                            {{ commentCount }}
+                            {{ state.entity.comments_count }}
                         </span>
                     </span>
                     {{ t('main.entity.tabs.comments') }}
@@ -146,87 +136,114 @@
             id="entity-detail-tab-content"
             class="tab-content col ps-0 pe-0 overflow-y-auto"
         >
-            <template
-                v-for="tg in state.entityGroups"
-                :key="`attribute-group-${tg.id}-panel`"
-            >
-                <div
-                    :id="`active-entity-attributes-panel-${tg.id}`"
-                    class="tab-pane fade h-100 active-entity-attributes-panel"
-                    :class="{ 'active': isAttributeActive(tg.id), 'show': isAttributeActive(tg.id) }"
-                    role="tabpanel"
-                >
-                    <form
-                        :id="`entity-attribute-form-${tg.id}`"
-                        :name="`entity-attribute-form-${tg.id}`"
-                        class="h-100 container-fluid"
-                        @submit.prevent
-                        @keydown.ctrl.s="e => handleSaveOnKey(e, `${tg.id}`)"
-                    >
-                        <template v-if="state.attributesFetched">
-                            <attribute-list
-                                :ref="el => setAttrRefs(el, tg.id)"
-                                v-dcan="'entity_data_read'"
-                                class="pt-2 h-100 overflow-y-auto row"
-                                :attributes="tg.data"
-                                :hidden-attributes="state.hiddenAttributeList"
-                                :show-hidden="state.hiddenAttributeState"
-                                :disable-drag="true"
-                                :metadata-addon="hasReferenceGroup"
-                                :selections="state.entityTypeSelections"
-                                :values="entity.data"
-                                :read-only="readOnly"
-                                @dirty="e => setFormState(e, tabName.id)"
-                                @metadata="showMetadata"
-                            />
-                        </template>
-                    </form>
-                </div>
-            </template>
+            <!-- ATTRIBUTES VIEW -->
+
             <div
-                class="tab-pane fade h-100 overflow-hidden"
-                :class="{ 'active': isMetadataView, 'show': isMetadataView }"
+                v-if="isAttributeView"
+                class="tab-pane fade h-100 active-entity-detail-panel active-entity-attributes-panel show active"
+                role="tabpanel"
+            >
+                <form
+                    v-if="tabName"
+                    class="h-100 container-fluid"
+                    @submit.prevent
+                    @keydown.ctrl.s="e => handleSaveOnKey(e, `${tabName.id}`)"
+                >
+                    <attribute-list
+                        v-dcan="'entity_data_read'"
+                        class="pt-2 h-100 row"
+                        :attributes="tabName.data"
+                        :hidden-attributes="state.hiddenAttributeList"
+                        :show-hidden="state.hiddenAttributeState"
+                        :disable-drag="true"
+                        :metadata-addon="hasReferenceGroup"
+                        :selections="state.entityTypeSelections"
+                        :values="state.entity.data"
+                        :read-only="readOnly"
+                        @dirty="e => setFormState(e, tabName.id)"
+                        @metadata="showMetadata"
+                    />
+                </form>
+            </div>
+
+
+            <!-- METADATA VIEW -->
+            <!-- <div
+                v-if="view === 'metadata'"
+                v-show="can('entity_read')"
+                id="active-entity-metadata-panel"
+                class="tab-pane fade h-100 active-entity-detail-panel overflow-hidden"
                 role="tabpanel"
             >
                 <MetadataTab class="mb-auto scroll-y-auto h-100 pe-2" />
-            </div>
+            </div> -->
 
+            <!-- COMMENTS VIEW -->
             <div
+                v-if="view === 'comments'"
                 v-show="can('comments_read')"
                 id="active-entity-comments-panel"
-                class="tab-pane fade h-100"
-                :class="{ 'active': isCommentsView, 'show': isCommentsView }"
+                class="tab-pane fade h-100 active-entity-detail-panel"
                 role="tabpanel"
             >
-                <Comments
-                    ref="comments"
-                    :subject="entity"
-                />
-            </div>
-
-            <template v-if="allowPluginSlot">
-                <template
-                    v-for="panel in pluginPanels"
-                    :key="`plugin-panel-${panel.view}`"
+                <div
+                    v-if="state.entity.comments"
+                    class="mb-auto overflow-y-auto h-100 pe-2"
                 >
                     <div
-                        class="tab-pane fade h-100"
-                        :class="{ 'active': isActive(panel.view), 'show': isActive(panel.view) }"
-                        role="tabpanel"
+                        v-if="state.commentsFetching"
+                        class="mt-2"
                     >
-                        <component
-                            :is="panel.component"
-                            v-bind="panel.vBind ?? {}"
-                            v-on="panel.vOn ?? {}"
+                        <alert
+                            class="mb-0"
+                            type="info"
+                            :message="t('global.comments.fetching')"
                         />
                     </div>
+                    <div
+                        v-else-if="state.commentFetchFailed"
+                        class="mt-2"
+                    >
+                        <p class="alert alert-danger mb-0">
+                            {{ t('global.comments.fetching_failed') }}
+                            <button
+                                type="button"
+                                class="d-block mt-2 btn btn-sm btn-outline-success"
+                                @click="fetchComments"
+                            >
+                                <i class="fas fa-fw fa-sync" />
+                                {{ t('global.comments.retry_failed') }}
+                            </button>
+                        </p>
+                    </div>
+                    <comment-list
+                        v-else
+                        :avatar="48"
+                        :comments="state.entity.comments"
+                        :hide-button="false"
+                        :resource="state.resourceInfo"
+                        @added="addComment"
+                    />
+                </div>
+            </div>
+            <EntityDetail
+                v-if="isEntityView"
+                class="ps-5 pt-2"
+                :read-only="true"
+                :entity="state.activeSubEntity"
+            >
+                <template #controls>
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary btn-sm"
+                        @click="_ => setEntity(state.activeSubEntity)"
+                    >
+                        <i class="fas fa-fw fa-arrow-up-right-from-square" />
+                        {{ t('global.notifications.body.goto_entity') }}
+                    </button>
                 </template>
-            </template>
+            </EntityDetail>
         </div>
-        <router-view
-            v-if="state.attributesFetched"
-            :entity="entity"
-        />
     </div>
 </template>
 
@@ -238,7 +255,6 @@
         onMounted,
         reactive,
         ref,
-        useSlots,
         watch,
     } from 'vue';
 
@@ -251,26 +267,24 @@
     import { useI18n } from 'vue-i18n';
 
     import {
+        Alert,
         Popover,
     } from 'bootstrap';
 
     import store from '@/bootstrap/store.js';
+    import router from '%router';
 
     import { useToast } from '@/plugins/toast.js';
-
     import {
-        ago,
-        date,
-    } from '@/helpers/filters.js';
-
-    import {
+        getEntityData,
+        getEntityReferences,
+        getEntityComments,
         patchAttributes,
-        patchEntityName,
     } from '@/api.js';
-
     import {
         can,
         isModerated,
+        isArray,
         userId,
         getAttribute,
         getAttributeName,
@@ -280,6 +294,8 @@
         getEntityTypeName,
         getEntityTypeAttributeSelections,
         getEntityTypeDependencies,
+        getConcept,
+        fillEntityData,
         translateConcept,
         _cloneDeep,
     } from '@/helpers/helpers.js';
@@ -292,23 +308,16 @@
 
     import { usePreventNavigation } from '@/helpers/form.js';
 
-    import MetadataTab from '@/components/entity/MetadataTab.vue';
     import EntityDetailHeader from './entity/EntityDetailHeader.vue';
-    import Spinner from './Spinner.vue';
-    import Comments from './Comments.vue';
 
     export default {
         components: {
-            Comments,
             EntityDetailHeader,
-            MetadataTab,
-            Spinner,
         },
         props: {
             entity: {
-                required: false,
-                type: Object,
-                default: () => null,
+                required: true,
+                type: Object
             },
             bibliography: {
                 required: false,
@@ -324,29 +333,21 @@
                 required: false,
                 type: Boolean,
                 default: false
-            },
-            allowPluginSlot: {
-                required: false,
-                type: Boolean,
-                default: true
-            },
+            }
         },
-        emits: [
-            'view-change',
-        ],
-        setup(props, context) {
+        setup(props) {
             const { t } = useI18n();
             const route = useRoute();
             const toast = useToast();
-
-            // FETCH
 
 
             // DATA
             const attrRefs = ref({});
             const state = reactive({
+                activeSubEntity: null,
+                tabType: 'attribute',
                 colorStyles: computed(_ => {
-                    const colors = getEntityColors(props.entity.entity_type_id);
+                    const colors = getEntityColors(state.entity.entity_type_id);
                     return {
                         color: colors.backgroundColor
                     };
@@ -361,15 +362,19 @@
                 attributeGrpHovered: null,
                 hiddenAttributes: {},
                 entityHeaderHovered: false,
-                editedEntityName: '',
+                entityMetadata: {},
                 initFinished: false,
+                commentLoadingState: 'not',
+                metadataTabLoaded: false,
                 hiddenAttributeState: false,
                 attributesInTabs: true,
-                entityUser: computed(_ => props.entity?.user),
-                entityAttributes: computed(_ => store.getters.entityTypeAttributes(props.entity?.entity_type_id)),
+                routeQuery: computed(_ => route.query),
+                entity: computed(_ => props.entity ?? store.getters.entity),
+                entityUser: computed(_ => state.entity.user),
+                entityAttributes: computed(_ => store.getters.entityTypeAttributes(state.entity.entity_type_id)),
                 entityGroups: computed(_ => {
                     if(!state.entityAttributes) {
-                        return {};
+                        return state.entityAttributes;
                     }
 
                     if(state.attributesInTabs) {
@@ -407,14 +412,14 @@
                         };
                     }
                 }),
-                entityTypeSelections: computed(_ => getEntityTypeAttributeSelections(props.entity.entity_type_id)),
-                entityTypeDependencies: computed(_ => getEntityTypeDependencies(props.entity.entity_type_id)),
-                hasAttributeLinks: computed(_ => props.entity.attributeLinks && props.entity.attributeLinks.length > 0),
+                entityTypeSelections: computed(_ => getEntityTypeAttributeSelections(state.entity.entity_type_id)),
+                entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
+                hasAttributeLinks: computed(_ => state.entity.attributeLinks && state.entity.attributeLinks.length > 0),
                 groupedAttributeLinks: computed(_ => {
                     if(!state.hasAttributeLinks) return {};
 
                     const groups = {};
-                    props.entity.attributeLinks.forEach(l => {
+                    state.entity.attributeLinks.forEach(l => {
                         if(!groups[l.id]) {
                             groups[l.id] = {
                                 ...l,
@@ -425,10 +430,6 @@
                         }
                     });
                     return groups;
-                }),
-                attributesFetched: computed(_ => state.initFinished && props.entity.data && !!state.entityAttributes && state.entityAttributes.length > 0),
-                entityTypeLabel: computed(_ => {
-                    return getEntityTypeName(props.entity.entity_type_id);
                 }),
                 hiddenAttributeList: computed(_ => {
                     const keys = Object.keys(state.hiddenAttributes);
@@ -444,52 +445,60 @@
                 hiddenAttributeCount: computed(_ => state.hiddenAttributeList.length),
                 hiddenAttributeListing: computed(_ => {
                     let listing = `<div>`;
-                    if(!!state.attributesFetched) {
-                        const keys = Object.keys(state.hiddenAttributes);
-                        const values = Object.values(state.hiddenAttributes);
-                        const listGroups = {};
-                        for(let i = 0; i < keys.length; i++) {
-                            const k = keys[i];
-                            const v = values[i];
-                            if(v.hide && (!state.hiddenAttributes[v.by] || !state.hiddenAttributes[v.by].hide)) {
-                                if(!listGroups[v.by]) {
-                                    listGroups[v.by] = [];
-                                }
-                                listGroups[v.by].push(k);
+                    const keys = Object.keys(state.hiddenAttributes);
+                    const values = Object.values(state.hiddenAttributes);
+                    const listGroups = {};
+                    for(let i = 0; i < keys.length; i++) {
+                        const k = keys[i];
+                        const v = values[i];
+                        if(v.hide && (!state.hiddenAttributes[v.by] || !state.hiddenAttributes[v.by].hide)) {
+                            if(!listGroups[v.by]) {
+                                listGroups[v.by] = [];
                             }
+                            listGroups[v.by].push(k);
                         }
-                        for(let k in listGroups) {
-                            const grpAttr = getAttribute(k);
-                            listing += `<span class="text-muted fw-light fs-6"># ${translateConcept(grpAttr.thesaurus_url)}</span>`;
-                            listing += `<ol class="mb-0">`;
-                            for(let i = 0; i < listGroups[k].length; i++) {
-                                const attr = getAttribute(listGroups[k][i]);
-                                listing += `<li><span class="fw-bold">${translateConcept(attr.thesaurus_url)}</span></li>`;
-                            }
-                            listing += `</ol>`;
+                    }
+                    for(let k in listGroups) {
+                        const grpAttr = getAttribute(k);
+                        listing += `<span class="text-muted fw-light fs-6"># ${translateConcept(grpAttr.thesaurus_url)}</span>`;
+                        listing += `<ol class="mb-0">`;
+                        // const data = state.entity.data[keys[i]];
+                        for(let i = 0; i < listGroups[k].length; i++) {
+                            const attr = getAttribute(listGroups[k][i]);
+                            listing += `<li><span class="fw-bold">${translateConcept(attr.thesaurus_url)}</span></li>`;
                         }
+                        listing += `</ol>`;
                     }
                     listing += `</div>`;
                     return listing;
                 }),
-                showBreadcrumb: computed(_ => {
-                    return props.entity.parentIds && props.entity.parentIds.length > 1;
-                }),
-                lastModified: computed(_ => {
-                    return props.entity.updated_at || props.entity.created_at;
-                }),
+                resourceInfo: computed(_ => {
+                    if(!state.entity) return {};
 
-                loading: true,
+                    return {
+                        id: state.entity.id,
+                        type: 'entity',
+                    };
+                }),
+                commentsFetching: computed(_ => {
+                    return state.commentLoadingState === 'fetching';
+                }),
+                commentsFetched: computed(_ => {
+                    return state.commentLoadingState === 'fetched';
+                }),
+                commentFetchFailed: computed(_ => {
+                    return state.commentLoadingState === 'failed';
+                }),
             });
 
             usePreventNavigation(_ => state.formDirty);
 
             // FUNCTIONS
             const hasReferenceGroup = group => {
-                if(!props.entity.references) return false;
-                if(!Object.keys(props.entity.references).length) return false;
-                if(!props.entity.references[group]) return false;
-                return Object.keys(props.entity.references[group]).length > 0;
+                if(!state.entity.references) return false;
+                if(!Object.keys(state.entity.references).length) return false;
+                if(!state.entity.references[group]) return false;
+                return Object.keys(state.entity.references[group]).length > 0;
             };
             const showMetadata = e => {
                 const attribute = e.element;
@@ -514,30 +523,7 @@
                     });
                 }
             };
-            const editEntityName = _ => {
-                if(!can('entity_write')) return;
 
-                state.editedEntityName = props.entity.name;
-                // props.entity.editing = true;
-            };
-            const updateEntityName = _ => {
-                // If name does not change, just cancel
-                if(props.entity.name == state.editedEntityName) {
-                    cancelUpdateEntityName();
-                } else {
-                    patchEntityName(props.entity.id, state.editedEntityName).then(data => {
-                        store.dispatch('updateEntity', {
-                            ...data,
-                            name: state.editedEntityName,
-                        });
-                        cancelEditEntityName();
-                    });
-                }
-            };
-            const cancelEditEntityName = _ => {
-                // props.entity.editing = false;
-                state.editedEntityName = '';
-            };
             const updateDependencyState = (aid, value) => {
                 const attrDeps = state.entityTypeDependencies[aid];
                 if(!attrDeps) return;
@@ -577,16 +563,7 @@
                     };
                 });
             };
-            const updateAllDependencies = _ => {
-                if(!state.entityAttributes) return;
 
-                console.log(props.entity.name, state.entityAttributes);
-                for(let i = 0; i < state.entityAttributes.length; i++) {
-                    const curr = state.entityAttributes[i];
-                    // TODO:: Reimplement
-                    // updateDependencyState(curr.id, state.entity.data[curr.id].value);
-                }
-            };
             const showHiddenAttributes = _ => {
                 state.hiddenAttributeState = true;
             };
@@ -596,42 +573,91 @@
             const confirmDeleteEntity = _ => {
                 if(!can('entity_delete')) return;
 
-                showDeleteEntity(props.entity.id);
+                showDeleteEntity(state.entity.id);
             };
+
 
             const view = ref('attributes-default');
 
-            const setView = (_view = 'attributes-default') => {
-                view.value = _view;
-
-                context.emit('view-change', view.value);
+            const setEntity = async (entity) => {
+                store.commit('setEntity', entity);
             };
 
+            const setEntityView = async (subEntity) => {
+                view.value = 'entity';
+                state.activeSubEntity = subEntity;
+
+                if(!subEntity.data) {
+                    state.activeSubEntity.data = await getEntityData(subEntity.id);
+
+                    // LAZYLY COPIED FROM THE STORE, AS THE STOER HAS SIDEEFFECTS
+                    fillEntityData(state.activeSubEntitydata, state.activeSubEntityentity_type_id);
+                    state.activeSubEntityreferences = await getEntityReferences(subEntity.id) || {};
+                    for(let k in state.activeSubEntitydata) {
+                        const curr = state.activeSubEntitydata[k];
+                        if(curr.attribute) {
+                            const key = curr.attribute.thesaurus_url;
+                            if(!state.activeSubEntityreferences[key]) {
+                                state.activeSubEntityreferences[key] = [];
+                            }
+                        }
+                    }
+                }
+            };
+
+            const setView = (_view = 'attributes-default') => {
+                view.value = _view;
+            };
 
             const isEntityView = computed(() => {
                 return view.value.startsWith('entity');
             });
 
-            const isCommentsView = computed(() => {
-                return view.value === 'comments';
+            const isAttributeView = computed(() => {
+                return view.value.startsWith('attributes');
             });
-
-            const isMetadataView = computed(() => {
-                return view.value === 'metadata';
-            });
-
-            const isAttributeActive = id => {
-                return view.value === `attributes-${id}`;
-            };
-
-            const isActive = id => {
-                return view.value === id;
-            };
 
             const tabName = computed(() => {
                 if(!state.entityGroups) return null;
                 return state.entityGroups[view.value.split('-')[1]];
             });
+
+            // const setView = view => {
+            //     $emit("update:view", view);
+            // };
+
+
+            // const setViewView = (tab = 'attributes-default') => {
+
+            //     const [tabType, tabId] = tab.split('-');
+
+            //     state.tabType = tabType;
+
+            //     let newTab, oldTabs, newPanel, oldPanels;
+            //     if(tab === 'comments') {
+            //         newTab = document.getElementById('active-entity-comments-tab');
+            //         newPanel = document.getElementById('active-entity-comments-panel');
+            //         if(!state.commentsFetched) {
+            //             fetchComments();
+            //         }
+            //     } else if(tab === 'metadata') {
+            //         newTab = document.getElementById('active-entity-metadata-tab');
+            //         newPanel = document.getElementById('active-entity-metadata-panel');
+            //     } else if(tabType === 'entity') {
+            //         newTab = document.getElementById(`active-entity-child-${tabId}-tab`);
+            //         newPanel = document.getElementById(`active-entity-child-${tabId}`);
+            //     } else {
+            //         newTab = document.getElementById(`active-entity-attributes-group-${tabId}-tab`);
+            //         newPanel = document.getElementById(`active-entity-attributes-panel-${tabId}`);
+            //     }
+            //     oldTabs = document.getElementsByClassName('active-entity-detail-tab');
+            //     oldPanels = document.getElementsByClassName('active-entity-detail-panel');
+
+            //     oldTabs.forEach(t => t.classList.remove('active'));
+            //     if(newTab) newTab.classList.add('active');
+            //     oldPanels.forEach(p => p.classList.remove('show', 'active'));
+            //     if(newPanel) newPanel.classList.add('show', 'active');
+            // };
 
             const onEntityHeaderHover = hoverState => {
                 state.entityHeaderHovered = hoverState;
@@ -674,8 +700,35 @@
                 });
             };
 
+            const fetchComments = _ => {
+                if(!can('comments_read')) return;
 
+                state.commentLoadingState = 'fetching';
+                getEntityComments(state.entity.id).then(comments => {
+                    store.dispatch('setEntityComments', comments);
+                    state.commentLoadingState = 'fetched';
+                }).catch(e => {
+                    state.commentLoadingState = 'failed';
+                });
+            };
 
+            const addComment = event => {
+                const comment = event.comment;
+                const replyTo = event.replyTo;
+                if(replyTo) {
+                    const op = state.entity.comments.find(c => c.id == replyTo);
+                    if(op.replies) {
+                        op.replies.push(comment);
+                    }
+                    op.replies_count++;
+                } else {
+                    if(!state.entity.comments) {
+                        state.entity.comments = [];
+                    }
+                    state.entity.comments.push(comment);
+                    state.entity.comments_count++;
+                }
+            };
 
             const handleSaveOnKey = (e, grp) => {
                 if(!can('entity_data_write')) return;
@@ -700,7 +753,7 @@
 
                 for(let v in dirtyValues) {
                     const aid = v;
-                    const data = props.entity.data[aid];
+                    const data = state.entity.data[aid];
                     const type = getAttribute(aid)?.datatype;
                     const patch = {
                         op: null,
@@ -738,18 +791,18 @@
                     patches.push(patch);
                     moderations.push(aid);
                 }
-                return patchAttributes(props.entity.id, patches).then(data => {
+                return patchAttributes(state.entity.id, patches).then(data => {
                     undirtyList(grps);
                     store.dispatch('updateEntity', data.entity);
                     store.dispatch('updateEntityData', {
                         data: dirtyValues,
                         new_data: data.added_attributes,
-                        eid: props.entity.id,
+                        eid: state.entity.id,
                         sync: !isModerated(),
                     });
                     if(isModerated()) {
                         store.dispatch('updateEntityDataModerations', {
-                            entity_id: props.entity.id,
+                            entity_id: state.entity.id,
                             attribute_ids: moderations,
                             state: 'pending',
                         });
@@ -800,27 +853,20 @@
                 attrRefs.value[grp] = el;
             };
 
-            const subscriptions = store.getters.pluginSubscription('entityDetail');
-
-
-            const pluginTabs = computed(() => {
-                let tabs = [];
-                for(let key in subscriptions) {
-                    tabs.push(...subscriptions[key].components.tabs);
+            // ON MOUNTED
+            onMounted(_ => {
+                console.log('entity detail component mounted');
+                let hiddenAttrElem = document.getElementById('hidden-attributes-icon');
+                if(!!hiddenAttrElem) {
+                    new Popover(hiddenAttrElem, {
+                        title: _ => t('main.entity.attributes.hidden', { cnt: state.hiddenAttributeCount }, state.hiddenAttributeCount),
+                        content: state.hiddenAttributeListing,
+                    });
                 }
-                return tabs;
             });
-
-            const pluginPanels = computed(() => {
-                let panels = [];
-                for(let key in subscriptions) {
-                    panels.push(...subscriptions[key].components.panels);
-                }
-                return panels;
-            });
-
-            watch(_ => pluginTabs, (newTabs, oldTabs) => {
-                console.log('plugin tabs changed', newTabs);
+            onBeforeUpdate(_ => {
+                attrRefs.value = {};
+                state.commentLoadingState = 'not';
             });
 
             watch(_ => state.hiddenAttributeCount,
@@ -838,79 +884,34 @@
             );
 
 
-            watch(_ => props.entity,
+            watch(_ => state.entity,
                 async (newValue, oldValue) => {
                     if(!newValue || !newValue.id) return;
-
-                    state.loading = true;
-
-                    await store.dispatch('getEntity', route.params.id).then(_ => {
-                        getEntityTypeAttributeSelections();
-                        state.initFinished = true;
-                        updateAllDependencies();
-                    });
-
-                    nextTick(async _ => {
-                        if(props.applyViewToQueryString) {
-                            setView(route.query.view);
-                        } else {
-                            setView();
+                    nextTick(_ => {
+                        setView(route.query.view);
+                        state.activeSubEntity = null;
+                        const eid = state.entity.id;
+                        const treeElem = document.getElementById(`tree-node-${eid}`);
+                        if(treeElem) {
+                            treeElem.scrollIntoView({
+                                behavior: 'smooth',
+                                inline: 'start',
+                            });
                         }
-
-                        for(const sub of Object.values(subscriptions)) {
-                            await sub.update(newValue);
-                        }
-
-                        state.loading = false;
                     });
                 }
             );
 
+            watch(_ => route.query.view,
+                async (newValue, oldValue) => {
+                    if(route.name != 'entitydetail') return;
+                    if(newValue == oldValue) return;
 
-            onMounted(_ => {
-                let hiddenAttrElem = document.getElementById('hidden-attributes-icon');
-                if(!!hiddenAttrElem) {
-                    new Popover(hiddenAttrElem, {
-                        title: _ => t('main.entity.attributes.hidden', { cnt: state.hiddenAttributeCount }, state.hiddenAttributeCount),
-                        content: state.hiddenAttributeListing,
-                    });
+                    // nextTick(_ => {
+                    //     setViewView(newValue);
+                    // });
                 }
-            });
-            onBeforeUpdate(_ => {
-                attrRefs.value = {};
-            });
-
-
-            // watch(_ => route.params,
-            //     async (newParams, oldParams) => {
-            //         if(newParams.id == oldParams.id) return;
-            //         if(!newParams.id) return;
-            //         state.initFinished = false;
-
-            //         initializeIfNecessary(newParams.id);
-
-
-            //         // state.initFinished = false;
-            //         // store.dispatch('getEntity', newParams.id).then(_ => {
-            //         //     getEntityTypeAttributeSelections();
-            //         //     state.initFinished = true;
-            //         //     updateAllDependencies();
-            //         // });
-            //     }
-            // );
-
-            if(props.applyViewToQueryString) {
-                watch(_ => route.query.view,
-                    async (newValue, oldValue) => {
-                        if(route.name != 'entitydetail') return;
-                        if(newValue == oldValue) return;
-
-                        nextTick(_ => {
-                            setView(newValue);
-                        });
-                    }
-                );
-            }
+            );
 
             // ON BEFORE LEAVE
             onBeforeRouteLeave(async (to, from) => {
@@ -938,20 +939,12 @@
                 }
             });
 
-            const comments = ref(null);
-
-            const commentCount = computed(() => {
-                return props.entity.comments_count || 0;
-            });
-
             // RETURN
             return {
                 t,
                 route,
                 // HELPERS
                 can,
-                ago,
-                date,
                 userId,
                 getUserBy,
                 showUserInfo,
@@ -963,37 +956,28 @@
                 // LOCAL
                 hasReferenceGroup,
                 showMetadata,
-                editEntityName,
-                updateEntityName,
-                cancelEditEntityName,
                 showHiddenAttributes,
                 hideHiddenAttributes,
                 confirmDeleteEntity,
-                view,
                 setView,
-                // setEntity,
-                // setEntityView,
-                isActive,
-                isAttributeActive,
-                isCommentsView,
-                isMetadataView,
+                setEntity,
+                setEntityView,
+                isAttributeView,
                 isEntityView,
                 tabName,
                 onEntityHeaderHover,
                 showTabActions,
                 setFormState,
+                fetchComments,
+                addComment,
                 handleSaveOnKey,
                 saveEntity,
                 resetForm,
                 setAttrRefs,
-                pluginTabs,
-                pluginPanels,
-                //COMMENTS
-                comments,
-                commentCount,
                 // STATE
                 attrRefs,
                 state,
+                view,
             };
         }
     };

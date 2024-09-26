@@ -402,9 +402,13 @@ export async function postComment(content, resource, replyTo = null, metadata = 
         data.metadata.is_empty = true;
     }
 
-    return $httpQueue.add(
+    const result = await $httpQueue.add(
         () => http.post(endpoint, data).then(response => response.data)
     );
+    
+    
+    
+    return result;
 }
 
 export async function editComment(cid, content, endpoint = '/comment/{cid}') {
@@ -414,9 +418,16 @@ export async function editComment(cid, content, endpoint = '/comment/{cid}') {
         content: content,
     };
 
-    return $httpQueue.add(
+    const result = await $httpQueue.add(
         () => http.patch(endpoint, data).then(response => response.data)
     );
+
+    store.dispatch('updateComment', {
+        comment_id: cid,
+        content: content,
+    });
+
+    return result;
 }
 
 export async function addOrUpdateBibliographyItem(item, file) {

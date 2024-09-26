@@ -2,9 +2,9 @@
     <button
         :id="state.pickId"
         type="button"
-        class="btn btn-outline-secondary btn-sm px-1 py-05"
+        class="btn btn-outline-secondary btn-sm p-2 py-05"
     >
-        <span class="far fa-fw fa-laugh" />
+        <span class="far fa-lg fa-fw fa-laugh" />
     </button>
 </template>
 
@@ -54,7 +54,7 @@
 
             return {
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

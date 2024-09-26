@@ -45,6 +45,7 @@ export const store = createStore({
                     attributeSelections: {},
                     entityTypeAttributes: {},
                     entityTypeColors: {},
+                    entityComments: {},
                     bibliography: [],
                     concepts: {},
                     deletedUsers: [],
@@ -98,7 +99,7 @@ export const store = createStore({
                     if(!state.registeredPluginSubscriptions[data.topic][data.of]) {
                         console.log('REgistering plugin subscription', data);
                         state.registeredPluginSubscriptions[data.topic][data.of] = data;
-                    }else{
+                    } else {
                         console.error(`Plugin "${data.of}" already subscribed to topic "${data.topic}"`);
                     }
                 },
@@ -586,6 +587,16 @@ export const store = createStore({
                     if(!state.entity) return;
                     state.entity.comments = data;
                 },
+                updateEntityComment(state, {entity, replyTo, comment}) {
+                    
+                },
+                updateEntityComment(state, { entity, comment, replyTo }) {
+                    if(replyTo) {
+
+                    } else {
+
+                    }
+                },
                 setEntityTypeColors(state, data) {
                     state.entityTypeColors[data.id] = data.colors;
                 },
@@ -791,7 +802,7 @@ export const store = createStore({
                     }
 
                     return children;
-                    
+
                 },
                 setEntityComments({ commit }, data) {
                     commit('setEntityComments', data);
@@ -1019,7 +1030,7 @@ export const store = createStore({
                 user: state => state.user,
                 isLoggedIn: state => !!state.user,
                 isModerated: state => state.user.roles.some(r => r.is_moderated),
-                entity: state => state.entity,
+                entity: state => state.entity ?? {},
                 file: state => state.file,
                 version: state => state.version,
                 plugins: state => state.plugins,

@@ -14,12 +14,7 @@ export function date(value, format = 'DD.MM.YYYY HH:mm') {
         return d.format(format);
     }
 }
-export function datestring(value) {
-    if(value) {
-        const d = isNaN(value) ? dayjs.utc(value) : dayjs.utc(value*1000);
-        return d.toDate().toString();
-    }
-}
+
 export function ago(value) {
     if(value) {
         let d;

@@ -8,7 +8,7 @@ import {
 // Pages
 import Login from '@/components/Login.vue';
 import MainView from '@/components/MainView.vue';
-import EntityDetail from '@/components/EntityDetail.vue';
+import EntityDetailView from '@/components/view/EntityDetailView.vue';
 import EntityReferenceModal from '@/components/modals/entity/Reference.vue';
 // Tools
 import Bibliography from '@/components/BibliographyTable.vue';
@@ -132,7 +132,7 @@ export const router = createRouter({
                 {
                     path: 'e/:id',
                     name: 'entitydetail',
-                    component: EntityDetail,
+                    component: EntityDetailView,
                     children: [
                         {
                             path: 'refs/:aid',
