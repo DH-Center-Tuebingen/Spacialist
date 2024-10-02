@@ -2,6 +2,8 @@
 
 namespace App\AttributeTypes;
 
+use App\Exceptions\InvalidDataException;
+
 class TimeperiodAttribute extends AttributeBase
 {
     protected static string $type = "timeperiod";
@@ -9,6 +11,11 @@ class TimeperiodAttribute extends AttributeBase
     protected static ?string $field = 'json_val';
 
     public static function fromImport(int|float|bool|string $data) : mixed {
+        $data = trim($data);
+        if($data == '') {
+            return null;
+        }
+        
         $startLabel = 'ad';
         $endLabel = 'ad';
         $parts = explode(';', $data);

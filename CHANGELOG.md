@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.10.2 - Importer Hotfix
+- Importer now automatically removes BOM if present
+- Better readable format for error message on validation
+- More elaborate type checking on attributes _fromImport_ method
+- Unit test for all attribute imports. 
+
 ## 0.10.1 - Dayjs Hotfix
 ### Fixed
 - Frontend errors due to wrong dayjs import

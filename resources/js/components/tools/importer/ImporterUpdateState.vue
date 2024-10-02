@@ -26,14 +26,12 @@
             :noicon="false"
             :type="activeOption.type"
         />
-        <Alert
+        <ErrorList
             v-for="(error, index) in errors"
             v-else
             :key="index"
-            :message="error"
-            :noicon="true"
-            type="error"
-            class="mb-1 py-1 px-2"
+            class="alert alert-danger mb-1 py-1 px-2"
+            :value="error"
         />
     </div>
 </template>
@@ -43,10 +41,12 @@
     import { useI18n } from 'vue-i18n';
 
     import ImporterUpdateItem from './ImporterUpdateItem.vue';
+    import ErrorList from '../../error/ErrorList.vue';
 
     export default {
         components: {
-            ImporterUpdateItem
+            ErrorList,
+            ImporterUpdateItem,
         },
         props: {
             conflict: {
@@ -117,9 +117,14 @@
                 return options.no_items;
             });
 
+            function splitLines(string) {
+                return string.split(', ');
+            }
+
             return {
                 t,
-                activeOption
+                activeOption,
+                splitLines
             };
         }
     };

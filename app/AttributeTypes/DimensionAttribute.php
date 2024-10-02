@@ -3,6 +3,7 @@
 namespace App\AttributeTypes;
 
 use App\Exceptions\InvalidDataException;
+use App\Utils\StringUtils;
 
 class DimensionAttribute extends AttributeBase
 {
@@ -11,6 +12,11 @@ class DimensionAttribute extends AttributeBase
     protected static ?string $field = 'json_val';
 
     public static function fromImport(int|float|bool|string $data) : mixed {
+        $data = StringUtils::guard($data);
+        if($data === "") {
+            return null;
+        }
+        
         $parts = explode(';', $data);
 
         if(count($parts) != 4) {

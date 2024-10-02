@@ -2,6 +2,8 @@
 
 namespace App\AttributeTypes;
 
+use App\Utils\StringUtils;
+
 class ListAttribute extends AttributeBase
 {
     protected static string $type = "list";
@@ -9,6 +11,11 @@ class ListAttribute extends AttributeBase
     protected static ?string $field = 'json_val';
 
     public static function fromImport(int|float|bool|string $data) : mixed {
+        $data = StringUtils::guard($data);
+        if($data === "") {
+            return null;
+        }
+        
         $trimmedValues = [];
         $parts = explode(';', $data);
         foreach($parts as $part) {

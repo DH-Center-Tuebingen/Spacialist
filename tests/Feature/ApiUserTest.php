@@ -7,9 +7,10 @@ use Illuminate\Http\UploadedFile;
 
 use App\User;
 use App\Role;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ApiUserTest extends TestCase
-{
+{    
     // Testing GET requests
 
     /**
@@ -40,7 +41,8 @@ class ApiUserTest extends TestCase
                 'email' => 'admin@localhost',
                 'created_at' => '2017-12-20T09:47:36.000000Z',
                 'updated_at' => '2017-12-20T09:47:36.000000Z',
-                'permissions' => []
+                'permissions' => [],
+                'roles' => []
             ]
         ]);
 

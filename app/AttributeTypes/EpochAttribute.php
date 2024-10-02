@@ -5,6 +5,7 @@ namespace App\AttributeTypes;
 use App\Attribute;
 use App\ThConcept;
 use App\Exceptions\InvalidDataException;
+use App\Utils\StringUtils;
 
 class EpochAttribute extends AttributeBase
 {
@@ -18,6 +19,12 @@ class EpochAttribute extends AttributeBase
     }
 
     public static function fromImport(int|float|bool|string $data) : mixed {
+        $data = StringUtils::guard($data);
+        if($data === "") {
+            return null;
+        }
+        
+        
         $startLabel = 'ad';
         $endLabel = 'ad';
         $parts = explode(';', $data);

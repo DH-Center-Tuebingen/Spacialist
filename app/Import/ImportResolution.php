@@ -40,6 +40,7 @@ class ImportResolution {
     public function conflict(string $message): ImportResolution {
         $this->errors[] = $message;
         $this->status[ImportResolutionType::CONFLICT->name]++;
+        info($message);
         return $this;
     }
 

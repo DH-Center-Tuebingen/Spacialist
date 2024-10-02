@@ -2,6 +2,8 @@
 
 namespace App\AttributeTypes;
 
+use App\Utils\StringUtils;
+
 class UrlAttribute extends AttributeBase
 {
     protected static string $type = "url";
@@ -9,6 +11,8 @@ class UrlAttribute extends AttributeBase
     protected static ?string $field = 'str_val';
 
     public static function fromImport(int|float|bool|string $data) : mixed {
+        $data = StringUtils::guard($data);
+        
         return $data;
     }
 

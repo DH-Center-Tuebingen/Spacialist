@@ -2,21 +2,36 @@
 
 namespace App\AttributeTypes;
 
+use App\Exceptions\InvalidDataException;
+
 class BooleanAttribute extends AttributeBase {
     protected static string $type = "boolean";
     protected static bool $inTable = true;
     protected static ?string $field = 'int_val';
 
-    public static function fromImport(int|float|bool|string $data): mixed {
-
-        if (is_string($data)) {
-            $data = strtolower(trim($data));
+    public static function fromImport(int|float|bool|string $data): mixed {        
+        
+        $boolean = false;
+        
+        if(is_bool($data)) {
+            $boolean = $data;
+        } else if(is_numeric($data)) {
+            floatval($data) > 0 ? $boolean = true : $boolean = false;
+        } else if(is_string($data)) {
+            $truthy = ['true', 't', 'x', 'wahr', 'w'];
+            $string_val = strtolower(trim($data));
+            
+            for($i = 0; $i < count($truthy); $i++) {
+                if($string_val === $truthy[$i]) {
+                    $boolean = true;
+                    break;
+                }
+            }
+        } else {
+            throw new InvalidDataException("Invalid data type for boolean attribute");
         }
 
-        return
-            $data == 1 || $data == '1' || $data == 'x' ||
-            $data == 'true' || $data == 't' ||
-            intval($data) > 0;
+        return $boolean;
     }
 
     public static function unserialize(mixed $data): mixed {

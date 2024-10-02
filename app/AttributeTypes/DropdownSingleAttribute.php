@@ -5,6 +5,7 @@ namespace App\AttributeTypes;
 use App\Attribute;
 use App\ThConcept;
 use App\Exceptions\InvalidDataException;
+use App\Utils\StringUtils;
 
 class DropdownSingleAttribute extends AttributeBase
 {
@@ -18,6 +19,13 @@ class DropdownSingleAttribute extends AttributeBase
     }
 
     public static function fromImport(int|float|bool|string $data) : mixed {
+        $data = StringUtils::guard($data);
+        info(strlen($data));
+        if($data === "") {
+            return null;
+        }
+        
+        
         $concept = ThConcept::getByString($data);
         if(isset($concept)) {
             return $concept->concept_url;

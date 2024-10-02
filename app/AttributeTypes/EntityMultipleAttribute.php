@@ -3,6 +3,7 @@
 namespace App\AttributeTypes;
 
 use App\Entity;
+use App\Utils\StringUtils;
 
 class EntityMultipleAttribute extends AttributeBase
 {
@@ -11,6 +12,11 @@ class EntityMultipleAttribute extends AttributeBase
     protected static ?string $field = 'json_val';
 
     public static function fromImport(int|float|bool|string $data) : mixed {
+        $data = StringUtils::guard($data);
+        if($data === "") {
+            return null;
+        }
+        
         $idList = [];
         $parts = explode(';', $data);
         foreach($parts as $part) {

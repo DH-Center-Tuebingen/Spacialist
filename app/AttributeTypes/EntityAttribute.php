@@ -3,6 +3,7 @@
 namespace App\AttributeTypes;
 
 use App\Entity;
+use App\Utils\StringUtils;
 
 class EntityAttribute extends AttributeBase
 {
@@ -14,6 +15,11 @@ class EntityAttribute extends AttributeBase
     // protected static string $deleted_string = "error.deleted_entity";
 
     public static function fromImport(int|float|bool|string $data) : mixed {
+        $data = StringUtils::guard($data);
+        if($data === "") {
+            return null;
+        }
+        
         return Entity::getFromPath($data);
     }
 

@@ -3,8 +3,10 @@
 namespace App\AttributeTypes;
 
 use App\Exceptions\InvalidDataException;
+use App\Utils\StringUtils;
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
+use Exception;
 
 class DateAttribute extends AttributeBase
 {
@@ -15,7 +17,17 @@ class DateAttribute extends AttributeBase
     private static string $format = "Y-m-d";
 
     public static function fromImport(int|float|bool|string $data) : mixed {
+        
         $errmsg = "Your provided date ($data) does not match the required format of 'Y-m-d'";
+        
+        try{
+            $data = StringUtils::guard($data);
+        } catch(Exception $e) {
+            throw new InvalidDataException("DateAttribute: " . $e->getMessage());
+        }
+        if($data === "") {
+            return null;
+        }
 
         // have to do hasFormat and createFromFormat, because both allow dates the other does not
         // e.g. 20222 is a valid year for hasFormat, but not createFromFormat

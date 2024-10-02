@@ -5,6 +5,7 @@ namespace App\AttributeTypes;
 use App\Attribute;
 use App\ThConcept;
 use App\Exceptions\InvalidDataException;
+use App\Utils\StringUtils;
 
 class DropdownMultipleAttribute extends AttributeBase
 {
@@ -18,6 +19,11 @@ class DropdownMultipleAttribute extends AttributeBase
     }
 
     public static function fromImport(int|float|bool|string $data) : mixed {
+        $data = StringUtils::guard($data);
+        if($data === "") {
+            return null;
+        }
+        
         $convValues = [];
         $parts = explode(';', $data);
         foreach($parts as $part) {
