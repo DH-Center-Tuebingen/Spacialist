@@ -35,17 +35,25 @@ class EpochAttributeTest extends TestCase {
 
     public static function truthyProvider() {
 
-        $epochData = json_encode([
+        $baseData = [
             "start" => 100,
             "startLabel" => "bc",
             "end" => 100,
             "endLabel" => "ad",
-            "epoch" => ["id"=>59, "concept_url" => "https://spacialist.escience.uni-tuebingen.de/<user-project>/steinzeit#20171220165355"]
-        ]);
+        ];
+        
+        $epochData = $baseData;
+        $epochData["epoch"] = ["id"=>59, "concept_url" => "https://spacialist.escience.uni-tuebingen.de/<user-project>/steinzeit#20171220165355"];
+        $epochData = json_encode($epochData);
+
+        $noEpochData = $baseData;
+        $noEpochData["epoch"] = null;
+        $noEpochData = json_encode($noEpochData);
 
         return [
             "no value" => ["", null],
             "corret value" => ["-100;100;Steinzeit", $epochData],
+            "correct value with no epoch" => ["-100;100;", $noEpochData],
             //TODO :: need english epoch, this is currently not in the test data
         ];
     }
