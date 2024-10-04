@@ -19,12 +19,8 @@ class DropdownSingleAttribute extends AttributeBase
     }
 
     public static function fromImport(int|float|bool|string $data) : mixed {
-        $data = StringUtils::guard($data);
-        info(strlen($data));
-        if($data === "") {
-            return null;
-        }
-        
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);
+        if(self::importDataIsMissing($data)) return null;        
         
         $concept = ThConcept::getByString($data);
         if(isset($concept)) {

@@ -19,16 +19,14 @@ class DropdownMultipleAttribute extends AttributeBase
     }
 
     public static function fromImport(int|float|bool|string $data) : mixed {
-        $data = StringUtils::guard($data);
-        if($data === "") {
-            return null;
-        }
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);
+        if(self::importDataIsMissing($data)) return null;
         
         $convValues = [];
         $parts = explode(';', $data);
         foreach($parts as $part) {
             $trimmedPart = trim($part);
-            $concept = ThConcept::getByString($trimmedPart);
+            $concept = ThConcept::getByString($trimmedPart); // Discuss: Problematic when there is another concept with the same name AND also when the concept is NOT available in this dropdown.
             if(isset($concept)) {
                 $convValues[] = [
                     'id' => $concept->id,

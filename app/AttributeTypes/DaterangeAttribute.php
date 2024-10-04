@@ -4,7 +4,6 @@ namespace App\AttributeTypes;
 
 use App\Exceptions\InvalidDataException;
 use App\Utils\StringUtils;
-use Exception;
 
 class DaterangeAttribute extends AttributeBase
 {
@@ -17,24 +16,17 @@ class DaterangeAttribute extends AttributeBase
     }
 
     public static function fromImport(int|float|bool|string $data) : mixed {
-        $errormsg = "Given data does not match this datatype's format: START;END";
-        try{
-            $data = StringUtils::guard($data);
-        } catch(Exception $e) {
-            throw new InvalidDataException($errormsg);
-        }
-        if($data === "") {
-            return null;
-        }
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);
+        if(self::importDataIsMissing($data)) return null;
         
         $dates = explode(";", $data);
-
+        $errormsg = "Given data does not match this datatype's format: START;END";
         if(count($dates) != 2) {
             throw new InvalidDataException($errormsg);
         }
         
-        $start = self::toDate(trim($dates[0]));
-        $end = self::toDate(trim($dates[1]));
+        $start = trim(self::toDate($dates[0]));
+        $end = trim(self::toDate($dates[1]));
         
         if($start > $end) {
             throw new InvalidDataException("End date cannot be before start date.");

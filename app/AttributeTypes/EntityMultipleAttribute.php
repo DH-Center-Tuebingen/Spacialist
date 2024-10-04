@@ -3,6 +3,7 @@
 namespace App\AttributeTypes;
 
 use App\Entity;
+use App\Exceptions\InvalidDataException;
 use App\Utils\StringUtils;
 
 class EntityMultipleAttribute extends AttributeBase
@@ -12,16 +13,18 @@ class EntityMultipleAttribute extends AttributeBase
     protected static ?string $field = 'json_val';
 
     public static function fromImport(int|float|bool|string $data) : mixed {
-        $data = StringUtils::guard($data);
-        if($data === "") {
-            return null;
-        }
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);
+        if(self::importDataIsMissing($data)) return null;     
         
         $idList = [];
         $parts = explode(';', $data);
         foreach($parts as $part) {
             $trimmedPart = trim($part);
-            $idList[] = Entity::getFromPath($trimmedPart);
+            $entityId = Entity::getFromPath($trimmedPart);
+            if($entityId === null) {
+                throw new InvalidDataException("Given data part ($trimmedPart) is not a valid entity name");
+            }
+            $idList[] = $entityId;
         }
         return json_encode($idList);
     }

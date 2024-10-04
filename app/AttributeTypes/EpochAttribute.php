@@ -19,37 +19,54 @@ class EpochAttribute extends AttributeBase
     }
 
     public static function fromImport(int|float|bool|string $data) : mixed {
-        $data = StringUtils::guard($data);
-        if($data === "") {
-            return null;
-        }
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);
+        if(self::importDataIsMissing($data)) return null;
         
         
         $startLabel = 'ad';
         $endLabel = 'ad';
-        $parts = explode(';', $data);
+        $parts = array_map(fn($str) => trim($str), explode(';', $data));
 
         if(count($parts) != 3) {
             throw new InvalidDataException("Given data does not match this datatype's format (START;END;CONCEPT)");
         }
 
-        $start = intval(trim($parts[0]));
-        $end = intval(trim($parts[1]));
+        if(!is_numeric($parts[0]) || !is_numeric($parts[1])) {
+            throw new InvalidDataException("Start and end date must be numeric values:" . $parts[0] . " " . $parts[1]);
+        }
+
+        $start = floatval($parts[0]);
+        $end = floatval($parts[1]);
+
+        $startInt = intval($start);
+        $endInt = intval($end);
+
+        // The is_int check is only working on 'real' integers. So when we create a numeric float with
+        // floatval, the type is still float. So we have to check if the floatval is equal to the intval.
+        if(!is_int($startInt) || !is_int($endInt) || $startInt != $start || $endInt != $end) {
+            throw new InvalidDataException("Start and end date must be integers:" . $start . " " . $end);
+        }
 
         if($end < $start) {
             throw new InvalidDataException("Start date must not be after end data ($start, $end)");
         }
         
-        $concept = ThConcept::getByString(trim($parts[2]));
+        $conceptString = trim($parts[2]);
+
         $epoch = null;
-        if(isset($concept)) {
-            $epoch = [
-                'id' => $concept->id,
-                'concept_url' => $concept->concept_url,
-            ];
-        } else {
-            throw new InvalidDataException("Given data is not a valid concept/label in the vocabulary");
+        if($conceptString !== '') {
+            $concept = ThConcept::getByString(trim($parts[2]));
+
+            if(isset($concept)) {
+                $epoch = [
+                    'id' => $concept->id,
+                    'concept_url' => $concept->concept_url,
+                ];
+            } else {
+                throw new InvalidDataException("Given data is not a valid concept/label in the vocabulary");
+            }    
         }
+
         if($start < 0) {
             $startLabel = 'bc';
             $start = abs($start);

@@ -12,15 +12,19 @@ class DimensionAttribute extends AttributeBase
     protected static ?string $field = 'json_val';
 
     public static function fromImport(int|float|bool|string $data) : mixed {
-        $data = StringUtils::guard($data);
-        if($data === "") {
-            return null;
-        }
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);
+        if(self::importDataIsMissing($data)) return null;
         
         $parts = explode(';', $data);
-
+        $message = "Provided data does not match this datatype's format (VAL1;VAL2;VAL3;UNIT)";
         if(count($parts) != 4) {
-            throw new InvalidDataException("Given data does not match this datatype's format (VAL1;VAL2;VAL3;UNIT)");
+            throw new InvalidDataException($message);
+        }
+
+         for($i = 0; $i < 3; $i++) {
+            if(!is_numeric($parts[$i])) {
+                throw new InvalidDataException($message);
+            }
         }
 
         return json_encode([

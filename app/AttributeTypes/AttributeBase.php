@@ -137,6 +137,11 @@ abstract class AttributeBase
         }
     }
 
+    protected static function importDataIsMissing($data):bool{
+        if(!is_string($data)) return false;
+        return trim($data) === "";
+    }
+
     public abstract static function fromImport(int|float|bool|string $data) : mixed;
     public abstract static function unserialize(mixed $data) : mixed;
     public abstract static function serialize(mixed $data) : mixed;
