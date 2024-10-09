@@ -56,8 +56,15 @@ class IntegerAttribute extends AttributeBase
     }
 
     public static function serialize(mixed $data) : mixed {
-        info("Serializing integer");
-        if(!self::is_integer($data)) {
+        if(is_int($data)) {
+            return $data;   
+        }else if(is_string($data)) {
+            $data = trim($data);
+            if(!self::is_numeric_string($data)){
+                throw new Exception("Given data is not an integer");
+            }
+            $data = intval($data);
+        }else{
             throw new Exception("Given data is not an integer");
         }
         
