@@ -11,15 +11,44 @@ class IntegerAttribute extends AttributeBase
     protected static bool $inTable = true;
     protected static ?string $field = 'int_val';
 
-    private static function is_integer($data) {
-        return is_int($data) || ctype_digit($data);
+    
+    private static function is_numeric_string($data) {
+        return preg_match('/^-?\d+$/', $data);
     }
     
-    public static function fromImport(int|float|bool|string $data) : mixed {        
-        if(!self::is_integer($data)) {
-            throw new InvalidDataException("Given data is not an integer");
+    private static function is_integer_too_big(string $data) {
+        // Compare with PHP_INT_MAX and PHP_INT_MIN using bccomp for arbitrary precision
+        if(bccomp($data, (string)PHP_INT_MAX) === 1 || bccomp($data, (string)PHP_INT_MIN) === -1) {
+            return true; 
         }
-        return intval($data);
+
+        return false; 
+    }
+    
+    public static function fromImport(int|float|bool|string $data) : mixed { 
+        
+        $not_an_integer_error = "Data is not an integer: " . $data;
+        
+        if(is_int($data)) {
+            return $data;
+        }else if(is_string($data)){
+            $data = trim($data);
+            if($data === "") {
+                return null;
+            }
+            
+            if(!self::is_numeric_string($data)) {
+                throw new InvalidDataException($not_an_integer_error);
+            }
+            
+            if(self::is_integer_too_big($data)) {
+                throw new InvalidDataException("Integer is too big: " . $data);
+            }
+            
+            return intval($data);
+        }else{
+            throw new InvalidDataException($not_an_integer_error);
+        }
     }
 
     public static function unserialize(mixed $data) : mixed {
