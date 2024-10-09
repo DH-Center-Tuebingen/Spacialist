@@ -137,7 +137,7 @@ abstract class AttributeBase
         }
     }
 
-    protected static function importDataIsMissing($data):bool{
+    protected static function importDataIsEmpty($data):bool{
         if(!is_string($data)) return false;
         return trim($data) === "";
     }

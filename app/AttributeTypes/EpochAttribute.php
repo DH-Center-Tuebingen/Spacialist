@@ -20,7 +20,7 @@ class EpochAttribute extends AttributeBase
 
     public static function fromImport(int|float|bool|string $data) : mixed {
         $data = StringUtils::useGuard(InvalidDataException::class)($data);
-        if(self::importDataIsMissing($data)) return null;
+        if(self::importDataIsEmpty($data)) return null;
         
         
         $startLabel = 'ad';

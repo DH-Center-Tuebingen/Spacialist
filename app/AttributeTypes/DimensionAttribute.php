@@ -13,7 +13,7 @@ class DimensionAttribute extends AttributeBase
 
     public static function fromImport(int|float|bool|string $data) : mixed {
         $data = StringUtils::useGuard(InvalidDataException::class)($data);
-        if(self::importDataIsMissing($data)) return null;
+        if(self::importDataIsEmpty($data)) return null;
         
         $parts = explode(';', $data);
         $message = "Provided data does not match this datatype's format (VAL1;VAL2;VAL3;UNIT)";

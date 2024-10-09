@@ -17,7 +17,7 @@ class DaterangeAttribute extends AttributeBase
 
     public static function fromImport(int|float|bool|string $data) : mixed {
         $data = StringUtils::useGuard(InvalidDataException::class)($data);
-        if(self::importDataIsMissing($data)) return null;
+        if(self::importDataIsEmpty($data)) return null;
         
         $dates = explode(";", $data);
         $errormsg = "Given data does not match this datatype's format: START;END";

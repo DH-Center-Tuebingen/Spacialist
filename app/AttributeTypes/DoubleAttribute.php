@@ -13,7 +13,7 @@ class DoubleAttribute extends AttributeBase
     public static function fromImport(int|float|bool|string $data) : mixed {
         if(is_string($data)){
             $data = trim($data);
-            if(self::importDataIsMissing($data)) return null;
+            if(self::importDataIsEmpty($data)) return null;
         }
 
         
