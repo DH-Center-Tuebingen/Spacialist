@@ -474,7 +474,7 @@
                                 class="text-muted"
                                 :title="t('global.no_file')"
                             >
-                                <i class="fas fa-fw fa-times" />
+                                <i class="fas fa-fw fa-minus" />
                             </span>
                             <span v-show="entry.file">
                                 <a
