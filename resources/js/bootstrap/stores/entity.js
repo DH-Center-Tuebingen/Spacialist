@@ -92,6 +92,7 @@ const handlePostDelete = (context, entityId) => {
 export const useEntityStore = defineStore('entity', {
     state: _ => ({
         selectedEntity: {},
+        selectedEntityUserIds: [],
         backup: {},
         entities: {},
         entityTypes: {},
@@ -103,6 +104,11 @@ export const useEntityStore = defineStore('entity', {
         treeSelectionTypeIds: [],
     }),
     getters: {
+        getActiveEntityUsers: state => {
+            return state.selectedEntityUserIds.map(user => {
+                return useUserStore().getUserBy(user.id);
+            });
+        },
         getEntity: state => id => {
             return state.entities[id] || {};
         },
@@ -205,6 +211,12 @@ export const useEntityStore = defineStore('entity', {
                 this.backup[node.id] = localVerion;
             }
             this.entities[node.id] = node;
+            if(node.id == this.selectedEntity?.id) {
+                this.selectedEntity = {
+                    ...this.selectedEntity,
+                    ...node,
+                };
+            }
             if(!entity.root_entity_id) {
                 if(entityExists) {
                     const idx = this.tree.findIndex(itm => itm.id == node.id);
@@ -237,6 +249,13 @@ export const useEntityStore = defineStore('entity', {
             entity.user = entityData.user;
             if(!!entityData.name) {
                 entity.name = entityData.name;
+            }
+
+            if(this.selectedEntity.id == entity.id) {
+                this.selectedEntity = {
+                    ...this.selectedEntity,
+                    ...entityData,
+                };
             }
         },
         move(entityId, parentId, rank) {
@@ -321,6 +340,33 @@ export const useEntityStore = defineStore('entity', {
                 }
             });
         },
+        // delete entity from store (after delete event from websocket)
+        soft_delete(node) {
+            const entity = this.entities[node.id];
+            if(entity) {
+                this.backup[node.id] = entity;
+                delete this.entities[node.id];
+            }
+            if(!entity.root_entity_id) {
+                const idx = this.tree.findIndex(itm => itm.id == entity.id);
+                if(idx > -1) {
+                    this.tree.splice(idx, 1);
+                }
+            } else {
+                const parent = this.entities[entity.root_entity_id];
+                if(parent) {
+                    if(parent.childrenLoaded) {
+                        const idx = parent.children.findIndex(itm => itm.id == entity.id);
+                        if(idx > -1) {
+                            parent.children.splice(idx, 1);
+                        }
+                    }
+                    parent.children_count--;
+                    parent.state.openable = parent.children_count > 0;
+                }
+            }
+            return node;
+        },
         async delete(entityId) {
             return deleteEntity(entityId).then(_ => {
                 const entity = this.entities[entityId];
@@ -376,6 +422,19 @@ export const useEntityStore = defineStore('entity', {
         },
         unset() {
             this.set({});
+        },
+        setActiveUserIds(userIdList) {
+            this.selectedEntityUserIds = [];
+            this.selectedEntityUserIds = userIdList;
+        },
+        addActiveUserId(userId) {
+            this.selectedEntityUserIds.push(userId);
+        },
+        removeActiveUserId(userId) {
+            const idx = this.selectedEntityUserIds.findIndex(u => u.id == userId);
+            if(idx > -1) {
+                this.selectedEntityUserIds.splice(idx, 1);
+            }
         },
         async fetchEntityComments(id) {
             if(id != this.selectedEntity?.id) return;
@@ -443,33 +502,101 @@ export const useEntityStore = defineStore('entity', {
                 return data;
             });
         },
-        async addReference(entityId, attributeId, attributeUrl, refData) {
-            return addReference(entityId, attributeId, refData).then(data => {
+        handleReference(entityId, attributeUrl, action, data) {
+            if(action == 'add') {
                 const references = this.getEntity(entityId)?.references[attributeUrl] || [];
                 references.push(data);
                 return data;
-            });
-        },
-        async updateReference(id, entityId, attributeUrl, refData) {
-            return updateReference(id, refData).then(data => {
+            } else if(action == 'update') {
                 const references = this.getEntity(entityId)?.references[attributeUrl] || [];
+                const id = data.id;
+                const refData = data.data;
+                const updateData = data.updates;
                 const reference = references.find(ref => ref.id == id);
                 if(!!reference) {
                     for(let k in refData) {
                         reference[k] = refData[k];
                     }
-                    reference.updated_at = data.updated_at;
+                    reference.updated_at = updateData.updated_at;
                 }
+            } else if(action == 'delete') {
+                const references = this.getEntity(entityId)?.references[attributeUrl] || [];
+                const idx = references.findIndex(ref => ref.id == data.id);
+                if(idx > -1) {
+                    references.splice(idx, 1);
+                }
+            }
+        },
+        async addReference(entityId, attributeId, attributeUrl, refData) {
+            return addReference(entityId, attributeId, refData).then(data => {
+                return this.handleReference(entityId, attributeUrl, 'add', data);
+            });
+        },
+        async updateReference(id, entityId, attributeUrl, refData) {
+            return updateReference(id, refData).then(data => {
+                this.handleReference(entityId, attributeUrl, 'update', {
+                    id: id,
+                    data: refData,
+                    updates: data,
+                });
             });
         },
         async removeReference(id, entityId, attributeUrl) {
             return deleteReferenceFromEntity(id).then(_ => {
-                const references = this.getEntity(entityId)?.references[attributeUrl] || [];
-                const idx = references.findIndex(ref => ref.id == id);
-                if(idx > -1) {
-                    references.splice(idx, 1);
-                }
+                this.handleReference(entityId, attributeUrl, 'delete', {id: id});
             });
+        },
+        handleComment(entityId, comment, action, data) {
+            const replyTo = data.replyTo;
+            const entity = this.getEntity(entityId);
+            if(action == 'add') {
+                if(replyTo) {
+                    const op = entity.comments.find(c => c.id == replyTo);
+                    if(op.replies) {
+                        op.replies.push(comment);
+                    }
+                    op.replies_count++;
+                } else {
+                    if(!entity.comments) {
+                        entity.comments = [];
+                    }
+                    entity.comments.push(comment);
+                    entity.comments_count++;
+                }
+            } else if(action == 'update' || action == 'delete') {
+                let editedComment = null;
+                if(replyTo) {
+                    const op = entity.comments.find(c => c.id == replyTo);
+                    if(op.replies) {
+                        editedComment = op.replies.find(reply => reply.id == comment.id);
+                    }
+                } else {
+                    editedComment = entity.comments.find(c => c.id == comment.id);
+                }
+                if(editedComment) {
+                    if(action == 'update') {
+                        editedComment.content = comment.content;
+                        editedComment.updated_at = comment.updated_at;
+                    } else if(action == 'delete') {
+                        editedComment.content = null;
+                        editedComment.updated_at = Date();
+                        editedComment.deleted_at = Date();
+                    }
+                }
+            }
+
+            if(this.selectedEntity) {
+                this.selectedEntity.comments = entity.comments;
+            }
+        },
+        async addComment() {
+
+        },
+        async editComment() {
+            // TODO
+        },
+        async deleteComment() {
+            // TODO
         },
         async setById(entityId) {
             let entity = this.entities[entityId];

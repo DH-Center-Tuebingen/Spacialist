@@ -61,7 +61,7 @@ export const useBibliographyStore = defineStore('bibliography', {
                         },
                     });
                 } else {
-                    this.add(data);
+                    this.addBibliographyItem(data);
                 }
 
                 return data;

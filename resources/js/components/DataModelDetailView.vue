@@ -204,7 +204,7 @@
                 state.entityType.sub_entity_types = [];
             };
             const addAttributeToEntityType = e => {
-                entityStore.addEntityTypeAttribute(currentRoute.params.id, e.element.id, e.to + 1).then(data => {console.log()
+                entityStore.addEntityTypeAttribute(currentRoute.params.id, e.element.id, e.to + 1).then(data => {
                     if(e.element.is_system && e.element.datatype == 'system-separator') {
                         showEditAttribute(data.id, currentRoute.params.id, {
                             is_system: e.element.is_system,

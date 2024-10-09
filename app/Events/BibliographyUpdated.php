@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Entity;
+use App\Bibliography;
 use App\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -10,7 +10,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class EntityUpdated implements ShouldBroadcast
+class BibliographyUpdated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -18,11 +18,11 @@ class EntityUpdated implements ShouldBroadcast
      * Create a new event instance.
      */
     public function __construct(
-        public Entity $entity,
+        public Bibliography $bibliography,
         public User $user,
     )
     {
-        $this->entity = $entity;
+        $this->bibliography = $bibliography;
         $this->user = $user;
     }
 

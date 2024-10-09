@@ -67,6 +67,7 @@
                     </a>
                     <!-- eslint-disable vue/no-v-html-->
                     <span
+                        v-if="!notf.data.in_reply"
                         v-html="t('global.notifications.body.user_left_comment_on', {
                             name: getCommentedObjectName(notf),
                         })"

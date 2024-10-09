@@ -103,6 +103,12 @@ export const useUserStore = defineStore('user', {
             }
         },
         getUserModerated: state => state.user.roles.sole(role => role.is_moderated),
+        getNotifications(state) {
+            const user = this.getCurrentUser;
+            if(!user) return [];
+
+            return user.notifications || [];
+        },
         getRoles: state => excludePermissions => {
             return excludePermissions ? state.roles.map(r => {
                 // Remove permissions from role
@@ -256,6 +262,12 @@ export const useUserStore = defineStore('user', {
                 }
             });
         },
+        pushNotification(notification) {
+            const user = this.getCurrentUser;
+            if(!user) return;
+
+            user.notifications.unshift(notification);
+        }
     },
 });
 

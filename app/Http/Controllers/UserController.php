@@ -38,52 +38,6 @@ class UserController extends Controller
         $user = User::with('notifications')->find(auth()->user()->id);
         $user->setPermissions();
 
-        // Load notification source data into info property
-        $user->notifications->map(function($n) {
-            if($n->type == 'App\Notifications\CommentPosted') {
-                $skip = false;
-                switch($n->data['resource']['type']) {
-                    case 'App\Entity':
-                        try {
-                            $name = Entity::findOrFail($n->data['resource']['id'])->name;
-                        } catch(ModelNotFoundException $e) {
-                            $skip = true;
-                        }
-                        break;
-                    case 'App\AttributeValue':
-                    case 'attribute_values':
-                        try {
-                            $name = Entity::findOrFail($n->data['resource']['meta']['entity_id'])->name;
-                            $attrUrl = Attribute::findOrFail($n->data['resource']['meta']['attribute_id'])->thesaurus_url;
-                        } catch(ModelNotFoundException $e) {
-                            $skip = true;
-                        }
-                        break;
-                    default:
-                        $skip = true;
-                        break;
-                }
-                if(!$skip) {
-                    $data = [
-                        'name' => $name,
-                    ];
-                    if(isset($attrUrl)) {
-                        $data['attribute_url'] = $attrUrl;
-                    }
-
-                    $n->info = $data;
-                }
-            } else if($n->type == 'App\Notifications\EntityUpdated') {
-                try {
-                    $n->info = [
-                        'name' => Entity::findOrFail($n->data['resource']['id'])->name,
-                    ];
-                } catch(ModelNotFoundException $e) {
-                }
-            }
-            return $n;
-        });
-
         return response()->json([
             'status' => 'success',
             'data' => $user

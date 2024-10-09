@@ -118,8 +118,6 @@
 
             // ON MOUNTED
             onMounted(_ => {
-                console.log("mounted!")
-
                 for(let i=0; i<state.sortedAttributes.length; i++) {
                     const curr = state.sortedAttributes[i];
                     state.defaultValues[curr.id] = {

@@ -653,8 +653,8 @@ export async function patchRoleData(rid, data) {
     );
 }
 
-export async function updateReference(id, eid, url, data) {
-    $httpQueue.add(
+export async function updateReference(id, data) {
+    return $httpQueue.add(
         () => http.patch(`/entity/reference/${id}`, data).then(response => response.data)
     );
 }

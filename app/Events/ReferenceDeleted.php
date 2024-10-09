@@ -2,15 +2,15 @@
 
 namespace App\Events;
 
-use App\Entity;
+use App\Reference;
 use App\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class EntityUpdated implements ShouldBroadcast
+class ReferenceDeleted implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -18,11 +18,11 @@ class EntityUpdated implements ShouldBroadcast
      * Create a new event instance.
      */
     public function __construct(
-        public Entity $entity,
+        public Reference $reference,
         public User $user,
     )
     {
-        $this->entity = $entity;
+        $this->reference = $reference;
         $this->user = $user;
     }
 
@@ -34,7 +34,7 @@ class EntityUpdated implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('channel.system'),
+            new PresenceChannel('room.entity.' . $this->reference->entity->id),
         ];
     }
 }

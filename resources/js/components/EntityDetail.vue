@@ -438,7 +438,6 @@
     } from '@/helpers/filters.js';
 
     import {
-        patchAttributes,
         patchEntityName,
     } from '@/api.js';
 
@@ -456,10 +455,19 @@
         canShowReferenceModal,
     } from '@/helpers/modal.js';
     import {
-        join,
-        unsubscribeFrom,
-        listenTo,
+        listenToList,
+        joinEntityRoom,
+        leaveEntityRoom,
     } from '@/helpers/websocket.js';
+    import {
+        handleEntityDataUpdated,
+        handleEntityReferenceAdded,
+        handleEntityReferenceUpdated,
+        handleEntityReferenceDeleted,
+        handleEntityCommentAdded,
+        handleEntityCommentUpdated,
+        handleEntityCommentDeleted,
+    } from '@/handlers/entity.js';
 
     import { usePreventNavigation } from '@/helpers/form.js';
 
@@ -489,7 +497,6 @@
             const toast = useToast();
             const attributeStore = useAttributeStore();
             const entityStore = useEntityStore();
-            const userStore = useUserStore();
 
             // FETCH
             entityStore.setById(route.params.id).then(_ => {
@@ -658,13 +665,9 @@
                 commentFetchFailed: computed(_ => {
                     return state.commentLoadingState === 'failed';
                 }),
-                activeUserIds: [],
-                activeUsers: computed(_ => {
-                    return state.activeUserIds.map(user => {
-                        return userStore.getUserBy(user.id);
-                    });
-                }),
+                activeUsers: computed(_ => entityStore.getActiveEntityUsers),
             });
+            const channels = {};
 
             usePreventNavigation(_ => state.formDirty);
 
@@ -866,21 +869,9 @@
             };
 
             const addComment = event => {
-                const comment = event.comment;
-                const replyTo = event.replyTo;
-                if(replyTo) {
-                    const op = state.entity.comments.find(c => c.id == replyTo);
-                    if(op.replies) {
-                        op.replies.push(comment);
-                    }
-                    op.replies_count++;
-                } else {
-                    if(!state.entity.comments) {
-                        state.entity.comments = [];
-                    }
-                    state.entity.comments.push(comment);
-                    state.entity.comments_count++;
-                }
+                entityStore.handleComment(state.entity.id, event.comment, 'add', {
+                    replyTo: event.replyTo,
+                });
             };
 
             const handleSaveOnKey = (e, grp) => {
@@ -991,33 +982,19 @@
                 attrRefs.value[grp] = el;
             };
 
-            const entityChangeCallback = e => {
-                console.log("Entity changed by user!", e);
-            }
-            const wsCallbacks = {
-                init: users => {
-                    state.activeUserIds = [];
-                    state.activeUserIds = users;
-                },
-                join: user => {
-                    state.activeUserIds.push(user);
-                },
-                leave: user => {
-                    const idx = state.activeUserIds.findIndex(u => u.id == user.id);
-                    if(idx > -1) {
-                        state.activeUserIds.splice(idx, 1);
-                    }
-                },
-                error: error => {
-                    console.error("[WS] Error occured!", error);
-                },
-            };
-
             // ON MOUNTED
             onMounted(_ => {
                 console.log('entity detail component mounted');
-                join(`entity.${route.params.id}`, wsCallbacks);
-                listenTo(`entity.${route.params.id}`, 'SomethingChanged', entityChangeCallback);
+                channels.entity = joinEntityRoom(route.params.id);
+                listenToList(channels.entity, [
+                    handleEntityDataUpdated,
+                    handleEntityReferenceAdded,
+                    handleEntityReferenceUpdated,
+                    handleEntityReferenceDeleted,
+                    handleEntityCommentAdded,
+                    handleEntityCommentUpdated,
+                    handleEntityCommentDeleted,
+                ]);
 
                 let hiddenAttrElem = document.getElementById('hidden-attributes-icon');
                 if(!!hiddenAttrElem) {
@@ -1099,7 +1076,8 @@
                     showDiscard(to, resetDirtyStates, saveEntity);
                     return false;
                 } else {
-                    unsubscribeFrom(`entity.${state.entity.id}`);
+                    leaveEntityRoom(channels.entity);
+                    channels.entity = null;
                     entityStore.unset();
                     return true;
                 }
@@ -1112,9 +1090,17 @@
                     } else {
                         state.hiddenAttributes = {};
                         entityStore.unset();
-                        unsubscribeFrom(`entity.${route.params.id}`);
-                        join(`entity.${to.params.id}`, wsCallbacks);
-                        listenTo(`entity.${to.params.id}`, 'SomethingChanged', entityChangeCallback);
+                        leaveEntityRoom(channels.entity);
+                        channels.entity = joinEntityRoom(to.params.id);
+                        listenToList(channels.entity, [
+                            handleEntityDataUpdated,
+                            handleEntityReferenceAdded,
+                            handleEntityReferenceUpdated,
+                            handleEntityReferenceDeleted,
+                            handleEntityCommentAdded,
+                            handleEntityCommentUpdated,
+                            handleEntityCommentDeleted,
+                        ]);
                         await entityStore.setById(route.params.id);
                         return true;
                     }

@@ -3,10 +3,11 @@
 namespace App\Observers;
 
 use App\Entity;
-use App\Events\SomethingChanged;
-use App\Events\EntityUpdated as EntityUpdatedEvent;
+use App\Events\EntityCreated;
+use App\Events\EntityDeleted;
+use App\Events\EntityUpdated;
 use App\Notification;
-use App\Notifications\EntityUpdated;
+use App\Notifications\EntityUpdated as EntityUpdatedNotification;
 use App\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -19,13 +20,12 @@ class EntityObserver
      * @param  \App\Entity  $entity
      * @return void
      */
-    public function saving(Entity $entity)
-    {
+    public function saving(Entity $entity) : void {
         $user = auth()->user();
         $userIds = $entity->activities()->groupBy('causer_id')->where('causer_id', '<>', $user->id)->pluck('causer_id')->toArray();
         foreach($userIds as $uid) {
             try {
-                User::find($uid)->notify(new EntityUpdated($entity));
+                User::find($uid)->notify(new EntityUpdatedNotification($entity));
             } catch(ModelNotFoundException $e) {
             }
         }
@@ -39,28 +39,25 @@ class EntityObserver
      * @return void
      *
      */
-    public function saved(Entity $entity) {
+    public function saved(Entity $entity) : void {
         $user = auth()->user();
-        $action = '';
         if($entity->wasRecentlyCreated) {
-            $action = "added";
+            broadcast(new EntityCreated($entity, $user))->toOthers();
         } else {
-            $action = "updated";
+            broadcast(new EntityUpdated($entity, $user))->toOthers();
         }
-        broadcast(new EntityUpdatedEvent($entity, $user, $action))->toOthers();
-        broadcast(new SomethingChanged($entity, $user))->toOthers();
     }
 
     /**
-     * Handle the Entity "deleted" event.
+     * Handle the Entity "deleting" event.
      *
      * @param  \App\Entity  $entity
      * @return void
      */
-    public function deleted(Entity $entity)
-    {
+    public function deleting(Entity $entity) : void {
         Entity::where('root_entity_id', $entity->root_entity_id)->where('rank', '>', $entity->rank)->decrement('rank');
         // Delete notifications where the deleted entity is referenced
         Notification::whereRaw("(data::json->>'resource')::json->>'id' = ?", [$entity->id])->delete();
+        broadcast(new EntityDeleted($entity, $user = auth()->user()))->toOthers();
     }
 }

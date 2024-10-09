@@ -442,7 +442,6 @@ import { provideToast, useToast } from '@/plugins/toast.js';
 
 import {
     throwError,
-    userNotifications,
 } from '@/helpers/helpers.js';
 
 import {
@@ -511,12 +510,8 @@ export default {
             loggedIn: computed(_ => userStore.userLoggedIn),
             ready: computed(_ => state.loggedIn && state.init),
             authUser: computed(_ => userStore.user),
-            notifications: computed(_ => {
-                return userNotifications();
-            }),
-            unreadNotifications: computed(_ => {
-                return state.notifications.filter(n => !n.read_at);
-            }),
+            notifications: computed(_ => userStore.getNotifications),
+            unreadNotifications: computed(_ => state.notifications.filter(n => !n.read_at)),
         });
 
         // FUNCTIONS

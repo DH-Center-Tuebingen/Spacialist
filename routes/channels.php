@@ -18,11 +18,15 @@ Broadcast::channel('App.User.{id}', function (User $user, $id) {
     return (int) $user->id === (int) $id;
 });
 
-Broadcast::channel('entity_updates', function (User $user) {
-    return $user->can('entity_read');
+Broadcast::channel('channel.system', function (User $user) {
+    return auth()->user()->id == $user->id;
 });
 
-Broadcast::channel('entity.{entityId}', function (User $user, int $entityId) {
+Broadcast::channel('channel.entity', function (User $user) {
+    return auth()->user()->id == $user->id;
+});
+
+Broadcast::channel('room.entity.{entityId}', function (User $user, int $entityId) {
     // TODO also check for $entityId
     if($user->can('entity_read')) {
         return [

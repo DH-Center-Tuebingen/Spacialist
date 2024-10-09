@@ -425,6 +425,10 @@ export function getUser() {
     return isLoggedIn() ? useUserStore().getCurrentUser : {};
 }
 
+export function getUsers() {
+    return useUserStore().users;
+}
+
 export function userId() {
     return getUser().id || -1;
 }
@@ -666,7 +670,7 @@ export function getNotificationSourceLink(notification) {
     const currentRoute = router.currentRoute.value;
     const query = currentRoute.query;
     if(notification.type == 'App\\Notifications\\CommentPosted') {
-        switch(simpleResourceType(notification.data.resource.type)) {
+        switch(simpleResourceType(notification.data.resource?.type)) {
             case 'entity':
                 return {
                     name: 'entitydetail',
@@ -702,10 +706,6 @@ export function getNotificationSourceLink(notification) {
             }
         };
     }
-}
-
-export function userNotifications() {
-    return getUser().notifications || [];
 }
 
 export async function asyncFor(arr, callback) {

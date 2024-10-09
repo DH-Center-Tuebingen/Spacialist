@@ -5,12 +5,13 @@ namespace App\Events;
 use App\Entity;
 use App\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Broadcasting\PresenceChannel;
+// use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class EntityUpdated implements ShouldBroadcast
+class EntityDataUpdated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -34,7 +35,8 @@ class EntityUpdated implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('channel.system'),
+            new PresenceChannel('room.entity.' . $this->entity->id),
+            // new PrivateChannel('channel.entity'),
         ];
     }
 }

@@ -2,15 +2,15 @@
 
 namespace App\Events;
 
-use App\Entity;
+use App\Comment;
 use App\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class EntityUpdated implements ShouldBroadcast
+class CommentAdded implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -18,11 +18,11 @@ class EntityUpdated implements ShouldBroadcast
      * Create a new event instance.
      */
     public function __construct(
-        public Entity $entity,
+        public Comment $comment,
         public User $user,
     )
     {
-        $this->entity = $entity;
+        $this->comment = $comment;
         $this->user = $user;
     }
 
@@ -33,8 +33,19 @@ class EntityUpdated implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
+        if(isset($this->comment->commentable_type)) {
+            $room = sp_get_comment_room($this->comment->commentable_type);
+        } else {
+            $room = sp_get_comment_room(
+                Comment::find($this->comment->reply_to)->commentable_type
+            );
+        }
+
+        if(!isset($room)) return [];
+
+        $cid = $this->comment->commentable_id;
         return [
-            new PrivateChannel('channel.system'),
+            new PresenceChannel("room.$room.$cid"),
         ];
     }
 }

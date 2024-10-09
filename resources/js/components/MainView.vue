@@ -131,7 +131,6 @@
 
     import useEntityStore from '@/bootstrap/stores/entity.js';
     import useSystemStore from '@/bootstrap/stores/system.js';
-    import useUserStore from '@/bootstrap/stores/user.js';
     import router from '%router';
 
     import {
@@ -151,9 +150,22 @@
         showLiteratureInfo,
     } from '@/helpers/modal.js';
     import {
-        subscribeTo,
-        unsubscribeFrom,
+        subscribeNotifications,
+        subscribeSystemChannel,
+        unsubscribeSystemChannel,
+        listenToList,
     } from '@/helpers/websocket.js';
+    import {
+        handleBibliographyCreated,
+        handleBibliographyUpdated,
+        handleBibliographyDeleted,
+        handleEntityCreated,
+        handleEntityUpdated,
+        handleEntityDeleted,
+    } from '@/handlers/system.js';
+    import {
+        handleNotifications,
+    } from '@/handlers/notification.js';
 
     import { useToast } from '@/plugins/toast.js';
 
@@ -169,7 +181,6 @@
             const toast = useToast();
             const entityStore = useEntityStore();
             const systemStore = useSystemStore();
-            const userStore = useUserStore();
 
             // FUNCTIONS
             const setTab = to => {
@@ -240,34 +251,22 @@
                 isDetailLoaded: computed(_ => state.entity?.id > 0),
                 tabPlugins: computed(_ => systemStore.getSlotPlugins('tab')),
             });
+            const channels = {};
 
             // ON MOUNTED
             onMounted(_ => {
                 console.log('mainview component mounted');
                 systemStore.setMainViewTab(currentRoute.query.tab);
-                subscribeTo(`entity_updates`, 'EntityUpdated', e => {
-                    // Only handle event if from different user
-                    if(e.user.id == userStore.getCurrentUserId) return;
-                    console.log("Entity created/updated by a user", e);
-                    let message = null;
-                    if(e.status == 'added') {
-                        message = `A new Entity '${e.entity.name}' has been added by '${e.user.nickname}'!`;
-                        entityStore.add(e.entity, true);
-                    } else if(e.status == 'updated') {
-                        message = `Entity '${e.entity.name}' has been updated by '${e.user.nickname}'!`;
-                        entityStore.add(e.entity, true);
-                    }
-
-                    if(message) {
-                        toast.$toast(message, '', {
-                            duration: 2500,
-                            autohide: true,
-                            channel: 'info',
-                            icon: true,
-                            simple: true,
-                        });
-                    }
-                }, true);
+                channels.system = subscribeSystemChannel();
+                listenToList(channels.system, [
+                    handleEntityCreated,
+                    handleEntityUpdated,
+                    handleEntityDeleted,
+                    handleBibliographyCreated,
+                    handleBibliographyUpdated,
+                    handleBibliographyDeleted,
+                ]);
+                channels.notification = subscribeNotifications(handleNotifications);
             });
 
             onBeforeRouteUpdate(async (to, from) => {
@@ -277,7 +276,7 @@
             });
             onBeforeRouteLeave((to, from) => {
                 systemStore.setMainViewTab(null);
-                unsubscribeFrom(`entity_updates`);
+                unsubscribeSystemChannel();
             });
 
             // RETURN
