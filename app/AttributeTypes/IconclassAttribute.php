@@ -2,6 +2,9 @@
 
 namespace App\AttributeTypes;
 
+use App\Exceptions\InvalidDataException;
+use App\Utils\StringUtils;
+
 class IconclassAttribute extends AttributeBase
 {
     protected static string $type = "iconclass";
@@ -9,6 +12,9 @@ class IconclassAttribute extends AttributeBase
     protected static ?string $field = 'str_val';
 
     public static function fromImport(int|float|bool|string $data) : mixed {
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);
+        if(self::importDataIsEmpty($data)) return null;
+        
         return $data;
     }
 
