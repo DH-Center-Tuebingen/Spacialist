@@ -26,8 +26,8 @@ import draggable from "vuedraggable";
 import App from '@/components/openaccess/App.vue';
 
 // Init required libs
-// Vuex
-import store from '@/bootstrap/store.js';
+// Pinia
+import pinia from '@/bootstrap/store.js';
 // Vue-Router
 import {
     openRouter as router
@@ -40,7 +40,7 @@ import '@/bootstrap/font.js';
 const app = createApp(App);
 app.use(i18n);
 app.use(router);
-app.use(store);
+app.use(pinia);
 
 app.component("attribute-list", AttributeList);
 app.component('result-card', ResultCard);

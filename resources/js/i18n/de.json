@@ -590,8 +590,8 @@
                     "view_original_data": "Originaldaten anzeigen",
                     "accept_changes": "Änderungen annehmen",
                     "deny_changes": "Änderungen ablehnen",
-                    "deleted_by": "<i class=\"fas fa-fw fa-trash\"></i> gelöscht {ts}",
-                    "modified_by": "<i class=\"fas fa-fw fa-edit\"></i> geändert {ts}",
+                    "deleted_by": "gelöscht {ts}",
+                    "modified_by": "geändert {ts}",
                     "edit_moderated_value": {
                         "title": "Änderung bearbeiten",
                         "accept": "Bearbeitete Änderung annehmen",

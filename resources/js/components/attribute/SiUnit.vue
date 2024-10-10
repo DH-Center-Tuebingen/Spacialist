@@ -49,7 +49,7 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import store from '@/bootstrap/store.js';
+    import useSystemStore from '@/bootstrap/stores/system.js';
 
     import { useField } from 'vee-validate';
 
@@ -80,10 +80,11 @@
         emits: ['change'],
         setup(props, context) {
             const { t } = useI18n();
-    
+            const systemStore = useSystemStore();
+
             // We need the toRefs for the vee-validate fields
             const {
-                value: valueProp, 
+                value: valueProp,
                 metadata: metadataProp,
             } = toRefs(props);
 
@@ -102,7 +103,7 @@
                     if(!state.unitGrp) return [];
                     let groupName = state.unitGrp;
 
-                    const allGroups = store.getters.datatypeDataOf('si-unit');
+                    const allGroups = systemStore.getDatatypeDataOf('si-unit');
                     if(!allGroups) return [];
 
                     let group = allGroups[groupName];

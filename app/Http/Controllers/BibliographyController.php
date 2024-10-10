@@ -300,7 +300,8 @@ class BibliographyController extends Controller
             ], 400);
         }
 
-        $bib->deleteFile();
+        // Only delete file from storage to not fire 'save' event on item
+        $bib->deleteFile(true);
         $bib->delete();
 
         return response()->json(null, 204);

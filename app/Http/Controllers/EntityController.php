@@ -15,8 +15,6 @@ use App\Exceptions\Structs\ImportExceptionStruct;
 use App\Exceptions\InvalidDataException;
 use App\Exceptions\Structs\AttributeImportExceptionStruct;
 use App\Import\EntityImporter;
-use App\Import\ImportResolution;
-use App\Import\ImportResolutionType;
 use App\Reference;
 use App\ThConcept;
 use Exception;
@@ -195,7 +193,7 @@ class EntityController extends Controller {
             ], 400);
         }
         if(isset($aid)) {
-            try{
+            try {
                 Attribute::findOrFail($aid);
             } catch(ModelNotFoundException $e) {
                 return response()->json([
@@ -321,11 +319,11 @@ class EntityController extends Controller {
             ], 403);
         }
 
-        try{
+        try {
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => __('This entity does not exist')
+                'error' => __('This entity does not exist'),
             ], 400);
         }
         return response()->json($entity->getAllMetadata());
@@ -661,7 +659,7 @@ class EntityController extends Controller {
 
         $rootEntityId = null;
         if(isset($rootEntityPath)) {
-            try{
+            try {
                 $rootEntityId = Entity::getFromPath($rootEntityPath);
             } catch(AmbiguousValueException $ave) {
                 throw new Exception($ave->getMessage());
@@ -892,7 +890,7 @@ class EntityController extends Controller {
         DB::beginTransaction();
 
         foreach($attrValues as $av) {
-            try{
+            try {
                 $attr = Attribute::findOrFail($av['attribute_id']);
             } catch(ModelNotFoundException $e) {
                 DB::rollBack();
@@ -968,7 +966,7 @@ class EntityController extends Controller {
 
         $editedValue = $request->get('value');
         if(isset($editedValue) && $action == 'accept') {
-            try{
+            try {
                 $formKeyValue = AttributeValue::getFormattedKeyValue($attribute->datatype, $editedValue);
             } catch(InvalidDataException $ide) {
                 return response()->json([
@@ -1024,11 +1022,11 @@ class EntityController extends Controller {
             'summary' => 'nullable|string',
         ]);
 
-        try{
+        try {
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => __('This entity does not exist')
+                'error' => __('This entity does not exist'),
             ], 400);
         }
 

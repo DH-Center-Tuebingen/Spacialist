@@ -263,9 +263,7 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import {
-        userNotifications,
-    } from '@/helpers/helpers.js';
+    import useUserStore from '@/bootstrap/stores/user.js';
 
     import {
         markAsRead,
@@ -281,7 +279,7 @@
             // FETCH
             // DATA
             const state = reactive({
-                notifications: computed(_ => userNotifications()),
+                notifications: computed(_ => useUserStore().getNotifications),
                 unreadNotifications: computed(_ => {
                     return state.notifications.filter(n => !n.read_at);
                 }),

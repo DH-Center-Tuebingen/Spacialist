@@ -1,5 +1,5 @@
 <template>
-    <span style="display: inline-flex;">
+    <span class="d-inline-flex">
         <img
             v-if="user.avatar"
             :src="user.avatar_url"

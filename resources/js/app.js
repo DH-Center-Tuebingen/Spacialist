@@ -17,20 +17,20 @@ window.$httpQueue = queue;
 import App from '@/App.vue';
 
 // Init required libs
-// Vuex
-import store from '@/bootstrap/store.js';
+// Pinia
+import pinia from '@/bootstrap/store.js';
 // Vue-Router
 import router from '%router';
 // Axios
 import '@/bootstrap/http.js';
-// Vue-Auth
-import vueAuth from '@/bootstrap/auth.js';
 // vue-i18n
 import i18n from '@/bootstrap/i18n.js';
 // vue-final-modal
 import { createVfm } from 'vue-final-modal';
 // Font Awesome
 import '@/bootstrap/font.js';
+// Laravel Echo (Frontend part of Reverb aka WebSockets)
+import '@/bootstrap/websocket.js';
 
 // Plugin System
 import { SpPS } from '@/bootstrap/plugins.js';
@@ -41,8 +41,8 @@ import initDirectives from '@/bootstrap/directives.js';
 const app = createApp(App);
 app.use(i18n);
 app.use(router);
-app.use(store);
-app.use(vueAuth);
+app.use(pinia);
+// app.use(vueAuth);
 app.use(createVfm());
 
 initDirectives(app);

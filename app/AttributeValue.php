@@ -2,7 +2,6 @@
 
 namespace App;
 
-use App\Exceptions\InvalidDataException;
 use App\Plugins\Map\App\Geodata;
 use App\AttributeTypes\AttributeBase;
 use Illuminate\Database\Eloquent\Model;

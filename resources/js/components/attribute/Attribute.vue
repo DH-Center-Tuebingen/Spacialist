@@ -252,8 +252,9 @@
         toRefs,
     } from 'vue';
 
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
+
     import {
-        getAttributeSelection,
         getEmptyAttributeValue,
         _cloneDeep,
     } from '@/helpers/helpers.js';
@@ -352,13 +353,14 @@
         },
         emits: ['expanded','change', 'update-selection'],
         setup(props, context) {
+            const attributeStore = useAttributeStore();
             const {
                 data,
                 valueWrapper,
                 disabled,
             } = toRefs(props);
             // FETCH
-            
+
             const getValueOrDefault = _ => {
                 return valueWrapper.value.value || getEmptyAttributeValue(data.value.datatype);
             };
@@ -369,7 +371,7 @@
                 disabled: computed(_ => data.value.isDisabled || disabled.value),
                 value: _cloneDeep(getValueOrDefault()),
                 // TODO check for selection need?
-                selection: computed(_ => getAttributeSelection(data.value.id) || []),
+                selection: computed(_ => attributeStore.getAttributeSelection(data.value.id) || []),
 
             });
 

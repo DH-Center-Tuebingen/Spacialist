@@ -389,11 +389,11 @@ class EditorController extends Controller {
         $user = auth()->user();
         if(!$user->can('entity_type_write')) {
             return response()->json([
-                'error' => __('You do not have the permission to modify entity-type labels')
+                'error' => __('You do not have the permission to modify entity-type')
             ], 403);
         }
         $this->validate($request, [
-            'data' => 'required|array'
+            'data' => 'required|array',
         ]);
 
         try {
@@ -403,14 +403,34 @@ class EditorController extends Controller {
                 'error' => __('This entity-type does not exist')
             ], 400);
         }
-        $data = Arr::only($request->get('data'), array_keys(EntityType::patchRules));
-        if(count($data) < 1) {
+        $relationData = Arr::only(
+            $request->get('data'),
+            ['is_root', 'sub_entity_types']
+        );
+        $propData = Arr::only(
+            $request->get('data'),
+            array_keys(EntityType::patchRules),
+        );
+
+        $updateRelation = count($relationData) > 0;
+        $updateProps = count($propData) > 0;
+
+        if(!$updateRelation && !$updateProps) {
             return response()->json([
                 'error' => __('The given data is invalid')
             ], 400);
         }
-        foreach($data as $key => $prop) {
-            $entityType->{$key} = $prop;
+
+        if($updateRelation) {
+            $isRoot = $relationData['is_root'];
+            $subEntityTypes = $relationData['sub_entity_types'];
+            $entityType->setRelationInfo($isRoot, $subEntityTypes);
+        }
+
+        if($updateProps) {
+            foreach($propData as $key => $prop) {
+                $entityType->{$key} = $prop;
+            }
         }
         $entityType->save();
 

@@ -2,10 +2,15 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Facades\Event;
-use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use App\Bibliography;
+use App\Comment;
 use App\Entity;
+use App\Reference;
+use App\Observers\BibliographyObserver;
+use App\Observers\CommentObserver;
 use App\Observers\EntityObserver;
+use App\Observers\ReferenceObserver;
+use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -28,7 +33,10 @@ class EventServiceProvider extends ServiceProvider
     public function boot()
     {
         parent::boot();
+        Bibliography::observe(BibliographyObserver::class);
+        Comment::observe(CommentObserver::class);
         Entity::observe(EntityObserver::class);
+        Reference::observe(ReferenceObserver::class);
         //
     }
 }
