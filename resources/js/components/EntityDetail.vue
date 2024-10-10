@@ -427,15 +427,9 @@
 
     import useAttributeStore from '@/bootstrap/stores/attribute.js';
     import useEntityStore from '@/bootstrap/stores/entity.js';
-    import useUserStore from '@/bootstrap/stores/user.js';
     import router from '%router';
 
     import {useToast} from '@/plugins/toast.js';
-
-    import {
-        ago,
-        date,
-    } from '@/helpers/filters.js';
 
     import {
         ago,
@@ -901,6 +895,8 @@
                 const dirtyValues = getDirtyValues(grps);
                 const patches = [];
                 const moderations = [];
+                console.log(dirtyValues, patches, moderations)
+                if(Object.keys(dirtyValues).length == 0 ) return;
 
                 for(let v in dirtyValues) {
                     const aid = v;
@@ -1127,7 +1123,6 @@
                 userId,
                 showUserInfo,
                 translateConcept,
-                getEntity,
                 // LOCAL
                 hasReferenceGroup,
                 showMetadata,
