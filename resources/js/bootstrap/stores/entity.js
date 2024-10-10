@@ -703,7 +703,7 @@ export const useEntityStore = defineStore('entity', {
             });
         },
         async patchAttributes(entityId, patchData, dirtyValues, moderations) {
-            const moderated = useUserStore().getUserModerated();
+            const moderated = useUserStore().getUserModerated;
             return patchAttributes(entityId, patchData).then(data => {
                 this.update(data.entity);
                 this.updateEntityData(entityId, dirtyValues, data.added_attributes, !moderated);

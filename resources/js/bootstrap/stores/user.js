@@ -102,7 +102,7 @@ export const useUserStore = defineStore('user', {
                 }
             }
         },
-        getUserModerated: state => state.user.roles.sole(role => role.is_moderated),
+        getUserModerated: state => state.user.roles.some(role => role.is_moderated),
         getNotifications(state) {
             const user = this.getCurrentUser;
             if(!user) return [];
