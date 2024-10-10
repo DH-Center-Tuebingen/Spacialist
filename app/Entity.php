@@ -4,8 +4,8 @@ namespace App;
 
 use App\Exceptions\AmbiguousValueException;
 use App\Traits\CommentTrait;
-use App\AttributeTypes\AttributeBase;
 use Illuminate\Database\Eloquent\Builder;
+use App\AttributeTypes\AttributeBase;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Nicolaslopezj\Searchable\SearchableTrait;
@@ -263,11 +263,13 @@ class Entity extends Model implements Searchable {
                 $query->whereJsonContains('json_val', $this->id)
                     ->whereIn('attribute_id', $entityMcAttributes);
             })
-            ->with('attribute')
+            ->with(['attribute', 'entity' => function($eq) {
+                $eq->without('user');
+            }])
             ->get();
         $entities = [];
         foreach($links as $link) {
-            $entity = Entity::find($link->entity_id);
+            $entity = $link->entity;
             $entities[] = [
                 'id' => $entity->id,
                 'name' => $entity->name,

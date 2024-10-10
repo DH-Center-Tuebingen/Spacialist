@@ -55,7 +55,7 @@ class EntityController extends Controller {
                 'error' => __('You do not have the permission to get a specific entity'),
             ], 403);
         }
-        try {
+        try{
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
@@ -73,14 +73,14 @@ class EntityController extends Controller {
                 'error' => __('You do not have the permission to get an entity\'s data'),
             ], 403);
         }
-        try {
+        try{
             $entityType = EntityType::findOrFail($etid);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity type does not exist'),
             ], 400);
         }
-        try {
+        try{
             Attribute::findOrFail($aid);
         } catch(ModelNotFoundException $e) {
             return response()->json([
@@ -138,7 +138,7 @@ class EntityController extends Controller {
                 $text = preg_replace_callback('/:entity_id/', function ($matches) use (&$i) {
                     return $matches[0] . '_' . $i++;
                 }, $sql->attribute->text);
-            } else {
+            }else{
                 $text = $sql->attribute->text;
             }
             foreach($entityIds as $eid) {
@@ -147,7 +147,7 @@ class EntityController extends Controller {
                     for($i = 0; $i < $cnt; $i++) {
                         $safes[':entity_id_' . $i] = $eid;
                     }
-                } else {
+                }else{
                     $safes = [
                         ':entity_id' => $eid,
                     ];
@@ -185,7 +185,7 @@ class EntityController extends Controller {
                 'error' => __('You do not have the permission to get an entity\'s data'),
             ], 403);
         }
-        try {
+        try{
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
@@ -207,7 +207,7 @@ class EntityController extends Controller {
                 ->where('attribute_id', $aid)
                 ->withModerated()
                 ->get();
-        } else {
+        }else{
             $attributes = AttributeValue::whereHas('attribute', function (Builder $q) {
                 $q->where('datatype', '!=', 'sql');
             })
@@ -239,7 +239,7 @@ class EntityController extends Controller {
             if($a->moderation_state == 'pending-delete') {
                 $a->value = [];
                 $a->original_value = $value;
-            } else {
+            }else{
                 $a->value = $value;
             }
             if(isset($data[$a->attribute_id])) {
@@ -250,7 +250,7 @@ class EntityController extends Controller {
                 if(isset($oldAttr->moderation_state)) {
                     $oldAttr->original_value = $value;
                     $a = $oldAttr;
-                } else {
+                }else{
                     $a->original_value = $oldAttr->value;
                 }
             }
@@ -280,7 +280,7 @@ class EntityController extends Controller {
                 $text = preg_replace_callback('/:entity_id/', function ($matches) use (&$i) {
                     return $matches[0] . '_' . $i++;
                 }, $sql->attribute->text);
-            } else {
+            }else{
                 $text = $sql->attribute->text;
                 $safes = [
                     ':entity_id' => $id,
@@ -337,7 +337,7 @@ class EntityController extends Controller {
             ], 403);
         }
 
-        try {
+        try{
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
@@ -377,7 +377,7 @@ class EntityController extends Controller {
 
         if($res['type'] === 'entity') {
             return response()->json($res['entity'], 201);
-        } else {
+        }else{
             return response()->json([
                 'error' => $res['msg'],
             ], $res['code']);
@@ -392,7 +392,7 @@ class EntityController extends Controller {
             ], 403);
         }
 
-        try {
+        try{
             $entity = Entity::without(['user', 'parentIds', 'parentNames'])->findOrFail($id);
             unset($entity->comments_count);
         } catch(ModelNotFoundException $e) {
@@ -408,7 +408,7 @@ class EntityController extends Controller {
         }
         if(isset($duplicate->root_entity_id)) {
             $duplicate->rank = Entity::where('root_entity_id', $duplicate->root_entity_id)->max('rank') + 1;
-        } else {
+        }else{
             $duplicate->rank = Entity::whereNull('root_entity_id')->max('rank') + 1;
         }
         $duplicate->user_id = $user->id;
@@ -510,7 +510,7 @@ class EntityController extends Controller {
         // Getting headers
         if(($row = fgetcsv($handle, 0, $metadata['delimiter'])) !== false) {
             $row = sp_trim_array($row);
-            try {
+            try{
                 $headerRow = $row;
                 for($i = 0; $i < count($row); $i++) {
                     if($row[$i] == $nameColumn) {
@@ -569,7 +569,7 @@ class EntityController extends Controller {
                 $errorResponseData->on_index = $parentIdx + 1;
                 $errorResponseData->on_value = $row[$parentIdx];
 
-                try {
+                try{
                     $parentEntity = Entity::getFromPath($rootEntityPath);
                     if(!isset($parentEntity)) {
                         DB::rollBack();
@@ -587,7 +587,7 @@ class EntityController extends Controller {
                 }
             }
 
-            try {
+            try{
                 $entityId = Entity::getFromPath($entityPath);
             } catch(AmbiguousValueException $ave) {
                 DB::rollBack();
@@ -596,7 +596,7 @@ class EntityController extends Controller {
                     'data' => $errorResponseData,
                 ], 400);
             }
-            try {
+            try{
                 $user = auth()->user();
                 if($entityId == null) {
                     $entity = $this->createImportedEntity($entityName, $rootEntityPath, $entityTypeId, $user);
@@ -682,7 +682,7 @@ class EntityController extends Controller {
             ], [
                 'user_id' => $user->id,
             ]);
-            try {
+            try{
                 $setValue = $attrVal->setValueFromRaw($row[$colIdx], $type);
             } catch(InvalidDataException $e) {
                 throw new AttributeImportException(
@@ -713,7 +713,7 @@ class EntityController extends Controller {
             ], 403);
         }
 
-        try {
+        try{
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
@@ -738,7 +738,7 @@ class EntityController extends Controller {
                     }
                     if($user->isModerated()) {
                         $attrval->moderate('pending-delete', true);
-                    } else {
+                    }else{
                         $attrval->delete();
                     }
                     break;
@@ -793,7 +793,7 @@ class EntityController extends Controller {
             }
 
             $attr = Attribute::find($aid);
-            try {
+            try{
                 $formKeyValue = AttributeValue::getFormattedKeyValue($attr->datatype, $value);
             } catch(InvalidDataException $ide) {
                 return response()->json([
@@ -813,7 +813,7 @@ class EntityController extends Controller {
         $entity->user_id = $user->id;
         if($entity->isDirty()) {
             $entity->save();
-        } else {
+        }else{
             $entity->touch();
         }
 
@@ -834,14 +834,14 @@ class EntityController extends Controller {
         }
         $this->validate($request, AttributeValue::patchRules);
 
-        try {
+        try{
             Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity does not exist'),
             ], 400);
         }
-        try {
+        try{
             Attribute::findOrFail($aid);
         } catch(ModelNotFoundException $e) {
             return response()->json([
@@ -898,7 +898,7 @@ class EntityController extends Controller {
                     'error' => __('This attribute does not exist'),
                 ], 400);
             }
-            try {
+            try{
                 $formKeyValue = AttributeValue::getFormattedKeyValue($attr->datatype, $av['value']);
             } catch(InvalidDataException $ide) {
                 DB::rollBack();
@@ -936,14 +936,14 @@ class EntityController extends Controller {
 
         $action = $request->get('action');
 
-        try {
+        try{
             Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity does not exist'),
             ], 400);
         }
-        try {
+        try{
             $attribute = Attribute::findOrFail($aid);
         } catch(ModelNotFoundException $e) {
             return response()->json([
@@ -992,7 +992,7 @@ class EntityController extends Controller {
             'name' => 'required|string',
         ]);
 
-        try {
+        try{
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
@@ -1053,7 +1053,7 @@ class EntityController extends Controller {
             'to_end' => 'boolean',
         ]);
 
-        try {
+        try{
             Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
@@ -1068,7 +1068,7 @@ class EntityController extends Controller {
         if($addToEnd) {
             if(isset($parent_id)) {
                 $rank = Entity::where('root_entity_id', $parent_id)->max('rank') + 1;
-            } else {
+            }else{
                 $rank = Entity::whereNull('root_entity_id')->max('rank') + 1;
             }
         }
@@ -1086,7 +1086,7 @@ class EntityController extends Controller {
                 'error' => __('You do not have the permission to delete an entity'),
             ], 403);
         }
-        try {
+        try{
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([

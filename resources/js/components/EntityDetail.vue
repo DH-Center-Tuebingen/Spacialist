@@ -419,7 +419,7 @@
         onBeforeRouteUpdate,
     } from 'vue-router';
 
-    import { useI18n } from 'vue-i18n';
+    import {useI18n} from 'vue-i18n';
 
     import {
         Popover,
@@ -430,7 +430,12 @@
     import useUserStore from '@/bootstrap/stores/user.js';
     import router from '%router';
 
-    import { useToast } from '@/plugins/toast.js';
+    import {useToast} from '@/plugins/toast.js';
+
+    import {
+        ago,
+        date,
+    } from '@/helpers/filters.js';
 
     import {
         ago,
@@ -492,7 +497,7 @@
             }
         },
         setup(props) {
-            const { t } = useI18n();
+            const {t} = useI18n();
             const route = useRoute();
             const toast = useToast();
             const attributeStore = useAttributeStore();
@@ -821,6 +826,7 @@
             const onEntityHeaderHover = hoverState => {
                 state.entityHeaderHovered = hoverState;
             };
+
             const showTabActions = (grp, status) => {
                 state.attributeGrpHovered = status ? grp : null;
             };
@@ -857,6 +863,7 @@
                     state.dirtyStates[g] = false;
                 });
             };
+
             const fetchComments = _ => {
                 if(!can('comments_read')) return;
 
@@ -1004,7 +1011,6 @@
                     });
                 }
             });
-
             onBeforeUpdate(_ => {
                 attrRefs.value = {};
                 state.commentLoadingState = 'not';
@@ -1121,6 +1127,7 @@
                 userId,
                 showUserInfo,
                 translateConcept,
+                getEntity,
                 // LOCAL
                 hasReferenceGroup,
                 showMetadata,
