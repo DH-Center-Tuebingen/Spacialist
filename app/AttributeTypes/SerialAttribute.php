@@ -6,6 +6,7 @@ use App\Attribute;
 use App\AttributeValue;
 use App\Entity;
 use App\EntityType;
+use App\Exceptions\InvalidDataException;
 use App\User;
 
 class SerialAttribute extends AttributeBase
@@ -23,8 +24,8 @@ class SerialAttribute extends AttributeBase
         $av->save();
     }
 
-    public static function fromImport(int|float|bool|string $data) : mixed {
-        return null;
+    public static function parseImport(int|float|bool|string $data) : mixed {
+        throw new InvalidDataException("SerialAttribute does not support import");
     }
     public static function unserialize(mixed $data) : mixed {
         return false;
@@ -67,4 +68,7 @@ class SerialAttribute extends AttributeBase
             $ctr++;
         }
     }
+
+    //TODO: add a method to handleOnDelete
+    // SO: As I see it currently the SerialAttribute is never deleted leading to orphans inside the database 
 }

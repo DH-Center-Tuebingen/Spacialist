@@ -10,12 +10,6 @@ class UrlAttribute extends AttributeBase
     protected static bool $inTable = true;
     protected static ?string $field = 'str_val';
 
-    public static function fromImport(int|float|bool|string $data) : mixed {
-        $data = StringUtils::guard($data);
-        
-        return $data;
-    }
-
     public static function unserialize(mixed $data) : mixed {
         return $data;
     }

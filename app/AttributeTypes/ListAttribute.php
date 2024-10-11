@@ -11,12 +11,8 @@ class ListAttribute extends AttributeBase
     protected static bool $inTable = false;
     protected static ?string $field = 'json_val';
 
-    public static function fromImport(int|float|bool|string $data) : mixed {
-        $data = StringUtils::useGuard(InvalidDataException::class)($data);
-        if($data === "") {
-            return null;
-        }
-        
+    public static function parseImport(int|float|bool|string $data) : mixed {
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);        
         $trimmedValues = [];
         $parts = explode(';', $data);
         foreach($parts as $part) {

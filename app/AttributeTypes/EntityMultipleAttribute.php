@@ -12,20 +12,24 @@ class EntityMultipleAttribute extends AttributeBase
     protected static bool $inTable = true;
     protected static ?string $field = 'json_val';
 
-    public static function fromImport(int|float|bool|string $data) : mixed {
+    public static function parseImport(int|float|bool|string $data) : mixed {
         $data = StringUtils::useGuard(InvalidDataException::class)($data);
-        if(self::importDataIsEmpty($data)) return null;     
-        
+        $errorList = [];
         $idList = [];
         $parts = explode(';', $data);
         foreach($parts as $part) {
             $trimmedPart = trim($part);
             $entityId = Entity::getFromPath($trimmedPart);
             if($entityId === null) {
-                throw new InvalidDataException("Given data part ($trimmedPart) is not a valid entity name");
+                $errorList[] = $trimmedPart;
             }
             $idList[] = $entityId;
         }
+
+        if(count($errorList) > 0) {
+            throw new InvalidDataException("Entities not found: " . implode(', ', $errorList));
+        }
+
         return json_encode($idList);
     }
 

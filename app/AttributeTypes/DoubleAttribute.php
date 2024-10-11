@@ -10,14 +10,7 @@ class DoubleAttribute extends AttributeBase
     protected static bool $inTable = true;
     protected static ?string $field = 'dbl_val';
 
-    public static function fromImport(int|float|bool|string $data) : mixed {
-        if(is_string($data)){
-            $data = trim($data);
-            if(self::importDataIsEmpty($data)) return null;
-        }
-
-        
-
+    public static function parseImport(int|float|bool|string $data) : mixed {       
         if(!is_numeric($data)) {
             throw new InvalidDataException("Given data is not a number");
         }

@@ -16,9 +16,8 @@ class DateAttribute extends AttributeBase
 
     private static string $format = "Y-m-d";
 
-    public static function fromImport(int|float|bool|string $data) : mixed {
+    public static function parseImport(int|float|bool|string $data) : mixed {
         $data = StringUtils::useGuard(InvalidDataException::class)($data);
-        if(self::importDataIsEmpty($data)) return null;
 
         $errmsg = "Your provided date ($data) does not match the required format of 'Y-m-d'";
 

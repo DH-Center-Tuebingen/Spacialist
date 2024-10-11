@@ -8,7 +8,7 @@ class SqlAttribute extends AttributeBase
     protected static bool $inTable = false;
     protected static ?string $field = null;
 
-    public static function fromImport(int|float|bool|string $data) : mixed {
+    public static function parseImport(int|float|bool|string $data) : mixed {
         return null;
     }
 

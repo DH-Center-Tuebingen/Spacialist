@@ -18,10 +18,8 @@ class DropdownSingleAttribute extends AttributeBase
         return ThConcept::getChildren($a->thesaurus_root_url, $a->recursive);
     }
 
-    public static function fromImport(int|float|bool|string $data) : mixed {
-        $data = StringUtils::useGuard(InvalidDataException::class)($data);
-        if(self::importDataIsEmpty($data)) return null;        
-        
+    public static function parseImport(int|float|bool|string $data) : mixed {
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);        
         $concept = ThConcept::getByString($data);
         if(isset($concept)) {
             return $concept->concept_url;

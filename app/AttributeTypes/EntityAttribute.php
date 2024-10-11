@@ -15,10 +15,10 @@ class EntityAttribute extends AttributeBase
     // TODO: Do we still need this?
     protected static string $deleted_string = "error.deleted_entity";
 
-    public static function fromImport(int|float|bool|string $data) : mixed {
-        $data = StringUtils::useGuard(InvalidDataException::class)($data);
-        if(self::importDataIsEmpty($data)) return null;
+    public static function parseImport(int|float|bool|string $data) : mixed {
 
+        // TODO: This does not check if the entity that is selected is actually valid!
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);
         $entityId = Entity::getFromPath($data);
         if($entityId === null) {
             throw new InvalidDataException("Entity not found: $data");

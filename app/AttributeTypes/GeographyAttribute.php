@@ -14,10 +14,8 @@ class GeographyAttribute extends AttributeBase
     protected static bool $inTable = true;
     protected static ?string $field = 'geography_val';
 
-    public static function fromImport(int|float|bool|string $data) : mixed {
-        $data = StringUtils::useGuard(InvalidDataException::class)($data);
-        if(self::importDataIsEmpty($data)) return null;        
-        
+    public static function parseImport(int|float|bool|string $data) : mixed {
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);        
         $geodata = null;
         try{
             $geodata = Geodata::parseWkt($data);

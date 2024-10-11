@@ -9,7 +9,7 @@ class BooleanAttribute extends AttributeBase {
     protected static bool $inTable = true;
     protected static ?string $field = 'int_val';
 
-    public static function fromImport(int|float|bool|string $data): mixed {        
+    public static function parseImport(int|float|bool|string $data): mixed {        
         
         $boolean = false;
         
