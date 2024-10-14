@@ -25,7 +25,7 @@ class Geodata
      * 
      * @param string $wkt
      * @return Geometry
-     * @throws \Clickbar\Magellan\Exceptions\InvalidWKTException
+     * @throws MStaack\LaravelPostgis\Exceptions\UnknownWKTTypeException
      */
     public static function parseWkt($wkt) {
         try {

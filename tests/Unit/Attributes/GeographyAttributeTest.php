@@ -3,9 +3,7 @@ namespace Tests\Unit\Attributes;
 
 use App\AttributeTypes\GeographyAttribute;
 use App\Exceptions\InvalidDataException;
-use Clickbar\Magellan\IO\Parser\WKT\WKTParser;
 use Tests\TestCase;
-
 
 // !!!! Currently this test is only testing the fromImport function!!!
 
@@ -21,8 +19,8 @@ class GeographyAttributeTest extends TestCase {
 
  
     private function assertPoint($expected, $actual) {
-        $this->assertEquals($expected[0], $actual->getX());
-        $this->assertEquals($expected[1], $actual->getY());
+        $this->assertEquals($expected[0], $actual->getLng());
+        $this->assertEquals($expected[1], $actual->getLat());
     }
     
     private function assertLineString($expected, $actual) {
@@ -41,8 +39,12 @@ class GeographyAttributeTest extends TestCase {
     
     private function assertMultiPolygon($expected, $actual) {
         $this->assertEquals(count($expected), count($actual->getPolygons()));
+        
+        // Hotfix for MSTAACK, as there is a filter function that remove a (supposedly) empty string that
+        // increments the index of the array, leading to a mismatch in the indexes of the arrays. 
+        $fixedActualValues = array_values($actual->getPolygons());
         for($i = 0; $i < count($expected); $i++) {
-            $this->assertMultiLineString($expected[$i], $actual->getPolygons()[$i]);
+            $this->assertMultiLineString($expected[$i], $fixedActualValues[$i]);
         }
     }
  

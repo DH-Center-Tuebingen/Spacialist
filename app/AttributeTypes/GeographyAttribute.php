@@ -5,7 +5,6 @@ namespace App\AttributeTypes;
 use App\Exceptions\InvalidDataException;
 use App\Geodata;
 use App\Utils\StringUtils;
-use Clickbar\Magellan\Exception\UnknownWKTTypeException;
 use Exception;
 
 class GeographyAttribute extends AttributeBase
