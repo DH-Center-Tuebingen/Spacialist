@@ -49,9 +49,6 @@ class GenerateTests extends Command
             return;
         }
         
-        
-        
-        
         if(is_dir(app_path($dir))) {
             $files = scandir(app_path($dir));
             foreach($files as $file) {

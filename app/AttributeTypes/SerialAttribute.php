@@ -6,10 +6,9 @@ use App\Attribute;
 use App\AttributeValue;
 use App\Entity;
 use App\EntityType;
-use App\Exceptions\InvalidDataException;
 use App\User;
 
-class SerialAttribute extends AttributeBase
+class SerialAttribute extends StaticAttribute
 {
     protected static string $type = "serial";
     protected static bool $inTable = false;
@@ -23,10 +22,7 @@ class SerialAttribute extends AttributeBase
         $av->user_id = $uid;
         $av->save();
     }
-
-    public static function parseImport(int|float|bool|string $data) : mixed {
-        throw new InvalidDataException("SerialAttribute does not support import");
-    }
+    
     public static function unserialize(mixed $data) : mixed {
         return false;
     }
