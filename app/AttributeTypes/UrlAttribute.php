@@ -2,8 +2,6 @@
 
 namespace App\AttributeTypes;
 
-use App\Utils\StringUtils;
-
 class UrlAttribute extends AttributeBase
 {
     protected static string $type = "url";
