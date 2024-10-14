@@ -201,7 +201,6 @@ class ApiDataImporterTest extends TestCase {
     }
 
     public function testValidationInvalidFile() {
-        info("============= INTERESTING TEST");
         $this->userRequest()->post('/api/v1/entity/import/validate', [
             'file' => null,
             'data' => $this->getData(),
@@ -216,8 +215,6 @@ class ApiDataImporterTest extends TestCase {
                     ]
                 ]
             ]);
-        info("============= INTERESTING TEST END");
-            
     }
 
 

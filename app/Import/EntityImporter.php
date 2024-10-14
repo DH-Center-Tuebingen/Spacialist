@@ -147,8 +147,6 @@ class EntityImporter {
     private function verifyAttributeMapping($headers): bool {
         $nameErrors = [];
         $indexErrors = [];
-
-        info($this->attributesMap);
         
         foreach($this->attributesMap as $attribute => $column) {
             if(trim($column) == "") {
