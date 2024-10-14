@@ -4,6 +4,7 @@ namespace App\AttributeTypes;
 
 use App\User;
 use App\Exceptions\InvalidDataException;
+use App\Utils\StringUtils;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class UserlistAttribute extends AttributeBase
@@ -12,17 +13,31 @@ class UserlistAttribute extends AttributeBase
     protected static bool $inTable = true;
     protected static ?string $field = 'json_val';
 
-    public static function fromImport(int|float|bool|string $data) : mixed {
+    public static function parseImport(int|float|bool|string $data) : mixed {
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);
         $nicknames = explode(';', $data);
         $list = [];
+        $incorrectUsers = [];
         foreach($nicknames as $name) {
+            $name = trim($name);
+            if($name === '') {
+                continue;
+            }
+
             try {
-                $name = trim($name);
-                $user = User::where('nickname', $name)->firstOrFail();
+                //TODO: The deleted_at check should be necessary here!!!!
+                $user = User::where('nickname', $name)
+                    ->where("deleted_at", null)
+                    ->firstOrFail();
+                    
                 $list[] = $user->id;
             } catch(ModelNotFoundException $e) {
-                throw new InvalidDataException("$name does not match any user's nickname");
+                $incorrectUsers[] = $name;
             }
+        }
+        
+        if(count($incorrectUsers) > 0){
+            throw new InvalidDataException("The following users were not found: " . implode(', ', $incorrectUsers));
         }
         return json_encode($list);
     }

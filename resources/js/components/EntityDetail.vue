@@ -391,7 +391,7 @@
         onBeforeRouteUpdate,
     } from 'vue-router';
 
-    import {useI18n} from 'vue-i18n';
+    import { useI18n } from 'vue-i18n';
 
     import {
         Popover,
@@ -400,7 +400,7 @@
     import store from '@/bootstrap/store.js';
     import router from '%router';
 
-    import {useToast} from '@/plugins/toast.js';
+    import { useToast } from '@/plugins/toast.js';
 
     import {
         ago,
@@ -459,7 +459,7 @@
             }
         },
         setup(props) {
-            const {t} = useI18n();
+            const { t } = useI18n();
             const route = useRoute();
             const toast = useToast();
 

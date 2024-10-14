@@ -8,7 +8,7 @@ use App\Entity;
 use App\EntityType;
 use App\User;
 
-class SerialAttribute extends AttributeBase
+class SerialAttribute extends StaticAttribute
 {
     protected static string $type = "serial";
     protected static bool $inTable = false;
@@ -22,10 +22,7 @@ class SerialAttribute extends AttributeBase
         $av->user_id = $uid;
         $av->save();
     }
-
-    public static function fromImport(int|float|bool|string $data) : mixed {
-        return null;
-    }
+    
     public static function unserialize(mixed $data) : mixed {
         return false;
     }
@@ -67,4 +64,7 @@ class SerialAttribute extends AttributeBase
             $ctr++;
         }
     }
+
+    //TODO: add a method to handleOnDelete
+    // SO: As I see it currently the SerialAttribute is never deleted leading to orphans inside the database 
 }

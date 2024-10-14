@@ -6,7 +6,9 @@ use App\Attribute;
 use App\AttributeValue;
 use App\Entity;
 use App\EntityType;
+use App\Exceptions\InvalidDataException;
 use App\User;
+use App\Utils\StringUtils;
 use Illuminate\Support\Arr;
 
 abstract class AttributeBase
@@ -137,7 +139,22 @@ abstract class AttributeBase
         }
     }
 
-    public abstract static function fromImport(int|float|bool|string $data) : mixed;
+    private static function importDataIsEmpty($data):bool{
+        if(!is_string($data)) return false;
+        return trim($data) === "";
+    }
+
+    public static function fromImport(int|float|bool|string $data): mixed{
+        if(self::importDataIsEmpty($data)) {
+            return null;
+        }
+        return static::parseImport($data);
+    }
+
+    public static function parseImport(int|float|bool|string $data) : mixed {
+        return StringUtils::useGuard(InvalidDataException::class)($data);
+    }
+    
     public abstract static function unserialize(mixed $data) : mixed;
     public abstract static function serialize(mixed $data) : mixed;
 }

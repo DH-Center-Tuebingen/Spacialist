@@ -5,6 +5,7 @@ namespace App\AttributeTypes;
 use App\Attribute;
 use App\ThConcept;
 use App\Exceptions\InvalidDataException;
+use App\Utils\StringUtils;
 
 class DropdownSingleAttribute extends AttributeBase
 {
@@ -17,7 +18,8 @@ class DropdownSingleAttribute extends AttributeBase
         return ThConcept::getChildren($a->thesaurus_root_url, $a->recursive);
     }
 
-    public static function fromImport(int|float|bool|string $data) : mixed {
+    public static function parseImport(int|float|bool|string $data) : mixed {
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);        
         $concept = ThConcept::getByString($data);
         if(isset($concept)) {
             return $concept->concept_url;
