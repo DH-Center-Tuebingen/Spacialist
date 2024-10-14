@@ -12,11 +12,11 @@ class RismAttribute extends AttributeBase
     protected static ?string $field = 'str_val';
 
     public static function parseImport(int|float|bool|string $data) : mixed {
-        $number = NumberUtils::useStringIntegerGuard(InvalidDataException::class)($data);
-        if($number < 0){
-            throw new InvalidDataException("Given data is not a positive integer");
+        $number = trim($data);
+        if(is_bool($data) || !NumberUtils::is_unsigned_integer_string($number)) {
+            throw new InvalidDataException("Given data is not only digits");
         }
-        return $number; 
+        return (string)$number;
     }
 
     public static function unserialize(mixed $data) : mixed {

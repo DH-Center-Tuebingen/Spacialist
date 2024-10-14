@@ -11,19 +11,18 @@ class EntityAttribute extends AttributeBase
     protected static string $type = "entity";
     protected static bool $inTable = true;
     protected static ?string $field = 'entity_val';
-    
+
     // TODO: Do we still need this?
     protected static string $deleted_string = "error.deleted_entity";
 
     public static function parseImport(int|float|bool|string $data) : mixed {
-
         // TODO: This does not check if the entity that is selected is actually valid!
         $data = StringUtils::useGuard(InvalidDataException::class)($data);
         $entityId = Entity::getFromPath($data);
         if($entityId === null) {
             throw new InvalidDataException("Entity not found: $data");
         }
-        
+
         return $entityId;
     }
 

@@ -41,7 +41,7 @@
     import { useI18n } from 'vue-i18n';
 
     import ImporterUpdateItem from './ImporterUpdateItem.vue';
-    import ErrorList from '../../error/ErrorList.vue';
+    import ErrorList from '@/components/error/ErrorList.vue';
 
     export default {
         components: {
@@ -124,7 +124,7 @@
             return {
                 t,
                 activeOption,
-                splitLines
+                splitLines,
             };
         }
     };

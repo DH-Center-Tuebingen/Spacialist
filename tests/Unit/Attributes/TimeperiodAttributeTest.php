@@ -8,7 +8,6 @@ use Tests\TestCase;
 // !!!! Currently this test is only testing the fromImport function!!!
 
 class TimeperiodAttributeTest extends TestCase {
-
     /**
      * @dataProvider truthyProvider
     */
@@ -21,7 +20,6 @@ class TimeperiodAttributeTest extends TestCase {
     * @dataProvider truthyProvider
     */
     public function testFromImportReturnValues($input, $expected) {
-
         // Convert the TimePeriod object to a json string
         if($expected != null){
             $expected = json_encode($expected);

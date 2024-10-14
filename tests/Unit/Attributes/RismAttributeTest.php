@@ -36,8 +36,9 @@ class RismAttributeTest extends TestCase {
     public static function truthyProvider() {
         return [
             "empty string" => ["", null],
-            "number as string" => ["600146721", 600146721],
-            "number as integer" => [600146721, 600146721],
+            "number as string" => ["600146721", "600146721"],
+            "number as string with leading zero" => ["000146721", "000146721"],
+            "number as integer" => [600146721, "600146721"],
         ];
     }
 

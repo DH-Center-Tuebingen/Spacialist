@@ -10,7 +10,7 @@ use App\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ApiUserTest extends TestCase
-{    
+{
     // Testing GET requests
 
     /**
@@ -26,7 +26,7 @@ class ApiUserTest extends TestCase
             'Authorization' => "Bearer $this->token"
             ])
             ->get('/api/v1/auth/user');
-            
+
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'status',
@@ -434,7 +434,7 @@ class ApiUserTest extends TestCase
             'orcid' => '0000-0002-1694-233X',
         ];
         $user->save();
-        
+
         $response = $this->withHeaders([
             'Authorization' => "Bearer $this->token"
         ])

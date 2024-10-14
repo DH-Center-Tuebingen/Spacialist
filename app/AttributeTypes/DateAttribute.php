@@ -6,7 +6,6 @@ use App\Exceptions\InvalidDataException;
 use App\Utils\StringUtils;
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
-use Exception;
 
 class DateAttribute extends AttributeBase
 {

@@ -19,7 +19,7 @@ class EpochAttribute extends AttributeBase
     }
 
     public static function parseImport(int|float|bool|string $data) : mixed {
-        $data = StringUtils::useGuard(InvalidDataException::class)($data);        
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);
         $parts = array_map(fn($str) => trim($str), explode(';', $data));
 
         if(count($parts) != 3) {
@@ -42,12 +42,14 @@ class EpochAttribute extends AttributeBase
                 ];
             } else {
                 throw new InvalidDataException("Given data is not a valid concept/label in the vocabulary");
-            }    
+            }
         }
 
-        return json_encode(array_merge($timeperiod,[
-            'epoch' => $epoch,
-        ]));
+        return json_encode(
+            array_merge($timeperiod, [
+                'epoch' => $epoch,
+            ])
+        );
     }
 
     public static function unserialize(mixed $data) : mixed {

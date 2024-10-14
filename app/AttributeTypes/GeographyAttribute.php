@@ -14,14 +14,14 @@ class GeographyAttribute extends AttributeBase
     protected static ?string $field = 'geography_val';
 
     public static function parseImport(int|float|bool|string $data) : mixed {
-        $data = StringUtils::useGuard(InvalidDataException::class)($data);        
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);
         $geodata = null;
-        try{
+        try {
             $geodata = Geodata::parseWkt($data);
         } catch(Exception $e) {
             throw new InvalidDataException("Invalid geography data: " . $data);
         }
-        
+
         return $geodata;
     }
 

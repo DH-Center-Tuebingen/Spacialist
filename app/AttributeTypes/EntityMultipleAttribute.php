@@ -22,8 +22,9 @@ class EntityMultipleAttribute extends AttributeBase
             $entityId = Entity::getFromPath($trimmedPart);
             if($entityId === null) {
                 $errorList[] = $trimmedPart;
+            } else {
+                $idList[] = $entityId;
             }
-            $idList[] = $entityId;
         }
 
         if(count($errorList) > 0) {
