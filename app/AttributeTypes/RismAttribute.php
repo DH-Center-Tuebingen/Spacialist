@@ -4,7 +4,6 @@ namespace App\AttributeTypes;
 
 use App\Exceptions\InvalidDataException;
 use App\Utils\NumberUtils;
-use App\Utils\StringUtils;
 
 class RismAttribute extends AttributeBase
 {
