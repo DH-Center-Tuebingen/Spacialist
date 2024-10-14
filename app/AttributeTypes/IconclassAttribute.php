@@ -2,9 +2,6 @@
 
 namespace App\AttributeTypes;
 
-use App\Exceptions\InvalidDataException;
-use App\Utils\StringUtils;
-
 class IconclassAttribute extends AttributeBase
 {
     protected static string $type = "iconclass";
