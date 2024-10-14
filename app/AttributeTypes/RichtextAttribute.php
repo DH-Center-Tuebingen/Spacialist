@@ -2,9 +2,6 @@
 
 namespace App\AttributeTypes;
 
-use App\Exceptions\InvalidDataException;
-use App\Utils\StringUtils;
-
 class RichtextAttribute extends AttributeBase
 {
     protected static string $type = "richtext";
