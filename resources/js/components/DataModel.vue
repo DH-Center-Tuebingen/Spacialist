@@ -76,7 +76,11 @@
                     :is-source="true"
                     :show-info="true"
                     @delete-element="onDeleteAttribute"
-                />
+                >
+                    <template #preceding="{attribute}">
+                        <AttributeUsageIndicator :count="attribute.entity_types_count" />
+                    </template>
+                </attribute-list>
             </div>
         </div>
     </div>
@@ -96,6 +100,8 @@
 
     import store from '@/bootstrap/store.js';
     import router from '%router';
+
+    import AttributeUsageIndicator from '@/components/dme/AttributeUsageIndicator.vue';
 
     import {
         duplicateEntityType as duplicateEntityTypeApi,
@@ -117,6 +123,9 @@
     } from '@/helpers/modal.js';
 
     export default {
+        components: {
+            AttributeUsageIndicator,
+        },
         setup(props, context) {
             const { t } = useI18n();
             const currentRoute = useRoute();
