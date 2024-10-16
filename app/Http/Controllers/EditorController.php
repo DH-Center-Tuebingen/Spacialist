@@ -83,7 +83,7 @@ class EditorController extends Controller {
                 'error' => __('You do not have the permission to view entity data')
             ], 403);
         }
-        $attributes = Attribute::whereNull('parent_id')->orderBy('id')->get();
+        $attributes = Attribute::whereNull('parent_id')->withCount('entity_types')->orderBy('id')->get();
         $selections = [];
         foreach($attributes as $a) {
             $selection = $a->getSelection();

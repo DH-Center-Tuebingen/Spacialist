@@ -716,6 +716,7 @@
                 "title": "Available Attributes",
                 "add_button": "Add Attribute",
                 "show_hidden": "Show hidden",
+                "indicator_info": "This attribute is not currently used in any entity-type! | This attribute is currently used in one entity-type. | This attribute is currently used in {cnt} entity-types.",
                 "modal": {
                     "new": {
                         "title": "New Attribute"

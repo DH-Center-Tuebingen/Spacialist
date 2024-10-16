@@ -1,7 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 0.10.1 - Dayjs Hotfix
+## 0.11 -
+### Added
+- Indicator in _Data Model Editor_ that visualizes if an attribute is used in any entity-type
+
+## 0.10.1
 ### Fixed
 - Frontend errors due to wrong dayjs import
 

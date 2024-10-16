@@ -14,22 +14,25 @@
             <div
                 v-if="!state.hiddenAttributeList[element.id] || showHidden"
                 class="mb-3 px-2"
-            >
                 :class="clFromMetadata(element)"
                 @mouseenter="onEnter(index)"
                 @mouseleave="onLeave(index)"
-                >
+            >
                 <div
                     class="row"
                     :class="addModerationStateClasses(element.id)"
                 >
                     <label
                         v-if="!state.hideLabels"
-                        class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break"
+                        class="col-form-label col-md-3 d-flex flex-row justify-content-between gap-1 text-break"
                         :for="`attr-${element.id}`"
                         :class="attributeClasses(element)"
                         @click="e => handleLabelClick(e, element.datatype)"
                     >
+                        <slot
+                            name="preceding"
+                            :attribute="element"
+                        />
                         <div
                             v-show="!!state.hoverStates[index]"
                             class="btn-fab-list"
@@ -623,7 +626,7 @@
                 updateDirtyState,
                 resetListValues,
                 undirtyList,
-                setRef,
+                setRef, 
                 onEditHandler,
                 onRemoveHandler,
                 onDeleteHandler,

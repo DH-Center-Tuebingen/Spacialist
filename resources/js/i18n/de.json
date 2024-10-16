@@ -716,6 +716,7 @@
                 "title": "Verfügbare Attribute",
                 "add_button": "Attribut hinzufügen",
                 "show_hidden": "Ausgeblendete anzeigen",
+                "indicator_info": "Dieses Attribut wird aktuell in keinem Entitätstyp verwendet! | Dieses Attribut wird aktuell in einem Entitätstyp verwendet. | Dieses Attribut wird aktuell in {cnt} Entitätstypen verwendet.",
                 "modal": {
                     "new": {
                         "title": "Neues Attribut"
