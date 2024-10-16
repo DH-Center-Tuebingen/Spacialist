@@ -1,9 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 0.10.1 - Dayjs Hotfix
+## 0.10.1
 ### Fixed
 - Frontend errors due to wrong dayjs import
+- Missing translation for _milligram_ in si-unit attribute
 
 ## 0.10 - Jelling
 ### Added
