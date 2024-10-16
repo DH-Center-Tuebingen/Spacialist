@@ -235,6 +235,7 @@
                 "mass": {
                     "label": "Gewicht",
                     "units": {
+                        "milligram": "Milligramm",
                         "gram": "Gramm",
                         "kilogram": "Kilogramm",
                         "ton": "Tonnen",
