@@ -231,15 +231,20 @@
                     :is-source="true"
                     :show-info="true"
                     @delete-element="onDeleteAttribute"
-                />
-                <Alert
-                    v-if="state.attributeList.length == 0"
-                    class="mb-0"
-                    :message="`${t('global.search_no_results_for')} ${state.attributeQuery}`"
-                    :type="'info'"
-                    :noicon="false"
-                    :icontext="t('global.information')"
-                />
+                >
+                    <Alert
+                        v-if="state.attributeList.length == 0"
+                        class="mb-0"
+                        :message="`${t('global.search_no_results_for')} ${state.attributeQuery}`"
+                        :type="'info'"
+                        :noicon="false"
+                        :icontext="t('global.information')"
+                    />
+
+                    <template #preceding="{attribute}">
+                        <AttributeUsageIndicator :count="attribute.entity_types_count" />
+                    </template>
+                </attribute-list>
             </div>
         </div>
     </div>
@@ -260,6 +265,8 @@
 
     import store from '@/bootstrap/store.js';
     import router from '%router';
+
+    import AttributeUsageIndicator from '@/components/dme/AttributeUsageIndicator.vue';
 
     import {
         duplicateEntityType as duplicateEntityTypeApi,
@@ -282,6 +289,9 @@
     } from '@/helpers/modal.js';
 
     export default {
+        components: {
+            AttributeUsageIndicator,
+        },
         setup(props, context) {
             const { t } = useI18n();
             const currentRoute = useRoute();
@@ -387,7 +397,7 @@
                 attributeListValues: computed(_ => {
                     if(!state.attributeList) return;
                     let data = {};
-                    for(let i=0; i<state.attributeList.length; i++) {
+                    for(let i = 0; i < state.attributeList.length; i++) {
                         let a = state.attributeList[i];
                         data[a.id] = {
                             value: getInitialAttributeValue(a, 'datatype'),

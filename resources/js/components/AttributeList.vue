@@ -24,11 +24,15 @@
                 >
                     <label
                         v-if="!state.hideLabels"
-                        class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break align-self-start"
+                        class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break align-self-start gap-1"
                         :for="`attr-${element.id}`"
                         :class="attributeClasses(element)"
                         @click="e => handleLabelClick(e, element.datatype)"
                     >
+                        <slot
+                            name="preceding"
+                            :attribute="element"
+                        />
                         <div
                             v-show="!!state.hoverStates[index]"
                             class="btn-fab-list"
@@ -627,7 +631,7 @@
                 updateDirtyState,
                 resetListValues,
                 undirtyList,
-                setRef,
+                setRef, 
                 onEditHandler,
                 onRemoveHandler,
                 onDeleteHandler,
