@@ -24,7 +24,6 @@ class DemoSeeder extends Seeder {
         $this->call(RoleUserTableSeeder::class);
 
         $this->call(BibliographyTableSeeder::class);
-        // $this->call(GeodataTableSeeder::class);
         $this->call(AttributesTableSeeder::class);
         $this->call(EntityTypesTableSeeder::class);
         $this->call(EntitiesTableSeeder::class);
@@ -56,7 +55,7 @@ class DemoSeeder extends Seeder {
             'test_archive.zip',
         ];
         $path = storage_path() . "/framework/testing/";
-        foreach ($testFiles as $f) {
+        foreach($testFiles as $f) {
             $filehandle = fopen("$path$f", 'r');
             Storage::put(
                 $f,
@@ -65,7 +64,7 @@ class DemoSeeder extends Seeder {
             fclose($filehandle);
         }
 
-        if (\DB::connection()->getDriverName() === 'pgsql') {
+        if(\DB::connection()->getDriverName() === 'pgsql') {
             $this->call(FixSequencesSeeder::class);
         }
 
