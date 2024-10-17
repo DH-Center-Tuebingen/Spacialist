@@ -45,7 +45,7 @@ class UserController extends Controller
                     case 'App\Entity':
                         try {
                             $name = Entity::findOrFail($n->data['resource']['id'])->name;
-                        } catch (ModelNotFoundException $e) {
+                        } catch(ModelNotFoundException $e) {
                             $skip = true;
                         }
                         break;
@@ -54,7 +54,7 @@ class UserController extends Controller
                         try {
                             $name = Entity::findOrFail($n->data['resource']['meta']['entity_id'])->name;
                             $attrUrl = Attribute::findOrFail($n->data['resource']['meta']['attribute_id'])->thesaurus_url;
-                        } catch (ModelNotFoundException $e) {
+                        } catch(ModelNotFoundException $e) {
                             $skip = true;
                         }
                         break;
@@ -69,7 +69,7 @@ class UserController extends Controller
                     if(isset($attrUrl)) {
                         $data['attribute_url'] = $attrUrl;
                     }
-                    
+
                     $n->info = $data;
                 }
             } else if($n->type == 'App\Notifications\EntityUpdated') {
@@ -77,7 +77,7 @@ class UserController extends Controller
                     $n->info = [
                         'name' => Entity::findOrFail($n->data['resource']['id'])->name,
                     ];
-                } catch (ModelNotFoundException $e) {
+                } catch(ModelNotFoundException $e) {
                 }
             }
             return $n;
@@ -360,7 +360,7 @@ class UserController extends Controller
     public function restoreUser($id)
     {
         $user = auth()->user();
-        if (!$user->can('users_roles_delete')) {
+        if(!$user->can('users_roles_delete')) {
             return response()->json([
                 'error' => __('You do not have the permission to restore users')
             ], 403);
@@ -368,7 +368,7 @@ class UserController extends Controller
 
         try {
             $delUser = User::onlyTrashed()->findOrFail($id);
-        } catch (ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This user does not exist')
             ], 400);
@@ -422,6 +422,7 @@ class UserController extends Controller
             $role->description = $request->get('description');
         }
         $role->save();
+        $role->permissions;
 
         return response()->json($role);
     }
@@ -483,7 +484,7 @@ class UserController extends Controller
             $password = Hash::make($request->get('password'));
             $pUser->password = $password;
         }
-        
+
         $pUser->login_attempts = null;
         $pUser->save();
 
@@ -545,7 +546,9 @@ class UserController extends Controller
             ], 400);
         }
 
-        Storage::delete($user->avatar);
+        if(isset($user->avatar)) {
+            Storage::delete($user->avatar);
+        }
         $user->avatar = null;
         $user->save();
         return response()->json(null, 204);

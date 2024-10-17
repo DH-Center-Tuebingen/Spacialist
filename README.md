@@ -30,11 +30,12 @@ A list with all available plugins is **coming soon**.
 
 All PHPUnit tests are based on the `DemoSeeder` seed. To run tests, follow these steps:
 
-1. Create a new database and a `.env.testing` file (`cp .env .env.testing`) and reference the DB in your `.env.testing`.
+1. Create a new database and a `.env.testing` file (e.g. with `cp .env .env.testing`) and reference the DB in your `.env.testing`.
 2. Run `php artisan app:test --refresh --skip` This will:
     1. Run migrations `php artisan migrate --env=testing`
     2. Run seeds `php artisan db:seed --class=DemoSeeder --env=testing`
 3. Run `php artisan test` or `vendor/bin/phpunit`
+    1. To generate an interactive code coverage report either run `php artisan test --coverage-html build/logs` or `vendor/bin/phpunit --coverage-html build/logs` and open `build/logs/index.html` to view results (**Please note:** xdebug-php-extension required!)
 
 ### Run specific tests
 You can also run specific tests in isolation:
@@ -43,7 +44,7 @@ You can also run specific tests in isolation:
 php artisan test --filter NameOfTestFile
 
 # Runs a specific test inside the specified test file
-php artisan test tests/Feature/MyTestFile.php --filter testTargetMethod 
+php artisan test tests/Feature/MyTestFile.php --filter testTargetMethod
 ```
 
 
