@@ -22,7 +22,7 @@ class PermissionsTableSeeder extends Seeder
             foreach($permSet as $perm) {
                 $name = $group . "_" . $perm['name'];
                 $insertData[] = [
-                    'id' => $idCntr,
+                    'id' => $idCntr++,
                     'name' => $name,
                     'display_name' => $perm['display_name'],
                     'description' => $perm['description'],
@@ -30,7 +30,6 @@ class PermissionsTableSeeder extends Seeder
                     'created_at' => '2022-03-24 09:06:58',
                     'updated_at' => '2022-03-24 09:06:58',
                 ];
-                $idCntr++;
             }
         }
         DB::table('permissions')->insert($insertData);

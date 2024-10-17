@@ -14,6 +14,25 @@ class BibliographyController extends Controller
 {
 
     // GET
+    public function getBibliographyItem(int $id){
+        $user = auth()->user();
+        if(!$user->can('bibliography_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to read bibliography')
+            ], 403);
+        }
+
+        try {
+            $bib = Bibliography::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This bibliography item does not exist')
+            ], 400);
+        }
+        
+        return response()->json($bib);
+    }
+    
     public function getBibliography() {
         $user = auth()->user();
         if(!$user->can('bibliography_read')) {
@@ -55,12 +74,13 @@ class BibliographyController extends Controller
                 'error' => __('You do not have the permission to add new bibliography')
             ], 403);
         }
+        
         $this->validate($request, [
-            'type' => 'required|alpha',
+            'entry_type' => 'required|alpha',
             'title' => 'required|string',
             'file' => 'file',
         ]);
-
+        
         $file = $request->file('file');
         $bib = new Bibliography();
         $success = $bib->fieldsFromRequest($request->except('file'), $user);
@@ -90,14 +110,16 @@ class BibliographyController extends Controller
         $this->validate($request, [
             'file' => 'required|file'
         ]);
+        
+        
+        // TODO:: This is too much logic for a controller. This should be moved inside the Model!
 
         $file = $request->file('file');
         $noOverwriteOnDup = $request->input('no-overwrite', false);
         $listener = new Listener();
         $listener->addProcessor(new TagNameCaseProcessor(CASE_LOWER));
         $listener->addProcessor(function($entry) {
-            $entry['_type'] = strtolower($entry['_type']);
-            $entry['type'] = strtolower($entry['type']);
+            $entry['entry_type'] = strtolower($entry['_type']);
             return $entry;
         });
         $parser = new Parser();
@@ -116,7 +138,10 @@ class BibliographyController extends Controller
         DB::beginTransaction();
 
         foreach($entries as $entry) {
-            $isValid = Bibliography::validateMandatory($entry, $entry['type']);
+            // Test uf tyoe exists(?)
+            
+            $entry_type = $entry['entry_type'];
+            $isValid = Bibliography::validateMandatory($entry, $entry_type);
             if(!$isValid) {
                 $errored = [
                     'type' => 'validation',
@@ -125,7 +150,7 @@ class BibliographyController extends Controller
                 break;
             }
 
-            $insArray = Bibliography::stripDisallowed($entry, $entry['type']);
+            $insArray = Bibliography::stripDisallowed($entry, $entry_type);
             // unset file, because file upload is (currently) not possible in import
             $insArray['file'] = null;
 
@@ -207,27 +232,31 @@ class BibliographyController extends Controller
 
         $entries = $query->get();
         $content = '';
+        
         foreach($entries as $e) {
-            $content .= '@'.$e->type.'{'.$e->citekey.',';
-            $content .= "\n";
+            $content .= "@{$e->entry_type}{{$e->citekey},\n";
             $attrs = $e->getAttributes();
-            foreach($attrs as $k => $a) {
-                if(!isset($a)) continue;
-                switch($k) {
+            $added = false;
+            for($i = 0; $i < count($attrs); $i++) {
+                $key = array_keys($attrs)[$i];
+                $value = array_values($attrs)[$i];
+                if(!isset($value)) continue;
+                switch($key) {
                     case 'id':
-                    case 'type':
+                    case 'entry_type':
                     case 'created_at':
                     case 'updated_at':
                     case 'citekey':
                     case 'user_id':
                         break;
                     default:
-                        $content .= '    '.$k.' = {'.$a.'}';
-                        $content .= "\n";
+                        $added = true;
+                        $content .= "    $key = {{$value}},\n";
                         break;
                 }
             }
-            $content .= '}';
+            $content = ($added)? substr($content, 0, -2) : $content;
+            $content .= "\n}";
             $content .= "\n\n";
         }
 
@@ -241,9 +270,8 @@ class BibliographyController extends Controller
         ]);
     }
 
-    // PATCH
-
     public function updateItem(Request $request, $id) {
+        
         $user = auth()->user();
         if(!$user->can('bibliography_write')) {
             return response()->json([
@@ -251,7 +279,7 @@ class BibliographyController extends Controller
             ], 403);
         }
         $this->validate($request, [
-            'type' => 'alpha|bibtex_type',
+            'entry_type' => 'alpha|bibtex_type',
             'file' => 'file',
             'delete_file' => 'boolean_string',
         ]);
@@ -264,8 +292,8 @@ class BibliographyController extends Controller
             ], 400);
         }
         $file = $request->file('file');
-
         $success = $bib->fieldsFromRequest($request->except(['file', 'delete_file']), $user);
+        
         if(!$success) {
             return response()->json([
                 'error' => __('At least one required field is not set')

@@ -168,6 +168,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 // BIBLIOGRAPHY
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/bibliography')->group(function() {
     Route::get('/', 'BibliographyController@getBibliography');
+    Route::get('/{id}', 'BibliographyController@getBibliographyItem')->where('id', '[0-9]+');
     Route::get('/{id}/ref_count', 'BibliographyController@getReferenceCount')->where('id', '[0-9]+');
     
     Route::post('/', 'BibliographyController@addItem');
