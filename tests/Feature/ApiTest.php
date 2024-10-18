@@ -3,16 +3,14 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 
-use App\Preference;
 use App\VersionInfo;
 
 class ApiTest extends TestCase
 {
     /**
-     * A basic test example.
+     * @testdox GET / : Get Base App Endpoint
      *
      * @return void
      */
@@ -24,7 +22,7 @@ class ApiTest extends TestCase
     }
 
     /**
-     * Test welcome page.
+     * @testdox GET /welcome : Get Welcome Page Endpoint
      *
      * @return void
      */
@@ -36,7 +34,7 @@ class ApiTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * @testdox GET /api/v1/pre : Get Pre Endpoint Failed Unauth
      *
      * @return void
      */
@@ -50,7 +48,7 @@ class ApiTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * @testdox GET /api/v1/pre : Get Pre Endpoint Failed Missing Token
      *
      * @return void
      */
@@ -63,48 +61,46 @@ class ApiTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * @testdox GET /api/v1/pre : Get Pre Endpoint
      *
      * @return void
      */
     public function testAuthPreRequest()
     {
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->get('/api/v1/pre');
 
         $response->assertStatus(200);
-        // returns array with 'preferences', 'concepts' and 'entityTypes'
-        $response->assertJsonCount(4);
+        $response->assertJsonCount(7);
         $response->assertJsonStructure([
+            'system_preferences',
             'preferences',
             'concepts',
             'entityTypes',
-            'users',
+            'datatype_data',
+            'colorsets',
+            'analysis',
         ]);
     }
 
     /**
-     * A basic test example.
+     * @testdox GET /api/v1/version : Get Version Endpoint
      *
      * @return void
      */
     public function testVersionRequest()
     {
         $vi = new VersionInfo();
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->get('/api/v1/version');
 
         $response->assertStatus(200);
         $content = $response->decodeResponseJson();
         $this->assertMatchesRegularExpression('/^\d+$/', $content['time']);
         $this->assertMatchesRegularExpression('/^[A-ZÄÖÜ][a-zäöüß]+$/', $content['name']);
-        $this->assertMatchesRegularExpression('/^v\d\.\d\.\d$/', $content['release']);
-        $this->assertMatchesRegularExpression('/^v\d\.\d\.\d \([A-ZÄÖÜ][a-zäöüß]+\)$/', $content['readable']);
-        $this->assertMatchesRegularExpression('/^v\d\.\d\.\d-[a-zäöüß]+(-g[a-f0-9]{8})?$/', $content['full']);
+        $this->assertMatchesRegularExpression('/^v\d+\.\d+\.\d+$/', $content['release']);
+        $this->assertMatchesRegularExpression('/^v\d+\.\d+\.\d+ \([A-ZÄÖÜ][a-zäöüß]+\)$/', $content['readable']);
+        $this->assertMatchesRegularExpression('/^v\d+\.\d+\.\d+-[a-zäöüß]+(-g[a-f0-9]{8})?$/', $content['full']);
         $this->assertEquals($content['release'], 'v' . $vi->getMajor() . "." . $vi->getMinor() . "." . $vi->getPatch());
 
         $hash = $vi->getReleaseHash();
