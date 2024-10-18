@@ -348,10 +348,13 @@ class EditorController extends Controller {
         $duplicate = $entityType->replicate();
         $duplicate->save();
 
-        $newLayer = $entityType->layer->replicate();
-        $newLayer->entity_type_id = $duplicate->id;
-        $newLayer->position = AvailableLayer::where('is_overlay', true)->max('position') + 1;
-        $newLayer->save();
+        // TODO:: This should be handled by a hook in the plugin [SO]
+        if($entityType->layer){
+            $newLayer = $entityType->layer->replicate();
+            $newLayer->entity_type_id = $duplicate->id;
+            $newLayer->position = AvailableLayer::where('is_overlay', true)->max('position') + 1;
+            $newLayer->save();
+        }
 
         foreach($entityType->attributes as $attribute) {
             $newAttribute = EntityAttribute::where('attribute_id', $attribute->pivot->attribute_id)

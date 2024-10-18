@@ -11,8 +11,9 @@ use App\Entity;
 use App\EntityAttribute;
 use App\EntityType;
 use App\ThConcept;
-use App\User;
 use Illuminate\Testing\Fluent\AssertableJson;
+use Tests\PermissionTester;
+use Tests\Permission;
 
 class ApiEditorTest extends TestCase
 {
@@ -211,22 +212,22 @@ class ApiEditorTest extends TestCase
             "boolean"       => true,
             "date"          => true,
             "daterange"     => true,
-            "dimension"     => true,
+            "dimension"     => false,
             "double"        => true,
             "string-mc"     => true,
             "string-sc"     => true,
             "entity"        => true,
             "entity-mc"     => true,
-            "epoch"         => true,
+            "epoch"         => false,
             "geography"     => true,
             "iconclass"     => true,
             "integer"       => true,
-            "list"          => true,
-            "percentage"    => true,
-            "richtext"      => true,
+            "list"          => false,
+            "percentage"    => false,
+            "richtext"      => false,
             "rism"          => true,
-            "serial"        => true,
-            "sql"           => true,
+            "serial"        => false,
+            "sql"           => false,
             "string"        => true,
             "stringf"       => false,
             "table"         => false,
@@ -426,7 +427,7 @@ class ApiEditorTest extends TestCase
     }
     
     
-    /*
+    /**
     * @testdox POST /api/v1/editor/dm/{id}/relation  -  Modify entity type relations
     */
     public function testModifyingEntityTypeRelation(){
@@ -451,7 +452,7 @@ class ApiEditorTest extends TestCase
     }
 
     /**
-     *  @testdox /api/v1/editor/dm/attribute  -  Test adding a new entity type and modifying it's relations afterwards.
+     *  @testdox POST /api/v1/editor/dm/attribute  -  Test adding a new entity type and modifying it's relations afterwards.
      */
     public function testAddAttributeEndpoint()
     {
@@ -464,7 +465,7 @@ class ApiEditorTest extends TestCase
                 'recursive' => false
             ]);
 
-        $attribute = Attribute::orderBy('id', 'asc')->first();
+        $attribute = Attribute::orderBy('id', 'desc')->first();
         $this->assertStatus($response, 201);
         $response->assertJsonStructure([
             'attribute' => [
@@ -481,12 +482,12 @@ class ApiEditorTest extends TestCase
             ], 
             'selection'
         ]);
-        
+
         $response->assertJson(fn(AssertableJson $json) =>
             $json
                 ->has('attribute', fn($json) =>
                     $json
-                        ->has('id')
+                        ->has("id")
                         ->has('thesaurus_url')
                         ->has('datatype')
                         ->has('text')
@@ -496,7 +497,11 @@ class ApiEditorTest extends TestCase
                         ->has('updated_at')
                         ->has('recursive')
                         ->has('root_attribute_id')
-                        ->where('id', $attribute->id)
+                        ->has('is_system')
+                        ->has('multiple')
+                        ->has('restrictions')
+                        ->has('metadata')
+                        ->has('columns')
                         ->where('thesaurus_url', $concept->concept_url)
                         ->where('datatype', 'string-sc')
                         ->where('text', null)
@@ -506,6 +511,11 @@ class ApiEditorTest extends TestCase
                         ->where('updated_at', $attribute->updated_at->toJSON())
                         ->where('recursive', false)
                         ->where('root_attribute_id', null)
+                        ->where('is_system', false)
+                        ->where('multiple', false)
+                        ->where('restrictions', null)
+                        ->where('metadata', null)
+                        ->where('columns', [])
                 )
                 ->has('selection.0', fn($json) =>
                     $json
@@ -516,6 +526,7 @@ class ApiEditorTest extends TestCase
                         ->has('updated_at')
                         ->has('is_top_concept')
                         ->has('narrower_id')
+                        ->has('broader_id')
                         ->has('user_id')
                         ->where('id', 48)
                 )
@@ -528,6 +539,7 @@ class ApiEditorTest extends TestCase
                         ->has('updated_at')
                         ->has('is_top_concept')
                         ->has('narrower_id')
+                        ->has('broader_id')
                         ->has('user_id')
                         ->where('id', 62)
                 )
@@ -535,9 +547,7 @@ class ApiEditorTest extends TestCase
     }
 
     /**
-     * Test adding an attribute (id=2) to an entity type (id=3).
-     *
-     * @return void
+     *  @testdox POST /api/v1/editor/dm/entity_type/{id}/attribute  -  Adding attributes to an entity type (id=3).
      */
     public function testAddAttributeToEntityTypeEndpoint()
     {
@@ -633,9 +643,7 @@ class ApiEditorTest extends TestCase
     }
 
     /**
-     * Test duplicate an entity type.
-     *
-     * @return void
+     *  @testdox POST /api/v1/editor/dm/entity_type/{id}/duplicate  -  Duplicating an entity type (id=3).
      */
     public function testDuplicateEntityTypeEndpoint()
     {
@@ -645,7 +653,6 @@ class ApiEditorTest extends TestCase
             ->post('/api/v1/editor/dm/entity_type/3/duplicate');
 
         $newEntityType = EntityType::latest()->first();
-        $newEntityTypeLayer = AvailableLayer::latest()->first();
 
         $this->assertStatus($response, 200);
         $response->assertJsonStructure([
@@ -666,38 +673,32 @@ class ApiEditorTest extends TestCase
 
         $content = json_decode($response->getContent());
         $etSubTypeIds = $entityType->sub_entity_types->pluck('id');
-        $this->assertEquals($newEntityType->id, $newEntityTypeLayer->entity_type_id);
-        $this->assertEquals($layMax+1, $newEntityTypeLayer->position);
         $this->assertEquals(count($etSubTypeIds), count($content->sub_entity_types));
     }
 
-    // Testing PATCH requests
-
     /**
-     * Test changing label of an entity type.
-     *
-     * @return void
+     *  @testdox PATCH /api/v1/editor/dm/entity_type/{id}  -  Editing an entity type (id=3).
      */
-    public function testRenamingEntityTypeEndpoint()
+    public function testEditEntityTypeEndpoint()
     {
         $entityType = EntityType::find(3);
         $this->assertEquals('https://spacialist.escience.uni-tuebingen.de/<user-project>/fundstelle#20171220094911', $entityType->thesaurus_url);
 
         $response = $this->userRequest()
-            ->patch('/api/v1/editor/dm/entity_type/3/label', [
-                'label' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/erhaltung#20171220100437'
+            ->patch('/api/v1/editor/dm/entity_type/3', [
+                'data' => [
+                    'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/erhaltung#20171220100437'
+                ]
             ]);
 
-        $this->assertStatus($response, 204);
+        $this->assertStatus($response, 200);
 
         $entityType = EntityType::find(3);
         $this->assertEquals('https://spacialist.escience.uni-tuebingen.de/<user-project>/erhaltung#20171220100437', $entityType->thesaurus_url);
     }
 
     /**
-     * Test reordering attributes of an entity type (id=4).
-     *
-     * @return void
+     *  @testdox PATCH /api/v1/editor/dm/entity_type/{id}/attribute/{aid}/position  -   Test reordering attributes of an entity type (id=4).
      */
     public function testRoorderEntityTypeAttributesEndpoint()
     {
@@ -791,37 +792,32 @@ class ApiEditorTest extends TestCase
     }
 
     /**
-     * Test adding dependency to an attribute of an entity type (id=4).
-     *
-     * @return void
+     *  @testdox PATCH /api/v1/editor/dm/entity_type/{id}/attribute/{aid}/dependency  -   Test adding dependency to an attribute of an entity type (id=4).
      */
     public function testAddDependencyToEntiyTypeAttributeEndpoint()
     {
         $response = $this->userRequest()
             ->patch('/api/v1/editor/dm/entity_type/4/attribute/14/dependency', [
-                'd_attribute' => 13,
-                'd_operator' => '=',
-                'd_value' => 'Test Value'
+                'attribute' => 13,
+                'operator' => '=',
+                'value' => 'Test Value'
             ]);
 
-        $this->assertStatus($response, 204);
+        $this->assertStatus($response, 200);
 
-        // id for entity_type_id = 4 AND attribute_id = 14 is 9
-        $entityAttribute = EntityAttribute::find(9)->load('attribute');
-        $dep = json_decode($entityAttribute->depends_on);
-        $exp = new \stdClass;
-        $expDep = new \stdClass;
-        $expDep->operator = '=';
-        $expDep->value = 'Test Value';
-        $expDep->dependant = 14;
-        $exp->{13} = $expDep;
-        $this->assertEquals($exp, $dep);
+        $entityAttribute = EntityAttribute::for(4, 14);
+        $this->assertArrayHasKey('depends_on', $entityAttribute);
+        $this->assertEquals([
+            13 => [
+                'operator' => '=',
+                'value' => 'Test Value',
+                'dependant' => 14
+            ]
+        ], $entityAttribute->depends_on);
     }
 
     /**
-     * Test deleting an entity type (id=4).
-     *
-     * @return void
+     *  @testdox DELETE /api/v1/editor/dm/entity_type/{id}  -   Test deleting an entity type (id=4).
      */
     public function testDeleteEntityTypeEndpoint()
     {
@@ -833,8 +829,6 @@ class ApiEditorTest extends TestCase
         $this->assertEquals(8, $eCnt);
         $avCnt = AttributeValue::count();
         $this->assertEquals(25, $avCnt);
-        $alCnt = AvailableLayer::count();
-        $this->assertEquals(8, $alCnt);
 
         $response = $this->userRequest()
             ->delete('/api/v1/editor/dm/entity_type/4');
@@ -849,15 +843,11 @@ class ApiEditorTest extends TestCase
         $this->assertEquals(4, $eCnt);
         $avCnt = AttributeValue::count();
         $this->assertEquals(7, $avCnt);
-        $alCnt = AvailableLayer::count();
-        $this->assertEquals(7, $alCnt);
     }
 
-    /**
-     * Test deleting an attribute (id=12).
-     *
-     * @return void
-     */
+     /**
+      * @testdox DELETE /api/v1/editor/dm/attribute/{id}  -  Test deleting an attribute (id=12).
+      */
     public function testDeleteAttributeEndpoint()
     {
         $eaCnt = EntityAttribute::count();
@@ -865,7 +855,7 @@ class ApiEditorTest extends TestCase
         $avCnt = AttributeValue::count();
         $this->assertEquals(25, $avCnt);
         $aCnt = Attribute::count();
-        $this->assertEquals(18, $aCnt);
+        $this->assertEquals(19, $aCnt);
 
         $response = $this->userRequest()
             ->delete('/api/v1/editor/dm/attribute/12');
@@ -877,14 +867,12 @@ class ApiEditorTest extends TestCase
         $avCnt = AttributeValue::count();
         $this->assertEquals(21, $avCnt);
         $aCnt = Attribute::count();
-        $this->assertEquals(17, $aCnt);
+        $this->assertEquals(18, $aCnt);
     }
 
-    /**
-     * Test deleting an attribute (id=11) from an entity type (id=5).
-     *
-     * @return void
-     */
+     /**
+      * @testdox DELETE /api/v1/editor/dm/entity_type/{id}/attribute/{aid}  -  Test deleting an attribute (id=11) from an entity type (id=5).
+      */
     public function testDeleteAttributeFromEntityTypeEndpoint()
     {
         $eaCnt = EntityAttribute::count();
@@ -892,30 +880,20 @@ class ApiEditorTest extends TestCase
         $avCnt = AttributeValue::count();
         $this->assertEquals(25, $avCnt);
         $entityType = EntityType::find(5)->load('attributes');
-        foreach($entityType->attributes as $a) {
-            if($a->id == 12) {
-                $this->assertEquals(1, $a->pivot->position);
-            } else if($a->id == 9) {
-                $this->assertEquals(2, $a->pivot->position);
-            } else if($a->id == 11) {
-                $this->assertEquals(3, $a->pivot->position);
-            } else if($a->id == 2) {
-                $this->assertEquals(4, $a->pivot->position);
-            } else if($a->id == 3) {
-                $this->assertEquals(5, $a->pivot->position);
-            } else if($a->id == 5) {
-                $this->assertEquals(6, $a->pivot->position);
-            } else if($a->id == 19) {
-                $this->assertEquals(7, $a->pivot->position);
-            } else if($a->id == 4) {
-                $this->assertEquals(8, $a->pivot->position);
-            } else if($a->id == 13) {
-                $this->assertEquals(9, $a->pivot->position);
+
+        $oldPositions = [12,9,11,2,3,5,19,4,13];
+        foreach($entityType->attributes as $entityType) {
+            foreach($oldPositions as $index => $position) {
+                if($entityType->id == $position) {
+                    $this->assertEquals($index+1, $entityType->pivot->position);
+                    break;
+                }
             }
         }
 
+        $entityAttribute = EntityAttribute::for(5, 11);
         $response = $this->userRequest()
-            ->delete('/api/v1/editor/dm/entity_type/5/attribute/11');
+            ->delete("/api/v1/editor/dm/entity_type/attribute/$entityAttribute->id");
 
         $this->assertStatus($response, 204);
 
@@ -924,109 +902,98 @@ class ApiEditorTest extends TestCase
         $avCnt = AttributeValue::count();
         $this->assertEquals(22, $avCnt);
         $entityType = EntityType::find(5)->load('attributes');
-        foreach($entityType->attributes as $a) {
-            if($a->id == 12) {
-                $this->assertEquals(1, $a->pivot->position);
-            } else if($a->id == 9) {
-                $this->assertEquals(2, $a->pivot->position);
-            } else if($a->id == 2) {
-                $this->assertEquals(3, $a->pivot->position);
-            } else if($a->id == 3) {
-                $this->assertEquals(4, $a->pivot->position);
-            } else if($a->id == 5) {
-                $this->assertEquals(5, $a->pivot->position);
-            } else if($a->id == 19) {
-                $this->assertEquals(6, $a->pivot->position);
-            } else if($a->id == 4) {
-                $this->assertEquals(7, $a->pivot->position);
-            } else if($a->id == 13) {
-                $this->assertEquals(8, $a->pivot->position);
+        $newPositions = [12,9,2,3,5,19,4,13];
+        foreach($entityType->attributes as $entityType) {
+            foreach($newPositions as $index => $position) {
+                if($entityType->id == $position) {
+                    $this->assertEquals($index+1, $entityType->pivot->position);
+                    break;
+                }
             }
         }
     }
 
-    // Testing exceptions and permissions
-
     /**
-     *
-     *
-     * @return void
+     * @dataProvider permissionsProvider
      */
-    public function testPermissions()
-    {
-        User::first()->roles()->detach();
-
-        $calls = [
-            ['url' => '/entity_type/1', 'error' => 'You do not have the permission to get an entity type\'s data', 'verb' => 'get'],
-            ['url' => '/entity_type/1/attribute', 'error' => 'You do not have the permission to view entity data', 'verb' => 'get'],
-            ['url' => '/attribute/1/selection', 'error' => 'You do not have the permission to view entity data', 'verb' => 'get'],
-            ['url' => '/dm/entity_type/top', 'error' => 'You do not have the permission to view entity data', 'verb' => 'get'],
-            ['url' => '/dm/attribute', 'error' => 'You do not have the permission to view entity data', 'verb' => 'get'],
-            ['url' => '/dm/entity_type', 'error' => 'You do not have the permission to create a new entity type', 'verb' => 'post'],
-            ['url' => '/dm/1/relation', 'error' => 'You do not have the permission to modify entity relations', 'verb' => 'post'],
-            ['url' => '/dm/attribute', 'error' => 'You do not have the permission to add attributes', 'verb' => 'post'],
-            ['url' => '/dm/entity_type/1/attribute', 'error' => 'You do not have the permission to add attributes to an entity type', 'verb' => 'post'],
-            ['url' => '/dm/entity_type/1/duplicate', 'error' => 'You do not have the permission to duplicate an entity type', 'verb' => 'post'],
-            ['url' => '/dm/entity_type/1/label', 'error' => 'You do not have the permission to modify entity-type labels', 'verb' => 'patch'],
-            ['url' => '/dm/entity_type/1/attribute/1/position', 'error' => 'You do not have the permission to reorder attributes', 'verb' => 'patch'],
-            ['url' => '/dm/entity_type/1/attribute/1/dependency', 'error' => 'You do not have the permission to add/modify attribute dependencies', 'verb' => 'patch'],
-            ['url' => '/dm/entity_type/1', 'error' => 'You do not have the permission to delete entity types', 'verb' => 'delete'],
-            ['url' => '/dm/attribute/1', 'error' => 'You do not have the permission to delete attributes', 'verb' => 'delete'],
-            ['url' => '/dm/entity_type/1/attribute/1', 'error' => 'You do not have the permission to remove attributes from entity types', 'verb' => 'delete'],
-        ];
-
-        foreach($calls as $c) {
-            $response = $this->withHeaders([
-                    'Authorization' => "Bearer $this->token"
-                ])
-                ->json($c['verb'], '/api/v1/editor' . $c['url']);
-
-            $this->assertStatus($response, 403);
-            $response->assertSimilarJson([
-                'error' => $c['error']
-            ]);
-
-            $this->refreshToken($response);
-        }
+    public function testWithoutPermission($permission){          
+        (new PermissionTester($this))->testMissingPermission($permission);
     }
+
     /**
-     *
-     *
-     * @return void
+     * @dataProvider exceptionsProvider
      */
-    public function testExceptions()
-    {
-        $calls = [
-            ['url' => '/entity_type/99', 'error' => 'This entity-type does not exist', 'verb' => 'get'],
-            ['url' => '/attribute/99/selection', 'error' => 'This attribute does not exist', 'verb' => 'get'],
-            ['url' => '/dm/99/relation', 'error' => 'This entity-type does not exist', 'verb' => 'post'],
-            ['url' => '/dm/entity_type/99/duplicate', 'error' => 'This entity-type does not exist', 'verb' => 'post'],
-            ['url' => '/dm/entity_type/99/label', 'error' => 'This entity-type does not exist', 'verb' => 'patch'],
-            ['url' => '/dm/entity_type/1/attribute/99/position', 'error' => 'Entity Attribute not found', 'verb' => 'patch'],
-            ['url' => '/dm/entity_type/1/attribute/99/dependency', 'error' => 'Entity Attribute not found', 'verb' => 'patch'],
-            ['url' => '/dm/entity_type/99', 'error' => 'This entity-type does not exist', 'verb' => 'delete'],
-            ['url' => '/dm/attribute/99', 'error' => 'This attribute does not exist', 'verb' => 'delete'],
-            ['url' => '/dm/entity_type/1/attribute/99', 'error' => 'Entity Attribute not found', 'verb' => 'delete'],
+    public function testExceptions($permission){
+        (new PermissionTester($this))->testExceptions($permission);
+    }
+
+    public static function permissionsProvider(){ 
+        return [
+            'permission to get entity type'                     => Permission::for("get", "/api/v1/editor/entity_type/1",           "You do not have the permission to get an entity type's data"),
+            'permission to view entity data'                    => Permission::for("get", "/api/v1/editor/entity_type/1/attribute", "You do not have the permission to view entity data"),
+            'permission to view entity data'                    => Permission::for("get", "/api/v1/editor/dm/entity_type/top",      "You do not have the permission to view entity data"),
+            'permission to view entity data'                    => Permission::for("get", "/api/v1/editor/dm/attribute",           "You do not have the permission to view entity data"),
+            'permission to create entity type'                  => Permission::for("post", "/api/v1/editor/dm/entity_type",        "You do not have the permission to create a new entity type"),
+            'permission to modify entity relations'             => Permission::for("post", "/api/v1/editor/dm/1/relation",     "You do not have the permission to modify entity relations"),
+            'permission to add attributes'                      => Permission::for("post", "/api/v1/editor/dm/attribute",          "You do not have the permission to add attributes",[
+                    'label_id' => 1,
+                    'datatype' => 'string-sc',
+                    'root_id' => 1,
+                    'recursive' => false
+            ]),
+            'permission to add attributes to an entity type'    => Permission::for("post", "/api/v1/editor/dm/entity_type/1/attribute", "You do not have the permission to add attributes to an entity type"),
+            'permission to duplicate an entity type'            => Permission::for("post", "/api/v1/editor/dm/entity_type/1/duplicate", "You do not have the permission to duplicate an entity type"),
+            'permission to modify entity-type'                  => Permission::for("patch", "/api/v1/editor/dm/entity_type/1", "You do not have the permission to modify entity-type labels",[
+                'data' => [
+                    'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/fundstelle#20171220094911'
+                ]
+            ]),
+            'permission to reorder attributes'                  => Permission::for("patch", "/api/v1/editor/dm/entity_type/1/attribute/1/position", "You do not have the permission to reorder attributes"),
+            'permission to add/modify attribute dependencies'   => Permission::for("patch", "/api/v1/editor/dm/entity_type/1/attribute/1/dependency", "You do not have the permission to add/modify attribute dependencies", [
+                    'attribute' => 15,
+                    'operator' => '=',
+                    'value' => 'NoValue',
+                ]),
+            'permission to delete entity types'                 => Permission::for("delete", "/api/v1/editor/dm/entity_type/1", "You do not have the permission to delete entity types"),
+            'permission to delete attributes'                   => Permission::for("delete", "/api/v1/editor/dm/attribute/1", "You do not have the permission to delete attributes"),
+            'permission to remove attributes from entity types' => Permission::for("delete", "/api/v1/editor/dm/entity_type/attribute/19", "You do not have the permission to remove attributes from entity types"),
         ];
+    }
 
-        foreach($calls as $c) {
-            $response = $this->withHeaders([
-                    'Authorization' => "Bearer $this->token"
-                ])
-                ->json($c['verb'], '/api/v1/editor' . $c['url'], [
-                    'label' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/fundstelle#20171220094911',
-                    'position' => 1,
-                    'd_attribute' => 15,
-                    'd_operator' => '=',
-                    'd_value' => 'NoValue',
-                ]);
+    public static function exceptionsProvider(){ 
 
-            $this->assertStatus($response, 400);
-            $response->assertSimilarJson([
-                'error' => $c['error']
-            ]);
+        $entityDoesNotExist = "This entity-type does not exist";
+        $entityAttributeNotFound = "Entity Attribute not found";
+        $attributeDoesNotExist = "This attribute does not exist";
 
-            $this->refreshToken($response);
-        }
+        return [
+            'exception on get entity type'                     => Permission::for("get", "/api/v1/editor/entity_type/99", $entityDoesNotExist),
+            'exception on view entity data'                    => Permission::for("post", "/api/v1/editor/dm/entity_type/99/attribute", $entityDoesNotExist,[
+                'attribute_id' => 2,
+                'position' => 1
+            ]),
+            'exception on modify entity relations'             => Permission::for("post", "/api/v1/editor/dm/99/relation", $entityDoesNotExist),
+            'exception on add attributes to an entity type'    => Permission::for("post", "/api/v1/editor/dm/entity_type/99/attribute", $entityDoesNotExist,[
+                'attribute_id' => 2,
+                'position' => 1
+            ]),
+            'exception on duplicate an entity type'            => Permission::for("post", "/api/v1/editor/dm/entity_type/99/duplicate", $entityDoesNotExist),
+            'exception on modify entity-type'                  => Permission::for("patch", "/api/v1/editor/dm/entity_type/99", $entityDoesNotExist,[
+                'data' => [
+                    'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/fundstelle#20171220094911'
+                ]
+            ]),
+            'exception on reorder attributes'                  => Permission::for("patch", "/api/v1/editor/dm/entity_type/1/attribute/99/position", $entityAttributeNotFound, [
+                'position' => 1
+            ]),
+            'exception on add/modify attribute dependencies'   => Permission::for("patch", "/api/v1/editor/dm/entity_type/1/attribute/99/dependency", $entityAttributeNotFound, [
+                    'attribute' => 15,
+                    'operator' => '=',
+                    'value' => 'NoValue',
+                ]),
+            'exception on delete entity types'                 => Permission::for("delete", "/api/v1/editor/dm/entity_type/99", $entityDoesNotExist),
+            'exception on delete attributes'                   => Permission::for("delete", "/api/v1/editor/dm/attribute/99", $attributeDoesNotExist),
+            'exception on remove attributes from entity types' => Permission::for("delete", "/api/v1/editor/dm/entity_type/attribute/99", "Entity Attribute not found"),
+        ];
     }
 }

@@ -15,7 +15,7 @@ class PermissionTester {
     
     public function testExceptions(Permission $permission) {
             $response = $this->case->userRequest()
-                ->json($permission->getMethod(), $permission->getUrl());
+                ->json($permission->getMethod(), $permission->getUrl(), $permission->getData());
 
             $this->case->assertStatus($response, 400);
             $response->assertSimilarJson([
@@ -27,7 +27,7 @@ class PermissionTester {
         User::first()->roles()->detach();
 
         $response = $this->case->userRequest()
-            ->json($permission->getMethod(), $permission->getUrl());
+            ->json($permission->getMethod(), $permission->getUrl(), $permission->getData());
 
         $this->case->assertStatus($response, 403);
         $response->assertSimilarJson([

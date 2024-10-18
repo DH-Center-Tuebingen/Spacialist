@@ -57,6 +57,14 @@ class EntityAttribute extends Model
             ->delete();
     }
 
+    public static function for($entityId, $attributeId) {
+        $instance = new static;
+        return $instance->where([
+            ['entity_type_id', $entityId],
+            ['attribute_id', $attributeId]
+        ])->firstOrFail();
+    }
+
     public function attribute() {
         return $this->belongsTo('App\Attribute');
     }
