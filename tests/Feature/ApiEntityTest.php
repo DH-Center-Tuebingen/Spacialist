@@ -13,12 +13,9 @@ use App\User;
 
 class ApiEntityTest extends TestCase
 {
-    // Testing GET requests
 
     /**
-     * Test getting all top entities.
-     *
-     * @return void
+     * @testdox GET /api/v1/entity  -  Test getting all top entities.
      */
     public function testTopEntityEndpoint()
     {
@@ -34,7 +31,6 @@ class ApiEntityTest extends TestCase
                 'name',
                 'entity_type_id',
                 'root_entity_id',
-                'geodata_id',
                 'rank',
                 'user_id',
                 'created_at',
@@ -46,11 +42,9 @@ class ApiEntityTest extends TestCase
     }
 
     /**
-     * Test getting entity (id=1).
-     *
-     * @return void
+     * @testdox GET /api/v1/entity/{id}  -  Test getting entity (id=1).
      */
-    public function testEntityEndpoint()
+    public function testEntityEndpointtestEntityEndpoint()
     {
         $response = $this->withHeaders([
                 'Authorization' => "Bearer $this->token"
@@ -62,7 +56,6 @@ class ApiEntityTest extends TestCase
             'name' => 'Site A',
             'entity_type_id' => 3,
             'root_entity_id' => null,
-            'geodata_id' => 2,
             'rank' => 1,
             'user_id' => 1,
             'user' => [
@@ -76,19 +69,20 @@ class ApiEntityTest extends TestCase
                 'avatar' => null,
                 'avatar_url' => null,
                 'metadata' => null,
+                'login_attempts' => null,
             ],
             'created_at' => '2017-12-20T17:10:34.000000Z',
             'updated_at' => '2017-12-31T16:10:56.000000Z',
             'parentIds' => [1],
             'parentNames' => ['Site A'],
-            'comments_count' => 0
+            'comments_count' => 0,
+            'metadata' => [],
+            'attributeLinks' => [],
         ]);
     }
 
     /**
-     * Test getting entity (id=2).
-     *
-     * @return void
+     * @testdox GET /api/v1/entity/{id}  -  Test getting entity (id=2).
      */
     public function testEntityEndpointId()
     {
@@ -102,10 +96,9 @@ class ApiEntityTest extends TestCase
         ]);
     }
 
+
     /**
-     * Test getting non-existing entity.
-     *
-     * @return void
+     * @testdox GET /api/v1/entity/{id}  -  Test getting non-existing entity.
      */
     public function testEntityWrongIdEndpoint()
     {
@@ -121,6 +114,9 @@ class ApiEntityTest extends TestCase
      * Test getting attribute values (id=15) of an entity-type (id=3).
      *
      * @return void
+     */
+    /**
+     * @testdox GET /api/v1/entity/entity_type/{id}/attributes  -  Test getting attributes of an entity-type (id=3).
      */
     public function testEntityTypeDataEndpoint()
     {
@@ -152,11 +148,9 @@ class ApiEntityTest extends TestCase
         ]);
     }
 
-    /**
-     * Test getting data of an entity (id=1).
-     *
-     * @return void
-     */
+     /**
+      * @testdox GET /api/v1/entity/{id}/data  -  Test getting data of an entity (id=1).
+      */
     public function testEntityDataEndpoint()
     {
         $response = $this->withHeaders([
@@ -184,11 +178,9 @@ class ApiEntityTest extends TestCase
         ]);
     }
 
-    /**
-     * Test getting data of an non-existing entity.
-     *
-     * @return void
-     */
+     /**
+      * @testdox GET /api/v1/entity/{id}/data  -  Test getting data of a non-existing entity.
+      */
     public function testEntityDataWithWrongIdEndpoint()
     {
         $response = $this->withHeaders([
@@ -202,10 +194,8 @@ class ApiEntityTest extends TestCase
         ]);
     }
 
-    /**
-     * Test getting data of an attribute (id=15) of an entity (id=1).
-     *
-     * @return void
+    /***
+     * @testdox GET /api/v1/entity/{id}/data/{aid}  -  Test getting data of an attribute (id=15) of an entity (id=1).
      */
     public function testEntityDataWithAttributeEndpoint()
     {
@@ -234,11 +224,9 @@ class ApiEntityTest extends TestCase
         ]);
     }
 
-    /**
-     * Test getting data with wrong attribute ID.
-     *
-     * @return void
-     */
+     /**
+      * @testdox GET /api/v1/entity/{id}/data/{aid}  -  Test getting data of a non-existing attribute (id=99) of an entity (id=1).
+      */
     public function testEntityDataWithWrongAttributeEndpoint()
     {
         $response = $this->withHeaders([
