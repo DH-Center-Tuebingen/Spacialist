@@ -91,7 +91,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::get('/dm/attribute', 'EditorController@getAttributes');
     Route::get('/dm/attribute_types', 'EditorController@getAttributeTypes');
     Route::get('/entity_type/{id}', 'EditorController@getEntityType')->where('id', '[0-9]+');
-    
+
     // TODO: This should be moved to the map plugin
     Route::get('/dm/geometry', 'EditorController@getAvailableGeometryTypes');
 
@@ -162,9 +162,8 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 // PREFERENCES
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/preference')->group(function() {
     Route::get('', 'PreferenceController@getPreferences');
-    Route::get('/{id}', 'PreferenceController@getUserPreferences')->where('id', '[0-9]+');
 
-    Route::patch('/', 'PreferenceController@patchPreferences');
+    Route::patch('', 'PreferenceController@patchPreferences');
 });
 
 // BIBLIOGRAPHY
@@ -172,11 +171,11 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::get('/', 'BibliographyController@getBibliography');
     Route::get('/{id}', 'BibliographyController@getBibliographyItem')->where('id', '[0-9]+');
     Route::get('/{id}/ref_count', 'BibliographyController@getReferenceCount')->where('id', '[0-9]+');
-    
+
     Route::post('/', 'BibliographyController@addItem');
     Route::post('/import', 'BibliographyController@importBibtex');
     Route::post('/export', 'BibliographyController@exportBibtex');
-    
+
     // form data params are not recognized using patch, thus using post
     Route::post('/{id}', 'BibliographyController@updateItem')->where('id', '[0-9]+');
 
