@@ -2,14 +2,20 @@
 
 namespace App\AttributeTypes;
 
+use App\Exceptions\InvalidDataException;
+
 class PercentageAttribute extends AttributeBase
 {
     protected static string $type = "percentage";
     protected static bool $inTable = false;
     protected static ?string $field = 'int_val';
 
-    public static function fromImport(int|float|bool|string $data) : mixed {
-        return IntegerAttribute::fromImport($data);
+    public static function parseImport(int|float|bool|string $data) : mixed {
+        $data = IntegerAttribute::fromImport($data);
+        if(intval($data) < 0 || intval($data) > 100)
+            throw InvalidDataException::requireRange($data, 0, 100);
+
+        return $data;
     }
 
     public static function unserialize(mixed $data) : mixed {

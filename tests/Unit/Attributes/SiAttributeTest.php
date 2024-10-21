@@ -424,7 +424,7 @@ class SiAttributeTest extends TestCase {
     public function testImportErrorNotANumber() {
         $importValue = "not a number;unit";
         $this->expectException(InvalidDataException::class);
-        $this->expectExceptionMessage('The section 1 must be a number.');
+        $this->expectExceptionMessage('The value must be a number  -  section 1');
         SiUnitAttribute::fromImport($importValue);
     }
 
@@ -433,7 +433,7 @@ class SiAttributeTest extends TestCase {
     public function testImportErrorNotAUnit() {
         $importValue = "2;not a unit";
         $this->expectException(InvalidDataException::class);
-        $this->expectExceptionMessage('The section 2 must be a valid unit.');
+        $this->expectExceptionMessage('Unit does not exist.');
         SiUnitAttribute::fromImport($importValue);
     }
 
@@ -464,7 +464,7 @@ class SiAttributeTest extends TestCase {
             'value' => 10.5,
         ];
         $this->expectException(InvalidDataException::class);
-        $this->expectExceptionMessage('The value must be a valid unit.');
+        $this->expectExceptionMessage('Unit does not exist.');
         SiUnitAttribute::unserialize($data);
     }
 
@@ -474,7 +474,7 @@ class SiAttributeTest extends TestCase {
             "unit" => "invalid unit",
         ];
         $this->expectException(InvalidDataException::class);
-        $this->expectExceptionMessage('The value must be a valid unit.');
+        $this->expectExceptionMessage('Unit does not exist.');
         SiUnitAttribute::unserialize($data);
     }
 

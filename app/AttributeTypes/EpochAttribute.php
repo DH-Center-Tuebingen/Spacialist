@@ -5,6 +5,7 @@ namespace App\AttributeTypes;
 use App\Attribute;
 use App\ThConcept;
 use App\Exceptions\InvalidDataException;
+use App\Utils\StringUtils;
 
 class EpochAttribute extends AttributeBase
 {
@@ -17,47 +18,36 @@ class EpochAttribute extends AttributeBase
         return ThConcept::getChildren($a->thesaurus_root_url, $a->recursive);
     }
 
-    public static function fromImport(int|float|bool|string $data) : mixed {
-        $startLabel = 'ad';
-        $endLabel = 'ad';
-        $parts = explode(';', $data);
+    public static function parseImport(int|float|bool|string $data) : mixed {
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);        
+        $parts = array_map(fn($str) => trim($str), explode(';', $data));
 
         if(count($parts) != 3) {
-            throw new InvalidDataException("Given data does not match this datatype's format (START;END;CONCEPT)");
+            throw InvalidDataException::requiredFormat("START;END;CONCEPT", $data);
         }
 
-        $start = intval(trim($parts[0]));
-        $end = intval(trim($parts[1]));
+        $timeperiod = json_decode(TimeperiodAttribute::parseImport($parts[0] . ';' . $parts[1]), true);
+        $conceptString = trim($parts[2]);
 
-        if($end < $start) {
-            throw new InvalidDataException("Start date must not be after end data ($start, $end)");
-        }
-        
-        $concept = ThConcept::getByString(trim($parts[2]));
         $epoch = null;
-        if(isset($concept)) {
-            $epoch = [
-                'id' => $concept->id,
-                'concept_url' => $concept->concept_url,
-            ];
-        } else {
-            throw new InvalidDataException("Given data is not a valid concept/label in the vocabulary");
+        if($conceptString !== '') {
+            // TODO: This does not check if the entity that is selected is actually valid!
+            $concept = ThConcept::getByString(trim($parts[2]));
+
+            if(isset($concept)) {
+                // Discuss: Do we need the concept_url here? Otherwise we could just use the EntityAttribute::parseImport
+                $epoch = [
+                    'id' => $concept->id,
+                    'concept_url' => $concept->concept_url,
+                ];
+            } else {
+                throw InvalidDataException::invalidConcept($conceptString);
+            }    
         }
-        if($start < 0) {
-            $startLabel = 'bc';
-            $start = abs($start);
-        }
-        if($end < 0) {
-            $endLabel = 'bc';
-            $end = abs($end);
-        }
-        return json_encode([
-            'start' => $start,
-            'startLabel' => $startLabel,
-            'end' => $end,
-            'endLabel' => $endLabel,
+
+        return json_encode(array_merge($timeperiod,[
             'epoch' => $epoch,
-        ]);
+        ]));
     }
 
     public static function unserialize(mixed $data) : mixed {
