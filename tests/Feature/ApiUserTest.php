@@ -43,10 +43,9 @@ class ApiUserTest extends TestCase
             ]
         ]);
 
-        // TODO what about thesaurex permissions?
-        // Check permission count (40 permissions in total)
+        // Check permission count (45 permissions in total)
         $content = json_decode($response->getContent());
-        $this->assertEquals(count(get_object_vars($content->data->permissions)), 40);
+        $this->assertEquals(count(get_object_vars($content->data->permissions)), 45);
     }
 
     /**
