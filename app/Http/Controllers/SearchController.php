@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Attribute;
-use App\AttributeValue;
 use App\Bibliography;
 use App\Entity;
 use App\EntityType;
@@ -18,7 +17,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 use Spatie\Searchable\Search;
-use Spatie\Searchable\ModelSearchAspect;
 
 class SearchController extends Controller {
     private static $shebangPrefix = [
@@ -28,7 +26,7 @@ class SearchController extends Controller {
         'geodata' => '!g ',
     ];
 
-    private function stripShebang($query) {
+    private function stripShebang(string $query) : string {
         if($this->isBib($query)) {
             return Str::after($query, self::$shebangPrefix['bibliography']);
         } else if($this->isEntity($query)) {
@@ -42,28 +40,46 @@ class SearchController extends Controller {
         }
     }
 
-    private function noShebang($query) {
+    private function noShebang(string $query) : bool {
         return !Str::startsWith($query, '!') || !($this->isBib($query) || $this->isEntity($query) || $this->isFile($query) || $this->isGeodata($query));
     }
 
-    private function isBib($query) {
+    private function isBib(string $query) : bool {
         return Str::startsWith($query, self::$shebangPrefix['bibliography']);
     }
 
-    private function isEntity($query) {
+    private function isEntity(string $query) : bool {
         return Str::startsWith($query, self::$shebangPrefix['entities']);
     }
 
+    // TODO handle in Plugin
     private function isFile($query) {
         return Str::startsWith($query, self::$shebangPrefix['files']);
     }
 
+    // TODO handle in Plugin
     private function isGeodata($query) {
         return Str::startsWith($query, self::$shebangPrefix['geodata']);
     }
 
     public function searchGlobal(Request $request) {
         $user = auth()->user();
+
+        // Search is currently supported in
+        // Entity, AttributeValue, Bibliography and
+        // Following Plugins: File, Geodata (TODO handle in Plugins or a Search Handler)
+        if(
+            !$user->can('bibliography_read') &&
+            !$user->can('entity_read') &&
+            !$user->can('entity_data_read') &&
+            !$user->can('file_read') &&
+            !$user->can('geodata_read')
+        ) {
+            return response()->json([
+                'error' => __('You do not have the permission to search global')
+            ], 403);
+        }
+
         $q = $request->query('q');
         $stripedQuery = $this->stripShebang($q);
         $search = new Search();
@@ -207,7 +223,7 @@ class SearchController extends Controller {
         return response()->json($matches);
     }
 
-    public function getConceptChildren($id, Request $request) {
+    public function getConceptChildren(int $id, Request $request) {
         $user = auth()->user();
         if(!$user->can('thesaurus_read')) {
             return response()->json([
