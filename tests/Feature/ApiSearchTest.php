@@ -87,7 +87,6 @@ class ApiSearchTest extends TestCase
 
         $response = $this->userRequest()
             ->get('/api/v1/search?q=!b iNv.');
-        info($response->json());
 
         $response->assertJsonCount(1);
         $response->assertJsonStructure([
