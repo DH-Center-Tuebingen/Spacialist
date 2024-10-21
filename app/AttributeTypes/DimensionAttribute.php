@@ -14,14 +14,14 @@ class DimensionAttribute extends AttributeBase
     public static function parseImport(int|float|bool|string $data) : mixed {
         $data = StringUtils::useGuard(InvalidDataException::class)($data);        
         $parts = explode(';', $data);
-        $message = "Provided data does not match this datatype's format (VAL1;VAL2;VAL3;UNIT)";
+        $format = "VAL1;VAL2;VAL3;UNIT";
         if(count($parts) != 4) {
-            throw new InvalidDataException($message);
+            throw InvalidDataException::requiredFormat($format, $data);
         }
 
-         for($i = 0; $i < 3; $i++) {
+        for($i = 0; $i < 3; $i++) {
             if(!is_numeric($parts[$i])) {
-                throw new InvalidDataException($message);
+                throw InvalidDataException::requiredFormat($format, $data);                
             }
         }
 

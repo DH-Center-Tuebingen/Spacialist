@@ -27,13 +27,13 @@ class SiUnitAttribute extends AttributeBase {
 
         if(count($parts) != 2) {
             $format = __('dictionary.value') . ';' . __('dictionary.unit');
-            throw new InvalidDataException(__('validation.import_format', ['format' => $format]));
+            throw InvalidDataException::requiredFormat($format, $data);
         }
 
         $value = trim($parts[0]);
         if(!is_numeric($value)) {
             $section_1 = __('dictionary.section') . ' 1';
-            throw new InvalidDataException(__('validation.numeric', ['attribute' => $section_1]));
+            throw InvalidDataException::requireNumeric($section_1);
         }
 
         $value = floatval($value);
@@ -42,7 +42,7 @@ class SiUnitAttribute extends AttributeBase {
 
         if(!isset($unitFound)) {
             $section_2 = __('dictionary.section') . ' 2';
-            throw new InvalidDataException(__('validation.unit', ['attribute' => $section_2]));
+            throw InvalidDataException::invalidUnit($section_2);
         }
 
         return json_encode([
@@ -59,7 +59,7 @@ class SiUnitAttribute extends AttributeBase {
         }
 
         if(!isset($unit) || !isset($data["value"]) || !isset($data["unit"])) {
-            throw new InvalidDataException(__('validation.unit', ['attribute' => __('dictionary.value')]));
+            throw InvalidDataException::invalidUnit(__('dictionary.value'));
         }
 
         $data['normalized'] =  $unit->normalize($data['value']);

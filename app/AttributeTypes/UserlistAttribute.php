@@ -37,7 +37,7 @@ class UserlistAttribute extends AttributeBase
         }
         
         if(count($incorrectUsers) > 0){
-            throw new InvalidDataException("The following users were not found: " . implode(', ', $incorrectUsers));
+            throw InvalidDataException::invalidUsers($incorrectUsers);
         }
         return json_encode($list);
     }

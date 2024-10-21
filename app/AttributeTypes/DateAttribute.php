@@ -6,7 +6,6 @@ use App\Exceptions\InvalidDataException;
 use App\Utils\StringUtils;
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
-use Exception;
 
 class DateAttribute extends AttributeBase
 {
@@ -19,20 +18,18 @@ class DateAttribute extends AttributeBase
     public static function parseImport(int|float|bool|string $data) : mixed {
         $data = StringUtils::useGuard(InvalidDataException::class)($data);
 
-        $errmsg = "Your provided date ($data) does not match the required format of 'Y-m-d'";
-
         // have to do hasFormat and createFromFormat, because both allow dates the other does not
         // e.g. 20222 is a valid year for hasFormat, but not createFromFormat
         // on the other hand 13 is a valid month for createFromFormat (overflows to next year's january), but not hasFormat
         if(!Carbon::hasFormat($data, self::$format)) {
-            throw new InvalidDataException($errmsg);
+            throw InvalidDataException::requiredFormat(self::$format);
         }
 
         try {
             $date = Carbon::createFromFormat(self::$format, $data);
             return $date->format(self::$format);
         } catch(InvalidFormatException $e) {
-            throw new InvalidDataException($errmsg);
+            throw InvalidDataException::requiredFormat(self::$format);
         }
     }
 

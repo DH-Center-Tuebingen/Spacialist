@@ -23,7 +23,7 @@ class EpochAttribute extends AttributeBase
         $parts = array_map(fn($str) => trim($str), explode(';', $data));
 
         if(count($parts) != 3) {
-            throw new InvalidDataException("Given data does not match this datatype's format (START;END;CONCEPT)");
+            throw InvalidDataException::requiredFormat("START;END;CONCEPT", $data);
         }
 
         $timeperiod = json_decode(TimeperiodAttribute::parseImport($parts[0] . ';' . $parts[1]), true);
@@ -41,7 +41,7 @@ class EpochAttribute extends AttributeBase
                     'concept_url' => $concept->concept_url,
                 ];
             } else {
-                throw new InvalidDataException("Given data is not a valid concept/label in the vocabulary");
+                throw InvalidDataException::invalidConcept($conceptString);
             }    
         }
 

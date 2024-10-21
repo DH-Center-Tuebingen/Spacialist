@@ -24,7 +24,7 @@ class DropdownSingleAttribute extends AttributeBase
         if(isset($concept)) {
             return $concept->concept_url;
         } else {
-            throw new InvalidDataException("Given data is not a valid concept/label in the vocabulary");
+            throw InvalidDataException::invalidConcept($data);
         }
     }
 

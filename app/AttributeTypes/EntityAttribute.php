@@ -5,6 +5,7 @@ namespace App\AttributeTypes;
 use App\Entity;
 use App\Exceptions\InvalidDataException;
 use App\Utils\StringUtils;
+use Spatie\FlareClient\Http\Exceptions\InvalidData;
 
 class EntityAttribute extends AttributeBase
 {
@@ -21,7 +22,7 @@ class EntityAttribute extends AttributeBase
         $data = StringUtils::useGuard(InvalidDataException::class)($data);
         $entityId = Entity::getFromPath($data);
         if($entityId === null) {
-            throw new InvalidDataException("Entity not found: $data");
+            throw InvalidDataException::invalidEntity($data);
         }
         
         return $entityId;

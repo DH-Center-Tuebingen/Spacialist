@@ -5,6 +5,7 @@ namespace App\AttributeTypes;
 use App\Entity;
 use App\Exceptions\InvalidDataException;
 use App\Utils\StringUtils;
+use Spatie\FlareClient\Http\Exceptions\InvalidData;
 
 class EntityMultipleAttribute extends AttributeBase
 {
@@ -14,20 +15,20 @@ class EntityMultipleAttribute extends AttributeBase
 
     public static function parseImport(int|float|bool|string $data) : mixed {
         $data = StringUtils::useGuard(InvalidDataException::class)($data);
-        $errorList = [];
+        $missingEntitiesList = [];
         $idList = [];
         $parts = explode(';', $data);
         foreach($parts as $part) {
             $trimmedPart = trim($part);
             $entityId = Entity::getFromPath($trimmedPart);
             if($entityId === null) {
-                $errorList[] = $trimmedPart;
+                $missingEntitiesList[] = $trimmedPart;
             }
             $idList[] = $entityId;
         }
 
-        if(count($errorList) > 0) {
-            throw new InvalidDataException("Entities not found: " . implode(', ', $errorList));
+        if(count($missingEntitiesList) > 0) {
+            throw InvalidDataException::invalidEntities($missingEntitiesList);
         }
 
         return json_encode($idList);

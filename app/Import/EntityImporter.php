@@ -213,6 +213,7 @@ class EntityImporter {
         if(!$isAllowedAsChild) {
             $childTh = EntityType::find($this->entityTypeId)->thesaurus_url;
             $childName = ThConcept::getLabel($childTh);
+            info($childName);
 
             $parentTh = EntityType::find($parentTypeId)->thesaurus_url;
             $parentName = ThConcept::getLabel($parentTh);
@@ -239,7 +240,10 @@ class EntityImporter {
                 $attrClass = AttributeBase::getMatchingClass($datatype);
                 $attrClass::fromImport($row[$column]);
             } catch(Exception $e) {
-                $message = $column . ' => ' . $e->getMessage() ?? $column;
+                $message = $column;
+                if($e->getMessage() != null && $e->getMessage() != "") {
+                    $message .= ' => ' . $e->getMessage() ?? $column; 
+                }
                 array_push($errors,  $message);
             }
         }
@@ -252,7 +256,7 @@ class EntityImporter {
 
     private function rowConflict($rowIndex, $msg, $args = []) {
         $tmsg = __($msg, $args);
-        $this->resolver->conflict("Row " . ($rowIndex + 1) . " " . $tmsg);
+        $this->resolver->conflict("Row " . ($rowIndex + 1) . ": " . $tmsg);
     }
 
     private function getParentColumn($row) {

@@ -6,6 +6,7 @@ use App\Exceptions\InvalidDataException;
 use App\Models\TimePeriod;
 use App\Utils\NumberUtils;
 use App\Utils\StringUtils;
+use PhpParser\Node\Stmt\For_;
 
 class TimeperiodAttribute extends AttributeBase
 {
@@ -18,19 +19,17 @@ class TimeperiodAttribute extends AttributeBase
         $parts = array_map(fn($str) => trim($str), explode(';', $data));
 
         if(count($parts) != 2) {
-            throw new InvalidDataException("Given data does not match this datatype's format: 'START;END'");
+            throw InvalidDataException::requiredFormat('START;END', $data);
         }
 
         if(!NumberUtils::is_integer_string($parts[0]) || !NumberUtils::is_integer_string($parts[1])) {
-            throw new InvalidDataException("Start and end date must be integer values:" . $parts[0] . " " . $parts[1]);
+            throw InvalidDataException::requireTypes("integer", $parts);
         }
 
         $start = intval($parts[0]);
         $end = intval($parts[1]);
-
-
         if($end < $start) {
-            throw new InvalidDataException("Start date must not be after end data ($start, $end)");
+            throw InvalidDataException::requireBefore($start, $end);
         }
         
         return json_encode(new TimePeriod($start, $end));

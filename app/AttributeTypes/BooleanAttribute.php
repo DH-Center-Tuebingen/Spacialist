@@ -28,7 +28,7 @@ class BooleanAttribute extends AttributeBase {
                 }
             }
         } else {
-            throw new InvalidDataException("Invalid data type for boolean attribute");
+            throw InvalidDataException::requireBoolean($data);
         }
 
         return $boolean;

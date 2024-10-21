@@ -18,16 +18,15 @@ class DaterangeAttribute extends AttributeBase
     public static function parseImport(int|float|bool|string $data) : mixed {
         $data = StringUtils::useGuard(InvalidDataException::class)($data);        
         $dates = explode(";", $data);
-        $errormsg = "Given data does not match this datatype's format: START;END";
         if(count($dates) != 2) {
-            throw new InvalidDataException($errormsg);
+            throw InvalidDataException::requiredFormat("START;END", $data);
         }
         
         $start = DateAttribute::parseImport($dates[0]);
         $end = DateAttribute::parseImport($dates[1]);
         
         if($start > $end) {
-            throw new InvalidDataException("End date cannot be before start date.");
+            throw InvalidDataException::requireBefore($start, $end);
         }
 
         return [

@@ -6,6 +6,7 @@ use App\Attribute;
 use App\ThConcept;
 use App\Exceptions\InvalidDataException;
 use App\Utils\StringUtils;
+use Spatie\FlareClient\Http\Exceptions\InvalidData;
 
 class DropdownMultipleAttribute extends AttributeBase
 {
@@ -31,7 +32,7 @@ class DropdownMultipleAttribute extends AttributeBase
                     'concept_url' => $concept->concept_url,
                 ];
             } else {
-                throw new InvalidDataException("Given data part ($trimmedPart) is not a valid concept/label in the vocabulary");
+                throw InvalidDataException::invalidConcept($trimmedPart);
             }
         }
         return json_encode($convValues);

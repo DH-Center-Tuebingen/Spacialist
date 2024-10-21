@@ -14,7 +14,7 @@ class RismAttribute extends AttributeBase
     public static function parseImport(int|float|bool|string $data) : mixed {
         $number = NumberUtils::useStringIntegerGuard(InvalidDataException::class)($data);
         if($number < 0){
-            throw new InvalidDataException("Given data is not a positive integer");
+            throw InvalidDataException::requirePositiveInteger($number);
         }
         return $number; 
     }

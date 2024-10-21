@@ -286,7 +286,7 @@ class ApiDataImporterTest extends TestCase {
         ])
             ->assertStatus(200)
             ->assertJson([
-                'errors' => ['2: The relationship between entity types is not allowed: Stone -> Site'],
+                'errors' => ['Row 2: The relationship between entity types is not allowed: Stone -> Site'],
                 "summary" => [
                     "create" => 0,
                     "update" => 0,
@@ -464,7 +464,7 @@ class ApiDataImporterTest extends TestCase {
         ])
             ->assertStatus(200)
             ->assertJson([
-                'errors' => ['2: Attribute could not be imported: Abmessungen'],
+                'errors' => ['Row 2: Attribute could not be imported: Abmessungen => Provided data has the wrong format, expected: VAL1;VAL2;VAL3;UNIT  -  1,2,3,cm'],
                 'summary' => [
                     'create' => 1,
                     'update' => 0,

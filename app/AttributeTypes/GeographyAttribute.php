@@ -19,7 +19,7 @@ class GeographyAttribute extends AttributeBase
         try{
             $geodata = Geodata::parseWkt($data);
         } catch(Exception $e) {
-            throw new InvalidDataException("Invalid geography data: " . $data);
+            throw InvalidDataException::invalidGeoData($data);
         }
         
         return $geodata;

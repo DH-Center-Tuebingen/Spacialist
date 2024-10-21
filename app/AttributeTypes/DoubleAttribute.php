@@ -12,7 +12,7 @@ class DoubleAttribute extends AttributeBase
 
     public static function parseImport(int|float|bool|string $data) : mixed {       
         if(!is_numeric($data)) {
-            throw new InvalidDataException("Given data is not a number");
+            throw InvalidDataException::requireNumeric($data);
         }
         return floatval($data);
     }
