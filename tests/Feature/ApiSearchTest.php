@@ -13,7 +13,7 @@ class ApiSearchTest extends TestCase
     // Testing GET requests
 
     /**
-     * A basic test example.
+     * @testdox GET /api/v1/search : Search Global for Entity
      *
      * @return void
      */
@@ -63,7 +63,7 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * @testdox GET /api/v1/search : Search Global for Bibliography
      *
      * @return void
      */
@@ -139,7 +139,7 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * @testdox GET /api/v1/search : Search Global
      *
      * @return void
      */
@@ -189,7 +189,7 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * @testdox GET /api/v1/search/entity : Search Entity
      *
      * @return void
      */
@@ -222,7 +222,7 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * @testdox GET /api/v1/search/label : Search for Thesaurex Label
      *
      * @return void
      */
@@ -274,7 +274,7 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * @testdox GET /api/v1/search/attribute : Search Attributes
      *
      * @return void
      */
@@ -318,7 +318,7 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * @testdox GET /api/v1/search/selection/{id} : Search in Attribute Selection
      *
      * @return void
      */
@@ -354,7 +354,7 @@ class ApiSearchTest extends TestCase
     // Testing exceptions and permissions
 
     /**
-     *
+     * @testdox Test Permissions
      *
      * @return void
      */
@@ -381,7 +381,7 @@ class ApiSearchTest extends TestCase
         }
     }
     /**
-     *
+     * @testdox Test Exceptions
      *
      * @return void
      */
