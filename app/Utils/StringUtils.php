@@ -7,7 +7,7 @@ use Exception;
 class StringUtils {
 
     static function useGuard(string $exceptionClass, string $message = "Provided data is not a string.") : callable {
-        return function($data) use ($exceptionClass, $message) {
+        return function(mixed $data) use ($exceptionClass, $message) {
             if(!is_string($data)) {
                 throw new $exceptionClass($message);
             }
@@ -16,7 +16,7 @@ class StringUtils {
         };
     }
 
-    static function guard($data) : string {
+    static function guard(mixed $data) : string {
         return self::useGuard(Exception::class)($data);
     }
 }

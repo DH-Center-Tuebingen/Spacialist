@@ -6,7 +6,7 @@ use Exception;
 
 class InvalidDataException extends Exception
 {
-    function __construct(string $message, string $actual = null){
+    function __construct(string $message, string $actual = null) {
         if($actual !== null){
             $pattern = '/\s*\.\s*$/';
             // Use preg_replace to remove the last dot in the string
@@ -17,7 +17,7 @@ class InvalidDataException extends Exception
         parent::__construct($message);
     }
 
-    private static function attributeString(){
+    private static function attributeString() {
         return __('dictionary.value');
     }
 
@@ -25,31 +25,31 @@ class InvalidDataException extends Exception
         return new self(__('validation.import_format', ['format' => $requiredFormat]), $actual);
     }
 
-    public static function requireBoolean(string $actual){
+    public static function requireBoolean(string $actual) {
         return new self(__('validation.boolean'), $actual);
     }
 
-    public static function requireTypes(string $type, array $actualValues){
+    public static function requireTypes(string $type, array $actualValues) {
         return new self(__('validation.types', ['type' => $type]), implode(', ', $actualValues));
     }
 
-    public static function requirePositiveInteger(string $actual){
+    public static function requirePositiveInteger(string $actual) {
         return new self(__('validation.integer_positive', ['attribute' => self::attributeString()], $actual));
     }
 
-    public static function requireNumeric(string $actual){
+    public static function requireNumeric(string $actual) {
         return new self(__('validation.numeric', ['attribute' => self::attributeString()]), $actual);
     }
 
-    public static function requireBefore(string $before, string $after){
+    public static function requireBefore(string $before, string $after) {
         return new self(__('validation.before', ['attribute' => self::attributeString(), 'after' => $after]), $before);
     }
 
-    public static function requireRange(string $value,  int $from, int $to){
+    public static function requireRange(string $value,  int $from, int $to) {
         return new self(__('validation.between.numeric', ['attribute' => self::attributeString(),'min' => strval($from), 'max' => strval($to)]), $value);
     }
 
-    public static function invalidConcept(string $concept){
+    public static function invalidConcept(string $concept) {
         return self::objectNotFound('concept', $concept);
     }
 
@@ -68,7 +68,7 @@ class InvalidDataException extends Exception
     public static function invalidUnit(string $unit){
         return self::objectNotFound('unit', $unit);
     }
-    
+
     public static function invalidDefinition(string $type, $data){
         return new self(__('validation.definition', ['type' => $type]), $data);
     }

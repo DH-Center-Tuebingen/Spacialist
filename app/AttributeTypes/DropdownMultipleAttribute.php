@@ -6,7 +6,6 @@ use App\Attribute;
 use App\Exceptions\InvalidDataException;
 use App\ThConcept;
 use App\Utils\StringUtils;
-use Spatie\FlareClient\Http\Exceptions\InvalidData;
 
 class DropdownMultipleAttribute extends AttributeBase
 {
@@ -20,7 +19,7 @@ class DropdownMultipleAttribute extends AttributeBase
     }
 
     public static function parseImport(int|float|bool|string $data) : mixed {
-        $data = StringUtils::useGuard(InvalidDataException::class)($data);     
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);
         $convValues = [];
         $parts = explode(';', $data);
         foreach($parts as $part) {
