@@ -14,7 +14,7 @@ class ApiUserTest extends TestCase
     // Testing GET requests
 
     /**
-     * @testdox GET /api/v1/auth/user : Get Auth User
+     * @testdox GET    /api/v1/auth/user : Get Auth User
      *
      * @return void
      */
@@ -49,7 +49,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * @testdox GET /api/v1/user : Get All Users
+     * @testdox GET    /api/v1/user : Get All Users
      *
      * @return void
      */
@@ -80,7 +80,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * @testdox GET /api/v1/role : Get All Roles
+     * @testdox GET    /api/v1/role : Get All Roles
      *
      * @return void
      */
@@ -112,7 +112,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * @testdox GET /api/v1/auth/refresh : Refresh JWT
+     * @testdox GET    /api/v1/auth/refresh : Refresh JWT
      *
      * @return void
      */
@@ -134,7 +134,7 @@ class ApiUserTest extends TestCase
     // Testing POST requests
 
     /**
-     * @testdox GET /api/v1/auth/login : Login
+     * @testdox GET    /api/v1/auth/login : Login
      *
      * @return void
      */
@@ -151,7 +151,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * @testdox GET /api/v1/auth/login : Login with nickname
+     * @testdox GET    /api/v1/auth/login : Login with nickname
      *
      * @return void
      */
@@ -168,7 +168,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * @testdox GET /api/v1/user : Failed Login
+     * @testdox GET    /api/v1/user : Failed Login
      *
      * @return void
      */
@@ -187,7 +187,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * @testdox POST /api/v1/user : Create User
+     * @testdox POST   /api/v1/user : Create User
      *
      * @return void
      */
@@ -225,7 +225,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * @testdox POST /api/v1/user/avatar : Add Avatar
+     * @testdox POST   /api/v1/user/avatar : Add Avatar
      *
      * @return void
      */
@@ -260,7 +260,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * @testdox POST /api/v1/role : Create Role
+     * @testdox POST   /api/v1/role : Create Role
      *
      * @return void
      */
@@ -297,7 +297,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * @testdox POST /api/v1/auth/logout : Logout
+     * @testdox POST   /api/v1/auth/logout : Logout
      *
      * @return void
      */
@@ -322,7 +322,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * @testdox POST /api/v1/user/avatar : Update User Avatar
+     * @testdox POST   /api/v1/user/avatar : Update User Avatar
      *
      * @return void
      */
@@ -342,7 +342,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * @testdox PATCH /api/v1/user/{id} : Patch User
+     * @testdox PATCH  /api/v1/user/{id} : Patch User
      *
      * @return void
      */
@@ -397,7 +397,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * @testdox PATCH /api/v1/user/{id} : Patch User Metadata
+     * @testdox PATCH  /api/v1/user/{id} : Patch User Metadata
      *
      * @return void
      */
@@ -423,7 +423,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * @testdox PATCH /api/v1/user/{id} : Patch User Fail ORCID Check
+     * @testdox PATCH  /api/v1/user/{id} : Patch User Fail ORCID Check
      *
      * @return void
      */
@@ -440,7 +440,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * @testdox PATCH /api/v1/user/{id} : Patch User Fail ORCID Format
+     * @testdox PATCH  /api/v1/user/{id} : Patch User Fail ORCID Format
      *
      * @return void
      */
@@ -457,7 +457,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * @testdox PATCH /api/v1/user/{id} : Patch User Fail ORCID Format
+     * @testdox PATCH  /api/v1/user/{id} : Patch User Fail ORCID Format
      *
      * @return void
      */
@@ -474,7 +474,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * @testdox PATCH /api/v1/user/{id} : Patch User Emtpy Request
+     * @testdox PATCH  /api/v1/user/{id} : Patch User Emtpy Request
      *
      * @return void
      */
@@ -487,7 +487,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * @testdox PATCH /api/v1/role/{id} : Patch Role Permissions
+     * @testdox PATCH  /api/v1/role/{id} : Patch Role Permissions
      *
      * @return void
      */
@@ -526,7 +526,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * @testdox PATCH /api/v1/role/{id} : Patch Role Empty Request
+     * @testdox PATCH  /api/v1/role/{id} : Patch Role Empty Request
      *
      * @return void
      */
@@ -534,6 +534,35 @@ class ApiUserTest extends TestCase
     {
         $response = $this->userRequest()
             ->patch('/api/v1/role/1', []);
+
+        $response->assertStatus(204);
+    }
+
+    /**
+     * @testdox PATCH  /api/v1/user/restore/{id} : Restore User
+     *
+     * @return void
+     */
+    public function testRestoreUserEndpoint()
+    {
+        $user = User::find(1);
+        $user->deleted_at = Carbon::now();
+        $user->save();
+
+        $cnt = User::count();
+        $this->assertEquals(1, $cnt);
+        $cnt = User::onlyTrashed()->count();
+        $this->assertEquals(1, $cnt);
+        $cnt = User::withoutTrashed()->count();
+        $this->assertEquals(0, $cnt);
+        $user = User::find(1);
+        $this->assertNotNull($user->deleted_at);
+
+        $response = $this->userRequest()
+            ->patch('/api/v1/user/restore/1');
+
+        $user = User::find(1);
+        $this->assertNull($user->deleted_at);
 
         $response->assertStatus(204);
     }
@@ -566,35 +595,6 @@ class ApiUserTest extends TestCase
         $this->assertNotNull($user->deleted_at);
 
         $response = $this->userRequest($response)
-            ->patch('/api/v1/user/restore/1');
-
-        $user = User::find(1);
-        $this->assertNull($user->deleted_at);
-
-        $response->assertStatus(204);
-    }
-
-    /**
-     * @testdox PATCH /api/v1/user/restore/{id} : Restore User
-     *
-     * @return void
-     */
-    public function testRestoreUserEndpoint()
-    {
-        $user = User::find(1);
-        $user->deleted_at = Carbon::now();
-        $user->save();
-
-        $cnt = User::count();
-        $this->assertEquals(1, $cnt);
-        $cnt = User::onlyTrashed()->count();
-        $this->assertEquals(1, $cnt);
-        $cnt = User::withoutTrashed()->count();
-        $this->assertEquals(0, $cnt);
-        $user = User::find(1);
-        $this->assertNotNull($user->deleted_at);
-
-        $response = $this->userRequest()
             ->patch('/api/v1/user/restore/1');
 
         $user = User::find(1);

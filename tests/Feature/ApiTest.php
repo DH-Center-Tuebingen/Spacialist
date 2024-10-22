@@ -10,7 +10,7 @@ use App\VersionInfo;
 class ApiTest extends TestCase
 {
     /**
-     * @testdox GET / : Get Base App Endpoint
+     * @testdox GET    / : Get Base App Endpoint
      *
      * @return void
      */
@@ -22,7 +22,7 @@ class ApiTest extends TestCase
     }
 
     /**
-     * @testdox GET /welcome : Get Welcome Page Endpoint
+     * @testdox GET    /welcome : Get Welcome Page Endpoint
      *
      * @return void
      */
@@ -34,7 +34,7 @@ class ApiTest extends TestCase
     }
 
     /**
-     * @testdox GET /api/v1/pre : Get Pre Endpoint Failed Unauth
+     * @testdox GET    /api/v1/pre : Get Pre Endpoint Failed Unauth
      *
      * @return void
      */
@@ -48,7 +48,7 @@ class ApiTest extends TestCase
     }
 
     /**
-     * @testdox GET /api/v1/pre : Get Pre Endpoint Failed Missing Token
+     * @testdox GET    /api/v1/pre : Get Pre Endpoint Failed Missing Token
      *
      * @return void
      */
@@ -61,7 +61,7 @@ class ApiTest extends TestCase
     }
 
     /**
-     * @testdox GET /api/v1/pre : Get Pre Endpoint
+     * @testdox GET    /api/v1/pre : Get Pre Endpoint
      *
      * @return void
      */
@@ -84,7 +84,7 @@ class ApiTest extends TestCase
     }
 
     /**
-     * @testdox GET /api/v1/version : Get Version Endpoint
+     * @testdox GET    /api/v1/version : Get Version Endpoint
      *
      * @return void
      */

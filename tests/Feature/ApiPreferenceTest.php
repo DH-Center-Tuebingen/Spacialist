@@ -15,7 +15,7 @@ class ApiPreferenceTest extends TestCase
     // Testing GET requests
 
     /**
-     * @testdox GET /api/v1/preferences : Get System Preferences
+     * @testdox GET    /api/v1/preferences : Get System Preferences
      *
      * @return void
      */
@@ -120,7 +120,7 @@ class ApiPreferenceTest extends TestCase
     }
 
     /**
-     * @testdox PATCH /api/v1/preference : Change System Preference
+     * @testdox PATCH  /api/v1/preference : Change System Preference
      *
      * @return void
      */
@@ -145,7 +145,7 @@ class ApiPreferenceTest extends TestCase
     }
 
     /**
-     * @testdox PATCH /api/v1/preference : Change User Preference
+     * @testdox PATCH  /api/v1/preference : Change User Preference
      *
      * @return void
      */
