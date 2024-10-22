@@ -722,26 +722,27 @@ class EntityController extends Controller {
                 'error' => __('This entity does not exist'),
             ], 400);
         }
-
+        
+        DB::beginTransaction();
         $addedAttributes = [];
         foreach($request->request as $patch) {
             $op = $patch['op'];
             $aid = $patch['params']['aid'];
+            $error = null;
             switch($op) {
                 case 'remove':
-                    $attrval = AttributeValue::where([
-                        ['entity_id', '=', $id],
-                        ['attribute_id', '=', $aid],
-                    ])->first();
-                    if(!isset($attrval)) {
-                        return response()->json([
-                            'error' => __('This attribute value does either not exist or is in moderation state.'),
-                        ], 400);
-                    }
-                    if($user->isModerated()) {
-                        $attrval->moderate('pending-delete', true);
-                    }else{
-                        $attrval->delete();
+                    try{
+                        $attrval = AttributeValue::where([
+                            ['entity_id', '=', $id],
+                            ['attribute_id', '=', $aid],
+                        ])->firstOrFail();
+                        if($user->isModerated()) {
+                            $attrval->moderate('pending-delete', true);
+                        }else{
+                            $attrval->delete();
+                        }
+                    }catch(ModelNotFoundException $e) {
+                        $error = __('This attribute value does either not exist or is in moderation state.');
                     }
                     break;
                 case 'add':
@@ -749,18 +750,18 @@ class EntityController extends Controller {
                         ->where('attribute_id', $aid)
                         ->withModerated()
                         ->exists();
+                        
                     if($alreadyAdded) {
-                        return response()->json([
-                            'error' => __('There is already a value set for this attribute or it is in moderation state.'),
-                        ], 400);
-                    }
-                    $value = $patch['value'];
-                    $attrval = new AttributeValue();
-                    $attrval->entity_id = $id;
-                    $attrval->attribute_id = $aid;
-                    $attrval->certainty = null;
-                    if($user->isModerated()) {
-                        $attrval->moderate('pending', true, true);
+                        $error = __('There is already a value set for this attribute or it is in moderation state.');
+                    }else{
+                        $value = $patch['value'];
+                        $attrval = new AttributeValue();
+                        $attrval->entity_id = $id;
+                        $attrval->attribute_id = $aid;
+                        $attrval->certainty = null;
+                        if($user->isModerated()) {
+                            $attrval->moderate('pending', true, true);
+                        }
                     }
                     break;
                 case 'replace':
@@ -769,24 +770,28 @@ class EntityController extends Controller {
                         ->onlyModerated()
                         ->exists();
                     if($alreadyModerated) {
-                        return response()->json([
-                            'error' => __('This attribute value is in moderation state. A user with appropriate permissions has to accept or deny it first.'),
-                        ], 400);
-                    }
-                    $value = $patch['value'];
-                    $attrval = AttributeValue::where([
-                        ['entity_id', '=', $id],
-                        ['attribute_id', '=', $aid],
-                    ])->first();
-                    if($user->isModerated()) {
-                        $attrval = $attrval->moderate('pending', false, true);
-                        unset($attrval->comments_count);
+                        $error = __('This attribute value is in moderation state. A user with appropriate permissions has to accept or deny it first.');
+                    }else{
+                        $value = $patch['value'];
+                        $attrval = AttributeValue::where([
+                            ['entity_id', '=', $id],
+                            ['attribute_id', '=', $aid],
+                        ])->first();
+                        if($user->isModerated()) {
+                            $attrval = $attrval->moderate('pending', false, true);
+                            unset($attrval->comments_count);
+                        }
                     }
                     break;
                 default:
-                    return response()->json([
-                        'error' => __('Unknown operation'),
-                    ], 400);
+                    $error = __('Unknown operation');
+            }
+            
+            if($error !== null) {
+                DB::rollBack();
+                return response()->json([
+                    'error' => $error,
+                ], 400);
             }
 
             // no further action required for deleted attribute values, continue with next patch
@@ -794,19 +799,30 @@ class EntityController extends Controller {
                 continue;
             }
 
-            $attr = Attribute::find($aid);
             try{
+                $attr = Attribute::findOrFail($aid);
                 $formKeyValue = AttributeValue::getFormattedKeyValue($attr->datatype, $value);
+                $attrval->{$formKeyValue->key} = $formKeyValue->val;
+                $attrval->user_id = $user->id;
+                $attrval->save();
+                if($op == 'add') {
+                    $addedAttributes[$aid] = $attrval;
+                }
             } catch(InvalidDataException $ide) {
+                DB::rollBack();
                 return response()->json([
                     'error' => $ide->getMessage(),
                 ], 422);
-            }
-            $attrval->{$formKeyValue->key} = $formKeyValue->val;
-            $attrval->user_id = $user->id;
-            $attrval->save();
-            if($op == 'add') {
-                $addedAttributes[$aid] = $attrval;
+            } catch(ModelNotFoundException $e) {
+                DB::rollBack();
+                return response()->json([
+                    'error' => __('This attribute does not exist'),
+                ], 400);
+            } catch(Exception $e) {
+                DB::rollBack();
+                return response()->json([
+                    'error' => $e->getMessage(),
+                ], 500);
             }
         }
 
@@ -818,7 +834,8 @@ class EntityController extends Controller {
         }else{
             $entity->touch();
         }
-
+        
+        DB::commit();
         $entity->load('user');
 
         return response()->json([
@@ -1074,8 +1091,15 @@ class EntityController extends Controller {
                 $rank = Entity::whereNull('root_entity_id')->max('rank') + 1;
             }
         }
-
-        Entity::patchRanks($rank, $id, $parent_id, $user);
+        
+        try{
+            Entity::patchRanks($rank, $id, $parent_id, $user);
+        }catch(Exception $e){
+            return response()->json([
+                'error' => $e->getMessage(),
+            ], 400);
+        }
+    
         return response()->json(null, 204);
     }
 

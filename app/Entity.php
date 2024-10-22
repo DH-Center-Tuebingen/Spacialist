@@ -30,7 +30,6 @@ class Entity extends Model implements Searchable {
         'root_entity_id',
         'name',
         'user_id',
-        'geodata_id',
         'rank',
     ];
 
@@ -56,14 +55,12 @@ class Entity extends Model implements Searchable {
         'name'              => 'required|string',
         'entity_type_id'   => 'required|integer|exists:entity_types,id',
         'root_entity_id'   => 'integer|exists:entities,id',
-        'geodata_id'        => 'integer|exists:geodata,id'
     ];
 
     const patchRules = [
         'name'              => 'string',
         // 'entity_type_id'   => 'integer|exists:entity_types,id',
         // 'root_entity_id'   => 'integer|exists:entities,id',
-        // 'geodata_id'        => 'integer|exists:geodata,id'
     ];
 
     public function getActivitylogOptions(): LogOptions {
@@ -183,15 +180,41 @@ class Entity extends Model implements Searchable {
         }
         return $entities->orderBy('rank')->get();
     }
+    
+    private function moveOrFail(int | null $parentId){
+        
+        if(isset($parentId)) {
+            if($parentId == $this->id){
+                throw new \Exception('Cannot move entity to itself.');
+            }
+            
+            $parentEntity = Entity::findOrFail($parentId);
+            $parentEntityType = $parentEntity->entity_type;
+            
+            if(!$parentEntityType->sub_entity_types->contains($this->entity_type_id)){
+                throw new \Exception('This type is not an allowed sub-type.');
+            }
+            
+            $this->root_entity_id = $parentId;
+            $query = self::where('root_entity_id', $parentId);
+        } else {
+            if(!$this->entity_type->is_root){
+                throw new \Exception('This type is not an allowed root-type.');
+            }
+            
+            $this->root_entity_id = null;
+            $query = self::whereNull('root_entity_id');
+        }
+        return $query;
+    }
 
-    public static function patchRanks($rank, $id, $parent, $user) {
+    public static function patchRanks($rank, $id, $parent, $user) { 
         $entity = Entity::find($id);
-
-        $hasParent = isset($parent);
         $oldRank = $entity->rank;
         $entity->rank = $rank;
         $entity->user_id = $user->id;
 
+        DB::beginTransaction();
         $query;
         if(isset($entity->root_entity_id)) {
             $query = self::where('root_entity_id', $entity->root_entity_id);
@@ -204,15 +227,14 @@ class Entity extends Model implements Searchable {
             $oc->rank--;
             $oc->saveQuietly();
         }
-
-        $query = null;
-        if($hasParent) {
-            $entity->root_entity_id = $parent;
-            $query = self::where('root_entity_id', $parent);
-        } else {
-            $entity->root_entity_id = null;
-            $query = self::whereNull('root_entity_id');
+        
+        try{
+            $query = $entity->moveOrFail($parent);
+        }catch(\Exception $e){
+            DB::rollBack();
+            throw $e;
         }
+
         $newEntities = $query->where('rank', '>=', $rank)->get();
 
         foreach($newEntities as $nc) {
@@ -221,6 +243,7 @@ class Entity extends Model implements Searchable {
         }
 
         $entity->save();
+        DB::commit();
     }
 
     public function child_entities() {
