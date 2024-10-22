@@ -43,17 +43,17 @@ class ThConcept extends Model {
                 ->orderBy("is_locale", 'desc')
                 ->orderBy('th_concept_label.id', 'asc')
                 ->firstOrFail()->label;
-        } catch (\Exception $e) {
+        } catch(\Exception $e) {
             info("Could not find translation for: $str\n" . $e->getMessage());
         }
         return $label;
     }
 
     public static function getByString($str) {
-        if (!isset($str) || $str === '') return null;
+        if(!isset($str) || $str === '') return null;
 
         $concept = ThConcept::where('concept_url', $str)->first();
-        if (!isset($concept)) {
+        if(!isset($concept)) {
             $concept = ThConcept::whereHas('labels', function (Builder $query) use ($str) {
                 $query->where('label', $str);
             })->first();
@@ -63,7 +63,7 @@ class ThConcept extends Model {
 
     public static function getMap($lang = 'en') {
         // Some languages use different lang codes (e.g. from weblate) in Spacialist and ThesauRex
-        if ($lang == 'ja') {
+        if($lang == 'ja') {
             $lang = 'jp';
         }
         $concepts = DB::select(DB::raw("
@@ -85,7 +85,7 @@ class ThConcept extends Model {
 
         $conceptMap = [];
 
-        foreach ($concepts as $concept) {
+        foreach($concepts as $concept) {
             $url = $concept->concept_url;
             unset($concept->concept_url);
             $conceptMap[$url] = $concept;
@@ -96,14 +96,14 @@ class ThConcept extends Model {
 
     public static function getChildren($url, $recursive = true) {
         $id = self::where('concept_url', $url)->value('id');
-        if (!isset($id)) return [];
+        if(!isset($id)) return [];
 
         $query = "SELECT br.broader_id, br.narrower_id, c.*
         FROM th_broaders br
         JOIN th_concept as c on c.id = br.narrower_id
         WHERE broader_id = $id";
 
-        if ($recursive) {
+        if($recursive) {
             $query = "
                 WITH RECURSIVE
                 top AS (
@@ -141,7 +141,8 @@ class ThConcept extends Model {
         return $this->belongsToMany('App\ThConcept', 'th_broaders', 'narrower_id', 'broader_id');
     }
 
-    public function files() {
-        return $this->belongsToMany('App\File', 'file_tags', 'concept_id', 'file_id');
-    }
+    // TODO Do we need this? If so, move to File Plugin
+    // public function files() {
+    //     return $this->belongsToMany('App\File', 'file_tags', 'concept_id', 'file_id');
+    // }
 }

@@ -481,7 +481,7 @@ class Bibliography extends Model implements Searchable
     public static function getSearchCols(): array {
         return array_keys(self::searchCols);
     }
-    
+
     public static function validateType(string $type) : bool {
         return array_key_exists($type, self::bibtexTypes);
     }
@@ -530,7 +530,7 @@ class Bibliography extends Model implements Searchable
         return $strippedFields;
     }
 
-    
+
     private function getEmptyFields(string $type) : array {
         $typeFields = self::bibtexTypes[$type];
         $emptyFields = [];
@@ -539,20 +539,20 @@ class Bibliography extends Model implements Searchable
         }
         return $emptyFields;
     }
-    
+
     // DISCUSS: Wouldnt it be better to throw an error containing the missing fields?
     //          Or at least return an array of missing fields? [SO]
     public function fieldsFromRequest($request, $user) {
         $fields = is_array($request) ? $request : $request->toArray();
-        
+
         if(!isset($fields['entry_type'])) {
             return false;
         }
-        
+
         $type = $fields['entry_type'];
         $filteredFields = self::stripDisallowed($fields, $type);
         $nullMap = array_map(fn() => null, self::patchRules );
-        $nullMap = array_filter($nullMap, fn($key) => !in_array($key, ["file"]), ARRAY_FILTER_USE_KEY); 
+        $nullMap = array_filter($nullMap, fn($key) => !in_array($key, ["file"]), ARRAY_FILTER_USE_KEY);
         $allFieldsFixed = array_merge($nullMap, $filteredFields);
         foreach($allFieldsFixed as $key => $value){
             if(!in_array($key, $this->fillable)) throw new \Exception("Field $key is not allowed for this type of entry");
@@ -590,7 +590,7 @@ class Bibliography extends Model implements Searchable
 
         $type = self::bibtexTypes[$fields['entry_type']];
         if(!array_key_exists('mandatory', $type)) return false;
-        
+
         $subFields = array_intersect_key($fields, $type['mandatory']);
         $subFields['entry_type'] = $type;
         $duplicateEntry = self::where($subFields)->first();
