@@ -22,14 +22,14 @@ class IntegerAttribute extends AttributeBase
 
     public static function serialize(mixed $data) : mixed {
         if(is_int($data)) {
-            return $data;   
-        }else if(is_string($data)) {
+            return $data;
+        } else if(is_string($data)) {
             $data = trim($data);
             if(!NumberUtils::is_integer_string($data)){
                 throw new Exception("Given data is not an integer");
             }
             $data = intval($data);
-        }else{
+        } else {
             throw new Exception("Given data is not an integer");
         }
 

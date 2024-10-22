@@ -28,20 +28,20 @@ class UserlistAttribute extends AttributeBase
                 $name = trim($name);
                 $user = User::where('nickname', $name)->firstOrFail();
                 //TODO: The deleted_at check should be necessary here!!!!
-                $user = User::where('nickname', $name)
-                    ->where("deleted_at", null)
-                    ->firstOrFail();
+                // $user = User::where('nickname', $name)
+                //     ->where("deleted_at", null)
+                //     ->firstOrFail();
 
                 $list[] = $user->id;
             } catch(ModelNotFoundException $e) {
                 $incorrectUsers[] = $name;
             }
         }
-        
+
         if(count($incorrectUsers) > 0) {
             throw new InvalidDataException(__("validation.user"), implode(', ', $incorrectUsers));
         }
-        
+
         return json_encode($list);
     }
 

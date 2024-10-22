@@ -1,13 +1,13 @@
 <?php
 namespace Tests\Unit\Attributes;
 
-use App\AttributeTypes\IconClassAttribute;
+use App\AttributeTypes\IconclassAttribute;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
 // !!!! Currently this test is only testing the fromImport function!!!
 
-class IconClassAttributeTest extends TestCase
+class IconclassAttributeTest extends TestCase
 {
 
     /**
@@ -15,8 +15,8 @@ class IconClassAttributeTest extends TestCase
      */
     public function testFromImportTruthy($input)
     {
-        $this->expectNotToPerformAssertions(IconClassAttribute::class);
-        IconClassAttribute::fromImport($input);
+        $this->expectNotToPerformAssertions(IconclassAttribute::class);
+        IconclassAttribute::fromImport($input);
     }
 
     /**
@@ -24,7 +24,7 @@ class IconClassAttributeTest extends TestCase
      */
     public function testFromImportReturnValues($input, $expected)
     {
-        $this->assertEquals($expected, IconClassAttribute::fromImport($input));
+        $this->assertEquals($expected, IconclassAttribute::fromImport($input));
     }
 
     /**
@@ -33,7 +33,7 @@ class IconClassAttributeTest extends TestCase
     public function testFromImportFalsy($input)
     {
         $this->expectException(InvalidDataException::class);
-        IconClassAttribute::fromImport($input);
+        IconclassAttribute::fromImport($input);
     }
 
     public static function truthyProvider()

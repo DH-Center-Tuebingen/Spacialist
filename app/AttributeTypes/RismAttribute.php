@@ -17,12 +17,12 @@ class RismAttribute extends AttributeBase
         if($data == "") {
             return null;
         }
-        
-        if(!NumberUtils::is_positive_integer_string($data)){
+
+        if(!NumberUtils::is_unsigned_integer_string($data)){
             throw InvalidDataException::invalidDefinition("RISM", $data);
         }
-        
-        return $data; 
+
+        return $data;
     }
 
     public static function unserialize(mixed $data) : mixed {

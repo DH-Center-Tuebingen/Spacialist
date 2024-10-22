@@ -26,7 +26,7 @@ class TimePeriod implements JsonSerializable{
         return $this->start . ' -> ' . $this->end;
     }
 
-    public function determineLabel(int $year): string {
+    public function determineLabel(int $year) : string {
         return $year > 0 ? 'ad' : 'bc';
     }
 

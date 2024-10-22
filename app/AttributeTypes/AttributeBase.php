@@ -63,7 +63,7 @@ abstract class AttributeBase
                     } else if($on == "in_table") {
                         if($attr::getInTable() != $value) return false;
                     } else if($on == "field") {
-                        if($attr::getField() != $value) return false; 
+                        if($attr::getField() != $value) return false;
                     } else if($on == "has_selection") {
                         if($attr::getHasSelection() != $value) return false;
                     }
@@ -130,8 +130,9 @@ abstract class AttributeBase
                 $class::handleOnCreate($entity, $attr, $user);
             }
         }
-        
+
     }
+
     public static function onAddHandler(Attribute $attr, EntityType $entityType, User $user) : void {
         $class = self::getMatchingClass($attr->datatype);
         if(method_exists($class, "handleOnAdd")) {
@@ -139,12 +140,12 @@ abstract class AttributeBase
         }
     }
 
-    private static function importDataIsEmpty($data):bool{
+    private static function importDataIsEmpty(int|float|bool|string $data) : bool {
         if(!is_string($data)) return false;
         return trim($data) === "";
     }
 
-    public static function fromImport(int|float|bool|string $data): mixed{
+    public static function fromImport(int|float|bool|string $data) : mixed{
         if(self::importDataIsEmpty($data)) {
             return null;
         }
@@ -154,7 +155,7 @@ abstract class AttributeBase
     public static function parseImport(int|float|bool|string $data) : mixed {
         return StringUtils::useGuard(InvalidDataException::class)($data);
     }
-    
+
     public abstract static function unserialize(mixed $data) : mixed;
     public abstract static function serialize(mixed $data) : mixed;
 }

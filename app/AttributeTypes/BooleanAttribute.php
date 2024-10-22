@@ -9,24 +9,17 @@ class BooleanAttribute extends AttributeBase {
     protected static bool $inTable = true;
     protected static ?string $field = 'int_val';
 
-    public static function parseImport(int|float|bool|string $data): mixed {        
-
+    public static function parseImport(int|float|bool|string $data) : mixed {
         $boolean = false;
 
         if(is_bool($data)) {
             $boolean = $data;
         } else if(is_numeric($data)) {
-            floatval($data) > 0 ? $boolean = true : $boolean = false;
+            $boolean = floatval($data) > 0;
         } else if(is_string($data)) {
             $truthy = ['true', 't', 'x', 'wahr', 'w'];
             $string_val = strtolower(trim($data));
-
-            for($i = 0; $i < count($truthy); $i++) {
-                if($string_val === $truthy[$i]) {
-                    $boolean = true;
-                    break;
-                }
-            }
+            $boolean = in_array($string_val, $truthy, true);
         } else {
             throw InvalidDataException::requireBoolean($data);
         }

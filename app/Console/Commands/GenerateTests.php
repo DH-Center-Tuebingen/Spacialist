@@ -30,9 +30,7 @@ class GenerateTests extends Command
      */
     public function handle()
     {
-        //
         $dir=$this->argument('dir');
-
 
         if($dir == ".") {
             $dir = "";
@@ -61,7 +59,7 @@ class GenerateTests extends Command
         }
     }
 
-    private function generateTestFor($fileName){
+    private function generateTestFor($fileName) {
         $location = $this->option("type");
         $outdir = $this->option("outdir");
 
