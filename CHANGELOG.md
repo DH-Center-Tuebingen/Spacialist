@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Frontend errors due to wrong dayjs import
 - Missing translation for _milligram_ in si-unit attribute
+- Added tests for all attribute type imports
+- Improved output in _Data Importer_ frontend
 
 ## 0.10 - Jelling
 ### Added

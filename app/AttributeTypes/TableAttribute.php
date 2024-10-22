@@ -26,7 +26,7 @@ class TableAttribute extends AttributeBase
         return $selection;
     }
 
-    public static function fromImport(int|float|bool|string $data) : mixed {
+    public static function parseImport(int|float|bool|string $data) : mixed {
         return null;
     }
 

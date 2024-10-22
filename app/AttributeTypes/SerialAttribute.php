@@ -8,7 +8,7 @@ use App\Entity;
 use App\EntityType;
 use App\User;
 
-class SerialAttribute extends AttributeBase
+class SerialAttribute extends StaticAttribute
 {
     protected static string $type = "serial";
     protected static bool $inTable = false;
@@ -23,9 +23,6 @@ class SerialAttribute extends AttributeBase
         $av->save();
     }
 
-    public static function fromImport(int|float|bool|string $data) : mixed {
-        return null;
-    }
     public static function unserialize(mixed $data) : mixed {
         return false;
     }
