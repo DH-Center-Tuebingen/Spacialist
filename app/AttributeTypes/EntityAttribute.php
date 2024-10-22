@@ -9,7 +9,7 @@ class EntityAttribute extends AttributeBase
     protected static string $type = "entity";
     protected static bool $inTable = true;
     protected static ?string $field = 'entity_val';
-    
+
     // TODO: Do we still need this?
     // protected static string $deleted_string = "error.deleted_entity";
 
@@ -25,7 +25,7 @@ class EntityAttribute extends AttributeBase
         // }
 
         // Always return id prop, even if entity is deleted. Otherwise it wouldn't be visible in the frontend
-        return $data["id"];
+        return $data["id"] ?? null;
     }
 
     public static function serialize(mixed $data) : mixed {

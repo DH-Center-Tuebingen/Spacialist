@@ -13,7 +13,7 @@ class ApiSearchTest extends TestCase
     // Testing GET requests
 
     /**
-     * @testdox GET /api/v1/search : Search Global for Entity
+     * @testdox GET    /api/v1/search : Search Global for Entity
      *
      * @return void
      */
@@ -63,7 +63,7 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * @testdox GET /api/v1/search : Search Global for Bibliography
+     * @testdox GET    /api/v1/search : Search Global for Bibliography
      *
      * @return void
      */
@@ -139,7 +139,7 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * @testdox GET /api/v1/search : Search Global
+     * @testdox GET    /api/v1/search : Search Global
      *
      * @return void
      */
@@ -189,7 +189,7 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * @testdox GET /api/v1/search/entity : Search Entity
+     * @testdox GET    /api/v1/search/entity : Search Entity
      *
      * @return void
      */
@@ -222,7 +222,7 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * @testdox GET /api/v1/search/label : Search for Thesaurex Label
+     * @testdox GET    /api/v1/search/label : Search for Thesaurex Label
      *
      * @return void
      */
@@ -274,7 +274,7 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * @testdox GET /api/v1/search/attribute : Search Attributes
+     * @testdox GET    /api/v1/search/attribute : Search Attributes
      *
      * @return void
      */
@@ -318,7 +318,7 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * @testdox GET /api/v1/search/selection/{id} : Search in Attribute Selection
+     * @testdox GET    /api/v1/search/selection/{id} : Search in Attribute Selection
      *
      * @return void
      */

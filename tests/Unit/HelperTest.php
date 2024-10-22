@@ -26,6 +26,10 @@ class HelperTest extends TestCase
             'updated_at',
             'recursive',
             'root_attribute_id',
+            'is_system',
+            'multiple',
+            'restrictions',
+            'metadata',
         ], $attributeColumns);
 
         $eaColumns = sp_column_names('entity_attributes');
@@ -37,6 +41,7 @@ class HelperTest extends TestCase
             'depends_on',
             'created_at',
             'updated_at',
+            'metadata',
         ], $eaColumns);
     }
 }

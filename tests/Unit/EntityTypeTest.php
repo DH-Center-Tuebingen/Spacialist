@@ -16,9 +16,8 @@ class EntityTypeTest extends TestCase
      */
     public function testRelations()
     {
-        $type = EntityType::with(['layer', 'entities', 'attributes', 'sub_entity_types', 'thesaurus_concept'])->find(4);
+        $type = EntityType::with(['entities', 'attributes', 'sub_entity_types', 'thesaurus_concept'])->find(4);
 
-        $this->assertEquals(5, $type->layer->id);
         $this->assertEquals(1, $type->entities->count());
         $this->assertEquals(2, $type->entities[0]->id);
         $this->assertEquals(5, $type->attributes->count());

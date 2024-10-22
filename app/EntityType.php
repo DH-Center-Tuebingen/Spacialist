@@ -46,9 +46,10 @@ class EntityType extends Model
         $this->save();
     }
 
-    public function layer() {
-        return $this->hasOne('App\AvailableLayer');
-    }
+    // TODO move to Map Plugin
+    // public function layer() {
+    //     return $this->hasOne('App\AvailableLayer');
+    // }
 
     public function entities() {
         return $this->hasMany('App\Entity')->orderBy('id');

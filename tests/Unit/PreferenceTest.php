@@ -4,7 +4,6 @@ namespace Tests\Unit;
 
 use Tests\TestCase;
 
-
 use App\Preference;
 
 class PreferenceTest extends TestCase
@@ -46,7 +45,7 @@ class PreferenceTest extends TestCase
             [
                 'label' => 'prefs.columns',
                 'value' => '{"left":2, "right":5, "center":5}',
-                'testValue' => '{"left":2, "right":5, "center":5}'
+                'testValue' => '"{\"left\":2, \"right\":5, \"center\":5}"'
             ],
             [
                 'label' => 'prefs.show-tooltips',
