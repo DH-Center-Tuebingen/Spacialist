@@ -5,7 +5,6 @@ namespace App\AttributeTypes;
 use App\Entity;
 use App\Exceptions\InvalidDataException;
 use App\Utils\StringUtils;
-use Spatie\FlareClient\Http\Exceptions\InvalidData;
 
 class EntityAttribute extends AttributeBase
 {
@@ -15,7 +14,6 @@ class EntityAttribute extends AttributeBase
     protected static string $deleted_string = "error.deleted_entity";
 
     public static function parseImport(int|float|bool|string $data) : mixed {
-
         // TODO: This does not check if the entity that is selected is actually valid!
         $data = StringUtils::useGuard(InvalidDataException::class)($data);
         $entityId = Entity::getFromPath($data);

@@ -5,7 +5,6 @@ namespace App\AttributeTypes;
 use App\Entity;
 use App\Exceptions\InvalidDataException;
 use App\Utils\StringUtils;
-use Spatie\FlareClient\Http\Exceptions\InvalidData;
 
 class EntityMultipleAttribute extends AttributeBase
 {
@@ -23,8 +22,9 @@ class EntityMultipleAttribute extends AttributeBase
             $entityId = Entity::getFromPath($trimmedPart);
             if($entityId === null) {
                 $missingEntitiesList[] = $trimmedPart;
+            } else {
+                $idList[] = $entityId;
             }
-            $idList[] = $entityId;
         }
 
         if(count($missingEntitiesList) > 0) {

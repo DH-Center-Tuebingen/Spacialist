@@ -4,16 +4,16 @@ namespace App;
 
 class File {
 
-    static function getBomBytes(){
+    static function getBomBytes() : string {
         return "\xEF\xBB\xBF";
     }
 
-    static function hasBom($handle) {
+    static function hasBom($handle) : bool {
         $bom = fread($handle, 3);
         return $bom == self::getBomBytes();
     }
 
-    static function removeBomIfNecessary($filename) {
+    static function removeBomIfNecessary(string $filename) : void {
         $file = fopen($filename, "r");
 
         if(self::hasBom($file)){
