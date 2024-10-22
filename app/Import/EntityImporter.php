@@ -251,7 +251,7 @@ class EntityImporter {
 
     private function rowConflict($rowIndex, $msg, $args = []) {
         $tmsg = __($msg, $args);
-        $this->resolver->conflict(($rowIndex + 1) . ": " . $tmsg);
+        $this->resolver->conflict("[" . ($rowIndex + 1) . "] " . $tmsg);
     }
 
     private function getParentColumn($row) {
