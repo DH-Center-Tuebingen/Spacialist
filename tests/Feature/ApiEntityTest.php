@@ -11,7 +11,6 @@ use Tests\PermissionTester;
 
 class ApiEntityTest extends TestCase
 {
-    
     // ==========================================
     //              [[ GET ]]
     // ==========================================
@@ -345,7 +344,7 @@ class ApiEntityTest extends TestCase
     // ==========================================
     //              [[ PATCH ]]
     // ==========================================
-    
+
     /**
      * @testdox PATCH  /api/v1/entity/{entity_id}/attributes  -  Test modifying [remove, replace, add] attributes of an entity (id=4).
      */
@@ -410,7 +409,7 @@ class ApiEntityTest extends TestCase
                         ->has('parentIds')
                         ->etc()
                 )
-                ->has('added_attributes.19', fn($addedAttrJson) => 
+                ->has('added_attributes.19', fn($addedAttrJson) =>
                     $addedAttrJson
                         ->has('id')
                         ->has('entity_id')
@@ -564,7 +563,7 @@ class ApiEntityTest extends TestCase
                 $this->assertEquals('bc', $val->endLabel);
             }
         }
-    }     
+    }
 
     /**
      * @testdox PATCH  /api/v1/entity/{entity_id}/name  -  Test renaming an entity (id=1)  -  Site A => Site A_renamed.
@@ -604,12 +603,12 @@ class ApiEntityTest extends TestCase
         $siteA = Entity::find(1);
         $this->assertEquals('Site A', $siteA->name);
         $this->assertNull($siteA->root_entity_id);
-        
+
         $siteB = Entity::find(7);
         $this->assertEquals('Site B', $siteB->name);
         $this->assertNull($siteB->root_entity_id);
         $this->assertEquals(2, $siteB->rank);
-        
+
         $find12 = Entity::find(8);
         $this->assertEquals('Fund 12', $find12->name);
         $this->assertEquals(1, $find12->rank);
@@ -629,29 +628,29 @@ class ApiEntityTest extends TestCase
         // Changed values
         $this->assertEquals(7, $siteA->root_entity_id);
         $this->assertEquals(1, $siteA->rank);
-        
+
         // Same values
         $this->assertEquals(1, $siteB->rank);
         $this->assertEquals(null, $siteB->root_entity_id);
         $this->assertEquals(7, $find12->root_entity_id);
         $this->assertEquals(2, $find12->rank);
     }
-    
-    
+
+
     /**
      *  @dataProvider  moveExceptionsProvider
-     *  @testdox PATCH  /api/v1/entity/{entity_id}/rank  -  Move entities exception 
+     *  @testdox PATCH  /api/v1/entity/{entity_id}/rank  -  Move entities exception
      */
-    function testMoveExceptions(int $entity,int | null $newParentEntity, int $statusCode = 400){        
+    function testMoveExceptions(int $entity,int | null $newParentEntity, int $statusCode = 400){
             $response = $this->userRequest()
             ->patch("/api/v1/entity/$entity/rank", [
                 'rank' => 1,
                 'parent_id' => $newParentEntity
             ]);
-            
+
             $response->assertStatus($statusCode);
     }
-    
+
     public static function moveExceptionsProvider(): array{
         return [
             "invalid entity type to top" => [8, null],
@@ -661,7 +660,7 @@ class ApiEntityTest extends TestCase
             "move to non-existing entity" => [8, 99999, 422],
         ];
     }
-    
+
 
 
 
@@ -685,7 +684,7 @@ class ApiEntityTest extends TestCase
         $cnt = Entity::count();
         $this->assertEquals($cnt, 7);
     }
-    
+
     /**
      * @testdox DELETE /api/v1/entity/{entity_id}  -  Delete an entity (id=1) and all it's sub-entities.
      */
@@ -720,7 +719,7 @@ class ApiEntityTest extends TestCase
     // ==========================================
     //      [[ ADDITIONAL DATA PROVIDERS ]]
     // ==========================================
-      
+
     /**
      * @dataProvider permissions
      * @testdox [[PROVIDER]] Routes Without Permissions
@@ -751,7 +750,7 @@ class ApiEntityTest extends TestCase
             "DELETE /api/v1/entity/1"                      => Permission::for("delete", "/api/v1/entity/1", "You do not have the permission to delete an entity"),
         ];
     }
-    
+
     public function exceptions() {
         return [
             "GET    /api/v1/entity/99" => Permission::for("get", "/api/v1/entity/99", "This entity does not exist"),
