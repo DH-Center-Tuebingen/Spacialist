@@ -34,7 +34,6 @@ abstract class TestCase extends BaseTestCase {
     }
 
     public function assertStatus($response, $status) {
-
         $no_errors = "No error message found in response.";
         $message= "";
         try{

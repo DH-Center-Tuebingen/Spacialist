@@ -725,19 +725,18 @@ class ApiEntityTest extends TestCase
      * @dataProvider permissions
      * @testdox [[PROVIDER]] Routes Without Permissions
      */
-    public function testWithoutPermission($permission){          
+    public function testWithoutPermission($permission) {
         (new PermissionTester($this))->testMissingPermission($permission);
     }
     /**
      * @dataProvider exceptions
      * @testdox [[PROVIDER]] Exceptions With Permissions
      */
-    public function testSucceedWithPermission($permission){
+    public function testSucceedWithPermission($permission) {
         (new PermissionTester($this))->testExceptions($permission);
     }
 
-    public function permissions()
-    {
+    public function permissions() {
         return [
             "GET    /api/v1/entity/top"                    => Permission::for("get", "/api/v1/entity/top", "You do not have the permission to get entities"),
             "GET    /api/v1/entity/1"                      => Permission::for("get", "/api/v1/entity/1", "You do not have the permission to get a specific entity"),
@@ -753,7 +752,7 @@ class ApiEntityTest extends TestCase
         ];
     }
     
-    public function exceptions(){
+    public function exceptions() {
         return [
             "GET    /api/v1/entity/99" => Permission::for("get", "/api/v1/entity/99", "This entity does not exist"),
             "GET    /api/v1/entity/entity_type/99/data/14" => Permission::for("get", "/api/v1/entity/entity_type/99/data/14", "This entity type does not exist"),
