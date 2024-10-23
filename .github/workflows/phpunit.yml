@@ -10,8 +10,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ['8.1', '8.2']
-        pg-gis-combo: ['14-3.4-alpine', '15-3.4-alpine']
+        php-versions: ['8.2', '8.3']
+        pg-gis-combo: ['16-3.5-alpine', '17-3.5-alpine']
         databases: ['pgsql']
     
     name: phpunit-php${{matrix.php-versions}}-${{matrix.databases}}-postgis${{matrix.pg-gis-combo}}
@@ -60,7 +60,7 @@ jobs:
       run: mkdir -p build/logs
     - name: Execute tests (Unit and Feature tests) via PHPUnit
       run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
-    - uses: codecov/codecov-action@v3
+    - uses: codecov/codecov-action@v4
       name: Codecov Coverage
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
