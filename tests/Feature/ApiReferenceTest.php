@@ -15,7 +15,7 @@ class ApiReferenceTest extends TestCase
     // ==========================================
     
     /**
-    * @testdox GET    /api/v1/entity/{id}/reference  -  Ger all references of an entity (id=1).
+    * @testdox GET    /api/v1/entity/{id}/reference  -  Get all references of an entity (id=1).
     */
     public function testEntityReferencesEndpoint()
     {

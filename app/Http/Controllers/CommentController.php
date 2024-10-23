@@ -38,7 +38,7 @@ class CommentController extends Controller {
                     $resource = AttributeValue::where('entity_id', $id)
                         ->where('attribute_id', $aid)
                         ->firstOrFail();
-                } catch (ModelNotFoundException $e) {
+                } catch(ModelNotFoundException $e) {
                     return response()->json([
                         'error' => __('This attribute value does not exist')
                     ], 400);
@@ -47,7 +47,7 @@ class CommentController extends Controller {
             case 'entity':
                 try {
                     $resource = Entity::findOrFail($id);
-                } catch (ModelNotFoundException $e) {
+                } catch(ModelNotFoundException $e) {
                     return response()->json([
                         'error' => __('This entity does not exist')
                     ], 400);
@@ -87,7 +87,7 @@ class CommentController extends Controller {
     public function addComment(Request $request)
     {
         $user = auth()->user();
-        if (!$user->can('comments_create')) {
+        if(!$user->can('comments_create')) {
             return response()->json([
                 'error' => __('You do not have the permission to add comments')
             ], 403);
@@ -102,7 +102,7 @@ class CommentController extends Controller {
             case 'entity':
                 try {
                     $object = Entity::findOrFail($id);
-                } catch (ModelNotFoundException $e) {
+                } catch(ModelNotFoundException $e) {
                     return response()->json([
                         'error' => __('This entity does not exist')
                     ], 400);
@@ -115,7 +115,7 @@ class CommentController extends Controller {
                         'entity_id' => $object->entity_id,
                         'attribute_id' => $object->attribute_id,
                     ];
-                } catch (ModelNotFoundException $e) {
+                } catch(ModelNotFoundException $e) {
                     return response()->json([
                         'error' => __('This attribute value does not exist')
                     ], 400);
@@ -138,7 +138,7 @@ class CommentController extends Controller {
     public function patchComment(Request $request, $id)
     {
         $user = auth()->user();
-        if (!$user->can('comments_write')) {
+        if(!$user->can('comments_write')) {
             return response()->json([
                 'error' => __('You do not have the permission to edit a comment')
             ], 403);
@@ -147,18 +147,22 @@ class CommentController extends Controller {
         $this->validate($request, Comment::patchKeys);
 
         try {
-            $comment = Comment::where('id', $id)
-                ->where('user_id', $user->id)
-                ->firstOrFail();
-        } catch (ModelNotFoundException $e) {
+            $comment = Comment::where('id', $id)->firstOrFail();
+        } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This comment does not exist')
             ], 400);
         }
+        
+        if($comment->user_id != $user->id) {
+            return response()->json([
+                'error' => __('You do not have the permission to edit this comment')
+            ], 403);
+        }
 
         $patchable = $request->only(array_keys(Comment::patchKeys));
 
-        foreach ($patchable as $key => $val) {
+        foreach($patchable as $key => $val) {
             if($key == 'content') {
                 $val = htmlspecialchars($val);
             }

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class DemoSeeder extends Seeder {
@@ -15,11 +16,12 @@ class DemoSeeder extends Seeder {
         activity()->disableLogging();
 
         $this->call(UsersTableSeeder::class);
-
+        $this->call(DemoUserSeeder::class);
         $this->call(ThesaurexSeeder::class);
 
         // $this->call(PermissionsTableSeeder::class);
         $this->call(RolesTableSeeder::class);
+        $this->call(DemoRoleUserSeeder::class);
         $this->call(PermissionRoleTableSeeder::class);
         $this->call(RoleUserTableSeeder::class);
 
@@ -27,14 +29,12 @@ class DemoSeeder extends Seeder {
         $this->call(AttributesTableSeeder::class);
         $this->call(EntityTypesTableSeeder::class);
         $this->call(EntitiesTableSeeder::class);
-        // $this->call(FilesTableSeeder::class);
         // $this->call(FileTagsTableSeeder::class);
-        // $this->call(AvailableLayersTableSeeder::class);
         $this->call(EntityTypeRelationsTableSeeder::class);
         $this->call(EntityAttributesTableSeeder::class);
         $this->call(AttributeValuesTableSeeder::class);
-        // $this->call(EntityFilesTableSeeder::class);
         $this->call(ReferencesTableSeeder::class);
+        $this->call(CommentsSeeder::class);
 
         // Set different root for tags
         \DB::table('preferences')
@@ -64,7 +64,7 @@ class DemoSeeder extends Seeder {
             fclose($filehandle);
         }
 
-        if(\DB::connection()->getDriverName() === 'pgsql') {
+        if(DB::connection()->getDriverName() === 'pgsql') {
             $this->call(FixSequencesSeeder::class);
         }
 

@@ -7,7 +7,7 @@ use Tests\TestCase;
 
 class PermissionTester {
     
-    private TestCase    $case;
+    private TestCase $case;
     
     public function __construct(TestCase $case) {
         $this->case = $case;

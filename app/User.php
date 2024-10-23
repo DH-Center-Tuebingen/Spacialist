@@ -121,10 +121,6 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany('App\UserPreference');
     }
 
-    // public function roles() {
-    //     return $this->belongsToMany('App\Role', 'role_user', 'user_id', 'role_id');
-    // }
-
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
      *

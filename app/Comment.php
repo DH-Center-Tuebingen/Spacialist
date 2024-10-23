@@ -63,4 +63,11 @@ class Comment extends Model
     public function author() {
         return $this->hasOne('App\User', 'id', 'user_id');
     }
+    
+    public static function boot(){
+        parent::boot();
+        static::deleting(function($comment){
+            $comment->replies()->delete();
+        });
+    }
 }
