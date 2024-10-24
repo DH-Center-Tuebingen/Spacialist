@@ -335,24 +335,31 @@ class UserController extends Controller
             // Update updated_at column
             $user->touch();
         }
+        $saveRequired = false;
         if($request->has('email')) {
             $user->email = Str::lower($request->get('email'));
-            $user->save();
+            $saveRequired = true;
         }
         if($request->has('name')) {
             $user->name = $request->get('name');
-            $user->save();
+            $saveRequired = true;
         }
         if($request->has('nickname')) {
             $user->nickname = Str::lower($request->get('nickname'));
-            $user->save();
+            $saveRequired = true;
         }
-        $user->setMetadata(
-            $request->only('phonenumber', 'orcid', 'role', 'field', 'institution', 'department')
-        );
+        $metadataFields = $request->only('phonenumber', 'orcid', 'role', 'field', 'institution', 'department');
+        if(count($metadataFields) > 0) {
+            $user->setMetadata($metadataFields);
+            $saveRequired = true;
+        }
 
         // return user without roles relation
         $user->unsetRelation('roles');
+
+        if($saveRequired) {
+            $user->save();
+        }
 
         return response()->json($user);
     }

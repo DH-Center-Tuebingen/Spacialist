@@ -91,13 +91,16 @@ class User extends Authenticatable implements JWTSubject
         $this->permissions = $permissions;
     }
 
-    public function setMetadata($data) {
+    public function setMetadata(array $data, bool $save = false) {
         if(!isset($this->metadata)) {
             $this->metadata = $data;
         } else {
             $this->metadata = array_replace($this->metadata, $data);
         }
-        $this->save();
+
+        if($save) {
+            $this->save();
+        }
     }
 
     public function isModerated() : bool {
