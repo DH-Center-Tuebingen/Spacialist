@@ -735,7 +735,7 @@ class ApiEntityTest extends TestCase
         (new PermissionTester($this))->testExceptions($permission);
     }
 
-    public function permissions() {
+    public static function permissions() {
         return [
             "GET    /api/v1/entity/top"                    => Permission::for("get", "/api/v1/entity/top", "You do not have the permission to get entities"),
             "GET    /api/v1/entity/1"                      => Permission::for("get", "/api/v1/entity/1", "You do not have the permission to get a specific entity"),
@@ -751,7 +751,7 @@ class ApiEntityTest extends TestCase
         ];
     }
 
-    public function exceptions() {
+    public static function exceptions() {
         return [
             "GET    /api/v1/entity/99" => Permission::for("get", "/api/v1/entity/99", "This entity does not exist"),
             "GET    /api/v1/entity/entity_type/99/data/14" => Permission::for("get", "/api/v1/entity/entity_type/99/data/14", "This entity type does not exist"),

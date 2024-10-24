@@ -406,7 +406,6 @@ class ApiEditorTest extends TestCase
                 ->has('id')
                 ->has('thesaurus_url')
                 ->has('is_root')
-                ->has('layer')
                 ->has('created_at')
                 ->has('updated_at')
                 ->where('id', $entityType->id)
