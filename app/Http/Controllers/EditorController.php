@@ -146,24 +146,26 @@ class EditorController extends Controller {
 
         $curl = $request->get('concept_url');
         $is_root = sp_parse_boolean($request->get('is_root'));
-        $geomtype = $request->get('geometry_type');
         $cType = new EntityType();
         $cType->thesaurus_url = $curl;
         $cType->is_root = $is_root;
         $cType->save();
         $cType = EntityType::find($cType->id);
 
-        AvailableLayer::createFromArray([
-            'name' => '',
-            'url' => '',
-            'type' => $geomtype,
-            'opacity' => 1,
-            'visible' => true,
-            'is_overlay' => true,
-            'entity_type_id' => $cType->id
-        ]);
+        // TODO:: Reimplement in plugin [SO]
+        //
+        // $geomtype = $request->get('geometry_type');
+        // AvailableLayer::createFromArray([
+        //     'name' => '',
+        //     'url' => '',
+        //     'type' => $geomtype,
+        //     'opacity' => 1,
+        //     'visible' => true,
+        //     'is_overlay' => true,
+        //     'entity_type_id' => $cType->id
+        // ]);
 
-        $cType->load('layer');
+        // $cType->load('layer');
 
         return response()->json($cType, 201);
     }
