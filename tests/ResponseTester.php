@@ -5,7 +5,7 @@ namespace Tests;
 use App\User;
 use Tests\TestCase;
 
-class PermissionTester {
+class ResponseTester {
     
     private TestCase $case;
     

@@ -12,7 +12,7 @@ use App\EntityAttribute;
 use App\EntityType;
 use App\ThConcept;
 use Illuminate\Testing\Fluent\AssertableJson;
-use Tests\PermissionTester;
+use Tests\ResponseTester;
 use Tests\Permission;
 
 class ApiEditorTest extends TestCase
@@ -916,14 +916,14 @@ class ApiEditorTest extends TestCase
      * @dataProvider permissionsProvider
      */
     public function testWithoutPermission($permission){          
-        (new PermissionTester($this))->testMissingPermission($permission);
+        (new ResponseTester($this))->testMissingPermission($permission);
     }
 
     /**
      * @dataProvider exceptionsProvider
      */
     public function testExceptions($permission){
-        (new PermissionTester($this))->testExceptions($permission);
+        (new ResponseTester($this))->testExceptions($permission);
     }
 
     public static function permissionsProvider(){ 

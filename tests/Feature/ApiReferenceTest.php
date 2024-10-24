@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Reference;
 use Tests\Permission;
-use Tests\PermissionTester;
+use Tests\ResponseTester;
 use Tests\TestCase;
 
 class ApiReferenceTest extends TestCase
@@ -204,14 +204,14 @@ class ApiReferenceTest extends TestCase
      * @testdox [[PROVIDER]] Routes Without Permissions
      */
     public function testWithoutPermission($permission){          
-        (new PermissionTester($this))->testMissingPermission($permission);
+        (new ResponseTester($this))->testMissingPermission($permission);
     }
     /**
      * @dataProvider exceptions
      * @testdox [[PROVIDER]] Exceptions With Permissions
      */
     public function testSucceedWithPermission($permission){
-        (new PermissionTester($this))->testExceptions($permission);
+        (new ResponseTester($this))->testExceptions($permission);
     }
     
     public static function permissions(){

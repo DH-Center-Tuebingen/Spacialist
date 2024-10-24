@@ -7,7 +7,7 @@ use App\AttributeValue;
 use App\Entity;
 use App\User;
 use Tests\Permission;
-use Tests\PermissionTester;
+use Tests\ResponseTester;
 
 class ApiEntityTest extends TestCase
 {
@@ -725,14 +725,14 @@ class ApiEntityTest extends TestCase
      * @testdox [[PROVIDER]] Routes Without Permissions
      */
     public function testWithoutPermission($permission) {
-        (new PermissionTester($this))->testMissingPermission($permission);
+        (new ResponseTester($this))->testMissingPermission($permission);
     }
     /**
      * @dataProvider exceptions
      * @testdox [[PROVIDER]] Exceptions With Permissions
      */
     public function testSucceedWithPermission($permission) {
-        (new PermissionTester($this))->testExceptions($permission);
+        (new ResponseTester($this))->testExceptions($permission);
     }
 
     public static function permissions() {

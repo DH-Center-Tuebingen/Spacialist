@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Bibliography;
 use Illuminate\Http\UploadedFile;
 use Tests\Permission;
-use Tests\PermissionTester;
+use Tests\ResponseTester;
 use Tests\TestCase;
 
 class ApiBibliographyTest extends TestCase
@@ -717,13 +717,13 @@ class ApiBibliographyTest extends TestCase
      * @dataProvider permissions
      */
     public function testWithoutPermission($permission){          
-        (new PermissionTester($this))->testMissingPermission($permission);
+        (new ResponseTester($this))->testMissingPermission($permission);
     }
     /**
      * @dataProvider exceptionPermissions
      */
     public function testSucceedWithPermission($permission){
-        (new PermissionTester($this))->testExceptions($permission);
+        (new ResponseTester($this))->testExceptions($permission);
     }
     
     // TODO: We should test the success of each endpoint by using a user that has only the single required permission. [SO]
