@@ -72,7 +72,7 @@ class ApiEntityTest extends TestCase
             'updated_at' => '2017-12-31T16:10:56.000000Z',
             'parentIds' => [1],
             'parentNames' => ['Site A'],
-            'comments_count' => 0,
+            'comments_count' => 3,
             'metadata' => [],
             'attributeLinks' => [],
         ]);
