@@ -24,8 +24,8 @@ class DemoUserSeeder extends Seeder
                 'metadata' => NULL,
                 'password' => bcrypt('password'),
                 'remember_token' => NULL,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => '2018-12-31 12:00:00',
+                'updated_at' => '2018-12-31 12:00:00',
                 'deleted_at' => NULL,
             ],
             [
@@ -36,8 +36,8 @@ class DemoUserSeeder extends Seeder
                 'metadata' => NULL,
                 'password' => bcrypt('password_gary'),
                 'remember_token' => NULL,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => '2019-01-06 12:00:00',
+                'updated_at' => '2019-01-06 12:00:00',
                 'deleted_at' => NULL,
             ]
         ]);
