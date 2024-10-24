@@ -14,7 +14,7 @@ class ApiBibliographyTest extends TestCase
      * Tests the get all (GET /bibliography/) and
      * add entry (POST /bibliography/) API endpoints
      * @return void
-     */    
+     */
      public function getBibliographyStructure(): array {
         return [
             // system fields
@@ -53,26 +53,26 @@ class ApiBibliographyTest extends TestCase
             'year',
         ];
      }
-    
+
      /**
       * @testdox GET /api/v1/bibliography/
       */
-     public function testGetAll(){
+     public function testGetAll() {
         $response = $this->userRequest()
             ->get('/api/v1/bibliography');
-            
+
         $this->assertStatus($response, 200);
         $response->assertJsonCount(6);
      }
-     
-     
+
+
     /**
     * @testdox GET /api/v1/bibliography/{id}
     */
-     public function testGetSingle(){
+     public function testGetSingle() {
         $response = $this->userRequest()
             ->get('/api/v1/bibliography/1320');
-            
+
         $this->assertStatus($response, 200);
         $response->assertJsonStructure($this->getBibliographyStructure());
         $response->assertJson([
@@ -86,7 +86,7 @@ class ApiBibliographyTest extends TestCase
             'citekey' => 'Sh:3'
         ]);
      }
-     
+
      /**
     * @testdox GET /api/v1/bibliography/{id}/ref_count
     */
@@ -98,12 +98,12 @@ class ApiBibliographyTest extends TestCase
         $this->assertStatus($response, 200);
         $response->assertSimilarJson([1]);
     }
-   
-    
+
+
     /**
      * @testdox POST /api/v1/bibliography/
      */
-    public function testAdd(){
+    public function testAdd() {
         $response = $this->userRequest()
             ->post('/api/v1/bibliography', [
                 'entry_type' => 'article',
@@ -113,10 +113,10 @@ class ApiBibliographyTest extends TestCase
                 'pages' => '10-15',
                 'year' => '2021'
             ]);
-        
+
         $this->assertStatus($response, 201);
         $response->assertJsonStructure($this->getBibliographyStructure());
-        
+
         $entry_id = 1324;
         $response->assertJson([
             'id' => $entry_id,
@@ -128,17 +128,17 @@ class ApiBibliographyTest extends TestCase
             'year' => '2021',
             'citekey' => 'Dietmar Köppke_Schweinegerichte_sudga_2021'
         ]);
-    
-        
+
+
         $response = $this->userRequest($response)
             ->get('/api/v1/bibliography');
-            
+
         $this->assertStatus($response, 200);
         $response->assertJsonCount(7);
-        
-        $response = $this->userRequest()
+
+        $response = $this->userRequest($response)
             ->get("/api/v1/bibliography/$entry_id");
-        
+
         $this->assertStatus($response, 200);
         $response->assertJsonStructure($this->getBibliographyStructure());
         $response->assertJson([
@@ -150,8 +150,8 @@ class ApiBibliographyTest extends TestCase
             'year' => '2021',
             'citekey' => 'Dietmar Köppke_Schweinegerichte_sudga_2021'
         ]);
-    }    
-    
+    }
+
     private function importTest($filename, $results) {
         $path = storage_path() . "/framework/testing/$filename";
         $file = new UploadedFile($path, $filename, 'application/x-bibtex', null, true);
@@ -160,7 +160,7 @@ class ApiBibliographyTest extends TestCase
             ->post('/api/v1/bibliography/import', [
                 'file' => $file
             ]);
-            
+
         $inserted = $response->json();
 
         $this->assertStatus($response, 201);
@@ -168,26 +168,26 @@ class ApiBibliographyTest extends TestCase
         $response->assertJsonStructure([ "*" => [
             "entry" => $this->getBibliographyStructure()]
         ]);
-        
+
         $response->assertJson(array_map(function($e) {
             return [
                 "entry" => $e,
                 "added" => true
             ];
         }, $results));
-        
+
         $cnt = Bibliography::count();
         $this->assertEquals(22, $cnt);
-        
+
         $i = 0;
         foreach($results as $r) {
             $addedItem = $inserted[$i++];
             // Note: I don't like the reliance on the $addedItem["entry"]["id"] here.
             //       But Postgres does not rollback the sequence when a transaction is rolled back.
             //       Therefore all alternative also seem to be more complex than this.
-            $response = $this->userRequest()
+            $response = $this->userRequest($response)
                 ->get('/api/v1/bibliography/'. $addedItem["entry"]["id"]);
-            
+
             $this->assertStatus($response, 200);
             $response->assertJsonStructure($this->getBibliographyStructure());
             $response->assertJson($r);
@@ -323,11 +323,11 @@ class ApiBibliographyTest extends TestCase
            ]
            ]);
     }
-    
+
     /**
      * @testdox POST /api/v1/bibliography/import (with optional fields)
      */
-    public function testOptionalImport(){
+    public function testOptionalImport() {
         $this->importTest("import_optional.bib", [
             [
                 "entry_type" => "article",
@@ -547,11 +547,11 @@ class ApiBibliographyTest extends TestCase
             ]
             ]);
     }
-    
+
     /**
      * @testdox POST /api/v1/bibliography/import (with invalid data)
      */
-    public function testInvalidImport(){
+    public function testInvalidImport() {
         $name = 'import_wrong_structure.bib';
         $path = storage_path() . "/framework/testing/$name";
         $file = new UploadedFile($path, $name, 'application/x-bibtex', null, true);
@@ -566,15 +566,15 @@ class ApiBibliographyTest extends TestCase
             'error' => "Unexpected character '\\0' at line 10 column 1"
         ]);
     }
-     
-    
+
+
     /**
      * @testdox POST /api/v1/bibliography/export
      */
-    function testExport(){
+    function testExport() {
         $response = $this->userRequest()
                 ->post('/api/v1/bibliography/export');
-                
+
         $this->assertStatus($response, 200);
         $this->assertTrue($response->headers->get('content-type') == 'application/x-bibtex');
         $this->assertTrue($response->headers->get('content-disposition') == 'attachment; filename=export.bib');
@@ -582,8 +582,8 @@ class ApiBibliographyTest extends TestCase
         $expectedContent = file_get_contents(storage_path() . "/framework/testing/demo.bib");
         $this->assertSame($expectedContent, $content);
     }
-        
-    function getUpdateData(){
+
+    function getUpdateData() {
         return [
             'entry_type'        => 'book',
             'author'            => 'Köppke, Dietmar and Sauer, Jürgen',
@@ -618,28 +618,28 @@ class ApiBibliographyTest extends TestCase
             'language'          => 'Patched Language',
         ];
     }
-     
-    
+
+
     /*
-     * TODO: The current problem here is that we are not simply updating 
+     * TODO: The current problem here is that we are not simply updating
      *       all table cells according to the passed data but instead sanatizing the
      *       data and only updating the fields that fit the entry_type.
-     * 
+     *
      *      All other fields are set to NULL. This is at the time of writing the
      *      desired behavior. For the tests there is the problem, that we need to
      *      test every entry type. This is not yet implemented.
-     * 
-     *      [SO] 
+     *
+     *      [SO]
      */
-    
+
      /**
       * @testdox POST /api/v1/bibliography/{id}
       */
-     function testPatchItem(){
+     function testPatchItem() {
         $data = $this->getUpdateData();
         $response = $this->userRequest()
             ->post('/api/v1/bibliography/1320', $data);
-            
+
         $this->assertStatus($response, 200);
         $response->assertJsonStructure([
             'id',
@@ -697,7 +697,7 @@ class ApiBibliographyTest extends TestCase
      /**
       * @testdox DELETE /api/v1/bibliography/{id}
       */
-     public function testDelete(){
+     public function testDelete() {
         $bib = Bibliography::latest()->first();
 
         $response = $this->userRequest()
@@ -708,7 +708,7 @@ class ApiBibliographyTest extends TestCase
         $this->assertEquals(5, $cnt);
         $this->assertEquals("", $response->getContent());
     }
-    
+
     /// TODO: Add tests for the following endpoints:
     // - DELETE /{id}/file
     // - UPLOAD file in all requests
@@ -716,18 +716,18 @@ class ApiBibliographyTest extends TestCase
     /**
      * @dataProvider permissions
      */
-    public function testWithoutPermission($permission){          
+    public function testWithoutPermission($permission) {
         (new ResponseTester($this))->testMissingPermission($permission);
     }
     /**
      * @dataProvider exceptionPermissions
      */
-    public function testSucceedWithPermission($permission){
+    public function testSucceedWithPermission($permission) {
         (new ResponseTester($this))->testExceptions($permission);
     }
-    
+
     // TODO: We should test the success of each endpoint by using a user that has only the single required permission. [SO]
-    public static function permissions(){
+    public static function permissions() {
         return [
             'permission to add item'    => Permission::for("post", '/api/v1/bibliography' ,'You do not have the permission to add new bibliography'),
             'permission to update item' => Permission::for("post", '/api/v1/bibliography/9000', 'You do not have the permission to edit existing bibliography'),
@@ -735,8 +735,8 @@ class ApiBibliographyTest extends TestCase
             'permission to import item' => Permission::for("post", '/api/v1/bibliography/import', 'You do not have the permission to add new/modify existing bibliography items'),
         ];
     }
-    
-    public static function exceptionPermissions(){
+
+    public static function exceptionPermissions() {
         return [
             "missing ref count" => Permission::for("get", '/api/v1/bibliography/99/ref_count', 'This bibliography item does not exist'),
             "update missing item" => Permission::for("post", '/api/v1/bibliography/99', 'This bibliography item does not exist'),

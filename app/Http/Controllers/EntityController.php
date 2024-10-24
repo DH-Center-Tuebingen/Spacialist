@@ -722,7 +722,7 @@ class EntityController extends Controller {
                 'error' => __('This entity does not exist'),
             ], 400);
         }
-        
+
         DB::beginTransaction();
         $addedAttributes = [];
         foreach($request->request as $patch) {
@@ -750,7 +750,7 @@ class EntityController extends Controller {
                         ->where('attribute_id', $aid)
                         ->withModerated()
                         ->exists();
-                        
+
                     if($alreadyAdded) {
                         $error = __('There is already a value set for this attribute or it is in moderation state.');
                     }else{
@@ -786,7 +786,7 @@ class EntityController extends Controller {
                 default:
                     $error = __('Unknown operation');
             }
-            
+
             if($error !== null) {
                 DB::rollBack();
                 return response()->json([
@@ -799,7 +799,7 @@ class EntityController extends Controller {
                 continue;
             }
 
-            try{
+            try {
                 $attr = Attribute::findOrFail($aid);
                 $formKeyValue = AttributeValue::getFormattedKeyValue($attr->datatype, $value);
                 $attrval->{$formKeyValue->key} = $formKeyValue->val;
@@ -834,7 +834,7 @@ class EntityController extends Controller {
         }else{
             $entity->touch();
         }
-        
+
         DB::commit();
         $entity->load('user');
 
@@ -1091,15 +1091,15 @@ class EntityController extends Controller {
                 $rank = Entity::whereNull('root_entity_id')->max('rank') + 1;
             }
         }
-        
+
         try{
             Entity::patchRanks($rank, $id, $parent_id, $user);
-        }catch(Exception $e){
+        }catch(Exception $e) {
             return response()->json([
                 'error' => $e->getMessage(),
             ], 400);
         }
-    
+
         return response()->json(null, 204);
     }
 

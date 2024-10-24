@@ -554,7 +554,7 @@ class Bibliography extends Model implements Searchable
         $nullMap = array_map(fn() => null, self::patchRules );
         $nullMap = array_filter($nullMap, fn($key) => !in_array($key, ["file"]), ARRAY_FILTER_USE_KEY);
         $allFieldsFixed = array_merge($nullMap, $filteredFields);
-        foreach($allFieldsFixed as $key => $value){
+        foreach($allFieldsFixed as $key => $value) {
             if(!in_array($key, $this->fillable)) throw new \Exception("Field $key is not allowed for this type of entry");
             $this->{$key} = $value;
         }

@@ -203,18 +203,18 @@ class ApiReferenceTest extends TestCase
      * @dataProvider permissions
      * @testdox [[PROVIDER]] Routes Without Permissions
      */
-    public function testWithoutPermission($permission){          
+    public function testWithoutPermission($permission) {
         (new ResponseTester($this))->testMissingPermission($permission);
     }
     /**
      * @dataProvider exceptions
      * @testdox [[PROVIDER]] Exceptions With Permissions
      */
-    public function testSucceedWithPermission($permission){
+    public function testSucceedWithPermission($permission) {
         (new ResponseTester($this))->testExceptions($permission);
     }
     
-    public static function permissions(){
+    public static function permissions() {
         return [
             "GET    /api/v1/entity/99/reference"    => Permission::for("get",      "/api/v1/entity/99/reference",      "You do not have the permission to view references"),
             "POST   /api/v1/entity/99/reference/99" => Permission::for("post",     "/api/v1/entity/99/reference/99",   "You do not have the permission to add references"),
@@ -223,7 +223,7 @@ class ApiReferenceTest extends TestCase
         ];
     }
     
-    public static function exceptions(){
+    public static function exceptions() {
         return [
             "GET    /api/v1/entity/99/reference" =>Permission::for("get",      "/api/v1/entity/99/reference",      "This entity does not exist"),
             "POST   /api/v1/entity/99/reference/99" =>Permission::for("post",     "/api/v1/entity/99/reference/99",   "This entity does not exist", ["bibliography_id" => 1322, "description" => "This is a simple test"]),

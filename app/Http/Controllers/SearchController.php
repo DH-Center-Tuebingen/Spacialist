@@ -171,7 +171,7 @@ class SearchController extends Controller {
         $langId = $language->id;
         $builder = th_tree_builder($lang);
 
-        $matches = $builder->whereHas('labels', function($query) use ($langId, $q){
+        $matches = $builder->whereHas('labels', function($query) use ($langId, $q) {
             $query->where('language_id', $langId)
                 ->where('label', 'ilike', "%$q%");
         })

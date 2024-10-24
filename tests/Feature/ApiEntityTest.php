@@ -478,7 +478,7 @@ class ApiEntityTest extends TestCase
             'error' => 'Start date of a time period must not be after it\'s end date'
         ]);
 
-        $response = $this->userRequest()
+        $response = $this->userRequest($response)
         ->patch('/api/v1/entity/2/attributes', [
             [
                 'params' => [
@@ -504,7 +504,7 @@ class ApiEntityTest extends TestCase
             'error' => 'Start date of a time period must not be after it\'s end date'
         ]);
 
-        $response = $this->userRequest()
+        $response = $this->userRequest($response)
         ->patch('/api/v1/entity/2/attributes', [
             [
                 'params' => [
@@ -530,7 +530,7 @@ class ApiEntityTest extends TestCase
             'error' => 'Start date of a time period must not be after it\'s end date'
         ]);
 
-        $response = $this->userRequest()
+        $response = $this->userRequest($response)
         ->patch('/api/v1/entity/2/attributes', [
             [
                 'params' => [
@@ -641,7 +641,7 @@ class ApiEntityTest extends TestCase
      *  @dataProvider  moveExceptionsProvider
      *  @testdox PATCH  /api/v1/entity/{entity_id}/rank  -  Move entities exception
      */
-    function testMoveExceptions(int $entity,int | null $newParentEntity, int $statusCode = 400){
+    function testMoveExceptions(int $entity,int | null $newParentEntity, int $statusCode = 400) {
             $response = $this->userRequest()
             ->patch("/api/v1/entity/$entity/rank", [
                 'rank' => 1,

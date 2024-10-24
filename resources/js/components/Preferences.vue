@@ -378,7 +378,7 @@
                         system: {},
                     };
 
-                    for(let category in categories){
+                    for(let category in categories) {
                         setProgramPreferences(categories, category);
                         setPluginPreferences(categories, category);
                     }

@@ -429,7 +429,7 @@ class ApiEditorTest extends TestCase
     /**
     * @testdox POST /api/v1/editor/dm/{id}/relation  -  Modify entity type relations
     */
-    public function testModifyingEntityTypeRelation(){
+    public function testModifyingEntityTypeRelation() {
         $id = 4;
         $response = $this->userRequest()
             ->post("/api/v1/editor/dm/$id/relation", [
@@ -915,18 +915,18 @@ class ApiEditorTest extends TestCase
     /**
      * @dataProvider permissionsProvider
      */
-    public function testWithoutPermission($permission){          
+    public function testWithoutPermission($permission) {
         (new ResponseTester($this))->testMissingPermission($permission);
     }
 
     /**
      * @dataProvider exceptionsProvider
      */
-    public function testExceptions($permission){
+    public function testExceptions($permission) {
         (new ResponseTester($this))->testExceptions($permission);
     }
 
-    public static function permissionsProvider(){ 
+    public static function permissionsProvider() { 
         return [
             'permission to get entity type'                     => Permission::for("get", "/api/v1/editor/entity_type/1",           "You do not have the permission to get an entity type's data"),
             'permission to view entity data'                    => Permission::for("get", "/api/v1/editor/entity_type/1/attribute", "You do not have the permission to view entity data"),
@@ -959,7 +959,7 @@ class ApiEditorTest extends TestCase
         ];
     }
 
-    public static function exceptionsProvider(){ 
+    public static function exceptionsProvider() { 
 
         $entityDoesNotExist = "This entity-type does not exist";
         $entityAttributeNotFound = "Entity Attribute not found";

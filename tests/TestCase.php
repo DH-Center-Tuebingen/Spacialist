@@ -39,23 +39,23 @@ abstract class TestCase extends BaseTestCase {
         try{
             $json = $response->json();
 
-            if(isset($json['message'])){
+            if(isset($json['message'])) {
                 $message .= "Message :: " . $json['message'] . "\n  ";
             }
 
-            if(isset($json['error'])){
+            if(isset($json['error'])) {
                 $message .= "Error :: " . $json['error'] . "\n  ";
             }
 
-            if(isset($json['errors'])){
+            if(isset($json['errors'])) {
                 $message .= "Errors \n  ";
                 $message .= "============\n  ";
-                foreach($json['errors'] as $key => $value){
+                foreach($json['errors'] as $key => $value) {
                     $message .= "==> ". $key . ":: " . json_encode($value) . "\n  ";
                 }
 
             }
-        }catch(\Exception $e){
+        }catch(\Exception $e) {
             // No error message found in response
         }
 

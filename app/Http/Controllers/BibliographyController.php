@@ -14,7 +14,7 @@ class BibliographyController extends Controller
 {
 
     // GET
-    public function getBibliographyItem(int $id){
+    public function getBibliographyItem(int $id) {
         $user = auth()->user();
         if(!$user->can('bibliography_read')) {
             return response()->json([

@@ -36,7 +36,7 @@ class Permission {
         return [(new Permission($method, $url, $errorMessage, $data))];
     }
     
-    public function provide(){
+    public function provide() {
         return [
             'method'        => $this->method,
             'url'           => $this->url,

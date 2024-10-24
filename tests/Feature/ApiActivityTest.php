@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Entity;
 use App\User;
-use Exception;
 use Tests\TestCase;
 use Spatie\Activitylog\Models\Activity;
 
@@ -30,9 +29,7 @@ class ApiActivityTest extends TestCase
         ]);
         $entity = Entity::latest()->first();
 
-        $this->refreshToken($response);
-
-        $response = $this->userRequest()
+        $response = $this->userRequest($response)
         ->patch('/api/v1/entity/4/attributes', [
             [
                 'params' => [
@@ -44,9 +41,7 @@ class ApiActivityTest extends TestCase
             ]
         ]);
 
-        $this->refreshToken($response);
-
-        $response = $this->userRequest()
+        $response = $this->userRequest($response)
         ->patch('/api/v1/entity/4/attributes', [
             [
                 'params' => [
@@ -58,20 +53,16 @@ class ApiActivityTest extends TestCase
             ]
         ]);
 
-        $this->refreshToken($response);
-
-        $response = $this->userRequest()
-        ->delete('/api/v1/entity/'.$entity->id);
+        $response = $this->userRequest($response)
+            ->delete('/api/v1/entity/'.$entity->id);
 
         $response->assertStatus(204);
         $actCnt = Activity::count();
         $this->assertGreaterThanOrEqual(5, $actCnt);
         $this->assertLessThanOrEqual(6, $actCnt);
 
-        $this->refreshToken($response);
-
-        $response = $this->userRequest()
-        ->get('/api/v1/activity');
+        $response = $this->userRequest($response)
+            ->get('/api/v1/activity');
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
@@ -100,27 +91,25 @@ class ApiActivityTest extends TestCase
         ]);
 
         // With start and end before now
-        $this->refreshToken($response);
-        $response = $this->userRequest()
-        ->post('/api/v1/activity', [
-            'timespan' => [
-                'from' => '2017-12-20 09:30:00',
-                'to' => '2018-12-20 09:30:00',
-            ]
-        ]);
+        $response = $this->userRequest($response)
+            ->post('/api/v1/activity', [
+                'timespan' => [
+                    'from' => '2017-12-20 09:30:00',
+                    'to' => '2018-12-20 09:30:00',
+                ]
+            ]);
 
         $response->assertStatus(200);
         $content = json_decode($response->getContent());
         $this->assertEquals([], $content->data);
 
         // With start before now
-        $this->refreshToken($response);
-        $response = $this->userRequest()
-        ->post('/api/v1/activity', [
-            'timespan' => [
-                'from' => '2017-12-20 09:30:00',
-            ]
-        ]);
+        $response = $this->userRequest($response)
+            ->post('/api/v1/activity', [
+                'timespan' => [
+                    'from' => '2017-12-20 09:30:00',
+                ]
+            ]);
 
         $response->assertStatus(200);
         $content = json_decode($response->getContent());
@@ -128,55 +117,50 @@ class ApiActivityTest extends TestCase
         $this->assertLessThanOrEqual(6, count($content->data));
 
         // With single text search string
-        $this->refreshToken($response);
-        $response = $this->userRequest()
-        ->post('/api/v1/activity', [
-            'text' => 'tEst'
-        ]);
+        $response = $this->userRequest($response)
+            ->post('/api/v1/activity', [
+                'text' => 'tEst'
+            ]);
 
         $response->assertStatus(200);
         $content = json_decode($response->getContent());
         $this->assertEquals(4, count($content->data));
 
         // With multiple text search strings
-        $this->refreshToken($response);
-        $response = $this->userRequest()
-        ->post('/api/v1/activity', [
-            'text' => 'unit entity'
-        ]);
+        $response = $this->userRequest($response)
+            ->post('/api/v1/activity', [
+                'text' => 'unit entity'
+            ]);
 
         $response->assertStatus(200);
         $content = json_decode($response->getContent());
         $this->assertEquals(2, count($content->data));
 
         // With file only
-        $this->refreshToken($response);
-        $response = $this->userRequest()
-        ->post('/api/v1/activity', [
-            'text' => 'Entity FooBar'
-        ]);
+        $response = $this->userRequest($response)
+            ->post('/api/v1/activity', [
+                'text' => 'Entity FooBar'
+            ]);
 
         $response->assertStatus(200);
         $content = json_decode($response->getContent());
         $this->assertEquals(0, count($content->data));
 
         // With user id=2 and id=3
-        $this->refreshToken($response);
-        $response = $this->userRequest()
-        ->post('/api/v1/activity', [
-            'users' => [2, 3]
-        ]);
+        $response = $this->userRequest($response)
+            ->post('/api/v1/activity', [
+                'users' => [2, 3]
+            ]);
 
         $response->assertStatus(200);
         $content = json_decode($response->getContent());
         $this->assertEquals(0, count($content->data));
 
         // With user id=1 only
-        $this->refreshToken($response);
-        $response = $this->userRequest()
-        ->post('/api/v1/activity', [
-            'users' => [1]
-        ]);
+        $response = $this->userRequest($response)
+            ->post('/api/v1/activity', [
+                'users' => [1]
+            ]);
 
         $response->assertStatus(200);
         $content = json_decode($response->getContent());
@@ -184,11 +168,10 @@ class ApiActivityTest extends TestCase
         $this->assertLessThanOrEqual(6, count($content->data));
 
         // With user id=1,2,5
-        $this->refreshToken($response);
-        $response = $this->userRequest()
-        ->post('/api/v1/activity', [
-            'users' => [1, 2, 5]
-        ]);
+        $response = $this->userRequest($response)
+            ->post('/api/v1/activity', [
+                'users' => [1, 2, 5]
+            ]);
 
         $response->assertStatus(200);
         $content = json_decode($response->getContent());
@@ -213,18 +196,15 @@ class ApiActivityTest extends TestCase
             ['url' => '/activity', 'error' => 'You do not have the permission to view activity logs', 'verb' => 'post'],
         ];
 
+        $response = null;
         foreach($calls as $c) {
-            $response = $this->withHeaders([
-                    'Authorization' => "Bearer $this->token"
-                ])
+            $response = $this->userRequest($response)
                 ->json($c['verb'], '/api/v1' . $c['url']);
 
             $response->assertStatus(403);
             $response->assertSimilarJson([
                 'error' => $c['error']
             ]);
-
-            $this->refreshToken($response);
         }
     }
 
@@ -261,18 +241,18 @@ class ApiActivityTest extends TestCase
      */
     public function testValidations()
     {
-        
+
         $userError = 'The users must be an array.';
-        
+
         $response = $this->userRequest()
             ->post('/api/v1/activity', [
                 'users' => 1
             ]);
-            
+
         $this->assertStatus($response, 422);
         $response->assertJson(['message' => $userError, 'errors' => ['users' => [$userError]]]);
 
-        $response = $this->userRequest()
+        $response = $this->userRequest($response)
             ->post('/api/v1/activity', [
                 'timespan' => '2017-12-20 09:30:00'
             ]);

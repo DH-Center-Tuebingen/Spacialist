@@ -78,7 +78,7 @@ class Entity extends Model implements Searchable {
         );
     }
 
-    public function getAllMetadata(){
+    public function getAllMetadata() {
         return [
             'creator' => $this->creator,
             'editors' => $this->editors,
@@ -181,24 +181,24 @@ class Entity extends Model implements Searchable {
         return $entities->orderBy('rank')->get();
     }
     
-    private function moveOrFail(int | null $parentId){
+    private function moveOrFail(int | null $parentId) {
         
         if(isset($parentId)) {
-            if($parentId == $this->id){
+            if($parentId == $this->id) {
                 throw new \Exception('Cannot move entity to itself.');
             }
             
             $parentEntity = Entity::findOrFail($parentId);
             $parentEntityType = $parentEntity->entity_type;
             
-            if(!$parentEntityType->sub_entity_types->contains($this->entity_type_id)){
+            if(!$parentEntityType->sub_entity_types->contains($this->entity_type_id)) {
                 throw new \Exception('This type is not an allowed sub-type.');
             }
             
             $this->root_entity_id = $parentId;
             $query = self::where('root_entity_id', $parentId);
         } else {
-            if(!$this->entity_type->is_root){
+            if(!$this->entity_type->is_root) {
                 throw new \Exception('This type is not an allowed root-type.');
             }
             
@@ -230,7 +230,7 @@ class Entity extends Model implements Searchable {
         
         try{
             $query = $entity->moveOrFail($parent);
-        }catch(\Exception $e){
+        }catch(\Exception $e) {
             DB::rollBack();
             throw $e;
         }
