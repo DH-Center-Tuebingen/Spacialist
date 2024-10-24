@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Entity;
 use App\User;
-
+use Exception;
 use Tests\TestCase;
 use Spatie\Activitylog\Models\Activity;
 
@@ -22,9 +22,7 @@ class ApiActivityTest extends TestCase
         $actCnt = Activity::count();
         $this->assertEquals(0, $actCnt);
 
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
+        $response = $this->userRequest()
         ->post('/api/v1/entity', [
             'name' => 'Unit-Test Entity I',
             'entity_type_id' => 3,
@@ -34,9 +32,7 @@ class ApiActivityTest extends TestCase
 
         $this->refreshToken($response);
 
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
+        $response = $this->userRequest()
         ->patch('/api/v1/entity/4/attributes', [
             [
                 'params' => [
@@ -50,9 +46,7 @@ class ApiActivityTest extends TestCase
 
         $this->refreshToken($response);
 
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
+        $response = $this->userRequest()
         ->patch('/api/v1/entity/4/attributes', [
             [
                 'params' => [
@@ -66,9 +60,7 @@ class ApiActivityTest extends TestCase
 
         $this->refreshToken($response);
 
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
+        $response = $this->userRequest()
         ->delete('/api/v1/entity/'.$entity->id);
 
         $response->assertStatus(204);
@@ -78,9 +70,7 @@ class ApiActivityTest extends TestCase
 
         $this->refreshToken($response);
 
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
+        $response = $this->userRequest()
         ->get('/api/v1/activity');
 
         $response->assertStatus(200);
@@ -111,9 +101,7 @@ class ApiActivityTest extends TestCase
 
         // With start and end before now
         $this->refreshToken($response);
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
+        $response = $this->userRequest()
         ->post('/api/v1/activity', [
             'timespan' => [
                 'from' => '2017-12-20 09:30:00',
@@ -127,9 +115,7 @@ class ApiActivityTest extends TestCase
 
         // With start before now
         $this->refreshToken($response);
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
+        $response = $this->userRequest()
         ->post('/api/v1/activity', [
             'timespan' => [
                 'from' => '2017-12-20 09:30:00',
@@ -143,9 +129,7 @@ class ApiActivityTest extends TestCase
 
         // With single text search string
         $this->refreshToken($response);
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
+        $response = $this->userRequest()
         ->post('/api/v1/activity', [
             'text' => 'tEst'
         ]);
@@ -156,9 +140,7 @@ class ApiActivityTest extends TestCase
 
         // With multiple text search strings
         $this->refreshToken($response);
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
+        $response = $this->userRequest()
         ->post('/api/v1/activity', [
             'text' => 'unit entity'
         ]);
@@ -169,9 +151,7 @@ class ApiActivityTest extends TestCase
 
         // With file only
         $this->refreshToken($response);
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
+        $response = $this->userRequest()
         ->post('/api/v1/activity', [
             'text' => 'Entity FooBar'
         ]);
@@ -182,9 +162,7 @@ class ApiActivityTest extends TestCase
 
         // With user id=2 and id=3
         $this->refreshToken($response);
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
+        $response = $this->userRequest()
         ->post('/api/v1/activity', [
             'users' => [2, 3]
         ]);
@@ -195,9 +173,7 @@ class ApiActivityTest extends TestCase
 
         // With user id=1 only
         $this->refreshToken($response);
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
+        $response = $this->userRequest()
         ->post('/api/v1/activity', [
             'users' => [1]
         ]);
@@ -209,9 +185,7 @@ class ApiActivityTest extends TestCase
 
         // With user id=1,2,5
         $this->refreshToken($response);
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
+        $response = $this->userRequest()
         ->post('/api/v1/activity', [
             'users' => [1, 2, 5]
         ]);
@@ -287,24 +261,22 @@ class ApiActivityTest extends TestCase
      */
     public function testValidations()
     {
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
+        
+        $userError = 'The users must be an array.';
+        
+        $response = $this->userRequest()
             ->post('/api/v1/activity', [
                 'users' => 1
             ]);
+            
+        $this->assertStatus($response, 422);
+        $response->assertJson(['message' => $userError, 'errors' => ['users' => [$userError]]]);
 
-        $this->assertEquals('The given data was invalid.', $response->exception->getMessage());
-
-        $this->refreshToken($response);
-
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
+        $response = $this->userRequest()
             ->post('/api/v1/activity', [
                 'timespan' => '2017-12-20 09:30:00'
             ]);
 
-        $this->assertEquals('The given data was invalid.', $response->exception->getMessage());
+        $this->assertEquals('The timespan must be an array.', $response->exception->getMessage());
     }
 }
