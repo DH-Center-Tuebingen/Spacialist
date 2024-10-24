@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 use App\User;
-use Database\Seeders\DemoSeeder;
+use Database\Seeders\TestingSeeder;
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
@@ -17,7 +17,7 @@ abstract class TestCase extends BaseTestCase {
     use RefreshDatabase;
     use ArraySubsetAsserts;
 
-    protected $seeder = DemoSeeder::class;
+    protected $seeder = TestingSeeder::class;
 
     public $user = null;
     public $token = null;

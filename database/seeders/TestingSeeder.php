@@ -4,20 +4,23 @@ namespace Database\Seeders;
 
 use Database\Seeders\Demo\AttributeValuesTableSeeder;
 use Database\Seeders\Demo\AttributesTableSeeder;
-use Database\Seeders\Demo\BibliographyTableSeeder;
 use Database\Seeders\Demo\EntitiesTableSeeder;
 use Database\Seeders\Demo\EntityAttributesTableSeeder;
 use Database\Seeders\Demo\EntityTypeRelationsTableSeeder;
 use Database\Seeders\Demo\EntityTypesTableSeeder;
 use Database\Seeders\Demo\ReferencesTableSeeder;
 use Database\Seeders\Demo\RoleUserTableSeeder;
+use Database\Seeders\Demo\ThesaurexSeeder;
 use Database\Seeders\Demo\UsersTableSeeder;
 use Database\Seeders\General\RolesPermissionsSeeder;
 use Database\Seeders\General\RolesTableSeeder;
+use Database\Seeders\Testing\BibliographyTableSeeder;
+use Database\Seeders\Testing\CommentsSeeder;
+use Database\Seeders\Testing\UserSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class DemoSeeder extends Seeder {
+class TestingSeeder extends Seeder {
     /**
      * Run the database seeds.
      *
@@ -27,6 +30,7 @@ class DemoSeeder extends Seeder {
         activity()->disableLogging();
 
         $this->call(UsersTableSeeder::class);
+        $this->call(UserSeeder::class);
         $this->call(ThesaurexSeeder::class);
 
         $this->call(RolesTableSeeder::class);
@@ -41,6 +45,7 @@ class DemoSeeder extends Seeder {
         $this->call(EntityAttributesTableSeeder::class);
         $this->call(AttributeValuesTableSeeder::class);
         $this->call(ReferencesTableSeeder::class);
+        $this->call(CommentsSeeder::class);
 
         // Set different root for tags
         DB::table('preferences')

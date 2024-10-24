@@ -53,7 +53,7 @@ jobs:
         php artisan migrate
     - name: Run seeds
       run: |
-        php artisan db:seed --class=DemoSeeder
+        php artisan db:seed --class=TestingSeeder
     - name: Directory Permissions
       run: chmod -R 777 storage bootstrap/cache
     - name: Setup Node
