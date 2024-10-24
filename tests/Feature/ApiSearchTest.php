@@ -2,119 +2,75 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Foundation\Testing\WithoutMiddleware;
-
-use Illuminate\Support\Facades\Storage;
-
-use App\File;
-use App\User;
-use App\ThLanguage;
 use App\Bibliography;
+use App\Entity;
+use App\ThLanguage;
+use App\User;
+use Tests\TestCase;
 
 class ApiSearchTest extends TestCase
 {
     // Testing GET requests
 
     /**
-     * A basic test example.
+     * @testdox GET    /api/v1/search : Search Global for Entity
      *
      * @return void
      */
     public function testGlobalSearchEntityEndpoint()
     {
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->get('/api/v1/search?q=!e inv.');
 
         $response->assertJsonCount(3);
         $response->assertJsonStructure([
             [
-                'id',
-                'name',
-                'entity_type_id',
-                'root_entity_id',
-                'geodata_id',
-                'rank',
-                'user_id',
-                'created_at',
-                'updated_at',
-                'relevance',
-                'group',
-                'parentIds'
-            ]
-        ]);
-
-        $response->assertJsonFragment([
-            'name' => 'Inv. 1234',
-            'relevance' => 60,
-            'group' => 'entities'
-        ]);
-        $response->assertJsonFragment([
-            'name' => 'Inv. 124',
-            'relevance' => 60,
-            'group' => 'entities'
-        ]);
-        $response->assertJsonFragment([
-            'name' => 'Inv. 31',
-            'relevance' => 60,
-            'group' => 'entities'
-        ]);
-    }
-
-    /**
-     * A basic test example.
-     *
-     * @return void
-     */
-    public function testGlobalSearchGeodataEndpoint()
-    {
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
-            ->get('/api/v1/search?q=!g 8.917369');
-
-        $response->assertJsonCount(1);
-        $response->assertJsonStructure([
-            [
-                'id',
-                'geom',
-                'color',
-                'user_id',
-                'created_at',
-                'updated_at',
-                'relevance',
-                'group'
-            ]
-        ]);
-        $response->assertJson([
-            [
-                'id' => 3,
-                'geom' => [
-                    'type' => 'Point',
-                    'coordinates' => [
-                        8.917369, 48.541572
-                    ]
+                'searchable' => [
+                    'id',
+                    'name',
+                    'entity_type_id',
+                    'root_entity_id',
+                    'rank',
+                    'user_id',
+                    'created_at',
+                    'updated_at',
+                    'parentIds',
                 ],
-                'color' => null,
-                'user_id' => 1,
-                'relevance' => 10,
-                'group' => 'geodata'
+                'title',
+                'url',
+                'type',
             ]
+        ]);
+
+        $response->assertJsonFragment([
+            'searchable' => Entity::find(3)->toArray(),
+            'title' => 'Inv. 1234',
+            'type' => 'entities',
+            'url' => null,
+        ]);
+        $response->assertJsonFragment([
+            'searchable' => Entity::find(4)->toArray(),
+            'title' => 'Inv. 124',
+            'type' => 'entities',
+            'url' => null,
+        ]);
+        $response->assertJsonFragment([
+            'searchable' => Entity::find(5)->toArray(),
+            'title' => 'Inv. 31',
+            'type' => 'entities',
+            'url' => null,
         ]);
     }
 
     /**
-     * A basic test example.
+     * @testdox GET    /api/v1/search : Search Global for Bibliography
      *
      * @return void
      */
     public function testGlobalSearchBibliographyEndpoint()
     {
         $fields = [
-            'type' => 'article',
+            'entry_type' => 'article',
             'citekey' => '',
             'title' => 'Testing API',
             'author' => 'API (Inv.) Tester',
@@ -129,141 +85,61 @@ class ApiSearchTest extends TestCase
         }
         $bibEntry->save();
 
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->get('/api/v1/search?q=!b iNv.');
 
         $response->assertJsonCount(1);
         $response->assertJsonStructure([
             [
-                'id',
-                'type',
-                'citekey',
+                'searchable' => [
+                    'id',
+                    'entry_type',
+                    'citekey',
+                    'title',
+                    'author',
+                    'editor',
+                    'journal',
+                    'year',
+                    'pages',
+                    'volume',
+                    'number',
+                    'booktitle',
+                    'publisher',
+                    'address',
+                    'misc',
+                    'howpublished',
+                    'annote',
+                    'chapter',
+                    'crossref',
+                    'edition',
+                    'institution',
+                    'key',
+                    'month',
+                    'note',
+                    'organization',
+                    'school',
+                    'series',
+                    'user_id',
+                    'created_at',
+                    'updated_at',
+                ],
                 'title',
-                'author',
-                'editor',
-                'journal',
-                'year',
-                'pages',
-                'volume',
-                'number',
-                'booktitle',
-                'publisher',
-                'address',
-                'misc',
-                'howpublished',
-                'annote',
-                'chapter',
-                'crossref',
-                'edition',
-                'institution',
-                'key',
-                'month',
-                'note',
-                'organization',
-                'school',
-                'series',
-                'user_id',
-                'created_at',
-                'updated_at',
-                'relevance',
-                'group'
-            ]
-        ]);
-        $response->assertJson([
-            [
-                'type' => 'article',
-                'citekey' => 'Ap:2009',
-                'title' => 'Testing API',
-                'author' => 'API (Inv.) Tester',
-                'year' => '2009',
-                'note' => 'Test Inv. Match Entity Name',
-                'user_id' => 1,
-                'relevance' => 15,
-                'group' => 'bibliography'
-            ]
-        ]);
-    }
-
-    /**
-     * A basic test example.
-     *
-     * @return void
-     */
-    public function testGlobalSearchFileEndpoint()
-    {
-        $nowTs = time();
-        $now = date('Y-m-d H:i:s', $nowTs);
-        $fields = [
-            'name' => 'test_inv.jpg',
-            'thumb' => 'test_inv_thumb.jpg',
-            'modified' => $now,
-            'created' => $now,
-            'description' => 'describes the test file',
-            'mime_type' => 'image/jpg',
-            'user_id' => 1
-        ];
-        Storage::fake('public');
-        UploadedFile::fake()->image('test_inv.jpg');
-        UploadedFile::fake()->image('test_inv_thumb.jpg');
-        $file = new File();
-        foreach($fields as $k => $v) {
-            $file->{$k} = $v;
-        }
-        $file->save();
-
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
-            ->get('/api/v1/search?q=!f INV.');
-
-        $response->assertJsonCount(1);
-        $response->assertJsonStructure([
-            [
-                'id',
-                'name',
-                'modified',
-                'created',
-                'thumb',
-                'cameraname',
-                'copyright',
-                'description',
-                'mime_type',
-                'user_id',
-                'created_at',
-                'updated_at',
-                'relevance',
-                'group',
                 'url',
-                'thumb_url',
-                'created_unix',
-                'category',
-                'exif'
+                'type',
             ]
         ]);
         $response->assertJson([
             [
-                'name' => 'test_inv.jpg',
-                'modified' => $now,
-                'created' => $now,
-                'thumb' => 'test_inv_thumb.jpg',
-                'cameraname' => null,
-                'copyright' => null,
-                'description' => 'describes the test file',
-                'mime_type' => 'image/jpg',
-                'user_id' => 1,
-                'relevance' => 10,
-                'group' => 'files',
-                'created_unix' => $nowTs,
-                'category' => 'image',
-                'exif' => null
+                'searchable' => Bibliography::find($bibEntry->id)->toArray(),
+                'title' => 'Testing API',
+                'type' => 'bibliography',
+                'url' => null,
             ]
         ]);
     }
 
     /**
-     * A basic test example.
+     * @testdox GET    /api/v1/search : Search Global
      *
      * @return void
      */
@@ -271,26 +147,9 @@ class ApiSearchTest extends TestCase
     {
         $nowTs = time();
         $now = date('Y-m-d H:i:s', $nowTs);
-        $fields = [
-            'name' => 'test_inv.jpg',
-            'thumb' => 'test_inv_thumb.jpg',
-            'modified' => $now,
-            'created' => $now,
-            'description' => 'describes the test file',
-            'mime_type' => 'image/jpg',
-            'user_id' => 1
-        ];
-        Storage::fake('public');
-        UploadedFile::fake()->image('test_inv.jpg');
-        UploadedFile::fake()->image('test_inv_thumb.jpg');
-        $file = new File();
-        foreach($fields as $k => $v) {
-            $file->{$k} = $v;
-        }
-        $file->save();
 
         $fields = [
-            'type' => 'article',
+            'entry_type' => 'article',
             'citekey' => '',
             'title' => 'Testing API',
             'author' => 'API (Inv.) Tester',
@@ -305,75 +164,38 @@ class ApiSearchTest extends TestCase
         }
         $bibEntry->save();
 
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->get('/api/v1/search?q=inV.');
 
-        $response->assertJsonCount(5);
+        $response->assertJsonCount(4);
 
         $response->assertJsonFragment([
-            'name' => 'Inv. 1234',
-            'relevance' => 60,
-            'group' => 'entities'
+            'title' => 'Inv. 1234',
+            'type' => 'entities'
         ]);
         $response->assertJsonFragment([
-            'name' => 'Inv. 124',
-            'relevance' => 60,
-            'group' => 'entities'
+            'title' => 'Inv. 124',
+            'type' => 'entities'
         ]);
         $response->assertJsonFragment([
-            'name' => 'Inv. 31',
-            'relevance' => 60,
-            'group' => 'entities'
+            'title' => 'Inv. 31',
+            'type' => 'entities'
         ]);
         $response->assertJsonFragment([
-            'name' => 'test_inv.jpg',
-            'modified' => $now,
-            'created' => $now,
-            'thumb' => 'test_inv_thumb.jpg',
-            'cameraname' => null,
-            'copyright' => null,
-            'description' => 'describes the test file',
-            'mime_type' => 'image/jpg',
-            'user_id' => 1,
-            'relevance' => 10,
-            'group' => 'files',
-            'created_unix' => $nowTs,
-            'category' => 'image',
-            'exif' => null
-        ]);
-        $response->assertJsonFragment([
-            'type' => 'article',
-            'citekey' => 'Ap:2009',
             'title' => 'Testing API',
-            'author' => 'API (Inv.) Tester',
-            'year' => '2009',
-            'note' => 'Test Inv. Match Entity Name',
-            'user_id' => 1,
-            'relevance' => 15,
-            'group' => 'bibliography'
+            'type' => 'bibliography',
+            'searchable' => Bibliography::find($bibEntry->id)->toArray(),
         ]);
-
-        $this->refreshToken($response);
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
-            ->get('/api/v1/search?q=48.541572');
-
-        $response->assertJsonCount(1);
     }
 
     /**
-     * A basic test example.
+     * @testdox GET    /api/v1/search/entity : Search Entity
      *
      * @return void
      */
     public function testEntitySearchEndpoint()
     {
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->get('/api/v1/search/entity?q=Inv.');
 
         $response->assertStatus(200);
@@ -384,7 +206,6 @@ class ApiSearchTest extends TestCase
                 'name',
                 'entity_type_id',
                 'root_entity_id',
-                'geodata_id',
                 'rank',
                 'user_id',
                 'created_at',
@@ -401,15 +222,13 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * @testdox GET    /api/v1/search/label : Search for Thesaurex Label
      *
      * @return void
      */
     public function testLabelSearchEndpoint()
     {
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->get('/api/v1/search/label?q=ind');
 
         $response->assertStatus(200);
@@ -455,15 +274,13 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * @testdox GET    /api/v1/search/attribute : Search Attributes
      *
      * @return void
      */
     public function testAttributeSearchEndpoint()
     {
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->get('/api/v1/search/attribute?q=ung');
 
         $response->assertStatus(200);
@@ -501,15 +318,13 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * @testdox GET    /api/v1/search/selection/{id} : Search in Attribute Selection
      *
      * @return void
      */
     public function testSelectionSearchEndpoint()
     {
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->get('/api/v1/search/selection/13');
 
         $response->assertStatus(200);
@@ -539,7 +354,7 @@ class ApiSearchTest extends TestCase
     // Testing exceptions and permissions
 
     /**
-     *
+     * @testdox Test Permissions
      *
      * @return void
      */
@@ -554,22 +369,19 @@ class ApiSearchTest extends TestCase
             ['url' => '/selection/12', 'error' => 'You do not have the permission to search for concepts'],
         ];
 
+        $response = null;
         foreach($calls as $c) {
-            $response = $this->withHeaders([
-                    'Authorization' => "Bearer $this->token"
-                ])
+            $response = $this->userRequest($response)
                 ->get('/api/v1/search' . $c['url']);
 
-            $response->assertStatus(403);
+            $this->assertStatus($response, 403);
             $response->assertSimilarJson([
                 'error' => $c['error']
             ]);
-
-            $this->refreshToken($response);
         }
     }
     /**
-     *
+     * @testdox Test Exceptions
      *
      * @return void
      */
@@ -582,18 +394,15 @@ class ApiSearchTest extends TestCase
             ['url' => '/selection/99', 'error' => 'This concept does not exist'],
         ];
 
+        $response = null;
         foreach($calls as $c) {
-            $response = $this->withHeaders([
-                    'Authorization' => "Bearer $this->token"
-                ])
+            $response = $this->userRequest($response)
                 ->get('/api/v1/search' . $c['url']);
 
-            $response->assertStatus(400);
+            $this->assertStatus($response, 400);
             $response->assertSimilarJson([
                 'error' => $c['error']
             ]);
-
-            $this->refreshToken($response);
         }
     }
 }

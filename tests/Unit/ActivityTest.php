@@ -3,24 +3,20 @@
 namespace Tests\Unit;
 
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+
 
 class ActivityTest extends TestCase
 {
     const models = [
         ['id' => "App\\Attribute", 'label' => 'Attribute'],
         ['id' => "App\\AttributeValue", 'label' => 'AttributeValue'],
-        ['id' => "App\\AvailableLayer", 'label' => 'AvailableLayer'],
+        ['id' => "App\\AvailableLayer", 'label' => 'AvailableLayer'], // TODO move to Map Plugin
         ['id' => "App\\Bibliography", 'label' => 'Bibliography'],
         ['id' => "App\\Entity", 'label' => 'Entity'],
         ['id' => "App\\EntityAttribute", 'label' => 'EntityAttribute'],
-        ['id' => "App\\EntityFile", 'label' => 'EntityFile'],
+        ['id' => "App\\EntityFile", 'label' => 'EntityFile'], // TODO move to File Plugin
         ['id' => "App\\EntityType", 'label' => 'EntityType'],
         ['id' => "App\\EntityTypeRelation", 'label' => 'EntityTypeRelation'],
-        ['id' => "App\\File", 'label' => 'File'],
-        ['id' => "App\\FileTag", 'label' => 'FileTag'],
-        ['id' => "App\\Geodata", 'label' => 'Geodata'],
         ['id' => "App\\Reference", 'label' => 'Reference'],
         ['id' => "App\\Role", 'label' => 'Role'],
         ['id' => "App\\ThBroader", 'label' => 'ThBroader'],

@@ -3,6 +3,7 @@
 namespace App\AttributeTypes;
 
 use App\Geodata;
+use Clickbar\Magellan\IO\Generator\WKT\WKTGenerator;
 
 class GeographyAttribute extends AttributeBase
 {
@@ -19,6 +20,8 @@ class GeographyAttribute extends AttributeBase
     }
 
     public static function serialize(mixed $data) : mixed {
-        return $data->toWKT();
+        // TODO already fixed in 0.11-feat-showcase with the following code:
+        // return Geodata::toWKT($data);
+        return (new WKTGenerator())->generate($data);
     }
 }

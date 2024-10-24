@@ -91,13 +91,16 @@ class User extends Authenticatable implements JWTSubject
         $this->permissions = $permissions;
     }
 
-    public function setMetadata($data) {
+    public function setMetadata(array $data, bool $save = false) {
         if(!isset($this->metadata)) {
             $this->metadata = $data;
         } else {
             $this->metadata = array_replace($this->metadata, $data);
         }
-        $this->save();
+
+        if($save) {
+            $this->save();
+        }
     }
 
     public function isModerated() : bool {
@@ -120,10 +123,6 @@ class User extends Authenticatable implements JWTSubject
     public function preferences() {
         return $this->hasMany('App\UserPreference');
     }
-
-    // public function roles() {
-    //     return $this->belongsToMany('App\Role', 'role_user', 'user_id', 'role_id');
-    // }
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
