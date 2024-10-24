@@ -69,10 +69,17 @@ class ApiUserTest extends TestCase
         $response->assertJson([
             'users' => [
                 [
-                    'id' => 1
-                ],
-                [
-                    'id' => $user->id
+                    'id' => 1,
+                    'name' => 'Admin',
+                ],[
+                  'id' => 2,
+                    'name' => "John Doe",  
+                ],[
+                    'id' => 3,
+                    'name' => "Gary Guest",
+                ],[
+                    'id' => $user->id,
+                    'name' => $user->name,
                 ]
             ],
             'deleted_users' => []
@@ -194,7 +201,7 @@ class ApiUserTest extends TestCase
     public function testCreateUserEndpoint()
     {
         $cnt = User::count();
-        $this->assertEquals(1, $cnt);
+        $this->assertEquals(3, $cnt);
         $response = $this->userRequest()
             ->post('/api/v1/user', [
                 'email' => 'test@test.com',
@@ -205,7 +212,7 @@ class ApiUserTest extends TestCase
 
         $user = User::latest()->first();
         $cnt = User::count();
-        $this->assertEquals(2, $cnt);
+        $this->assertEquals(4, $cnt);
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'id',
@@ -550,18 +557,18 @@ class ApiUserTest extends TestCase
         $user->save();
 
         $cnt = User::count();
-        $this->assertEquals(1, $cnt);
+        $this->assertEquals(3, $cnt);
         $cnt = User::onlyTrashed()->count();
         $this->assertEquals(1, $cnt);
         $cnt = User::withoutTrashed()->count();
-        $this->assertEquals(0, $cnt);
+        $this->assertEquals(2, $cnt);
         $user = User::find(1);
         $this->assertNotNull($user->deleted_at);
 
         $response = $this->userRequest()
             ->patch('/api/v1/user/restore/1');
 
-        $user = User::find(1);
+        $user = User::find(3);
         $this->assertNull($user->deleted_at);
 
         $response->assertStatus(204);
@@ -575,22 +582,22 @@ class ApiUserTest extends TestCase
     public function testDeleteUserEndpoint()
     {
         $cnt = User::count();
-        $this->assertEquals(1, $cnt);
+        $this->assertEquals(3, $cnt);
         $cnt = User::onlyTrashed()->count();
         $this->assertEquals(0, $cnt);
         $cnt = User::withoutTrashed()->count();
-        $this->assertEquals(1, $cnt);
+        $this->assertEquals(3, $cnt);
         $response = $this->userRequest()
             ->delete('/api/v1/user/1');
 
         $response->assertStatus(200);
 
         $cnt = User::count();
-        $this->assertEquals(1, $cnt);
+        $this->assertEquals(3, $cnt);
         $cnt = User::onlyTrashed()->count();
         $this->assertEquals(1, $cnt);
         $cnt = User::withoutTrashed()->count();
-        $this->assertEquals(0, $cnt);
+        $this->assertEquals(2, $cnt);
         $user = User::find(1);
         $this->assertNotNull($user->deleted_at);
 
@@ -611,12 +618,12 @@ class ApiUserTest extends TestCase
     public function testDeleteNonExstingUserEndpoint()
     {
         $cnt = User::count();
-        $this->assertEquals(1, $cnt);
+        $this->assertEquals(3, $cnt);
         $response = $this->userRequest()
             ->delete('/api/v1/user/99');
 
         $cnt = User::count();
-        $this->assertEquals(1, $cnt);
+        $this->assertEquals(3, $cnt);
 
         $response->assertStatus(400);
         $response->assertSimilarJson([
