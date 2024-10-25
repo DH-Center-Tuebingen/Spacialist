@@ -2,7 +2,7 @@
 
 namespace App\PluginResources;
 
-use App\Permission; 
+use App\Permission;
 use App\PluginResources\Presets\RolePresetPlugin;
 use App\Preference;
 use Carbon\Carbon;
@@ -27,12 +27,12 @@ class Plugin extends Model
         'licence',
         'title',
     ];
-    
+
     private $presets = [];
-    
+
     public function __construct($attributes = []) {
         parent::__construct($attributes);
-        
+
         $this->presets = [
             RolePresetPlugin::class,
         ];
@@ -63,12 +63,12 @@ class Plugin extends Model
     public static function getInfo($path, $isString = false) {
         $xmlString = '';
         if(!$isString) {
-            
+
             $manifestLocations = [
                 'App/info.xml', // Legacy location of the 'info.xml' file
                 'manifest.xml', // This is the potential new location of the 'info.xml' file
             ];
-            
+
             while(count($manifestLocations) > 0){
                 $location = array_shift($manifestLocations);
                 $infoPath = Str::finish($path, '/') . $location;
@@ -77,7 +77,7 @@ class Plugin extends Model
                     break;
                 }
             }
-            
+
             if($xmlString == ''){
                 return false;
             }
@@ -86,7 +86,7 @@ class Plugin extends Model
         }
 
         $xmlObject = simplexml_load_string($xmlString);
-        
+
         return json_decode(json_encode($xmlObject), true);
     }
 
@@ -107,7 +107,7 @@ class Plugin extends Model
             return [];
         }
     }
-    
+
     public function getPath(array $parts = []){
         $path = base_path("app/Plugins/$this->name");
         if(count($parts) > 0){
@@ -132,7 +132,7 @@ class Plugin extends Model
     public static function updateOrCreateFromInfo(array $info) : Plugin {
         $id = $info['name'];
         $plugin = self::where('name', $id)->first();
-    
+
         // discovered new Plugin, add it to DB
         if(!isset($plugin)) {
             $plugin = new self();
@@ -169,6 +169,17 @@ class Plugin extends Model
         }
     }
 
+    public static function registerRelations() {
+        $availablePlugins = self::getInstalled();
+        foreach($availablePlugins as $plugin) {
+            $relationClass = "App\\Plugins\\" . $plugin->name . "\\Relations";
+
+            if(class_exists($relationClass)) {
+                new $relationClass();
+            }
+        }
+    }
+
     public static function discoverPlugins(array $list) : void {
         foreach($list as $ap) {
             $info = self::getInfo($ap);
@@ -196,7 +207,7 @@ class Plugin extends Model
             preg_match('/(\d+)\.(\d+).(\d+)(-.+)?/', $this->version, $iv);
             // available/latest version splitted
             preg_match('/(\d+)\.(\d+).(\d+)(-.+)?/', $fromInfoVersion, $lv);
-    
+
             if(
                 ($lv[1] > $iv[1] || $lv[2] > $iv[2] || $lv[3] > $iv[3]) ||
                 (!isset($lv[4]) && isset($iv[4])) ||
@@ -209,7 +220,7 @@ class Plugin extends Model
             $this->save();
         }
     }
-    
+
     public function handleAdd(){
         Migration::use($this)->migrate();
         $this->addPermissions();
@@ -269,26 +280,26 @@ class Plugin extends Model
     public function getPermissionGroups() {
         return array_keys($this->getPermissions());
     }
-    
+
     public function getClassPath(array $parts){
         return "App\\Plugins\\$this->name\\" . implode('\\', $parts);
     }
-    
+
     public function getProblemsAttribute(){
         $problems = [];
-        
+
         if(!$this->hasScript()){
             $problems[] = "script_missing";
         }
-        
+
         return $problems;
     }
-    
+
 
     private function hasScript(){
         return Storage::exists($this->publicName());
     }
-    
+
     private function publishScript() {
         $name = $this->name;
         $scriptPath = base_path("app/Plugins/$name/js/script.js");
@@ -346,23 +357,23 @@ class Plugin extends Model
         $id = Str::kebab($this->name);
         Preference::where('label', 'ilike', "plugin.$id.%")->delete();
     }
-    
+
     public function getErrors(){
-        
+
         $requiredFiles = [
             'manifest.xml',
             'README.md',
             'CHANGELOG.md',
         ];
-        
+
         $errors = [];
         foreach($requiredFiles as $file){
             if(!File::isFile($this->getPath([$file]))){
                 $errors[] = "Missing required file: $file";
             }
         }
-        
+
         return $errors;
-        
+
     }
 }
