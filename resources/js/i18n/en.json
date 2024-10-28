@@ -717,6 +717,9 @@
                 "title": "Available Attributes",
                 "add_button": "Add Attribute",
                 "show_hidden": "Show hidden",
+                "hide_hidden": "Hide hidden",
+                "separated": "List attributes separated",
+                "in_groups": "List attributes in groups",
                 "modal": {
                     "new": {
                         "title": "New Attribute"
