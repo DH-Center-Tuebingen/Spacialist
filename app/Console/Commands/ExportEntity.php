@@ -7,6 +7,7 @@ use App\EntityType;
 use App\ThConcept;
 use App\Attribute;
 use App\ThBroader;
+use App\ThConceptLabel;
 use App\ThLanguage;
 use App\User;
 use Carbon\Carbon;
@@ -33,6 +34,8 @@ class ExportEntity extends Command {
     private $filehandle;
     private static $source = "pgsql";
     private static $destination = "transfer";
+    private $labels = [];
+    private $languageMap = [];
     
     private function extractThesaurusConcepts($model, array &$allConcepts){
         $collection = ThConcept::where('concept_url', $model->thesaurus_url)->get();
@@ -115,62 +118,20 @@ class ExportEntity extends Command {
                 return 1;
             }
             
-            
             $this->print("Analyze structure starting at base entity: " . $entity->name . " (" . $entity->id . ")");
             
-            $languages = ThLanguage::all()->toArray();
-            $languageMap = [];
-            foreach($languages as $language){
-                $languageMap[$language['id']] = $language;
-            }
-
             $this->print();
             $this->print("=============================================================");
             $this->print("====== Traverse Entity Tree & Extracting Data Models =======");
             $this->print("=============================================================");
             $data = $this->collectAllDataFromEntityChildren($entity);
-            $this->print("=============================================================");
-            $this->print();
-            $this->print();
-            $this->print("=============================================================");
-            $this->print("===========         Collected Data Overview         =========");
-            $this->print("=============================================================");
-            $this->print();
-            $this->print("========================= Attributes =========================");
-            foreach($data['attributes'] as $key => $value){
-                 $label = ThConcept::getLabel($value->thesaurus_url);
-                 $this->print($label . " (" . $value->id . ")");
-            }
-            $this->print("=============================================================");
-            $this->print();
-            $this->print("========================= Entity Types =========================");
-            foreach($data['entityTypes'] as $key => $value){
-                $label = ThConcept::getLabel($value->thesaurus_url);
-                $this->print($label . " (" . $value->id . ")");
-            }
-            $this->print("=============================================================");
-            $this->print();
-            $this->print("========================= Thesaurus Concepts =========================");
-            foreach($data['thesaurusConcepts'] as $key => $value){
-                $label = ThConcept::getLabel($value->concept_url);
-                $this->print($label . " (" . $value->id . ") => " . $value->concept_url);
-            }
-            $this->print("=============================================================");
-            $this->print();
-            $this->print("========================= Thesaurus Labels =========================");
-            foreach($data['thesaurusLabels'] as $key => $value){
-                $label = $value->label;
-                $langShort = $languageMap[$value->language_id]["short_name"];
-                $this->print("[$langShort of ". $value->concept_id."] " . $label . " (" . $value->id . ")");
-            }
-            $this->print("=============================================================");
 
-            
-            
+
+            $this->printReceipt($data);
             $this->print("Beginning Transaction");
             DB::connection("transfer")->beginTransaction(); 
-            // $user = $this->selectOrCreateTransferUser();
-            // $this->transferData($user, $data);
+            $user = $this->selectOrCreateTransferUser();
+            $this->transferData($user, $data);
 
             $this->print("Waiting for user confirmation of this receipt ...");
             
@@ -226,17 +187,27 @@ class ExportEntity extends Command {
     }
     
     private function transferData($user, $data){
+        $this->print("=============================================================");
+        $this->print("======= Transfering Data Models to Transfer Database =======");
+        $this->print("=============================================================");
+        $this->print();
+        $this->print("============ Transfering Thesaurus Concepts ================");
         $this->transferThConcepts($user, $data['thesaurusConcepts']);
-        // $this->transferThLabels($user, $data['thesaurusLabels']);
+        $this->print("=============================================================");
+        $this->print();
+        $this->print("============ Transfering Thesaurus Labels ==================");
+        $this->transferThLabels($user, $data['thesaurusLabels']);
+        $this->print("=============================================================");
         // $this->transferEntityTypes($user, $data['entityTypes']);
         // $this->transferAttributes($user, $data['attributes']);
     }
     
     private function selectOrCreateTransferUser(): User{
-        $user = User::where('nickname', '__transfer')->firstOrCreate(
+        $user = User::on(static::$destination)->where('nickname', '__transfer')->firstOrCreate(
             [
                 'nickname' => '__transfer',
             ],[
+                'name' => 'Transfer User',
                 'email' => 'nomail@localhost',
                 'password' => bcrypt('__transfer'),
                 'deleted_at' => Carbon::now(),
@@ -246,29 +217,85 @@ class ExportEntity extends Command {
         return $user;
     }
     
+    private function print($message = ""){
+        fwrite($this->filehandle, Carbon::now() . " ::> " . $message . "\n");
+    }
+
+    private function printReceipt($data){
+        $languages = ThLanguage::all()->toArray();
+        foreach($languages as $language){
+            $this->languageMap[$language['id']] = $language;
+        }
+
+        $this->print("=============================================================");
+        $this->print();
+        $this->print();
+        $this->print("=============================================================");
+        $this->print("===========         Collected Data Overview         =========");
+        $this->print("=============================================================");
+        $this->print();
+        $this->print("========================= Attributes =========================");
+        foreach($data['attributes'] as $key => $value){
+             $label = ThConcept::getLabel($value->thesaurus_url);
+             $this->labels[$value->thesaurus_url] = $label;
+             $this->print($label . " (" . $value->id . ")");
+        }
+        $this->print("=============================================================");
+        $this->print();
+        $this->print("========================= Entity Types =========================");
+        foreach($data['entityTypes'] as $key => $value){
+            $label = ThConcept::getLabel($value->thesaurus_url);
+            $this->labels[$value->thesaurus_url] = $label;
+            $this->print($label . " (" . $value->id . ")");
+        }
+        $this->print("=============================================================");
+        $this->print();
+        $this->print("========================= Thesaurus Concepts =========================");
+        foreach($data['thesaurusConcepts'] as $key => $value){
+            $label = ThConcept::getLabel($value->concept_url);
+            $this->labels[$value->concept_url] = $label;
+            $this->print($label . " (" . $value->id . ") => " . $value->concept_url);
+        }
+        $this->print("=============================================================");
+        $this->print();
+        $this->print("========================= Thesaurus Labels =========================");
+        foreach($data['thesaurusLabels'] as $key => $value){
+            $label = $value->label;
+            $langShort = $this->languageMap[$value->language_id]["short_name"];
+            $this->print("[$langShort of ". $value->concept_id."] " . $label . " (" . $value->id . ")");
+        }
+        $this->print("=============================================================");
+    } 
+
     private function transferThConcepts(User $user, array $data){
-        $concepts = $data['thesaurusConcepts'];
-        foreach($concepts as $concept){
+        foreach($data as $concept){
             $result = ThConcept::on("transfer")->where('concept_url', $concept->concept_url)->first();
-            
+            $message = " >> ThConcept for " . $this->labels[$concept->concept_url];
             if(!$result){
                 $clone = $concept->replicate();
                 $clone->user_id = $user->id;
                 $clone->setConnection("transfer");
                 $clone->save();
-                $this->print("ThConcept " . $concept->id . " created");
+                $clone->save("CREATE" . $message);
             }else{
-                $this->print("ThConcept " . $concept->id . " already exists");
+                $this->print("EXIST" . $message);
             }
         }
     }
     
-    private function print($message = ""){
-        fwrite($this->filehandle, Carbon::now() . " ::> " . $message . "\n");
-    }
-    
     private function transferThLabels(User $user, array $data){
-        
+        foreach($data as $label){
+            $result = ThConceptLabel::on("transfer")->where('concept_id', $label->concept_id)->where('language_id', $label->language_id)->first();
+            $message = " >> ThConceptLabel for " . $label->concept_id . " in " . $this->languageMap[$label->language_id]['short_name'];
+            if(!$result){
+                $clone = $label->replicate();
+                $clone->user_id = $user->id;
+                $clone->setConnection("transfer");
+                $clone->save("CREATE" . $message);
+            }else{
+                $this->print("EXIST" . $message);
+            }
+        }
     }
     
     private function transferEntityTypes(User $user, array $data){
