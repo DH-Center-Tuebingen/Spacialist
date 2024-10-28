@@ -7,6 +7,7 @@ use App\EntityType;
 use App\ThConcept;
 use App\Attribute;
 use App\ThBroader;
+use App\ThLanguage;
 use App\User;
 use Carbon\Carbon;
 use Exception;
@@ -30,14 +31,13 @@ class ExportEntity extends Command {
 
 
     private $filehandle;
-    private static $source = "pgsql";   
+    private static $source = "pgsql";
+    private static $destination = "transfer";
     
     private function extractThesaurusConcepts($model, array &$allConcepts){
         $collection = ThConcept::where('concept_url', $model->thesaurus_url)->get();
         foreach($collection as $concept){
-            if(!$allConcepts[$model->thesaurus_url])
-                print("[ThConcept] found => " . $concept->concept_url . "\n");
-            $allConcepts[$model->thesaurus_url] = $concept;
+                $allConcepts[$model->thesaurus_url] = $concept;
         }        
     }
     
@@ -51,19 +51,24 @@ class ExportEntity extends Command {
         $entityTypeIds = $this->getEntityTypes($entity);
         $entityTypes = array_map(function($entityType){
             $entityType = EntityType::findOrFail($entityType);
+            return $entityType;
         }, $entityTypeIds);
         $thesaurusConcepts = [];
         $attributes = [];
-        foreach($entityTypes as $entityType){            
+        foreach($entityTypes as $entityType){
             $this->extractThesaurusConcepts($entityType, $thesaurusConcepts);
             
             foreach($entityType->attributes as $attribute){
-                $attributes[$attribute->id] = Attribute::findOrFail($attribute->id);
+                $fetchedAttribute = Attribute::findOrFail($attribute->id);
+                if($fetchedAttribute->datatype === "system-separator"){
+                    continue;
+                }
+
+                $attributes[$fetchedAttribute->id] = $fetchedAttribute;
                 $this->extractThesaurusConcepts($attribute, $thesaurusConcepts);
             }
         }
-        
-        
+
         $validLanguages = ['de', 'en'];
         foreach($thesaurusConcepts as $concept){
             $concept->labels->each(function($label) use ($validLanguages, &$thesaurusLabels, $concept){
@@ -84,9 +89,23 @@ class ExportEntity extends Command {
     
     public function handle(){
         try{
+            DB::connection(static::$source)->getPdo();
+        }catch(\Exception $e){
+            $this->print("Could not connect to '" . static::$source . "' database " . $e->getMessage());
+            return 1;
+        }
+
+        try{
+            DB::connection(static::$destination)->getPdo();
+        }catch(\Exception $e){
+            $this->print("Could not connect to'". static::$destination . "' database " . $e->getMessage());
+            return 1;
+        }
+
+
+        try{
             $logLocation = "./storage/logs/transfer.log";
             $this->filehandle = fopen($logLocation, "w");
-            
             
             $entityId = $this->option('entity');
             
@@ -97,26 +116,72 @@ class ExportEntity extends Command {
             }
             
             
-            $this->print("Starting Export From Base Entity: " . $entity->name . " (" . $entity->id . ")");
+            $this->print("Analyze structure starting at base entity: " . $entity->name . " (" . $entity->id . ")");
             
-  
+            $languages = ThLanguage::all()->toArray();
+            $languageMap = [];
+            foreach($languages as $language){
+                $languageMap[$language['id']] = $language;
+            }
+
+            $this->print();
+            $this->print("=============================================================");
+            $this->print("====== Traverse Entity Tree & Extracting Data Models =======");
+            $this->print("=============================================================");
             $data = $this->collectAllDataFromEntityChildren($entity);
+            $this->print("=============================================================");
+            $this->print();
+            $this->print();
+            $this->print("=============================================================");
+            $this->print("===========         Collected Data Overview         =========");
+            $this->print("=============================================================");
+            $this->print();
+            $this->print("========================= Attributes =========================");
+            foreach($data['attributes'] as $key => $value){
+                 $label = ThConcept::getLabel($value->thesaurus_url);
+                 $this->print($label . " (" . $value->id . ")");
+            }
+            $this->print("=============================================================");
+            $this->print();
+            $this->print("========================= Entity Types =========================");
+            foreach($data['entityTypes'] as $key => $value){
+                $label = ThConcept::getLabel($value->thesaurus_url);
+                $this->print($label . " (" . $value->id . ")");
+            }
+            $this->print("=============================================================");
+            $this->print();
+            $this->print("========================= Thesaurus Concepts =========================");
+            foreach($data['thesaurusConcepts'] as $key => $value){
+                $label = ThConcept::getLabel($value->concept_url);
+                $this->print($label . " (" . $value->id . ") => " . $value->concept_url);
+            }
+            $this->print("=============================================================");
+            $this->print();
+            $this->print("========================= Thesaurus Labels =========================");
+            foreach($data['thesaurusLabels'] as $key => $value){
+                $label = $value->label;
+                $langShort = $languageMap[$value->language_id]["short_name"];
+                $this->print("[$langShort of ". $value->concept_id."] " . $label . " (" . $value->id . ")");
+            }
+            $this->print("=============================================================");
+
+            
             
             $this->print("Beginning Transaction");
             DB::connection("transfer")->beginTransaction(); 
-            $user = $this->selectOrCreateTransferUser();
-            $this->transferData($user, $data);
+            // $user = $this->selectOrCreateTransferUser();
+            // $this->transferData($user, $data);
 
             $this->print("Waiting for user confirmation of this receipt ...");
-        
-        if($this->confirm('Check the receipt carefully before proceeding')){
-            $this->print("User confirmed receipt. Proceeding with commit");
-            DB::connection("transfer")->commit();
-        }else{
-            $this->print("User declined receipt. Rolling back transaction and exiting Program");
-             DB::connection("transfer")->rollBack();
-             return 1;
-        }
+            
+            if($this->confirm('Check the receipt carefully before proceeding')){
+                $this->print("User confirmed receipt. Proceeding with commit");
+                DB::connection("transfer")->commit();
+            }else{
+                $this->print("User declined receipt. Rolling back transaction and exiting Program");
+                DB::connection("transfer")->rollBack();
+                return 1;
+            }
         
         //    // We need to commit the changes first before we can (re-)build the thesaurus tree
         //    $allConceptsInTree = $this->createMissingThConcepts($user, $data['thesaurusConcepts']);
@@ -124,7 +189,7 @@ class ExportEntity extends Command {
         
        
     } catch(Exception $e) {
-        $this->print("The program failed unexpectedly:\n" . $e->getMessage());
+        $this->print("The program failed unexpectedly:\n" . $e->getMessage() . "\n" . $e->getTraceAsString());
         return 1;
     }
        
@@ -198,7 +263,7 @@ class ExportEntity extends Command {
         }
     }
     
-    private function print($message){
+    private function print($message = ""){
         fwrite($this->filehandle, Carbon::now() . " ::> " . $message . "\n");
     }
     
@@ -273,26 +338,38 @@ class ExportEntity extends Command {
         }
     }
     
-    
-    public function getEntityTypes(Entity $entity) : array{
-        $arr = [];
-        $children = Entity::getEntitiesByParent($entity->id);
-        $this->print("[[Entity]] => Get Children Of \"" . $entity->name ."\"");
-        
-        if(count($children) == 0){
-            $this->print("[[Entity]] => No Children Found => " . $entity->entity_type_id);
-            return [$entity->entity_type_id];
+    private function ellipsis($string, $max = 50){
+        if(strlen($string) > $max){
+            return substr($string, 0, $max) . "...";
         }
+        return $string;
+    }
+    
+    public function getEntityTypes(Entity $entity, string $path = "") : array{
+        $arr = [$entity->entity_type_id];
+        $children = Entity::getEntitiesByParent($entity->id);
+        if(count($children) == 0){
+            return $arr;
+        }
+
+        $entityType = EntityType::findOrFail($entity->entity_type_id);
+        
+        $entityTypeName = "No Label";
+        $entityTypeLabel = ThConcept::where('concept_url', $entityType->thesaurus_url)->first();
+
+        if($entityTypeLabel){
+            $entityTypeName = $entityTypeLabel->labels->first()->label;
+        }
+
+        $this->print($this->ellipsis($entity->name,14) . "(". $this->ellipsis($entityTypeName, 14) . ", " . $entityType->id . ")" . " (" . $entity->id . ") @" . $path);
         foreach($children as $child){
-            $this->print("[[Entity]] => Found Child \"" . $child->name . "\"");
-            $childEntityIds = $this->getEntityTypes($child);
+            $childEntityIds = $this->getEntityTypes($child, $path . "/" . $this->ellipsis($child->name, 14));
             foreach($childEntityIds as $childEntityId){
                 $arr[] = $childEntityId;
             }
         }
-        $entityTypeIdList = array_unique($arr);
-        $this->print(json_encode($entityTypeIdList));
-        
+
+        $entityTypeIdList = array_unique($arr);        
         return $entityTypeIdList;
     }
 }

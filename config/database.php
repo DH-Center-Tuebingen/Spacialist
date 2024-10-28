@@ -93,10 +93,10 @@ return [
         
         'transfer' => [
             'driver' => 'pgsql',
-            'host' => env('DB_TRANSFER_HOST', '127.0.0.1'),
-            'port' => env('DB_TRANSFER_PORT', '5432'),
-            'database' => env('DB_TRANSFER_DATABASE', 'forge'),
-            'username' => env('DB_TRANSFER_USERNAME', 'forge'),
+            'host' => env('DB_TRANSFER_HOST'),
+            'port' => env('DB_TRANSFER_PORT'),
+            'database' => env('DB_TRANSFER_DATABASE'),
+            'username' => env('DB_TRANSFER_USERNAME'),
             'password' => env('DB_TRANSFER_PASSWORD', ''),
             'charset' => 'utf8',
             'prefix' => '',
