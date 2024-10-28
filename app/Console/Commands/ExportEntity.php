@@ -1,0 +1,298 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Entity;
+use App\EntityType;
+use App\ThConcept;
+use App\Attribute;
+use App\ThBroader;
+use App\User;
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+
+class ExportEntity extends Command {
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'app:export {--e|entity=: The id of the entity to export}';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = "cli tool to export a specific and all it's dependencies";
+
+
+    private $filehandle;
+    private static $source = "pgsql";   
+    
+    private function extractThesaurusConcepts($model, array &$allConcepts){
+        $collection = ThConcept::where('concept_url', $model->thesaurus_url)->get();
+        foreach($collection as $concept){
+            if(!$allConcepts[$model->thesaurus_url])
+                print("[ThConcept] found => " . $concept->concept_url . "\n");
+            $allConcepts[$model->thesaurus_url] = $concept;
+        }        
+    }
+    
+    private function getLabel($model){
+        $collection = ThConcept::where('concept_url', $model->thesaurus_url)->firstOrFail();
+        return $collection->labels->first()->label;
+    }
+    
+    private function collectAllDataFromEntityChildren(Entity $entity){
+        $thesaurusLabels = [];
+        $entityTypeIds = $this->getEntityTypes($entity);
+        $entityTypes = array_map(function($entityType){
+            $entityType = EntityType::findOrFail($entityType);
+        }, $entityTypeIds);
+        $thesaurusConcepts = [];
+        $attributes = [];
+        foreach($entityTypes as $entityType){            
+            $this->extractThesaurusConcepts($entityType, $thesaurusConcepts);
+            
+            foreach($entityType->attributes as $attribute){
+                $attributes[$attribute->id] = Attribute::findOrFail($attribute->id);
+                $this->extractThesaurusConcepts($attribute, $thesaurusConcepts);
+            }
+        }
+        
+        
+        $validLanguages = ['de', 'en'];
+        foreach($thesaurusConcepts as $concept){
+            $concept->labels->each(function($label) use ($validLanguages, &$thesaurusLabels, $concept){
+                if(in_array($label->language->short_name, $validLanguages)){
+                    $lang = $label->language->short_name;
+                    $thesaurusLabels[$concept->concept_url . "-" . $lang] = $label;
+                }
+            });
+        }
+        
+        return [
+            'attributes' => $attributes,
+            'entityTypes' => $entityTypes,
+            'thesaurusConcepts' => $thesaurusConcepts,
+            'thesaurusLabels' => $thesaurusLabels
+        ];
+    }
+    
+    public function handle(){
+        try{
+            $logLocation = "./storage/logs/transfer.log";
+            $this->filehandle = fopen($logLocation, "w");
+            
+            
+            $entityId = $this->option('entity');
+            
+            $entity = Entity::find($entityId);
+            if(!$entity){
+                $this->print('Entity not found');
+                return 1;
+            }
+            
+            
+            $this->print("Starting Export From Base Entity: " . $entity->name . " (" . $entity->id . ")");
+            
+  
+            $data = $this->collectAllDataFromEntityChildren($entity);
+            
+            $this->print("Beginning Transaction");
+            DB::connection("transfer")->beginTransaction(); 
+            $user = $this->selectOrCreateTransferUser();
+            $this->transferData($user, $data);
+
+            $this->print("Waiting for user confirmation of this receipt ...");
+        
+        if($this->confirm('Check the receipt carefully before proceeding')){
+            $this->print("User confirmed receipt. Proceeding with commit");
+            DB::connection("transfer")->commit();
+        }else{
+            $this->print("User declined receipt. Rolling back transaction and exiting Program");
+             DB::connection("transfer")->rollBack();
+             return 1;
+        }
+        
+        //    // We need to commit the changes first before we can (re-)build the thesaurus tree
+        //    $allConceptsInTree = $this->createMissingThConcepts($user, $data['thesaurusConcepts']);
+        //    $this->linkBroaderThConcepts($user, $allConceptsInTree);
+        
+       
+    } catch(Exception $e) {
+        $this->print("The program failed unexpectedly:\n" . $e->getMessage());
+        return 1;
+    }
+       
+       ////////// LEGACY
+       
+        // $user = User::on('transfer')->firstOrFail();
+        
+        // try{
+        //     foreach($thesaurusConcepts as $concept){
+        //         try{
+        //             fwrite($filehandle,"[[INSERT]] " . $concept::class . ": " . $concept->id . "\n");
+        //             $clone = $concept->replicate();
+        //             $clone->user_id = $user->id;
+        //             $clone->setConnection("transfer");
+        //             $clone->save();
+        //         }catch(\Exception $e){
+        //             fwrite($filehandle,"[[ERROR]] " . $e->getMessage(). "\n");
+        //             fwrite($filehandle,"[[ROLLBACK]] Transaction On Transfer " . $concept->id . "\n");
+        //             DB::connection("transfer")->rollBack();
+        //             return 1;
+        //         }
+        //     }
+            
+        //     fwrite($filehandle,"[[COMMIT]] Transaction On Transfer " . $concept->id . "\n");
+        //     DB::connection("transfer")->commit();
+        // }catch(\Exception $e){
+        //     fwrite($filehandle,"[[ERROR]] " . $e->getMessage(). "\n");
+        //     fwrite($filehandle,"[[ROLLBACK]] Transaction On Transfer " . $concept->id . "\n");
+        //     DB::connection("transfer")->rollBack();
+        //     return 1;
+        // }finally{
+        //     fclose($filehandle);
+        // }
+    }
+    
+    private function transferData($user, $data){
+        $this->transferThConcepts($user, $data['thesaurusConcepts']);
+        // $this->transferThLabels($user, $data['thesaurusLabels']);
+        // $this->transferEntityTypes($user, $data['entityTypes']);
+        // $this->transferAttributes($user, $data['attributes']);
+    }
+    
+    private function selectOrCreateTransferUser(): User{
+        $user = User::where('nickname', '__transfer')->firstOrCreate(
+            [
+                'nickname' => '__transfer',
+            ],[
+                'email' => 'nomail@localhost',
+                'password' => bcrypt('__transfer'),
+                'deleted_at' => Carbon::now(),
+            ]
+        );
+        
+        return $user;
+    }
+    
+    private function transferThConcepts(User $user, array $data){
+        $concepts = $data['thesaurusConcepts'];
+        foreach($concepts as $concept){
+            $result = ThConcept::on("transfer")->where('concept_url', $concept->concept_url)->first();
+            
+            if(!$result){
+                $clone = $concept->replicate();
+                $clone->user_id = $user->id;
+                $clone->setConnection("transfer");
+                $clone->save();
+                $this->print("ThConcept " . $concept->id . " created");
+            }else{
+                $this->print("ThConcept " . $concept->id . " already exists");
+            }
+        }
+    }
+    
+    private function print($message){
+        fwrite($this->filehandle, Carbon::now() . " ::> " . $message . "\n");
+    }
+    
+    private function transferThLabels(User $user, array $data){
+        
+    }
+    
+    private function transferEntityTypes(User $user, array $data){
+        
+    }
+    
+    private function transferAttributes(User $user, array $data){
+        
+    }
+    
+    private function createMissingThConcepts(User $user, array $concepts){
+        $conceptsInTree = array_values($concepts);
+        
+        $idx = 0;
+        while(count($conceptsInTree) > $idx){
+            $concept = $conceptsInTree[$idx];
+            $originalId = ThConcept::where('concept_url', $concept->concept_url)->value('id');
+            $broaders = ThBroader::where('narrower_id', $originalId)->get();
+            foreach($broaders as $broader){
+                $broaderId = $broader->broader_id;
+                $broaderConcept = ThConcept::where('id', $broaderId)->first();
+                $broaderConceptUrl = $broaderConcept->concept_url;
+                
+                $transferBroader = ThConcept::on("transfer")->where('concept_url', $broaderConceptUrl)->first();
+                if(!$transferBroader){
+                    $this->print("ThConcept " . $broaderConcept->id . " not found in transfer database. Creating it now.");
+                    $concepts[$broaderConceptUrl] = $broaderConcept;
+                    $transferBroader = ThConcept::where('concept_url', $broaderConceptUrl)->first();
+                    $clone = $transferBroader->replicate();
+                    $clone->user_id = $user->id;
+                    $clone->setConnection("transfer");
+                    $clone->save();
+                }
+            }
+            $idx++;
+        }
+        return $concepts;
+    }
+    
+    private function linkBroaderThConcepts(User $user, array $concepts){
+        foreach($concepts as $concept){
+            $originalId = ThConcept::where('concept_url', $concept->concept_url)->value('id');
+            $broaders = ThBroader::where('narrower_id', $originalId)->get();
+            $transferNarrowerId = ThConcept::on("transfer")->where('concept_url', $concept->concept_url)->value('id');
+            foreach($broaders as $broader){
+                $broaderId = $broader->broader_id;
+                $broaderConcept = ThConcept::where('id', $broaderId)->first();
+                $broaderConceptUrl = $broaderConcept->concept_url;
+                
+                $transferBroaderId = ThConcept::on("transfer")->where('concept_url', $broaderConceptUrl)->value('id');
+                if(!$transferBroaderId){
+                    throw new \Exception("Broader Concept not found in transfer database");
+                }
+                
+                $broader = ThBroader::on("transfer")->where('narrower_id', $transferNarrowerId)->where('broader_id', $transferBroaderId)->first();
+                if($broader){
+                    $this->print("Broader link already exists:: " . $transferBroaderId . " >>> " . $transferNarrowerId);
+                }else{
+                    $this->print("Creating Broader link:: " . $transferBroaderId . " >>> " . $transferNarrowerId);
+                    $broader = new ThBroader();
+                    $broader->narrower_id = $transferNarrowerId;
+                    $broader->broader_id = $transferBroaderId;
+                    $broader->setConnection("transfer");
+                    $broader->save();
+                }
+            }
+        }
+    }
+    
+    
+    public function getEntityTypes(Entity $entity) : array{
+        $arr = [];
+        $children = Entity::getEntitiesByParent($entity->id);
+        $this->print("[[Entity]] => Get Children Of \"" . $entity->name ."\"");
+        
+        if(count($children) == 0){
+            $this->print("[[Entity]] => No Children Found => " . $entity->entity_type_id);
+            return [$entity->entity_type_id];
+        }
+        foreach($children as $child){
+            $this->print("[[Entity]] => Found Child \"" . $child->name . "\"");
+            $childEntityIds = $this->getEntityTypes($child);
+            foreach($childEntityIds as $childEntityId){
+                $arr[] = $childEntityId;
+            }
+        }
+        $entityTypeIdList = array_unique($arr);
+        $this->print(json_encode($entityTypeIdList));
+        
+        return $entityTypeIdList;
+    }
+}

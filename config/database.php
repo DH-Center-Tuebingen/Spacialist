@@ -90,6 +90,19 @@ return [
             'search_path' => 'public',
             'sslmode' => 'prefer',
         ],
+        
+        'transfer' => [
+            'driver' => 'pgsql',
+            'host' => env('DB_TRANSFER_HOST', '127.0.0.1'),
+            'port' => env('DB_TRANSFER_PORT', '5432'),
+            'database' => env('DB_TRANSFER_DATABASE', 'forge'),
+            'username' => env('DB_TRANSFER_USERNAME', 'forge'),
+            'password' => env('DB_TRANSFER_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'search_path' => 'public',
+            'sslmode' => 'prefer',
+        ],
 
     ],
 
