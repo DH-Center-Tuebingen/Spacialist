@@ -717,6 +717,9 @@
                 "title": "Verfügbare Attribute",
                 "add_button": "Attribut hinzufügen",
                 "show_hidden": "Ausgeblendete anzeigen",
+                "hide_hidden": "Ausgeblendete verstecken",
+                "separated": "Attribute einzeln auflisten",
+                "in_groups": "Attribute in Gruppen auflisten",
                 "modal": {
                     "new": {
                         "title": "Neues Attribut"
