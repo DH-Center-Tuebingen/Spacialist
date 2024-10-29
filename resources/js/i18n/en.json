@@ -699,6 +699,10 @@
             "toggle_pretty_print": "Toggle Pretty Print"
         },
         "datamodel": {
+            "expand_groups": "Expand all groups",
+            "collapse_groups": "Collapse all groups",
+            "sort_by_name": "Sort by name",
+            "sort_by_default": "Default sorting",
             "toasts": {
                 "updated_type": {
                     "title": "Entity-Type updated",
