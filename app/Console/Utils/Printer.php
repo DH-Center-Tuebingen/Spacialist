@@ -79,4 +79,14 @@ trait Printer {
     protected function printExists(string $message){
         $this->print("✅ $message");
     }
+    
+    protected function printConnectionConfig(string $name, array $connection){
+        $this->printHeading($name);
+        $this->print("Host: " . $connection["host"]);
+        $this->print("Port: " . $connection["port"]);
+        $this->print("Database: " . $connection["database"]);
+        $this->print("Username: " . $connection["username"]);
+        $this->printLine();
+        $this->print();
+    }
 }
