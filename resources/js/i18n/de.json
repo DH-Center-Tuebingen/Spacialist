@@ -699,6 +699,10 @@
             "toggle_pretty_print": "Darstellung umschalten"
         },
         "datamodel": {
+            "expand_groups": "Alle Gruppen ausklappen",
+            "collapse_groups": "Alle Gruppen einklappen",
+            "sort_by_name": "Nach Namen sortieren",
+            "sort_by_default": "Standard-Reihenfolge",
             "toasts": {
                 "updated_type": {
                     "title": "Entitätstyp aktualisiert",

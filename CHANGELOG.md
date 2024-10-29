@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 ## 0.10.1
 ### Added
 - Option to display attributes in _Data Model Editor_ in groups
+- Filter attributes in _Data Model Editor_
+- Attributes in _Data Model Editor_ can now be sorted (by name or creation date)
 ### Fixed
 - Frontend errors due to wrong dayjs import
 - Missing translation for _milligram_ in si-unit attribute
