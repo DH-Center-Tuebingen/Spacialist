@@ -40,7 +40,7 @@ class ExportEntityTypes extends Command {
      *
      * @var string
      */
-    protected $description = "cli tool to export a specific and all it's dependencies";
+    protected $description = "cli tool to export all entity types and related data starting at specific entity";
 
     private static $source = "pgsql";
     private static $destination = "transfer";
