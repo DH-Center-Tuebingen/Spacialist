@@ -10,14 +10,16 @@ use Illuminate\Support\Facades\Storage;
 
 if(!function_exists('sp_remove_dir')) {
     function sp_remove_dir($dir) {
-        foreach(glob("{$dir}/*") as $file) {
-            if(is_dir($file)) {
-                sp_remove_dir($file);
-            } else if(!is_link($file)) {
-                unlink($file);
+        if(is_dir($dir)){
+            foreach(glob("{$dir}/*") as $file) {
+                if(is_dir($file)) {
+                    sp_remove_dir($file);
+                } else if(!is_link($file)) {
+                    unlink($file);
+                }
             }
+            rmdir($dir);
         }
-        rmdir($dir);
     }
 }
 

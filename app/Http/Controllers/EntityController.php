@@ -11,20 +11,21 @@ use App\EntityType;
 use App\Exceptions\AmbiguousValueException;
 use App\Exceptions\AttributeImportException;
 use App\Exceptions\ImportException;
-use App\Exceptions\Structs\ImportExceptionStruct;
 use App\Exceptions\InvalidDataException;
 use App\Exceptions\Structs\AttributeImportExceptionStruct;
+use App\Exceptions\Structs\ImportExceptionStruct;
 use App\Import\EntityImporter;
-use App\Import\ImportResolution;
-use App\Import\ImportResolutionType;
 use App\Reference;
 use App\ThConcept;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use ZipArchive;
 
 class EntityController extends Controller {
     /**
@@ -655,6 +656,147 @@ class EntityController extends Controller {
         fclose($handle);
         DB::commit();
         return response()->json($changedEntities, 201);
+    }
+
+    function exportEntityTree($id, Request $request) {
+        $user = auth()->user();
+        if(!$user->can('entity_read') || !$user->can('entity_share')) {
+            return response()->json([
+                'error' => __('You do not have the permission to export an entity tree'),
+            ], 403);
+        }
+
+        try {
+            $entity = Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist'),
+            ], 400);
+        }
+
+        $entities = [];
+        $parents[] = $entity;
+
+        while($entity = array_shift($parents)) {
+            // Add entity to array
+            $data = [];
+            $data['_name']=$entity->name;
+            $data['_parent']=implode("\\", $entity->getAncestorsAttribute());
+            $data['_entity_type']= $entity->entity_type->thesaurus_concept->getActiveLocaleLabel();
+
+            $entityData = $entity->getData();
+            foreach($entityData as $attribute) {
+                $name = ThConcept::getLabel($attribute->attribute->thesaurus_url);
+                $rawValue = $attribute->getValue();
+                $data[$name] = $this->determineAttributeValue($rawValue);;
+            }            
+            $entities[] = $data;
+            // Get all children and add them to the Queue
+            $child_entities = Entity::getEntitiesByParent($entity->id);
+            $parents = array_merge($parents, $child_entities->all());
+        }
+        $files = [];
+        
+        // Ensure TMP directory exists
+        $i = 1;
+        $tmpDir = 'temp_' . Carbon::now()->format('YmdHis');
+        while(Storage::disk('private')->exists($tmpDir)){
+            $tmpDir = 'temp_' . Carbon::now()->format('YmdHis') . '_' . $i++;
+        }
+        Storage::disk('private')->makeDirectory($tmpDir);
+        try{
+            $files = [];
+            $headers = [];
+            foreach($entities as $entity) {
+                $entityType = $entity['_entity_type'];
+                ksort($entity);
+                $delimiter = ";";
+                
+                if(!isset($files[$entityType])) {
+                    $filename = $tmpDir . '/' . $entity['_entity_type'] . '_' . Carbon::now()->format('YmdHis') . '.csv';
+                    $files[$entityType] = $filename;
+                    $headers = array_map(function($header) {
+                        $header = str_replace('"', '\"', $header);
+                        $header = str_replace('\n', '', $header);  
+                        return '"' . $header . '"';
+                    }, array_keys($entity));
+                    $headers[$entityType] = array_keys($entity); 
+                    Storage::disk('private')->put($filename, implode($delimiter, $headers[$entityType]));
+                }
+                
+                $filename = $files[$entityType];    
+                $columns = [];
+                $columnHeaders = $headers[$entityType];
+                foreach($columnHeaders as $columnHeader) {
+                    $columns[] = $entity[$columnHeader];
+                }
+                Storage::disk('private')->append($filename, implode($delimiter, array_map(function($item){
+                    return '"' . strval($item) . '"';
+                }, $columns)));
+                $files[$entityType] = $filename;
+            }
+            
+            if(count($files) == 0) {
+                return response()->json([
+                    'error' => __('No entities found'),
+                ], 400);
+            }
+            
+            // Create a ZIP file
+            $zipFile = 'entities_' . Carbon::now()->format('YmdHis') . '.zip';
+            $zip = new ZipArchive;
+            $zipPath = Storage::disk('private')->path($zipFile);
+
+            if($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+                foreach($files as $file) {
+                    $zip->addFile(Storage::disk('private')->path($file), basename($file));
+                }
+                $zip->close();
+            }
+        
+            // Clean up the temporary files
+            Storage::disk('private')->deleteDirectory($tmpDir);
+
+            // Return the ZIP file as a download response
+            return response()->download($zipPath)->deleteFileAfterSend(true);
+            
+        }catch(Exception $e){
+            Storage::disk('private')->delete($tmpDir);
+            Log::error($e->getMessage(), ['exception' => $e]);
+            return response()->json([
+                'error' => __('An unexpected error occurred while exporting the entities'),
+            ], 500);
+        }
+    }
+
+    //Todo: This should be done by the respective attribute classes
+    private function determineAttributeValue(mixed $attr_value){
+        if(is_array($attr_value)){
+            $val = [];
+            foreach($attr_value as $attr_value){
+                $val[] = $this->determineAttributeValue($attr_value);
+            }
+            return implode(";", $val);
+        } else {
+            if(is_string($attr_value)){
+                return $attr_value;
+            } else if(is_int($attr_value)){
+                return $attr_value;
+            } else if(is_float($attr_value)){
+                return $attr_value;
+            } else if(is_bool($attr_value)){
+                return $attr_value;
+            } else if(isset($attr_value->concept_url)) {
+                return ThConcept::getLabel($attr_value->concept_url);
+            } else if(isset($attr_value->thesaurus_url)){
+                return ThConcept::getLabel($attr_value->thesaurus_url);
+            } else if(isset($attr_value->name)){
+                return $attr_value->name;
+            } else {
+                info("Could not process element: " . json_encode($attr_value));
+                return "";
+            }
+        }
     }
 
     function createImportedEntity($entityName, ?string $rootEntityPath, $entityTypeId, $user) {
