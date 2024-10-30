@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\DB;
  *      - Attributes: Attributes are assumed to have the same thesaurus_url and datatype. This may lead to problems if the same attribute is used in different contexts.
  *      - Entity Type Relations: Will only include transferred relations.
  */
-class ExportEntity extends Command {
+class ExportEntityTypes extends Command {
     
     use Printer;
     
@@ -33,7 +33,7 @@ class ExportEntity extends Command {
      *
      * @var string
      */
-    protected $signature = 'app:export {--e|entity=: The id of the entity to export}';
+    protected $signature = 'app:export-types {--e|entity=: The id of the entity to export}';
 
     /**
      * The console command description.
