@@ -25,6 +25,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use ZipArchive;
 
 class EntityController extends Controller {
@@ -674,9 +675,66 @@ class EntityController extends Controller {
             ], 400);
         }
 
-        $entities = [];
-        $parents[] = $entity;
+        $entities = $this->getAllChildren($entity); 
+        $tmpDir = $this->createTemporaryDirectory();
+        Storage::disk('private')->makeDirectory($tmpDir);
+        try{
+            $files = $this->createImportFilesForDistinctEntityTypes($entities, $tmpDir);
+            
+            if(count($files) == 0) {
+                return response()->json([
+                    'error' => __('No entities found'),
+                ], 400);
+            }
 
+            $filename = 'export_' . Str::snake($entity->name) . '_' . Carbon::now()->format('YmdHis');
+            $filepath = "";
+
+            if(count($files) == 1) {
+                $filename = $filename . '.csv';
+                Storage::disk('private')->move(array_pop($files), $filename);
+                $filepath = Storage::disk('private')->path($filename);
+            }else{
+                // Create a ZIP file
+                $filename = $filename . '.zip';
+                $zip = new ZipArchive;
+                $filepath = Storage::disk('private')->path($filename);
+
+                if($zip->open($filepath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+                    foreach($files as $file) {
+                        $zip->addFile(Storage::disk('private')->path($file), basename($file));
+                    }
+                    $zip->close();
+                }
+            }
+        
+            // Clean up the temporary files
+            Storage::disk('private')->deleteDirectory($tmpDir);
+
+            // Return the ZIP file as a download response
+            return response()->download($filepath, $filename)->deleteFileAfterSend(true);
+            
+        }catch(Exception $e){
+            Storage::disk('private')->delete($tmpDir);
+            Log::error($e->getMessage(), ['exception' => $e]);
+            return response()->json([
+                'error' => __('An unexpected error occurred while exporting the entities'),
+            ], 500);
+        }
+    }
+
+    private function createTemporaryDirectory(): string {
+        $i = 1;
+        $tmpDir = 'temp_' . Carbon::now()->format('YmdHis');
+        while(Storage::disk('private')->exists($tmpDir)){
+            $tmpDir = 'temp_' . Carbon::now()->format('YmdHis') . '_' . $i++;
+        }
+        return $tmpDir;
+    }
+
+    private function getAllChildren(Entity $entity): array {
+        $entities = [];
+        $parents = [$entity];
         while($entity = array_shift($parents)) {
             // Add entity to array
             $data = [];
@@ -695,16 +753,10 @@ class EntityController extends Controller {
             $child_entities = Entity::getEntitiesByParent($entity->id);
             $parents = array_merge($parents, $child_entities->all());
         }
-        $files = [];
-        
-        // Ensure TMP directory exists
-        $i = 1;
-        $tmpDir = 'temp_' . Carbon::now()->format('YmdHis');
-        while(Storage::disk('private')->exists($tmpDir)){
-            $tmpDir = 'temp_' . Carbon::now()->format('YmdHis') . '_' . $i++;
-        }
-        Storage::disk('private')->makeDirectory($tmpDir);
-        try{
+        return $entities;
+    }
+
+    private function createImportFilesForDistinctEntityTypes(array $entities, string $tmpDir): array{
             $files = [];
             $headers = [];
             foreach($entities as $entity) {
@@ -721,6 +773,7 @@ class EntityController extends Controller {
                         return '"' . $header . '"';
                     }, array_keys($entity));
                     $headers[$entityType] = array_keys($entity); 
+                    $content = 
                     Storage::disk('private')->put($filename, implode($delimiter, $headers[$entityType]));
                 }
                 
@@ -735,38 +788,7 @@ class EntityController extends Controller {
                 }, $columns)));
                 $files[$entityType] = $filename;
             }
-            
-            if(count($files) == 0) {
-                return response()->json([
-                    'error' => __('No entities found'),
-                ], 400);
-            }
-            
-            // Create a ZIP file
-            $zipFile = 'entities_' . Carbon::now()->format('YmdHis') . '.zip';
-            $zip = new ZipArchive;
-            $zipPath = Storage::disk('private')->path($zipFile);
-
-            if($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-                foreach($files as $file) {
-                    $zip->addFile(Storage::disk('private')->path($file), basename($file));
-                }
-                $zip->close();
-            }
-        
-            // Clean up the temporary files
-            Storage::disk('private')->deleteDirectory($tmpDir);
-
-            // Return the ZIP file as a download response
-            return response()->download($zipPath)->deleteFileAfterSend(true);
-            
-        }catch(Exception $e){
-            Storage::disk('private')->delete($tmpDir);
-            Log::error($e->getMessage(), ['exception' => $e]);
-            return response()->json([
-                'error' => __('An unexpected error occurred while exporting the entities'),
-            ], 500);
-        }
+            return $files;
     }
 
     //Todo: This should be done by the respective attribute classes

@@ -9,6 +9,7 @@ import {
     simpleResourceType,
     getEntityTypeAttributes as storedEntityTypeAttributes,
 } from '@/helpers/helpers.js';
+import File from './helpers/file';
 
 // GET AND STORE (FETCH)
 export async function fetchVersion() {
@@ -482,7 +483,11 @@ export async function duplicateEntity(entity) {
 
 export async function exportEntityTree(root){
     return $httpQueue.add(
-        () => http.get(`/entity/${root}/exportTree`).then(response => response.data)
+        () => http.get(`/entity/${root}/exportTree`,{
+            responseType: 'blob'
+        })
+        .then(File.saveFileWithFallback('export_no_name'))
+        .catch(e => { throw e; })
     );
 }
 
