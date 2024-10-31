@@ -687,7 +687,8 @@ class EntityController extends Controller {
                 ], 400);
             }
 
-            $filename = 'export_' . Str::snake($entity->name) . '_' . Carbon::now()->format('YmdHis');
+            // We replace all non-alphanumeric characters to avoid path traversal attacks
+            $filename = 'export_' . Str::limit(Str::snake(preg_replace('/[^a-zA-Z0-9]/', '', $entity->name)), 20) . '_' . Carbon::now()->format('YmdHis');
             $filepath = "";
 
             if(count($files) == 1) {
@@ -758,7 +759,7 @@ class EntityController extends Controller {
 
     private function createImportFilesForDistinctEntityTypes(array $entities, string $tmpDir): array{
             $files = [];
-            $headers = [];
+            $headersMap = [];
             foreach($entities as $entity) {
                 $entityType = $entity['_entity_type'];
                 ksort($entity);
@@ -767,21 +768,21 @@ class EntityController extends Controller {
                 if(!isset($files[$entityType])) {
                     $filename = $tmpDir . '/' . $entity['_entity_type'] . '_' . Carbon::now()->format('YmdHis') . '.csv';
                     $files[$entityType] = $filename;
-                    $headers = array_map(function($header) {
+
+                    $headersMap[$entityType] = array_keys($entity);
+                    $headerStrings = array_map(function($header) {
                         $header = str_replace('"', '\"', $header);
                         $header = str_replace('\n', '', $header);  
                         return '"' . $header . '"';
                     }, array_keys($entity));
-                    $headers[$entityType] = array_keys($entity); 
-                    $content = 
-                    Storage::disk('private')->put($filename, implode($delimiter, $headers[$entityType]));
+                    Storage::disk('private')->put($filename, implode($delimiter,  $headerStrings));
                 }
                 
                 $filename = $files[$entityType];    
                 $columns = [];
-                $columnHeaders = $headers[$entityType];
+                $columnHeaders = $headersMap[$entityType];
                 foreach($columnHeaders as $columnHeader) {
-                    $columns[] = $entity[$columnHeader];
+                    $columns[] = isset($entity[$columnHeader]) ? $entity[$columnHeader] : "";
                 }
                 Storage::disk('private')->append($filename, implode($delimiter, array_map(function($item){
                     return '"' . strval($item) . '"';
@@ -808,6 +809,8 @@ class EntityController extends Controller {
                 return $attr_value;
             } else if(is_bool($attr_value)){
                 return $attr_value;
+            } else if(isset($attr_value->unit)){
+                return $attr_value->value . ";" . $attr_value->unit;
             } else if(isset($attr_value->concept_url)) {
                 return ThConcept::getLabel($attr_value->concept_url);
             } else if(isset($attr_value->thesaurus_url)){
