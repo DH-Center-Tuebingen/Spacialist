@@ -740,7 +740,7 @@ class EntityController extends Controller {
             // Add entity to array
             $data = [];
             $data['_name']=$entity->name;
-            $data['_parent']=implode("\\", $entity->getAncestorsAttribute());
+            $data['_parent']=implode(EntityImporter::PARENT_DELIMITER, $entity->getAncestorsAttribute());
             $data['_entity_type']= $entity->entity_type->thesaurus_concept->getActiveLocaleLabel();
 
             $entityData = $entity->getData();
