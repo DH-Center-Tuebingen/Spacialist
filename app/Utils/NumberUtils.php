@@ -55,10 +55,9 @@ class NumberUtils {
      */
     public static function is_integer_too_big(string $intString) : bool {
         // Compare with PHP_INT_MAX and PHP_INT_MIN using bccomp for arbitrary precision
-        if(bccomp($intString, (string)PHP_INT_MAX) === 1 || bccomp($intString, (string)PHP_INT_MIN) === -1) {
-            return true;
-        }
-
-        return false;
+        return
+            bccomp($intString, (string)PHP_INT_MAX) === 1
+            ||
+            bccomp($intString, (string)PHP_INT_MIN) === -1;
     }
 }

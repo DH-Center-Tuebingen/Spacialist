@@ -100,7 +100,7 @@
                 },
             };
 
-            const activeOption = computed(() => {
+            const activeOption = computed(_ => {
                 if(props.imported) {
                     return options.imported;
                 }
@@ -116,7 +116,6 @@
                 if(props.create > 0) {
                     return options.create;
                 }
-
                 return options.no_items;
             });
 

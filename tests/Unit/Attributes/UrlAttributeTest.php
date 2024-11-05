@@ -5,11 +5,8 @@ use App\AttributeTypes\UrlAttribute;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
-
 // !!!! Currently this test is only testing the fromImport function!!!
-
 class UrlAttributeTest extends TestCase {
-
     /**
      * @dataProvider truthyProvider
     */

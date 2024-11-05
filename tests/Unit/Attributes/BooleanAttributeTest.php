@@ -6,19 +6,20 @@ use App\AttributeTypes\BooleanAttribute;
 use Tests\TestCase;
 
 class BooleanAttributeTest extends TestCase {
-        
     /**
      * @dataProvider truthyProvider
      */
     public function testFromImportTruthy($input) {
         $this->assertTrue(BooleanAttribute::fromImport($input));
     }
+
     /**
      * @dataProvider falsyProvider
      */
     public function testFromImportFalsy($input) {
         $this->assertFalse(BooleanAttribute::fromImport($input));
     }
+
     public static function truthyProvider() {
         return [
             [true],
@@ -31,6 +32,7 @@ class BooleanAttributeTest extends TestCase {
             ['w'],
         ];
     }
+
     public static function falsyProvider() {
         return [
             [false],

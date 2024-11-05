@@ -5,11 +5,8 @@ use App\AttributeTypes\StringfieldAttribute;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
-
 // !!!! Currently this test is only testing the fromImport function!!!
-
 class StringfieldAttributeTest extends TestCase {
-
     /**
      * @dataProvider truthyProvider
     */
