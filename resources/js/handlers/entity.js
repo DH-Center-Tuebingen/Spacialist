@@ -11,6 +11,41 @@ export const handleEntityDataUpdated = {
     },
 };
 
+export const handleAttributeValueCreated = {
+    'AttributeValueCreated': e => {
+        // Only handle event if from different user
+        if(e.user.id == useUserStore().getCurrentUserId) return;
+        console.log('handleAttributeValueCreated', e);
+    },
+};
+
+export const handleAttributeValueUpdated = {
+    'AttributeValueUpdated': e => {
+        // Only handle event if from different user
+        if(e.user.id == useUserStore().getCurrentUserId) return;
+        console.log('handleAttributeValueUpdated', e);
+        useEntityStore().updateEntityData(
+            e.attributeValue.entity_id,
+            {
+                [e.attributeValue.attribute_id]: e.value,
+            },
+            {
+                [e.attributeValue.attribute_id]: e.attributeValue,
+            },
+            true,
+            true,
+        );
+    },
+};
+
+export const handleAttributeValueDeleted = {
+    'AttributeValueDeleted': e => {
+        // Only handle event if from different user
+        if(e.user.id == useUserStore().getCurrentUserId) return;
+        console.log('handleAttributeValueDeleted', e);
+    },
+};
+
 export const handleEntityReferenceAdded = {
     'ReferenceAdded': e => {
         // Only handle event if from different user

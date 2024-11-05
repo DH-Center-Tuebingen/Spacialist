@@ -98,6 +98,7 @@ export const useEntityStore = defineStore('entity', {
         entityTypes: {},
         entityTypeAttributes: {},
         entityTypeColors: {},
+        receivedEntityData: {},
         tree: [],
         treeSelectionMode: false,
         treeSelection: {},
@@ -232,11 +233,20 @@ export const useEntityStore = defineStore('entity', {
                 const parent = this.entities[node.root_entity_id];
                 if(parent) {
                     if(parent.childrenLoaded) {
-                        parent.children.push(node);
+                        if(entityExists) {
+                            const idx = parent.children.findIndex(itm => itm.id == node.id);
+                            if(idx > -1) {
+                                parent.children.splice(idx, 1, node);
+                            }
+                        } else {
+                            parent.children.push(node);
+                        }
                     }
                     if(doCount) {
-                        parent.children_count++;
-                        parent.state.openable = true;
+                        if(!entityExists) {
+                            parent.children_count++;
+                            parent.state.openable = true;
+                        }
                     }
                 }
             }
@@ -455,8 +465,16 @@ export const useEntityStore = defineStore('entity', {
                 this.updateAttributeMetadata(entityTypeId, attributeId, etAttrId, data);
             });
         },
-        updateEntityData(entityId, updatedValues, patchedData, sync) {
+        updateEntityData(entityId, updatedValues, patchedData, sync, fromWebsocket = false) {
             const entity = this.getEntity(entityId);
+            if(fromWebsocket) {
+                this.receivedEntityData[entity.id] = {};
+                for(let k in updatedValues) {
+                    this.receivedEntityData[entity.id][k] = patchedData[k];
+                    this.receivedEntityData[entity.id][k].value = updatedValues[k];
+                }
+                return;
+            }
             for(let k in updatedValues) {
                 // when attribute value is set empty, delete whole attribute
                 if(!updatedValues[k] && updatedValues[k] != false) {
@@ -472,7 +490,7 @@ export const useEntityStore = defineStore('entity', {
                         entity.data[k].value = updatedValues[k];
                         if(sync) {
                             this.selectedEntity.data[k] = patchedData[k];
-                            this.selectedEntity.data[k].value = data[k];
+                            this.selectedEntity.data[k].value = updatedValues[k];
                         }
                     } else {
                         entity.data[k].value = updatedValues[k];
@@ -774,7 +792,7 @@ export const useEntityStore = defineStore('entity', {
                 if(attribute) {
                     attribute.pivot.depends_on = data;
                 }
-            })
+            });
         },
         initialize(topEntities) {
             this.backup = {};

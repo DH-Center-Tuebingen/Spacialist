@@ -14,7 +14,7 @@
             <div
                 v-if="!state.hiddenAttributeList[element.id] || showHidden"
                 class="mb-3 px-2"
-                :class="clFromMetadata(element)"
+                :class="additionalRowClasses(element)"
                 @mouseenter="onEnter(index)"
                 @mouseleave="onLeave(index)"
             >
@@ -29,6 +29,15 @@
                         :class="attributeClasses(element)"
                         @click="e => handleLabelClick(e, element.datatype)"
                     >
+                        <div
+                            v-if="hasAttributeChangeIndicator(element)"
+                            class="d-flex align-items-center"
+                            :title="getAttributeChangeIndicatorDescription(element)"
+                        >
+                            <DotIndicator
+                                :type="getAttributeChangeIndicator(element)"
+                            />
+                        </div>
                         <div
                             v-show="!!state.hoverStates[index]"
                             class="btn-fab-list"
@@ -97,7 +106,7 @@
                             class="clickable d-flex flex-row align-items-start top-0"
                             @click="onMetadataHandler(element)"
                         >
-                            <validity-indicator :state="certainty(element)" />
+                            <ValidityIndicator :state="certainty(element)" />
                             <span v-if="hasComment(element)">
                                 <i class="fas fa-fw fa-comment" />
                             </span>
@@ -127,7 +136,7 @@
                             @expanded="e => onAttributeExpand(e, index)"
                         />
 
-                        <attribute-moderation-panel
+                        <ModerationPanel
                             v-if="isInModeration(element.id)"
                             :element="element"
                             :value="state.attributeValues[element.id]"
@@ -162,12 +171,14 @@
     } from '@/helpers/helpers.js';
 
     import ModerationPanel from '@/components/moderation/Panel.vue';
-    import ValidityIndicator from './forms/indicators/ValidityIndicator.vue';
+    import ValidityIndicator from '@/components/forms/indicators/ValidityIndicator.vue';
+    import DotIndicator from '@/components/indicators/DotIndicator.vue';
 
     export default {
         components: {
-            'attribute-moderation-panel': ModerationPanel,
-            'validity-indicator': ValidityIndicator,
+            ModerationPanel,
+            ValidityIndicator,
+            DotIndicator,
         },
         props: {
             classes: {
@@ -263,17 +274,20 @@
                 }
             };
 
-            const clFromMetadata = elem => {
+            const additionalRowClasses = elem => {
+                const classes = [];
                 if(!state.ignoreMetadata && elem.pivot && elem.pivot.metadata && elem.pivot.metadata.width) {
                     const width = elem.pivot.metadata.width;
                     switch(width) {
                         case 50:
-                            return 'col-6';
+                            classes.push('col-6');
                         default:
-                            return 'col-12';
+                            classes.push('col-12');
                     }
+                } else {
+                    classes.push('col-12');
                 }
-                return 'col-12';
+                return classes;
             };
             const attributeClasses = attribute => {
                 const classes = [];
@@ -431,6 +445,7 @@
                 return values;
             };
             const updateDirtyState = e => {
+                state.changeTracker.local[e.attribute_id] = true;
                 // Do not update dirty state if attribute is currently in moderation edit mode
                 if(state.attributeValues[e.attribute_id].moderation_edit_state == 'active') {
                     return;
@@ -439,6 +454,8 @@
                 context.emit('dirty', e);
             };
             const resetListValues = _ => {
+                state.changeTracker.local = {};
+                state.changeTracker.external = {};
                 for(let k in attrRefs.value) {
                     // skip all attributes currently in moderation edit mode
                     if(state.attributeValues[k].moderation_edit_state == 'active') {
@@ -451,6 +468,8 @@
                 }
             };
             const undirtyList = _ => {
+                state.changeTracker.local = {};
+                state.changeTracker.external = {};
                 for(let k in attrRefs.value) {
                     // skip all attributes currently in moderation edit mode
                     if(state.attributeValues[k].moderation_edit_state == 'active') {
@@ -460,6 +479,47 @@
                     if(!!curr && !!curr.undirtyField) {
                         curr.undirtyField();
                     }
+                }
+            };
+            const broadcastAttributeChanges = changes => {
+                for(let k in changes) {
+                    if(attrRefs.value[k]) {
+                        // Broadcast changes to Attribute component...
+                        state.attributeValues[k].value = changes[k].value;
+                        attrRefs.value[k].handleExternalChange(changes[k]);
+                        // ... but also display info
+                        state.changeTracker.external[k] = changes[k];
+                    }
+                }
+            };
+            const hasAttributeChangeIndicator = attribute => {
+                return state.changeTracker.local[attribute.id] || state.changeTracker.external[attribute.id];
+            };
+            const getAttributeChangeIndicator = attribute => {
+                let externalChange = false;
+                let localChange = false;
+                if(state.changeTracker.local[attribute.id]) {
+                    localChange = true;
+                }
+                if(state.changeTracker.external[attribute.id]) {
+                    externalChange = true;
+                }
+                if(externalChange && localChange) {
+                    return 'error';
+                } else if(externalChange) {
+                    return 'primary';
+                } else if(localChange) {
+                    return 'warning';
+                }
+            };
+            const getAttributeChangeIndicatorDescription = attribute => {
+                const type = getAttributeChangeIndicator(attribute);
+                if(type == 'error') {
+                    return t('main.entity.attributes.change_indicator.both');
+                } else if(type == 'primary') {
+                    return t('main.entity.attributes.change_indicator.external_only');
+                } else if(type == 'warning') {
+                    return t('main.entity.attributes.change_indicator.local_only');
                 }
             };
             const setRef = (el, id) => {
@@ -546,6 +606,10 @@
                 attributeList: attributes,
                 attributeValues: values,
                 rootAttributeValues: {},
+                changeTracker: {
+                    local: {},
+                    external: {},
+                },
                 entity: computed(_ => entityStore.selectedEntity),
                 dynamicSelectionList: computed(_ => {
                     const list = [];
@@ -602,7 +666,7 @@
                 // LOCAL
                 certainty,
                 handleSelectionUpdate,
-                clFromMetadata,
+                additionalRowClasses,
                 attributeClasses,
                 expandedClasses,
                 onAttributeExpand,
@@ -620,6 +684,10 @@
                 updateDirtyState,
                 resetListValues,
                 undirtyList,
+                broadcastAttributeChanges,
+                hasAttributeChangeIndicator,
+                getAttributeChangeIndicator,
+                getAttributeChangeIndicatorDescription,
                 setRef,
                 onEditHandler,
                 onRemoveHandler,

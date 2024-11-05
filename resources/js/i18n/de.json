@@ -599,6 +599,11 @@
                         "reset": "Bearbeitete Änderung zurücksetzen",
                         "cancel": "Bearbeitung verwerfen"
                     }
+                },
+                "change_indicator": {
+                    "local_only": "Der Attributwert wurde von dir geändert. Die Daten können gespeichert werden.",
+                    "external_only": "Der Attributwert wurde von einem anderen Benutzern geändert.",
+                    "both": "Der Attributwert wurde von dir und einem anderen Benutzern geändert. Beim Speichern werden deine Änderungen übernommen!"
                 }
             },
             "metadata": {

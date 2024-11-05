@@ -177,10 +177,9 @@
                             />
                         </a>
                     </div>
-                    <!-- TODO move to component -->
-                    <div
-                        class="bg-success bg-opacity-75 rounded-circle"
-                        style="width: 0.6rem; aspect-ratio: 1 / 1;"
+                    <DotIndicator
+                        :type="'success'"
+                        style="width: 0.6rem;"
                     />
                 </div>
                 <div class="d-flex flex-row gap-1 align-items-center">
@@ -242,7 +241,10 @@
                         @mouseover="showTabActions(tg.id, true)"
                         @mouseleave="showTabActions(tg.id, false)"
                     >
-                        <i class="fas fa-fw fa-2xs fa-circle text-warning" />
+                        <DotIndicator
+                            :type="'warning'"
+                            style="width: 0.5rem;"
+                        />
                         <div v-show="state.attributeGrpHovered == tg.id">
                             <a
                                 href="#"
@@ -460,6 +462,9 @@
     } from '@/helpers/websocket.js';
     import {
         handleEntityDataUpdated,
+        handleAttributeValueCreated,
+        handleAttributeValueUpdated,
+        handleAttributeValueDeleted,
         handleEntityReferenceAdded,
         handleEntityReferenceUpdated,
         handleEntityReferenceDeleted,
@@ -472,11 +477,13 @@
 
     import MetadataTab from '@/components/entity/MetadataTab.vue';
     import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
+    import DotIndicator from '@/components/indicators/DotIndicator.vue';
 
     export default {
         components: {
             EntityTypeLabel,
             MetadataTab,
+            DotIndicator,
         },
         props: {
             bibliography: {
@@ -521,6 +528,10 @@
                 routeQuery: computed(_ => route.query),
                 entity: computed(_ => entityStore.selectedEntity),
                 entityUser: computed(_ => state.entity.user),
+                entityChanges: computed(_ => {
+                    if(!state.entity?.id) return {};
+                    return entityStore.receivedEntityData[state.entity.id];
+                }),
                 entityAttributes: computed(_ => entityStore.getEntityTypeAttributes(state.entity.entity_type_id)),
                 colorStyles: computed(_ => {
                     const colors = entityStore.getEntityTypeColors(state.entity.entity_type_id);
@@ -991,6 +1002,9 @@
                 channels.entity = joinEntityRoom(route.params.id);
                 listenToList(channels.entity, [
                     handleEntityDataUpdated,
+                    handleAttributeValueCreated,
+                    handleAttributeValueUpdated,
+                    handleAttributeValueDeleted,
                     handleEntityReferenceAdded,
                     handleEntityReferenceUpdated,
                     handleEntityReferenceDeleted,
@@ -1011,6 +1025,14 @@
                 attrRefs.value = {};
                 state.commentLoadingState = 'not';
             });
+
+            watch(_ => state.entityChanges,
+                (newChanges, oldChanges) => {
+                    for(let k in attrRefs.value) {
+                        attrRefs.value[k].broadcastAttributeChanges(newChanges);
+                    }
+                }
+            );
 
             watch(_ => state.hiddenAttributeCount,
                 async (newCount, oldCount) => {
@@ -1035,7 +1057,7 @@
                         entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id);
                         state.initFinished = true;
                         updateAllDependencies();
-                    })
+                    });
                     // store.dispatch('getEntity', newParams.id).then(_ => {
                     //     entityStore.getEntityTypeAttributeSelections();
                     //     state.initFinished = true;
@@ -1096,6 +1118,9 @@
                         channels.entity = joinEntityRoom(to.params.id);
                         listenToList(channels.entity, [
                             handleEntityDataUpdated,
+                            handleAttributeValueCreated,
+                            handleAttributeValueUpdated,
+                            handleAttributeValueDeleted,
                             handleEntityReferenceAdded,
                             handleEntityReferenceUpdated,
                             handleEntityReferenceDeleted,

@@ -599,6 +599,11 @@
                         "reset": "Reset edited changes",
                         "cancel": "Cancel editing"
                     }
+                },
+                "change_indicator": {
+                    "local_only": "Attribute value changes made by you. Data can be saved.",
+                    "external_only": "Attribute value has been changed by another user.",
+                    "both": "Attribute value has been changed by you and another user. Saving will overwrite their changes with yours!"
                 }
             },
             "metadata": {
