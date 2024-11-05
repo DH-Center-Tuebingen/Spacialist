@@ -7,55 +7,55 @@ use Carbon\Carbon;
 /**
  * Class Printer
  * @package App\Console\Utils
- * 
+ *
  * This class is used to print messages to a specific log file.
  * It provides utility functions to create formatted receipts for commands.
  */
 trait Printer {
-    
     protected $filehandle;
     abstract function printerLogFileName();
     private $lineLength = 64;
-    
-    protected function print(string $message = "") {        
+
+    protected function print(string $message = ""): void {
         fwrite($this->filehandle, Carbon::now() . " ::> " . $message . "\n");
     }
-    
-    protected function startPrinter(){
+
+    protected function startPrinter(): void {
         $logLocation = "./storage/logs/" . $this->printerLogFileName();
         $this->filehandle = fopen($logLocation, "w");
     }
-    
-    protected function closePrinter(){
+
+    protected function closePrinter(): void {
         fclose($this->filehandle);
     }
-    
-    protected function printHeading(string $message, array|null $data = null){
+
+    protected function printHeading(string $message, array|null $data = null): void {
         $this->print();
-        if($data != null){
+        if($data != null) {
             $count = count($data);
             $message .= " ($count)";
         }
-        
         $this->printLine($message);
     }
-    
-    protected function printLine(string $message = ""){
+
+    protected function printLine(string $message = ""): void {
         $spaces = 3;
-        if($message != ""){
-            $message = str_pad($message, strlen($this->lineLength) + 2*$spaces, STR_PAD_BOTH);
+        if($message != "") {
+            $message = str_pad(
+                $message,
+                strlen($this->lineLength) + (2 * $spaces),
+                STR_PAD_BOTH);
         }
-        
         $this->print(str_pad($message, $this->lineLength, "=", STR_PAD_BOTH));
     }
-    
-    protected function printSeparator(){
+
+    protected function printSeparator(): void {
         $this->print("=============================================================");
         $this->print();
         $this->print();
     }
-    
-    protected function printSectionHeading(string $message){
+
+    protected function printSectionHeading(string $message): void {
         $this->print();
         $this->print();
         $this->printLine();
@@ -63,24 +63,24 @@ trait Printer {
         $this->printLine();
         $this->print();
     }
-    
-    protected function printError(string $message){
+
+    protected function printError(string $message): void {
         $this->print("❌ $message");
     }
-    
-    protected function printInfo(string $message){
+
+    protected function printInfo(string $message): void {
         $this->print("⏺️ $message");
     }
-    
-    protected function printCreated(string $message){
+
+    protected function printCreated(string $message): void {
         $this->print("➕ $message");
     }
-    
-    protected function printExists(string $message){
+
+    protected function printExists(string $message): void {
         $this->print("✅ $message");
     }
-    
-    protected function printConnectionConfig(string $name, array $connection){
+
+    protected function printConnectionConfig(string $name, array $connection): void {
         $this->printHeading($name);
         $this->print("Host: " . $connection["host"]);
         $this->print("Port: " . $connection["port"]);

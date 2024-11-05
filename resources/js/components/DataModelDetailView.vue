@@ -40,7 +40,7 @@
                     >{{ t('global.geometry_type') }}</label>
                     <div class="col-md-9 d-flex align-items-center">
                         <span>
-                            <!-- {{ state.entityType.layer.type }} -->
+                            {{ state.entityType.layer.type }}
                         </span>
                         <!-- <router-link :to="{name: 'ldetail', params: { id: state.entityType.layer.id }}">
                             {{ t('main.datamodel.detail.manage_layer') }}
