@@ -5,11 +5,8 @@ use App\AttributeTypes\DropdownMultipleAttribute;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
-
 // !!!! Currently this test is only testing the fromImport function!!!
-
 class DropdownMultipleAttributeTest extends TestCase {
-
     /**
      * @dataProvider truthyProvider
     */
@@ -33,9 +30,7 @@ class DropdownMultipleAttributeTest extends TestCase {
         DropdownMultipleAttribute::fromImport($input);
     }
 
-
     public static function truthyProvider() {
-
         $find = [
             "id" => 3,
             "concept_url" => "https://spacialist.escience.uni-tuebingen.de/<user-project>/fundobjekt#20171220094921",

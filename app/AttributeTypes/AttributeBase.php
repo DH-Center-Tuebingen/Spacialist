@@ -145,7 +145,7 @@ abstract class AttributeBase
         return trim($data) === "";
     }
 
-    public static function fromImport(int|float|bool|string $data) : mixed{
+    public static function fromImport(int|float|bool|string $data) : mixed {
         if(self::importDataIsEmpty($data)) {
             return null;
         }

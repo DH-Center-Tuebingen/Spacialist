@@ -5,11 +5,8 @@ use App\AttributeTypes\DimensionAttribute;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
-
 // !!!! Currently this test is only testing the fromImport function!!!
-
 class DimensionAttributeTest extends TestCase {
-
     /**
      * @dataProvider truthyProvider
     */
@@ -17,7 +14,6 @@ class DimensionAttributeTest extends TestCase {
         $this->expectNotToPerformAssertions(DimensionAttribute::class);
         DimensionAttribute::fromImport($input);
     }
-
 
     /**
     * @dataProvider truthyProvider

@@ -5,11 +5,8 @@ use App\AttributeTypes\DaterangeAttribute;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
-
 // !!!! Currently this test is only testing the fromImport function!!!
-
 class DaterangeAttributeTest extends TestCase {
-
     /**
      * @dataProvider truthyProvider
     */

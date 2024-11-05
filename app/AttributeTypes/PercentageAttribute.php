@@ -12,9 +12,9 @@ class PercentageAttribute extends AttributeBase
 
     public static function parseImport(int|float|bool|string $data) : mixed {
         $data = IntegerAttribute::fromImport($data);
-        if($data < 0 || $data > 100)
+        if($data < 0 || $data > 100) {
             throw InvalidDataException::requireRange($data, 0, 100);
-
+        }
         return $data;
     }
 

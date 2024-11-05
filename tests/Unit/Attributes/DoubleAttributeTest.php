@@ -5,11 +5,8 @@ use App\AttributeTypes\DoubleAttribute;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
-
 // !!!! Currently this test is only testing the fromImport function!!!
-
 class DoubleAttributeTest extends TestCase {
-
     /**
      * @dataProvider truthyProvider
     */

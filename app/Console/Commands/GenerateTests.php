@@ -28,8 +28,7 @@ class GenerateTests extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
-    {
+    public function handle() {
         $dir=$this->argument('dir');
 
         if($dir == ".") {
@@ -71,7 +70,7 @@ class GenerateTests extends Command
         if(!file_exists($path)) {
             touch($path);
             $this->info("✔️  File created: $path");
-        }else{
+        } else {
             $this->info("➡️  File already exists: $path");
         }
     }

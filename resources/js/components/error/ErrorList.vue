@@ -18,51 +18,47 @@
 </template>
 
 <script>
+    import { computed } from 'vue';
 
-import { computed } from 'vue';
+    export default {
+        props: {
+            headerSeparator: {
+                type: String,
+                default: ':'
+            },
+            separator: {
+                type: String,
+                default: ','
+            },
+            value: {
+                type: String,
+                required: true
+            }
+        },
+        setup(props){
+            const header = computed(_ => {
+                return props.value.split(props.headerSeparator)[0].trim();
+            });
 
-export default {
-    props: {
-        headerSeparator: {
-            type: String,
-            default: ':'
-        },
-        separator: {
-            type: String,
-            default: ','
-        },
-        value: {
-            type: String,
-            required: true
+            const items = computed(_ => {
+
+                const headerParts = props.value.split(props.headerSeparator);
+                headerParts.shift();
+
+                const parts = headerParts.join(props.separator);
+                return parts.split(props.separator);
+            });
+
+            const hasItems = computed(_ => {
+                return items.value.length > 0 && items.value[0].trim() !== '';
+            });
+
+
+            return {
+                hasItems,
+                header,
+                items
+            };
         }
-    },
-    setup(props){
-        
-
-        
-        const header = computed(() => {
-            return props.value.split(props.headerSeparator)[0].trim();
-        });
-        
-        const items = computed(() => {
-            
-            const headerParts = props.value.split(props.headerSeparator);
-            headerParts.shift();
-            
-            const parts = headerParts.join(props.separator);            
-            return parts.split(props.separator);
-        });
-        
-        const hasItems = computed(() => {
-            return items.value.length > 0 && items.value[0].trim() !== '';
-        });
-        
-        
-        return {
-            hasItems,
-            header,
-            items
-        };
-    }
-};
+    };
 </script>

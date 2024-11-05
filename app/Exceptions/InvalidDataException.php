@@ -7,7 +7,7 @@ use Exception;
 class InvalidDataException extends Exception
 {
     function __construct(string $message, string $actual = null) {
-        if($actual !== null){
+        if($actual !== null) {
             $pattern = '/\s*\.\s*$/';
             // Use preg_replace to remove the last dot in the string
             $result = preg_replace($pattern, '', $message);
@@ -53,31 +53,31 @@ class InvalidDataException extends Exception
         return self::objectNotFound('concept', $concept);
     }
 
-    public static function invalidEntity(string $entity){
+    public static function invalidEntity(string $entity) {
         return self::objectNotFound('entity', $entity);
     }
 
-    public static function invalidEntities(array $entities){
+    public static function invalidEntities(array $entities) {
         return self::objectNotFound('entity', $entities);
     }
 
-    public static function invalidGeoData(string $data){
+    public static function invalidGeoData(string $data) {
         return new self(__('validation.invalid_geodata', ['data' => $data]));
     }
 
-    public static function invalidUnit(string $unit){
+    public static function invalidUnit(string $unit) {
         return self::objectNotFound('unit', $unit);
     }
 
-    public static function invalidDefinition(string $type, $data){
+    public static function invalidDefinition(string $type, $data) {
         return new self(__('validation.definition', ['type' => $type]), $data);
     }
 
-    public static function importNotSupported(string $type){
+    public static function importNotSupported(string $type) {
         return new self(__('validation.import_not_supported', ['type' => $type]));
     }
 
-    public static function objectNotFound(string $object){
+    public static function objectNotFound(string $object) {
         return new self(__('validation.object_missing', ['object' => $object]));
     }
 }

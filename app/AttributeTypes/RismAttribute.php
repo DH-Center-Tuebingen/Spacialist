@@ -18,7 +18,7 @@ class RismAttribute extends AttributeBase
             return null;
         }
 
-        if(!NumberUtils::is_unsigned_integer_string($data)){
+        if(!NumberUtils::is_unsigned_integer_string($data)) {
             throw InvalidDataException::invalidDefinition("RISM", $data);
         }
 

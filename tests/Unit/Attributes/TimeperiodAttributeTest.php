@@ -5,8 +5,8 @@ use App\AttributeTypes\TimeperiodAttribute;
 use App\DataTypes\TimePeriod;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
-// !!!! Currently this test is only testing the fromImport function!!!
 
+// !!!! Currently this test is only testing the fromImport function!!!
 class TimeperiodAttributeTest extends TestCase {
     /**
      * @dataProvider truthyProvider
@@ -24,7 +24,6 @@ class TimeperiodAttributeTest extends TestCase {
         if($expected != null){
             $expected = json_encode($expected);
         }
-
         $this->assertEquals($expected, TimeperiodAttribute::fromImport($input));
     }
 

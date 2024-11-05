@@ -19,7 +19,6 @@ class Geodata
         return self::$availableGeometryTypes;
     }
     
-    
     /**
      * Parses a WKT string into a Geometry object
      * if the WKT string is invalid, an exception is thrown.

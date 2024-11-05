@@ -16,14 +16,14 @@ abstract class TestCase extends BaseTestCase {
     use WithFaker;
     use DatabaseTransactions;
     use ArraySubsetAsserts;
-    
+
     /**
     * Indicates whether the default seeder should run before each test.
     *
     * @var bool
     */
     protected $seed = true;
-    
+
     /**
      * Specify the seeder that should be run.
      */
@@ -69,12 +69,13 @@ abstract class TestCase extends BaseTestCase {
     }
 
     public function userRequest($response = null) {
-        if(isset($response))
+        if(isset($response)) {
             $this->refreshToken($response);
+        }
 
         return $this->withHeaders([
             'Authorization' => "Bearer $this->token",
-            'Accept' => 'application/json' // When not setting this, Laravels validation will return a 302 on failure! 
+            'Accept' => 'application/json' // When not setting this, Laravels validation will return a 302 on failure!
         ]);
     }
 }

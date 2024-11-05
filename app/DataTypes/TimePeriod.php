@@ -4,7 +4,7 @@ namespace App\DataTypes;
 
 use JsonSerializable;
 
-class TimePeriod implements JsonSerializable{
+class TimePeriod implements JsonSerializable {
     private int $start;
     private int $end;
 

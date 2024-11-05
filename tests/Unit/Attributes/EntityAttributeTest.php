@@ -5,11 +5,8 @@ use App\AttributeTypes\EntityAttribute;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
-
 // !!!! Currently this test is only testing the fromImport function!!!
-
 class EntityAttributeTest extends TestCase {
-
     /**
      * @dataProvider truthyProvider
     */

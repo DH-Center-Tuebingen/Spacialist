@@ -5,11 +5,8 @@ use App\AttributeTypes\EpochAttribute;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
-
 // !!!! Currently this test is only testing the fromImport function!!!
-
 class EpochAttributeTest extends TestCase {
-
     /**
      * @dataProvider truthyProvider
     */
@@ -34,14 +31,13 @@ class EpochAttributeTest extends TestCase {
     }
 
     public static function truthyProvider() {
-
         $baseData = [
             "start" => 100,
             "startLabel" => "bc",
             "end" => 100,
             "endLabel" => "ad",
         ];
-        
+
         $epochData = $baseData;
         $epochData["epoch"] = ["id"=>59, "concept_url" => "https://spacialist.escience.uni-tuebingen.de/<user-project>/steinzeit#20171220165355"];
         $epochData = json_encode($epochData);

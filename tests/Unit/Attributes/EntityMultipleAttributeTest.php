@@ -5,11 +5,8 @@ use App\AttributeTypes\EntityMultipleAttribute;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
-
 // !!!! Currently this test is only testing the fromImport function!!!
-
 class EntityMultipleAttributeTest extends TestCase {
-
     /**
      * @dataProvider truthyProvider
     */
@@ -33,10 +30,7 @@ class EntityMultipleAttributeTest extends TestCase {
         EntityMultipleAttribute::fromImport($input);
     }
 
-
-
     public static function truthyProvider() {
-
         $dataJson = json_encode([3, 4]);
 
         return [
