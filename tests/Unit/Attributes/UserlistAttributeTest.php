@@ -34,8 +34,8 @@ class UserlistAttributeTest extends TestCase {
         return [
             "empty string" => ["", null],
             "single user" => ["admin", "[1]"],
-            "multiple users" => ["admin;first_user", "[1,2]"],
-            "multiple users with spaces" => [" admin ; first_user ", "[1,2]"],
+            "multiple users" => ["admin;johndoe", "[1,2]"],
+            "multiple users with spaces" => [" admin ; johndoe ", "[1,2]"],
         ];
     }
 
