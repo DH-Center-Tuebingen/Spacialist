@@ -450,11 +450,11 @@ class SiAttributeTest extends TestCase {
     } 
 
     public function testSerialize(){
-        $data = `{
+        $data = "{
             'value': 10.5,
             'unit': 'km',
             'normalized': 10500,
-        }`;
+        }";
         $expected = json_decode($data);
         $this->assertEquals($expected, SiUnitAttribute::serialize($data));
     }

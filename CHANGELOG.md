@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.10.1
+
+### Added
+- Importer now automatically removes BOM if present
+- Better readable format for error message on validation
+- Renamed _fromImport_ to _parseImport_ on the attribute classses. The base class now by default imports the passed string, removing redundancies on the string-based classes.
+- More elaborate type checking on attributes _parseImport_ method.
+- Unit test for all attribute imports (except Table due to complexity).
+
 ### Fixed
 - Frontend errors due to wrong dayjs import
 - Missing translation for _milligram_ in si-unit attribute

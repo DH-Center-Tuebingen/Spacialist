@@ -39,7 +39,7 @@ class UserlistAttribute extends AttributeBase
         }
 
         if(count($incorrectUsers) > 0) {
-            throw new InvalidDataException(__("validation.user"), implode(', ', $incorrectUsers));
+            throw new InvalidDataException(__("validation.users"), implode(', ', $incorrectUsers));
         }
 
         return json_encode($list);
