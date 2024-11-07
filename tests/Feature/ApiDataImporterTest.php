@@ -34,8 +34,8 @@ class ApiDataImporterTest extends TestCase {
 
     private function createCSVFile(array $tableData, $delimiter = ",") {
         $content = '';
-        if (!empty($tableData)) {
-            foreach ($tableData as $row) {
+        if(!empty($tableData)) {
+            foreach($tableData as $row) {
                 // Cells need to be escaped, as some cells may contain elements that collide with the delimiter
                 // e.g. lists are separated by semicolons
                 $escapeAllRows = array_map(fn ($cell) => "\"$cell\"", $row);
@@ -286,7 +286,7 @@ class ApiDataImporterTest extends TestCase {
         ])
             ->assertStatus(200)
             ->assertJson([
-                'errors' => ['2: The relationship between entity types is not allowed: Stone -> Site'],
+                'errors' => ['[2] The relationship between entity types is not allowed: Stone -> Site'],
                 "summary" => [
                     "create" => 0,
                     "update" => 0,
@@ -464,7 +464,7 @@ class ApiDataImporterTest extends TestCase {
         ])
             ->assertStatus(200)
             ->assertJson([
-                'errors' => ['2: Attribute could not be imported: Abmessungen'],
+                'errors' => ['[2] Attribute could not be imported: Abmessungen'],
                 'summary' => [
                     'create' => 1,
                     'update' => 0,
@@ -481,7 +481,7 @@ class ApiDataImporterTest extends TestCase {
             'metadata' => $this->getMetaData(),
         ]);
 
-        if ($response->status() !== 201) {
+        if($response->status() !== 201) {
             $response->assertJson([
                 'error' => 'any'
             ]);
@@ -494,7 +494,7 @@ class ApiDataImporterTest extends TestCase {
         $entityId = null;
         try {
             $entityId = Entity::getFromPath('Site A\\\\imported');
-        } catch (\Exception $e) {
+        } catch(\Exception $e) {
             $this->fail('Entity not found');
         }
 

@@ -11,7 +11,7 @@ class InvalidDataException extends Exception
             $pattern = '/\s*\.\s*$/';
             // Use preg_replace to remove the last dot in the string
             $result = preg_replace($pattern, '', $message);
-            $message = $result . '  -  ' . $actual;
+            $message = $result . ': ' . $actual;
         }
 
         parent::__construct($message);
@@ -66,7 +66,7 @@ class InvalidDataException extends Exception
     }
 
     public static function invalidUnit(string $unit) {
-        return self::objectNotFound('unit', $unit);
+        return self::stringNotFound('unit', $unit);
     }
 
     public static function invalidDefinition(string $type, $data) {
@@ -77,7 +77,11 @@ class InvalidDataException extends Exception
         return new self(__('validation.import_not_supported', ['type' => $type]));
     }
 
-    public static function objectNotFound(string $object) {
-        return new self(__('validation.object_missing', ['object' => $object]));
+    public static function objectNotFound(string $name, mixed $object) {
+        return self::stringNotFound($name, json_encode($object));
     }
+    
+    public static function stringNotFound(string $name, string $object) {
+        return new self(__('validation.object_missing', ['object' => $name]), $object);
+    }   
 }

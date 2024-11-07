@@ -322,7 +322,6 @@ class SiAttributeTest extends TestCase {
         $this->assertEquals(1000, $kN->is(1));
     }
     
-        
     # Pressure
     public function testPressureUnits(){
         $pressureUnits = new PressureUnits();
@@ -371,7 +370,6 @@ class SiAttributeTest extends TestCase {
         $this->assertEqualsWithDelta(1, $atm->is(9.869232667160128e-6), self::INACCURACY);
     }
     
-    
     # Volumetric Flow Rate
     public function testVolumetricFlow(){
         $volumetricFlowUnits = new VolumetricFlowUnits();
@@ -398,7 +396,6 @@ class SiAttributeTest extends TestCase {
         $this->assertEquals(1e6, $percent->is(100));
     }
     
-
     public function testImportErrorWrongValue(){
         $importValue = 10;
         $this->expectException(InvalidDataException::class);
@@ -424,20 +421,16 @@ class SiAttributeTest extends TestCase {
     public function testImportErrorNotANumber() {
         $importValue = "not a number;unit";
         $this->expectException(InvalidDataException::class);
-        $this->expectExceptionMessage('The value must be a number  -  section 1');
+        $this->expectExceptionMessage('The value must be a number: section 1 => not a number');
         SiUnitAttribute::fromImport($importValue);
     }
-
-    
 
     public function testImportErrorNotAUnit() {
         $importValue = "2;not a unit";
         $this->expectException(InvalidDataException::class);
-        $this->expectExceptionMessage('Unit does not exist.');
+        $this->expectExceptionMessage('Unit does not exist: section 2 => not a unit');
         SiUnitAttribute::fromImport($importValue);
     }
-
-
 
     public function testImportSuccess() {
         $importValue = "10.5;km";
@@ -464,7 +457,7 @@ class SiAttributeTest extends TestCase {
             'value' => 10.5,
         ];
         $this->expectException(InvalidDataException::class);
-        $this->expectExceptionMessage('Unit does not exist.');
+        $this->expectExceptionMessage('Unit does not exist');
         SiUnitAttribute::unserialize($data);
     }
 
@@ -474,7 +467,7 @@ class SiAttributeTest extends TestCase {
             "unit" => "invalid unit",
         ];
         $this->expectException(InvalidDataException::class);
-        $this->expectExceptionMessage('Unit does not exist.');
+        $this->expectExceptionMessage('Unit does not exist');
         SiUnitAttribute::unserialize($data);
     }
 

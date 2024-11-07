@@ -34,7 +34,7 @@ class SiUnitAttribute extends AttributeBase {
         $value = trim($parts[0]);
         if(!is_numeric($value)) {
             $section_1 = __('dictionary.section') . ' 1';
-            throw InvalidDataException::requireNumeric($section_1);
+            throw InvalidDataException::requireNumeric($section_1 . ' => ' . $value);
         }
 
         $value = floatval($value);
@@ -43,7 +43,7 @@ class SiUnitAttribute extends AttributeBase {
 
         if(!isset($unitFound)) {
             $section_2 = __('dictionary.section') . ' 2';
-            throw InvalidDataException::invalidUnit($section_2);
+            throw InvalidDataException::invalidUnit($section_2 . ' => ' . $unit);
         }
 
         return json_encode([

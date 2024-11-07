@@ -34,8 +34,10 @@ class UserlistAttributeTest extends TestCase {
         return [
             "empty string" => ["", null],
             "single user" => ["admin", "[1]"],
-            "multiple users" => ["admin;johndoe", "[1,2]"],
-            "multiple users with spaces" => [" admin ; johndoe ", "[1,2]"],
+            "multiple users" => ["admin;first_user", "[1,2]"],
+            "multiple users with spaces" => [" admin ; first_user ", "[1,2]"],
+            "single deleted user" => ["deleted_user", "[3]"],
+            "multiple users with single deleted user" => ["admin;deleted_user", "[1,3]"],
         ];
     }
 
@@ -46,8 +48,6 @@ class UserlistAttributeTest extends TestCase {
             "fails on boolean" => [true],
             "fails on incorrect user" => ["unknown"],
             "fails on any incorrect user" => ["unknown,unknown2"],
-            "fails on single deleted user" => ["deleted_user"],
-            "fails on multiple users with single deleted user" => ["admin;deleted_user"],
         ];
     }
 }
