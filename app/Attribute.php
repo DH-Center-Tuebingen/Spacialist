@@ -72,7 +72,7 @@ class Attribute extends Model
             $this->pivot->thesaurus_val ??
             json_decode($this->pivot->json_val) ??
             $this->pivot->dt_val ??
-            Geometry::fromWKB($this->pivot->geography_val)->toWKT();
+            Geodata::wkb2wkt($this->pivot->geography_val);
     }
 
     public function getSelection() {
