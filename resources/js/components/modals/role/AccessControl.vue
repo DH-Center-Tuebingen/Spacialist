@@ -102,7 +102,7 @@
 
     import store from '@/bootstrap/store.js';
 
-    import AccessControlState from '@/components/role/AccessControlState.vue';
+    import PermissionMatrix from '@/components/user/PermissionMatrix.vue';
 
     import {
         getRoleBy,
@@ -111,7 +111,6 @@
     import {
         getAccessGroups,
     } from '@/helpers/accesscontrol.js';
-    import PermissionMatrix from '../../user/PermissionMatrix.vue';
 
     export default {
         components: {

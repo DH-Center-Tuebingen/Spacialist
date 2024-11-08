@@ -1,11 +1,8 @@
-
-
-
 /**
  * Checks all values in the map.
  * If all are uniform, returns that value.
  * If not, returns mixedValue.
- * 
+ *
  * @param {object} map - the map of the permissions
  * @param {array} rights - the rights as an array of strings to check
  * @param {number} mixedValue - returns this if the values are not uniform in the map - default is 3
@@ -22,4 +19,4 @@ export function determineUniformState(map, rights, mixedValue = 3) {
         }
     }
     return firstValue;
-} 
+}

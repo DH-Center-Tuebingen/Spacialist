@@ -5,7 +5,7 @@
         </td>
         <td
             v-for="right in rights"
-            :key="`${i}-${right}`"
+            :key="`permission-row-${label}-${right}`"
         >
             <a
                 href="#"
@@ -30,11 +30,11 @@
 </template>
 
 <script>
-
     import { useI18n } from 'vue-i18n';
 
+    import { determineUniformState } from '@/helpers/role.js';
+
     import AccessControlState from '@/components/role/AccessControlState.vue';
-    import { determineUniformState } from '../../helpers/role';
 
     export default {
         components: {
@@ -60,19 +60,21 @@
         },
         emits: ['change'],
         setup(props, context) {
+            const { t } = useI18n();
 
-            const allState = (name) => {
+            const allState = name => {
                 return determineUniformState(props.permissionMap[name], props.rights);
             };
 
-            const change = (right) => {
+            const change = right => {
                 context.emit('change', props.name, right);
             };
 
             return {
+                t,
+                // LOCAL
                 allState,
                 change,
-                t: useI18n().t,
             };
         }
     };

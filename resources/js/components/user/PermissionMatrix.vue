@@ -57,9 +57,7 @@
                     :name="permissionGroup"
                     :rights="rights"
                     @change="(grp, right) => changePermissionState(grp, right)"
-                >
-                    />
-                </permissionrow>
+                />
             </template>
         </tbody>
     </table>
@@ -67,11 +65,15 @@
 
 
 <script>
-    import { useI18n } from 'vue-i18n';
-    import { cloneDeep } from 'lodash';
-    import PermissionRow from './PermissionRow.vue';
-    import { determineUniformState } from '../../helpers/role';
     import { computed } from 'vue';
+    import { useI18n } from 'vue-i18n';
+
+    import { determineUniformState } from '@/helpers/role.js';
+    import {
+        _cloneDeep,
+    } from '@/helpers/helpers.js';
+
+    import PermissionRow from './PermissionRow.vue';
 
     export default {
         components: {
@@ -104,19 +106,14 @@
         },
         emits: ['update:permissionMap'],
         setup(props, ctx) {
-
-            const t = useI18n().t;
-
+            const { t } = useI18n();
 
             const changePermissionState = (permissionGroup, right) => {
-                if(props.disabled) {
-                    return;
-                }
+                if(props.disabled) return;
 
-                const newPermissionMap = cloneDeep(props.permissionMap);
+                const newPermissionMap = _cloneDeep(props.permissionMap);
 
                 if(right == 'all') {
-
                     let combinedState = determineUniformState(newPermissionMap[permissionGroup], props.rights);
                     console.log('newState', combinedState);
 
@@ -147,15 +144,15 @@
                 return filteredPluginGroup;
             });
 
+            // controlClasses: {
+            //     'opacity-50': props.disabled,
+            // },
             return {
-                changePermissionState,
-                controlClasses: {
-                    'opacity-50': props.disabled,
-                },
-                pluginsUsingPermissions,
                 t,
+                // LOCAL
+                changePermissionState,
+                pluginsUsingPermissions,
             };
         },
     };
-
 </script>
