@@ -164,12 +164,15 @@
                         class="accordion accordion-flush flex-grow-1 overflow-y-auto overflow-x-hidden pe-2"
                     >
                         <template
-                            v-for="[type, attrGrp] in state.sortedAttributeListGroups"
+                            v-for="([type, attrGrp], index) in state.sortedAttributeListGroups"
                             :key="`dme-attribute-list-${type}-grp`"
                         >
                             <div
                                 v-show="attributeGroupHasItems(attrGrp)"
                                 class="accordion-item"
+                                :class="{
+                                    'border-bottom': index == state.sortedAttributeListGroups.length - 1,
+                                }"
                             >
                                 <h2 class="accordion-header">
                                     <button
@@ -404,7 +407,6 @@
                 }),
                 sortedAttributeListGroups: computed(_ => {
                     const groupList = Object.entries(state.attributeListGroups);
-                    if(!state.sortAttributes) return groupList;
 
                     return groupList.sort((a, b) => {
                         const labelA = t(`global.attributes.${a[0]}`);
