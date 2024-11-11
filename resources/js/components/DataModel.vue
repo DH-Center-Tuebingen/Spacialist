@@ -147,7 +147,7 @@
                             </span>
                             <span
                                 v-show="!state.sortAttributes"
-                                :title="t('main.datamodel.sort_by_default')"
+                                :title="t('main.datamodel.sort_by_creation_date')"
                             >
                                 <i class="fas fa-fw fa-arrow-down-1-9" />
                             </span>
