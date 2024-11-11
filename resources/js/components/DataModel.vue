@@ -116,7 +116,7 @@
                         role="group"
                     >
                         <button
-                            v-show="state.showAttributesInGroups"
+                            v-if="state.showAttributesInGroups"
                             type="button"
                             class="btn btn-outline-primary"
                             :title="t('main.datamodel.expand_groups')"
@@ -125,7 +125,7 @@
                             <i class="fas fa-fw fa-angles-down" />
                         </button>
                         <button
-                            v-show="state.showAttributesInGroups"
+                            v-if="state.showAttributesInGroups"
                             type="button"
                             class="btn btn-outline-primary"
                             :title="t('main.datamodel.collapse_groups')"
@@ -140,13 +140,13 @@
                             @click="state.sortAttributes = !state.sortAttributes"
                         >
                             <span
-                                v-show="state.sortAttributes"
+                                v-if="state.sortAttributes"
                                 :title="t('main.datamodel.sort_by_name')"
                             >
                                 <i class="fas fa-fw fa-arrow-down-a-z" />
                             </span>
                             <span
-                                v-show="!state.sortAttributes"
+                                v-if="!state.sortAttributes"
                                 :title="t('main.datamodel.sort_by_creation_date')"
                             >
                                 <i class="fas fa-fw fa-arrow-down-1-9" />
