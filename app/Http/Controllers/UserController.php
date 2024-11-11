@@ -38,6 +38,52 @@ class UserController extends Controller
         $user = User::with('notifications')->find(auth()->user()->id);
         $user->setPermissions();
 
+        // Load notification source data into info property
+        $user->notifications->map(function($n) {
+            if($n->type == 'App\Notifications\CommentPosted') {
+                $skip = false;
+                switch($n->data['resource']['type']) {
+                    case 'App\Entity':
+                        try {
+                            $name = Entity::findOrFail($n->data['resource']['id'])->name;
+                        } catch(ModelNotFoundException $e) {
+                            $skip = true;
+                        }
+                        break;
+                    case 'App\AttributeValue':
+                    case 'attribute_values':
+                        try {
+                            $name = Entity::findOrFail($n->data['resource']['meta']['entity_id'])->name;
+                            $attrUrl = Attribute::findOrFail($n->data['resource']['meta']['attribute_id'])->thesaurus_url;
+                        } catch(ModelNotFoundException $e) {
+                            $skip = true;
+                        }
+                        break;
+                    default:
+                        $skip = true;
+                        break;
+                }
+                if(!$skip) {
+                    $data = [
+                        'name' => $name,
+                    ];
+                    if(isset($attrUrl)) {
+                        $data['attribute_url'] = $attrUrl;
+                    }
+
+                    $n->info = $data;
+                }
+            } else if($n->type == 'App\Notifications\EntityUpdated') {
+                try {
+                    $n->info = [
+                        'name' => Entity::findOrFail($n->data['resource']['id'])->name,
+                    ];
+                } catch(ModelNotFoundException $e) {
+                }
+            }
+            return $n;
+        });
+
         return response()->json([
             'status' => 'success',
             'data' => $user
@@ -294,24 +340,31 @@ class UserController extends Controller
             // Update updated_at column
             $user->touch();
         }
+        $saveRequired = false;
         if($request->has('email')) {
             $user->email = Str::lower($request->get('email'));
-            $user->save();
+            $saveRequired = true;
         }
         if($request->has('name')) {
             $user->name = $request->get('name');
-            $user->save();
+            $saveRequired = true;
         }
         if($request->has('nickname')) {
             $user->nickname = Str::lower($request->get('nickname'));
-            $user->save();
+            $saveRequired = true;
         }
-        $user->setMetadata(
-            $request->only('phonenumber', 'orcid', 'role', 'field', 'institution', 'department')
-        );
+        $metadataFields = $request->only('phonenumber', 'orcid', 'role', 'field', 'institution', 'department');
+        if(count($metadataFields) > 0) {
+            $user->setMetadata($metadataFields);
+            $saveRequired = true;
+        }
 
         // return user without roles relation
         $user->unsetRelation('roles');
+
+        if($saveRequired) {
+            $user->save();
+        }
 
         return response()->json($user);
     }
@@ -381,6 +434,7 @@ class UserController extends Controller
             $role->description = $request->get('description');
         }
         $role->save();
+        $role->permissions;
 
         return response()->json($role);
     }
@@ -442,6 +496,7 @@ class UserController extends Controller
             $password = Hash::make($request->get('password'));
             $pUser->password = $password;
         }
+
         $pUser->login_attempts = null;
         $pUser->save();
 
@@ -503,7 +558,9 @@ class UserController extends Controller
             ], 400);
         }
 
-        Storage::delete($user->avatar);
+        if(isset($user->avatar)) {
+            Storage::delete($user->avatar);
+        }
         $user->avatar = null;
         $user->save();
         return response()->json(null, 204);

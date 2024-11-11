@@ -7,13 +7,14 @@ use Illuminate\Http\UploadedFile;
 
 use App\User;
 use App\Role;
+use Carbon\Carbon;
 
 class ApiUserTest extends TestCase
 {
     // Testing GET requests
 
     /**
-     * Test getting the authenticated user.
+     * @testdox GET    /api/v1/auth/user : Get Auth User
      *
      * @return void
      */
@@ -21,11 +22,9 @@ class ApiUserTest extends TestCase
     {
         $user = User::find(1);
         $user->setPermissions();
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->get('/api/v1/auth/user');
-            
+
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'status',
@@ -44,13 +43,13 @@ class ApiUserTest extends TestCase
             ]
         ]);
 
-        // Check permission count (30 permissions in total)
+        // Check permission count (45 permissions in total)
         $content = json_decode($response->getContent());
-        $this->assertEquals(count(get_object_vars($content->data->permissions)), 30);
+        $this->assertEquals(count(get_object_vars($content->data->permissions)), 45);
     }
 
     /**
-     * Test getting all users.
+     * @testdox GET    /api/v1/user : Get All Users
      *
      * @return void
      */
@@ -58,45 +57,47 @@ class ApiUserTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->get('/api/v1/user');
 
         $response->assertStatus(200);
-        $response->assertJsonCount(3);
+        $response->assertJsonCount(2);
         $response->assertJsonStructure([
             'users',
             'deleted_users',
-            'roles'
         ]);
         $response->assertJson([
             'users' => [
                 [
-                    'id' => 1
-                ],
-                [
-                    'id' => $user->id
+                    'id' => 1,
+                    'name' => 'Admin',
+                ],[
+                  'id' => 2,
+                    'name' => "John Doe",  
+                ],[
+                    'id' => 3,
+                    'name' => "Gary Guest",
+                ],[
+                    'id' => $user->id,
+                    'name' => $user->name,
                 ]
             ],
-            'roles' => []
+            'deleted_users' => []
         ]);
     }
 
     /**
-     * Test getting all roles.
+     * @testdox GET    /api/v1/role : Get All Roles
      *
      * @return void
      */
     public function testGetRolesEndpoint()
     {
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->get('/api/v1/role');
 
         $response->assertStatus(200);
-        $response->assertJsonCount(2);
+        $response->assertJsonCount(3);
         $response->assertJsonStructure([
             'roles',
             'permissions'
@@ -112,21 +113,20 @@ class ApiUserTest extends TestCase
                     'name' => 'guest'
                 ]
             ],
-            'permissions' => []
+            'permissions' => [],
+            'presets' => [],
         ]);
     }
 
     /**
-     * Test refreshing JWT token.
+     * @testdox GET    /api/v1/auth/refresh : Refresh JWT
      *
      * @return void
      */
     public function testRefreshTokenEndpoint()
     {
         $oldToken = $this->token;
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->get('/api/v1/auth/refresh');
 
         $response->assertStatus(200);
@@ -141,15 +141,13 @@ class ApiUserTest extends TestCase
     // Testing POST requests
 
     /**
-     * Test login.
+     * @testdox GET    /api/v1/auth/login : Login
      *
      * @return void
      */
     public function testLoginEndpoint()
     {
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->post('/api/v1/auth/login', [
                 'email' => 'admin@localhost',
                 'password' => 'admin'
@@ -160,15 +158,13 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * Test login with nickname.
+     * @testdox GET    /api/v1/auth/login : Login with nickname
      *
      * @return void
      */
     public function testLoginWithNicknameEndpoint()
     {
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->post('/api/v1/auth/login', [
                 'nickname' => 'admin',
                 'password' => 'admin'
@@ -179,15 +175,13 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * Test login with wrong credentials.
+     * @testdox GET    /api/v1/user : Failed Login
      *
      * @return void
      */
     public function testLoginWrongCredentialsEndpoint()
     {
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->post('/api/v1/auth/login', [
                 'email' => 'admin@localhost',
                 'password' => 'admin1337'
@@ -200,27 +194,25 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * Test creating a new user.
+     * @testdox POST   /api/v1/user : Create User
      *
      * @return void
      */
     public function testCreateUserEndpoint()
     {
         $cnt = User::count();
-        $this->assertEquals(1, $cnt);
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $this->assertEquals(3, $cnt);
+        $response = $this->userRequest()
             ->post('/api/v1/user', [
                 'email' => 'test@test.com',
                 'name' => 'Test User',
                 'nickname' => 'tuser',
-                'password' => 'test'
+                'password' => 'test1234' // at least 6 characters
             ]);
 
         $user = User::latest()->first();
         $cnt = User::count();
-        $this->assertEquals(2, $cnt);
+        $this->assertEquals(4, $cnt);
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'id',
@@ -240,7 +232,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * Test creating an avatar for user (id=1).
+     * @testdox POST   /api/v1/user/avatar : Add Avatar
      *
      * @return void
      */
@@ -249,16 +241,14 @@ class ApiUserTest extends TestCase
         $user = User::find(1);
         $this->assertNull($user->avatar);
         $file = UploadedFile::fake()->image('spacialist_screenshot.png', 350, 100);
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
-            ->post('/api/v1/user/1/avatar', [
+        $response = $this->userRequest()
+            ->post('/api/v1/user/avatar', [
                 'file' => $file
             ]);
 
         $user = User::find(1);
         $this->assertEquals('avatars/1.png', $user->avatar);
-        $response->assertStatus(200);
+        $this->assertStatus($response, 200);
         $response->assertJsonStructure([
             'id',
             'email',
@@ -277,28 +267,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * Test creating an avatar for non-existing user.
-     *
-     * @return void
-     */
-    public function testCreateAvatarNonExistingUserEndpoint()
-    {
-        $file = UploadedFile::fake()->image('spacialist_screenshot.png', 350, 100);
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
-            ->post('/api/v1/user/99/avatar', [
-                'file' => $file
-            ]);
-
-        $response->assertStatus(400);
-        $response->assertSimilarJson([
-            'error' => 'This user does not exist'
-        ]);
-    }
-
-    /**
-     * Test creating a new role.
+     * @testdox POST   /api/v1/role : Create Role
      *
      * @return void
      */
@@ -306,9 +275,7 @@ class ApiUserTest extends TestCase
     {
         $cnt = Role::count();
         $this->assertEquals(2, $cnt);
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->post('/api/v1/role', [
                 'name' => 'test_role',
                 'display_name' => 'Test Role'
@@ -337,7 +304,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * Test user logout.
+     * @testdox POST   /api/v1/auth/logout : Logout
      *
      * @return void
      */
@@ -345,9 +312,7 @@ class ApiUserTest extends TestCase
     {
         $cnt = Role::count();
         $this->assertEquals(2, $cnt);
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->post('/api/v1/auth/logout');
 
         $response->assertStatus(200);
@@ -358,13 +323,33 @@ class ApiUserTest extends TestCase
                 'Authorization' => "$token"
             ])
             ->get('/api/v1/user');
-            $response->assertStatus(302);
+            $response->assertStatus(401);
             $this->assertEquals("Unauthenticated.", $response->exception->getMessage());
         }
     }
 
     /**
-     * Test patching user.
+     * @testdox POST   /api/v1/user/avatar : Update User Avatar
+     *
+     * @return void
+     */
+    public function testUpdateAvatarEndpoint()
+    {
+        $user = User::find(1);
+        $this->assertNull($user->avatar);
+        $file = UploadedFile::fake()->image('spacialist_screenshot.png', 350, 100);
+        $response = $this->userRequest()
+            ->post('/api/v1/user/avatar', [
+                'file' => $file
+            ]);
+
+        $user = User::find(1);
+        $this->assertEquals('avatars/1.png', $user->avatar);
+        $this->assertStatus($response, 200);
+    }
+
+    /**
+     * @testdox PATCH  /api/v1/user/{id} : Patch User
      *
      * @return void
      */
@@ -378,9 +363,7 @@ class ApiUserTest extends TestCase
         $this->assertNull($user->avatar);
         $this->assertNull($user->avatar_url);
 
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->patch('/api/v1/user/1', [
                 'roles' => [2],
                 'email' => 'test@test.com',
@@ -404,6 +387,7 @@ class ApiUserTest extends TestCase
             'deleted_at' => null,
             'avatar' => null,
             'avatar_url' => null,
+            'login_attempts' => null,
             'metadata' => [
                 'phonenumber' => '+43 123 1234',
                 'orcid' => '0000-0002-1694-233X',
@@ -420,7 +404,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * Test patching a users existing metadata.
+     * @testdox PATCH  /api/v1/user/{id} : Patch User Metadata
      *
      * @return void
      */
@@ -432,10 +416,8 @@ class ApiUserTest extends TestCase
             'orcid' => '0000-0002-1694-233X',
         ];
         $user->save();
-        
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
+
+        $response = $this->userRequest()
             ->patch('/api/v1/user/1', [
                 'orcid' => '0000-0001-5109-3700'
             ]);
@@ -448,7 +430,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * Test patching user with wrong orcid
+     * @testdox PATCH  /api/v1/user/{id} : Patch User Fail ORCID Check
      *
      * @return void
      */
@@ -456,9 +438,7 @@ class ApiUserTest extends TestCase
     {
         $user = User::find(1);
 
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->json('patch', '/api/v1/user/1', [
                 'orcid' => '0000-0002-1694-2338'
             ]);
@@ -467,7 +447,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * Test patching user with wrong orcid
+     * @testdox PATCH  /api/v1/user/{id} : Patch User Fail ORCID Format
      *
      * @return void
      */
@@ -475,9 +455,7 @@ class ApiUserTest extends TestCase
     {
         $user = User::find(1);
 
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->json('patch', '/api/v1/user/1', [
                 'orcid' => '0000-0002-1694233X'
             ]);
@@ -486,7 +464,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * Test patching user with wrong orcid
+     * @testdox PATCH  /api/v1/user/{id} : Patch User Fail ORCID Format
      *
      * @return void
      */
@@ -494,9 +472,7 @@ class ApiUserTest extends TestCase
     {
         $user = User::find(1);
 
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->json('patch', '/api/v1/user/1', [
                 'orcid' => '0000-0002-1694-23aX'
             ]);
@@ -505,30 +481,26 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * Test patching user with empty request.
+     * @testdox PATCH  /api/v1/user/{id} : Patch User Emtpy Request
      *
      * @return void
      */
     public function testPatchUserWithoutDataEndpoint()
     {
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->patch('/api/v1/user/1', []);
 
         $response->assertStatus(204);
     }
 
     /**
-     * Test patching role.
+     * @testdox PATCH  /api/v1/role/{id} : Patch Role Permissions
      *
      * @return void
      */
     public function testPatchRoleEndpoint()
     {
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->patch('/api/v1/role/1', [
                 'permissions' => [1, 2],
                 'display_name' => 'NOT Admin',
@@ -536,9 +508,9 @@ class ApiUserTest extends TestCase
             ]);
 
         $role = Role::find(1);
-        $this->assertTrue($role->hasPermissionTo('create_concepts'));
-        $this->assertTrue($role->hasPermissionTo('delete_move_concepts'));
-        $this->assertTrue(!$role->hasPermissionTo('duplicate_edit_concepts'));
+        $this->assertTrue($role->hasPermissionTo('entity_read'));
+        $this->assertTrue($role->hasPermissionTo('entity_write'));
+        $this->assertTrue(!$role->hasPermissionTo('entity_create'));
         $this->assertEquals(2, count($role->permissions));
         $response->assertStatus(200);
         $response->assertJsonStructure([
@@ -561,56 +533,75 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * Test patching role with empty request.
+     * @testdox PATCH  /api/v1/role/{id} : Patch Role Empty Request
      *
      * @return void
      */
     public function testPatchRoleWithoutDataEndpoint()
     {
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->patch('/api/v1/role/1', []);
 
         $response->assertStatus(204);
     }
 
     /**
-     * Test deleting and restoring a user (id=1).
+     * @testdox PATCH  /api/v1/user/restore/{id} : Restore User
+     *
+     * @return void
+     */
+    public function testRestoreUserEndpoint()
+    {
+        $user = User::find(1);
+        $user->deleted_at = Carbon::now();
+        $user->save();
+
+        $cnt = User::count();
+        $this->assertEquals(3, $cnt);
+        $cnt = User::onlyTrashed()->count();
+        $this->assertEquals(1, $cnt);
+        $cnt = User::withoutTrashed()->count();
+        $this->assertEquals(2, $cnt);
+        $user = User::find(1);
+        $this->assertNotNull($user->deleted_at);
+
+        $response = $this->userRequest()
+            ->patch('/api/v1/user/restore/1');
+
+        $user = User::find(3);
+        $this->assertNull($user->deleted_at);
+
+        $response->assertStatus(204);
+    }
+
+    /**
+     * @testdox DELETE /api/v1/user/{id} : Delete User
      *
      * @return void
      */
     public function testDeleteUserEndpoint()
     {
         $cnt = User::count();
-        $this->assertEquals(1, $cnt);
+        $this->assertEquals(3, $cnt);
         $cnt = User::onlyTrashed()->count();
         $this->assertEquals(0, $cnt);
         $cnt = User::withoutTrashed()->count();
-        $this->assertEquals(1, $cnt);
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $this->assertEquals(3, $cnt);
+        $response = $this->userRequest()
             ->delete('/api/v1/user/1');
 
         $response->assertStatus(200);
 
         $cnt = User::count();
-        $this->assertEquals(1, $cnt);
+        $this->assertEquals(3, $cnt);
         $cnt = User::onlyTrashed()->count();
         $this->assertEquals(1, $cnt);
         $cnt = User::withoutTrashed()->count();
-        $this->assertEquals(0, $cnt);
+        $this->assertEquals(2, $cnt);
         $user = User::find(1);
         $this->assertNotNull($user->deleted_at);
 
-
-        // Test restore
-        $this->refreshToken($response);
-
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
+        $response = $this->userRequest($response)
             ->patch('/api/v1/user/restore/1');
 
         $user = User::find(1);
@@ -620,21 +611,19 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * Test deleting non-existing user.
+     * @testdox DELETE /api/v1/user/99 : Delete User Fail
      *
      * @return void
      */
     public function testDeleteNonExstingUserEndpoint()
     {
         $cnt = User::count();
-        $this->assertEquals(1, $cnt);
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $this->assertEquals(3, $cnt);
+        $response = $this->userRequest()
             ->delete('/api/v1/user/99');
 
         $cnt = User::count();
-        $this->assertEquals(1, $cnt);
+        $this->assertEquals(3, $cnt);
 
         $response->assertStatus(400);
         $response->assertSimilarJson([
@@ -643,7 +632,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * Test deleting role (id=1).
+     * @testdox DELETE /api/v1/role/{id} : Delete Role
      *
      * @return void
      */
@@ -651,9 +640,7 @@ class ApiUserTest extends TestCase
     {
         $cnt = Role::count();
         $this->assertEquals(2, $cnt);
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->delete('/api/v1/role/1');
 
         $cnt = Role::count();
@@ -663,7 +650,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * Test deleting non-existing role.
+     * @testdox DELETE /api/v1/role/99 : Delete Role Fail
      *
      * @return void
      */
@@ -671,9 +658,7 @@ class ApiUserTest extends TestCase
     {
         $cnt = Role::count();
         $this->assertEquals(2, $cnt);
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->delete('/api/v1/role/99');
 
         $cnt = Role::count();
@@ -686,55 +671,20 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * Test deleting avatar (user id=1).
+     * @testdox DELETE /api/v1/user/avatar : Delete User Avatar
      *
      * @return void
      */
     public function testDeleteAvatarEndpoint()
     {
-        $user = User::find(1);
-        $this->assertNull($user->avatar);
-        $file = UploadedFile::fake()->image('spacialist_screenshot.png', 350, 100);
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
-            ->post('/api/v1/user/1/avatar', [
-                'file' => $file
-            ]);
-
-        $user = User::find(1);
-        $this->assertEquals('avatars/1.png', $user->avatar);
-
-        $this->refreshToken($response);
-
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
-            ->delete('/api/v1/user/1/avatar');
+        $response = $this->userRequest()
+            ->delete('/api/v1/user/avatar');
 
         $user = User::find(1);
         $this->assertNull($user->avatar);
         $this->assertNull($user->avatar_url);
 
-        $response->assertStatus(204);
-    }
-
-    /**
-     * Test deleting avatar (user id=1).
-     *
-     * @return void
-     */
-    public function testDeleteAvatarNonExistingUserEndpoint()
-    {
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
-            ->delete('/api/v1/user/99/avatar');
-
-        $response->assertStatus(400);
-        $response->assertSimilarJson([
-            'error' => 'This user does not exist'
-        ]);
+        $this->assertStatus($response, 204);
     }
 
     // Testing exceptions and permissions
@@ -753,26 +703,22 @@ class ApiUserTest extends TestCase
             ['url' => '/role', 'error' => 'You do not have the permission to view roles', 'verb' => 'get'],
             ['url' => '/user', 'error' => 'You do not have the permission to add new users', 'verb' => 'post'],
             ['url' => '/role', 'error' => 'You do not have the permission to add roles', 'verb' => 'post'],
-            ['url' => '/user/1', 'error' => 'You do not have the permission to set user roles', 'verb' => 'patch'],
+            ['url' => '/user/1', 'error' => 'You do not have the permission to modify user data', 'verb' => 'patch'],
             ['url' => '/role/1', 'error' => 'You do not have the permission to set role permissions', 'verb' => 'patch'],
-            ['url' => '/user/restore/1', 'error' => 'You do not have the permission to delete users', 'verb' => 'patch'],
+            ['url' => '/user/restore/1', 'error' => 'You do not have the permission to restore users', 'verb' => 'patch'],
             ['url' => '/user/1', 'error' => 'You do not have the permission to delete users', 'verb' => 'delete'],
             ['url' => '/role/1', 'error' => 'You do not have the permission to delete roles', 'verb' => 'delete'],
-            ['url' => '/user/1/avatar', 'error' => 'You do not have the permission to delete users', 'verb' => 'delete'],
         ];
 
+        $response = null;
         foreach($calls as $c) {
-            $response = $this->withHeaders([
-                    'Authorization' => "Bearer $this->token"
-                ])
+            $response = $this->userRequest($response)
                 ->json($c['verb'], '/api/v1' . $c['url']);
 
-            $response->assertStatus(403);
+            $this->assertStatus($response, 403);
             $response->assertSimilarJson([
                 'error' => $c['error']
             ]);
-
-            $this->refreshToken($response);
         }
     }
 
@@ -790,9 +736,7 @@ class ApiUserTest extends TestCase
         ];
 
         foreach($calls as $c) {
-            $response = $this->withHeaders([
-                    'Authorization' => "Bearer $this->token"
-                ])
+            $response = $this->userRequest()
                 ->json($c['verb'], '/api/v1' . $c['url'], [
                     'description' => 'does not matter'
                 ]);
@@ -820,13 +764,18 @@ class ApiUserTest extends TestCase
         $user->password = 'not_safe';
         $user->save();
 
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->patch('/api/v1/user/' . $user->id, [
                 'email' => 'admin@localhost'
             ]);
 
-        $this->assertEquals('The given data was invalid.', $response->exception->getMessage());
+        $this->assertEquals('The email has already been taken.', $response->exception->getMessage());
+
+        $response = $this->userRequest($response)
+            ->patch('/api/v1/user/' . $user->id, [
+                'email' => 'admin@localhost!'
+            ]);
+
+        $this->assertEquals('The email must be a valid email address.', $response->exception->getMessage());
     }
 }

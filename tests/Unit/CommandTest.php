@@ -3,7 +3,6 @@
 namespace Tests\Unit;
 
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
 
 use App\Role;
 use App\User;
@@ -78,8 +77,11 @@ class CommandTest extends TestCase {
             ->expectsOutput('The email has already been taken.')
             ->assertExitCode(1);
 
-        $user = User::latest()->first();
+        $user = User::firstWhere("email", "=", "admin@localhost");
         $this->assertEquals($user->name, 'Admin');
+
+        $latest = User::latest()->first();
+        $this->assertEquals($latest->name, 'Gary Guest');
     }
 
     /**
@@ -96,7 +98,7 @@ class CommandTest extends TestCase {
             ->assertExitCode(1);
 
         $user = User::latest()->first();
-        $this->assertEquals($user->name, 'Admin');
+        $this->assertEquals($user->name, 'Gary Guest');
     }
 
     /**
@@ -113,7 +115,7 @@ class CommandTest extends TestCase {
             ->assertExitCode(1);
 
         $user = User::latest()->first();
-        $this->assertEquals($user->name, 'Admin');
+        $this->assertEquals($user->name, 'Gary Guest');
     }
 
     /**
@@ -130,7 +132,7 @@ class CommandTest extends TestCase {
             ->assertExitCode(1);
 
         $user = User::latest()->first();
-        $this->assertEquals($user->name, 'Admin');
+        $this->assertEquals($user->name, 'Gary Guest');
     }
 
     /**

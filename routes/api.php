@@ -92,6 +92,8 @@ Route::middleware('auth:sanctum')->prefix('v1/editor')->group(function() {
     Route::get('/dm/attribute', 'EditorController@getAttributes');
     Route::get('/dm/attribute_types', 'EditorController@getAttributeTypes');
     Route::get('/entity_type/{id}', 'EditorController@getEntityType')->where('id', '[0-9]+');
+
+    // TODO: This should be moved to the map plugin
     Route::get('/dm/geometry', 'EditorController@getAvailableGeometryTypes');
 
     Route::post('/dm/entity_type', 'EditorController@addEntityType');
@@ -163,14 +165,14 @@ Route::middleware('auth:sanctum')->prefix('v1/notification')->group(function() {
 // PREFERENCES
 Route::middleware('auth:sanctum')->prefix('v1/preference')->group(function() {
     Route::get('', 'PreferenceController@getPreferences');
-    Route::get('/{id}', 'PreferenceController@getUserPreferences')->where('id', '[0-9]+');
 
-    Route::patch('/', 'PreferenceController@patchPreferences');
+    Route::patch('', 'PreferenceController@patchPreferences');
 });
 
 // BIBLIOGRAPHY
 Route::middleware('auth:sanctum')->prefix('v1/bibliography')->group(function() {
     Route::get('/', 'BibliographyController@getBibliography');
+    Route::get('/{id}', 'BibliographyController@getBibliographyItem')->where('id', '[0-9]+');
     Route::get('/{id}/ref_count', 'BibliographyController@getReferenceCount')->where('id', '[0-9]+');
 
     Route::post('/', 'BibliographyController@addItem');

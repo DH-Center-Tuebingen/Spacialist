@@ -3,8 +3,7 @@
 namespace Tests\Unit;
 
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+
 use Illuminate\Http\Request;
 
 use App\Bibliography;
@@ -35,7 +34,10 @@ class BibliographyTest extends TestCase
         $r = new Request();
         $r->replace([
             'year' => 1999,
-            'type' => 'book',
+            'entry_type' => 'book',
+            'author' => 'Book Author',
+            'publisher' => 'Spacialist',
+            'title' => 'Book Title',
         ]);
 
         $user = new \stdClass;
@@ -45,8 +47,8 @@ class BibliographyTest extends TestCase
         foreach($ranges as $letter) {
             $b = new Bibliography();
             $b->title = 'Title';
-            $b->type = 'article';
-            $b->citekey = 'No:1999'.$letter;
+            $b->entry_type = 'article';
+            $b->citekey = 'Book Author_Book_bt_1999'.$letter;
             $b->user_id = 1;
             $b->save();
         }
@@ -56,8 +58,8 @@ class BibliographyTest extends TestCase
 
         $newBib = Bibliography::orderBy('id', 'desc')->first();
         $this->assertEquals($bib->id, $newBib->id);
-        $this->assertEquals('No Title', $newBib->title);
-        $this->assertEquals('No:1999aa', $newBib->citekey);
+        $this->assertEquals('Book Title', $newBib->title);
+        $this->assertEquals('Book Author_Book_bt_1999aa', $newBib->citekey);
     }
 
     /**

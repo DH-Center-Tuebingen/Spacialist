@@ -30,26 +30,6 @@ class PreferenceController extends Controller {
         return response()->json($preferences);
     }
 
-    public function getUserPreferences($id) {
-        $user = auth()->user();
-        if(!isset($user) || ($user->id != $id && !$user->can('preferences_write'))) {
-            return response()->json([
-                'error' => __('You are not allowed to access preferences of another user')
-            ], 403);
-        }
-
-        try {
-            User::findOrFail($id);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This user does not exist')
-            ], 400);
-        }
-
-        $preferences = Preference::getUserPreferences($id);
-        return response()->json($preferences);
-    }
-
     // POST
 
     // PATCH
@@ -64,7 +44,7 @@ class PreferenceController extends Controller {
 
         foreach($changes as $c) {
             $label = $c['label'];
-            $value = $c['value'];
+            $value = $c['value'] ?? '';
             $isUser = isset($c['user']) && $c['user'];
 
             if(!$isUser && !$user->can('preferences_write')) {
@@ -81,7 +61,7 @@ class PreferenceController extends Controller {
                 ], 400);
             }
             $encodedValue = Preference::encodePreference($label, $value);
-    
+
             if($isUser) {
                 UserPreference::updateOrCreate(
                     ['pref_id' => $pref->id, 'user_id' => $user->id],

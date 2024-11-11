@@ -23,7 +23,7 @@ class EntityAttribute extends AttributeBase
         // }
 
         // Always return id prop, even if entity is deleted. Otherwise it wouldn't be visible in the frontend
-        return $data["id"];
+        return $data["id"] ?? null;
     }
 
     public static function serialize(mixed $data) : mixed {

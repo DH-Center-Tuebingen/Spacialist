@@ -47,7 +47,9 @@ class HomeController extends Controller
             }
         }
 
-        $entityTypes = EntityType::with(['sub_entity_types', 'layer', 'attributes'])
+        // TODO handle layer relation in Map Plugin
+        // $entityTypes = EntityType::with(['sub_entity_types', 'layer', 'attributes'])
+        $entityTypes = EntityType::with(['sub_entity_types', 'attributes'])
             ->orderBy('id')
             ->get();
         $entityTypeMap = $entityTypes->getDictionary();

@@ -34,22 +34,21 @@ class RefreshTesting extends Command {
      * @return mixed
      */
     public function handle() {
-
         $testingEnv = \Dotenv\Dotenv::createMutable(base_path(), '.env.testing');
         $testingEnv->load();
 
         $database = env('DB_DATABASE');
 
-        if ($this->option('refresh')) {
+        if($this->option('refresh')) {
             $this->info("Refreshing database '$database' ...");
             $this->call('config:clear');
             $this->call('migrate:fresh');
             $this->call('db:seed', [
-                '--class' => 'DemoSeeder',
+                '--class' => 'TestingSeeder',
             ]);
         }
 
-        if (!$this->option('skip')) {
+        if(!$this->option('skip')) {
             $this->info('Running tests...');
             $this->call('test');
         } else {
