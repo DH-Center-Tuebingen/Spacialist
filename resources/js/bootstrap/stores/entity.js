@@ -208,8 +208,19 @@ export const useEntityStore = defineStore('entity', {
             // If we get an existing entity from Websocket, back it up in case we need it
             const entityExists = from_ws && this.entities[node.id];
             if(entityExists) {
-                const localVerion = this.entities[node.id];
-                this.backup[node.id] = localVerion;
+                // const localVerion = this.entities[node.id];
+                // this.backup[node.id] = localVerion;
+                this.entities[node.id] = {
+                    ...this.entities[node.id],
+                    ...node,
+                };
+                if(node.id == this.selectedEntity?.id) {
+                    this.selectedEntity = {
+                        ...this.selectedEntity,
+                        ...node,
+                    };
+                }
+                return;
             }
             this.entities[node.id] = node;
             if(node.id == this.selectedEntity?.id) {
