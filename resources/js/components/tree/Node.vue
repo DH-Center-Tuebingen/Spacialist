@@ -51,12 +51,6 @@
                 </span>
                 <span :class="{ 'fw-bold': state.isSelected }">
                     {{ data.name }}
-                    <span
-                        v-if="state.receivedWsUpdate"
-                        :title="`${data.user.name}`"
-                    >
-                        <i class="fas fa-fw fa-asterisk" />
-                    </span>
                 </span>
             </a>
         </div>
@@ -161,7 +155,6 @@
                     }
                     return !entityStore.hasIntersectionWithEntityAttributes(data.value.entity_type_id, entityStore.treeSelectionTypeIds);
                 }),
-                receivedWsUpdate: computed(_ => !!entityStore.backup[data.value.id]),
             });
 
             // WATCHER
