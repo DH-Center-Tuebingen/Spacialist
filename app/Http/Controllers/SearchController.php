@@ -171,13 +171,16 @@ class SearchController extends Controller {
         $langId = $language->id;
         $builder = th_tree_builder($lang);
 
-        $matches = $builder->whereHas('labels', function($query) use ($langId, $q) {
-            $query->where('language_id', $langId)
-                ->where('label', 'ilike', "%$q%");
-        })
+        $matches = $builder
+            ->with('broaders')
+            ->whereHas('labels', function($query) use ($langId, $q) {
+                $query->where('language_id', $langId)
+                    ->where('label', 'ilike', "%$q%");
+            })
             ->get();
 
         $foreignMatches = th_tree_builder($lang)
+            ->with('broaders')
             ->whereDoesntHave('labels', function($query) use ($langId) {
                 $query->where('language_id', $langId);
             })

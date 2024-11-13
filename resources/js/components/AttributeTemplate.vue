@@ -14,6 +14,8 @@
                     :endpoint="searchLabel"
                     :key-fn="getConceptLabel"
                     :default-value="state.searchResetValue"
+                    :chain="'broaders'"
+                    :chain-fn="b => translateConcept(b.concept_url)"
                     @selected="e => labelSelected(e, 'label')"
                 />
             </div>
