@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - Missing translation for _milligram_ in si-unit attribute
 ### Changed
 - Move switch to show hidden attributes in _Data Model Editor_ to dropdown
+- Make tabular head _sticky_
 
 ## 0.10 - Jelling
 ### Added
