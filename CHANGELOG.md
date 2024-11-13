@@ -1,7 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 0.10.1 - Dayjs Hotfix
+## 0.11 -
+### Added
+- Label Search displays full path of thesaurus concept
+
+## 0.10.1
 ### Fixed
 - Frontend errors due to wrong dayjs import
 

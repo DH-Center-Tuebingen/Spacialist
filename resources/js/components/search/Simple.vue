@@ -64,7 +64,10 @@
                         :key="`search-result-multiselect-${state.id}-${anc}`"
                         class="breadcrumb-item text-muted small"
                     >
-                        <span>
+                        <span v-if="state.isFnChain">
+                            {{ chainFn(anc) }}
+                        </span>
+                        <span v-else-if="state.isSimpleChain">
                             {{ anc }}
                         </span>
                     </li>
@@ -143,6 +146,11 @@
                 required: false,
                 default: null,
             },
+            chainFn: {
+                type: Function,
+                required: false,
+                default: null,
+            },
             mode: {
                 type: String,
                 required: false,
@@ -171,11 +179,12 @@
                 keyText,
                 keyFn,
                 chain,
+                chainFn,
                 mode,
                 defaultValue,
                 disabled,
             } = toRefs(props);
-            
+
             if(!keyText.value && !keyFn.value) {
                 throw new Error('You have to either provide a key or key function for your search component!');
             }
@@ -227,16 +236,15 @@
             const handleTagClick = option => {
                 context.emit('entry-click', option);
             };
-
             const getBaseValue = _ => {
                     return mode.value == 'single' ? {} : [];
             };
-            
             const getDefaultValue = _ => {
-                if(defaultValue.value) 
+                if(defaultValue.value) {
                     return defaultValue.value;
-                else
+                } else {
                     return getBaseValue();
+                }
             };
 
             // DATA
@@ -244,7 +252,9 @@
                 id: `multiselect-search-${getTs()}`,
                 entry: getDefaultValue(),
                 query: '',
-                enableChain: computed(_ => chain.value && chain.value.length > 0),
+                isSimpleChain: computed(_ => chain.value && chain.value.length > 0),
+                isFnChain: computed(_ => !!chainFn.value),
+                enableChain: computed(_ => state.isSimpleChain || state.isFnChain),
             });
 
             watch(_ => defaultValue.value, (newValue, oldValue) => {
@@ -268,5 +278,5 @@
                 state,
             };
         },
-    }
+    };
 </script>
