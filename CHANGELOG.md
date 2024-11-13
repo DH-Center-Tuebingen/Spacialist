@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Frontend errors due to wrong dayjs import
 - Missing translation for _milligram_ in si-unit attribute
+- Entity tree header overflow on small screens
 ### Changed
 - Move switch to show hidden attributes in _Data Model Editor_ to dropdown
 
