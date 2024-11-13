@@ -186,6 +186,12 @@ dl.dl-0-mb > dd:last-child {
     overflow-y: auto;
 }
 
+table.table-sticky > thead > tr > th {
+    @extend .position-sticky;
+    top: -1rem;
+    z-index: $zindex-sticky + 1;
+}
+
 .hover-underline:hover {
     text-decoration: underline;
 }
