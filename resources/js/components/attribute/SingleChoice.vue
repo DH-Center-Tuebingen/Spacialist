@@ -14,6 +14,7 @@
         :limit="15"
         :filter-results="false"
         :placeholder="t('global.select.placeholder')"
+        @keydown.tab="handleTab"
         @select="value => v.handleChange(value)"
         @deselect="v.handleChange(null)"
         @search-change="setSearchQuery"
@@ -185,6 +186,17 @@
                 return veeHandleChange(value);
             };
 
+            const handleTab = event => {
+                if(state.filteredSelections.length == 1) {
+                    return formatAndHandleChange(state.filteredSelections[0]);
+                }
+                const value = event.target.value.toLowerCase();
+                const match = state.filteredSelections.find(concept => translateConcept(concept.concept_url).toLowerCase() == value);
+                if(match) {
+                    return formatAndHandleChange(match);
+                }
+            };
+
             const setSearchQuery = query => {
                 state.query = query ? query.toLowerCase().trim() : null;
             };
@@ -252,6 +264,7 @@
                 // LOCAL
                 resetFieldState,
                 undirtyField,
+                handleTab,
                 setSearchQuery,
                 // STATE
                 state,

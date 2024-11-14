@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 - Option to display attributes in _Data Model Editor_ in groups
 - Filter attributes in _Data Model Editor_
 - Attributes in _Data Model Editor_ can now be sorted (by name or creation date)
+- Pressing `Tab` key in _Single Choice Dropdowns_ now either:
+  - selects the first choice (if there is **only one choice** in the dropdown)
+  - selects the exact match (**case insensitive**; e.g. "apple" + `Tab` will select the available choice "apple", but also "Apple")
+  - nothing and focuses the next attribute (default)
 ### Fixed
 - Frontend errors due to wrong dayjs import
 - Missing translation for _milligram_ in si-unit attribute
