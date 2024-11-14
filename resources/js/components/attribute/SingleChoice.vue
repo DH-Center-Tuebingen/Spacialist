@@ -187,7 +187,7 @@
             };
 
             const handleTab = event => {
-                if(state.filteredSelections.length == 1) {
+                if(state.query.length > 0 && state.filteredSelections.length == 1) {
                     return formatAndHandleChange(state.filteredSelections[0]);
                 }
                 const value = event.target.value.toLowerCase();
