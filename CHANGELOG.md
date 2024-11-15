@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - Filter and sort functionality on _Entity Type List_
 - Indicator in _Data Model Editor_ that visualizes if an attribute is used in any entity-type
 - Label Search displays full path of thesaurus concept
+- _Add Entity Above_ and _Add Entity Below_ to the Contextmenu in the entity tree
 ### Fixed
 - Dirty indicator not showing in Tab of _Entity Detail_
 - Missing "Color Dots" of _Entity Type_ (colors are now handled on the Entity Type itself and do no longer rely on the _Map_ Plugin)
