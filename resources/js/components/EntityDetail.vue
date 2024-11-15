@@ -1029,7 +1029,7 @@
             watch(_ => state.entityChanges,
                 (newChanges, oldChanges) => {
                     for(let k in attrRefs.value) {
-                        attrRefs.value[k].broadcastAttributeChanges(newChanges);
+                        attrRefs.value[k]?.broadcastAttributeChanges(newChanges);
                     }
                 }
             );
