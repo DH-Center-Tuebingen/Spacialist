@@ -236,7 +236,15 @@ export const useEntityStore = defineStore('entity', {
                         this.tree.splice(idx, 1, node);
                     }
                 } else {
-                    this.tree.push(node);
+                    if(this.tree.length == 0 || node.rank > this.tree.at(-1).rank) {
+                        this.tree.push(node);
+                    } else {
+                        const idx = this.tree.findIndex(c => c.rank == node.rank);
+                        this.tree.splice(idx, 0, node);
+                        for(let i=idx+1; i<this.tree.length; i++) {
+                            this.tree[i].rank++;
+                        }
+                    }
                 }
             } else {
                 const doCount = !node?.already_existing;
@@ -250,7 +258,15 @@ export const useEntityStore = defineStore('entity', {
                                 parent.children.splice(idx, 1, node);
                             }
                         } else {
-                            parent.children.push(node);
+                            if(node.rank > parent.children.at(-1).rank) {
+                                parent.children.push(node);
+                            } else {
+                                const idx = parent.children.findIndex(c => c.rank == node.rank);
+                                parent.children.splice(idx, 0, node);
+                                for(let i=idx+1; i<parent.children.length; i++) {
+                                    parent.children[i].rank++;
+                                }
+                            }
                         }
                     }
                     if(doCount) {

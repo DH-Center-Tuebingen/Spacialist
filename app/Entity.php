@@ -52,9 +52,10 @@ class Entity extends Model implements Searchable {
     ];
 
     const rules = [
-        'name'              => 'required|string',
-        'entity_type_id'   => 'required|integer|exists:entity_types,id',
-        'root_entity_id'   => 'integer|exists:entities,id',
+        'name'           => 'required|string',
+        'entity_type_id' => 'required|integer|exists:entity_types,id',
+        'root_entity_id' => 'integer|exists:entities,id',
+        'rank'           => 'integer|min:1',
     ];
 
     const patchRules = [
@@ -84,8 +85,8 @@ class Entity extends Model implements Searchable {
             'editors' => $this->editors,
             'metadata' => $this->metadata,
         ];
-    }  
-    
+    }
+
     public static function getSearchCols(): array {
         return array_keys(self::searchCols);
     }
@@ -120,7 +121,7 @@ class Entity extends Model implements Searchable {
         }
     }
 
-    public static function create($fields, $entityTypeId, $user, $rootEntityId = null) {
+    public static function create($fields, $entityTypeId, $user, $rootEntityId = null, $rank = null) {
         $isChild = isset($rootEntityId);
         if($isChild) {
             $parentCtid = self::find($rootEntityId)->entity_type_id;
@@ -144,14 +145,27 @@ class Entity extends Model implements Searchable {
         }
 
         $entity = new self();
-        $rank;
         if($isChild) {
-            $rank = self::where('root_entity_id', $rootEntityId)->max('rank') + 1;
+            if(!isset($rank)) {
+                $rank = self::where('root_entity_id', $rootEntityId)->max('rank') + 1;
+            } else {
+                $nextSiblings = self::where('root_entity_id', $rootEntityId)->where('rank', '>=', $rank)->get();
+            }
             $entity->root_entity_id = $rootEntityId;
         } else {
-            $rank = self::whereNull('root_entity_id')->max('rank') + 1;
+            if(!isset($rank)) {
+                $rank = self::whereNull('root_entity_id')->max('rank') + 1;
+            } else {
+                $nextSiblings = self::whereNull('root_entity_id')->where('rank', '>=', $rank)->get();
+            }
         }
         $entity->rank = $rank;
+        if(isset($nextSiblings) && count($nextSiblings) > 0) {
+            foreach($nextSiblings as $sibling) {
+                $sibling->rank = $sibling->rank + 1;
+                $sibling->saveQuietly();
+            }
+        }
 
         foreach($fields as $key => $value) {
             $entity->{$key} = $value;
@@ -180,35 +194,34 @@ class Entity extends Model implements Searchable {
         }
         return $entities->orderBy('rank')->get();
     }
-    
+
     private function moveOrFail(int | null $parentId) {
-        
         if(isset($parentId)) {
             if($parentId == $this->id) {
                 throw new \Exception('Cannot move entity to itself.');
             }
-            
+
             $parentEntity = Entity::findOrFail($parentId);
             $parentEntityType = $parentEntity->entity_type;
-            
+
             if(!$parentEntityType->sub_entity_types->contains($this->entity_type_id)) {
                 throw new \Exception('This type is not an allowed sub-type.');
             }
-            
+
             $this->root_entity_id = $parentId;
             $query = self::where('root_entity_id', $parentId);
         } else {
             if(!$this->entity_type->is_root) {
                 throw new \Exception('This type is not an allowed root-type.');
             }
-            
+
             $this->root_entity_id = null;
             $query = self::whereNull('root_entity_id');
         }
         return $query;
     }
 
-    public static function patchRanks($rank, $id, $parent, $user) { 
+    public static function patchRanks($rank, $id, $parent, $user) {
         $entity = Entity::find($id);
         $oldRank = $entity->rank;
         $entity->rank = $rank;
@@ -227,7 +240,7 @@ class Entity extends Model implements Searchable {
             $oc->rank--;
             $oc->saveQuietly();
         }
-        
+
         try{
             $query = $entity->moveOrFail($parent);
         }catch(\Exception $e) {

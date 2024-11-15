@@ -384,6 +384,9 @@ export async function addEntity(entity) {
     if(!!entity.parent_id) {
         data.root_entity_id = entity.parent_id;
     }
+    if(!!entity.rank) {
+        data.rank = entity.rank;
+    }
     return $httpQueue.add(
         () => http.post(`/entity`, data).then(response => response.data)
     );

@@ -481,6 +481,8 @@
                 "add": "Neue Top-Level Entität hinzufügen",
                 "contextmenu": {
                     "add": "Unterentität hinzufügen",
+                    "add_above": "Entität darüber hinzufügen",
+                    "add_below": "Entität darunter hinzufügen",
                     "duplicate": "Duplikat erzeugen",
                     "move": "Im Baum verschieben",
                     "delete": "Entität löschen"
