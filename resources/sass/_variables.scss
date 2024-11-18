@@ -60,3 +60,7 @@ $breadcrumb-divider-flipped: $breadcrumb-divider;
     --bs-dropdown-link-active-color: var(--bs-body-color) !important;
     --bs-dropdown-link-active-bg: var(--bs-gray-400) !important;
 }
+
+//Z-Index
+$zindex-sticky-in-page: 995;
+$zindex-dropdown-underneath-sticky: 990; 
