@@ -298,7 +298,7 @@
                         v-if="state.attributesFetched"
                         :ref="el => setAttrRefs(el, tg.id)"
                         v-dcan="'entity_data_read'"
-                        class="pt-2 h-100 overflow-y-auto row"
+                        class="h-100 overflow-y-auto row"
                         :attributes="tg.data"
                         :hidden-attributes="state.hiddenAttributeList"
                         :show-hidden="state.hiddenAttributeState"
