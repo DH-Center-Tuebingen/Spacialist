@@ -729,7 +729,7 @@ class EntityController extends Controller {
             return response()->json([
                 'entity' => $entity,
                 'added_attributes' => $addedAttributes,
-            ]);
+            ], 204);
         }
 
         foreach($request->request as $patch) {
