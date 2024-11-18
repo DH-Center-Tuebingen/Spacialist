@@ -6,6 +6,14 @@
     font-size: 50%;
 }
 
+.fs-xs {
+    font-size: $font-size-base * 0.6 !important;
+}
+
+.fs-sm {
+    font-size: $font-size-sm !important;
+}
+
 .fs-50 {
     font-size: 0.5em !important;
 }

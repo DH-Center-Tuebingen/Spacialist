@@ -14,7 +14,7 @@
                     <i class="fas fa-fw fa-plus" /> {{ t('main.datamodel.entity.add_button') }}
                 </button>
             </h4>
-            <entity-type-list
+            <EntityTypeList
                 class="col px-0 h-100 d-flex flex-column"
                 :data="state.entityTypes"
                 :selected-id="state.selectedEntityType"
@@ -39,25 +39,56 @@
                         <i class="fas fa-fw fa-plus" /> {{ t('main.datamodel.attribute.add_button') }}
                     </button>
                 </h4>
-                <div class="form-check form-switch">
-                    <input
-                        id="toggle-hidden-attributes"
-                        v-model="state.showHiddenAttributes"
-                        class="form-check-input"
-                        type="checkbox"
+                <div class="dropdown">
+                    <span
+                        id="dme-attribute-list-options-dropdown"
+                        class="clickable text-body align-middle"
+                        data-bs-toggle="dropdown"
+                        role="button"
+                        aria-haspopup="true"
+                        aria-expanded="false"
                     >
-                    <label
-                        class="form-check-label"
-                        for="toggle-hidden-attributes"
+                        <i class="fas fa-fw fa-ellipsis-vertical" />
+                    </span>
+                    <div
+                        class="dropdown-menu"
+                        aria-labelledby="dme-attribute-list-options-dropdown"
                     >
-                        {{ t('main.datamodel.attribute.show_hidden') }}
-                    </label>
+                        <a
+                            href="#"
+                            class="dropdown-item"
+                            @click.prevent="state.showHiddenAttributes = !state.showHiddenAttributes"
+                        >
+                            <span v-show="state.showHiddenAttributes">
+                                <i class="fas fa-fw fa-eye-slash" />
+                                {{ t('main.datamodel.attribute.hide_hidden') }}
+                            </span>
+                            <span v-show="!state.showHiddenAttributes">
+                                <i class="fas fa-fw fa-eye" />
+                                {{ t('main.datamodel.attribute.show_hidden') }}
+                            </span>
+                        </a>
+                        <a
+                            href="#"
+                            class="dropdown-item"
+                            @click.prevent="state.showAttributesInGroups = !state.showAttributesInGroups"
+                        >
+                            <span v-show="state.showAttributesInGroups">
+                                <i class="fas fa-fw fa-list" />
+                                {{ t('main.datamodel.attribute.separated') }}
+                            </span>
+                            <span v-show="!state.showAttributesInGroups">
+                                <i class="fas fa-fw fa-table-list" />
+                                {{ t('main.datamodel.attribute.in_groups') }}
+                            </span>
+                        </a>
+                    </div>
                 </div>
             </div>
             <div class="col overflow-hidden mt-2 d-flex flex-column">
                 <attribute-list
                     :group="{name: 'attribute-selection', pull: true, put: false}"
-                    :classes="'mx-2 py-3 rounded-3 bg-secondary bg-opacity-10'"
+                    :classes="'mx-2 px-2 py-3 rounded-3 bg-secondary bg-opacity-10'"
                     :attributes="state.systemAttributeList"
                     :values="[]"
                     :options="{'hide_labels': true}"
@@ -65,7 +96,131 @@
                     :is-source="true"
                 />
                 <hr>
+                <div class="d-flex flex-row justify-content-between align-items-center mb-2">
+                    <div class="input-group w-50">
+                        <span
+                            id="dme-attribute-search"
+                            class="input-group-text"
+                        >
+                            <i class="fas fa-fw fa-search" />
+                        </span>
+                        <input
+                            v-model="state.attributeQuery"
+                            :placeholder="t('global.search')"
+                            type="text"
+                            class="form-control"
+                        >
+                    </div>
+                    <div
+                        class="btn-group btn-group-sm"
+                        role="group"
+                    >
+                        <button
+                            v-if="state.showAttributesInGroups"
+                            type="button"
+                            class="btn btn-outline-primary"
+                            :title="t('main.datamodel.expand_groups')"
+                            @click="setAttributeGroupExpand(true)"
+                        >
+                            <i class="fas fa-fw fa-angles-down" />
+                        </button>
+                        <button
+                            v-if="state.showAttributesInGroups"
+                            type="button"
+                            class="btn btn-outline-primary"
+                            :title="t('main.datamodel.collapse_groups')"
+                            @click="setAttributeGroupExpand(false)"
+                        >
+                            <i class="fas fa-fw fa-angles-up" />
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary"
+                            :class="{'active': state.sortAttributes}"
+                            @click="state.sortAttributes = !state.sortAttributes"
+                        >
+                            <span
+                                v-if="state.sortAttributes"
+                                :title="t('main.datamodel.sort_by_name')"
+                            >
+                                <i class="fas fa-fw fa-arrow-down-a-z" />
+                            </span>
+                            <span
+                                v-if="!state.sortAttributes"
+                                :title="t('main.datamodel.sort_by_creation_date')"
+                            >
+                                <i class="fas fa-fw fa-arrow-down-1-9" />
+                            </span>
+                        </button>
+                    </div>
+                </div>
+                <div
+                    v-if="state.showAttributesInGroups && state.attributeList.length > 0"
+                    class="col overflow-hidden d-flex flex-column"
+                >
+                    <div
+                        id="dme-attribute-list-accordion"
+                        ref="accordionRef"
+                        class="accordion accordion-flush flex-grow-1 overflow-y-auto overflow-x-hidden pe-2"
+                    >
+                        <template
+                            v-for="([type, attrGrp], index) in state.sortedAttributeListGroups"
+                            :key="`dme-attribute-list-${type}-grp`"
+                        >
+                            <div
+                                v-show="attributeGroupHasItems(attrGrp)"
+                                class="accordion-item"
+                                :class="{
+                                    'border-bottom': index == state.sortedAttributeListGroups.length - 1,
+                                }"
+                            >
+                                <h2 class="accordion-header">
+                                    <button
+                                        class="accordion-button"
+                                        :class="{'text-muted': attributeGroupItemCount(attrGrp) == 0}"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        :data-bs-target="`#dme-attribute-list-${type}-grp-container`"
+                                        aria-expanded="false"
+                                        :aria-controls="`dme-attribute-list-${type}-grp-container`"
+                                    >
+                                        <span>
+                                            {{ t(`global.attributes.${type}`) }}
+                                        </span>
+                                        <span
+                                            class="badge bg-primary ms-2 d-flex flex-row"
+                                            :class="{'bg-opacity-50': attributeGroupItemCount(attrGrp) == 0}"
+                                        >
+                                            <span>{{ attributeGroupItemCount(attrGrp) }}</span>
+                                            <span>/</span>
+                                            <span>{{ attrGrp.length }}</span>
+                                        </span>
+                                    </button>
+                                </h2>
+                                <div
+                                    :id="`dme-attribute-list-${type}-grp-container`"
+                                    class="accordion-collapse collapse show"
+                                >
+                                    <div class="accordion-body px-2 py-3">
+                                        <attribute-list
+                                            :group="{name: `attribute-selection-${type}`, pull: true, put: false}"
+                                            :attributes="attrGrp"
+                                            :hidden-attributes="state.selectedEntityTypeAttributeIds"
+                                            :show-hidden="state.showHiddenAttributes"
+                                            :values="state.attributeListValues"
+                                            :selections="{}"
+                                            :is-source="true"
+                                            :show-info="true"
+                                            @delete-element="onDeleteAttribute"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
                 <attribute-list
+                    v-else-if="!state.showAttributesInGroups"
                     :classes="'pe-2 col overflow-y-auto overflow-x-hidden'"
                     :group="{name: 'attribute-selection', pull: true, put: false}"
                     :attributes="state.attributeList"
@@ -77,6 +232,14 @@
                     :show-info="true"
                     @delete-element="onDeleteAttribute"
                 />
+                <Alert
+                    v-if="state.attributeList.length == 0"
+                    class="mb-0"
+                    :message="`${t('global.search_no_results_for')} ${state.attributeQuery}`"
+                    :type="'info'"
+                    :noicon="false"
+                    :icontext="t('global.information')"
+                />
             </div>
         </div>
     </div>
@@ -86,6 +249,7 @@
     import {
         computed,
         reactive,
+        ref,
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
@@ -106,6 +270,7 @@
     import {
         getEntityTypeAttributes,
         getInitialAttributeValue,
+        translateConcept,
     } from '@/helpers/helpers.js';
 
     import {
@@ -171,12 +336,53 @@
                     showDeleteAttribute(attribute, metadata);
                 });
             };
+            const setAttributeGroupExpand = (expand = true) => {
+                const parent = accordionRef.value;
+                const buttons = parent.querySelectorAll('.accordion-button');
+                const containers = parent.querySelectorAll('.accordion-collapse');
+                if(expand) {
+                    buttons.forEach(btn => btn.classList.remove('collapsed'));
+                    containers.forEach(btn => btn.classList.add('show'));
+                } else {
+                    buttons.forEach(btn => btn.classList.add('collapsed'));
+                    containers.forEach(btn => btn.classList.remove('show'));
+                }
+            };
+            const attributeGroupItemCount = (items, onlyVisible = true) => {
+                if(!onlyVisible) {
+                    return items.length;
+                } else {
+                    return items.filter(itm => !state.selectedEntityTypeAttributeIds.includes(itm.id)).length;
+                }
+            };
+            const attributeGroupHasItems = items => {
+                if(state.showHiddenAttributes && items.length > 0) return true;
+
+                return attributeGroupItemCount(items) > 0;
+            };
 
             // DATA
+            const accordionRef = ref(null);
             const state = reactive({
                 siu: computed(_ => store.getters.datatypeDataOf('si-unit')),
                 systemAttributeList: computed(_ => store.getters.attributes.filter(a => a.is_system)),
-                attributeList: computed(_ => store.getters.attributes.filter(a => !a.is_system)),
+                userAttributeList: computed(_ => store.getters.attributes.filter(a => !a.is_system)),
+                attributeList: computed(_ => {
+                    if(!state.sortAttributes) return state.filteredAttributeList;
+
+                    return state.filteredAttributeList.toSorted((a, b) => {
+                        const conceptA = translateConcept(a.thesaurus_url);
+                        const conceptB = translateConcept(b.thesaurus_url);
+                        return conceptA.localeCompare(conceptB);
+                    });
+                }),
+                filteredAttributeList: computed(_ => {
+                    if(!state.attributeQuery) return state.userAttributeList;
+
+                    return state.userAttributeList.filter(attribute => {
+                        return translateConcept(attribute.thesaurus_url).toLowerCase().indexOf(state.attributeQuery.toLowerCase()) > -1;
+                    });
+                }),
                 // set values for all attributes to '', so values in <attribute-list> are existant
                 attributeListValues: computed(_ => {
                     if(!state.attributeList) return;
@@ -189,7 +395,29 @@
                     }
                     return data;
                 }),
+                attributeListGroups: computed(_ => {
+                    const grps = {};
+                    state.attributeList.forEach(a => {
+                        if(!grps[a.datatype]) {
+                            grps[a.datatype] = [];
+                        }
+                        grps[a.datatype].push(a);
+                    });
+                    return grps;
+                }),
+                sortedAttributeListGroups: computed(_ => {
+                    const groupList = Object.entries(state.attributeListGroups);
+
+                    return groupList.sort((a, b) => {
+                        const labelA = t(`global.attributes.${a[0]}`);
+                        const labelB = t(`global.attributes.${b[0]}`);
+                        return labelA.localeCompare(labelB);
+                    });
+                }),
                 showHiddenAttributes: false,
+                showAttributesInGroups: true,
+                sortAttributes: true,
+                attributeQuery: '',
                 entityTypes: computed(_ => Object.values(store.getters.entityTypes)),
                 selectedEntityType: computed(_ => parseInt(currentRoute.params.id)),
                 selectedEntityTypeAttributeIds: computed(_ => state.selectedEntityType ? getEntityTypeAttributes(state.selectedEntityType).map(a => a.id) : []),
@@ -207,7 +435,11 @@
                 requestDeleteEntityType,
                 createAttribute,
                 onDeleteAttribute,
+                setAttributeGroupExpand,
+                attributeGroupItemCount,
+                attributeGroupHasItems,
                 // STATE
+                accordionRef,
                 state,
             };
         },
