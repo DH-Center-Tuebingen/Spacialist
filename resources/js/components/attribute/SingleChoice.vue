@@ -25,13 +25,26 @@
             {{ translateConcept(option.concept_url) }}
             <span
                 v-if="isTabOption(option)"
-                class="position-absolute end-0 me-2 badge rounded-pill border border-1 border-primary text-primary py-1"
+                class="position-absolute end-0 me-2 badge rounded-pill border border-1 border-secondary text-secondary py-1 fs-xs"
             >Tab</span>
         </template>
         <template #singlelabel="{ value: singlelabelValue }">
             <div class="multiselect-single-label">
                 {{ translateConcept(singlelabelValue.concept_url) }}
             </div>
+        </template>
+        <template #clear="{clear}">
+            <span
+                aria-hidden="true"
+                role="button"
+                data-clear=""
+                aria-roledescription="❎"
+                class="multiselect-clear multiselect-clear-reset"
+                tabindex="-1"
+                @mousedown.prevent.stop="clear"
+            >
+                <span class="multiselect-clear-icon" />
+            </span>
         </template>
     </multiselect>
     <div
