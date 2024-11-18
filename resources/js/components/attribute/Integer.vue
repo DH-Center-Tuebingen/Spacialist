@@ -91,7 +91,14 @@
                 // Apparently, invalid values are returned as empty value in HTML number inputs
                 // Because it is not a required field, it returns true, because an empty value is a valid int
                 // see https://github.com/logaretm/vee-validate/issues/1667#issuecomment-431992508
-                if(!validateValidation(v.value)) return;
+                if(!validateValidation(v.value)) {
+                    context.emit('change', {
+                        dirty: v.meta.dirty,
+                        valid: false,
+                        value: v.value,
+                    });
+                    return;
+                }
                 // also call validate() to make sure all values are up to date
                 // without this, meta/errors still contain the value from last validation
                 validate().then(validation => {
