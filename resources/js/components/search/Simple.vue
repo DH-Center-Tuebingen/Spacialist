@@ -6,6 +6,7 @@
         :name="state.id"
         :object="true"
         :label="'id'"
+        :loading="state.loading"
         :track-by="'id'"
         :value-prop="'id'"
         :mode="mode"
@@ -117,6 +118,7 @@
     import {
         computed,
         reactive,
+        ref,
         toRefs,
         watch,
     } from 'vue';
@@ -215,14 +217,23 @@
 
             // FUNCTIONS
 
+            const executionNum = ref(0);
+            
             /** 
              * Called when the search is changed
              * so the query always has a different value. 
              */
             const requestEndpoint = async query => {
+                executionNum.value++;
+                const round = executionNum.value;
                 state.loading = true;
                 const results = await endpoint.value(query);
 
+                if(round !== executionNum.value) {
+                    // If the query changed in the meantime we do not want to apply the results.
+                    return;
+                }  
+                
                 let filteredResults;
                 if(!!filterFn.value) {
                     filteredResults = filterFn.value(results, query);
@@ -241,7 +252,7 @@
             };
 
             const debouncedSearch = _debounce(requestEndpoint, props.delay);
-
+            
             const search = async function (query) {
                 if(!query) query = '';
                 state.query = query;
