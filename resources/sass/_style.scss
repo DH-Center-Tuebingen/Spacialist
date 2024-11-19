@@ -201,3 +201,7 @@ dl.dl-0-mb > dd:last-child {
     display: inline !important;
     margin: 0px !important;
 }
+
+.list-hover:hover {
+    background-color: $gray-200 !important;
+}

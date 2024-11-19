@@ -31,7 +31,7 @@
         <template #tag="{ option, handleTagRemove, disabled: tagDisabled }">
             <div
                 class="multiselect-tag"
-                :class="{'pe-2': tagDisabled}"
+                :class="{ 'pe-2': tagDisabled }"
             >
                 <span @click.prevent="handleTagClick(option)">
                     {{ displayResult(option) }}
@@ -90,16 +90,23 @@
             </div>
         </template>
         <template
-            v-if="infinite && canFetchMore && state.hasResults"
+            v-if="infinite && canFetchMore && hasResults"
             #afterlist=""
         >
-            <div class="p-2">
+            <div class="d-flex">
                 <a
-                    class="text-decoration-none text-reset"
+                    class="list-hover d-flex align-items-center justify-content-between p-2 flex-fill"
                     href="#"
-                    @click.prevent="search(state.query)"
+                    @click.stop.prevent="loadMore()"
                 >
-                    {{ t('global.search_load_n_more', {n: limit}) }}
+                    {{ t('global.search_load_n_more', { n: limit }) }}
+
+                    <span
+                        v-if="state.loading"
+                        class="spinner-border spinner-border-sm ms-2"
+                        role="status"
+                        aria-hidden="true"
+                    />
                 </a>
             </div>
         </template>
@@ -207,14 +214,13 @@
             // FETCH
 
             // FUNCTIONS
-            const search = _debounce(async query => {
-                const queryChanged = state.query != query;
-                state.query = query;
-                if(!query) {
-                    state.hasResults = false;
-                    state.searchResults = [];
-                    return;
-                }
+
+            /** 
+             * Called when the search is changed
+             * so the query always has a different value. 
+             */
+            const requestEndpoint = async query => {
+                state.loading = true;
                 const results = await endpoint.value(query);
 
                 let filteredResults;
@@ -223,16 +229,45 @@
                 } else {
                     filteredResults = results;
                 }
-                state.hasResults = results.length > 0;
-                if(queryChanged) {
-                    state.searchResults = filteredResults;
-                } else {
+                
+                // Only apply if the query did not change in the meantime.
+                if(state.query === query) {
                     state.searchResults = [
                         ...state.searchResults,
-                        ...filteredResults
+                        ...filteredResults,
                     ];
                 }
-            }, 250);
+                state.loading = false;
+            };
+
+            const debouncedSearch = _debounce(requestEndpoint, props.delay);
+
+            const search = async function (query) {
+                if(!query) query = '';
+                state.query = query;
+                resetSearch(query);
+
+                if(query === '') {
+                    debouncedSearch.cancel();
+                    // If the query is empty there is no need to search
+                    return;
+                }
+
+                // As long as the query is typed we debounce the search
+                debouncedSearch(query);
+            };
+
+            const resetSearch = (query = '') => {
+                state.query = query;
+                state.searchResults = [];
+                state.hasResults = false;
+            };
+
+            const loadMore = async _ => {
+                if(state.loading) return;
+                await requestEndpoint(state.query);
+            };
+
             const displayResult = result => {
                 if(!!keyText.value) {
                     return result[keyText.value];
@@ -268,7 +303,7 @@
             };
 
             const getBaseValue = _ => {
-                    return mode.value == 'single' ? {} : [];
+                return mode.value == 'single' ? {} : [];
             };
 
             const getDefaultValue = _ => {
@@ -282,9 +317,9 @@
             const state = reactive({
                 id: `multiselect-search-${getTs()}`,
                 entry: getDefaultValue(),
+                loading: false,
                 query: '',
                 searchResults: [],
-                hasResults: false,
                 enableChain: computed(_ => chain.value && chain.value.length > 0),
             });
 
@@ -295,13 +330,17 @@
                     state.entry = newValue;
                 }
             });
+            
+            const hasResults = computed(_ => state.searchResults.length > 0);
 
             // RETURN
             return {
                 t,
                 // HELPER
                 // LOCAL
+                hasResults,
                 search,
+                loadMore,
                 displayResult,
                 handleSelection,
                 handleTagClick,
@@ -309,5 +348,5 @@
                 state,
             };
         },
-    }
+    };
 </script>
