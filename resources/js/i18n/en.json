@@ -236,6 +236,7 @@
                 "mass": {
                     "label": "Mass",
                     "units": {
+                        "milligram": "Milligram",
                         "gram": "Gram",
                         "kilogram": "Kilogram",
                         "ton": "Tons",
@@ -699,6 +700,10 @@
             "toggle_pretty_print": "Toggle Pretty Print"
         },
         "datamodel": {
+            "expand_groups": "Expand all groups",
+            "collapse_groups": "Collapse all groups",
+            "sort_by_name": "Sort by name",
+            "sort_by_creation_date": "Sort by creation date",
             "toasts": {
                 "updated_type": {
                     "title": "Entity-Type updated",
@@ -717,6 +722,9 @@
                 "title": "Available Attributes",
                 "add_button": "Add Attribute",
                 "show_hidden": "Show hidden",
+                "hide_hidden": "Hide hidden",
+                "separated": "List attributes separated",
+                "in_groups": "List attributes in groups",
                 "modal": {
                     "new": {
                         "title": "New Attribute"

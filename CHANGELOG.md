@@ -2,10 +2,24 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.10.1
+### Added
+- Option to display attributes in _Data Model Editor_ in groups
+- Filter attributes in _Data Model Editor_
+- Attributes in _Data Model Editor_ can now be sorted (by name or creation date)
+- Pressing `Tab` key in _Single Choice Dropdowns_ now either:
+  - selects the first choice (if there is **only one choice** in the dropdown)*
+  - selects the exact match (**case insensitive**; e.g. "apple" + `Tab` will select the available choice "apple", but also "Apple")*
+  - nothing and focuses the next attribute (default)
+  - * Selected elements will be marked with a blue (Tab) badge 
+- Pressing `Delete` inside _Single Choice Dropdowns_ will clear the element  
 ### Fixed
 - Frontend errors due to wrong dayjs import
+- Missing translation for _milligram_ in si-unit attribute
 - Entity search now allows to display more than first 10 results
   - `^` and `$` can be used in search query to match query only at the beginning/end of entity name
+### Changed
+- Move switch to show hidden attributes in _Data Model Editor_ to dropdown
+- Make tabular head _sticky_
 
 ## 0.10 - Jelling
 ### Added
