@@ -13,7 +13,7 @@
         <template #item="{ element, index }">
             <div
                 v-if="!state.hiddenAttributeList[element.id] || showHidden"
-                class="mb-3 px-2"
+                class="mt-3 px-2"
                 :class="clFromMetadata(element)"
                 @mouseenter="onEnter(index)"
                 @mouseleave="onLeave(index)"
@@ -24,7 +24,7 @@
                 >
                     <label
                         v-if="!state.hideLabels"
-                        class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break"
+                        class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break align-self-start"
                         :for="`attr-${element.id}`"
                         :class="attributeClasses(element)"
                         @click="e => handleLabelClick(e, element.datatype)"
