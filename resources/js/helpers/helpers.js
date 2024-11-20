@@ -430,25 +430,25 @@ export function getEmptyAttributeValue(type) {
         case 'integer':
         case 'percentage':
             return;
-        case 'list':
         case 'daterange':
-        case 'string-mc':
         case 'entity-mc':
+        case 'list':
+        case 'string-mc':
         case 'table':
         case 'userlist':
             return [];
         case 'serial':
         case 'sql':
             return null;
+        case 'date':
+        case 'geography':
+        case 'iconclass':
         case 'richtext':
         case 'rism':
+        case 'string-sc':
         case 'string':
         case 'stringf':
         case 'system-separator':
-        case 'geography':
-        case 'iconclass':
-        case 'string-sc':
-        case 'date':
         case 'url':
         default:
             return '';

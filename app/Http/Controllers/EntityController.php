@@ -11,12 +11,11 @@ use App\EntityType;
 use App\Exceptions\AmbiguousValueException;
 use App\Exceptions\AttributeImportException;
 use App\Exceptions\ImportException;
-use App\Exceptions\Structs\ImportExceptionStruct;
 use App\Exceptions\InvalidDataException;
 use App\Exceptions\Structs\AttributeImportExceptionStruct;
+use App\Exceptions\Structs\ImportExceptionStruct;
+use App\File;
 use App\Import\EntityImporter;
-use App\Import\ImportResolution;
-use App\Import\ImportResolutionType;
 use App\Reference;
 use App\ThConcept;
 use Exception;
@@ -460,17 +459,34 @@ class EntityController extends Controller {
             'metadata' => 'required|json',
             'data' => 'required|json',
         ]);
+        
+        $file = $request->file('file');
+
+        if(!$file || !$file->isValid()) {
+            return response()->json([
+                'error' => __('entity-importer.invalid-data', ['column' => 'file', 'value' => $file === null ? 'null' : 'invalid']),
+            ], 422);
+        }
+
+        $filepath = $file->getRealPath();
+        File::removeBomIfNecessary($filepath);
+
+        return null;
     }
 
     public function validateImportData(Request $request) {
-        $this->verifyImportData($request);
+        $errorResponse = $this->verifyImportData($request);
+        if($errorResponse) {
+            return $errorResponse;
+        }
 
         $file = $request->file('file');
+        $filepath = $file->getRealPath();
         $metadata = json_decode($request->get('metadata'), true);
         $data = json_decode($request->get('data'), true);
 
         $entityImport = new EntityImporter($metadata, $data);
-        $resolver = $entityImport->validateImportData($file->getRealPath());
+        $resolver = $entityImport->validateImportData($filepath);
 
         return response()->json([
             'errors' => $resolver->getErrors(),
@@ -482,12 +498,16 @@ class EntityController extends Controller {
      * TODO: Move this functionality into the EntityImporter class.
      */
     public function importData(Request $request) {
-        $this->verifyImportData($request);
+        $errorResponse = $this->verifyImportData($request);
+        if($errorResponse) {
+            return $errorResponse;
+        }
 
         $file = $request->file('file');
+        $filepath = $file->getRealPath();
         $metadata = json_decode($request->get('metadata'), true);
         $data = json_decode($request->get('data'), true);
-        $handle = fopen($file->getRealPath(), 'r');
+        $handle = fopen($filepath, 'r');
 
         // Data values
         $nameColumn = trim($data['name_column']);

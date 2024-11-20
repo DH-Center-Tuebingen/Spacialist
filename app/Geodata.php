@@ -18,7 +18,15 @@ class Geodata
     public static function getAvailableGeometryTypes() {
         return self::$availableGeometryTypes;
     }
-
+    
+    /**
+     * Parses a WKT string into a Geometry object
+     * if the WKT string is invalid, an exception is thrown.
+     * 
+     * @param string $wkt
+     * @return Geometry
+     * @throws MStaack\LaravelPostgis\Exceptions\UnknownWKTTypeException
+     */
     public static function parseWkt($wkt) {
         try {
             $geom = Geometry::getWKTClass($wkt);

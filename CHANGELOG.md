@@ -12,6 +12,11 @@ All notable changes to this project will be documented in this file.
   - nothing and focuses the next attribute (default)
   - * Selected elements will be marked with a blue (Tab) badge 
 - Pressing `Delete` inside _Single Choice Dropdowns_ will clear the element  
+- Importer now automatically removes BOM if present
+- Better readable format for error message on validation
+- Renamed _fromImport_ to _parseImport_ on the attribute classses. The base class now by default imports the passed string, removing redundancies on the string-based classes.
+- More elaborate type checking on attributes _parseImport_ method.
+- Unit test for all attribute imports (except Table).
 ### Fixed
 - Frontend errors due to wrong dayjs import
 - Missing translation for _milligram_ in si-unit attribute
@@ -19,6 +24,8 @@ All notable changes to this project will be documented in this file.
   - `^` and `$` can be used in search query to match query only at the beginning/end of entity name
 - Wrong behavior in validation/updating of _Integer_ values
 - Entity tree header overflow on small screens
+- Added tests for all attribute type imports
+- Improved output in _Data Importer_ frontend
 ### Changed
 - Move switch to show hidden attributes in _Data Model Editor_ to dropdown
 - Make tabular head _sticky_
