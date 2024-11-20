@@ -90,6 +90,19 @@ return [
             'search_path' => 'public',
             'sslmode' => 'prefer',
         ],
+        
+        'transfer' => [
+            'driver' => 'pgsql',
+            'host' => env('DB_TRANSFER_HOST'),
+            'port' => env('DB_TRANSFER_PORT'),
+            'database' => env('DB_TRANSFER_DATABASE'),
+            'username' => env('DB_TRANSFER_USERNAME'),
+            'password' => env('DB_TRANSFER_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'search_path' => 'public',
+            'sslmode' => 'prefer',
+        ],
 
     ],
 
