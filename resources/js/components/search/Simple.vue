@@ -95,20 +95,23 @@
             #afterlist=""
         >
             <div class="d-flex">
-                <!-- 
+                <!--
                 It happened that the click listener occasionally closed the select list.
                 Using the mousedown event prevents this from happening.
                 We need to prevent the click event and stop the propagation of the link navigation.
                 -->
                 <a
-                    class="list-hover d-flex align-items-center justify-content-between p-2 flex-fill"
+                    class="list-hover text-decoration-none d-flex align-items-center justify-content-between p-2 flex-fill"
                     href="#"
                     tabindex="-1"
                     draggable="false"
                     @click.stop.prevent
                     @mousedown.stop.prevent="loadMore()"
                 >
-                    {{ t('global.search_load_n_more', { n: limit }) }}
+                    <span>
+                        <i class="fas fa-fw fa-arrows-rotate" />
+                        {{ t('global.search_load_n_more', { n: limit }) }}
+                    </span>
 
                     <span
                         v-if="state.loading"
@@ -224,12 +227,12 @@
             // FETCH
 
             // FUNCTIONS
-            
+
             // Used to check for a race condition
             const searchExecutionCounter = ref(0);
-            /** 
+            /**
              * Called when the search is changed
-             * so the query always has a different value. 
+             * so the query always has a different value.
              */
             const requestSearchEndpoint = async query => {
                 searchExecutionCounter.value++;
@@ -242,6 +245,7 @@
                     // we do not want to apply the results.
                     return;
                 }
+
                 let filteredResults;
                 if(!!filterFn.value) {
                     filteredResults = filterFn.value(results, query);
@@ -255,15 +259,14 @@
                         ...state.searchResults,
                         ...filteredResults,
                     ];
-                } 
+                }
                 state.loading = false;
             };
 
             const debouncedSearchRequest = _debounce(requestSearchEndpoint, props.delay);
-            
-            const search = async function (query) {
+
+            const search = async query => {
                 if(!query) query = '';
-                state.query = query;
                 resetSearch(query);
 
                 // As long as the query is typed we debounce the search
