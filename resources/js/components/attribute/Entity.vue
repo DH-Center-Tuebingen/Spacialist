@@ -141,7 +141,7 @@
             const searchWrapper = async query => {
                 if(!query) {
                     state.page = 0;
-                    Promise.resolve([]);
+                    return Promise.resolve([]);
                 }
                 if(state.lastQueryString.toLowerCase() != query.toLowerCase()) {
                     state.page = 0;
