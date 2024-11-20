@@ -15,6 +15,8 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Frontend errors due to wrong dayjs import
 - Missing translation for _milligram_ in si-unit attribute
+- Entity search now allows to display more than first 10 results
+  - `^` and `$` can be used in search query to match query only at the beginning/end of entity name
 - Wrong behavior in validation/updating of _Integer_ values
 - Entity tree header overflow on small screens
 ### Changed

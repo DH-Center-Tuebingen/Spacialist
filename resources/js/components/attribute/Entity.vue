@@ -6,6 +6,9 @@
         :mode="state.mode"
         :default-value="v.fieldValue"
         :disabled="disabled"
+        :infinite="true"
+        :limit="10"
+        :can-fetch-more="state.hasNextPage"
         @selected="e => entitySelected(e)"
         @entry-click="e => entryClicked(e)"
         @deselect="v.handleChange(null)"
@@ -135,7 +138,21 @@
                     value: v.fieldValue,
                 });
             };
-            const searchWrapper = query => searchEntityInTypes(query, props.searchIn || []);
+            const searchWrapper = async query => {
+                if(!query) {
+                    state.page = 0;
+                    return Promise.resolve([]);
+                }
+                if(state.lastQueryString.toLowerCase() != query.toLowerCase()) {
+                    state.page = 0;
+                }
+                state.lastQueryString = query;
+                state.page++;
+                const pagination = await searchEntityInTypes(query, props.searchIn || [], state.page);
+
+                state.hasNextPage = !!pagination.next_page_url;
+                return pagination.data;
+            };
 
             const canShowLink = computed(_ => {
                 if(props.hideLink || !v.fieldValue?.name) return false;
@@ -170,6 +187,9 @@
             const state = reactive({
                 query: computed(_ => route.query),
                 mode: computed(_ => props.multiple ? 'tags' : 'single'),
+                lastQueryString: '',
+                page: 0,
+                hasNextPage: false,
             });
             const v = reactive({
                 fieldValue,
