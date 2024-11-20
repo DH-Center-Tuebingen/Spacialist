@@ -6,10 +6,11 @@
         :name="state.id"
         :object="true"
         :label="'id'"
+        :loading="state.loading"
         :track-by="'id'"
         :value-prop="'id'"
         :mode="mode"
-        :options="query => search(query)"
+        :options="state.searchResults"
         :hide-selected="false"
         :filterResults="false"
         :resolve-on-load="false"
@@ -18,11 +19,10 @@
         :caret="false"
         :min-chars="0"
         :searchable="true"
-        :delay="delay"
-        :limit="limit"
         :placeholder="t('global.search')"
         :disabled="disabled"
         @change="handleSelection"
+        @search-change="search"
     >
         <template #singlelabel="{ value }">
             <div class="multiselect-single-label">
@@ -32,7 +32,7 @@
         <template #tag="{ option, handleTagRemove, disabled: tagDisabled }">
             <div
                 class="multiselect-tag"
-                :class="{'pe-2': tagDisabled}"
+                :class="{ 'pe-2': tagDisabled }"
             >
                 <span @click.prevent="handleTagClick(option)">
                     {{ displayResult(option) }}
@@ -90,6 +90,38 @@
                 {{ t('global.search_no_term_info') }}
             </div>
         </template>
+        <template
+            v-if="infinite && canFetchMore && hasResults"
+            #afterlist=""
+        >
+            <div class="d-flex">
+                <!--
+                It happened that the click listener occasionally closed the select list.
+                Using the mousedown event prevents this from happening.
+                We need to prevent the click event and stop the propagation of the link navigation.
+                -->
+                <a
+                    class="list-hover text-decoration-none d-flex align-items-center justify-content-between p-2 flex-fill"
+                    href="#"
+                    tabindex="-1"
+                    draggable="false"
+                    @click.stop.prevent
+                    @mousedown.stop.prevent="loadMore()"
+                >
+                    <span>
+                        <i class="fas fa-fw fa-arrows-rotate" />
+                        {{ t('global.search_load_n_more', { n: limit }) }}
+                    </span>
+
+                    <span
+                        v-if="state.loading"
+                        class="spinner-border spinner-border-sm ms-2"
+                        role="status"
+                        aria-hidden="true"
+                    />
+                </a>
+            </div>
+        </template>
     </multiselect>
 </template>
 
@@ -97,6 +129,7 @@
     import {
         computed,
         reactive,
+        ref,
         toRefs,
         watch,
     } from 'vue';
@@ -104,7 +137,8 @@
     import { useI18n } from 'vue-i18n';
 
     import {
-        getTs
+        _debounce,
+        getTs,
     } from '@/helpers/helpers.js';
 
     export default {
@@ -158,6 +192,16 @@
                 required: false,
                 default: false,
             },
+            infinite: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
+            canFetchMore: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
         },
         emits: ['selected', 'entry-click'],
         setup(props, context) {
@@ -174,26 +218,72 @@
                 mode,
                 defaultValue,
                 disabled,
+                infinite,
             } = toRefs(props);
-            
+
             if(!keyText.value && !keyFn.value) {
                 throw new Error('You have to either provide a key or key function for your search component!');
             }
             // FETCH
 
             // FUNCTIONS
-            const search = async (query) => {
-                state.query = query;
-                if(!query) {
-                    return await new Promise(r => r([]));
-                }
+
+            // Used to check for a race condition
+            const searchExecutionCounter = ref(0);
+            /**
+             * Called when the search is changed
+             * so the query always has a different value.
+             */
+            const requestSearchEndpoint = async query => {
+                searchExecutionCounter.value++;
+                const round = searchExecutionCounter.value;
+                state.loading = true;
                 const results = await endpoint.value(query);
-                if(!!filterFn.value && !!filterFn.value) {
-                    return filterFn.value(results, query);
-                } else {
-                    return results;
+
+                if(round !== searchExecutionCounter.value) {
+                    // If there was a newer query executed in the meantime,
+                    // we do not want to apply the results.
+                    return;
                 }
+
+                let filteredResults;
+                if(!!filterFn.value) {
+                    filteredResults = filterFn.value(results, query);
+                } else {
+                    filteredResults = results;
+                }
+
+                // Only apply if the query did not change in the meantime.
+                if(state.query === query) {
+                    state.searchResults = [
+                        ...state.searchResults,
+                        ...filteredResults,
+                    ];
+                }
+                state.loading = false;
             };
+
+            const debouncedSearchRequest = _debounce(requestSearchEndpoint, props.delay);
+
+            const search = async query => {
+                if(!query) query = '';
+                resetSearch(query);
+
+                // As long as the query is typed we debounce the search
+                debouncedSearchRequest(query);
+            };
+
+            const resetSearch = (query = '') => {
+                state.query = query;
+                state.searchResults = [];
+                state.hasResults = false;
+            };
+
+            const loadMore = async _ => {
+                if(state.loading) return;
+                await requestSearchEndpoint(state.query);
+            };
+
             const displayResult = result => {
                 if(!!keyText.value) {
                     return result[keyText.value];
@@ -229,11 +319,11 @@
             };
 
             const getBaseValue = _ => {
-                    return mode.value == 'single' ? {} : [];
+                return mode.value == 'single' ? {} : [];
             };
-            
+
             const getDefaultValue = _ => {
-                if(defaultValue.value) 
+                if(defaultValue.value)
                     return defaultValue.value;
                 else
                     return getBaseValue();
@@ -243,7 +333,9 @@
             const state = reactive({
                 id: `multiselect-search-${getTs()}`,
                 entry: getDefaultValue(),
+                loading: false,
                 query: '',
+                searchResults: [],
                 enableChain: computed(_ => chain.value && chain.value.length > 0),
             });
 
@@ -255,12 +347,16 @@
                 }
             });
 
+            const hasResults = computed(_ => state.searchResults.length > 0);
+
             // RETURN
             return {
                 t,
                 // HELPER
                 // LOCAL
+                hasResults,
                 search,
+                loadMore,
                 displayResult,
                 handleSelection,
                 handleTagClick,
@@ -268,5 +364,5 @@
                 state,
             };
         },
-    }
+    };
 </script>

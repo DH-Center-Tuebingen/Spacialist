@@ -744,6 +744,14 @@ class EntityController extends Controller {
         }
 
         $addedAttributes = [];
+
+        if(count($request->request) === 0) {
+            return response()->json([
+                'entity' => $entity,
+                'added_attributes' => $addedAttributes,
+            ], 204);
+        }
+
         foreach($request->request as $patch) {
             $op = $patch['op'];
             $aid = $patch['params']['aid'];
