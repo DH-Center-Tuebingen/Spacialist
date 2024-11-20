@@ -95,10 +95,18 @@
             #afterlist=""
         >
             <div class="d-flex">
+                <!-- 
+                It happened that the click listener occasionally closed the select list.
+                Using the mousedown event prevents this from happening.
+                We need to prevent the click event and stop the propagation of the link navigation.
+                -->
                 <a
                     class="list-hover d-flex align-items-center justify-content-between p-2 flex-fill"
                     href="#"
-                    @click.stop.prevent="loadMore()"
+                    tabindex="-1"
+                    draggable="false"
+                    @click.stop.prevent
+                    @mousedown.stop.prevent="loadMore()"
                 >
                     {{ t('global.search_load_n_more', { n: limit }) }}
 
@@ -216,56 +224,50 @@
             // FETCH
 
             // FUNCTIONS
-
-            const executionNum = ref(0);
             
+            // Used to check for a race condition
+            const searchExecutionCounter = ref(0);
             /** 
              * Called when the search is changed
              * so the query always has a different value. 
              */
-            const requestEndpoint = async query => {
-                executionNum.value++;
-                const round = executionNum.value;
+            const requestSearchEndpoint = async query => {
+                searchExecutionCounter.value++;
+                const round = searchExecutionCounter.value;
                 state.loading = true;
                 const results = await endpoint.value(query);
 
-                if(round !== executionNum.value) {
-                    // If the query changed in the meantime we do not want to apply the results.
+                if(round !== searchExecutionCounter.value) {
+                    // If there was a newer query executed in the meantime,
+                    // we do not want to apply the results.
                     return;
-                }  
-                
+                }
                 let filteredResults;
                 if(!!filterFn.value) {
                     filteredResults = filterFn.value(results, query);
                 } else {
                     filteredResults = results;
                 }
-                
+
                 // Only apply if the query did not change in the meantime.
                 if(state.query === query) {
                     state.searchResults = [
                         ...state.searchResults,
                         ...filteredResults,
                     ];
-                }
+                } 
                 state.loading = false;
             };
 
-            const debouncedSearch = _debounce(requestEndpoint, props.delay);
+            const debouncedSearchRequest = _debounce(requestSearchEndpoint, props.delay);
             
             const search = async function (query) {
                 if(!query) query = '';
                 state.query = query;
                 resetSearch(query);
 
-                if(query === '') {
-                    debouncedSearch.cancel();
-                    // If the query is empty there is no need to search
-                    return;
-                }
-
                 // As long as the query is typed we debounce the search
-                debouncedSearch(query);
+                debouncedSearchRequest(query);
             };
 
             const resetSearch = (query = '') => {
@@ -276,7 +278,7 @@
 
             const loadMore = async _ => {
                 if(state.loading) return;
-                await requestEndpoint(state.query);
+                await requestSearchEndpoint(state.query);
             };
 
             const displayResult = result => {
@@ -341,7 +343,7 @@
                     state.entry = newValue;
                 }
             });
-            
+
             const hasResults = computed(_ => state.searchResults.length > 0);
 
             // RETURN

@@ -64,3 +64,9 @@ $breadcrumb-divider-flipped: $breadcrumb-divider;
 //Z-Index
 $zindex-sticky-in-page: 995;
 $zindex-dropdown-underneath-sticky: 990; 
+
+
+:root {
+    /* Increases the max size of the vueform/multiselect list */
+    --ms-max-height: 20rem;
+}

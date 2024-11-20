@@ -139,7 +139,10 @@
                 });
             };
             const searchWrapper = async query => {
-                if(!query) return new Promise(r => r([]));
+                if(!query) {
+                    state.page = 0;
+                    Promise.resolve([]);
+                }
                 if(state.lastQueryString.toLowerCase() != query.toLowerCase()) {
                     state.page = 0;
                 }
