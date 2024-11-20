@@ -114,7 +114,7 @@
                 v.handleChange(data);
             };
             const entryClicked = e => {
-                if(hideLink.value) return;
+                if(props.hideLink) return;
 
                 router.push({
                     name: 'entitydetail',
