@@ -27,6 +27,7 @@ All notable changes to this project will be documented in this file.
 - Entity tree header overflow on small screens
 - Added tests for all attribute type imports
 - Improved output in _Data Importer_ frontend
+- Adding _Group Separator_ in _Data Model Editor_
 ### Changed
 - Move switch to show hidden attributes in _Data Model Editor_ to dropdown
 - Make tabular head _sticky_
