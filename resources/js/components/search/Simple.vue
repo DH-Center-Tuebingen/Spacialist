@@ -1,7 +1,7 @@
 <template>
     <multiselect
         :id="state.id"
-        v-model="state.entry"
+        :value="value"
         class="multiselect"
         :name="state.id"
         :object="true"
@@ -22,7 +22,7 @@
         :limit="limit"
         :placeholder="t('global.search')"
         :disabled="disabled"
-        @change="handleSelection"
+        @change="onChange"
     >
         <template #singlelabel="{ value }">
             <div class="multiselect-single-label">
@@ -144,14 +144,20 @@
                 default: null,
             },
             mode: {
-                type: String,
                 required: false,
                 default: 'single',
+                validator: (val) => ['single', 'multiple'].includes(val),
             },
-            defaultValue: {
-                type: Object, // TODO should be Array for Entity-MC
+            value: {
                 required: false,
                 default: null,
+                validator: (val, props) => {
+                    if(props.mode == 'single') {
+                        return val == null || typeof val == 'object';
+                    } else {
+                        return val == null || Array.isArray(val);
+                    }
+                },
             },
             disabled: {
                 type: Boolean,
@@ -164,18 +170,14 @@
             const { t } = useI18n();
 
             const {
-                delay,
-                limit,
                 endpoint,
                 filterFn,
                 keyText,
                 keyFn,
                 chain,
                 mode,
-                defaultValue,
-                disabled,
             } = toRefs(props);
-            
+
             if(!keyText.value && !keyFn.value) {
                 throw new Error('You have to either provide a key or key function for your search component!');
             }
@@ -194,65 +196,31 @@
                     return results;
                 }
             };
-            const displayResult = result => {
-                if(!!keyText.value) {
-                    return result[keyText.value];
-                } else if(!!keyFn.value) {
-                    return keyFn.value(result);
+
+            const displayResult = obj => {
+                if(keyText.value) {
+                    return obj[keyText.value];
+                } else if(keyFn.value) {
+                    return keyFn.value(obj);
                 } else {
-                    // Should never happen ;) :P
-                    throw new Error('Can not display search result!');
+                    // Should never happen
+                    throw new Error('No key provided!');
                 }
-            };
-            const handleSelection = option => {
-                let data = {};
-                if(option) {
-                    if(mode.value == 'single') {
-                        data = {
-                            ...option,
-                            added: true,
-                        };
-                    } else {
-                        data = {
-                            values: option,
-                            added: true,
-                        };
-                    }
-                } else {
-                    data.removed = true;
-                }
-                state.entry = option;
-                context.emit('selected', data);
-            };
-            const handleTagClick = option => {
-                context.emit('entry-click', option);
             };
 
-            const getBaseValue = _ => {
-                    return mode.value == 'single' ? {} : [];
+            const onChange = value => {
+                context.emit('selected', value);
             };
-            
-            const getDefaultValue = _ => {
-                if(defaultValue.value) 
-                    return defaultValue.value;
-                else
-                    return getBaseValue();
+
+            const handleTagClick = option => {
+                context.emit('entry-click', option);
             };
 
             // DATA
             const state = reactive({
                 id: `multiselect-search-${getTs()}`,
-                entry: getDefaultValue(),
                 query: '',
                 enableChain: computed(_ => chain.value && chain.value.length > 0),
-            });
-
-            watch(_ => defaultValue.value, (newValue, oldValue) => {
-                if(!newValue || newValue.reset) {
-                    state.entry = getBaseValue();
-                } else {
-                    state.entry = newValue;
-                }
             });
 
             // RETURN
@@ -262,11 +230,12 @@
                 // LOCAL
                 search,
                 displayResult,
-                handleSelection,
+                // handleChange,
                 handleTagClick,
+                onChange,
                 // STATE
                 state,
             };
         },
-    }
+    };
 </script>
