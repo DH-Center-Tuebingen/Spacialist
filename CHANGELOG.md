@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## 0.10.1
 ### Fixed
+- Entity (Multiple-Choice) no longer uses all values when one is deleted.
 - Frontend errors due to wrong dayjs import
 - Missing translation for _milligram_ in si-unit attribute
 
