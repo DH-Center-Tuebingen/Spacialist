@@ -25,18 +25,7 @@
             // FETCH
 
             // FUNCTIONS
-            const entitySelected = e => {
-                const {
-                    added,
-                    removed,
-                    ...entity
-                } = e;
-                let data;
-                if(removed) {
-                    data = null;
-                } else if(added) {
-                    data = entity;
-                }
+            const entitySelected = data => {
                 context.emit('selected', data);
             };
             const prependSelectAllMatches = (results, query) => {
@@ -68,5 +57,5 @@
             };
 
         },
-    }
+    };
 </script>
