@@ -263,6 +263,23 @@
                 }
                 state.loading = false;
             };
+            
+            const debouncedSearchRequest = _debounce(requestSearchEndpoint, props.delay);
+            const search = async query => {
+                if(!query) query = '';
+                resetSearch(query);
+                // As long as the query is typed we debounce the search
+                debouncedSearchRequest(query);
+            };
+            const resetSearch = (query = '') => {
+                state.query = query;
+                state.searchResults = [];
+                state.hasResults = false;
+            };
+            const loadMore = async _ => {
+                if(state.loading) return;
+                await requestSearchEndpoint(state.query);
+            };
 
             const displayResult = obj => {
                 if(keyText.value) {
@@ -276,6 +293,15 @@
             };
 
             const onChange = value => {
+                /**
+                 * For some reason the multiselect is triggered again after the value is cleared by clicking the
+                 * x button. In that case the value is set to null and emitted. And directly afterwards an emtpty
+                 * array is emitted as well. This is a workaround to 'parse' the empty object to null which prevents
+                 * the parent from assuming the value has changed again.
+                 */
+                if(value && typeof(value) === 'object' && Object.keys(value).length === 0) {
+                    value = null;
+                }                
                 context.emit('selected', value);
             };
 

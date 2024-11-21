@@ -10,9 +10,8 @@
         :infinite="true"
         :limit="10"
         :can-fetch-more="state.hasNextPage"
-        @selected="data => v.handleChange(data)"
+        @selected="selected"
         @entry-click="entity => entryClicked(entity)"
-        @deselect="v.handleChange(null)"
     />
     <router-link
         v-if="canShowLink"
@@ -157,6 +156,10 @@
                 }
             };
 
+            const selected = function (data) {
+                v.handleChange(data);
+            };
+
             // DATA
             const {
                 handleChange,
@@ -166,7 +169,7 @@
             } = useField(`entity_${props.name}`, yup.mixed().nullable(), {
                 initialValue: value.value || (props.multiple ? [] : null),
             });
-            
+
             const state = reactive({
                 query: computed(_ => route.query),
                 mode: computed(_ => props.multiple ? 'tags' : 'single'),
@@ -181,7 +184,6 @@
                 resetField,
                 value: computed(_ => {
                     if(!v.fieldValue) return (props.multiple ? [] : null);
-                    
                     let value = null;
                     if(v.fieldValue) {
                         if(props.multiple) {
@@ -193,7 +195,7 @@
                     return value;
                 }),
             });
-
+            
             watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
@@ -219,6 +221,7 @@
                 resetFieldState,
                 undirtyField,
                 searchWrapper,
+                selected,
                 // STATE
                 state,
                 v,
