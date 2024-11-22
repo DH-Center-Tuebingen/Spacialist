@@ -302,7 +302,7 @@
                         expClasses[itm] = true;
                     });
                 }
-                
+
                 return expClasses;
             };
             const onAttributeExpand = (e, i) => {
@@ -412,18 +412,22 @@
                     // curr is e.g. null if attribute is hidden
                     if(!!curr && !!curr.v && curr.v.meta.dirty && curr.v.meta.valid) {
                         currValue = curr.v.value;
+                        const datatype = getAttribute(k).datatype;
                         if(currValue !== null) {
                             // filter out deleted table rows
-                            if(getAttribute(k).datatype == 'table') {
+                            if(datatype == 'table') {
                                 currValue = currValue.filter(cv => !cv.mark_deleted);
+                            } else if(datatype == 'entity') {
+                                if(Object.keys(currValue).length == 0) {
+                                    currValue = null;
+                                }
                             }
                             values[k] = currValue;
                         } else {
-                            // null is allowed for date, string-sc, entity
+                            // null is allowed for date, string-sc
                             if(
-                                getAttribute(k).datatype == 'date' ||
-                                getAttribute(k).datatype == 'string-sc' ||
-                                getAttribute(k).datatype == 'entity'
+                                datatype == 'date' ||
+                                datatype == 'string-sc'
                             ) {
                                 values[k] = currValue;
                             }

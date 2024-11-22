@@ -116,7 +116,7 @@
             };
             const undirtyField = _ => {
                 v.resetField({
-                    value: v.fieldValue,
+                    value: v.fieldValue || (props.multiple ? [] : {}),
                 });
             };
             const searchWrapper = async query => {
@@ -156,7 +156,7 @@
                 }
             };
 
-            const selected = function (data) {
+            const selected = data => {
                 v.handleChange(data);
             };
 
@@ -167,7 +167,7 @@
                 meta,
                 resetField,
             } = useField(`entity_${props.name}`, yup.mixed().nullable(), {
-                initialValue: value.value || (props.multiple ? [] : null),
+                initialValue: value.value || (props.multiple ? [] : {}),
             });
 
             const state = reactive({
@@ -183,7 +183,7 @@
                 meta,
                 resetField,
                 value: computed(_ => {
-                    if(!v.fieldValue) return (props.multiple ? [] : null);
+                    if(!v.fieldValue || (!props.multiple && Object.keys(v.fieldValue).length == 0)) return (props.multiple ? [] : {});
                     let value = null;
                     if(v.fieldValue) {
                         if(props.multiple) {
@@ -195,7 +195,7 @@
                     return value;
                 }),
             });
-            
+
             watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
