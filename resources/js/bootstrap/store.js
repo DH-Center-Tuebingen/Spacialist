@@ -281,6 +281,15 @@ export const store = createStore({
                             }
                         }
                     }
+
+                    // Remove the data from the entity. 
+                    // We need to do this as the 'replace', 'add' 'remove' 
+                    // operations are calculated based on this value.
+                    for(const attributeId in data.removed_data) {
+                        if(entity.data[attributeId]) {
+                            state.entity.data[attributeId].id = null;
+                        }
+                    }
                 },
                 updateEntityMetadata(state, data) {
                     let metadata = {};

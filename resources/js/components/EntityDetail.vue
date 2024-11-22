@@ -919,6 +919,7 @@
                     store.dispatch('updateEntityData', {
                         data: dirtyValues,
                         new_data: data.added_attributes,
+                        removed_data: data.removed_attributes,
                         eid: state.entity.id,
                         sync: !isModerated(),
                     });

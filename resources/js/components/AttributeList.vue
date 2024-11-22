@@ -504,7 +504,7 @@
             };
 
             const hasComment = attribute => {
-                return state.attributeValues[attribute.id].comments_count > 0;
+                return state.attributeValues[attribute.id]?.comments_count > 0;
             };
             const hasBookmarks = attribute => {
                 return metadataAddon.value && metadataAddon.value(attribute.thesaurus_url);
