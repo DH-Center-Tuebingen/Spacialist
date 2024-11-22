@@ -306,7 +306,7 @@
                         :metadata-addon="hasReferenceGroup"
                         :selections="state.entityTypeSelections"
                         :values="state.entity.data"
-                        @dirty="e => setFormState(e, tg.id)"
+                        @dirty="(e, isDirty) => setFormState(e, isDirty, tg.id)"
                         @metadata="showMetadata"
                     />
                 </form>
@@ -788,8 +788,8 @@
             const showTabActions = (grp, status) => {
                 state.attributeGrpHovered = status ? grp : null;
             };
-            const setFormState = (e, grp) => {
-                state.dirtyStates[grp] = e.dirty && e.valid;
+            const setFormState = (e, isDirty, grp) => {
+                state.dirtyStates[grp] = isDirty;
                 updateDependencyState(e.attribute_id, e.value);
             };
             const getDirtyValues = grp => {

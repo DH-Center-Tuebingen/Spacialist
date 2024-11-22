@@ -441,8 +441,9 @@
                 if(state.attributeValues[e.attribute_id].moderation_edit_state == 'active') {
                     return;
                 }
-
-                context.emit('dirty', e);
+                const dirtyValues = getDirtyValues();
+                const isDirty = Object.keys(dirtyValues).length > 0;
+                context.emit('dirty', e, isDirty);
             };
             const resetListValues = _ => {
                 for(let k in attrRefs.value) {
