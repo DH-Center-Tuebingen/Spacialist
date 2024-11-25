@@ -1,7 +1,7 @@
 <template>
     <div
-        class="dity-state-indicator"
-        :style="style"
+        :class="styling.classes"
+        :style="styling.style"
     />
 </template>
 
@@ -14,30 +14,41 @@
                 type: Object,
                 required: true,
             },
-        }, setup(props) {
-
-            const isDirty = computed(() => {
+            size: {
+                type: Number,
+                required: false,
+                default: 10,
+            },
+        },
+	setup(props) {
+            const isDirty = computed(_ => {
                 return props?.value?.meta?.dirty;
             });
 
-
-            const isUnset = computed(() => {
+            const isUnset = computed(_ => {
                 return props?.value?.meta?.dirty == null;
             });
 
-
-            const size = 10;
-            const style = computed(() => {
+            const styling = computed(_ => {
+                const classes = ['rounded-circle'];
+                if(isUnset.value) {
+                    classes.push('bg-danger');
+                } else if(isDirty.value) {
+                    classes.push('bg-warning');
+                } else {
+                    classes.push('bg-success');
+                }
                 return {
-                    width: `${size}px`,
-                    height: `${size}px`,
-                    borderRadius: '50%',
-                    backgroundColor: isUnset.value ? 'red' : isDirty.value ? 'orange' : 'green',
+                    style: {
+                        width: `${props.size}px`,
+                        height: `${props.size}px`,
+                    },
+                    classes: classes,
                 };
             });
 
             return {
-                style
+                styling,
             };
         },
     };
