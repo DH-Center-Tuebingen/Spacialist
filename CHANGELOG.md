@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 - More elaborate type checking on attributes _parseImport_ method.
 - Unit test for all attribute imports (except Table).
 ### Fixed
+- Entity (Multiple-Choice) no longer removes all entries when a single one is deleted.
 - Frontend errors due to wrong dayjs import
 - Missing translation for _milligram_ in si-unit attribute
 - Entity search now allows to display more than first 10 results
@@ -26,6 +27,7 @@ All notable changes to this project will be documented in this file.
 - Entity tree header overflow on small screens
 - Added tests for all attribute type imports
 - Improved output in _Data Importer_ frontend
+- Adding _Group Separator_ in _Data Model Editor_
 ### Changed
 - Move switch to show hidden attributes in _Data Model Editor_ to dropdown
 - Make tabular head _sticky_

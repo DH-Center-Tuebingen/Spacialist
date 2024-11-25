@@ -135,7 +135,7 @@ abstract class AttributeBase
 
     public static function onAddHandler(Attribute $attr, EntityType $entityType, User $user) : void {
         $class = self::getMatchingClass($attr->datatype);
-        if(method_exists($class, "handleOnAdd")) {
+        if($class !== false && method_exists($class, "handleOnAdd")) {
             $class::handleOnAdd($attr, $entityType, $user);
         }
     }

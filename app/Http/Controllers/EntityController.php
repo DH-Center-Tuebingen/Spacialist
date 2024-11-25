@@ -744,11 +744,13 @@ class EntityController extends Controller {
         }
 
         $addedAttributes = [];
+        $removedAttributes = [];
 
         if(count($request->request) === 0) {
             return response()->json([
                 'entity' => $entity,
                 'added_attributes' => $addedAttributes,
+                'removed_attributes' => $removedAttributes,
             ], 204);
         }
 
@@ -769,6 +771,7 @@ class EntityController extends Controller {
                     if($user->isModerated()) {
                         $attrval->moderate('pending-delete', true);
                     } else {
+                        $removedAttributes[$aid] = $attrval;
                         $attrval->delete();
                     }
                     break;
@@ -830,6 +833,7 @@ class EntityController extends Controller {
                     'error' => $ide->getMessage(),
                 ], 422);
             }
+
             $attrval->{$formKeyValue->key} = $formKeyValue->val;
             $attrval->user_id = $user->id;
             $attrval->save();
@@ -852,6 +856,7 @@ class EntityController extends Controller {
         return response()->json([
             'entity' => $entity,
             'added_attributes' => $addedAttributes,
+            'removed_attributes' => $removedAttributes,
         ]);
     }
 

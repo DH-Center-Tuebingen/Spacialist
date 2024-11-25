@@ -1,5 +1,6 @@
 <template>
     <simple-search
+        :value="v.value"
         :endpoint="searchWrapper"
         :key-fn="handleDisplayResult"
         :chain="'ancestors'"
@@ -9,9 +10,8 @@
         :infinite="true"
         :limit="10"
         :can-fetch-more="state.hasNextPage"
-        @selected="e => entitySelected(e)"
-        @entry-click="e => entryClicked(e)"
-        @deselect="v.handleChange(null)"
+        @selected="selected"
+        @entry-click="entity => entryClicked(entity)"
     />
     <router-link
         v-if="canShowLink"
@@ -91,42 +91,23 @@
             // FETCH
 
             // FUNCTIONS
-            const entitySelected = e => {
-                const {
-                    added,
-                    removed,
-                    ...entity
-                } = e;
-                let data;
-                if(removed) {
-                    if(props.multiple) {
-                        data = entity.values;
-                    } else {
-                        data = null;
-                    }
-                } else if(added) {
-                    if(props.multiple) {
-                        data = entity.values;
-                    } else {
-                        data = entity;
-                    }
-                }
-                v.handleChange(data);
-            };
-            const entryClicked = e => {
+
+            const entryClicked = entity => {
                 if(props.hideLink) return;
 
                 router.push({
                     name: 'entitydetail',
                     params: {
-                        id: e.id,
+                        id: entity.id,
                     },
                     query: route.query
                 });
             };
-            const handleDisplayResult = e => {
-                if(e.name == 'error.deleted_entity') return t('main.entity.attributes.table.error.deleted_entity');
-                return e?.name;
+            const handleDisplayResult = entity => {
+                if(searchEntityInTypes.name == 'error.deleted_entity') {
+                    return t('main.entity.attributes.tablsearchEntityInTypes.error.deleted_entity');
+                }
+                return entity?.name;
             };
             const resetFieldState = _ => {
                 v.resetField({
@@ -135,7 +116,7 @@
             };
             const undirtyField = _ => {
                 v.resetField({
-                    value: v.fieldValue,
+                    value: v.fieldValue || (props.multiple ? [] : {}),
                 });
             };
             const searchWrapper = async query => {
@@ -175,6 +156,10 @@
                 }
             };
 
+            const selected = data => {
+                v.handleChange(data);
+            };
+
             // DATA
             const {
                 handleChange,
@@ -182,8 +167,9 @@
                 meta,
                 resetField,
             } = useField(`entity_${props.name}`, yup.mixed().nullable(), {
-                initialValue: value.value || (props.multiple ? [] : null),
+                initialValue: value.value || (props.multiple ? [] : {}),
             });
+
             const state = reactive({
                 query: computed(_ => route.query),
                 mode: computed(_ => props.multiple ? 'tags' : 'single'),
@@ -197,8 +183,7 @@
                 meta,
                 resetField,
                 value: computed(_ => {
-                    if(!v.fieldValue) return (props.multiple ? [] : null);
-
+                    if(!v.fieldValue || (!props.multiple && Object.keys(v.fieldValue).length == 0)) return (props.multiple ? [] : {});
                     let value = null;
                     if(v.fieldValue) {
                         if(props.multiple) {
@@ -231,12 +216,12 @@
                 t,
                 // LOCAL
                 canShowLink,
-                entitySelected,
                 entryClicked,
                 handleDisplayResult,
                 resetFieldState,
                 undirtyField,
                 searchWrapper,
+                selected,
                 // STATE
                 state,
                 v,
