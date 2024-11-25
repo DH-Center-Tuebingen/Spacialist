@@ -459,7 +459,7 @@ class EntityController extends Controller {
             'metadata' => 'required|json',
             'data' => 'required|json',
         ]);
-        
+
         $file = $request->file('file');
 
         if(!$file || !$file->isValid()) {
@@ -758,6 +758,7 @@ class EntityController extends Controller {
         foreach($request->request as $patch) {
             $op = $patch['op'];
             $aid = $patch['params']['aid'];
+            $error = null;
             switch($op) {
                 case 'remove':
                     $attrval = AttributeValue::where([
@@ -765,9 +766,8 @@ class EntityController extends Controller {
                         ['attribute_id', '=', $aid],
                     ])->first();
                     if(!isset($attrval)) {
-                        return response()->json([
-                            'error' => __('This attribute value does either not exist or is in moderation state.'),
-                        ], 400);
+                        $error = __('This attribute value does either not exist or is in moderation state.');
+                        break;
                     }
                     if($user->isModerated()) {
                         $attrval->moderate('pending-delete', true);
@@ -782,9 +782,8 @@ class EntityController extends Controller {
                         ->withModerated()
                         ->exists();
                     if($alreadyAdded) {
-                        return response()->json([
-                            'error' => __('There is already a value set for this attribute or it is in moderation state.'),
-                        ], 400);
+                        $error = __('There is already a value set for this attribute or it is in moderation state.');
+                        break;
                     }
                     $value = $patch['value'];
                     $attrval = new AttributeValue();
@@ -801,9 +800,8 @@ class EntityController extends Controller {
                         ->onlyModerated()
                         ->exists();
                     if($alreadyModerated) {
-                        return response()->json([
-                            'error' => __('This attribute value is in moderation state. A user with appropriate permissions has to accept or deny it first.'),
-                        ], 400);
+                        $error = __('This attribute value is in moderation state. A user with appropriate permissions has to accept or deny it first.');
+                        break;
                     }
                     $value = $patch['value'];
                     $attrval = AttributeValue::where([
