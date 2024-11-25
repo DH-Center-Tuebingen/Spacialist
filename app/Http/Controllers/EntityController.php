@@ -832,9 +832,8 @@ class EntityController extends Controller {
                 return response()->json([
                     'error' => $ide->getMessage(),
                 ], 422);
-            }          
-            
-            
+            }
+
             $attrval->{$formKeyValue->key} = $formKeyValue->val;
             $attrval->user_id = $user->id;
             $attrval->save();
