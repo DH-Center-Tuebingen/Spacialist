@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 use App\User;
+use Database\Seeders\TestSeeder;
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
@@ -15,6 +16,18 @@ abstract class TestCase extends BaseTestCase {
     use WithFaker;
     use DatabaseTransactions;
     use ArraySubsetAsserts;
+
+    /**
+    * Indicates whether the default seeder should run before each test.
+    *
+    * @var bool
+    */
+    protected $seed = true;
+
+    /**
+     * Specify the seeder that should be run.
+     */
+    protected $seeder = TestSeeder::class;
 
     protected $connectionsToTransact = [
         'testing'
@@ -25,13 +38,6 @@ abstract class TestCase extends BaseTestCase {
 
     protected function setUp(): void {
         parent::setUp();
-        // Running the seeders is problematic as the
-        // test database should be setup correctly beforehand
-        // and the seeders should not be necessary.
-        // $this->seed([
-        //     'DatabaseSeeder',
-        //     'DemoSeeder'
-        // ]);
         $this->user = null;
         $this->token = null;
         $this->getUserToken();
@@ -49,26 +55,27 @@ abstract class TestCase extends BaseTestCase {
     }
 
     public function getUserToken() {
-        if (!isset($this->user)) {
+        if(!isset($this->user)) {
             $this->user = User::find(1);
         }
         $this->token = JWTAuth::fromUser($this->user);
     }
 
     public function getUnauthUser() {
-        if (!isset($this->user)) {
+        if(!isset($this->user)) {
             $this->user = User::find(1);
         }
         return $this->user;
     }
 
     public function userRequest($response = null) {
-        if (isset($response))
+        if(isset($response)) {
             $this->refreshToken($response);
+        }
 
         return $this->withHeaders([
             'Authorization' => "Bearer $this->token",
-            'Accept' => 'application/json' // When not setting this, Laravels validation will return a 302 on failure! 
+            'Accept' => 'application/json' // When not setting this, Laravels validation will return a 302 on failure!
         ]);
     }
 }
