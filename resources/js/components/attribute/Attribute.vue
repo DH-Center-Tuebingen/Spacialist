@@ -250,6 +250,7 @@
         reactive,
         ref,
         toRefs,
+        watch,
     } from 'vue';
 
     import {
@@ -357,8 +358,9 @@
                 valueWrapper,
                 disabled,
             } = toRefs(props);
+
             // FETCH
-            
+
             const getValueOrDefault = _ => {
                 return valueWrapper.value.value || getEmptyAttributeValue(data.value.datatype);
             };
@@ -415,6 +417,10 @@
             };
 
             const v = ref({});
+
+            watch(_ => valueWrapper.value, (newValue, oldValue) => {
+                state.value = _cloneDeep(getValueOrDefault());
+            });
 
             // RETURN
             return {

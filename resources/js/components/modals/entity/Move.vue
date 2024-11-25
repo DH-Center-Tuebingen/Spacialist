@@ -58,7 +58,7 @@
                                 :filter-fn="filterEntityResults"
                                 :key-text="'name'"
                                 :chain="'ancestors'"
-                                @selected="e => entitySelected(e)"
+                                @selected="entity => entitySelected(entity)"
                             />
                         </div>
                     </div>
@@ -117,17 +117,8 @@
             } = toRefs(props);
 
             // FUNCTIONS
-            const entitySelected = e => {
-                const {
-                    added,
-                    removed,
-                    ...entity
-                } = e;
-                if(removed) {
-                    state.parent = null;
-                } else if(added) {
-                    state.parent = entity;
-                }
+            const entitySelected = entity => {
+                state.parent = entity;
             };
             const filterEntityResults = results => {
                 return results.filter(r => {
@@ -169,7 +160,7 @@
                 closeModal,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

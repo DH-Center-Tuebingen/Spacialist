@@ -13,19 +13,18 @@
         <template #item="{ element, index }">
             <div
                 v-if="!state.hiddenAttributeList[element.id] || showHidden"
-                class="mb-3 px-2"
-            >
+                class="mt-3 px-2"
                 :class="clFromMetadata(element)"
                 @mouseenter="onEnter(index)"
                 @mouseleave="onLeave(index)"
-                >
+            >
                 <div
                     class="row"
                     :class="addModerationStateClasses(element.id)"
                 >
                     <label
                         v-if="!state.hideLabels"
-                        class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break"
+                        class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break align-self-start"
                         :for="`attr-${element.id}`"
                         :class="attributeClasses(element)"
                         @click="e => handleLabelClick(e, element.datatype)"
@@ -303,7 +302,7 @@
                         expClasses[itm] = true;
                     });
                 }
-                
+
                 return expClasses;
             };
             const onAttributeExpand = (e, i) => {
@@ -413,18 +412,22 @@
                     // curr is e.g. null if attribute is hidden
                     if(!!curr && !!curr.v && curr.v.meta.dirty && curr.v.meta.valid) {
                         currValue = curr.v.value;
+                        const datatype = getAttribute(k).datatype;
                         if(currValue !== null) {
                             // filter out deleted table rows
-                            if(getAttribute(k).datatype == 'table') {
+                            if(datatype == 'table') {
                                 currValue = currValue.filter(cv => !cv.mark_deleted);
+                            } else if(datatype == 'entity') {
+                                if(Object.keys(currValue).length == 0) {
+                                    currValue = null;
+                                }
                             }
                             values[k] = currValue;
                         } else {
-                            // null is allowed for date, string-sc, entity
+                            // null is allowed for date, string-sc
                             if(
-                                getAttribute(k).datatype == 'date' ||
-                                getAttribute(k).datatype == 'string-sc' ||
-                                getAttribute(k).datatype == 'entity'
+                                datatype == 'date' ||
+                                datatype == 'string-sc'
                             ) {
                                 values[k] = currValue;
                             }
@@ -438,8 +441,9 @@
                 if(state.attributeValues[e.attribute_id].moderation_edit_state == 'active') {
                     return;
                 }
-
-                context.emit('dirty', e);
+                const dirtyValues = getDirtyValues();
+                const isDirty = Object.keys(dirtyValues).length > 0;
+                context.emit('dirty', e, isDirty);
             };
             const resetListValues = _ => {
                 for(let k in attrRefs.value) {
@@ -501,7 +505,7 @@
             };
 
             const hasComment = attribute => {
-                return state.attributeValues[attribute.id].comments_count > 0;
+                return state.attributeValues[attribute.id]?.comments_count > 0;
             };
             const hasBookmarks = attribute => {
                 return metadataAddon.value && metadataAddon.value(attribute.thesaurus_url);

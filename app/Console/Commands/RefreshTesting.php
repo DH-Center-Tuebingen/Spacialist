@@ -36,21 +36,27 @@ class RefreshTesting extends Command {
     public function handle() {
         $testingEnv = \Dotenv\Dotenv::createMutable(base_path(), '.env.testing');
         $testingEnv->load();
+        $this->call('config:clear');
 
         $database = env('DB_DATABASE');
 
         if($this->option('refresh')) {
             $this->info("Refreshing database '$database' ...");
             $this->call('config:clear');
-            $this->call('migrate:fresh');
+            $this->call('migrate:fresh', [
+                '--env' => 'testing',
+            ]);
             $this->call('db:seed', [
                 '--class' => 'TestingSeeder',
+                '--env' => 'testing',
             ]);
         }
 
         if(!$this->option('skip')) {
             $this->info('Running tests...');
-            $this->call('test');
+            $this->call('test', [
+                '--env' => 'testing',
+            ]);
         } else {
             $this->info('Skipping tests...');
         }

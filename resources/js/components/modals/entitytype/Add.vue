@@ -134,17 +134,8 @@
             const closeModal = _ => {
                 context.emit('closing', false);
             };
-            const labelSelected = e => {
-                const {
-                    added,
-                    removed,
-                    ...label
-                } = e;
-                if(removed) {
-                    state.entityType.label = null;
-                } else if(added) {
-                    state.entityType.label = label;
-                }
+            const labelSelected = label => {
+                state.entityType.label = label;
             };
 
             // DATA
@@ -172,7 +163,7 @@
                 labelSelected,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

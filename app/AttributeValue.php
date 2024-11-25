@@ -2,7 +2,6 @@
 
 namespace App;
 
-use App\Exceptions\InvalidDataException;
 use App\Plugins\Map\App\Geodata;
 use App\AttributeTypes\AttributeBase;
 use Illuminate\Database\Eloquent\Model;
@@ -170,11 +169,12 @@ class AttributeValue extends Model implements Searchable
 
     // Throws InvalidDataException
     // Throws AmbiguousValueException
-    public static function stringToValue($strValue, $type) {
-        if(!isset($strValue) || trim($strValue) === '') return null;
+    public static function stringToValue(string $strValue, string $type) {
+        $strValue = trim($strValue);
+        if($strValue === '') return null;
 
         $attributeClass = AttributeBase::getMatchingClass($type);
-        return $attributeClass::fromImport(trim($strValue));
+        return $attributeClass::fromImport($strValue);
     }
 
     public function user() {
