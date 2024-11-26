@@ -4,7 +4,6 @@ namespace App;
 
 use App\AttributeTypes\AttributeBase;
 use Illuminate\Database\Eloquent\Model;
-use MStaack\LaravelPostgis\Geometries\Geometry;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
@@ -59,7 +58,7 @@ class Attribute extends Model
 
     public function getAttributeValueFromEntityPivot()
     {
-        switch ($this->datatype) {
+        switch($this->datatype) {
             case 'string-sc':
                 $this->pivot->thesaurus_val = ThConcept::where('concept_url', $this->pivot->thesaurus_val)->first();
                 break;
@@ -73,7 +72,7 @@ class Attribute extends Model
             $this->pivot->thesaurus_val ??
             json_decode($this->pivot->json_val) ??
             $this->pivot->dt_val ??
-            Geometry::fromWKB($this->pivot->geography_val)->toWKT();
+            Geodata::wkb2wkt($this->pivot->geography_val);
     }
 
     public function getSelection() {

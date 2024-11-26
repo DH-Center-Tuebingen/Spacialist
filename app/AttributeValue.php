@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\Plugins\Map\App\Geodata;
+use App\Geodata;
 use App\AttributeTypes\AttributeBase;
 use Illuminate\Database\Eloquent\Model;
 use Clickbar\Magellan\Database\Eloquent\HasPostgisColumns;
@@ -113,7 +113,7 @@ class AttributeValue extends Model implements Searchable
             return $arr['dt_val'];
         }
         if(isset($arr['geography_val'])) {
-            return Geodata::arrayToWkt($arr['geography_val']);
+            return Geodata::arrayToWKT($arr['geography_val']);
         }
     }
 
