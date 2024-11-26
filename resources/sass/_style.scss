@@ -196,6 +196,19 @@ dl.dl-0-mb > dd:last-child {
     overflow-y: auto;
 }
 
+table.table-sticky > thead {
+    @extend .position-sticky;
+    top:0;
+    background-color: var(--bs-table-bg);;
+    box-shadow: 0 2px 1px -1px var(--bs-table-border-color);
+    z-index: $zindex-sticky-in-page;
+}
+
+table.table-sticky .multiselect-dropdown,
+table.table-sticky .dropdown-menu {
+    z-index: $zindex-dropdown-underneath-sticky;
+}
+
 .hover-underline:hover {
     text-decoration: underline;
 }
@@ -210,4 +223,8 @@ dl.dl-0-mb > dd:last-child {
 .rendered-markdown li > p {
     display: inline !important;
     margin: 0px !important;
+}
+
+.list-hover:hover {
+    background-color: $gray-200 !important;
 }

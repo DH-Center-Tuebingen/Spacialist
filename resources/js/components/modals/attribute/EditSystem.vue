@@ -94,16 +94,13 @@
             const closeModal = _ => {
                 context.emit('closing', false);
             };
-            const handleSeparatorRename = e => {
-                const {
-                    added,
-                    removed,
-                    ...label
-                } = e;
-                if(added) {
-                    state.title = label.concept_url;
-                } else if(removed) {
+            const handleSeparatorRename = label => {
+                if(label === null){
                     state.title = null;
+                } else if(label.concept_url) {
+                    state.title = label.concept_url;
+                }else{
+                    console.error('Invalid separator label', label);
                 }
             };
 
@@ -128,7 +125,7 @@
                 handleSeparatorRename,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

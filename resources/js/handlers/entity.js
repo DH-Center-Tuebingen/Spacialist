@@ -32,6 +32,7 @@ export const handleAttributeValueUpdated = {
             {
                 [e.attributeValue.attribute_id]: e.attributeValue,
             },
+            {},
             true,
             true,
         );

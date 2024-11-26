@@ -170,30 +170,6 @@ class EditorController extends Controller {
         return response()->json($cType, 201);
     }
 
-    public function setRelationInfo(Request $request, $id) {
-        $user = auth()->user();
-        if(!$user->can('entity_type_write')) {
-            return response()->json([
-                'error' => __('You do not have the permission to modify entity relations')
-            ], 403);
-        }
-        $this->validate($request, [
-            'is_root' => 'boolean_string',
-            'sub_entity_types' => 'array'
-        ]);
-        try {
-            $entityType = EntityType::findOrFail($id);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This entity-type does not exist')
-            ], 400);
-        }
-        $is_root = $request->get('is_root');
-        $subs = $request->get('sub_entity_types');
-        $entityType->setRelationInfo($is_root, $subs);
-        return response()->json(null, 204);
-    }
-
     public function addAttribute(Request $request) {
         $user = auth()->user();
         if(!$user->can('attribute_create')) {

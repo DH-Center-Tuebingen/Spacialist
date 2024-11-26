@@ -758,9 +758,9 @@ export async function searchConceptSelection(cid) {
     );
 }
 
-export async function searchEntityInTypes(query = '', types = []) {
+export async function searchEntityInTypes(query = '', types = [], page = 1) {
     const typeList = types.join(',');
     return $httpQueue.add(
-        () => http.get(`search/entity?q=${query}&t=${typeList}`).then(response => response.data)
+        () => http.get(`search/entity?q=${query}&t=${typeList}&page=${page}`).then(response => response.data)
     );
 }

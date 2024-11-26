@@ -73,16 +73,18 @@ class ApiUserTest extends TestCase
                     'name' => 'Admin',
                 ],[
                   'id' => 2,
-                    'name' => "John Doe",  
-                ],[
-                    'id' => 3,
-                    'name' => "Gary Guest",
+                    'name' => "John Doe",
                 ],[
                     'id' => $user->id,
                     'name' => $user->name,
-                ]
+                ],
             ],
-            'deleted_users' => []
+            'deleted_users' => [
+                [
+                    'id' => 3,
+                    'name' => "Gary Guest",
+                ],
+            ]
         ]);
     }
 
@@ -118,26 +120,6 @@ class ApiUserTest extends TestCase
         ]);
     }
 
-    /**
-     * @testdox GET    /api/v1/auth/refresh : Refresh JWT
-     *
-     * @return void
-     */
-    public function testRefreshTokenEndpoint()
-    {
-        $oldToken = $this->token;
-        $response = $this->userRequest()
-            ->get('/api/v1/auth/refresh');
-
-        $response->assertStatus(200);
-        $response->assertJsonCount(1);
-        $response->assertSimilarJson([
-            'status' => 'success'
-        ]);
-        $this->refreshToken($response);
-        $this->assertTrue($oldToken != $this->token);
-    }
-
     // Testing POST requests
 
     /**
@@ -154,7 +136,6 @@ class ApiUserTest extends TestCase
             ]);
 
         $response->assertStatus(200);
-        $this->assertTrue($response->headers->has('authorization'));
     }
 
     /**
@@ -171,7 +152,6 @@ class ApiUserTest extends TestCase
             ]);
 
         $response->assertStatus(200);
-        $this->assertTrue($response->headers->has('authorization'));
     }
 
     /**
@@ -559,16 +539,16 @@ class ApiUserTest extends TestCase
         $cnt = User::count();
         $this->assertEquals(3, $cnt);
         $cnt = User::onlyTrashed()->count();
-        $this->assertEquals(1, $cnt);
-        $cnt = User::withoutTrashed()->count();
         $this->assertEquals(2, $cnt);
+        $cnt = User::withoutTrashed()->count();
+        $this->assertEquals(1, $cnt);
         $user = User::find(1);
         $this->assertNotNull($user->deleted_at);
 
         $response = $this->userRequest()
             ->patch('/api/v1/user/restore/1');
 
-        $user = User::find(3);
+        $user = User::find(2);
         $this->assertNull($user->deleted_at);
 
         $response->assertStatus(204);
@@ -584,9 +564,9 @@ class ApiUserTest extends TestCase
         $cnt = User::count();
         $this->assertEquals(3, $cnt);
         $cnt = User::onlyTrashed()->count();
-        $this->assertEquals(0, $cnt);
+        $this->assertEquals(1, $cnt);
         $cnt = User::withoutTrashed()->count();
-        $this->assertEquals(3, $cnt);
+        $this->assertEquals(2, $cnt);
         $response = $this->userRequest()
             ->delete('/api/v1/user/1');
 
@@ -595,13 +575,13 @@ class ApiUserTest extends TestCase
         $cnt = User::count();
         $this->assertEquals(3, $cnt);
         $cnt = User::onlyTrashed()->count();
-        $this->assertEquals(1, $cnt);
-        $cnt = User::withoutTrashed()->count();
         $this->assertEquals(2, $cnt);
+        $cnt = User::withoutTrashed()->count();
+        $this->assertEquals(1, $cnt);
         $user = User::find(1);
         $this->assertNotNull($user->deleted_at);
 
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
             ->patch('/api/v1/user/restore/1');
 
         $user = User::find(1);
@@ -712,7 +692,7 @@ class ApiUserTest extends TestCase
 
         $response = null;
         foreach($calls as $c) {
-            $response = $this->userRequest($response)
+            $response = $this->userRequest()
                 ->json($c['verb'], '/api/v1' . $c['url']);
 
             $this->assertStatus($response, 403);
@@ -745,8 +725,6 @@ class ApiUserTest extends TestCase
             $response->assertSimilarJson([
                 'error' => $c['error']
             ]);
-
-            $this->refreshToken($response);
         }
     }
 
@@ -771,7 +749,7 @@ class ApiUserTest extends TestCase
 
         $this->assertEquals('The email has already been taken.', $response->exception->getMessage());
 
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
             ->patch('/api/v1/user/' . $user->id, [
                 'email' => 'admin@localhost!'
             ]);

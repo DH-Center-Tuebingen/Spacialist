@@ -476,7 +476,7 @@ export const useEntityStore = defineStore('entity', {
                 this.updateAttributeMetadata(entityTypeId, attributeId, etAttrId, data);
             });
         },
-        updateEntityData(entityId, updatedValues, patchedData, sync, fromWebsocket = false) {
+        updateEntityData(entityId, updatedValues, patchedData, removedData, sync, fromWebsocket = false) {
             const entity = this.getEntity(entityId);
             if(fromWebsocket) {
                 this.receivedEntityData[entity.id] = {};
@@ -508,6 +508,18 @@ export const useEntityStore = defineStore('entity', {
                         if(sync) {
                             this.selectedEntity.data[k].value = updatedValues[k];
                         }
+                    }
+                }
+            }
+
+            // Remove the data from the entity. 
+            // We need to do this as the 'replace', 'add' 'remove' 
+            // operations are calculated based on this value.
+            for(const attributeId in removedData) {
+                if(entity.data[attributeId]) {
+                    this.entity.data[attributeId].id = null;
+                    if(sync) {
+                        this.selectedEntity.data[attributeId].id = null;
                     }
                 }
             }
@@ -727,7 +739,7 @@ export const useEntityStore = defineStore('entity', {
                 const updatedValues = {
                     [attributeId]: data,
                 };
-                this.updateEntityData(entityId, updatedValues, updatedValues, true);
+                this.updateEntityData(entityId, updatedValues, updatedValues, {}, true);
                 return data;
             });
         },
@@ -735,7 +747,7 @@ export const useEntityStore = defineStore('entity', {
             const moderated = useUserStore().getUserModerated;
             return patchAttributes(entityId, patchData).then(data => {
                 this.update(data.entity);
-                this.updateEntityData(entityId, dirtyValues, data.added_attributes, !moderated);
+                this.updateEntityData(entityId, dirtyValues, data.added_attributes, data.removed_attributes, !moderated);
                 if(moderated) {
                     this.updateEntityDataModerations(entityId, moderations, 'pending');
                 }

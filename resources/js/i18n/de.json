@@ -80,6 +80,7 @@
         "search_no_results_for": "Keine Ergebnisse für den Begriff:",
         "search_no_term_info": "Gib einen Suchbegriff ein",
         "search_no_term_info_global": "Gib einen Suchbegriff ein um das gesamte System zu durchsuchen",
+        "search_load_n_more": "Lade bis zu {n} weitere Treffer",
         "login": "Einloggen",
         "login_title": "Anmelden",
         "login_subtitle": "Willkommen bei Spacialist",
@@ -235,6 +236,7 @@
                 "mass": {
                     "label": "Gewicht",
                     "units": {
+                        "milligram": "Milligramm",
                         "gram": "Gramm",
                         "kilogram": "Kilogramm",
                         "ton": "Tonnen",
@@ -703,6 +705,10 @@
             "toggle_pretty_print": "Darstellung umschalten"
         },
         "datamodel": {
+            "expand_groups": "Alle Gruppen ausklappen",
+            "collapse_groups": "Alle Gruppen einklappen",
+            "sort_by_name": "Nach Namen sortieren",
+            "sort_by_creation_date": "Nach Erstellungsdatum sortieren",
             "toasts": {
                 "updated_type": {
                     "title": "Entitätstyp aktualisiert",
@@ -721,6 +727,9 @@
                 "title": "Verfügbare Attribute",
                 "add_button": "Attribut hinzufügen",
                 "show_hidden": "Ausgeblendete anzeigen",
+                "hide_hidden": "Ausgeblendete verstecken",
+                "separated": "Attribute einzeln auflisten",
+                "in_groups": "Attribute in Gruppen auflisten",
                 "modal": {
                     "new": {
                         "title": "Neues Attribut"

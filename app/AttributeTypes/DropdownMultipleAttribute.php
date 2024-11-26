@@ -3,8 +3,9 @@
 namespace App\AttributeTypes;
 
 use App\Attribute;
-use App\ThConcept;
 use App\Exceptions\InvalidDataException;
+use App\ThConcept;
+use App\Utils\StringUtils;
 
 class DropdownMultipleAttribute extends AttributeBase
 {
@@ -17,19 +18,20 @@ class DropdownMultipleAttribute extends AttributeBase
         return ThConcept::getChildren($a->thesaurus_root_url, $a->recursive);
     }
 
-    public static function fromImport(int|float|bool|string $data) : mixed {
+    public static function parseImport(int|float|bool|string $data) : mixed {
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);
         $convValues = [];
         $parts = explode(';', $data);
         foreach($parts as $part) {
             $trimmedPart = trim($part);
-            $concept = ThConcept::getByString($trimmedPart);
+            $concept = ThConcept::getByString($trimmedPart); // Discuss: Problematic when there is another concept with the same name AND also when the concept is NOT available in this dropdown.
             if(isset($concept)) {
                 $convValues[] = [
                     'id' => $concept->id,
                     'concept_url' => $concept->concept_url,
                 ];
             } else {
-                throw new InvalidDataException("Given data part ($trimmedPart) is not a valid concept/label in the vocabulary");
+                throw InvalidDataException::invalidConcept($trimmedPart);
             }
         }
         return json_encode($convValues);

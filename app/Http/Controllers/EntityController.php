@@ -11,9 +11,10 @@ use App\EntityType;
 use App\Exceptions\AmbiguousValueException;
 use App\Exceptions\AttributeImportException;
 use App\Exceptions\ImportException;
-use App\Exceptions\Structs\ImportExceptionStruct;
 use App\Exceptions\InvalidDataException;
 use App\Exceptions\Structs\AttributeImportExceptionStruct;
+use App\Exceptions\Structs\ImportExceptionStruct;
+use App\File;
 use App\Import\EntityImporter;
 use App\Reference;
 use App\ThConcept;
@@ -458,17 +459,34 @@ class EntityController extends Controller {
             'metadata' => 'required|json',
             'data' => 'required|json',
         ]);
+
+        $file = $request->file('file');
+
+        if(!$file || !$file->isValid()) {
+            return response()->json([
+                'error' => __('entity-importer.invalid-data', ['column' => 'file', 'value' => $file === null ? 'null' : 'invalid']),
+            ], 422);
+        }
+
+        $filepath = $file->getRealPath();
+        File::removeBomIfNecessary($filepath);
+
+        return null;
     }
 
     public function validateImportData(Request $request) {
-        $this->verifyImportData($request);
+        $errorResponse = $this->verifyImportData($request);
+        if($errorResponse) {
+            return $errorResponse;
+        }
 
         $file = $request->file('file');
+        $filepath = $file->getRealPath();
         $metadata = json_decode($request->get('metadata'), true);
         $data = json_decode($request->get('data'), true);
 
         $entityImport = new EntityImporter($metadata, $data);
-        $resolver = $entityImport->validateImportData($file->getRealPath());
+        $resolver = $entityImport->validateImportData($filepath);
 
         return response()->json([
             'errors' => $resolver->getErrors(),
@@ -480,12 +498,16 @@ class EntityController extends Controller {
      * TODO: Move this functionality into the EntityImporter class.
      */
     public function importData(Request $request) {
-        $this->verifyImportData($request);
+        $errorResponse = $this->verifyImportData($request);
+        if($errorResponse) {
+            return $errorResponse;
+        }
 
         $file = $request->file('file');
+        $filepath = $file->getRealPath();
         $metadata = json_decode($request->get('metadata'), true);
         $data = json_decode($request->get('data'), true);
-        $handle = fopen($file->getRealPath(), 'r');
+        $handle = fopen($filepath, 'r');
 
         // Data values
         $nameColumn = trim($data['name_column']);
@@ -723,24 +745,35 @@ class EntityController extends Controller {
 
         DB::beginTransaction();
         $addedAttributes = [];
+        $removedAttributes = [];
+
+        if(count($request->request) === 0) {
+            return response()->json([
+                'entity' => $entity,
+                'added_attributes' => $addedAttributes,
+                'removed_attributes' => $removedAttributes,
+            ], 204);
+        }
+
         foreach($request->request as $patch) {
             $op = $patch['op'];
             $aid = $patch['params']['aid'];
             $error = null;
             switch($op) {
                 case 'remove':
-                    try{
-                        $attrval = AttributeValue::where([
-                            ['entity_id', '=', $id],
-                            ['attribute_id', '=', $aid],
-                        ])->firstOrFail();
-                        if($user->isModerated()) {
-                            $attrval->moderate('pending-delete', true);
-                        }else{
-                            $attrval->delete();
-                        }
-                    }catch(ModelNotFoundException $e) {
+                    $attrval = AttributeValue::where([
+                        ['entity_id', '=', $id],
+                        ['attribute_id', '=', $aid],
+                    ])->first();
+                    if(!isset($attrval)) {
                         $error = __('This attribute value does either not exist or is in moderation state.');
+                        break;
+                    }
+                    if($user->isModerated()) {
+                        $attrval->moderate('pending-delete', true);
+                    } else {
+                        $removedAttributes[$aid] = $attrval;
+                        $attrval->delete();
                     }
                     break;
                 case 'add':
@@ -748,18 +781,17 @@ class EntityController extends Controller {
                         ->where('attribute_id', $aid)
                         ->withModerated()
                         ->exists();
-
                     if($alreadyAdded) {
                         $error = __('There is already a value set for this attribute or it is in moderation state.');
-                    }else{
-                        $value = $patch['value'];
-                        $attrval = new AttributeValue();
-                        $attrval->entity_id = $id;
-                        $attrval->attribute_id = $aid;
-                        $attrval->certainty = null;
-                        if($user->isModerated()) {
-                            $attrval->moderate('pending', true, true);
-                        }
+                        break;
+                    }
+                    $value = $patch['value'];
+                    $attrval = new AttributeValue();
+                    $attrval->entity_id = $id;
+                    $attrval->attribute_id = $aid;
+                    $attrval->certainty = null;
+                    if($user->isModerated()) {
+                        $attrval->moderate('pending', true, true);
                     }
                     break;
                 case 'replace':
@@ -769,16 +801,16 @@ class EntityController extends Controller {
                         ->exists();
                     if($alreadyModerated) {
                         $error = __('This attribute value is in moderation state. A user with appropriate permissions has to accept or deny it first.');
-                    }else{
-                        $value = $patch['value'];
-                        $attrval = AttributeValue::where([
-                            ['entity_id', '=', $id],
-                            ['attribute_id', '=', $aid],
-                        ])->first();
-                        if($user->isModerated()) {
-                            $attrval = $attrval->moderate('pending', false, true);
-                            unset($attrval->comments_count);
-                        }
+                        break;
+                    }
+                    $value = $patch['value'];
+                    $attrval = AttributeValue::where([
+                        ['entity_id', '=', $id],
+                        ['attribute_id', '=', $aid],
+                    ])->first();
+                    if($user->isModerated()) {
+                        $attrval = $attrval->moderate('pending', false, true);
+                        unset($attrval->comments_count);
                     }
                     break;
                 default:
@@ -800,27 +832,17 @@ class EntityController extends Controller {
             try {
                 $attr = Attribute::findOrFail($aid);
                 $formKeyValue = AttributeValue::getFormattedKeyValue($attr->datatype, $value);
-                $attrval->{$formKeyValue->key} = $formKeyValue->val;
-                $attrval->user_id = $user->id;
-                $attrval->save();
-                if($op == 'add') {
-                    $addedAttributes[$aid] = $attrval;
-                }
             } catch(InvalidDataException $ide) {
-                DB::rollBack();
                 return response()->json([
                     'error' => $ide->getMessage(),
                 ], 422);
-            } catch(ModelNotFoundException $e) {
-                DB::rollBack();
-                return response()->json([
-                    'error' => __('This attribute does not exist'),
-                ], 400);
-            } catch(Exception $e) {
-                DB::rollBack();
-                return response()->json([
-                    'error' => $e->getMessage(),
-                ], 500);
+            }
+
+            $attrval->{$formKeyValue->key} = $formKeyValue->val;
+            $attrval->user_id = $user->id;
+            $attrval->save();
+            if($op == 'add') {
+                $addedAttributes[$aid] = $attrval;
             }
         }
 
@@ -839,6 +861,7 @@ class EntityController extends Controller {
         return response()->json([
             'entity' => $entity,
             'added_attributes' => $addedAttributes,
+            'removed_attributes' => $removedAttributes,
         ]);
     }
 

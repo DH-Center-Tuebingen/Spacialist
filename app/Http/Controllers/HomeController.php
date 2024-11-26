@@ -23,7 +23,7 @@ class HomeController extends Controller
         if(!Preference::hasPublicAccess()) {
             $this->middleware('auth:sanctum')->except(['welcome', 'index', 'external']);
         }
-        $this->middleware('guest')->only('welcome');
+        // $this->middleware('guest')->only('welcome');
     }
 
     public function getGlobalData() {

@@ -198,27 +198,33 @@ class ApiSearchTest extends TestCase
         $response = $this->userRequest()
             ->get('/api/v1/search/entity?q=Inv.');
 
+        $content = json_decode($response->getContent());
         $response->assertStatus(200);
-        $response->assertJsonCount(3);
-        $response->assertJsonStructure([
-            [
-                'id',
-                'name',
-                'entity_type_id',
-                'root_entity_id',
-                'rank',
-                'user_id',
-                'created_at',
-                'updated_at',
-                'ancestors'
-            ]
-        ]);
+        $response->assertJsonCount(9);
+        // response content is Laravel Paginate Array
+        $this->assertObjectHasProperty('data', $content);
+        $this->assertObjectHasProperty('from', $content);
+        $this->assertObjectHasProperty('to', $content);
+        $this->assertObjectHasProperty('per_page', $content);
+        $this->assertObjectHasProperty('current_page', $content);
+        $this->assertObjectHasProperty('first_page_url', $content);
+        $this->assertObjectHasProperty('next_page_url', $content);
+        $this->assertObjectHasProperty('prev_page_url', $content);
+        $this->assertObjectHasProperty('path', $content);
 
-        $response->assertJson([
-            ['name' => 'Inv. 1234'],
-            ['name' => 'Inv. 124'],
-            ['name' => 'Inv. 31']
-        ]);
+        $this->assertObjectHasProperty('id', $content->data[0]);
+        $this->assertObjectHasProperty('name', $content->data[0]);
+        $this->assertObjectHasProperty('entity_type_id', $content->data[0]);
+        $this->assertObjectHasProperty('root_entity_id', $content->data[0]);
+        $this->assertObjectHasProperty('rank', $content->data[0]);
+        $this->assertObjectHasProperty('user_id', $content->data[0]);
+        $this->assertObjectHasProperty('created_at', $content->data[0]);
+        $this->assertObjectHasProperty('updated_at', $content->data[0]);
+        $this->assertObjectHasProperty('ancestors', $content->data[0]);
+
+        $this->assertEquals('Inv. 1234', $content->data[0]->name);
+        $this->assertEquals('Inv. 124', $content->data[1]->name);
+        $this->assertEquals('Inv. 31', $content->data[2]->name);
     }
 
     /**
@@ -371,7 +377,7 @@ class ApiSearchTest extends TestCase
 
         $response = null;
         foreach($calls as $c) {
-            $response = $this->userRequest($response)
+            $response = $this->userRequest()
                 ->get('/api/v1/search' . $c['url']);
 
             $this->assertStatus($response, 403);
@@ -396,7 +402,7 @@ class ApiSearchTest extends TestCase
 
         $response = null;
         foreach($calls as $c) {
-            $response = $this->userRequest($response)
+            $response = $this->userRequest()
                 ->get('/api/v1/search' . $c['url']);
 
             $this->assertStatus($response, 400);

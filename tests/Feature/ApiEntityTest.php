@@ -420,6 +420,17 @@ class ApiEntityTest extends TestCase
                         ->has('updated_at')
                         ->etc()
                 )
+                ->has('removed_attributes.9', fn($removedAttrJson) =>
+                    $removedAttrJson
+                        ->has('id')
+                        ->has('entity_id')
+                        ->has('attribute_id')
+                        ->has('certainty')
+                        ->has('user_id')
+                        ->has('created_at')
+                        ->has('updated_at')
+                        ->etc()
+                )
         );
 
         $entity = Entity::with('attributes')->find(4);
@@ -478,7 +489,7 @@ class ApiEntityTest extends TestCase
             'error' => 'Start date of a time period must not be after it\'s end date'
         ]);
 
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
         ->patch('/api/v1/entity/2/attributes', [
             [
                 'params' => [
@@ -504,7 +515,7 @@ class ApiEntityTest extends TestCase
             'error' => 'Start date of a time period must not be after it\'s end date'
         ]);
 
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
         ->patch('/api/v1/entity/2/attributes', [
             [
                 'params' => [
@@ -530,7 +541,7 @@ class ApiEntityTest extends TestCase
             'error' => 'Start date of a time period must not be after it\'s end date'
         ]);
 
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
         ->patch('/api/v1/entity/2/attributes', [
             [
                 'params' => [

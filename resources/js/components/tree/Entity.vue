@@ -1,9 +1,9 @@
 <template>
     <div class="d-flex flex-column">
         <div class="d-flex flex-row justify-content-between mb-2">
-            <h3 class="mb-0">
+            <h3 class="mb-0 d-flex flex-row align-items-center gap-2 text-truncate">
                 {{ t('main.entity.title', 2) }}
-                <small class="badge bg-secondary fw-light align-middle font-size-50">
+                <small class="badge bg-secondary fw-light align-middle font-size-50 text-truncate">
                     {{ t('main.entity.count', {cnt: state.topLevelCount}, state.topLevelCount) }}
                 </small>
             </h3>
