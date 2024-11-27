@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## 0.11 - ???
 ### Fixed
 - _Map Action Button_ position
+- _Map Action Button_ tooltips
 
 ## 0.10.1
 ### Added
