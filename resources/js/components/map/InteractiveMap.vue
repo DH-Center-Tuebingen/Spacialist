@@ -7,7 +7,7 @@
             <div class="d-flex flex-column ol-bar ol-right ol-bottom">
                 <div
                     v-if="drawing"
-                    class="d-flex flex-column align-items-end"
+                    class="d-flex flex-column align-items-end pb-2 pe-2"
                 >
                     <button
                         type="button"

@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.11 - ???
+### Fixed
+- _Map Action Button_ position
+
 ## 0.10.1
 ### Added
 - Option to display attributes in _Data Model Editor_ in groups
