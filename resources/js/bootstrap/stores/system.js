@@ -30,6 +30,7 @@ import {
 } from '@/open_api.js';
 
 import {
+    only,
     slugify,
 } from '@/helpers/helpers.js';
 
@@ -105,6 +106,9 @@ export const useSystemStore = defineStore('system', {
         hasPlugin: state => nameId => {
             return state.plugins.some(plugin => plugin.name == nameId);
         },
+        getPluginStore: state => id => {
+            return state.pluginStores[id] ? state.pluginStores[id]() : {};
+        },
         getSlotPlugins: state => slot => {
             const plugins = state.registeredPluginSlots;
             return slot ? plugins[slot] : plugins;
@@ -121,13 +125,13 @@ export const useSystemStore = defineStore('system', {
         addCachedConceptSelection(data) {
             this.cachedConceptSelections[data.id] = data.selection;
         },
-        addPluginStore(id, storeFn) {
+        addPluginStore(id, store) {
             if(this.pluginStores[id]) {
                 console.error(`A Plugin with id="${id}" already registered a store!`);
                 return;
             }
 
-            this.pluginStores[id] = storeFn();
+            this.pluginStores[id] = defineStore(`plugin_${id}`, store);
         },
         async initialize(locale) {
             resetState(this);

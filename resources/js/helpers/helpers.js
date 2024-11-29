@@ -157,9 +157,7 @@ export function getConceptLabel(concept) {
 }
 
 export function translateEntityType(id) {
-    console.error("Re-Implement translateEntityType(id) due to missing getEntityType(id) method");
-    return;
-    // return translateConcept(getEntityType(id).thesaurus_url);
+    return translateConcept(useEntityStore().getEntityType(id).thesaurus_url);
 }
 
 export function getEntityTypeAttributes(id, exclude = false) {

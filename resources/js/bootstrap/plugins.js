@@ -1,5 +1,6 @@
 import { only } from '@/helpers/helpers';
 import useSystemStore from './stores/system.js';
+import useEntityStore from './stores/entity.js';
 import i18n from './i18n.js';
 import {
     router,
@@ -126,6 +127,7 @@ export const SpPS = {
         SpPS.data.app = app;
         SpPS.data.t = t;
         SpPS.api.store.systemStore = useSystemStore();
+        SpPS.api.store.entityStore = useEntityStore();
     },
     registerI18n: (id, messages) => {
         for(let k in messages) {
