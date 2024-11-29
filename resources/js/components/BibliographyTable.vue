@@ -474,7 +474,7 @@
                                 class="text-muted"
                                 :title="t('global.no_file')"
                             >
-                                <i class="fas fa-fw fa-times" />
+                                <i class="fas fa-fw fa-minus" />
                             </span>
                             <span v-show="entry.file">
                                 <a
@@ -555,7 +555,8 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import store from '@/bootstrap/store.js';
+    import useBibliographyStore from '@/bootstrap/stores/bibliography.js';
+    import useSystemStore from '@/bootstrap/stores/system.js';
 
     import { useToast } from '@/plugins/toast.js';
 
@@ -565,13 +566,11 @@
 
     import {
         exportBibtexFile,
-        updateBibliography,
     } from '@/api.js';
     import {
         can,
         createDownloadLink,
         createAnchorFromUrl,
-        getProjectName,
         throwError,
         _debounce,
         _orderBy,
@@ -588,6 +587,8 @@
         setup(props, context) {
             const { t } = useI18n();
             const toast = useToast();
+            const bibliographyStore = useBibliographyStore();
+            const systemStore = useSystemStore();
             // FETCH
 
             const chunkSize = 20;
@@ -612,7 +613,7 @@
             };
             const showNewItemModal = _ => {
                 if(!can('bibliography_create')) return;
-                
+
                 showBibliographyEntry({fields: {}}, _ => {
                     if(state.allEntries.length < chunkSize) {
                         state.entriesLoaded++;
@@ -637,12 +638,8 @@
                 }
             };
             const importFile = (file, component) => {
-                return updateBibliography(file.file).then(data => {
-                    store.dispatch('updateBibliography', data);
-                    const lng = data.length;
-                    const lngAdd = data.filter(item => item.added).length;
-                    const lngUpd = lng - lngAdd;
-                    const label = t('main.bibliography.toast.import.msg', {cnt: lngAdd, cnt_upd: lngUpd});
+                return bibliographyStore.import(file.file).then(data => {
+                    const label = t('main.bibliography.toast.import.msg', {cnt: data.added, cnt_upd: data.updated});
                     const title = t('main.bibliography.toast.import.title');
                     toast.$toast(label, title, {
                         channel: 'success',
@@ -661,7 +658,8 @@
                 }
 
                 exportBibtexFile(selection).then(data => {
-                    const filename = getProjectName(true) + '.bibtex';
+                    const projectName = systemStore.getProjectName(true);
+                    const filename = projectName + '.bibtex';
                     createDownloadLink(data, filename, false, 'application/x-bibtex');
                 });
             };
@@ -691,8 +689,8 @@
 
             // DATA
             const state = reactive({
-                allEntries: computed(_ => store.getters.bibliography),
-                entriesLoaded: Math.min(chunkSize, store.getters.bibliography.length),
+                allEntries: computed(_ => bibliographyStore.bibliography),
+                entriesLoaded: Math.min(chunkSize, bibliographyStore.bibliography.length),
                 orderColumn: 'author',
                 orderType: 'asc',
                 query: '',

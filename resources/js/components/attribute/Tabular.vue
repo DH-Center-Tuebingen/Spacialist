@@ -203,13 +203,11 @@
     } from 'chart.js';
 
     import { useI18n } from 'vue-i18n';
-    import store from '@/bootstrap/store.js';
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
 
     import {
         createDownloadLink,
         getTs,
-        getAttribute,
-        hash,
         slugify,
         translateConcept,
         _cloneDeep,
@@ -261,6 +259,7 @@
         emits: ['change', 'expanded'],
         setup(props, context) {
             const { t } = useI18n();
+            const attributeStore = useAttributeStore();
 
             Chart.register(
                 Colors,
@@ -487,7 +486,7 @@
             });
             const state = reactive({
                 isPreview: computed(_ => previewColumns.value && Object.keys(previewColumns.value).length > 0),
-                columns: computed(_ => state.isPreview ? previewColumns.value : getAttribute(attribute.value.id).columns),
+                columns: computed(_ => state.isPreview ? previewColumns.value : attributeStore.getAttribute(attribute.value.id).columns),
                 placeholderWidth: computed(_ => {
                     const colCnt = state.columns ? Object.keys(state.columns).length : 0;
                     return colCnt + 2;
@@ -499,7 +498,7 @@
                     for(let k in state.columns) {
                         const curr = state.columns[k];
                         if(curr.datatype == 'string-sc' || curr.datatype == 'string-mc') {
-                            list[curr.id] = store.getters.attributeSelections[curr.id];
+                            list[curr.id] = attributeStore.getAttributeSelection(curr.id);
                         }
                     }
                     return list;

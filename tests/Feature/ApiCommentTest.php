@@ -95,7 +95,7 @@ class ApiCommentTest extends TestCase
             ->post("/api/v1/comment", $input);
 
         $this->assertStatus($response, 201);
-        $getResponse = $this->userRequest($response)
+        $getResponse = $this->userRequest()
             ->get("/api/v1/comment/resource/$url");
 
         $this->assertStatus($getResponse, 200);
@@ -181,7 +181,7 @@ class ApiCommentTest extends TestCase
             ->patch("/api/v1/comment/$id", $input);
 
         $this->assertStatus($response, 200);
-        $getResponse = $this->userRequest($response)
+        $getResponse = $this->userRequest()
             ->get("/api/v1/comment/resource/$url");
 
         $this->assertStatus($getResponse, 200);

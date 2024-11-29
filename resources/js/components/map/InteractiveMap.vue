@@ -1,5 +1,5 @@
 <template>
-    <div class="h-100"> 
+    <div class="h-100">
         <div
             :id="state.mapId"
             class="map h-100"
@@ -303,8 +303,10 @@
         toRefs,
         watch,
     } from 'vue';
-    
+
     import { useI18n } from 'vue-i18n';
+
+    import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import {
         Tooltip,
@@ -359,7 +361,6 @@
     } from '@/helpers/map.js';
 
     import {
-        getEntityType,
         getTs,
         translateConcept,
         _throttle,
@@ -432,13 +433,14 @@
             },
         },
         emits: [
-            'added', 
+            'added',
             'deleted',
             'modified',
             'select',
         ],
         setup(props, context) {
             const { t } = useI18n();
+            const entityStore = useEntityStore();
 
             const {
                 selection,
@@ -613,7 +615,7 @@
                         } else {
                             let layerName = '';
                             if(l.entity_type_id) {
-                                const et = getEntityType(l.entity_type_id);
+                                const et = entityStore.getEntityType(l.entity_type_id);
                                 if(!!et) {
                                     layerName = translateConcept(et.thesaurus_url);
                                 }
@@ -691,7 +693,7 @@
                 let finalStyle = null;
                 const layerProps = layer.getProperties();
                 const color = layerProps.color;
-                
+
                 const p = f.getProperties();
                 if(stylePerLayer.value) {
                     if(!state.layerStyleCache[layerProps.layer_id]) {
@@ -1563,7 +1565,7 @@
                 state,
                 actionState,
             };
-            
+
         },
     };
 </script>

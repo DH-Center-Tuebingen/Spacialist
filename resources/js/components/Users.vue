@@ -254,14 +254,9 @@
 
     import * as yup from 'yup';
 
-    import store from '@/bootstrap/store.js';
+    import useUserStore from '@/bootstrap/stores/user.js';
 
     import { useToast } from '@/plugins/toast.js';
-
-    import {
-        reactivateUser as reactivateUserApi,
-        patchUserData,
-    } from '@/api.js';
 
     import {
         showDiscard,
@@ -275,11 +270,8 @@
         can,
         getClassByValidation,
         getErrorMessages,
-        getUserBy,
-        hasPreference,
-        userId,
     } from '@/helpers/helpers.js';
-    
+
     import {
         date,
     } from '@/helpers/filters.js';
@@ -287,6 +279,7 @@
     export default {
         setup(props) {
             const { t } = useI18n();
+            const userStore = useUserStore();
             const toast = useToast();
 
             // FUNCTIONS
@@ -367,7 +360,7 @@
                     return;
                 }
 
-                const user = getUserBy(id);
+                const user = userStore.getUserBy(id);
                 const data = {};
 
                 if(v.fields[id].roles.meta.dirty) {
@@ -377,15 +370,9 @@
                     data.email = v.fields[id].email.value;
                 }
 
-                return await patchUserData(id, data).then(data => {
+                await userStore.updateUser(id, data).then(_ => {
                     state.errors[id] = {};
                     resetUserMeta(id);
-                    store.dispatch('updateUser', {
-                        id: data.id,
-                        email: data.email,
-                        roles: data.roles,
-                        updated_at: data.updated_at,
-                    });
                     const msg = t('main.user.toasts.updated.msg', {
                         name: user.name
                     });
@@ -421,13 +408,11 @@
             };
             const deactivateUser = id => {
                 if(!can('users_roles_delete')) return;
-                showDeactivateUser(getUserBy(id));
+                showDeactivateUser(userStore.getUserBy(id));
             };
             const reactivateUser = id => {
                 if(!can('users_roles_delete')) return;
-                reactivateUserApi(id).then(_ => {
-                    store.dispatch('reactivateUser', id);
-                });
+                userStore.reactivateUser(id);
             };
             const updatePassword = uid => {
                 if(state.currentUserId != uid && !can('users_roles_write')) return;
@@ -479,15 +464,15 @@
             // DATA
             const state = reactive({
                 setupFinished: false,
-                currentUserId: userId(),
-                userList: computed(_ => store.getters.users),
+                currentUserId: userStore.getCurrentUserId,
+                userList: computed(_ => userStore.users),
                 validatedUserList: computed(_ => {
                     return state.userList.filter(u => {
                         return v.fields[u.id] && Object.keys(v.fields[u.id]).length > 0;
                     });
                 }),
-                deletedUserList: computed(_ => store.getters.deletedUsers),
-                roles: computed(_ => store.getters.roles(true)),
+                deletedUserList: computed(_ => userStore.deletedUsers),
+                roles: computed(_ => userStore.getRoles(true)),
                 dataInitialized: computed(_ => state.userList.length > 0 && state.roles.length > 0),
                 errors: {},
             });
@@ -523,7 +508,6 @@
                 can,
                 date,
                 getClassByValidation,
-                hasPreference,
                 showUserInfo,
                 // LOCAL
                 userDirty,

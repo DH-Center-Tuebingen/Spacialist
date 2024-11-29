@@ -377,7 +377,7 @@ class ApiSearchTest extends TestCase
 
         $response = null;
         foreach($calls as $c) {
-            $response = $this->userRequest($response)
+            $response = $this->userRequest()
                 ->get('/api/v1/search' . $c['url']);
 
             $this->assertStatus($response, 403);
@@ -402,7 +402,7 @@ class ApiSearchTest extends TestCase
 
         $response = null;
         foreach($calls as $c) {
-            $response = $this->userRequest($response)
+            $response = $this->userRequest()
                 ->get('/api/v1/search' . $c['url']);
 
             $this->assertStatus($response, 400);

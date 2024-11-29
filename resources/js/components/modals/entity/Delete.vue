@@ -64,7 +64,7 @@
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
-    import store from '@/bootstrap/store.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
 
     export default {
         props: {
@@ -76,6 +76,7 @@
         emits: ['closing', 'confirm'],
         setup(props, context) {
             const { t } = useI18n();
+            const entityStore = useEntityStore();
             const {
                 entityId,
             } = toRefs(props);
@@ -90,7 +91,7 @@
 
             // DATA
             const state = reactive({
-                entity: computed(_ => store.getters.entities[entityId.value] || {}),
+                entity: computed(_ => entityStore.getEntity(entityId.value)),
                 count: computed(_ => state.entity.children ? state.entity.children.length : 0),
                 needsAlert: computed(_ => state.count > 0),
             });
