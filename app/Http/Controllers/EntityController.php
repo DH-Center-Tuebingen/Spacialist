@@ -373,8 +373,9 @@ class EntityController extends Controller {
         $fields = $request->only(array_keys(Entity::rules));
         $etid = $request->get('entity_type_id');
         $reid = $request->get('root_entity_id');
+        $rank = $request->get('rank');
 
-        $res = Entity::create($fields, $etid, $user, $reid);
+        $res = Entity::create($fields, $etid, $user, $reid, $rank);
 
         if($res['type'] === 'entity') {
             return response()->json($res['entity'], 201);
@@ -515,7 +516,6 @@ class EntityController extends Controller {
         $entityTypeId = trim($data['entity_type_id']);
         $attributesMapping = array_map(fn ($col) => trim($col), $data['attributes']);
 
-
         $headerRow = null;
         $hasParent = false;
         $attributeIdToColumnIdxMapping = [];
@@ -527,7 +527,6 @@ class EntityController extends Controller {
         $affectedRows = 0;
         $parentIdx = null;
         $nameIdx = null;
-
 
         // Getting headers
         if(($row = fgetcsv($handle, 0, $metadata['delimiter'])) !== false) {
@@ -678,7 +677,6 @@ class EntityController extends Controller {
     }
 
     function createImportedEntity($entityName, ?string $rootEntityPath, $entityTypeId, $user) {
-
         $rootEntityId = null;
         if(isset($rootEntityPath)) {
             try {

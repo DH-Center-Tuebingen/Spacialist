@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.11 - 
+### Added
+- _Add Entity Above_ and _Add Entity Below_ to the Contextmenu in the entity tree
+
 ## 0.10.1
 ### Added
 - Option to display attributes in _Data Model Editor_ in groups

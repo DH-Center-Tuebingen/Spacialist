@@ -529,7 +529,7 @@ export function showLiteratureInfo(id, options) {
     modal.open();
 }
 
-export function showAddEntity(parent = null, onAdded) {
+export function showAddEntity(parent = null, onAdded, rank = -1) {
     const uid = `AddEntity-${getTs()}`;
     const modal = useModal({
         component: AddEntity,
@@ -545,6 +545,9 @@ export function showAddEntity(parent = null, onAdded) {
                     parent_id: entity.parent_id,
                     name: entity.name,
                 };
+                if(rank != -1) {
+                    entityData.rank = rank;
+                }
 
                 useEntityStore().create(entityData).then(node => {
                     if(!!onAdded) {
