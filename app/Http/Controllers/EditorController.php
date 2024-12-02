@@ -179,7 +179,8 @@ class EditorController extends Controller {
         }
         $this->validate($request, [
             'is_root' => 'boolean_string',
-            'sub_entity_types' => 'array'
+            'sub_entity_types' => 'array',
+            'color' => 'color',
         ]);
         try {
             $entityType = EntityType::findOrFail($id);
@@ -190,7 +191,8 @@ class EditorController extends Controller {
         }
         $is_root = $request->get('is_root');
         $subs = $request->get('sub_entity_types');
-        $entityType->setRelationInfo($is_root, $subs);
+        $color = $request->get('color');
+        $entityType->setRelationInfo($color, $is_root, $subs);
         return response()->json(null, 204);
     }
 

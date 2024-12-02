@@ -35,9 +35,29 @@
                 </div>
                 <div class="mb-3 row">
                     <label
+                        for="entity-color"
+                        class="col-form-label col-md-3 text-end"
+                    >
+                        {{ t('global.color') }}
+                    </label>
+                    <div class="col-md-9 d-flex align-items-center">
+                        <input
+                            v-model="state.entityType.color"
+                            type="color"
+                            class="w-100"
+                        >
+                    </div>
+                </div>
+                <div
+                    v-if="state.entityType?.layer?.type"
+                    class="mb-3 row"
+                >
+                    <label
                         for="entity-geometrytype-ro"
                         class="col-form-label col-md-3 text-end"
-                    >{{ t('global.geometry_type') }}</label>
+                    >
+                        {{ t('global.geometry_type') }}
+                    </label>
                     <div class="col-md-9 d-flex align-items-center">
                         <span>
                             {{ state.entityType.layer.type }}
@@ -185,6 +205,7 @@
                 const data = {
                     'is_root': et.is_root || false,
                     'sub_entity_types': et.sub_entity_types || [],
+                    'color': et.color,
                 };
 
                 updateEntityTypeRelation(et.id, data).then(_ => {
