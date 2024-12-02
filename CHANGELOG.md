@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.10.3
+### Fixed
+- Attribute Dependency inverted
+
 ## 0.10.2
 ### Fixed
 - Date Range _importFrom_ did not return a JSON string
