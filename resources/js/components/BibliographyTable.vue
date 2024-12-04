@@ -478,7 +478,7 @@
                             </span>
                             <span v-show="entry.file">
                                 <a
-                                    :href="entry.file_url"
+                                    :href="`download/bibliography?path=${entry.file}`"
                                     target="_blank"
                                 >
                                     <i class="fas fa-fw fa-search" />

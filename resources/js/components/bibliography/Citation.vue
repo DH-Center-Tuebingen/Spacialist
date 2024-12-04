@@ -18,9 +18,9 @@
 
 <script>
     import { computed } from 'vue';
-    import { truncate } from '@/helpers/filters';
-    import { formatAuthors } from '@/helpers/bibliography';
-    import { showLiteratureInfo } from '@/helpers/modal';
+    import { truncate } from '@/helpers/filters.js';
+    import { formatAuthors } from '@/helpers/bibliography.js';
+    import { showLiteratureInfo } from '@/helpers/modal.js';
     export default {
         props: {
             value: {

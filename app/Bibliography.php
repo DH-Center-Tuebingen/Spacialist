@@ -16,10 +16,6 @@ class Bibliography extends Model implements Searchable
 
     protected $table = 'bibliography';
 
-    protected $appends = [
-        'file_url',
-    ];
-
     /**
      * The attributes that are assignable.
      *
@@ -650,9 +646,10 @@ class Bibliography extends Model implements Searchable
         $this->deleteFile(true);
 
         $filename = $this->id . "_" . $file->getClientOriginalName();
-        return $file->storeAs(
+        return Storage::putFileAs(
             'bibliography',
-            $filename
+            $file,
+            $filename,
         );
     }
 
@@ -673,9 +670,5 @@ class Bibliography extends Model implements Searchable
 
     public function entities() {
         return $this->belongsToMany('App\Entity', 'references')->withPivot('description', 'attribute_id');
-    }
-
-    public function getFileUrlAttribute() {
-        return isset($this->file) ? sp_get_public_url($this->file) : null;
     }
 }

@@ -64,7 +64,6 @@ class ApiEntityTest extends TestCase
                 'updated_at' => "2017-12-20T09:47:36.000000Z",
                 'deleted_at' => null,
                 'avatar' => null,
-                'avatar_url' => null,
                 'metadata' => null,
                 'login_attempts' => null,
             ],

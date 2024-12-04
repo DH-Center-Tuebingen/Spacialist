@@ -36,10 +36,6 @@ class User extends Authenticatable
         'name', 'nickname', 'email', 'password',
     ];
 
-    protected $appends = [
-        'avatar_url',
-    ];
-
     protected $casts = [
         'metadata' => 'array',
     ];
@@ -116,10 +112,6 @@ class User extends Authenticatable
         }
 
         return $moderated;
-    }
-
-    public function getAvatarUrlAttribute() {
-        return isset($this->avatar) ? sp_get_public_url($this->avatar) : null;
     }
 
     public function preferences() {

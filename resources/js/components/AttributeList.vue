@@ -424,7 +424,7 @@
                     // curr is e.g. null if attribute is hidden
                     if(!!curr && !!curr.v && curr.v.meta.dirty && curr.v.meta.valid) {
                         currValue = curr.v.value;
-                        const datatype = getAttribute(k).datatype;
+                        const datatype = attributeStore.getAttribute(k).datatype;
                         if(currValue !== null) {
                             // filter out deleted table rows
                             if(datatype == 'table') {
