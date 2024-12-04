@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.11
+### Fixed
+- Several problems with adding, editing and displaying _Bibliography Items_
 ### Changed
 - Files (e.g. avatars or bibliography attachments) are stored in a user-only directory
 

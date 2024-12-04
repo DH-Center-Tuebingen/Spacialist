@@ -155,6 +155,7 @@ class Bibliography extends Model implements Searchable
                 'abstract',
                 'address',
                 'author',
+                'doi',
                 'edition',
                 'editor',
                 'email',
@@ -183,6 +184,7 @@ class Bibliography extends Model implements Searchable
                 'author',
                 'booktitle',
                 'chapter',
+                'doi',
                 'edition',
                 'editor',
                 'email',
@@ -212,6 +214,7 @@ class Bibliography extends Model implements Searchable
             "fields" => [
                 'abstract',
                 'author',
+                'doi',
                 'email',
                 'howpublished',
                 'language',
@@ -227,6 +230,7 @@ class Bibliography extends Model implements Searchable
                 'abstract',
                 'address',
                 'author',
+                'doi',
                 'email',
                 'howpublished',
                 'language',
@@ -246,6 +250,7 @@ class Bibliography extends Model implements Searchable
                 'address',
                 'author',
                 'booktitle',
+                'doi',
                 'editor',
                 'email',
                 'language',
@@ -274,6 +279,7 @@ class Bibliography extends Model implements Searchable
                 'address',
                 'author',
                 'chapter',
+                'doi',
                 'edition',
                 'editor',
                 'email',
@@ -307,6 +313,7 @@ class Bibliography extends Model implements Searchable
                 'address',
                 'author',
                 'booktitle',
+                'doi',
                 'editor',
                 'email',
                 'language',
@@ -334,6 +341,7 @@ class Bibliography extends Model implements Searchable
                 'abstract',
                 'address',
                 'author',
+                'doi',
                 'edition',
                 'email',
                 'language',
@@ -353,6 +361,7 @@ class Bibliography extends Model implements Searchable
                 'abstract',
                 'address',
                 'author',
+                'doi',
                 'email',
                 'language',
                 'month',
@@ -375,6 +384,7 @@ class Bibliography extends Model implements Searchable
                 'abstract',
                 'address',
                 'author',
+                'doi',
                 'email',
                 'language',
                 'month',
@@ -396,6 +406,7 @@ class Bibliography extends Model implements Searchable
             "fields" => [
                 'abstract',
                 'address',
+                'doi',
                 'editor',
                 'email',
                 'language',
@@ -420,6 +431,7 @@ class Bibliography extends Model implements Searchable
                 'abstract',
                 'address',
                 'author',
+                'doi',
                 'email',
                 'institution',
                 'language',
@@ -427,7 +439,7 @@ class Bibliography extends Model implements Searchable
                 'note',
                 'number',
                 'title',
-                'type'   ,
+                'type',
                 'url',
                 'year',
             ],
@@ -526,6 +538,20 @@ class Bibliography extends Model implements Searchable
         return $strippedFields;
     }
 
+    public function unsetDisallowed(): void {
+        $typeFields = self::bibtexTypes[$this->entry_type]['fields'];
+
+        $allFields = $this->fillable;
+        foreach($allFields as $field) {
+            if(in_array($field, $typeFields)) continue;
+            if($field == 'entry_type') continue;
+            if($field == 'file') continue;
+            if($field == 'citekey') continue;
+            if($field == 'user_id') continue;
+
+            $this->{$field} = null;
+        }
+    }
 
     private function getEmptyFields(string $type) : array {
         $typeFields = self::bibtexTypes[$type];
@@ -547,13 +573,11 @@ class Bibliography extends Model implements Searchable
 
         $type = $fields['entry_type'];
         $filteredFields = self::stripDisallowed($fields, $type);
-        $nullMap = array_map(fn() => null, self::patchRules );
-        $nullMap = array_filter($nullMap, fn($key) => !in_array($key, ["file"]), ARRAY_FILTER_USE_KEY);
-        $allFieldsFixed = array_merge($nullMap, $filteredFields);
-        foreach($allFieldsFixed as $key => $value) {
+        foreach($filteredFields as $key => $value) {
             if(!in_array($key, $this->fillable)) throw new \Exception("Field $key is not allowed for this type of entry");
             $this->{$key} = $value;
         }
+        $this->unsetDisallowed();
 
         // updating an item does not have to update all fields
         // thus we first set all allowed keys from request and then

@@ -125,10 +125,10 @@
                             <a
                                 href="#"
                                 class="text-nowrap"
-                                @click.prevent="setOrderColumn('type')"
+                                @click.prevent="setOrderColumn('entry_type')"
                             >
                                 {{ t('global.type') }}
-                                <span v-show="state.orderColumn == 'type'">
+                                <span v-show="state.orderColumn == 'entry_type'">
                                     <span v-show="state.orderType == 'asc'">
                                         <i class="fas fa-fw fa-sort-down" />
                                     </span>
@@ -394,7 +394,7 @@
                             {{ i+1 }}
                         </td>
                         <td>
-                            {{ entry.type }}
+                            {{ entry.entry_type }}
                         </td>
                         <td v-html="formatBibtexAndShowHighlight(entry.citekey)" />
                         <td v-html="formatBibtexAndShowHighlight(entry.author)" />
@@ -444,7 +444,7 @@
                             v-html="formatBibtexAndShowHighlight(entry.url)"
                         />
                         <td v-if="state.showAllFields">
-                            {{ entry.subtype }}
+                            {{ entry.type }}
                         </td>
                         <td>
                             {{ entry.misc }}
@@ -521,7 +521,6 @@
                         </td>
                     </tr>
                     <!-- eslint-enable vue/no-v-html -->
-
                     <tr>
                         <td :colspan="state.maxTableCols">
                             <button
@@ -665,7 +664,7 @@
             };
             const editItem = data => {
                 if(!can('bibliography_write')) return;
-                const type = bibliographyTypes.find(t => t.name == data.type);
+                const type = bibliographyTypes.find(t => t.name == data.entry_type);
                 if(!type) return;
                 let fields = {};
                 type.fields.forEach(f => {
@@ -675,10 +674,9 @@
                 });
                 const item = {
                     fields: fields,
-                    type: type,
+                    entry_type: type,
                     id: data.id,
                     file: data.file,
-                    file_url: data.file_url,
                 };
                 showBibliographyEntry(item);
             };
