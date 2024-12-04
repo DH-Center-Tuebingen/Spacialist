@@ -693,6 +693,71 @@ class ApiBibliographyTest extends TestCase
             'volume'            => null,
         ]));
      }
+     
+         
+    function testSinglePatchItem(){
+        $response = $this->userRequest()
+            ->post('/api/v1/bibliography/1318', [
+                'entry_type' => 'article',
+                'title' => 'Patched Single Field'
+            ]);
+            
+        $response->assertStatus(200);
+        $response->assertJson([
+            'id' => 1318,
+            'entry_type' => 'article',
+            // Citekey gets generated on every change. 
+            //'citekey' => 'Sh:1',
+            'title' => 'Patched Single Field',
+            'author' => 'Shelah, Saharon',
+            'editor' => NULL,
+            'journal' => 'Israel Journal of Mathematics',
+            'year' => '1969',
+            'pages' => '187--202',
+            'volume' => '7'
+        ]);
+    }
+    
+    function testSinglePatchChangeType(){
+        $response = $this->userRequest()
+            ->post('/api/v1/bibliography/1318', [
+                'entry_type' => 'book',
+                'title' => 'Patched To Book',
+                'publisher' => 'Patched Publisher'
+            ]);
+            
+        $response->assertStatus(200);
+        $response->assertJson(array_merge([
+            'id' => 1318,
+            'entry_type' => 'book',
+            // Citekey gets generated on every change. 
+            //'citekey' => 'Sh:1',
+            'title' => 'Patched To Book',
+            'author' => 'Shelah, Saharon',
+            'editor' => NULL,
+            'year' => '1969',
+            'publisher' => 'Patched Publisher',
+        ],[
+          // Set all non-book fields to NULL
+            'annote'            => null,
+            'booktitle'         => null,
+            'chapter'           => null,
+            'crossref'          => null,
+            'howpublished'      => null,
+            'institution'       => null,
+            'issn'              => null,
+            'journal'           => null,
+            'key'               => null,
+            'misc'              => null,
+            'number'            => null,
+            'organization'      => null,
+            'pages'             => null,
+            'school'            => null,
+            'type'              => null,
+            'volume'            => null,
+        ]));
+    }
+
 
      /**
       * @testdox DELETE /api/v1/bibliography/{id}
