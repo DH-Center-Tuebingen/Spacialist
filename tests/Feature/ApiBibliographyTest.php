@@ -90,15 +90,13 @@ class ApiBibliographyTest extends TestCase
      /**
     * @testdox GET /api/v1/bibliography/{id}/ref_count
     */
-    public function testGetReferenceCountEndpoint()
-    {
+    public function testGetReferenceCountEndpoint() {
         $response = $this->userRequest()
             ->get('/api/v1/bibliography/1319/ref_count');
 
         $this->assertStatus($response, 200);
         $response->assertSimilarJson([1]);
     }
-
 
     /**
      * @testdox POST /api/v1/bibliography/
@@ -128,7 +126,6 @@ class ApiBibliographyTest extends TestCase
             'year' => '2021',
             'citekey' => 'Dietmar Köppke_Schweinegerichte_sudga_2021'
         ]);
-
 
         $response = $this->userRequest()
             ->get('/api/v1/bibliography');
@@ -197,8 +194,7 @@ class ApiBibliographyTest extends TestCase
     /**
      * @testdox POST /api/v1/bibliography/import (mandatory fields)
      */
-    public function testMandatoryImport()
-    {
+    public function testMandatoryImport() {
        $this->importTest('import_mandatory.bib', [
            [
                "entry_type" => "article",
@@ -567,11 +563,10 @@ class ApiBibliographyTest extends TestCase
         ]);
     }
 
-
     /**
      * @testdox POST /api/v1/bibliography/export
      */
-    function testExport() {
+    public function testExport() {
         $response = $this->userRequest()
                 ->post('/api/v1/bibliography/export');
 
@@ -583,7 +578,7 @@ class ApiBibliographyTest extends TestCase
         $this->assertSame($expectedContent, $content);
     }
 
-    function getUpdateData() {
+    public function getUpdateData() {
         return [
             'entry_type'        => 'book',
             'author'            => 'Köppke, Dietmar and Sauer, Jürgen',
@@ -619,23 +614,21 @@ class ApiBibliographyTest extends TestCase
         ];
     }
 
-
     /*
-     * TODO: The current problem here is that we are not simply updating
-     *       all table cells according to the passed data but instead sanatizing the
-     *       data and only updating the fields that fit the entry_type.
+     * TODO: We are not simply updating all table cells according to
+     *       the passed data but instead sanatizing the data and
+     *       only updating the fields that fit the entry_type.
+     *       All other fields are set to NULL. This is at the time of writing the
+     *       desired behavior. We therefore need to test every entry type.
+     *       This is not yet implemented.
      *
-     *      All other fields are set to NULL. This is at the time of writing the
-     *      desired behavior. For the tests there is the problem, that we need to
-     *      test every entry type. This is not yet implemented.
-     *
-     *      [SO]
+     *      [SO/VR]
      */
 
      /**
       * @testdox POST /api/v1/bibliography/{id}
       */
-     function testPatchItem() {
+    public function testPatchItem() {
         $data = $this->getUpdateData();
         $response = $this->userRequest()
             ->post('/api/v1/bibliography/1320', $data);
@@ -692,21 +685,20 @@ class ApiBibliographyTest extends TestCase
             'type'              => null,
             'volume'            => null,
         ]));
-     }
-     
-         
-    function testSinglePatchItem(){
+    }
+
+    public function testSinglePatchItem() {
         $response = $this->userRequest()
             ->post('/api/v1/bibliography/1318', [
                 'entry_type' => 'article',
                 'title' => 'Patched Single Field'
             ]);
-            
+
         $response->assertStatus(200);
         $response->assertJson([
             'id' => 1318,
             'entry_type' => 'article',
-            // Citekey gets generated on every change. 
+            // Citekey gets generated on every change.
             //'citekey' => 'Sh:1',
             'title' => 'Patched Single Field',
             'author' => 'Shelah, Saharon',
@@ -717,28 +709,29 @@ class ApiBibliographyTest extends TestCase
             'volume' => '7'
         ]);
     }
-    
-    function testSinglePatchChangeType(){
+
+    public function testSinglePatchChangeType() {
         $response = $this->userRequest()
             ->post('/api/v1/bibliography/1318', [
                 'entry_type' => 'book',
                 'title' => 'Patched To Book',
                 'publisher' => 'Patched Publisher'
             ]);
-            
+
         $response->assertStatus(200);
         $response->assertJson(array_merge([
             'id' => 1318,
             'entry_type' => 'book',
-            // Citekey gets generated on every change. 
+            // Citekey gets generated on every change.
             //'citekey' => 'Sh:1',
             'title' => 'Patched To Book',
             'author' => 'Shelah, Saharon',
             'editor' => NULL,
             'year' => '1969',
             'publisher' => 'Patched Publisher',
-        ],[
-          // Set all non-book fields to NULL
+        ],
+        [
+            // Set all non-book fields to NULL
             'annote'            => null,
             'booktitle'         => null,
             'chapter'           => null,
@@ -757,7 +750,6 @@ class ApiBibliographyTest extends TestCase
             'volume'            => null,
         ]));
     }
-
 
      /**
       * @testdox DELETE /api/v1/bibliography/{id}
@@ -784,6 +776,7 @@ class ApiBibliographyTest extends TestCase
     public function testWithoutPermission($permission) {
         (new ResponseTester($this))->testMissingPermission($permission);
     }
+
     /**
      * @dataProvider exceptionPermissions
      */
