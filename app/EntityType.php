@@ -34,8 +34,9 @@ class EntityType extends Model
             ->logOnlyDirty();
     }
 
-    public function setRelationInfo($isRoot = false, $subTypes = []) {
+    public function setRelationInfo($color, $isRoot = false, $subTypes = []) {
         $this->is_root = $isRoot;
+        $this->color = $color;
         EntityTypeRelation::where('parent_id', $this->id)->delete();
         foreach($subTypes as $type) {
             $relation = new EntityTypeRelation();
