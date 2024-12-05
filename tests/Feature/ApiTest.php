@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\User;
 use Tests\TestCase;
 use Illuminate\Support\Str;
 
@@ -40,24 +41,12 @@ class ApiTest extends TestCase
      */
     public function testUnauthPreRequest()
     {
+        $this->unsetTestUser();
         // Unauthenticated request redirects to /login
         $response = $this->get('/api/v1/pre');
 
         $response->assertStatus(302);
         $response->assertRedirect('/login');
-    }
-
-    /**
-     * @testdox GET    /api/v1/pre : Get Pre Endpoint Failed Missing Token
-     *
-     * @return void
-     */
-    public function testAuthPreRequestWithoutToken()
-    {
-        $response = $this->actingAs($this->user)
-            ->get('/api/v1/pre');
-
-        $response->assertStatus(401);
     }
 
     /**

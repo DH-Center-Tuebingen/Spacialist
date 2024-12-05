@@ -187,7 +187,7 @@ class ApiPreferenceTest extends TestCase
 
         $response = null;
         foreach($calls as $c) {
-            $response = $this->userRequest($response)
+            $response = $this->userRequest()
                 ->json($c['verb'], '/api/v1/preference' . $c['url'], [
                     'changes' => [
                         ['label' => 'prefs.columns']
@@ -213,7 +213,7 @@ class ApiPreferenceTest extends TestCase
 
         $response = null;
         foreach($calls as $c) {
-            $response = $this->userRequest($response)
+            $response = $this->userRequest()
                 ->json($c['verb'], '/api/v1/preference' . $c['url'], [
                     'changes' => [
                         ['label' => 'prefs.columnsWrongName']

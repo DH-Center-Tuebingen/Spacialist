@@ -21,9 +21,9 @@ class HomeController extends Controller
     {
         parent::__construct();
         if(!Preference::hasPublicAccess()) {
-            $this->middleware('auth')->except(['welcome', 'index', 'external']);
+            $this->middleware('auth:sanctum')->except(['welcome', 'index', 'external']);
         }
-        $this->middleware('guest')->only('welcome');
+        // $this->middleware('guest')->only('welcome');
     }
 
     public function getGlobalData() {

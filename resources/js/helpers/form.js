@@ -14,7 +14,7 @@ export function usePreventNavigation(func) {
 
     // Keep this here until we know this is working properly.
     // Managing unbeforereload with vue and router is a bit tricky.
-    const debug = true;
+    const debug = false;
     const debugLog = msg => console.trace(
         `%c${msgHeader}${msg}`,
         'background: #3999ed; color: #f2f2f2; padding: 2px 6px; border-radius: 3px;'

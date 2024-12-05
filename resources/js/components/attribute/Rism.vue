@@ -64,10 +64,6 @@
         getRismInfo,
     } from '@/api.js';
 
-    import {
-        getPreference,
-    } from '@/helpers/helpers.js';
-
     export default {
         props: {
             name: {
@@ -203,7 +199,6 @@
             return {
                 t,
                 // HELPERS
-                getPreference,
                 // LOCAL
                 resetFieldState,
                 closeInfoBox,

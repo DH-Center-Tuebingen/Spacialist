@@ -253,11 +253,12 @@
 
     import { useI18n } from 'vue-i18n';
     import router from '%router';
-    import store from '@/bootstrap/store.js';
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
+    import useBibliographyStore from '@/bootstrap/stores/bibliography.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import {
         can,
-        getAttribute,
         getCertaintyClass,
         translateConcept,
     } from '@/helpers/helpers.js';
@@ -265,9 +266,6 @@
     import {
         patchAttribute,
         getAttributeValueComments,
-        deleteReferenceFromEntity,
-        updateReference,
-        addReference,
     } from '@/api.js';
 
     import {
@@ -292,6 +290,9 @@
         },
         setup(props, context) {
             const { t } = useI18n();
+            const attributeStore = useAttributeStore();
+            const bibliographyStore = useBibliographyStore();
+            const entityStore = useEntityStore();
             const {
                 entity,
             } = toRefs(props);
@@ -329,16 +330,8 @@
                 let data = {
                     certainty: state.certainty,
                 };
-                patchAttribute(entity.value.id, aid, data).then(data => {
+                entityStore.patchAttribute(entity.value.id, aid, data).then(data => {
                     state.comments.push(event.comment);
-
-                    const dataRow = { [aid]: data };
-                    store.commit('updateEntityData', {
-                        eid: entity.value.id,
-                        data: dataRow,
-                        new_data: dataRow,
-                        sync: true,
-                    });
                     // set startCertainty to new, stored value
                     state.startCertainty = state.certainty;
                 });
@@ -383,14 +376,13 @@
                     bibliography_id: state.newItem.bibliography.id,
                     description: state.newItem.description,
                 };
-                addReference(entity.value.id, state.attribute.id, state.attribute.thesaurus_url, data).then(data => {
+                entityStore.addReference(entity.value.id, state.attribute.id, state.attribute.thesaurus_url, data).then(_ => {
                     resetNewItem();
                 });
             };
             const onDeleteReference = reference => {
                 if(!can('bibliography_read|entity_data_write')) return;
-                const id = reference.id;
-                deleteReferenceFromEntity(reference.id, entity.value.id, state.attribute.thesaurus_url).then(data => {
+                entityStore.removeReference(reference.id, entity.value.id, state.attribute.thesaurus_url).then(_ => {
                     cancelEditReference();
                 });
             };
@@ -404,7 +396,7 @@
                 const data = {
                     description: editedReference.description
                 };
-                updateReference(ref.id, entity.value.id, state.attribute.thesaurus_url, data).then(data => {
+                entityStore.updateReference(ref.id, entity.value.id, state.attribute.thesaurus_url, data).then(_ => {
                     cancelEditReference();
                 });
             };
@@ -433,9 +425,9 @@
                     );
                 }),
                 editItem: {},
-                attribute: getAttribute(aid),
+                attribute: attributeStore.getAttribute(aid),
                 references: computed(_ => entity.value.references[state.attribute.thesaurus_url]),
-                bibliography: computed(_ => store.getters.bibliography),
+                bibliography: computed(_ => bibliographyStore.bibliography),
                 startCertainty: entity.value.data[aid].certainty,
                 certainty: entity.value.data[aid].certainty,
                 comments: [],

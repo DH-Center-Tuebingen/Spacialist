@@ -50,7 +50,7 @@
                         >{{ t('global.type') }}:</label>
                         <div class="col-md-9">
                             <multiselect
-                                v-model="state.data.type"
+                                v-model="state.data.entry_type"
                                 class="multiselect-modal"
                                 :classes="{
                                     ...multiselectResetClasslist,
@@ -95,7 +95,7 @@
                         class=""
                     >
                         <a
-                            :href="state.data.file_url"
+                            :href="`download/bibliography?path=${state.data.file}`"
                             target="_blank"
                         >
                             {{ state.data.file.split('/')[1] }}
@@ -239,10 +239,10 @@
                     if(!content || !content.entries || content.entries.length !== 1) return;
                     const entry = content.entries[0];
                     const type = bibliographyTypes.find(t => t.name == entry.type);
-                    state.data.type = type;
+                    state.data.entry_type = type;
                     state.data.fields.citekey = entry.key;
                     nextTick(_ => {
-                        state.fieldData.type = type;
+                        state.fieldData.entry_type = type;
                         state.fieldData.fields.citekey = entry.key;
                         for(let k in entry.fields) {
                             const p = entry.fields[k];
@@ -277,7 +277,6 @@
             const removeFile = _ => {
                 state.fileRemoved = true;
                 state.data.file = '';
-                state.data.file_url = '';
             };
             const fieldsetStateUpdated = event => {
                 state.formState.dirty = event.dirty;
@@ -292,7 +291,7 @@
                 const updFields = fsRef.getData();
                 const data = {
                     fields: updFields,
-                    type: state.data.type,
+                    entry_type: state.data.entry_type,
                     id: state.data.id,
                 };
                 const file = state.fileRemoved ? 'delete' : (state.file ? state.file.file : null);
@@ -314,7 +313,7 @@
                 error: {},
                 fileContainer: [],
                 scrollStateClasses: computed(_ => {
-                    if(state.data.type) {
+                    if(state.data.entry_type) {
                         return ['overflow-y-auto', 'overflow-x-hidden'];
                     } else {
                         return ['overflow-visible'];
@@ -327,7 +326,7 @@
                     valid: false,
                 },
                 disabled: computed(_ => !(!state.file && state.fileRemoved) && !(state.file && !state.fileRemoved) && !(state.formState.dirty && state.formState.valid)),
-                typeName: computed(_ => state.data.type ? state.data.type.name : null),
+                typeName: computed(_ => state.data.entry_type ? state.data.entry_type.name : null),
                 typeList: bibliographyTypes.map(t => t.name),
             });
 

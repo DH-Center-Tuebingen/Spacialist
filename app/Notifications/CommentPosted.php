@@ -2,8 +2,10 @@
 
 namespace App\Notifications;
 
+use App\Comment;
+use App\Notification as AppNotification;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 
 class CommentPosted extends Notification
@@ -16,11 +18,12 @@ class CommentPosted extends Notification
 
     /**
      * Create a new notification instance.
-     *
+     * @param App\Comment $comment
+     * @param array $metadata
+     * @param array $resourceMetadata
      * @return void
      */
-    public function __construct($comment, $metadata = [], $resourceMetadata = [])
-    {
+    public function __construct(Comment $comment, array $metadata = [], array $resourceMetadata = []) {
         $metadata = array_merge($metadata, ['persistence' => 'none']);
         $this->comment = $comment;
         $this->metadata = $metadata;
@@ -33,9 +36,8 @@ class CommentPosted extends Notification
      * @param  mixed  $notifiable
      * @return array
      */
-    public function via($notifiable)
-    {
-        return ['database'];
+    public function via(mixed $notifiable) : array {
+        return ['database', 'broadcast'];
     }
 
     /**
@@ -44,8 +46,7 @@ class CommentPosted extends Notification
      * @param  mixed  $notifiable
      * @return array
      */
-    public function toArray($notifiable)
-    {
+    public function toArray(mixed $notifiable) : array {
         $res = [
             'id' => $this->comment->commentable_id,
             'type' => $this->comment->commentable_type,
@@ -63,5 +64,17 @@ class CommentPosted extends Notification
             'metadata' => $this->metadata,
             'resource' => $res,
         ];
+    }
+
+    /**
+     * Get the broadcastable representation of the notification.
+     *
+     * @param  object  $notifiable
+     * @return BroadcastMessage
+     */
+    public function toBroadcast(object $notifiable): BroadcastMessage {
+        return new BroadcastMessage([
+            'content' => $notifiable->notifications->first(),
+        ]);
     }
 }

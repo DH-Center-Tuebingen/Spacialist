@@ -64,7 +64,6 @@ class ApiEntityTest extends TestCase
                 'updated_at' => "2017-12-20T09:47:36.000000Z",
                 'deleted_at' => null,
                 'avatar' => null,
-                'avatar_url' => null,
                 'metadata' => null,
                 'login_attempts' => null,
             ],
@@ -489,7 +488,7 @@ class ApiEntityTest extends TestCase
             'error' => 'Start date of a time period must not be after it\'s end date'
         ]);
 
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
         ->patch('/api/v1/entity/2/attributes', [
             [
                 'params' => [
@@ -515,7 +514,7 @@ class ApiEntityTest extends TestCase
             'error' => 'Start date of a time period must not be after it\'s end date'
         ]);
 
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
         ->patch('/api/v1/entity/2/attributes', [
             [
                 'params' => [
@@ -541,7 +540,7 @@ class ApiEntityTest extends TestCase
             'error' => 'Start date of a time period must not be after it\'s end date'
         ]);
 
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
         ->patch('/api/v1/entity/2/attributes', [
             [
                 'params' => [

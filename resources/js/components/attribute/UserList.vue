@@ -69,8 +69,9 @@
 
     import * as yup from 'yup';
 
+    import useUserStore from '@/bootstrap/stores/user.js';
+
     import {
-        getUsers,
         multiselectResetClasslist,
     } from '@/helpers/helpers.js';
 
@@ -97,6 +98,7 @@
         emits: ['change'],
         setup(props, context) {
             const { t } = useI18n();
+            const userStore = useUserStore();
             const {
                 name,
                 disabled,
@@ -126,7 +128,7 @@
             } = useField(`userlist_${name.value}`, yup.mixed(), {
                 initialValue: value.value || [],
             });
-            const users = getUsers();
+            const users = userStore.users;
             const v = reactive({
                 value: fieldValue,
                 handleChange,

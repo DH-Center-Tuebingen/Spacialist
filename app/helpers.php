@@ -173,6 +173,19 @@ if(!function_exists('sp_column_names')) {
     }
 }
 
+if(!function_exists('sp_get_comment_room')) {
+    function sp_get_comment_room(string $type) : ?string {
+        $room = null;
+        switch($type) {
+            case 'App\Entity':
+            case 'App\AttributeValue':
+                $room = 'entity';
+                break;
+        }
+        return $room;
+    }
+}
+
 // detail level
 // 0 = no relations
 // 1 = labels

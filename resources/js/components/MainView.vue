@@ -129,7 +129,8 @@
         useRoute,
     } from 'vue-router';
 
-    import store from '@/bootstrap/store.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
+    import useSystemStore from '@/bootstrap/stores/system.js';
     import router from '%router';
 
     import {
@@ -148,6 +149,23 @@
         canShowReferenceModal,
         showLiteratureInfo,
     } from '@/helpers/modal.js';
+    import {
+        subscribeNotifications,
+        subscribeSystemChannel,
+        unsubscribeSystemChannel,
+        listenToList,
+    } from '@/helpers/websocket.js';
+    import {
+        handleBibliographyCreated,
+        handleBibliographyUpdated,
+        handleBibliographyDeleted,
+        handleEntityCreated,
+        handleEntityUpdated,
+        handleEntityDeleted,
+    } from '@/handlers/system.js';
+    import {
+        handleNotifications,
+    } from '@/handlers/notification.js';
 
     import { useToast } from '@/plugins/toast.js';
 
@@ -161,6 +179,8 @@
             const { t } = useI18n();
             const currentRoute = useRoute();
             const toast = useToast();
+            const entityStore = useEntityStore();
+            const systemStore = useSystemStore();
 
             // FUNCTIONS
             const setTab = to => {
@@ -207,7 +227,7 @@
 
             // DATA
             const state = reactive({
-                tab: computed(_ => store.getters.mainView.tab),
+                tab: computed(_ => systemStore.mainView.tab),
                 tabComponent: computed(_ => {
                     const plugin = state.tabPlugins.find(p => p.key == state.tab);
                     if(!!plugin) {
@@ -216,8 +236,8 @@
                         return '';
                     }
                 }),
-                concepts: computed(_ => store.getters.concepts),
-                entity: computed(_ => store.getters.entity),
+                concepts: computed(_ => systemStore.concepts),
+                entity: computed(_ => entityStore.selectedEntity),
                 hasReferences: computed(_ => {
                     const isNotSet = !state.entity.references;
                     if(isNotSet) return false;
@@ -226,25 +246,37 @@
                     if(isEmpty) return false;
                     return Object.values(state.entity.references).some(v => v.length > 0);
                 }),
-                entityTypes: computed(_ => store.getters.entityTypes),
-                columnPref: computed(_ => store.getters.preferenceByKey('prefs.columns')),
-                isDetailLoaded: computed(_ => store.getters.entity?.id > 0),
-                tabPlugins: computed(_ => store.getters.slotPlugins('tab')),
+                entityTypes: computed(_ => entityStore.entityTypes),
+                columnPref: computed(_ => systemStore.getPreference('prefs.columns')),
+                isDetailLoaded: computed(_ => state.entity?.id > 0),
+                tabPlugins: computed(_ => systemStore.getSlotPlugins('tab')),
             });
+            const channels = {};
 
             // ON MOUNTED
             onMounted(_ => {
                 console.log('mainview component mounted');
-                store.dispatch('setMainViewTab', currentRoute.query.tab);
+                systemStore.setMainViewTab(currentRoute.query.tab);
+                channels.system = subscribeSystemChannel();
+                listenToList(channels.system, [
+                    handleEntityCreated,
+                    handleEntityUpdated,
+                    handleEntityDeleted,
+                    handleBibliographyCreated,
+                    handleBibliographyUpdated,
+                    handleBibliographyDeleted,
+                ]);
+                channels.notification = subscribeNotifications(handleNotifications);
             });
 
             onBeforeRouteUpdate(async (to, from) => {
                 if(to.query.tab !== from.query.tab) {
-                    store.dispatch('setMainViewTab', to.query.tab);
+                    systemStore.setMainViewTab(to.query.tab);
                 }
             });
             onBeforeRouteLeave((to, from) => {
-                store.dispatch('setMainViewTab', null);
+                systemStore.setMainViewTab(null);
+                unsubscribeSystemChannel();
             });
 
             // RETURN

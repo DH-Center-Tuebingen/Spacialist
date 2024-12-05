@@ -258,11 +258,12 @@
         useRoute,
     } from 'vue-router';
 
-    import store from '@/bootstrap/store.js';
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
+    import useSystemStore from '@/bootstrap/stores/system.js';
     import router from '%router';
 
     import {
-        duplicateEntityType as duplicateEntityTypeApi,
         getEntityTypeOccurrenceCount,
         getAttributeOccurrenceCount,
     } from '@/api.js';
@@ -285,6 +286,9 @@
         setup(props, context) {
             const { t } = useI18n();
             const currentRoute = useRoute();
+            const attributeStore = useAttributeStore();
+            const entityStore = useEntityStore();
+            const systemStore = useSystemStore();
 
             // FETCH
 
@@ -301,11 +305,7 @@
                 showAddEntityType();
             };
             const duplicateEntityType = event => {
-                const attrs = getEntityTypeAttributes(event.id).slice();
-                duplicateEntityTypeApi(event.id).then(data => {
-                    data.attributes = attrs;
-                    store.dispatch('addEntityType', data);
-                });
+                entityStore.duplicateEntityType(event.id);
             };
             const editEntityType = e => {
                 showEditEntityType(e.type);
@@ -364,9 +364,9 @@
             // DATA
             const accordionRef = ref(null);
             const state = reactive({
-                siu: computed(_ => store.getters.datatypeDataOf('si-unit')),
-                systemAttributeList: computed(_ => store.getters.attributes.filter(a => a.is_system)),
-                userAttributeList: computed(_ => store.getters.attributes.filter(a => !a.is_system)),
+                siu: computed(_ => systemStore.getDatatypeDataOf('si-unit')),
+                systemAttributeList: computed(_ => attributeStore.getAttributeListBy('system')),
+                userAttributeList: computed(_ => attributeStore.getAttributeListBy()),
                 attributeList: computed(_ => {
                     if(!state.sortAttributes) return state.filteredAttributeList;
 
@@ -415,10 +415,10 @@
                     });
                 }),
                 showHiddenAttributes: false,
+                entityTypes: computed(_ => Object.values(entityStore.entityTypes)),
                 showAttributesInGroups: true,
                 sortAttributes: true,
                 attributeQuery: '',
-                entityTypes: computed(_ => Object.values(store.getters.entityTypes)),
                 selectedEntityType: computed(_ => parseInt(currentRoute.params.id)),
                 selectedEntityTypeAttributeIds: computed(_ => state.selectedEntityType ? getEntityTypeAttributes(state.selectedEntityType).map(a => a.id) : []),
             });

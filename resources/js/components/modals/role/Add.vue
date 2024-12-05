@@ -44,7 +44,7 @@
                                 required
                                 @input="v.fields.name.handleInput"
                             >
-    
+
                             <div class="invalid-feedback">
                                 <span
                                     v-for="(msg, i) in v.fields.name.errors"
@@ -73,7 +73,7 @@
                                 required
                                 @input="v.fields.display_name.handleInput"
                             >
-    
+
                             <div class="invalid-feedback">
                                 <span
                                     v-for="(msg, i) in v.fields.display_name.errors"
@@ -102,7 +102,7 @@
                                 required
                                 @input="v.fields.description.handleInput"
                             >
-    
+
                             <div class="invalid-feedback">
                                 <span
                                     v-for="(msg, i) in v.fields.description.errors"
@@ -179,7 +179,7 @@
 
     import * as yup from 'yup';
 
-    import store from '@/bootstrap/store.js';
+    import useUserStore from '@/bootstrap/stores/user.js';
 
     import {
         getClassByValidation,
@@ -192,6 +192,7 @@
         emits: ['add', 'cancel'],
         setup(props, context) {
             const { t } = useI18n();
+            const userStore = useUserStore();
 
             // FUNCTIONS
             const closeModal = _ => {
@@ -203,7 +204,7 @@
                     display_name: v.fields.display_name.value,
                     description: v.fields.description.value,
                 };
-                if(v.fields.derived_from.vale) {
+                if(v.fields.derived_from.value) {
                     role.derived_from = v.fields.derived_from.value.id;
                 }
                 context.emit('add', role);
@@ -241,7 +242,7 @@
 
             const state = reactive({
                 form: formMeta,
-                rolePresets: computed(_ => store.getters.rolePresets),
+                rolePresets: computed(_ => userStore.rolePresets),
             });
             const v = reactive({
                 fields: {
