@@ -35,22 +35,40 @@
                 required: true
             }
         },
-        setup(props){
+        setup(props) {
             const header = computed(_ => {
                 return props.value.split(props.headerSeparator)[0].trim();
             });
 
             const items = computed(_ => {
 
-                const headerParts = props.value.split(props.headerSeparator);
-                headerParts.shift();
+                // Replace text inside double curly braces with placeholders
+                const preservationRegex = RegExp('{{(.*?)}}', 'g');
+                const variables = {};
+                let counter = 1;
+                const preservationMatches = props.value.replace(preservationRegex, (match, p1 = '') => {
+                    const key = `$${counter++}`;
+                    variables[key] = p1;
+                    return key;
+                });
+                
+                const [header, ...body] = preservationMatches.split(props.headerSeparator);
 
-                const parts = headerParts.join(props.separator);
-                return parts.split(props.separator);
+                const joinedBody = body.join(props.headerSeparator).trim();
+                let lines = joinedBody.split(props.separator);
+                lines = lines.map((line, idx) => {
+                    let result = line;
+                    for(const [key, value] of Object.entries(variables)) {
+                        result = result.replace(key, value);
+                    }
+                    return result;
+                });
+                console.log(lines);
+                return lines;
             });
 
             const hasItems = computed(_ => {
-                return items.value.length > 0 && items.value[0].trim() !== '';
+                return items.value.length > 0 && items.value[0] && items.value[0].trim() !== '';
             });
 
 

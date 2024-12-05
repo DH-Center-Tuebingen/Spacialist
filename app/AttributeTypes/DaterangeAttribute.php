@@ -29,10 +29,10 @@ class DaterangeAttribute extends AttributeBase
             throw InvalidDataException::requireBefore($start, $end);
         }
 
-        return [
+        return json_encode([
             "start" => $start,
             "end" => $end,
-        ];
+        ]);
     }
 
     public static function unserialize(mixed $data) : mixed {

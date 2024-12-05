@@ -54,7 +54,7 @@ class EntityAttributesTableSeeder extends Seeder
                 'updated_at' => '2017-12-20 17:01:58',
                 'position' => 2,
                 'depends_on' => NULL,
-            ),
+            ),            
             4 =>
             array (
                 'id' => 18,
@@ -245,6 +245,16 @@ class EntityAttributesTableSeeder extends Seeder
                 'position' => 6,
                 'depends_on' => NULL,
             ),
+            23 =>             
+            array (
+                'id' => 26,
+                'entity_type_id' => 3, // Fundstelle
+                'attribute_id' => 19, // Aufbewahrung [string]
+                'created_at' => '2017-12-20 17:00:43',
+                'updated_at' => '2017-12-20 17:01:58',
+                'position' => 3,
+                'depends_on' => NULL,
+            ),   
         ));
     }
 }

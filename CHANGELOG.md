@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.10.2
+
+### Fixed
+- Fixed Date Range _importFrom_ to return a JSON string
+
+### Changed 
+- Added tests to _ApiDataImporterTest_ to check if the same columns can be used in multiple attributes
+- Added in testing data an attribute (_'Aufbewahrung' [string]_) to the entity type _'Fundstelle'_
+- Changed the row error from just sending the column name to also send the column value
+- The ErrorList component of the Data Importer in the Frontend now preserves text inside `{{...}}`
+
 ## 0.10.1
 ### Added
 - Option to display attributes in _Data Model Editor_ in groups
