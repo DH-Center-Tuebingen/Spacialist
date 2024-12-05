@@ -5,11 +5,13 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - Fixed Date Range _importFrom_ to return a JSON string
+- Fixed Date Range component in the frontend
 
 ### Changed 
 - Added tests to _ApiDataImporterTest_ to check if the same columns can be used in multiple attributes
 - Added in testing data an attribute (_'Aufbewahrung' [string]_) to the entity type _'Fundstelle'_
 - Changed the row error from just sending the column name to also send the column value
+- Dropdowns in the _Data Importer_ are now sorted alphabetically, both the order of the attribute mappings and the option lists inside the dropdowns
 - The ErrorList component of the Data Importer in the Frontend now preserves text inside `{{...}}`
 
 ## 0.10.1

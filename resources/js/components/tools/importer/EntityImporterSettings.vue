@@ -14,7 +14,7 @@
                 :hide-selected="true"
                 :label="'thesaurus_url'"
                 :object="true"
-                :options="availableEntityTypes"
+                :options="sortedAvailableEntityTypes"
                 :placeholder="t('global.select.placeholder')"
                 :searchable="true"
                 :track-by="'id'"
@@ -24,11 +24,11 @@
                 @change="value => $emit('update:entityType', value)"
             >
                 <template #option="{ option }">
-                    {{ translateConcept(option.thesaurus_url) }}
+                    {{ option._label }}
                 </template>
                 <template #singlelabel="{ value }">
                     <div class="multiselect-single-label">
-                        {{ translateConcept(value.thesaurus_url) }}
+                        {{ value._label }}
                     </div>
                 </template>
             </multiselect>
@@ -53,7 +53,7 @@
                 :classes="multiselectResetClasslist"
                 :disabled="disabled"
                 :hide-selected="true"
-                :options="availableColumns"
+                :options="sortedAvailableColumns"
                 :placeholder="t('global.select.placeholder')"
                 :searchable="true"
                 :value="entityName"
@@ -79,7 +79,7 @@
                 :disabled="disabled"
                 :hide-selected="true"
                 :value="entityParent"
-                :options="availableColumns"
+                :options="sortedAvailableColumns"
                 :placeholder="t('global.select.placeholder')"
                 :searchable="true"
                 :append-to-body="true"
@@ -91,6 +91,7 @@
 
 <script>
     import { useI18n } from 'vue-i18n';
+    import { computed } from 'vue';
 
     import {
         multiselectResetClasslist,
@@ -152,12 +153,36 @@
                 return val;
             }
 
+            const sortedAvailableEntityTypes = computed(() => {
+                const options = props.availableEntityTypes;
+                for(const option of options) {
+                    option._label = translateConcept(option.thesaurus_url);
+                }
+
+                return options.sort((a, b) => {
+                    return a._label.localeCompare(b._label);
+                });
+            });
+
+            const sortedAvailableColumns = computed(() => {
+                const options = [];
+                for(const key in props.availableColumns) {
+                    options.push(props.availableColumns[key]);
+                }
+
+                return Object.values(options).sort((a, b) => {
+                    return a.localeCompare(b);
+                });
+            });
+
             return {
                 t,
                 multiselectResetClasslist,
                 translateConcept,
                 getTotal,
                 getMissing,
+                sortedAvailableColumns,
+                sortedAvailableEntityTypes,
             };
         },
     };

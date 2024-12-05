@@ -46,6 +46,9 @@
             },
             value: {
                 type: Array,
+                validator: arr => {
+                    return !arr || arr.length === 2;
+                },
                 required: true,
             },
         },
@@ -58,13 +61,15 @@
             } = toRefs(props);
             // FETCH
 
-            // FUNCTIONS
-            const strToDate = str => {
-                return new Date(str);
+            
+            const fixValue = _ => {                
+                return value.value?.map(dt => new Date(dt));
             };
+            
+            
             const resetFieldState = _ => {
                 v.resetField({
-                    value: value.value?.map(dt => strToDate(dt)),
+                    value: fixValue(),
                 });
             };
             const undirtyField = _ => {
@@ -78,7 +83,7 @@
                     return new Date(date.getTime() - (date.getTimezoneOffset()*60*1000));
                 });
                 v.handleChange(correctValue);
-            }
+            };
 
             // DATA
             const {
@@ -87,7 +92,7 @@
                 meta,
                 resetField,
             } = useField(`daterange_${name.value}`, yup.array(), {
-                initialValue: value.value?.map(dt => strToDate(dt)),
+                initialValue: fixValue(),
             });
             const state = reactive({
 

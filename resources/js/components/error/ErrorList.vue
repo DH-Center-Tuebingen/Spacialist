@@ -63,7 +63,6 @@
                     }
                     return result;
                 });
-                console.log(lines);
                 return lines;
             });
 

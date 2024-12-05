@@ -30,8 +30,8 @@ class DaterangeAttribute extends AttributeBase
         }
 
         return json_encode([
-            "start" => $start,
-            "end" => $end,
+            $start,
+            $end,
         ]);
     }
 

@@ -7,7 +7,7 @@
             {{ t('main.importer.info.entity_type_has_no_attributes') }}
         </div>
         <div
-            v-for="(attr, i) in availableAttributes"
+            v-for="(attr, i) in availableAttributesSortedByName"
             :key="i"
             class="attribute-mapping-item"
         >
@@ -20,7 +20,7 @@
                     class="form-label"
                     :for="`input-data-column-${attr.id}`"
                 >
-                    {{ translateConcept(attr.thesaurus_url) }}
+                    {{ attr._name }}
                     <span class="ms-2 opacity-50 small">
                         {{ t(`global.attributes.${attr.datatype}`) }}
                     </span>
@@ -31,9 +31,7 @@
                 :disabled="disabled"
                 :value="attributeMapping[attr.id]"
                 :classes="multiselectResetClasslist"
-                :object="false"
-                :mode="'single'"
-                :options="availableColumns"
+                :options="sortedOptions"
                 :placeholder="t('global.select.placeholder')"
                 :hide-selected="true"
                 :searchable="true"
@@ -54,6 +52,7 @@
     } from '@/helpers/helpers.js';
 
     import ValuesMissingIndicator from './ValuesMissingIndicator.vue';
+    import { computed } from 'vue';
 
     export default {
         components: {
@@ -127,16 +126,38 @@
                 return val;
             }
 
+            const availableAttributesSortedByName = computed(_ => {
+                let arr = [];
+                for(const attr of props.availableAttributes) {
+                    arr.push({
+                        ...attr,
+                        _name: translateConcept(attr.thesaurus_url),
+                    });
+                }
+
+                return arr.sort((a, b) => {
+                    return a._name.localeCompare(b._name);
+                });
+            });
+
+            const sortedOptions = computed(_ => {
+                return props.availableColumns.toSorted((a, b) => {
+                    return a.localeCompare(b);
+                });
+            });
+
             return {
                 t,
                 translateConcept,
-                multiselectResetClasslist,
-                updateAttributeMapping,
+                // Local
+                availableAttributesSortedByName,
                 deselectWorkAround,
-                getTotal,
                 getMissing,
+                getTotal,
+                multiselectResetClasslist,
+                sortedOptions,
+                updateAttributeMapping,
             };
         },
     };
 </script>
-
