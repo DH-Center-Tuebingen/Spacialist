@@ -60,7 +60,7 @@ function updateSelectionTypeIdList(selection) {
 const handleAddEntityType = (context, typeData, attributes = []) => {
     context.entityTypeAttributes[typeData.id] = attributes.slice();
     context.entityTypes[typeData.id] = typeData;
-}
+};
 
 const handlePostDelete = (context, entityId) => {
     const currentRoute = router.currentRoute.value;
@@ -87,7 +87,7 @@ const handlePostDelete = (context, entityId) => {
             }
         }
     }
-}
+};
 
 export const useEntityStore = defineStore('entity', {
     state: _ => ({
@@ -180,7 +180,7 @@ export const useEntityStore = defineStore('entity', {
                     colors = state.entityTypeColors[id];
                 }
                 return colors;
-            }
+            };
         },
         getEntityTypeName(state) {
             return id => {
@@ -512,8 +512,8 @@ export const useEntityStore = defineStore('entity', {
                 }
             }
 
-            // Remove the data from the entity. 
-            // We need to do this as the 'replace', 'add' 'remove' 
+            // Remove the data from the entity.
+            // We need to do this as the 'replace', 'add' 'remove'
             // operations are calculated based on this value.
             for(const attributeId in removedData) {
                 if(entity.data[attributeId]) {
@@ -544,12 +544,17 @@ export const useEntityStore = defineStore('entity', {
             });
         },
         handleReference(entityId, attributeUrl, action, data) {
+            const entity = this.getEntity(entityId);
+            let references;
+            if(attributeUrl) {
+                references = entity?.references[attributeUrl] || [];
+            } else {
+                references = entity?.references.on_entity || [];
+            }
             if(action == 'add') {
-                const references = this.getEntity(entityId)?.references[attributeUrl] || [];
                 references.push(data);
                 return data;
             } else if(action == 'update') {
-                const references = this.getEntity(entityId)?.references[attributeUrl] || [];
                 const id = data.id;
                 const refData = data.data;
                 const updateData = data.updates;
@@ -561,7 +566,6 @@ export const useEntityStore = defineStore('entity', {
                     reference.updated_at = updateData.updated_at;
                 }
             } else if(action == 'delete') {
-                const references = this.getEntity(entityId)?.references[attributeUrl] || [];
                 const idx = references.findIndex(ref => ref.id == data.id);
                 if(idx > -1) {
                     references.splice(idx, 1);

@@ -161,73 +161,9 @@
                 <h6 class="mt-2">
                     {{ t('main.entity.references.bibliography.add') }}
                 </h6>
-                <form
-                    v-dcan="'bibliography_read|entity_data_write'"
-                    role="form"
-                    @submit.prevent="onAddReference()"
-                >
-                    <div class="d-flex flex-row">
-                        <div class="flex-grow-1">
-                            <multiselect
-                                id="bibliography-search"
-                                v-model="state.newItem.bibliography"
-                                :object="true"
-                                :label="'title'"
-                                :track-by="'id'"
-                                :hide-selected="true"
-                                :value-prop="'id'"
-                                :mode="'single'"
-                                :delay="0"
-                                :min-chars="0"
-                                :resolve-on-load="true"
-                                :filterResults="false"
-                                :options="async query => await filterBibliographyList(query)"
-                                :searchable="true"
-                                :placeholder="t('global.select.placeholder')"
-                            >
-                                <template #singlelabel="{ value }">
-                                    <div class="multiselect-single-label">
-                                        <div>
-                                            <span class="fw-medium">{{ value.title }}</span>
-                                            -
-                                            <cite class="small">
-                                                {{ formatAuthors(value.author) }} ({{ value.year }})
-                                            </cite>
-                                        </div>
-                                    </div>
-                                </template>
-                                <template #option="{ option }">
-                                    <div>
-                                        <div>
-                                            <span class="fw-medium">{{ option.title }}</span>
-                                        </div>
-                                        <cite class="small">
-                                            {{ formatAuthors(option.author) }} <span class="fw-light">({{ option.year
-                                            }})</span>
-                                        </cite>
-                                    </div>
-                                </template>
-                            </multiselect>
-                        </div>
-                        <div class="flex-grow-1 ms-1">
-                            <textarea
-                                v-model="state.newItem.description"
-                                class="form-control"
-                                :placeholder="t('main.entity.references.bibliography.comment')"
-                            />
-                        </div>
-                        <div class="ms-1 mt-auto">
-                            <button
-                                type="submit"
-                                class="btn btn-outline-success btn-sm px-1 py-05"
-                                :disabled="state.addReferenceDisabled"
-                                :title="t('main.entity.references.bibliography.add_button')"
-                            >
-                                <i class="fas fa-fw fa-plus" />
-                            </button>
-                        </div>
-                    </div>
-                </form>
+                <ReferenceForm
+                    @add="onAddReference"
+                />
             </div>
             <div class="modal-footer">
                 <button
@@ -254,7 +190,6 @@
     import { useI18n } from 'vue-i18n';
     import router from '%router';
     import useAttributeStore from '@/bootstrap/stores/attribute.js';
-    import useBibliographyStore from '@/bootstrap/stores/bibliography.js';
     import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import {
@@ -269,18 +204,16 @@
     } from '@/api.js';
 
     import {
-        formatAuthors,
-    } from '@/helpers/bibliography.js';
-
-    import {
         date,
     } from '@/helpers/filters.js';
 
     import Quotation from '@/components/bibliography/Quotation.vue';
+    import ReferenceForm from '@/components/bibliography/ReferenceForm.vue';
 
     export default {
         components: {
             Quotation,
+            ReferenceForm,
         },
         props: {
             entity: {
@@ -291,7 +224,6 @@
         setup(props, context) {
             const { t } = useI18n();
             const attributeStore = useAttributeStore();
-            const bibliographyStore = useBibliographyStore();
             const entityStore = useEntityStore();
             const {
                 entity,
@@ -336,32 +268,6 @@
                     state.startCertainty = state.certainty;
                 });
             };
-            const isMatch = (prop, exp) => {
-                return !!prop && !!prop.match(exp);
-            };
-            const filterBibliographyList = async query => {
-                if(!query) {
-                    return await new Promise(r => r(state.bibliography));
-                } else {
-                    const exp = new RegExp(query, 'i');
-                    return await new Promise(r => r(
-                        state.bibliography.filter(entry => {
-                            return (
-                                isMatch(entry.title, exp) ||
-                                isMatch(entry.booktitle, exp) ||
-                                isMatch(entry.author, exp) ||
-                                isMatch(entry.year, exp) ||
-                                isMatch(entry.citekey, exp) ||
-                                isMatch(entry.journal, exp)
-                            );
-                        })
-                    ));
-                }
-            };
-            const resetNewItem = _ => {
-                state.newItem.bibliography = {};
-                state.newItem.description = '';
-            };
             const enableEditReference = reference => {
                 state.editItem = {
                     ...reference
@@ -370,15 +276,9 @@
             const cancelEditReference = _ => {
                 state.editItem = {};
             };
-            const onAddReference = _ => {
+            const onAddReference = data => {
                 if(!can('bibliography_read|entity_data_write')) return;
-                const data = {
-                    bibliography_id: state.newItem.bibliography.id,
-                    description: state.newItem.description,
-                };
-                entityStore.addReference(entity.value.id, state.attribute.id, state.attribute.thesaurus_url, data).then(_ => {
-                    resetNewItem();
-                });
+                entityStore.addReference(entity.value.id, state.attribute.id, state.attribute.thesaurus_url, data);
             };
             const onDeleteReference = reference => {
                 if(!can('bibliography_read|entity_data_write')) return;
@@ -418,16 +318,9 @@
                     bibliography: {},
                     description: '',
                 },
-                addReferenceDisabled: computed(_ => {
-                    return (
-                        (!!state.newItem.bibliography && !state.newItem.bibliography.id) ||
-                        state.newItem.description.length == 0
-                    );
-                }),
                 editItem: {},
                 attribute: attributeStore.getAttribute(aid),
                 references: computed(_ => entity.value.references[state.attribute.thesaurus_url]),
-                bibliography: computed(_ => bibliographyStore.bibliography),
                 startCertainty: entity.value.data[aid].certainty,
                 certainty: entity.value.data[aid].certainty,
                 comments: [],
@@ -462,13 +355,11 @@
                 can,
                 getCertaintyClass,
                 translateConcept,
-                formatAuthors,
                 date,
                 // PROPS
                 // LOCAL
                 setCertainty,
                 onUpdateCertainty,
-                filterBibliographyList,
                 enableEditReference,
                 cancelEditReference,
                 onAddReference,

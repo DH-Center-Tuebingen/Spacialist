@@ -40,7 +40,12 @@ class ReferenceController extends Controller {
 
         $groupedReferences = [];
         foreach($references as $r) {
-            $key = $r->attribute->thesaurus_url;
+            if(isset($r->attribute)) {
+                $key = $r->attribute->thesaurus_url;
+            } else {
+                $key = 'on_entity';
+            }
+
             if(!isset($groupedReferences[$key])) {
                 $groupedReferences[$key] = [];
             }
@@ -53,7 +58,7 @@ class ReferenceController extends Controller {
 
     // POST
 
-    public function addReference(Request $request, $id, $aid) {
+    public function addReference(Request $request, int $id, ?int $aid = null) {
         $user = auth()->user();
         if(!$user->can('entity_data_create')) {
             return response()->json([
@@ -69,18 +74,25 @@ class ReferenceController extends Controller {
                 'error' => __('This entity does not exist')
             ], 400);
         }
-        try {
-            Attribute::findOrFail($aid);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This attribute does not exist')
-            ], 400);
+
+        $data = [
+            'entity_id' => $id,
+        ];
+        if(isset($aid)) {
+            try {
+                Attribute::findOrFail($aid);
+                $data['attribute_id'] = $aid;
+            } catch(ModelNotFoundException $e) {
+                return response()->json([
+                    'error' => __('This attribute does not exist')
+                ], 400);
+            }
         }
 
-        $props = array_merge([
-            'entity_id' => $id,
-            'attribute_id' => $aid
-        ], $request->only(array_keys(Reference::rules)));
+        $props = array_merge(
+            $data,
+            $request->only(array_keys(Reference::rules))
+        );
         $reference = Reference::add($props, $user);
         return response()->json($reference, 201);
     }

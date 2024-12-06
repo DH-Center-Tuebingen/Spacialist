@@ -539,6 +539,7 @@
             },
             "references": {
                 "title": "References",
+                "general": "General References",
                 "empty": "No References found",
                 "certainty": "Certainty",
                 "bibliography": {

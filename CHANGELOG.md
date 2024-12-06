@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.11
+### Added
+- References can also be added to an Entity, not only to an Entity Attribute
+
 ## 0.10.1
 ### Added
 - Option to display attributes in _Data Model Editor_ in groups
@@ -10,8 +14,8 @@ All notable changes to this project will be documented in this file.
   - selects the first choice (if there is **only one choice** in the dropdown)*
   - selects the exact match (**case insensitive**; e.g. "apple" + `Tab` will select the available choice "apple", but also "Apple")*
   - nothing and focuses the next attribute (default)
-  - * Selected elements will be marked with a blue (Tab) badge 
-- Pressing `Delete` inside _Single Choice Dropdowns_ will clear the element  
+  - * Selected elements will be marked with a blue (Tab) badge
+- Pressing `Delete` inside _Single Choice Dropdowns_ will clear the element
 - Importer now automatically removes BOM if present
 - Better readable format for error message on validation
 - Renamed _fromImport_ to _parseImport_ on the attribute classses. The base class now by default imports the passed string, removing redundancies on the string-based classes.
