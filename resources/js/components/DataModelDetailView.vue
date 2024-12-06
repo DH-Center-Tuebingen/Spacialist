@@ -233,11 +233,10 @@
                 });
             };
             const addAllEntityTypes = _ => {
-                state.entityType.sub_entity_types = [];
-                state.entityType.sub_entity_types = state.minimalEntityTypes.slice();
+                state.properties.sub_entity_types = state.minimalEntityTypes.slice();
             };
             const removeAllEntityTypes = _ => {
-                state.entityType.sub_entity_types = [];
+                state.properties.sub_entity_types = [];
             };
             const addAttributeToEntityType = e => {
                 addEntityTypeAttribute(currentRoute.params.id, e.element.id, e.to).then(data => {
