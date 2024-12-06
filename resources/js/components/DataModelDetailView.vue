@@ -298,7 +298,15 @@
 
             // DATA
             const state = reactive({
-                entityType: computed(_ => _cloneDeep(getEntityType(currentRoute.params.id))),
+                entityType: computed(_ => {
+                    const entityType = _cloneDeep(getEntityType(currentRoute.params.id));
+                    
+                    // We need to ensure that sub_entity_types is set
+                    // otherwise the dirties calculation may fail.
+                    if(!entityType.sub_entity_types)
+                        entityType.sub_entity_types = [];
+                    return entityType;
+                }),
                 propertiesDirty: computed(_ => {
                     if(!state.entityType) return false;
                     const rootDirty = state.entityType.is_root !== state.properties.is_root;
@@ -395,21 +403,21 @@
                                 state.selectedDependency.operator &&
                                 state.selectedDependency.operator.id &&
                                 state.selectedDependency.value
-                                )
-                                ||
+                            )
+                            ||
+                            (
                                 (
-                                    (
-                                        !state.selectedDependency.attribute ||
-                                        !state.selectedDependency.attribute.id
-                                    ) &&
+                                    !state.selectedDependency.attribute ||
+                                    !state.selectedDependency.attribute.id
+                                ) &&
                                 (
                                     !state.selectedDependency.operator ||
                                     !state.selectedDependency.operator.id
                                 ) &&
                                 !state.selectedDependency.value
-                                )
                             )
-                            ;
+                        )
+                        ;
                 }),
             });
 
