@@ -146,11 +146,12 @@ class EditorController extends Controller {
 
         $curl = $request->get('concept_url');
         $is_root = sp_parse_boolean($request->get('is_root'));
-        $cType = new EntityType();
-        $cType->thesaurus_url = $curl;
-        $cType->is_root = $is_root;
-        $cType->save();
-        $cType = EntityType::find($cType->id);
+        $entityType = new EntityType();
+        $entityType->thesaurus_url = $curl;
+        $entityType->is_root = $is_root;
+        $entityType->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+        $entityType->save();
+        $entityType = EntityType::find($entityType->id);
 
         // TODO:: Reimplement in plugin [SO]
         //
@@ -167,7 +168,7 @@ class EditorController extends Controller {
 
         // $cType->load('layer');
 
-        return response()->json($cType, 201);
+        return response()->json($entityType, 201);
     }
 
     public function setRelationInfo(Request $request, $id) {
