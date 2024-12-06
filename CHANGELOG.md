@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 ## 0.11
 ### Added
 - References can also be added to an Entity, not only to an Entity Attribute
+### Fixed
+- Attribute Dependency inverted
 
 ## 0.10.1
 ### Added
