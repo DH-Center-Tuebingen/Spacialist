@@ -1,25 +1,28 @@
 <template>
-    <div class="list-group overflow-y-auto px-2">
+    <div class="list-group overflow-y-auto">
         <a
             v-for="(entry, i) in state.entries"
             :key="i"
             href="#"
-            class="list-group-item list-group-item-action d-flex flex-row align-items-center"
+            class="list-group-item list-group-item-action d-flex flex-row align-items-center p-0"
             :class="{ 'active': entry.id == selectedId }"
             @click.prevent="selectEntry(entry)"
             @mouseenter="onEnter(i)"
             @mouseleave="onLeave(i)"
         >
-            <div>
-                <i class="fas fa-fw fa-monument" />
-                <span class="p-1">
+            <div class="d-flex p-0  flex-fill">
+                <div
+                    :style="getColorStyle(entry)"
+                    class="me-2"
+                />
+                <span class="flex-fill p-1">
                     {{ translateConcept(entry.thesaurus_url) }}
                 </span>
             </div>
             <div
                 v-if="state.hasOnHoverListener"
                 v-show="state.hoverStates[i]"
-                class="ms-auto btn-fab-list"
+                class="ms-auto btn-fab-list bg-white position-absolute z-1 end-0 me-2"
                 :class="activeClasses(entry)"
             >
                 <button
@@ -131,7 +134,7 @@
                 state.hoverStates[i] = false;
             };
             const activeClasses = entry => {
-                if(entry.id != selectedId.value) return [];
+                // if(entry.id != selectedId.value) return [];
 
                 return ['badge', 'rounded-pill', 'bg-light'];
             };
@@ -158,10 +161,14 @@
                 hasOnHoverListener: computed(_ => state.hasDeleteListener || state.hasDuplicateListener || state.hasEditListener),
             });
 
-            // ON MOUNTED
-            onMounted(_ => {
-
-            });
+            const getColorStyle = entry => {
+                const size = '3px';
+                return {
+                    backgroundColor: entry.color ?? '#000000',
+                    width: size,
+                    'flex-shrink': 0,
+                };
+            };
 
             // RETURN
             return {
@@ -169,6 +176,7 @@
                 // HELPERS
                 translateConcept,
                 // LOCAL
+                getColorStyle,
                 onEnter,
                 onLeave,
                 activeClasses,
