@@ -91,6 +91,16 @@ dl.dl-0-mb > dd:last-child {
     height: 64px;
 }
 
+.avatar-list > .avatar-list-item {
+    @extend .ms-n2;
+}
+.avatar-list:hover > .avatar-list-item {
+    @extend .ms-1;
+}
+.avatar-list > .avatar-list-item:first-child {
+    margin-left: 0 !important;
+}
+
 .btn-fab {
     padding: 0;
     height: 1.8rem;

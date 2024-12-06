@@ -9,11 +9,11 @@ use Tests\TestCase;
 
 class ApiReferenceTest extends TestCase
 {
-    
+
     // ==========================================
     //                [[ GET ]]
     // ==========================================
-    
+
     /**
     * @testdox GET    /api/v1/entity/{id}/reference  -  Get all references of an entity (id=1).
     */
@@ -85,11 +85,11 @@ class ApiReferenceTest extends TestCase
             ]
         ]);
     }
-    
+
     // ==========================================
     //              [[ POST ]]
     // ==========================================
-    
+
     /**
     * @testdox POST   /api/v1/entity/{entity_id}/reference/{attribute_id}  -  Add a new reference to an entity (id=2).
     */
@@ -132,14 +132,14 @@ class ApiReferenceTest extends TestCase
         $cnt = Reference::count();
         $this->assertEquals($cnt, 4);
     }
-    
-    
+
+
     // ==========================================
     //              [[ PATCH ]]
     // ==========================================
-    
-/**
-     * @testdox PATCH  /api/v1/entity/{entity_id}/rank  -  Move an entity (id=1) to top.
+
+    /**
+     * @testdox PATCH  /api/v1/entity/reference/{id}  -  Patch description of an entity reference (id=1)
      */
     public function testPatchReferenceEndpoint()
     {
@@ -173,11 +173,28 @@ class ApiReferenceTest extends TestCase
             'user_id' => 1,
         ]);
     }
-    
+
+    /**
+     * @testdox PATCH  /api/v1/entity/reference/{id}  -  Patch without description of an entity reference (id=1)
+     */
+    public function testPatchReferenceMissingDescriptionEndpoint()
+    {
+        $reference = Reference::find(2);
+        $this->assertEquals(1, $reference->entity_id);
+        $this->assertEquals(15, $reference->attribute_id);
+        $this->assertEquals(1319, $reference->bibliography_id);
+        $this->assertEquals('Picture on left side of page 12', $reference->description);
+
+        $response = $this->userRequest()
+        ->patch('/api/v1/entity/reference/2');
+
+        $response->assertStatus(422);
+    }
+
     // ==========================================
     //              [[ DELETE ]]
     // ==========================================
-    
+
     /**
      * @testdox DELETE /api/v1/entity/reference/{id}  -  Delete a reference (id=1).
      */
@@ -194,11 +211,11 @@ class ApiReferenceTest extends TestCase
         $cnt = Reference::count();
         $this->assertEquals($cnt, 2);
     }
-    
+
     // ==========================================
     //      [[ ADDITIONAL DATA PROVIDERS ]]
     // ==========================================
-    
+
     /**
      * @dataProvider permissions
      * @testdox [[PROVIDER]] Routes Without Permissions
@@ -213,7 +230,7 @@ class ApiReferenceTest extends TestCase
     public function testSucceedWithPermission($permission) {
         (new ResponseTester($this))->testExceptions($permission);
     }
-    
+
     public static function permissions() {
         return [
             "GET    /api/v1/entity/99/reference"    => Permission::for("get",      "/api/v1/entity/99/reference",      "You do not have the permission to view references"),
@@ -222,13 +239,13 @@ class ApiReferenceTest extends TestCase
             "DELETE /api/v1/entity/reference/99"    => Permission::for("delete",   "/api/v1/entity/reference/99",      "You do not have the permission to delete references"),
         ];
     }
-    
+
     public static function exceptions() {
         return [
             "GET    /api/v1/entity/99/reference" =>Permission::for("get",      "/api/v1/entity/99/reference",      "This entity does not exist"),
             "POST   /api/v1/entity/99/reference/99" =>Permission::for("post",     "/api/v1/entity/99/reference/99",   "This entity does not exist", ["bibliography_id" => 1322, "description" => "This is a simple test"]),
             "POST   /api/v1/entity/1/reference/99" =>Permission::for("post",     "/api/v1/entity/1/reference/99",      "This attribute does not exist", ["bibliography_id" => 1322, "description" => "This is a simple test"]),
-            "PATCH  /api/v1/entity/reference/99" =>Permission::for("patch",    "/api/v1/entity/reference/99",      "This reference does not exist"),
+            "PATCH  /api/v1/entity/reference/99" =>Permission::for("patch",    "/api/v1/entity/reference/99",      "This reference does not exist", ["description" => "This is a simple test"]),
             "DELETE /api/v1/entity/reference/99" =>Permission::for("delete",   "/api/v1/entity/reference/99",      "This reference does not exist"),
         ];
     }

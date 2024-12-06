@@ -22,38 +22,38 @@ class ApiActivityTest extends TestCase
         $this->assertEquals(0, $actCnt);
 
         $response = $this->userRequest()
-        ->post('/api/v1/entity', [
-            'name' => 'Unit-Test Entity I',
-            'entity_type_id' => 3,
-            'root_entity_id' => 1
-        ]);
+            ->post('/api/v1/entity', [
+                'name' => 'Unit-Test Entity I',
+                'entity_type_id' => 3,
+                'root_entity_id' => 1
+            ]);
         $entity = Entity::latest()->first();
 
-        $response = $this->userRequest($response)
-        ->patch('/api/v1/entity/4/attributes', [
-            [
-                'params' => [
-                    'aid' => 19,
-                    'cid' => 4
-                ],
-                'op' => 'add',
-                'value' => 'Test'
-            ]
-        ]);
+        $response = $this->userRequest()
+            ->patch('/api/v1/entity/4/attributes', [
+                [
+                    'params' => [
+                        'aid' => 19,
+                        'cid' => 4
+                    ],
+                    'op' => 'add',
+                    'value' => 'Test'
+                ]
+            ]);
 
-        $response = $this->userRequest($response)
-        ->patch('/api/v1/entity/4/attributes', [
-            [
-                'params' => [
-                    'aid' => 19,
-                    'cid' => 4
-                ],
-                'op' => 'replace',
-                'value' => 'Test2'
-            ]
-        ]);
+        $response = $this->userRequest()
+            ->patch('/api/v1/entity/4/attributes', [
+                [
+                    'params' => [
+                        'aid' => 19,
+                        'cid' => 4
+                    ],
+                    'op' => 'replace',
+                    'value' => 'Test2'
+                ]
+            ]);
 
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
             ->delete('/api/v1/entity/'.$entity->id);
 
         $response->assertStatus(204);
@@ -61,7 +61,7 @@ class ApiActivityTest extends TestCase
         $this->assertGreaterThanOrEqual(5, $actCnt);
         $this->assertLessThanOrEqual(6, $actCnt);
 
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
             ->get('/api/v1/activity');
 
         $response->assertStatus(200);
@@ -91,7 +91,7 @@ class ApiActivityTest extends TestCase
         ]);
 
         // With start and end before now
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
             ->post('/api/v1/activity', [
                 'timespan' => [
                     'from' => '2017-12-20 09:30:00',
@@ -104,7 +104,7 @@ class ApiActivityTest extends TestCase
         $this->assertEquals([], $content->data);
 
         // With start before now
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
             ->post('/api/v1/activity', [
                 'timespan' => [
                     'from' => '2017-12-20 09:30:00',
@@ -117,7 +117,7 @@ class ApiActivityTest extends TestCase
         $this->assertLessThanOrEqual(6, count($content->data));
 
         // With single text search string
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
             ->post('/api/v1/activity', [
                 'text' => 'tEst'
             ]);
@@ -127,7 +127,7 @@ class ApiActivityTest extends TestCase
         $this->assertEquals(4, count($content->data));
 
         // With multiple text search strings
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
             ->post('/api/v1/activity', [
                 'text' => 'unit entity'
             ]);
@@ -137,7 +137,7 @@ class ApiActivityTest extends TestCase
         $this->assertEquals(2, count($content->data));
 
         // With file only
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
             ->post('/api/v1/activity', [
                 'text' => 'Entity FooBar'
             ]);
@@ -147,7 +147,7 @@ class ApiActivityTest extends TestCase
         $this->assertEquals(0, count($content->data));
 
         // With user id=2 and id=3
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
             ->post('/api/v1/activity', [
                 'users' => [2, 3]
             ]);
@@ -157,7 +157,7 @@ class ApiActivityTest extends TestCase
         $this->assertEquals(0, count($content->data));
 
         // With user id=1 only
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
             ->post('/api/v1/activity', [
                 'users' => [1]
             ]);
@@ -168,7 +168,7 @@ class ApiActivityTest extends TestCase
         $this->assertLessThanOrEqual(6, count($content->data));
 
         // With user id=1,2,5
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
             ->post('/api/v1/activity', [
                 'users' => [1, 2, 5]
             ]);
@@ -198,7 +198,7 @@ class ApiActivityTest extends TestCase
 
         $response = null;
         foreach($calls as $c) {
-            $response = $this->userRequest($response)
+            $response = $this->userRequest()
                 ->json($c['verb'], '/api/v1' . $c['url']);
 
             $response->assertStatus(403);
@@ -229,8 +229,6 @@ class ApiActivityTest extends TestCase
             $response->assertSimilarJson([
                 'error' => $c['error']
             ]);
-
-            $this->refreshToken($response);
         }
     }
 
@@ -252,7 +250,7 @@ class ApiActivityTest extends TestCase
         $this->assertStatus($response, 422);
         $response->assertJson(['message' => $userError, 'errors' => ['users' => [$userError]]]);
 
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
             ->post('/api/v1/activity', [
                 'timespan' => '2017-12-20 09:30:00'
             ]);

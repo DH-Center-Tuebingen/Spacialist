@@ -4,7 +4,7 @@ namespace App\Notifications;
 
 use App\Entity;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 
 class EntityUpdated extends Notification
@@ -33,9 +33,8 @@ class EntityUpdated extends Notification
      * @param  mixed  $notifiable
      * @return array
      */
-    public function via($notifiable)
-    {
-        return ['database'];
+    public function via(mixed $notifiable) : array {
+        return ['database', 'broadcast'];
     }
 
     /**
@@ -44,8 +43,7 @@ class EntityUpdated extends Notification
      * @param  mixed  $notifiable
      * @return array
      */
-    public function toArray($notifiable)
-    {
+    public function toArray(mixed $notifiable) : array {
         return [
             'resource' => [
                 'id' => $this->entity->id,
@@ -53,5 +51,17 @@ class EntityUpdated extends Notification
             'user_id' => $this->entity->user_id,
             'metadata' => $this->metadata,
         ];
+    }
+
+    /**
+     * Get the broadcastable representation of the notification.
+     *
+     * @param  object  $notifiable
+     * @return BroadcastMessage
+     */
+    public function toBroadcast(object $notifiable): BroadcastMessage {
+       return new BroadcastMessage([
+            'content' => $notifiable->notifications->first(),
+        ]);
     }
 }

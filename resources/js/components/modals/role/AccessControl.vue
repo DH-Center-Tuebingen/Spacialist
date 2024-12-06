@@ -110,7 +110,7 @@
                         <tr v-for="(pluginSet, j) in pg" :key="j">
                             <td class="text-start">
                                 {{ t(`plugin.${i}.permissions.groups.${pluginSet}`) }}
-                                
+
                             </td>
                             <td>
                                 <a href="#" class="text-reset text-decoration-none" @click.prevent="changePermissionState(pluginSet, 'read')">
@@ -170,13 +170,9 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import store from '@/bootstrap/store.js';
+    import useUserStore from '@/bootstrap/stores/user.js';
 
     import AccessControlState from '@/components/role/AccessControlState.vue';
-
-    import {
-        getRoleBy,
-    } from '@/helpers/helpers.js';
 
     import {
         getAccessGroups,
@@ -195,6 +191,7 @@
         emits: ['save', 'cancel'],
         setup(props, context) {
             const { t } = useI18n();
+            const userStore = useUserStore();
             const {
                 roleId,
             } = toRefs(props);
@@ -282,7 +279,7 @@
             const resetToPreset = _ => {
                 if(!state.isDerived) return;
 
-                const preset = store.getters.rolePresets.find(rp => rp.name == state.role.derived.name);
+                const preset = userStore.getRolePreset(state.role.derived.name);
 
                 if(!preset) return;
 
@@ -312,7 +309,7 @@
             // DATA
             const state = reactive({
                 permissionsLoaded: false,
-                role: computed(_ => getRoleBy(roleId.value, 'id', true) || {}),
+                role: computed(_ => userStore.getRoleBy(roleId.value, 'id', true) || {}),
                 permissionStates: {},
                 permissionGroups: null,
                 moderated: false,
@@ -321,7 +318,7 @@
                     if(!state.isDerived) return false;
 
                     // state.role.derived.name
-                    const preset = store.getters.rolePresets.find(rp => rp.name == state.role.derived.name);
+                    const preset = userStore.getRolePreset(state.role.derived.name);
                     if(!preset) return false;
 
                     const presetPerms = preset.fullSet;

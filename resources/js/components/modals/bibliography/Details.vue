@@ -117,14 +117,14 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import store from '@/bootstrap/store.js';
+    import useBibliographyStore from '@/bootstrap/stores/bibliography.js';
+    import useUserStore from '@/bootstrap/stores/user.js';
 
     import { useToast } from '@/plugins/toast.js';
 
     import {
         createAnchorFromUrl,
         except,
-        getUserBy,
         getTs,
     } from '@/helpers/helpers.js';
     import {
@@ -149,6 +149,8 @@
                 id,
             } = toRefs(props);
             const { t } = useI18n();
+            const bibliographyStore = useBibliographyStore();
+            const userStore = useUserStore();
             const toast = useToast();
 
             // FUNCTIONS
@@ -169,7 +171,7 @@
                     type: '',
                     data: {},
                 },
-                user: computed(_ => getUserBy(state.data.user)),
+                user: computed(_ => userStore.getUserBy(state.data.user)),
                 filteredFields: computed(_ => {
                     const filtered = {};
                     for(let k in state.data.data) {
@@ -189,7 +191,7 @@
                 }),
             });
 
-            const item = store.getters.bibliography.find(item => item.id == id.value);
+            const item = bibliographyStore.getEntry(id.value);
             if(item) {
                 const {
                     citekey,
@@ -216,7 +218,6 @@
                 t,
                 // HELPERS
                 createAnchorFromUrl,
-                getUserBy,
                 bibtexEntryToText,
                 bibtexify,
                 date,

@@ -2,12 +2,13 @@ import {
     default as http,
 } from '@/bootstrap/http.js';
 
+import useUserStore from '@/bootstrap/stores/user.js';
+
 import {
-    userNotifications,
     _cloneDeep,
 } from '@/helpers/helpers.js';
 
-export async function markAsRead(id, from = userNotifications()) {
+export async function markAsRead(id, from = useUserStore().getNotifications) {
     const elem = from.find(elem => elem.id === id)
     if(elem) {
         return await $httpQueue.add(() => http.patch(`notification/read/${id}`).then(response => {
@@ -19,7 +20,7 @@ export async function markAsRead(id, from = userNotifications()) {
     }
 }
 
-export async function markAllAsRead(ids = null, from = userNotifications()) {
+export async function markAllAsRead(ids = null, from = useUserStore().getNotifications) {
     if(!ids) {
         ids = from.map(elem => elem.id);
     }
@@ -39,7 +40,7 @@ export async function markAllAsRead(ids = null, from = userNotifications()) {
     }));
 }
 
-export async function deleteNotification(id, from = userNotifications()) {
+export async function deleteNotification(id, from = useUserStore().getNotifications) {
     return await $httpQueue.add(() => http.delete(`notification/${id}`).then(response => {
         const idx = from.findIndex(elem => elem.id === id);
         if(idx > -1) {
@@ -49,7 +50,7 @@ export async function deleteNotification(id, from = userNotifications()) {
     }));
 }
 
-export async function deleteAllNotifications(ids = null, from = userNotifications()) {
+export async function deleteAllNotifications(ids = null, from = useUserStore().getNotifications) {
     if(!ids) {
         ids = from.map(elem => elem.id);
     }

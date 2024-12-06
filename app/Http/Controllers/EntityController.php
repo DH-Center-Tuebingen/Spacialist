@@ -320,11 +320,11 @@ class EntityController extends Controller {
             ], 403);
         }
 
-        try{
+        try {
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => __('This entity does not exist')
+                'error' => __('This entity does not exist'),
             ], 400);
         }
         return response()->json($entity->getAllMetadata());
@@ -1062,11 +1062,11 @@ class EntityController extends Controller {
             'summary' => 'nullable|string',
         ]);
 
-        try{
+        try {
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => __('This entity does not exist')
+                'error' => __('This entity does not exist'),
             ], 400);
         }
 

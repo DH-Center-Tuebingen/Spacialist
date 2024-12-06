@@ -79,8 +79,9 @@
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
+
     import {
-        getAttribute,
         translateConcept,
     } from '@/helpers/helpers.js';
 
@@ -98,6 +99,7 @@
         emits: ['closing', 'confirm'],
         setup(props, context) {
             const { t } = useI18n();
+            const attributeStore = useAttributeStore();
             const {
                 attributeId,
                 metadata,
@@ -113,7 +115,7 @@
 
             // DATA
             const state = reactive({
-                attribute: computed(_ => getAttribute(attributeId.value)),
+                attribute: computed(_ => attributeStore.getAttribute(attributeId.value)),
                 count: computed(_ => metadata.value.entityCount),
                 needsAlert: computed(_ => state.count > 0),
             });

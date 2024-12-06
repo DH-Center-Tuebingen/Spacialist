@@ -67,6 +67,7 @@
                     </a>
                     <!-- eslint-disable vue/no-v-html-->
                     <span
+                        v-if="!notf.data.in_reply"
                         v-html="t('global.notifications.body.user_left_comment_on', {
                             name: getCommentedObjectName(notf),
                         })"
@@ -180,7 +181,7 @@
                             @click.prevent="postReply()"
                         >
                             <i class="fas fa-fw fa-reply" />
-                            
+
                             <!-- eslint-disable-next-line vue/no-v-html -->
                             <span v-html="t('global.notifications.body.reply_to_user', {name: state.sender.nickname})" />
                         </button>
@@ -209,13 +210,15 @@
 
     import { useI18n } from 'vue-i18n';
 
+    import useUserStore from '@/bootstrap/stores/user.js';
+
     import {
         truncate,
         datestring,
         ago,
     } from '@/helpers/filters.js';
+
     import {
-        getUserBy,
         getNotificationSourceLink,
         simpleResourceType,
         translateConcept,
@@ -249,10 +252,11 @@
         emits: [
             'delete',
             'posted',
-            'read', 
+            'read',
         ],
         setup(props, context) {
             const { t } = useI18n();
+            const userStore = useUserStore();
             const {
                 notf,
                 odd,
@@ -268,7 +272,7 @@
                 replyMessage: '',
                 showAvatar: computed(_ => avatar.value > 0),
                 read: computed(_ => !!notf.value.read_at),
-                sender: computed(_ => getUserBy(notf.value.data.user_id) || {}),
+                sender: computed(_ => userStore.getUserBy(notf.value.data.user_id) || {}),
                 isSystem: computed(_ => notf.value.data.metadata.persistence === 'system'),
                 smallStyle: computed(_ => smallText.value ? 'font-size: 0.7rem;' : ''),
                 smallClass: computed(_ => {

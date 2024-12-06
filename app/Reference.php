@@ -26,11 +26,11 @@ class Reference extends Model
 
     const rules = [
         'bibliography_id' => 'required|integer|exists:bibliography,id',
-        'description' => 'string|nullable'
+        'description' => 'required|string'
     ];
 
     const patchRules = [
-        'description' => 'string|nullable'
+        'description' => 'required|string'
     ];
 
     public function getActivitylogOptions() : LogOptions

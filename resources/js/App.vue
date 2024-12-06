@@ -12,7 +12,7 @@
                         class="logo"
                         alt="spacialist logo"
                     >
-                    {{ getPreference('prefs.project-name') }}
+                    {{ state.appName }}
                 </router-link>
                 <button
                     class="navbar-toggler"
@@ -208,9 +208,9 @@
                                     />
                                 </h6>
                                 <a
-                                    v-if="hasPreference('prefs.link-to-thesaurex')"
+                                    v-if="state.hasThesaurexLink"
                                     class="dropdown-item"
-                                    :href="getPreference('prefs.link-to-thesaurex')"
+                                    :href="state.thesaurexLink"
                                     target="_blank"
                                 >
                                     <i class="fas fa-fw fa-paw" />
@@ -378,8 +378,8 @@
 
                     <!-- eslint-disable vue/no-v-html -->
                     <h1
-                        class="mt-5" 
-                        v-html="t('main.app.loading_screen_msg', { appname: state.appName })" 
+                        class="mt-5"
+                        v-html="t('main.app.loading_screen_msg', { appname: state.appName })"
                     />
                     <!-- eslint-enable-->
                 </div>
@@ -435,18 +435,13 @@ import videojs from 'video.js';
 // import adapter from 'webrtc-adapter';
 import Record from 'videojs-record';
 
-import store from '@/bootstrap/store.js';
-import auth from '@/bootstrap/auth.js';
+import useSystemStore from '@/bootstrap/stores/system.js';
+import useUserStore from '@/bootstrap/stores/user.js';
 import { useI18n } from 'vue-i18n';
 import { provideToast, useToast } from '@/plugins/toast.js';
 
 import {
-    getPreference,
-    getProjectName,
-    hasPreference,
-    initApp,
     throwError,
-    userNotifications,
 } from '@/helpers/helpers.js';
 
 import {
@@ -457,10 +452,8 @@ import {
 import {
     showAbout,
     showSaveScreencast,
+    showConfirmPassword,
 } from '@/helpers/modal.js';
-import {
-    searchParamsToObject
-} from '@/helpers/routing.js';
 
 export default {
     components: {
@@ -468,13 +461,13 @@ export default {
     },
     setup(props) {
         const { t, locale } = useI18n();
+        const systemStore = useSystemStore();
+        const userStore = useUserStore();
 
         // FETCH
-        initApp(locale).then(_ => {
-            store.dispatch('setAppState', true);
-        }).catch(e => {
+        systemStore.initialize(locale).catch(e => {
             if(e.response.status == 401) {
-                store.dispatch('setAppState', true);
+                systemStore.setAppState(true);
             } else {
                 throwError(e);
             }
@@ -502,19 +495,23 @@ export default {
         const state = reactive({
             recordingTimeout: 0,
             isRecording: false,
-            plugins: computed(_ => store.getters.slotPlugins()),
-            hasAnalysis: computed(_ => store.getters.hasAnalysis),
-            auth: auth,
-            appName: computed(_ => getProjectName()),
-            init: computed(_ => store.getters.appInitialized),
-            loggedIn: computed(_ => store.getters.isLoggedIn),
-            authUser: computed(_ => store.getters.user),
-            notifications: computed(_ => {
-                return userNotifications();
+            plugins: computed(_ => systemStore.getSlotPlugins()),
+            hasAnalysis: computed(_ => systemStore.hasAnalysis),
+            appName: computed(_ => systemStore.getProjectName()),
+            hasThesaurexLink: computed(_ => systemStore.hasPreference('prefs.link-to-thesaurex')),
+            thesaurexLink: computed(_ => {
+                if(state.hasThesaurexLink) {
+                    return systemStore.getPreference('prefs.link-to-thesaurex');
+                } else {
+                    return '';
+                }
             }),
-            unreadNotifications: computed(_ => {
-                return state.notifications.filter(n => !n.read_at);
-            }),
+            init: computed(_ => systemStore.appInitialized),
+            loggedIn: computed(_ => userStore.userLoggedIn),
+            ready: computed(_ => state.loggedIn && state.init),
+            authUser: computed(_ => userStore.user),
+            notifications: computed(_ => userStore.getNotifications),
+            unreadNotifications: computed(_ => state.notifications.filter(n => !n.read_at)),
         });
 
         // FUNCTIONS
@@ -563,9 +560,10 @@ export default {
             deleteNotificationHelper(event);
         };
         const logout = _ => {
-            auth.logout({
-                makeRequest: true,
-                redirect: '/login'
+            userStore.logout().then(_ => {
+                router.push({
+                    name: 'login'
+                });
             });
         };
         const showAboutModal = _ => {
@@ -573,18 +571,14 @@ export default {
         };
 
         // WATCHER
+        // watch(_ => state.ready, (newValue, oldValue) => {
+        //     if(state.ready) {
+        //     }
+        // });
         watch(_ => state.loggedIn, (newValue, oldValue) => {
             if(newValue && !oldValue) {
-                const route = router.currentRoute.value;
-                if(route.query.redirect) {
-                    // get path without potential query params
-                    const path = route.query.redirect.split('?')[0];
-                    // extract query params to explicitly set in new route
-                    const query = searchParamsToObject(route.query.redirect);
-                    router.push({
-                        path: path,
-                        query: query,
-                    });
+                if(state.authUser.login_attempts > 0 || state.authUser.login_attempts === 0) {
+                    showConfirmPassword(state.authUser.id);
                 }
                 // prevent notification dropdown from close on click
                 // this.$nextTick(_ => {
@@ -596,9 +590,9 @@ export default {
                 // })
             }
         });
-        watch(state.auth, (newValue, oldValue) => {
-            store.commit('setUser', state.auth.user());
-        });
+        // watch(state.auth, (newValue, oldValue) => {
+        //     store.commit('setUser', state.auth.user());
+        // });
 
         // ON MOUNTED
         onMounted(_ => {
@@ -612,7 +606,8 @@ export default {
                 container: 'toast-container',
             });
             useToast();
-            // if (adapter.browserDetails.browser == 'firefox') {
+
+            // if(adapter.browserDetails.browser == 'firefox') {
             //     adapter.browserShim.shimGetDisplayMedia(window, 'window');
             // }
             rtc.player = videojs('#rtc-sharing-container', rtc.options);
@@ -644,8 +639,6 @@ export default {
         return {
             t,
             // HELPERS
-            getPreference,
-            hasPreference,
             // LOCAL
             startRecording,
             stopRecording,

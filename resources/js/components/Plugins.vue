@@ -131,17 +131,9 @@
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
-    import store from '@/bootstrap/store.js';
+    import useSystemStore from '@/bootstrap/stores/system.js';
 
     import { useToast } from '@/plugins/toast.js';
-
-    import {
-        uploadPlugin,
-        installPlugin,
-        uninstallPlugin,
-        updatePlugin,
-        removePlugin,
-    } from '@/api.js';
 
     import {
         can,
@@ -151,14 +143,10 @@
         showChangelogModal,
     } from '@/helpers/modal.js';
 
-    import {
-        appendScript,
-        removeScript,
-    } from '@/helpers/plugins.js';
-
     export default {
         setup(props) {
             const { t } = useI18n();
+            const systemStore = useSystemStore();
             const toast = useToast();
 
             // FUNCTIONS
@@ -172,18 +160,14 @@
                 showChangelogModal(plugin);
             };
             const install = plugin => {
-                installPlugin(plugin.id).then(data => {
-                    appendScript(data.install_location);
-                });
+                systemStore.installPlugin(plugin.id);
             };
             const uninstall = plugin => {
-                uninstallPlugin(plugin.id).then(data => {
-                    removeScript(data.uninstall_location);
-                });
+                systemStore.uninstallPlugin(plugin.id);
             };
             const update = plugin => {
-                const vo = plugin.version;
-                updatePlugin(plugin.id).then(_ => {
+                systemStore.patchPlugin(plugin.id).then(_ => {
+                    const vo = plugin.version;
                     const label = t('main.plugins.toasts.update.message', {
                         name: plugin.metadata.title,
                         vo: vo,
@@ -197,9 +181,7 @@
                 });
             };
             const remove = plugin => {
-                removePlugin(plugin.id).then(data => {
-                    removeScript(data.uninstall_location);
-                });
+                systemStore.removePlugin(plugin.id);
             };
             const inputFile = (newFile, oldFile) => {
                 if(!can('preferences_create')) return;
@@ -212,15 +194,14 @@
                 }
             };
             const uploadZip = (file, component) => {
-                return uploadPlugin(file.file).then(_ => {
+                return systemStore.uploadPlugin(file.file).then(_ => {
                     state.files = [];
-
                 });
             };
 
             // DATA
             const state = reactive({
-                plugins: computed(_ => store.getters.plugins),
+                plugins: computed(_ => systemStore.plugins),
                 sortedPlugins: computed(_ => Object.values(state.plugins).sort((a, b) => a.metadata.title > b.metadata.title)),
                 files: [],
             });

@@ -120,7 +120,7 @@
                                 <div
                                     class="dropdown-menu"
                                     :aria-labelledby="`role-options-dropdown-${role.id}`"
-                                > 
+                                >
                                     <a
                                         v-if="roleDirty(role.id)"
                                         class="dropdown-item"
@@ -162,7 +162,7 @@
 
     import * as yup from 'yup';
 
-    import store from '@/bootstrap/store.js';
+    import useUserStore from '@/bootstrap/stores/user.js';
 
     import { useToast } from '@/plugins/toast.js';
 
@@ -176,18 +176,15 @@
         can,
         getClassByValidation,
         getErrorMessages,
-        getRoleBy,
     } from '@/helpers/helpers.js';
     import {
         date,
     } from '@/helpers/filters.js';
-    import {
-        patchRoleData,
-    } from '@/api.js';
 
     export default {
         setup(props) {
             const { t } = useI18n();
+            const userStore = useUserStore();
             const toast = useToast();
 
             // FUNCTIONS
@@ -253,7 +250,7 @@
             };
             const roleValid = id => {
                 if(!v.fields[id]) return false;
-                
+
                 return v.fields[id].display_name.meta.valid ||
                     v.fields[id].description.meta.valid;
             };
@@ -282,18 +279,11 @@
                     data.description = v.fields[id].description.value;
                 }
 
-                return await patchRoleData(id, data).then(data => {
+                return await userStore.updateRole(id, data).then(data => {
                     state.errors[id] = {};
                     resetRoleMeta(id);
-                    store.dispatch('updateRole', {
-                        id: data.id,
-                        display_name: data.display_name,
-                        description: data.description,
-                        updated_at: data.updated_at,
-                    });
-                    const role = getRoleBy(id);
                     const msg = t('main.role.toasts.updated.msg', {
-                        name: role.display_name
+                        name: data.display_name
                     });
                     const title = t('main.role.toasts.updated.title');
                     toast.$toast(msg, title, {
@@ -322,7 +312,7 @@
             };
             const deleteRole = rid => {
                 if(!can('users_roles_delete')) return;
-                showDeleteRole(getRoleBy(rid));
+                showDeleteRole(userStore.getRoleBy(rid));
             };
             const anyRoleDirty = _ => {
                 let isDirty = false;
@@ -374,7 +364,7 @@
             // DATA
             const state = reactive({
                 setupFinished: false,
-                roleList: computed(_ => store.getters.roles()),
+                roleList: computed(_ => userStore.getRoles()),
                 dataInitialized: computed(_ => state.roleList.length > 0),
                 errors: {},
             });
