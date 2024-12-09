@@ -80,14 +80,16 @@ class ApiEditorTest extends TestCase
                 'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/fundstelle#20171220094911',
                 'is_root' => true,
                 'created_at' => '2017-12-20T10:03:06.000000Z',
-                'updated_at' => '2017-12-20T10:03:06.000000Z'
+                'updated_at' => '2017-12-20T10:03:06.000000Z',
+                'color' => '#FF0000',
             ],
             [
                 'id' => 7,
                 'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/lagerstatte#20171220165727',
                 'is_root' => true,
                 'created_at' => '2017-12-20T16:57:41.000000Z',
-                'updated_at' => '2017-12-20T16:57:41.000000Z'
+                'updated_at' => '2017-12-20T16:57:41.000000Z',
+                'color' => '#0000FF',
             ]
         ]);
     }
@@ -99,8 +101,8 @@ class ApiEditorTest extends TestCase
     {
         $response = $this->userRequest()
             ->get('/api/v1/editor/dm/attribute');
-            
-            
+
+
         $this->assertStatus($response, 200);
         $response->assertJsonCount(16, 'attributes');
         $response->assertJsonStructure([
@@ -145,7 +147,7 @@ class ApiEditorTest extends TestCase
                 )
                 // This was originally an array keyed by index. But the backend changed
                 // to use the id as key. Idk if this is a good idea. [SO]
-                ->has('attributes.4.columns.6', fn($json) => 
+                ->has('attributes.4.columns.6', fn($json) =>
                     $json
                         ->where('id', 6)
                         ->where('thesaurus_url',  'https://spacialist.escience.uni-tuebingen.de/<user-project>/gefassposition#20171220105434')
@@ -162,7 +164,7 @@ class ApiEditorTest extends TestCase
                         ->where('restrictions', NULL)
                         ->where('metadata', NULL)
                 )
-                ->has('attributes.4.columns.7', fn($json) => 
+                ->has('attributes.4.columns.7', fn($json) =>
                     $json
                         ->where('id', 7)
                         ->where('thesaurus_url', 'https://spacialist.escience.uni-tuebingen.de/<user-project>/verzierungselement#20171220105440')
@@ -179,7 +181,7 @@ class ApiEditorTest extends TestCase
                         ->where('restrictions', NULL)
                         ->where('metadata', NULL)
                 )
-                ->has('attributes.4.columns.8', fn($json) => 
+                ->has('attributes.4.columns.8', fn($json) =>
                     $json
                         ->where('id', 8)
                         ->where('thesaurus_url', 'https://spacialist.escience.uni-tuebingen.de/<user-project>/notizen#20171220105603')
@@ -207,7 +209,7 @@ class ApiEditorTest extends TestCase
     {
         $response = $this->userRequest()
             ->get('/api/v1/editor/dm/attribute_types');
-        
+
         $attributeTypes = [
             "boolean"       => true,
             "date"          => true,
@@ -248,7 +250,7 @@ class ApiEditorTest extends TestCase
         foreach($attributeTypes as $datatype => $in_table) {
             $resultArray[] = ['datatype' => $datatype, 'in_table' => $in_table];
         }
-        
+
         $response->assertSimilarJson($resultArray, $attributeTypes);
     }
 
@@ -351,7 +353,6 @@ class ApiEditorTest extends TestCase
     //     $this->assertEquals('placeholder', $deps[0]->value);
     // }
 
-    
     // TODO:: Deprecated (?)
     //
     // /**
@@ -397,10 +398,10 @@ class ApiEditorTest extends TestCase
             'thesaurus_url',
             'is_root',
             'created_at',
-            'updated_at'
+            'updated_at',
+            'color',
         ]);
-        
-        
+
         $response->assertJson(fn(AssertableJson $json) =>
             $json
                 ->has('id')
@@ -408,24 +409,23 @@ class ApiEditorTest extends TestCase
                 ->has('is_root')
                 ->has('created_at')
                 ->has('updated_at')
+                ->has('color')
                 ->where('id', $entityType->id)
                 ->where('thesaurus_url', $concept->concept_url)
                 ->where('is_root', true)
                 ->where('created_at', $entityType->created_at->toJSON())
                 ->where('updated_at', $entityType->updated_at->toJSON())
+                ->where('color', $entityType->color)
         );
-        
 
         // DISCUSS: Is this relevant anymore?
         // $entityTypeLayer = AvailableLayer::latest()->first();
         // $this->assertEquals($entityType->id, $entityTypeLayer->entity_type_id);
-        
-        
+
         // $layMax = AvailableLayer::where('is_overlay', true)->max('position');
         // $this->assertEquals($layMax+1, $entityTypeLayer->position);
     }
-    
-    
+
     /**
     * @testdox POST /api/v1/editor/dm/{id}/relation  -  Modify entity type relations
     */
@@ -478,7 +478,7 @@ class ApiEditorTest extends TestCase
                 'updated_at',
                 'recursive',
                 'root_attribute_id'
-            ], 
+            ],
             'selection'
         ]);
 
@@ -926,7 +926,7 @@ class ApiEditorTest extends TestCase
         (new ResponseTester($this))->testExceptions($permission);
     }
 
-    public static function permissionsProvider() { 
+    public static function permissionsProvider() {
         return [
             'permission to get entity type'                     => Permission::for("get", "/api/v1/editor/entity_type/1",           "You do not have the permission to get an entity type's data"),
             'permission to view entity data'                    => Permission::for("get", "/api/v1/editor/entity_type/1/attribute", "You do not have the permission to view entity data"),
@@ -959,7 +959,7 @@ class ApiEditorTest extends TestCase
         ];
     }
 
-    public static function exceptionsProvider() { 
+    public static function exceptionsProvider() {
 
         $entityDoesNotExist = "This entity-type does not exist";
         $entityAttributeNotFound = "Entity Attribute not found";
