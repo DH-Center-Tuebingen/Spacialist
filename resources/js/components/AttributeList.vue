@@ -88,7 +88,7 @@
                         </div>
                         <span
                             v-if="!element.is_system"
-                            class="text-end col"
+                            class="text-end col text-truncate"
                         >
                             {{ translateConcept(element.thesaurus_url) }}
                         </span>

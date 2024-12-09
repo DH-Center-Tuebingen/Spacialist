@@ -1,11 +1,11 @@
 <template>
     <multiselect
         :id="state.id"
-        :value="value"
+        :value="valueDriven ? value : state.internalValue"
         class="multiselect"
         :name="state.id"
         :object="true"
-        :label="'id'"
+        :label="'name'"
         :loading="state.loading"
         :track-by="'id'"
         :value-prop="'id'"
@@ -24,13 +24,13 @@
         @search-change="search"
         @change="onChange"
     >
-        <template #singlelabel="{ value }">
-            <div class="multiselect-single-label">
+        <!-- <template #singlelabel="{ value }"> -->
+        <!-- <div class="multiselect-single-label">
                 {{ displayResult(value) }}
-            </div>
-        </template>
-        <template #tag="{ option, handleTagRemove, disabled: tagDisabled }">
-            <div
+            </div> -->
+        <!-- </template>
+        <template #tag="{ option, handleTagRemove, disabled: tagDisabled }"> -->
+        <!-- <div
                 class="multiselect-tag"
                 :class="{ 'pe-2': tagDisabled }"
             >
@@ -45,10 +45,10 @@
                 >
                     <span class="multiselect-tag-remove-icon" />
                 </span>
-            </div>
-        </template>
-        <template #option="{ option }">
-            <span v-if="!state.enableChain">
+            </div> -->
+        <!-- </template>
+        <template #option="{ option }"> -->
+        <!-- <span v-if="!state.enableChain">
                 {{ displayResult(option) }}
             </span>
             <div
@@ -69,10 +69,10 @@
                         </span>
                     </li>
                 </ol>
-            </div>
-        </template>
-        <template #nooptions="">
-            <div
+            </div> -->
+        <!-- </template>
+        <template #nooptions=""> -->
+        <!-- <div
                 v-if="!!state.query"
                 class="p-2"
             >
@@ -88,41 +88,45 @@
                 class="p-1 text-muted"
             >
                 {{ t('global.search_no_term_info') }}
-            </div>
-        </template>
+            </div> -->
+        <!-- </template>
         <template
             v-if="infinite && canFetchMore && hasResults"
             #afterlist=""
-        >
-            <div class="d-flex">
-                <!--
+        > -->
+        <!-- <div class="d-flex">-->
+        <!--
                 It happened that the click listener occasionally closed the select list.
                 Using the mousedown event prevents this from happening.
                 We need to prevent the click event and stop the propagation of the link navigation.
                 -->
-                <a
-                    class="list-hover text-decoration-none d-flex align-items-center justify-content-between p-2 flex-fill"
-                    href="#"
-                    tabindex="-1"
-                    draggable="false"
-                    @click.stop.prevent
-                    @mousedown.stop.prevent="loadMore()"
-                >
-                    <span>
-                        <i class="fas fa-fw fa-arrows-rotate" />
-                        {{ t('global.search_load_n_more', { n: limit }) }}
-                    </span>
+        <!--<a
+                        class="list-hover text-decoration-none d-flex align-items-center justify-content-between p-2 flex-fill"
+                        href="#"
+                        tabindex="-1"
+                        draggable="false"
+                        @click.stop.prevent
+                        @mousedown.stop.prevent="loadMore()"
+                    >
+                        <span>
+                            <i class="fas fa-fw fa-arrows-rotate" />
+                            {{ t('global.search_load_n_more', { n: limit }) }}
+                        </span>
 
-                    <span
-                        v-if="state.loading"
-                        class="spinner-border spinner-border-sm ms-2"
-                        role="status"
-                        aria-hidden="true"
-                    />
-                </a>
-            </div>
-        </template>
+                        <span
+                            v-if="state.loading"
+                            class="spinner-border spinner-border-sm ms-2"
+                            role="status"
+                            aria-hidden="true"
+                        />
+                    </a>
+            </div> -->
+        <!-- </template> -->
     </multiselect>
+    <pre class="bg-success">{{ valueDriven ? value : state.internalValue }}</pre>
+    <pre>
+        {{ state.searchResults }}
+    </pre>
 </template>
 
 <script>
@@ -181,16 +185,27 @@
                 default: 'single',
                 validator: (val) => ['single', 'multiple'].includes(val),
             },
+            defaultValue: {
+                type: Object,
+                required: false,
+                default: null,
+            },
             value: {
                 required: false,
                 default: null,
                 validator: (val, props) => {
+                    console.log('EXEC 6');
                     if(props.mode == 'single') {
                         return val == null || typeof val == 'object';
                     } else {
                         return val == null || Array.isArray(val);
                     }
                 },
+            },
+            valueDriven: {
+                type: Boolean,
+                required: false,
+                default: false,
             },
             disabled: {
                 type: Boolean,
@@ -208,7 +223,7 @@
                 default: false,
             },
         },
-        emits: ['selected', 'entry-click'],
+        emits: ['selected', 'entry-click', 'update:value'],
         setup(props, context) {
             const { t } = useI18n();
 
@@ -224,8 +239,6 @@
             if(!keyText.value && !keyFn.value) {
                 throw new Error('You have to either provide a key or key function for your search component!');
             }
-            // FETCH
-
             // FUNCTIONS
 
             // Used to check for a race condition
@@ -235,52 +248,74 @@
              * so the query always has a different value.
              */
             const requestSearchEndpoint = async query => {
+                console.log('EXEC 7');
+                if(query === '') {
+                    resetSearch();
+                    return;
+                }
+
                 searchExecutionCounter.value++;
                 const round = searchExecutionCounter.value;
                 state.loading = true;
                 const results = await endpoint.value(query);
+                
+                console.log(results.data);
+                state.searchResults = results.data;
 
-                if(round !== searchExecutionCounter.value) {
-                    // If there was a newer query executed in the meantime,
-                    // we do not want to apply the results.
-                    return;
-                }
+                // if(round !== searchExecutionCounter.value) {
+                //     // If there was a newer query executed in the meantime,
+                //     // we do not want to apply the results.
+                //     return;
+                // }
 
-                let filteredResults;
-                if(!!filterFn.value) {
-                    filteredResults = filterFn.value(results, query);
-                } else {
-                    filteredResults = results;
-                }
+                // let filteredResults;
+                // if(!!filterFn.value) {
+                //     try {
+                //         const filtered = filterFn.value(results, query);
+                //         console.log(filtered);
+                //         filteredResults = filtered;
+                //     } catch(e) {
+                //         filteredResults = [];
+                //         console.error(e);
+                //     }
+                // } else {
+                //     filteredResults = results;
+                // }
 
-                // Only apply if the query did not change in the meantime.
-                if(state.query === query) {
-                    state.searchResults = [
-                        ...state.searchResults,
-                        ...filteredResults,
-                    ];
-                }
-                state.loading = false;
+                // // Only apply if the query did not change in the meantime.
+                // if(state.query === query) {
+                //     state.searchResults = [
+                //         ...state.searchResults,
+                //         ...filteredResults,
+                //     ];
+                // }
+                // state.loading = false;
             };
 
             const debouncedSearchRequest = _debounce(requestSearchEndpoint, props.delay);
             const search = async query => {
                 if(!query) query = '';
-                resetSearch(query);
-                // As long as the query is typed we debounce the search
-                debouncedSearchRequest(query);
+                
+                await requestSearchEndpoint(query);
+                // console.log('EXEC 0');
+                // resetSearch(query);
+                // // As long as the query is typed we debounce the search
+                // debouncedSearchRequest(query);
             };
             const resetSearch = (query = '') => {
+                console.log('EXEC 1');
                 state.query = query;
                 state.searchResults = [];
                 state.hasResults = false;
             };
             const loadMore = async _ => {
+                console.log('EXEC 2');
                 if(state.loading) return;
                 await requestSearchEndpoint(state.query);
             };
 
             const displayResult = obj => {
+                console.log('EXEC 3');
                 if(keyText.value) {
                     return obj[keyText.value];
                 } else if(keyFn.value) {
@@ -292,10 +327,13 @@
             };
 
             const onChange = value => {
+                console.log('EXEC 4');
                 context.emit('selected', value);
+                context.emit('update:value', value);
             };
 
             const handleTagClick = option => {
+                console.log('EXEC 5');
                 context.emit('entry-click', option);
             };
 
@@ -304,6 +342,7 @@
                 id: `multiselect-search-${getTs()}`,
                 loading: false,
                 query: '',
+                internalValue: props.defaultValue,
                 searchResults: [],
                 enableChain: computed(_ => chain.value && chain.value.length > 0),
             });

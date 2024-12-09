@@ -24,6 +24,7 @@ import VueUploadComponent from 'vue-upload-component';
 import DatePicker from 'vue-datepicker-next';
 import draggable from 'vuedraggable';
 import { Tree, Node, } from 'tree-vue-component';
+import { VueFinalModal } from 'vue-final-modal';
 
 
 export default function initGlobalComponents(app) {
@@ -55,4 +56,5 @@ export default function initGlobalComponents(app) {
     app.component('Draggable', draggable);
     app.component('Node', Node);
     app.component('Tree', Tree);
+    app.component('VueFinalModal', VueFinalModal);
 }

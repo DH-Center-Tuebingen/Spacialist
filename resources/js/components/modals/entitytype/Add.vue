@@ -33,9 +33,10 @@
                         </label>
                         <div class="col-md-9">
                             <simple-search
+                                v-model:value="state.entityType.label"
                                 :endpoint="searchLabel"
                                 :key-fn="getConceptLabel"
-                                @selected="labelSelected"
+                                :value-driven="true"
                             />
                         </div>
                     </div>
@@ -63,6 +64,7 @@
                         <div class="col-md-9">
                             <multiselect
                                 v-model="state.entityType.geometryType"
+                                :value-driven="true"
                                 :classes="multiselectResetClasslist"
                                 :name="'geometry-type-selection'"
                                 :object="true"
@@ -134,9 +136,6 @@
             const closeModal = _ => {
                 context.emit('closing', false);
             };
-            const labelSelected = label => {
-                state.entityType.label = label;
-            };
 
             // DATA
             const state = reactive({
@@ -160,7 +159,6 @@
                 // LOCAL
                 add,
                 closeModal,
-                labelSelected,
                 // STATE
                 state,
             };

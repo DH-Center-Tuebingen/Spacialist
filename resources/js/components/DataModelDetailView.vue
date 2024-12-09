@@ -39,9 +39,9 @@
                         class="col-form-label col-md-3 text-end"
                     >{{ t('global.geometry_type') }}</label>
                     <div class="col-md-9 d-flex align-items-center">
-                        <span>
+                        <!-- <span>
                             {{ state.entityType.layer.type }}
-                        </span>
+                        </span> -->
                         <!-- <router-link :to="{name: 'ldetail', params: { id: state.entityType.layer.id }}">
                             {{ t('main.datamodel.detail.manage_layer') }}
                         </router-link> -->
