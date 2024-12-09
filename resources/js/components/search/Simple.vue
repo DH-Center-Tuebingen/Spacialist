@@ -24,12 +24,13 @@
         @search-change="search"
         @change="onChange"
     >
-        <!-- <template #singlelabel="{ value }"> -->
-        <!-- <div class="multiselect-single-label">
+        <template #singlelabel="{ value }">
+            <div class="multiselect-single-label">
                 {{ displayResult(value) }}
-            </div> -->
-        <!-- </template>
-        <template #tag="{ option, handleTagRemove, disabled: tagDisabled }"> -->
+            </div> 
+        </template>
+
+        <!-- <template #tag="{ option, handleTagRemove, disabled: tagDisabled }"> --> -->
         <!-- <div
                 class="multiselect-tag"
                 :class="{ 'pe-2': tagDisabled }"
@@ -123,8 +124,7 @@
             </div> -->
         <!-- </template> -->
     </multiselect>
-    <pre class="bg-success">{{ valueDriven ? value : state.internalValue }}</pre>
-    <pre>
+    <pre style="margin-top: 100px;">
         {{ state.searchResults }}
     </pre>
 </template>
@@ -227,16 +227,7 @@
         setup(props, context) {
             const { t } = useI18n();
 
-            const {
-                endpoint,
-                filterFn,
-                keyText,
-                keyFn,
-                chain,
-                mode,
-            } = toRefs(props);
-
-            if(!keyText.value && !keyFn.value) {
+            if(!props.keyText && !props.keyFn) {
                 throw new Error('You have to either provide a key or key function for your search component!');
             }
             // FUNCTIONS
@@ -248,7 +239,6 @@
              * so the query always has a different value.
              */
             const requestSearchEndpoint = async query => {
-                console.log('EXEC 7');
                 if(query === '') {
                     resetSearch();
                     return;
@@ -257,50 +247,47 @@
                 searchExecutionCounter.value++;
                 const round = searchExecutionCounter.value;
                 state.loading = true;
-                const results = await endpoint.value(query);
                 
-                console.log(results.data);
-                state.searchResults = results.data;
+                const results = await props.endpoint(query);
+                state.searchResults = results;
 
-                // if(round !== searchExecutionCounter.value) {
-                //     // If there was a newer query executed in the meantime,
-                //     // we do not want to apply the results.
-                //     return;
-                // }
+                if(round !== searchExecutionCounter.value) {
+                    // If there was a newer query executed in the meantime,
+                    // we do not want to apply the results.
+                    return;
+                }
 
-                // let filteredResults;
-                // if(!!filterFn.value) {
-                //     try {
-                //         const filtered = filterFn.value(results, query);
-                //         console.log(filtered);
-                //         filteredResults = filtered;
-                //     } catch(e) {
-                //         filteredResults = [];
-                //         console.error(e);
-                //     }
-                // } else {
-                //     filteredResults = results;
-                // }
+                let filteredResults;
+                if(!!props.filterFn) {
+                    try {
+                        const filtered = props.filterFn(results, query);
+                        filteredResults = filtered;
+                    } catch(e) {
+                        filteredResults = [];
+                        console.error(e);
+                    }
+                } else {
+                    filteredResults = results;
+                }
 
-                // // Only apply if the query did not change in the meantime.
-                // if(state.query === query) {
-                //     state.searchResults = [
-                //         ...state.searchResults,
-                //         ...filteredResults,
-                //     ];
-                // }
-                // state.loading = false;
+                // Only apply if the query did not change in the meantime.
+                if(state.query === query) {
+                    state.searchResults = [
+                        ...state.searchResults,
+                        ...filteredResults,
+                    ];
+                }
+                state.loading = false;
             };
 
             const debouncedSearchRequest = _debounce(requestSearchEndpoint, props.delay);
             const search = async query => {
                 if(!query) query = '';
                 
-                await requestSearchEndpoint(query);
                 // console.log('EXEC 0');
-                // resetSearch(query);
-                // // As long as the query is typed we debounce the search
-                // debouncedSearchRequest(query);
+                resetSearch(query);
+                // As long as the query is typed we debounce the search
+                debouncedSearchRequest(query);
             };
             const resetSearch = (query = '') => {
                 console.log('EXEC 1');
@@ -315,11 +302,11 @@
             };
 
             const displayResult = obj => {
-                console.log('EXEC 3');
-                if(keyText.value) {
-                    return obj[keyText.value];
-                } else if(keyFn.value) {
-                    return keyFn.value(obj);
+                console.log(obj);
+                if(props.keyText) {
+                    return obj[props.keyText];
+                } else if(props.keyFn) {
+                    return props.keyFn(obj);
                 } else {
                     // Should never happen
                     throw new Error('No key provided!');
@@ -344,7 +331,7 @@
                 query: '',
                 internalValue: props.defaultValue,
                 searchResults: [],
-                enableChain: computed(_ => chain.value && chain.value.length > 0),
+                enableChain: computed(_ => props.chain && props.chain.length > 0),
             });
 
             const hasResults = computed(_ => state.searchResults.length > 0);

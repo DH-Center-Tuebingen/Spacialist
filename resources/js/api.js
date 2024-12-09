@@ -940,6 +940,7 @@ export async function searchAttribute(query = '') {
 }
 
 export async function searchLabel(query = '') {
+    console.log('searchLabel', query);
     return $httpQueue.add(
         () => http.get(`search/label?q=${query}`).then(response => response.data)
     );
