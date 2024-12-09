@@ -2,8 +2,12 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.11
+### Added
+- Filter and sort functionality on _Entity Type List_
+
 ### Fixed
 - Missing "Color Dots" of _Entity Type_ (colors are now handled on the Entity Type itself and do no longer rely on the _Map_ Plugin)
+- 'Jumping' behavior on floating quick access controls on the _Entity Type List_ (copy, duplicate, delete)
 
 ## 0.10.1
 ### Added
