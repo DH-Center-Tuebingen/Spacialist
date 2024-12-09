@@ -971,3 +971,9 @@ export function copyToClipboard(elemId) {
 export function sortConcepts(ca, cb) {
     return translateConcept(ca.concept_url).localeCompare(translateConcept(cb.concept_url));
 }
+
+export function sortTranslated(asc = true, prop = 'thesaurus_url') {
+    return function (a, b) {
+        return translateConcept(a[prop]).localeCompare(translateConcept(b[prop])) * (asc ? 1 : -1);
+    };
+}
