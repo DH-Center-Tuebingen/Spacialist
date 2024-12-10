@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 - Date Range _importFrom_ did not return a JSON string
 - Richtext editor did not trigger the dirty state on entity
 - Certainty warning due to _undefined_ value
+- Serial and Sql now have the required value (_v_) and functions (_resetFieldState_, _undirtyField_)
 ### Changed
 - Added tests to _ApiDataImporterTest_ to check if the same columns can be used in multiple attributes
 - Row error now also sends the column value, instead of just sending the column name
