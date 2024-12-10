@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Date Range _importFrom_ did not return a JSON string
 - Richtext editor did not trigger the dirty state on entity
+- Certainty warning due to _undefined_ value
 ### Changed
 - Added tests to _ApiDataImporterTest_ to check if the same columns can be used in multiple attributes
 - Row error now also sends the column value, instead of just sending the column name
