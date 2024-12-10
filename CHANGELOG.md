@@ -2,12 +2,16 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.10.2
+### Fixed
+- Date Range _importFrom_ did not return a JSON string
+- Richtext editor did not trigger the dirty state on entity
+
 ### Changed
-- Date Range _importFrom_ returns a JSON string
 - Added tests to _ApiDataImporterTest_ to check if the same columns can be used in multiple attributes
 - Row error now also sends the column value, instead of just sending the column name
 - Dropdowns in the _Data Importer_ are now sorted alphabetically
 - The ErrorList component of the Data Importer in the Frontend now preserves text inside `{{...}}`
+- Adjusted colors of Markdown modal buttons
 
 ## 0.10.1
 ### Added
