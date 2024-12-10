@@ -93,7 +93,6 @@
             };
 
             const undirtyField = _ => {
-                console.error('undirtyField');
                 v.meta.dirty = false;
             };
 
