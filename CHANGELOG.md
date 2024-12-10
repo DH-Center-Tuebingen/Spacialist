@@ -2,16 +2,11 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.10.2
-
-### Fixed
-- Fixed Date Range _importFrom_ to return a JSON string
-- Fixed Date Range component in the frontend
-
-### Changed 
+### Changed
+- Date Range _importFrom_ returns a JSON string
 - Added tests to _ApiDataImporterTest_ to check if the same columns can be used in multiple attributes
-- Added in testing data an attribute (_'Aufbewahrung' [string]_) to the entity type _'Fundstelle'_
-- Changed the row error from just sending the column name to also send the column value
-- Dropdowns in the _Data Importer_ are now sorted alphabetically, both the order of the attribute mappings and the option lists inside the dropdowns
+- Row error now also sends the column value, instead of just sending the column name
+- Dropdowns in the _Data Importer_ are now sorted alphabetically
 - The ErrorList component of the Data Importer in the Frontend now preserves text inside `{{...}}`
 
 ## 0.10.1
@@ -23,8 +18,8 @@ All notable changes to this project will be documented in this file.
   - selects the first choice (if there is **only one choice** in the dropdown)*
   - selects the exact match (**case insensitive**; e.g. "apple" + `Tab` will select the available choice "apple", but also "Apple")*
   - nothing and focuses the next attribute (default)
-  - * Selected elements will be marked with a blue (Tab) badge 
-- Pressing `Delete` inside _Single Choice Dropdowns_ will clear the element  
+  - * Selected elements will be marked with a blue (Tab) badge
+- Pressing `Delete` inside _Single Choice Dropdowns_ will clear the element
 - Importer now automatically removes BOM if present
 - Better readable format for error message on validation
 - Renamed _fromImport_ to _parseImport_ on the attribute classses. The base class now by default imports the passed string, removing redundancies on the string-based classes.

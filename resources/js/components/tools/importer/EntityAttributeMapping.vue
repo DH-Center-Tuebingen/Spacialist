@@ -44,6 +44,7 @@
 </template>
 
 <script>
+    import { computed } from 'vue';
     import { useI18n } from 'vue-i18n';
 
     import {
@@ -52,7 +53,6 @@
     } from '@/helpers/helpers.js';
 
     import ValuesMissingIndicator from './ValuesMissingIndicator.vue';
-    import { computed } from 'vue';
 
     export default {
         components: {
@@ -83,48 +83,47 @@
         emits: [
             'row-changed',
             'update:attributeMapping',
-        ], setup(props, context) {
-            const {
-                t
-            } = useI18n();
+        ],
+        setup(props, context) {
+            const { t } = useI18n();
 
-            function updateAttributeMapping(id, option) {
+            const updateAttributeMapping = (id, option) => {
                 const newMapping = Object.assign({}, props.attributeMapping);
                 newMapping[id] = option;
 
                 context.emit('row-changed', id, option);
                 context.emit('update:attributeMapping', newMapping);
-            }
+            };
 
-            function deselectWorkAround(id, value) {
+            const deselectWorkAround = (id, value) => {
                 /**
                  * There is a deselect function for multiselect.
                  * But for some reason it's not fired when the user deselects an option.
-                 * So we use the change listener and only call the update function 
+                 * So we use the change listener and only call the update function
                  * when the value is set to 'null'.
                  */
                 if(value === null) {
                     updateAttributeMapping(id, null);
                 }
-            }
+            };
 
-            function getTotal(attr) {
+            const getTotal = attr => {
                 let val = 0;
                 const stat = props.stats.attributes[attr.id];
                 if(stat && stat.total) {
                     val = stat.total;
                 }
                 return val;
-            }
+            };
 
-            function getMissing(attr) {
+            const getMissing = attr => {
                 let val = 0;
                 const stat = props.stats.attributes[attr.id];
                 if(stat && stat.total) {
                     val = stat.missing;
                 }
                 return val;
-            }
+            };
 
             const availableAttributesSortedByName = computed(_ => {
                 let arr = [];
@@ -148,7 +147,6 @@
 
             return {
                 t,
-                translateConcept,
                 // Local
                 availableAttributesSortedByName,
                 deselectWorkAround,

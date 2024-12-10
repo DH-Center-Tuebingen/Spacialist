@@ -7,12 +7,10 @@ use Tests\TestCase;
 use Illuminate\Http\UploadedFile;
 
 class ApiDataImporterTest extends TestCase {
-
-
     /**
-     * 
+     *
      * Utilities
-     * 
+     *
      */
     private function createDefaultCSVFile($delimiter = ",") {
         return $this->createCSVFile([
@@ -74,11 +72,10 @@ class ApiDataImporterTest extends TestCase {
     }
 
     /**
-     * 
+     *
      * Tests
-     * 
+     *
      */
-
     public function testValidationEmptyFile() {
         $file = $this->createCSVFile([]);
         $metadata = $this->getMetaData();
@@ -122,7 +119,6 @@ class ApiDataImporterTest extends TestCase {
             ]);
     }
 
-
     public function testValidationNamesColumnMissingError() {
         $file = $this->createCSVFile([['other'], [''], ['other 2']]);
 
@@ -164,7 +160,6 @@ class ApiDataImporterTest extends TestCase {
             ]
         ]);
     }
-
 
     public function testValidationWithAllNamesSetCorrectly() {
         $this->userRequest()->post('/api/v1/entity/import/validate', [
@@ -217,8 +212,6 @@ class ApiDataImporterTest extends TestCase {
             ]);
     }
 
-
-
     public function testValidationIncorrectDelimiter() {
         $this->userRequest()->post('/api/v1/entity/import/validate', [
             'file' => $this->createDefaultCSVFile(';'),
@@ -235,7 +228,6 @@ class ApiDataImporterTest extends TestCase {
                 ]
             ]);
     }
-
 
     public function testValidationCorrectDelimiter() {
         $this->userRequest()->post('/api/v1/entity/import/validate', [
@@ -254,7 +246,6 @@ class ApiDataImporterTest extends TestCase {
             ]);
     }
 
-
     public function testValidationWithParentColumn() {
         $this->userRequest()->post('/api/v1/entity/import/validate', [
             'file' => $this->createDefaultCSVFile(),
@@ -271,7 +262,6 @@ class ApiDataImporterTest extends TestCase {
                 ]
             ]);;
     }
-
 
     public function testValidationWithParentColumnChildTypeNotAllowed() {
         $file = $this->createCSVFile([
@@ -317,7 +307,6 @@ class ApiDataImporterTest extends TestCase {
             ]);
     }
 
-
     public function testValidationWithParentColumnSubElementAlreadyExists() {
         $file = $this->createCSVFile([
             ['name', 'parent', 'Notizen'],
@@ -359,7 +348,6 @@ class ApiDataImporterTest extends TestCase {
                 ]
             ]);
     }
-
 
     public function testValidationOfAttributesInvalidColumnName() {
         $this->userRequest()->post('/api/v1/entity/import/validate', [
@@ -472,7 +460,7 @@ class ApiDataImporterTest extends TestCase {
                 ]
             ]);
     }
-    
+
     public function testValidationWithDuplicateColumnMapping(){
         $response = $this->userRequest()->post('/api/v1/entity/import/validate', [
             'file' => $this->createDefaultCSVFile(),
@@ -508,10 +496,7 @@ class ApiDataImporterTest extends TestCase {
                 'error' => 'any'
             ]);
         }
-
         $response->assertStatus(201);
-
-
 
         $entityId = null;
         try {
@@ -599,7 +584,7 @@ class ApiDataImporterTest extends TestCase {
             ]
         ]);
     }
-    
+
     public function testDataImportFailsWithDuplicateColumnMapping(){
         $response = $this->userRequest()->post('/api/v1/entity/import', [
             'file' => $this->createDefaultCSVFile(),
@@ -612,7 +597,5 @@ class ApiDataImporterTest extends TestCase {
             'metadata' => $this->getMetaData(),
         ])
             ->assertStatus(201);
-
-            
     }
 }

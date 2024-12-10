@@ -1,4 +1,3 @@
- 
 <template>
     <date-picker
         :id="name"
@@ -59,14 +58,12 @@
                 disabled,
                 value,
             } = toRefs(props);
-            // FETCH
 
-            
-            const fixValue = _ => {                
+            // FETCH
+            const fixValue = _ => {
                 return value.value?.map(dt => new Date(dt));
             };
-            
-            
+
             const resetFieldState = _ => {
                 v.resetField({
                     value: fixValue(),
@@ -103,7 +100,6 @@
                 meta,
                 resetField,
             });
-
 
             watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();

@@ -41,7 +41,6 @@
             });
 
             const items = computed(_ => {
-
                 // Replace text inside double curly braces with placeholders
                 const preservationRegex = RegExp('{{(.*?)}}', 'g');
                 const variables = {};
@@ -51,7 +50,7 @@
                     variables[key] = p1;
                     return key;
                 });
-                
+
                 const [header, ...body] = preservationMatches.split(props.headerSeparator);
 
                 const joinedBody = body.join(props.headerSeparator).trim();
@@ -70,11 +69,10 @@
                 return items.value.length > 0 && items.value[0] && items.value[0].trim() !== '';
             });
 
-
             return {
                 hasItems,
                 header,
-                items
+                items,
             };
         }
     };

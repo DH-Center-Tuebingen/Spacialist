@@ -90,8 +90,8 @@
 </template>
 
 <script>
-    import { useI18n } from 'vue-i18n';
     import { computed } from 'vue';
+    import { useI18n } from 'vue-i18n';
 
     import {
         multiselectResetClasslist,
@@ -136,24 +136,23 @@
         },
         emits: ['update:entityType', 'update:entityName', 'update:entityParent'],
         setup(props) {
-
             const { t } = useI18n();
 
-            function getTotal(attr) {
+            const getTotal = attr => {
                 let val = 0;
                 if(props.stats[attr]?.total != undefined)
                     val = props.stats[attr].total;
                 return val;
             }
 
-            function getMissing(attr) {
+            const getMissing = attr => {
                 let val = 0;
                 if(props.stats[attr]?.missing != undefined)
                     val = props.stats[attr].missing;
                 return val;
             }
 
-            const sortedAvailableEntityTypes = computed(() => {
+            const sortedAvailableEntityTypes = computed(_ => {
                 const options = props.availableEntityTypes;
                 for(const option of options) {
                     option._label = translateConcept(option.thesaurus_url);
@@ -164,7 +163,7 @@
                 });
             });
 
-            const sortedAvailableColumns = computed(() => {
+            const sortedAvailableColumns = computed(_ => {
                 const options = [];
                 for(const key in props.availableColumns) {
                     options.push(props.availableColumns[key]);
@@ -178,7 +177,6 @@
             return {
                 t,
                 multiselectResetClasslist,
-                translateConcept,
                 getTotal,
                 getMissing,
                 sortedAvailableColumns,
