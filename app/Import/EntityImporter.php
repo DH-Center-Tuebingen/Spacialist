@@ -25,7 +25,7 @@ class EntityImporter {
 
     private $metadata;
     private array $attributesMap;
-    private array $attributeAttributeMap = [];
+    private array $attributeIdToAttributeValue = [];
     private int $entityTypeId;
     private string $nameColumn;
     private ?string $parentColumn = null;
@@ -147,7 +147,7 @@ class EntityImporter {
     private function verifyAttributeMapping($headers): bool {
         $nameErrors = [];
         $indexErrors = [];
-        foreach($this->attributesMap as $attribute => $column) {
+        foreach($this->attributesMap as $attributeId => $column) {
             $column = trim($column);
             if($column == "") {
                 continue;
@@ -157,27 +157,26 @@ class EntityImporter {
                 array_push($nameErrors, $column);
             }
 
-            $attr = Attribute::find($attribute);
+            $attr = Attribute::find($attributeId);
             if(!$attr) {
-                array_push($indexErrors, $attribute);
+                array_push($indexErrors, $attributeId);
             } else {
-                $this->attributeAttributeMap[$column] = $attr;
+                $this->attributeIdToAttributeValue[$attributeId] = $attr;
             }
         }
 
+        $valid = true;
         if(count($indexErrors) > 0) {
             $this->resolver->conflict(__("entity-importer.attribute-id-does-not-exist", ["attributes" => implode(", ", $indexErrors)]));
+            $valid = false;
         }
 
         if(count($nameErrors) > 0) {
             $this->resolver->conflict(__("entity-importer.attribute-column-does-not-exist", ["columns" => implode(", ", $nameErrors)]));
+            $valid = false;
         }
 
-        if(count($indexErrors) > 0 || count($nameErrors) > 0) {
-            return false;
-        } else {
-            return true;
-        }
+        return $valid;
     }
 
     private function validateName($row, $rowIndex): bool {
@@ -233,18 +232,22 @@ class EntityImporter {
 
     private function validateAttributesInRow($row, $index): bool {
         $errors = [];
-        foreach($this->attributeAttributeMap as $column => $attribute) {
+        foreach($this->attributeIdToAttributeValue as $attributeId => $attribute) {
             try {
+                $column = $this->attributesMap[$attributeId];
                 $datatype = $attribute->datatype;
                 $attrClass = AttributeBase::getMatchingClass($datatype);
                 $attrClass::fromImport($row[$column]);
             } catch(Exception $e) {
-                array_push($errors, $column);
+                array_push($errors, ["column" => $column, "value" => $row[$column]]);
             }
         }
 
         if(count($errors) > 0) {
-            $this->rowConflict($index, "entity-importer.attribute-could-not-be-imported", ["attribute" => implode(", ", $errors)]);
+            $errorStrings = array_map(function ($error) {
+                return "{{" . $error['column'] . "}}" . " => " . "{{" . $error['value'] . "}}";
+            }, $errors);
+            $this->rowConflict($index, "entity-importer.attribute-could-not-be-imported", ["attributeErrors" => implode(", ", $errorStrings)]);
         }
         return count($errors) == 0;
     }
