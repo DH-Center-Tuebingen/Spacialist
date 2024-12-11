@@ -508,6 +508,8 @@ class EntityController extends Controller {
         $metadata = json_decode($request->get('metadata'), true);
         $data = json_decode($request->get('data'), true);
         $handle = fopen($filepath, 'r');
+        
+        $hasHeaderRow = $metadata["has_header_row"];
 
         // Data values
         $nameColumn = trim($data['name_column']);
@@ -528,22 +530,24 @@ class EntityController extends Controller {
         $parentIdx = null;
         $nameIdx = null;
 
-
         // Getting headers
         if(($row = fgetcsv($handle, 0, $metadata['delimiter'])) !== false) {
             $row = sp_trim_array($row);
             try{
                 $headerRow = $row;
                 for($i = 0; $i < count($row); $i++) {
-                    if($row[$i] == $nameColumn) {
+                    // Use the provided column name or the column number
+                    $columnName = $hasHeaderRow ? $row[$i] : "#".($i + 1);
+                    
+                    if($columnName == $nameColumn) {
                         $nameIdx = $i;
-                    } else if(isset($parentColumn) && $row[$i] == $parentColumn) {
+                    } else if(isset($parentColumn) && $columnName == $parentColumn) {
                         $parentIdx = $i;
                         $hasParent = true;
                     }
 
                     foreach($attributesMapping as $id => $a) {
-                        if($a == $row[$i]) {
+                        if($a == $columnName) {
                             $attributeIdToColumnIdxMapping[$id] = $i;
                             $attributeTypes[$id] = Attribute::findOrFail($id)->datatype;
                             break;
@@ -558,6 +562,11 @@ class EntityController extends Controller {
                     'data' => new ImportExceptionStruct(),
                 ], 400);
             }
+        }
+        
+        // When we have no header row, we need to rewind the file handle
+        if(!$hasHeaderRow){
+            rewind($handle);
         }
 
         //Processing rows

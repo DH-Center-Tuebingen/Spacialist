@@ -31,9 +31,9 @@ class Csv extends Parser {
         $rowIndex = 0;
         $this->rows = 0;
         // We don't use the fgetcsvfunction to change the file encoding to UTF-8.
-        while (($row = fgets($fileHandle)) !== false) {
+        while(($row = fgets($fileHandle)) !== false) {
             $this->rows++;
-            if ($this->hasHeaderRow && $rowIndex === 0) {
+            if($this->hasHeaderRow && $rowIndex === 0) {
                 $rowIndex++;
                 continue;
             }
@@ -58,11 +58,11 @@ class Csv extends Parser {
         $headers = null;
 
         $row = fgets($fileHandle);
-        if (!$row) {
+        if(!$row) {
             throw new \Exception("File is empty.");
         }
 
-        if ($this->hasHeaderRow) {
+        if($this->hasHeaderRow) {
             $utf8Line = $this->toUtf8($row);
             $headers = $this->fromCsvLine($utf8Line);
             $headers = array_map(fn ($header) => trim($header), $headers);
@@ -77,8 +77,8 @@ class Csv extends Parser {
 
     private function generateNumberHeaders($row) {
         $headers = [];
-
-        for ($i = 1; $i <= count($row); $i++) {
+        $parts = explode($this->delimiter, $row);
+        for($i = 1; $i <= count($parts); $i++) {
             $headers[] = "#$i";
         }
 
@@ -92,14 +92,14 @@ class Csv extends Parser {
      * @return array $row - Associative array using the headers as keys and the values from the line as values
      */
     private function parseRow($line) {
-        if (empty($this->headers)) {
+        if(empty($this->headers)) {
             throw new \Exception("Headers are not set. Run parseHeaders first.");
         }
 
         $row = [];
 
         $arr = $this->fromCsvLine($line);
-        for ($i = 0; $i < count($arr); $i++) {
+        for($i = 0; $i < count($arr); $i++) {
             $row[$this->headers[$i]] = trim($arr[$i]);
         }
         return $row;
@@ -113,10 +113,10 @@ class Csv extends Parser {
      * @return array|string $data - The converted data
      */
     private function toUtf8(array|string $data): array|string {
-        if ($this->isUtf8()) return $data;
+        if($this->isUtf8()) return $data;
 
         $tgt = 'UTF-8';
-        if (is_array($data)) {
+        if(is_array($data)) {
             $data = array_map(fn ($str) => iconv($this->encoding, $tgt, $str), $data);
         } else {
             $data = iconv($this->encoding, $tgt, $data);
@@ -147,7 +147,7 @@ class Csv extends Parser {
     }
 
     private function verifyColumnExists($column) {
-        if (!in_array($column, $this->headers)) {
+        if(!in_array($column, $this->headers)) {
             throw new \Exception("Column '$column' does not exist.");
         }
     }
