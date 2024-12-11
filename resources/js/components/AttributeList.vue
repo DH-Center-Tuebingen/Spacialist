@@ -501,7 +501,7 @@
             };
 
             const certainty = attribute => {
-                return state.attributeValues?.[attribute.id]?.certainty;
+                return state.attributeValues?.[attribute.id]?.certainty ?? null;
             };
 
             const hasComment = attribute => {
