@@ -32,7 +32,7 @@
         <template #tag="{ option, handleTagRemove, disabled: tagDisabled }">
             <div
                 class="multiselect-tag"
-                :class="{'pe-2': tagDisabled}"
+                :class="{ 'pe-2': tagDisabled }"
             >
                 <span @click.prevent="handleTagClick(option)">
                     {{ displayResult(option) }}
@@ -60,16 +60,11 @@
                 </span>
                 <ol class="breadcrumb m-0 p-0 bg-none small">
                     <li
-                        v-for="anc in option[chain]"
-                        :key="`search-result-multiselect-${state.id}-${anc}`"
+                        v-for="chainLink in option[chain]"
+                        :key="`search-result-multiselect-${state.id}-${chainLink}`"
                         class="breadcrumb-item text-muted small"
                     >
-                        <span v-if="state.isFnChain">
-                            {{ chainFn(anc) }}
-                        </span>
-                        <span v-else-if="state.isSimpleChain">
-                            {{ anc }}
-                        </span>
+                        <span>{{ formatChainLink(chainLink) }}</span>
                     </li>
                 </ol>
             </div>
@@ -237,7 +232,7 @@
                 context.emit('entry-click', option);
             };
             const getBaseValue = _ => {
-                    return mode.value == 'single' ? {} : [];
+                return mode.value == 'single' ? {} : [];
             };
             const getDefaultValue = _ => {
                 if(defaultValue.value) {
@@ -264,6 +259,14 @@
                     state.entry = newValue;
                 }
             });
+            
+            const formatChainLink = chainLink => {
+                if(state.isFnChain) {
+                    return chainFn.value(chainLink);
+                } else {
+                    return chainLink;
+                }
+            };
 
             // RETURN
             return {
@@ -271,6 +274,7 @@
                 // HELPER
                 // LOCAL
                 search,
+                formatChainLink,
                 displayResult,
                 handleSelection,
                 handleTagClick,
