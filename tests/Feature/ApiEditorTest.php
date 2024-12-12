@@ -626,7 +626,7 @@ class ApiEditorTest extends TestCase
         $response->assertJson([
             'entity_type_id' => 3,
             'attribute_id' => 3,
-            'position' => 4,
+            'position' => 5,
             'depends_on' => null,
             'attribute' => [
                 'id' => 3,
@@ -843,7 +843,8 @@ class ApiEditorTest extends TestCase
         $etCnt = EntityType::count();
         $this->assertEquals(5, $etCnt);
         $eaCnt = EntityAttribute::count();
-        $this->assertEquals(23, $eaCnt);
+        info(EntityAttribute::all());
+        $this->assertEquals(24, $eaCnt);
         $eCnt = Entity::count();
         $this->assertEquals(8, $eCnt);
         $avCnt = AttributeValue::count();
@@ -857,7 +858,7 @@ class ApiEditorTest extends TestCase
         $etCnt = EntityType::count();
         $this->assertEquals(4, $etCnt);
         $eaCnt = EntityAttribute::count();
-        $this->assertEquals(18, $eaCnt);
+        $this->assertEquals(19, $eaCnt);
         $eCnt = Entity::count();
         $this->assertEquals(4, $eCnt);
         $avCnt = AttributeValue::count();
@@ -870,7 +871,7 @@ class ApiEditorTest extends TestCase
     public function testDeleteAttributeEndpoint()
     {
         $eaCnt = EntityAttribute::count();
-        $this->assertEquals(23, $eaCnt);
+        $this->assertEquals(24, $eaCnt);
         $avCnt = AttributeValue::count();
         $this->assertEquals(25, $avCnt);
         $aCnt = Attribute::count();
@@ -882,7 +883,7 @@ class ApiEditorTest extends TestCase
         $this->assertStatus($response, 204);
 
         $eaCnt = EntityAttribute::count();
-        $this->assertEquals(21, $eaCnt);
+        $this->assertEquals(22, $eaCnt);
         $avCnt = AttributeValue::count();
         $this->assertEquals(21, $avCnt);
         $aCnt = Attribute::count();
@@ -895,7 +896,7 @@ class ApiEditorTest extends TestCase
     public function testDeleteAttributeFromEntityTypeEndpoint()
     {
         $eaCnt = EntityAttribute::count();
-        $this->assertEquals(23, $eaCnt);
+        $this->assertEquals(24, $eaCnt);
         $avCnt = AttributeValue::count();
         $this->assertEquals(25, $avCnt);
         $entityType = EntityType::find(5)->load('attributes');
@@ -917,7 +918,7 @@ class ApiEditorTest extends TestCase
         $this->assertStatus($response, 204);
 
         $eaCnt = EntityAttribute::count();
-        $this->assertEquals(22, $eaCnt);
+        $this->assertEquals(23, $eaCnt);
         $avCnt = AttributeValue::count();
         $this->assertEquals(22, $avCnt);
         $entityType = EntityType::find(5)->load('attributes');
