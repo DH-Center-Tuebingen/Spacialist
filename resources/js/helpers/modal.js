@@ -72,7 +72,6 @@ import RemoveAttribute from '@/components/modals/entitytype/RemoveAttribute.vue'
 import AddAttribute from '@/components/modals/attribute/Add.vue';
 import EditAttribute from '@/components/modals/attribute/Edit.vue';
 import MultiEditAttribute from '@/components/modals/attribute/MultiEdit.vue';
-import EditSystemAttribute from '@/components/modals/attribute/EditSystem.vue';
 import DeleteAttribute from '@/components/modals/attribute/Delete.vue';
 
 export function showAbout() {
@@ -345,7 +344,7 @@ export function showResetPassword(id) {
                     addToast(msg, title, {
                         channel: 'success',
                     });
-                })
+                });
             },
             onCancel(e) {
                 modal.destroy();
@@ -370,7 +369,7 @@ export function showConfirmPassword(id) {
                         login_attempts: null,
                     });
                     modal.destroy();
-                })
+                });
             },
             onCancel(e) {
                 modal.destroy();
@@ -398,7 +397,7 @@ export function showDeactivateUser(user, onDeactivated) {
                     }
                     store.dispatch('deactivateUser', data);
                     modal.destroy();
-                })
+                });
             },
             onCancel(e) {
                 modal.destroy();
@@ -729,11 +728,9 @@ export function showDeleteEntityType(entityType, metadata, onDeleted) {
 }
 
 export function showEditAttribute(aid, etid, metadata) {
-    const isSystem = metadata && metadata.is_system;
-    const component = isSystem ? EditSystemAttribute : EditAttribute;
     const uid = `EditAttribute-${getTs()}`;
     const modal = useModal({
-        component: component,
+        component: EditAttribute,
         attrs: {
             name: uid,
             attributeId: aid,
@@ -744,18 +741,13 @@ export function showEditAttribute(aid, etid, metadata) {
                 modal.destroy();
             },
             async onConfirm(e) {
-                if(isSystem) {
-                    await updateAttributeMetadata(etid, aid, metadata.pivot.id, e);
-                    modal.destroy();
-                } else {
-                    if(e.metadata) {
-                        await updateAttributeMetadata(etid, aid, metadata.pivot.id, e.metadata);
-                    }
-                    if(e.dependency) {
-                        await updateAttributeDependency(etid, aid, e.dependency);
-                    }
-                    modal.destroy();
+                if(e.metadata) {
+                    await updateAttributeMetadata(etid, aid, metadata.pivot.id, e.metadata);
                 }
+                if(e.dependency) {
+                    await updateAttributeDependency(etid, aid, e.dependency);
+                }
+                modal.destroy();
             },
         },
     });

@@ -360,6 +360,18 @@
         "geometry_type": "Geometry-Type",
         "dependency": {
             "title": "Dependency",
+            "group": "Group",
+            "add_group": "Add Group",
+            "remove_group": "Remove group",
+            "add_rule": "Add Dependency Rule",
+            "remove_rule": "Remove Rule",
+            "no_rules_defined": "No dependency rules defined for this group yet.",
+            "modes": {
+                "union": "Union",
+                "union_desc": "All groups must evaluate to true",
+                "intersect": "Intersect",
+                "intersect_desc": "Any group must evaluate to true"
+            },
             "depends_on": {
                 "title": "Depends on",
                 "desc": "Visibility is based on another attribute (value)"

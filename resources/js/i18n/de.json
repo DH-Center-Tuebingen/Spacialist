@@ -360,6 +360,18 @@
         "geometry_type": "Geometrietyp",
         "dependency": {
             "title": "Abhängigkeiten",
+            "group": "Gruppe",
+            "add_group": "Gruppe hinzufügen",
+            "remove_group": "Gruppe entfernen",
+            "add_rule": "Neue Regel hinzufügen",
+            "remove_rule": "Regel entfernen",
+            "no_rules_defined": "Noch keine Abhängigkeitsregeln für diese Gruppe definiert.",
+            "modes": {
+                "union": "Vereinigung",
+                "union_desc": "Alle Gruppen müssen erfüllt sein",
+                "intersect": "Schnitt",
+                "intersect_desc": "Mindestens eine Gruppe muss erfüllt sein"
+            },
             "depends_on": {
                 "title": "Hängt ab von",
                 "desc": "Sichtbarkeit hängt von einem anderen Attribut(wert) ab"

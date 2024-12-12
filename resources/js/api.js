@@ -776,14 +776,22 @@ export async function reorderEntityAttributes(etid, aid, from, to) {
 }
 
 export async function updateAttributeDependency(etid, aid, dependency) {
-    const data = {};
-    if(!!dependency.attribute) {
-        data.attribute = dependency.attribute.id;
-        data.operator = dependency.operator.label;
-        data.value = dependency.value.value || dependency.value;
-    }
+    const apiData = {};
+    const dependencyData = {};
+    dependencyData.union = dependency.union;
+    dependencyData.groups = dependency.groups.map(group => {
+        group.rules = group.rules.map(rule => {
+            return {
+                attribute: rule.attribute.id,
+                operator: rule.operator.label,
+                value: rule.value.value || rule.value,
+            };
+        });
+        return group;
+    });
+    apiData.data = dependencyData;
     return $httpQueue.add(
-        () => http.patch(`/editor/dm/entity_type/${etid}/attribute/${aid}/dependency`, data).then(response => {
+        () => http.patch(`/editor/dm/entity_type/${etid}/attribute/${aid}/dependency`, apiData).then(response => {
             const data = Object.values(response.data).length > 0 ? response.data : null;
             store.dispatch('updateDependency', {
                 entity_type_id: etid,
@@ -798,7 +806,7 @@ export async function updateAttributeDependency(etid, aid, dependency) {
 
 export async function updateAttributeMetadata(etid, aid, pivid, data) {
     return $httpQueue.add(
-        () => http.patch(`/editor/dm/entity_type/attribute/system/${pivid}`, data).then(response => {
+        () => http.patch(`/editor/dm/entity_type/attribute/${pivid}/metadata`, data).then(response => {
             store.dispatch('updateAttributeMetadata', {
                 entity_type_id: etid,
                 attribute_id: aid,
