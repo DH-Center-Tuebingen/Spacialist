@@ -843,7 +843,6 @@ class ApiEditorTest extends TestCase
         $etCnt = EntityType::count();
         $this->assertEquals(5, $etCnt);
         $eaCnt = EntityAttribute::count();
-        info(EntityAttribute::all());
         $this->assertEquals(24, $eaCnt);
         $eCnt = Entity::count();
         $this->assertEquals(8, $eCnt);
