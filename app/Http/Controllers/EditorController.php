@@ -505,7 +505,6 @@ class EditorController extends Controller {
         $hasData = false;
         $dependsOn = [
             'union' => $dependencyData['union'],
-            'rules' => [],
         ];
         $operators = ['<', '>', '=', '!='];
         foreach($dependencyData['groups'] as $group) {
