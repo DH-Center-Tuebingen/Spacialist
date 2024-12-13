@@ -402,9 +402,13 @@
                     !!rule.value;
             };
             const formatDependency = dependencyRules => {
+                const formattedRules = {};
+                formattedRules.union = !!dependencyRules?.union;
                 if(dependencyRules.groups) {
-                    dependencyRules.groups = dependencyRules.groups.map(group => {
-                        group.rules = group.rules.map(rule => {
+                    formattedRules.groups = dependencyRules.groups.map(group => {
+                        const formattedGroup = {};
+                        formattedGroup.union = group.union;
+                        formattedGroup.rules = group.rules.map(rule => {
                             const converted = {
                                 attribute: null,
                                 operator: null,
@@ -415,18 +419,16 @@
                             converted.value = rule.value;
                             return converted;
                         });
-                        return group;
+                        return formattedGroup;
                     });
                 } else if(Object.keys(dependencyRules).length == 0) {
-                    dependencyRules = {
-                        union: false,
-                        groups: [{
-                            union: true,
-                            rules: [],
-                        }],
-                    };
+                    formattedRules.union = false;
+                    formattedRules.groups = [{
+                        union: true,
+                        rules: [],
+                    }];
                 }
-                return dependencyRules;
+                return formattedRules;
             };
             const confirmEdit = _ => {
                 const data = {
