@@ -877,7 +877,7 @@
             };
 
             const addComment = event => {
-                entityStore.handleComment(state.entity.id, event.comment, 'add', {
+                entityStore.addComment(state.entity.id, event.comment, {
                     replyTo: event.replyTo,
                 });
             };

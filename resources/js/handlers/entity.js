@@ -119,8 +119,10 @@ export const handleEntityReferenceDeleted = {
 
 export const handleEntityCommentAdded = {
     'CommentAdded': e => {
+        if(e.user.id == useUserStore().getCurrentUserId) return;
+                
         const entityStore = useEntityStore();
-        entityStore.handleComment(e.comment.commentable_id, e.comment, 'add', {
+        entityStore.addComment(e.comment.commentable_id, e.comment, {
             replyTo: e.replyTo,
         });
 
@@ -138,8 +140,10 @@ export const handleEntityCommentAdded = {
 
 export const handleEntityCommentUpdated = {
     'CommentUpdated': e => {
+        if(e.user.id == useUserStore().getCurrentUserId) return;
+        
         const entityStore = useEntityStore();
-        entityStore.handleComment(e.comment.commentable_id, e.comment, 'update', {
+        entityStore.updateComment(e.comment.commentable_id, e.comment, {
             replyTo: e.replyTo,
         });
 
@@ -157,8 +161,10 @@ export const handleEntityCommentUpdated = {
 
 export const handleEntityCommentDeleted = {
     'CommentDeleted': e => {
+        if(e.user.id == useUserStore().getCurrentUserId) return;
+        
         const entityStore = useEntityStore();
-        entityStore.handleComment(e.comment.commentable_id, e.comment, 'delete', {
+        entityStore.deleteComment(e.comment.commentable_id, e.comment, {
             replyTo: e.replyTo,
         });
 
