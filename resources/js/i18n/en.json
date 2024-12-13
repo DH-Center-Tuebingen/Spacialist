@@ -749,7 +749,7 @@
             "detail": {
                 "properties": {
                     "title": "Properties",
-                    "top_level": "Top-Level-Entity-Type?",
+                    "top_level": "Top-Level",
                     "sub_types": "Allowed Sub-Entity-Types"
                 },
                 "attribute": {

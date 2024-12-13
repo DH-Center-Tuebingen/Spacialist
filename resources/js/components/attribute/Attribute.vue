@@ -64,6 +64,7 @@
 
     <serial-attribute
         v-else-if="data.datatype == 'serial'"
+        :ref="el => setRef(el)"
         :disabled="state.disabled"
         :name="`attr-${data.id}`"
         :value="state.value"
@@ -223,6 +224,7 @@
 
     <sql-attribute
         v-else-if="data.datatype == 'sql'"
+        :ref="el => setRef(el)"
         :disabled="state.disabled"
         :name="`attr-${data.id}`"
         :value="state.value"

@@ -22,6 +22,7 @@ class EntityTypesTableSeeder extends Seeder
                 'created_at' => '2017-12-20 10:03:06',
                 'updated_at' => '2017-12-20 10:03:06',
                 'is_root' => true,
+                'color' => '#FF0000',
             ),
             1 =>
             array (
@@ -30,6 +31,7 @@ class EntityTypesTableSeeder extends Seeder
                 'created_at' => '2017-12-20 10:03:15',
                 'updated_at' => '2017-12-20 10:03:15',
                 'is_root' => false,
+                'color' => '#FFFF00',
             ),
             2 =>
             array (
@@ -38,6 +40,7 @@ class EntityTypesTableSeeder extends Seeder
                 'created_at' => '2017-12-20 10:03:23',
                 'updated_at' => '2017-12-20 10:03:23',
                 'is_root' => false,
+                'color' => '#00FF00',
             ),
             3 =>
             array (
@@ -46,6 +49,7 @@ class EntityTypesTableSeeder extends Seeder
                 'created_at' => '2017-12-20 10:03:30',
                 'updated_at' => '2017-12-20 10:03:30',
                 'is_root' => false,
+                'color' => '#00FFFF',
             ),
             4 =>
             array (
@@ -54,6 +58,7 @@ class EntityTypesTableSeeder extends Seeder
                 'created_at' => '2017-12-20 16:57:41',
                 'updated_at' => '2017-12-20 16:57:41',
                 'is_root' => true,
+                'color' => '#0000FF',
             ),
         ));
     }

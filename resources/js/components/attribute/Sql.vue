@@ -63,28 +63,26 @@
             },
         },
         setup(props, context) {
-            const {
-                name,
-                disabled,
-                value,
-            } = toRefs(props);
-            // FETCH
-
-            // FUNCTIONS
-
-            // DATA
-            const state = reactive({
-
+            const v = reactive({
+                value: props.value,
+                meta: {
+                    dirty: false,
+                    valid: true,
+                },
+                resetField: _ => true,
             });
+            
+            const resetFieldState = _ => {};
+            const undirtyField = _ => {};
 
             // RETURN
             return {
                 // HELPERS
+                v,
                 isArray,
                 translateConcept,
-                // LOCAL
-                // STATE
-                state,
+                resetFieldState,
+                undirtyField,
             };
         },
     };

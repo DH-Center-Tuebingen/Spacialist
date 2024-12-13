@@ -91,7 +91,7 @@ class ApiDataImporterTest extends TestCase {
      *
      */
 
-     public function testValidationEmptyFile() {
+    public function testValidationEmptyFile() {
         $file = $this->createCSVFile([]);
         $metadata = $this->getMetaData();
 
@@ -467,7 +467,7 @@ class ApiDataImporterTest extends TestCase {
         ])
             ->assertStatus(200)
             ->assertJson([
-                'errors' => ['[2] Attribute could not be imported: Abmessungen'],
+                'errors' => ['[2] Attribute could not be imported: {{Abmessungen}} => {{1,2,3,cm}}'],
                 'summary' => [
                     'create' => 1,
                     'update' => 0,
@@ -500,6 +500,29 @@ class ApiDataImporterTest extends TestCase {
         ]);
     }
 
+    public function testValidationWithDuplicateColumnMapping(){
+        $response = $this->userRequest()->post('/api/v1/entity/import/validate', [
+            'file' => $this->createDefaultCSVFile(),
+            'data' => $this->getData(
+                attributes: [
+                    13 => "Notizen", // Notizen
+                    19 => "Notizen", // Aufbewahrung
+                ]
+            ),
+            'metadata' => $this->getMetaData(),
+        ]);
+        $response->assertStatus(200);
+
+        $response->assertJson([
+            'errors' => [],
+            'summary' => [
+                'create' => 4,
+                'update' => 1,
+                'conflict' => 0
+            ]
+        ]);
+    }
+
     public function testDataImportSuccess() {
         $response = $this->userRequest()->post('/api/v1/entity/import', [
             'file' => $this->createDimensionsCSVFile(),
@@ -512,7 +535,6 @@ class ApiDataImporterTest extends TestCase {
                 'error' => 'any'
             ]);
         }
-
         $response->assertStatus(201);
 
         $entityId = null;
@@ -1004,5 +1026,19 @@ class ApiDataImporterTest extends TestCase {
                     'conflict' => 1,
                 ]
             ]);
+    }
+
+    public function testDataImportFailsWithDuplicateColumnMapping(){
+        $response = $this->userRequest()->post('/api/v1/entity/import', [
+            'file' => $this->createDefaultCSVFile(),
+            'data' => $this->getData(
+                attributes: [
+                    13 => "Notizen", // Notizen
+                    19 => "Notizen", // Aufbewahrung
+                ]
+            ),
+            'metadata' => $this->getMetaData(),
+        ])
+            ->assertStatus(201);
     }
 }
