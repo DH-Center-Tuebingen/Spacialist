@@ -7,12 +7,10 @@ use Tests\TestCase;
 use Illuminate\Http\UploadedFile;
 
 class ApiDataImporterTest extends TestCase {
-
-
     /**
-     * 
+     *
      * Utilities
-     * 
+     *
      */
     private function createDefaultCSVFile($delimiter = ",", $hasHeaderRow = true) {
         $columns = [
@@ -22,11 +20,11 @@ class ApiDataImporterTest extends TestCase {
             ['ياماتو', 'Site B', 'أصفر', "عَلِي;يُوْسِف;حَسَن"],
             ['Site A', '', 'Updated', 'Alternative Site']
         ];
-        
+
         if($hasHeaderRow) {
             array_unshift($columns, ['name', 'parent', 'Notizen', 'Alternativer Name']);
         }
-        
+
         return $this->createCSVFile($columns, $delimiter);
     }
 
@@ -34,11 +32,11 @@ class ApiDataImporterTest extends TestCase {
         $columns = [
             ['imported', 'Site A', '1;2;3;cm'],
         ];
-        
+
         if($hasHeaderRow) {
             array_unshift($columns, ['name', 'parent', 'Abmessungen']);
         }
-        
+
         return $this->createCSVFile($columns, $delimiter);
     }
 
@@ -55,8 +53,7 @@ class ApiDataImporterTest extends TestCase {
 
         return UploadedFile::fake()->createWithContent('data.csv', $content);
     }
-    
-    
+
     private function getData(?string $name = 'name', int $entityTypeId = 3, array $attributes = [], ?string $parentColumn = null) {
         return json_encode([
             "name_column" => $name,
@@ -65,7 +62,7 @@ class ApiDataImporterTest extends TestCase {
             "attributes" => $attributes,
         ]);
     }
-    
+
     private function getDimensionsData() {
         return $this->getData(
             parentColumn: 'parent',
@@ -87,13 +84,13 @@ class ApiDataImporterTest extends TestCase {
     /**
      * We run the tests two times. Once with a header row and once without.
      */
-   
+
     /**
-     * 
+     *
      * TESTS WITH NAMED HEADERS
-     * 
+     *
      */
-   
+
      public function testValidationEmptyFile() {
         $file = $this->createCSVFile([]);
         $metadata = $this->getMetaData();
@@ -137,7 +134,6 @@ class ApiDataImporterTest extends TestCase {
             ]);
     }
 
-
     public function testValidationNamesColumnMissingError() {
         $file = $this->createCSVFile([['other'], [''], ['other 2']]);
 
@@ -179,7 +175,6 @@ class ApiDataImporterTest extends TestCase {
             ]
         ]);
     }
-
 
     public function testValidationWithAllNamesSetCorrectly() {
         $this->userRequest()->post('/api/v1/entity/import/validate', [
@@ -232,8 +227,6 @@ class ApiDataImporterTest extends TestCase {
             ]);
     }
 
-
-
     public function testValidationIncorrectDelimiter() {
         $this->userRequest()->post('/api/v1/entity/import/validate', [
             'file' => $this->createDefaultCSVFile(';'),
@@ -250,7 +243,6 @@ class ApiDataImporterTest extends TestCase {
                 ]
             ]);
     }
-
 
     public function testValidationCorrectDelimiter() {
         $this->userRequest()->post('/api/v1/entity/import/validate', [
@@ -269,7 +261,6 @@ class ApiDataImporterTest extends TestCase {
             ]);
     }
 
-
     public function testValidationWithParentColumn() {
         $this->userRequest()->post('/api/v1/entity/import/validate', [
             'file' => $this->createDefaultCSVFile(),
@@ -286,7 +277,6 @@ class ApiDataImporterTest extends TestCase {
                 ]
             ]);;
     }
-
 
     public function testValidationWithParentColumnChildTypeNotAllowed() {
         $file = $this->createCSVFile([
@@ -332,7 +322,6 @@ class ApiDataImporterTest extends TestCase {
             ]);
     }
 
-
     public function testValidationWithParentColumnSubElementAlreadyExists() {
         $file = $this->createCSVFile([
             ['name', 'parent', 'Notizen'],
@@ -374,7 +363,6 @@ class ApiDataImporterTest extends TestCase {
                 ]
             ]);
     }
-
 
     public function testValidationOfAttributesInvalidColumnName() {
         $this->userRequest()->post('/api/v1/entity/import/validate', [
@@ -488,6 +476,29 @@ class ApiDataImporterTest extends TestCase {
             ]);
     }
 
+    public function testValidationFailsWithMismatchingColumns() {
+        $headerRow = ["name", "parent", "Notes", "Description"];
+        $headerRowString = implode(',', $headerRow);
+        $headerCount = count($headerRow);
+        $dataRow = ["Site A", "", "updated"];
+        $dataRowString = implode(',', $dataRow);
+        $dataCount = count($dataRow);
+        $response = $this->userRequest()->post('/api/v1/entity/import/validate', [
+            'file' => $this->createCSVFile([
+                $headerRow,
+                $dataRow,
+            ]),
+            'data' => $this->getData(),
+            'metadata' => $this->getMetaData(),
+        ])
+            ->assertStatus(200);
+
+        $response->assertJson([
+            'errors' => [
+                "Column count of current row '{$dataRowString}' ({$dataCount} columns) does not match column count in header row '{$headerRowString}' ({$headerCount} columns)."
+            ],
+        ]);
+    }
 
     public function testDataImportSuccess() {
         $response = $this->userRequest()->post('/api/v1/entity/import', [
@@ -503,8 +514,6 @@ class ApiDataImporterTest extends TestCase {
         }
 
         $response->assertStatus(201);
-
-
 
         $entityId = null;
         try {
@@ -592,13 +601,13 @@ class ApiDataImporterTest extends TestCase {
             ]
         ]);
     }
-    
+
     /**
-    * 
+    *
     * TESTS WITH NO HEADERS
-    * 
+    *
     */
-   
+
     public function testValidationEmptyFileNoHeaders() {
         $file = $this->createCSVFile([]);
         $metadata = $this->getMetaData(hasHeaderRow: false);
@@ -851,7 +860,7 @@ class ApiDataImporterTest extends TestCase {
         $this->userRequest()->post('/api/v1/entity/import/validate', [
             'file' => $this->createDefaultCSVFile(hasHeaderRow: false),
             'data' => $this->getData(
-                name: "#1",     
+                name: "#1",
                 attributes: [
                 8 => "#3",
                 15 => "#4"
@@ -875,7 +884,7 @@ class ApiDataImporterTest extends TestCase {
         $this->userRequest()->post('/api/v1/entity/import/validate', [
             'file' => $this->createDefaultCSVFile(hasHeaderRow: false),
             'data' => $this->getData(
-                name: "#1", 
+                name: "#1",
                 attributes: [
                 8 => "#10",
                 15 => "#11"
@@ -921,7 +930,7 @@ class ApiDataImporterTest extends TestCase {
         $this->userRequest()->post('/api/v1/entity/import/validate', [
             'file' => $this->createDefaultCSVFile(hasHeaderRow: false),
             'data' => $this->getData(
-                name: "#1", 
+                name: "#1",
                 attributes: [
                 -1 => "#11",
             ]),

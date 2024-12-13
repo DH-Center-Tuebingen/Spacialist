@@ -5,6 +5,7 @@ return [
     'file-not-found' => 'File could not be read.',
     'missing-data' => 'Required column is missing: :column',
     'invalid-data' => 'Invalid data: [:column] => :value',
+    'csv-column-mismatch' => 'Column count of current row \':data\' (:data_count columns) does not match column count in header row \':header_data\' (:header_count columns).',
     'attribute-could-not-be-imported' => 'Attribute could not be imported: :attribute',
     'attribute-id-does-not-exist' => 'The attribute id does not exist: :attributes',
     'attribute-column-does-not-exist' => 'The attribute columns do not exist: :columns',
