@@ -906,7 +906,6 @@
                 const dirtyValues = getDirtyValues(grps);
                 const patches = [];
                 const moderations = [];
-                console.log(dirtyValues, patches, moderations)
                 if(Object.keys(dirtyValues).length == 0 ) return;
 
                 for(let v in dirtyValues) {
@@ -1102,7 +1101,6 @@
                 } else {
                     leaveEntityRoom(channels.entity);
                     channels.entity = null;
-                    entityStore.unset();
                     return true;
                 }
             });
@@ -1113,7 +1111,6 @@
                         return false;
                     } else {
                         state.hiddenAttributes = {};
-                        entityStore.unset();
                         leaveEntityRoom(channels.entity);
                         channels.entity = joinEntityRoom(to.params.id);
                         listenToList(channels.entity, [
