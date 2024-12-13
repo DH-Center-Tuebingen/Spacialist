@@ -21,6 +21,8 @@ import {
     only,
 } from '@/helpers/helpers.js';
 
+import { getEditedComment } from '@/helpers/comment.js';
+
 import {
     addEntity,
     addEntityType,
@@ -60,7 +62,7 @@ function updateSelectionTypeIdList(selection) {
 const handleAddEntityType = (context, typeData, attributes = []) => {
     context.entityTypeAttributes[typeData.id] = attributes.slice();
     context.entityTypes[typeData.id] = typeData;
-}
+};
 
 const handlePostDelete = (context, entityId) => {
     const currentRoute = router.currentRoute.value;
@@ -87,7 +89,7 @@ const handlePostDelete = (context, entityId) => {
             }
         }
     }
-}
+};
 
 export const useEntityStore = defineStore('entity', {
     state: _ => ({
@@ -180,7 +182,7 @@ export const useEntityStore = defineStore('entity', {
                     colors = state.entityTypeColors[id];
                 }
                 return colors;
-            }
+            };
         },
         getEntityTypeName(state) {
             return id => {
@@ -584,60 +586,48 @@ export const useEntityStore = defineStore('entity', {
         },
         async removeReference(id, entityId, attributeUrl) {
             return deleteReferenceFromEntity(id).then(_ => {
-                this.handleReference(entityId, attributeUrl, 'delete', {id: id});
+                this.handleReference(entityId, attributeUrl, 'delete', { id: id });
             });
         },
-        handleComment(entityId, comment, action, data) {
-            const replyTo = data.replyTo;
+        async addComment(entityId, comment, { replyTo = null } = {}) {
             const entity = this.getEntity(entityId);
-            if(action == 'add') {
-                if(replyTo) {
-                    const op = entity.comments.find(c => c.id == replyTo);
-                    if(op.replies) {
-                        op.replies.push(comment);
-                    }
-                    op.replies_count++;
-                } else {
-                    if(!entity.comments) {
-                        entity.comments = [];
-                    }
-                    entity.comments.push(comment);
-                    entity.comments_count++;
+            if(replyTo) {
+                const op = entity.comments.find(c => c.id == replyTo);
+                if(op.replies) {
+                    op.replies.push(comment);
                 }
-            } else if(action == 'update' || action == 'delete') {
-                let editedComment = null;
-                if(replyTo) {
-                    const op = entity.comments.find(c => c.id == replyTo);
-                    if(op.replies) {
-                        editedComment = op.replies.find(reply => reply.id == comment.id);
-                    }
-                } else {
-                    editedComment = entity.comments.find(c => c.id == comment.id);
+                op.replies_count++;
+            } else {
+                if(!entity.comments) {
+                    entity.comments = [];
                 }
-                if(editedComment) {
-                    if(action == 'update') {
-                        editedComment.content = comment.content;
-                        editedComment.updated_at = comment.updated_at;
-                    } else if(action == 'delete') {
-                        editedComment.content = null;
-                        editedComment.updated_at = Date();
-                        editedComment.deleted_at = Date();
-                    }
-                }
+                // We dont need to add the comment manually
+                // as it is broadcasted via websocket
+                entity.comments.push(comment);
+                entity.comments_count++;
             }
 
             if(this.selectedEntity) {
                 this.selectedEntity.comments = entity.comments;
             }
         },
-        async addComment() {
+        async updateComment(entityId, comment, { replyTo = null } = {}) {
+            const entity = this.getEntity(entityId);
+            let editedComment = getEditedComment(entity, comment, replyTo);
+            if(editedComment) {
+                editedComment.content = comment.content;
+                editedComment.updated_at = comment.updated_at;
 
+            }
         },
-        async editComment() {
-            // TODO
-        },
-        async deleteComment() {
-            // TODO
+        async deleteComment(entityId, comment, { replyTo = null } = {}) {
+            const entity = this.getEntity(entityId);
+            let editedComment = getEditedComment(entity, comment, replyTo);
+            if(editedComment) {
+                editedComment.content = null;
+                editedComment.updated_at = Date();
+                editedComment.deleted_at = Date();
+            }
         },
         async setById(entityId) {
             let entity = this.entities[entityId];

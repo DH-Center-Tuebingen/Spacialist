@@ -156,37 +156,13 @@
                 :icon-only="false"
             />
             <div class="d-flex flex-row gap-2">
-                <div
+                <ActiveUsers
                     v-if="state.activeUsers.length > 0"
-                    class="d-flex flex-row gap-1 align-items-center"
-                >
-                    <div
-                        class="avatar-list"
-                    >
-                        <a
-                            v-for="user in state.activeUsers"
-                            :key="user.id"
-                            href="#"
-                            class="avatar-list-item"
-                            @click.prevent="showUserInfo(user)"
-                        >
-                            <user-avatar
-                                :user="user"
-                                :size="20"
-                                class="align-middle"
-                            />
-                        </a>
-                    </div>
-                    <DotIndicator
-                        :type="'success'"
-                        style="width: 0.6rem;"
-                    />
-                </div>
+                    :active-users="state.activeUsers"
+                />
                 <div class="d-flex flex-row gap-1 align-items-center">
                     <i class="fas fa-fw fa-user-edit" />
-                    <span
-                        :title="date(state.lastModified, undefined, true, true)"
-                    >
+                    <span :title="date(state.lastModified, undefined, true, true)">
                         {{ ago(state.lastModified) }}
                     </span>
                     -
@@ -421,7 +397,7 @@
         onBeforeRouteUpdate,
     } from 'vue-router';
 
-    import {useI18n} from 'vue-i18n';
+    import { useI18n } from 'vue-i18n';
 
     import {
         Popover,
@@ -431,7 +407,7 @@
     import useEntityStore from '@/bootstrap/stores/entity.js';
     import router from '%router';
 
-    import {useToast} from '@/plugins/toast.js';
+    import { useToast } from '@/plugins/toast.js';
 
     import {
         ago,
@@ -475,12 +451,14 @@
 
     import { usePreventNavigation } from '@/helpers/form.js';
 
+    import ActiveUsers from '@/components/user/ActiveUsers.vue';
     import MetadataTab from '@/components/entity/MetadataTab.vue';
     import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
     import DotIndicator from '@/components/indicators/DotIndicator.vue';
 
     export default {
         components: {
+            ActiveUsers,
             EntityTypeLabel,
             MetadataTab,
             DotIndicator,
@@ -498,7 +476,7 @@
             }
         },
         setup(props) {
-            const {t} = useI18n();
+            const { t } = useI18n();
             const route = useRoute();
             const toast = useToast();
             const attributeStore = useAttributeStore();
@@ -881,7 +859,7 @@
             };
 
             const addComment = event => {
-                entityStore.handleComment(state.entity.id, event.comment, 'add', {
+                entityStore.addComment(state.entity.id, event.comment, {
                     replyTo: event.replyTo,
                 });
             };
@@ -906,8 +884,7 @@
                 const dirtyValues = getDirtyValues(grps);
                 const patches = [];
                 const moderations = [];
-                console.log(dirtyValues, patches, moderations)
-                if(Object.keys(dirtyValues).length == 0 ) return;
+                if(Object.keys(dirtyValues).length == 0) return;
 
                 for(let v in dirtyValues) {
                     const aid = v;
@@ -1101,8 +1078,8 @@
                     return false;
                 } else {
                     leaveEntityRoom(channels.entity);
-                    channels.entity = null;
                     entityStore.unset();
+                    channels.entity = null;
                     return true;
                 }
             });
@@ -1113,7 +1090,6 @@
                         return false;
                     } else {
                         state.hiddenAttributes = {};
-                        entityStore.unset();
                         leaveEntityRoom(channels.entity);
                         channels.entity = joinEntityRoom(to.params.id);
                         listenToList(channels.entity, [

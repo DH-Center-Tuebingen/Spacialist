@@ -2,6 +2,8 @@ import Echo from 'laravel-echo';
 
 import Pusher from 'pusher-js';
 
+// Why do we handle this as window objects and not with
+// import/export syntax and pollute the window object? [SO]
 window.Pusher = Pusher;
 
 window.Echo = new Echo({
