@@ -160,9 +160,7 @@
                     v-if="state.activeUsers.length > 0"
                     class="d-flex flex-row gap-1 align-items-center"
                 >
-                    <div
-                        class="avatar-list"
-                    >
+                    <div class="avatar-list">
                         <a
                             v-for="user in state.activeUsers"
                             :key="user.id"
@@ -184,9 +182,7 @@
                 </div>
                 <div class="d-flex flex-row gap-1 align-items-center">
                     <i class="fas fa-fw fa-user-edit" />
-                    <span
-                        :title="date(state.lastModified, undefined, true, true)"
-                    >
+                    <span :title="date(state.lastModified, undefined, true, true)">
                         {{ ago(state.lastModified) }}
                     </span>
                     -
@@ -421,7 +417,7 @@
         onBeforeRouteUpdate,
     } from 'vue-router';
 
-    import {useI18n} from 'vue-i18n';
+    import { useI18n } from 'vue-i18n';
 
     import {
         Popover,
@@ -431,7 +427,7 @@
     import useEntityStore from '@/bootstrap/stores/entity.js';
     import router from '%router';
 
-    import {useToast} from '@/plugins/toast.js';
+    import { useToast } from '@/plugins/toast.js';
 
     import {
         ago,
@@ -498,7 +494,7 @@
             }
         },
         setup(props) {
-            const {t} = useI18n();
+            const { t } = useI18n();
             const route = useRoute();
             const toast = useToast();
             const attributeStore = useAttributeStore();
@@ -906,7 +902,7 @@
                 const dirtyValues = getDirtyValues(grps);
                 const patches = [];
                 const moderations = [];
-                if(Object.keys(dirtyValues).length == 0 ) return;
+                if(Object.keys(dirtyValues).length == 0) return;
 
                 for(let v in dirtyValues) {
                     const aid = v;
@@ -1100,6 +1096,7 @@
                     return false;
                 } else {
                     leaveEntityRoom(channels.entity);
+                    entityStore.unset();
                     channels.entity = null;
                     return true;
                 }
