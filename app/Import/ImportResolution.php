@@ -2,7 +2,6 @@
 
 namespace App\Import;
 
-
 enum ImportResolutionType {
     case CREATE;
     case UPDATE;
@@ -10,7 +9,6 @@ enum ImportResolutionType {
 }
 
 class ImportResolution {
-
     private array $status;
     private array $errors = [];
 

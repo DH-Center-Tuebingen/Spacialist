@@ -5,7 +5,6 @@ namespace App\Exceptions\Structs;
 use JsonSerializable;
 
 class AttributeImportExceptionStruct implements JsonSerializable {
-
     public $type;
     public $columnIndex;
     public $columnName;

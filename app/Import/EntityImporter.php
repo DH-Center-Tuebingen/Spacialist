@@ -2,6 +2,7 @@
 
 namespace App\Import;
 
+use App\Exceptions\CsvColumnMismatchException;
 use App\File\Csv;
 use App\Entity;
 use App\EntityType;
@@ -40,7 +41,7 @@ class EntityImporter {
         $this->entityTypeId = $data['entity_type_id'];
         $this->attributesMap = $data['attributes'];
 
-        // The parent column is optional, therefore we only set it 
+        // The parent column is optional, therefore we only set it
         // to another value than null, if there is valid data set.
         if(array_key_exists('parent_column', $data)) {
             $parentColumn = trim($data['parent_column']);
@@ -103,14 +104,23 @@ class EntityImporter {
             return $this->resolver;
         }
 
-        $csvTable->parse($handle, function ($row, $index) use (&$result, &$status) {
-            $namesValid = $this->validateName($row, $index);
-            if($namesValid) {
-                // The location depends on the name column. If the name is not correct, we can't check the location.
-                $this->validateLocation($row, $index);
-            }
-            $this->validateAttributesInRow($row, $index);
-        });
+        try {
+            $csvTable->parse($handle, function ($row, $index) {
+                $namesValid = $this->validateName($row, $index);
+                if($namesValid) {
+                    // The location depends on the name column. If the name is not correct, we can't check the location.
+                    $this->validateLocation($row, $index);
+                }
+                $this->validateAttributesInRow($row, $index);
+            });
+        } catch(CsvColumnMismatchException $csvMismatchException) {
+            return $this->resolver->conflict(__("entity-importer.csv-column-mismatch", [
+                "data" => $csvMismatchException->dataLine,
+                "data_count" => $csvMismatchException->dataColumns,
+                "header_data" => $csvMismatchException->headerLine,
+                "header_count" => $csvMismatchException->headerColumns,
+            ]));
+        }
 
         if($csvTable->getDataRows() == 0) {
             $this->resolver->conflict(__("entity-importer.empty"));

@@ -5,6 +5,7 @@ return [
     'file-not-found' => 'Datei konnte nicht gelesen werden.',
     'missing-data' => 'Benötigte Spalte fehlt: :column',
     'invalid-data' => 'Ungültige Daten: [:column] => :value',
+    'csv-column-mismatch' => 'Die Anzahl der Spalten in der aktuellen Zeile \':data\' (:data_count Spalten) stimmt nicht mit den Spalten der Kopfzeile \':header_data\' (:header_count Spalten) überein.',
     'attribute-could-not-be-imported' => 'Attribut konnte nicht importiert werden: :attributeErrors',
     'attribute-id-does-not-exist' => 'Die Attribut-ID existiert nicht: :attributes',
     'attribute-column-does-not-exist' => 'Die Attribut-Spalten existieren nicht: :columns',
