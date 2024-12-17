@@ -1,6 +1,7 @@
 <template>
     <div
-        class="d-flex flex-row gap-1 align-items-center rounded p-1"
+        v-if="hasOtherUsers"
+        class="d-flex flex-row gap-1 align-items-center border-end pe-2"
     >
         <div class="d-flex align-items-center avatar-list">
             <a
@@ -18,6 +19,10 @@
                 />
             </a>
         </div>
+        <DotIndicator
+            type="success"
+            style="width: 0.6rem;"
+        />
     </div>
 </template>
 
@@ -43,12 +48,12 @@
         },
         setup(props) {
             const userStore = useUserStore();
-            const otherUsers = computed(() => {
-                return props.activeUsers.filter(user => user.id !== userStore.getCurrentUserId);
+            const hasOtherUsers = computed(_=> {
+                return props.activeUsers.length >= 2 || (props.activeUsers.length == 1 && props.activeUsers[0].id != userStore.getCurrentUserId);
             });
             return {
-                otherUsers,
                 showUserInfo,
+                hasOtherUsers,
             };
         },
     };
