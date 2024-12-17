@@ -92,6 +92,9 @@ dl.dl-0-mb > dd:last-child {
 }
 
 .avatar-list > .avatar-list-item {
+    transition: .25s;
+}
+.avatar-list > .avatar-list-item {
     @extend .ms-n2;
 }
 .avatar-list:hover > .avatar-list-item {

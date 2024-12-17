@@ -25,13 +25,3 @@
         transform: rotate(0deg);
     }
 }
-
-
-.blink {
-    animation: blink ease-in-out 1s infinite;
-}
-@keyframes blink {
-    0% {opacity: 0;}
-    50% {opacity: 1;}
-    100% {opacity: 0;}
-}

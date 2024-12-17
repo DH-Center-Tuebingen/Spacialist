@@ -1,17 +1,11 @@
 <template>
     <div
-        v-if="otherUsers.length > 0"
-        class="d-flex flex-row gap-1 align-items-center rounded bg-white border border-1 border-primary p-1 px-2"
+        v-if="hasOtherUsers"
+        class="d-flex flex-row gap-1 align-items-center border-end pe-2"
     >
-        <DotIndicator
-            class="blink"
-            type="primary"
-            style="width: 0.6rem;"
-        />
-
-        <div class="d-flex align-items-center avatar-list ps-2">
+        <div class="d-flex align-items-center avatar-list">
             <a
-                v-for="user in otherUsers"
+                v-for="user in activeUsers"
                 :key="user.id"
                 href="#"
                 class="avatar-list-item d-flex align-items-center text-decoration-none"
@@ -24,6 +18,10 @@
                 />
             </a>
         </div>
+        <DotIndicator
+            type="success"
+            style="width: 0.6rem;"
+        />
     </div>
 </template>
 
@@ -53,13 +51,13 @@
         setup(props) {
 
             const userStore = useUserStore();
-            const otherUsers = computed(() => {
-                return props.activeUsers.filter(user => user.id !== userStore.getCurrentUserId);
+            const hasOtherUsers = computed(_=> {
+                return props.activeUsers.length >= 2 || (props.activeUsers.length == 1 && props.activeUsers[0].id != userStore.getCurrentUserId);
             });
 
             return {
-                otherUsers,
                 showUserInfo,
+                hasOtherUsers,
             };
         },
     };
