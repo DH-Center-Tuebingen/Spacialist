@@ -31,7 +31,7 @@
                     >
                         <div
                             v-show="!!state.hoverStates[index]"
-                            class="btn-fab-list"
+                            class="btn-fab-list btn-fab-list-md position-absolute"
                         >
                             <button
                                 v-show="hasEmitter('onReorderList')"
@@ -86,12 +86,16 @@
                                 />
                             </button>
                         </div>
-                        <span
-                            v-if="!element.is_system"
+                        <div
                             class="text-end col"
                         >
-                            {{ translateConcept(element.thesaurus_url) }}
-                        </span>
+                            <span v-if="element.is_system">
+                                &nbsp;
+                            </span>
+                            <span v-else>
+                                {{ translateConcept(element.thesaurus_url) }}
+                            </span>
+                        </div>
                         <sup
                             v-if="hasEmitter('onMetadata')"
                             class="clickable d-flex flex-row align-items-start top-0"

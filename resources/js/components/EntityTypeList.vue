@@ -27,12 +27,12 @@
                 <div
                     v-if="state.hasOnHoverListener"
                     v-show="state.hoverStates[i]"
-                    class="ms-auto btn-fab-list bg-white position-absolute z-1 end-0 me-2"
+                    class="ms-auto btn-fab-list btn-fab-list-sm bg-white position-absolute z-1 end-0 me-2"
                     :class="activeClasses(entry)"
                 >
                     <button
                         v-if="state.hasEditListener"
-                        class="btn btn-outline-info btn-fab-sm rounded-circle"
+                        class="btn btn-outline-info btn-fab rounded-circle"
                         data-bs-toggle="popover"
                         :data-content="t('global.edit')"
                         data-trigger="hover"
@@ -46,7 +46,7 @@
                     </button>
                     <button
                         v-if="state.hasDuplicateListener"
-                        class="btn btn-outline-primary btn-fab-sm rounded-circle"
+                        class="btn btn-outline-primary btn-fab rounded-circle"
                         data-bs-toggle="popover"
                         :data-content="t('global.duplicate')"
                         data-trigger="hover"
@@ -60,7 +60,7 @@
                     </button>
                     <button
                         v-if="state.hasDeleteListener"
-                        class="btn btn-outline-danger btn-fab-sm rounded-circle"
+                        class="btn btn-outline-danger btn-fab rounded-circle"
                         data-bs-toggle="popover"
                         :data-content="t('global.delete')"
                         data-trigger="hover"
