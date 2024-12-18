@@ -443,8 +443,7 @@
                         width: state.width,
                     };
                 }
-                if(state.attribute.pivot &&
-                    (!state.attribute.pivot.metadata || state.separatorTitle != state.attribute.pivot.metadata.title)
+                if(state.attribute.is_system && state.separatorTitle && (!state.attribute.pivot.metadata?.title || state.separatorTitle != state.attribute.pivot.metadata.title)
                 ) {
                     data.metadata = {
                         title: state.separatorTitle,
@@ -697,7 +696,7 @@
                 removeItem,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>
