@@ -506,13 +506,20 @@ class EditorController extends Controller {
         $dependsOn = [
             'union' => $dependencyData['union'],
         ];
-        $operators = ['<', '>', '=', '!='];
+        $operators = [
+            '<' => true,
+            '>' => true,
+            '=' => true,
+            '!=' => true,
+            '?' => false,
+            '!?' => false,
+        ];
         foreach($dependencyData['groups'] as $group) {
             if(count($group['rules']) > 0) {
                 $hasData = true;
                 $groupRules = [];
                 foreach($group['rules'] as $rule) {
-                    if(!in_array($rule['operator'], $operators)) {
+                    if(!in_array($rule['operator'], array_keys($operators))) {
                         return response()->json([
                             'error' => __('Operator mismatch')
                         ], 400);
@@ -523,11 +530,14 @@ class EditorController extends Controller {
                         ], 400);
                     }
 
-                    $groupRules[] = [
+                    $formattedRule = [
                         'operator' => $rule['operator'],
-                        'value' => $rule['value'],
                         'on' => $rule['attribute'],
                     ];
+                    if($operators[$rule['operator']]) {
+                        $formattedRule['value'] = $rule['value'];
+                    }
+                    $groupRules[] = $formattedRule;
                 }
                 $dependsOn['groups'][] = [
                     'union' => $group['union'],

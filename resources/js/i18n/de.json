@@ -366,6 +366,14 @@
             "add_rule": "Neue Regel hinzufügen",
             "remove_rule": "Regel entfernen",
             "no_rules_defined": "Noch keine Abhängigkeitsregeln für diese Gruppe definiert.",
+            "operators": {
+                "equal": "entspricht",
+                "not_equal": "entspricht nicht",
+                "greater": "größer als",
+                "less": "kleiner als",
+                "set": "gesetzt",
+                "not_set": "nicht gesetzt"
+            },
             "modes": {
                 "union": "Vereinigung",
                 "union_desc": "Mindestens eine Gruppe muss erfüllt sein",

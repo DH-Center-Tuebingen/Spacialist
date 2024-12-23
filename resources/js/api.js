@@ -781,11 +781,16 @@ export async function updateAttributeDependency(etid, aid, dependency) {
     dependencyData.union = dependency.union;
     dependencyData.groups = dependency.groups.map(group => {
         group.rules = group.rules.map(rule => {
-            return {
+            const formattedRule = {
                 attribute: rule.attribute.id,
                 operator: rule.operator.operator,
-                value: rule.value.value || rule.value,
             };
+
+            if(!rule.operator.no_parameter) {
+                formattedRule.value = rule.value.value || rule.value;
+            }
+
+            return formattedRule;
         });
         return group;
     });

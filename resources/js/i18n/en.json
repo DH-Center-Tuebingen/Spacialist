@@ -366,6 +366,14 @@
             "add_rule": "Add Dependency Rule",
             "remove_rule": "Remove Rule",
             "no_rules_defined": "No dependency rules defined for this group yet.",
+            "operators": {
+                "equal": "equals",
+                "not_equal": "does not equal",
+                "greater": "greater than",
+                "less": "less than",
+                "set": "set",
+                "not_set": "not set"
+            },
             "modes": {
                 "union": "Union",
                 "union_desc": "Any group must evaluate to true",

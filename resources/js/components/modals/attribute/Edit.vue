@@ -419,7 +419,7 @@
                                 value: null,
                             };
                             converted.attribute = getAttribute(rule.on);
-                            converted.operator = operators.find(o => o.label == rule.operator);
+                            converted.operator = operators.find(o => o.operator == rule.operator);
                             converted.value = rule.value;
                             return converted;
                         });
@@ -510,7 +510,6 @@
             };
             const getOperatorList = datatype => {
                 const list = defaultOperators.slice();
-                console.log(list.map(l => l.operator).join(', '));
                 switch(datatype) {
                     case 'epoch':
                     case 'timeperiod':
@@ -623,33 +622,33 @@
                 {
                     id: 1,
                     operator: '=',
-                    label: '=',
+                    label: t('global.dependency.operators.equal'),
                 },
                 {
                     id: 2,
                     operator: '!=',
-                    label: '!=',
+                    label: t('global.dependency.operators.not_equal'),
                 },
                 {
                     id: 3,
                     operator: '<',
-                    label: '<',
+                    label: t('global.dependency.operators.less'),
                 },
                 {
                     id: 4,
                     operator: '>',
-                    label: '>',
+                    label: t('global.dependency.operators.greater'),
                 },
                 {
                     id: 5,
                     operator: '?',
-                    label: 'Set',
+                    label: t('global.dependency.operators.set'),
                     no_parameter: true,
                 },
                 {
                     id: 6,
                     operator: '!?',
-                    label: 'Unset',
+                    label: t('global.dependency.operators.not_set'),
                     no_parameter: true,
                 },
             ];

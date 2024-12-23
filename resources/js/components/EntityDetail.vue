@@ -711,11 +711,11 @@
 
                 attributeTriggers.forEach(dependantId => {
                     const attributeDependencies = state.entityTypeDependencies[dependantId];
-                    const matchAllGroups = attributeDependencies.union;
+                    const matchAllGroups = !attributeDependencies.union;
                     let dependencyMatch = matchAllGroups;
 
                     attributeDependencies.groups.forEach(group => {
-                        const matchAllRules = group.union;
+                        const matchAllRules = !group.union;
                         let ruleMatch = matchAllRules;
 
                         group.rules.forEach(rule => {
@@ -754,7 +754,8 @@
                                     } else if(type == 'string-mc') {
                                         tmpMatch = Array.isArray(refValue) && refValue.length > 0;
                                     } else {
-                                        tmpMatch = refValue != undefined && refValue != null;
+                                        tmpMatch = refValue != undefined && refValue != null && refValue != '' &&
+                                                    refValue?.value != undefined && refValue?.value != null && refValue?.value != '';
                                     }
                                     // !? is the exact opposite of ?
                                     if(rule.operator == '!?') {
