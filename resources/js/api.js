@@ -783,7 +783,7 @@ export async function updateAttributeDependency(etid, aid, dependency) {
         group.rules = group.rules.map(rule => {
             return {
                 attribute: rule.attribute.id,
-                operator: rule.operator.label,
+                operator: rule.operator.operator,
                 value: rule.value.value || rule.value,
             };
         });

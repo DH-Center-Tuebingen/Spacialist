@@ -368,9 +368,9 @@
             "no_rules_defined": "Noch keine Abhängigkeitsregeln für diese Gruppe definiert.",
             "modes": {
                 "union": "Vereinigung",
-                "union_desc": "Alle Gruppen müssen erfüllt sein",
+                "union_desc": "Mindestens eine Gruppe muss erfüllt sein",
                 "intersect": "Schnitt",
-                "intersect_desc": "Mindestens eine Gruppe muss erfüllt sein"
+                "intersect_desc": "Alle Gruppen müssen erfüllt sein"
             },
             "depends_on": {
                 "title": "Hängt ab von",

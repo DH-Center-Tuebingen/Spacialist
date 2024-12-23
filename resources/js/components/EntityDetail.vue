@@ -736,7 +736,7 @@
                                     if(type == 'string-sc') {
                                         tmpMatch = refValue?.id != rule.value;
                                     } else if(type == 'string-mc') {
-                                        tmpMatch = refValue && refValue.every(mc => mc.id != rule.value);
+                                        tmpMatch = Array.isArray(refValue) && refValue.every(mc => mc.id != rule.value);
                                     } else {
                                         tmpMatch = refValue != rule.value;
                                     }
@@ -746,6 +746,20 @@
                                     break;
                                 case '>':
                                     tmpMatch = refValue > rule.value;
+                                    break;
+                                case '?':
+                                case '!?':
+                                    if(type == 'string-sc') {
+                                        tmpMatch = refValue?.id !== undefined;
+                                    } else if(type == 'string-mc') {
+                                        tmpMatch = Array.isArray(refValue) && refValue.length > 0;
+                                    } else {
+                                        tmpMatch = refValue != undefined && refValue != null;
+                                    }
+                                    // !? is the exact opposite of ?
+                                    if(rule.operator == '!?') {
+                                        tmpMatch = !tmpMatch;
+                                    }
                                     break;
                             }
 

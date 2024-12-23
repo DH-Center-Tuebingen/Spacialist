@@ -368,9 +368,9 @@
             "no_rules_defined": "No dependency rules defined for this group yet.",
             "modes": {
                 "union": "Union",
-                "union_desc": "All groups must evaluate to true",
+                "union_desc": "Any group must evaluate to true",
                 "intersect": "Intersect",
-                "intersect_desc": "Any group must evaluate to true"
+                "intersect_desc": "All groups must evaluate to true"
             },
             "depends_on": {
                 "title": "Depends on",

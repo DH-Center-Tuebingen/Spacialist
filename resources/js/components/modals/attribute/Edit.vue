@@ -92,14 +92,14 @@
                                 v-show="state.dependency.union"
                                 :title="t('global.dependency.modes.union_desc')"
                             >
-                                <i class="fas fa-fw fa-object-group" />
+                                <i class="fas fa-fw fa-object-ungroup" />
                                 {{ t('global.dependency.modes.union') }}
                             </span>
                             <span
                                 v-show="!state.dependency.union"
                                 :title="t('global.dependency.modes.intersect_desc')"
                             >
-                                <i class="fas fa-fw fa-object-ungroup" />
+                                <i class="fas fa-fw fa-object-group" />
                                 {{ t('global.dependency.modes.intersect') }}
                             </span>
                         </button>
@@ -209,7 +209,7 @@
                         />
                     </div>
                     <div class="col-4">
-                        <div v-if="itm.attribute?.id && itm.operator?.id">
+                        <div v-if="itm.attribute?.id && itm.operator?.id && !itm.operator.no_parameter">
                             <div
                                 v-if="getInputTypeClass(itm.attribute.datatype) == 'boolean'"
                                 class="form-check form-switch"
@@ -289,14 +289,14 @@
                             v-show="state.dependency.groups[state.currentDependencyGroupId].union"
                             :title="t('global.dependency.modes.union_desc')"
                         >
-                            <i class="fas fa-fw fa-object-group" />
+                            <i class="fas fa-fw fa-object-ungroup" />
                             {{ t('global.dependency.modes.union') }}
                         </span>
                         <span
                             v-show="!state.dependency.groups[state.currentDependencyGroupId].union"
                             :title="t('global.dependency.modes.intersect_desc')"
                         >
-                            <i class="fas fa-fw fa-object-ungroup" />
+                            <i class="fas fa-fw fa-object-group" />
                             {{ t('global.dependency.modes.intersect') }}
                         </span>
                     </button>
@@ -399,7 +399,11 @@
             const validateDependencyRule = rule => {
                 return rule.attribute?.id &&
                     rule.operator?.id &&
-                    !!rule.value;
+                    (
+                        (!rule.operator.no_parameter && !!rule.value)
+                        ||
+                        (rule.operator.no_parameter && !rule.value)
+                    );
             };
             const formatDependency = dependencyRules => {
                 const formattedRules = {};
@@ -422,9 +426,9 @@
                         return formattedGroup;
                     });
                 } else if(Object.keys(dependencyRules).length == 0) {
-                    formattedRules.union = false;
+                    formattedRules.union = true;
                     formattedRules.groups = [{
-                        union: true,
+                        union: false,
                         rules: [],
                     }];
                 }
@@ -505,6 +509,8 @@
                     }
             };
             const getOperatorList = datatype => {
+                const list = defaultOperators.slice();
+                console.log(list.map(l => l.operator).join(', '));
                 switch(datatype) {
                     case 'epoch':
                     case 'timeperiod':
@@ -512,12 +518,12 @@
                     case 'list':
                     case 'table':
                     case 'sql':
-                        return [];
+                        break;
                     // TODO handle entity attributes
                     case 'entity':
                     case 'entity-mc':
                     case 'userlist':
-                        return [];
+                        break;
                     case 'string':
                     case 'stringf':
                     case 'richtext':
@@ -527,42 +533,43 @@
                     case 'iconclass':
                     case 'rism':
                     case 'serial':
-                        return operators.filter(o => {
+                        operators.forEach(o => {
                             switch(o.id) {
                                 case 1:
                                 case 2:
-                                    return true;
-                                default:
-                                    return false;
+                                    list.push(o);
+                                    break;
                             }
                         });
+                        break;
                     case 'double':
                     case 'integer':
                     case 'date':
                     case 'percentage':
-                        return operators.filter(o => {
+                        operators.forEach(o => {
                             switch(o.id) {
                                 case 1:
                                 case 2:
                                 case 3:
                                 case 4:
-                                    return true;
-                                default:
-                                    return false;
+                                    list.push(o);
+                                    break;
                             }
                         });
+                        break;
                     case 'boolean':
-                        return operators.filter(o => {
+                        operators.forEach(o => {
                             switch(o.id) {
                                 case 1:
-                                    return true;
-                                default:
-                                    return false;
+                                    list.push(o);
+                                    break;
                             }
                         });
+                        break;
                     default:
                         throw new Error(`Unsupported datatype ${datatype}`);
                 }
+                return list;
             };
             const getDependantOptions = (aid, datatype) => {
                 if(getInputTypeClass(datatype) == 'select') {
@@ -589,7 +596,7 @@
 
                 state.dependency.groups.push({
                     rules: [],
-                    union: true,
+                    union: false,
                 });
                 gotoGroup(state.dependency.groups.length - 1);
             };
@@ -615,27 +622,44 @@
             const operators = [
                 {
                     id: 1,
+                    operator: '=',
                     label: '=',
                 },
                 {
                     id: 2,
+                    operator: '!=',
                     label: '!=',
                 },
                 {
                     id: 3,
+                    operator: '<',
                     label: '<',
                 },
                 {
                     id: 4,
+                    operator: '>',
                     label: '>',
                 },
+                {
+                    id: 5,
+                    operator: '?',
+                    label: 'Set',
+                    no_parameter: true,
+                },
+                {
+                    id: 6,
+                    operator: '!?',
+                    label: 'Unset',
+                    no_parameter: true,
+                },
             ];
+            const defaultOperators = operators.filter(o => o.operator == '?' || o.operator == '!?');
             const state = reactive({
                 currentDependencyGroupId: 0,
                 dependency: {
-                    union: false,
+                    union: true,
                     groups: [{
-                        union: true,
+                        union: false,
                         rules: [],
                     }],
                 },
