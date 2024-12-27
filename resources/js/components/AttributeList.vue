@@ -24,7 +24,7 @@
                 >
                     <label
                         v-if="!state.hideLabels"
-                        class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break align-self-start"
+                        class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break align-self-start position-relative"
                         :for="`attr-${element.id}`"
                         :class="attributeClasses(element)"
                         @click="e => handleLabelClick(e, element.datatype)"

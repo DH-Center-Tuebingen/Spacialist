@@ -30,7 +30,7 @@
                     @click="closeModal()"
                 />
             </div>
-            <div class="modal-body nonscrollable">
+            <div class="modal-body overflow-hidden d-flex flex-column">
                 <template v-if="state.attribute.is_system">
                     <div class="mb-3 row">
                         <label class="col-form-label text-end col-md-2">
@@ -163,111 +163,125 @@
                     :type="'info'"
                     :noicon="true"
                 />
-                <div
-                    v-for="(itm, i) in state.dependency.groups[state.currentDependencyGroupId].rules"
-                    :key="`dependency-group-${state.currentDependencyGroupId}-item-${i}`"
-                    class="mb-2 row g-2"
-                >
-                    <div class="col-5">
-                        <multiselect
-                            v-model="itm.attribute"
-                            :classes="multiselectResetClasslist"
-                            :value-prop="'id'"
-                            :label="'thesaurus_url'"
-                            :track-by="'id'"
-                            :object="true"
-                            :mode="'single'"
-                            :hide-selected="true"
-                            :options="state.selection"
-                            :placeholder="t('global.select.placeholder')"
-                            @change="dependantSelected"
-                        >
-                            <template #option="{ option }">
-                                {{ translateConcept(option.thesaurus_url) }}
-                            </template>
-                            <template #singlelabel="{ value }">
-                                <div class="multiselect-single-label">
-                                    {{ translateConcept(value.thesaurus_url) }}
-                                </div>
-                            </template>
-                        </multiselect>
-                    </div>
-                    <div class="col-2">
-                        <multiselect
-                            v-if="itm.attribute?.id"
-                            v-model="itm.operator"
-                            :classes="multiselectResetClasslist"
-                            :value-prop="'id'"
-                            :label="'label'"
-                            :track-by="'id'"
-                            :mode="'single'"
-                            :object="true"
-                            :hide-selected="true"
-                            :options="getOperatorList(itm.attribute.datatype)"
-                            :placeholder="t('global.select.placeholder')"
-                            @change="operatorSelected"
-                        />
-                    </div>
-                    <div class="col-4">
-                        <div v-if="itm.attribute?.id && itm.operator?.id && !itm.operator.no_parameter">
-                            <div
-                                v-if="getInputTypeClass(itm.attribute.datatype) == 'boolean'"
-                                class="form-check form-switch"
-                            >
-                                <input
-                                    id="dependency-boolean-value"
-                                    v-model="itm.value"
-                                    type="checkbox"
-                                    class="form-check-input"
-                                >
-                            </div>
-                            <input
-                                v-else-if="getInputTypeClass(itm.attribute.datatype) == 'number'"
-                                v-model.number="itm.value"
-                                type="number"
-                                class="form-control"
-                                :step="itm.attribute.datatype == 'double' ? 0.01 : 1"
-                            >
+                <div class="overflow-y-auto overflow-x-hidden">
+                    <div
+                        v-for="(itm, i) in state.dependency.groups[state.currentDependencyGroupId].rules"
+                        :key="`dependency-group-${state.currentDependencyGroupId}-item-${i}`"
+                        class="mb-2 row g-2"
+                    >
+                        <div class="col-5">
                             <multiselect
-                                v-else-if="getInputTypeClass(itm.attribute.datatype) == 'select'"
-                                v-model="itm.value"
-                                :classes="multiselectResetClasslist"
+                                v-model="itm.attribute"
+                                :classes="{
+                                    ...multiselectResetClasslist,
+                                    'dropdown': 'multiselect-dropdown multiselect-modal-dropdown'
+                                }"
+                                :append-to-body="true"
                                 :value-prop="'id'"
-                                :label="'concept_url'"
+                                :label="'thesaurus_url'"
                                 :track-by="'id'"
-                                :hide-selected="true"
+                                :object="true"
                                 :mode="'single'"
-                                :options="getDependantOptions(itm.attribute.id, itm.attribute.datatype)"
+                                :hide-selected="true"
+                                :options="state.selection"
                                 :placeholder="t('global.select.placeholder')"
+                                @change="dependantSelected"
                             >
                                 <template #option="{ option }">
-                                    {{ translateConcept(option.concept_url) }}
+                                    {{ translateConcept(option.thesaurus_url) }}
                                 </template>
                                 <template #singlelabel="{ value }">
                                     <div class="multiselect-single-label">
-                                        {{ translateConcept(value.concept_url) }}
+                                        {{ translateConcept(value.thesaurus_url) }}
                                     </div>
                                 </template>
                             </multiselect>
-                            <input
-                                v-else
-                                v-model="itm.value"
-                                type="text"
-                                class="form-control"
-                            >
                         </div>
-                    </div>
-                    <div
-                        class="col-1 d-flex flex-row justify-content-center align-items-center"
-                        :title="t('global.dependency.remove_rule')"
-                    >
-                        <a
-                            href="#"
-                            class="text-danger text-decoration-none"
-                            @click.prevent="removeItem(state.currentDependencyGroupId, i)"
+                        <div class="col-2">
+                            <multiselect
+                                v-if="itm.attribute?.id"
+                                v-model="itm.operator"
+                                :classes="{
+                                    ...multiselectResetClasslist,
+                                    'dropdown': 'multiselect-dropdown multiselect-modal-dropdown'
+                                }"
+                                :append-to-body="true"
+                                :value-prop="'id'"
+                                :label="'label'"
+                                :track-by="'id'"
+                                :mode="'single'"
+                                :object="true"
+                                :hide-selected="true"
+                                :options="getOperatorList(itm.attribute.datatype)"
+                                :placeholder="t('global.select.placeholder')"
+                                @change="operatorSelected"
+                            />
+                        </div>
+                        <div class="col-4">
+                            <div v-if="itm.attribute?.id && itm.operator?.id && !itm.operator.no_parameter">
+                                <div
+                                    v-if="getInputTypeClass(itm.attribute.datatype) == 'boolean'"
+                                    class="form-check form-switch"
+                                >
+                                    <input
+                                        id="dependency-boolean-value"
+                                        v-model="itm.value"
+                                        type="checkbox"
+                                        class="form-check-input"
+                                    >
+                                </div>
+                                <input
+                                    v-else-if="getInputTypeClass(itm.attribute.datatype) == 'number'"
+                                    v-model.number="itm.value"
+                                    type="number"
+                                    class="form-control"
+                                    :step="itm.attribute.datatype == 'double' ? 0.01 : 1"
+                                >
+                                <multiselect
+                                    v-else-if="getInputTypeClass(itm.attribute.datatype) == 'select'"
+                                    v-model="itm.value"
+                                    :classes="{
+                                        ...multiselectResetClasslist,
+                                        'dropdown': 'multiselect-dropdown multiselect-modal-dropdown'
+                                    }"
+                                    :append-to-body="true"
+                                    :value-prop="'id'"
+                                    :label="'concept_url'"
+                                    :track-by="'id'"
+                                    :hide-selected="true"
+                                    :mode="'single'"
+                                    :options="getDependantOptions(itm.attribute.id, itm.attribute.datatype)"
+                                    :placeholder="t('global.select.placeholder')"
+                                >
+                                    <template #option="{ option }">
+                                        {{ translateConcept(option.concept_url) }}
+                                    </template>
+                                    <template #singlelabel="{ value }">
+                                        <div class="multiselect-single-label">
+                                            {{ translateConcept(value.concept_url) }}
+                                        </div>
+                                    </template>
+                                </multiselect>
+                                <input
+                                    v-else
+                                    v-model="itm.value"
+                                    type="text"
+                                    class="form-control"
+                                >
+                            </div>
+                        </div>
+                        <div
+                            class="col-1 d-flex flex-row justify-content-center align-items-center"
+                            :title="t('global.dependency.remove_rule')"
                         >
-                            <i class="fas fa-fw fa-trash" />
-                        </a>
+                            <a
+                                href="#"
+                                class="text-danger text-decoration-none"
+                                @click.prevent="removeItem(state.currentDependencyGroupId, i)"
+                            >
+                                <i class="fas fa-fw fa-trash" />
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="input-group input-group-sm">
