@@ -156,10 +156,30 @@
                 :icon-only="false"
             />
             <div class="d-flex flex-row gap-2">
-                <ActiveUsers
+                <div
                     v-if="state.activeUsers.length > 0"
-                    :active-users="state.activeUsers"
-                />
+                    class="d-flex flex-row gap-1 align-items-center"
+                >
+                    <div class="avatar-list">
+                        <a
+                            v-for="user in state.activeUsers"
+                            :key="user.id"
+                            href="#"
+                            class="avatar-list-item"
+                            @click.prevent="showUserInfo(user)"
+                        >
+                            <user-avatar
+                                :user="user"
+                                :size="20"
+                                class="align-middle"
+                            />
+                        </a>
+                    </div>
+                    <DotIndicator
+                        :type="'success'"
+                        style="width: 0.6rem;"
+                    />
+                </div>
                 <div class="d-flex flex-row gap-1 align-items-center">
                     <i class="fas fa-fw fa-user-edit" />
                     <span :title="date(state.lastModified, undefined, true, true)">
@@ -451,14 +471,12 @@
 
     import { usePreventNavigation } from '@/helpers/form.js';
 
-    import ActiveUsers from '@/components/user/ActiveUsers.vue';
     import MetadataTab from '@/components/entity/MetadataTab.vue';
     import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
     import DotIndicator from '@/components/indicators/DotIndicator.vue';
 
     export default {
         components: {
-            ActiveUsers,
             EntityTypeLabel,
             MetadataTab,
             DotIndicator,
