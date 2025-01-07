@@ -1083,7 +1083,7 @@
                 }
             });
             onBeforeRouteUpdate(async (to, from) => {
-                if(to.params.id !== route.params.id) {
+                if(to.params.id !== route.params.id) {                    
                     if(state.formDirty) {
                         showDiscard(to, resetDirtyStates, saveEntity);
                         return false;
@@ -1103,7 +1103,7 @@
                             handleEntityCommentUpdated,
                             handleEntityCommentDeleted,
                         ]);
-                        await entityStore.setById(route.params.id);
+                        await entityStore.setById(to.params.id);
                         return true;
                     }
                 } else {
