@@ -28,6 +28,7 @@
                     </label>
                     <div class="col">
                         <simple-search
+                            :default-value="state.concept"
                             :endpoint="searchLabel"
                             :key-fn="getConceptLabel"
                             @selected="handleSeparatorRename"
@@ -89,26 +90,27 @@
 
             // FUNCTIONS
             const confirmEdit = _ => {
-                context.emit('confirm', {title: state.title});
+                context.emit('confirm', {title: state.concept_url});
             };
             const closeModal = _ => {
                 context.emit('closing', false);
             };
             const handleSeparatorRename = label => {
                 if(label === null){
-                    state.title = null;
-                } else if(label.concept_url) {
-                    state.title = label.concept_url;
-                }else{
-                    console.error('Invalid separator label', label);
+                    state.concept = null;
+                } else {
+                    state.concept = label;
                 }
             };
 
             // DATA
             const state = reactive({
-                title: null,
+                concept: null,
+                concept_url: computed(_ => {
+                    return state.concept ? state.concept.concept_url : null;
+                }),
                 isValid: computed(_ => {
-                    return !!state.title;
+                    return Boolean(state.concept_url);
                 }),
             });
 

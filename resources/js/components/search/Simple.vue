@@ -1,7 +1,7 @@
 <template>
     <multiselect
         :id="state.id"
-        :value="value"
+        v-model="state.value"
         class="multiselect"
         :name="state.id"
         :object="true"
@@ -131,6 +131,7 @@
         reactive,
         ref,
         toRefs,
+        watch,
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
@@ -181,7 +182,7 @@
                 default: 'single',
                 validator: (val) => ['single', 'multiple'].includes(val),
             },
-            value: {
+            defaultValue: {
                 required: false,
                 default: null,
                 validator: (val, props) => {
@@ -299,16 +300,35 @@
                 context.emit('entry-click', option);
             };
 
+            const getBaseValue = _ => {
+                return mode.value == 'single' ? {} : [];
+            };
+            const getDefaultValue = _ => {
+                if(props.defaultValue)
+                    return props.defaultValue;
+                else
+                    return getBaseValue();
+            };
+
             // DATA
             const state = reactive({
                 id: `multiselect-search-${getTs()}`,
                 loading: false,
                 query: '',
+                value: getDefaultValue(),
                 searchResults: [],
                 enableChain: computed(_ => chain.value && chain.value.length > 0),
             });
 
             const hasResults = computed(_ => state.searchResults.length > 0);
+
+            watch(_ => props.defaultValue, (newValue, oldValue) => {
+                if(!newValue || newValue.reset) {
+                    state.value = getBaseValue();
+                } else {
+                    state.value = newValue;
+                }
+            });
 
             // RETURN
             return {

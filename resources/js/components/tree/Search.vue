@@ -3,6 +3,7 @@
         :endpoint="searchEntity"
         :filter-fn="prependSelectAllMatches"
         :key-text="'name'"
+        chain="chain"
         @selected="e => entitySelected(e)"
     />
 </template>
@@ -17,9 +18,6 @@
     } from '@/api.js';
 
     export default {
-        props: {
-
-        },
         emits: ['selected'],
         setup(props, context) {
             // FETCH
@@ -28,9 +26,23 @@
             const entitySelected = data => {
                 context.emit('selected', data);
             };
-            const prependSelectAllMatches = (results, query) => {
+
+            const constructChain = option => {
+                let chain = [];
+                if(option.parentNames && option.parentNames.length > 0) {
+                    chain = option.parentNames.reverse();
+                    chain.pop();
+                }
+
+                option.chain = chain;
+                return option;
+            };
+
+            const prependSelectAllMatches = (paginatedResults, query) => {
+                const results = paginatedResults.data.map(constructChain);
                 results.unshift({
                     id: -1,
+                    chain: [],
                     glob: true,
                     query: query,
                     results: results.slice(),
