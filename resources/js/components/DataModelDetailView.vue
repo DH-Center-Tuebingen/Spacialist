@@ -39,7 +39,8 @@
                         class="col-form-label col-md-3 text-end"
                     >{{ t('global.geometry_type') }}</label>
                     <div class="col-md-9 d-flex align-items-center">
-                        <span>
+                        <!-- This should be handled using a Plugin Slot from within the map plugin. -->
+                        <span v-if="state.entityType.layer">
                             {{ state.entityType.layer.type }}
                         </span>
                         <!-- <router-link :to="{name: 'ldetail', params: { id: state.entityType.layer.id }}">
