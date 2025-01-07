@@ -156,30 +156,10 @@
                 :icon-only="false"
             />
             <div class="d-flex flex-row gap-2">
-                <div
+                <MultiUserWidget
                     v-if="state.activeUsers.length > 0"
-                    class="d-flex flex-row gap-1 align-items-center"
-                >
-                    <div class="avatar-list">
-                        <a
-                            v-for="user in state.activeUsers"
-                            :key="user.id"
-                            href="#"
-                            class="avatar-list-item"
-                            @click.prevent="showUserInfo(user)"
-                        >
-                            <user-avatar
-                                :user="user"
-                                :size="20"
-                                class="align-middle"
-                            />
-                        </a>
-                    </div>
-                    <DotIndicator
-                        :type="'success'"
-                        style="width: 0.6rem;"
-                    />
-                </div>
+                    :active-users="state.activeUsers"
+                />
                 <div class="d-flex flex-row gap-1 align-items-center">
                     <i class="fas fa-fw fa-user-edit" />
                     <span :title="date(state.lastModified, undefined, true, true)">
@@ -474,12 +454,13 @@
     import MetadataTab from '@/components/entity/MetadataTab.vue';
     import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
     import DotIndicator from '@/components/indicators/DotIndicator.vue';
+    import MultiUserWidget from './user/MultiUserWidget.vue';
 
     export default {
         components: {
             EntityTypeLabel,
             MetadataTab,
-            DotIndicator,
+            MultiUserWidget,
         },
         props: {
             bibliography: {
