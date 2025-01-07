@@ -2,7 +2,7 @@
     <button
         class="btn"
         role="button"
-        :disabled="loading"
+        :disabled="loading || disabled"
     >
         <span
             v-if="loading"
@@ -26,6 +26,10 @@
                 type: Boolean,
                 required: true,
             },
+            disabled: {
+                type: Boolean,
+                default: false,
+            }
         },
     };
 </script>

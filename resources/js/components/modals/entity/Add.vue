@@ -1,103 +1,68 @@
 <template>
-    <vue-final-modal
-        class="modal-container modal"
-        content-class="sp-modal-content sp-modal-content-sm"
+    <ConfirmModal
+        :title="t('main.entity.modals.add.title')"
         name="add-entity-modal"
+        :disabled="state.dataMissing"
+        :loading="loading"
+        @confirm="add()"
+        @close="closeModal"
     >
-        <div class="sp-modal-content sp-modal-content-sm">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    {{ t('main.entity.modals.add.title') }}
-                    <small v-if="state.hasParent">
-                        {{ parent.name }}
-                    </small>
-                </h5>
-                <button
-                    type="button"
-                    class="btn-close"
-                    aria-label="Close"
-                    data-bs-dismiss="modal"
-                    @click="closeModal()"
-                />
-            </div>
-            <div class="modal-body nonscrollable">
-                <form
-                    id="newEntityForm"
-                    name="newEntityForm"
-                    role="form"
-                    @submit.prevent="add()"
+        <form
+            id="newEntityForm"
+            name="newEntityForm"
+            role="form"
+        >
+            <div class="mb-3">
+                <label
+                    class="col-form-label col-md-3"
+                    for="name"
                 >
-                    <div class="mb-3">
-                        <label
-                            class="col-form-label col-md-3"
-                            for="name"
-                        >
-                            {{ t('global.name') }}:
-                        </label>
-                        <div class="col-md-9">
-                            <input
-                                id="name"
-                                v-model="state.entity.name"
-                                type="text"
-                                class="form-control"
-                                required
-                            >
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label
-                            class="col-form-label col-md-3"
-                            for="type"
-                        >
-                            {{ t('global.type') }}:
-                        </label>
-                        <div class="col-md-9">
-                            <multiselect
-                                id="type"
-                                v-model="state.entity.type"
-                                name="type"
-                                :classes="multiselectResetClasslist"
-                                :object="true"
-                                :label="'thesaurus_url'"
-                                :track-by="'id'"
-                                :value-prop="'id'"
-                                :mode="'single'"
-                                :options="state.entityTypes"
-                                :placeholder="t('global.select.placeholder')"
-                            >
-                                <template #option="{ option }">
-                                    {{ translateConcept(option.thesaurus_url) }}
-                                </template>
-                                <template #singlelabel="{ value }">
-                                    <div class="multiselect-single-label">
-                                        {{ translateConcept(value.thesaurus_url) }}
-                                    </div>
-                                </template>
-                            </multiselect>
-                        </div>
-                    </div>
-                </form>
+                    {{ t('global.name') }}
+                </label>
+                <div class="col-md-9">
+                    <input
+                        id="name"
+                        v-model="state.entity.name"
+                        type="text"
+                        class="form-control"
+                        required
+                    >
+                </div>
             </div>
-            <div class="modal-footer">
-                <button
-                    type="submit"
-                    class="btn btn-outline-success"
-                    form="newEntityForm"
-                    :disabled="state.dataMissing"
+            <div class="mb-3">
+                <label
+                    class="col-form-label col-md-3"
+                    for="type"
                 >
-                    <i class="fas fa-fw fa-plus" /> {{ t('global.add') }}
-                </button>
-                <button
-                    type="button"
-                    class="btn btn-outline-secondary"
-                    data-bs-dismiss="modal"
-                    @click="closeModal()"
-                >
-                    <i class="fas fa-fw fa-times" /> {{ t('global.cancel') }}
-                </button>
+                    {{ t('global.type') }}
+                </label>
+                <div class="col-md-9">
+                    <multiselect
+                        id="type"
+                        v-model="state.entity.type"
+                        name="type"
+                        :classes="multiselectResetClasslist"
+                        :object="true"
+                        :label="'thesaurus_url'"
+                        :track-by="'id'"
+                        :value-prop="'id'"
+                        :mode="'single'"
+                        :options="state.entityTypes"
+                        :placeholder="t('global.select.placeholder')"
+                    >
+                        <template #option="{ option }">
+                            {{ translateConcept(option.thesaurus_url) }}
+                        </template>
+                        <template #singlelabel="{ value }">
+                            <div class="multiselect-single-label">
+                                {{ translateConcept(value.thesaurus_url) }}
+                            </div>
+                        </template>
+                    </multiselect>
+                </div>
             </div>
-        </div>
-    </vue-final-modal>
+        </form>
+    </ConfirmModal>
 </template>
 
 <script>
@@ -114,16 +79,24 @@
         translateConcept,
         multiselectResetClasslist,
     } from '@/helpers/helpers.js';
+    import ConfirmModal from '../ConfirmModal.vue';
 
     export default {
+        components: {
+            ConfirmModal,
+        },
         props: {
             parent: {
                 required: false,
                 type: Object,
                 default: null,
             },
+            loading: {
+                type: Boolean,
+                default: false,
+            },
         },
-        emits: ['closing', 'confirm'],
+        emits: ['close', 'confirm'],
         setup(props, context) {
             const { t } = useI18n();
             const {
@@ -138,7 +111,8 @@
                 context.emit('confirm', state.entity);
             };
             const closeModal = _ => {
-                context.emit('closing', false);
+                console.log('closeModal');
+                context.emit('close', false);
             };
 
             // DATA
@@ -179,7 +153,7 @@
                 closeModal,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

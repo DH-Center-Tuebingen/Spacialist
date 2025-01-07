@@ -74,6 +74,7 @@ import EditAttribute from '@/components/modals/attribute/Edit.vue';
 import MultiEditAttribute from '@/components/modals/attribute/MultiEdit.vue';
 import EditSystemAttribute from '@/components/modals/attribute/EditSystem.vue';
 import DeleteAttribute from '@/components/modals/attribute/Delete.vue';
+import { ref } from 'vue';
 
 export function showAbout() {
     const uid = `AboutModal-${getTs()}`;
@@ -345,7 +346,7 @@ export function showResetPassword(id) {
                     addToast(msg, title, {
                         channel: 'success',
                     });
-                })
+                });
             },
             onCancel(e) {
                 modal.destroy();
@@ -370,7 +371,7 @@ export function showConfirmPassword(id) {
                         login_attempts: null,
                     });
                     modal.destroy();
-                })
+                });
             },
             onCancel(e) {
                 modal.destroy();
@@ -398,7 +399,7 @@ export function showDeactivateUser(user, onDeactivated) {
                     }
                     store.dispatch('deactivateUser', data);
                     modal.destroy();
-                })
+                });
             },
             onCancel(e) {
                 modal.destroy();
@@ -581,15 +582,18 @@ export function showLiteratureInfo(id, options) {
 
 export function showAddEntity(parent = null, onAdded) {
     const uid = `AddEntity-${getTs()}`;
+    const loading = ref(false);
     const modal = useModal({
         component: AddEntity,
         attrs: {
             name: uid,
             parent: parent,
-            onClosing(e) {
+            loading,
+            onClose(e) {
                 modal.destroy();
             },
             onConfirm(entity) {
+                loading.value = true;
                 const entityData = {
                     type_id: entity.type.id,
                     parent_id: entity.parent_id,
@@ -601,6 +605,8 @@ export function showAddEntity(parent = null, onAdded) {
                         onAdded(node);
                     }
                     modal.destroy();
+                }).finally(_ => {
+                    loading.value = false;
                 });
             },
         },
