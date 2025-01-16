@@ -32,8 +32,11 @@ import Fill from 'ol/style/Fill';
 import Stroke from 'ol/style/Stroke';
 import Style from 'ol/style/Style';
 
-import { splitColor } from '@/helpers/colors.js';
+import VectorTileLayer from 'ol/layer/VectorTile.js';
+import VectorTile from 'ol/source/VectorTile.js';
+import MVT from 'ol/format/MVT';
 
+import { splitColor } from '@/helpers/colors.js';
 const convertFormats = {};
 
 export function getGeoJsonFormat() {
@@ -98,6 +101,7 @@ export function formatLengthArea(value, precision = 2, isArea = false) {
 }
 
 export function createOptionBasedStyle(options) {
+
     if(!options.default) {
         return new Style();
     }
@@ -177,7 +181,7 @@ export function createStyle(color = '#ffcc33', width = 2, styleOptions = {}) {
         });
     } else {
         options.image = new CircleStyle({
-            radius: width*3,
+            radius: width * 3,
             fill: new Fill({
                 color: color
             }),
@@ -242,11 +246,11 @@ export function createStyle(color = '#ffcc33', width = 2, styleOptions = {}) {
 export async function getLayers(includeEntityLayers = false) {
     const data = await getMapLayers(includeEntityLayers);
     const layers = {};
-    for(let i=0; i<data.baselayers.length; i++) {
+    for(let i = 0; i < data.baselayers.length; i++) {
         const l = data.baselayers[i];
         layers[l.id] = l;
     }
-    for(let i=0; i<data.overlays.length; i++) {
+    for(let i = 0; i < data.overlays.length; i++) {
         const l = data.overlays[i];
         layers[l.id] = l;
     }
@@ -273,7 +277,24 @@ export function createNewLayer(layerData) {
     const layers = layerData.layers;
     const layerType = layerData.layer_type;
     let source;
-    
+
+    const rgba = splitColor(layerData.color);
+    const rgbaFill = rgba.slice();
+    rgbaFill[3] = 0.3;
+
+    const fillRgba = `rgba(${rgbaFill.join(',')})`;
+
+    const style = new Style({
+        fill: new Fill({
+            color: fillRgba,
+        }),
+        stroke: new Stroke({
+            color: `rgba(${rgba.join(',')})`,
+            width: 1,
+        }),
+        text: new Text(),
+    });
+
     switch(layerData.type) {
         case 'xyz':
             source = new TileImage({
@@ -315,8 +336,22 @@ export function createNewLayer(layerData) {
                 - Streetside
                     */
                 imagerySet: layerType,
-            })
+            });
             break;
+        case 'mvt':
+            const vectorTileLayer = new VectorTileLayer({
+                style: () => style,
+                source: new VectorTile({
+                    format: new MVT(),
+                    url: url,
+                    visible: layerData.visible,
+                    displayInLayerSwitcher: true,
+                    opacity: opacity,
+                    properties: layerData,
+                })
+            });
+
+            return vectorTileLayer;
         default:
             source = new OSM({
                 wrapX: false,
@@ -324,12 +359,14 @@ export function createNewLayer(layerData) {
             break;
     }
 
+
+    console.log('createNewLayer', layerData.name, layerData.visible, layerData);
     return new TileLayer({
         layer: 'osm',
         title: layerData.name,
         baseLayer: isBaseLayer,
         displayInLayerSwitcher: true,
-        visible: isVisible,
+        visible: layerData.visible,
         opacity: opacity,
         source: source
     });

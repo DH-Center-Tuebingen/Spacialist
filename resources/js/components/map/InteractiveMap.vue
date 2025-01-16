@@ -1,5 +1,5 @@
 <template>
-    <div class="h-100"> 
+    <div class="h-100">
         <div
             :id="state.mapId"
             class="map h-100"
@@ -12,7 +12,7 @@
                     <button
                         type="button"
                         class="btn btn-fab rounded-circle"
-                        :class="{'btn-primary': actionState.drawType == 'Point', 'btn-outline-primary': actionState.drawType != 'Point'}"
+                        :class="{ 'btn-primary': actionState.drawType == 'Point', 'btn-outline-primary': actionState.drawType != 'Point' }"
                         data-bs-toggle="popover"
                         :data-content="t('main.map.draw.point.desc')"
                         data-trigger="hover"
@@ -24,7 +24,7 @@
                     <button
                         type="button"
                         class="btn btn-fab rounded-circle"
-                        :class="{'btn-primary': actionState.drawType == 'LineString', 'btn-outline-primary': actionState.drawType != 'LineString'}"
+                        :class="{ 'btn-primary': actionState.drawType == 'LineString', 'btn-outline-primary': actionState.drawType != 'LineString' }"
                         data-bs-toggle="popover"
                         :data-content="t('main.map.draw.linestring.desc')"
                         data-trigger="hover"
@@ -36,7 +36,7 @@
                     <button
                         type="button"
                         class="btn btn-fab rounded-circle"
-                        :class="{'btn-primary': actionState.drawType == 'Polygon', 'btn-outline-primary': actionState.drawType != 'Polygon'}"
+                        :class="{ 'btn-primary': actionState.drawType == 'Polygon', 'btn-outline-primary': actionState.drawType != 'Polygon' }"
                         data-bs-toggle="popover"
                         :data-content="t('main.map.draw.polygon.desc')"
                         data-trigger="hover"
@@ -120,7 +120,7 @@
                     <button
                         type="button"
                         class="btn btn-fab rounded-circle"
-                        :class="{'btn-primary': actionState.measure.active, 'btn-outline-primary': !actionState.measure.active}"
+                        :class="{ 'btn-primary': actionState.measure.active, 'btn-outline-primary': !actionState.measure.active }"
                         data-bs-toggle="popover"
                         :data-content="t('main.map.draw.measure.desc')"
                         data-trigger="hover"
@@ -303,7 +303,7 @@
         toRefs,
         watch,
     } from 'vue';
-    
+
     import { useI18n } from 'vue-i18n';
 
     import {
@@ -317,20 +317,30 @@
     import { defaults as defaultInteractions } from 'ol/interaction';
     import Feature from 'ol/Feature';
     import Map from 'ol/Map';
-    import {unByKey} from 'ol/Observable.js';
+    import { unByKey } from 'ol/Observable.js';
     import View from 'ol/View';
     import Overlay from 'ol/Overlay';
     import { transform as transformProj } from 'ol/proj';
-    import {getArea, getLength} from 'ol/sphere';
+    import { getArea, getLength } from 'ol/sphere';
+
+    import VectorTileLayer from 'ol/layer/VectorTile.js';
+    import VectorTile from 'ol/source/VectorTile.js';
+
+    import Style from 'ol/style/Style';
+    import Fill from 'ol/style/Fill.js';
+    import Stroke from 'ol/style/Stroke.js';
+
+    import { createXYZ } from 'ol/tilegrid';
+    import MVT from 'ol/format/MVT';
 
     import FullScreen from 'ol/control/FullScreen';
     import OverviewMap from 'ol/control/OverviewMap';
     import Rotate from 'ol/control/Rotate';
     import ScaleLine from 'ol/control/ScaleLine';
 
-    import {never as neverCond, shiftKeyOnly, platformModifierKeyOnly} from 'ol/events/condition';
+    import { never as neverCond, shiftKeyOnly, platformModifierKeyOnly } from 'ol/events/condition';
 
-    import { getCenter as getExtentCenter, extend as extendExtent} from 'ol/extent';
+    import { getCenter as getExtentCenter, extend as extendExtent } from 'ol/extent';
 
     import Draw from 'ol/interaction/Draw';
     import DragRotate from 'ol/interaction/DragRotate';
@@ -432,7 +442,7 @@
             },
         },
         emits: [
-            'added', 
+            'added',
             'deleted',
             'modified',
             'select',
@@ -459,7 +469,10 @@
                 const geometry = feature.getGeometry();
                 const props = feature.getProperties();
                 const coords = getExtentCenter(geometry.getExtent());
-                let title = t('main.map.geometry_name', {id: props.id});
+                
+                console.log(feature);
+                
+                let title = t('main.map.geometry_name', { id: props.id });
                 let subtitle = '';
                 const sizes = {
                     in_m: 0,
@@ -541,7 +554,7 @@
             const setExtent = (to = null) => {
                 const newExtent = to || getEntityExtent() || defaultExtent;
 
-                for(let i=0; i<newExtent.length; i++) {
+                for(let i = 0; i < newExtent.length; i++) {
                     if(newExtent[i] == Infinity || newExtent[i] == -Infinity) {
                         newExtent[i] = defaultExtent[i];
                     }
@@ -557,7 +570,7 @@
             const getAssociatedLayer = feature => {
                 const layerGroup = state.mapLayerGroups.entity.getLayers().getArray();
                 if(data.value.format == 'wkt') {
-                    for(let i=0; i<layerGroup.length; i++) {
+                    for(let i = 0; i < layerGroup.length; i++) {
                         if(layerGroup[i].get('layer_id')) {
                             return layerGroup[i];
                         }
@@ -691,7 +704,6 @@
                 let finalStyle = null;
                 const layerProps = layer.getProperties();
                 const color = layerProps.color;
-                
                 const p = f.getProperties();
                 if(stylePerLayer.value) {
                     if(!state.layerStyleCache[layerProps.layer_id]) {
@@ -739,12 +751,12 @@
                 state.mapEntityLayers.push(wktLayer);
                 const source = wktLayer.getSource();
 
-                for(let i=0; i<features.length; i++) {
+                for(let i = 0; i < features.length; i++) {
                     const geom = wktFormat.readGeometry(features[i], {
                         featureProjection: 'EPSG:3857',
                         dataProjection: state.inputEpsgCode,
                     });
-                    source.addFeature(new Feature({geometry: geom}));
+                    source.addFeature(new Feature({ geometry: geom }));
                 }
             };
             const loadGeojsonData = features => {
@@ -833,7 +845,7 @@
                         const coords = getExtentCenter(geometry.getExtent());
                         actionState.popup.setPosition(coords);
 
-                        let title = t('main.map.geometry_name', {id: props.id});
+                        let title = t('main.map.geometry_name', { id: props.id });
                         if(titleFn.value) {
                             const fromFn = titleFn.value(feature);
                             if(fromFn) {
@@ -864,9 +876,13 @@
                 state.map.on('singleclick', e => {
                     if(anyInteractionActive()) return;
                     if(actionState.measure.active) return;
-
                     const feature = getFeaturesAtEvent(e);
                     context.emit('select', feature);
+                });
+                state.map.on('moveend', e => {
+                    const center = e.map.getView().getCenter();
+                    const zoom = e.map.getView().getZoom();
+                    localStorage.setItem('map_view', JSON.stringify({center, zoom}));
                 });
             };
             const getLineLength = geometry => {
@@ -1402,6 +1418,18 @@
                 nextTick(_ => {
                     initializeLayers();
                     initializeData();
+                    
+                    const mapView = {
+                        center: [0, 0],
+                        zoom: 2,
+                    };
+                    try{
+                        const loadedMapView = JSON.parse(localStorage.getItem('map_view'));
+                        Object.assign(mapView, loadedMapView);
+                        console.log('Loaded: ' + localStorage.getItem('map_view'), JSON.stringify(mapView));
+                    }catch(e){
+                        console.log(e);
+                    }
 
                     state.map = new Map({
                         controls: defaultControls().extend([
@@ -1428,12 +1456,14 @@
                         ],
                         target: state.mapId,
                         view: new View({
-                            center: [0, 0],
+                            center: mapView.center,
                             projection: 'EPSG:3857',
-                            zoom: 2,
+                            zoom: mapView.zoom,
                             extent: state.extent,
                         }),
                     });
+                    
+                    window.map = state.map;
 
                     const overlayElem = document.getElementById(actionState.popupIds.p);
                     const hoverElem = document.getElementById(actionState.popupIds.h);
@@ -1471,15 +1501,15 @@
 
             // WATCHER
             watch(_ => selection.value, (newValue, oldValue) => {
-                    const feature = state.featureList[newValue];
-                    if(!!feature) {
-                        setOverlay(feature);
-                    } else {
-                        actionState.overlay.setPosition();
-                        actionState.bsOverlay.hide();
-                        actionState.overlayData = {};
-                        // vm.selectedFeature = {};
-                    }
+                const feature = state.featureList[newValue];
+                if(!!feature) {
+                    setOverlay(feature);
+                } else {
+                    actionState.overlay.setPosition();
+                    actionState.bsOverlay.hide();
+                    actionState.overlayData = {};
+                    // vm.selectedFeature = {};
+                }
             });
 
             watch(_ => extent.value, (newValue, oldValue) => {
@@ -1496,7 +1526,7 @@
                         bbox = newValue.bbox;
                         break;
                     case 'layer':
-                        for(let i=0; i<layers.length; i++) {
+                        for(let i = 0; i < layers.length; i++) {
                             const l = layers[i];
                             const p = l.getProperties();
                             if(p.layer_id == id) {
@@ -1508,11 +1538,11 @@
                     case 'layer_by_feature':
                         let found = false;
 
-                        for(let i=0; i<layers.length; i++) {
+                        for(let i = 0; i < layers.length; i++) {
                             const l = layers[i];
                             const s = l.getSource();
                             const features = s.getFeatures();
-                            for(let j=0; j<features.length; j++) {
+                            for(let j = 0; j < features.length; j++) {
                                 const f = features[j];
                                 if(f.getProperties().id == id) {
                                     bbox = s.getExtent();
@@ -1563,7 +1593,6 @@
                 state,
                 actionState,
             };
-            
         },
     };
 </script>
