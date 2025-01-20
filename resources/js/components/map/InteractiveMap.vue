@@ -470,8 +470,6 @@
                 const props = feature.getProperties();
                 const coords = getExtentCenter(geometry.getExtent());
                 
-                console.log(feature);
-                
                 let title = t('main.map.geometry_name', { id: props.id });
                 let subtitle = '';
                 const sizes = {
@@ -838,6 +836,7 @@
                         // same feature, no update needed
                         return;
                     }
+                    
                     if(!!feature) {
                         actionState.hoveredFeature = feature;
                         const geometry = feature.getGeometry();

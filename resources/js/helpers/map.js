@@ -32,9 +32,10 @@ import Fill from 'ol/style/Fill';
 import Stroke from 'ol/style/Stroke';
 import Style from 'ol/style/Style';
 
-import VectorTileLayer from 'ol/layer/VectorTile.js';
-import VectorTile from 'ol/source/VectorTile.js';
+import VectorTileLayer from 'ol/layer/VectorTile';
+import VectorTileSource from 'ol/source/VectorTile';
 import MVT from 'ol/format/MVT';
+import { createXYZ } from 'ol/tilegrid';
 
 import { splitColor } from '@/helpers/colors.js';
 const convertFormats = {};
@@ -267,24 +268,15 @@ export async function changeLayerClass(id) {
     return data;
 }
 
-export function createNewLayer(layerData) {
-    const isBaseLayer = !layerData.is_overlay;
-    const isVisible = layerData.visible;
-    const opacity = parseFloat(layerData.opacity);
-    const url = layerData.url;
-    const attribution = layerData.attribution;
-    const apiKey = layerData.api_key;
-    const layers = layerData.layers;
-    const layerType = layerData.layer_type;
-    let source;
-
-    const rgba = splitColor(layerData.color);
+function createStyleFromColor(color = '#007bff') {
+    console.log('createStyleFromColor', color);
+    const rgba = splitColor(color);
     const rgbaFill = rgba.slice();
-    rgbaFill[3] = 0.3;
+    rgbaFill[3] = 0.1;
 
     const fillRgba = `rgba(${rgbaFill.join(',')})`;
 
-    const style = new Style({
+    return new Style({
         fill: new Fill({
             color: fillRgba,
         }),
@@ -294,31 +286,40 @@ export function createNewLayer(layerData) {
         }),
         text: new Text(),
     });
+}
+
+export function createNewLayer(layerData) {
+    let source;
+    let LayerClass = TileLayer;
+    let layer = 'osm';
+
+    const commonSourceOptions = {
+        attributions: layerData.attribution,
+        wrapX:false,
+        url: layerData.url,
+    };
+    
+    console.log(createStyleFromColor(layerData.color));
+    
 
     switch(layerData.type) {
         case 'xyz':
-            source = new TileImage({
-                url: url,
-                attributions: attribution,
-                wrapX: false,
-            });
+            source = new TileImage(commonSourceOptions);
             break;
         case 'wms':
             source = new TileWMS({
-                url: url,
-                attributions: attribution,
-                wrapX: false,
+                ...commonSourceOptions,
                 serverType: 'geoserver',
                 params: {
-                    layers: layers,
+                    layers: layerData.layers,
                     tiled: true,
                 },
             });
             break;
         case 'bing':
             source = new BingMaps({
-                key: apiKey,
-                wrapX: false,
+                ...commonSourceOptions,
+                key: layerData.api_key,
                 /*
                 # Supported
                 - Aerial
@@ -335,40 +336,44 @@ export function createNewLayer(layerData) {
                 - BirdseyeV2WithLabels
                 - Streetside
                     */
-                imagerySet: layerType,
+                imagerySet: layerData.layer_type,
             });
             break;
         case 'mvt':
-            const vectorTileLayer = new VectorTileLayer({
-                style: () => style,
-                source: new VectorTile({
-                    format: new MVT(),
-                    url: url,
-                    visible: layerData.visible,
-                    displayInLayerSwitcher: true,
-                    opacity: opacity,
-                    properties: layerData,
-                })
+            const tileGrid = createXYZ({
+                maxZoom: 19
             });
 
-            return vectorTileLayer;
-        default:
-            source = new OSM({
-                wrapX: false,
+            source = new VectorTileSource({
+                ...commonSourceOptions,
+                tileGrid,
+                format: new MVT(),
             });
+
+            layer = 'mvt';
+            LayerClass = VectorTileLayer;
+            break;
+        default:
+            source = new OSM(commonSourceOptions);
             break;
     }
 
-
-    console.log('createNewLayer', layerData.name, layerData.visible, layerData);
-    return new TileLayer({
-        layer: 'osm',
-        title: layerData.name,
-        baseLayer: isBaseLayer,
-        displayInLayerSwitcher: true,
+    return new LayerClass({
+        // Layer Properties
+        source: source,
+        minZoom: layerData.min_zoom,
+        maxZoom: layerData.max_zoom,
+        opacity: parseFloat(layerData.opacity),
         visible: layerData.visible,
-        opacity: opacity,
-        source: source
+        
+        // Only applied for VectorTileLayer
+        style: createStyleFromColor(layerData.color),
+
+        // Custom Properties
+        title: layerData.name,
+        layer,
+        baseLayer: !layerData.is_overlay,
+        displayInLayerSwitcher: true,
     });
 }
 
