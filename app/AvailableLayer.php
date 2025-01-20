@@ -34,6 +34,8 @@ class AvailableLayer extends Model
         'layer_type',
         'position',
         'color',
+        'min_zoom',
+        'max_zoom',
     ];
 
     const patchRules = [
@@ -52,6 +54,8 @@ class AvailableLayer extends Model
         'api_key' => 'nullable|string',
         'layer_type' => 'nullable|string',
         'color' => 'color',
+        'min_zoom' => 'nullable|integer',
+        'max_zoom' => 'nullable|integer',
     ];
 
     public function getActivitylogOptions() : LogOptions

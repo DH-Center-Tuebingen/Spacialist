@@ -357,12 +357,9 @@ export function createNewLayer(layerData) {
             source = new OSM(commonSourceOptions);
             break;
     }
-
-    return new LayerClass({
+    const layerOptions = {
         // Layer Properties
         source: source,
-        minZoom: layerData.min_zoom,
-        maxZoom: layerData.max_zoom,
         opacity: parseFloat(layerData.opacity),
         visible: layerData.visible,
         
@@ -374,7 +371,19 @@ export function createNewLayer(layerData) {
         layer,
         baseLayer: !layerData.is_overlay,
         displayInLayerSwitcher: true,
-    });
+    };
+
+    /**
+     * We need to add min and max zoom only when they are set
+     * otherwise the layer will interpret them as 0.
+     */
+    if(layerData.min_zoom)
+        layerOptions.minZoom = layerData.min_zoom;
+
+    if(layerData.max_zoom)
+        layerOptions.maxZoom = layerData.max_zoom;
+
+    return new LayerClass(layerOptions);
 }
 
 export function createVectorLayer(data = {}) {

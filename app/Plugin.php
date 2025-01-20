@@ -264,7 +264,7 @@ class Plugin extends Model
         return [];
     }
 
-    private function runMigrations() {
+    public function runMigrations() {
         foreach($this->getSortedMigrations() as $migration) {
             preg_match("/^[1-9]\d{3}_\d{2}_\d{2}_\d{6}_(.*)\.php$/", $migration, $matches);
             if(count($matches) != 2) continue;
