@@ -1037,6 +1037,7 @@
             const resetForm = grps => {
                 resetListValues(grps);
                 resetDirtyStates(grps);
+                updateAllDependencies();
             };
             const setAttrRefs = (el, grp) => {
                 attrRefs.value[grp] = el;
