@@ -581,7 +581,10 @@
                     const values = Object.values(state.hiddenAttributes);
                     const list = [];
                     for(let i = 0; i < keys.length; i++) {
-                        if(values[i].hide && (!state.hiddenAttributes[values[i].by] || !state.hiddenAttributes[values[i].by].hide)) {
+                        // TODO/FIXME Disable check on dependant for now, because it breaks
+                        // !? operator. But now hidden dependants affect an attribute's
+                        // hide state!
+                        if(values[i].hide /* && (!state.hiddenAttributes[values[i].by] || !state.hiddenAttributes[values[i].by].hide) */) {
                             list.push(keys[i]);
                         }
                     }
