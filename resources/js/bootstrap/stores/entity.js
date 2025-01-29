@@ -765,7 +765,7 @@ export const useEntityStore = defineStore('entity', {
             if(from == to) {
                 return;
             }
-            const attributes = this.entityTypeAttributes(entityTypeId);
+            const attributes = this.getEntityTypeAttributes(entityTypeId);
             // Already added
             if(attributes.length < to && attributes[to].id == attributeId) {
                 return;
