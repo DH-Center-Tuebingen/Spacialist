@@ -158,7 +158,7 @@
             <div class="d-flex flex-row gap-2">
                 <div
                     v-if="state.activeUsers.length > 0"
-                    class="d-flex flex-row gap-1 align-items-center"
+                    class="d-flex flex-row gap-1 align-items-center border-end pe-2"
                 >
                     <div
                         class="avatar-list"
