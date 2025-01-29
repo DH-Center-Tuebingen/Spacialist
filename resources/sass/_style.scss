@@ -92,7 +92,14 @@ dl.dl-0-mb > dd:last-child {
 }
 
 .avatar-list > .avatar-list-item {
-    @extend .ms-n1;
+    transition: .25s;
+}
+.avatar-list > .avatar-list-item {
+    @extend .ms-n2;
+}
+.avatar-list:hover > .avatar-list-item {
+    /* @extend .ms-1; */
+    margin-left: 0.1rem !important;
 }
 .avatar-list > .avatar-list-item:first-child {
     margin-left: 0 !important;
