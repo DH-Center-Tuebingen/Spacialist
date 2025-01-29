@@ -420,7 +420,7 @@
             let types = [];
             switch(type.value) {
                 case 'table':
-                    types = attributeStore.getTableAttributeTypes();
+                    types = attributeStore.getTableAttributeTypes;
                     break;
                 default:
                     types = attributeStore.attributeTypes;
