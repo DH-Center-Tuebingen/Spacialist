@@ -1,4 +1,4 @@
-// import Echo from '@/bootstrap/websocket.js';
+
 
 import useEntityStore from '@/bootstrap/stores/entity.js';
 import useUserStore from '@/bootstrap/stores/user.js';
@@ -13,24 +13,24 @@ function listen(channelname, event, callback) {
 }
 
 export function subscribeToTestWebSockets() {
-    Echo.private('private_testchannel')
+    window.Echo.private('private_testchannel')
         .listen('TestEvent', e => {
             console.log('Private WebSockets are working! Received message:', e);
         });
-    Echo.channel('testchannel')
+    window.Echo.channel('testchannel')
         .listen('TestEvent', e => {
             console.log('Public WebSockets are working! Received message:', e);
         });
 }
 
 export function unsubscribeFromTestWebSockets() {
-    Echo.leave('private_testchannel');
-    Echo.leave('testchannel');
+    window.Echo.leave('private_testchannel');
+    window.Echo.leave('testchannel');
 }
 
 // Subscribe to public/private channel and optionally listen to an event
 export function subscribeTo(channelname, isPrivate = false, listenTo = null, callback = null) {
-    const channel = isPrivate ? Echo.private(channelname) : Echo.channel(channelname);
+    const channel = isPrivate ? window.Echo.private(channelname) : window.Echo.channel(channelname);
     if(!activeChannels[channelname]) {
         activeChannels[channelname] = channel;
     }
@@ -40,7 +40,7 @@ export function subscribeTo(channelname, isPrivate = false, listenTo = null, cal
 }
 
 export function unsubscribeFrom(channelname) {
-    Echo.leave(channelname);
+    window.Echo.leave(channelname);
 }
 
 // Listen for a specific event of an already subscribed channel
@@ -66,7 +66,7 @@ export function listenToList(channelname, eventHandlerList) {
 
 // Join a presence channel
 export function join(roomname, callbacks) {
-    const room = Echo.join(roomname)
+    const room = window.Echo.join(roomname)
         .here(callbacks.init)
         .joining(callbacks.join)
         .leaving(callbacks.leave)
@@ -112,7 +112,7 @@ export function joinEntityRoom(entityId) {
         join: user => entityStore.addActiveUserId(user),
         leave: user => entityStore.removeActiveUserId(user.id),
         error: error => {
-            console.error("[WS] Error occured!", error);
+            console.error('[WS] Error occured!', error);
         },
     });
     return roomname;
@@ -120,4 +120,21 @@ export function joinEntityRoom(entityId) {
 
 export function leaveEntityRoom(roomname) {
     unsubscribeFrom(roomname);
+}
+
+
+/**
+ * Gets the active pusher connection.
+ * @returns {connection | null} - The pusher connection object or null if not available
+ */
+export function getConnection(){
+    return window.Echo?.connector?.pusher?.connection ?? null;
+}
+
+/**
+ * 
+ * @returns {string} - The current state of the websocket connection can be one of the following: 'initialized', 'connecting', 'connected', 'unavailable', 'disconnected', 'failed'
+ */
+export function getState() {
+    return getConnection().state ?? 'unavailable';
 }

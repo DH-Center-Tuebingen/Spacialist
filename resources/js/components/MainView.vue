@@ -1,5 +1,9 @@
 <template>
     <div class="row h-100 overflow-hidden">
+        <!-- Row scales all children to 100% that is not what we want here. -->
+        <div>
+            <WebSocketConnection />
+        </div>
         <div
             v-if="state.columnPref.left > 0"
             id="tree-container"
@@ -170,10 +174,12 @@
     import { useToast } from '@/plugins/toast.js';
 
     import Quotation from '@/components/bibliography/Quotation.vue';
+    import WebSocketConnection from './indicators/WebSocketConnection.vue';
 
     export default {
         components: {
             Quotation,
+            WebSocketConnection,
         },
         setup(props, context) {
             const { t } = useI18n();

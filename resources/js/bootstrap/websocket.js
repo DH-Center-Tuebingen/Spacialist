@@ -2,10 +2,9 @@ import Echo from 'laravel-echo';
 
 import Pusher from 'pusher-js';
 
-// Why do we handle this as window objects and not with
-// import/export syntax and pollute the window object? [SO]
+// This is how it's done in the Laravel Echo documentation
+// and all other resources I could find.
 window.Pusher = Pusher;
-
 window.Echo = new Echo({
     broadcaster: 'reverb',
     key: import.meta.env.VITE_REVERB_APP_KEY,
@@ -15,5 +14,3 @@ window.Echo = new Echo({
     forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
     enabledTransports: ['ws', 'wss'],
 });
-
-// export default Echo;
