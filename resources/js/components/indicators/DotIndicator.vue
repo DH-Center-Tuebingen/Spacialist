@@ -1,7 +1,7 @@
 <template>
     <div
         :class="state.merged"
-        style="width: 0.6rem;"
+        style="width: 0.6rem; height: 0.6rem;"
     />
 </template>
 
@@ -91,5 +91,5 @@
                 state,
             };
         },
-    }
+    };
 </script>

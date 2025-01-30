@@ -1045,5 +1045,9 @@
     "keyboard": {
         "tab": "Tab",
         "space": "Spacebar"
+    },
+    "websockets": {
+        "service_available_again": "Live updates available again!",
+        "service_unavailable": "Live updates unavailable!"
     }
 }

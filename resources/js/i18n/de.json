@@ -1044,5 +1044,9 @@
     "keyboard": {
         "tab": "Tab",
         "space": "Leertaste"
+    },
+    "websockets": {
+        "service_available_again": "Echtzeitupdates wieder verfügbar!",
+        "service_unavailable": "Echtzeitupdates nicht verfügbar!"
     }
 }
