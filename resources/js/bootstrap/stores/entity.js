@@ -478,38 +478,30 @@ export const useEntityStore = defineStore('entity', {
                 this.updateAttributeMetadata(entityTypeId, attributeId, etAttrId, data);
             });
         },
-        updateEntityData(entityId, updatedValues, patchedData, removedData, sync, fromWebsocket = false) {
+        externalAttributeValueDeleted(entityId, attributeId) {
+            this.receivedEntityData[entityId] = {};
+            this.receivedEntityData[entityId][attributeId] = {};
+        },
+        externalAttributeValueUpdated(entityId, attributeValue, value) {
+            const attributeId = attributeValue.attribute_id;
+            this.receivedEntityData[entityId] = {};
+            this.receivedEntityData[entityId][attributeId] = attributeValue;
+            this.receivedEntityData[entityId][attributeId].value = value;
+            
+        },
+        updateEntityData(entityId, updatedValues, patchedData, removedData) {
             const entity = this.getEntity(entityId);
-            if(fromWebsocket) {
-                this.receivedEntityData[entity.id] = {};
-                for(let k in updatedValues) {
-                    this.receivedEntityData[entity.id][k] = patchedData[k];
-                    this.receivedEntityData[entity.id][k].value = updatedValues[k];
-                }
-                return;
-            }
             for(let k in updatedValues) {
                 // when attribute value is set empty, delete whole attribute
                 if(!updatedValues[k] && updatedValues[k] != false) {
                     entity.data[k] = {};
-                    if(sync) {
-                        this.selectedEntity.data[k] = {};
-                        state.entity.data[k] = {};
-                    }
                 } else {
                     // if no id exists, this data is added
                     if(!entity.data[k].id) {
                         entity.data[k] = patchedData[k];
                         entity.data[k].value = updatedValues[k];
-                        if(sync) {
-                            this.selectedEntity.data[k] = patchedData[k];
-                            this.selectedEntity.data[k].value = updatedValues[k];
-                        }
                     } else {
                         entity.data[k].value = updatedValues[k];
-                        if(sync) {
-                            this.selectedEntity.data[k].value = updatedValues[k];
-                        }
                     }
                 }
             }
@@ -729,7 +721,7 @@ export const useEntityStore = defineStore('entity', {
                 const updatedValues = {
                     [attributeId]: data,
                 };
-                this.updateEntityData(entityId, updatedValues, updatedValues, {}, true);
+                this.updateEntityData(entityId, updatedValues, updatedValues, {});
                 return data;
             });
         },
@@ -737,7 +729,7 @@ export const useEntityStore = defineStore('entity', {
             const moderated = useUserStore().getUserModerated;
             return patchAttributes(entityId, patchData).then(data => {
                 this.update(data.entity);
-                this.updateEntityData(entityId, dirtyValues, data.added_attributes, data.removed_attributes, !moderated);
+                this.updateEntityData(entityId, dirtyValues, data.added_attributes, data.removed_attributes);
                 if(moderated) {
                     this.updateEntityDataModerations(entityId, moderations, 'pending');
                 }

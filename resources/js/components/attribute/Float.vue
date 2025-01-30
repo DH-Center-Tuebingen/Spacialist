@@ -9,6 +9,13 @@
         :disabled="disabled"
         :name="name"
     >
+    <div
+        v-if="errorMessage"
+        class="alert alert-danger"
+        role="alert"
+    >
+        {{ errorMessage }}
+    </div>
 </template>
 
 <script>
@@ -64,6 +71,7 @@
                 value: fieldValue,
                 meta,
                 resetField,
+                errorMessage
             } = useField(`float_${name.value}`, yup.number(), {
                 initialValue: value.value,
             });
@@ -100,6 +108,7 @@
                 // STATE
                 state,
                 v,
+                errorMessage,
             };
         },
     };
