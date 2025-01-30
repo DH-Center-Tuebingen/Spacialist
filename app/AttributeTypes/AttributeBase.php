@@ -116,6 +116,8 @@ abstract class AttributeBase
         $class = self::getMatchingClass($value->attribute->datatype);
         if($class !== false) {
             $field = $class::getField();
+            // info("Serializing value for field $field");
+            // info($value->{$field});
             return $class::serialize($value->{$field});
         } else {
             return null;

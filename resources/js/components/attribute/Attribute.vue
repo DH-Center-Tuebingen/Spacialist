@@ -193,7 +193,7 @@
         @change="updateDirtyState"
     />
 
-    <multichoice-attribute
+    <!-- <multichoice-attribute
         v-else-if="data.datatype == 'string-mc'"
         :ref="el => setRef(el)"
         :disabled="state.disabled"
@@ -201,7 +201,7 @@
         :value="state.value"
         :selections="state.selection"
         @change="updateDirtyState"
-    />
+    /> -->
 
     <userlist-attribute
         v-else-if="data.datatype == 'userlist'"
@@ -353,7 +353,7 @@
                 default: _ => new Object(),
             },
         },
-        emits: ['expanded','change', 'update-selection'],
+        emits: ['expanded', 'change', 'update-selection'],
         setup(props, context) {
             const attributeStore = useAttributeStore();
             const {
@@ -365,7 +365,11 @@
             // FETCH
 
             const getValueOrDefault = _ => {
-                return valueWrapper.value.value || getEmptyAttributeValue(data.value.datatype);
+                if(valueWrapper?.value?.value == null) {
+                    return getEmptyAttributeValue(data.value.datatype);
+                }
+
+                return valueWrapper.value.value;
             };
 
             const attrRef = ref({});
@@ -425,9 +429,11 @@
             const handleExternalChange = changeData => {
                 state.externalUpdate = !!changeData;
                 if(state.externalUpdate) {
+                    
                     // set "initial" value (aka state.value) to external value
                     state.value = _cloneDeep(getValueOrDefault());
-                    // if not dirty: resetFeildState to external "initial" value
+                    
+                    // if not dirty: resetFieldState to external "initial" value
                     if(!attrRef.value?.v?.meta?.dirty) {
                         nextTick(_ => {
                             resetFieldState();

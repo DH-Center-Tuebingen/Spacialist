@@ -219,7 +219,6 @@
                     >
                         <DotIndicator
                             :type="'warning'"
-                            style="width: 0.5rem;"
                         />
                         <div v-show="state.attributeGrpHovered == tg.id">
                             <a
@@ -458,6 +457,7 @@
 
     export default {
         components: {
+            DotIndicator,
             EntityTypeLabel,
             MetadataTab,
             MultiUserWidget,
@@ -522,8 +522,8 @@
                     }
                     return false;
                 }),
-                // TODO
                 entityGroups: computed(_ => {
+                    // TODO:: Does this makes sense?
                     if(!state.entityAttributes) {
                         return state.entityAttributes;
                     }

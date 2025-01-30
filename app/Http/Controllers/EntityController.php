@@ -186,6 +186,8 @@ class EntityController extends Controller {
                 'error' => __('You do not have the permission to get an entity\'s data'),
             ], 403);
         }
+        
+        $entity = null;
         try{
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
@@ -193,122 +195,7 @@ class EntityController extends Controller {
                 'error' => __('This entity does not exist'),
             ], 400);
         }
-        if(isset($aid)) {
-            try {
-                Attribute::findOrFail($aid);
-            } catch(ModelNotFoundException $e) {
-                return response()->json([
-                    'error' => __('This attribute does not exist'),
-                ], 400);
-            }
-            $attributes = AttributeValue::whereHas('attribute', function (Builder $q) {
-                $q->where('datatype', '!=', 'sql');
-            })
-                ->where('entity_id', $id)
-                ->where('attribute_id', $aid)
-                ->withModerated()
-                ->get();
-        }else{
-            $attributes = AttributeValue::whereHas('attribute', function (Builder $q) {
-                $q->where('datatype', '!=', 'sql');
-            })
-                ->where('entity_id', $id)
-                ->withModerated()
-                ->get();
-        }
-
-        $data = [];
-        foreach($attributes as $a) {
-            switch($a->attribute->datatype) {
-                case 'string-sc':
-                    $a->thesaurus_val = ThConcept::where('concept_url', $a->thesaurus_val)->first();
-                    break;
-                case 'entity':
-                    $a->name = Entity::find($a->entity_val)->name;
-                    break;
-                case 'entity-mc':
-                    $names = [];
-                    foreach(json_decode($a->json_val) as $dec) {
-                        $names[] = Entity::find($dec)->name;
-                    }
-                    $a->name = $names;
-                    break;
-                default:
-                    break;
-            }
-            $value = $a->getValue();
-            if($a->moderation_state == 'pending-delete') {
-                $a->value = [];
-                $a->original_value = $value;
-            }else{
-                $a->value = $value;
-            }
-            if(isset($data[$a->attribute_id])) {
-                $oldAttr = $data[$a->attribute_id];
-                // check if stored entry is moderated one
-                // if so, add current value as original value
-                // otherwise, set stored entry as original value
-                if(isset($oldAttr->moderation_state)) {
-                    $oldAttr->original_value = $value;
-                    $a = $oldAttr;
-                }else{
-                    $a->original_value = $oldAttr->value;
-                }
-            }
-            $data[$a->attribute_id] = $a;
-        }
-
-        $sqls = EntityAttribute::whereHas('attribute', function (Builder $q) {
-            $q->where('datatype', 'sql');
-        })
-            ->where('entity_type_id', $entity->entity_type_id);
-        if(isset($aid)) {
-            $sqls->where('attribute_id', $aid);
-        }
-        $sqls = $sqls->get();
-
-        foreach($sqls as $sql) {
-            // if entity_id is referenced several times
-            // add an incrementing counter, so the
-            // references are unique (required by PDO)
-            $cnt = substr_count($sql->attribute->text, ':entity_id');
-            if($cnt > 1) {
-                $safes = [];
-                for($i = 0; $i < $cnt; $i++) {
-                    $safes[':entity_id_' . $i] = $id;
-                }
-                $i = 0;
-                $text = preg_replace_callback('/:entity_id/', function ($matches) use (&$i) {
-                    return $matches[0] . '_' . $i++;
-                }, $sql->attribute->text);
-            }else{
-                $text = $sql->attribute->text;
-                $safes = [
-                    ':entity_id' => $id,
-                ];
-            }
-
-            DB::beginTransaction();
-            $sqlValue = DB::select($text, $safes);
-            DB::rollBack();
-
-            // Check if only one result exists
-            if(count($sqlValue) === 1) {
-                // Get all column indices (keys) using the first row
-                $valueKeys = array_keys(get_object_vars($sqlValue[0]));
-                // Check if also only one key/column exists
-                if(count($valueKeys) === 1) {
-                    // If only one row and one column exist,
-                    // return plain value instead of array
-                    $firstKey = $valueKeys[0];
-                    $sqlValue = $sqlValue[0]->{$firstKey};
-                }
-            }
-            $data[$sql->attribute_id] = [
-                'value' => $sqlValue,
-            ];
-        }
-
+        $data = $entity->getData($aid);
         return response()->json($data);
     }
 
@@ -320,11 +207,11 @@ class EntityController extends Controller {
             ], 403);
         }
 
-        try {
+        try{
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => __('This entity does not exist'),
+                'error' => __('This entity does not exist')
             ], 400);
         }
         return response()->json($entity->getAllMetadata());
@@ -776,38 +663,35 @@ class EntityController extends Controller {
                         $attrval->delete();
                     }
                     break;
+                    
+                /**
+                 * In the case when a user created the attribute, while another was visiting the
+                 * page and sends an 'add' operation, and the other user also sends his changes, 
+                 * the application would have thrown an error, that the attribute was already created.
+                 * 
+                 * That's why we combined the add and replace operations into one case.
+                 * [SO] 29.01.2025 
+                 */
                 case 'add':
-                    $alreadyAdded = AttributeValue::where('entity_id', $id)
-                        ->where('attribute_id', $aid)
-                        ->withModerated()
-                        ->exists();
-                    if($alreadyAdded) {
-                        $error = __('There is already a value set for this attribute or it is in moderation state.');
-                        break;
-                    }
-                    $value = $patch['value'];
-                    $attrval = new AttributeValue();
-                    $attrval->entity_id = $id;
-                    $attrval->attribute_id = $aid;
-                    $attrval->certainty = null;
-                    if($user->isModerated()) {
-                        $attrval->moderate('pending', true, true);
-                    }
-                    break;
                 case 'replace':
                     $alreadyModerated = AttributeValue::where('entity_id', $id)
                         ->where('attribute_id', $aid)
                         ->onlyModerated()
                         ->exists();
-                    if($alreadyModerated) {
+                    
+                    // Currently the logic is that a moderated state cannot be changed
+                    // by a moderated user.
+                    if($alreadyModerated && $user->isModerated()) {
                         $error = __('This attribute value is in moderation state. A user with appropriate permissions has to accept or deny it first.');
                         break;
                     }
                     $value = $patch['value'];
-                    $attrval = AttributeValue::where([
-                        ['entity_id', '=', $id],
-                        ['attribute_id', '=', $aid],
-                    ])->first();
+                    $attrval = AttributeValue::firstOrNew([
+                        'entity_id' => $id,
+                        'attribute_id' => $aid,
+                    ], [
+                        'certainty' => null
+                    ]);
                     if($user->isModerated()) {
                         $attrval = $attrval->moderate('pending', false, true);
                         unset($attrval->comments_count);
@@ -841,7 +725,11 @@ class EntityController extends Controller {
             $attrval->{$formKeyValue->key} = $formKeyValue->val;
             $attrval->user_id = $user->id;
             $attrval->save();
-            if($op == 'add') {
+            
+            // As we cannot ensure that the 'add' is correct,
+            // we use this laravel option to ensure the attribute
+            // was created and not replaced.
+            if($attrval->wasRecentlyCreated) {
                 $addedAttributes[$aid] = $attrval;
             }
         }
@@ -1062,11 +950,11 @@ class EntityController extends Controller {
             'summary' => 'nullable|string',
         ]);
 
-        try {
+        try{
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => __('This entity does not exist'),
+                'error' => __('This entity does not exist')
             ], 400);
         }
 

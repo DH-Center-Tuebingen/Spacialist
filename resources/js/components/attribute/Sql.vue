@@ -63,28 +63,11 @@
             },
         },
         setup(props, context) {
-            const {
-                name,
-                disabled,
-                value,
-            } = toRefs(props);
-            // FETCH
-
-            // FUNCTIONS
-
-            // DATA
-            const state = reactive({
-
-            });
-
             // RETURN
             return {
                 // HELPERS
                 isArray,
                 translateConcept,
-                // LOCAL
-                // STATE
-                state,
             };
         },
     };

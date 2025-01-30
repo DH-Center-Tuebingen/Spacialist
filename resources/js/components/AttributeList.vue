@@ -34,15 +34,13 @@
                             class="d-flex align-items-center"
                             :title="getAttributeChangeIndicatorDescription(element)"
                         >
-                            <DotIndicator
-                                :type="getAttributeChangeIndicator(element)"
-                            />
+                            <DotIndicator :type="getAttributeChangeIndicator(element)" />
                         </div>
                         <div
                             v-show="!!state.hoverStates[index]"
-                            class="btn-fab-list"
+                            class="btn-fab-list position-absolute start-0"
                         >
-                            <button
+                            <!-- <button
                                 v-show="hasEmitter('onReorderList')"
                                 class="reorder-handle btn btn-outline-secondary btn-fab rounded-circle"
                                 data-bs-toggle="popover"
@@ -51,7 +49,7 @@
                                 data-placement="bottom"
                             >
                                 <i class="fas fa-fw fa-sort" />
-                            </button>
+                            </button> -->
                             <button
                                 v-show="hasEmitter('onEditElement')"
                                 class="btn btn-outline-info btn-fab rounded-circle"
@@ -121,7 +119,7 @@
                             <i class="fas fa-diagram-next text-warning fa-rotate-180" />
                         </sup>
                     </label>
-                    <div :class="expandedClasses(index)">
+                    <div :class="expandedClasses(index, element)">
                         <Attribute
                             :ref="el => setRef(el, element.id)"
                             :data="element"
@@ -299,8 +297,10 @@
                 }
                 return classes;
             };
-            const expandedClasses = i => {
-                let expClasses = {};
+            const expandedClasses = (i, element) => {
+                let expClasses = {
+                    ['attribute-' + element.id]: true,
+                };
 
                 if(state.hideLabels || state.expansionStates[i]) {
                     expClasses['col-md-12'] = true;
@@ -419,12 +419,16 @@
             const getDirtyValues = _ => {
                 const values = {};
                 for(let k in attrRefs.value) {
+                    const datatype = attributeStore.getAttribute(k).datatype;
                     const curr = attrRefs.value[k];
                     let currValue = null;
                     // curr is e.g. null if attribute is hidden
+                    const excludedDatatypes = ['sql', 'serial'];
+                    if(excludedDatatypes.includes(datatype)) {
+                        continue;
+                    }
                     if(!!curr && !!curr.v && curr.v.meta.dirty && curr.v.meta.valid) {
                         currValue = curr.v.value;
-                        const datatype = getAttribute(k).datatype;
                         if(currValue !== null) {
                             // filter out deleted table rows
                             if(datatype == 'table') {
@@ -449,6 +453,7 @@
                 return values;
             };
             const updateDirtyState = e => {
+                console.trace('updateDirtyState');
                 state.changeTracker.local[e.attribute_id] = true;
                 // Do not update dirty state if attribute is currently in moderation edit mode
                 if(state.attributeValues[e.attribute_id].moderation_edit_state == 'active') {
@@ -490,6 +495,7 @@
                 for(let k in changes) {
                     if(attrRefs.value[k]) {
                         // Broadcast changes to Attribute component...
+                        console.log(changes[k]);
                         state.attributeValues[k].value = changes[k].value;
                         attrRefs.value[k].handleExternalChange(changes[k]);
                         // ... but also display info
