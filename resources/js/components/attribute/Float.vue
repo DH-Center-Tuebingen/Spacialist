@@ -9,13 +9,10 @@
         :disabled="disabled"
         :name="name"
     >
-    <div
-        v-if="errorMessage"
-        class="alert alert-danger"
-        role="alert"
-    >
-        {{ errorMessage }}
-    </div>
+    <InputError
+        :v="v"
+        :error="errorMessage"
+    />
 </template>
 
 <script>
@@ -28,8 +25,12 @@
     import { useField } from 'vee-validate';
 
     import * as yup from 'yup';
+    import InputError from '../forms/InputError.vue';
 
     export default {
+        components: {
+            InputError,
+        },
         props: {
             name: {
                 type: String,
