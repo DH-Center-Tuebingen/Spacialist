@@ -373,7 +373,7 @@ export function fillEntityData(data, etid) {
         const currAttr = attrs[i];
         if(!data[currAttr.id]) {
             data[currAttr.id] = {
-                value: getInitialAttributeValue(currAttr),
+                value: getInitialAttributeValue(currAttr, 'datatype'),
             };
         }
     }

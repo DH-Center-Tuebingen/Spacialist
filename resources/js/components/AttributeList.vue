@@ -40,6 +40,7 @@
                             v-show="!!state.hoverStates[index]"
                             class="btn-fab-list position-absolute start-0"
                         >
+                            <!-- TODO: Do we need the icon, as we can just drag the item (?) [SO] -->
                             <!-- <button
                                 v-show="hasEmitter('onReorderList')"
                                 class="reorder-handle btn btn-outline-secondary btn-fab rounded-circle"
