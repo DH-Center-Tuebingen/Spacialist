@@ -166,6 +166,8 @@
             });
 
             watch(_ => v, (newValue, oldValue) => {
+
+                // TODO: The SiUnit is not updating accurately. as the new and old value is always the same (new) value.
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
