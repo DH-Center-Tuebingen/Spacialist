@@ -20,7 +20,6 @@
                 <i class="fas fa-fw fa-arrow-up-right-from-square" />
             </a>
         </div>
-        <pre>{{ v }}</pre>
         <InputError
             :v="v"
             :error="errorMessage"
