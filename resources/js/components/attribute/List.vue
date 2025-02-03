@@ -3,19 +3,17 @@
         <div class="input-group">
             <button
                 type="button"
-                class="btn btn-outline-secondary"
+                class="btn btn-outline-secondary d-flex align-items-center gap-1"
                 :disabled="disabled"
                 @click="toggleList()"
             >
                 <div v-show="!state.expanded">
-                    <i class="fas fa-fw fa-caret-up" />
-                    <span v-if="v.value.length">
-                        ({{ v.value.length }})
-                    </span>
+                    <i class="fas fa-fw fa-eye-slash" />
                 </div>
                 <div v-show="state.expanded">
-                    <i class="fas fa-fw fa-caret-down" />
+                    <i class="fas fa-fw fa-eye" />
                 </div>
+                <span>({{ v.value.length }})</span>
             </button>
             <input
                 v-model="state.input"
@@ -34,16 +32,21 @@
                 <i class="fas fa-fw fa-plus" />
             </button>
         </div>
-        <ol
+        <ul
             v-if="state.expanded && v.value.length"
-            class="mt-2 mb-0"
+            class="mt-2 mb-0 list-group"
         >
             <li
                 v-for="(l, i) in v.value"
                 :key="i"
+                class="list-group-item d-flex"
             >
+                <span class="me-4 text-secondary">{{ i }}</span>
                 <!-- eslint-disable-next-line vue/no-v-html -->
-                <span v-html="createAnchorFromUrl(l)" />
+                <span
+                    class="flex-fill"
+                    v-html="createAnchorFromUrl(l)"
+                />
                 <a
                     v-if="!disabled"
                     href="#"
@@ -53,7 +56,7 @@
                     <i class="fas fa-fw fa-trash" />
                 </a>
             </li>
-        </ol>
+        </ul>
     </div>
 </template>
 
@@ -73,9 +76,9 @@
 
     export default {
         props: {
-            name:{ 
-                type: String, 
-                required: false, 
+            name: {
+                type: String,
+                required: false,
                 default: null
             },
             entries: {
@@ -89,9 +92,6 @@
         emits: ['change'],
         setup(props, context) {
             const { t } = useI18n();
-            const {
-                entries,
-            } = toRefs(props);
             // FETCH
 
             // FUNCTIONS
@@ -130,17 +130,17 @@
             // DATA
             const state = reactive({
                 input: '',
-                initialValue: entries.value.slice(),
-                expanded: false,
+                initialValue: props.entries.slice(),
+                expanded: true,
                 valid: computed(_ => !!state.input),
             });
             const v = reactive({
-                meta:{
+                meta: {
                     dirty: false,
                     valid: true,
                     validated: false,
                 },
-                value: entries.value.slice(),
+                value: props.entries.slice(),
             });
 
             watch(v.value, (newValue, oldValue) => {
@@ -153,7 +153,7 @@
                     value: v.value,
                 });
             });
-            watch(_ => entries, (newValue, oldValue) => {
+            watch(_ => props.entries, (newValue, oldValue) => {
                 state.initialValue = newValue.slice();
                 resetFieldState();
             });
@@ -172,7 +172,7 @@
                 // STATE
                 state,
                 v,
-            }
+            };
         },
-    }
+    };
 </script>
