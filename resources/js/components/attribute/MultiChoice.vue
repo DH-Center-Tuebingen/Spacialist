@@ -152,6 +152,7 @@
                 if(!a || !b) return true;
 
                 if(a.length != b.length) return true;
+                if(a.length == 0) return false;
 
                 return a.every((item, idx) => {
                     if(item.id != b[idx].id) return true;
