@@ -454,8 +454,8 @@
                 return values;
             };
             const updateDirtyState = e => {
-                console.trace('updateDirtyState');
-                state.changeTracker.local[e.attribute_id] = true;
+                // state.changeTracker.local[e.attribute_id] = true;
+                state.changeTracker.local[e.attribute_id] = e.dirty;
                 // Do not update dirty state if attribute is currently in moderation edit mode
                 if(state.attributeValues[e.attribute_id].moderation_edit_state == 'active') {
                     return;
@@ -496,7 +496,6 @@
                 for(let k in changes) {
                     if(attrRefs.value[k]) {
                         // Broadcast changes to Attribute component...
-                        console.log(changes[k]);
                         state.attributeValues[k].value = changes[k].value;
                         attrRefs.value[k].handleExternalChange(changes[k]);
                         // ... but also display info
