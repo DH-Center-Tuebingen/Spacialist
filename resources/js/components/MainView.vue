@@ -170,7 +170,7 @@
     import { useToast } from '@/plugins/toast.js';
 
     import Quotation from '@/components/bibliography/Quotation.vue';
-    import useWebSocketConnectionToast from '../composables/websocket-connection-toast';
+    import useWebSocketConnectionToast from '@/composables/websocket-connection-toast.js';
 
     export default {
         components: {

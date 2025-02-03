@@ -117,7 +117,7 @@
                 </div>
                 <attribute-list
                     class="h-100 overflow-y-auto overflow-x-hidden"
-                    style="padding-bottom: 20rem;"
+                    style="padding-bottom: 10rem;"
                     :group="{name: 'attribute-selection', pull: false, put: true}"
                     :attributes="state.entityAttributes"
                     :values="state.entityValues"

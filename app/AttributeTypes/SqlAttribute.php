@@ -2,6 +2,9 @@
 
 namespace App\AttributeTypes;
 
+use App\EntityAttribute;
+use Illuminate\Support\Facades\DB;
+
 class SqlAttribute extends StaticAttribute
 {
     protected static string $type = "sql";
@@ -15,16 +18,16 @@ class SqlAttribute extends StaticAttribute
     public static function serialize(mixed $data) : mixed {
         return false;
     }
-    
-    public static function evaluate($sql, $entity_id) {
+
+    public static function evaluate(EntityAttribute $sql, int $entity_id) : array|string {
         // if entity_id is referenced several times
         // add an incrementing counter, so the
         // references are unique (required by PDO)
         $text = $sql->attribute->text;
         $safes = [];
-        
+
         $cnt = substr_count($sql->attribute->text, ':entity_id');
-        if($cnt === 1){
+        if($cnt === 1) {
             $text = $sql->attribute->text;
             $safes = [
                 ':entity_id' => $entity_id,
@@ -40,9 +43,9 @@ class SqlAttribute extends StaticAttribute
             }, $sql->attribute->text);
         }
 
-        \DB::beginTransaction();
-        $sqlValue = \DB::select($text, $safes);
-        \DB::rollBack();
+        DB::beginTransaction();
+        $sqlValue = DB::select($text, $safes);
+        DB::rollBack();
 
         // Check if only one result exists
         if(count($sqlValue) === 1) {

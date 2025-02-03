@@ -896,7 +896,7 @@
                             aid: aid,
                         },
                     };
-                    if(data.id) {
+                    if(data?.id) {
                         // if data.id exists, there has been an entry in the database, therefore it is a replace/remove operation
                         if(
                             (dirtyValues[v] && dirtyValues[v] != '')
@@ -1083,7 +1083,7 @@
                 }
             });
             onBeforeRouteUpdate(async (to, from) => {
-                if(to.params.id !== route.params.id) {                    
+                if(to.params.id !== route.params.id) {
                     if(state.formDirty) {
                         showDiscard(to, resetDirtyStates, saveEntity);
                         return false;

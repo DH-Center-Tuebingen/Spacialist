@@ -36,7 +36,7 @@
     import { useField } from 'vee-validate';
 
     import * as yup from 'yup';
-    import InputError from '../forms/InputError.vue';
+    import InputError from '@/components/forms/InputError.vue';
 
     export default {
         components: {
