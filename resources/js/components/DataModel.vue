@@ -212,7 +212,11 @@
                                             :is-source="true"
                                             :show-info="true"
                                             @delete-element="onDeleteAttribute"
-                                        />
+                                        >
+                                            <template #preceding="{ attribute }">
+                                                <AttributeUsageIndicator :count="attribute.entity_types_count" />
+                                            </template>
+                                        </attribute-list>
                                     </div>
                                 </div>
                             </div>
@@ -241,7 +245,7 @@
                         :icontext="t('global.information')"
                     />
 
-                    <template #preceding="{attribute}">
+                    <template #preceding="{ attribute }">
                         <AttributeUsageIndicator :count="attribute.entity_types_count" />
                     </template>
                 </attribute-list>
