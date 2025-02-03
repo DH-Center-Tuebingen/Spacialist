@@ -1,23 +1,29 @@
 <template>
-    <div class="input-group">
-        <input
-            :id="name"
-            v-model="v.value"
-            class="form-control input-anchor"
-            type="text"
-            :disabled="disabled"
-            :name="name"
-            @mousedown="preventFocusOnCtrlClick"
-            @click="openOnCtrlClick"
-        >
-        <a
-            class="input-group-text text-muted"
-            target="_blank"
-            :href="v.value"
-            :title="v.value"
-        >
-            <i class="fas fa-fw fa-arrow-up-right-from-square" />
-        </a>
+    <div class="url-attribute">
+        <div class="input-group">
+            <input
+                :id="name"
+                v-model="v.value"
+                class="form-control input-anchor"
+                type="text"
+                :disabled="disabled"
+                :name="name"
+                @mousedown="preventFocusOnCtrlClick"
+                @click="openOnCtrlClick"
+            >
+            <a
+                class="input-group-text text-muted"
+                target="_blank"
+                :href="v.value"
+                :title="v.value"
+            >
+                <i class="fas fa-fw fa-arrow-up-right-from-square" />
+            </a>
+        </div>
+        <InputError
+            :v="v"
+            :error="errorMessage"
+        />
     </div>
 </template>
 
@@ -30,8 +36,12 @@
     import { useField } from 'vee-validate';
 
     import * as yup from 'yup';
+    import InputError from '../forms/InputError.vue';
 
     export default {
+        components: {
+            InputError,
+        },
         props: {
             name: {
                 type: String,
@@ -76,6 +86,7 @@
 
             // DATA
             const {
+                errorMessage,
                 value: fieldValue,
                 meta,
                 resetField,
@@ -115,6 +126,7 @@
                 openOnCtrlClick,
                 preventFocusOnCtrlClick,
                 // STATE
+                errorMessage,
                 state,
                 v,
             };

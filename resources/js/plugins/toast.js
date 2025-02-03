@@ -48,7 +48,9 @@ export function addToast(message, title, config) {
         e.target.parentNode.remove();
     });
     const bsToast = new Toast(toastElem);
+    finalConfig.instance = bsToast;
     bsToast.show();
+    return bsToast;
 }
 
 function initializeWrapper(config) {
@@ -85,7 +87,7 @@ const createToast = config => ({
     $toast(message, title, config = {}) {
         const reducedLocal = reduceToastConfig(config);
         const combined = reduceToastConfig({...this.config, ...reducedLocal});
-        addToast(message, title, combined);
+        return addToast(message, title, combined);
     },
 });
 
@@ -102,7 +104,7 @@ export function provideToast(toastConfig = {}) {
 export function useToast() {
     // const toast = inject(toastSymbol);
     const toast = toastInstance;
-    if (!toast) throw new Error('No toast provided!');
+    if(!toast) throw new Error('No toast provided!');
 
     if(!store.wrapper) {
         initializeWrapper(toast.config);

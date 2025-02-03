@@ -192,8 +192,8 @@
         @update-selection="onSelectionUpdate"
         @change="updateDirtyState"
     />
-
-    <!-- <multichoice-attribute
+    
+    <multichoice-attribute
         v-else-if="data.datatype == 'string-mc'"
         :ref="el => setRef(el)"
         :disabled="state.disabled"
@@ -201,7 +201,7 @@
         :value="state.value"
         :selections="state.selection"
         @change="updateDirtyState"
-    /> -->
+    />
 
     <userlist-attribute
         v-else-if="data.datatype == 'userlist'"
