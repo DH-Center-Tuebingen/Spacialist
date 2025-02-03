@@ -130,7 +130,6 @@
             });
 
             watch(_ => props.value, (newValue, oldValue) => {
-                console.log('User list value updated: ', newValue);
                 resetFieldState();
             });
             watch(_ => v.value, (newValue, oldValue) => {

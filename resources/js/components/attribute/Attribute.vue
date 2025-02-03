@@ -192,7 +192,7 @@
         @update-selection="onSelectionUpdate"
         @change="updateDirtyState"
     />
-    
+
     <multichoice-attribute
         v-else-if="data.datatype == 'string-mc'"
         :ref="el => setRef(el)"
@@ -380,7 +380,6 @@
                 externalUpdate: false,
                 // TODO check for selection need?
                 selection: computed(_ => attributeStore.getAttributeSelection(data.value.id) || []),
-
             });
 
             const setRef = el => {
@@ -429,10 +428,9 @@
             const handleExternalChange = changeData => {
                 state.externalUpdate = !!changeData;
                 if(state.externalUpdate) {
-                    
                     // set "initial" value (aka state.value) to external value
                     state.value = _cloneDeep(getValueOrDefault());
-                    
+
                     // if not dirty: resetFieldState to external "initial" value
                     if(!attrRef.value?.v?.meta?.dirty) {
                         nextTick(_ => {

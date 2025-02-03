@@ -487,7 +487,6 @@ export const useEntityStore = defineStore('entity', {
             this.receivedEntityData[entityId] = {};
             this.receivedEntityData[entityId][attributeId] = attributeValue;
             this.receivedEntityData[entityId][attributeId].value = value;
-            
         },
         updateEntityData(entityId, updatedValues, patchedData, removedData) {
             const entity = this.getEntity(entityId);
@@ -506,8 +505,8 @@ export const useEntityStore = defineStore('entity', {
                 }
             }
 
-            // Remove the data from the entity. 
-            // We need to do this as the 'replace', 'add' 'remove' 
+            // Remove the data from the entity.
+            // We need to do this as the 'replace', 'add' 'remove'
             // operations are calculated based on this value.
             for(const attributeId in removedData) {
                 if(entity.data[attributeId]) {

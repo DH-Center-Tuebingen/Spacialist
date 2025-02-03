@@ -17,7 +17,6 @@ use App\Exceptions\Structs\ImportExceptionStruct;
 use App\File;
 use App\Import\EntityImporter;
 use App\Reference;
-use App\ThConcept;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -186,7 +185,7 @@ class EntityController extends Controller {
                 'error' => __('You do not have the permission to get an entity\'s data'),
             ], 403);
         }
-        
+
         $entity = null;
         try{
             $entity = Entity::findOrFail($id);
@@ -225,7 +224,7 @@ class EntityController extends Controller {
             ], 403);
         }
 
-        try{
+        try {
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
@@ -663,14 +662,14 @@ class EntityController extends Controller {
                         $attrval->delete();
                     }
                     break;
-                    
+
                 /**
                  * In the case when a user created the attribute, while another was visiting the
-                 * page and sends an 'add' operation, and the other user also sends his changes, 
+                 * page and sends an 'add' operation, and the other user also sends his changes,
                  * the application would have thrown an error, that the attribute was already created.
-                 * 
+                 *
                  * That's why we combined the add and replace operations into one case.
-                 * [SO] 29.01.2025 
+                 * [SO] 29.01.2025
                  */
                 case 'add':
                 case 'replace':
@@ -678,7 +677,7 @@ class EntityController extends Controller {
                         ->where('attribute_id', $aid)
                         ->onlyModerated()
                         ->exists();
-                    
+
                     // Currently the logic is that a moderated state cannot be changed
                     // by a moderated user.
                     if($alreadyModerated && $user->isModerated()) {
@@ -725,7 +724,7 @@ class EntityController extends Controller {
             $attrval->{$formKeyValue->key} = $formKeyValue->val;
             $attrval->user_id = $user->id;
             $attrval->save();
-            
+
             // As we cannot ensure that the 'add' is correct,
             // we use this laravel option to ensure the attribute
             // was created and not replaced.
@@ -950,7 +949,7 @@ class EntityController extends Controller {
             'summary' => 'nullable|string',
         ]);
 
-        try{
+        try {
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([

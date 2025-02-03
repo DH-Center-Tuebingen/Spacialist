@@ -1,6 +1,15 @@
-import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue';
-import { getState, getConnection } from '@/helpers/websocket';
+import {
+        computed,
+        onBeforeUnmount,
+        onMounted,
+        ref,
+        watch,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
+import {
+        getState,
+        getConnection,
+} from '@/helpers/websocket.js';
 import { useToast } from '@/plugins/toast.js';
 
 
@@ -8,14 +17,14 @@ export default function useWebSocketConnectionToast() {
     const toast = useToast();
     const t = useI18n().t;
     const status = ref(getState());
-    const message = computed(() => {
+    const message = computed(_ => {
         if(isConnected.value) {
             return t('websockets.service_available_again');
         } else {
             return t('websockets.service_unavailable');
         }
     });
-    const isConnected = computed(() => {
+    const isConnected = computed(_ => {
         switch(status.value) {
             case 'connected':
                 return true;
@@ -33,18 +42,18 @@ export default function useWebSocketConnectionToast() {
         status.value = getState();
     };
 
-    onMounted(() => {
+    onMounted(_ => {
         const connection = getConnection();
         if(!connection) {
             console.error('Could not get connection object');
         } else {
-            connection.bind('state_change', function (states) {
+            connection.bind('state_change', function(states) {
                 updateState();
             });
         }
     });
 
-    onBeforeUnmount(() => {
+    onBeforeUnmount(_ => {
         const connection = getConnection();
         if(!connection) {
             console.error('Could not get connection object');

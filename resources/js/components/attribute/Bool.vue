@@ -41,8 +41,7 @@
         },
         emits: ['change'],
         setup(props, context) {
-                        
-            const initValue = computed(()=>!!props.value ? true : false);
+            const initValue = computed(_ => !!props.value);
 
             // FUNCTIONS
             const resetFieldState = _ => {
@@ -77,7 +76,6 @@
 
 
             watch(_ => props.value, (newValue, oldValue) => {
-                console.log('value changed', newValue, oldValue);
                 resetFieldState();
             });
             watch(_ => v.value, (newValue, oldValue) => {
