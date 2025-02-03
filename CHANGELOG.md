@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.11
+
+### Added
+- Added websockets for various data synchronization
+  - _Entity Data_
+  - _Attribute Values_
+  - _Entity References_
+  - _Entity Comments_
+### Fixed
+- Dirty indicator not showing in Tab of _Entity Detail_
+
 ## 0.10.1
 ### Added
 - Option to display attributes in _Data Model Editor_ in groups
