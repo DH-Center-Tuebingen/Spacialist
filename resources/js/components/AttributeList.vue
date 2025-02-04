@@ -419,12 +419,12 @@
             };
             const getDirtyValues = _ => {
                 const values = {};
+                const excludedDatatypes = ['sql', 'serial'];
                 for(let k in attrRefs.value) {
                     const datatype = attributeStore.getAttribute(k).datatype;
                     const curr = attrRefs.value[k];
                     let currValue = null;
                     // curr is e.g. null if attribute is hidden
-                    const excludedDatatypes = ['sql', 'serial'];
                     if(excludedDatatypes.includes(datatype)) {
                         continue;
                     }

@@ -126,16 +126,14 @@
             });
 
             /**
-             * v is required as the attr-list fetches 
+             * v is required as the attr-list fetches
              * the values of the attributes via every
              * attribute's v.value.
              */
             const v = computed(_ => {
                 return {
                     value: current.value,
-                    meta: {
-                        ...meta
-                    }
+                    meta: meta,
                 };
             });
 
