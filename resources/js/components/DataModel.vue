@@ -236,19 +236,18 @@
                     :show-info="true"
                     @delete-element="onDeleteAttribute"
                 >
-                    <Alert
-                        v-if="state.attributeList.length == 0"
-                        class="mb-0"
-                        :message="`${t('global.search_no_results_for')} ${state.attributeQuery}`"
-                        :type="'info'"
-                        :noicon="false"
-                        :icontext="t('global.information')"
-                    />
-
                     <template #after="{ attribute }">
                         <AttributeUsageIndicator :count="attribute.entity_types_count" />
                     </template>
                 </attribute-list>
+                <Alert
+                    v-if="state.attributeList.length == 0"
+                    class="mb-0"
+                    :message="`${t('global.search_no_results_for')} ${state.attributeQuery}`"
+                    :type="'info'"
+                    :noicon="false"
+                    :icontext="t('global.information')"
+                />
             </div>
         </div>
     </div>
