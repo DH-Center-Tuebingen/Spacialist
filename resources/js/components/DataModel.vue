@@ -400,7 +400,7 @@
                 attributeListValues: computed(_ => {
                     if(!state.attributeList) return;
                     let data = {};
-                    for(let i = 0; i < state.attributeList.length; i++) {
+                    for(let i=0; i<state.attributeList.length; i++) {
                         let a = state.attributeList[i];
                         data[a.id] = {
                             value: getInitialAttributeValue(a, 'datatype'),
