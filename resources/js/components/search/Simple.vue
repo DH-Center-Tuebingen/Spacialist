@@ -22,7 +22,7 @@
         :placeholder="t('global.search')"
         :disabled="disabled"
         @search-change="search"
-        @change="onChange"
+        @select="onChange"
     >
         <template #singlelabel="{ value }">
             <div class="multiselect-single-label">
@@ -129,6 +129,7 @@
         reactive,
         ref,
         toRefs,
+        watch,
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
@@ -252,7 +253,7 @@
 
                 let filteredResults;
                 if(!!filterFn.value) {
-                    filteredResults = filterFn.value(results, query);
+                    filteredResults = filterFn.value(results, query, state.searchResults);
                 } else {
                     filteredResults = results;
                 }
@@ -293,16 +294,9 @@
                     throw new Error('No key provided!');
                 }
             };
-            
+
             const getBaseValue = _ => {
                 return mode.value == 'single' ? {} : [];
-            };
-            const getDefaultValue = _ => {
-                if(defaultValue.value) {
-                    return defaultValue.value;
-                } else {
-                    return getBaseValue();
-                }
             };
 
             const onChange = value => {
@@ -324,14 +318,14 @@
                 searchResults: [],
             });
 
-            watch(_ => defaultValue.value, (newValue, oldValue) => {
+            watch(_ => props.value, (newValue, oldValue) => {
                 if(!newValue || newValue.reset) {
                     state.entry = getBaseValue();
                 } else {
                     state.entry = newValue;
                 }
             });
-            
+
             const formatChainLink = chainLink => {
                 if(state.isFnChain) {
                     return chainFn.value(chainLink);
