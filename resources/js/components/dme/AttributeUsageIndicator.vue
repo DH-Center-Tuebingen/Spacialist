@@ -3,6 +3,11 @@
         :class="state.classes"
         :title="t('main.datamodel.attribute.indicator_info', { cnt: count }, count)"
     >
+        <!-- 
+            The icon is not ideal, it should be a circle with outline.
+            But in FontAwesome this icon is not available to us.
+            When switching to a different icon library, this should be updated.  
+        -->
         <i class="fas fa-circle-info" />
     </span>
 </template>
