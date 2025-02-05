@@ -33,6 +33,7 @@ return [
     'confirmed'            => 'The :attribute confirmation does not match.',
     'date'                 => 'The :attribute is not a valid date.',
     'date_format'          => 'The :attribute does not match the format :format.',
+    'definition'           => 'The value does not match the definition for :type.',
     'different'            => 'The :attribute and :other must be different.',
     'digits'               => 'The :attribute must be :digits digits.',
     'digits_between'       => 'The :attribute must be between :min and :max digits.',
@@ -44,9 +45,12 @@ return [
     'filled'               => 'The :attribute field must have a value.',
     'image'                => 'The :attribute must be an image.',
     'import_format'        => 'Provided data has the wrong format, expected: :format',
+    'import_not_supported' => 'Import is not supported.',
     'in'                   => 'The selected :attribute is invalid.',
     'in_array'             => 'The :attribute field does not exist in :other.',
     'integer'              => 'The :attribute must be an integer.',
+    'integer_positive'     => 'The :attribute must be a positive integer.',
+    'invalid_geodata'      => 'Invalid geodata: :data',
     'ip'                   => 'The :attribute must be a valid IP address.',
     'ipv4'                 => 'The :attribute must be a valid IPv4 address.',
     'ipv6'                 => 'The :attribute must be a valid IPv6 address.',
@@ -67,6 +71,7 @@ return [
     ],
     'not_in'               => 'The selected :attribute is invalid.',
     'numeric'              => 'The :attribute must be a number.',
+    'object_missing'       => ':Object does not exist.',
     'present'              => 'The :attribute field must be present.',
     'regex'                => 'The :attribute format is invalid.',
     'required'             => 'The :attribute field is required.',
@@ -85,10 +90,13 @@ return [
     ],
     'string'               => 'The :attribute must be a string.',
     'timezone'             => 'The :attribute must be a valid zone.',
+    'types'                => 'The values must be of type :type.',
     'unit'                 => 'The :attribute must be a valid unit.',
     'unique'               => 'The :attribute has already been taken.',
     'uploaded'             => 'The :attribute failed to upload.',
     'url'                  => 'The :attribute format is invalid.',
+    'users'                => 'Users were not found.',
+    
 
     /*
     |--------------------------------------------------------------------------

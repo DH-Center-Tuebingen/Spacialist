@@ -1,15 +1,16 @@
 <template>
     <multiselect
         :id="state.id"
-        v-model="state.entry"
+        :value="value"
         class="multiselect"
         :name="state.id"
         :object="true"
         :label="'id'"
+        :loading="state.loading"
         :track-by="'id'"
         :value-prop="'id'"
         :mode="mode"
-        :options="query => search(query)"
+        :options="state.searchResults"
         :hide-selected="false"
         :filterResults="false"
         :resolve-on-load="false"
@@ -18,11 +19,10 @@
         :caret="false"
         :min-chars="0"
         :searchable="true"
-        :delay="delay"
-        :limit="limit"
         :placeholder="t('global.search')"
         :disabled="disabled"
-        @change="handleSelection"
+        @search-change="search"
+        @change="onChange"
     >
         <template #singlelabel="{ value }">
             <div class="multiselect-single-label">
@@ -88,6 +88,38 @@
                 {{ t('global.search_no_term_info') }}
             </div>
         </template>
+        <template
+            v-if="infinite && canFetchMore && hasResults"
+            #afterlist=""
+        >
+            <div class="d-flex">
+                <!--
+                It happened that the click listener occasionally closed the select list.
+                Using the mousedown event prevents this from happening.
+                We need to prevent the click event and stop the propagation of the link navigation.
+                -->
+                <a
+                    class="list-hover text-decoration-none d-flex align-items-center justify-content-between p-2 flex-fill"
+                    href="#"
+                    tabindex="-1"
+                    draggable="false"
+                    @click.stop.prevent
+                    @mousedown.stop.prevent="loadMore()"
+                >
+                    <span>
+                        <i class="fas fa-fw fa-arrows-rotate" />
+                        {{ t('global.search_load_n_more', { n: limit }) }}
+                    </span>
+
+                    <span
+                        v-if="state.loading"
+                        class="spinner-border spinner-border-sm ms-2"
+                        role="status"
+                        aria-hidden="true"
+                    />
+                </a>
+            </div>
+        </template>
     </multiselect>
 </template>
 
@@ -95,14 +127,15 @@
     import {
         computed,
         reactive,
+        ref,
         toRefs,
-        watch,
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
 
     import {
-        getTs
+        _debounce,
+        getTs,
     } from '@/helpers/helpers.js';
 
     export default {
@@ -147,16 +180,32 @@
                 default: null,
             },
             mode: {
-                type: String,
                 required: false,
                 default: 'single',
+                validator: (val) => ['single', 'multiple'].includes(val),
             },
-            defaultValue: {
-                type: Object, // TODO should be Array for Entity-MC
+            value: {
                 required: false,
                 default: null,
+                validator: (val, props) => {
+                    if(props.mode == 'single') {
+                        return val == null || typeof val == 'object';
+                    } else {
+                        return val == null || Array.isArray(val);
+                    }
+                },
             },
             disabled: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
+            infinite: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
+            canFetchMore: {
                 type: Boolean,
                 required: false,
                 default: false,
@@ -167,8 +216,6 @@
             const { t } = useI18n();
 
             const {
-                delay,
-                limit,
                 endpoint,
                 filterFn,
                 keyText,
@@ -176,8 +223,6 @@
                 chain,
                 chainFn,
                 mode,
-                defaultValue,
-                disabled,
             } = toRefs(props);
 
             if(!keyText.value && !keyFn.value) {
@@ -186,51 +231,69 @@
             // FETCH
 
             // FUNCTIONS
-            const search = async (query) => {
-                state.query = query;
-                if(!query) {
-                    return await new Promise(r => r([]));
-                }
+
+            // Used to check for a race condition
+            const searchExecutionCounter = ref(0);
+            /**
+             * Called when the search is changed
+             * so the query always has a different value.
+             */
+            const requestSearchEndpoint = async query => {
+                searchExecutionCounter.value++;
+                const round = searchExecutionCounter.value;
+                state.loading = true;
                 const results = await endpoint.value(query);
-                if(!!filterFn.value && !!filterFn.value) {
-                    return filterFn.value(results, query);
+
+                if(round !== searchExecutionCounter.value) {
+                    // If there was a newer query executed in the meantime,
+                    // we do not want to apply the results.
+                    return;
+                }
+
+                let filteredResults;
+                if(!!filterFn.value) {
+                    filteredResults = filterFn.value(results, query);
                 } else {
-                    return results;
+                    filteredResults = results;
+                }
+
+                // Only apply if the query did not change in the meantime.
+                if(state.query === query) {
+                    state.searchResults = [
+                        ...state.searchResults,
+                        ...filteredResults,
+                    ];
+                }
+                state.loading = false;
+            };
+
+            const debouncedSearchRequest = _debounce(requestSearchEndpoint, props.delay);
+            const search = async query => {
+                if(!query) query = '';
+                resetSearch(query);
+                // As long as the query is typed we debounce the search
+                debouncedSearchRequest(query);
+            };
+            const resetSearch = (query = '') => {
+                state.query = query;
+                state.searchResults = [];
+            };
+            const loadMore = async _ => {
+                if(state.loading) return;
+                await requestSearchEndpoint(state.query);
+            };
+
+            const displayResult = obj => {
+                if(keyText.value) {
+                    return obj[keyText.value];
+                } else if(keyFn.value) {
+                    return keyFn.value(obj);
+                } else {
+                    // Should never happen
+                    throw new Error('No key provided!');
                 }
             };
-            const displayResult = result => {
-                if(!!keyText.value) {
-                    return result[keyText.value];
-                } else if(!!keyFn.value) {
-                    return keyFn.value(result);
-                } else {
-                    // Should never happen ;) :P
-                    throw new Error('Can not display search result!');
-                }
-            };
-            const handleSelection = option => {
-                let data = {};
-                if(option) {
-                    if(mode.value == 'single') {
-                        data = {
-                            ...option,
-                            added: true,
-                        };
-                    } else {
-                        data = {
-                            values: option,
-                            added: true,
-                        };
-                    }
-                } else {
-                    data.removed = true;
-                }
-                state.entry = option;
-                context.emit('selected', data);
-            };
-            const handleTagClick = option => {
-                context.emit('entry-click', option);
-            };
+            
             const getBaseValue = _ => {
                 return mode.value == 'single' ? {} : [];
             };
@@ -242,14 +305,23 @@
                 }
             };
 
+            const onChange = value => {
+                context.emit('selected', value);
+            };
+
+            const handleTagClick = option => {
+                context.emit('entry-click', option);
+            };
+
             // DATA
             const state = reactive({
                 id: `multiselect-search-${getTs()}`,
-                entry: getDefaultValue(),
+                loading: false,
                 query: '',
                 isSimpleChain: computed(_ => chain.value && chain.value.length > 0),
                 isFnChain: computed(_ => !!chainFn.value),
                 enableChain: computed(_ => state.isSimpleChain || state.isFnChain),
+                searchResults: [],
             });
 
             watch(_ => defaultValue.value, (newValue, oldValue) => {
@@ -268,16 +340,21 @@
                 }
             };
 
+            const hasResults = computed(_ => state.searchResults.length > 0);
+
             // RETURN
             return {
                 t,
                 // HELPER
                 // LOCAL
+                hasResults,
                 search,
                 formatChainLink,
+                loadMore,
                 displayResult,
-                handleSelection,
+                // handleChange,
                 handleTagClick,
+                onChange,
                 // STATE
                 state,
             };

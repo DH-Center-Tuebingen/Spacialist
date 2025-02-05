@@ -16,7 +16,7 @@
                     :default-value="state.searchResetValue"
                     :chain="'broaders'"
                     :chain-fn="b => translateConcept(b.concept_url)"
-                    @selected="e => labelSelected(e, 'label')"
+                    @selected="label => labelSelected(label, 'label')"
                 />
             </div>
         </div>
@@ -79,7 +79,7 @@
                 <simple-search
                     :endpoint="searchAttribute"
                     :key-fn="getAttributeLabel"
-                    @selected="e => labelSelected(e, 'rootAttributeLabel')"
+                    @selected="label => labelSelected(label, 'rootAttributeLabel')"
                 />
             </div>
         </div>
@@ -95,7 +95,7 @@
                     :endpoint="searchLabel"
                     :key-fn="getConceptLabel"
                     :default-value="state.attribute.label"
-                    @selected="e => labelSelected(e, 'rootLabel')"
+                    @selected="label => labelSelected(label, 'rootLabel')"
                 />
             </div>
         </div>
@@ -373,17 +373,8 @@
             const emitUpdate = _ => {
                 context.emit('updated', state.attribute);
             };
-            const labelSelected = (e, key) => {
-                const {
-                    added,
-                    removed,
-                    ...label
-                } = e;
-                if(removed) {
-                    state.attribute[key] = null;
-                } else if(added) {
-                    state.attribute[key] = label;
-                }
+            const labelSelected = (label, key) => {
+                state.attribute[key] = label;
                 emitUpdate();
             };
             const typeSelected = e => {

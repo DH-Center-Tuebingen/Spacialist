@@ -80,6 +80,7 @@
         "search_no_results_for": "No results for term:",
         "search_no_term_info": "Enter a search term",
         "search_no_term_info_global": "Enter a search term to search globally",
+        "search_load_n_more": "Load up to {n} more results",
         "login": "Login",
         "login_title": "Login",
         "login_subtitle": "Welcome to Spacialist",
@@ -235,6 +236,7 @@
                 "mass": {
                     "label": "Mass",
                     "units": {
+                        "milligram": "Milligram",
                         "gram": "Gram",
                         "kilogram": "Kilogram",
                         "ton": "Tons",
@@ -698,6 +700,10 @@
             "toggle_pretty_print": "Toggle Pretty Print"
         },
         "datamodel": {
+            "expand_groups": "Expand all groups",
+            "collapse_groups": "Collapse all groups",
+            "sort_by_name": "Sort by name",
+            "sort_by_creation_date": "Sort by creation date",
             "toasts": {
                 "updated_type": {
                     "title": "Entity-Type updated",
@@ -716,6 +722,10 @@
                 "title": "Available Attributes",
                 "add_button": "Add Attribute",
                 "show_hidden": "Show hidden",
+                "hide_hidden": "Hide hidden",
+                "separated": "List attributes separated",
+                "in_groups": "List attributes in groups",
+                "indicator_info": "This attribute is not currently used in any entity-type! | This attribute is currently used in one entity-type. | This attribute is currently used in {cnt} entity-types.",
                 "modal": {
                     "new": {
                         "title": "New Attribute"
@@ -740,7 +750,7 @@
             "detail": {
                 "properties": {
                     "title": "Properties",
-                    "top_level": "Top-Level-Entity-Type?",
+                    "top_level": "Top-Level",
                     "sub_types": "Allowed Sub-Entity-Types"
                 },
                 "attribute": {

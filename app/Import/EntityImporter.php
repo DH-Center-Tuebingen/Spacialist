@@ -25,7 +25,7 @@ class EntityImporter {
 
     private $metadata;
     private array $attributesMap;
-    private array $attributeAttributeMap = [];
+    private array $attributeIdToAttributeValue = [];
     private int $entityTypeId;
     private string $nameColumn;
     private ?string $parentColumn = null;
@@ -42,26 +42,26 @@ class EntityImporter {
 
         // The parent column is optional, therefore we only set it 
         // to another value than null, if there is valid data set.
-        if (array_key_exists('parent_column', $data)) {
+        if(array_key_exists('parent_column', $data)) {
             $parentColumn = trim($data['parent_column']);
-            if (!empty($parentColumn)) {
+            if(!empty($parentColumn)) {
                 $this->parentColumn = trim($data['parent_column']);
             }
         }
     }
 
     private function validateStringData(string $varName, string $dataName) {
-        if (gettype($this->{$varName}) == "string") {
+        if(gettype($this->{$varName}) == "string") {
             $this->{$varName} = trim($this->{$varName});
         }
 
-        if (empty($this->{$varName})) {
+        if(empty($this->{$varName})) {
             $this->resolver->conflict(__("entity-importer.missing-data", ["column" => $dataName]));
         }
     }
 
     private function validateAttributeData() {
-        if (!is_array($this->attributesMap)) {
+        if(!is_array($this->attributesMap)) {
             $this->resolver->conflict(__("entity-importer.invalid-data", ["column" => "attributes", "value" => json_encode($this->attributesMap)]));
             return;
         }
@@ -76,13 +76,13 @@ class EntityImporter {
         $this->validateStringData('entityTypeId', 'entity_type_id');
         $this->validateAttributeData();
 
-        if ($this->resolver->hasErrors()) {
+        if($this->resolver->hasErrors()) {
             return $this->resolver;
         }
 
         $handle = fopen($filepath, 'r');
 
-        if (!$handle) {
+        if(!$handle) {
             return $this->resolver->conflict(__("entity-importer.file-not-found", ["file" => $filepath]));
         }
 
@@ -90,7 +90,7 @@ class EntityImporter {
 
         try {
             $headers = $csvTable->parseHeaders($handle);
-        } catch (\Exception $e) {
+        } catch(\Exception $e) {
             return $this->resolver->conflict(__("entity-importer.empty"));
         }
 
@@ -99,20 +99,20 @@ class EntityImporter {
         $this->verifyEntityType($this->entityTypeId);
         $this->verifyAttributeMapping($headers);
 
-        if ($this->resolver->hasErrors()) {
+        if($this->resolver->hasErrors()) {
             return $this->resolver;
         }
 
         $csvTable->parse($handle, function ($row, $index) use (&$result, &$status) {
             $namesValid = $this->validateName($row, $index);
-            if ($namesValid) {
+            if($namesValid) {
                 // The location depends on the name column. If the name is not correct, we can't check the location.
                 $this->validateLocation($row, $index);
             }
             $this->validateAttributesInRow($row, $index);
         });
 
-        if ($csvTable->getDataRows() == 0) {
+        if($csvTable->getDataRows() == 0) {
             $this->resolver->conflict(__("entity-importer.empty"));
         }
 
@@ -121,7 +121,7 @@ class EntityImporter {
     }
 
     private function verifyNameColumn($headers): bool {
-        if (empty($this->nameColumn) || !in_array($this->nameColumn, $headers)) {
+        if(empty($this->nameColumn) || !in_array($this->nameColumn, $headers)) {
             $this->resolver->conflict(__("entity-importer.name-column-does-not-exist", ["column" => $this->nameColumn]));
             return false;
         }
@@ -129,7 +129,7 @@ class EntityImporter {
     }
 
     private function verifyParentColumn($headers): bool {
-        if (isset($this->parentColumn) && !in_array($this->parentColumn, $headers)) {
+        if(isset($this->parentColumn) && !in_array($this->parentColumn, $headers)) {
             $this->resolver->conflict(__("entity-importer.parent-column-does-not-exist", ["column" => $this->parentColumn]));
             return false;
         }
@@ -137,7 +137,7 @@ class EntityImporter {
     }
 
     private function verifyEntityType($entityTypeId): bool {
-        if (!EntityType::find($entityTypeId)) {
+        if(!EntityType::find($entityTypeId)) {
             $this->resolver->conflict(__("entity-importer.entity-type-does-not-exist", ["entity_type_id" => $entityTypeId]));
             return false;
         }
@@ -147,41 +147,45 @@ class EntityImporter {
     private function verifyAttributeMapping($headers): bool {
         $nameErrors = [];
         $indexErrors = [];
-        foreach ($this->attributesMap as $attribute => $column) {
-            if (!in_array($column, $headers)) {
+        foreach($this->attributesMap as $attributeId => $column) {
+            $column = trim($column);
+            if($column == "") {
+                continue;
+            }
+
+            if(!in_array($column, $headers)) {
                 array_push($nameErrors, $column);
             }
 
-            $attr = Attribute::find($attribute);
-            if (!$attr) {
-                array_push($indexErrors, $attribute);
+            $attr = Attribute::find($attributeId);
+            if(!$attr) {
+                array_push($indexErrors, $attributeId);
             } else {
-                $this->attributeAttributeMap[$column] = $attr;
+                $this->attributeIdToAttributeValue[$attributeId] = $attr;
             }
         }
 
-        if (count($indexErrors) > 0) {
+        $valid = true;
+        if(count($indexErrors) > 0) {
             $this->resolver->conflict(__("entity-importer.attribute-id-does-not-exist", ["attributes" => implode(", ", $indexErrors)]));
+            $valid = false;
         }
 
-        if (count($nameErrors) > 0) {
+        if(count($nameErrors) > 0) {
             $this->resolver->conflict(__("entity-importer.attribute-column-does-not-exist", ["columns" => implode(", ", $nameErrors)]));
+            $valid = false;
         }
 
-        if (count($indexErrors) > 0 || count($nameErrors) > 0) {
-            return false;
-        } else {
-            return true;
-        }
+        return $valid;
     }
 
     private function validateName($row, $rowIndex): bool {
         $entityName = $row[$this->nameColumn];
 
-        if (gettype($entityName) == "string")
+        if(gettype($entityName) == "string")
             $entityName = trim($entityName);
 
-        if (empty($entityName)) {
+        if(empty($entityName)) {
             $this->rowConflict($rowIndex, "entity-importer.missing-name-in-row");
             return false;
         }
@@ -193,9 +197,9 @@ class EntityImporter {
 
         $parentTypeId = null;
         $parentPath = $this->getParentColumn($row);
-        if (!empty($parentPath)) {
+        if(!empty($parentPath)) {
             $parentId = Entity::getFromPath($parentPath);
-            if ($parentId == null) {
+            if($parentId == null) {
                 $this->rowConflict($rowIndex, "entity-importer.parent-entity-does-not-exist", ["entity" => $parentPath]);
                 return false;
             }
@@ -205,7 +209,7 @@ class EntityImporter {
         }
 
         $isAllowedAsChild = EntityTypeRelation::isAllowed($parentTypeId, $this->entityTypeId);
-        if (!$isAllowedAsChild) {
+        if(!$isAllowedAsChild) {
             $childTh = EntityType::find($this->entityTypeId)->thesaurus_url;
             $childName = ThConcept::getLabel($childTh);
 
@@ -217,7 +221,7 @@ class EntityImporter {
         }
 
         $filepath = implode(self::PARENT_DELIMITER, array_filter([$parentPath, $row[$this->nameColumn]], fn ($part) => !empty($part)));
-        if ($this->checkIfEntityExists($filepath)) {
+        if($this->checkIfEntityExists($filepath)) {
             $this->resolver->update();
         } else {
             $this->resolver->create();
@@ -228,29 +232,33 @@ class EntityImporter {
 
     private function validateAttributesInRow($row, $index): bool {
         $errors = [];
-        foreach ($this->attributeAttributeMap as $column => $attribute) {
+        foreach($this->attributeIdToAttributeValue as $attributeId => $attribute) {
             try {
+                $column = $this->attributesMap[$attributeId];
                 $datatype = $attribute->datatype;
                 $attrClass = AttributeBase::getMatchingClass($datatype);
                 $attrClass::fromImport($row[$column]);
-            } catch (Exception $e) {
-                array_push($errors, $column);
+            } catch(Exception $e) {
+                array_push($errors, ["column" => $column, "value" => $row[$column]]);
             }
         }
 
-        if (count($errors) > 0) {
-            $this->rowConflict($index, "entity-importer.attribute-could-not-be-imported", ["attribute" => implode(", ", $errors)]);
+        if(count($errors) > 0) {
+            $errorStrings = array_map(function ($error) {
+                return "{{" . $error['column'] . "}}" . " => " . "{{" . $error['value'] . "}}";
+            }, $errors);
+            $this->rowConflict($index, "entity-importer.attribute-could-not-be-imported", ["attributeErrors" => implode(", ", $errorStrings)]);
         }
         return count($errors) == 0;
     }
 
     private function rowConflict($rowIndex, $msg, $args = []) {
         $tmsg = __($msg, $args);
-        $this->resolver->conflict(($rowIndex + 1) . ": " . $tmsg);
+        $this->resolver->conflict("[" . ($rowIndex + 1) . "] " . $tmsg);
     }
 
     private function getParentColumn($row) {
-        if (!isset($this->parentColumn)) {
+        if(!isset($this->parentColumn)) {
             return null;
         }
 
@@ -261,7 +269,7 @@ class EntityImporter {
     private function checkIfParentDoesExist($row) {
         $parent = $this->getParentColumn($row);
         // When parent column is not set, or it is empty, it's a top level entity
-        if ($parent == null || $parent == "") {
+        if($parent == null || $parent == "") {
             return true;
         }
 
@@ -271,10 +279,10 @@ class EntityImporter {
     // private function resolveRootPath($row, $rowIndex) {
     //     $rootPath = "";
     //     $entityName = $row[$this->nameColumn];
-    //     if (isset($this->parentColumn)) {
+    //     if(isset($this->parentColumn)) {
     //         $parent =  $row[$this->parentColumn];
     //         $parentEntity = Entity::getFromPath($parent);
-    //         if (!isset($parentEntity)) {
+    //         if(!isset($parentEntity)) {
     //             $exceptionData = new ImportExceptionStruct(
     //                 count: $rowIndex,
     //                 entry: $entityName,
@@ -297,7 +305,7 @@ class EntityImporter {
         try {
             $id = Entity::getFromPath($path);
             return $id == null ? ImportResolutionType::CREATE : ImportResolutionType::UPDATE;
-        } catch (AmbiguousValueException $e) {
+        } catch(AmbiguousValueException $e) {
             return ImportResolutionType::CONFLICT;
         }
     }

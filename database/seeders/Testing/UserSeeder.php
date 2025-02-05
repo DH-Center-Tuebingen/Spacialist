@@ -38,7 +38,7 @@ class UserSeeder extends Seeder
                 'remember_token' => NULL,
                 'created_at' => '2019-01-06 12:00:00',
                 'updated_at' => '2019-01-06 12:00:00',
-                'deleted_at' => NULL,
+                'deleted_at' => '2020-01-06 12:00:00',
             ]
         ]);
     }

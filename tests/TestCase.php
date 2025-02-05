@@ -17,7 +17,21 @@ abstract class TestCase extends BaseTestCase {
     use RefreshDatabase;
     use ArraySubsetAsserts;
 
+    /**
+    * Indicates whether the default seeder should run before each test.
+    *
+    * @var bool
+    */
+    protected $seed = true;
+
+    /**
+     * Specify the seeder that should be run.
+     */
     protected $seeder = TestingSeeder::class;
+
+    protected $connectionsToTransact = [
+        'testing'
+    ];
 
     public $user = null;
     public $token = null;
