@@ -1,10 +1,10 @@
 <template>
-    <span
-        class="rounded-circle align-self-center"
-        :class="state.colorIndicator"
-        :style="`width: ${size}px; height: ${size}px;`"
-        :title="t('main.datamodel.attribute.indicator_info', {cnt: count}, count)"
-    />
+    <span 
+        :class="state.classes"
+        :title="t('main.datamodel.attribute.indicator_info', { cnt: count }, count)"
+    >
+        <i class="fas fa-circle-info" />
+    </span>
 </template>
 
 <script>
@@ -29,23 +29,22 @@
         },
         setup(props, context) {
             const { t } = useI18n();
-
-            // FETCH
-
-            // FUNCTIONS
-
-            // DATA
+            
             const state = reactive({
-                positive: computed(_ => props.count > 0),
-                colorIndicator: computed(_ => state.positive ? 'bg-success' : 'bg-danger'),
+                classes: computed(_ => {
+                    const classes = [];
+                    if(props.count > 0) {
+                        classes.push('text-secondary');   
+                        classes.push('opacity-25');
+                    }else {
+                        classes.push('text-danger');
+                    }
+                    return classes;
+                }),
             });
 
-            // RETURN
             return {
                 t,
-                // HELPERS
-                // LOCAL
-                // STATE
                 state,
             };
         },
