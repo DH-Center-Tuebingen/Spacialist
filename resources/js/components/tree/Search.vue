@@ -3,7 +3,7 @@
         :endpoint="searchWrapper"
         :filter-fn="prependSelectAllMatches"
         :key-text="'name'"
-        :chain="'parentNames'"
+        :chain="'ancestors'"
         :can-fetch-more="state.hasNextPage"
         :infinite="true"
         @selected="e => entitySelected(e)"
@@ -52,10 +52,6 @@
                 return pagination.data;
             };
             const prependSelectAllMatches = (results, query, existingItems) => {
-                if(isPaginated(results)) {
-                    results = results.data;
-                }
-
                 // We append the 'Select All' option if there are results and no existing items
                 // otherwise we would add it at the start of any 'page' on a paginated list.
                 if(results.length !== 0 && existingItems.length === 0) {
