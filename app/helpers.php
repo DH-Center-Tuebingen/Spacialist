@@ -52,7 +52,7 @@ if(!function_exists('sp_get_permission_groups')) {
 if(!function_exists('sp_get_themes')) {
     function sp_get_themes() {
         $themeDir = base_path("resources/sass/");
-        $fileList = glob("${themeDir}app*.scss");
+        $fileList = glob("{$themeDir}app*.scss");
         $themes = [];
         foreach($fileList as $file) {
             $theme = [];
