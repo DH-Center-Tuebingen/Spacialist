@@ -3,11 +3,11 @@
         :endpoint="searchWrapper"
         :filter-fn="prependSelectAllMatches"
         :key-text="'name'"
+        :chain="'parentNames'"
         :can-fetch-more="state.hasNextPage"
         :infinite="true"
         @selected="e => entitySelected(e)"
     />
-    {{ state.hasNextPage }}
 </template>
 
 <script>
@@ -48,7 +48,8 @@
                 state.page++;
                 const pagination = await searchEntity(query, state.page);
                 state.hasNextPage = hasNextPage(pagination);
-                return pagination;
+
+                return pagination.data;
             };
             const prependSelectAllMatches = (results, query, existingItems) => {
                 if(isPaginated(results)) {
