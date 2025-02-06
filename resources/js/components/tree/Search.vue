@@ -1,12 +1,13 @@
 <template>
     <simple-search
-        :endpoint="searchEntity"
+        :endpoint="searchWrapper"
         :filter-fn="prependSelectAllMatches"
         :key-text="'name'"
-        :can-fetch-more="true"
+        :can-fetch-more="state.hasNextPage"
         :infinite="true"
         @selected="e => entitySelected(e)"
     />
+    {{ state.hasNextPage }}
 </template>
 
 <script>
@@ -20,6 +21,7 @@
 
     import {
         isPaginated,
+        hasNextPage,
     } from '@/helpers/pagination.js';
 
     export default {
@@ -34,8 +36,21 @@
             const entitySelected = data => {
                 context.emit('selected', data);
             };
+            const searchWrapper = async query => {
+                if(!query) {
+                    state.page = 0;
+                    return Promise.resolve([]);
+                }
+                if(state.lastQueryString.toLowerCase() != query.toLowerCase()) {
+                    state.page = 0;
+                }
+                state.lastQueryString = query;
+                state.page++;
+                const pagination = await searchEntity(query, state.page);
+                state.hasNextPage = hasNextPage(pagination);
+                return pagination;
+            };
             const prependSelectAllMatches = (results, query, existingItems) => {
-
                 if(isPaginated(results)) {
                     results = results.data;
                 }
@@ -56,7 +71,9 @@
 
             // DATA
             const state = reactive({
-
+                lastQueryString: '',
+                page: 0,
+                hasNextPage: false,
             });
 
             // RETURN
@@ -65,6 +82,7 @@
                 searchEntity,
                 // LOCAL
                 entitySelected,
+                searchWrapper,
                 prependSelectAllMatches,
                 // PROPS
                 // STATE
