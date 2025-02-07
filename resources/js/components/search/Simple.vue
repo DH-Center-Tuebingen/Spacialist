@@ -48,25 +48,17 @@
             </div>
         </template>
         <template #option="{ option }">
-            <span v-if="!state.enableChain">
-                {{ displayResult(option) }}
-            </span>
-            <div
-                v-else
-                class="d-flex flex-column"
-            >
+            <div class="d-flex flex-column">
                 <span>
                     {{ displayResult(option) }}
                 </span>
-                <ol class="breadcrumb m-0 p-0 bg-none small">
-                    <li
-                        v-for="chainLink in option[chain]"
-                        :key="`search-result-multiselect-${state.id}-${chainLink}`"
-                        class="breadcrumb-item text-muted small"
-                    >
-                        <span>{{ formatChainLink(chainLink) }}</span>
-                    </li>
-                </ol>
+                <slot
+                    v-if="state.enableChain"
+                    name="chain"
+                    :option="option"
+                >
+                    <Chain :chain="getChain(option)" />
+                </slot>
             </div>
         </template>
         <template #nooptions="">
@@ -138,8 +130,12 @@
         _debounce,
         getTs,
     } from '@/helpers/helpers.js';
+    import Chain from '@/components/chain/Chain.vue';
 
     export default {
+        components: {
+            Chain,
+        },
         props: {
             delay: {
                 type: Number,
@@ -216,17 +212,8 @@
         setup(props, context) {
             const { t } = useI18n();
 
-            const {
-                endpoint,
-                filterFn,
-                keyText,
-                keyFn,
-                chain,
-                chainFn,
-                mode,
-            } = toRefs(props);
 
-            if(!keyText.value && !keyFn.value) {
+            if(!props.keyText && !props.keyFn) {
                 throw new Error('You have to either provide a key or key function for your search component!');
             }
             // FETCH
@@ -240,10 +227,14 @@
              * so the query always has a different value.
              */
             const requestSearchEndpoint = async query => {
+                // When selected a null value is set and triggers the
+                // search again, resulting in an error. This is a workaround.
+                if(!query) return;
+
                 searchExecutionCounter.value++;
                 const round = searchExecutionCounter.value;
                 state.loading = true;
-                const results = await endpoint.value(query);
+                const results = await props.endpoint(query);
 
                 if(round !== searchExecutionCounter.value) {
                     // If there was a newer query executed in the meantime,
@@ -252,8 +243,8 @@
                 }
 
                 let filteredResults;
-                if(!!filterFn.value) {
-                    filteredResults = filterFn.value(results, query, state.searchResults);
+                if(!!props.filterFn) {
+                    filteredResults = props.filterFn(results, query, state.searchResults);
                 } else {
                     filteredResults = results;
                 }
@@ -285,10 +276,10 @@
             };
 
             const displayResult = obj => {
-                if(keyText.value) {
-                    return obj[keyText.value];
-                } else if(keyFn.value) {
-                    return keyFn.value(obj);
+                if(props.keyText) {
+                    return obj[props.keyText];
+                } else if(props.keyFn) {
+                    return props.keyFn(obj);
                 } else {
                     // Should never happen
                     throw new Error('No key provided!');
@@ -296,10 +287,11 @@
             };
 
             const getBaseValue = _ => {
-                return mode.value == 'single' ? {} : [];
+                return props.mode == 'single' ? {} : [];
             };
 
             const onChange = value => {
+                console.log('CHANGED', value);
                 context.emit('selected', value);
             };
 
@@ -312,9 +304,9 @@
                 id: `multiselect-search-${getTs()}`,
                 loading: false,
                 query: '',
-                isSimpleChain: computed(_ => chain.value && chain.value.length > 0),
-                isFnChain: computed(_ => !!chainFn.value),
-                enableChain: computed(_ => state.isSimpleChain || state.isFnChain),
+                isSimpleChain: computed(_ => props.chain && props.chain.length > 0),
+                isFnChain: computed(_ => !!props.chainFn),
+                enableChain: computed(_ => state.isSimpleChain || state.isFnChain || context.slots.chain),
                 searchResults: [],
             });
 
@@ -326,11 +318,11 @@
                 }
             });
 
-            const formatChainLink = chainLink => {
+            const getChain = option => {
                 if(state.isFnChain) {
-                    return chainFn.value(chainLink);
+                    return props.chainFn(option);
                 } else {
-                    return chainLink;
+                    return option[props.chain];
                 }
             };
 
@@ -343,7 +335,7 @@
                 // LOCAL
                 hasResults,
                 search,
-                formatChainLink,
+                getChain,
                 loadMore,
                 displayResult,
                 // handleChange,

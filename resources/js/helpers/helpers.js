@@ -977,3 +977,24 @@ export function sortTranslated(asc = true, prop = 'thesaurus_url') {
         return translateConcept(a[prop]).localeCompare(translateConcept(b[prop])) * (asc ? 1 : -1);
     };
 }
+
+export function sortAlphabetically(asc = true) {
+    return function (a, b) {
+        return a.localeCompare(b) * (asc ? 1 : -1);
+    };
+}
+
+export function sortByLength(secondarySort = null, asc = true) {
+    return function (a, b) {
+        if(secondarySort && a.length == b.length) {
+            for(let i = 0; i < a.length; i++) {
+                const order = secondarySort(a[i], b[i]);
+                if(order != 0) {
+                    return order;
+                }
+            }
+            return 0;
+        }
+        return a.length - b.length;
+    };
+}

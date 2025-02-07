@@ -14,10 +14,15 @@
                     :endpoint="searchLabel"
                     :key-fn="getConceptLabel"
                     :default-value="state.searchResetValue"
-                    :chain="'broaders'"
-                    :chain-fn="b => translateConcept(b.concept_url)"
                     @selected="label => labelSelected(label, 'label')"
-                />
+                >
+                    <template #chain="{ option }">
+                        <ChainList
+                            :lists="option.parent_path"
+                            :max-length="3"
+                        />
+                    </template>
+                </simple-search>
             </div>
         </div>
         <div class="mb-3">
@@ -306,7 +311,12 @@
         multiselectResetClasslist,
     } from '@/helpers/helpers.js';
 
+    import ChainList from './chain/ChainList.vue';
+
     export default {
+        components: {
+            ChainList,
+        },
         props: {
             type: {
                 required: false,
@@ -526,10 +536,6 @@
                             state.attribute.rootAttributeLabel.id > 0
                         );
                 }),
-            });
-
-            // ON MOUNTED
-            onMounted(_ => {
             });
 
             // RETURN
