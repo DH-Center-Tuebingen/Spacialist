@@ -248,7 +248,8 @@ class ApiSearchTest extends TestCase
                 'user_id',
                 'created_at',
                 'updated_at',
-                'labels'
+                'labels',
+                'parent_path'
             ]
         ]);
         $response->assertJson([
@@ -274,6 +275,9 @@ class ApiSearchTest extends TestCase
                         'label' => 'Kammeindruck',
                         'language_id' => 1
                     ]
+                ],
+                'parent_path' => [
+                    ["Fundobjekt","Art Fundobjekt","Keramik","Verzierung","Verzierungselement","Kammeindruck"]
                 ]
             ],
         ]);
