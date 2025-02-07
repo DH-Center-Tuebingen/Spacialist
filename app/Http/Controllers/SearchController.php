@@ -100,7 +100,7 @@ class SearchController extends Controller {
         return response()->json($matches);
     }
 
-    public function searchEntityByName(Request $request) {
+    public function searchEntityByName(Request $request, int $page = 1) {
         $user = auth()->user();
         if(!$user->can('entity_read')) {
             return response()->json([
@@ -110,15 +110,37 @@ class SearchController extends Controller {
         $q = $request->query('q');
         $t = $request->query('t');
 
-        $matches = Entity::where('name', 'ilike', '%'.$q.'%');
+        $exactStart = false;
+        $exactEnd = false;
+        if(Str::startsWith($q, '^')) {
+            $exactStart = true;
+            $q = substr($q, 1);
+        }
+        if(Str::endsWith($q, '$')) {
+            $exactEnd = true;
+            $q = substr($q, 0, -1);
+        }
+
+        $searchQuery = $q;
+        if(!$exactStart) {
+            $searchQuery = '%'.$searchQuery;
+        }
+        if(!$exactEnd) {
+            $searchQuery = $searchQuery.'%';
+        }
+
+        $matches = Entity::where('name', 'ilike', $searchQuery);
         if(isset($t)) {
             $types = explode(',', $t);
             $matches->whereIn('entity_type_id', $types);
         }
         $matches = $matches
             ->orderBy('name')
-            ->get();
-        $matches->each->append(['ancestors']);
+            ->simplePaginate(10);
+
+        $matches->each(function($entity) {
+            $entity->append('ancestors');
+        });
         return response()->json($matches);
     }
 

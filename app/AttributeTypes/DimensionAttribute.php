@@ -3,6 +3,7 @@
 namespace App\AttributeTypes;
 
 use App\Exceptions\InvalidDataException;
+use App\Utils\StringUtils;
 
 class DimensionAttribute extends AttributeBase
 {
@@ -10,11 +11,19 @@ class DimensionAttribute extends AttributeBase
     protected static bool $inTable = false;
     protected static ?string $field = 'json_val';
 
-    public static function fromImport(int|float|bool|string $data) : mixed {
+    public static function parseImport(int|float|bool|string $data) : mixed {
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);     
         $parts = explode(';', $data);
 
+        $format = "VAL1;VAL2;VAL3;UNIT";
         if(count($parts) != 4) {
-            throw new InvalidDataException("Given data does not match this datatype's format (VAL1;VAL2;VAL3;UNIT)");
+            throw InvalidDataException::requiredFormat($format, $data);
+        }
+
+        for($i = 0; $i < 3; $i++) {
+            if(!is_numeric($parts[$i])) {
+                throw InvalidDataException::requiredFormat($format, $data);                
+            }
         }
 
         return json_encode([

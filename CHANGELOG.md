@@ -1,9 +1,58 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 0.10.1 - Dayjs Hotfix
+## 0.11
+### Added
+- Filter and sort functionality on _Entity Type List_
+- Indicator in _Data Model Editor_ that visualizes if an attribute is used in any entity-type
 ### Fixed
+- Missing "Color Dots" of _Entity Type_ (colors are now handled on the Entity Type itself and do no longer rely on the _Map_ Plugin)
+- 'Jumping' behavior on floating quick access controls on the _Entity Type List_ (copy, duplicate, delete)
+- Attribute Dependency inverted
+
+## 0.10.2
+### Fixed
+- Date Range _importFrom_ did not return a JSON string
+- Richtext editor did not trigger the dirty state on entity
+- Certainty warning due to _undefined_ value
+- Serial and SQL attributes now have the required value (_v_) and functions (_resetFieldState_, _undirtyField_)
+### Changed
+- Added tests to _ApiDataImporterTest_ to check if the same columns can be used in multiple attributes
+- Row error now also sends the column value, instead of just sending the column name
+- Dropdowns in the _Data Importer_ are now sorted alphabetically
+- The ErrorList component of the Data Importer in the Frontend now preserves text inside `{{...}}`
+- Adjusted colors of Markdown modal buttons
+
+## 0.10.1
+### Added
+- Option to display attributes in _Data Model Editor_ in groups
+- Filter attributes in _Data Model Editor_
+- Attributes in _Data Model Editor_ can now be sorted (by name or creation date)
+- Pressing `Tab` key in _Single Choice Dropdowns_ now either:
+  - selects the first choice (if there is **only one choice** in the dropdown)*
+  - selects the exact match (**case insensitive**; e.g. "apple" + `Tab` will select the available choice "apple", but also "Apple")*
+  - nothing and focuses the next attribute (default)
+  - * Selected elements will be marked with a blue (Tab) badge
+- Pressing `Delete` inside _Single Choice Dropdowns_ will clear the element
+- Importer now automatically removes BOM if present
+- Better readable format for error message on validation
+- Renamed _fromImport_ to _parseImport_ on the attribute classses. The base class now by default imports the passed string, removing redundancies on the string-based classes.
+- More elaborate type checking on attributes _parseImport_ method.
+- Unit test for all attribute imports (except Table).
+### Fixed
+- Entity (Multiple-Choice) no longer removes all entries when a single one is deleted.
 - Frontend errors due to wrong dayjs import
+- Missing translation for _milligram_ in si-unit attribute
+- Entity search now allows to display more than first 10 results
+  - `^` and `$` can be used in search query to match query only at the beginning/end of entity name
+- Wrong behavior in validation/updating of _Integer_ values
+- Entity tree header overflow on small screens
+- Added tests for all attribute type imports
+- Improved output in _Data Importer_ frontend
+- Adding _Group Separator_ in _Data Model Editor_
+### Changed
+- Move switch to show hidden attributes in _Data Model Editor_ to dropdown
+- Make tabular head _sticky_
 
 ## 0.10 - Jelling
 ### Added

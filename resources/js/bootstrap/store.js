@@ -7,6 +7,7 @@ import {
 } from '@/helpers/tree.js';
 import {
     can,
+    calculateEntityColors,
     fillEntityData,
     only,
     slugify,
@@ -159,9 +160,13 @@ export const store = createStore({
                 },
                 updateEntityType(state, data) {
                     const entityType = state.entityTypes[data.id];
-                    const values = only(data, ['thesaurus_url', 'updated_at', 'is_root', 'sub_entity_types']);
+                    const values = only(data, ['thesaurus_url', 'updated_at', 'is_root', 'sub_entity_types', 'color']);
                     for(let k in values) {
                         entityType[k] = values[k];
+                    }
+                    if(data.color) {
+                        const colors = calculateEntityColors(data.id);
+                        state.entityTypeColors[data.id] = colors;
                     }
                 },
                 moveEntity(state, data) {
@@ -279,6 +284,15 @@ export const store = createStore({
                                     state.entity.data[k].value = data.data[k];
                                 }
                             }
+                        }
+                    }
+
+                    // Remove the data from the entity.
+                    // We need to do this as the 'replace', 'add' 'remove'
+                    // operations are calculated based on this value.
+                    for(const attributeId in data.removed_data) {
+                        if(entity.data[attributeId]) {
+                            state.entity.data[attributeId].id = null;
                         }
                     }
                 },

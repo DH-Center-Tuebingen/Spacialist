@@ -73,16 +73,18 @@ class ApiUserTest extends TestCase
                     'name' => 'Admin',
                 ],[
                   'id' => 2,
-                    'name' => "John Doe",  
-                ],[
-                    'id' => 3,
-                    'name' => "Gary Guest",
+                    'name' => "John Doe",
                 ],[
                     'id' => $user->id,
                     'name' => $user->name,
-                ]
+                ],
             ],
-            'deleted_users' => []
+            'deleted_users' => [
+                [
+                    'id' => 3,
+                    'name' => "Gary Guest",
+                ],
+            ]
         ]);
     }
 
@@ -559,16 +561,16 @@ class ApiUserTest extends TestCase
         $cnt = User::count();
         $this->assertEquals(3, $cnt);
         $cnt = User::onlyTrashed()->count();
-        $this->assertEquals(1, $cnt);
-        $cnt = User::withoutTrashed()->count();
         $this->assertEquals(2, $cnt);
+        $cnt = User::withoutTrashed()->count();
+        $this->assertEquals(1, $cnt);
         $user = User::find(1);
         $this->assertNotNull($user->deleted_at);
 
         $response = $this->userRequest()
             ->patch('/api/v1/user/restore/1');
 
-        $user = User::find(3);
+        $user = User::find(2);
         $this->assertNull($user->deleted_at);
 
         $response->assertStatus(204);
@@ -584,9 +586,9 @@ class ApiUserTest extends TestCase
         $cnt = User::count();
         $this->assertEquals(3, $cnt);
         $cnt = User::onlyTrashed()->count();
-        $this->assertEquals(0, $cnt);
+        $this->assertEquals(1, $cnt);
         $cnt = User::withoutTrashed()->count();
-        $this->assertEquals(3, $cnt);
+        $this->assertEquals(2, $cnt);
         $response = $this->userRequest()
             ->delete('/api/v1/user/1');
 
@@ -595,9 +597,9 @@ class ApiUserTest extends TestCase
         $cnt = User::count();
         $this->assertEquals(3, $cnt);
         $cnt = User::onlyTrashed()->count();
-        $this->assertEquals(1, $cnt);
-        $cnt = User::withoutTrashed()->count();
         $this->assertEquals(2, $cnt);
+        $cnt = User::withoutTrashed()->count();
+        $this->assertEquals(1, $cnt);
         $user = User::find(1);
         $this->assertNotNull($user->deleted_at);
 

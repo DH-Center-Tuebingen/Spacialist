@@ -58,12 +58,16 @@
                     value: v.value,
                 });
             };
+            const validateValidation = value => {
+                return Number.isInteger(value);
+            };
 
             // DATA
             const {
                 value: fieldValue,
                 meta,
                 resetField,
+                validate,
             } = useField(`int_${name.value}`, yup.number().integer(), {
                 initialValue: value.value,
             });
@@ -84,11 +88,26 @@
                 // only emit @change event if field is validated (required because Entity.vue components)
                 // trigger this watcher several times even if another component is updated/validated
                 if(!v.meta.validated) return;
-                context.emit('change', {
-                    dirty: v.meta.dirty,
-                    valid: v.meta.valid,
-                    value: v.value,
-                });
+                // Apparently, invalid values are returned as empty value in HTML number inputs
+                // Because it is not a required field, it returns true, because an empty value is a valid int
+                // see https://github.com/logaretm/vee-validate/issues/1667#issuecomment-431992508
+                if(!validateValidation(v.value)) {
+                    context.emit('change', {
+                        dirty: v.meta.dirty,
+                        valid: false,
+                        value: v.value,
+                    });
+                    return;
+                }
+                // also call validate() to make sure all values are up to date
+                // without this, meta/errors still contain the value from last validation
+                validate().then(validation => {
+                    context.emit('change', {
+                        dirty: v.meta.dirty,
+                        valid: v.meta.valid,
+                        value: v.value,
+                    });
+                })
             });
 
             // RETURN

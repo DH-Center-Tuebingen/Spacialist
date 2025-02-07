@@ -109,18 +109,13 @@
             const closeModal = _ => {
                 context.emit('closing', false);
             };
-            const labelSelected = e => {
-                const {
-                    added,
-                    removed,
-                    ...label
-                } = e;
-                if(removed) {
-                    // state.defaultConcept.label = null;
-                    state.editedProps.thesaurus_url = null;
-                } else if(added) {
-                    // state.defaultConcept.label = label;
+            const labelSelected = label => {
+                if(label === null){
+                    state.editedProps.thesaurus_url = label.concept_url; 
+                }else if(label.concept_url){
                     state.editedProps.thesaurus_url = label.concept_url;
+                }else{
+                    console.error('Entity Type Label: unexpected value', label);
                 }
             };
             const getDefaultConcept = url => {
@@ -133,7 +128,7 @@
                     }];
                 }
                 return concept;
-            }
+            };
 
             // DATA
             const state = reactive({
@@ -176,7 +171,7 @@
                 labelSelected,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

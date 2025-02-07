@@ -430,27 +430,25 @@ export function getEmptyAttributeValue(type) {
         case 'integer':
         case 'percentage':
             return;
-        case 'list':
         case 'daterange':
-        case 'string-mc':
         case 'entity-mc':
-        case 'userlist':
-        case 'daterange':
+        case 'list':
+        case 'string-mc':
         case 'table':
         case 'userlist':
             return [];
         case 'serial':
         case 'sql':
             return null;
+        case 'date':
+        case 'geography':
+        case 'iconclass':
         case 'richtext':
         case 'rism':
+        case 'string-sc':
         case 'string':
         case 'stringf':
         case 'system-separator':
-        case 'geography':
-        case 'iconclass':
-        case 'string-sc':
-        case 'date':
         case 'url':
         default:
             return '';
@@ -523,9 +521,16 @@ export function fillEntityData(data, etid) {
 // Formula based on https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color/3943023#3943023
 export function calculateEntityColors(id, alpha = 0.5) {
     const et = getEntityType(id);
-    if(!et || !et.layer) return {};
+    let typeColor = null;
+    if(et?.layer?.color) {
+        typeColor = et.layer.color;
+    } else if(et.color) {
+        typeColor = et.color;
+    } else {
+        return {};
+    }
     let r, g, b, a;
-    [r, g, b] = splitColor(et.layer.color);
+    [r, g, b] = splitColor(typeColor);
     const cs = [r, g, b].map(c => {
         c /= 255.0;
         if(c <= 0.03928) c /= 12.92;
@@ -965,4 +970,10 @@ export function copyToClipboard(elemId) {
 
 export function sortConcepts(ca, cb) {
     return translateConcept(ca.concept_url).localeCompare(translateConcept(cb.concept_url));
+}
+
+export function sortTranslated(asc = true, prop = 'thesaurus_url') {
+    return function (a, b) {
+        return translateConcept(a[prop]).localeCompare(translateConcept(b[prop])) * (asc ? 1 : -1);
+    };
 }
