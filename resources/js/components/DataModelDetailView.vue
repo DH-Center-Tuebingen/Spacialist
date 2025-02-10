@@ -150,7 +150,6 @@
                 <attribute-list
                     class="h-100 overflow-y-auto overflow-x-hidden"
                     style="padding-bottom: 10rem;"
-                    :group="{name: 'attribute-selection', pull: false, put: true}"
                     :group="{ name: 'attribute-selection', pull: false, put: true }"
                     :attributes="state.entityAttributes"
                     :values="state.entityValues"
@@ -300,7 +299,7 @@
             const state = reactive({
                 entityType: computed(_ => {
                     const entityType = _cloneDeep(entityStore.getEntityType(currentRoute.params.id));
-                    
+
                     // We need to ensure that sub_entity_types is set
                     // otherwise the dirties calculation may fail.
                     if(!entityType.sub_entity_types)
