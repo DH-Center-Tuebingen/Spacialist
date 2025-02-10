@@ -213,15 +213,9 @@
                 if(!state.entityType.id) return;
 
                 const et = state.entityType;
-                const data = {
-                    'is_root': et.is_root || false,
-                    'sub_entity_types': et.sub_entity_types || [],
-                };
 
-                entityStore.updateEntityType(et.id, data).then(_ => {
-                state.propertiesSaving = true;
-                // TODO seems to be old store logic, but state.properties seems newer
-                // updateEntityTypeRelation(et.id, state.properties).then(_ => {
+                entityStore.updateEntityType(et.id, state.properties).then(_ => {
+                    state.propertiesSaving = true;
                     const name = translateConcept(state.entityType.thesaurus_url);
                     toast.$toast(
                         t('main.datamodel.toasts.updated_type.msg', {

@@ -123,19 +123,13 @@
              * the values of the attributes via every
              * attribute's v.value.
              */
-            const v = computed(_ => {
-                return {
-                    value: current.value,
-                    meta: meta,
-                };
+            const v = reactive({
+                value: initial.value || '',
+                meta: {
+                    dirty: false,
+                    valid: true,
+                }
             });
-            // const v = reactive({
-            //     value: initial.value || '',
-            //     meta: {
-            //         dirty: false,
-            //         valid: true,
-            //     }
-            // });
 
             // RETURN
             return {

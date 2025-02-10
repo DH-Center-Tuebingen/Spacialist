@@ -448,7 +448,7 @@ class Entity extends Model implements Searchable {
         $sqls = $sqls->get();
 
         foreach($sqls as $sql) {
-            $value = SqlAttribute::evaluate($sql, $this->id);
+            $value = SqlAttribute::execute($sql->attribute->text, $this->id);
             $data[$sql->attribute_id] = [
                 'value' => $value,
             ];

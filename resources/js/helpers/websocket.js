@@ -122,7 +122,6 @@ export function leaveEntityRoom(roomname) {
     unsubscribeFrom(roomname);
 }
 
-
 /**
  * Gets the active pusher connection.
  * @returns {connection | null} - The pusher connection object or null if not available
@@ -132,7 +131,7 @@ export function getConnection(){
 }
 
 /**
- * 
+ *
  * @returns {string} - The current state of the websocket connection can be one of the following: 'initialized', 'connecting', 'connected', 'unavailable', 'disconnected', 'failed'
  */
 export function getState() {
