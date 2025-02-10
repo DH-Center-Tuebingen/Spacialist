@@ -746,7 +746,6 @@
                     }
                     state.hiddenAttributes[ad.dependant] = {
                         hide: !matches,
-                        hide: matches,
                         by: aid,
                     };
                 });

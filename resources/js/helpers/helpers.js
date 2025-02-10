@@ -385,6 +385,19 @@ export function calculateEntityTypeColors(entityType, alpha = 0.5) {
     if(!entityType || !entityType.layer) return {};
     let r, g, b, a;
     [r, g, b] = splitColor(entityType.layer.color);
+}
+export function calculateEntityColors(id, alpha = 0.5) {
+    const et = getEntityType(id);
+    let typeColor = null;
+    if(et?.layer?.color) {
+        typeColor = et.layer.color;
+    } else if(et.color) {
+        typeColor = et.color;
+    } else {
+        return {};
+    }
+    let r, g, b, a;
+    [r, g, b] = splitColor(typeColor);
     const cs = [r, g, b].map(c => {
         c /= 255.0;
         if(c <= 0.03928) c /= 12.92;
@@ -743,4 +756,11 @@ export function copyToClipboard(elemId) {
 export function sortConcepts(ca, cb) {
     const systemStore = useSystemStore();
     return systemStore.translateConcept(ca.concept_url).localeCompare(systemStore.translateConcept(cb.concept_url));
+}
+
+export function sortTranslated(asc = true, prop = 'thesaurus_url') {
+    const systemStore = useSystemStore();
+    return function (a, b) {
+        return systemStore.translateConcept(a[prop]).localeCompare(systemStore.translateConcept(b[prop])) * (asc ? 1 : -1);
+    };
 }

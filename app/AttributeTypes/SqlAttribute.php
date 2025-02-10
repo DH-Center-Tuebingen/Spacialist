@@ -42,6 +42,19 @@ class SqlAttribute extends StaticAttribute
                 return $matches[0] . '_' . $i++;
             }, $sql->attribute->text);
         }
+    }
+
+    public static function execute(string $sql, int $entityId) : array|string {
+        // if entity_id is referenced several times
+        // add an incrementing counter, so the
+        // references are unique (required by PDO)
+        $i = 0;
+        $safes = [];
+        $text = preg_replace_callback('/:entity_id/', function($matches) use (&$i, &$safes, $entityId) {
+            ++$i;
+            $safes[':entity_id_' . $i] = $entityId;
+            return $matches[0] . '_' . $i;
+        }, $sql);
 
         DB::beginTransaction();
         $sqlValue = DB::select($text, $safes);

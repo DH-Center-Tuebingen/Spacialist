@@ -63,11 +63,26 @@
             },
         },
         setup(props, context) {
+            const v = reactive({
+                value: props.value,
+                meta: {
+                    dirty: false,
+                    valid: true,
+                },
+                resetField: _ => true,
+            });
+            
+            const resetFieldState = _ => {};
+            const undirtyField = _ => {};
+
             // RETURN
             return {
                 // HELPERS
+                v,
                 isArray,
                 translateConcept,
+                resetFieldState,
+                undirtyField,
             };
         },
     };

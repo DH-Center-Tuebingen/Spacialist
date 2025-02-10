@@ -731,6 +731,7 @@
                 "hide_hidden": "Hide hidden",
                 "separated": "List attributes separated",
                 "in_groups": "List attributes in groups",
+                "indicator_info": "This attribute is not currently used in any entity-type! | This attribute is currently used in one entity-type. | This attribute is currently used in {cnt} entity-types.",
                 "modal": {
                     "new": {
                         "title": "New Attribute"
@@ -755,7 +756,7 @@
             "detail": {
                 "properties": {
                     "title": "Properties",
-                    "top_level": "Top-Level-Entity-Type?",
+                    "top_level": "Top-Level",
                     "sub_types": "Allowed Sub-Entity-Types"
                 },
                 "attribute": {

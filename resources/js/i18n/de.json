@@ -731,6 +731,7 @@
                 "hide_hidden": "Ausgeblendete verstecken",
                 "separated": "Attribute einzeln auflisten",
                 "in_groups": "Attribute in Gruppen auflisten",
+                "indicator_info": "Dieses Attribut wird aktuell in keinem Entitätstyp verwendet! | Dieses Attribut wird aktuell in einem Entitätstyp verwendet. | Dieses Attribut wird aktuell in {cnt} Entitätstypen verwendet.",
                 "modal": {
                     "new": {
                         "title": "Neues Attribut"
@@ -755,7 +756,7 @@
             "detail": {
                 "properties": {
                     "title": "Eigenschaften",
-                    "top_level": "Top-Level Entitätstyp?",
+                    "top_level": "Top-Level",
                     "sub_types": "Erlaubte Unter-Entitätstypen"
                 },
                 "attribute": {

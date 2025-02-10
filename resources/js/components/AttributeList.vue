@@ -18,132 +18,141 @@
                 @mouseenter="onEnter(index)"
                 @mouseleave="onLeave(index)"
             >
-                <div
-                    class="row"
-                    :class="addModerationStateClasses(element.id)"
-                >
-                    <label
-                        v-if="!state.hideLabels"
-                        class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break align-self-start"
-                        :for="`attr-${element.id}`"
-                        :class="attributeClasses(element)"
-                        @click="e => handleLabelClick(e, element.datatype)"
+                <div class="d-flex align-items-center gap-2">
+                    <div
+                        class="row flex-fill"
+                        :class="addModerationStateClasses(element.id)"
                     >
-                        <div
-                            v-if="hasAttributeChangeIndicator(element)"
-                            class="d-flex align-items-center"
-                            :title="getAttributeChangeIndicatorDescription(element)"
+                        <label
+                            v-if="!state.hideLabels"
+                            class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break align-self-start gap-1"
+                            :for="`attr-${element.id}`"
+                            :class="attributeClasses(element)"
+                            @click="e => handleLabelClick(e, element.datatype)"
                         >
-                            <DotIndicator :type="getAttributeChangeIndicator(element)" />
-                        </div>
-                        <div
-                            v-show="!!state.hoverStates[index]"
-                            class="btn-fab-list position-absolute start-0"
-                        >
-                            <!-- TODO: Do we need the icon, as we can just drag the item (?) [SO] -->
-                            <!-- <button
-                                v-show="hasEmitter('onReorderList')"
-                                class="reorder-handle btn btn-outline-secondary btn-fab rounded-circle"
-                                data-bs-toggle="popover"
-                                :data-content="t('global.resort')"
-                                data-trigger="hover"
-                                data-placement="bottom"
+                            <slot
+                                name="before"
+                                :attribute="element"
+                            />
+                            <div
+                                v-if="hasAttributeChangeIndicator(element)"
+                                class="d-flex align-items-center"
+                                :title="getAttributeChangeIndicatorDescription(element)"
                             >
-                                <i class="fas fa-fw fa-sort" />
-                            </button> -->
-                            <button
-                                v-show="hasEmitter('onEditElement')"
-                                class="btn btn-outline-info btn-fab rounded-circle"
-                                data-bs-toggle="popover"
-                                :data-content="t('global.edit')"
-                                data-trigger="hover"
-                                data-placement="bottom"
-                                @click="onEditHandler(element)"
+                                <DotIndicator :type="getAttributeChangeIndicator(element)" />
+                            </div>
+                            <div
+                                v-show="!!state.hoverStates[index]"
+                                class="btn-fab-list position-absolute start-0"
                             >
-                                <i
-                                    class="fas fa-fw fa-xs fa-edit"
-                                    style="vertical-align: 0;"
-                                />
-                            </button>
-                            <button
-                                v-show="hasEmitter('onRemoveElement')"
-                                class="btn btn-outline-danger btn-fab rounded-circle"
-                                data-bs-toggle="popover"
-                                :data-content="t('global.remove')"
-                                data-trigger="hover"
-                                data-placement="bottom"
-                                @click="onRemoveHandler(element)"
+                                <button
+                                    v-show="hasEmitter('onReorderList')"
+                                    class="reorder-handle btn btn-outline-secondary btn-fab rounded-circle"
+                                    data-bs-toggle="popover"
+                                    :data-content="t('global.resort')"
+                                    data-trigger="hover"
+                                    data-placement="bottom"
+                                >
+                                    <i class="fas fa-fw fa-sort" />
+                                </button>
+                                <button
+                                    v-show="hasEmitter('onEditElement')"
+                                    class="btn btn-outline-info btn-fab rounded-circle"
+                                    data-bs-toggle="popover"
+                                    :data-content="t('global.edit')"
+                                    data-trigger="hover"
+                                    data-placement="bottom"
+                                    @click="onEditHandler(element)"
+                                >
+                                    <i
+                                        class="fas fa-fw fa-xs fa-edit"
+                                        style="vertical-align: 0;"
+                                    />
+                                </button>
+                                <button
+                                    v-show="hasEmitter('onRemoveElement')"
+                                    class="btn btn-outline-danger btn-fab rounded-circle"
+                                    data-bs-toggle="popover"
+                                    :data-content="t('global.remove')"
+                                    data-trigger="hover"
+                                    data-placement="bottom"
+                                    @click="onRemoveHandler(element)"
+                                >
+                                    <i
+                                        class="fas fa-fw fa-xs fa-times"
+                                        style="vertical-align: 0;"
+                                    />
+                                </button>
+                                <button
+                                    v-show="hasEmitter('onDeleteElement')"
+                                    class="btn btn-outline-danger btn-fab rounded-circle"
+                                    data-bs-toggle="popover"
+                                    :data-content="t('global.delete')"
+                                    data-trigger="hover"
+                                    data-placement="bottom"
+                                    @click="onDeleteHandler(element)"
+                                >
+                                    <i
+                                        class="fas fa-fw fa-xs fa-trash"
+                                        style="vertical-align: 0;"
+                                    />
+                                </button>
+                            </div>
+                            <span
+                                v-if="!element.is_system"
+                                class="text-end col"
                             >
-                                <i
-                                    class="fas fa-fw fa-xs fa-times"
-                                    style="vertical-align: 0;"
-                                />
-                            </button>
-                            <button
-                                v-show="hasEmitter('onDeleteElement')"
-                                class="btn btn-outline-danger btn-fab rounded-circle"
-                                data-bs-toggle="popover"
-                                :data-content="t('global.delete')"
-                                data-trigger="hover"
-                                data-placement="bottom"
-                                @click="onDeleteHandler(element)"
-                            >
-                                <i
-                                    class="fas fa-fw fa-xs fa-trash"
-                                    style="vertical-align: 0;"
-                                />
-                            </button>
-                        </div>
-                        <span
-                            v-if="!element.is_system"
-                            class="text-end col"
-                        >
-                            {{ translateConcept(element.thesaurus_url) }}
-                        </span>
-                        <sup
-                            v-if="hasEmitter('onMetadata')"
-                            class="clickable d-flex flex-row align-items-start top-0"
-                            @click="onMetadataHandler(element)"
-                        >
-                            <ValidityIndicator :state="certainty(element)" />
-                            <span v-if="hasComment(element)">
-                                <i class="fas fa-fw fa-comment" />
+                                {{ translateConcept(element.thesaurus_url) }}
                             </span>
-                            <span v-if="hasBookmarks(element)">
-                                <i class="fas fa-fw fa-bookmark" />
-                            </span>
-                        </sup>
-                        <sup
-                            v-if="hasEmitter('onEditElement') && !!element.pivot.depends_on"
-                            :title="t('global.dependency.depends_on.desc')"
-                        >
-                            <i class="fas fa-diagram-next text-warning fa-rotate-180" />
-                        </sup>
-                    </label>
-                    <div :class="expandedClasses(index, element)">
-                        <Attribute
-                            :ref="el => setRef(el, element.id)"
-                            :data="element"
-                            :value-wrapper="state.attributeValues[element.id]"
-                            :disabled="state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :react-to="state.rootAttributeValues[element.root_attribute_id]"
-                            :hide-links="state.hideEntityLink"
-                            :preview="preview"
-                            :preview-data="previewData"
-                            @change="updateDirtyState"
-                            @update-selection="handleSelectionUpdate"
-                            @expanded="e => onAttributeExpand(e, index)"
-                        />
+                            <sup
+                                v-if="hasEmitter('onMetadata')"
+                                class="clickable d-flex flex-row align-items-start top-0"
+                                @click="onMetadataHandler(element)"
+                            >
+                                <validity-indicator :state="certainty(element)" />
+                                <span v-if="hasComment(element)">
+                                    <i class="fas fa-fw fa-comment" />
+                                </span>
+                                <span v-if="hasBookmarks(element)">
+                                    <i class="fas fa-fw fa-bookmark" />
+                                </span>
+                            </sup>
+                            <sup
+                                v-if="hasEmitter('onEditElement') && !!element.pivot.depends_on"
+                                :title="t('global.dependency.depends_on.desc')"
+                            >
+                                <i class="fas fa-diagram-next text-warning fa-rotate-180" />
+                            </sup>
+                        </label>
+                        <div :class="expandedClasses(index, element)">
+                            <Attribute
+                                :ref="el => setRef(el, element.id)"
+                                :data="element"
+                                :value-wrapper="state.attributeValues[element.id]"
+                                :disabled="state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                                :react-to="state.rootAttributeValues[element.root_attribute_id]"
+                                :hide-links="state.hideEntityLink"
+                                :preview="preview"
+                                :preview-data="previewData"
+                                @change="updateDirtyState"
+                                @update-selection="handleSelectionUpdate"
+                                @expanded="e => onAttributeExpand(e, index)"
+                            />
 
-                        <ModerationPanel
-                            v-if="isInModeration(element.id)"
-                            :element="element"
-                            :value="state.attributeValues[element.id]"
-                            @toggle-data="e => toggleAttributeValue(element.id)"
-                            @moderate="e => handleModeration(element.id, e)"
-                            @edit="e => handleEditModeration(element.id, e)"
-                        />
+                            <ModerationPanel
+                                v-if="isInModeration(element.id)"
+                                :element="element"
+                                :value="state.attributeValues[element.id]"
+                                @toggle-data="e => toggleAttributeValue(element.id)"
+                                @moderate="e => handleModeration(element.id, e)"
+                                @edit="e => handleEditModeration(element.id, e)"
+                            />
+                        </div>
                     </div>
+                    <slot
+                        name="after"
+                        :attribute="element"
+                    />
                 </div>
             </div>
         </template>
@@ -565,7 +574,7 @@
             };
 
             const certainty = attribute => {
-                return state.attributeValues?.[attribute.id]?.certainty;
+                return state.attributeValues?.[attribute.id]?.certainty ?? null;
             };
 
             const hasComment = attribute => {

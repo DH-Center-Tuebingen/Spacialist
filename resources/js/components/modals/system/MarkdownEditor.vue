@@ -31,7 +31,7 @@
                 <template v-if="state.isDirty">
                     <button
                         type="button"
-                        class="btn btn-warning"
+                        class="btn btn-outline-secondary"
                         data-bs-dismiss="modal"
                         @click="closeModal()"
                     >
@@ -39,7 +39,7 @@
                     </button>
                     <button
                         type="button"
-                        class="btn btn-outline-success"
+                        class="btn btn-outline-primary"
                         data-bs-dismiss="modal"
                         @click="updateContent()"
                     >
