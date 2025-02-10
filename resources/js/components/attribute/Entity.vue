@@ -47,6 +47,10 @@
     } from '@/helpers/helpers.js';
 
     import {
+        hasNextPage,
+    } from '@/helpers/pagination.js';
+
+    import {
         searchEntityInTypes,
     } from '@/api.js';
 
@@ -132,7 +136,7 @@
                 state.page++;
                 const pagination = await searchEntityInTypes(query, props.searchIn || [], state.page);
 
-                state.hasNextPage = !!pagination.next_page_url;
+                state.hasNextPage = hasNextPage(pagination);
                 return pagination.data;
             };
 

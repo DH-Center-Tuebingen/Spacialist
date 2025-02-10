@@ -29,6 +29,7 @@
         "remove_file": "Datei entfernen",
         "no_file": "Keine Datei vorhanden",
         "list": {
+            "and_more": "und weitere | und {cnt} weitere",
             "nr_of_entries": "Keine Einträge | 1 Eintrag | {cnt} Einträge",
             "no_entries": "Keine Einträge gefunden.",
             "fetch_next_entries": "Weitere Einträge laden",

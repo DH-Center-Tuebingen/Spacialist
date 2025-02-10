@@ -199,6 +199,37 @@ table.table-sticky .dropdown-menu {
     z-index: $zindex-dropdown-underneath-sticky;
 }
 
+.multiselect-option.is-selected {
+    &:hover {
+        $hoverColor: var(--bs-gray-300);
+        .chain-link {
+            color: $hoverColor !important;
+
+            &::before {
+                color: $hoverColor !important;
+            }
+        }
+
+        .list-info {
+            color: $hoverColor !important;
+        }
+    }
+
+    $lighterColor: var(--bs-gray-500);
+    .chain-link {
+        color: $lighterColor !important;
+
+        &::before {
+            color: $lighterColor !important;
+        }
+    }
+
+    .list-info {
+        color: $lighterColor !important;
+    }
+}
+
+
 .hover-underline:hover {
     text-decoration: underline;
 }
