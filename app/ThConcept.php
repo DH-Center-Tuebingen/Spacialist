@@ -149,7 +149,7 @@ class ThConcept extends Model {
     /**
      * Get the label of the concept in the given language.
      */
-    public function getLabelWithLang($targetLang = "en"){
+    public function getLabelWithLang($targetLang = "en"): string {
         $label = $this->labels->where('language.short_name', $targetLang)->first();
         if($label) {
             return $label->label;
@@ -161,9 +161,8 @@ class ThConcept extends Model {
      * Recursive helper function to get all broader concepts of a concept.
      * Will also build a conceptMap for performance reasons.
      */
-    private function getAllBroaderPaths(&$conceptMap, $lang="en", $concept = null, $paths = [], $currentPath = [])
-    {
-        $concept = $concept ?: $this;
+    private function getAllBroaderPaths(&$conceptMap, $lang="en", $concept = null, $paths = [], $currentPath = []): array {
+        $concept ??= $this;
         $currentId = $concept->id;
         if(!isset($conceptMap[$currentId])){
             $conceptMap[$currentId] = $concept->getLabelWithLang($lang);
@@ -193,8 +192,7 @@ class ThConcept extends Model {
      * @param bool $bottomToTop - If true, the paths will be returned from bottom to top.
      * @return array - An array of arrays of labels of the paths. From top to bottom.
      */
-    public function getParentPathAttribute($lang="en", $bottomToTop = false)
-    {   
+    public function getParentPathAttribute($lang = "en", $bottomToTop = false): array {
         // For performance reasons, we get the conceptMap
         // while building the paths.
         $conceptMap = [];

@@ -210,10 +210,7 @@ class SearchController extends Controller {
             ->get();
 
         $matches = $matches->merge($foreignMatches);
-
-        $matches->each(function($concept) {
-            $concept->append('parent_path');
-        });
+        $matches->each->setAppends(['parent_path']);
 
         return response()->json($matches);
     }

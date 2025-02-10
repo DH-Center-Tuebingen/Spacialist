@@ -1,12 +1,12 @@
 <template>
     <Chain
-        v-for="path in state.truncatedList(option)"
+        v-for="path in truncatedList"
         :key="path.join('-') ?? 'default'"
         :chain="path"
         class="text-secondary"
     />
     <div
-        v-if="lists.length > state.maxChildLength"
+        v-if="lists.length > maxLength"
         class="list-info opacity-50 text-secondary small fst-italic text-secondary"
     >
         {{ t("global.list.and_more") }}
@@ -14,9 +14,12 @@
 </template>
 
 <script>
+    import { computed } from 'vue';
     import { useI18n } from 'vue-i18n';
-    import { reactive } from 'vue';
-    import { sortAlphabetically, sortByLength } from '@/helpers/helpers';
+    import {
+        sortAlphabetically,
+        sortByLength,
+    } from '@/helpers/helpers.js';
 
     import Chain from './Chain.vue';
 
@@ -38,24 +41,22 @@
             },
         },
         setup(props) {
-            const state = reactive({
-                maxChildLength: 3,
-                truncatedList: () => {
-                    const sortedList = props.lists.toSorted(
-                        sortByLength(sortAlphabetically())
-                    );
+            const { t } = useI18n();
+            const truncatedList = computed(_ => {
+                const sortedList = props.lists.toSorted(
+                    sortByLength(sortAlphabetically())
+                );
 
-                    if(props.maxLength) {
-                        return sortedList.slice(0, props.maxLength);
-                    } else {
-                        return sortedList;
-                    }
-                },
+                if(props.maxLength) {
+                    return sortedList.slice(0, props.maxLength);
+                } else {
+                    return sortedList;
+                }
             });
 
             return {
-                t: useI18n().t,
-                state,
+                t,
+                truncatedList,
             };
         },
     };
