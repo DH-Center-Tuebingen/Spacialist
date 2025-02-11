@@ -22,8 +22,7 @@ use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
-    private static $avatarFolder = 'avatars' . DIRECTORY_SEPARATOR;
-
+    
     public function __construct() {
         $this->middleware('auth:sanctum', ['except' => ['login']]);
     }
@@ -153,13 +152,13 @@ class UserController extends Controller
 
     public function downloadAvatar(Request $request) {
         $filepath = $request->query('path');
-
-        // Only return files from within the avatars folder
-        if(!Str::startsWith($filepath, self::$avatarFolder)) {
+        $directory = User::getAvatarDirectory();
+        $file = $directory->download($filepath);
+        if($file != null){
+            return $file;
+        }else{
             return response()->noContent();
-        }
-
-        return DownloadHandler::makeFileResponse($filepath);
+        }    
     }
 
     // POST
@@ -252,10 +251,7 @@ class UserController extends Controller
         }
 
         $file = $request->file('file');
-        $path = $user->uploadAvatar($file);
-        $user->avatar = $path;
-        $user->save();
-
+        $user->uploadAvatar($file);
         // return user without roles relation
         $user->unsetRelation('roles');
 
