@@ -59,7 +59,6 @@
     import {
         computed,
         reactive,
-        toRefs,
         watch,
     } from 'vue';
 
@@ -99,18 +98,13 @@
         setup(props, context) {
             const { t } = useI18n();
             const userStore = useUserStore();
-            const {
-                name,
-                disabled,
-                value,
-            } = toRefs(props);
+
             // FETCH
 
             // FUNCTIONS
-
             const resetFieldState = _ => {
                 v.resetField({
-                    value: value.value || []
+                    value: props.value || []
                 });
             };
             const undirtyField = _ => {
@@ -126,7 +120,7 @@
                 meta,
                 resetField,
             } = useField(`userlist_${name.value}`, yup.mixed(), {
-                initialValue: value.value || [],
+                initialValue: props.value || [],
             });
             const users = userStore.users;
             const v = reactive({
@@ -136,8 +130,7 @@
                 resetField,
             });
 
-
-            watch(_ => value, (newValue, oldValue) => {
+            watch(_ => props.value, (newValue, oldValue) => {
                 resetFieldState();
             });
             watch(_ => v.value, (newValue, oldValue) => {

@@ -83,7 +83,7 @@ class EditorController extends Controller {
                 'error' => __('You do not have the permission to view entity data')
             ], 403);
         }
-        $attributes = Attribute::whereNull('parent_id')->orderBy('id')->get();
+        $attributes = Attribute::whereNull('parent_id')->withCount('entity_types')->orderBy('id')->get();
         $selections = [];
         foreach($attributes as $a) {
             $selection = $a->getSelection();
@@ -146,11 +146,12 @@ class EditorController extends Controller {
 
         $curl = $request->get('concept_url');
         $is_root = sp_parse_boolean($request->get('is_root'));
-        $cType = new EntityType();
-        $cType->thesaurus_url = $curl;
-        $cType->is_root = $is_root;
-        $cType->save();
-        $cType = EntityType::find($cType->id);
+        $entityType = new EntityType();
+        $entityType->thesaurus_url = $curl;
+        $entityType->is_root = $is_root;
+        $entityType->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+        $entityType->save();
+        $entityType = EntityType::find($entityType->id);
 
         // TODO:: Reimplement in plugin [SO]
         //
@@ -167,7 +168,7 @@ class EditorController extends Controller {
 
         // $cType->load('layer');
 
-        return response()->json($cType, 201);
+        return response()->json($entityType, 201);
     }
 
     public function addAttribute(Request $request) {
@@ -387,7 +388,7 @@ class EditorController extends Controller {
         }
         $relationData = Arr::only(
             $request->get('data'),
-            ['is_root', 'sub_entity_types']
+            ['is_root', 'sub_entity_types', 'color'],
         );
         $propData = Arr::only(
             $request->get('data'),
@@ -406,7 +407,8 @@ class EditorController extends Controller {
         if($updateRelation) {
             $isRoot = $relationData['is_root'];
             $subEntityTypes = $relationData['sub_entity_types'];
-            $entityType->setRelationInfo($isRoot, $subEntityTypes);
+            $color = $relationData['color'];
+            $entityType->setRelationInfo($color, $isRoot, $subEntityTypes);
         }
 
         if($updateProps) {

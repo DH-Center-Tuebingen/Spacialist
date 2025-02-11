@@ -33,7 +33,7 @@
                 {{ translateConcept(singlelabelValue.concept_url) }}
             </div>
         </template>
-        <template #clear="{clear}">
+        <template #clear="{ clear }">
             <span
                 aria-hidden="true"
                 role="button"

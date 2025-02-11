@@ -373,7 +373,7 @@ export function fillEntityData(data, etid) {
         const currAttr = attrs[i];
         if(!data[currAttr.id]) {
             data[currAttr.id] = {
-                value: getInitialAttributeValue(currAttr),
+                value: getInitialAttributeValue(currAttr, 'datatype'),
             };
         }
     }
@@ -381,10 +381,18 @@ export function fillEntityData(data, etid) {
 }
 
 // Formula based on https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color/3943023#3943023
-export function calculateEntityTypeColors(entityType, alpha = 0.5) {
-    if(!entityType || !entityType.layer) return {};
+export function calculateEntityColors(id, alpha = 0.5) {
+    const et = getEntityType(id);
+    let typeColor = null;
+    if(et?.layer?.color) {
+        typeColor = et.layer.color;
+    } else if(et.color) {
+        typeColor = et.color;
+    } else {
+        return {};
+    }
     let r, g, b, a;
-    [r, g, b] = splitColor(entityType.layer.color);
+    [r, g, b] = splitColor(typeColor);
     const cs = [r, g, b].map(c => {
         c /= 255.0;
         if(c <= 0.03928) c /= 12.92;
@@ -743,4 +751,32 @@ export function copyToClipboard(elemId) {
 export function sortConcepts(ca, cb) {
     const systemStore = useSystemStore();
     return systemStore.translateConcept(ca.concept_url).localeCompare(systemStore.translateConcept(cb.concept_url));
+}
+
+export function sortTranslated(asc = true, prop = 'thesaurus_url') {
+    const systemStore = useSystemStore();
+    return function (a, b) {
+        return systemStore.translateConcept(a[prop]).localeCompare(systemStore.translateConcept(b[prop])) * (asc ? 1 : -1);
+    };
+}
+
+export function sortAlphabetically(asc = true) {
+    return function (a, b) {
+        return a.localeCompare(b) * (asc ? 1 : -1);
+    };
+}
+
+export function sortByLength(secondarySort = null, asc = true) {
+    return function (a, b) {
+        if(secondarySort && a.length == b.length) {
+            for(let i = 0; i < a.length; i++) {
+                const order = secondarySort(a[i], b[i]);
+                if(order != 0) {
+                    return order;
+                }
+            }
+            return 0;
+        }
+        return a.length - b.length;
+    };
 }

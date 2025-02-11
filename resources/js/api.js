@@ -746,9 +746,9 @@ export async function searchLabel(query = '') {
     );
 }
 
-export async function searchEntity(query = '') {
+export async function searchEntity(query = '', page = 1) {
     return $httpQueue.add(
-        () => http.get(`search/entity?q=${query}`).then(response => response.data)
+        () => http.get(`search/entity?q=${query}&page=${page}`).then(response => response.data)
     );
 }
 

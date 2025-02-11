@@ -64,6 +64,7 @@
 
     <serial-attribute
         v-else-if="data.datatype == 'serial'"
+        :ref="el => setRef(el)"
         :disabled="state.disabled"
         :name="`attr-${data.id}`"
         :value="state.value"
@@ -223,6 +224,7 @@
 
     <sql-attribute
         v-else-if="data.datatype == 'sql'"
+        :ref="el => setRef(el)"
         :disabled="state.disabled"
         :name="`attr-${data.id}`"
         :value="state.value"
@@ -353,7 +355,7 @@
                 default: _ => new Object(),
             },
         },
-        emits: ['expanded','change', 'update-selection'],
+        emits: ['expanded', 'change', 'update-selection'],
         setup(props, context) {
             const attributeStore = useAttributeStore();
             const {
@@ -365,7 +367,11 @@
             // FETCH
 
             const getValueOrDefault = _ => {
-                return valueWrapper.value.value || getEmptyAttributeValue(data.value.datatype);
+                if(valueWrapper?.value?.value == null) {
+                    return getEmptyAttributeValue(data.value.datatype);
+                }
+
+                return valueWrapper.value.value;
             };
 
             const attrRef = ref({});
@@ -376,7 +382,6 @@
                 externalUpdate: false,
                 // TODO check for selection need?
                 selection: computed(_ => attributeStore.getAttributeSelection(data.value.id) || []),
-
             });
 
             const setRef = el => {
@@ -427,7 +432,8 @@
                 if(state.externalUpdate) {
                     // set "initial" value (aka state.value) to external value
                     state.value = _cloneDeep(getValueOrDefault());
-                    // if not dirty: resetFeildState to external "initial" value
+
+                    // if not dirty: resetFieldState to external "initial" value
                     if(!attrRef.value?.v?.meta?.dirty) {
                         nextTick(_ => {
                             resetFieldState();

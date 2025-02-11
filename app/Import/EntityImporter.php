@@ -2,6 +2,7 @@
 
 namespace App\Import;
 
+use App\Exceptions\CsvColumnMismatchException;
 use App\File\Csv;
 use App\Entity;
 use App\EntityType;
@@ -25,7 +26,7 @@ class EntityImporter {
 
     private $metadata;
     private array $attributesMap;
-    private array $attributeAttributeMap = [];
+    private array $attributeIdToAttributeValue = [];
     private int $entityTypeId;
     private string $nameColumn;
     private ?string $parentColumn = null;
@@ -40,7 +41,7 @@ class EntityImporter {
         $this->entityTypeId = $data['entity_type_id'];
         $this->attributesMap = $data['attributes'];
 
-        // The parent column is optional, therefore we only set it 
+        // The parent column is optional, therefore we only set it
         // to another value than null, if there is valid data set.
         if(array_key_exists('parent_column', $data)) {
             $parentColumn = trim($data['parent_column']);
@@ -103,14 +104,23 @@ class EntityImporter {
             return $this->resolver;
         }
 
-        $csvTable->parse($handle, function ($row, $index) use (&$result, &$status) {
-            $namesValid = $this->validateName($row, $index);
-            if($namesValid) {
-                // The location depends on the name column. If the name is not correct, we can't check the location.
-                $this->validateLocation($row, $index);
-            }
-            $this->validateAttributesInRow($row, $index);
-        });
+        try {
+            $csvTable->parse($handle, function ($row, $index) {
+                $namesValid = $this->validateName($row, $index);
+                if($namesValid) {
+                    // The location depends on the name column. If the name is not correct, we can't check the location.
+                    $this->validateLocation($row, $index);
+                }
+                $this->validateAttributesInRow($row, $index);
+            });
+        } catch(CsvColumnMismatchException $csvMismatchException) {
+            return $this->resolver->conflict(__("entity-importer.csv-column-mismatch", [
+                "data" => $csvMismatchException->dataLine,
+                "data_count" => $csvMismatchException->dataColumns,
+                "header_data" => $csvMismatchException->headerLine,
+                "header_count" => $csvMismatchException->headerColumns,
+            ]));
+        }
 
         if($csvTable->getDataRows() == 0) {
             $this->resolver->conflict(__("entity-importer.empty"));
@@ -147,7 +157,7 @@ class EntityImporter {
     private function verifyAttributeMapping($headers): bool {
         $nameErrors = [];
         $indexErrors = [];
-        foreach($this->attributesMap as $attribute => $column) {
+        foreach($this->attributesMap as $attributeId => $column) {
             $column = trim($column);
             if($column == "") {
                 continue;
@@ -157,27 +167,26 @@ class EntityImporter {
                 array_push($nameErrors, $column);
             }
 
-            $attr = Attribute::find($attribute);
+            $attr = Attribute::find($attributeId);
             if(!$attr) {
-                array_push($indexErrors, $attribute);
+                array_push($indexErrors, $attributeId);
             } else {
-                $this->attributeAttributeMap[$column] = $attr;
+                $this->attributeIdToAttributeValue[$attributeId] = $attr;
             }
         }
 
+        $valid = true;
         if(count($indexErrors) > 0) {
             $this->resolver->conflict(__("entity-importer.attribute-id-does-not-exist", ["attributes" => implode(", ", $indexErrors)]));
+            $valid = false;
         }
 
         if(count($nameErrors) > 0) {
             $this->resolver->conflict(__("entity-importer.attribute-column-does-not-exist", ["columns" => implode(", ", $nameErrors)]));
+            $valid = false;
         }
 
-        if(count($indexErrors) > 0 || count($nameErrors) > 0) {
-            return false;
-        } else {
-            return true;
-        }
+        return $valid;
     }
 
     private function validateName($row, $rowIndex): bool {
@@ -233,18 +242,22 @@ class EntityImporter {
 
     private function validateAttributesInRow($row, $index): bool {
         $errors = [];
-        foreach($this->attributeAttributeMap as $column => $attribute) {
+        foreach($this->attributeIdToAttributeValue as $attributeId => $attribute) {
             try {
+                $column = $this->attributesMap[$attributeId];
                 $datatype = $attribute->datatype;
                 $attrClass = AttributeBase::getMatchingClass($datatype);
                 $attrClass::fromImport($row[$column]);
             } catch(Exception $e) {
-                array_push($errors, $column);
+                array_push($errors, ["column" => $column, "value" => $row[$column]]);
             }
         }
 
         if(count($errors) > 0) {
-            $this->rowConflict($index, "entity-importer.attribute-could-not-be-imported", ["attribute" => implode(", ", $errors)]);
+            $errorStrings = array_map(function ($error) {
+                return "{{" . $error['column'] . "}}" . " => " . "{{" . $error['value'] . "}}";
+            }, $errors);
+            $this->rowConflict($index, "entity-importer.attribute-could-not-be-imported", ["attributeErrors" => implode(", ", $errorStrings)]);
         }
         return count($errors) == 0;
     }

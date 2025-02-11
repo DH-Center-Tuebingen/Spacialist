@@ -2,13 +2,18 @@
 
 namespace App;
 
+use App\AttributeTypes\AttributeBase;
+use App\AttributeTypes\SqlAttribute;
 use App\Exceptions\AmbiguousValueException;
 use App\Traits\CommentTrait;
+
 use Illuminate\Database\Eloquent\Builder;
-use App\AttributeTypes\AttributeBase;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
+
 use Nicolaslopezj\Searchable\SearchableTrait;
+
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Models\Activity;
@@ -84,8 +89,8 @@ class Entity extends Model implements Searchable {
             'editors' => $this->editors,
             'metadata' => $this->metadata,
         ];
-    }  
-    
+    }
+
     public static function getSearchCols(): array {
         return array_keys(self::searchCols);
     }
@@ -180,35 +185,35 @@ class Entity extends Model implements Searchable {
         }
         return $entities->orderBy('rank')->get();
     }
-    
+
     private function moveOrFail(int | null $parentId) {
-        
+
         if(isset($parentId)) {
             if($parentId == $this->id) {
                 throw new \Exception('Cannot move entity to itself.');
             }
-            
+
             $parentEntity = Entity::findOrFail($parentId);
             $parentEntityType = $parentEntity->entity_type;
-            
+
             if(!$parentEntityType->sub_entity_types->contains($this->entity_type_id)) {
                 throw new \Exception('This type is not an allowed sub-type.');
             }
-            
+
             $this->root_entity_id = $parentId;
             $query = self::where('root_entity_id', $parentId);
         } else {
             if(!$this->entity_type->is_root) {
                 throw new \Exception('This type is not an allowed root-type.');
             }
-            
+
             $this->root_entity_id = null;
             $query = self::whereNull('root_entity_id');
         }
         return $query;
     }
 
-    public static function patchRanks($rank, $id, $parent, $user) { 
+    public static function patchRanks($rank, $id, $parent, $user) {
         $entity = Entity::find($id);
         $oldRank = $entity->rank;
         $entity->rank = $rank;
@@ -227,10 +232,10 @@ class Entity extends Model implements Searchable {
             $oc->rank--;
             $oc->saveQuietly();
         }
-        
-        try{
+
+        try {
             $query = $entity->moveOrFail($parent);
-        }catch(\Exception $e) {
+        } catch(\Exception $e) {
             DB::rollBack();
             throw $e;
         }
@@ -392,55 +397,63 @@ class Entity extends Model implements Searchable {
         return $parents;
     }
 
-    public function getData() {
-        $attributes = AttributeValue::whereHas('attribute', function (Builder $q) {
-            $q->where('datatype', '!=', 'sql');
+    public function getStaticAttributes() {
+        $sqls = EntityAttribute::whereHas('attribute', function (Builder $q) {
+            $q->where('datatype', 'sql');
         })
-            ->where('entity_id', $this->id)
-            ->withModerated()
-            ->get();
+            ->where('entity_type_id', $this->entity_type_id);
+        if(isset($aid)) {
+            $sqls->where('attribute_id', $aid);
+        }
+        $sqls = $sqls->get();
+    }
 
-        $data = [];
-        foreach($attributes as $a) {
-            switch($a->attribute->datatype) {
-                case 'string-sc':
-                    $a->thesaurus_val = ThConcept::where('concept_url', $a->thesaurus_val)->first();
-                    break;
-                case 'entity':
-                    $a->name = Entity::find($a->entity_val)->name;
-                    break;
-                case 'entity-mc':
-                    $names = [];
-                    foreach(json_decode($a->json_val) as $dec) {
-                        $names[] = Entity::find($dec)->name;
-                    }
-                    $a->name = $names;
-                    break;
-                default:
-                    break;
+    public function getData($aid = null) {
+        $attributes = [];
+        if(isset($aid)) {
+            try {
+                Attribute::findOrFail($aid);
+            } catch(ModelNotFoundException $e) {
+                return response()->json([
+                    'error' => __('This attribute does not exist'),
+                ], 400);
             }
-            $value = $a->getValue();
-            if($a->moderation_state == 'pending-delete') {
-                $a->value = [];
-                $a->original_value = $value;
-            } else {
-                $a->value = $value;
-            }
-            if(isset($data[$a->attribute_id])) {
-                $oldAttr = $data[$a->attribute_id];
-                // check if stored entry is moderated one
-                // if so, add current value as original value
-                // otherwise, set stored entry as original value
-                if(isset($oldAttr->moderation_state)) {
-                    $oldAttr->original_value = $value;
-                    $a = $oldAttr;
-                } else {
-                    $a->original_value = $oldAttr->value;
-                }
-            }
-            $data[$a->attribute_id] = $a;
+            $attributes = AttributeValue::whereHas('attribute')
+                ->where('entity_id', $this->id)
+                ->where('attribute_id', $aid)
+                ->withModerated()
+                ->get();
+        } else {
+            $attributes = AttributeValue::whereHas('attribute')
+                ->where('entity_id', $this->id)
+                ->withModerated()
+                ->get();
         }
 
-        return $data;
+        $data = AttributeValue::generateObject($attributes);
+
+        //// Somehow this is not working and I only receive the entity_type instead of
+        //// the attributes array.
+        // $entityType = $this->entity_type;
+        // $attributes = $entityType->attributes;
+        // info(json_encode($attributes));
+
+        $sqls = EntityAttribute::whereHas('attribute', function (Builder $q) {
+            $q->where('datatype', 'sql');
+        })
+            ->where('entity_type_id', $this->entity_type_id);
+        if(isset($aid)) {
+            $sqls->where('attribute_id', $aid);
+        }
+        $sqls = $sqls->get();
+
+        foreach($sqls as $sql) {
+            $value = SqlAttribute::execute($sql->attribute->text, $this->id);
+            $data[$sql->attribute_id] = [
+                'value' => $value,
+            ];
+        }
+
+       return $data;
     }
 }

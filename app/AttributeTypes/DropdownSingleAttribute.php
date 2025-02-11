@@ -33,6 +33,6 @@ class DropdownSingleAttribute extends AttributeBase
     }
 
     public static function serialize(mixed $data) : mixed {
-        return $data;
+        return ThConcept::getByURL($data);
     }
 }

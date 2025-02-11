@@ -16,6 +16,9 @@ export const handleAttributeValueCreated = {
         // Only handle event if from different user
         if(e.user.id == useUserStore().getCurrentUserId) return;
         console.log('handleAttributeValueCreated', e);
+        const attributeValue = e.attributeValue;
+        const entity_id = attributeValue.entity_id;
+        useEntityStore().externalAttributeValueUpdated(entity_id, attributeValue, e.value);
     },
 };
 
@@ -24,6 +27,7 @@ export const handleAttributeValueUpdated = {
         // Only handle event if from different user
         if(e.user.id == useUserStore().getCurrentUserId) return;
         console.log('handleAttributeValueUpdated', e);
+        // <<<<<<< 0.11-feat-private-files
         useEntityStore().updateEntityData(
             e.attributeValue.entity_id,
             {
@@ -36,14 +40,20 @@ export const handleAttributeValueUpdated = {
             true,
             true,
         );
+        // =======
+        const attributeValue = e.attributeValue;
+        const entityId = attributeValue.entity_id;
+        useEntityStore().externalAttributeValueUpdated(entityId, attributeValue, e.value);
     },
 };
 
 export const handleAttributeValueDeleted = {
     'AttributeValueDeleted': e => {
+        const attributeId = e.attributeValue.attribute_id;
+        const entityId = e.attributeValue.entity_id;
         // Only handle event if from different user
         if(e.user.id == useUserStore().getCurrentUserId) return;
-        console.log('handleAttributeValueDeleted', e);
+        useEntityStore().externalAttributeValueDeleted(entityId, attributeId);
     },
 };
 
@@ -119,8 +129,10 @@ export const handleEntityReferenceDeleted = {
 
 export const handleEntityCommentAdded = {
     'CommentAdded': e => {
+        if(e.user.id == useUserStore().getCurrentUserId) return;
+
         const entityStore = useEntityStore();
-        entityStore.handleComment(e.comment.commentable_id, e.comment, 'add', {
+        entityStore.addComment(e.comment.commentable_id, e.comment, {
             replyTo: e.replyTo,
         });
 
@@ -138,8 +150,10 @@ export const handleEntityCommentAdded = {
 
 export const handleEntityCommentUpdated = {
     'CommentUpdated': e => {
+        if(e.user.id == useUserStore().getCurrentUserId) return;
+
         const entityStore = useEntityStore();
-        entityStore.handleComment(e.comment.commentable_id, e.comment, 'update', {
+        entityStore.updateComment(e.comment.commentable_id, e.comment, {
             replyTo: e.replyTo,
         });
 
@@ -157,8 +171,10 @@ export const handleEntityCommentUpdated = {
 
 export const handleEntityCommentDeleted = {
     'CommentDeleted': e => {
+        if(e.user.id == useUserStore().getCurrentUserId) return;
+
         const entityStore = useEntityStore();
-        entityStore.handleComment(e.comment.commentable_id, e.comment, 'delete', {
+        entityStore.deleteComment(e.comment.commentable_id, e.comment, {
             replyTo: e.replyTo,
         });
 

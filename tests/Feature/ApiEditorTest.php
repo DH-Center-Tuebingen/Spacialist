@@ -80,14 +80,16 @@ class ApiEditorTest extends TestCase
                 'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/fundstelle#20171220094911',
                 'is_root' => true,
                 'created_at' => '2017-12-20T10:03:06.000000Z',
-                'updated_at' => '2017-12-20T10:03:06.000000Z'
+                'updated_at' => '2017-12-20T10:03:06.000000Z',
+                'color' => '#FF0000',
             ],
             [
                 'id' => 7,
                 'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/lagerstatte#20171220165727',
                 'is_root' => true,
                 'created_at' => '2017-12-20T16:57:41.000000Z',
-                'updated_at' => '2017-12-20T16:57:41.000000Z'
+                'updated_at' => '2017-12-20T16:57:41.000000Z',
+                'color' => '#0000FF',
             ]
         ]);
     }
@@ -351,7 +353,6 @@ class ApiEditorTest extends TestCase
     //     $this->assertEquals('placeholder', $deps[0]->value);
     // }
 
-
     // TODO:: Deprecated (?)
     //
     // /**
@@ -397,9 +398,9 @@ class ApiEditorTest extends TestCase
             'thesaurus_url',
             'is_root',
             'created_at',
-            'updated_at'
+            'updated_at',
+            'color',
         ]);
-
 
         $response->assertJson(fn(AssertableJson $json) =>
             $json
@@ -408,21 +409,35 @@ class ApiEditorTest extends TestCase
                 ->has('is_root')
                 ->has('created_at')
                 ->has('updated_at')
+                ->has('color')
                 ->where('id', $entityType->id)
                 ->where('thesaurus_url', $concept->concept_url)
                 ->where('is_root', true)
                 ->where('created_at', $entityType->created_at->toJSON())
                 ->where('updated_at', $entityType->updated_at->toJSON())
+                ->where('color', $entityType->color)
         );
-
 
         // DISCUSS: Is this relevant anymore?
         // $entityTypeLayer = AvailableLayer::latest()->first();
         // $this->assertEquals($entityType->id, $entityTypeLayer->entity_type_id);
 
-
         // $layMax = AvailableLayer::where('is_overlay', true)->max('position');
         // $this->assertEquals($layMax+1, $entityTypeLayer->position);
+    }
+
+    /**
+    * @testdox POST /api/v1/editor/dm/{id}/relation  -  Modify entity type relations
+    */
+    public function testModifyingEntityTypeRelation() {
+        $id = 4;
+        $response = $this->userRequest()
+            ->post("/api/v1/editor/dm/$id/relation", [
+                'is_root' => false,
+                'sub_entity_types' => [
+                    3, 6, 7
+                ]
+            ]);
     }
 
     // TODO check if necessary to replace old set relation logic with new logic in EditorController::patchEntityType

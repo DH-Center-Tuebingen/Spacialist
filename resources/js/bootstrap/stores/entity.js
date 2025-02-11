@@ -21,6 +21,8 @@ import {
     only,
 } from '@/helpers/helpers.js';
 
+import { getEditedComment } from '@/helpers/comment.js';
+
 import {
     addEntity,
     addEntityType,
@@ -60,7 +62,7 @@ function updateSelectionTypeIdList(selection) {
 const handleAddEntityType = (context, typeData, attributes = []) => {
     context.entityTypeAttributes[typeData.id] = attributes.slice();
     context.entityTypes[typeData.id] = typeData;
-}
+};
 
 const handlePostDelete = (context, entityId) => {
     const currentRoute = router.currentRoute.value;
@@ -87,7 +89,7 @@ const handlePostDelete = (context, entityId) => {
             }
         }
     }
-}
+};
 
 export const useEntityStore = defineStore('entity', {
     state: _ => ({
@@ -180,7 +182,7 @@ export const useEntityStore = defineStore('entity', {
                     colors = state.entityTypeColors[id];
                 }
                 return colors;
-            }
+            };
         },
         getEntityTypeName(state) {
             return id => {
@@ -476,44 +478,35 @@ export const useEntityStore = defineStore('entity', {
                 this.updateAttributeMetadata(entityTypeId, attributeId, etAttrId, data);
             });
         },
-        updateEntityData(entityId, updatedValues, patchedData, removedData, sync, fromWebsocket = false) {
+        externalAttributeValueDeleted(entityId, attributeId) {
+            this.receivedEntityData[entityId] = {};
+            this.receivedEntityData[entityId][attributeId] = {};
+        },
+        externalAttributeValueUpdated(entityId, attributeValue, value) {
+            const attributeId = attributeValue.attribute_id;
+            this.receivedEntityData[entityId] = {};
+            this.receivedEntityData[entityId][attributeId] = attributeValue;
+            this.receivedEntityData[entityId][attributeId].value = value;
+        },
+        updateEntityData(entityId, updatedValues, patchedData, removedData) {
             const entity = this.getEntity(entityId);
-            if(fromWebsocket) {
-                this.receivedEntityData[entity.id] = {};
-                for(let k in updatedValues) {
-                    this.receivedEntityData[entity.id][k] = patchedData[k];
-                    this.receivedEntityData[entity.id][k].value = updatedValues[k];
-                }
-                return;
-            }
             for(let k in updatedValues) {
                 // when attribute value is set empty, delete whole attribute
                 if(!updatedValues[k] && updatedValues[k] != false) {
                     entity.data[k] = {};
-                    if(sync) {
-                        this.selectedEntity.data[k] = {};
-                        state.entity.data[k] = {};
-                    }
                 } else {
                     // if no id exists, this data is added
                     if(!entity.data[k].id) {
                         entity.data[k] = patchedData[k];
                         entity.data[k].value = updatedValues[k];
-                        if(sync) {
-                            this.selectedEntity.data[k] = patchedData[k];
-                            this.selectedEntity.data[k].value = updatedValues[k];
-                        }
                     } else {
                         entity.data[k].value = updatedValues[k];
-                        if(sync) {
-                            this.selectedEntity.data[k].value = updatedValues[k];
-                        }
                     }
                 }
             }
 
-            // Remove the data from the entity. 
-            // We need to do this as the 'replace', 'add' 'remove' 
+            // Remove the data from the entity.
+            // We need to do this as the 'replace', 'add' 'remove'
             // operations are calculated based on this value.
             for(const attributeId in removedData) {
                 if(entity.data[attributeId]) {
@@ -584,60 +577,48 @@ export const useEntityStore = defineStore('entity', {
         },
         async removeReference(id, entityId, attributeUrl) {
             return deleteReferenceFromEntity(id).then(_ => {
-                this.handleReference(entityId, attributeUrl, 'delete', {id: id});
+                this.handleReference(entityId, attributeUrl, 'delete', { id: id });
             });
         },
-        handleComment(entityId, comment, action, data) {
-            const replyTo = data.replyTo;
+        async addComment(entityId, comment, { replyTo = null } = {}) {
             const entity = this.getEntity(entityId);
-            if(action == 'add') {
-                if(replyTo) {
-                    const op = entity.comments.find(c => c.id == replyTo);
-                    if(op.replies) {
-                        op.replies.push(comment);
-                    }
-                    op.replies_count++;
-                } else {
-                    if(!entity.comments) {
-                        entity.comments = [];
-                    }
-                    entity.comments.push(comment);
-                    entity.comments_count++;
+            if(replyTo) {
+                const op = entity.comments.find(c => c.id == replyTo);
+                if(op.replies) {
+                    op.replies.push(comment);
                 }
-            } else if(action == 'update' || action == 'delete') {
-                let editedComment = null;
-                if(replyTo) {
-                    const op = entity.comments.find(c => c.id == replyTo);
-                    if(op.replies) {
-                        editedComment = op.replies.find(reply => reply.id == comment.id);
-                    }
-                } else {
-                    editedComment = entity.comments.find(c => c.id == comment.id);
+                op.replies_count++;
+            } else {
+                if(!entity.comments) {
+                    entity.comments = [];
                 }
-                if(editedComment) {
-                    if(action == 'update') {
-                        editedComment.content = comment.content;
-                        editedComment.updated_at = comment.updated_at;
-                    } else if(action == 'delete') {
-                        editedComment.content = null;
-                        editedComment.updated_at = Date();
-                        editedComment.deleted_at = Date();
-                    }
-                }
+                // We dont need to add the comment manually
+                // as it is broadcasted via websocket
+                entity.comments.push(comment);
+                entity.comments_count++;
             }
 
             if(this.selectedEntity) {
                 this.selectedEntity.comments = entity.comments;
             }
         },
-        async addComment() {
+        async updateComment(entityId, comment, { replyTo = null } = {}) {
+            const entity = this.getEntity(entityId);
+            let editedComment = getEditedComment(entity, comment, replyTo);
+            if(editedComment) {
+                editedComment.content = comment.content;
+                editedComment.updated_at = comment.updated_at;
 
+            }
         },
-        async editComment() {
-            // TODO
-        },
-        async deleteComment() {
-            // TODO
+        async deleteComment(entityId, comment, { replyTo = null } = {}) {
+            const entity = this.getEntity(entityId);
+            let editedComment = getEditedComment(entity, comment, replyTo);
+            if(editedComment) {
+                editedComment.content = null;
+                editedComment.updated_at = Date();
+                editedComment.deleted_at = Date();
+            }
         },
         async setById(entityId) {
             let entity = this.entities[entityId];
@@ -739,7 +720,7 @@ export const useEntityStore = defineStore('entity', {
                 const updatedValues = {
                     [attributeId]: data,
                 };
-                this.updateEntityData(entityId, updatedValues, updatedValues, {}, true);
+                this.updateEntityData(entityId, updatedValues, updatedValues, {});
                 return data;
             });
         },
@@ -747,7 +728,7 @@ export const useEntityStore = defineStore('entity', {
             const moderated = useUserStore().getUserModerated;
             return patchAttributes(entityId, patchData).then(data => {
                 this.update(data.entity);
-                this.updateEntityData(entityId, dirtyValues, data.added_attributes, data.removed_attributes, !moderated);
+                this.updateEntityData(entityId, dirtyValues, data.added_attributes, data.removed_attributes);
                 if(moderated) {
                     this.updateEntityDataModerations(entityId, moderations, 'pending');
                 }
@@ -775,7 +756,7 @@ export const useEntityStore = defineStore('entity', {
             if(from == to) {
                 return;
             }
-            const attributes = this.entityTypeAttributes(entityTypeId);
+            const attributes = this.getEntityTypeAttributes(entityTypeId);
             // Already added
             if(attributes.length < to && attributes[to].id == attributeId) {
                 return;

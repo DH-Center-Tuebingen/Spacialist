@@ -34,8 +34,9 @@ class EntityType extends Model
             ->logOnlyDirty();
     }
 
-    public function setRelationInfo($isRoot = false, $subTypes = []) {
+    public function setRelationInfo($color, $isRoot = false, $subTypes = []) {
         $this->is_root = $isRoot;
+        $this->color = $color;
         EntityTypeRelation::where('parent_id', $this->id)->delete();
         foreach($subTypes as $type) {
             $relation = new EntityTypeRelation();
@@ -56,7 +57,10 @@ class EntityType extends Model
     }
 
     public function attributes() {
-        return $this->belongsToMany('App\Attribute', 'entity_attributes')->withPivot(['position', 'depends_on', 'metadata', 'id'])->orderBy('entity_attributes.position')->using(EntityAttributePivot::class);
+        return $this->belongsToMany('App\Attribute', 'entity_attributes')
+            ->withPivot(['position', 'depends_on', 'metadata', 'id'])
+            ->orderBy('entity_attributes.position')
+            ->using(EntityAttributePivot::class);
     }
 
     public function sub_entity_types() {

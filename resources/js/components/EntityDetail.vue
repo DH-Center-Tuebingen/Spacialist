@@ -156,37 +156,13 @@
                 :icon-only="false"
             />
             <div class="d-flex flex-row gap-2">
-                <div
+                <MultiUserWidget
                     v-if="state.activeUsers.length > 0"
-                    class="d-flex flex-row gap-1 align-items-center"
-                >
-                    <div
-                        class="avatar-list"
-                    >
-                        <a
-                            v-for="user in state.activeUsers"
-                            :key="user.id"
-                            href="#"
-                            class="avatar-list-item"
-                            @click.prevent="showUserInfo(user)"
-                        >
-                            <user-avatar
-                                :user="user"
-                                :size="20"
-                                class="align-middle"
-                            />
-                        </a>
-                    </div>
-                    <DotIndicator
-                        :type="'success'"
-                        style="width: 0.6rem;"
-                    />
-                </div>
+                    :active-users="state.activeUsers"
+                />
                 <div class="d-flex flex-row gap-1 align-items-center">
                     <i class="fas fa-fw fa-user-edit" />
-                    <span
-                        :title="date(state.lastModified, undefined, true, true)"
-                    >
+                    <span :title="date(state.lastModified, undefined, true, true)">
                         {{ ago(state.lastModified) }}
                     </span>
                     -
@@ -243,7 +219,6 @@
                     >
                         <DotIndicator
                             :type="'warning'"
-                            style="width: 0.5rem;"
                         />
                         <div v-show="state.attributeGrpHovered == tg.id">
                             <a
@@ -421,7 +396,7 @@
         onBeforeRouteUpdate,
     } from 'vue-router';
 
-    import {useI18n} from 'vue-i18n';
+    import { useI18n } from 'vue-i18n';
 
     import {
         Popover,
@@ -431,7 +406,7 @@
     import useEntityStore from '@/bootstrap/stores/entity.js';
     import router from '%router';
 
-    import {useToast} from '@/plugins/toast.js';
+    import { useToast } from '@/plugins/toast.js';
 
     import {
         ago,
@@ -478,12 +453,15 @@
     import MetadataTab from '@/components/entity/MetadataTab.vue';
     import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
     import DotIndicator from '@/components/indicators/DotIndicator.vue';
+    import MultiUserWidget from '@/components/user/MultiUserWidget.vue';
 
     export default {
         components: {
+            DotIndicator,
             EntityTypeLabel,
             MetadataTab,
             DotIndicator,
+            MultiUserWidget,
         },
         props: {
             bibliography: {
@@ -498,7 +476,7 @@
             }
         },
         setup(props) {
-            const {t} = useI18n();
+            const { t } = useI18n();
             const route = useRoute();
             const toast = useToast();
             const attributeStore = useAttributeStore();
@@ -547,6 +525,7 @@
                 }),
                 // TODO
                 entityGroups: computed(_ => {
+                    // TODO:: Does this makes sense?
                     if(!state.entityAttributes) {
                         return state.entityAttributes;
                     }
@@ -769,7 +748,6 @@
                     }
                     state.hiddenAttributes[ad.dependant] = {
                         hide: !matches,
-                        hide: matches,
                         by: aid,
                     };
                 });
@@ -881,7 +859,7 @@
             };
 
             const addComment = event => {
-                entityStore.handleComment(state.entity.id, event.comment, 'add', {
+                entityStore.addComment(state.entity.id, event.comment, {
                     replyTo: event.replyTo,
                 });
             };
@@ -906,8 +884,7 @@
                 const dirtyValues = getDirtyValues(grps);
                 const patches = [];
                 const moderations = [];
-                console.log(dirtyValues, patches, moderations)
-                if(Object.keys(dirtyValues).length == 0 ) return;
+                if(Object.keys(dirtyValues).length == 0) return;
 
                 for(let v in dirtyValues) {
                     const aid = v;
@@ -920,7 +897,7 @@
                             aid: aid,
                         },
                     };
-                    if(data.id) {
+                    if(data?.id) {
                         // if data.id exists, there has been an entry in the database, therefore it is a replace/remove operation
                         if(
                             (dirtyValues[v] && dirtyValues[v] != '')
@@ -1101,8 +1078,8 @@
                     return false;
                 } else {
                     leaveEntityRoom(channels.entity);
-                    channels.entity = null;
                     entityStore.unset();
+                    channels.entity = null;
                     return true;
                 }
             });
@@ -1113,7 +1090,8 @@
                         return false;
                     } else {
                         state.hiddenAttributes = {};
-                        entityStore.unset();
+                        // TODO not present on 0.11. Is this an artifact?
+                        // entityStore.unset();
                         leaveEntityRoom(channels.entity);
                         channels.entity = joinEntityRoom(to.params.id);
                         listenToList(channels.entity, [
@@ -1128,7 +1106,8 @@
                             handleEntityCommentUpdated,
                             handleEntityCommentDeleted,
                         ]);
-                        await entityStore.setById(route.params.id);
+
+                        await entityStore.setById(to.params.id);
                         return true;
                     }
                 } else {

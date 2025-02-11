@@ -1,7 +1,8 @@
 <template>
     <div
+        class="dot-indicator"
         :class="state.merged"
-        style="width: 0.6rem;"
+        :style="state.size"
     />
 </template>
 
@@ -13,6 +14,11 @@
 
     export default {
         props: {
+            size:{
+                required: false,
+                type: String,
+                default: '0.6rem',
+            },
             type: {
                 required: false,
                 type: String,
@@ -34,6 +40,12 @@
 
             // DATA
             const state = reactive({
+                size: computed(_ => {
+                    return {
+                        width: props.size,
+                        height: props.size,
+                    };
+                }),
                 merged: computed(_ => {
                     const mergedClasses = props.classes.split(' ');
                     switch(props.type) {
@@ -91,5 +103,5 @@
                 state,
             };
         },
-    }
+    };
 </script>

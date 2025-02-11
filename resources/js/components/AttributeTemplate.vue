@@ -15,7 +15,14 @@
                     :key-fn="getConceptLabel"
                     :default-value="state.searchResetValue"
                     @selected="label => labelSelected(label, 'label')"
-                />
+                >
+                    <template #chain="{ option }">
+                        <ChainList
+                            :lists="option.parent_path"
+                            :max-length="3"
+                        />
+                    </template>
+                </simple-search>
             </div>
         </div>
         <div class="mb-3">
@@ -306,7 +313,12 @@
         multiselectResetClasslist,
     } from '@/helpers/helpers.js';
 
+    import ChainList from './chain/ChainList.vue';
+
     export default {
+        components: {
+            ChainList,
+        },
         props: {
             type: {
                 required: false,
@@ -420,7 +432,7 @@
             let types = [];
             switch(type.value) {
                 case 'table':
-                    types = attributeStore.getTableAttributeTypes();
+                    types = attributeStore.getTableAttributeTypes;
                     break;
                 default:
                     types = attributeStore.attributeTypes;
@@ -529,10 +541,6 @@
                             state.attribute.rootAttributeLabel.id > 0
                         );
                 }),
-            });
-
-            // ON MOUNTED
-            onMounted(_ => {
             });
 
             // RETURN
