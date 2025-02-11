@@ -1,5 +1,5 @@
-import store from '@/bootstrap/store.js';
+import useSystemStore from '@/bootstrap/stores/system.js';
 
 export function getSupportedColorSets() {
-    return store.getters.colorSets;
+    return useSystemStore().colorSets;
 }

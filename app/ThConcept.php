@@ -48,6 +48,10 @@ class ThConcept extends Model {
         }
         return $label;
     }
+    
+    public static function getByURL($url) {
+        return self::where('concept_url', $url)->first();
+    }
 
     public static function getByString($str) {
         if(!isset($str) || $str === '') return null;

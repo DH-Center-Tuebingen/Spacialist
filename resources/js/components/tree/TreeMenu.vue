@@ -90,7 +90,7 @@
         can,
     } from '@/helpers/helpers.js';
 
-    import store from '@/bootstrap/store.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
 
     export default {
         props: {
@@ -103,6 +103,8 @@
             'close'
         ],
         setup(props, context) {
+            const entityStore = useEntityStore();
+
             useGlobalClick(function () {
                 context.emit('close');
             });
@@ -112,7 +114,7 @@
             };
             const duplicateEntity = _ => {
                 duplicateEntityApi(props.data).then(data => {
-                    store.dispatch('addEntity', data);
+                    entityStore.add(data);
                     context.emit('close');
                 });
             };

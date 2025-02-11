@@ -196,10 +196,9 @@
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
-    import store from '@/bootstrap/store.js';
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
 
     import {
-        getAttribute,
         getEntityTypeAttribute,
         getEntityTypeDependencies,
         translateConcept,
@@ -224,6 +223,7 @@
         emits: ['closing', 'confirm'],
         setup(props, context) {
             const { t } = useI18n();
+            const attributeStore = useAttributeStore();
             const {
                 attributeId,
                 entityTypeId,
@@ -243,7 +243,7 @@
                 }
                 const depId = keys[0];
                 const data = dep[depId];
-                converted.attribute = getAttribute(depId);
+                converted.attribute = attributeStore.getAttribute(depId);
                 converted.operator = operators.find(o => o.label == data.operator);
                 converted.value = data.value;
                 return converted;
@@ -353,7 +353,7 @@
                 width: 100,
                 dependantOptions: computed(_ => {
                     if(state.attributeSelected && state.operatorSelected && state.inputType == 'select') {
-                        return store.getters.attributeSelections[state.dependency.attribute.id];
+                        return attributeStore.getAttributeSelections(state.dependency.attribute.id);
                     } else {
                         return [];
                     }

@@ -97,21 +97,20 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import {
-        getPreference,
-    } from '@/helpers/helpers.js';
+    import useSystemStore from '@/bootstrap/stores/system.js';
 
     export default {
         setup(props) {
             const { t } = useI18n();
+            const systemStore = useSystemStore();
 
             // FETCH
 
             // DATA
             const state = reactive({
                 showDescription: false,
-                project: computed(_ => getPreference('prefs.project-name')),
-                maintainer: computed(_ => getPreference('prefs.project-maintainer')),
+                project: computed(_ => systemStore.getProjectName()),
+                maintainer: computed(_ => systemStore.getPreference('prefs.project-maintainer')),
                 prefLoaded: computed(_ => !!state.maintainer),
             });
 
@@ -126,7 +125,6 @@
             return {
                 t,
                 // HELPERS
-                getPreference,
                 // LOCAL
                 toggleShowDescription,
                 // PROPS

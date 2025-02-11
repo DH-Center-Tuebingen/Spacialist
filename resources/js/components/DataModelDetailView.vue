@@ -66,7 +66,7 @@
                     </label>
                     <div class="col-md-9 d-flex align-items-center">
                         <span>
-                            {{ state.entityType.layer.type }}
+                            {{ state.entityType?.layer?.type ?? "" }}
                         </span>
                         <!-- <router-link :to="{name: 'ldetail', params: { id: state.entityType.layer.id }}">
                             {{ t('main.datamodel.detail.manage_layer') }}
@@ -149,6 +149,7 @@
                 </div>
                 <attribute-list
                     class="h-100 overflow-y-auto overflow-x-hidden"
+                    style="padding-bottom: 10rem;"
                     :group="{ name: 'attribute-selection', pull: false, put: true }"
                     :attributes="state.entityAttributes"
                     :values="state.entityValues"
@@ -179,24 +180,19 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import store from '@/bootstrap/store.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import { useToast } from '@/plugins/toast.js';
 
     import {
         getInitialAttributeValue,
-        getEntityType,
         getEntityTypeAttributes,
         translateConcept,
         _cloneDeep,
     } from '@/helpers/helpers.js';
 
     import {
-        reorderEntityAttributes,
-        addEntityTypeAttribute,
-        updateEntityTypeRelation,
         getAttributeOccurrenceCount,
-        removeEntityTypeAttribute,
     } from '@/api.js';
 
     import {
@@ -207,6 +203,7 @@
     export default {
         setup(props, context) {
             const { t } = useI18n();
+            const entityStore = useEntityStore();
             const currentRoute = useRoute();
             const toast = useToast();
             // FETCH
@@ -216,8 +213,9 @@
                 if(!state.entityType.id) return;
 
                 const et = state.entityType;
-                state.propertiesSaving = true;
-                updateEntityTypeRelation(et.id, state.properties).then(_ => {
+
+                entityStore.updateEntityType(et.id, state.properties).then(_ => {
+                    state.propertiesSaving = true;
                     const name = translateConcept(state.entityType.thesaurus_url);
                     toast.$toast(
                         t('main.datamodel.toasts.updated_type.msg', {
@@ -239,7 +237,7 @@
                 state.properties.sub_entity_types = [];
             };
             const addAttributeToEntityType = e => {
-                addEntityTypeAttribute(currentRoute.params.id, e.element.id, e.to).then(data => {
+                entityStore.addEntityTypeAttribute(currentRoute.params.id, e.element.id, e.to + 1).then(data => {
                     if(e.element.is_system && e.element.datatype == 'system-separator') {
                         showEditAttribute(data.id, currentRoute.params.id, {
                             is_system: e.element.is_system,
@@ -275,16 +273,11 @@
                         });
                     }
                 } else {
-                    removeEntityTypeAttribute(id).then(_ => {
-                        store.dispatch('removeEntityTypeAttribute', {
-                            entity_type_id: etid,
-                            attribute_id: id,
-                        });
-                    });
+                    entityStore.removeEntityTypeAttribute(id, etid);
                 }
             };
             const reorderEntityAttribute = e => {
-                reorderEntityAttributes(currentRoute.params.id, e.element.id, e.from, e.to);
+                entityStore.reorderAttributes(currentRoute.params.id, e.element.id, e.from, e.to);
             };
 
             const getDefaultPropertyValues = function () {
@@ -299,8 +292,8 @@
             // DATA
             const state = reactive({
                 entityType: computed(_ => {
-                    const entityType = _cloneDeep(getEntityType(currentRoute.params.id));
-                    
+                    const entityType = _cloneDeep(entityStore.getEntityType(currentRoute.params.id));
+
                     // We need to ensure that sub_entity_types is set
                     // otherwise the dirties calculation may fail.
                     if(!entityType.sub_entity_types)
@@ -344,7 +337,7 @@
                     values: []
                 },
                 minimalEntityTypes: computed(_ => {
-                    return Object.values(store.getters.entityTypes).map(et => ({
+                    return Object.values(entityStore.entityTypes).map(et => ({
                         id: et.id,
                         thesaurus_url: et.thesaurus_url
                     }));

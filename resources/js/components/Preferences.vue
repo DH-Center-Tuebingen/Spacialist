@@ -108,7 +108,8 @@
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
-    import store from '@/bootstrap/store.js';
+    import useSystemStore from '@/bootstrap/stores/system.js';
+    import useUserStore from '@/bootstrap/stores/user.js';
     import { useToast } from '@/plugins/toast.js';
     import { patchPreferences } from '@/api.js';
 
@@ -144,6 +145,8 @@
         },
         setup(props, context) {
             const { t, locale } = useI18n();
+            const systemStore = useSystemStore();
+            const userStore = useUserStore();
             const toast = useToast();
             const currentRoute = useRoute();
 
@@ -174,7 +177,7 @@
                 }
                 if(!state.dirtyData[c][label]) {
 
-                    // The endpoint expect all values to be set. 
+                    // The endpoint expect all values to be set.
                     // If any of those change they will be overwritten.
                     state.dirtyData[c][label] = {
                         label: label,
@@ -357,11 +360,11 @@
                 dirtyData: {},
                 hasDirtyData: computed(_ => Object.keys(state.dirtyData).length > 0),
                 systemPreferences: computed(_ => {
-                    const sysPrefs = store.getters.systemPreferences;
+                    const sysPrefs = systemStore.systemPreferences;
                     return sysPrefs;
                 }),
                 userPreferences: computed(_ => {
-                    const userPrefs = store.getters.preferences;
+                    const userPrefs = userStore.preferences;
                     return userPrefs;
                 }),
                 preferences: computed(_ => {
@@ -371,7 +374,7 @@
                         return state.userPreferences;
                     }
                 }),
-                pluginPreferences: computed(_ => store.getters.pluginPreferences),
+                pluginPreferences: computed(_ => systemStore.registeredPluginPreferences),
                 categories: computed(_ => {
                     const categories = {
                         user: {},

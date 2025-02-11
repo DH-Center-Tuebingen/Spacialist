@@ -1,10 +1,10 @@
 <template>
     <vue-final-modal
         class="modal-container modal"
-        content-class="sp-modal-content sp-modal-content-xs"
+        content-class="sp-modal-content sp-modal-content-sm"
         name="user-info-modal"
     >
-        <div class="sp-modal-content sp-modal-content-xs">
+        <div class="sp-modal-content sp-modal-content-sm">
             <div class="modal-header">
                 <h5 class="modal-title">
                     {{
@@ -20,17 +20,17 @@
                 />
             </div>
             <div class="modal-body">
-                <div class="text-center">
-                    <user-avatar
-                        :user="user"
-                        :size="128"
-                    />
+                <div class="text-center mb-3">
                     <h3 class="mb-0 mt-1">
                         {{ user.name }}
                     </h3>
                     <h6 class="fw-normal text-muted">
                         {{ user.nickname }}
                     </h6>
+                    <user-avatar
+                        :user="user"
+                        :size="128"
+                    />
                 </div>
                 <div class="d-flex flex-row justify-content-center gap-5">
                     <dl class="mb-0 flex-grow-1 text-end">

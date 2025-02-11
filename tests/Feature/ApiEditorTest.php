@@ -438,17 +438,32 @@ class ApiEditorTest extends TestCase
                     3, 6, 7
                 ]
             ]);
-
-        $this->assertStatus($response, 204);
-
-        $entityType = EntityType::find($id)->load('sub_entity_types');
-        $this->assertTrue(!$entityType->is_root);
-        $this->assertArraySubset([
-            ['id' => 3],
-            ['id' => 6],
-            ['id' => 7]
-        ], $entityType->sub_entity_types->toArray());
     }
+
+    // TODO check if necessary to replace old set relation logic with new logic in EditorController::patchEntityType
+    // /**
+    // * @testdox POST /api/v1/editor/dm/{id}/relation  -  Modify entity type relations
+    // */
+    // public function testModifyingEntityTypeRelation() {
+    //     $id = 4;
+    //     $response = $this->userRequest()
+    //         ->post("/api/v1/editor/dm/$id/relation", [
+    //             'is_root' => false,
+    //             'sub_entity_types' => [
+    //                 3, 6, 7
+    //             ]
+    //         ]);
+
+    //     $this->assertStatus($response, 204);
+
+    //     $entityType = EntityType::find($id)->load('sub_entity_types');
+    //     $this->assertTrue(!$entityType->is_root);
+    //     $this->assertArraySubset([
+    //         ['id' => 3],
+    //         ['id' => 6],
+    //         ['id' => 7]
+    //     ], $entityType->sub_entity_types->toArray());
+    // }
 
     /**
      *  @testdox POST /api/v1/editor/dm/attribute  -  Test adding a new entity type and modifying it's relations afterwards.
@@ -595,8 +610,6 @@ class ApiEditorTest extends TestCase
             ]
         ]);
 
-        $this->refreshToken($response);
-
         $response = $this->userRequest()
             ->post('/api/v1/editor/dm/entity_type/3/attribute', [
                 'attribute_id' => 3
@@ -739,8 +752,6 @@ class ApiEditorTest extends TestCase
         }
 
         // Testing again with higher position
-        $this->refreshToken($response);
-
         $response = $this->userRequest()
             ->patch('/api/v1/editor/dm/entity_type/4/attribute/13/position', [
                 'position' => 1
@@ -763,10 +774,7 @@ class ApiEditorTest extends TestCase
             }
         }
 
-
         // Testing again with same position (nothing should happen)
-        $this->refreshToken($response);
-
         $response = $this->userRequest()
             ->patch('/api/v1/editor/dm/entity_type/4/attribute/14/position', [
                 'position' => 4
@@ -933,7 +941,6 @@ class ApiEditorTest extends TestCase
             'permission to view entity data'                    => Permission::for("get", "/api/v1/editor/dm/entity_type/top",      "You do not have the permission to view entity data"),
             'permission to view entity data'                    => Permission::for("get", "/api/v1/editor/dm/attribute",           "You do not have the permission to view entity data"),
             'permission to create entity type'                  => Permission::for("post", "/api/v1/editor/dm/entity_type",        "You do not have the permission to create a new entity type"),
-            'permission to modify entity relations'             => Permission::for("post", "/api/v1/editor/dm/1/relation",     "You do not have the permission to modify entity relations"),
             'permission to add attributes'                      => Permission::for("post", "/api/v1/editor/dm/attribute",          "You do not have the permission to add attributes",[
                     'label_id' => 1,
                     'datatype' => 'string-sc',
@@ -942,7 +949,7 @@ class ApiEditorTest extends TestCase
             ]),
             'permission to add attributes to an entity type'    => Permission::for("post", "/api/v1/editor/dm/entity_type/1/attribute", "You do not have the permission to add attributes to an entity type"),
             'permission to duplicate an entity type'            => Permission::for("post", "/api/v1/editor/dm/entity_type/1/duplicate", "You do not have the permission to duplicate an entity type"),
-            'permission to modify entity-type'                  => Permission::for("patch", "/api/v1/editor/dm/entity_type/1", "You do not have the permission to modify entity-type labels",[
+            'permission to modify entity-type'                  => Permission::for("patch", "/api/v1/editor/dm/entity_type/1", "You do not have the permission to modify entity-type",[
                 'data' => [
                     'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/fundstelle#20171220094911'
                 ]
@@ -971,7 +978,8 @@ class ApiEditorTest extends TestCase
                 'attribute_id' => 2,
                 'position' => 1
             ]),
-            'exception on modify entity relations'             => Permission::for("post", "/api/v1/editor/dm/99/relation", $entityDoesNotExist),
+            // TODO check if necessary to replace old set relation logic with new logic in EditorController::patchEntityType
+            // 'exception on modify entity relations'             => Permission::for("post", "/api/v1/editor/dm/99/relation", $entityDoesNotExist),
             'exception on add attributes to an entity type'    => Permission::for("post", "/api/v1/editor/dm/entity_type/99/attribute", $entityDoesNotExist,[
                 'attribute_id' => 2,
                 'position' => 1

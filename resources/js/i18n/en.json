@@ -74,7 +74,8 @@
             "info_issue": "If you think this is a bug, please have a look at our <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues\" target=\"_blank\">issue tracker</a> on github to see if this has been already reported or <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues?q=is:issue+is:closed\" target=\"_blank\">closed</a> in a later version (Your current version can be found in Settings > <i class=\"fas fa-fw fa-info-circle\"></i> About Dialog). If it is neither reported nor closed, feel free to <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues/new\" target=\"_blank\">open a new issue</a>.",
             "occur": "Error occured",
             "headers": "Headers",
-            "request_failed": "<code class=\"fw-normal\">{method}</code>-Request to endpoint <code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code> failed with status code <span class=\"fw-medium\">{status}</span>."
+            "request_failed": "<code class=\"fw-normal\">{method}</code>-Request to endpoint <code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code> failed with status code <span class=\"fw-medium\">{status}</span>.",
+            "value_invalid": "This value is invalid"
         },
         "search": "Search…",
         "search_no_results": "No results",
@@ -593,8 +594,8 @@
                     "view_original_data": "Show original data",
                     "accept_changes": "Accept changes",
                     "deny_changes": "Deny changes",
-                    "deleted_by": "<i class=\"fas fa-fw fa-trash\"></i> deleted {ts}",
-                    "modified_by": "<i class=\"fas fa-fw fa-edit\"></i> modified {ts}",
+                    "deleted_by": "deleted {ts}",
+                    "modified_by": "modified {ts}",
                     "edit_moderated_value": {
                         "title": "Edit changes",
                         "accept": "Accept edited changes",
@@ -602,6 +603,11 @@
                         "reset": "Reset edited changes",
                         "cancel": "Cancel editing"
                     }
+                },
+                "change_indicator": {
+                    "local_only": "Attribute value changes made by you. Data can be saved.",
+                    "external_only": "Attribute value has been changed by another user.",
+                    "both": "Attribute value has been changed by you and another user. Saving will overwrite their changes with yours!"
                 }
             },
             "metadata": {
@@ -1042,5 +1048,9 @@
     "keyboard": {
         "tab": "Tab",
         "space": "Spacebar"
+    },
+    "websockets": {
+        "service_available_again": "Live updates available again!",
+        "service_unavailable": "Live updates unavailable!"
     }
 }

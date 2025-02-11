@@ -14,7 +14,7 @@
             <div
                 v-if="!state.hiddenAttributeList[element.id] || showHidden"
                 class="mt-3 px-2"
-                :class="clFromMetadata(element)"
+                :class="additionalRowClasses(element)"
                 @mouseenter="onEnter(index)"
                 @mouseleave="onLeave(index)"
             >
@@ -35,8 +35,15 @@
                                 :attribute="element"
                             />
                             <div
+                                v-if="hasAttributeChangeIndicator(element)"
+                                class="d-flex align-items-center"
+                                :title="getAttributeChangeIndicatorDescription(element)"
+                            >
+                                <DotIndicator :type="getAttributeChangeIndicator(element)" />
+                            </div>
+                            <div
                                 v-show="!!state.hoverStates[index]"
-                                class="btn-fab-list"
+                                class="btn-fab-list position-absolute start-0"
                             >
                                 <button
                                     v-show="hasEmitter('onReorderList')"
@@ -117,7 +124,7 @@
                                 <i class="fas fa-diagram-next text-warning fa-rotate-180" />
                             </sup>
                         </label>
-                        <div :class="expandedClasses(index)">
+                        <div :class="expandedClasses(index, element)">
                             <Attribute
                                 :ref="el => setRef(el, element.id)"
                                 :data="element"
@@ -132,7 +139,7 @@
                                 @expanded="e => onAttributeExpand(e, index)"
                             />
 
-                            <attribute-moderation-panel
+                            <ModerationPanel
                                 v-if="isInModeration(element.id)"
                                 :element="element"
                                 :value="state.attributeValues[element.id]"
@@ -164,24 +171,22 @@
 
     import { useI18n } from 'vue-i18n';
 
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
+
     import {
-        getAttribute,
         translateConcept,
     } from '@/helpers/helpers.js';
 
-    import {
-        handleModeration as handleModerationApi,
-    } from '@/api.js';
-
-    import store from '@/bootstrap/store.js';
-
     import ModerationPanel from '@/components/moderation/Panel.vue';
-    import ValidityIndicator from './forms/indicators/ValidityIndicator.vue';
+    import ValidityIndicator from '@/components/forms/indicators/ValidityIndicator.vue';
+    import DotIndicator from '@/components/indicators/DotIndicator.vue';
 
     export default {
         components: {
-            'attribute-moderation-panel': ModerationPanel,
-            'validity-indicator': ValidityIndicator,
+            ModerationPanel,
+            ValidityIndicator,
+            DotIndicator,
         },
         props: {
             classes: {
@@ -250,6 +255,8 @@
         emits: ['dirty'],
         setup(props, context) {
             const { t } = useI18n();
+            const attributeStore = useAttributeStore();
+            const entityStore = useEntityStore();
             const {
                 classes,
                 attributes,
@@ -275,17 +282,20 @@
                 }
             };
 
-            const clFromMetadata = elem => {
+            const additionalRowClasses = elem => {
+                const classes = [];
                 if(!state.ignoreMetadata && elem.pivot && elem.pivot.metadata && elem.pivot.metadata.width) {
                     const width = elem.pivot.metadata.width;
                     switch(width) {
                         case 50:
-                            return 'col-6';
+                            classes.push('col-6');
                         default:
-                            return 'col-12';
+                            classes.push('col-12');
                     }
+                } else {
+                    classes.push('col-12');
                 }
-                return 'col-12';
+                return classes;
             };
             const attributeClasses = attribute => {
                 const classes = [];
@@ -297,8 +307,10 @@
                 }
                 return classes;
             };
-            const expandedClasses = i => {
-                let expClasses = {};
+            const expandedClasses = (i, element) => {
+                let expClasses = {
+                    ['attribute-' + element.id]: true,
+                };
 
                 if(state.hideLabels || state.expansionStates[i]) {
                     expClasses['col-md-12'] = true;
@@ -355,7 +367,7 @@
                 ) {
                     toggleAttributeValue(aid);
                 }
-                handleModerationApi(action, entity_id, aid, overwrite_value);
+                entityStore.patchEntityDataModerations(action, entity_id, aid, overwrite_value);
             };
             const handleEditModeration = (aid, e) => {
                 const attr = state.attributeValues[aid];
@@ -416,13 +428,17 @@
             };
             const getDirtyValues = _ => {
                 const values = {};
+                const excludedDatatypes = ['sql', 'serial'];
                 for(let k in attrRefs.value) {
+                    const datatype = attributeStore.getAttribute(k).datatype;
                     const curr = attrRefs.value[k];
                     let currValue = null;
                     // curr is e.g. null if attribute is hidden
+                    if(excludedDatatypes.includes(datatype)) {
+                        continue;
+                    }
                     if(!!curr && !!curr.v && curr.v.meta.dirty && curr.v.meta.valid) {
                         currValue = curr.v.value;
-                        const datatype = getAttribute(k).datatype;
                         if(currValue !== null) {
                             // filter out deleted table rows
                             if(datatype == 'table') {
@@ -447,6 +463,8 @@
                 return values;
             };
             const updateDirtyState = e => {
+                // state.changeTracker.local[e.attribute_id] = true;
+                state.changeTracker.local[e.attribute_id] = e.dirty;
                 // Do not update dirty state if attribute is currently in moderation edit mode
                 if(state.attributeValues[e.attribute_id].moderation_edit_state == 'active') {
                     return;
@@ -456,6 +474,8 @@
                 context.emit('dirty', e, isDirty);
             };
             const resetListValues = _ => {
+                state.changeTracker.local = {};
+                state.changeTracker.external = {};
                 for(let k in attrRefs.value) {
                     // skip all attributes currently in moderation edit mode
                     if(state.attributeValues[k].moderation_edit_state == 'active') {
@@ -468,6 +488,8 @@
                 }
             };
             const undirtyList = _ => {
+                state.changeTracker.local = {};
+                state.changeTracker.external = {};
                 for(let k in attrRefs.value) {
                     // skip all attributes currently in moderation edit mode
                     if(state.attributeValues[k].moderation_edit_state == 'active') {
@@ -477,6 +499,47 @@
                     if(!!curr && !!curr.undirtyField) {
                         curr.undirtyField();
                     }
+                }
+            };
+            const broadcastAttributeChanges = changes => {
+                for(let k in changes) {
+                    if(attrRefs.value[k]) {
+                        // Broadcast changes to Attribute component...
+                        state.attributeValues[k].value = changes[k].value;
+                        attrRefs.value[k].handleExternalChange(changes[k]);
+                        // ... but also display info
+                        state.changeTracker.external[k] = changes[k];
+                    }
+                }
+            };
+            const hasAttributeChangeIndicator = attribute => {
+                return state.changeTracker.local[attribute.id] || state.changeTracker.external[attribute.id];
+            };
+            const getAttributeChangeIndicator = attribute => {
+                let externalChange = false;
+                let localChange = false;
+                if(state.changeTracker.local[attribute.id]) {
+                    localChange = true;
+                }
+                if(state.changeTracker.external[attribute.id]) {
+                    externalChange = true;
+                }
+                if(externalChange && localChange) {
+                    return 'error';
+                } else if(externalChange) {
+                    return 'primary';
+                } else if(localChange) {
+                    return 'warning';
+                }
+            };
+            const getAttributeChangeIndicatorDescription = attribute => {
+                const type = getAttributeChangeIndicator(attribute);
+                if(type == 'error') {
+                    return t('main.entity.attributes.change_indicator.both');
+                } else if(type == 'primary') {
+                    return t('main.entity.attributes.change_indicator.external_only');
+                } else if(type == 'warning') {
+                    return t('main.entity.attributes.change_indicator.local_only');
                 }
             };
             const setRef = (el, id) => {
@@ -563,7 +626,11 @@
                 attributeList: attributes,
                 attributeValues: values,
                 rootAttributeValues: {},
-                entity: computed(_ => store.getters.entity),
+                changeTracker: {
+                    local: {},
+                    external: {},
+                },
+                entity: computed(_ => entityStore.selectedEntity),
                 dynamicSelectionList: computed(_ => {
                     const list = [];
                     state.attributeList.forEach(a => {
@@ -619,7 +686,7 @@
                 // LOCAL
                 certainty,
                 handleSelectionUpdate,
-                clFromMetadata,
+                additionalRowClasses,
                 attributeClasses,
                 expandedClasses,
                 onAttributeExpand,
@@ -637,6 +704,10 @@
                 updateDirtyState,
                 resetListValues,
                 undirtyList,
+                broadcastAttributeChanges,
+                hasAttributeChangeIndicator,
+                getAttributeChangeIndicator,
+                getAttributeChangeIndicatorDescription,
                 setRef,
                 onEditHandler,
                 onRemoveHandler,

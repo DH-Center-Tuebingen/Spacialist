@@ -2,6 +2,7 @@
 
 namespace App\AttributeTypes;
 
+use App\EntityAttribute;
 use Illuminate\Support\Facades\DB;
 
 class SqlAttribute extends StaticAttribute

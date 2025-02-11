@@ -49,7 +49,7 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import store from '@/bootstrap/store.js';
+    import useSystemStore from '@/bootstrap/stores/system.js';
 
     import { useField } from 'vee-validate';
 
@@ -80,10 +80,11 @@
         emits: ['change'],
         setup(props, context) {
             const { t } = useI18n();
-    
+            const systemStore = useSystemStore();
+
             // We need the toRefs for the vee-validate fields
             const {
-                value: valueProp, 
+                value: valueProp,
                 metadata: metadataProp,
             } = toRefs(props);
 
@@ -102,7 +103,7 @@
                     if(!state.unitGrp) return [];
                     let groupName = state.unitGrp;
 
-                    const allGroups = store.getters.datatypeDataOf('si-unit');
+                    const allGroups = systemStore.getDatatypeDataOf('si-unit');
                     if(!allGroups) return [];
 
                     let group = allGroups[groupName];
@@ -146,8 +147,12 @@
             });
 
             const resetFieldState = _ => {
-                resetValueField();
-                resetUnitField();
+                resetValueField({
+                    value: valueProp.value.value,
+                });
+                resetUnitField({
+                    value: valueProp.value.unit,
+                });
             };
 
             const undirtyField = _ => {
@@ -165,6 +170,7 @@
             });
 
             watch(_ => v, (newValue, oldValue) => {
+                // TODO: The SiUnit is not updating accurately. as the new and old value is always the same (new) value.
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,

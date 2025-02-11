@@ -171,32 +171,6 @@ class EditorController extends Controller {
         return response()->json($entityType, 201);
     }
 
-    public function setRelationInfo(Request $request, $id) {
-        $user = auth()->user();
-        if(!$user->can('entity_type_write')) {
-            return response()->json([
-                'error' => __('You do not have the permission to modify entity relations')
-            ], 403);
-        }
-        $this->validate($request, [
-            'is_root' => 'boolean_string',
-            'sub_entity_types' => 'array',
-            'color' => 'color',
-        ]);
-        try {
-            $entityType = EntityType::findOrFail($id);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This entity-type does not exist')
-            ], 400);
-        }
-        $is_root = $request->get('is_root');
-        $subs = $request->get('sub_entity_types');
-        $color = $request->get('color');
-        $entityType->setRelationInfo($color, $is_root, $subs);
-        return response()->json(null, 204);
-    }
-
     public function addAttribute(Request $request) {
         $user = auth()->user();
         if(!$user->can('attribute_create')) {
@@ -398,11 +372,11 @@ class EditorController extends Controller {
         $user = auth()->user();
         if(!$user->can('entity_type_write')) {
             return response()->json([
-                'error' => __('You do not have the permission to modify entity-type labels')
+                'error' => __('You do not have the permission to modify entity-type')
             ], 403);
         }
         $this->validate($request, [
-            'data' => 'required|array'
+            'data' => 'required|array',
         ]);
 
         try {
@@ -412,14 +386,35 @@ class EditorController extends Controller {
                 'error' => __('This entity-type does not exist')
             ], 400);
         }
-        $data = Arr::only($request->get('data'), array_keys(EntityType::patchRules));
-        if(count($data) < 1) {
+        $relationData = Arr::only(
+            $request->get('data'),
+            ['is_root', 'sub_entity_types', 'color'],
+        );
+        $propData = Arr::only(
+            $request->get('data'),
+            array_keys(EntityType::patchRules),
+        );
+
+        $updateRelation = count($relationData) > 0;
+        $updateProps = count($propData) > 0;
+
+        if(!$updateRelation && !$updateProps) {
             return response()->json([
                 'error' => __('The given data is invalid')
             ], 400);
         }
-        foreach($data as $key => $prop) {
-            $entityType->{$key} = $prop;
+
+        if($updateRelation) {
+            $isRoot = $relationData['is_root'];
+            $subEntityTypes = $relationData['sub_entity_types'];
+            $color = $relationData['color'];
+            $entityType->setRelationInfo($color, $isRoot, $subEntityTypes);
+        }
+
+        if($updateProps) {
+            foreach($propData as $key => $prop) {
+                $entityType->{$key} = $prop;
+            }
         }
         $entityType->save();
 

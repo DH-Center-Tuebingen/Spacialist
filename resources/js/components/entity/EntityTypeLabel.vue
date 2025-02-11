@@ -1,5 +1,5 @@
 <template>
-    <div 
+    <div
         class="d-flex flex-row gap-1"
     >
         <span
@@ -20,10 +20,7 @@
         reactive,
     } from 'vue';
 
-    import {
-        getEntityColors,
-        getEntityTypeName,
-    } from '@/helpers/helpers.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
 
     export default {
         props: {
@@ -38,14 +35,16 @@
             },
         },
         setup(props) {
+            const entityStore = useEntityStore();
+
             const state = reactive({
                 colorStyles: computed(_ => {
-                    const colors = getEntityColors(props.type);
+                    const colors = entityStore.getEntityTypeColors(props.type);
                     return {
                         color: colors.backgroundColor,
                     };
                 }),
-                label: computed(_ => getEntityTypeName(props.type)),
+                label: computed(_ => entityStore.getEntityTypeName(props.type)),
             });
 
             return {

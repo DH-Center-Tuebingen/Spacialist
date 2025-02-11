@@ -1,19 +1,8 @@
-import auth from '@/bootstrap/auth.js';
-import store from '%store';
+// import auth from '@/bootstrap/auth.js';
 import router from '%router';
-
-import {
-    fetchAttributes,
-    fetchBibliography,
-    fetchTags,
-    fetchTopEntities,
-    fetchPreData,
-    fetchGeometryTypes,
-    fetchUsers,
-    fetchVersion,
-    fetchPlugins,
-    fetchAttributeTypes,
-} from '@/api.js';
+import useEntityStore from '@/bootstrap/stores/entity.js';
+import useSystemStore from '@/bootstrap/stores/system.js';
+import useUserStore from '@/bootstrap/stores/user.js';
 
 import {
     showError
@@ -23,25 +12,9 @@ import {
     splitColor,
 } from '@/helpers/colors.js';
 
-export async function initApp(locale) {
-    store.dispatch('setAppState', false);
-    await fetchPreData(locale);
-    await fetchAttributes();
-    await fetchUsers();
-    await fetchTopEntities();
-    await fetchBibliography();
-    await fetchTags();
-    await fetchVersion();
-    await fetchPlugins();
-    await fetchGeometryTypes();
-    await fetchAttributeTypes();
-    store.dispatch('setAppState', true);
-    return new Promise(r => r(null));
-}
-
 export function can(permissionString, oneOf) {
     oneOf = oneOf || false;
-    const user = store.getters.user;
+    const user = useUserStore().user;
     if(!user) return false;
     const permissions = permissionString.split('|');
     const hasPermission = permission => {
@@ -56,7 +29,7 @@ export function can(permissionString, oneOf) {
 }
 
 export function hasPlugin(id) {
-    return store.getters.plugins.some(p => p.name == id);
+    return useSystemStore().hasPlugin(id);
 }
 
 export function getErrorMessages(error, suffix = '') {
@@ -158,15 +131,15 @@ export function randomId(min = 0, max = 100) {
 }
 
 export function getConcept(url) {
-    if(!url || !hasConcept(url)) {
+    if(!url) {
         return {};
     }
-    return store.getters.concepts[url];
+    return useSystemStore().concepts[url] || {};
 }
 
 export function hasConcept(url) {
     if(!url) return false;
-    return !!store.getters.concepts[url];
+    return !!useSystemStore().concepts[url];
 }
 
 export function translateLabel(element, prop) {
@@ -176,89 +149,31 @@ export function translateLabel(element, prop) {
 }
 
 export function translateConcept(url) {
-    const concepts = store.getters.concepts;
-    if(!url || !concepts) return url;
-    if(!concepts[url]) return url;
-    return concepts[url].label;
+    return useSystemStore().translateConcept(url);
 }
 
 export function getConceptLabel(concept) {
     return concept.labels.length ? concept.labels[0].label : '';
 }
 
-export async function handleDeletedEntity(entity) {
-    const currentRoute = router.currentRoute.value;
-    // Currently an entity is selected, thus maybe route back is needed
-    if(currentRoute.name == 'entitydetail' || currentRoute.name == 'entitydetail') {
-        const selectedEntityId = currentRoute.params.id;
-        // Selected entity is deleted entity
-        if(selectedEntityId == entity.id) {
-            router.push({
-                append: true,
-                name: 'home',
-                query: currentRoute.query
-            });
-        } else {
-            const selectedEntity = store.getters.entities[selectedEntityId];
-            const idx = selectedEntity.parentIds.findIndex(pid => pid == entity.id);
-            // Selected entity is child of deleted entity
-            if(idx > -1) {
-                router.push({
-                    append: true,
-                    name: 'home',
-                    query: currentRoute.query
-                });
-            }
-        }
-    }
-    return new Promise(r => r(null));
-}
-
-export function getAttribute(id) {
-    if(!id) return {};
-    return store.getters.attributes.find(a => a.id == id) || {};
-}
-
-export function getAttributeName(id) {
-    const attr = getAttribute(id);
-    if(!attr || !attr.thesaurus_url) return '';
-
-    return translateConcept(attr.thesaurus_url);
-}
-
 export function translateEntityType(id) {
-    return translateConcept(getEntityType(id).thesaurus_url);
+    return translateConcept(useEntityStore().getEntityType(id).thesaurus_url);
 }
 
-export function getEntityType(id) {
-    if(!id) return {};
-    return getEntityTypes()[id];
-}
-
-export function getEntityTypeName(id) {
-    const entityType = getEntityType(id);
-    if(!entityType) return '';
-    return translateConcept(entityType.thesaurus_url);
-}
-
-export function getEntityTypes() {
-    return store.getters.entityTypes || {};
-}
-
-export function getEntityTypeAttribute(etid, aid) {
-    if(!etid || !aid) return null;
-    const attributes = store.getters.entityTypeAttributes(etid);
-    return attributes ? attributes.find(a => a.id == aid) : null;
-}
-
-export function getEntityTypeAttributes(id) {
+export function getEntityTypeAttributes(id, exclude = false) {
     if(!id) return [];
-    return store.getters.entityTypeAttributes(id) || [];
+    return useEntityStore().getEntityTypeAttributes(id, exclude) || [];
+}
+
+export function getEntityTypeAttribute(etid, aid, exclude = false) {
+    if(!etid || !aid) return null;
+    const attributes = getEntityTypeAttributes(etid, exclude);
+    return attributes ? attributes.find(a => a.id == aid) : null;
 }
 
 export function getEntityTypeDependencies(id, aid) {
     if(!id) return {};
-    const attrs = store.getters.entityTypeAttributes(id);
+    const attrs = getEntityTypeAttributes(id);
     if(!attrs) return {};
     if(!!aid) {
         const attr = attrs.find(a => a.id == aid);
@@ -284,61 +199,8 @@ export function getEntityTypeDependencies(id, aid) {
     }
 }
 
-export function getAttributeSelection(aid) {
-    return store.getters.attributeSelections[aid];
-}
-
-export function getAttributeSelections(attributes) {
-    const sel = store.getters.attributeSelections;
-    let filteredSel = {};
-    for(let k in sel) {
-        if(attributes.findIndex(a => a.id == k) > -1) {
-            filteredSel[k] = sel[k];
-        }
-    }
-    return filteredSel;
-}
-
-export function getEntityTypeAttributeSelections(id) {
-    const attrs = getEntityTypeAttributes(id);
-    if(!attrs) return {};
-    return getAttributeSelections(attrs);
-}
-
-export function getIntersectedEntityAttributes(entityTypeLists) {
-    if(entityTypeLists.length == 0) return [];
-
-    let compArr = getEntityTypeAttributes(entityTypeLists[0]);
-
-    if(entityTypeLists.length == 1) {
-        return compArr;
-    }
-
-    let intersections = [];
-    for(let i = 1; i < entityTypeLists.length; i++) {
-        intersections = [];
-        const attrN = getEntityTypeAttributes(entityTypeLists[i]);
-        for(let j = 0; j < compArr.length; j++) {
-            for(let k = 0; k < attrN.length; k++) {
-                const a1 = compArr[j];
-                const a2 = attrN[k];
-                if(a1.id == a2.id) {
-                    intersections.push(a1);
-                }
-            }
-        }
-        compArr = intersections;
-    }
-
-    return intersections;
-}
-
-export function hasIntersectionWithEntityAttributes(etid, entityTypeList) {
-    return getIntersectedEntityAttributes([etid, ...entityTypeList]).length > 0;
-}
-
 export function isAllowedSubEntityType(parentId, id) {
-    const parent = store.getters.entityTypes[parentId];
+    const parent = useEntityStore().getEntityType(parentId);
     if(!parent) return false;
     return parent.sub_entity_types.some(et => et.id == id);
 }
@@ -511,7 +373,7 @@ export function fillEntityData(data, etid) {
         const currAttr = attrs[i];
         if(!data[currAttr.id]) {
             data[currAttr.id] = {
-                value: getInitialAttributeValue(currAttr),
+                value: getInitialAttributeValue(currAttr, 'datatype'),
             };
         }
     }
@@ -519,6 +381,11 @@ export function fillEntityData(data, etid) {
 }
 
 // Formula based on https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color/3943023#3943023
+export function calculateEntityTypeColors(entityType, alpha = 0.5) {
+    if(!entityType || !entityType.layer) return {};
+    let r, g, b, a;
+    [r, g, b] = splitColor(entityType.layer.color);
+}
 export function calculateEntityColors(id, alpha = 0.5) {
     const et = getEntityType(id);
     let typeColor = null;
@@ -549,24 +416,6 @@ export function calculateEntityColors(id, alpha = 0.5) {
     };
 }
 
-export function getEntity(id) {
-    return store.getters.entities[id] || {};
-}
-
-export function getEntityColors(id) {
-    let colors = store.getters.entityTypeColors(id);
-    if(!colors) {
-        const calc = calculateEntityColors(id);
-        const data = {
-            id: id,
-            colors: calc,
-        };
-        store.dispatch('setEntityTypeColors', data);
-        colors = store.getters.entityTypeColors(id);
-    }
-    return colors;
-}
-
 export function siSymbolToStr(symbol) {
     if(!symbol) return '';
 
@@ -578,28 +427,19 @@ export function siSymbolToStr(symbol) {
 }
 
 export function isLoggedIn() {
-    return auth.check();
+    return useUserStore().userLoggedIn;
 }
 
 export function getUser() {
-    return isLoggedIn() ? auth.user() : {};
+    return isLoggedIn() ? useUserStore().getCurrentUser : {};
 }
 
-export function isModerated() {
-    return isLoggedIn() ? store.getters.isModerated : true;
+export function getUsers() {
+    return useUserStore().users;
 }
 
 export function userId() {
     return getUser().id || -1;
-}
-
-export function getUsers() {
-    const fallback = [];
-    if(isLoggedIn()) {
-        return store.getters.users || fallback;
-    } else {
-        return fallback;
-    }
 }
 
 // where can be any of 'start', 'end', 'whole' (default)
@@ -615,41 +455,6 @@ export function filterUsers(term, ci = true, where = 'whole') {
     return getUsers().filter(u => {
         return regex.test(u.name) || regex.test(u.nickname);
     });
-}
-
-export function getRoles(withPermissions = false) {
-    const fallback = [];
-    if(isLoggedIn()) {
-        return store.getters.roles(!withPermissions) || fallback;
-    } else {
-        return fallback;
-    }
-}
-
-export function getUserBy(value, attr = 'id') {
-    if(!value) return null;
-
-    if(isLoggedIn()) {
-        const isNum = !isNaN(value);
-        const lValue = isNum ? value : value.toLowerCase();
-        if(attr == 'id' && value == userId()) {
-            return getUser();
-        } else {
-            return getUsers().find(u => isNum ? (u[attr] == lValue) : (u[attr].toLowerCase() == lValue));
-        }
-    } else {
-        return null;
-    }
-}
-
-export function getRoleBy(value, attr = 'id', withPermissions = false) {
-    if(isLoggedIn()) {
-        const isNum = !isNaN(value);
-        const lValue = isNum ? value : value.toLowerCase();
-        return getRoles(withPermissions).find(r => isNum ? (r[attr] == lValue) : (r[attr].toLowerCase() == lValue));
-    } else {
-        return null;
-    }
 }
 
 export function throwError(error) {
@@ -773,22 +578,6 @@ export function createAnchorFromUrl(url) {
     return url.replace(urlRegex, match => `<a href="${match}" target="_blank">${match}</a>`);
 }
 
-export function hasPreference(prefKey, prop) {
-    const ps = store.getters.preferenceByKey(prefKey);
-    if(ps) {
-        return ps[prop] || ps;
-    }
-}
-
-export function getPreference(prefKey) {
-    return store.getters.preferenceByKey(prefKey);
-}
-
-export function getProjectName(slug = false) {
-    const name = getPreference('prefs.project-name');
-    return slug ? slugify(name) : name;
-}
-
 export function slugify(s, delimiter = '-') {
     var char_map = {
         // Latin
@@ -890,7 +679,7 @@ export function getNotificationSourceLink(notification) {
     const currentRoute = router.currentRoute.value;
     const query = currentRoute.query;
     if(notification.type == 'App\\Notifications\\CommentPosted') {
-        switch(simpleResourceType(notification.data.resource.type)) {
+        switch(simpleResourceType(notification.data.resource?.type)) {
             case 'entity':
                 return {
                     name: 'entitydetail',
@@ -926,10 +715,6 @@ export function getNotificationSourceLink(notification) {
             }
         };
     }
-}
-
-export function userNotifications() {
-    return getUser().notifications || [];
 }
 
 export async function asyncFor(arr, callback) {
@@ -969,12 +754,14 @@ export function copyToClipboard(elemId) {
 }
 
 export function sortConcepts(ca, cb) {
-    return translateConcept(ca.concept_url).localeCompare(translateConcept(cb.concept_url));
+    const systemStore = useSystemStore();
+    return systemStore.translateConcept(ca.concept_url).localeCompare(systemStore.translateConcept(cb.concept_url));
 }
 
 export function sortTranslated(asc = true, prop = 'thesaurus_url') {
+    const systemStore = useSystemStore();
     return function (a, b) {
-        return translateConcept(a[prop]).localeCompare(translateConcept(b[prop])) * (asc ? 1 : -1);
+        return systemStore.translateConcept(a[prop]).localeCompare(systemStore.translateConcept(b[prop])) * (asc ? 1 : -1);
     };
 }
 

@@ -268,10 +268,10 @@
                     return {
                         dirty: v.start.meta.dirty || v.startLabel.meta.dirty || v.end.meta.dirty || v.endLabel.meta.dirty || v.epoch.meta.dirty,
                         valid: ((v.start.meta.dirty && v.start.meta.valid) || !v.start.meta.dirty) &&
-                               ((v.startLabel.meta.dirty && v.startLabel.meta.valid) || !v.startLabel.meta.dirty) &&
-                               ((v.end.meta.dirty && v.end.meta.valid) || !v.end.meta.dirty) &&
-                               ((v.endLabel.meta.dirty && v.endLabel.meta.valid) || !v.endLabel.meta.dirty) &&
-                               ((v.epoch.meta.dirty && v.epoch.meta.valid) || !v.epoch.meta.dirty),
+                            ((v.startLabel.meta.dirty && v.startLabel.meta.valid) || !v.startLabel.meta.dirty) &&
+                            ((v.end.meta.dirty && v.end.meta.valid) || !v.end.meta.dirty) &&
+                            ((v.endLabel.meta.dirty && v.endLabel.meta.valid) || !v.endLabel.meta.dirty) &&
+                            ((v.epoch.meta.dirty && v.epoch.meta.valid) || !v.epoch.meta.dirty),
                     };
                 }),
                 start: {
@@ -314,11 +314,18 @@
                 resetFieldState();
             });
             watch(_ => v.value, (newValue, oldValue) => {
-                context.emit('change', {
-                    dirty: v.meta.dirty,
-                    valid: v.meta.valid,
-                    value: v.value,
-                });
+                // Probably due the the values being computed,
+                // the watcher is triggered when the form is submitted
+                // (even when the value was not dirty), it will emit
+                // the change event, causing the AttributeList to set
+                // the field to dirty.
+                if(JSON.stringify(newValue) !== JSON.stringify(oldValue)) {
+                    context.emit('change', {
+                        dirty: v.meta.dirty,
+                        valid: v.meta.valid,
+                        value: v.value,
+                    });
+                }
             });
 
             // RETURN
