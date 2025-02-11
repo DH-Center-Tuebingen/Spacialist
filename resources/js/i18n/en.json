@@ -485,6 +485,8 @@
                 "add": "Add new Top-Level-Entity",
                 "contextmenu": {
                     "add": "Add Sub-Entity",
+                    "add_above": "Add Entity Above",
+                    "add_below": "Add Entity Below",
                     "duplicate": "Create Duplicate",
                     "move": "Move in Tree",
                     "delete": "Delete Entity"

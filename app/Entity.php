@@ -57,9 +57,10 @@ class Entity extends Model implements Searchable {
     ];
 
     const rules = [
-        'name'              => 'required|string',
-        'entity_type_id'   => 'required|integer|exists:entity_types,id',
-        'root_entity_id'   => 'integer|exists:entities,id',
+        'name'           => 'required|string',
+        'entity_type_id' => 'required|integer|exists:entity_types,id',
+        'root_entity_id' => 'integer|exists:entities,id',
+        'rank'           => 'integer|min:1',
     ];
 
     const patchRules = [
@@ -125,7 +126,7 @@ class Entity extends Model implements Searchable {
         }
     }
 
-    public static function create($fields, $entityTypeId, $user, $rootEntityId = null) {
+    public static function create($fields, $entityTypeId, $user, $rootEntityId = null, $rank = null) {
         $isChild = isset($rootEntityId);
         if($isChild) {
             $parentCtid = self::find($rootEntityId)->entity_type_id;
@@ -149,14 +150,27 @@ class Entity extends Model implements Searchable {
         }
 
         $entity = new self();
-        $rank;
         if($isChild) {
-            $rank = self::where('root_entity_id', $rootEntityId)->max('rank') + 1;
+            if(!isset($rank)) {
+                $rank = self::where('root_entity_id', $rootEntityId)->max('rank') + 1;
+            } else {
+                $nextSiblings = self::where('root_entity_id', $rootEntityId)->where('rank', '>=', $rank)->get();
+            }
             $entity->root_entity_id = $rootEntityId;
         } else {
-            $rank = self::whereNull('root_entity_id')->max('rank') + 1;
+            if(!isset($rank)) {
+                $rank = self::whereNull('root_entity_id')->max('rank') + 1;
+            } else {
+                $nextSiblings = self::whereNull('root_entity_id')->where('rank', '>=', $rank)->get();
+            }
         }
         $entity->rank = $rank;
+        if(isset($nextSiblings) && count($nextSiblings) > 0) {
+            foreach($nextSiblings as $sibling) {
+                $sibling->rank = $sibling->rank + 1;
+                $sibling->saveQuietly();
+            }
+        }
 
         foreach($fields as $key => $value) {
             $entity->{$key} = $value;
@@ -187,7 +201,6 @@ class Entity extends Model implements Searchable {
     }
 
     private function moveOrFail(int | null $parentId) {
-
         if(isset($parentId)) {
             if($parentId == $this->id) {
                 throw new \Exception('Cannot move entity to itself.');
