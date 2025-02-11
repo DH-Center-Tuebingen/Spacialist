@@ -387,7 +387,7 @@ export function calculateEntityTypeColors(entityType, alpha = 0.5) {
     [r, g, b] = splitColor(entityType.layer.color);
 }
 export function calculateEntityColors(id, alpha = 0.5) {
-    const et = getEntityType(id);
+    const et = useEntityStore().getEntityType(id);
     let typeColor = null;
     if(et?.layer?.color) {
         typeColor = et.layer.color;

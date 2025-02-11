@@ -5,10 +5,10 @@ namespace App;
 use App\Traits\SoftDeletesWithTrashed;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Notifications\Notifiable;
+use App\File\FileDirectory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
-use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 use Spatie\Activitylog\Traits\CausesActivity;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
@@ -65,14 +65,12 @@ class User extends Authenticatable
     }
 
     public function uploadAvatar($file) {
-        if(isset($this->avatar) && Storage::exists($this->avatar)) {
-            Storage::delete($this->avatar);
-        }
+        $avatarDirectory = self::getAvatarDirectory();
+        $avatarDirectory->deleteRaw($this->avatar);
         $filename = $this->id . "." . $file->getClientOriginalExtension();
-        return $file->storeAs(
-            'avatars',
-            $filename
-        );
+        $storedFilename = $avatarDirectory->store($filename, $file);
+        $this->avatar = $storedFilename;
+        $this->save();
     }
 
     public function setPermissions() {
@@ -116,6 +114,10 @@ class User extends Authenticatable
 
     public function preferences() {
         return $this->hasMany('App\UserPreference');
+    }
+
+    public static function getAvatarDirectory(){
+        return new FileDirectory('local', 'avatars');
     }
 
     // public function roles() {
