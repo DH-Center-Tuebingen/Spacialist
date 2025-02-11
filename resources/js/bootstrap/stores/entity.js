@@ -16,7 +16,7 @@ import {
 
 import {
     can,
-    calculateEntityTypeColors,
+    calculateEntityColors,
     fillEntityData,
     only,
 } from '@/helpers/helpers.js';
@@ -176,8 +176,7 @@ export const useEntityStore = defineStore('entity', {
                 if(!id) return {};
                 let colors = state.entityTypeColors[id];
                 if(!colors) {
-                    const entityType = this.getEntityType(id);
-                    const calculatedColors = calculateEntityTypeColors(entityType);
+                    const calculatedColors = calculateEntityColors(id);
                     state.entityTypeColors[id] = calculatedColors;
                     colors = state.entityTypeColors[id];
                 }
