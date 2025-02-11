@@ -491,9 +491,15 @@ export async function addEntityTypeAttribute(etid, aid, rank) {
 }
 
 export async function addReference(eid, aid, data) {
-    return $httpQueue.add(
-        () => http.post(`/entity/${eid}/reference/${aid}`, data).then(response => response.data)
-    );
+    if(aid) {
+        return $httpQueue.add(
+            () => http.post(`/entity/${eid}/reference/${aid}`, data).then(response => response.data)
+        );
+    } else {
+        return $httpQueue.add(
+            () => http.post(`/entity/${eid}/reference`, data).then(response => response.data)
+        );
+    }
 }
 
 export async function getFilteredActivity(pageUrl, payload) {

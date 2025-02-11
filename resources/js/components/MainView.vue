@@ -71,39 +71,70 @@
                     >
                         {{ t('main.entity.references.empty') }}
                     </p>
-                    <template
-                        v-for="(referenceGroup, key) in state.entity.references"
-                        v-else
-                        :key="key"
+                    <div
+                        v-if="state.hasEntityReferences"
+                        class="reference-group mb-1"
                     >
-                        <div
-                            v-if="referenceGroup.length > 0"
-                            class="reference-group"
-                        >
-                            <h5 class="mb-2 fw-medium">
-                                <a
-                                    href="#"
-                                    class="text-decoration-none"
-                                    @click.prevent="showMetadataForReferenceGroup(referenceGroup)"
-                                >
-                                    {{ translateConcept(key) }}
-                                </a>
-                            </h5>
-                            <div class="list-group w-90">
-                                <div
-                                    v-for="(reference, i) in referenceGroup"
-                                    :key="i"
-                                    class="list-group-item pt-0"
-                                >
-                                    <header class="text-end">
-                                        <span class="text-muted fw-light small">
-                                            {{ date(reference.updated_at) }}
-                                        </span>
-                                    </header>
-                                    <Quotation :value="reference" />
-                                </div>
+                        <h5 class="mb-2 fw-medium">
+                            {{ t('main.entity.references.general') }}
+                        </h5>
+                        <div class="list-group w-90">
+                            <div
+                                v-for="(reference, i) in state.entityReferences"
+                                :key="i"
+                                class="list-group-item pt-0"
+                            >
+                                <header class="text-end">
+                                    <span class="text-muted fw-light small">
+                                        {{ date(reference.updated_at) }}
+                                    </span>
+                                </header>
+                                <Quotation :value="reference" />
                             </div>
                         </div>
+                        <ReferenceForm
+                            class="mt-2 w-90"
+                            @add="addEntityReference"
+                        />
+                    </div>
+                    <hr
+                        v-if="state.hasEntityReferences && state.hasAttributeReferences"
+                        class="w-90"
+                    >
+                    <template v-if="state.hasAttributeReferences">
+                        <template
+                            v-for="(referenceGroup, key) in state.attributeReferences"
+                            :key="key"
+                        >
+                            <div
+                                v-if="referenceGroup.length > 0"
+                                class="reference-group"
+                            >
+                                <h5 class="mb-2 fw-medium">
+                                    <a
+                                        href="#"
+                                        class="text-decoration-none"
+                                        @click.prevent="showMetadataForReferenceGroup(referenceGroup)"
+                                    >
+                                        {{ translateConcept(key) }}
+                                    </a>
+                                </h5>
+                                <div class="list-group w-90">
+                                    <div
+                                        v-for="(reference, i) in referenceGroup"
+                                        :key="i"
+                                        class="list-group-item pt-0"
+                                    >
+                                        <header class="text-end">
+                                            <span class="text-muted fw-light small">
+                                                {{ date(reference.updated_at) }}
+                                            </span>
+                                        </header>
+                                        <Quotation :value="reference" />
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
                     </template>
                 </div>
             </div>
@@ -129,6 +160,7 @@
         useRoute,
     } from 'vue-router';
 
+    import useBibliographyStore from '@/bootstrap/stores/bibliography.js';
     import useEntityStore from '@/bootstrap/stores/entity.js';
     import useSystemStore from '@/bootstrap/stores/system.js';
     import router from '%router';
@@ -170,16 +202,19 @@
     import { useToast } from '@/plugins/toast.js';
 
     import Quotation from '@/components/bibliography/Quotation.vue';
+    import ReferenceForm from '@/components/bibliography/ReferenceForm.vue';
     import useWebSocketConnectionToast from '@/composables/websocket-connection-toast.js';
 
     export default {
         components: {
             Quotation,
+            ReferenceForm,
         },
         setup(props, context) {
             const { t } = useI18n();
             const currentRoute = useRoute();
             const toast = useToast();
+            const bibliographyStore = useBibliographyStore();
             const entityStore = useEntityStore();
             const systemStore = useSystemStore();
             useWebSocketConnectionToast();
@@ -196,6 +231,9 @@
             };
             const isTab = id => {
                 return state.tab == id;
+            };
+            const addEntityReference = data => {
+                entityStore.addReference(state.entity.id, null, null, data);
             };
             const showMetadataForReferenceGroup = referenceGroup => {
                 if(!referenceGroup) return;
@@ -240,13 +278,37 @@
                 }),
                 concepts: computed(_ => systemStore.concepts),
                 entity: computed(_ => entityStore.selectedEntity),
-                hasReferences: computed(_ => {
+                hasEntityReferences: computed(_ => {
                     const isNotSet = !state.entity.references;
                     if(isNotSet) return false;
 
                     const isEmpty = !Object.keys(state.entity.references).length > 0;
                     if(isEmpty) return false;
-                    return Object.values(state.entity.references).some(v => v.length > 0);
+                    return state.entity.references.on_entity?.length > 0;
+                }),
+                hasAttributeReferences: computed(_ => {
+                    const isNotSet = !state.entity.references;
+                    if(isNotSet) return false;
+                    const {
+                        on_entity,
+                        ...refs
+                    } = state.entity.references;
+                    const isEmpty = !Object.keys(refs).length > 0;
+                    if(isEmpty) return false;
+                    return Object.values(refs).some(v => v.length > 0);
+                }),
+                hasReferences: computed(_ => state.hasEntityReferences || state.hasAttributeReferences),
+                entityReferences: computed(_ => state.hasEntityReferences ? state.entity.references.on_entity : []),
+                attributeReferences: computed(_ => {
+                    if(state.hasAttributeReferences) {
+                        const {
+                            on_entity,
+                            ...refs
+                        } = state.entity.references;
+                        return refs;
+                    } else {
+                        return {};
+                    }
                 }),
                 entityTypes: computed(_ => entityStore.entityTypes),
                 columnPref: computed(_ => systemStore.getPreference('prefs.columns')),
@@ -291,6 +353,7 @@
                 // LOCAL
                 setTab,
                 isTab,
+                addEntityReference,
                 showMetadataForReferenceGroup,
                 openLiteratureInfo,
                 // STATE

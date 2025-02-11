@@ -537,12 +537,17 @@ export const useEntityStore = defineStore('entity', {
             });
         },
         handleReference(entityId, attributeUrl, action, data) {
+            const entity = this.getEntity(entityId);
+            let references;
+            if(attributeUrl) {
+                references = entity?.references[attributeUrl] || [];
+            } else {
+                references = entity?.references.on_entity || [];
+            }
             if(action == 'add') {
-                const references = this.getEntity(entityId)?.references[attributeUrl] || [];
                 references.push(data);
                 return data;
             } else if(action == 'update') {
-                const references = this.getEntity(entityId)?.references[attributeUrl] || [];
                 const id = data.id;
                 const refData = data.data;
                 const updateData = data.updates;
@@ -554,7 +559,6 @@ export const useEntityStore = defineStore('entity', {
                     reference.updated_at = updateData.updated_at;
                 }
             } else if(action == 'delete') {
-                const references = this.getEntity(entityId)?.references[attributeUrl] || [];
                 const idx = references.findIndex(ref => ref.id == data.id);
                 if(idx > -1) {
                     references.splice(idx, 1);
