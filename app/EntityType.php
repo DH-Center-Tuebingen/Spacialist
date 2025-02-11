@@ -20,10 +20,13 @@ class EntityType extends Model
     protected $fillable = [
         'thesaurus_url',
         'is_root',
+        'color',
     ];
 
     const patchRules = [
         'thesaurus_url' => 'string',
+        'color' => 'string',
+        'is_root' => 'boolean',
     ];
 
     public function getActivitylogOptions() : LogOptions
@@ -34,9 +37,13 @@ class EntityType extends Model
             ->logOnlyDirty();
     }
 
-    public function setRelationInfo($color, $isRoot = false, $subTypes = []) {
-        $this->is_root = $isRoot;
-        $this->color = $color;
+    public function updateWithRelations($data, $subTypes = []) {
+         foreach(array_keys(self::patchRules) as $key) {
+            if(isset($data[$key])) {
+                $this->$key = $data[$key];
+            }
+        }
+
         EntityTypeRelation::where('parent_id', $this->id)->delete();
         foreach($subTypes as $type) {
             $relation = new EntityTypeRelation();

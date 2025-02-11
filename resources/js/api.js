@@ -582,7 +582,7 @@ export async function moveEntity(entityId, parentId = null, rank = null) {
 }
 
 export async function patchEntityType(etid, updatedProps) {
-    const allowedData = only(updatedProps, ['thesaurus_url', 'is_root', 'sub_entity_types']);
+    const allowedData = only(updatedProps, ['thesaurus_url', 'is_root', 'sub_entity_types', 'color']);
     // If no allowed props updated, do nothing
     if(Object.keys(allowedData).length < 1) {
         return;

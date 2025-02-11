@@ -16,7 +16,7 @@ class EntityTypeTest extends TestCase
      */
     public function testRelations()
     {
-        $type = EntityType::with(['entities', 'attributes', 'sub_entity_types', 'thesaurus_concept'])->find(4);
+        $type = EntityType::find(4);
 
         $this->assertEquals(1, $type->entities->count());
         $this->assertEquals(2, $type->entities[0]->id);
@@ -33,5 +33,35 @@ class EntityTypeTest extends TestCase
         $this->assertEquals(5, $type->attributes[4]->pivot->position);
         $this->assertEquals(0, $type->sub_entity_types->count());
         $this->assertEquals(2, $type->thesaurus_concept->id);
+        $this->assertEquals(false, $type->is_root);
+        $this->assertEquals('#FFFF00', $type->color);
+        $this->assertEquals('https://spacialist.escience.uni-tuebingen.de/<user-project>/befund#20171220094916', $type->thesaurus_url);
     }
+
+    public function testSubEntityTypeCountCorrect(){
+        $type = EntityType::with(['sub_entity_types'])->find(3);
+        $this->assertEquals(5, $type->sub_entity_types->count());
+    }
+
+    public function testSubEntityTypesAreCorrect(){
+        $type = EntityType::with(['sub_entity_types'])->find(3);
+        $this->assertEquals([3,4,5,6,7], $type->sub_entity_types->pluck('id')->toArray());
+    }
+
+    public function testUpdateWithRelations(){
+        info("TestUpdateWithRelations: ");
+        $type = EntityType::with(['sub_entity_types'])->find(4);
+        $type->updateWithRelations([
+            'is_root' => true,
+            'color' => '#FF0000',
+        ], [3,5]);
+
+        $updated_type = EntityType::with(['sub_entity_types'])->find(4);
+        $this->assertEquals(2, $updated_type->sub_entity_types->count());
+        $this->assertEquals([3,5], $updated_type->sub_entity_types->pluck('id')->toArray());
+        $this->assertEquals(true, $updated_type->is_root);
+        $this->assertEquals('#FF0000', $updated_type->color);
+    }
+
+
 }

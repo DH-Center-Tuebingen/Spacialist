@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 - Missing "Color Dots" of _Entity Type_ (colors are now handled on the Entity Type itself and do no longer rely on the _Map_ Plugin)
 - 'Jumping' behavior on floating quick access controls on the _Entity Type List_ (copy, duplicate, delete)
 - Attribute Dependency inverted
+- Color of entity type was not saved
 
 ## 0.10.2
 ### Fixed

@@ -377,6 +377,9 @@ class EditorController extends Controller {
         }
         $this->validate($request, [
             'data' => 'required|array',
+            'data.color' => 'hex_color',
+            'data.is_root' => 'required|boolean',
+            'data.sub_entity_types' => 'required|array'
         ]);
 
         try {
@@ -386,38 +389,9 @@ class EditorController extends Controller {
                 'error' => __('This entity-type does not exist')
             ], 400);
         }
-        $relationData = Arr::only(
-            $request->get('data'),
-            ['is_root', 'sub_entity_types', 'color'],
-        );
-        $propData = Arr::only(
-            $request->get('data'),
-            array_keys(EntityType::patchRules),
-        );
 
-        $updateRelation = count($relationData) > 0;
-        $updateProps = count($propData) > 0;
-
-        if(!$updateRelation && !$updateProps) {
-            return response()->json([
-                'error' => __('The given data is invalid')
-            ], 400);
-        }
-
-        if($updateRelation) {
-            $isRoot = $relationData['is_root'];
-            $subEntityTypes = $relationData['sub_entity_types'];
-            $color = $relationData['color'];
-            $entityType->setRelationInfo($color, $isRoot, $subEntityTypes);
-        }
-
-        if($updateProps) {
-            foreach($propData as $key => $prop) {
-                $entityType->{$key} = $prop;
-            }
-        }
-        $entityType->save();
-
+        $data = $request->get('data');
+        $entityType->updateWithRelations($data, $data['sub_entity_types']);
         return response()->json($entityType, 200);
     }
 
