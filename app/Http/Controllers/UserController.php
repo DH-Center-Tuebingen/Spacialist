@@ -567,11 +567,7 @@ class UserController extends Controller
             ], 400);
         }
 
-        if(isset($user->avatar)) {
-            Storage::delete($user->avatar);
-        }
-        $user->avatar = null;
-        $user->save();
+        $user->deleteAvatar();
         return response()->json(null, 204);
     }
 

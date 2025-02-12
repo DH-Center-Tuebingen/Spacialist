@@ -73,6 +73,12 @@ class User extends Authenticatable
         $this->save();
     }
 
+    public function deleteAvatar(){
+        self::getAvatarDirectory()->deleteRaw($this->avatar);
+        $this->avatar = null;
+        $this->save();
+    }
+
     public function setPermissions() {
         $permissions = [];
         foreach($this->roles as $role) {
