@@ -1,75 +1,80 @@
 <template>
-    <div
-        class="h-100 overflow-y-auto"
-    >
-        <ReferenceForm @add="addEntityReference" />
-        <p
-            v-if="!state.hasReferences"
-            class="alert alert-info mt-2"
-        >
-            {{ t('main.entity.references.empty') }}
-        </p>
+    <div class="tab reference-tab d-flex flex-column h-100">
         <div
-            v-if="state.hasEntityReferences"
-            class="reference-group mb-1"
+            class="flex-fill overflow-y-auto"
         >
-            <h5 class="mb-2 fw-medium">
-                {{ t('main.entity.references.general') }}
-            </h5>
-            <div class="list-group w-90">
-                <div
-                    v-for="(reference, i) in state.entityReferences"
-                    :key="i"
-                    class="list-group-item pt-0"
-                >
-                    <header class="text-end">
-                        <span class="text-muted fw-light small">
-                            {{ date(reference.updated_at) }}
-                        </span>
-                    </header>
-                    <Quotation :value="reference" />
-                </div>
-            </div>
-        </div>
-        <hr
-            v-if="state.hasEntityReferences && state.hasAttributeReferences"
-            class="w-90"
-        >
-        <template v-if="state.hasAttributeReferences">
-            <template
-                v-for="(referenceGroup, key) in state.attributeReferences"
-                :key="key"
+            <p
+                v-if="!state.hasReferences"
+                class="alert alert-info mt-2"
             >
-                <div
-                    v-if="referenceGroup.length > 0"
-                    class="reference-group"
-                >
-                    <h5 class="mb-2 fw-medium">
-                        <a
-                            href="#"
-                            class="text-decoration-none"
-                            @click.prevent="showMetadataForReferenceGroup(referenceGroup)"
-                        >
-                            {{ translateConcept(key) }}
-                        </a>
-                    </h5>
-                    <div class="list-group w-90">
-                        <div
-                            v-for="(reference, i) in referenceGroup"
-                            :key="i"
-                            class="list-group-item pt-0"
-                        >
-                            <header class="text-end">
-                                <span class="text-muted fw-light small">
-                                    {{ date(reference.updated_at) }}
-                                </span>
-                            </header>
-                            <Quotation :value="reference" />
-                        </div>
+                {{ t('main.entity.references.empty') }}
+            </p>
+            <div
+                v-if="state.hasEntityReferences"
+                class="reference-group mb-1"
+            >
+                <h5 class="mb-2 fw-medium">
+                    {{ t('main.entity.references.general') }}
+                </h5>
+                <div class="list-group w-90">
+                    <div
+                        v-for="(reference, i) in state.entityReferences"
+                        :key="i"
+                        class="list-group-item pt-0"
+                    >
+                        <header class="text-end">
+                            <span class="text-muted fw-light small">
+                                {{ date(reference.updated_at) }}
+                            </span>
+                        </header>
+                        <Quotation :value="reference" />
                     </div>
                 </div>
+            </div>
+            <hr
+                v-if="state.hasEntityReferences && state.hasAttributeReferences"
+                class="w-90"
+            >
+            <template v-if="state.hasAttributeReferences">
+                <template
+                    v-for="(referenceGroup, key) in state.attributeReferences"
+                    :key="key"
+                >
+                    <div
+                        v-if="referenceGroup.length > 0"
+                        class="reference-group"
+                    >
+                        <h5 class="mb-2 fw-medium">
+                            <a
+                                href="#"
+                                class="text-decoration-none"
+                                @click.prevent="showMetadataForReferenceGroup(referenceGroup)"
+                            >
+                                {{ translateConcept(key) }}
+                            </a>
+                        </h5>
+                        <div class="list-group w-90">
+                            <div
+                                v-for="(reference, i) in referenceGroup"
+                                :key="i"
+                                class="list-group-item pt-0"
+                            >
+                                <header class="text-end">
+                                    <span class="text-muted fw-light small">
+                                        {{ date(reference.updated_at) }}
+                                    </span>
+                                </header>
+                                <Quotation :value="reference" />
+                            </div>
+                        </div>
+                    </div>
+                </template>
             </template>
-        </template>
+        </div>
+        <hr>
+        <ReferenceForm
+            @add="addEntityReference"
+        />
     </div>
 </template>
 
