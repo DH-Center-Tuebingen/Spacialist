@@ -1,8 +1,6 @@
 <template>
     <div class="tab reference-tab d-flex flex-column h-100">
-        <div
-            class="flex-fill overflow-y-auto"
-        >
+        <div class="flex-fill overflow-y-auto">
             <p
                 v-if="!state.hasReferences"
                 class="alert alert-info mt-2"
@@ -27,7 +25,7 @@
                                 {{ date(reference.updated_at) }}
                             </span>
                         </header>
-                        <Quotation :value="reference" />
+                        <EditableQuotation :value="reference" />
                     </div>
                 </div>
             </div>
@@ -72,7 +70,11 @@
             </template>
         </div>
         <hr>
+        <h6 class="mb-2">
+            {{ t('main.entity.references.bibliography.add') }}
+        </h6>
         <ReferenceForm
+            ref="referenceForm"
             @add="addEntityReference"
         />
     </div>
@@ -81,9 +83,10 @@
 <script>
     import {
         computed,
-        reactive
+        reactive,
+        ref,
     } from 'vue';
-    
+
     import { useI18n } from 'vue-i18n';
     import { useToast } from '@/plugins/toast.js';
 
@@ -98,25 +101,37 @@
     import {
         date,
     } from '@/helpers/filters.js';
-    
+
     import useEntityStore from '@/bootstrap/stores/entity.js';
 
-    import Quotation from '@/components/bibliography/Quotation.vue';
+    import Quotation from '@/components/bibliography/Quotation/Quotation.vue';
     import ReferenceForm from '@/components/bibliography/ReferenceForm.vue';
+    import { throwError } from '@/helpers/helpers';
 
+    import {
+        router,
+    } from '@/bootstrap/router.js';
+    import EditableQuotation from './Quotation/EditableQuotation.vue';
 
     export default {
         components: {
             ReferenceForm,
             Quotation,
+            EditableQuotation,
         },
         setup() {
 
             const entityStore = useEntityStore();
             const toast = useToast();
+            const referenceForm = ref(null);
 
-            const addEntityReference = data => {
-                entityStore.addReference(state.entity.id, null, null, data);
+            const addEntityReference = async data => {
+                try {
+                    await entityStore.addReference(state.entity.id, null, null, data);
+                    referenceForm.value.reset();
+                } catch(e) {
+                    throwError(e);
+                }
             };
             const showMetadataForReferenceGroup = referenceGroup => {
                 if(!referenceGroup) return;
@@ -188,6 +203,7 @@
                 addEntityReference,
                 showMetadataForReferenceGroup,
                 translateConcept,
+                referenceForm,
             };
         }
     };

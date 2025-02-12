@@ -536,43 +536,39 @@ export const useEntityStore = defineStore('entity', {
                 return data;
             });
         },
-        handleReference(entityId, attributeUrl, action, data) {
-            const entity = this.getEntity(entityId);
-            let references;
-            if(attributeUrl) {
-                references = entity?.references[attributeUrl] || [];
-            } else {
-                references = entity?.references.on_entity || [];
-            }
-            if(action == 'add') {
-                references.push(data);
-                return data;
-            } else if(action == 'update') {
-                const id = data.id;
-                const refData = data.data;
-                const updateData = data.updates;
-                const reference = references.find(ref => ref.id == id);
-                if(!!reference) {
-                    for(let k in refData) {
-                        reference[k] = refData[k];
-                    }
-                    reference.updated_at = updateData.updated_at;
+        handleUpdate(entityId, attributeUrl, data) {
+            this.getReferences(entityId, attributeUrl);
+            const id = data.id;
+            const refData = data.data;
+            const updateData = data.updates;
+            const reference = references.find(ref => ref.id == id);
+            if(!!reference) {
+                for(let k in refData) {
+                    reference[k] = refData[k];
                 }
-            } else if(action == 'delete') {
-                const idx = references.findIndex(ref => ref.id == data.id);
-                if(idx > -1) {
-                    references.splice(idx, 1);
-                }
+                reference.updated_at = updateData.updated_at;
             }
         },
+        getReferences(entityId, attributeUrl = null) {
+            const entity = this.getEntity(entityId);
+            if(attributeUrl) {
+                return entity?.references[attributeUrl] || [];
+            } else {
+                return entity?.references.on_entity || [];
+            }
+        },
+
         async addReference(entityId, attributeId, attributeUrl, refData) {
             return addReference(entityId, attributeId, refData).then(data => {
-                return this.handleReference(entityId, attributeUrl, 'add', data);
+                const references = this.getReferences(entityId, attributeUrl);
+                console.log(references);
+                references.push(data);
+                return data;
             });
         },
         async updateReference(id, entityId, attributeUrl, refData) {
             return updateReference(id, refData).then(data => {
-                this.handleReference(entityId, attributeUrl, 'update', {
+                this.handleUpdate(entityId, attributeUrl, {
                     id: id,
                     data: refData,
                     updates: data,
@@ -581,7 +577,11 @@ export const useEntityStore = defineStore('entity', {
         },
         async removeReference(id, entityId, attributeUrl) {
             return deleteReferenceFromEntity(id).then(_ => {
-                this.handleReference(entityId, attributeUrl, 'delete', { id: id });
+                const references = this.getReferences(entityId, attributeUrl);
+                const idx = references.findIndex(ref => ref.id == id);
+                if(idx > -1) {
+                    references.splice(idx, 1);
+                }
             });
         },
         async addComment(entityId, comment, { replyTo = null } = {}) {
