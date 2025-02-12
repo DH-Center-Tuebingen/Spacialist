@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Attribute;
 use App\Entity;
-use App\File;
 use App\Permission;
 use App\Role;
 use App\User;
 use App\Http\Controllers\Controller;
 use App\Plugin;
 use App\RolePreset;
+use App\File\DownloadHandler;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
@@ -22,6 +22,8 @@ use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
+    private static $avatarFolder = 'avatars' . DIRECTORY_SEPARATOR;
+
     public function __construct() {
         $this->middleware('auth:sanctum', ['except' => ['login']]);
     }
@@ -147,6 +149,17 @@ class UserController extends Controller
         }
 
         return response()->json($groups);
+    }
+
+    public function downloadAvatar(Request $request) {
+        $filepath = $request->query('path');
+
+        // Only return files from within the avatars folder
+        if(!Str::startsWith($filepath, self::$avatarFolder)) {
+            return response()->noContent();
+        }
+
+        return DownloadHandler::makeFileResponse($filepath);
     }
 
     // POST

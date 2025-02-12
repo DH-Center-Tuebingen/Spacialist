@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 use App\Bibliography;
+use App\File\DownloadHandler;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use RenanBr\BibTexParser\Listener;
 use RenanBr\BibTexParser\Exception\ParserException;
@@ -12,6 +14,7 @@ use RenanBr\BibTexParser\Processor\TagNameCaseProcessor;
 
 class BibliographyController extends Controller
 {
+    private static $folder = 'bibliography' . DIRECTORY_SEPARATOR;
 
     // GET
     public function getBibliographyItem(int $id) {
@@ -29,10 +32,10 @@ class BibliographyController extends Controller
                 'error' => __('This bibliography item does not exist')
             ], 400);
         }
-        
+
         return response()->json($bib);
     }
-    
+
     public function getBibliography() {
         $user = auth()->user();
         if(!$user->can('bibliography_read')) {
@@ -65,6 +68,24 @@ class BibliographyController extends Controller
         return response()->json($count);
     }
 
+    public function downloadFile(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('bibliography_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to view attached files')
+            ], 403);
+        }
+
+        $filepath = $request->query('path');
+
+        // Only return files from within the bibliography folder
+        if(!Str::startsWith($filepath, self::$folder)) {
+            return response()->noContent();
+        }
+
+        return DownloadHandler::makeFileResponse($filepath);
+    }
+
     // POST
 
     public function addItem(Request $request) {
@@ -74,13 +95,12 @@ class BibliographyController extends Controller
                 'error' => __('You do not have the permission to add new bibliography')
             ], 403);
         }
-        
+
         $this->validate($request, [
-            'entry_type' => 'required|alpha',
-            'title' => 'required|string',
+            'entry_type' => 'required|alpha|bibtex_type',
             'file' => 'file',
         ]);
-        
+
         $file = $request->file('file');
         $bib = new Bibliography();
         $success = $bib->fieldsFromRequest($request->except('file'), $user);
@@ -110,8 +130,7 @@ class BibliographyController extends Controller
         $this->validate($request, [
             'file' => 'required|file'
         ]);
-        
-        
+
         // TODO:: This is too much logic for a controller. This should be moved inside the Model!
 
         $file = $request->file('file');
@@ -138,8 +157,7 @@ class BibliographyController extends Controller
         DB::beginTransaction();
 
         foreach($entries as $entry) {
-            // Test uf tyoe exists(?)
-            
+            // Test if type exists(?)
             $entry_type = $entry['entry_type'];
             $isValid = Bibliography::validateMandatory($entry, $entry_type);
             if(!$isValid) {
@@ -232,7 +250,7 @@ class BibliographyController extends Controller
 
         $entries = $query->get();
         $content = '';
-        
+
         foreach($entries as $e) {
             $content .= "@{$e->entry_type}{{$e->citekey},\n";
             $attrs = $e->getAttributes();
@@ -271,7 +289,6 @@ class BibliographyController extends Controller
     }
 
     public function updateItem(Request $request, $id) {
-        
         $user = auth()->user();
         if(!$user->can('bibliography_write')) {
             return response()->json([
@@ -293,7 +310,7 @@ class BibliographyController extends Controller
         }
         $file = $request->file('file');
         $success = $bib->fieldsFromRequest($request->except(['file', 'delete_file']), $user);
-        
+
         if(!$success) {
             return response()->json([
                 'error' => __('At least one required field is not set')

@@ -52,7 +52,7 @@ export const useBibliographyStore = defineStore('bibliography', {
                 if(itemData.id) {
                     this.updateBibliographyItem({
                         id: itemData.id,
-                        type: itemData.type.name,
+                        entry_type: itemData.entry_type.name,
                         fields: {
                             ...itemData.fields,
                             citekey: data.citekey,
