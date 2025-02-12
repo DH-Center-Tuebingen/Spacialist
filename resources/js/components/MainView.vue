@@ -61,7 +61,6 @@
                 <keep-alive>
                     <component :is="state.tabComponent" />
                 </keep-alive>
-                <ReferenceTab />
             </div>
         </div>
     </div>

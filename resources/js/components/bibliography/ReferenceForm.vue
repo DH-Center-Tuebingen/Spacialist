@@ -4,7 +4,7 @@
         role="form"
         @submit.prevent="onAddReference()"
     >
-        <div class="d-flex flex-row">
+        <div class="d-flex flex-row gap-2">
             <div class="flex-grow-1">
                 <multiselect
                     id="bibliography-search"
@@ -21,6 +21,7 @@
                     :filterResults="false"
                     :options="async query => await filterBibliographyList(query)"
                     :searchable="true"
+                    open-direction="top"
                     :placeholder="t('global.select.placeholder')"
                 >
                     <template #singlelabel="{ value }">
@@ -47,23 +48,23 @@
                     </template>
                 </multiselect>
             </div>
-            <div class="flex-grow-1 ms-1">
-                <textarea
-                    v-model="state.description"
-                    class="form-control"
-                    :placeholder="t('main.entity.references.bibliography.comment')"
-                />
-            </div>
-            <div class="ms-1 mt-auto">
-                <button
-                    type="submit"
-                    class="btn btn-outline-success btn-sm px-1 py-05"
-                    :disabled="state.addReferenceDisabled"
-                    :title="t('main.entity.references.bibliography.add_button')"
-                >
-                    <i class="fas fa-fw fa-plus" />
-                </button>
-            </div>
+
+            <button
+                type="submit"
+                class="btn btn-outline-success"
+                :disabled="state.addReferenceDisabled"
+                :title="t('main.entity.references.bibliography.add_button')"
+            >
+                <i class="fas fa-fw fa-plus" />
+                {{ t("global.add") }}
+            </button>
+        </div>
+        <div class="mt-2">
+            <AutoTextarea
+                v-model="state.description"
+                class="form-control"
+                :placeholder="t('main.entity.references.bibliography.comment')"
+            />
         </div>
     </form>
 </template>
@@ -81,11 +82,20 @@
     import {
         formatAuthors,
     } from '@/helpers/bibliography.js';
+    import AutoTextarea from '../forms/AutoTextarea.vue';
+
     export default {
+        components: {
+            AutoTextarea,
+        },
         props: {
             value: {
                 type: Object,
                 required: true
+            },
+            maxHeight: {
+                type: String,
+                default: '',
             }
         },
         emits: ['add'],
