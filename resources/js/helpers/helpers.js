@@ -458,6 +458,7 @@ export function filterUsers(term, ci = true, where = 'whole') {
 }
 
 export function throwError(error) {
+    console.log(error);
     if(error.response) {
         const r = error.response;
         const req = {

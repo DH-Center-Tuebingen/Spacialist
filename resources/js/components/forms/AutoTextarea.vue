@@ -33,7 +33,6 @@
 
             const input = (event) => {
                 autoExpand();
-                console.log('update:modelValue', event.target.value);
                 emit('update:modelValue', event.target.value);
             };
             return {

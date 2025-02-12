@@ -4,6 +4,13 @@
         role="form"
         @submit.prevent="onAddReference()"
     >
+        <div class="mb-2">
+            <AutoTextarea
+                v-model="state.description"
+                class="form-control"
+                :placeholder="t('main.entity.references.bibliography.comment')"
+            />
+        </div>
         <div class="d-flex flex-row gap-2">
             <div class="flex-grow-1">
                 <multiselect
@@ -27,7 +34,7 @@
                     <template #singlelabel="{ value }">
                         <div class="multiselect-single-label">
                             <div>
-                                <span class="fw-medium">{{ value.title }}</span>
+                                <span class="fw-medium">{{ formatBibtexText(value.title) }}</span>
                                 -
                                 <cite class="small">
                                     {{ formatAuthors(value.author) }} ({{ value.year }})
@@ -38,11 +45,11 @@
                     <template #option="{ option }">
                         <div>
                             <div>
-                                <span class="fw-medium">{{ option.title }}</span>
+                                <span class="fw-medium">{{ formatBibtexText(option.title) }}</span>
                             </div>
                             <cite class="small">
-                                {{ formatAuthors(option.author) }} <span class="fw-light">({{ option.year
-                                }})</span>
+                                {{ formatAuthors(option.author) }}
+                                <span class="fw-light">({{ option.year }})</span>
                             </cite>
                         </div>
                     </template>
@@ -59,13 +66,6 @@
                 {{ t("global.add") }}
             </button>
         </div>
-        <div class="mt-2">
-            <AutoTextarea
-                v-model="state.description"
-                class="form-control"
-                :placeholder="t('main.entity.references.bibliography.comment')"
-            />
-        </div>
     </form>
 </template>
 
@@ -81,8 +81,9 @@
     } from '@/helpers/helpers.js';
     import {
         formatAuthors,
+        formatBibtexText
     } from '@/helpers/bibliography.js';
-    import AutoTextarea from '../forms/AutoTextarea.vue';
+    import AutoTextarea from '@/components/forms/AutoTextarea.vue';
 
     export default {
         components: {
@@ -135,7 +136,6 @@
                     description: state.description,
                 };
                 context.emit('add', data);
-                reset();
             };
             const state = reactive({
                 entry: null,
@@ -143,12 +143,15 @@
                 bibliography: computed(_ => bibliographyStore.bibliography),
                 addReferenceDisabled: computed(_ => !state.entry?.id || !state.description),
             });
+
             return {
                 t,
                 formatAuthors,
                 filterBibliographyList,
                 onAddReference,
                 state,
+                reset,
+                formatBibtexText,
             };
         },
     };

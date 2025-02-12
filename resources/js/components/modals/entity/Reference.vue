@@ -62,7 +62,7 @@
                 >
                     <template #metadata="data">
                         <span
-                            v-if="Object.keys(data.comment.metadata).length > 0"
+                            v-if="data?.comment?.metadata && Object.keys(data.comment.metadata).length > 0"
                             class="me-1 small"
                         >
                             <span
@@ -91,77 +91,14 @@
                         :key="reference.id"
                         class="list-group-item d-flex flex-row justify-content-between"
                     >
-                        <div class="flex-grow-1">
-                            <Quotation
-                                v-if="state.editItem.id !== reference.id"
-                                :value="reference"
-                            />
-                            <div
-                                v-else
-                                class="d-flex align-items-center"
-                            >
-                                <input
-                                    v-model="state.editItem.description"
-                                    type="text"
-                                    class="form-control me-1"
-                                >
-                                <button
-                                    type="button"
-                                    class="btn btn-outline-success btn-sm me-1"
-                                    @click.prevent="onUpdateReference(state.editItem)"
-                                >
-                                    <i class="fas fa-fw fa-check" />
-                                </button>
-                                <button
-                                    type="button"
-                                    class="btn btn-outline-danger btn-sm"
-                                    @click.prevent="cancelEditReference()"
-                                >
-                                    <i class="fas fa-fw fa-times" />
-                                </button>
-                            </div>
-                        </div>
-                        <div class="d-flex flex-row small ms-2">
-                            <span class="text-muted fw-light">
-                                {{ date(reference.updated_at) }}
-                            </span>
-                            <div class="dropdown ms-1">
-                                <span
-                                    :id="`edit-reference-dropdown-${reference.id}`"
-                                    class="clickable text-muted"
-                                    data-bs-toggle="dropdown"
-                                    aria-haspopup="true"
-                                    aria-expanded="false"
-                                >
-                                    <i class="fas fa-fw fa-ellipsis-h" />
-                                </span>
-                                <div
-                                    class="dropdown-menu"
-                                    :aria-labelledby="`edit-reference-dropdown-${reference.id}`"
-                                >
-                                    <a
-                                        class="dropdown-item"
-                                        href="#"
-                                        @click.prevent="enableEditReference(reference)"
-                                    >
-                                        <i class="fas fa-fw fa-edit text-info" /> {{ t('global.edit') }}
-                                    </a>
-                                    <a
-                                        class="dropdown-item"
-                                        href="#"
-                                        @click.prevent="onDeleteReference(reference)"
-                                    >
-                                        <i class="fas fa-fw fa-trash text-danger" /> {{ t('global.delete') }}
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+                        <EditableQuotation />
                     </li>
                 </ul>
                 <h6 class="mt-2">
                     {{ t('main.entity.references.bibliography.add') }}
                 </h6>
                 <ReferenceForm
+                    ref="referenceForm"
                     @add="onAddReference"
                 />
             </div>
@@ -185,6 +122,7 @@
         onMounted,
         reactive,
         toRefs,
+        ref,
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
@@ -198,22 +136,19 @@
         translateConcept,
     } from '@/helpers/helpers.js';
 
+    // TODO: TODO: This should be done in the store
     import {
-        patchAttribute,
         getAttributeValueComments,
     } from '@/api.js';
 
-    import {
-        date,
-    } from '@/helpers/filters.js';
-
-    import Quotation from '@/components/bibliography/Quotation.vue';
     import ReferenceForm from '@/components/bibliography/ReferenceForm.vue';
+    import { throwError } from '../../../helpers/helpers';
+import EditableQuotation from '../../bibliography/Quotation/EditableQuotation.vue';
 
     export default {
         components: {
-            Quotation,
             ReferenceForm,
+            EditableQuotation,
         },
         props: {
             entity: {
@@ -229,9 +164,11 @@
                 entity,
             } = toRefs(props);
             const aid = router.currentRoute.value.params.aid;
+            const referenceForm = ref(null);
 
             // FETCH
             if(can('comments_read')) {
+                // TODO: This should be done in the store
                 getAttributeValueComments(entity.value.id, aid).then(comments => {
                     state.comments = comments;
                 });
@@ -268,17 +205,15 @@
                     state.startCertainty = state.certainty;
                 });
             };
-            const enableEditReference = reference => {
-                state.editItem = {
-                    ...reference
-                };
-            };
-            const cancelEditReference = _ => {
-                state.editItem = {};
-            };
-            const onAddReference = data => {
+
+            const onAddReference = async data => {
                 if(!can('bibliography_read|entity_data_write')) return;
-                entityStore.addReference(entity.value.id, state.attribute.id, state.attribute.thesaurus_url, data);
+                try {
+                    await entityStore.addReference(entity.value.id, state.attribute.id, state.attribute.thesaurus_url, data);
+                    referenceForm.value.reset();
+                } catch(e) {
+                    throwError(e);
+                }
             };
             const onDeleteReference = reference => {
                 if(!can('bibliography_read|entity_data_write')) return;
@@ -318,7 +253,6 @@
                     bibliography: {},
                     description: '',
                 },
-                editItem: {},
                 attribute: attributeStore.getAttribute(aid),
                 references: computed(_ => entity.value.references[state.attribute.thesaurus_url]),
                 startCertainty: entity.value.data[aid].certainty,
@@ -355,19 +289,17 @@
                 can,
                 getCertaintyClass,
                 translateConcept,
-                date,
                 // PROPS
                 // LOCAL
                 setCertainty,
                 onUpdateCertainty,
-                enableEditReference,
-                cancelEditReference,
                 onAddReference,
                 onDeleteReference,
                 onUpdateReference,
                 closeModal,
                 // STATE
                 state,
+                referenceForm,
             };
 
         },
