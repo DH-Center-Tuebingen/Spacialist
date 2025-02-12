@@ -1,21 +1,19 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Bibliography;
-use App\File\DownloadHandler;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use RenanBr\BibTexParser\Listener;
 use RenanBr\BibTexParser\Exception\ParserException;
 use RenanBr\BibTexParser\Parser;
 use RenanBr\BibTexParser\Processor\TagNameCaseProcessor;
+use Exception;
 
 class BibliographyController extends Controller
 {
-    private static $folder = 'bibliography' . DIRECTORY_SEPARATOR;
-
     // GET
     public function getBibliographyItem(int $id) {
         $user = auth()->user();
@@ -77,7 +75,7 @@ class BibliographyController extends Controller
         }
 
         $filepath = $request->query('path');
-        return Bibliography::getFileDirectory()->download($filepath);
+        return Bibliography::getDirectory()->download($filepath);
     }
 
     // POST
@@ -103,15 +101,20 @@ class BibliographyController extends Controller
             ], 422);
         }
 
-        $file = $request->file('file');
-        try{
-            if($file) $bib->uploadFile($file);
-        }catch(\Exception $e){
-            info($e->getMessage());
-            return response()->json([
-                'error' => $e->getMessage()
-            ], 400);
+        if($request->has('file')) {
+            $file = $request->file('file');
+            $bib->uploadFile($file);
         }
+
+        // Does this make sense? It seems none of the methods throws an exception [VR]
+        // try {
+        //     if($file) $bib->uploadFile($file);
+        // } catch(Exception $e) {
+        //     info($e->getMessage());
+        //     return response()->json([
+        //         'error' => $e->getMessage()
+        //     ], 400);
+        // }
         return response()->json($bib->refresh(), 201);
     }
 

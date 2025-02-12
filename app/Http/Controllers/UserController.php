@@ -10,19 +10,17 @@ use App\User;
 use App\Http\Controllers\Controller;
 use App\Plugin;
 use App\RolePreset;
-use App\File\DownloadHandler;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Sleep;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
-class UserController extends Controller
-{
-    
+class UserController extends Controller {
     public function __construct() {
         $this->middleware('auth:sanctum', ['except' => ['login']]);
     }
@@ -150,15 +148,9 @@ class UserController extends Controller
         return response()->json($groups);
     }
 
-    public function downloadAvatar(Request $request) {
+    public function downloadAvatar(Request $request): Response|BinaryFileResponse {
         $filepath = $request->query('path');
-        $directory = User::getFileDirectory();
-        $file = $directory->download($filepath);
-        if($file != null){
-            return $file;
-        }else{
-            return response()->noContent();
-        }    
+        return User::getDirectory()->download($filepath);
     }
 
     // POST
