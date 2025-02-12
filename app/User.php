@@ -5,9 +5,8 @@ namespace App;
 use App\Traits\SoftDeletesWithTrashed;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Notifications\Notifiable;
-use App\File\FileDirectory;
+use App\File\Directory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\Traits\CausesActivity;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -64,9 +63,9 @@ class User extends Authenticatable
         return 'en';
     }
 
-    public function uploadAvatar($file) : string {
-        $avatarDirectory = self::getFileDirectory();
-        $avatarDirectory->deleteRaw($this->avatar);
+    public function uploadAvatar($file): string {
+        $avatarDirectory = self::getDirectory();
+        $avatarDirectory->delete($this->avatar);
         $filename = $this->id . "." . $file->getClientOriginalExtension();
         $storedFilename = $avatarDirectory->store($filename, $file);
         $this->avatar = $storedFilename;
@@ -75,9 +74,11 @@ class User extends Authenticatable
     }
 
     public function deleteAvatar() : void{
-        self::getFileDirectory()->deleteRaw($this->avatar);
-        $this->avatar = null;
-        $this->save();
+        $success = self::getDirectory()->delete($this->avatar);
+        if($success) {
+            $this->avatar = null;
+            $this->save();
+        }
     }
 
     public function setPermissions() {
@@ -123,8 +124,8 @@ class User extends Authenticatable
         return $this->hasMany('App\UserPreference');
     }
 
-    public static function getFileDirectory() : FileDirectory{
-        return new FileDirectory('local', 'avatars');
+    public static function getDirectory(): Directory {
+        return new Directory('avatars');
     }
 
     // public function roles() {
