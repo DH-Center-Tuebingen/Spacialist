@@ -373,7 +373,6 @@
     } from '@/api.js';
 
     import {
-        getAttribute,
         getConceptLabel,
         getEntityTypeAttribute,
         getEntityTypeDependencies,
@@ -433,7 +432,7 @@
                                 operator: null,
                                 value: null,
                             };
-                            converted.attribute = getAttribute(rule.on);
+                            converted.attribute = attributeStore.getAttribute(rule.on);
                             converted.operator = operators.find(o => o.operator == rule.operator);
                             converted.value = rule.value;
                             return converted;
