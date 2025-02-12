@@ -110,14 +110,10 @@
         useToast,
     } from '@/plugins/toast.js';
 
-    import store from '@/bootstrap/store';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
+    import useUserStore from '@/bootstrap/stores/user.js';
 
     import {
-        getUserBy,
-    } from '@/helpers/helpers.js';
-
-    import {
-        fetchEntityMetadata,
         patchEntityMetadata,
     } from '@/api.js';
 
@@ -129,6 +125,8 @@
         },
         setup() {
             const { t } = useI18n();
+            const entityStore = useEntityStore();
+            const userStore = useUserStore();
             const toast = useToast();
 
             const defaultUser = {
@@ -146,7 +144,7 @@
                     summary: '',
                     licence: '',
                 },
-                entity: computed(_ => store.getters.entity),
+                entity: computed(_ => entityStore.selectedEntity),
                 creatorId: computed(_ => {
                     if(!state.entity?.metadata?.creator) return 0;
                     return state.entity.metadata.creator;
@@ -156,13 +154,13 @@
                         return defaultUser;
                     }
 
-                    const user = getUserBy(state.creatorId);
+                    const user = userStore.getUserBy(state.creatorId);
                     return user || defaultUser;
                 }),
                 editors: computed(_ => {
                     if(!state.entity?.metadata?.editors) return [];
                     return state.entity.metadata.editors.map(u => {
-                        const user = getUserBy(u.user_id);
+                        const user = userStore.getUserBy(u.user_id);
                         return user || defaultUser;
                     });
                 }),
@@ -184,10 +182,7 @@
 
                         setMetadata({...metadata});
 
-                        store.dispatch('updateEntityMetadata', {
-                            eid: state.entity.id,
-                            data: data,
-                        });
+                        entityStore.updateEntityMetadata(state.entity.id, data);
 
                         toast.$toast(
                             t('main.entity.toasts.updated_metadata.msg', {
@@ -211,6 +206,7 @@
                 state.metadata.licence = state.loadedMetadata.licence;
             };
 
+            // TODO can data be loaded from store?
             const setMetadata = data => {
                 state.loadedMetadata.summary = data.summary || '';
                 state.loadedMetadata.licence = data.licence || '';
@@ -225,7 +221,7 @@
             const updateMetadata = _ => {
                 if(!state.entity?.id) return;
                 state.loading = true;
-                fetchEntityMetadata(state.entity.id).then(value => {
+                entityStore.fetchEntityMetadata(state.entity.id).then(value => {
                     state.loading = false;
                     setMetadata({...value.metadata});
                 });

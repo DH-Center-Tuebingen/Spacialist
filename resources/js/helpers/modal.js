@@ -1,4 +1,7 @@
-import store from '@/bootstrap/store.js';
+
+import useAttributeStore from '@/bootstrap/stores/attribute.js';
+import useEntityStore from '@/bootstrap/stores/entity.js';
+import useUserStore from '@/bootstrap/stores/user.js';
 import router from '%router';
 
 import { addToast } from '@/plugins/toast.js';
@@ -8,37 +11,16 @@ import {
 } from 'vue-final-modal';
 
 import {
-    addUser,
     resetUserPassword,
-    confirmUserPassword,
-    deactivateUser,
-    addOrUpdateBibliographyItem,
-    deleteBibliographyItem,
-    addEntity,
-    addEntityType,
-    deleteEntityType,
-    addAttribute,
-    deleteAttribute,
-    deleteEntity,
-    removeEntityTypeAttribute,
-    patchEntityType,
-    updateAttributeDependency,
     multieditAttributes,
-    updateAttributeMetadata,
-    addRole,
-    patchRoleData,
-    deleteRole,
     moveEntity,
 } from '@/api.js';
 
 import {
     can,
     userId,
-    getUserBy,
     getEntityTypeAttributes,
     getTs,
-    getRoleBy,
-    handleDeletedEntity,
 } from '@/helpers/helpers.js';
 
 import About from '@/components/modals/system/About.vue';
@@ -73,6 +55,7 @@ import AddAttribute from '@/components/modals/attribute/Add.vue';
 import EditAttribute from '@/components/modals/attribute/Edit.vue';
 import MultiEditAttribute from '@/components/modals/attribute/MultiEdit.vue';
 import DeleteAttribute from '@/components/modals/attribute/Delete.vue';
+import useBibliographyStore from '../bootstrap/stores/bibliography';
 
 export function showAbout() {
     const uid = `AboutModal-${getTs()}`;
@@ -300,12 +283,12 @@ export function showAddUser(onAdded) {
             errors: {},
             onAdd(e) {
                 if(!can('users_roles_create')) return;
-                addUser(e).then(user => {
+                useUserStore().addUser(e).then(_ => {
                     if(!!onAdded) {
                         onAdded();
                     }
-                    store.dispatch('addUser', user);
                     modal.destroy();
+
                 }).catch(e => {
                     modal.patchOptions({
                         attrs: {
@@ -335,7 +318,7 @@ export function showResetPassword(id) {
 
                 resetUserPassword(id, e.password).then(_ => {
                     modal.destroy();
-                    const user = getUserBy(id);
+                    const user = useUserStore().getUserBy(id);
                     const msg = t('main.user.toasts.reset_password.message', {
                         name: user.name,
                         nickname: user.nickname,
@@ -363,11 +346,7 @@ export function showConfirmPassword(id) {
             modalId: uid,
             userId: id,
             onConfirm(e) {
-                confirmUserPassword(id, e.password).then(_ => {
-                    store.dispatch('updateUser', {
-                        id: id,
-                        login_attempts: null,
-                    });
+                useUserStore().confirmOrUpdatePassword(id, e.password).then(_ => {
                     modal.destroy();
                 });
             },
@@ -391,11 +370,10 @@ export function showDeactivateUser(user, onDeactivated) {
                     modal.destroy();
                     return;
                 }
-                deactivateUser(user.id).then(data => {
+                useUserStore().deactivateUser(user.id).then(_ => {
                     if(!!onDeactivated) {
                         onDeactivated();
                     }
-                    store.dispatch('deactivateUser', data);
                     modal.destroy();
                 });
             },
@@ -419,13 +397,7 @@ export function showAccessControlModal(roleId) {
                     permissions: e.permissions,
                     is_moderated: e.is_moderated,
                 };
-                patchRoleData(roleId, data).then(data => {
-                    store.dispatch('updateRole', {
-                        id: roleId,
-                        permissions: data.permissions,
-                        is_moderated: data.is_moderated,
-                    });
-                    const role = getRoleBy(roleId);
+                useUserStore().updateRole(roleId, data).then(role => {
                     const msg = t('main.role.toasts.updated.msg', {
                         name: role.display_name
                     });
@@ -451,11 +423,10 @@ export function showAddRole(onAdded) {
             name: uid,
             onAdd(e) {
                 if(!can('users_roles_create')) return;
-                addRole(e).then(role => {
+                useUserStore().addRole(e).then(_ => {
                     if(!!onAdded) {
                         onAdded();
                     }
-                    store.dispatch('addRole', role);
                     modal.destroy();
                 });
             },
@@ -477,11 +448,10 @@ export function showDeleteRole(role, onDeleted) {
             onConfirm(e) {
                 if(!can('users_roles_delete')) return;
 
-                deleteRole(role.id).then(_ => {
+                useUserStore().deleteRole(role).then(_ => {
                     if(!!onDeleted) {
                         onDeleted();
                     }
-                    store.dispatch('deleteRole', role);
                     modal.destroy();
                 });
             },
@@ -504,29 +474,10 @@ export function showBibliographyEntry(data, onSave) {
                 if(e.data.id && !can('bibliography_write')) return;
                 if(!e.data.id && !can('bibliography_create')) return;
 
-                const formData = e.data;
-                const file = e.file;
-                addOrUpdateBibliographyItem(formData, file).then(reData => {
-                    // if id exists, it is an existing item
-                    if(e.data.id) {
-                        store.dispatch('updateBibliographyItem', {
-                            id: e.data.id,
-                            type: e.data.type.name,
-                            fields: {
-                                ...e.data.fields,
-                                citekey: reData.citekey,
-                                file: reData.file,
-                                file_url: reData.file_url,
-                            },
-                        });
-                    } else {
-                        store.dispatch('addBibliographyItem', reData);
-                    }
-
+                useBibliographyStore().createOrUpdate(e.data, e.file).then(data => {
                     if(onSave) {
-                        onSave(reData);
+                        onSave(data);
                     }
-
                     modal.destroy();
                 });
             },
@@ -546,11 +497,10 @@ export function showDeleteBibliographyEntry(entry, onDeleted) {
             name: uid,
             data: entry,
             onDelete(e) {
-                deleteBibliographyItem(entry.id).then(_ => {
+                useBibliographyStore().delete(entry.id).then(_ => {
                     if(!!onDeleted) {
                         onDeleted(entry);
                     }
-                    store.dispatch('deleteBibliographyItem', entry);
                     modal.destroy();
                 });
             },
@@ -578,7 +528,7 @@ export function showLiteratureInfo(id, options) {
     modal.open();
 }
 
-export function showAddEntity(parent = null, onAdded) {
+export function showAddEntity(parent = null, onAdded, rank = -1) {
     const uid = `AddEntity-${getTs()}`;
     const modal = useModal({
         component: AddEntity,
@@ -594,8 +544,11 @@ export function showAddEntity(parent = null, onAdded) {
                     parent_id: entity.parent_id,
                     name: entity.name,
                 };
-                addEntity(entityData).then(data => {
-                    const node = store.dispatch('addEntity', data);
+                if(rank != -1) {
+                    entityData.rank = rank;
+                }
+
+                useEntityStore().create(entityData).then(node => {
                     if(!!onAdded) {
                         onAdded(node);
                     }
@@ -641,17 +594,11 @@ export function showDeleteEntity(entityId, onDeleted) {
                 modal.destroy();
             },
             onConfirm() {
-                const entity = store.getters.entities[entityId];
-                deleteEntity(entityId).then(_ => {
+                useEntityStore().delete(entityId).then(entity => {
                     modal.destroy();
-                    store.dispatch('deleteEntity', {
-                        id: entityId,
-                    });
-                    handleDeletedEntity(entity).then(_ => {
-                        if(!!onDeleted) {
-                            onDeleted(entity);
-                        }
-                    });
+                    if(!!onDeleted) {
+                        onDeleted(entity);
+                    }
                 });
             },
         },
@@ -669,11 +616,10 @@ export function showAddEntityType(onAdded) {
                 modal.destroy();
             },
             onConfirm(entityType) {
-                addEntityType(entityType).then(data => {
+                useEntityStore().addEntityType(entityType).then(_ => {
                     if(!!onAdded) {
                         onAdded();
                     }
-                    store.dispatch('addEntityType', data);
                     modal.destroy();
                 });
             },
@@ -693,7 +639,7 @@ export function showEditEntityType(entityType) {
                 modal.destroy();
             },
             onConfirm(editedProps) {
-                patchEntityType(entityType.id, editedProps).then(_ => {
+                useEntityStore().patchEntityType(entityType.id, editedProps).then(_ => {
                     modal.destroy();
                 });
             },
@@ -714,11 +660,10 @@ export function showDeleteEntityType(entityType, metadata, onDeleted) {
                 modal.destroy();
             },
             onConfirm(e) {
-                deleteEntityType(entityType.id).then(_ => {
+                useEntityStore().deleteEntityType(entityType).then(_ => {
                     if(!!onDeleted) {
                         onDeleted();
                     }
-                    store.dispatch('deleteEntityType', entityType);
                     modal.destroy();
                 });
             },
@@ -742,10 +687,10 @@ export function showEditAttribute(aid, etid, metadata) {
             },
             async onConfirm(e) {
                 if(e.metadata) {
-                    await updateAttributeMetadata(etid, aid, metadata.pivot.id, e.metadata);
+                    await entityStore.patchEntityMetadata(etid, aid, metadata.pivot.id, e.metadata);
                 }
                 if(e.dependency) {
-                    await updateAttributeDependency(etid, aid, e.dependency);
+                    await entityStore.updateDependency(etid, aid, e.dependency);
                 }
                 modal.destroy();
             },
@@ -777,7 +722,7 @@ export function showMultiEditAttribute(entityIds, attributes) {
                     entries.push(entry);
                 }
                 multieditAttributes(entityIds, entries).then(_ => {
-                    store.dispatch('unsetTreeSelectionMode');
+                    useEntityStore().setTreeSeletionMode(false);
                     modal.destroy();
                     const title = t('main.entity.tree.multiedit.toast.saved.title');
                     const msg = t('main.entity.tree.multiedit.toast.saved.msg', {
@@ -806,14 +751,10 @@ export function showRemoveAttribute(etid, aid, id, metadata, onDeleted) {
                 modal.destroy();
             },
             onConfirm(e) {
-                removeEntityTypeAttribute(id).then(_ => {
+                useEntityStore().removeEntityTypeAttribute(id, etid).then(_ => {
                     if(!!onDeleted) {
                         onDeleted();
                     }
-                    store.dispatch('removeEntityTypeAttribute', {
-                        entity_type_id: etid,
-                        attribute_id: id,
-                    });
                     modal.destroy();
                 });
             },
@@ -832,11 +773,10 @@ export function showAddAttribute(onAdded) {
                 modal.destroy();
             },
             onConfirm(attribute) {
-                addAttribute(attribute).then(data => {
+                useAttributeStore().addAttribute(attribute).then(data => {
                     if(!!onAdded) {
                         onAdded();
                     }
-                    store.dispatch('addAttribute', data);
                     modal.destroy();
                 });
             },
@@ -857,11 +797,10 @@ export function showDeleteAttribute(attribute, metadata, onDeleted) {
                 modal.destroy();
             },
             onConfirm(e) {
-                deleteAttribute(attribute.id).then(_ => {
+                useAttributeStore().deleteAttribute(attribute.id).then(_ => {
                     if(!!onDeleted) {
                         onDeleted();
                     }
-                    store.dispatch('deleteAttribute', attribute);
                     modal.destroy();
                 });
             },
@@ -871,6 +810,6 @@ export function showDeleteAttribute(attribute, metadata, onDeleted) {
 }
 
 export function canShowReferenceModal(aid) {
-    const attrValue = store.getters.entity.data[aid];
+    const attrValue = useEntityStore().selectedEntity?.data[aid];
     return !!attrValue && attrValue.id;
 }

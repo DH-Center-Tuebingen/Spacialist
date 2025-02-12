@@ -91,6 +91,20 @@ dl.dl-0-mb > dd:last-child {
     height: 64px;
 }
 
+.avatar-list > .avatar-list-item {
+    transition: .25s;
+}
+.avatar-list > .avatar-list-item {
+    @extend .ms-n2;
+}
+.avatar-list:hover > .avatar-list-item {
+    margin-left: 0.1rem !important;
+    transition: .3s ease;
+}
+.avatar-list > .avatar-list-item:first-child {
+    margin-left: 0 !important;
+}
+
 .btn-fab {
     padding: 0;
     height: 1.8rem;
@@ -206,6 +220,37 @@ table.table-sticky .multiselect-dropdown,
 table.table-sticky .dropdown-menu {
     z-index: $zindex-dropdown-underneath-sticky;
 }
+
+.multiselect-option.is-selected {
+    &:hover {
+        $hoverColor: var(--bs-gray-300);
+        .chain-link {
+            color: $hoverColor !important;
+
+            &::before {
+                color: $hoverColor !important;
+            }
+        }
+
+        .list-info {
+            color: $hoverColor !important;
+        }
+    }
+
+    $lighterColor: var(--bs-gray-500);
+    .chain-link {
+        color: $lighterColor !important;
+
+        &::before {
+            color: $lighterColor !important;
+        }
+    }
+
+    .list-info {
+        color: $lighterColor !important;
+    }
+}
+
 
 .hover-underline:hover {
     text-decoration: underline;

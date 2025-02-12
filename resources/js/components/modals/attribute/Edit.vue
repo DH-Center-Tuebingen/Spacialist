@@ -366,7 +366,7 @@
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
-    import store from '@/bootstrap/store.js';
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
 
     import {
         searchLabel,
@@ -403,6 +403,7 @@
         emits: ['closing', 'confirm'],
         setup(props, context) {
             const { t } = useI18n();
+            const attributeStore = useAttributeStore();
             const {
                 attributeId,
                 entityTypeId,

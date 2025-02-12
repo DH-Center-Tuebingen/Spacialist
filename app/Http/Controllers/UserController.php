@@ -12,8 +12,9 @@ use App\Http\Controllers\Controller;
 use App\Plugin;
 use App\RolePreset;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Sleep;
@@ -22,7 +23,7 @@ use Illuminate\Validation\ValidationException;
 class UserController extends Controller
 {
     public function __construct() {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:sanctum', ['except' => ['login']]);
     }
 
     // GET
@@ -178,9 +179,11 @@ class UserController extends Controller
         }
         $credentials = request($creds);
 
-        if(!$token = auth()->attempt($credentials)) {
+        if(!Auth::guard('web')->attempt($credentials, true)) {
             return response()->json(['error' => __('Invalid Credentials')], 400);
         }
+
+        $request->session()->regenerate();
 
         if($user->login_attempts > 0) {
             $user->login_attempts--;
@@ -188,8 +191,7 @@ class UserController extends Controller
         }
 
         return response()
-            ->json(null, 200)
-            ->header('Authorization', $token);
+            ->json($user, 200);
     }
 
     public function addUser(Request $request) {
@@ -276,8 +278,11 @@ class UserController extends Controller
     }
 
     public function logout(Request $request) {
-        auth()->logout(true);
-        auth()->invalidate(true);
+        Auth::guard('web')->logout(true);
+        // auth()->invalidate(true);
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
     }
 
     // PATCH

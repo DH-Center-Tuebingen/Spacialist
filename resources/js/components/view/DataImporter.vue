@@ -169,10 +169,9 @@
         watch,
     } from 'vue';
 
-    import store from '%store';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import { stringSimilarity } from 'string-similarity-js';
-
 
     import EntityAttributeMapping from '@/components/tools/importer/EntityAttributeMapping.vue';
     import EntityImporterSettings from '@/components/tools/importer/EntityImporterSettings.vue';
@@ -197,7 +196,7 @@
 
     import {
         handleUnhandledErrors
-    } from '../../bootstrap/http';
+    } from '@/bootstrap/http.js';
 
 
     export default {
@@ -209,6 +208,7 @@
         },
         setup(props, context) {
             const { t } = useI18n();
+            const entityStore = useEntityStore();
 
             const csvTableRef = ref(null);
 
@@ -354,7 +354,7 @@
                     state.availableAttributes = [];
                     return;
                 } else {
-                    state.availableAttributes = store.getters.entityTypeAttributes(e.id, true) || [];
+                    state.availableAttributes = entityStore.getEntityTypeAttributes(e.id, true) || [];
                 }
                 guessAttributeMapping();
             };
@@ -432,7 +432,7 @@
                 importEntityData(formData).then(data => {
                     state.imported = true;
                     for(let i = 0; i < data.length; i++) {
-                        store.dispatch('addEntity', data[i]);
+                        entityStore.add(data[i]);
                     }
                     toast.$toast(t('main.importer.success', {
                         cnt: data.length
@@ -485,7 +485,7 @@
                 attributeSettings.mapping = {};
             }
 
-            // 
+            //
             const resetImportState = _ => {
                 resetValidation();
                 resetImport();
@@ -534,7 +534,7 @@
                 cancelImport();
             };
 
-            const availableEntityTypes = computed(() => Object.values(store.getters.entityTypes));
+            const availableEntityTypes = computed(_ => Object.values(entityStore.entityTypes));
             const state = reactive({
                 files: [],
                 fileData: [],
@@ -557,7 +557,7 @@
                 inputsDissabled: computed(_ => {
                     return state.validated || state.uploading || state.imported;
                 }),
-                csvTableCollapsed: computed(() => state.fileLoaded && !csvTableRef.value?.csvSettings?.showPreview),
+                csvTableCollapsed: computed(_ => state.fileLoaded && !csvTableRef.value?.csvSettings?.showPreview),
                 uploading: false,
                 imported: false,
                 validating: false,

@@ -48,6 +48,10 @@ class ThConcept extends Model {
         }
         return $label;
     }
+    
+    public static function getByURL($url) {
+        return self::where('concept_url', $url)->first();
+    }
 
     public static function getByString($str) {
         if(!isset($str) || $str === '') return null;
@@ -145,4 +149,64 @@ class ThConcept extends Model {
     // public function files() {
     //     return $this->belongsToMany('App\File', 'file_tags', 'concept_id', 'file_id');
     // }
+
+    /**
+     * Get the label of the concept in the given language.
+     */
+    public function getLabelWithLang($targetLang = "en"): string {
+        $label = $this->labels->where('language.short_name', $targetLang)->first();
+        if($label) {
+            return $label->label;
+        }
+        return $this->labels->first()->label;
+    }
+
+    /**
+     * Recursive helper function to get all broader concepts of a concept.
+     * Will also build a conceptMap for performance reasons.
+     */
+    private function getAllBroaderPaths(&$conceptMap, $lang="en", $concept = null, $paths = [], $currentPath = []): array {
+        $concept ??= $this;
+        $currentId = $concept->id;
+        if(!isset($conceptMap[$currentId])){
+            $conceptMap[$currentId] = $concept->getLabelWithLang($lang);
+        }
+        // Prevent infinite loop
+        if(in_array($currentId, $currentPath)) {
+            $currentPath[] = $currentId;
+            return $paths;
+        }
+        $currentPath[] = $conceptMap[$currentId];
+
+        if($concept->broaders->isEmpty()) {
+            $paths[] = $currentPath;
+        } else {
+            foreach($concept->broaders as $broader) {
+                $paths = $this->getAllBroaderPaths($conceptMap, $lang, $broader, $paths, $currentPath);
+            }
+        }
+
+        return $paths;
+    }
+
+    /**
+     * Gets the paths of all parents of the concept as labels in the given language (will fallback to the 'first' language).
+     *
+     * @param string $lang - The language code of the labels.
+     * @param bool $bottomToTop - If true, the paths will be returned from bottom to top.
+     * @return array - An array of arrays of labels of the paths. From top to bottom.
+     */
+    public function getParentPathAttribute($lang = "en", $bottomToTop = false): array {
+        // For performance reasons, we get the conceptMap
+        // while building the paths.
+        $conceptMap = [];
+        $paths = $this->getAllBroaderPaths($conceptMap, $lang);
+
+        if(!$bottomToTop){
+            foreach($paths as &$path) {
+                $path = array_reverse($path);
+            }
+        }
+        return $paths;
+    }
 }

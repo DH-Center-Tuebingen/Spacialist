@@ -130,13 +130,13 @@ class ApiBibliographyTest extends TestCase
         ]);
 
 
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
             ->get('/api/v1/bibliography');
 
         $this->assertStatus($response, 200);
         $response->assertJsonCount(7);
 
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
             ->get("/api/v1/bibliography/$entry_id");
 
         $this->assertStatus($response, 200);
@@ -185,7 +185,7 @@ class ApiBibliographyTest extends TestCase
             // Note: I don't like the reliance on the $addedItem["entry"]["id"] here.
             //       But Postgres does not rollback the sequence when a transaction is rolled back.
             //       Therefore all alternative also seem to be more complex than this.
-            $response = $this->userRequest($response)
+            $response = $this->userRequest()
                 ->get('/api/v1/bibliography/'. $addedItem["entry"]["id"]);
 
             $this->assertStatus($response, 200);

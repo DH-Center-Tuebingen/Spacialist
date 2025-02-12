@@ -3,9 +3,18 @@ All notable changes to this project will be documented in this file.
 
 ## 0.11
 ### Added
+- Added websockets for various data synchronization
+  - _Entity Data_
+  - _Attribute Values_
+  - _Entity References_
+  - _Entity Comments_
 - Filter and sort functionality on _Entity Type List_
 - Dependencies added to _System Separator_ attribute
+- Indicator in _Data Model Editor_ that visualizes if an attribute is used in any entity-type
+- Label Search displays full path of thesaurus concept
+- _Add Entity Above_ and _Add Entity Below_ to the Contextmenu in the entity tree
 ### Fixed
+- Dirty indicator not showing in Tab of _Entity Detail_
 - Missing "Color Dots" of _Entity Type_ (colors are now handled on the Entity Type itself and do no longer rely on the _Map_ Plugin)
 - 'Jumping' behavior on floating quick access controls on the _Entity Type List_ (copy, duplicate, delete)
 - Attribute Dependency inverted

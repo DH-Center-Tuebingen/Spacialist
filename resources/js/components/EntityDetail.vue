@@ -155,28 +155,31 @@
                 :type="state.entity.entity_type_id"
                 :icon-only="false"
             />
-            <div>
-                <i class="fas fa-fw fa-user-edit" />
-                <span
-                    class="ms-1"
-                    :title="date(state.lastModified, undefined, true, true)"
-                >
-                    {{ ago(state.lastModified) }}
-                </span>
-                -
-                <a
-                    v-if="state.entity.user"
-                    href="#"
-                    class="fw-medium"
-                    @click.prevent="showUserInfo(state.entityUser)"
-                >
-                    {{ state.entityUser.name }}
-                    <user-avatar
-                        :user="state.entityUser"
-                        :size="20"
-                        class="align-middle"
-                    />
-                </a>
+            <div class="d-flex flex-row gap-2">
+                <MultiUserWidget
+                    v-if="state.activeUsers.length > 0"
+                    :active-users="state.activeUsers"
+                />
+                <div class="d-flex flex-row gap-1 align-items-center">
+                    <i class="fas fa-fw fa-user-edit" />
+                    <span :title="date(state.lastModified, undefined, true, true)">
+                        {{ ago(state.lastModified) }}
+                    </span>
+                    -
+                    <a
+                        v-if="state.entity.user"
+                        href="#"
+                        class="fw-medium"
+                        @click.prevent="showUserInfo(state.entityUser)"
+                    >
+                        {{ state.entityUser.name }}
+                        <user-avatar
+                            :user="state.entityUser"
+                            :size="20"
+                            class="align-middle"
+                        />
+                    </a>
+                </div>
             </div>
         </div>
         <ul
@@ -214,7 +217,9 @@
                         @mouseover="showTabActions(tg.id, true)"
                         @mouseleave="showTabActions(tg.id, false)"
                     >
-                        <i class="fas fa-fw fa-2xs fa-circle text-warning" />
+                        <DotIndicator
+                            :type="'warning'"
+                        />
                         <div v-show="state.attributeGrpHovered == tg.id">
                             <a
                                 href="#"
@@ -391,16 +396,17 @@
         onBeforeRouteUpdate,
     } from 'vue-router';
 
-    import {useI18n} from 'vue-i18n';
+    import { useI18n } from 'vue-i18n';
 
     import {
         Popover,
     } from 'bootstrap';
 
-    import store from '@/bootstrap/store.js';
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
     import router from '%router';
 
-    import {useToast} from '@/plugins/toast.js';
+    import { useToast } from '@/plugins/toast.js';
 
     import {
         ago,
@@ -408,23 +414,12 @@
     } from '@/helpers/filters.js';
 
     import {
-        getEntityComments,
-        patchAttributes,
         patchEntityName,
     } from '@/api.js';
 
     import {
         can,
-        isModerated,
-        isArray,
         userId,
-        getAttribute,
-        getAttributeName,
-        getUserBy,
-        getEntity,
-        getEntityColors,
-        getEntityTypeName,
-        getEntityTypeAttributeSelections,
         getEntityTypeDependencies,
         getEntityTypeDependencyTriggers,
         translateConcept,
@@ -436,16 +431,37 @@
         showUserInfo,
         canShowReferenceModal,
     } from '@/helpers/modal.js';
+    import {
+        listenToList,
+        joinEntityRoom,
+        leaveEntityRoom,
+    } from '@/helpers/websocket.js';
+    import {
+        handleEntityDataUpdated,
+        handleAttributeValueCreated,
+        handleAttributeValueUpdated,
+        handleAttributeValueDeleted,
+        handleEntityReferenceAdded,
+        handleEntityReferenceUpdated,
+        handleEntityReferenceDeleted,
+        handleEntityCommentAdded,
+        handleEntityCommentUpdated,
+        handleEntityCommentDeleted,
+    } from '@/handlers/entity.js';
 
     import { usePreventNavigation } from '@/helpers/form.js';
 
     import MetadataTab from '@/components/entity/MetadataTab.vue';
     import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
+    import DotIndicator from '@/components/indicators/DotIndicator.vue';
+    import MultiUserWidget from './user/MultiUserWidget.vue';
 
     export default {
         components: {
+            DotIndicator,
             EntityTypeLabel,
             MetadataTab,
+            MultiUserWidget,
         },
         props: {
             bibliography: {
@@ -460,13 +476,15 @@
             }
         },
         setup(props) {
-            const {t} = useI18n();
+            const { t } = useI18n();
             const route = useRoute();
             const toast = useToast();
+            const attributeStore = useAttributeStore();
+            const entityStore = useEntityStore();
 
             // FETCH
-            store.dispatch('getEntity', route.params.id).then(_ => {
-                getEntityTypeAttributeSelections();
+            entityStore.setById(route.params.id).then(_ => {
+                entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id);
                 state.initFinished = true;
                 updateAllDependencies();
             });
@@ -474,18 +492,6 @@
             // DATA
             const attrRefs = ref({});
             const state = reactive({
-                colorStyles: computed(_ => {
-                    const colors = getEntityColors(state.entity.entity_type_id);
-                    return {
-                        color: colors.backgroundColor
-                    };
-                }),
-                formDirty: computed(_ => {
-                    for(let k in state.dirtyStates) {
-                        if(state.dirtyStates[k]) return true;
-                    }
-                    return false;
-                }),
                 dirtyStates: {},
                 attributeGrpHovered: null,
                 hiddenAttributes: {},
@@ -498,10 +504,27 @@
                 hiddenAttributeState: false,
                 attributesInTabs: true,
                 routeQuery: computed(_ => route.query),
-                entity: computed(_ => store.getters.entity),
+                entity: computed(_ => entityStore.selectedEntity),
                 entityUser: computed(_ => state.entity.user),
-                entityAttributes: computed(_ => store.getters.entityTypeAttributes(state.entity.entity_type_id)),
+                entityChanges: computed(_ => {
+                    if(!state.entity?.id) return {};
+                    return entityStore.receivedEntityData[state.entity.id];
+                }),
+                entityAttributes: computed(_ => entityStore.getEntityTypeAttributes(state.entity.entity_type_id)),
+                colorStyles: computed(_ => {
+                    const colors = entityStore.getEntityTypeColors(state.entity.entity_type_id);
+                    return {
+                        color: colors.backgroundColor
+                    };
+                }),
+                formDirty: computed(_ => {
+                    for(let k in state.dirtyStates) {
+                        if(state.dirtyStates[k]) return true;
+                    }
+                    return false;
+                }),
                 entityGroups: computed(_ => {
+                    // TODO:: Does this makes sense?
                     if(!state.entityAttributes) {
                         return state.entityAttributes;
                     }
@@ -552,7 +575,7 @@
                         };
                     }
                 }),
-                entityTypeSelections: computed(_ => getEntityTypeAttributeSelections(state.entity.entity_type_id)),
+                entityTypeSelections: computed(_ => entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id)),
                 entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
                 entityTypeTriggers: computed(_ => getEntityTypeDependencyTriggers(state.entity.entity_type_id)),
                 hasAttributeLinks: computed(_ => state.entity.attributeLinks && state.entity.attributeLinks.length > 0),
@@ -574,7 +597,7 @@
                 }),
                 attributesFetched: computed(_ => state.initFinished && state.entity.data && !!state.entityAttributes && state.entityAttributes.length > 0),
                 entityTypeLabel: computed(_ => {
-                    return getEntityTypeName(state.entity.entity_type_id);
+                    return entityStore.getEntityTypeName(state.entity.entity_type_id);
                 }),
                 hiddenAttributeList: computed(_ => {
                     const keys = Object.keys(state.hiddenAttributes);
@@ -608,12 +631,12 @@
                             }
                         }
                         for(let k in listGroups) {
-                            const grpAttr = getAttribute(k);
+                            const grpAttr = attributeStore.getAttribute(k);
                             listing += `<span class="text-muted fw-light fs-6"># ${translateConcept(grpAttr.thesaurus_url)}</span>`;
                             listing += `<ol class="mb-0">`;
                             // const data = state.entity.data[keys[i]];
                             for(let i = 0; i < listGroups[k].length; i++) {
-                                const attr = getAttribute(listGroups[k][i]);
+                                const attr = attributeStore.getAttribute(listGroups[k][i]);
                                 listing += `<li><span class="fw-bold">${translateConcept(attr.thesaurus_url)}</span></li>`;
                             }
                             listing += `</ol>`;
@@ -645,7 +668,9 @@
                 commentFetchFailed: computed(_ => {
                     return state.commentLoadingState === 'failed';
                 }),
+                activeUsers: computed(_ => entityStore.getActiveEntityUsers),
             });
+            const channels = {};
 
             usePreventNavigation(_ => state.formDirty);
 
@@ -691,7 +716,7 @@
                     cancelUpdateEntityName();
                 } else {
                     patchEntityName(state.entity.id, state.editedEntityName).then(data => {
-                        store.dispatch('updateEntity', {
+                        entityStore.update({
                             ...data,
                             name: state.editedEntityName,
                         });
@@ -892,8 +917,7 @@
                 if(!can('comments_read')) return;
 
                 state.commentLoadingState = 'fetching';
-                getEntityComments(state.entity.id).then(comments => {
-                    store.dispatch('setEntityComments', comments);
+                entityStore.fetchEntityComments(state.entity.id).then(_ => {
                     state.commentLoadingState = 'fetched';
                 }).catch(e => {
                     state.commentLoadingState = 'failed';
@@ -901,21 +925,9 @@
             };
 
             const addComment = event => {
-                const comment = event.comment;
-                const replyTo = event.replyTo;
-                if(replyTo) {
-                    const op = state.entity.comments.find(c => c.id == replyTo);
-                    if(op.replies) {
-                        op.replies.push(comment);
-                    }
-                    op.replies_count++;
-                } else {
-                    if(!state.entity.comments) {
-                        state.entity.comments = [];
-                    }
-                    state.entity.comments.push(comment);
-                    state.entity.comments_count++;
-                }
+                entityStore.addComment(state.entity.id, event.comment, {
+                    replyTo: event.replyTo,
+                });
             };
 
             const handleSaveOnKey = (e, grp) => {
@@ -938,11 +950,12 @@
                 const dirtyValues = getDirtyValues(grps);
                 const patches = [];
                 const moderations = [];
+                if(Object.keys(dirtyValues).length == 0) return;
 
                 for(let v in dirtyValues) {
                     const aid = v;
                     const data = state.entity.data[aid];
-                    const type = getAttribute(aid)?.datatype;
+                    const type = attributeStore.getAttribute(aid)?.datatype;
                     const patch = {
                         op: null,
                         value: null,
@@ -950,7 +963,7 @@
                             aid: aid,
                         },
                     };
-                    if(data.id) {
+                    if(data?.id) {
                         // if data.id exists, there has been an entry in the database, therefore it is a replace/remove operation
                         if(
                             (dirtyValues[v] && dirtyValues[v] != '')
@@ -979,24 +992,8 @@
                     patches.push(patch);
                     moderations.push(aid);
                 }
-                return patchAttributes(state.entity.id, patches).then(data => {
+                return entityStore.patchAttributes(state.entity.id, patches, dirtyValues, moderations).then(data => {
                     undirtyList(grps);
-                    store.dispatch('updateEntity', data.entity);
-                    store.dispatch('updateEntityData', {
-                        data: dirtyValues,
-                        new_data: data.added_attributes,
-                        removed_data: data.removed_attributes,
-                        eid: state.entity.id,
-                        sync: !isModerated(),
-                    });
-                    if(isModerated()) {
-                        store.dispatch('updateEntityDataModerations', {
-                            entity_id: state.entity.id,
-                            attribute_ids: moderations,
-                            state: 'pending',
-                        });
-                    }
-
                     resetDirtyStates(grps);
 
                     toast.$toast(
@@ -1046,6 +1043,20 @@
             // ON MOUNTED
             onMounted(_ => {
                 console.log('entity detail component mounted');
+                channels.entity = joinEntityRoom(route.params.id);
+                listenToList(channels.entity, [
+                    handleEntityDataUpdated,
+                    handleAttributeValueCreated,
+                    handleAttributeValueUpdated,
+                    handleAttributeValueDeleted,
+                    handleEntityReferenceAdded,
+                    handleEntityReferenceUpdated,
+                    handleEntityReferenceDeleted,
+                    handleEntityCommentAdded,
+                    handleEntityCommentUpdated,
+                    handleEntityCommentDeleted,
+                ]);
+
                 let hiddenAttrElem = document.getElementById('hidden-attributes-icon');
                 if(!!hiddenAttrElem) {
                     new Popover(hiddenAttrElem, {
@@ -1058,6 +1069,14 @@
                 attrRefs.value = {};
                 state.commentLoadingState = 'not';
             });
+
+            watch(_ => state.entityChanges,
+                (newChanges, oldChanges) => {
+                    for(let k in attrRefs.value) {
+                        attrRefs.value[k]?.broadcastAttributeChanges(newChanges);
+                    }
+                }
+            );
 
             watch(_ => state.hiddenAttributeCount,
                 async (newCount, oldCount) => {
@@ -1078,11 +1097,16 @@
                     if(newParams.id == oldParams.id) return;
                     if(!newParams.id) return;
                     state.initFinished = false;
-                    store.dispatch('getEntity', newParams.id).then(_ => {
-                        getEntityTypeAttributeSelections();
+                    entityStore.setById(newParams.id).then(_ => {
+                        entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id);
                         state.initFinished = true;
                         updateAllDependencies();
                     });
+                    // store.dispatch('getEntity', newParams.id).then(_ => {
+                    //     entityStore.getEntityTypeAttributeSelections();
+                    //     state.initFinished = true;
+                    //     updateAllDependencies();
+                    // });
                 }
             );
 
@@ -1120,7 +1144,9 @@
                     showDiscard(to, resetDirtyStates, saveEntity);
                     return false;
                 } else {
-                    store.dispatch('resetEntity');
+                    leaveEntityRoom(channels.entity);
+                    entityStore.unset();
+                    channels.entity = null;
                     return true;
                 }
             });
@@ -1131,7 +1157,21 @@
                         return false;
                     } else {
                         state.hiddenAttributes = {};
-                        // store.dispatch('resetEntity');
+                        leaveEntityRoom(channels.entity);
+                        channels.entity = joinEntityRoom(to.params.id);
+                        listenToList(channels.entity, [
+                            handleEntityDataUpdated,
+                            handleAttributeValueCreated,
+                            handleAttributeValueUpdated,
+                            handleAttributeValueDeleted,
+                            handleEntityReferenceAdded,
+                            handleEntityReferenceUpdated,
+                            handleEntityReferenceDeleted,
+                            handleEntityCommentAdded,
+                            handleEntityCommentUpdated,
+                            handleEntityCommentDeleted,
+                        ]);
+                        await entityStore.setById(to.params.id);
                         return true;
                     }
                 } else {
@@ -1149,13 +1189,8 @@
                 ago,
                 date,
                 userId,
-                getUserBy,
                 showUserInfo,
-                getAttributeName,
-                getEntityTypeName,
-                getEntityColors,
                 translateConcept,
-                getEntity,
                 // LOCAL
                 hasReferenceGroup,
                 showMetadata,

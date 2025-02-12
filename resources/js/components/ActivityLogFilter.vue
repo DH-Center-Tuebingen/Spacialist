@@ -144,11 +144,9 @@
         toRefs,
     } from 'vue';
 
-    import { useI18n } from 'vue-i18n';
+    import useUserStore from '@/bootstrap/stores/user.js';
 
-    import {
-        getUsers
-    } from '@/helpers/helpers.js';
+    import { useI18n } from 'vue-i18n';
 
     export default {
         props: {
@@ -167,6 +165,7 @@
         setup(props, context) {
             // FETCH
             const { t } = useI18n();
+            const userStore = useUserStore();
             const {
                 hideUser,
                 hiddenPanel,
@@ -184,7 +183,7 @@
                 hideUser: hideUser,
                 hiddenFilterPanel: hiddenPanel,
                 types: ['created', 'updated', 'deleted'],
-                allUsers: hideUser.value ? [] : getUsers(),
+                allUsers: hideUser.value ? [] : userStore.users,
                 filters: {
                     users: [],
                     from: null,
