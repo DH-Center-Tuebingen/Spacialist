@@ -77,13 +77,7 @@ class BibliographyController extends Controller
         }
 
         $filepath = $request->query('path');
-
-        // Only return files from within the bibliography folder
-        if(!Str::startsWith($filepath, self::$folder)) {
-            return response()->noContent();
-        }
-
-        return DownloadHandler::makeFileResponse($filepath);
+        return Bibliography::getFileDirectory()->download($filepath);
     }
 
     // POST
@@ -101,7 +95,6 @@ class BibliographyController extends Controller
             'file' => 'file',
         ]);
 
-        $file = $request->file('file');
         $bib = new Bibliography();
         $success = $bib->fieldsFromRequest($request->except('file'), $user);
         if(!$success) {
@@ -110,14 +103,16 @@ class BibliographyController extends Controller
             ], 422);
         }
 
-        if(isset($file)) {
-            $bib->file = $bib->uploadFile($file);
-            $bib->user_id = $user->id;
-            $bib->save();
+        $file = $request->file('file');
+        try{
+            if($file) $bib->uploadFile($file);
+        }catch(\Exception $e){
+            info($e->getMessage());
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 400);
         }
-        $bib = Bibliography::find($bib->id);
-
-        return response()->json($bib, 201);
+        return response()->json($bib->refresh(), 201);
     }
 
     public function importBibtex(Request $request) {
@@ -308,24 +303,21 @@ class BibliographyController extends Controller
                 'error' => __('This bibliography item does not exist')
             ], 400);
         }
-        $file = $request->file('file');
-        $success = $bib->fieldsFromRequest($request->except(['file', 'delete_file']), $user);
 
+        $success = $bib->fieldsFromRequest($request->except(['file', 'delete_file']), $user);
         if(!$success) {
             return response()->json([
                 'error' => __('At least one required field is not set')
             ], 422);
         }
+
+        $file = $request->file('file');
         if(isset($file)) {
             $bib->file = $bib->uploadFile($file);
-            $bib->user_id = $user->id;
-            $bib->save();
         } else if($request->has('delete_file') && sp_parse_boolean($request->get('delete_file'))) {
             $bib->deleteFile();
         }
-        $bib = Bibliography::find($bib->id);
-
-        return response()->json($bib);
+        return response()->json($bib->refresh());
     }
 
     // DELETE
@@ -346,7 +338,7 @@ class BibliographyController extends Controller
         }
 
         // Only delete file from storage to not fire 'save' event on item
-        $bib->deleteFile(true);
+        $bib->deleteFileFromStorage();
         $bib->delete();
 
         return response()->json(null, 204);

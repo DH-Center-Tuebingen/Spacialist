@@ -2,8 +2,8 @@
 
 namespace App;
 
+use App\File\FileDirectory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
@@ -667,26 +667,23 @@ class Bibliography extends Model implements Searchable
         return $key;
     }
 
-    public function uploadFile($file) {
-        $this->deleteFile(true);
-
+    public function uploadFile($file): void {
+        $this->deleteFile();
         $filename = $this->id . "_" . $file->getClientOriginalName();
-        return Storage::putFileAs(
-            'bibliography',
-            $file,
-            $filename,
-        );
+        $storagePath = self::getFileDirectory()->store($filename, $file);
+        $this->file = $storagePath;
+        $this->save();
     }
 
-    public function deleteFile(bool $fromStorageOnly = false) {
-        if(isset($this->file) && Storage::exists($this->file)) {
-            Storage::delete($this->file);
-        }
+    public function deleteFile(): void {
+        $this->deleteFileFromStorage();
+        $this->file = null;
+        $this->save();
+    }
 
-        if(!$fromStorageOnly) {
-            $this->file = null;
-            $this->save();
-        }
+    public function deleteFileFromStorage(): void {
+        if($this->file == null) return;
+        self::getFileDirectory()->deleteRaw($this->file);
     }
 
     public function user() {
@@ -695,5 +692,9 @@ class Bibliography extends Model implements Searchable
 
     public function entities() {
         return $this->belongsToMany('App\Entity', 'references')->withPivot('description', 'attribute_id');
+    }
+
+    public static function getFileDirectory(){
+        return new FileDirectory('local', 'bibliography');
     }
 }
