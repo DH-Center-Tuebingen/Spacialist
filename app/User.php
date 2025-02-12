@@ -64,17 +64,18 @@ class User extends Authenticatable
         return 'en';
     }
 
-    public function uploadAvatar($file) {
-        $avatarDirectory = self::getAvatarDirectory();
+    public function uploadAvatar($file) : string {
+        $avatarDirectory = self::getFileDirectory();
         $avatarDirectory->deleteRaw($this->avatar);
         $filename = $this->id . "." . $file->getClientOriginalExtension();
         $storedFilename = $avatarDirectory->store($filename, $file);
         $this->avatar = $storedFilename;
         $this->save();
+        return$storedFilename;
     }
 
-    public function deleteAvatar(){
-        self::getAvatarDirectory()->deleteRaw($this->avatar);
+    public function deleteAvatar() : void{
+        self::getFileDirectory()->deleteRaw($this->avatar);
         $this->avatar = null;
         $this->save();
     }
@@ -122,7 +123,7 @@ class User extends Authenticatable
         return $this->hasMany('App\UserPreference');
     }
 
-    public static function getAvatarDirectory(){
+    public static function getFileDirectory() : FileDirectory{
         return new FileDirectory('local', 'avatars');
     }
 

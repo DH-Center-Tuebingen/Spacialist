@@ -152,7 +152,7 @@ class UserController extends Controller
 
     public function downloadAvatar(Request $request) {
         $filepath = $request->query('path');
-        $directory = User::getAvatarDirectory();
+        $directory = User::getFileDirectory();
         $file = $directory->download($filepath);
         if($file != null){
             return $file;

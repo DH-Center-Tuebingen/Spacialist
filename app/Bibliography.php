@@ -694,7 +694,7 @@ class Bibliography extends Model implements Searchable
         return $this->belongsToMany('App\Entity', 'references')->withPivot('description', 'attribute_id');
     }
 
-    public static function getFileDirectory(){
+    public static function getFileDirectory() : FileDirectory{
         return new FileDirectory('local', 'bibliography');
     }
 }
