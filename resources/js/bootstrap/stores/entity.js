@@ -27,10 +27,8 @@ import {
     addEntity,
     addEntityType,
     addEntityTypeAttribute,
-    addReference,
     deleteEntity,
     deleteEntityType,
-    deleteReferenceFromEntity,
     duplicateEntityType,
     fetchEntityMetadata,
     getEntityComments,
@@ -45,7 +43,6 @@ import {
     removeEntityTypeAttribute,
     reorderEntityAttributes,
     updateAttributeMetadata,
-    updateReference,
 } from '@/api.js';
 
 function updateSelectionTypeIdList(selection) {

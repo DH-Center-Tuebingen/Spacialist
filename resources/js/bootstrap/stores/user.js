@@ -55,7 +55,7 @@ const updateUserAt = (context, userId, data, isProfile) => {
             context.setActiveUser(context.users[idx]);
         }
     }
-}
+};
 
 export const useUserStore = defineStore('user', {
     state: _ => ({
@@ -69,6 +69,9 @@ export const useUserStore = defineStore('user', {
         preferences: {},
     }),
     getters: {
+        isSameUser: state => userId => {
+            return state.user.id == userId;
+        },
         getPreferenceByKey: state => key => {
             return state.preferences[key];
         },
@@ -100,7 +103,7 @@ export const useUserStore = defineStore('user', {
                 } else {
                     return null;
                 }
-            }
+            };
         },
         getUserModerated: state => state.user.roles.some(role => role.is_moderated),
         getNotifications(state) {
@@ -221,7 +224,7 @@ export const useUserStore = defineStore('user', {
                     updateData.avatar_url += `#${Date.now()}`;
                 }
                 return updateUserAt(this, user.id, updateData, true);
-            })
+            });
         },
         async deleteAvatar() {
             deleteUserAvatar().then(_ => {
