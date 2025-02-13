@@ -7,6 +7,7 @@ import {
     only,
     simpleResourceType,
 } from '@/helpers/helpers.js';
+import { throwError } from './helpers/helpers';
 
 // GET AND STORE (FETCH)
 export async function logout() {
@@ -594,7 +595,7 @@ export async function patchEntityType(etid, updatedProps) {
         return;
     }
     const data = {
-        data: {...allowedData},
+        data: { ...allowedData },
     };
 
     if(allowedData.sub_entity_types) {
@@ -661,7 +662,9 @@ export async function patchRoleData(rid, data) {
 
 export async function updateReference(id, data) {
     return $httpQueue.add(
-        () => http.patch(`/entity/reference/${id}`, data).then(response => response.data)
+        () => http.patch(`/entity/reference/${id}`, data)
+            .then(response => response.data)
+            .catch(throwError)
     );
 }
 
@@ -729,7 +732,9 @@ export async function deleteBibliographyItem(id) {
 
 export async function deleteReferenceFromEntity(id) {
     return $httpQueue.add(
-        () => http.delete(`/entity/reference/${id}`).then(response => response.data)
+        () => http.delete(`/entity/reference/${id}`)
+            .then(response => response.data)
+            .catch(throwError)
     );
 }
 

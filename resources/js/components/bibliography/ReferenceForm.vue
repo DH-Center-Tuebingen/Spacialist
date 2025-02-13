@@ -59,7 +59,7 @@
             <button
                 type="submit"
                 class="btn btn-outline-success"
-                :disabled="state.addReferenceDisabled"
+                :disabled="state.addReferenceDisabled || state.pending"
                 :title="t('main.entity.references.bibliography.add_button')"
             >
                 <i class="fas fa-fw fa-plus" />
@@ -127,18 +127,27 @@
             };
             const reset = _ => {
                 state.entry = null;
+                state.pending = false;
                 state.description = '';
             };
+
+            const successCallback = (success = false) => {
+                if(success)
+                    reset();
+            };
+
             const onAddReference = _ => {
                 if(!can('bibliography_read|entity_data_write')) return;
+                state.pending = true;
                 const data = {
                     bibliography_id: state.entry.id,
                     description: state.description,
                 };
-                context.emit('add', data);
+                context.emit('add', data, successCallback);
             };
             const state = reactive({
                 entry: null,
+                pending: false,
                 description: '',
                 bibliography: computed(_ => bibliographyStore.bibliography),
                 addReferenceDisabled: computed(_ => !state.entry?.id || !state.description),

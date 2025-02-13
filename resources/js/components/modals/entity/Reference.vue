@@ -89,9 +89,14 @@
                     <li
                         v-for="reference in state.references"
                         :key="reference.id"
-                        class="list-group-item d-flex flex-row justify-content-between"
+                        class="list-group-item d-flex flex-row justify-content-between pt-0"
                     >
-                        <EditableQuotation />
+                        <EditableQuotation
+                            class="flex-fill"
+                            :value="reference"
+                            @update="onUpdateReference"
+                            @delete="onDeleteReference"
+                        />
                     </li>
                 </ul>
                 <h6 class="mt-2">
@@ -141,9 +146,8 @@
         getAttributeValueComments,
     } from '@/api.js';
 
+    import EditableQuotation from '@/components/bibliography/EditableQuotation.vue';
     import ReferenceForm from '@/components/bibliography/ReferenceForm.vue';
-    import { throwError } from '../../../helpers/helpers';
-import EditableQuotation from '../../bibliography/Quotation/EditableQuotation.vue';
 
     export default {
         components: {
@@ -195,15 +199,19 @@ import EditableQuotation from '../../bibliography/Quotation/EditableQuotation.vu
 
                 state.certainty = value;
             };
-            const onUpdateCertainty = event => {
+            const onUpdateCertainty = async event => {
                 let data = {
                     certainty: state.certainty,
                 };
-                entityStore.patchAttribute(entity.value.id, aid, data).then(data => {
+                try {
+                    await entityStore.patchAttribute(entity.value.id, aid, data);
                     state.comments.push(event.comment);
                     // set startCertainty to new, stored value
                     state.startCertainty = state.certainty;
-                });
+                } catch(e) {
+                    // Error will be handled elsewhere ...
+                    console.error(e);
+                }
             };
 
             const onAddReference = async data => {
@@ -212,27 +220,30 @@ import EditableQuotation from '../../bibliography/Quotation/EditableQuotation.vu
                     await entityStore.addReference(entity.value.id, state.attribute.id, state.attribute.thesaurus_url, data);
                     referenceForm.value.reset();
                 } catch(e) {
-                    throwError(e);
+                    // Error will be handled elsewhere ...
+                    console.error(e);
                 }
             };
             const onDeleteReference = reference => {
                 if(!can('bibliography_read|entity_data_write')) return;
-                entityStore.removeReference(reference.id, entity.value.id, state.attribute.thesaurus_url).then(_ => {
-                    cancelEditReference();
-                });
+                entityStore.deleteReference(reference.id, entity.value.id, state.attribute.thesaurus_url);
             };
-            const onUpdateReference = editedReference => {
+            const onUpdateReference = (editedReference, successCallback) => {
                 if(!can('bibliography_read|entity_data_write')) return;
                 const ref = state.references.find(r => r.id == editedReference.id);
                 if(ref.description == editedReference.description) {
-                    cancelEditReference();
+                    // We can return early here, because the reference was not changed
+                    successCallback(true);
                     return;
                 }
                 const data = {
                     description: editedReference.description
                 };
                 entityStore.updateReference(ref.id, entity.value.id, state.attribute.thesaurus_url, data).then(_ => {
-                    cancelEditReference();
+                    successCallback(true);
+                }).catch(e => {
+                    successCallback(false);
+                    throwError(e);
                 });
             };
             const closeModal = _ => {

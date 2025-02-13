@@ -537,7 +537,7 @@ export const useEntityStore = defineStore('entity', {
             });
         },
         handleUpdate(entityId, attributeUrl, data) {
-            this.getReferences(entityId, attributeUrl);
+            const references = this.getReferences(entityId, attributeUrl);
             const id = data.id;
             const refData = data.data;
             const updateData = data.updates;
@@ -552,33 +552,37 @@ export const useEntityStore = defineStore('entity', {
         getReferences(entityId, attributeUrl = null) {
             const entity = this.getEntity(entityId);
             if(attributeUrl) {
-                return entity?.references[attributeUrl] || [];
+                return entity?.references?.[attributeUrl] || [];
             } else {
-                return entity?.references.on_entity || [];
+                return entity?.references?.on_entity || [];
             }
         },
 
         async addReference(entityId, attributeId, attributeUrl, refData) {
             return addReference(entityId, attributeId, refData).then(data => {
+                const entity = this.getEntity(entityId);
                 const references = this.getReferences(entityId, attributeUrl);
-                console.log(references);
                 references.push(data);
                 return data;
             });
         },
         async updateReference(id, entityId, attributeUrl, refData) {
-            return updateReference(id, refData).then(data => {
-                this.handleUpdate(entityId, attributeUrl, {
-                    id: id,
-                    data: refData,
-                    updates: data,
+            console.log(refData);
+            return updateReference(id, refData)
+                .then(data => {
+                    this.handleUpdate(entityId, attributeUrl, {
+                        id: id,
+                        data: refData,
+                        updates: data,
+                    });
                 });
-            });
         },
-        async removeReference(id, entityId, attributeUrl) {
+        async deleteReference(id, entityId, attributeUrl) {
+            console.log('deleteReference', id, entityId, attributeUrl);
             return deleteReferenceFromEntity(id).then(_ => {
                 const references = this.getReferences(entityId, attributeUrl);
                 const idx = references.findIndex(ref => ref.id == id);
+                console.log('deleteReference', idx);
                 if(idx > -1) {
                     references.splice(idx, 1);
                 }
