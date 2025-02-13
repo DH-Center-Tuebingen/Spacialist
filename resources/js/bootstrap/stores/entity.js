@@ -567,7 +567,6 @@ export const useEntityStore = defineStore('entity', {
             });
         },
         async updateReference(id, entityId, attributeUrl, refData) {
-            console.log(refData);
             return updateReference(id, refData)
                 .then(data => {
                     this.handleUpdate(entityId, attributeUrl, {
@@ -578,11 +577,9 @@ export const useEntityStore = defineStore('entity', {
                 });
         },
         async deleteReference(id, entityId, attributeUrl) {
-            console.log('deleteReference', id, entityId, attributeUrl);
             return deleteReferenceFromEntity(id).then(_ => {
                 const references = this.getReferences(entityId, attributeUrl);
                 const idx = references.findIndex(ref => ref.id == id);
-                console.log('deleteReference', idx);
                 if(idx > -1) {
                     references.splice(idx, 1);
                 }

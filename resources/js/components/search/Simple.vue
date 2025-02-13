@@ -291,7 +291,6 @@
             };
 
             const onChange = value => {
-                console.log('CHANGED', value);
                 context.emit('selected', value);
             };
 
