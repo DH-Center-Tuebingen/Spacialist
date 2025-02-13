@@ -138,11 +138,12 @@
 
     import {
         can,
+        throwError,
         getCertaintyClass,
         translateConcept,
     } from '@/helpers/helpers.js';
 
-    // TODO: TODO: This should be done in the store
+    // TODO: This should be done in the store
     import {
         getAttributeValueComments,
     } from '@/api.js';
@@ -228,20 +229,18 @@
             };
             const onDeleteReference = reference => {
                 if(!can('bibliography_read|entity_data_write')) return;
-                referenceStore.remove(reference.id, entity.value.id, state.attribute.thesaurus_url);
+                referenceStore.delete(entity.value.id, state.attribute.thesaurus_url, reference);
             };
-            const onUpdateReference = (editedReference, successCallback) => {
+            const onUpdateReference = (updatedReference, successCallback) => {
                 if(!can('bibliography_read|entity_data_write')) return;
-                const ref = state.references.find(r => r.id == editedReference.id);
-                if(ref.description == editedReference.description) {
+                const ref = state.references.find(r => r.id == updatedReference.id);
+                if(ref.description == updatedReference.description) {
                     // We can return early here, because the reference was not changed
                     successCallback(true);
                     return;
                 }
-                const data = {
-                    description: editedReference.description
-                };
-                referenceStore.update(ref.id, entity.value.id, state.attribute.thesaurus_url, data).then(_ => {
+
+                referenceStore.update(entity.value.id, state.attribute.thesaurus_url, updatedReference).then(_ => {
                     successCallback(true);
                 }).catch(e => {
                     successCallback(false);

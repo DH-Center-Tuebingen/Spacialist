@@ -660,9 +660,10 @@ export async function patchRoleData(rid, data) {
     );
 }
 
-export async function updateReference(id, data) {
+export async function updateReference(data) {
+    if(!data?.id) throw new Error('Reference ID is required!');
     return $httpQueue.add(
-        () => http.patch(`/entity/reference/${id}`, data)
+        () => http.patch(`/entity/reference/${data.id}`, data)
             .then(response => response.data)
             .catch(throwError)
     );

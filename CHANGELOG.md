@@ -18,6 +18,9 @@ All notable changes to this project will be documented in this file.
 - 'Jumping' behavior on floating quick access controls on the _Entity Type List_ (copy, duplicate, delete)
 - Attribute Dependency inverted
 
+### Changed
+- Improved style of Reference Input.
+
 ## 0.10.2
 ### Fixed
 - Date Range _importFrom_ did not return a JSON string

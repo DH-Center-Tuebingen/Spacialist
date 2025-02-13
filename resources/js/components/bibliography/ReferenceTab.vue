@@ -135,7 +135,7 @@
             };
             const updateEntityReference = async (reference, callback) => {
                 try {
-                    await referenceStore.update(reference.id, state.entity.id, null, reference);
+                    await referenceStore.update(state.entity.id, null, reference);
                     callback(true);
                 } catch(e) {
                     // Error is handled by http class.
@@ -145,7 +145,7 @@
             };
             const deleteEntityReference = async reference => {
                 try {
-                    await referenceStore.remove(reference.id, state.entity.id);
+                    await referenceStore.delete(state.entity.id, null, reference);
                 } catch(e) {
                     // Error is handled by http class.
                     console.error(e);
