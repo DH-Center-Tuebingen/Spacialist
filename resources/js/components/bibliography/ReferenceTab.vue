@@ -14,24 +14,22 @@
                 <h5 class="mb-2 fw-medium">
                     {{ t('main.entity.references.general') }}
                 </h5>
-                <div class="list-group w-90">
+                <div class="list-group">
                     <div
                         v-for="(reference, i) in state.entityReferences"
                         :key="i"
                         class="list-group-item pt-0"
                     >
-                        <header class="text-end">
-                            <span class="text-muted fw-light small">
-                                {{ date(reference.updated_at) }}
-                            </span>
-                        </header>
-                        <EditableQuotation :value="reference" />
+                        <EditableQuotation
+                            :value="reference"
+                            @update="updateEntityReference"
+                            @delete="() => deleteEntityReference(reference)"
+                        />
                     </div>
                 </div>
             </div>
             <hr
                 v-if="state.hasEntityReferences && state.hasAttributeReferences"
-                class="w-90"
             >
             <template v-if="state.hasAttributeReferences">
                 <template
@@ -51,7 +49,7 @@
                                 {{ translateConcept(key) }}
                             </a>
                         </h5>
-                        <div class="list-group w-90">
+                        <div class="list-group">
                             <div
                                 v-for="(reference, i) in referenceGroup"
                                 :key="i"
@@ -104,14 +102,13 @@
 
     import useEntityStore from '@/bootstrap/stores/entity.js';
 
-    import Quotation from '@/components/bibliography/Quotation/Quotation.vue';
+    import EditableQuotation from '@/components/bibliography/EditableQuotation.vue';
+    import Quotation from '@/components/bibliography/Quotation.vue';
     import ReferenceForm from '@/components/bibliography/ReferenceForm.vue';
-    import { throwError } from '@/helpers/helpers';
 
     import {
         router,
     } from '@/bootstrap/router.js';
-    import EditableQuotation from './Quotation/EditableQuotation.vue';
 
     export default {
         components: {
@@ -130,7 +127,26 @@
                     await entityStore.addReference(state.entity.id, null, null, data);
                     referenceForm.value.reset();
                 } catch(e) {
-                    throwError(e);
+                    // Error is handled by http class.
+                    console.error(e);
+                }
+            };
+            const updateEntityReference = async (reference, callback) => {
+                try {
+                    await entityStore.updateReference(reference.id, state.entity.id, null, reference);
+                    callback(true);
+                } catch(e) {
+                    // Error is handled by http class.
+                    console.error(e);
+                    callback(false);
+                }
+            };
+            const deleteEntityReference = async reference => {
+                try {
+                    await entityStore.deleteReference(reference.id, state.entity.id);
+                } catch(e) {
+                    // Error is handled by http class.
+                    console.error(e);
                 }
             };
             const showMetadataForReferenceGroup = referenceGroup => {
@@ -201,6 +217,8 @@
                 date,
                 state,
                 addEntityReference,
+                updateEntityReference,
+                deleteEntityReference,
                 showMetadataForReferenceGroup,
                 translateConcept,
                 referenceForm,

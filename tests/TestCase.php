@@ -95,9 +95,8 @@ abstract class TestCase extends BaseTestCase {
         Auth::guard('web')->logout(true);
         }
 
-    public function userRequest() {
-        return $this->withHeaders([
-            'Accept' => 'application/json' // When not setting this, Laravels validation will return a 302 on failure!
-        ]);
+    public function userRequest($userId = 1) {
+        $user = User::find($userId);
+        return $this->actingAs($user);
     }
 }
