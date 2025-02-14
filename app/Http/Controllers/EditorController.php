@@ -405,10 +405,7 @@ class EditorController extends Controller {
         }
 
         if($updateRelation) {
-            $isRoot = $relationData['is_root'];
-            $subEntityTypes = $relationData['sub_entity_types'];
-            $color = $relationData['color'];
-            $entityType->setRelationInfo($color, $isRoot, $subEntityTypes);
+            $entityType->setRelationInfo($relationData);
         }
 
         if($updateProps) {

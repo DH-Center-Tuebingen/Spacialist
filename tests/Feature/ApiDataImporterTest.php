@@ -1019,7 +1019,7 @@ class ApiDataImporterTest extends TestCase {
         ])
             ->assertStatus(200)
             ->assertJson([
-                'errors' => ['[1] Attribute could not be imported: #3'],
+                'errors' => ['[1] Attribute could not be imported: {{#3}} => {{1,2,3,cm}}'],
                 'summary' => [
                     'create' => 1,
                     'update' => 0,

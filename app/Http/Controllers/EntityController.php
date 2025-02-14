@@ -180,7 +180,7 @@ class EntityController extends Controller {
         return response()->json($data);
     }
 
-    public function getData($id, $aid = null) {
+    public function getData(int $id, ?int $aid = null) {
         $user = auth()->user();
         if(!$user->can('entity_read') || !$user->can('entity_data_read')) {
             return response()->json([
@@ -195,6 +195,15 @@ class EntityController extends Controller {
             return response()->json([
                 'error' => __('This entity does not exist'),
             ], 400);
+        }
+        if(isset($aid)) {
+            try {
+                Attribute::findOrFail($aid);
+            } catch(ModelNotFoundException $e) {
+                return response()->json([
+                    'error' => __('This attribute does not exist'),
+                ], 400);
+            }
         }
         $data = $entity->getData($aid);
         return response()->json($data);
@@ -261,8 +270,9 @@ class EntityController extends Controller {
         $fields = $request->only(array_keys(Entity::rules));
         $etid = $request->get('entity_type_id');
         $reid = $request->get('root_entity_id');
+        $rank = $request->get('rank');
 
-        $res = Entity::create($fields, $etid, $user, $reid);
+        $res = Entity::create($fields, $etid, $user, $reid, $rank);
 
         if($res['type'] === 'entity') {
             return response()->json($res['entity'], 201);
@@ -404,7 +414,6 @@ class EntityController extends Controller {
         $parentColumn = isset($data['parent_column']) ? trim($data['parent_column']) : null;
         $entityTypeId = trim($data['entity_type_id']);
         $attributesMapping = array_map(fn ($col) => trim($col), $data['attributes']);
-
 
         $headerRow = null;
         $hasParent = false;
@@ -575,7 +584,6 @@ class EntityController extends Controller {
     }
 
     function createImportedEntity($entityName, ?string $rootEntityPath, $entityTypeId, $user) {
-
         $rootEntityId = null;
         if(isset($rootEntityPath)) {
             try {

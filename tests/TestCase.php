@@ -73,13 +73,6 @@ abstract class TestCase extends BaseTestCase {
         $this->assertSame($status, $response->getStatusCode(), $message == "" ? $no_errors : $message);
     }
 
-    protected function getStreamedContent($response) {
-        ob_start();
-        $response->sendContent();
-        $content = ob_get_clean();
-        return $content;
-    }
-
     public function setTestUser() {
         if(!isset($this->user)) {
             $this->user = User::find(1);
