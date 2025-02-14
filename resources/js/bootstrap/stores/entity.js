@@ -27,10 +27,8 @@ import {
     addEntity,
     addEntityType,
     addEntityTypeAttribute,
-    addReference,
     deleteEntity,
     deleteEntityType,
-    deleteReferenceFromEntity,
     duplicateEntityType,
     fetchEntityMetadata,
     getEntityComments,
@@ -45,7 +43,6 @@ import {
     removeEntityTypeAttribute,
     reorderEntityAttributes,
     updateAttributeMetadata,
-    updateReference,
 } from '@/api.js';
 
 function updateSelectionTypeIdList(selection) {
@@ -550,50 +547,6 @@ export const useEntityStore = defineStore('entity', {
                     this.updateEntityData(entityId, updateData);
                 }
                 return data;
-            });
-        },
-        handleReference(entityId, attributeUrl, action, data) {
-            if(action == 'add') {
-                const references = this.getEntity(entityId)?.references[attributeUrl] || [];
-                references.push(data);
-                return data;
-            } else if(action == 'update') {
-                const references = this.getEntity(entityId)?.references[attributeUrl] || [];
-                const id = data.id;
-                const refData = data.data;
-                const updateData = data.updates;
-                const reference = references.find(ref => ref.id == id);
-                if(!!reference) {
-                    for(let k in refData) {
-                        reference[k] = refData[k];
-                    }
-                    reference.updated_at = updateData.updated_at;
-                }
-            } else if(action == 'delete') {
-                const references = this.getEntity(entityId)?.references[attributeUrl] || [];
-                const idx = references.findIndex(ref => ref.id == data.id);
-                if(idx > -1) {
-                    references.splice(idx, 1);
-                }
-            }
-        },
-        async addReference(entityId, attributeId, attributeUrl, refData) {
-            return addReference(entityId, attributeId, refData).then(data => {
-                return this.handleReference(entityId, attributeUrl, 'add', data);
-            });
-        },
-        async updateReference(id, entityId, attributeUrl, refData) {
-            return updateReference(id, refData).then(data => {
-                this.handleReference(entityId, attributeUrl, 'update', {
-                    id: id,
-                    data: refData,
-                    updates: data,
-                });
-            });
-        },
-        async removeReference(id, entityId, attributeUrl) {
-            return deleteReferenceFromEntity(id).then(_ => {
-                this.handleReference(entityId, attributeUrl, 'delete', { id: id });
             });
         },
         async addComment(entityId, comment, { replyTo = null } = {}) {

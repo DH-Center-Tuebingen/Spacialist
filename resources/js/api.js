@@ -6,6 +6,7 @@ import {
 import {
     only,
     simpleResourceType,
+    throwError,
 } from '@/helpers/helpers.js';
 
 // GET AND STORE (FETCH)
@@ -494,9 +495,15 @@ export async function addEntityTypeAttribute(etid, aid, rank) {
 }
 
 export async function addReference(eid, aid, data) {
-    return $httpQueue.add(
-        () => http.post(`/entity/${eid}/reference/${aid}`, data).then(response => response.data)
-    );
+    if(aid) {
+        return $httpQueue.add(
+            () => http.post(`/entity/${eid}/reference/${aid}`, data).then(response => response.data)
+        );
+    } else {
+        return $httpQueue.add(
+            () => http.post(`/entity/${eid}/reference`, data).then(response => response.data)
+        );
+    }
 }
 
 export async function getFilteredActivity(pageUrl, payload) {
@@ -591,7 +598,7 @@ export async function patchEntityType(etid, updatedProps) {
         return;
     }
     const data = {
-        data: {...allowedData},
+        data: { ...allowedData },
     };
 
     if(allowedData.sub_entity_types) {
@@ -656,9 +663,12 @@ export async function patchRoleData(rid, data) {
     );
 }
 
-export async function updateReference(id, data) {
+export async function updateReference(data) {
+    if(!data?.id) throw new Error('Reference ID is required!');
     return $httpQueue.add(
-        () => http.patch(`/entity/reference/${id}`, data).then(response => response.data)
+        () => http.patch(`/entity/reference/${data.id}`, data)
+            .then(response => response.data)
+            .catch(throwError)
     );
 }
 
@@ -726,7 +736,9 @@ export async function deleteBibliographyItem(id) {
 
 export async function deleteReferenceFromEntity(id) {
     return $httpQueue.add(
-        () => http.delete(`/entity/reference/${id}`).then(response => response.data)
+        () => http.delete(`/entity/reference/${id}`)
+            .then(response => response.data)
+            .catch(throwError)
     );
 }
 

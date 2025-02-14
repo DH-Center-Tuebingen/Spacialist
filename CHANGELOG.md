@@ -11,12 +11,16 @@ All notable changes to this project will be documented in this file.
 - Filter and sort functionality on _Entity Type List_
 - Indicator in _Data Model Editor_ that visualizes if an attribute is used in any entity-type
 - Label Search displays full path of thesaurus concept
+- References can also be added to an Entity, not only to an Entity Attribute
 - _Add Entity Above_ and _Add Entity Below_ to the Contextmenu in the entity tree
 ### Fixed
 - Dirty indicator not showing in Tab of _Entity Detail_
 - Missing "Color Dots" of _Entity Type_ (colors are now handled on the Entity Type itself and do no longer rely on the _Map_ Plugin)
 - 'Jumping' behavior on floating quick access controls on the _Entity Type List_ (copy, duplicate, delete)
 - Attribute Dependency inverted
+
+### Changed
+- Improved style of Reference Input.
 
 ## 0.10.2
 ### Fixed

@@ -18,9 +18,13 @@
 
 <script>
     import { computed } from 'vue';
-    import { truncate } from '@/helpers/filters';
-    import { formatAuthors } from '@/helpers/bibliography';
-    import { showLiteratureInfo } from '@/helpers/modal';
+
+    import {
+        formatAuthors,
+        formatBibtexText,
+    } from '@/helpers/bibliography.js';
+    import { truncate } from '@/helpers/filters.js';
+    import { showLiteratureInfo } from '@/helpers/modal.js';
     export default {
         props: {
             value: {
@@ -30,7 +34,8 @@
         },
         setup(props) {
             const shortenedTitle = computed(() => {
-                return truncate(props.value.title, 60);
+                const formattedText = formatBibtexText(props.value.title);
+                return truncate(formattedText, 60);
             });
             return {
                 formatAuthors,

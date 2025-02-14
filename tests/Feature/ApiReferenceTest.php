@@ -139,7 +139,7 @@ class ApiReferenceTest extends TestCase
     // ==========================================
     
 /**
-     * @testdox PATCH  /api/v1/entity/{entity_id}/rank  -  Move an entity (id=1) to top.
+     * @testdox PATCH  /api/v1/entity/reference/{id}  -  Patch description of an entity reference (id=1)
      */
     public function testPatchReferenceEndpoint()
     {
@@ -174,6 +174,23 @@ class ApiReferenceTest extends TestCase
         ]);
     }
     
+    /**
+     * @testdox PATCH  /api/v1/entity/reference/{id}  -  Patch without description of an entity reference (id=1)
+     */
+    public function testPatchReferenceMissingDescriptionEndpoint()
+    {
+        $reference = Reference::find(2);
+        $this->assertEquals(1, $reference->entity_id);
+        $this->assertEquals(15, $reference->attribute_id);
+        $this->assertEquals(1319, $reference->bibliography_id);
+        $this->assertEquals('Picture on left side of page 12', $reference->description);
+
+        $response = $this->userRequest()
+        ->patch('/api/v1/entity/reference/2');
+
+        $response->assertStatus(422);
+    }
+
     // ==========================================
     //              [[ DELETE ]]
     // ==========================================
@@ -228,7 +245,7 @@ class ApiReferenceTest extends TestCase
             "GET    /api/v1/entity/99/reference" =>Permission::for("get",      "/api/v1/entity/99/reference",      "This entity does not exist"),
             "POST   /api/v1/entity/99/reference/99" =>Permission::for("post",     "/api/v1/entity/99/reference/99",   "This entity does not exist", ["bibliography_id" => 1322, "description" => "This is a simple test"]),
             "POST   /api/v1/entity/1/reference/99" =>Permission::for("post",     "/api/v1/entity/1/reference/99",      "This attribute does not exist", ["bibliography_id" => 1322, "description" => "This is a simple test"]),
-            "PATCH  /api/v1/entity/reference/99" =>Permission::for("patch",    "/api/v1/entity/reference/99",      "This reference does not exist"),
+            "PATCH  /api/v1/entity/reference/99" =>Permission::for("patch",    "/api/v1/entity/reference/99",      "This reference does not exist", ["description" => "This is a simple test"]),
             "DELETE /api/v1/entity/reference/99" =>Permission::for("delete",   "/api/v1/entity/reference/99",      "This reference does not exist"),
         ];
     }

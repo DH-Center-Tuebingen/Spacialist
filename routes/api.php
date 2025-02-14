@@ -59,7 +59,7 @@ Route::middleware('auth:sanctum')->prefix('v1/entity')->group(function() {
     Route::post('/{id}/duplicate', 'EntityController@duplicateEntity')->where('id', '[0-9]+');
     Route::post('/import', 'EntityController@importData')->where('id', '[0-9]+')->where('aid', '[0-9]+');
     Route::post('/import/validate', 'EntityController@validateImportData');
-    Route::post('/{id}/reference/{aid}', 'ReferenceController@addReference')->where('id', '[0-9]+')->where('aid', '[0-9]+');
+    Route::post('/{id}/reference/{aid?}', 'ReferenceController@addReference')->where('id', '[0-9]+');
 
     Route::patch('/{id}/attributes', 'EntityController@patchAttributes')->where('id', '[0-9]+');
     Route::patch('/{id}/attribute/{aid}', 'EntityController@patchAttribute')->where('id', '[0-9]+')->where('aid', '[0-9]+');

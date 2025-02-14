@@ -1,6 +1,7 @@
 import useAttributeStore from '@/bootstrap/stores/attribute.js';
 import useBibliographyStore from '@/bootstrap/stores/bibliography.js';
 import useEntityStore from '@/bootstrap/stores/entity.js';
+import useReferenceStore from '../bootstrap/stores/reference';
 import useUserStore from '@/bootstrap/stores/user.js';
 
 import { addToast } from '@/plugins/toast.js';
@@ -43,50 +44,56 @@ export const handleAttributeValueDeleted = {
     },
 };
 
+
+const sendReferenceToastMessage = (message) => {
+    addToast(message, '', {
+        duration: 2500,
+        autohide: true,
+        channel: 'info',
+        icon: true,
+        simple: true,
+    });
+};
+
+const getReferenceValues = (e) => {
+    const reference = e.reference;
+    const entityId = reference.entity_id;
+    const attribute = useAttributeStore().getAttribute(reference.attribute_id);
+    const attributeUrl = attribute.thesaurus_url;
+    reference.bibliography = useBibliographyStore().getEntry(reference.bibliography_id);
+    return { entityId, attributeUrl, reference };
+};
+
 export const handleEntityReferenceAdded = {
     'ReferenceAdded': e => {
-        // Only handle event if from different user
-        if(e.user.id == useUserStore().getCurrentUserId) return;
-        const reference = e.reference;
-        const entityId = reference.entity_id;
-        const attribute = useAttributeStore().getAttribute(reference.attribute_id);
-        const attributeUrl = attribute.thesaurus_url;
-        reference.bibliography = useBibliographyStore().getEntry(reference.bibliography_id);
-        useEntityStore().handleReference(entityId, attributeUrl, 'add', reference);
-
+        // TODO: We should only send to different users in the backend.
+        if(useUserStore().isSameUser(e.user.id)) return;
+        const {
+            entityId,
+            attributeUrl,
+            reference,
+        } = getReferenceValues(e);
+        useReferenceStore().handleAdd(entityId, attributeUrl, reference);
         const message = `A reference has been added by '${e.user.nickname}'!`;
-        addToast(message, '', {
-            duration: 2500,
-            autohide: true,
-            channel: 'info',
-            icon: true,
-            simple: true,
-        });
+        sendReferenceToastMessage(message);
     },
 };
 
 export const handleEntityReferenceUpdated = {
     'ReferenceUpdated': e => {
+        console.log('handleEntityReferenceUpdated', e);
+        console.log(e.user.id == useUserStore().getCurrentUserId);
         // Only handle event if from different user
         if(e.user.id == useUserStore().getCurrentUserId) return;
-        const reference = e.reference;
-        const entityId = reference.entity_id;
-        const attribute = useAttributeStore().getAttribute(reference.attribute_id);
-        const attributeUrl = attribute.thesaurus_url;
-        useEntityStore().handleReference(entityId, attributeUrl, 'update', {
-            id: reference.id,
-            data: reference,
-            updates: reference,
-        });
+        const {
+            entityId,
+            attributeUrl,
+            reference,
+        } = getReferenceValues(e);
+        useReferenceStore().handleUpdate(entityId, attributeUrl, reference);
 
         const message = `A reference has been updated by '${e.user.nickname}'!`;
-        addToast(message, '', {
-            duration: 2500,
-            autohide: true,
-            channel: 'info',
-            icon: true,
-            simple: true,
-        });
+        sendReferenceToastMessage(message);
     },
 };
 
@@ -94,22 +101,15 @@ export const handleEntityReferenceDeleted = {
     'ReferenceDeleted': e => {
         // Only handle event if from different user
         if(e.user.id == useUserStore().getCurrentUserId) return;
-        const reference = e.reference;
-        const entityId = reference.entity_id;
-        const attribute = useAttributeStore().getAttribute(reference.attribute_id);
-        const attributeUrl = attribute.thesaurus_url;
-        useEntityStore().handleReference(entityId, attributeUrl, 'delete', {
-            id: reference.id,
-        });
+        const {
+            entityId,
+            attributeUrl,
+            reference,
+        } = getReferenceValues(e);
+        useReferenceStore().handleDelete(entityId, attributeUrl, reference.id);
 
         const message = `A reference has been deleted by '${e.user.nickname}'!`;
-        addToast(message, '', {
-            duration: 2500,
-            autohide: true,
-            channel: 'info',
-            icon: true,
-            simple: true,
-        });
+        sendReferenceToastMessage(message);
     },
 };
 
@@ -124,13 +124,7 @@ export const handleEntityCommentAdded = {
 
         const entity = entityStore.getEntity(e.comment.commentable_id);
         const message = `'${e.user.nickname}' commented on entity '${entity.name}'!`;
-        addToast(message, '', {
-            duration: 2500,
-            autohide: true,
-            channel: 'info',
-            icon: true,
-            simple: true,
-        });
+        sendReferenceToastMessage(message);
     },
 };
 
@@ -145,13 +139,7 @@ export const handleEntityCommentUpdated = {
 
         const entity = entityStore.getEntity(e.comment.commentable_id);
         const message = `'${e.user.nickname}' updated their comment on entity '${entity.name}'!`;
-        addToast(message, '', {
-            duration: 2500,
-            autohide: true,
-            channel: 'info',
-            icon: true,
-            simple: true,
-        });
+        sendReferenceToastMessage(message);
     },
 };
 
@@ -166,12 +154,6 @@ export const handleEntityCommentDeleted = {
 
         const entity = entityStore.getEntity(e.comment.commentable_id);
         const message = `'${e.user.nickname}' deleted their comment on entity '${entity.name}'!`;
-        addToast(message, '', {
-            duration: 2500,
-            autohide: true,
-            channel: 'info',
-            icon: true,
-            simple: true,
-        });
+        sendReferenceToastMessage(message);
     },
 };
