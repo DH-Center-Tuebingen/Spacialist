@@ -46,11 +46,10 @@ Route::middleware('auth:sanctum')->prefix('v1/plugin')->group(function() {
 Route::middleware('auth:sanctum')->prefix('v1/entity')->group(function() {
     Route::get('/top', 'EntityController@getTopEntities');
     Route::get('/{id}', 'EntityController@getEntity')->where('id', '[0-9]+');
-    
-    // This route is only used for the map plugin 
+
+    // This route is only used for the map plugin
     Route::get('/entity_type/{etid}/data/{aid}', 'EntityController@getDataForEntityType')->where('etid', '[0-9]+')->where('aid', '[0-9]+');
-    Route::get('/{id}/data', 'EntityController@getData')->where('id', '[0-9]+');
-    Route::get('/{id}/data/{aid}', 'EntityController@getData')->where('id', '[0-9]+')->where('aid', '[0-9]+');
+    Route::get('/{id}/data/{aid?}', 'EntityController@getData')->where('id', '[0-9]+');
     Route::get('/{id}/metadata', 'EntityController@getMetadata')->where('id', '[0-9]+');
     Route::get('/{id}/reference', 'ReferenceController@getByEntity')->where('id', '[0-9]+');
     Route::get('/{id}/parentIds', 'EntityController@getParentIds')->where('id', '[0-9]+');

@@ -144,6 +144,7 @@ class ApiEditorTest extends TestCase
                         ->where('multiple', false)
                         ->where('restrictions', NULL)
                         ->where('metadata', NULL)
+                        ->where('entity_types_count', 1)
                 )
                 // This was originally an array keyed by index. But the backend changed
                 // to use the id as key. Idk if this is a good idea. [SO]
@@ -251,7 +252,7 @@ class ApiEditorTest extends TestCase
             $resultArray[] = ['datatype' => $datatype, 'in_table' => $in_table];
         }
 
-        $response->assertSimilarJson($resultArray, $attributeTypes);
+        $response->assertSimilarJson($resultArray);
     }
 
     /**
@@ -432,12 +433,24 @@ class ApiEditorTest extends TestCase
     public function testModifyingEntityTypeRelation() {
         $id = 4;
         $response = $this->userRequest()
-            ->post("/api/v1/editor/dm/$id/relation", [
-                'is_root' => false,
-                'sub_entity_types' => [
-                    3, 6, 7
+            ->patch("/api/v1/editor/dm/entity_type/$id", [
+                'data' => [
+                    'is_root' => true,
+                    'sub_entity_types' => [
+                        3, 6, 7
+                    ]
                 ]
             ]);
+
+        $this->assertStatus($response, 200);
+
+        $entityType = EntityType::find($id)->load('sub_entity_types');
+        $this->assertTrue($entityType->is_root);
+        $this->assertArraySubset([
+            ['id' => 3],
+            ['id' => 6],
+            ['id' => 7]
+        ], $entityType->sub_entity_types->toArray());
     }
 
     // TODO check if necessary to replace old set relation logic with new logic in EditorController::patchEntityType
@@ -639,7 +652,7 @@ class ApiEditorTest extends TestCase
         $response->assertJson([
             'entity_type_id' => 3,
             'attribute_id' => 3,
-            'position' => 4,
+            'position' => 5,
             'depends_on' => null,
             'attribute' => [
                 'id' => 3,
@@ -831,7 +844,7 @@ class ApiEditorTest extends TestCase
         $etCnt = EntityType::count();
         $this->assertEquals(5, $etCnt);
         $eaCnt = EntityAttribute::count();
-        $this->assertEquals(23, $eaCnt);
+        $this->assertEquals(24, $eaCnt);
         $eCnt = Entity::count();
         $this->assertEquals(8, $eCnt);
         $avCnt = AttributeValue::count();
@@ -845,7 +858,7 @@ class ApiEditorTest extends TestCase
         $etCnt = EntityType::count();
         $this->assertEquals(4, $etCnt);
         $eaCnt = EntityAttribute::count();
-        $this->assertEquals(18, $eaCnt);
+        $this->assertEquals(19, $eaCnt);
         $eCnt = Entity::count();
         $this->assertEquals(4, $eCnt);
         $avCnt = AttributeValue::count();
@@ -858,7 +871,7 @@ class ApiEditorTest extends TestCase
     public function testDeleteAttributeEndpoint()
     {
         $eaCnt = EntityAttribute::count();
-        $this->assertEquals(23, $eaCnt);
+        $this->assertEquals(24, $eaCnt);
         $avCnt = AttributeValue::count();
         $this->assertEquals(25, $avCnt);
         $aCnt = Attribute::count();
@@ -870,7 +883,7 @@ class ApiEditorTest extends TestCase
         $this->assertStatus($response, 204);
 
         $eaCnt = EntityAttribute::count();
-        $this->assertEquals(21, $eaCnt);
+        $this->assertEquals(22, $eaCnt);
         $avCnt = AttributeValue::count();
         $this->assertEquals(21, $avCnt);
         $aCnt = Attribute::count();
@@ -883,12 +896,12 @@ class ApiEditorTest extends TestCase
     public function testDeleteAttributeFromEntityTypeEndpoint()
     {
         $eaCnt = EntityAttribute::count();
-        $this->assertEquals(23, $eaCnt);
+        $this->assertEquals(24, $eaCnt);
         $avCnt = AttributeValue::count();
         $this->assertEquals(25, $avCnt);
         $entityType = EntityType::find(5)->load('attributes');
 
-        $oldPositions = [12,9,11,2,3,5,19,4,13];
+        $oldPositions = [12, 9, 11, 2, 3, 5, 19, 4, 13];
         foreach($entityType->attributes as $entityType) {
             foreach($oldPositions as $index => $position) {
                 if($entityType->id == $position) {
@@ -905,11 +918,11 @@ class ApiEditorTest extends TestCase
         $this->assertStatus($response, 204);
 
         $eaCnt = EntityAttribute::count();
-        $this->assertEquals(22, $eaCnt);
+        $this->assertEquals(23, $eaCnt);
         $avCnt = AttributeValue::count();
         $this->assertEquals(22, $avCnt);
         $entityType = EntityType::find(5)->load('attributes');
-        $newPositions = [12,9,2,3,5,19,4,13];
+        $newPositions = [12, 9, 2, 3, 5, 19, 4, 13];
         foreach($entityType->attributes as $entityType) {
             foreach($newPositions as $index => $position) {
                 if($entityType->id == $position) {

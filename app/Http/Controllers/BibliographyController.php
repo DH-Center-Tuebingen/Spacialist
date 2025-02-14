@@ -29,10 +29,10 @@ class BibliographyController extends Controller
                 'error' => __('This bibliography item does not exist')
             ], 400);
         }
-        
+
         return response()->json($bib);
     }
-    
+
     public function getBibliography() {
         $user = auth()->user();
         if(!$user->can('bibliography_read')) {
@@ -74,13 +74,13 @@ class BibliographyController extends Controller
                 'error' => __('You do not have the permission to add new bibliography')
             ], 403);
         }
-        
+
         $this->validate($request, [
             'entry_type' => 'required|alpha',
             'title' => 'required|string',
             'file' => 'file',
         ]);
-        
+
         $file = $request->file('file');
         $bib = new Bibliography();
         $success = $bib->fieldsFromRequest($request->except('file'), $user);
@@ -110,8 +110,8 @@ class BibliographyController extends Controller
         $this->validate($request, [
             'file' => 'required|file'
         ]);
-        
-        
+
+
         // TODO:: This is too much logic for a controller. This should be moved inside the Model!
 
         $file = $request->file('file');
@@ -138,8 +138,7 @@ class BibliographyController extends Controller
         DB::beginTransaction();
 
         foreach($entries as $entry) {
-            // Test uf tyoe exists(?)
-            
+            // Test if type exists(?)
             $entry_type = $entry['entry_type'];
             $isValid = Bibliography::validateMandatory($entry, $entry_type);
             if(!$isValid) {
@@ -232,7 +231,7 @@ class BibliographyController extends Controller
 
         $entries = $query->get();
         $content = '';
-        
+
         foreach($entries as $e) {
             $content .= "@{$e->entry_type}{{$e->citekey},\n";
             $attrs = $e->getAttributes();
@@ -271,7 +270,6 @@ class BibliographyController extends Controller
     }
 
     public function updateItem(Request $request, $id) {
-        
         $user = auth()->user();
         if(!$user->can('bibliography_write')) {
             return response()->json([
@@ -293,7 +291,7 @@ class BibliographyController extends Controller
         }
         $file = $request->file('file');
         $success = $bib->fieldsFromRequest($request->except(['file', 'delete_file']), $user);
-        
+
         if(!$success) {
             return response()->json([
                 'error' => __('At least one required field is not set')
