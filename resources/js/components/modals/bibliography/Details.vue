@@ -48,9 +48,9 @@
                     </dt>
                     <dd
                         class="col-md-9 font-monospace"
-                        :title="state.data.type"
+                        :title="state.data.data.entry_type"
                     >
-                        {{ t(`main.bibliography.types.${state.data.type}`) }}
+                        {{ t(`main.bibliography.types.${state.data.data.entry_type}`) }}
                     </dd>
                     <dt class="col-md-3 text-end">
                         {{ t('main.bibliography.column.author') }}
@@ -227,7 +227,7 @@
                 closeModal,
                 //STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

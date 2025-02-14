@@ -11,7 +11,7 @@
                 v-if="state.hasEntityReferences"
                 class="reference-group mb-1"
             >
-                <h5 class="mb-2 fw-medium">
+                <h5 class="mb-2 fw-medium bg-body sticky-top">
                     {{ t('main.entity.references.general') }}
                 </h5>
                 <div class="list-group">
@@ -40,7 +40,7 @@
                         v-if="referenceGroup.length > 0"
                         class="reference-group"
                     >
-                        <h5 class="mb-2 fw-medium">
+                        <h5 class="mb-2 fw-medium bg-body sticky-top">
                             <a
                                 href="#"
                                 class="text-decoration-none"
@@ -101,6 +101,7 @@
     } from '@/helpers/filters.js';
 
     import useEntityStore from '@/bootstrap/stores/entity.js';
+    import useReferenceStore from '@/bootstrap/stores/reference.js';
 
     import EditableQuotation from '@/components/bibliography/EditableQuotation.vue';
     import Quotation from '@/components/bibliography/Quotation.vue';
@@ -117,14 +118,15 @@
             EditableQuotation,
         },
         setup() {
-
             const entityStore = useEntityStore();
+            const referenceStore = useReferenceStore();
             const toast = useToast();
             const referenceForm = ref(null);
+            const { t } = useI18n();
 
             const addEntityReference = async data => {
                 try {
-                    await entityStore.addReference(state.entity.id, null, null, data);
+                    await referenceStore.add(state.entity.id, null, null, data);
                     referenceForm.value.reset();
                 } catch(e) {
                     // Error is handled by http class.
@@ -133,7 +135,7 @@
             };
             const updateEntityReference = async (reference, callback) => {
                 try {
-                    await entityStore.updateReference(reference.id, state.entity.id, null, reference);
+                    await referenceStore.update(reference.id, state.entity.id, null, reference);
                     callback(true);
                 } catch(e) {
                     // Error is handled by http class.
@@ -143,7 +145,7 @@
             };
             const deleteEntityReference = async reference => {
                 try {
-                    await entityStore.deleteReference(reference.id, state.entity.id);
+                    await referenceStore.remove(reference.id, state.entity.id);
                 } catch(e) {
                     // Error is handled by http class.
                     console.error(e);
@@ -213,7 +215,7 @@
             });
 
             return {
-                t: useI18n().t,
+                t,
                 date,
                 state,
                 addEntityReference,

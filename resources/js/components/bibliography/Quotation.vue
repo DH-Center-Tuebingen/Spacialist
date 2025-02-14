@@ -1,5 +1,5 @@
 <template>
-    <div class="quotation">
+    <figure class="quotation">
         <blockquote class="blockquote fs-09 mb-4">
             <p class="text-muted">
                 {{ value.description }}
@@ -8,7 +8,7 @@
         <figcaption class="blockquote-footer fw-medium mb-0 d-flex gap-1 ">
             <Citation :value="value.bibliography" />
         </figcaption>
-    </div>
+    </figure>
 </template>
 
 <script>

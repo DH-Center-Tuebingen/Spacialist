@@ -5,7 +5,7 @@
         @submit.prevent="onAddReference()"
     >
         <div class="mb-2">
-            <AutoTextarea
+            <textarea
                 v-model="state.description"
                 class="form-control"
                 :placeholder="t('main.entity.references.bibliography.comment')"
@@ -31,13 +31,13 @@
                     open-direction="top"
                     :placeholder="t('global.select.placeholder')"
                 >
-                    <template #singlelabel="{ value }">
+                    <template #singlelabel="{ value: labelValue }">
                         <div class="multiselect-single-label">
                             <div>
-                                <span class="fw-medium">{{ formatBibtexText(value.title) }}</span>
+                                <span class="fw-medium">{{ formatBibtexText(labelValue.title) }}</span>
                                 -
                                 <cite class="small">
-                                    {{ formatAuthors(value.author) }} ({{ value.year }})
+                                    {{ formatAuthors(labelValue.author) }} ({{ labelValue.year }})
                                 </cite>
                             </div>
                         </div>
@@ -74,8 +74,11 @@
         computed,
         reactive,
     } from 'vue';
+
     import { useI18n } from 'vue-i18n';
+
     import useBibliographyStore from '@/bootstrap/stores/bibliography.js';
+
     import {
         can,
     } from '@/helpers/helpers.js';
@@ -83,12 +86,8 @@
         formatAuthors,
         formatBibtexText
     } from '@/helpers/bibliography.js';
-    import AutoTextarea from '@/components/forms/AutoTextarea.vue';
 
     export default {
-        components: {
-            AutoTextarea,
-        },
         props: {
             value: {
                 type: Object,
@@ -132,8 +131,9 @@
             };
 
             const successCallback = (success = false) => {
-                if(success)
+                if(success) {
                     reset();
+                }
             };
 
             const onAddReference = _ => {

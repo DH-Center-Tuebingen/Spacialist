@@ -18,12 +18,13 @@
 
 <script>
     import { computed } from 'vue';
-    import { truncate } from '@/helpers/filters';
+
     import {
         formatAuthors,
         formatBibtexText,
-    } from '@/helpers/bibliography';
-    import { showLiteratureInfo } from '@/helpers/modal';
+    } from '@/helpers/bibliography.js';
+    import { truncate } from '@/helpers/filters.js';
+    import { showLiteratureInfo } from '@/helpers/modal.js';
     export default {
         props: {
             value: {

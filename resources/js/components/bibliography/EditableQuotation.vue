@@ -43,16 +43,16 @@
                 v-if="!isEditing"
                 :value="value"
             />
-            <!-- 
+            <!--
                 Currently this only allows editing the text of the quote
                 but not the literature reference. This could be easily done
                 by using the ReferenceForm component here.
-                
+
                 But to stick with the current design, we only allow editing
                 the quote text. Which is handled by the QuotationInput component,
                 which contains the former code.
             -->
-            <QuotationInput
+            <QuotationForm
                 v-else
                 :value="value"
                 @cancel="cancelEdit"
@@ -64,21 +64,23 @@
 
 <script>
     import {
-        date,
-    } from '@/helpers/filters.js';
-
-    import Quotation from './Quotation.vue';
-    import QuotationInput from './QuotationInput.vue';
-    import { useI18n } from 'vue-i18n';
-    import {
         computed,
         reactive
     } from 'vue';
 
+    import { useI18n } from 'vue-i18n';
+
+    import {
+        date,
+    } from '@/helpers/filters.js';
+
+    import Quotation from './Quotation.vue';
+    import QuotationForm from './QuotationForm.vue';
+
     export default {
         components: {
             Quotation,
-            QuotationInput,
+            QuotationForm,
         },
         props: {
             value: {
@@ -96,10 +98,11 @@
         },
         emits: ['update', 'delete'],
         setup(props, { emit }) {
+            const { t } = useI18n();
+
             const state = reactive({
                 editing: props.editing,
             });
-
 
             const cancelEdit = _ => {
                 state.editing = false;
@@ -114,7 +117,7 @@
             };
 
             const update = reference => {
-                emit('update', reference, (success) => {
+                emit('update', reference, success => {
                     if(success) {
                         cancelEdit();
                     } else {
@@ -132,7 +135,7 @@
             });
 
             return {
-                t: useI18n().t,
+                t,
                 //External
                 date,
                 //Local
