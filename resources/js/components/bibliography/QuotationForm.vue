@@ -1,24 +1,28 @@
 <template>
-    <div class="quotation-input d-flex align-items-end">
-        <AutoTextarea
+    <div class="quotation-input d-flex flex-column gap-1">
+        <textarea
             v-model="state.updatedReference.description"
             class="form-control me-1"
         />
-        <button
-            type="button"
-            class="btn btn-outline-success btn-sm me-1"
-            :disabled="!isDirty && !state.pending"
-            @click.prevent="update"
-        >
-            <i class="fas fa-fw fa-check" />
-        </button>
-        <button
-            type="button"
-            class="btn btn-outline-danger btn-sm"
-            @click.prevent="cancel"
-        >
-            <i class="fas fa-fw fa-times" />
-        </button>
+        <div class="d-flex gap-2">
+            <button
+                type="button"
+                class="btn btn-outline-success btn-sm"
+                :disabled="!isDirty && !state.pending"
+                @click.prevent="update"
+            >
+                <i class="fas fa-fw fa-check" />
+                {{ t('global.update') }}
+            </button>
+            <button
+                type="button"
+                class="btn btn-outline-danger btn-sm"
+                @click.prevent="cancel"
+            >
+                <i class="fas fa-fw fa-times" />
+                {{ t('global.cancel') }}
+            </button>
+        </div>
     </div>
 </template>
 
@@ -28,14 +32,11 @@
         reactive,
     } from 'vue';
 
-    import { _cloneDeep } from '@/helpers/helpers';
+    import { useI18n } from 'vue-i18n';
 
-    import AutoTextarea from '@/components/forms/AutoTextarea.vue';
+    import { _cloneDeep } from '@/helpers/helpers.js';
 
     export default {
-        components: {
-            AutoTextarea,
-        },
         props: {
             value: {
                 type: Object,
@@ -43,11 +44,14 @@
             },
         }, emits: ['update', 'cancel'],
         setup(props, { emit }) {
+            const { t } = useI18n();
+
             const state = reactive({
                 pending: false,
                 updatedReference: _cloneDeep(props.value),
             });
-            const successCallback = () => {
+
+            const successCallback = _ => {
                 state.pending = false;
             };
 
@@ -65,6 +69,7 @@
             });
 
             return {
+                t,
                 state,
                 update,
                 cancel,
@@ -73,8 +78,3 @@
         },
     };
 </script>
-
-<style
-    lang='scss'
-    scoped
-></style>

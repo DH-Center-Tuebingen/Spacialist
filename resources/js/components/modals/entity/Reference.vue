@@ -103,7 +103,7 @@
                     {{ t('main.entity.references.bibliography.add') }}
                 </h6>
                 <ReferenceForm
-                    ref="referenceForm"
+                    ref="referenceFormRef"
                     @add="onAddReference"
                 />
             </div>
@@ -134,6 +134,7 @@
     import router from '%router';
     import useAttributeStore from '@/bootstrap/stores/attribute.js';
     import useEntityStore from '@/bootstrap/stores/entity.js';
+    import useReferenceStore from '@/bootstrap/stores/reference.js';
 
     import {
         can,
@@ -151,8 +152,8 @@
 
     export default {
         components: {
-            ReferenceForm,
             EditableQuotation,
+            ReferenceForm,
         },
         props: {
             entity: {
@@ -164,11 +165,12 @@
             const { t } = useI18n();
             const attributeStore = useAttributeStore();
             const entityStore = useEntityStore();
+            const referenceStore = useReferenceStore();
             const {
                 entity,
             } = toRefs(props);
             const aid = router.currentRoute.value.params.aid;
-            const referenceForm = ref(null);
+            const referenceFormRef = ref(null);
 
             // FETCH
             if(can('comments_read')) {
@@ -217,8 +219,8 @@
             const onAddReference = async data => {
                 if(!can('bibliography_read|entity_data_write')) return;
                 try {
-                    await entityStore.addReference(entity.value.id, state.attribute.id, state.attribute.thesaurus_url, data);
-                    referenceForm.value.reset();
+                    await referenceStore.add(entity.value.id, state.attribute.id, state.attribute.thesaurus_url, data);
+                    referenceFormRef.value.reset();
                 } catch(e) {
                     // Error will be handled elsewhere ...
                     console.error(e);
@@ -226,7 +228,7 @@
             };
             const onDeleteReference = reference => {
                 if(!can('bibliography_read|entity_data_write')) return;
-                entityStore.deleteReference(reference.id, entity.value.id, state.attribute.thesaurus_url);
+                referenceStore.remove(reference.id, entity.value.id, state.attribute.thesaurus_url);
             };
             const onUpdateReference = (editedReference, successCallback) => {
                 if(!can('bibliography_read|entity_data_write')) return;
@@ -239,7 +241,7 @@
                 const data = {
                     description: editedReference.description
                 };
-                entityStore.updateReference(ref.id, entity.value.id, state.attribute.thesaurus_url, data).then(_ => {
+                referenceStore.update(ref.id, entity.value.id, state.attribute.thesaurus_url, data).then(_ => {
                     successCallback(true);
                 }).catch(e => {
                     successCallback(false);
@@ -309,8 +311,8 @@
                 onUpdateReference,
                 closeModal,
                 // STATE
+                referenceFormRef,
                 state,
-                referenceForm,
             };
 
         },

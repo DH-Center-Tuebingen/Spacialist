@@ -6,8 +6,8 @@ import {
 import {
     only,
     simpleResourceType,
+    throwError,
 } from '@/helpers/helpers.js';
-import { throwError } from './helpers/helpers';
 
 // GET AND STORE (FETCH)
 export async function logout() {

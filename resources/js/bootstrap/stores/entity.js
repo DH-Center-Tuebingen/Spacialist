@@ -536,55 +536,6 @@ export const useEntityStore = defineStore('entity', {
                 return data;
             });
         },
-        handleUpdate(entityId, attributeUrl, data) {
-            const references = this.getReferences(entityId, attributeUrl);
-            const id = data.id;
-            const refData = data.data;
-            const updateData = data.updates;
-            const reference = references.find(ref => ref.id == id);
-            if(!!reference) {
-                for(let k in refData) {
-                    reference[k] = refData[k];
-                }
-                reference.updated_at = updateData.updated_at;
-            }
-        },
-        getReferences(entityId, attributeUrl = null) {
-            const entity = this.getEntity(entityId);
-            if(attributeUrl) {
-                return entity?.references?.[attributeUrl] || [];
-            } else {
-                return entity?.references?.on_entity || [];
-            }
-        },
-
-        async addReference(entityId, attributeId, attributeUrl, refData) {
-            return addReference(entityId, attributeId, refData).then(data => {
-                const entity = this.getEntity(entityId);
-                const references = this.getReferences(entityId, attributeUrl);
-                references.push(data);
-                return data;
-            });
-        },
-        async updateReference(id, entityId, attributeUrl, refData) {
-            return updateReference(id, refData)
-                .then(data => {
-                    this.handleUpdate(entityId, attributeUrl, {
-                        id: id,
-                        data: refData,
-                        updates: data,
-                    });
-                });
-        },
-        async deleteReference(id, entityId, attributeUrl) {
-            return deleteReferenceFromEntity(id).then(_ => {
-                const references = this.getReferences(entityId, attributeUrl);
-                const idx = references.findIndex(ref => ref.id == id);
-                if(idx > -1) {
-                    references.splice(idx, 1);
-                }
-            });
-        },
         async addComment(entityId, comment, { replyTo = null } = {}) {
             const entity = this.getEntity(entityId);
             if(replyTo) {
