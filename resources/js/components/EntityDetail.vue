@@ -747,7 +747,7 @@
                         let ruleMatch = matchAllRules;
 
                         group.rules.forEach(rule => {
-                            const type = getAttribute(rule.on).datatype;
+                            const type = attributeStore.getAttribute(rule.on).datatype;
                             const refValue = liveData[rule.on];
                             let tmpMatch = false;
                             switch(rule.operator) {
