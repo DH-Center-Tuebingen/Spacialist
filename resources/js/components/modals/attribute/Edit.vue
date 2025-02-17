@@ -167,7 +167,7 @@
                     <div
                         v-for="(itm, i) in state.dependency.groups[state.currentDependencyGroupId].rules"
                         :key="`dependency-group-${state.currentDependencyGroupId}-item-${i}`"
-                        class="mb-2 row g-2"
+                        class="mb-2 row g-2 align-items-center"
                     >
                         <div class="col-5">
                             <multiselect

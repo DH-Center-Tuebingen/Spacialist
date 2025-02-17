@@ -686,6 +686,7 @@ export function showEditAttribute(aid, etid, metadata) {
                 modal.destroy();
             },
             async onConfirm(e) {
+                const entityStore = useEntityStore();
                 if(e.metadata) {
                     await entityStore.patchEntityMetadata(etid, aid, metadata.pivot.id, e.metadata);
                 }

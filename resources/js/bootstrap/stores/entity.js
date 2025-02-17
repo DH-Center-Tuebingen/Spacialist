@@ -47,6 +47,7 @@ import {
     updateAttributeMetadata,
     updateReference,
 } from '@/api.js';
+import { updateAttributeDependency } from '../../api.js';
 
 function updateSelectionTypeIdList(selection) {
     const tmpDict = {};

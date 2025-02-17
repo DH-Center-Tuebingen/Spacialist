@@ -634,32 +634,13 @@ export async function updateAttributeDependency(etid, aid, dependency) {
     });
     apiData.data = dependencyData;
     return $httpQueue.add(
-        () => http.patch(`/editor/dm/entity_type/${etid}/attribute/${aid}/dependency`, apiData).then(response => {
-            const data = Object.values(response.data).length > 0 ? response.data : null;
-            // TODO migrate to pinia store
-            store.dispatch('updateDependency', {
-                entity_type_id: etid,
-                attribute_id: aid,
-                data: data,
-            });
-
-            return data;
-        })
+        () => http.patch(`/editor/dm/entity_type/${etid}/attribute/${aid}/dependency`, apiData)
     );
 }
 
 export async function updateAttributeMetadata(pivid, data) {
     return $httpQueue.add(
-        // TODO migrate to pinia store
-        () => http.patch(`/editor/dm/entity_type/attribute/${pivid}/metadata`, data).then(response => {
-            store.dispatch('updateAttributeMetadata', {
-                entity_type_id: etid,
-                attribute_id: aid,
-                id: pivid,
-                data: response.data,
-            });
-            return response.data;
-        })
+        () => http.patch(`/editor/dm/entity_type/attribute/${pivid}/metadata`, data)
     );
 }
 
