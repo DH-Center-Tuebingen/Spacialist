@@ -156,6 +156,10 @@ export function getConceptLabel(concept) {
     return concept.labels.length ? concept.labels[0].label : '';
 }
 
+export function getConceptNote(url) {
+    return getConcept(url)?.note;
+}
+
 export function translateEntityType(id) {
     return translateConcept(useEntityStore().getEntityType(id).thesaurus_url);
 }

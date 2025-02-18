@@ -243,7 +243,6 @@ table.table-sticky .dropdown-menu {
     }
 }
 
-
 .hover-underline:hover {
     text-decoration: underline;
 }
@@ -262,4 +261,9 @@ table.table-sticky .dropdown-menu {
 
 .list-hover:hover {
     background-color: $gray-200 !important;
+}
+
+.infobox {
+    min-width: 250px;
+    z-index: $zindex-sticky-in-page + 1;
 }

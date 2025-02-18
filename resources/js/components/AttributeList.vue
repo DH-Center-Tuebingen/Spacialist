@@ -104,6 +104,22 @@
                             >
                                 {{ translateConcept(element.thesaurus_url) }}
                             </span>
+                            <a
+                                v-if="getConceptNote(element.thesaurus_url)"
+                                href="#"
+                                class="text-decoration-none text-muted ms-1 position-relative"
+                                @click.prevent.stop="handleNoteInfoClick(element)"
+                            >
+                                <i class="fas fa-fw fa-circle-info" />
+                                <div
+                                    :id="`concept-note-${element.id}`"
+                                    class="infobox d-none position-absolute bg-white border rounded px-2 py-1"
+                                >
+                                    <div class="d-flex flex-row">
+                                        {{ getConceptNote(element.thesaurus_url) }}
+                                    </div>
+                                </div>
+                            </a>
                             <sup
                                 v-if="hasEmitter('onMetadata')"
                                 class="clickable d-flex flex-row align-items-start top-0"
@@ -176,6 +192,7 @@
 
     import {
         translateConcept,
+        getConceptNote,
     } from '@/helpers/helpers.js';
 
     import ModerationPanel from '@/components/moderation/Panel.vue';
@@ -589,33 +606,21 @@
                     e.preventDefault();
                 }
             };
-            const convertEntityValue = (value, isMultiple) => {
-                let actValue = null;
-                if(value == '' || !value.value) {
-                    if(isMultiple) {
-                        actValue = {
-                            value: [],
-                            name: [],
-                        };
-                    } else {
-                        actValue = {};
-                    }
+            const handleNoteInfoClick = element => {
+                state.visibleAttributeNotes[element.id] = !state.visibleAttributeNotes[element.id];
+                document.getElementsByClassName('infobox').forEach(infobox => {
+                    infobox.classList.remove('d-flex');
+                    infobox.classList.add('d-none');
+                    const infoboxId = Number.parseInt(infobox.id.replace('concept-note-', ''));
+                    state.visibleAttributeNotes[infoboxId] = false;
+                });
+                const elem = document.getElementById(`concept-note-${element.id}`);
+                if(state.visibleAttributeNotes[element.id]) {
+                    elem.classList.add('d-flex');
+                    elem.classList.remove('d-none');
                 } else {
-                    actValue = value;
-                }
-
-                if(isMultiple) {
-                    return actValue.value.map((v, i) => {
-                        return {
-                            id: v,
-                            name: actValue.name ? actValue.name[i] : '',
-                        };
-                    });
-                } else {
-                    return {
-                        id: actValue.value,
-                        name: actValue.name,
-                    };
+                    elem.classList.remove('d-flex');
+                    elem.classList.add('d-none');
                 }
             };
 
@@ -626,6 +631,7 @@
                 attributeList: attributes,
                 attributeValues: values,
                 rootAttributeValues: {},
+                visibleAttributeNotes: {},
                 changeTracker: {
                     local: {},
                     external: {},
@@ -683,6 +689,7 @@
                 t,
                 // HELPERS
                 translateConcept,
+                getConceptNote,
                 // LOCAL
                 certainty,
                 handleSelectionUpdate,
@@ -717,6 +724,7 @@
                 hasComment,
                 hasBookmarks,
                 handleLabelClick,
+                handleNoteInfoClick,
                 // STATE
                 attrRefs,
                 state,
