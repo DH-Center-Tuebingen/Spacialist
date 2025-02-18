@@ -180,7 +180,7 @@ class EntityController extends Controller {
         return response()->json($data);
     }
 
-    public function getData($id, $aid = null) {
+    public function getData(int $id, ?int $aid = null) {
         $user = auth()->user();
         if(!$user->can('entity_read') || !$user->can('entity_data_read')) {
             return response()->json([
@@ -195,6 +195,15 @@ class EntityController extends Controller {
             return response()->json([
                 'error' => __('This entity does not exist'),
             ], 400);
+        }
+        if(isset($aid)) {
+            try {
+                Attribute::findOrFail($aid);
+            } catch(ModelNotFoundException $e) {
+                return response()->json([
+                    'error' => __('This attribute does not exist'),
+                ], 400);
+            }
         }
         $data = $entity->getData($aid);
         return response()->json($data);

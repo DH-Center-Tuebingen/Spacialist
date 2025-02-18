@@ -561,6 +561,7 @@
 
     import {
         bibliographyTypes,
+        formatBibtexText,
     } from '@/helpers/bibliography.js';
 
     import {
@@ -739,11 +740,6 @@
             const debouncedSearch = _debounce(e => {
                 state.query = e.target.value;
             }, state.debounceTimeout);
-
-            const formatBibtexText = text => {
-                if(!text) return '';
-                return text.replace(/[\{\}]/g, '');
-            };
 
             const formatBibtexAndShowHighlight = text => {
                 if(!text) return '';

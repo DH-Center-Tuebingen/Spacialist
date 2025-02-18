@@ -543,6 +543,7 @@
             },
             "references": {
                 "title": "Quellenangaben",
+                "general": "Allgemeine Quellenangaben",
                 "empty": "Keine Quellen gefunden",
                 "certainty": "Sicherheit",
                 "bibliography": {

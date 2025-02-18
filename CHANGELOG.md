@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - Filter and sort functionality on _Entity Type List_
 - Indicator in _Data Model Editor_ that visualizes if an attribute is used in any entity-type
 - Label Search displays full path of thesaurus concept
+- References can also be added to an Entity, not only to an Entity Attribute
 - _Add Entity Above_ and _Add Entity Below_ to the Contextmenu in the entity tree
 ### Fixed
 - Dirty indicator not showing in Tab of _Entity Detail_
@@ -20,6 +21,9 @@ All notable changes to this project will be documented in this file.
 - Several problems with adding, editing and displaying _Bibliography Items_
 ### Changed
 - Files (e.g. avatars or bibliography attachments) are stored in a user-only directory
+
+### Changed
+- Improved style of Reference Input.
 
 ## 0.10.2
 ### Fixed

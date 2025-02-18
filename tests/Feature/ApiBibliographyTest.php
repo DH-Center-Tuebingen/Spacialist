@@ -573,7 +573,7 @@ class ApiBibliographyTest extends TestCase
         $this->assertStatus($response, 200);
         $this->assertTrue($response->headers->get('content-type') == 'application/x-bibtex');
         $this->assertTrue($response->headers->get('content-disposition') == 'attachment; filename=export.bib');
-        $content = $this->getStreamedContent($response);
+        $content = $response->streamedContent();
         $expectedContent = file_get_contents(storage_path() . "/framework/testing/demo.bib");
         $this->assertSame($expectedContent, $content);
     }
