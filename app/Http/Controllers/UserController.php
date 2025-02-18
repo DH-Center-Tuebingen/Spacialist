@@ -212,18 +212,12 @@ class UserController extends Controller {
             'password' => 'required|min:6',
         ]);
 
-        $name = $request->get('name');
-        $nickname = $request->get('nickname');
-        $email = $request->get('email');
-        $password = Hash::make($request->get('password'));
-
-        $user = new User();
-        $user->name = $name;
-        $user->nickname = Str::lower($nickname);
-        $user->email = Str::lower($email);
-        $user->password = $password;
-        $user->save();
-        $user = User::find($user->id);
+        $user = User::create(
+            $request->get('name'),
+            $request->get('nickname'),
+            $request->get('email'),
+            $request->get('password')
+        );
 
         return response()->json($user);
     }
