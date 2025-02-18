@@ -48,7 +48,7 @@ class ThConcept extends Model {
         }
         return $label;
     }
-    
+
     public static function getByURL($url) {
         return self::where('concept_url', $url)->first();
     }
@@ -73,7 +73,7 @@ class ThConcept extends Model {
         $concepts = DB::select(DB::raw("
             WITH summary AS
             (
-                SELECT th_concept.id, concept_url, is_top_concept, label, language_id, th_language.short_name,
+                SELECT th_concept.id, concept_url, is_top_concept, label, content as note, th_concept_label.language_id, th_language.short_name,
                 ROW_NUMBER() OVER
                 (
                     PARTITION BY th_concept.id
@@ -81,9 +81,10 @@ class ThConcept extends Model {
                 ) AS rk
                 FROM th_concept
                 JOIN th_concept_label ON th_concept_label.concept_id = th_concept.id
-                JOIN th_language ON language_id = th_language.id
+                JOIN th_language ON th_concept_label.language_id = th_language.id
+                LEFT JOIN th_concept_notes ON th_concept_notes.concept_id = th_concept.id
             )
-            SELECT id, concept_url, is_top_concept, label, language_id, short_name
+            SELECT id, concept_url, is_top_concept, label, note, language_id, short_name
             FROM summary s
             WHERE s.rk = 1")->getValue(DB::connection()->getQueryGrammar()));
 
