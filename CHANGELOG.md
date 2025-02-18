@@ -18,6 +18,9 @@ All notable changes to this project will be documented in this file.
 - Missing "Color Dots" of _Entity Type_ (colors are now handled on the Entity Type itself and do no longer rely on the _Map_ Plugin)
 - 'Jumping' behavior on floating quick access controls on the _Entity Type List_ (copy, duplicate, delete)
 - Attribute Dependency inverted
+- Several problems with adding, editing and displaying _Bibliography Items_
+### Changed
+- Files (e.g. avatars or bibliography attachments) are stored in a user-only directory
 
 ### Changed
 - Improved style of Reference Input.

@@ -39,7 +39,6 @@ const updateUserAt = (context, userId, data, isProfile) => {
                 'nickname',
                 'metadata',
                 'avatar',
-                'avatar_url',
             );
         }
 
@@ -52,7 +51,7 @@ const updateUserAt = (context, userId, data, isProfile) => {
         };
 
         if(context.getCurrentUserId == userId) {
-            context.setActiveUser(context.users[idx]);
+            context.setActiveUser(context.users[idx], true);
         }
     }
 };
@@ -156,8 +155,15 @@ export const useUserStore = defineStore('user', {
             this.setLoginState(false);
             this.setActiveUser({});
         },
-        setActiveUser(user) {
-            this.user = user;
+        setActiveUser(user, merge = false) {
+            if(merge) {
+                this.user = {
+                    ...this.user,
+                    ...user,
+                };
+            } else {
+                this.user = user;
+            }
         },
         setUsers(users, deletedUsers) {
             this.users = users;
@@ -217,11 +223,11 @@ export const useUserStore = defineStore('user', {
             setUserAvatar(file).then(data => {
                 const updateData = {
                     avatar: data.avatar,
-                    avatar_url: data.avatar_url,
                 };
                 // Workaround to update avatar image, because url may not change
                 if(filepath == data.avatar) {
-                    updateData.avatar_url += `#${Date.now()}`;
+                    // TODO fix!
+                    updateData.avatar += `#${Date.now()}`;
                 }
                 return updateUserAt(this, user.id, updateData, true);
             });
@@ -230,7 +236,6 @@ export const useUserStore = defineStore('user', {
             deleteUserAvatar().then(_ => {
                 const updateData = {
                     avatar: false,
-                    avatar_url: '',
                 };
                 return updateUserAt(this, this.getCurrentUserId, updateData, true);
             });

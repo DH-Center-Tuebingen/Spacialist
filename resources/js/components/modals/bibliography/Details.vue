@@ -90,6 +90,15 @@
                         </dd>
                     </template>
                 </dl>
+                <a
+                    v-if="state.file"
+                    :href="`/download/bibliography?path=${state.file}`"
+                    class="text-decoration-none"
+                    target="_blank"
+                >
+                    <i class="fas fa-fw fa-up-right-from-square" />
+                    {{ state.file.split('/')[1] }}
+                </a>
                 <bibtex-code
                     :code="state.toBibtexify"
                     :type="state.data.type"
@@ -171,6 +180,7 @@
                     type: '',
                     data: {},
                 },
+                file: null,
                 user: computed(_ => userStore.getUserBy(state.data.user)),
                 filteredFields: computed(_ => {
                     const filtered = {};
@@ -198,10 +208,10 @@
                     user_id,
                     title,
                     author,
-                    type,
+                    entry_type,
                     updated_at,
                     ...data
-                } = except(item, ['id', 'created_at', 'file', 'file_url']);
+                } = except(item, ['id', 'created_at', 'file']);
 
                 state.data.id = id.value;
                 state.data.citekey = citekey;
@@ -209,7 +219,7 @@
                 state.data.last_updated = updated_at;
                 state.data.title = title;
                 state.data.author = author;
-                state.data.type = type;
+                state.data.entry_type = entry_type;
                 state.data.data = data;
             }
 

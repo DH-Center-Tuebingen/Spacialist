@@ -341,7 +341,7 @@ export async function addOrUpdateBibliographyItem(item, file) {
     for(let k in item.fields) {
         data.append(k, item.fields[k]);
     }
-    data.append('type', item.type.name);
+    data.append('entry_type', item.entry_type.name);
     if(file) {
         if(file == 'delete') {
             data.append('delete_file', true);

@@ -341,7 +341,6 @@ class ApiUserTest extends TestCase
         $this->assertEquals('admin@localhost', $user->email);
         $this->assertNull($user->metadata);
         $this->assertNull($user->avatar);
-        $this->assertNull($user->avatar_url);
 
         $response = $this->userRequest()
             ->patch('/api/v1/user/1', [
@@ -366,7 +365,6 @@ class ApiUserTest extends TestCase
             'updated_at' => $user->updated_at->toJSON(),
             'deleted_at' => null,
             'avatar' => null,
-            'avatar_url' => null,
             'login_attempts' => null,
             'metadata' => [
                 'phonenumber' => '+43 123 1234',
@@ -380,7 +378,6 @@ class ApiUserTest extends TestCase
         $this->assertEquals('+43 123 1234', $user->metadata['phonenumber']);
         $this->assertEquals('0000-0002-1694-233X', $user->metadata['orcid']);
         $this->assertNull($user->avatar);
-        $this->assertNull($user->avatar_url);
     }
 
     /**
@@ -662,7 +659,6 @@ class ApiUserTest extends TestCase
 
         $user = User::find(1);
         $this->assertNull($user->avatar);
-        $this->assertNull($user->avatar_url);
 
         $this->assertStatus($response, 204);
     }

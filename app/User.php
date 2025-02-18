@@ -5,10 +5,9 @@ namespace App;
 use App\Traits\SoftDeletesWithTrashed;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Notifications\Notifiable;
+use App\File\Directory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
-use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 use Spatie\Activitylog\Traits\CausesActivity;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
@@ -34,10 +33,6 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name', 'nickname', 'email', 'password',
-    ];
-
-    protected $appends = [
-        'avatar_url',
     ];
 
     protected $casts = [
@@ -68,15 +63,22 @@ class User extends Authenticatable
         return 'en';
     }
 
-    public function uploadAvatar($file) {
-        if(isset($this->avatar) && Storage::exists($this->avatar)) {
-            Storage::delete($this->avatar);
-        }
+    public function uploadAvatar($file): string {
+        $avatarDirectory = self::getDirectory();
+        $avatarDirectory->delete($this->avatar);
         $filename = $this->id . "." . $file->getClientOriginalExtension();
-        return $file->storeAs(
-            'avatars',
-            $filename
-        );
+        $storedFilename = $avatarDirectory->store($filename, $file);
+        $this->avatar = $storedFilename;
+        $this->save();
+        return$storedFilename;
+    }
+
+    public function deleteAvatar() : void{
+        $success = self::getDirectory()->delete($this->avatar);
+        if($success) {
+            $this->avatar = null;
+            $this->save();
+        }
     }
 
     public function setPermissions() {
@@ -118,12 +120,12 @@ class User extends Authenticatable
         return $moderated;
     }
 
-    public function getAvatarUrlAttribute() {
-        return isset($this->avatar) ? sp_get_public_url($this->avatar) : null;
-    }
-
     public function preferences() {
         return $this->hasMany('App\UserPreference');
+    }
+
+    public static function getDirectory(): Directory {
+        return new Directory('avatars');
     }
 
     // public function roles() {

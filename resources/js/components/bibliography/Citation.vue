@@ -24,6 +24,7 @@
         formatBibtexText,
     } from '@/helpers/bibliography.js';
     import { truncate } from '@/helpers/filters.js';
+
     import { showLiteratureInfo } from '@/helpers/modal.js';
     export default {
         props: {

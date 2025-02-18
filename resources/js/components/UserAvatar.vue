@@ -2,7 +2,7 @@
     <span class="d-inline-flex">
         <img
             v-if="user.avatar"
-            :src="user.avatar_url"
+            :src="`/download/avatar?path=${user.avatar}`"
             alt="user avatar"
             :width="size"
             :height="size"
@@ -52,7 +52,7 @@
                 styles: computed(_ => {
                     return {
                         'rounded-circle': round.value
-                    }
+                    };
                 }),
                 halfSize: computed(_ => size.value / 2),
                 color: computed(_ => {
@@ -78,7 +78,7 @@
                             'line-height': `${state.halfSize}px`,
                             color: '#ffffff'
                         }
-                    }
+                    };
                 }),
                 initials: computed(_ => {
                     if(!user.value.name) return;
@@ -95,7 +95,7 @@
             // RETURN
             return {
                 state,
-            }
+            };
         }
-    }
+    };
 </script>
