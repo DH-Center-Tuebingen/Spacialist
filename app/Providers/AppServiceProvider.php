@@ -21,7 +21,6 @@ class AppServiceProvider extends ServiceProvider {
      * @return void
      */
     public function boot() {
-        
         // In some Proxy setups it might be necessary to enforce using the app's url as root url
         if(env('APP_FORCE_URL') === true) {
             $rootUrl = config('app.url');

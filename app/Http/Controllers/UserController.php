@@ -27,12 +27,6 @@ class UserController extends Controller {
 
     // GET
 
-    public function refreshToken() {
-        return response()->json([
-            'status' => 'success'
-        ]);
-    }
-
     public function getUser(Request $request) {
         $user = User::with('notifications')->find(auth()->user()->id);
         $user->setPermissions();

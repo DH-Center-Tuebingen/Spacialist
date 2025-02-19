@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 use App\Role;
 use App\Permission;
@@ -121,7 +122,8 @@ class CreatePermissionTables extends Migration
 
         foreach($old_user_roles as $ur) {
             // uid, rid
-            $user = User::find($ur->user_id);
+            $user = User::withoutGlobalScope(new SoftDeletingScope())
+                ->find($ur->user_id);
             $role = $role_map["old_$ur->role_id"];
             $user->assignRole($role->name);
         }

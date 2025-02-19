@@ -6,6 +6,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AddUserNickname extends Migration
 {
@@ -18,7 +19,8 @@ class AddUserNickname extends Migration
     {
         activity()->disableLogging();
 
-        $users = User::all();
+        $users = User::withoutGlobalScope(new SoftDeletingScope())
+            ->get();
         Schema::table('users', function (Blueprint $table) {
             $table->text('nickname')->nullable();
         });
