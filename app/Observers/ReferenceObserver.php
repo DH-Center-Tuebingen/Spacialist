@@ -6,6 +6,7 @@ use App\Reference;
 use App\Events\ReferenceAdded;
 use App\Events\ReferenceDeleted;
 use App\Events\ReferenceUpdated;
+use Illuminate\Broadcasting\BroadcastException;
 
 class ReferenceObserver
 {
@@ -26,11 +27,15 @@ class ReferenceObserver
      *
      */
     public function saved(Reference $reference) : void {
-        $user = auth()->user();
-        if($reference->wasRecentlyCreated) {
-            broadcast(new ReferenceAdded($reference, $user))->toOthers();
-        } else {
-            broadcast(new ReferenceUpdated($reference, $user))->toOthers();
+        try {
+            $user = auth()->user();
+            if($reference->wasRecentlyCreated) {
+                broadcast(new ReferenceAdded($reference, $user))->toOthers();
+            } else {
+                broadcast(new ReferenceUpdated($reference, $user))->toOthers();
+            }
+        } catch(BroadcastException $e) {
+            info("BroadcastException while handling saved() event in ReferenceObserver");
         }
     }
 
@@ -41,6 +46,10 @@ class ReferenceObserver
      * @return void
      */
     public function deleting(Reference $reference) : void {
-        broadcast(new ReferenceDeleted($reference, $user = auth()->user()))->toOthers();
+        try {
+            broadcast(new ReferenceDeleted($reference, $user = auth()->user()))->toOthers();
+        } catch(BroadcastException $e) {
+            info("BroadcastException while handling deleting() event in ReferenceObserver");
+        }
     }
 }

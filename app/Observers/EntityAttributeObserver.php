@@ -6,6 +6,7 @@ use App\AttributeValue;
 use App\Events\AttributeValueCreated;
 use App\Events\AttributeValueDeleted;
 use App\Events\AttributeValueUpdated;
+use Illuminate\Broadcasting\BroadcastException;
 
 class EntityAttributeObserver {
     /**
@@ -17,11 +18,15 @@ class EntityAttributeObserver {
      *
      */
     public function saved(AttributeValue $attributeValue) : void {
-        $user = auth()->user();
-        if($attributeValue->wasRecentlyCreated) {
-            broadcast(new AttributeValueCreated($attributeValue, $user))->toOthers();
-        } else {
-            broadcast(new AttributeValueUpdated($attributeValue, $user))->toOthers();
+        try {
+            $user = auth()->user();
+            if($attributeValue->wasRecentlyCreated) {
+                broadcast(new AttributeValueCreated($attributeValue, $user))->toOthers();
+            } else {
+                broadcast(new AttributeValueUpdated($attributeValue, $user))->toOthers();
+            }
+        } catch(BroadcastException $e) {
+            info("BroadcastException while handling saved() event in EntityAttributeObserver");
         }
     }
 
@@ -32,6 +37,10 @@ class EntityAttributeObserver {
      * @return void
      */
     public function deleting(AttributeValue $attributeValue) : void {
-        broadcast(new AttributeValueDeleted($attributeValue, $user = auth()->user()))->toOthers();
+        try {
+            broadcast(new AttributeValueDeleted($attributeValue, auth()->user()))->toOthers();
+        } catch(BroadcastException $e) {
+            info("BroadcastException while handling deleting() event in EntityAttributeObserver");
+        }
     }
 }

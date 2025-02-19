@@ -9,6 +9,7 @@ use App\Events\EntityUpdated;
 use App\Notification;
 use App\Notifications\EntityUpdated as EntityUpdatedNotification;
 use App\User;
+use Illuminate\Broadcasting\BroadcastException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class EntityObserver
@@ -40,11 +41,15 @@ class EntityObserver
      *
      */
     public function saved(Entity $entity) : void {
-        $user = auth()->user();
-        if($entity->wasRecentlyCreated) {
-            broadcast(new EntityCreated($entity, $user))->toOthers();
-        } else {
-            broadcast(new EntityUpdated($entity, $user))->toOthers();
+        try {
+            $user = auth()->user();
+            if($entity->wasRecentlyCreated) {
+                broadcast(new EntityCreated($entity, $user))->toOthers();
+            } else {
+                broadcast(new EntityUpdated($entity, $user))->toOthers();
+            }
+        } catch(BroadcastException $e) {
+            info("BroadcastException while handling saved() event in EntityObserver");
         }
     }
 
@@ -58,6 +63,10 @@ class EntityObserver
         Entity::where('root_entity_id', $entity->root_entity_id)->where('rank', '>', $entity->rank)->decrement('rank');
         // Delete notifications where the deleted entity is referenced
         Notification::whereRaw("(data::json->>'resource')::json->>'id' = ?", [$entity->id])->delete();
-        broadcast(new EntityDeleted($entity, $user = auth()->user()))->toOthers();
+        try {
+            broadcast(new EntityDeleted($entity, $user = auth()->user()))->toOthers();
+        } catch(BroadcastException $e) {
+            info("BroadcastException while handling deleting() event in EntityObserver");
+        }
     }
 }
