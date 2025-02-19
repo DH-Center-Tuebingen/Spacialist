@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file.
 - 'Jumping' behavior on floating quick access controls on the _Entity Type List_ (copy, duplicate, delete)
 - Attribute Dependency inverted
 - Several problems with adding, editing and displaying _Bibliography Items_
+- Long entity names in _Entity Detail_ are now truncated with … to avoid line breaks in name and buttons
 ### Changed
 - Files (e.g. avatars or bibliography attachments) are stored in a user-only directory
 - Improved style of Reference Input.

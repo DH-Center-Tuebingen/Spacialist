@@ -5,15 +5,23 @@
             class="mb-2 small"
             :entity="state.entity"
         />
-        <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center justify-content-between gap-2">
             <h3
-                class="mb-0"
+                class="mb-0 overflow-hidden text-nowrap flex-grow-1"
                 @mouseenter="onEntityHeaderHover(true)"
                 @mouseleave="onEntityHeaderHover(false)"
             >
-                <span v-if="!state.entity.editing">
-                    {{ state.entity.name }}
-                    <small class="d-inline-flex gap-1">
+                <span
+                    v-if="!state.entity.editing"
+                    class="d-flex flex-row"
+                >
+                    <span
+                        class="text-truncate"
+                        :title="state.entity.name"
+                    >
+                        {{ state.entity.name }}
+                    </span>
+                    <small class="d-inline-flex gap-1 align-self-end">
                         <button
                             v-show="state.hiddenAttributeCount > 0"
                             id="hidden-attributes-icon"
@@ -122,7 +130,7 @@
                     </button>
                 </form>
             </h3>
-            <div class="d-flex flex-row gap-2">
+            <div class="d-flex flex-row gap-2 text-nowrap">
                 <button
                     type="submit"
                     form="entity-attribute-form"
