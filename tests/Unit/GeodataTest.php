@@ -2,11 +2,11 @@
 
 namespace Tests\Unit;
 
-use Clickbar\Magellan\Data\Geometries\Dimension;
 use Tests\TestCase;
-
-
 use App\Geodata;
+use Clickbar\Magellan\Data\Geometries\Dimension;
+use Clickbar\Magellan\Exception\UnknownWKTTypeException;
+use Tests\TestCase;
 
 class GeodataTest extends TestCase
 {
@@ -50,7 +50,6 @@ class GeodataTest extends TestCase
         // $this->assertNull($typoData);
 
         $sridPoint2d = Geodata::fromWKT('SRID=4326;POINT(1 2)');
-        info($sridPoint2d);
         $this->assertEquals(1, $sridPoint2d->getLongitude());
         $this->assertEquals(2, $sridPoint2d->getLatitude());
         $this->assertNull($sridPoint2d->getAltitude());

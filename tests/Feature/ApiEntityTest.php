@@ -420,6 +420,17 @@ class ApiEntityTest extends TestCase
                         ->has('updated_at')
                         ->etc()
                 )
+                ->has('removed_attributes.9', fn($removedAttrJson) =>
+                    $removedAttrJson
+                        ->has('id')
+                        ->has('entity_id')
+                        ->has('attribute_id')
+                        ->has('certainty')
+                        ->has('user_id')
+                        ->has('created_at')
+                        ->has('updated_at')
+                        ->etc()
+                )
         );
 
         $entity = Entity::with('attributes')->find(4);

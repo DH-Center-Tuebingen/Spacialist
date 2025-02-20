@@ -11,6 +11,7 @@ use Database\Seeders\Demo\EntityTypeRelationsTableSeeder;
 use Database\Seeders\Demo\EntityTypesTableSeeder;
 use Database\Seeders\Demo\ReferencesTableSeeder;
 use Database\Seeders\Demo\RoleUserTableSeeder;
+use Database\Seeders\Demo\ThesaurexSeeder;
 use Database\Seeders\Demo\UsersTableSeeder;
 use Database\Seeders\General\RolesPermissionsSeeder;
 use Database\Seeders\General\RolesTableSeeder;

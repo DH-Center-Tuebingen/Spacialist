@@ -7,12 +7,10 @@ use Tests\TestCase;
 use Illuminate\Http\UploadedFile;
 
 class ApiDataImporterTest extends TestCase {
-
-
     /**
-     * 
+     *
      * Utilities
-     * 
+     *
      */
     private function createDefaultCSVFile($delimiter = ",") {
         return $this->createCSVFile([
@@ -34,8 +32,8 @@ class ApiDataImporterTest extends TestCase {
 
     private function createCSVFile(array $tableData, $delimiter = ",") {
         $content = '';
-        if (!empty($tableData)) {
-            foreach ($tableData as $row) {
+        if(!empty($tableData)) {
+            foreach($tableData as $row) {
                 // Cells need to be escaped, as some cells may contain elements that collide with the delimiter
                 // e.g. lists are separated by semicolons
                 $escapeAllRows = array_map(fn ($cell) => "\"$cell\"", $row);
@@ -74,11 +72,10 @@ class ApiDataImporterTest extends TestCase {
     }
 
     /**
-     * 
+     *
      * Tests
-     * 
+     *
      */
-
     public function testValidationEmptyFile() {
         $file = $this->createCSVFile([]);
         $metadata = $this->getMetaData();
@@ -122,7 +119,6 @@ class ApiDataImporterTest extends TestCase {
             ]);
     }
 
-
     public function testValidationNamesColumnMissingError() {
         $file = $this->createCSVFile([['other'], [''], ['other 2']]);
 
@@ -164,7 +160,6 @@ class ApiDataImporterTest extends TestCase {
             ]
         ]);
     }
-
 
     public function testValidationWithAllNamesSetCorrectly() {
         $this->userRequest()->post('/api/v1/entity/import/validate', [
@@ -217,8 +212,6 @@ class ApiDataImporterTest extends TestCase {
             ]);
     }
 
-
-
     public function testValidationIncorrectDelimiter() {
         $this->userRequest()->post('/api/v1/entity/import/validate', [
             'file' => $this->createDefaultCSVFile(';'),
@@ -235,7 +228,6 @@ class ApiDataImporterTest extends TestCase {
                 ]
             ]);
     }
-
 
     public function testValidationCorrectDelimiter() {
         $this->userRequest()->post('/api/v1/entity/import/validate', [
@@ -254,7 +246,6 @@ class ApiDataImporterTest extends TestCase {
             ]);
     }
 
-
     public function testValidationWithParentColumn() {
         $this->userRequest()->post('/api/v1/entity/import/validate', [
             'file' => $this->createDefaultCSVFile(),
@@ -272,7 +263,6 @@ class ApiDataImporterTest extends TestCase {
             ]);;
     }
 
-
     public function testValidationWithParentColumnChildTypeNotAllowed() {
         $file = $this->createCSVFile([
             ['name', 'parent', 'Notizen'],
@@ -286,7 +276,7 @@ class ApiDataImporterTest extends TestCase {
         ])
             ->assertStatus(200)
             ->assertJson([
-                'errors' => ['2: The relationship between entity types is not allowed: Stone -> Site'],
+                'errors' => ['[2] The relationship between entity types is not allowed: Stone -> Site'],
                 "summary" => [
                     "create" => 0,
                     "update" => 0,
@@ -316,7 +306,6 @@ class ApiDataImporterTest extends TestCase {
                 ]
             ]);
     }
-
 
     public function testValidationWithParentColumnSubElementAlreadyExists() {
         $file = $this->createCSVFile([
@@ -359,7 +348,6 @@ class ApiDataImporterTest extends TestCase {
                 ]
             ]);
     }
-
 
     public function testValidationOfAttributesInvalidColumnName() {
         $this->userRequest()->post('/api/v1/entity/import/validate', [
@@ -464,7 +452,7 @@ class ApiDataImporterTest extends TestCase {
         ])
             ->assertStatus(200)
             ->assertJson([
-                'errors' => ['2: Attribute could not be imported: Abmessungen'],
+                'errors' => ['[2] Attribute could not be imported: {{Abmessungen}} => {{1,2,3,cm}}'],
                 'summary' => [
                     'create' => 1,
                     'update' => 0,
@@ -473,6 +461,28 @@ class ApiDataImporterTest extends TestCase {
             ]);
     }
 
+    public function testValidationWithDuplicateColumnMapping(){
+        $response = $this->userRequest()->post('/api/v1/entity/import/validate', [
+            'file' => $this->createDefaultCSVFile(),
+            'data' => $this->getData(
+                attributes: [
+                    13 => "Notizen", // Notizen
+                    19 => "Notizen", // Aufbewahrung
+                ]
+            ),
+            'metadata' => $this->getMetaData(),
+        ]);
+        $response->assertStatus(200);
+
+        $response->assertJson([
+            'errors' => [],
+            'summary' => [
+                'create' => 4,
+                'update' => 1,
+                'conflict' => 0
+            ]
+        ]);
+    }
 
     public function testDataImportSuccess() {
         $response = $this->userRequest()->post('/api/v1/entity/import', [
@@ -481,20 +491,17 @@ class ApiDataImporterTest extends TestCase {
             'metadata' => $this->getMetaData(),
         ]);
 
-        if ($response->status() !== 201) {
+        if($response->status() !== 201) {
             $response->assertJson([
                 'error' => 'any'
             ]);
         }
-
         $response->assertStatus(201);
-
-
 
         $entityId = null;
         try {
             $entityId = Entity::getFromPath('Site A\\\\imported');
-        } catch (\Exception $e) {
+        } catch(\Exception $e) {
             $this->fail('Entity not found');
         }
 
@@ -576,5 +583,19 @@ class ApiDataImporterTest extends TestCase {
                 'on_name' => null
             ]
         ]);
+    }
+
+    public function testDataImportFailsWithDuplicateColumnMapping(){
+        $response = $this->userRequest()->post('/api/v1/entity/import', [
+            'file' => $this->createDefaultCSVFile(),
+            'data' => $this->getData(
+                attributes: [
+                    13 => "Notizen", // Notizen
+                    19 => "Notizen", // Aufbewahrung
+                ]
+            ),
+            'metadata' => $this->getMetaData(),
+        ])
+            ->assertStatus(201);
     }
 }

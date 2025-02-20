@@ -3,6 +3,8 @@
 namespace App\AttributeTypes;
 
 use App\Entity;
+use App\Exceptions\InvalidDataException;
+use App\Utils\StringUtils;
 
 class EntityAttribute extends AttributeBase
 {
@@ -13,8 +15,15 @@ class EntityAttribute extends AttributeBase
     // TODO: Do we still need this?
     // protected static string $deleted_string = "error.deleted_entity";
 
-    public static function fromImport(int|float|bool|string $data) : mixed {
-        return Entity::getFromPath($data);
+    public static function parseImport(int|float|bool|string $data) : mixed {
+        // TODO: This does not check if the entity that is selected is actually valid!
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);
+        $entityId = Entity::getFromPath($data);
+        if($entityId === null) {
+            throw InvalidDataException::invalidEntity($data);
+        }
+
+        return $entityId;
     }
 
     public static function unserialize(mixed $data) : mixed {
