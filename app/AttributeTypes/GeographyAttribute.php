@@ -13,7 +13,7 @@ class GeographyAttribute extends AttributeBase
     protected static bool $inTable = true;
     protected static ?string $field = 'geography_val';
 
-    public static function parseImport(int|float|bool|string $data) : mixed {
+    public static function parseImport(int|float|bool|string $data): mixed {
         $data = StringUtils::useGuard(InvalidDataException::class)($data);
         $geodata = null;
         try {
@@ -25,11 +25,11 @@ class GeographyAttribute extends AttributeBase
         return $geodata;
     }
 
-    public static function unserialize(mixed $data) : mixed {
+    public static function unserialize(mixed $data): mixed {
         return Geodata::fromWKT($data);
     }
 
-    public static function serialize(mixed $data) : mixed {
+    public static function serialize(mixed $data): mixed {
         return Geodata::toWKT($data);
     }
 }
