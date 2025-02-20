@@ -8,10 +8,11 @@ use Clickbar\Magellan\IO\Generator\WKT\WKTGenerator;
 use Clickbar\Magellan\IO\Parser\WKB\WKBParser;
 use Clickbar\Magellan\IO\Parser\WKT\WKTParser;
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class Geodata
 {
-    protected static $availableGeometryTypes = [
+    protected static array $availableGeometryTypes = [
         'Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon'
     ];
 
@@ -19,23 +20,23 @@ class Geodata
         return self::$availableGeometryTypes;
     }
 
-    public static function fromWKB(string $wkb): Geometry {
-        $parser = app(WKBParser::class);
-        return $parser->parse($wkb);
+    public static function fromWKB(string $wkb): ?Geometry {
+        try {
+            $parser = app(WKBParser::class);
+            return $parser->parse($wkb);
+        } catch(Exception $e) {
+            return null;
+        }
     }
 
-    /**
-     * Parses a WKT string into a Geometry object
-     * if the WKT string is invalid, an exception is thrown.
-     *
-     * @param string $wkt
-     * @return Geometry
-     * @throws Clickbar\Magellan\Exception\UnknownWKTTypeException
-     */
-    public static function fromWKT(string $wkt): Geometry {
-        $parser = app(WKTParser::class);
-        // SRID=4326;POINT (2, 2)
-        return $parser->parse($wkt);
+    public static function fromWKT(string $wkt): ?Geometry {
+        try {
+            $parser = app(WKTParser::class);
+            // SRID=4326;POINT (2, 2)
+            return $parser->parse($wkt);
+        } catch(Exception $e) {
+            return null;
+        }
     }
 
     public static function toWKB(Geometry $geometry): string {
@@ -50,11 +51,11 @@ class Geodata
         return self::toWKB(self::fromWKT($wkt));
     }
 
-    public static function wkb2wkt(string $wkb) : string {
+    public static function wkb2wkt(string $wkb): string {
         return self::toWKT(self::fromWKB($wkb));
     }
 
-    public static function arrayToWKT(array $arr) : string {
+    public static function arrayToWKT(array $arr): string {
         $json = json_encode($arr);
         return DB::select("SELECT ST_AsText(ST_GeomFromGeoJSON('$json')) AS wkt")[0]->wkt;
     }

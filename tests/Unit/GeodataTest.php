@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use Tests\TestCase;
 use App\Geodata;
 use Clickbar\Magellan\Data\Geometries\Dimension;
 use Clickbar\Magellan\Exception\UnknownWKTTypeException;
@@ -15,8 +16,8 @@ class GeodataTest extends TestCase
      * @return void
      */
     public function testFromWktWithTypo() {
-        $this->expectException(UnknownWKTTypeException::class);
-        Geodata::fromWKT('PIONT(1 2)');
+        $typoData = Geodata::fromWKT('PIONT(1 2)');
+        $this->assertNull($typoData);
     }
 
     /**
