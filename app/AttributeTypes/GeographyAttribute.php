@@ -15,14 +15,21 @@ class GeographyAttribute extends AttributeBase
 
     public static function parseImport(int|float|bool|string $data): mixed {
         $data = StringUtils::useGuard(InvalidDataException::class)($data);
-        $geodata = null;
-        try {
-            $geodata = Geodata::fromWKT($data);
-        } catch(Exception $e) {
-            throw InvalidDataException::invalidGeoData($data);
+
+        // Try to parse as WKT string
+        $geodata = Geodata::fromWKT($data);
+        if(isset($geodata)) {
+            return $geodata;
         }
 
-        return $geodata;
+        // Try to parse as WKB string
+        $geodata = Geodata::fromWKB($data);
+        if(isset($geodata)) {
+            return $geodata;
+        }
+
+        // Throw an exception if the data is neither WKT nor WKB
+        throw InvalidDataException::invalidGeoData($data);
     }
 
     public static function unserialize(mixed $data): mixed {

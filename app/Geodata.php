@@ -32,7 +32,7 @@ class Geodata
     public static function fromWKT(string $wkt): ?Geometry {
         try {
             $parser = app(WKTParser::class);
-            // SRID=4326;POINT (2, 2)
+            // Format: SRID=4326;POINT (2, 2)
             return $parser->parse($wkt);
         } catch(Exception $e) {
             return null;
