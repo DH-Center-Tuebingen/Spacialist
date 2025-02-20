@@ -39,23 +39,23 @@ class Geodata
         }
     }
 
-    public static function toWKB(Geometry $geometry) : string {
+    public static function toWKB(Geometry $geometry): string {
         return (new WKBGenerator())->generate($geometry);
     }
 
-    public static function toWKT(Geometry $geometry) : string {
+    public static function toWKT(Geometry $geometry): string {
         return (new WKTGenerator())->generate($geometry);
     }
 
-    public static function wkt2wkb(string $wkt) : string {
+    public static function wkt2wkb(string $wkt): string {
         return self::toWKB(self::fromWKT($wkt));
     }
 
-    public static function wkb2wkt(string $wkb) : string {
+    public static function wkb2wkt(string $wkb): string {
         return self::toWKT(self::fromWKB($wkb));
     }
 
-    public static function arrayToWKT(array $arr) : string {
+    public static function arrayToWKT(array $arr): string {
         $json = json_encode($arr);
         return DB::select("SELECT ST_AsText(ST_GeomFromGeoJSON('$json')) AS wkt")[0]->wkt;
     }
