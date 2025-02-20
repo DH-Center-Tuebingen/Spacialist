@@ -2,10 +2,8 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
 use App\Geodata;
 use Clickbar\Magellan\Data\Geometries\Dimension;
-use Clickbar\Magellan\Exception\UnknownWKTTypeException;
 use Tests\TestCase;
 
 class GeodataTest extends TestCase
