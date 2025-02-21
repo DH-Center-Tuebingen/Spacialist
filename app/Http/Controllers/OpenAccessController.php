@@ -17,6 +17,38 @@ use Illuminate\Support\Facades\App;
 
 class OpenAccessController extends Controller
 {
+
+    private function getImplementedAttributesList(){
+        return [
+            'string',
+            'stringf',
+            'richtext',
+            'iconclass',
+            'rism',
+            'double',
+            'integer',
+            'boolean',
+            'percentage',
+            'string-sc',
+            'geography',
+            'entity'
+        ];
+    }
+    
+    private function getValueKey(string $datatype, mixed $attributeValue) : string {
+        switch($datatype) {
+            case 'boolean':
+            case 'double':
+            case 'integer':
+            case 'percentage':
+                return (string) $attributeValue;
+            case 'entity':
+                return $attributeValue['id'];
+            default:
+                return $attributeValue;
+        }
+    }
+
     private function getAttributeValueCount($entityTypeId, $filteredEntityIds = []) : array {
         $attributes = EntityAttribute::with(['attribute'])
             ->where('entity_type_id', $entityTypeId)
@@ -31,17 +63,19 @@ class OpenAccessController extends Controller
 
         $attrData = [];
         foreach($attributes as $attr) {
-            if(!in_array($attr->attribute->datatype, ['string', 'stringf', 'richtext', 'iconclass', 'rism', 'double', 'integer', 'boolean', 'percentage', 'string-sc', 'geography', 'entity'])) {
+            $datatype = $attr->attribute->datatype;
+            if(!in_array($datatype, $this->getImplementedAttributesList())) {
                 continue;
             }
             $currData = [];
             $attributeValues = AttributeValue::where('attribute_id', $attr->attribute_id)->whereIn('entity_id', $entityIds)->get();
+
             foreach($attributeValues as $attrVal) {
-                $val = $attrVal->getValue();
-                if(!array_key_exists($val, $currData)) {
-                    $currData[$val] = 0;
+                $value = $this->getValueKey($datatype, $attrVal->getValue());
+                if(!array_key_exists($value, $currData)) {
+                    $currData[$value] = 0;
                 }
-                $currData[$val]++;
+                $currData[$value]++;
             }
             $attrData[$attr->attribute_id] = $currData;
         }

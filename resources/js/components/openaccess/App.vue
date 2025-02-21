@@ -40,6 +40,7 @@
 
 <script>
     import {
+        computed,
         reactive,
     } from 'vue';
 
@@ -64,18 +65,11 @@
                 projectName: computed(_ => systemStore.getProjectName()),
             });
 
-            // FUNCTIONS
 
-            // WATCHER
-
-            // RETURN
             return {
                 t,
-                // HELPERS
-                // LOCAL
-                // PROPS
-                // STATE
                 state,
+                getPreference: useSystemStore().getPreference,
             };
         }
     };
