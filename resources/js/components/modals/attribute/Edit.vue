@@ -571,13 +571,6 @@
                         });
                         break;
                     case 'boolean':
-                        operators.forEach(o => {
-                            switch(o.id) {
-                                case 1:
-                                    list.push(o);
-                                    break;
-                            }
-                        });
                         break;
                     default:
                         throw new Error(`Unsupported datatype ${datatype}`);
