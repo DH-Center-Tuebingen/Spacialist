@@ -236,6 +236,10 @@
              * so the query always has a different value.
              */
             const requestSearchEndpoint = async query => {
+                // When selected a null value is set and triggers the
+                // search again, resulting in an error. This is a workaround.
+                if(!query) return;
+
                 searchExecutionCounter.value++;
                 const round = searchExecutionCounter.value;
                 state.loading = true;
