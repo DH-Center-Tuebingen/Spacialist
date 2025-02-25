@@ -1,4 +1,3 @@
- 
 <template>
     <date-picker
         :id="name"
@@ -76,7 +75,7 @@
                     const correctValue = new Date(value.getTime() - (value.getTimezoneOffset()*60*1000));
                     v.handleChange(correctValue);
                 }
-            }
+            };
 
             // DATA
             const {

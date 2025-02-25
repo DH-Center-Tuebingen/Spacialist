@@ -22,7 +22,7 @@
         :placeholder="t('global.search')"
         :disabled="disabled"
         @search-change="search"
-        @change="onChange"
+        @select="onChange"
     >
         <template #singlelabel="{ value }">
             <div class="multiselect-single-label">
@@ -48,27 +48,17 @@
             </div>
         </template>
         <template #option="{ option }">
-            <span v-if="!state.enableChain">
-                {{ displayResult(option) }}
-            </span>
-            <div
-                v-else
-                class="d-flex flex-column"
-            >
+            <div class="d-flex flex-column">
                 <span>
                     {{ displayResult(option) }}
                 </span>
-                <ol class="breadcrumb m-0 p-0 bg-none small">
-                    <li
-                        v-for="anc in option[chain]"
-                        :key="`search-result-multiselect-${state.id}-${anc}`"
-                        class="breadcrumb-item text-muted small"
-                    >
-                        <span>
-                            {{ anc }}
-                        </span>
-                    </li>
-                </ol>
+                <slot
+                    v-if="state.enableChain"
+                    name="chain"
+                    :option="option"
+                >
+                    <Chain :chain="getChain(option)" />
+                </slot>
             </div>
         </template>
         <template #nooptions="">
@@ -131,6 +121,7 @@
         reactive,
         ref,
         toRefs,
+        watch,
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
@@ -139,8 +130,12 @@
         _debounce,
         getTs,
     } from '@/helpers/helpers.js';
+    import Chain from '@/components/chain/Chain.vue';
 
     export default {
+        components: {
+            Chain,
+        },
         props: {
             delay: {
                 type: Number,
@@ -173,6 +168,11 @@
             },
             chain: {
                 type: String,
+                required: false,
+                default: null,
+            },
+            chainFn: {
+                type: Function,
                 required: false,
                 default: null,
             },
@@ -212,16 +212,8 @@
         setup(props, context) {
             const { t } = useI18n();
 
-            const {
-                endpoint,
-                filterFn,
-                keyText,
-                keyFn,
-                chain,
-                mode,
-            } = toRefs(props);
 
-            if(!keyText.value && !keyFn.value) {
+            if(!props.keyText && !props.keyFn) {
                 throw new Error('You have to either provide a key or key function for your search component!');
             }
             // FETCH
@@ -235,10 +227,14 @@
              * so the query always has a different value.
              */
             const requestSearchEndpoint = async query => {
+                // When selected a null value is set and triggers the
+                // search again, resulting in an error. This is a workaround.
+                if(!query) return;
+
                 searchExecutionCounter.value++;
                 const round = searchExecutionCounter.value;
                 state.loading = true;
-                const results = await endpoint.value(query);
+                const results = await props.endpoint(query);
 
                 if(round !== searchExecutionCounter.value) {
                     // If there was a newer query executed in the meantime,
@@ -247,8 +243,8 @@
                 }
 
                 let filteredResults;
-                if(!!filterFn.value) {
-                    filteredResults = filterFn.value(results, query);
+                if(!!props.filterFn) {
+                    filteredResults = props.filterFn(results, query, state.searchResults);
                 } else {
                     filteredResults = results;
                 }
@@ -273,7 +269,6 @@
             const resetSearch = (query = '') => {
                 state.query = query;
                 state.searchResults = [];
-                state.hasResults = false;
             };
             const loadMore = async _ => {
                 if(state.loading) return;
@@ -281,14 +276,18 @@
             };
 
             const displayResult = obj => {
-                if(keyText.value) {
-                    return obj[keyText.value];
-                } else if(keyFn.value) {
-                    return keyFn.value(obj);
+                if(props.keyText) {
+                    return obj[props.keyText];
+                } else if(props.keyFn) {
+                    return props.keyFn(obj);
                 } else {
                     // Should never happen
                     throw new Error('No key provided!');
                 }
+            };
+
+            const getBaseValue = _ => {
+                return props.mode == 'single' ? {} : [];
             };
 
             const onChange = value => {
@@ -304,9 +303,27 @@
                 id: `multiselect-search-${getTs()}`,
                 loading: false,
                 query: '',
+                isSimpleChain: computed(_ => props.chain && props.chain.length > 0),
+                isFnChain: computed(_ => !!props.chainFn),
+                enableChain: computed(_ => state.isSimpleChain || state.isFnChain || context.slots.chain),
                 searchResults: [],
-                enableChain: computed(_ => chain.value && chain.value.length > 0),
             });
+
+            watch(_ => props.value, (newValue, oldValue) => {
+                if(!newValue || newValue.reset) {
+                    state.entry = getBaseValue();
+                } else {
+                    state.entry = newValue;
+                }
+            });
+
+            const getChain = option => {
+                if(state.isFnChain) {
+                    return props.chainFn(option);
+                } else {
+                    return option[props.chain];
+                }
+            };
 
             const hasResults = computed(_ => state.searchResults.length > 0);
 
@@ -317,6 +334,7 @@
                 // LOCAL
                 hasResults,
                 search,
+                getChain,
                 loadMore,
                 displayResult,
                 // handleChange,

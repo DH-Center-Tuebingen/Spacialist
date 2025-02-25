@@ -1,10 +1,41 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 0.11 - ???
+## 0.11
+### Added
+- Added websockets for various data synchronization
+  - _Entity Data_
+  - _Attribute Values_
+  - _Entity References_
+  - _Entity Comments_
+- Filter and sort functionality on _Entity Type List_
+- Indicator in _Data Model Editor_ that visualizes if an attribute is used in any entity-type
+- Label Search displays full path of thesaurus concept
+- References can also be added to an Entity, not only to an Entity Attribute
+- _Add Entity Above_ and _Add Entity Below_ to the Contextmenu in the entity tree
 ### Fixed
-- _Map Action Button_ position
-- _Map Action Button_ tooltips
+- Dirty indicator not showing in Tab of _Entity Detail_
+- Missing "Color Dots" of _Entity Type_ (colors are now handled on the Entity Type itself and do no longer rely on the _Map_ Plugin)
+- 'Jumping' behavior on floating quick access controls on the _Entity Type List_ (copy, duplicate, delete)
+- Attribute Dependency inverted
+- Several problems with adding, editing and displaying _Bibliography Items_
+- _Map Action Button_ position and tooltips
+### Changed
+- Files (e.g. avatars or bibliography attachments) are stored in a user-only directory
+- Improved style of Reference Input.
+
+## 0.10.2
+### Fixed
+- Date Range _importFrom_ did not return a JSON string
+- Richtext editor did not trigger the dirty state on entity
+- Certainty warning due to _undefined_ value
+- Serial and SQL attributes now have the required value (_v_) and functions (_resetFieldState_, _undirtyField_)
+### Changed
+- Added tests to _ApiDataImporterTest_ to check if the same columns can be used in multiple attributes
+- Row error now also sends the column value, instead of just sending the column name
+- Dropdowns in the _Data Importer_ are now sorted alphabetically
+- The ErrorList component of the Data Importer in the Frontend now preserves text inside `{{...}}`
+- Adjusted colors of Markdown modal buttons
 
 ## 0.10.1
 ### Added
@@ -15,8 +46,8 @@ All notable changes to this project will be documented in this file.
   - selects the first choice (if there is **only one choice** in the dropdown)*
   - selects the exact match (**case insensitive**; e.g. "apple" + `Tab` will select the available choice "apple", but also "Apple")*
   - nothing and focuses the next attribute (default)
-  - * Selected elements will be marked with a blue (Tab) badge 
-- Pressing `Delete` inside _Single Choice Dropdowns_ will clear the element  
+  - * Selected elements will be marked with a blue (Tab) badge
+- Pressing `Delete` inside _Single Choice Dropdowns_ will clear the element
 - Importer now automatically removes BOM if present
 - Better readable format for error message on validation
 - Renamed _fromImport_ to _parseImport_ on the attribute classses. The base class now by default imports the passed string, removing redundancies on the string-based classes.

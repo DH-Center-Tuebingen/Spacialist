@@ -5,11 +5,12 @@ namespace Tests;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 
 use App\User;
 use Database\Seeders\TestingSeeder;
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
-use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Auth;
 
 abstract class TestCase extends BaseTestCase {
     use CreatesApplication;
@@ -40,11 +41,7 @@ abstract class TestCase extends BaseTestCase {
         parent::setUp();
         $this->user = null;
         $this->token = null;
-        $this->getUserToken();
-    }
-
-    protected function refreshToken($response) {
-        $this->token = substr($response->headers->get('authorization'), 7);
+        $this->setTestUser();
     }
 
     public function assertStatus($response, $status) {
@@ -76,34 +73,23 @@ abstract class TestCase extends BaseTestCase {
         $this->assertSame($status, $response->getStatusCode(), $message == "" ? $no_errors : $message);
     }
 
-    protected function getStreamedContent($response) {
-        ob_start();
-        $response->sendContent();
-        $content = ob_get_clean();
-        return $content;
-    }
-
-    public function getUserToken() {
+    public function setTestUser() {
         if(!isset($this->user)) {
             $this->user = User::find(1);
         }
-        $this->token = JWTAuth::fromUser($this->user);
+        Sanctum::actingAs($this->user, [], 'web');
     }
 
-    public function getUnauthUser() {
-        if(!isset($this->user)) {
-            $this->user = User::find(1);
-        }
-        return $this->user;
-    }
-
-    public function userRequest($response = null) {
-        if(isset($response)) {
-            $this->refreshToken($response);
+    public function unsetTestUser() {
+        if(isset($this->user)) {
+            $this->user = null;
         }
 
+        Auth::guard('web')->logout(true);
+        }
+
+    public function userRequest() {
         return $this->withHeaders([
-            'Authorization' => "Bearer $this->token",
             'Accept' => 'application/json' // When not setting this, Laravels validation will return a 302 on failure!
         ]);
     }

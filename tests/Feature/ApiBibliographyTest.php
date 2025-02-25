@@ -90,15 +90,13 @@ class ApiBibliographyTest extends TestCase
      /**
     * @testdox GET /api/v1/bibliography/{id}/ref_count
     */
-    public function testGetReferenceCountEndpoint()
-    {
+    public function testGetReferenceCountEndpoint() {
         $response = $this->userRequest()
             ->get('/api/v1/bibliography/1319/ref_count');
 
         $this->assertStatus($response, 200);
         $response->assertSimilarJson([1]);
     }
-
 
     /**
      * @testdox POST /api/v1/bibliography/
@@ -129,14 +127,13 @@ class ApiBibliographyTest extends TestCase
             'citekey' => 'Dietmar Köppke_Schweinegerichte_sudga_2021'
         ]);
 
-
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
             ->get('/api/v1/bibliography');
 
         $this->assertStatus($response, 200);
         $response->assertJsonCount(7);
 
-        $response = $this->userRequest($response)
+        $response = $this->userRequest()
             ->get("/api/v1/bibliography/$entry_id");
 
         $this->assertStatus($response, 200);
@@ -185,7 +182,7 @@ class ApiBibliographyTest extends TestCase
             // Note: I don't like the reliance on the $addedItem["entry"]["id"] here.
             //       But Postgres does not rollback the sequence when a transaction is rolled back.
             //       Therefore all alternative also seem to be more complex than this.
-            $response = $this->userRequest($response)
+            $response = $this->userRequest()
                 ->get('/api/v1/bibliography/'. $addedItem["entry"]["id"]);
 
             $this->assertStatus($response, 200);
@@ -197,8 +194,7 @@ class ApiBibliographyTest extends TestCase
     /**
      * @testdox POST /api/v1/bibliography/import (mandatory fields)
      */
-    public function testMandatoryImport()
-    {
+    public function testMandatoryImport() {
        $this->importTest('import_mandatory.bib', [
            [
                "entry_type" => "article",
@@ -567,23 +563,22 @@ class ApiBibliographyTest extends TestCase
         ]);
     }
 
-
     /**
      * @testdox POST /api/v1/bibliography/export
      */
-    function testExport() {
+    public function testExport() {
         $response = $this->userRequest()
                 ->post('/api/v1/bibliography/export');
 
         $this->assertStatus($response, 200);
         $this->assertTrue($response->headers->get('content-type') == 'application/x-bibtex');
         $this->assertTrue($response->headers->get('content-disposition') == 'attachment; filename=export.bib');
-        $content = $this->getStreamedContent($response);
+        $content = $response->streamedContent();
         $expectedContent = file_get_contents(storage_path() . "/framework/testing/demo.bib");
         $this->assertSame($expectedContent, $content);
     }
 
-    function getUpdateData() {
+    public function getUpdateData() {
         return [
             'entry_type'        => 'book',
             'author'            => 'Köppke, Dietmar and Sauer, Jürgen',
@@ -621,21 +616,20 @@ class ApiBibliographyTest extends TestCase
 
 
     /*
-     * TODO: The current problem here is that we are not simply updating
-     *       all table cells according to the passed data but instead sanatizing the
-     *       data and only updating the fields that fit the entry_type.
+     * TODO: We are not simply updating all table cells according to
+     *       the passed data but instead sanatizing the data and
+     *       only updating the fields that fit the entry_type.
+     *       All other fields are set to NULL. This is at the time of writing the
+     *       desired behavior. We therefore need to test every entry type.
+     *       This is not yet implemented.
      *
-     *      All other fields are set to NULL. This is at the time of writing the
-     *      desired behavior. For the tests there is the problem, that we need to
-     *      test every entry type. This is not yet implemented.
-     *
-     *      [SO]
+     *      [SO/VR]
      */
 
      /**
       * @testdox POST /api/v1/bibliography/{id}
       */
-     function testPatchItem() {
+    public function testPatchItem() {
         $data = $this->getUpdateData();
         $response = $this->userRequest()
             ->post('/api/v1/bibliography/1320', $data);
@@ -719,6 +713,7 @@ class ApiBibliographyTest extends TestCase
     public function testWithoutPermission($permission) {
         (new ResponseTester($this))->testMissingPermission($permission);
     }
+
     /**
      * @dataProvider exceptionPermissions
      */

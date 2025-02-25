@@ -33,21 +33,20 @@ jobs:
       with:
         php-version: ${{matrix.php-versions}}
         coverage: xdebug
-    - name: Install required packages
-      run: |
-        sudo add-apt-repository ppa:ubuntugis/ppa
-        sudo apt update
-        sudo apt -y install gdal-bin
+#    - name: Install required packages
+#      run: |
+#        sudo add-apt-repository ppa:ubuntugis/ppa
+#        sudo apt update
+#        sudo apt -y install gdal-bin
     - name: Copy .env
       run: php -r "file_exists('.env') || copy('.env.phpunit', '.env');"
     - name: Update Composer
       run: composer update
     - name: Install Dependencies
       run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-    - name: Generate keys
+    - name: Generate key
       run: |
         php artisan key:generate
-        php artisan jwt:secret
     - name: Run migrations
       run: |
         php artisan migrate

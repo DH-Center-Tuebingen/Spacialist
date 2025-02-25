@@ -83,7 +83,7 @@ class EditorController extends Controller {
                 'error' => __('You do not have the permission to view entity data')
             ], 403);
         }
-        $attributes = Attribute::whereNull('parent_id')->orderBy('id')->get();
+        $attributes = Attribute::whereNull('parent_id')->withCount('entity_types')->orderBy('id')->get();
         $selections = [];
         foreach($attributes as $a) {
             $selection = $a->getSelection();
@@ -146,11 +146,12 @@ class EditorController extends Controller {
 
         $curl = $request->get('concept_url');
         $is_root = sp_parse_boolean($request->get('is_root'));
-        $cType = new EntityType();
-        $cType->thesaurus_url = $curl;
-        $cType->is_root = $is_root;
-        $cType->save();
-        $cType = EntityType::find($cType->id);
+        $entityType = new EntityType();
+        $entityType->thesaurus_url = $curl;
+        $entityType->is_root = $is_root;
+        $entityType->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+        $entityType->save();
+        $entityType = EntityType::find($entityType->id);
 
         // TODO:: Reimplement in plugin [SO]
         //
@@ -167,31 +168,7 @@ class EditorController extends Controller {
 
         // $cType->load('layer');
 
-        return response()->json($cType, 201);
-    }
-
-    public function setRelationInfo(Request $request, $id) {
-        $user = auth()->user();
-        if(!$user->can('entity_type_write')) {
-            return response()->json([
-                'error' => __('You do not have the permission to modify entity relations')
-            ], 403);
-        }
-        $this->validate($request, [
-            'is_root' => 'boolean_string',
-            'sub_entity_types' => 'array'
-        ]);
-        try {
-            $entityType = EntityType::findOrFail($id);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This entity-type does not exist')
-            ], 400);
-        }
-        $is_root = $request->get('is_root');
-        $subs = $request->get('sub_entity_types');
-        $entityType->setRelationInfo($is_root, $subs);
-        return response()->json(null, 204);
+        return response()->json($entityType, 201);
     }
 
     public function addAttribute(Request $request) {
@@ -395,11 +372,11 @@ class EditorController extends Controller {
         $user = auth()->user();
         if(!$user->can('entity_type_write')) {
             return response()->json([
-                'error' => __('You do not have the permission to modify entity-type labels')
+                'error' => __('You do not have the permission to modify entity-type')
             ], 403);
         }
         $this->validate($request, [
-            'data' => 'required|array'
+            'data' => 'required|array',
         ]);
 
         try {
@@ -409,14 +386,32 @@ class EditorController extends Controller {
                 'error' => __('This entity-type does not exist')
             ], 400);
         }
-        $data = Arr::only($request->get('data'), array_keys(EntityType::patchRules));
-        if(count($data) < 1) {
+        $relationData = Arr::only(
+            $request->get('data'),
+            ['is_root', 'sub_entity_types', 'color'],
+        );
+        $propData = Arr::only(
+            $request->get('data'),
+            array_keys(EntityType::patchRules),
+        );
+
+        $updateRelation = count($relationData) > 0;
+        $updateProps = count($propData) > 0;
+
+        if(!$updateRelation && !$updateProps) {
             return response()->json([
                 'error' => __('The given data is invalid')
             ], 400);
         }
-        foreach($data as $key => $prop) {
-            $entityType->{$key} = $prop;
+
+        if($updateRelation) {
+            $entityType->setRelationInfo($relationData);
+        }
+
+        if($updateProps) {
+            foreach($propData as $key => $prop) {
+                $entityType->{$key} = $prop;
+            }
         }
         $entityType->save();
 

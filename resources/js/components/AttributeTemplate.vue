@@ -15,7 +15,14 @@
                     :key-fn="getConceptLabel"
                     :default-value="state.searchResetValue"
                     @selected="label => labelSelected(label, 'label')"
-                />
+                >
+                    <template #chain="{ option }">
+                        <ChainList
+                            :lists="option.parent_path"
+                            :max-length="3"
+                        />
+                    </template>
+                </simple-search>
             </div>
         </div>
         <div class="mb-3">
@@ -289,7 +296,9 @@
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
-    import store from '@/bootstrap/store.js';
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
+    import useSystemStore from '@/bootstrap/stores/system.js';
 
     import {
         searchAttribute,
@@ -304,7 +313,12 @@
         multiselectResetClasslist,
     } from '@/helpers/helpers.js';
 
+    import ChainList from './chain/ChainList.vue';
+
     export default {
+        components: {
+            ChainList,
+        },
         props: {
             type: {
                 required: false,
@@ -325,6 +339,9 @@
         emits: ['created', 'updated', 'validation'],
         setup(props, context) {
             const { t } = useI18n();
+            const attributeStore = useAttributeStore();
+            const entityStore = useEntityStore();
+            const systemStore = useSystemStore();
             const {
                 type,
                 external,
@@ -392,7 +409,7 @@
                     state.attribute.siGroupUnit = null;
                     state.siGroupUnits = null;
                 } else {
-                    const grp = store.getters.datatypeDataOf('si-unit')[state.attribute.siGroup];
+                    const grp = systemStore.getDatatypeDataOf('si-unit')[state.attribute.siGroup];
                     const matchUnit = grp.units.find(u => grp.default == u.symbol);
                     if(matchUnit) {
                         state.attribute.siGroupUnit = matchUnit.label;
@@ -415,10 +432,10 @@
             let types = [];
             switch(type.value) {
                 case 'table':
-                    types = store.getters.attributeTableTypes;
+                    types = attributeStore.getTableAttributeTypes;
                     break;
                 default:
-                    types = store.getters.attributeTypes;
+                    types = attributeStore.attributeTypes;
                     break;
             }
             types = types.slice().sort((a, b) => {
@@ -451,7 +468,7 @@
                 siGroups: computed(_ => {
                     if(!state.isSiUnit) return null;
 
-                    const keys = Object.keys(store.getters.datatypeDataOf('si-unit'));
+                    const keys = Object.keys(systemStore.getDatatypeDataOf('si-unit'));
                     if(!state.siQuery) return keys;
 
                     return keys.filter(grp => {
@@ -461,7 +478,7 @@
                 searchResetValue: null,
                 formId: external.value || 'create-attribute-form',
                 minimalEntityTypes: computed(_ => {
-                    return Object.values(store.getters.entityTypes).map(et => ({
+                    return Object.values(entityStore.entityTypes).map(et => ({
                         id: et.id,
                         thesaurus_url: et.thesaurus_url
                     }));
@@ -524,10 +541,6 @@
                             state.attribute.rootAttributeLabel.id > 0
                         );
                 }),
-            });
-
-            // ON MOUNTED
-            onMounted(_ => {
             });
 
             // RETURN

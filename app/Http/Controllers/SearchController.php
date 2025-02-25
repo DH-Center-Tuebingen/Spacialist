@@ -193,10 +193,11 @@ class SearchController extends Controller {
         $langId = $language->id;
         $builder = th_tree_builder($lang);
 
-        $matches = $builder->whereHas('labels', function($query) use ($langId, $q) {
-            $query->where('language_id', $langId)
-                ->where('label', 'ilike', "%$q%");
-        })
+        $matches = $builder
+            ->whereHas('labels', function($query) use ($langId, $q) {
+                $query->where('language_id', $langId)
+                    ->where('label', 'ilike', "%$q%");
+            })
             ->get();
 
         $foreignMatches = th_tree_builder($lang)
@@ -209,6 +210,8 @@ class SearchController extends Controller {
             ->get();
 
         $matches = $matches->merge($foreignMatches);
+        $matches->each->setAppends(['parent_path']);
+
         return response()->json($matches);
     }
 
