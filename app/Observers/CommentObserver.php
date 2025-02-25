@@ -35,7 +35,9 @@ class CommentObserver
                 broadcast(new CommentUpdated($comment, $user))->toOthers();
             }
         } catch(BroadcastException $e) {
-            info("BroadcastException while handling saved() event in CommentObserver");
+            if(env('APP_DEBUG')) {
+                info("BroadcastException while handling saved() event in CommentObserver");
+            }
         }
     }
 
@@ -49,7 +51,9 @@ class CommentObserver
         try {
             broadcast(new CommentDeleted($comment, $user = auth()->user()))->toOthers();
         } catch(BroadcastException $e) {
-            info("BroadcastException while handling deleting() event in CommentObserver");
+            if(env('APP_DEBUG')) {
+                info("BroadcastException while handling deleting() event in CommentObserver");
+            }
         }
     }
 }

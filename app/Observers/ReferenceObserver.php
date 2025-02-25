@@ -35,7 +35,9 @@ class ReferenceObserver
                 broadcast(new ReferenceUpdated($reference, $user))->toOthers();
             }
         } catch(BroadcastException $e) {
-            info("BroadcastException while handling saved() event in ReferenceObserver");
+            if(env('APP_DEBUG')) {
+                info("BroadcastException while handling saved() event in ReferenceObserver");
+            }
         }
     }
 
@@ -49,7 +51,9 @@ class ReferenceObserver
         try {
             broadcast(new ReferenceDeleted($reference, $user = auth()->user()))->toOthers();
         } catch(BroadcastException $e) {
-            info("BroadcastException while handling deleting() event in ReferenceObserver");
+            if(env('APP_DEBUG')) {
+                info("BroadcastException while handling deleting() event in ReferenceObserver");
+            }
         }
     }
 }

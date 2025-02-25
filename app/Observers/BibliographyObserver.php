@@ -35,7 +35,9 @@ class BibliographyObserver
                 broadcast(new BibliographyUpdated($bibliography, $user))->toOthers();
             }
         } catch(BroadcastException $e) {
-            info("BroadcastException while handling saved() event in BibliographyObserver");
+            if(env('APP_DEBUG')) {
+                info("BroadcastException while handling saved() event in BibliographyObserver");
+            }
         }
     }
 
@@ -49,7 +51,9 @@ class BibliographyObserver
         try {
             broadcast(new BibliographyDeleted($bibliography, $user = auth()->user()))->toOthers();
         } catch(BroadcastException $e) {
-            info("BroadcastException while handling deleting() event in BibliographyObserver");
+            if(env('APP_DEBUG')) {
+                info("BroadcastException while handling deleting() event in BibliographyObserver");
+            }
         }
     }
 }

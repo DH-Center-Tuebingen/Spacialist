@@ -26,7 +26,9 @@ class EntityAttributeObserver {
                 broadcast(new AttributeValueUpdated($attributeValue, $user))->toOthers();
             }
         } catch(BroadcastException $e) {
-            info("BroadcastException while handling saved() event in EntityAttributeObserver");
+            if(env('APP_DEBUG')) {
+                info("BroadcastException while handling saved() event in EntityAttributeObserver");
+            }
         }
     }
 
@@ -40,7 +42,9 @@ class EntityAttributeObserver {
         try {
             broadcast(new AttributeValueDeleted($attributeValue, auth()->user()))->toOthers();
         } catch(BroadcastException $e) {
-            info("BroadcastException while handling deleting() event in EntityAttributeObserver");
+            if(env('APP_DEBUG')) {
+                info("BroadcastException while handling deleting() event in EntityAttributeObserver");
+            }
         }
     }
 }

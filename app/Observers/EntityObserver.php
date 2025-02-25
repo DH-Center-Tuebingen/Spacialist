@@ -49,7 +49,9 @@ class EntityObserver
                 broadcast(new EntityUpdated($entity, $user))->toOthers();
             }
         } catch(BroadcastException $e) {
-            info("BroadcastException while handling saved() event in EntityObserver");
+            if(env('APP_DEBUG')) {
+                info("BroadcastException while handling saved() event in EntityObserver");
+            }
         }
     }
 
@@ -66,7 +68,9 @@ class EntityObserver
         try {
             broadcast(new EntityDeleted($entity, $user = auth()->user()))->toOthers();
         } catch(BroadcastException $e) {
-            info("BroadcastException while handling deleting() event in EntityObserver");
+            if(env('APP_DEBUG')) {
+                info("BroadcastException while handling deleting() event in EntityObserver");
+            }
         }
     }
 }
