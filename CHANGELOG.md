@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 0.11
+## 0.11 - Kilcrea
 ### Added
 - Added websockets for various data synchronization
   - _Entity Data_
@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file.
 - Attribute Dependency inverted
 - Several problems with adding, editing and displaying _Bibliography Items_
 - Long entity names in _Entity Detail_ are now truncated with … to avoid line breaks in name and buttons
+- _Map Action Button_ position and tooltips
 ### Changed
 - Files (e.g. avatars or bibliography attachments) are stored in a user-only directory
 - Improved style of Reference Input.

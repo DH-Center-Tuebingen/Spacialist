@@ -74,6 +74,18 @@ export const useAttributeStore = defineStore('attribute', {
             }
             this.attributeSelections = attributeSelections;
         },
+        increaseEntityTypeCounter(attributeId) {
+            const attribute = this.attributes.find(a => a.id == attributeId);
+            if(attribute) {
+                attribute.entity_types_count++;
+            }
+        },
+        decreaseEntityTypeCounter(attributeId) {
+            const attribute = this.attributes.find(a => a.id == attributeId);
+            if(attribute) {
+                attribute.entity_types_count--;
+            }
+        },
         async addAttribute(attribute) {
             return addAttribute(attribute).then(data => {
                 this.attributes.push(data.attribute);
@@ -81,7 +93,7 @@ export const useAttributeStore = defineStore('attribute', {
                     const nested = data.attribute.datatype == 'table';
                     const id = data.attribute.id;
                     const selection = data.selection;
-                    this.setAttributeSelection(id, selection, nested)
+                    this.setAttributeSelection(id, selection, nested);
                 }
                 return data;
             });

@@ -680,7 +680,7 @@ export const useEntityStore = defineStore('entity', {
                         attributes[i].pivot.position++;
                     }
                 }
-
+                useAttributeStore().increaseEntityTypeCounter(mergedData.pivot.attribute_id);
                 return mergedData;
             });
         },
@@ -709,7 +709,9 @@ export const useEntityStore = defineStore('entity', {
                 const attributes = this.getEntityTypeAttributes(entityTypeId);
                 const idx = attributes.findIndex(a => a.pivot.id == id);
                 if(idx > -1) {
+                    const aid = attributes[idx].attribute_id;
                     attributes.splice(idx, 1);
+                    useAttributeStore().decreaseEntityTypeCounter(aid);
                 }
                 // TODO was: position++; what is correct?
                 for(let i = idx; i < attributes.length; i++) {
