@@ -4,9 +4,24 @@
             v-for="certainty in certainties"
             :key="certainty"
         >
-            <span v-show="certainty.rangeFunction(state)">
+            <template v-if="certainty.rangeFunction(state) && Array.isArray(certainty.icon)">
+                <div
+                    class="position-relative mt-1 h-100 w-100"
+                    :class="addOnCenter('h-100 w-100')"
+                >
+                    <i
+                        v-for="icon in certainty.icon"
+                        :key="icon"
+                        :class="`position-absolute ${addOnCenter('w-100')} ${icon}`"
+                    />
+                </div>
+            </template>
+            <div
+                v-show="certainty.rangeFunction(state) && !Array.isArray(certainty.icon)"
+                :class="addOnCenter('text-center')"
+            >
                 <i :class="`${certainty.icon} text-${certainty.type}`" />
-            </span>
+            </div>
         </template>
     </div>
 </template>
@@ -25,13 +40,22 @@
                     return value === null || (value >= 0 && value <= 100);
                 },
             },
+            center: {
+                type: Boolean,
+                default: false,
+                required: false,
+            },
         },
         setup(props) {
-
             const certainties = getCertainties();
+
+            const addOnCenter = classes => {
+                return props.center ? classes : '';
+            };
 
             return {
                 certainties,
+                addOnCenter,
             };
         },
     };

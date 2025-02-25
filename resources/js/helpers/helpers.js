@@ -48,7 +48,7 @@ export function getErrorMessages(error, suffix = '') {
 }
 
 
-const UNSET_CERTAINTY = {type: 'unset', icon: 'fas fa-fw fa-question', rangeFunction: (certainty) => certainty == null || certainty < 0 || certainty > 100};
+const UNSET_CERTAINTY = {type: 'unset', icon: ['fas fa-fw fa-question', 'fas fa-fw fa-exclamation'], rangeFunction: (certainty) => certainty == null || certainty < 0 || certainty > 100};
 export function getCertainties() {
     function inRangeOf(lowIn, highEx) {
         return (certainty) => parseFloat(certainty) >= lowIn && parseFloat(certainty) < highEx;

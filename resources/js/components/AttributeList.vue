@@ -20,12 +20,12 @@
             >
                 <div class="d-flex align-items-center gap-2">
                     <div
-                        class="row flex-fill"
+                        class="row gx-3 flex-fill"
                         :class="addModerationStateClasses(element.id)"
                     >
                         <label
                             v-if="!state.hideLabels"
-                            class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break align-self-start gap-1"
+                            class="col-form-label col-md-2 d-flex flex-row justify-content-between text-break align-self-start gap-1"
                             :for="`attr-${element.id}`"
                             :class="attributeClasses(element)"
                             @click="e => handleLabelClick(e, element.datatype)"
@@ -105,19 +105,6 @@
                                 {{ translateConcept(element.thesaurus_url) }}
                             </span>
                             <sup
-                                v-if="hasEmitter('onMetadata')"
-                                class="clickable d-flex flex-row align-items-start top-0"
-                                @click="onMetadataHandler(element)"
-                            >
-                                <validity-indicator :state="certainty(element)" />
-                                <span v-if="hasComment(element)">
-                                    <i class="fas fa-fw fa-comment" />
-                                </span>
-                                <span v-if="hasBookmarks(element)">
-                                    <i class="fas fa-fw fa-bookmark" />
-                                </span>
-                            </sup>
-                            <sup
                                 v-if="hasEmitter('onEditElement') && !!element.pivot.depends_on"
                                 :title="t('global.dependency.depends_on.desc')"
                             >
@@ -147,6 +134,29 @@
                                 @moderate="e => handleModeration(element.id, e)"
                                 @edit="e => handleEditModeration(element.id, e)"
                             />
+                        </div>
+                        <div
+                            v-if="hasEmitter('onMetadata')"
+                            class="small col-md-1 clickable d-flex flex-row align-items-start justify-content-center"
+                            @click="onMetadataHandler(element)"
+                        >
+                            <ValidityIndicator
+                                class="col h-100"
+                                :center="true"
+                                :state="certainty(element)"
+                            />
+                            <span
+                                class="col text-center"
+                                :class="inactiveMetadataClass(!hasComment(element))"
+                            >
+                                <i class="fas fa-fw fa-comment" />
+                            </span>
+                            <span
+                                class="col text-center"
+                                :class="inactiveMetadataClass(!hasBookmarks(element))"
+                            >
+                                <i class="fas fa-fw fa-bookmark" />
+                            </span>
                         </div>
                     </div>
                     <slot
@@ -192,7 +202,7 @@
             classes: {
                 required: false,
                 type: String,
-                default: 'h-100 pe-2',
+                default: 'h-100',
             },
             attributes: {
                 required: true,
@@ -584,6 +594,12 @@
                 return metadataAddon.value && metadataAddon.value(attribute.thesaurus_url);
             };
 
+            const inactiveMetadataClass = inactive => {
+                if(inactive) {
+                    return ['opacity-25'];
+                }
+            };
+
             const handleLabelClick = (e, attrType) => {
                 if(attrType == 'boolean') {
                     e.preventDefault();
@@ -716,6 +732,7 @@
                 hasEmitter,
                 hasComment,
                 hasBookmarks,
+                inactiveMetadataClass,
                 handleLabelClick,
                 // STATE
                 attrRefs,

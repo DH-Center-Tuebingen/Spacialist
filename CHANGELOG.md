@@ -25,6 +25,7 @@ All notable changes to this project will be documented in this file.
 - Files (e.g. avatars or bibliography attachments) are stored in a user-only directory
 - Improved style of Reference Input.
 - Do not return deleted users by default
+- Moved attribute indicators to the end of the line and reworked style (always visible, but greyed out)
 
 ## 0.10.2
 ### Fixed
