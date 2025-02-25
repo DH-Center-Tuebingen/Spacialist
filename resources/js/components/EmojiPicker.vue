@@ -1,6 +1,6 @@
 <template>
     <button
-        :id="state.pickId"
+        ref="emojiButton"
         type="button"
         class="btn btn-outline-secondary btn-sm px-1 py-05"
     >
@@ -11,6 +11,7 @@
 <script>
     import {
         reactive,
+        ref,
         onMounted,
     } from 'vue';
 
@@ -23,25 +24,23 @@
         emits: ['selected'],
         setup(props, context) {
             // DATA
-            const state = reactive({
-                pickId: `emoji-picker-${Date.now()}`,
-            });
+
+            const emojiButton = ref(null);
 
             // ON MOUNTED
             onMounted(_ => {
-                const emojiButton = document.getElementById(state.pickId);
 
                 const picker = createPopup({
                     emojiData,
                     messages,
                 }, {
-                    triggerElement: emojiButton,
-                    referenceElement: emojiButton,
+                    triggerElement: emojiButton.value,
+                    referenceElement: emojiButton.value,
                     position: 'bottom-end',
                     hideOnEmojiSelect: false,
                 });
 
-                emojiButton.addEventListener('click', _ => {
+                emojiButton.value.addEventListener('click', _ => {
                     picker.toggle();
                 });
 
@@ -53,8 +52,8 @@
             });
 
             return {
-                state,
-            }
+                emojiButton,
+            };
         },
-    }
+    };
 </script>

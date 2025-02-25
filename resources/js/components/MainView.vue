@@ -61,51 +61,6 @@
                 <keep-alive>
                     <component :is="state.tabComponent" />
                 </keep-alive>
-                <div
-                    v-show="isTab('references') && !!state.entity.id"
-                    class="h-100 overflow-y-auto"
-                >
-                    <p
-                        v-if="!state.hasReferences"
-                        class="alert alert-info"
-                    >
-                        {{ t('main.entity.references.empty') }}
-                    </p>
-                    <template
-                        v-for="(referenceGroup, key) in state.entity.references"
-                        v-else
-                        :key="key"
-                    >
-                        <div
-                            v-if="referenceGroup.length > 0"
-                            class="reference-group"
-                        >
-                            <h5 class="mb-2 fw-medium">
-                                <a
-                                    href="#"
-                                    class="text-decoration-none"
-                                    @click.prevent="showMetadataForReferenceGroup(referenceGroup)"
-                                >
-                                    {{ translateConcept(key) }}
-                                </a>
-                            </h5>
-                            <div class="list-group w-90">
-                                <div
-                                    v-for="(reference, i) in referenceGroup"
-                                    :key="i"
-                                    class="list-group-item pt-0"
-                                >
-                                    <header class="text-end">
-                                        <span class="text-muted fw-light small">
-                                            {{ date(reference.updated_at) }}
-                                        </span>
-                                    </header>
-                                    <Quotation :value="reference" />
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
             </div>
         </div>
     </div>
@@ -129,38 +84,41 @@
         useRoute,
     } from 'vue-router';
 
-    import store from '@/bootstrap/store.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
+    import useSystemStore from '@/bootstrap/stores/system.js';
     import router from '%router';
 
     import {
-        translateConcept,
-    } from '@/helpers/helpers.js';
-
+        subscribeNotifications,
+        subscribeSystemChannel,
+        unsubscribeSystemChannel,
+        listenToList,
+    } from '@/helpers/websocket.js';
     import {
-        formatAuthors,
-    } from '@/helpers/bibliography.js';
-
+        handleBibliographyCreated,
+        handleBibliographyUpdated,
+        handleBibliographyDeleted,
+        handleEntityCreated,
+        handleEntityUpdated,
+        handleEntityDeleted,
+    } from '@/handlers/system.js';
     import {
-        date,
-    } from '@/helpers/filters.js';
+        handleNotifications,
+    } from '@/handlers/notification.js';
 
-    import {
-        canShowReferenceModal,
-        showLiteratureInfo,
-    } from '@/helpers/modal.js';
-
-    import { useToast } from '@/plugins/toast.js';
-
-    import Quotation from '@/components/bibliography/Quotation.vue';
+    import useWebSocketConnectionToast from '@/composables/websocket-connection-toast.js';
+    import ReferenceTab from './bibliography/ReferenceTab.vue';
 
     export default {
         components: {
-            Quotation,
+            ReferenceTab,
         },
         setup(props, context) {
             const { t } = useI18n();
             const currentRoute = useRoute();
-            const toast = useToast();
+            const entityStore = useEntityStore();
+            const systemStore = useSystemStore();
+            useWebSocketConnectionToast();
 
             // FUNCTIONS
             const setTab = to => {
@@ -172,43 +130,15 @@
                     append: true,
                 });
             };
-            const isTab = id => {
-                return state.tab == id;
-            };
-            const showMetadataForReferenceGroup = referenceGroup => {
-                if(!referenceGroup) return;
-                if(!state.entity) return;
-                const aid = referenceGroup[0].attribute_id;
-
-                const canOpen = canShowReferenceModal(aid);
-                if(canOpen) {
-                    router.push({
-                        append: true,
-                        name: 'entityrefs',
-                        query: currentRoute.query,
-                        params: {
-                            aid: aid,
-                        },
-                    });
-                } else {
-                    const msg = t('main.entity.references.toasts.cannot_edit_metadata.msg');
-                    toast.$toast(msg, '', {
-                        duration: 2500,
-                        autohide: true,
-                        channel: 'warning',
-                        icon: true,
-                        simple: true,
-                    });
-                }
-            };
-            const openLiteratureInfo = reference => {
-                showLiteratureInfo(reference.bibliography.id);
-            };
-
+           
             // DATA
             const state = reactive({
-                tab: computed(_ => store.getters.mainView.tab),
+                tab: computed(_ => systemStore.mainView.tab),
                 tabComponent: computed(_ => {
+                    if(state.tab === 'references') {
+                        return ReferenceTab;
+                    }
+
                     const plugin = state.tabPlugins.find(p => p.key == state.tab);
                     if(!!plugin) {
                         return plugin.componentTag;
@@ -216,49 +146,47 @@
                         return '';
                     }
                 }),
-                concepts: computed(_ => store.getters.concepts),
-                entity: computed(_ => store.getters.entity),
-                hasReferences: computed(_ => {
-                    const isNotSet = !state.entity.references;
-                    if(isNotSet) return false;
-
-                    const isEmpty = !Object.keys(state.entity.references).length > 0;
-                    if(isEmpty) return false;
-                    return Object.values(state.entity.references).some(v => v.length > 0);
-                }),
-                entityTypes: computed(_ => store.getters.entityTypes),
-                columnPref: computed(_ => store.getters.preferenceByKey('prefs.columns')),
-                isDetailLoaded: computed(_ => store.getters.entity?.id > 0),
-                tabPlugins: computed(_ => store.getters.slotPlugins('tab')),
+                concepts: computed(_ => systemStore.concepts),
+                entity: computed(_ => entityStore.selectedEntity),
+                entityTypes: computed(_ => entityStore.entityTypes),
+                columnPref: computed(_ => systemStore.getPreference('prefs.columns')),
+                isDetailLoaded: computed(_ => state.entity?.id > 0),
+                tabPlugins: computed(_ => systemStore.getSlotPlugins('tab')),
             });
+            const channels = {};
 
             // ON MOUNTED
             onMounted(_ => {
                 console.log('mainview component mounted');
-                store.dispatch('setMainViewTab', currentRoute.query.tab);
+                systemStore.setMainViewTab(currentRoute.query.tab);
+                channels.system = subscribeSystemChannel();
+                listenToList(channels.system, [
+                    handleEntityCreated,
+                    handleEntityUpdated,
+                    handleEntityDeleted,
+                    handleBibliographyCreated,
+                    handleBibliographyUpdated,
+                    handleBibliographyDeleted,
+                ]);
+                channels.notification = subscribeNotifications(handleNotifications);
             });
 
             onBeforeRouteUpdate(async (to, from) => {
                 if(to.query.tab !== from.query.tab) {
-                    store.dispatch('setMainViewTab', to.query.tab);
+                    systemStore.setMainViewTab(to.query.tab);
                 }
             });
             onBeforeRouteLeave((to, from) => {
-                store.dispatch('setMainViewTab', null);
+                systemStore.setMainViewTab(null);
+                unsubscribeSystemChannel();
             });
 
             // RETURN
             return {
                 t,
                 // HELPERS
-                translateConcept,
-                formatAuthors,
-                date,
                 // LOCAL
                 setTab,
-                isTab,
-                showMetadataForReferenceGroup,
-                openLiteratureInfo,
                 // STATE
                 state,
             };

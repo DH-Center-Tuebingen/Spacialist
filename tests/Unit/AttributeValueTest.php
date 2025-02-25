@@ -3,8 +3,7 @@
 namespace Tests\Unit;
 
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+
 
 use App\AttributeValue;
 
@@ -41,7 +40,7 @@ class AttributeValueTest extends TestCase
     public function testGetAttributeValueById()
     {
         $value = AttributeValue::getValueById(16, 2);
-        $this->assertEquals('POINT(8.92 48.45)', $value);
+        $this->assertEquals('SRID=4326;POINT(8.92 48.45)', $value);
 
         $value = AttributeValue::getValueById(99, 2);
         $this->assertNull($value);

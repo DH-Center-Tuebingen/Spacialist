@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AddCommentTable extends Migration
 {
@@ -39,7 +40,9 @@ class AddCommentTable extends Migration
 
         foreach($values as $v) {
             try {
-                $user = User::where('name', $v->lasteditor)->firstOrFail();
+                $user = User::withoutGlobalScope(new SoftDeletingScope())
+                    ->where('name', $v->lasteditor)
+                    ->firstOrFail();
             } catch(ModelNotFoundException $e) {
                 // skip adding comment, if user can not be found
                 continue;
@@ -82,7 +85,8 @@ class AddCommentTable extends Migration
             ->get();
 
         foreach($comments as $c) {
-            $user = User::find($c->user_id);
+            $user = User::withoutGlobalScope(new SoftDeletingScope())
+                ->find($c->user_id);
             $val = AttributeValue::find($c->commentable_id);
             $val->certainty_description = $c->content;
             $val->lasteditor = $user->name;

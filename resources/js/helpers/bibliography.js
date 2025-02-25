@@ -353,3 +353,8 @@ export const formatAuthorName = (author) => {
     let names = author.split(/\s*,\s*/g);
     return names.reverse().join(' ');
 };
+
+export const formatBibtexText = text => {
+    if(!text) return '';
+    return text.replace(/[\{\}]/g, '');
+};

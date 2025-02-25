@@ -1,19 +1,24 @@
 <template>
     <simple-search
+        :value="v.value"
         :endpoint="searchWrapper"
-        :key-text="'name'"
+        :key-fn="handleDisplayResult"
         :chain="'ancestors'"
         :mode="state.mode"
         :default-value="v.fieldValue"
-        @selected="e => entitySelected(e)"
-        @entry-click="e => entryClicked(e)"
+        :disabled="disabled"
+        :infinite="true"
+        :limit="10"
+        :can-fetch-more="state.hasNextPage"
+        @selected="selected"
+        @entry-click="entity => entryClicked(entity)"
     />
     <router-link
-        v-if="!hideLink && !multiple && v.value"
-        :to="{name: 'entitydetail', params: {id: v.fieldValue.id}, query: state.query}"
+        v-if="canShowLink"
+        :to="{ name: 'entitydetail', params: { id: v.fieldValue?.id }, query: state.query }"
         class="btn btn-outline-secondary btn-sm mt-2"
     >
-        {{ t('main.entity.attributes.entity.go_to', {name: v.fieldValue.name}) }}
+        {{ t('main.entity.attributes.entity.go_to', { name: v.fieldValue.name }) }}
     </router-link>
 </template>
 
@@ -36,6 +41,14 @@
     import * as yup from 'yup';
 
     import router from '%router';
+
+    import {
+        only,
+    } from '@/helpers/helpers.js';
+
+    import {
+        hasNextPage,
+    } from '@/helpers/pagination.js';
 
     import {
         searchEntityInTypes,
@@ -77,60 +90,80 @@
             const { t } = useI18n();
             const route = useRoute();
             const {
-                name,
-                multiple,
-                disabled,
-                hideLink,
                 value,
                 searchIn,
             } = toRefs(props);
             // FETCH
 
             // FUNCTIONS
-            const entitySelected = e => {
-                const {
-                    added,
-                    removed,
-                    ...entity
-                } = e;
-                let data;
-                if(removed) {
-                    if(multiple.value) {
-                        data = entity.values;
-                    } else {
-                        data = null;
-                    }
-                } else if(added) {
-                    if(multiple.value) {
-                        data = entity.values;
-                    } else {
-                        data = entity;
-                    }
-                }
-                v.handleChange(data);
-            };
-            const entryClicked = e => {
-                if(hideLink.value) return;
+
+            const entryClicked = entity => {
+                if(props.hideLink) return;
 
                 router.push({
                     name: 'entitydetail',
                     params: {
-                        id: e.id,
+                        id: entity.id,
                     },
                     query: route.query
                 });
             };
+            const handleDisplayResult = entity => {
+                if(searchEntityInTypes.name == 'error.deleted_entity') {
+                    return t('main.entity.attributes.tablsearchEntityInTypes.error.deleted_entity');
+                }
+                return entity?.name;
+            };
             const resetFieldState = _ => {
                 v.resetField({
-                    value: value.value || (multiple.value ? [] : {})
+                    value: value.value || (props.multiple ? [] : {})
                 });
             };
             const undirtyField = _ => {
                 v.resetField({
-                    value: v.fieldValue,
+                    value: v.fieldValue || (props.multiple ? [] : {}),
                 });
             };
-            const searchWrapper = query => searchEntityInTypes(query, searchIn.value || []);
+            const searchWrapper = async query => {
+                if(!query) {
+                    state.page = 0;
+                    return Promise.resolve([]);
+                }
+                if(state.lastQueryString.toLowerCase() != query.toLowerCase()) {
+                    state.page = 0;
+                }
+                state.lastQueryString = query;
+                state.page++;
+                const pagination = await searchEntityInTypes(query, props.searchIn || [], state.page);
+
+                state.hasNextPage = hasNextPage(pagination);
+                return pagination.data;
+            };
+
+            const canShowLink = computed(_ => {
+                if(props.hideLink || !v.fieldValue?.name) return false;
+                return !props.multiple && v.fieldValue.name != 'error.deleted_entity';
+            });
+
+            const valueHasChanged = (v1, v2) => {
+                if(!v1 && !v2) return false;
+                if(!v1 || !v2) return true;
+                if(v1.length != v2.length) return true;
+                if(props.multiple) {
+                    const l2 = v2.map(itm => itm.id);
+                    for(let i=0; i<v1.length; i++) {
+                        const itm1 = v1[i];
+                        if(!l2.includes(itm1)) return true;
+                    }
+                    return false;
+                } else {
+                    return v1.id != v2.id;
+                }
+            };
+
+            const selected = data => {
+                v.handleChange(data);
+            };
 
             // DATA
             const {
@@ -138,12 +171,16 @@
                 value: fieldValue,
                 meta,
                 resetField,
-            } = useField(`entity_${name.value}`, yup.mixed().nullable(), {
-                initialValue: value.value || (multiple.value ? [] : null),
+            } = useField(`entity_${props.name}`, yup.mixed().nullable(), {
+                initialValue: value.value || (props.multiple ? [] : {}),
             });
+
             const state = reactive({
                 query: computed(_ => route.query),
-                mode: computed(_ => multiple.value ? 'tags' : 'single'),
+                mode: computed(_ => props.multiple ? 'tags' : 'single'),
+                lastQueryString: '',
+                page: 0,
+                hasNextPage: false,
             });
             const v = reactive({
                 fieldValue,
@@ -151,12 +188,13 @@
                 meta,
                 resetField,
                 value: computed(_ => {
+                    if(!v.fieldValue || (!props.multiple && Object.keys(v.fieldValue).length == 0)) return (props.multiple ? [] : {});
                     let value = null;
                     if(v.fieldValue) {
-                        if(multiple.value) {
-                            value = v.fieldValue.map(fv => fv.id);
+                        if(props.multiple) {
+                            value = v.fieldValue.map(fv => only(fv, ['id', 'name']));
                         } else {
-                            value = v.fieldValue.id;
+                            value = only(v.fieldValue, ['id', 'name']);
                         }
                     }
                     return value;
@@ -170,6 +208,7 @@
                 // only emit @change event if field is validated (required because Entity.vue components)
                 // trigger this watcher several times even if another component is updated/validated
                 if(!v.meta.validated) return;
+                if(!valueHasChanged(oldValue, newValue)) return;
                 context.emit('change', {
                     dirty: v.meta.dirty,
                     valid: v.meta.valid,
@@ -180,14 +219,14 @@
             // RETURN
             return {
                 t,
-                // HELPERS
                 // LOCAL
-                entitySelected,
+                canShowLink,
                 entryClicked,
+                handleDisplayResult,
                 resetFieldState,
                 undirtyField,
                 searchWrapper,
-                // PROPS
+                selected,
                 // STATE
                 state,
                 v,

@@ -29,6 +29,7 @@ trait CommentTrait
         }
 
         if($notify) {
+            $alreadyNotified = [];
             $oldComments = Comment::where('commentable_id', $comment->commentable_id)
                 ->where('commentable_type', $comment->commentable_type)
                 ->whereHas('author', function(Builder $query) use($user) {
@@ -38,11 +39,22 @@ trait CommentTrait
                 ->select('user_id')
                 ->groupBy('user_id')
                 ->get();
-            
+
             foreach($oldComments as $c) {
+                $alreadyNotified[] = $c->user_id;
                 $notifUser = User::find($c->user_id);
-    
                 $notifUser->notify(new CommentPosted($comment, [], $resourceMetadata));
+            }
+
+            preg_match_all('/@([a-zA-Z0-9_]+)/', $comment->content, $mentionMatches);
+            if(count($mentionMatches) > 0 && count($mentionMatches[1]) > 0) {
+                $userNickMatches = $mentionMatches[1];
+                $notifUsers = User::whereIn('nickname', $userNickMatches)
+                    ->whereNotIn('id', $alreadyNotified)
+                    ->get();
+                foreach($notifUsers as $notifUser) {
+                    $notifUser->notify(new CommentPosted($comment, [], $resourceMetadata));
+                }
             }
         }
 

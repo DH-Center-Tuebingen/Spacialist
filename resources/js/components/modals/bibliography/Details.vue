@@ -48,9 +48,9 @@
                     </dt>
                     <dd
                         class="col-md-9 font-monospace"
-                        :title="state.data.type"
+                        :title="state.data.data.entry_type"
                     >
-                        {{ t(`main.bibliography.types.${state.data.type}`) }}
+                        {{ t(`main.bibliography.types.${state.data.data.entry_type}`) }}
                     </dd>
                     <dt class="col-md-3 text-end">
                         {{ t('main.bibliography.column.author') }}
@@ -90,6 +90,15 @@
                         </dd>
                     </template>
                 </dl>
+                <a
+                    v-if="state.file"
+                    :href="`/download/bibliography?path=${state.file}`"
+                    class="text-decoration-none"
+                    target="_blank"
+                >
+                    <i class="fas fa-fw fa-up-right-from-square" />
+                    {{ state.file.split('/')[1] }}
+                </a>
                 <bibtex-code
                     :code="state.toBibtexify"
                     :type="state.data.type"
@@ -117,14 +126,14 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import store from '@/bootstrap/store.js';
+    import useBibliographyStore from '@/bootstrap/stores/bibliography.js';
+    import useUserStore from '@/bootstrap/stores/user.js';
 
     import { useToast } from '@/plugins/toast.js';
 
     import {
         createAnchorFromUrl,
         except,
-        getUserBy,
         getTs,
     } from '@/helpers/helpers.js';
     import {
@@ -149,6 +158,8 @@
                 id,
             } = toRefs(props);
             const { t } = useI18n();
+            const bibliographyStore = useBibliographyStore();
+            const userStore = useUserStore();
             const toast = useToast();
 
             // FUNCTIONS
@@ -169,7 +180,8 @@
                     type: '',
                     data: {},
                 },
-                user: computed(_ => getUserBy(state.data.user)),
+                file: null,
+                user: computed(_ => userStore.getUserBy(state.data.user)),
                 filteredFields: computed(_ => {
                     const filtered = {};
                     for(let k in state.data.data) {
@@ -189,17 +201,17 @@
                 }),
             });
 
-            const item = store.getters.bibliography.find(item => item.id == id.value);
+            const item = bibliographyStore.getEntry(id.value);
             if(item) {
                 const {
                     citekey,
                     user_id,
                     title,
                     author,
-                    type,
+                    entry_type,
                     updated_at,
                     ...data
-                } = except(item, ['id', 'created_at', 'file', 'file_url']);
+                } = except(item, ['id', 'created_at', 'file']);
 
                 state.data.id = id.value;
                 state.data.citekey = citekey;
@@ -207,7 +219,7 @@
                 state.data.last_updated = updated_at;
                 state.data.title = title;
                 state.data.author = author;
-                state.data.type = type;
+                state.data.entry_type = entry_type;
                 state.data.data = data;
             }
 
@@ -216,7 +228,6 @@
                 t,
                 // HELPERS
                 createAnchorFromUrl,
-                getUserBy,
                 bibtexEntryToText,
                 bibtexify,
                 date,
@@ -226,7 +237,7 @@
                 closeModal,
                 //STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

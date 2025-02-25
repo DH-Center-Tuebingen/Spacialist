@@ -106,11 +106,12 @@
         reactive,
         toRefs,
     } from 'vue';
+
     import { useI18n } from 'vue-i18n';
 
+    import useEntityStore from '@/bootstrap/stores/entity.js';
+
     import {
-        getEntityType,
-        getEntityTypes,
         translateConcept,
         multiselectResetClasslist,
     } from '@/helpers/helpers.js';
@@ -126,6 +127,7 @@
         emits: ['closing', 'confirm'],
         setup(props, context) {
             const { t } = useI18n();
+            const entityStore = useEntityStore();
             const {
                 parent,
             } = toRefs(props);
@@ -151,9 +153,9 @@
                 hasParent: computed(_ => !!parent.value),
                 entityTypes: computed(_ => {
                     if(parent.value && parent.value.entity_type_id) {
-                        return getEntityType(parent.value.entity_type_id).sub_entity_types;
+                        return entityStore.getEntityType(parent.value.entity_type_id).sub_entity_types;
                     } else {
-                        return Object.values(getEntityTypes()).filter(type => type.is_root);
+                        return Object.values(entityStore.entityTypes).filter(type => type.is_root);
                     }
                 }),
                 dataMissing: computed(_ => {

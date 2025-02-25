@@ -8,8 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
-class ThConcept extends Model
-{
+class ThConcept extends Model {
     use LogsActivity;
 
     protected $table = 'th_concept';
@@ -25,8 +24,7 @@ class ThConcept extends Model
         'user_id',
     ];
 
-    public function getActivitylogOptions() : LogOptions
-    {
+    public function getActivitylogOptions(): LogOptions {
         return LogOptions::defaults()
             ->logOnly(['id'])
             ->logFillable()
@@ -34,12 +32,33 @@ class ThConcept extends Model
             ->logOnlyDirty();
     }
 
+    public static function getLabel($str) {
+        $label = $str;
+        $locale = \App::getLocale();
+        try {
+            $concept = self::getByString($str);
+            $label = ThConceptLabel::selectRaw('label, short_name = ? as is_locale', [$locale])
+                ->join('th_language', 'language_id', '=', 'th_language.id')
+                ->where('concept_id', $concept->id)
+                ->orderBy("is_locale", 'desc')
+                ->orderBy('th_concept_label.id', 'asc')
+                ->firstOrFail()->label;
+        } catch(\Exception $e) {
+            info("Could not find translation for: $str\n" . $e->getMessage());
+        }
+        return $label;
+    }
+    
+    public static function getByURL($url) {
+        return self::where('concept_url', $url)->first();
+    }
+
     public static function getByString($str) {
         if(!isset($str) || $str === '') return null;
 
         $concept = ThConcept::where('concept_url', $str)->first();
         if(!isset($concept)) {
-            $concept = ThConcept::whereHas('labels', function(Builder $query) use ($str) {
+            $concept = ThConcept::whereHas('labels', function (Builder $query) use ($str) {
                 $query->where('label', $str);
             })->first();
         }
@@ -70,7 +89,7 @@ class ThConcept extends Model
 
         $conceptMap = [];
 
-        foreach ($concepts as $concept) {
+        foreach($concepts as $concept) {
             $url = $concept->concept_url;
             unset($concept->concept_url);
             $conceptMap[$url] = $concept;
@@ -126,7 +145,68 @@ class ThConcept extends Model
         return $this->belongsToMany('App\ThConcept', 'th_broaders', 'narrower_id', 'broader_id');
     }
 
-    public function files() {
-        return $this->belongsToMany('App\File', 'file_tags', 'concept_id', 'file_id');
+    // TODO Do we need this? If so, move to File Plugin
+    // public function files() {
+    //     return $this->belongsToMany('App\File', 'file_tags', 'concept_id', 'file_id');
+    // }
+
+    /**
+     * Get the label of the concept in the given language.
+     */
+    public function getLabelWithLang($targetLang = "en"): string {
+        $label = $this->labels->where('language.short_name', $targetLang)->first();
+        if($label) {
+            return $label->label;
+        }
+        return $this->labels->first()->label;
+    }
+
+    /**
+     * Recursive helper function to get all broader concepts of a concept.
+     * Will also build a conceptMap for performance reasons.
+     */
+    private function getAllBroaderPaths(&$conceptMap, $lang="en", $concept = null, $paths = [], $currentPath = []): array {
+        $concept ??= $this;
+        $currentId = $concept->id;
+        if(!isset($conceptMap[$currentId])){
+            $conceptMap[$currentId] = $concept->getLabelWithLang($lang);
+        }
+        // Prevent infinite loop
+        if(in_array($currentId, $currentPath)) {
+            $currentPath[] = $currentId;
+            return $paths;
+        }
+        $currentPath[] = $conceptMap[$currentId];
+
+        if($concept->broaders->isEmpty()) {
+            $paths[] = $currentPath;
+        } else {
+            foreach($concept->broaders as $broader) {
+                $paths = $this->getAllBroaderPaths($conceptMap, $lang, $broader, $paths, $currentPath);
+            }
+        }
+
+        return $paths;
+    }
+
+    /**
+     * Gets the paths of all parents of the concept as labels in the given language (will fallback to the 'first' language).
+     *
+     * @param string $lang - The language code of the labels.
+     * @param bool $bottomToTop - If true, the paths will be returned from bottom to top.
+     * @return array - An array of arrays of labels of the paths. From top to bottom.
+     */
+    public function getParentPathAttribute($lang = "en", $bottomToTop = false): array {
+        // For performance reasons, we get the conceptMap
+        // while building the paths.
+        $conceptMap = [];
+        $paths = $this->getAllBroaderPaths($conceptMap, $lang);
+
+        if(!$bottomToTop){
+            foreach($paths as &$path) {
+                $path = array_reverse($path);
+            }
+        }
+        return $paths;
     }
 }

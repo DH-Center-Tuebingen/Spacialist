@@ -12,6 +12,10 @@ thesaurex
 /db
 /app/Plugins/
 
+
+## PHPUnit
+phpunit.xml.bak
+
 ## Created by PHPUnit/Coveralls
 /build
 phpunit.xml.bak
@@ -22,6 +26,7 @@ phpunit.xml.bak
 /public/hot
 /public/storage
 /storage/*.key
+/tmp
 /vendor
 /.idea
 /.vscode
@@ -36,3 +41,6 @@ yarn.lock
 
 # Vite
 /public/build
+
+# Playground
+/playground

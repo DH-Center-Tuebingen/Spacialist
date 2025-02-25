@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex">
+    <div class="d-flex align-items-center h-100 gap-3">
         <input
             :id="name"
             v-model="v.value"
@@ -11,7 +11,7 @@
             :disabled="disabled"
             :name="name"
         >
-        <span class="ms-3">
+        <span>
             {{ v.value }}%
         </span>
     </div>

@@ -7,11 +7,13 @@ use App\Exceptions\Structs\ImportExceptionStruct;
 
 class ImportException extends Exception {
 
+    private int $httpErrorCode;
     private ImportExceptionStruct $data;
 
-    public function __construct(String $message, ImportExceptionStruct $data = null) {
+    public function __construct(String $message, int $httpErrorCode = 400, ImportExceptionStruct $data = null) {
         parent::__construct($message);
 
+        $this->httpErrorCode = $httpErrorCode;
         $this->data = $data;
     }
 
@@ -22,7 +24,8 @@ class ImportException extends Exception {
     public function getObject() {
         return [
             "error" => __($this->getMessage()),
-            "data" => $this->data
+            "data" => $this->data,
+            "code" => $this->httpErrorCode,
         ];
     }
 }

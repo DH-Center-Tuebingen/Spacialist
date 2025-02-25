@@ -125,10 +125,10 @@
                             <a
                                 href="#"
                                 class="text-nowrap"
-                                @click.prevent="setOrderColumn('type')"
+                                @click.prevent="setOrderColumn('entry_type')"
                             >
                                 {{ t('global.type') }}
-                                <span v-show="state.orderColumn == 'type'">
+                                <span v-show="state.orderColumn == 'entry_type'">
                                     <span v-show="state.orderType == 'asc'">
                                         <i class="fas fa-fw fa-sort-down" />
                                     </span>
@@ -394,7 +394,7 @@
                             {{ i+1 }}
                         </td>
                         <td>
-                            {{ entry.type }}
+                            {{ entry.entry_type }}
                         </td>
                         <td v-html="formatBibtexAndShowHighlight(entry.citekey)" />
                         <td v-html="formatBibtexAndShowHighlight(entry.author)" />
@@ -444,7 +444,7 @@
                             v-html="formatBibtexAndShowHighlight(entry.url)"
                         />
                         <td v-if="state.showAllFields">
-                            {{ entry.subtype }}
+                            {{ entry.type }}
                         </td>
                         <td>
                             {{ entry.misc }}
@@ -474,11 +474,11 @@
                                 class="text-muted"
                                 :title="t('global.no_file')"
                             >
-                                <i class="fas fa-fw fa-times" />
+                                <i class="fas fa-fw fa-minus" />
                             </span>
                             <span v-show="entry.file">
                                 <a
-                                    :href="entry.file_url"
+                                    :href="`download/bibliography?path=${entry.file}`"
                                     target="_blank"
                                 >
                                     <i class="fas fa-fw fa-search" />
@@ -521,7 +521,6 @@
                         </td>
                     </tr>
                     <!-- eslint-enable vue/no-v-html -->
-
                     <tr>
                         <td :colspan="state.maxTableCols">
                             <button
@@ -555,23 +554,23 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import store from '@/bootstrap/store.js';
+    import useBibliographyStore from '@/bootstrap/stores/bibliography.js';
+    import useSystemStore from '@/bootstrap/stores/system.js';
 
     import { useToast } from '@/plugins/toast.js';
 
     import {
         bibliographyTypes,
+        formatBibtexText,
     } from '@/helpers/bibliography.js';
 
     import {
         exportBibtexFile,
-        updateBibliography,
     } from '@/api.js';
     import {
         can,
         createDownloadLink,
         createAnchorFromUrl,
-        getProjectName,
         throwError,
         _debounce,
         _orderBy,
@@ -588,6 +587,8 @@
         setup(props, context) {
             const { t } = useI18n();
             const toast = useToast();
+            const bibliographyStore = useBibliographyStore();
+            const systemStore = useSystemStore();
             // FETCH
 
             const chunkSize = 20;
@@ -612,7 +613,7 @@
             };
             const showNewItemModal = _ => {
                 if(!can('bibliography_create')) return;
-                
+
                 showBibliographyEntry({fields: {}}, _ => {
                     if(state.allEntries.length < chunkSize) {
                         state.entriesLoaded++;
@@ -637,12 +638,8 @@
                 }
             };
             const importFile = (file, component) => {
-                return updateBibliography(file.file).then(data => {
-                    store.dispatch('updateBibliography', data);
-                    const lng = data.length;
-                    const lngAdd = data.filter(item => item.added).length;
-                    const lngUpd = lng - lngAdd;
-                    const label = t('main.bibliography.toast.import.msg', {cnt: lngAdd, cnt_upd: lngUpd});
+                return bibliographyStore.import(file.file).then(data => {
+                    const label = t('main.bibliography.toast.import.msg', {cnt: data.added, cnt_upd: data.updated});
                     const title = t('main.bibliography.toast.import.title');
                     toast.$toast(label, title, {
                         channel: 'success',
@@ -661,13 +658,14 @@
                 }
 
                 exportBibtexFile(selection).then(data => {
-                    const filename = getProjectName(true) + '.bibtex';
+                    const projectName = systemStore.getProjectName(true);
+                    const filename = projectName + '.bibtex';
                     createDownloadLink(data, filename, false, 'application/x-bibtex');
                 });
             };
             const editItem = data => {
                 if(!can('bibliography_write')) return;
-                const type = bibliographyTypes.find(t => t.name == data.type);
+                const type = bibliographyTypes.find(t => t.name == data.entry_type);
                 if(!type) return;
                 let fields = {};
                 type.fields.forEach(f => {
@@ -677,7 +675,7 @@
                 });
                 const item = {
                     fields: fields,
-                    type: type,
+                    entry_type: type,
                     id: data.id,
                     file: data.file,
                     file_url: data.file_url,
@@ -691,8 +689,8 @@
 
             // DATA
             const state = reactive({
-                allEntries: computed(_ => store.getters.bibliography),
-                entriesLoaded: Math.min(chunkSize, store.getters.bibliography.length),
+                allEntries: computed(_ => bibliographyStore.bibliography),
+                entriesLoaded: Math.min(chunkSize, bibliographyStore.bibliography.length),
                 orderColumn: 'author',
                 orderType: 'asc',
                 query: '',
@@ -742,11 +740,6 @@
             const debouncedSearch = _debounce(e => {
                 state.query = e.target.value;
             }, state.debounceTimeout);
-
-            const formatBibtexText = text => {
-                if(!text) return '';
-                return text.replace(/[\{\}]/g, '');
-            };
 
             const formatBibtexAndShowHighlight = text => {
                 if(!text) return '';

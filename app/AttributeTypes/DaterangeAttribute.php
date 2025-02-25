@@ -3,6 +3,7 @@
 namespace App\AttributeTypes;
 
 use App\Exceptions\InvalidDataException;
+use App\Utils\StringUtils;
 
 class DaterangeAttribute extends AttributeBase
 {
@@ -14,17 +15,24 @@ class DaterangeAttribute extends AttributeBase
         return date($format, strtotime($date));
     }
 
-    public static function fromImport(int|float|bool|string $data) : mixed {
+    public static function parseImport(int|float|bool|string $data) : mixed {
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);        
         $dates = explode(";", $data);
-
         if(count($dates) != 2) {
-            throw new InvalidDataException("Given data does not match this datatype's format (START;END)");
+            throw InvalidDataException::requiredFormat("START;END", $data);
+        }
+        
+        $start = DateAttribute::parseImport($dates[0]);
+        $end = DateAttribute::parseImport($dates[1]);
+        
+        if($start > $end) {
+            throw InvalidDataException::requireBefore($start, $end);
         }
 
-        return [
-            "start" => trim(self::toDate($dates[0])),
-            "end" => trim(self::toDate($dates[1])),
-        ];
+        return json_encode([
+            $start,
+            $end,
+        ]);
     }
 
     public static function unserialize(mixed $data) : mixed {

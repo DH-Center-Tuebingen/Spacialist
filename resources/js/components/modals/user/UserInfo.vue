@@ -1,10 +1,10 @@
 <template>
     <vue-final-modal
         class="modal-container modal"
-        content-class="sp-modal-content sp-modal-content-xs"
+        content-class="sp-modal-content sp-modal-content-sm"
         name="user-info-modal"
     >
-        <div class="sp-modal-content sp-modal-content-xs">
+        <div class="sp-modal-content sp-modal-content-sm">
             <div class="modal-header">
                 <h5 class="modal-title">
                     {{
@@ -20,17 +20,17 @@
                 />
             </div>
             <div class="modal-body">
-                <div class="text-center">
-                    <user-avatar
-                        :user="user"
-                        :size="128"
-                    />
+                <div class="text-center mb-3">
                     <h3 class="mb-0 mt-1">
                         {{ user.name }}
                     </h3>
                     <h6 class="fw-normal text-muted">
                         {{ user.nickname }}
                     </h6>
+                    <user-avatar
+                        :user="user"
+                        :size="128"
+                    />
                 </div>
                 <div class="d-flex flex-row justify-content-center gap-5">
                     <dl class="mb-0 flex-grow-1 text-end">
@@ -73,8 +73,8 @@
                         <dd
                             v-if="state.hasPhone"
                         >
-                            <a :href="`tel:${user.metadata.phonenumber}`">
-                                {{ user.metadata.phonenumber }}
+                            <a :href="`tel:${user.metadata?.phonenumber}`">
+                                {{ user.metadata?.phonenumber }}
                             </a>
                         </dd>
                         <dt
@@ -86,10 +86,10 @@
                             v-if="state.hasOrcid"
                         >
                             <a
-                                :href="`https://orcid.org/${user.metadata.orcid}`"
+                                :href="`https://orcid.org/${user.metadata?.orcid}`"
                                 target="_blank"
                             >
-                                {{ user.metadata.orcid }}
+                                {{ user.metadata?.orcid }}
                             </a>
                         </dd>
                     </dl>
@@ -102,14 +102,14 @@
                             <i class="fas fa-fw fa-id-card-clip" />
                         </dt>
                         <dd>
-                            {{ user.metadata.role || t('global.user.not_assigned') }}
+                            {{ user.metadata?.role || t('global.user.not_assigned') }}
                         </dd>
                         <dt>
                             {{ t('global.user.field') }}
                             <i class="fas fa-fw fa-chalkboard-user" />
                         </dt>
                         <dd>
-                            {{ user.metadata.field || t('global.user.not_assigned') }}
+                            {{ user.metadata?.field || t('global.user.not_assigned') }}
                         </dd>
                     </dl>
                     <div class="border" />
@@ -119,14 +119,14 @@
                             {{ t('global.user.institution') }}
                         </dt>
                         <dd>
-                            {{ user.metadata.institution || t('global.user.not_assigned') }}
+                            {{ user.metadata?.institution || t('global.user.not_assigned') }}
                         </dd>
                         <dt>
                             <i class="fas fa-fw fa-users-between-lines" />
                             {{ t('global.user.department') }}
                         </dt>
                         <dd>
-                            {{ user.metadata.department || t('global.user.not_assigned') }}
+                            {{ user.metadata?.department || t('global.user.not_assigned') }}
                         </dd>
                     </dl>
                 </div>
@@ -174,7 +174,7 @@
             // FUNCTIONS
             const closeModal = _ => {
                 context.emit('closing', false);
-            }
+            };
 
             // DATA
             const state = reactive({
@@ -193,7 +193,7 @@
                 closeModal,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

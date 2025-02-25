@@ -5,15 +5,23 @@
             class="mb-2 small"
             :entity="state.entity"
         />
-        <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center justify-content-between gap-2">
             <h3
-                class="mb-0"
+                class="mb-0 overflow-hidden text-nowrap flex-grow-1"
                 @mouseenter="onEntityHeaderHover(true)"
                 @mouseleave="onEntityHeaderHover(false)"
             >
-                <span v-if="!state.entity.editing">
-                    {{ state.entity.name }}
-                    <small class="d-inline-flex gap-1">
+                <span
+                    v-if="!state.entity.editing"
+                    class="d-flex flex-row"
+                >
+                    <span
+                        class="text-truncate"
+                        :title="state.entity.name"
+                    >
+                        {{ state.entity.name }}
+                    </span>
+                    <small class="d-inline-flex gap-1 align-self-end">
                         <button
                             v-show="state.hiddenAttributeCount > 0"
                             id="hidden-attributes-icon"
@@ -77,14 +85,10 @@
                                         class="dropdown-item d-flex align-items-center gap-1"
                                         :title="link.path.join(' / ')"
                                     >
-                                        <span
-                                            class="badge rounded-pill"
-                                            style="font-size: 8px;"
-                                            :style="getEntityColors(link.entity_type_id)"
-                                            :title="getEntityTypeName(link.entity_type_id)"
-                                        >
-                                            &nbsp;&nbsp;
-                                        </span>
+                                        <entity-type-label
+                                            :type="link.entity_type_id"
+                                            :icon-only="true"
+                                        />
                                         {{ link.name }}
                                         <span class="text-muted small">{{ link.attribute_urls.join(', ') }}</span>
                                     </router-link>
@@ -126,7 +130,7 @@
                     </button>
                 </form>
             </h3>
-            <div class="d-flex flex-row gap-2">
+            <div class="d-flex flex-row gap-2 text-nowrap">
                 <button
                     type="submit"
                     form="entity-attribute-form"
@@ -155,38 +159,39 @@
             </div>
         </div>
         <div class="d-flex justify-content-between my-2">
-            <div class="d-flex flex-row gap-1">
-                <span :style="state.colorStyles">
-                    <i class="fas fa-fw fa-circle" />
-                </span>
-                <span>
-                    {{ state.entityTypeLabel }}
-                </span>
-            </div>
-            <div>
-                <i class="fas fa-fw fa-user-edit" />
-                <span class="ms-1">
-                    {{ date(state.lastModified, undefined, true, true) }}
-                </span>
-                -
-                <a
-                    v-if="state.entity.user"
-                    href="#"
-                    class="fw-medium"
-                    @click.prevent="showUserInfo(state.entityUser)"
-                >
-                    {{ state.entityUser.name }}
-                    <user-avatar
-                        :user="state.entityUser"
-                        :size="20"
-                        class="align-middle"
-                    />
-                </a>
+            <entity-type-label
+                :type="state.entity.entity_type_id"
+                :icon-only="false"
+            />
+            <div class="d-flex flex-row gap-2">
+                <MultiUserWidget
+                    v-if="state.activeUsers.length > 0"
+                    :active-users="state.activeUsers"
+                />
+                <div class="d-flex flex-row gap-1 align-items-center">
+                    <i class="fas fa-fw fa-user-edit" />
+                    <span :title="date(state.lastModified, undefined, true, true)">
+                        {{ ago(state.lastModified) }}
+                    </span>
+                    -
+                    <a
+                        v-if="state.entity.user"
+                        href="#"
+                        class="fw-medium"
+                        @click.prevent="showUserInfo(state.entityUser)"
+                    >
+                        {{ state.entityUser.name }}
+                        <user-avatar
+                            :user="state.entityUser"
+                            :size="20"
+                            class="align-middle"
+                        />
+                    </a>
+                </div>
             </div>
         </div>
         <ul
-            v-show="can('comments_read')"
-            id="myTab"
+            id="entity-detail-tabs"
             class="nav nav-tabs"
             role="tablist"
         >
@@ -220,7 +225,9 @@
                         @mouseover="showTabActions(tg.id, true)"
                         @mouseleave="showTabActions(tg.id, false)"
                     >
-                        <i class="fas fa-fw fa-2xs fa-circle text-warning" />
+                        <DotIndicator
+                            :type="'warning'"
+                        />
                         <div v-show="state.attributeGrpHovered == tg.id">
                             <a
                                 href="#"
@@ -238,7 +245,31 @@
                     </div>
                 </a>
             </li>
+            <!-- empty nav-item to separate metadata and comments from attributes -->
+            <li class="nav-item nav-item-list-divider ms-auto" />
             <li
+                v-show="can('entity_read')"
+                class="nav-item"
+                role="presentation"
+            >
+                <a
+                    id="active-entity-metadata-tab"
+                    class="nav-link active-entity-detail-tab d-flex gap-2 align-items-center"
+                    href="#"
+                    @click.prevent="setDetailPanel('metadata')"
+                >
+                    <i class="fas fa-fw fa-file-shield" />
+                    {{ t('main.entity.tabs.metadata') }}
+                    <span
+                        v-if="!state.entity.metadata || !state.entity.metadata.licence"
+                        :title="t('global.licence_missing')"
+                    >
+                        <i class="fas fa-exclamation text-warning" />
+                    </span>
+                </a>
+            </li>
+            <li
+                v-show="can('comments_read')"
                 class="nav-item"
                 role="presentation"
             >
@@ -280,7 +311,7 @@
                         v-if="state.attributesFetched"
                         :ref="el => setAttrRefs(el, tg.id)"
                         v-dcan="'entity_data_read'"
-                        class="pt-2 h-100 overflow-y-auto row"
+                        class="h-100 overflow-y-auto row"
                         :attributes="tg.data"
                         :hidden-attributes="state.hiddenAttributeList"
                         :show-hidden="state.hiddenAttributeState"
@@ -288,15 +319,24 @@
                         :metadata-addon="hasReferenceGroup"
                         :selections="state.entityTypeSelections"
                         :values="state.entity.data"
-                        @dirty="e => setFormState(e, tg.id)"
+                        @dirty="(e, isDirty) => setFormState(e, isDirty, tg.id)"
                         @metadata="showMetadata"
                     />
                 </form>
             </div>
             <div
+                v-show="can('entity_read')"
+                id="active-entity-metadata-panel"
+                class="tab-pane fade h-100 active-entity-detail-panel overflow-hidden"
+                role="tabpanel"
+            >
+                <MetadataTab class="mb-auto scroll-y-auto h-100 pe-2" />
+            </div>
+
+            <div
                 v-show="can('comments_read')"
                 id="active-entity-comments-panel"
-                class="tab-pane fade h-100 active-entity-detail-panel d-flex flex-column"
+                class="tab-pane fade h-100 active-entity-detail-panel"
                 role="tabpanel"
             >
                 <div
@@ -370,26 +410,27 @@
         Popover,
     } from 'bootstrap';
 
-    import store from '@/bootstrap/store.js';
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
     import router from '%router';
 
     import { useToast } from '@/plugins/toast.js';
 
-    import { date } from '@/helpers/filters.js';
     import {
-        getEntityComments,
-        patchAttributes,
+        ago,
+        date,
+    } from '@/helpers/filters.js';
+
+    import {
         patchEntityName,
     } from '@/api.js';
+
     import {
         can,
-        isModerated,
-        getAttribute,
-        getEntityColors,
-        getEntityTypeName,
-        getEntityTypeAttributeSelections,
+        userId,
         getEntityTypeDependencies,
         translateConcept,
+        _cloneDeep,
     } from '@/helpers/helpers.js';
     import {
         showDiscard,
@@ -397,10 +438,38 @@
         showUserInfo,
         canShowReferenceModal,
     } from '@/helpers/modal.js';
+    import {
+        listenToList,
+        joinEntityRoom,
+        leaveEntityRoom,
+    } from '@/helpers/websocket.js';
+    import {
+        handleEntityDataUpdated,
+        handleAttributeValueCreated,
+        handleAttributeValueUpdated,
+        handleAttributeValueDeleted,
+        handleEntityReferenceAdded,
+        handleEntityReferenceUpdated,
+        handleEntityReferenceDeleted,
+        handleEntityCommentAdded,
+        handleEntityCommentUpdated,
+        handleEntityCommentDeleted,
+    } from '@/handlers/entity.js';
 
     import { usePreventNavigation } from '@/helpers/form.js';
 
+    import MetadataTab from '@/components/entity/MetadataTab.vue';
+    import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
+    import DotIndicator from '@/components/indicators/DotIndicator.vue';
+    import MultiUserWidget from './user/MultiUserWidget.vue';
+
     export default {
+        components: {
+            DotIndicator,
+            EntityTypeLabel,
+            MetadataTab,
+            MultiUserWidget,
+        },
         props: {
             bibliography: {
                 required: false,
@@ -417,10 +486,12 @@
             const { t } = useI18n();
             const route = useRoute();
             const toast = useToast();
+            const attributeStore = useAttributeStore();
+            const entityStore = useEntityStore();
 
             // FETCH
-            store.dispatch('getEntity', route.params.id).then(_ => {
-                getEntityTypeAttributeSelections();
+            entityStore.setById(route.params.id).then(_ => {
+                entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id);
                 state.initFinished = true;
                 updateAllDependencies();
             });
@@ -428,8 +499,27 @@
             // DATA
             const attrRefs = ref({});
             const state = reactive({
+                dirtyStates: {},
+                attributeGrpHovered: null,
+                hiddenAttributes: {},
+                entityHeaderHovered: false,
+                editedEntityName: '',
+                entityMetadata: {},
+                initFinished: false,
+                commentLoadingState: 'not',
+                metadataTabLoaded: false,
+                hiddenAttributeState: false,
+                attributesInTabs: true,
+                routeQuery: computed(_ => route.query),
+                entity: computed(_ => entityStore.selectedEntity),
+                entityUser: computed(_ => state.entity.user),
+                entityChanges: computed(_ => {
+                    if(!state.entity?.id) return {};
+                    return entityStore.receivedEntityData[state.entity.id];
+                }),
+                entityAttributes: computed(_ => entityStore.getEntityTypeAttributes(state.entity.entity_type_id)),
                 colorStyles: computed(_ => {
-                    const colors = getEntityColors(state.entity.entity_type_id);
+                    const colors = entityStore.getEntityTypeColors(state.entity.entity_type_id);
                     return {
                         color: colors.backgroundColor
                     };
@@ -440,20 +530,8 @@
                     }
                     return false;
                 }),
-                dirtyStates: {},
-                attributeGrpHovered: null,
-                hiddenAttributes: {},
-                entityHeaderHovered: false,
-                editedEntityName: '',
-                initFinished: false,
-                commentLoadingState: 'not',
-                hiddenAttributeState: false,
-                attributesInTabs: true,
-                routeQuery: computed(_ => route.query),
-                entity: computed(_ => store.getters.entity),
-                entityUser: computed(_ => state.entity.user),
-                entityAttributes: computed(_ => store.getters.entityTypeAttributes(state.entity.entity_type_id)),
                 entityGroups: computed(_ => {
+                    // TODO:: Does this makes sense?
                     if(!state.entityAttributes) {
                         return state.entityAttributes;
                     }
@@ -493,7 +571,7 @@
                         };
                     }
                 }),
-                entityTypeSelections: computed(_ => getEntityTypeAttributeSelections(state.entity.entity_type_id)),
+                entityTypeSelections: computed(_ => entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id)),
                 entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
                 hasAttributeLinks: computed(_ => state.entity.attributeLinks && state.entity.attributeLinks.length > 0),
                 groupedAttributeLinks: computed(_ => {
@@ -514,7 +592,7 @@
                 }),
                 attributesFetched: computed(_ => state.initFinished && state.entity.data && !!state.entityAttributes && state.entityAttributes.length > 0),
                 entityTypeLabel: computed(_ => {
-                    return getEntityTypeName(state.entity.entity_type_id);
+                    return entityStore.getEntityTypeName(state.entity.entity_type_id);
                 }),
                 hiddenAttributeList: computed(_ => {
                     const keys = Object.keys(state.hiddenAttributes);
@@ -545,12 +623,12 @@
                             }
                         }
                         for(let k in listGroups) {
-                            const grpAttr = getAttribute(k);
+                            const grpAttr = attributeStore.getAttribute(k);
                             listing += `<span class="text-muted fw-light fs-6"># ${translateConcept(grpAttr.thesaurus_url)}</span>`;
                             listing += `<ol class="mb-0">`;
                             // const data = state.entity.data[keys[i]];
                             for(let i = 0; i < listGroups[k].length; i++) {
-                                const attr = getAttribute(listGroups[k][i]);
+                                const attr = attributeStore.getAttribute(listGroups[k][i]);
                                 listing += `<li><span class="fw-bold">${translateConcept(attr.thesaurus_url)}</span></li>`;
                             }
                             listing += `</ol>`;
@@ -582,8 +660,9 @@
                 commentFetchFailed: computed(_ => {
                     return state.commentLoadingState === 'failed';
                 }),
+                activeUsers: computed(_ => entityStore.getActiveEntityUsers),
             });
-
+            const channels = {};
 
             usePreventNavigation(_ => state.formDirty);
 
@@ -629,7 +708,7 @@
                     cancelUpdateEntityName();
                 } else {
                     patchEntityName(state.entity.id, state.editedEntityName).then(data => {
-                        store.dispatch('updateEntity', {
+                        entityStore.update({
                             ...data,
                             name: state.editedEntityName,
                         });
@@ -644,7 +723,7 @@
             const updateDependencyState = (aid, value) => {
                 const attrDeps = state.entityTypeDependencies[aid];
                 if(!attrDeps) return;
-                const type = getAttribute(aid).datatype;
+                const type = attributeStore.getAttribute(aid).datatype;
                 attrDeps.forEach(ad => {
                     let matches = false;
                     switch(ad.operator) {
@@ -675,7 +754,6 @@
                     }
                     state.hiddenAttributes[ad.dependant] = {
                         hide: !matches,
-                        hide: matches,
                         by: aid,
                     };
                 });
@@ -716,17 +794,18 @@
                 if(tab === 'comments') {
                     newTab = document.getElementById('active-entity-comments-tab');
                     newPanel = document.getElementById('active-entity-comments-panel');
-                    oldTabs = document.getElementsByClassName('active-entity-attributes-tab');
-                    oldPanels = document.getElementsByClassName('active-entity-attributes-panel');
                     if(!state.commentsFetched) {
                         fetchComments();
                     }
+                } else if(tab === 'metadata') {
+                    newTab = document.getElementById('active-entity-metadata-tab');
+                    newPanel = document.getElementById('active-entity-metadata-panel');
                 } else {
                     newTab = document.getElementById(`active-entity-attributes-group-${tabId}-tab`);
                     newPanel = document.getElementById(`active-entity-attributes-panel-${tabId}`);
-                    oldTabs = document.getElementsByClassName('active-entity-detail-tab');
-                    oldPanels = document.getElementsByClassName('active-entity-detail-panel');
                 }
+                oldTabs = document.getElementsByClassName('active-entity-detail-tab');
+                oldPanels = document.getElementsByClassName('active-entity-detail-panel');
 
                 oldTabs.forEach(t => t.classList.remove('active'));
                 if(newTab) newTab.classList.add('active');
@@ -736,11 +815,12 @@
             const onEntityHeaderHover = hoverState => {
                 state.entityHeaderHovered = hoverState;
             };
+
             const showTabActions = (grp, status) => {
                 state.attributeGrpHovered = status ? grp : null;
             };
-            const setFormState = (e, grp) => {
-                state.dirtyStates[grp] = e.dirty && e.valid;
+            const setFormState = (e, isDirty, grp) => {
+                state.dirtyStates[grp] = isDirty;
                 updateDependencyState(e.attribute_id, e.value);
             };
             const getDirtyValues = grp => {
@@ -772,12 +852,12 @@
                     state.dirtyStates[g] = false;
                 });
             };
+
             const fetchComments = _ => {
                 if(!can('comments_read')) return;
 
                 state.commentLoadingState = 'fetching';
-                getEntityComments(state.entity.id).then(comments => {
-                    store.dispatch('setEntityComments', comments);
+                entityStore.fetchEntityComments(state.entity.id).then(_ => {
                     state.commentLoadingState = 'fetched';
                 }).catch(e => {
                     state.commentLoadingState = 'failed';
@@ -785,21 +865,9 @@
             };
 
             const addComment = event => {
-                const comment = event.comment;
-                const replyTo = event.replyTo;
-                if(replyTo) {
-                    const op = state.entity.comments.find(c => c.id == replyTo);
-                    if(op.replies) {
-                        op.replies.push(comment);
-                    }
-                    op.replies_count++;
-                } else {
-                    if(!state.entity.comments) {
-                        state.entity.comments = [];
-                    }
-                    state.entity.comments.push(comment);
-                    state.entity.comments_count++;
-                }
+                entityStore.addComment(state.entity.id, event.comment, {
+                    replyTo: event.replyTo,
+                });
             };
 
             const handleSaveOnKey = (e, grp) => {
@@ -822,11 +890,12 @@
                 const dirtyValues = getDirtyValues(grps);
                 const patches = [];
                 const moderations = [];
+                if(Object.keys(dirtyValues).length == 0) return;
 
                 for(let v in dirtyValues) {
                     const aid = v;
                     const data = state.entity.data[aid];
-                    const type = getAttribute(aid)?.datatype;
+                    const type = attributeStore.getAttribute(aid)?.datatype;
                     const patch = {
                         op: null,
                         value: null,
@@ -834,7 +903,7 @@
                             aid: aid,
                         },
                     };
-                    if(data.id) {
+                    if(data?.id) {
                         // if data.id exists, there has been an entry in the database, therefore it is a replace/remove operation
                         if(
                             (dirtyValues[v] && dirtyValues[v] != '')
@@ -863,23 +932,8 @@
                     patches.push(patch);
                     moderations.push(aid);
                 }
-                return patchAttributes(state.entity.id, patches).then(data => {
+                return entityStore.patchAttributes(state.entity.id, patches, dirtyValues, moderations).then(data => {
                     undirtyList(grps);
-                    store.dispatch('updateEntity', data.entity);
-                    store.dispatch('updateEntityData', {
-                        data: dirtyValues,
-                        new_data: data.added_attributes,
-                        eid: state.entity.id,
-                        sync: !isModerated(),
-                    });
-                    if(isModerated()) {
-                        store.dispatch('updateEntityDataModerations', {
-                            entity_id: state.entity.id,
-                            attribute_ids: moderations,
-                            state: 'pending',
-                        });
-                    }
-
                     resetDirtyStates(grps);
 
                     toast.$toast(
@@ -928,6 +982,20 @@
             // ON MOUNTED
             onMounted(_ => {
                 console.log('entity detail component mounted');
+                channels.entity = joinEntityRoom(route.params.id);
+                listenToList(channels.entity, [
+                    handleEntityDataUpdated,
+                    handleAttributeValueCreated,
+                    handleAttributeValueUpdated,
+                    handleAttributeValueDeleted,
+                    handleEntityReferenceAdded,
+                    handleEntityReferenceUpdated,
+                    handleEntityReferenceDeleted,
+                    handleEntityCommentAdded,
+                    handleEntityCommentUpdated,
+                    handleEntityCommentDeleted,
+                ]);
+
                 let hiddenAttrElem = document.getElementById('hidden-attributes-icon');
                 if(!!hiddenAttrElem) {
                     new Popover(hiddenAttrElem, {
@@ -936,11 +1004,18 @@
                     });
                 }
             });
-
             onBeforeUpdate(_ => {
                 attrRefs.value = {};
                 state.commentLoadingState = 'not';
             });
+
+            watch(_ => state.entityChanges,
+                (newChanges, oldChanges) => {
+                    for(let k in attrRefs.value) {
+                        attrRefs.value[k]?.broadcastAttributeChanges(newChanges);
+                    }
+                }
+            );
 
             watch(_ => state.hiddenAttributeCount,
                 async (newCount, oldCount) => {
@@ -961,11 +1036,16 @@
                     if(newParams.id == oldParams.id) return;
                     if(!newParams.id) return;
                     state.initFinished = false;
-                    store.dispatch('getEntity', newParams.id).then(_ => {
-                        getEntityTypeAttributeSelections();
+                    entityStore.setById(newParams.id).then(_ => {
+                        entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id);
                         state.initFinished = true;
                         updateAllDependencies();
                     });
+                    // store.dispatch('getEntity', newParams.id).then(_ => {
+                    //     entityStore.getEntityTypeAttributeSelections();
+                    //     state.initFinished = true;
+                    //     updateAllDependencies();
+                    // });
                 }
             );
 
@@ -1003,7 +1083,9 @@
                     showDiscard(to, resetDirtyStates, saveEntity);
                     return false;
                 } else {
-                    store.dispatch('resetEntity');
+                    leaveEntityRoom(channels.entity);
+                    entityStore.unset();
+                    channels.entity = null;
                     return true;
                 }
             });
@@ -1014,7 +1096,21 @@
                         return false;
                     } else {
                         state.hiddenAttributes = {};
-                        // store.dispatch('resetEntity');
+                        leaveEntityRoom(channels.entity);
+                        channels.entity = joinEntityRoom(to.params.id);
+                        listenToList(channels.entity, [
+                            handleEntityDataUpdated,
+                            handleAttributeValueCreated,
+                            handleAttributeValueUpdated,
+                            handleAttributeValueDeleted,
+                            handleEntityReferenceAdded,
+                            handleEntityReferenceUpdated,
+                            handleEntityReferenceDeleted,
+                            handleEntityCommentAdded,
+                            handleEntityCommentUpdated,
+                            handleEntityCommentDeleted,
+                        ]);
+                        await entityStore.setById(to.params.id);
                         return true;
                     }
                 } else {
@@ -1026,12 +1122,13 @@
             // RETURN
             return {
                 t,
+                route,
                 // HELPERS
                 can,
+                ago,
                 date,
+                userId,
                 showUserInfo,
-                getEntityTypeName,
-                getEntityColors,
                 translateConcept,
                 // LOCAL
                 hasReferenceGroup,
@@ -1046,6 +1143,7 @@
                 onEntityHeaderHover,
                 showTabActions,
                 setFormState,
+                fetchComments,
                 addComment,
                 handleSaveOnKey,
                 saveEntity,

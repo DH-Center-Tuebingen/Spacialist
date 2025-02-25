@@ -7,7 +7,7 @@
             {{ t('main.importer.info.entity_type_has_no_attributes') }}
         </div>
         <div
-            v-for="(attr, i) in availableAttributes"
+            v-for="(attr, i) in availableAttributesSortedByName"
             :key="i"
             class="attribute-mapping-item"
         >
@@ -20,7 +20,7 @@
                     class="form-label"
                     :for="`input-data-column-${attr.id}`"
                 >
-                    {{ translateConcept(attr.thesaurus_url) }}
+                    {{ attr._name }}
                     <span class="ms-2 opacity-50 small">
                         {{ t(`global.attributes.${attr.datatype}`) }}
                     </span>
@@ -31,9 +31,7 @@
                 :disabled="disabled"
                 :value="attributeMapping[attr.id]"
                 :classes="multiselectResetClasslist"
-                :object="false"
-                :mode="'single'"
-                :options="availableColumns"
+                :options="sortedOptions"
                 :placeholder="t('global.select.placeholder')"
                 :hide-selected="true"
                 :searchable="true"
@@ -46,6 +44,7 @@
 </template>
 
 <script>
+    import { computed } from 'vue';
     import { useI18n } from 'vue-i18n';
 
     import {
@@ -84,59 +83,79 @@
         emits: [
             'row-changed',
             'update:attributeMapping',
-        ], setup(props, context) {
-            const {
-                t
-            } = useI18n();
+        ],
+        setup(props, context) {
+            const { t } = useI18n();
 
-            function updateAttributeMapping(id, option) {
+            const updateAttributeMapping = (id, option) => {
                 const newMapping = Object.assign({}, props.attributeMapping);
                 newMapping[id] = option;
 
                 context.emit('row-changed', id, option);
                 context.emit('update:attributeMapping', newMapping);
-            }
+            };
 
-            function deselectWorkAround(id, value) {
+            const deselectWorkAround = (id, value) => {
                 /**
                  * There is a deselect function for multiselect.
                  * But for some reason it's not fired when the user deselects an option.
-                 * So we use the change listener and only call the update function 
+                 * So we use the change listener and only call the update function
                  * when the value is set to 'null'.
                  */
                 if(value === null) {
                     updateAttributeMapping(id, null);
                 }
-            }
+            };
 
-            function getTotal(attr) {
+            const getTotal = attr => {
                 let val = 0;
                 const stat = props.stats.attributes[attr.id];
                 if(stat && stat.total) {
                     val = stat.total;
                 }
                 return val;
-            }
+            };
 
-            function getMissing(attr) {
+            const getMissing = attr => {
                 let val = 0;
                 const stat = props.stats.attributes[attr.id];
                 if(stat && stat.total) {
                     val = stat.missing;
                 }
                 return val;
-            }
+            };
+
+            const availableAttributesSortedByName = computed(_ => {
+                let arr = [];
+                for(const attr of props.availableAttributes) {
+                    arr.push({
+                        ...attr,
+                        _name: translateConcept(attr.thesaurus_url),
+                    });
+                }
+
+                return arr.sort((a, b) => {
+                    return a._name.localeCompare(b._name);
+                });
+            });
+
+            const sortedOptions = computed(_ => {
+                return props.availableColumns.toSorted((a, b) => {
+                    return a.localeCompare(b);
+                });
+            });
 
             return {
                 t,
-                translateConcept,
-                multiselectResetClasslist,
-                updateAttributeMapping,
+                // Local
+                availableAttributesSortedByName,
                 deselectWorkAround,
-                getTotal,
                 getMissing,
+                getTotal,
+                multiselectResetClasslist,
+                sortedOptions,
+                updateAttributeMapping,
             };
         },
     };
 </script>
-

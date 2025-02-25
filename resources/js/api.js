@@ -1,28 +1,30 @@
 import {
     default as http,
     external,
+    web_http,
 } from '@/bootstrap/http.js';
-import store from '@/bootstrap/store.js';
-import auth from '@/bootstrap/auth.js';
 import {
     only,
     simpleResourceType,
-    getEntityTypeAttributes as storedEntityTypeAttributes,
+    throwError,
 } from '@/helpers/helpers.js';
 
 // GET AND STORE (FETCH)
-export async function fetchVersion() {
-    await $httpQueue.add(() => http.get('/version').then(response => {
-        store.dispatch('setVersion', response.data);
+export async function logout() {
+    return await $httpQueue.add(() => http.post('/auth/logout'));
+}
+
+export async function getCsrfCookie() {
+    await $httpQueue.add(() => web_http.get('/sanctum/csrf-cookie').then(response => {
     }));
 }
 
+export async function fetchVersion() {
+    return await $httpQueue.add(() => http.get('/version').then(response => response.data));
+}
+
 export async function fetchPlugins() {
-    await $httpQueue.add(
-        () => http.get('/plugin').then(response => {
-            store.dispatch('setPlugins', response.data);
-        })
-    );
+    return await $httpQueue.add(() => http.get('/plugin').then(response => response.data));
 }
 
 export async function uploadPlugin(file) {
@@ -30,135 +32,73 @@ export async function uploadPlugin(file) {
     formData.append('file', file);
 
     return $httpQueue.add(
-        () => http.post(`/plugin`, formData).then(response => {
-            store.dispatch('addPlugin', response.data);
-        })
+        () => http.post(`/plugin`, formData).then(response => response.data)
     );
 }
 
 export async function installPlugin(id) {
     return $httpQueue.add(
-        () => http.get(`/plugin/${id}`).then(response => {
-            const plugin = response.data.plugin;
-            store.dispatch('updatePlugin', {
-                plugin_id: id,
-                properties: {
-                    installed_at: plugin.installed_at,
-                    updated_at: plugin.updated_at,
-                },
-            });
-            return response.data;
-        })
+        () => http.get(`/plugin/${id}`).then(response => response.data)
     );
 }
 
 export async function updatePlugin(id) {
     return $httpQueue.add(
-        () => http.patch(`/plugin/${id}`).then(response => {
-            store.dispatch('updatePlugin', {
-                plugin_id: id,
-                properties: {
-                    installed_at: response.data.installed_at,
-                    updated_at: response.data.updated_at,
-                    version: response.data.version,
-                    update_available: false,
-                },
-            });
-        })
+        () => http.patch(`/plugin/${id}`).then(response => response.data)
     );
 }
 
 export async function uninstallPlugin(id) {
     return $httpQueue.add(
-        () => http.delete(`/plugin/${id}`).then(response => {
-            store.dispatch('updatePlugin', {
-                plugin_id: id,
-                uninstalled: true,
-                properties: {
-                    installed_at: null,
-                    updated_at: response.data.plugin.updated_at,
-                },
-            });
-            return response.data;
-        })
+        () => http.delete(`/plugin/${id}`).then(response => response.data)
     );
 }
 
 export async function removePlugin(id) {
     return $httpQueue.add(
-        () => http.delete(`/plugin/remove/${id}`).then(response => {
-            store.dispatch('updatePlugin', {
-                plugin_id: id,
-                deleted: true,
-            });
-            return response.data;
-        })
+        () => http.delete(`/plugin/remove/${id}`).then(response => response.data)
     );
 }
 
+export async function fetchEntityMetadata(id) {
+    return await $httpQueue.add(() => http.get(`entity/${id}/metadata`).then(response => response.data));
+}
+
+export async function fetchUser() {
+    return await $httpQueue.add(() => http.get('/auth/user').then(response => response.data));
+}
+
 export async function fetchUsers() {
-    store.commit('setUser', auth.user());
-    await $httpQueue.add(() => http.get('user').then(response => {
-        store.dispatch('setUsers', {
-            active: response.data.users,
-            deleted: response.data.deleted_users || []
-        });
-    }));
-    await $httpQueue.add(() => http.get('role').then(response => {
-        store.dispatch('setRoles', {
-            roles: response.data.roles,
-            permissions: response.data.permissions,
-            presets: response.data.presets,
-        });
-    }));
+    const userData = await $httpQueue.add(() => http.get('user').then(response => response.data));
+    const roleData = await $httpQueue.add(() => http.get('role').then(response => response.data));
+    return {
+        user: userData,
+        role: roleData,
+    };
 }
 
 export async function fetchTopEntities() {
-    await $httpQueue.add(() => http.get('/entity/top').then(response => {
-        store.dispatch('setInitialEntities', response.data);
-    }));
+    return await $httpQueue.add(() => http.get('/entity/top').then(response => response.data));
 }
 
 export async function fetchAttributes() {
-    return await $httpQueue.add(() => http.get('editor/dm/attribute').then(response => {
-        store.dispatch('setAttributes', response.data);
-    }));
+    return await $httpQueue.add(() => http.get('editor/dm/attribute').then(response => response.data));
 }
 
 export async function fetchBibliography() {
-    await $httpQueue.add(() => http.get('bibliography').then(response => {
-        store.dispatch('setBibliography', response.data);
-    }));
+    return await $httpQueue.add(() => http.get('bibliography').then(response => response.data));
 }
 
 export async function fetchTags() {
-    await $httpQueue.add(() => http.get('tag').then(response => {
-        store.dispatch('setTags', response.data);
-    }));
+    return await $httpQueue.add(() => http.get('tag').then(response => response.data));
 }
 
-export async function fetchPreData(locale) {
-    return $httpQueue.add(() => http.get('pre').then(response => {
-        store.commit('setConcepts', response.data.concepts);
-        store.dispatch('setEntityTypes', response.data.entityTypes);
-        store.commit('setPreferences', response.data.preferences);
-        store.commit('setSystemPreferences', response.data.system_preferences);
-        store.dispatch('setColorSets', response.data.colorsets);
-        store.dispatch('setAnalysis', response.data.analysis);
-        store.dispatch('setDatatypeData', response.data.datatype_data);
-
-        if(auth.ready()) {
-            auth.load().then(_ => {
-                locale.value = store.getters.preferenceByKey('prefs.gui-language');
-            });
-        } else {
-            locale.value = store.getters.preferenceByKey('prefs.gui-language');
-        }
-    }));
+export async function fetchPreData() {
+    return $httpQueue.add(() => http.get('pre').then(response => response.data));
 }
 
 export async function fetchGeometryTypes() {
-    return $httpQueue.add(
+    return await $httpQueue.add(
         () => http.get('editor/dm/geometry').then(response => {
             let geom = [];
             for(let i = 0; i < response.data.length; i++) {
@@ -172,17 +112,13 @@ export async function fetchGeometryTypes() {
                 label: 'Any',
                 key: 'any'
             });
-            store.dispatch('setGeometryTypes', geom);
+            return geom;
         })
     );
 }
 
 export async function fetchAttributeTypes() {
-    return $httpQueue.add(
-        () => http.get('/editor/dm/attribute_types').then(response => {
-            store.dispatch('setAttributeTypes', response.data);
-        })
-    );
+    return await $httpQueue.add(() => http.get('/editor/dm/attribute_types').then(response => response.data));
 }
 
 // GET
@@ -234,6 +170,12 @@ export async function getEntityReferences(id) {
                 }
                 return response.data;
             })
+    );
+}
+
+export async function getEntityTypeAttributes(id) {
+    return await $httpQueue.add(
+        () => http.get(`/editor/entity_type/${id}/attribute`)
     );
 }
 
@@ -322,6 +264,12 @@ export async function getMapProjection(srid) {
 }
 
 // POST
+export async function login(credentials) {
+    return await $httpQueue.add(() => http.post('/auth/login', credentials).then(response => {
+        return response.data;
+    }));
+}
+
 export async function addUser(user) {
     const data = only(user, ['name', 'nickname', 'email', 'password']);
     return $httpQueue.add(
@@ -349,25 +297,6 @@ export async function confirmUserPassword(uid, password = null) {
     const data = !!password ? { password: password } : {};
     return $httpQueue.add(
         () => http.patch(`user/${uid}/password/confirm`, data).then(response => response.data)
-    );
-}
-
-export async function updateEntityTypeRelation(etid, values) {
-    const data = only(values, ['is_root', 'sub_entity_types']);
-    const apiData = { ...data };
-    if(data.sub_entity_types) {
-        apiData.sub_entity_types = data.sub_entity_types.map(t => t.id);
-    }
-
-    return await $httpQueue.add(
-        () => http.post(`/editor/dm/${etid}/relation`, apiData).then(response => {
-            store.dispatch('updateEntityType', {
-                ...data,
-                id: etid,
-            });
-
-            return response.data;
-        })
     );
 }
 
@@ -412,7 +341,7 @@ export async function addOrUpdateBibliographyItem(item, file) {
     for(let k in item.fields) {
         data.append(k, item.fields[k]);
     }
-    data.append('type', item.type.name);
+    data.append('entry_type', item.entry_type.name);
     if(file) {
         if(file == 'delete') {
             data.append('delete_file', true);
@@ -432,7 +361,7 @@ export async function addOrUpdateBibliographyItem(item, file) {
     }
 }
 
-export async function updateBibliography(file) {
+export async function importBibliographyFile(file) {
     let formData = new FormData();
     formData.append('file', file);
     return await $httpQueue.add(
@@ -455,6 +384,9 @@ export async function addEntity(entity) {
     };
     if(!!entity.parent_id) {
         data.root_entity_id = entity.parent_id;
+    }
+    if(!!entity.rank) {
+        data.rank = entity.rank;
     }
     return $httpQueue.add(
         () => http.post(`/entity`, data).then(response => response.data)
@@ -480,11 +412,11 @@ export async function validateEntityData(data) {
     );
 }
 
-export async function addEntityType(et) {
+export async function addEntityType(entityType) {
     const data = {
-        concept_url: et.label.concept_url,
-        is_root: et.is_root,
-        geometry_type: et.geometryType.label,
+        concept_url: entityType.label.concept_url,
+        is_root: entityType.is_root,
+        geometry_type: entityType.geometryType.label,
     };
     return $httpQueue.add(
         () => http.post(`/editor/dm/entity_type`, data).then(response => response.data)
@@ -513,19 +445,29 @@ export async function addAttribute(attribute) {
         data.restricted_types = attribute.restrictedTypes.map(t => t.id);
     }
     if(attribute.columns && attribute.columns.length > 0) {
-        data.columns = attribute.columns.map(c => {
-            const mappedC = { ...c };
-            if(mappedC.label) {
-                mappedC.label_id = mappedC.label.id;
-                delete mappedC.label;
+        data.columns = attribute.columns.map(column => {
+            const mappedColumn = { ...column };
+            if(mappedColumn.label) {
+                mappedColumn.label_id = mappedColumn.label.id;
+                delete mappedColumn.label;
             }
-            if(mappedC.rootLabel) {
-                mappedC.root_id = mappedC.rootLabel.id;
-                delete mappedC.rootLabel;
+            if(mappedColumn.rootLabel) {
+                mappedColumn.root_id = mappedColumn.rootLabel.id;
+                delete mappedColumn.rootLabel;
             }
-            mappedC.datatype = mappedC.type;
-            delete mappedC.type;
-            return mappedC;
+            if(mappedColumn.restrictedTypes) {
+                mappedColumn.restricted_types = mappedColumn.restrictedTypes.map(t => t.id);
+                delete mappedColumn.restrictedTypes;
+            }
+            if(mappedColumn.siGroup) {
+                mappedColumn.si_base = mappedColumn.siGroup;
+                mappedColumn.si_default = mappedColumn.siGroupUnit;
+                delete mappedColumn.siGroup;
+                delete mappedColumn.siGroupUnit;
+            }
+            mappedColumn.datatype = mappedColumn.type;
+            delete mappedColumn.type;
+            return mappedColumn;
         });
     }
     if(attribute.textContent) {
@@ -541,54 +483,27 @@ export async function addAttribute(attribute) {
     );
 }
 
-export async function addEntityTypeAttribute(etid, aid, to) {
-    const attrs = storedEntityTypeAttributes(etid);
-    // Already added
-    if(attrs.length < to && attrs[to].id == aid) {
-        return;
-    }
-
-    const rank = to + 1;
+export async function addEntityTypeAttribute(etid, aid, rank) {
     const data = {
         attribute_id: aid,
         position: rank,
     };
 
     return $httpQueue.add(
-        () => http.post(`/editor/dm/entity_type/${etid}/attribute`, data).then(response => {
-            const relation = response.data.attribute;
-            delete response.data.attribute;
-
-            const data = {
-                ...response.data,
-                ...relation,
-                entity_attribute_id: response.data.id,
-                pivot: {
-                    id: response.data.id,
-                    entity_type_id: response.data.entity_type_id,
-                    attribute_id: response.data.attribute_id,
-                    position: response.data.position,
-                    depends_on: response.data.depends_on,
-                    metadata: response.data.metadata,
-                },
-            };
-
-            store.dispatch('addEntityTypeAttribute', data);
-            return new Promise(r => r(data));
-        })
+        () => http.post(`/editor/dm/entity_type/${etid}/attribute`, data).then(response => response.data)
     );
 }
 
-export async function addReference(eid, aid, url, data) {
-    $httpQueue.add(
-        () => http.post(`/entity/${eid}/reference/${aid}`, data).then(response => {
-            store.dispatch('addReference', {
-                ...response.data,
-                attribute_url: url,
-            });
-            return response.data;
-        })
-    );
+export async function addReference(eid, aid, data) {
+    if(aid) {
+        return $httpQueue.add(
+            () => http.post(`/entity/${eid}/reference/${aid}`, data).then(response => response.data)
+        );
+    } else {
+        return $httpQueue.add(
+            () => http.post(`/entity/${eid}/reference`, data).then(response => response.data)
+        );
+    }
 }
 
 export async function getFilteredActivity(pageUrl, payload) {
@@ -616,6 +531,12 @@ export async function patchEntityName(eid, name) {
     );
 }
 
+export async function patchEntityMetadata(eid, metadata) {
+    return $httpQueue.add(
+        () => http.patch(`entity/${eid}/metadata`, metadata).then(response => response.data).catch(error => { throw error; })
+    );
+}
+
 export async function patchAttribute(entityId, attributeId, data) {
     return $httpQueue.add(
         () => http.patch(`/entity/${entityId}/attribute/${attributeId}`, data).then(response => response.data)
@@ -638,22 +559,11 @@ export async function handleModeration(modAction, entity_id, attribute_id, overw
     }
 
     return $httpQueue.add(
-        () => http.patch(`/entity/${entity_id}/attribute/${attribute_id}/moderate`, data).then(response => {
-            store.dispatch('updateEntityDataModerations', {
-                entity_id: entity_id,
-                attribute_ids: [attribute_id],
-                state: null,
-            });
-            if(overwrite_value) {
-                store.dispatch('updateEntityData', {
-                    eid: entity_id,
-                    data: {
-                        [attribute_id]: overwrite_value,
-                    },
-                });
-            }
-            return response.data;
-        }).catch(error => { throw error; })
+        () => http.patch(`/entity/${entity_id}/attribute/${attribute_id}/moderate`, data)
+            .then(response => response.data)
+            .catch(error => {
+                throw error;
+            })
     );
 }
 
@@ -675,75 +585,38 @@ export async function moveEntity(entityId, parentId = null, rank = null) {
     const data = {
         parent_id: parentId,
     };
-    if(!!rank) {
-        data.rank = rank;
-    } else {
-        data.rank = 0;
-        data.to_end = true;
-    }
 
     return $httpQueue.add(
-        () => http.patch(`/entity/${entityId}/rank`, data).then(response => {
-            store.dispatch('moveEntity', {
-                entity_id: entityId,
-                parent_id: parentId,
-                rank: data.rank,
-                to_end: data.to_end,
-            });
-            return response.data;
-        })
+        () => http.patch(`/entity/${entityId}/rank`, data).then(response => response.data)
     );
 }
 
 export async function patchEntityType(etid, updatedProps) {
-    // If no props updated, do nothing
-    if(Object.keys(updatedProps).length < 1) {
+    const allowedData = only(updatedProps, ['thesaurus_url', 'is_root', 'sub_entity_types']);
+    // If no allowed props updated, do nothing
+    if(Object.keys(allowedData).length < 1) {
         return;
     }
-
-    // Currently only thesaurus_url is allowed to be changed
     const data = {
-        data: only(updatedProps, ['thesaurus_url'])
+        data: { ...allowedData },
     };
 
+    if(allowedData.sub_entity_types) {
+        data.data.sub_entity_types = allowedData.sub_entity_types.map(t => t.id);
+    }
+
     return $httpQueue.add(
-        () => http.patch(`/editor/dm/entity_type/${etid}`, data).then(response => {
-            store.dispatch('updateEntityType', {
-                ...data.data,
-                id: etid,
-                updated_at: response.data.updated_at,
-            });
-            return response.data;
-        })
+        () => http.patch(`/editor/dm/entity_type/${etid}`, data).then(response => response.data)
     );
 }
 
-export async function reorderEntityAttributes(etid, aid, from, to) {
-    if(from == to) {
-        return;
-    }
-    const attrs = storedEntityTypeAttributes(etid);
-    // Return if moved attribute does not match
-    if(attrs[from].id != aid) {
-        return;
-    }
-
-    const rank = to + 1;
+export async function reorderEntityAttributes(etid, aid, position) {
     const data = {
-        position: rank
+        position: position,
     };
 
     return $httpQueue.add(
-        () => http.patch(`/editor/dm/entity_type/${etid}/attribute/${aid}/position`, data).then(response => {
-            store.dispatch('reorderAttributes', {
-                rank: rank,
-                from: from,
-                to: to,
-                entity_type_id: etid,
-                attribute_id: aid,
-            });
-            return response.data;
-        })
+        () => http.patch(`/editor/dm/entity_type/${etid}/attribute/${aid}/position`, data).then(response => response.data)
     );
 }
 
@@ -756,29 +629,14 @@ export async function updateAttributeDependency(etid, aid, dependency) {
     }
     return $httpQueue.add(
         () => http.patch(`/editor/dm/entity_type/${etid}/attribute/${aid}/dependency`, data).then(response => {
-            const data = Object.values(response.data).length > 0 ? response.data : null;
-            store.dispatch('updateDependency', {
-                entity_type_id: etid,
-                attribute_id: aid,
-                data: data,
-            });
-
-            return data;
+            return Object.values(response.data).length > 0 ? response.data : null;
         })
     );
 }
 
-export async function updateAttributeMetadata(etid, aid, pivid, data) {
+export async function updateAttributeMetadata(pivid, data) {
     return $httpQueue.add(
-        () => http.patch(`/editor/dm/entity_type/attribute/system/${pivid}`, data).then(response => {
-            store.dispatch('updateAttributeMetadata', {
-                entity_type_id: etid,
-                attribute_id: aid,
-                id: pivid,
-                data: response.data,
-            });
-            return response.data;
-        })
+        () => http.patch(`/editor/dm/entity_type/attribute/system/${pivid}`, data).then(response => response.data)
     );
 }
 
@@ -805,21 +663,12 @@ export async function patchRoleData(rid, data) {
     );
 }
 
-export async function updateReference(id, eid, url, data) {
-    $httpQueue.add(
-        () => http.patch(`/entity/reference/${id}`, data).then(response => {
-            const updData = {
-                ...data,
-                updated_at: response.data.updated_at,
-            };
-            store.dispatch('updateReference', {
-                reference_id: id,
-                entity_id: eid,
-                attribute_url: url,
-                data: updData,
-            });
-            return response.data;
-        })
+export async function updateReference(data) {
+    if(!data?.id) throw new Error('Reference ID is required!');
+    return $httpQueue.add(
+        () => http.patch(`/entity/reference/${data.id}`, data)
+            .then(response => response.data)
+            .catch(throwError)
     );
 }
 
@@ -885,16 +734,11 @@ export async function deleteBibliographyItem(id) {
     );
 }
 
-export async function deleteReferenceFromEntity(id, eid, url) {
+export async function deleteReferenceFromEntity(id) {
     return $httpQueue.add(
-        () => http.delete(`/entity/reference/${id}`).then(response => {
-            store.dispatch('removeReferenceFromEntity', {
-                reference_id: id,
-                entity_id: eid,
-                attribute_url: url,
-            });
-            return response.data;
-        })
+        () => http.delete(`/entity/reference/${id}`)
+            .then(response => response.data)
+            .catch(throwError)
     );
 }
 
@@ -917,9 +761,9 @@ export async function searchLabel(query = '') {
     );
 }
 
-export async function searchEntity(query = '') {
+export async function searchEntity(query = '', page = 1) {
     return $httpQueue.add(
-        () => http.get(`search/entity?q=${query}`).then(response => response.data)
+        () => http.get(`search/entity?q=${query}&page=${page}`).then(response => response.data)
     );
 }
 
@@ -929,9 +773,9 @@ export async function searchConceptSelection(cid) {
     );
 }
 
-export async function searchEntityInTypes(query = '', types = []) {
+export async function searchEntityInTypes(query = '', types = [], page = 1) {
     const typeList = types.join(',');
     return $httpQueue.add(
-        () => http.get(`search/entity?q=${query}&t=${typeList}`).then(response => response.data)
+        () => http.get(`search/entity?q=${query}&t=${typeList}&page=${page}`).then(response => response.data)
     );
 }

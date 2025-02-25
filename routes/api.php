@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Broadcast;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1')->group(function() {
+Route::middleware('auth:sanctum')->prefix('v1')->group(function() {
     Route::get('/pre', 'HomeController@getGlobalData');
     Route::get('/version', function() {
         $versionInfo = new App\VersionInfo();
@@ -29,7 +30,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 });
 
 // PLUGINS
-Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/plugin')->group(function() {
+Route::middleware('auth:sanctum')->prefix('v1/plugin')->group(function() {
     Route::get('', 'PluginController@getPlugins');
     Route::get('/{id}', 'PluginController@installPlugin')->where('id', '[0-9]+');
 
@@ -42,12 +43,14 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 });
 
 // ENTITY
-Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/entity')->group(function() {
+Route::middleware('auth:sanctum')->prefix('v1/entity')->group(function() {
     Route::get('/top', 'EntityController@getTopEntities');
     Route::get('/{id}', 'EntityController@getEntity')->where('id', '[0-9]+');
+
+    // This route is only used for the map plugin
     Route::get('/entity_type/{etid}/data/{aid}', 'EntityController@getDataForEntityType')->where('etid', '[0-9]+')->where('aid', '[0-9]+');
-    Route::get('/{id}/data', 'EntityController@getData')->where('id', '[0-9]+');
-    Route::get('/{id}/data/{aid}', 'EntityController@getData')->where('id', '[0-9]+')->where('aid', '[0-9]+');
+    Route::get('/{id}/data/{aid?}', 'EntityController@getData')->where('id', '[0-9]+');
+    Route::get('/{id}/metadata', 'EntityController@getMetadata')->where('id', '[0-9]+');
     Route::get('/{id}/reference', 'ReferenceController@getByEntity')->where('id', '[0-9]+');
     Route::get('/{id}/parentIds', 'EntityController@getParentIds')->where('id', '[0-9]+');
     Route::get('/byParent/{id}', 'EntityController@getEntitiesByParent')->where('id', '[0-9]+');
@@ -56,13 +59,14 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::post('/{id}/duplicate', 'EntityController@duplicateEntity')->where('id', '[0-9]+');
     Route::post('/import', 'EntityController@importData')->where('id', '[0-9]+')->where('aid', '[0-9]+');
     Route::post('/import/validate', 'EntityController@validateImportData');
-    Route::post('/{id}/reference/{aid}', 'ReferenceController@addReference')->where('id', '[0-9]+')->where('aid', '[0-9]+');
+    Route::post('/{id}/reference/{aid?}', 'ReferenceController@addReference')->where('id', '[0-9]+');
 
     Route::patch('/{id}/attributes', 'EntityController@patchAttributes')->where('id', '[0-9]+');
     Route::patch('/{id}/attribute/{aid}', 'EntityController@patchAttribute')->where('id', '[0-9]+')->where('aid', '[0-9]+');
     Route::patch('/multiedit', 'EntityController@multieditAttributes');
     Route::patch('/{id}/attribute/{aid}/moderate', 'EntityController@handleModeration')->where('id', '[0-9]+')->where('aid', '[0-9]+');
     Route::patch('/{id}/name', 'EntityController@patchName')->where('id', '[0-9]+');
+    Route::patch('/{id}/metadata', 'EntityController@patchMetadata')->where('id', '[0-9]+');
     Route::patch('/{id}/rank', 'EntityController@moveEntity')->where('id', '[0-9]+');
     Route::patch('/reference/{id}', 'ReferenceController@patchReference')->where('id', '[0-9]+');
 
@@ -71,7 +75,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 });
 
 // SEARCH
-Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/search')->group(function() {
+Route::middleware('auth:sanctum')->prefix('v1/search')->group(function() {
     Route::get('', 'SearchController@searchGlobal');
     Route::get('/entity', 'SearchController@searchEntityByName');
     Route::get('/entity-type', 'SearchController@searchEntityTypes');
@@ -81,7 +85,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 });
 
 // EDITOR
-Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/editor')->group(function() {
+Route::middleware('auth:sanctum')->prefix('v1/editor')->group(function() {
     Route::get('/dm/entity_type/occurrence_count/{id}', 'EditorController@getEntityTypeOccurrenceCount')->where('id', '[0-9]+');
     Route::get('/dm/attribute/occurrence_count/{aid}', 'EditorController@getAttributeValueOccurrenceCount')->where('aid', '[0-9]+');
     Route::get('/dm/attribute/occurrence_count/{aid}/{ctid}', 'EditorController@getAttributeValueOccurrenceCount')->where('aid', '[0-9]+')->where('ctid', '[0-9]+');
@@ -89,10 +93,11 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::get('/dm/attribute', 'EditorController@getAttributes');
     Route::get('/dm/attribute_types', 'EditorController@getAttributeTypes');
     Route::get('/entity_type/{id}', 'EditorController@getEntityType')->where('id', '[0-9]+');
+
+    // TODO: This should be moved to the map plugin
     Route::get('/dm/geometry', 'EditorController@getAvailableGeometryTypes');
 
     Route::post('/dm/entity_type', 'EditorController@addEntityType');
-    Route::post('/dm/{id}/relation', 'EditorController@setRelationInfo')->where('id', '[0-9]+');
     Route::post('/dm/attribute', 'EditorController@addAttribute');
     Route::post('/dm/entity_type/{etid}/attribute', 'EditorController@addAttributeToEntityType')->where('etid', '[0-9]+');
     Route::post('/dm/entity_type/{ctid}/duplicate', 'EditorController@duplicateEntityType')->where('ctid', '[0-9]+');
@@ -108,10 +113,13 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 });
 
 // USER
-Route::post('/v1/auth/login', 'UserController@login');
+Route::middleware('web')->prefix('v1')->group(function() {
+    Route::post('/auth/login', 'UserController@login');
+    Route::post('/auth/logout', 'UserController@logout');
+});
 
-Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1')->group(function() {
-    Route::get('/auth/refresh', 'UserController@refreshToken');
+
+Route::middleware('auth:sanctum')->prefix('v1')->group(function() {
     Route::get('/auth/user', 'UserController@getUser');
     Route::get('/user', 'UserController@getUsers');
     Route::get('/role', 'UserController@getRoles');
@@ -120,7 +128,6 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::post('/user', 'UserController@addUser');
     Route::post('/user/avatar', 'UserController@addAvatar')->where('id', '[0-9]+');
     Route::post('/role', 'UserController@addRole');
-    Route::post('/auth/logout', 'UserController@logout');
 
     Route::patch('/user/{id}', 'UserController@patchUser');
     Route::patch('/user/restore/{id}', 'UserController@restoreUser');
@@ -134,7 +141,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 });
 
 // COMMENTS
-Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/comment')->group(function () {
+Route::middleware('auth:sanctum')->prefix('v1/comment')->group(function () {
     Route::get('/resource/{id}', 'CommentController@getComments')->where('id', '[0-9]+');
     Route::get('/{id}/reply', 'CommentController@getCommentReplies')->where('id', '[0-9]+');
 
@@ -146,7 +153,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 });
 
 // NOTIFICATIONS
-Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/notification')->group(function() {
+Route::middleware('auth:sanctum')->prefix('v1/notification')->group(function() {
     Route::patch('/read/{id}', 'NotificationController@markNotificationAsRead');
     Route::patch('/read', 'NotificationController@markAllNotificationsAsRead');
 
@@ -156,22 +163,22 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 });
 
 // PREFERENCES
-Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/preference')->group(function() {
+Route::middleware('auth:sanctum')->prefix('v1/preference')->group(function() {
     Route::get('', 'PreferenceController@getPreferences');
-    Route::get('/{id}', 'PreferenceController@getUserPreferences')->where('id', '[0-9]+');
 
-    Route::patch('/', 'PreferenceController@patchPreferences');
+    Route::patch('', 'PreferenceController@patchPreferences');
 });
 
 // BIBLIOGRAPHY
-Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/bibliography')->group(function() {
+Route::middleware('auth:sanctum')->prefix('v1/bibliography')->group(function() {
     Route::get('/', 'BibliographyController@getBibliography');
+    Route::get('/{id}', 'BibliographyController@getBibliographyItem')->where('id', '[0-9]+');
     Route::get('/{id}/ref_count', 'BibliographyController@getReferenceCount')->where('id', '[0-9]+');
-    
+
     Route::post('/', 'BibliographyController@addItem');
     Route::post('/import', 'BibliographyController@importBibtex');
     Route::post('/export', 'BibliographyController@exportBibtex');
-    
+
     // form data params are not recognized using patch, thus using post
     Route::post('/{id}', 'BibliographyController@updateItem')->where('id', '[0-9]+');
 
@@ -180,7 +187,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 });
 
 // ACTIVITY LOG
-Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/activity')->group(function() {
+Route::middleware('auth:sanctum')->prefix('v1/activity')->group(function() {
     Route::get('', 'ActivityController@getAll');
     Route::get('/{id}', 'ActivityController@getByUser')->where('id', '[0-9]+');
 
@@ -188,14 +195,14 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 });
 
 // TAGS
-Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/tag')->group(function() {
+Route::middleware('auth:sanctum')->prefix('v1/tag')->group(function() {
     Route::get('', 'TagController@getAll');
 });
 
 // EXTENSIONS
 
 // FILE
-Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/file')->group(function() {
+Route::middleware('auth:sanctum')->prefix('v1/file')->group(function() {
     Route::get('/{id}', 'FileController@getFile')->where('id', '[0-9]+');
     Route::get('/{id}/link_count', 'FileController@getLinkCount')->where('id', '[0-9]+');
     Route::get('/{id}/sub_files', 'FileController@getSubFiles')->where('id', '[0-9]+');
@@ -207,7 +214,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 });
 
 // MAP
-Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/map')->group(function() {
+Route::middleware('auth:sanctum')->prefix('v1/map')->group(function() {
     Route::post('epsg/text', 'MapController@getEpsgByText');
 
     Route::patch('/{id}', 'MapController@updateGeometry')->where('id', '[0-9]+');
@@ -218,7 +225,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 });
 
 // ANALYSIS
-Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/analysis')->group(function() {
+Route::middleware('auth:sanctum')->prefix('v1/analysis')->group(function() {
     Route::post('export', 'AnalysisController@export');
     Route::post('export/{type}', 'AnalysisController@export');
     Route::post('filter', 'AnalysisController@applyFilterQuery');

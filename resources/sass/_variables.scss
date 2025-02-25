@@ -18,6 +18,7 @@ $navbar-default-bg: #fff !default;
 // Panels
 $panel-default-heading-bg: #fff !default;
 $enable-rounded: true !default;
+$enable-negative-margins: true !default;
 
 // Borders
 $laravel-border-color: darken($body-bg, 10%);
@@ -58,4 +59,14 @@ $breadcrumb-divider-flipped: $breadcrumb-divider;
     //Active
     --bs-dropdown-link-active-color: var(--bs-body-color) !important;
     --bs-dropdown-link-active-bg: var(--bs-gray-400) !important;
+}
+
+//Z-Index
+$zindex-sticky-in-page: 995;
+$zindex-dropdown-underneath-sticky: 990; 
+
+
+:root {
+    /* Increases the max size of the vueform/multiselect list */
+    --ms-max-height: 20rem;
 }

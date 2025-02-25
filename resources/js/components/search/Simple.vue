@@ -1,15 +1,16 @@
 <template>
     <multiselect
         :id="state.id"
-        v-model="state.entry"
+        :value="value"
         class="multiselect"
         :name="state.id"
         :object="true"
         :label="'id'"
+        :loading="state.loading"
         :track-by="'id'"
         :value-prop="'id'"
         :mode="mode"
-        :options="query => search(query)"
+        :options="state.searchResults"
         :hide-selected="false"
         :filterResults="false"
         :resolve-on-load="false"
@@ -18,23 +19,26 @@
         :caret="false"
         :min-chars="0"
         :searchable="true"
-        :delay="delay"
-        :limit="limit"
         :placeholder="t('global.search')"
-        @change="handleSelection"
+        :disabled="disabled"
+        @search-change="search"
+        @select="onChange"
     >
         <template #singlelabel="{ value }">
             <div class="multiselect-single-label">
                 {{ displayResult(value) }}
             </div>
         </template>
-        <template #tag="{ option, handleTagRemove, disabled }">
-            <div class="multiselect-tag">
+        <template #tag="{ option, handleTagRemove, disabled: tagDisabled }">
+            <div
+                class="multiselect-tag"
+                :class="{ 'pe-2': tagDisabled }"
+            >
                 <span @click.prevent="handleTagClick(option)">
                     {{ displayResult(option) }}
                 </span>
                 <span
-                    v-if="!disabled"
+                    v-if="!tagDisabled"
                     class="multiselect-tag-remove"
                     @click.prevent
                     @mousedown.prevent.stop="handleTagRemove(option, $event)"
@@ -44,27 +48,17 @@
             </div>
         </template>
         <template #option="{ option }">
-            <span v-if="!state.enableChain">
-                {{ displayResult(option) }}
-            </span>
-            <div
-                v-else
-                class="d-flex flex-column"
-            >
+            <div class="d-flex flex-column">
                 <span>
                     {{ displayResult(option) }}
                 </span>
-                <ol class="breadcrumb m-0 p-0 bg-none small">
-                    <li
-                        v-for="anc in option[chain]"
-                        :key="`search-result-multiselect-${state.id}-${anc}`"
-                        class="breadcrumb-item text-muted small"
-                    >
-                        <span>
-                            {{ anc }}
-                        </span>
-                    </li>
-                </ol>
+                <slot
+                    v-if="state.enableChain"
+                    name="chain"
+                    :option="option"
+                >
+                    <Chain :chain="getChain(option)" />
+                </slot>
             </div>
         </template>
         <template #nooptions="">
@@ -86,6 +80,38 @@
                 {{ t('global.search_no_term_info') }}
             </div>
         </template>
+        <template
+            v-if="infinite && canFetchMore && hasResults"
+            #afterlist=""
+        >
+            <div class="d-flex">
+                <!--
+                It happened that the click listener occasionally closed the select list.
+                Using the mousedown event prevents this from happening.
+                We need to prevent the click event and stop the propagation of the link navigation.
+                -->
+                <a
+                    class="list-hover text-decoration-none d-flex align-items-center justify-content-between p-2 flex-fill"
+                    href="#"
+                    tabindex="-1"
+                    draggable="false"
+                    @click.stop.prevent
+                    @mousedown.stop.prevent="loadMore()"
+                >
+                    <span>
+                        <i class="fas fa-fw fa-arrows-rotate" />
+                        {{ t('global.search_load_n_more', { n: limit }) }}
+                    </span>
+
+                    <span
+                        v-if="state.loading"
+                        class="spinner-border spinner-border-sm ms-2"
+                        role="status"
+                        aria-hidden="true"
+                    />
+                </a>
+            </div>
+        </template>
     </multiselect>
 </template>
 
@@ -93,6 +119,7 @@
     import {
         computed,
         reactive,
+        ref,
         toRefs,
         watch,
     } from 'vue';
@@ -100,10 +127,15 @@
     import { useI18n } from 'vue-i18n';
 
     import {
-        getTs
+        _debounce,
+        getTs,
     } from '@/helpers/helpers.js';
+    import Chain from '@/components/chain/Chain.vue';
 
     export default {
+        components: {
+            Chain,
+        },
         props: {
             delay: {
                 type: Number,
@@ -139,105 +171,145 @@
                 required: false,
                 default: null,
             },
-            mode: {
-                type: String,
-                required: false,
-                default: 'single',
-            },
-            defaultValue: {
-                type: Object, // TODO should be Array for Entity-MC
+            chainFn: {
+                type: Function,
                 required: false,
                 default: null,
+            },
+            mode: {
+                required: false,
+                default: 'single',
+                validator: (val) => ['single', 'multiple'].includes(val),
+            },
+            value: {
+                required: false,
+                default: null,
+                validator: (val, props) => {
+                    if(props.mode == 'single') {
+                        return val == null || typeof val == 'object';
+                    } else {
+                        return val == null || Array.isArray(val);
+                    }
+                },
+            },
+            disabled: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
+            infinite: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
+            canFetchMore: {
+                type: Boolean,
+                required: false,
+                default: false,
             },
         },
         emits: ['selected', 'entry-click'],
         setup(props, context) {
             const { t } = useI18n();
 
-            const {
-                delay,
-                limit,
-                endpoint,
-                filterFn,
-                keyText,
-                keyFn,
-                chain,
-                mode,
-                defaultValue,
-            } = toRefs(props);
-            
-            if(!keyText.value && !keyFn.value) {
+
+            if(!props.keyText && !props.keyFn) {
                 throw new Error('You have to either provide a key or key function for your search component!');
             }
             // FETCH
 
             // FUNCTIONS
-            const search = async (query) => {
+
+            // Used to check for a race condition
+            const searchExecutionCounter = ref(0);
+            /**
+             * Called when the search is changed
+             * so the query always has a different value.
+             */
+            const requestSearchEndpoint = async query => {
+                // When selected a null value is set and triggers the
+                // search again, resulting in an error. This is a workaround.
+                if(!query) return;
+
+                searchExecutionCounter.value++;
+                const round = searchExecutionCounter.value;
+                state.loading = true;
+                const results = await props.endpoint(query);
+
+                if(round !== searchExecutionCounter.value) {
+                    // If there was a newer query executed in the meantime,
+                    // we do not want to apply the results.
+                    return;
+                }
+
+                let filteredResults;
+                if(!!props.filterFn) {
+                    filteredResults = props.filterFn(results, query, state.searchResults);
+                } else {
+                    filteredResults = results;
+                }
+
+                // Only apply if the query did not change in the meantime.
+                if(state.query === query) {
+                    state.searchResults = [
+                        ...state.searchResults,
+                        ...filteredResults,
+                    ];
+                }
+                state.loading = false;
+            };
+
+            const debouncedSearchRequest = _debounce(requestSearchEndpoint, props.delay);
+            const search = async query => {
+                if(!query) query = '';
+                resetSearch(query);
+                // As long as the query is typed we debounce the search
+                debouncedSearchRequest(query);
+            };
+            const resetSearch = (query = '') => {
                 state.query = query;
-                if(!query) {
-                    return await new Promise(r => r([]));
-                }
-                const results = await endpoint.value(query);
-                if(!!filterFn.value && !!filterFn.value) {
-                    return filterFn.value(results, query);
-                } else {
-                    return results;
-                }
+                state.searchResults = [];
             };
-            const displayResult = result => {
-                if(!!keyText.value) {
-                    return result[keyText.value];
-                } else if(!!keyFn.value) {
-                    return keyFn.value(result);
-                } else {
-                    // Should never happen ;) :P
-                    throw new Error('Can not display search result!');
-                }
+            const loadMore = async _ => {
+                if(state.loading) return;
+                await requestSearchEndpoint(state.query);
             };
-            const handleSelection = option => {
-                let data = {};
-                if(option) {
-                    if(mode.value == 'single') {
-                        data = {
-                            ...option,
-                            added: true,
-                        };
-                    } else {
-                        data = {
-                            values: option,
-                            added: true,
-                        };
-                    }
+
+            const displayResult = obj => {
+                if(props.keyText) {
+                    return obj[props.keyText];
+                } else if(props.keyFn) {
+                    return props.keyFn(obj);
                 } else {
-                    data.removed = true;
+                    // Should never happen
+                    throw new Error('No key provided!');
                 }
-                state.entry = option;
-                context.emit('selected', data);
-            };
-            const handleTagClick = option => {
-                context.emit('entry-click', option);
             };
 
             const getBaseValue = _ => {
-                    return mode.value == 'single' ? {} : [];
+                return props.mode == 'single' ? {} : [];
             };
-            
-            const getDefaultValue = _ => {
-                if(defaultValue.value) 
-                    return defaultValue.value;
-                else
-                    return getBaseValue();
+
+            const onChange = value => {
+                context.emit('selected', value);
+            };
+
+            const handleTagClick = option => {
+                context.emit('entry-click', option);
             };
 
             // DATA
             const state = reactive({
                 id: `multiselect-search-${getTs()}`,
-                entry: getDefaultValue(),
+                loading: false,
                 query: '',
-                enableChain: computed(_ => chain.value && chain.value.length > 0),
+                isSimpleChain: computed(_ => props.chain && props.chain.length > 0),
+                isFnChain: computed(_ => !!props.chainFn),
+                enableChain: computed(_ => state.isSimpleChain || state.isFnChain || context.slots.chain),
+                searchResults: [],
             });
 
-            watch(_ => defaultValue.value, (newValue, oldValue) => {
+            watch(_ => props.value, (newValue, oldValue) => {
                 if(!newValue || newValue.reset) {
                     state.entry = getBaseValue();
                 } else {
@@ -245,18 +317,32 @@
                 }
             });
 
+            const getChain = option => {
+                if(state.isFnChain) {
+                    return props.chainFn(option);
+                } else {
+                    return option[props.chain];
+                }
+            };
+
+            const hasResults = computed(_ => state.searchResults.length > 0);
+
             // RETURN
             return {
                 t,
                 // HELPER
                 // LOCAL
+                hasResults,
                 search,
+                getChain,
+                loadMore,
                 displayResult,
-                handleSelection,
+                // handleChange,
                 handleTagClick,
+                onChange,
                 // STATE
                 state,
             };
         },
-    }
+    };
 </script>

@@ -10,6 +10,8 @@
         :options="state.filteredSelections"
         :name="name"
         :searchable="true"
+        :infinite="true"
+        :limit="15"
         :filter-results="false"
         :close-on-select="false"
         :placeholder="t('global.select.placeholder')"
@@ -20,7 +22,10 @@
             {{ translateConcept(option.concept_url) }}
         </template>
         <template #tag="{ option, handleTagRemove, disabled: tagDisabled }">
-            <div class="multiselect-tag">
+            <div
+                class="multiselect-tag"
+                :class="{'pe-2': tagDisabled}"
+            >
                 {{ translateConcept(option.concept_url) }}
                 <span
                     v-if="!tagDisabled"
@@ -51,6 +56,7 @@
 
     import {
         translateConcept,
+        only,
     } from '@/helpers/helpers.js';
 
     export default {
@@ -88,6 +94,9 @@
             // FETCH
 
             // FUNCTIONS
+
+            // TODO FIX BUG: When the field is changed then saved and resetted, it will reset to the
+            // previously loaded value, bot the newly saved one!
             const resetFieldState = _ => {
                 v.resetField({
                     value: value.value
@@ -115,11 +124,16 @@
             const state = reactive({
                 query: null,
                 filteredSelections: computed(_ => {
-                    if(!state.query) return selections.value;
+                    let selection = null;
+                    if(!state.query) {
+                        selection = selections.value;
+                    } else {
+                        selection = selections.value.filter(concept => {
+                            return concept.concept_url.toLowerCase().indexOf(state.query) !== -1 || translateConcept(concept.concept_url).toLowerCase().indexOf(state.query) !== -1;
+                        });
+                    }
 
-                    return selections.value.filter(concept => {
-                        return concept.concept_url.toLowerCase().indexOf(state.query) !== -1 || translateConcept(concept.concept_url).toLowerCase().indexOf(state.query) !== -1;
-                    });
+                    return selection.map(s => only(s, ['id', 'concept_url']));
                 }),
             });
             const v = reactive({
@@ -132,12 +146,29 @@
             watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
-            watch(_ => v.value, (newValue, oldValue) => {
-                context.emit('change', {
-                    dirty: v.meta.dirty,
-                    valid: v.meta.valid,
-                    value: v.value,
+
+            function valueHasChanged(a, b) {
+                if(!a && !b) return false;
+                if(!a || !b) return true;
+
+                if(a.length != b.length) return true;
+                if(a.length == 0) return false;
+
+                return a.every((item, idx) => {
+                    if(item.id != b[idx].id) return true;
                 });
+            }
+
+            watch(_ => v.value, (newValue, oldValue) => {
+                // only emit @change event if field is validated (required because Entity.vue components)
+                // trigger this watcher several times even if another component is updated/validated
+                if(valueHasChanged(newValue, oldValue)) {
+                    context.emit('change', {
+                        dirty: v.meta.dirty,
+                        valid: v.meta.valid,
+                        value: v.value,
+                    });
+                }
             });
 
             // RETURN

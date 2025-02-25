@@ -27,6 +27,12 @@ if(!function_exists('sp_slug')) {
     }
 }
 
+if(!function_exists('sp_trim_array')) {
+    function sp_trim_array(array $arr) : array {
+        return array_map(fn($elem) => trim($elem), $arr);
+    }
+}
+
 if(!function_exists('sp_get_permission_groups')) {
     function sp_get_permission_groups($onlyGroups = false) {
         $corePermissionPath = base_path("storage/framework/App/core-permissions.json");
@@ -46,7 +52,7 @@ if(!function_exists('sp_get_permission_groups')) {
 if(!function_exists('sp_get_themes')) {
     function sp_get_themes() {
         $themeDir = base_path("resources/sass/");
-        $fileList = glob("${themeDir}app*.scss");
+        $fileList = glob("{$themeDir}app*.scss");
         $themes = [];
         foreach($fileList as $file) {
             $theme = [];
@@ -164,6 +170,19 @@ if(!function_exists('sp_column_names')) {
             default:
                 return Schema::getColumnListing($table);
         }
+    }
+}
+
+if(!function_exists('sp_get_comment_room')) {
+    function sp_get_comment_room(string $type) : ?string {
+        $room = null;
+        switch($type) {
+            case 'App\Entity':
+            case 'App\AttributeValue':
+                $room = 'entity';
+                break;
+        }
+        return $room;
     }
 }
 

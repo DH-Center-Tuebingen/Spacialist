@@ -2,8 +2,8 @@
 
 namespace App;
 
+use App\File\Directory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
@@ -15,10 +15,6 @@ class Bibliography extends Model implements Searchable
     use LogsActivity;
 
     protected $table = 'bibliography';
-
-    protected $appends = [
-        'file_url',
-    ];
 
     /**
      * The attributes that are assignable.
@@ -39,7 +35,7 @@ class Bibliography extends Model implements Searchable
         'address',
         'misc',
         'howpublished',
-        'type',
+        'entry_type',
         'annote',
         'chapter',
         'crossref',
@@ -51,13 +47,13 @@ class Bibliography extends Model implements Searchable
         'organization',
         'school',
         'series',
-        'subtype',
-        'file',
+        'type',
         'abstract',
         'doi',
         'isbn',
         'issn',
         'language',
+        'file',
         'citekey',
         'user_id',
     ];
@@ -76,7 +72,7 @@ class Bibliography extends Model implements Searchable
         'address' => 5,
         'misc' => 8,
         'howpublished' => 5,
-        'type' => 5,
+        'entry_type' => 5,
         'annote' => 5,
         'chapter' => 5,
         'crossref' => 5,
@@ -92,6 +88,9 @@ class Bibliography extends Model implements Searchable
     ];
 
     const patchRules = [
+        'entry_type'   => 'string',
+        'file'         => 'file',
+        // bibtex standard fields
         'author'       => 'string',
         'editor'       => 'string',
         'title'        => 'string',
@@ -105,7 +104,6 @@ class Bibliography extends Model implements Searchable
         'address'      => 'string',
         'misc'         => 'string',
         'howpublished' => 'string',
-        'type'         => 'string',
         'annote'       => 'string',
         'chapter'      => 'string',
         'crossref'     => 'string',
@@ -117,8 +115,7 @@ class Bibliography extends Model implements Searchable
         'organization' => 'string',
         'school'       => 'string',
         'series'       => 'string',
-        'subtype'      => 'string',
-        'file'         => 'file',
+        'type'         => 'string',
         // non-standard fields
         'abstract'     => 'string',
         'doi'          => 'string',
@@ -130,47 +127,118 @@ class Bibliography extends Model implements Searchable
     public const bibtexTypes = [
         "article" => [
             "fields" => [
-                'author', 'title', 'journal', 'year', 'volume', 'number', 'pages', 'month', 'note', 'doi', 'email', 'url', 'issn', 'language', 'abstract'
+                'abstract',
+                'author',
+                'doi',
+                'email',
+                'issn',
+                'journal',
+                'language',
+                'month',
+                'note',
+                'number',
+                'pages',
+                'title',
+                'url',
+                'volume',
+                'year',
             ],
             "mandatory" => [
                 "author" => true,
-                "title" => true,
                 "journal" => true,
+                "title" => true,
                 "year" => true,
             ],
         ],
         "book" => [
             "fields" => [
-                'title', 'publisher', 'year', 'author', 'editor', 'volume', 'number', 'address', 'series', 'edition', 'month', 'note', 'email', 'url', 'isbn', 'language', 'abstract'
+                'abstract',
+                'address',
+                'author',
+                'doi',
+                'edition',
+                'editor',
+                'email',
+                'isbn',
+                'language',
+                'month',
+                'note',
+                'publisher',
+                'series',
+                'title',
+                'url',
+                'year',
             ],
             "mandatory" => [
                 "author" => 'editor',
                 "editor" => 'author',
-                "title" => true,
                 "publisher" => true,
+                "title" => true,
                 "year" => true,
             ],
         ],
         "incollection" => [
             "fields" => [
-                'author', 'title', 'booktitle', 'publisher', 'year', 'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note', 'subtype', 'email', 'url', 'language', 'abstract'
+                'abstract',
+                'address',
+                'author',
+                'booktitle',
+                'chapter',
+                'doi',
+                'edition',
+                'editor',
+                'email',
+                'language',
+                'month',
+                'note',
+                'number',
+                'organization',
+                'pages',
+                'publisher',
+                'series',
+                'title',
+                'type',
+                'url',
+                'volume',
+                'year',
             ],
             "mandatory" => [
                 "author" => true,
-                "title" => true,
                 "booktitle" => true,
                 "publisher" => true,
+                "title" => true,
                 "year" => true,
             ],
         ],
         "misc" => [
             "fields" => [
-                'author', 'title', 'howpublished', 'month', 'year', 'note', 'email', 'url', 'language', 'abstract'
+                'abstract',
+                'author',
+                'doi',
+                'email',
+                'howpublished',
+                'language',
+                'month',
+                'note',
+                'title',
+                'url',
+                'year',
             ],
         ],
         "booklet" => [
             "fields" => [
-                'title', 'author', 'howpublished', 'address', 'month', 'year', 'note', 'email', 'url', 'language', 'abstract'
+                'abstract',
+                'address',
+                'author',
+                'doi',
+                'email',
+                'howpublished',
+                'language',
+                'month',
+                'note',
+                'title',
+                'url',
+                'year',
             ],
             "mandatory" => [
                 "title" => true,
@@ -178,43 +246,111 @@ class Bibliography extends Model implements Searchable
         ],
         "conference" => [
             "fields" => [
-                'author', 'title', 'booktitle', 'year', 'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note', 'email', 'url', 'language', 'abstract'
+                'abstract',
+                'address',
+                'author',
+                'booktitle',
+                'doi',
+                'editor',
+                'email',
+                'language',
+                'month',
+                'note',
+                'number',
+                'organization',
+                'pages',
+                'publisher',
+                'series',
+                'title',
+                'url',
+                'volume',
+                'year',
             ],
             "mandatory" => [
                 "author" => true,
-                "title" => true,
                 "booktitle" => true,
+                "title" => true,
                 "year" => true,
             ],
         ],
         "inbook" => [
             "fields" => [
-                'title', 'publisher', 'year', 'author', 'editor', 'chapter', 'pages', 'volume', 'number', 'series', 'address', 'edition', 'month', 'note', 'subtype', 'email', 'url', 'isbn', 'language', 'abstract'
+                'abstract',
+                'address',
+                'author',
+                'chapter',
+                'doi',
+                'edition',
+                'editor',
+                'email',
+                'isbn',
+                'language',
+                'month',
+                'note',
+                'number',
+                'pages',
+                'publisher',
+                'series',
+                'title',
+                'type',
+                'url',
+                'volume',
+                'year',
             ],
             "mandatory" => [
                 "author" => "editor",
-                "editor" => "author",
-                "title" => true,
                 "chapter" => "pages",
+                "editor" => "author",
                 "pages" => "chapter",
                 "publisher" => true,
+                "title" => true,
                 "year" => true,
             ],
         ],
         "inproceedings" => [
             "fields" => [
-                'author', 'title', 'booktitle', 'year', 'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note', 'email', 'url', 'language', 'abstract'
+                'abstract',
+                'address',
+                'author',
+                'booktitle',
+                'doi',
+                'editor',
+                'email',
+                'language',
+                'month',
+                'note',
+                'number',
+                'organization',
+                'pages',
+                'publisher',
+                'series',
+                'title',
+                'url',
+                'volume',
+                'year',
             ],
             "mandatory" => [
                 "author" => true,
-                "title" => true,
                 "booktitle" => true,
+                "title" => true,
                 "year" => true,
             ],
         ],
         "manual" => [
             "fields" => [
-                'title', 'author', 'organization', 'address', 'edition', 'month', 'year', 'note', 'email', 'url', 'language', 'abstract'
+                'abstract',
+                'address',
+                'author',
+                'doi',
+                'edition',
+                'email',
+                'language',
+                'month',
+                'note',
+                'organization',
+                'title',
+                'url',
+                'year',
             ],
             "mandatory" => [
                 "title" => true,
@@ -222,29 +358,68 @@ class Bibliography extends Model implements Searchable
         ],
         "mastersthesis" => [
             "fields" => [
-                'author', 'title', 'school', 'year', 'address', 'month', 'note', 'subtype', 'email', 'url', 'language', 'abstract'
+                'abstract',
+                'address',
+                'author',
+                'doi',
+                'email',
+                'language',
+                'month',
+                'note',
+                'school',
+                'title',
+                'type',
+                'url',
+                'year',
             ],
             "mandatory" => [
                 "author" => true,
-                "title" => true,
                 "school" => true,
+                "title" => true,
                 "year" => true,
             ],
         ],
         "phdthesis" => [
             "fields" => [
-                'author', 'title', 'school', 'year', 'address', 'month', 'note', 'subtype', 'email', 'url', 'language', 'abstract'
+                'abstract',
+                'address',
+                'author',
+                'doi',
+                'email',
+                'language',
+                'month',
+                'note',
+                'school',
+                'title',
+                'type'   ,
+                'url',
+                'year',
             ],
             "mandatory" => [
                 "author" => true,
-                "title" => true,
                 "school" => true,
+                "title" => true,
                 "year" => true,
             ],
         ],
         "proceedings" => [
             "fields" => [
-                'title', 'year', 'editor', 'volume', 'number', 'series', 'address', 'month', 'organization', 'publisher', 'note', 'email', 'url', 'language', 'abstract'
+                'abstract',
+                'address',
+                'doi',
+                'editor',
+                'email',
+                'language',
+                'month',
+                'note',
+                'number',
+                'organization',
+                'publisher',
+                'series',
+                'title',
+                'url',
+                'volume',
+                'year',
             ],
             "mandatory" => [
                 "title" => true,
@@ -253,23 +428,44 @@ class Bibliography extends Model implements Searchable
         ],
         "techreport" => [
             "fields" => [
-                'author', 'title', 'institution', 'year', 'number', 'address', 'month', 'note', 'subtype', 'email', 'url', 'language', 'abstract'
+                'abstract',
+                'address',
+                'author',
+                'doi',
+                'email',
+                'institution',
+                'language',
+                'month',
+                'note',
+                'number',
+                'title',
+                'type',
+                'url',
+                'year',
             ],
             "mandatory" => [
                 "author" => true,
-                "title" => true,
                 "institution" => true,
+                "title" => true,
                 "year" => true,
             ],
         ],
         "unpublished" => [
             "fields" => [
-                'author', 'title', 'note', 'month', 'year', 'email', 'url', 'language', 'abstract'
+                'abstract',
+                'author',
+                'email',
+                'language',
+                'month',
+                'note',
+                'title',
+                'url',
+                'year',
             ],
             "mandatory" => [
                 "author" => true,
-                "title" => true,
                 "note" => true,
+                "title" => true,
             ],
         ],
     ];
@@ -292,6 +488,10 @@ class Bibliography extends Model implements Searchable
 
     public static function getSearchCols(): array {
         return array_keys(self::searchCols);
+    }
+
+    public static function validateType(string $type) : bool {
+        return array_key_exists($type, self::bibtexTypes);
     }
 
     public static function validateMandatory(array $fields, string $type) : bool {
@@ -325,7 +525,7 @@ class Bibliography extends Model implements Searchable
         $typeFields = self::bibtexTypes[$type];
         $allowedFields = array_merge(
             $typeFields['fields'],
-            ['type', 'file']
+            ['entry_type', 'file', 'doi']
         );
         $strippedFields = [];
         foreach($fields as $key => $field) {
@@ -338,20 +538,53 @@ class Bibliography extends Model implements Searchable
         return $strippedFields;
     }
 
+    public function unsetDisallowed(): void {
+        $typeFields = self::bibtexTypes[$this->entry_type]['fields'];
+
+        $allFields = $this->fillable;
+        foreach($allFields as $field) {
+            if(in_array($field, $typeFields)) continue;
+            if($field == 'entry_type') continue;
+            if($field == 'file') continue;
+            if($field == 'citekey') continue;
+            if($field == 'user_id') continue;
+
+            $this->{$field} = null;
+        }
+    }
+
+
+    private function getEmptyFields(string $type) : array {
+        $typeFields = self::bibtexTypes[$type];
+        $emptyFields = [];
+        foreach($typeFields['fields'] as $field) {
+            $emptyFields[$field] = '';
+        }
+        return $emptyFields;
+    }
+
+    // DISCUSS: Wouldnt it be better to throw an error containing the missing fields?
+    //          Or at least return an array of missing fields? [SO]
     public function fieldsFromRequest($request, $user) {
         $fields = is_array($request) ? $request : $request->toArray();
 
-        
-        $filteredFields = self::stripDisallowed($fields, $this->type ?? $request['type']);
-        foreach($filteredFields as $key => $value){
+        if(!isset($fields['entry_type'])) {
+            return false;
+        }
+
+        $type = $fields['entry_type'];
+        $filteredFields = self::stripDisallowed($fields, $type);
+        foreach($filteredFields as $key => $value) {
+            if(!in_array($key, $this->fillable)) throw new \Exception("Field $key is not allowed for this type of entry");
             $this->{$key} = $value;
         }
+        $this->unsetDisallowed();
 
         // updating an item does not have to update all fields
         // thus we first set all allowed keys from request and then
         // run validation on the update entry
         $validateFields = array_intersect_key($this->toArray(), self::patchRules);
-        $isValid = self::validateMandatory($validateFields, $this->type ?? $request['type']);
+        $isValid = self::validateMandatory($validateFields, $type);
         if(!$isValid) return false;
 
         $this->citekey = self::computeCitationKey($this->toArray());
@@ -376,9 +609,11 @@ class Bibliography extends Model implements Searchable
             if(isset($duplicateEntry)) return $duplicateEntry;
         }
 
-        $type = self::bibtexTypes[$fields['type']];
+        $type = self::bibtexTypes[$fields['entry_type']];
+        if(!array_key_exists('mandatory', $type)) return false;
+
         $subFields = array_intersect_key($fields, $type['mandatory']);
-        $subFields['type'] = $type;
+        $subFields['entry_type'] = $type;
         $duplicateEntry = self::where($subFields)->first();
         if(isset($duplicateEntry)) return $duplicateEntry;
 
@@ -432,22 +667,21 @@ class Bibliography extends Model implements Searchable
         return $key;
     }
 
-    public function uploadFile($file) {
-        $this->deleteFile(true);
-
-        $filename = $this->id . "_" . $file->getClientOriginalName();
-        return $file->storeAs(
-            'bibliography',
-            $filename
-        );
+    public function deleteFileFromStorage(): bool {
+        return self::getDirectory()->delete($this->file);
     }
 
-    public function deleteFile(bool $fromStorageOnly = false) {
-        if(isset($this->file) && Storage::exists($this->file)) {
-            Storage::delete($this->file);
-        }
+    public function uploadFile($file): void {
+        $this->deleteFileFromStorage();
+        $filename = $this->id . "_" . $file->getClientOriginalName();
+        $storagePath = self::getDirectory()->store($filename, $file);
+        $this->file = $storagePath;
+        $this->save();
+    }
 
-        if(!$fromStorageOnly) {
+    public function deleteFile(): void {
+        $success = $this->deleteFileFromStorage();
+        if($success) {
             $this->file = null;
             $this->save();
         }
@@ -461,7 +695,7 @@ class Bibliography extends Model implements Searchable
         return $this->belongsToMany('App\Entity', 'references')->withPivot('description', 'attribute_id');
     }
 
-    public function getFileUrlAttribute() {
-        return isset($this->file) ? sp_get_public_url($this->file) : null;
+    public static function getDirectory() : Directory{
+        return new Directory('bibliography');
     }
 }

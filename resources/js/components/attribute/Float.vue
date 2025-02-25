@@ -9,6 +9,10 @@
         :disabled="disabled"
         :name="name"
     >
+    <InputError
+        :v="v"
+        :error="errorMessage"
+    />
 </template>
 
 <script>
@@ -21,8 +25,12 @@
     import { useField } from 'vee-validate';
 
     import * as yup from 'yup';
+    import InputError from '@/components/forms/InputError.vue';
 
     export default {
+        components: {
+            InputError,
+        },
         props: {
             name: {
                 type: String,
@@ -64,6 +72,7 @@
                 value: fieldValue,
                 meta,
                 resetField,
+                errorMessage,
             } = useField(`float_${name.value}`, yup.number(), {
                 initialValue: value.value,
             });
@@ -75,7 +84,6 @@
                 meta,
                 resetField,
             });
-
 
             watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
@@ -100,6 +108,7 @@
                 // STATE
                 state,
                 v,
+                errorMessage,
             };
         },
     };
