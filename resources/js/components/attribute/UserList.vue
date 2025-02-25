@@ -1,7 +1,6 @@
 <template>
     <multiselect
         v-model="v.value"
-        class="mt-2"
         :classes="multiselectResetClasslist"
         :value-prop="'id'"
         :label="'name'"
