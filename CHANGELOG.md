@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file.
 - 'Jumping' behavior on floating quick access controls on the _Entity Type List_ (copy, duplicate, delete)
 - Attribute Dependency inverted
 - Several problems with adding, editing and displaying _Bibliography Items_
+- _Map Action Button_ position and tooltips
 ### Changed
 - Files (e.g. avatars or bibliography attachments) are stored in a user-only directory
 - Improved style of Reference Input.
