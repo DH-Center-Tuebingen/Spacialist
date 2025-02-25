@@ -38,8 +38,8 @@ import {
     handleModeration,
     moveEntity,
     patchEntityType,
-    patchAttribute,
-    patchAttributes,
+    patchAttribute as apiPatchAttribute,
+    patchAttributes as apiPatchAttributes,
     removeEntityTypeAttribute,
     reorderEntityAttributes,
     updateAttributeMetadata,
@@ -685,7 +685,7 @@ export const useEntityStore = defineStore('entity', {
             });
         },
         async patchAttribute(entityId, attributeId, apiData) {
-            return patchAttribute.then(data => {
+            return apiPatchAttribute(entityId, attributeId, apiData).then(data => {
                 const updatedValues = {
                     [attributeId]: data,
                 };
@@ -695,7 +695,7 @@ export const useEntityStore = defineStore('entity', {
         },
         async patchAttributes(entityId, patchData, dirtyValues, moderations) {
             const moderated = useUserStore().getUserModerated;
-            return patchAttributes(entityId, patchData).then(data => {
+            return apiPatchAttributes(entityId, patchData).then(data => {
                 this.update(data.entity);
                 this.updateEntityData(entityId, dirtyValues, data.added_attributes, data.removed_attributes);
                 if(moderated) {
