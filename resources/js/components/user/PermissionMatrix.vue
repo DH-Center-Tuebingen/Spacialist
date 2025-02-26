@@ -115,7 +115,6 @@
 
                 if(right == 'all') {
                     let combinedState = determineUniformState(newPermissionMap[permissionGroup], props.rights);
-                    console.log('newState', combinedState);
 
                     const newState = (combinedState + 1) % 2;
                     for(let k in newPermissionMap[permissionGroup]) {
