@@ -183,7 +183,9 @@ export function translateConcept(url) {
 }
 
 export function getConceptLabel(concept) {
-    return concept.labels.length ? concept.labels[0].label : '';
+    const lang = getUser().language || 'en';
+    const labelObject = concept.labels.find(l => l.language?.short_name == lang) || concept.labels[0];
+    return labelObject ? labelObject.label : '';
 }
 
 export async function handleDeletedEntity(entity) {
