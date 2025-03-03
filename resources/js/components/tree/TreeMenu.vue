@@ -81,7 +81,7 @@
                 @click.stop.prevent="exportWithChildren"
                 @dblclick.stop.prevent=""
             >
-                <i class="fas fa-fw file-export" />
+                <i class="fas fa-fw fa-file-export text-primary" />
                 <span class="ms-2">
                     {{ t('global.export') }}
                 </span>
