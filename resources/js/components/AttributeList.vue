@@ -107,7 +107,7 @@
                             <a
                                 v-if="getConceptNote(element.thesaurus_url)"
                                 tabindex="0"
-                                class="text-decoration-none text-muted ms-1 position-relative"
+                                class="text-decoration-none text-secondary ms-1 position-relative"
                                 data-bs-toggle="popover"
                                 data-bs-trigger="focus"
                                 data-bs-placement="top"
