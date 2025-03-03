@@ -29,6 +29,7 @@
         "remove_file": "Datei entfernen",
         "no_file": "Keine Datei vorhanden",
         "list": {
+            "and_more": "und weitere | und {cnt} weitere",
             "nr_of_entries": "Keine Einträge | 1 Eintrag | {cnt} Einträge",
             "no_entries": "Keine Einträge gefunden.",
             "fetch_next_entries": "Weitere Einträge laden",
@@ -73,13 +74,15 @@
             "info_issue": "Wenn du denkst, dass diese Fehlermeldung ein Bug ist, schaue in unserem <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues\" target=\"_blank\">Bugtracker</a> auf Github nach, ob der Fehler schon gemeldet wurde oder sogar bereits in einer aktuelleren Version <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues?q=is:issue+is:closed\" target=\"_blank\">geschlossen</a> wurde (Deine aktuelle Version findest du über Einstellungen > <i class=\"fas fa-fw fa-info-circle\"></i> Über). Wenn es weder gemeldet, noch geschlossen ist, kannst du gerne einen <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues/new\" target=\"_blank\">neuen Bug</a> melden.",
             "occur": "Fehler aufgetreten",
             "headers": "Kopfzeilen",
-            "request_failed": "<code class=\"fw-normal\">{method}</code>-Anfrage an den Endpunkt <code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code> ist mit Statuscode <span class=\"fw-medium\">{status}</span> fehlgeschlagen."
+            "request_failed": "<code class=\"fw-normal\">{method}</code>-Anfrage an den Endpunkt <code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code> ist mit Statuscode <span class=\"fw-medium\">{status}</span> fehlgeschlagen.",
+            "value_invalid": "Dieser Wert ist ungültig."
         },
         "search": "Suche…",
         "search_no_results": "Keine Suchergebnisse",
         "search_no_results_for": "Keine Ergebnisse für den Begriff:",
         "search_no_term_info": "Gib einen Suchbegriff ein",
         "search_no_term_info_global": "Gib einen Suchbegriff ein um das gesamte System zu durchsuchen",
+        "search_load_n_more": "Lade bis zu {n} weitere Treffer",
         "login": "Einloggen",
         "login_title": "Anmelden",
         "login_subtitle": "Willkommen bei Spacialist",
@@ -235,6 +238,7 @@
                 "mass": {
                     "label": "Gewicht",
                     "units": {
+                        "milligram": "Milligramm",
                         "gram": "Gramm",
                         "kilogram": "Kilogramm",
                         "ton": "Tonnen",
@@ -481,6 +485,8 @@
                 "add": "Neue Top-Level Entität hinzufügen",
                 "contextmenu": {
                     "add": "Unterentität hinzufügen",
+                    "add_above": "Entität darüber hinzufügen",
+                    "add_below": "Entität darunter hinzufügen",
                     "duplicate": "Duplikat erzeugen",
                     "move": "Im Baum verschieben",
                     "delete": "Entität löschen"
@@ -537,6 +543,7 @@
             },
             "references": {
                 "title": "Quellenangaben",
+                "general": "Allgemeine Quellenangaben",
                 "empty": "Keine Quellen gefunden",
                 "certainty": "Sicherheit",
                 "bibliography": {
@@ -590,8 +597,8 @@
                     "view_original_data": "Originaldaten anzeigen",
                     "accept_changes": "Änderungen annehmen",
                     "deny_changes": "Änderungen ablehnen",
-                    "deleted_by": "<i class=\"fas fa-fw fa-trash\"></i> gelöscht {ts}",
-                    "modified_by": "<i class=\"fas fa-fw fa-edit\"></i> geändert {ts}",
+                    "deleted_by": "gelöscht {ts}",
+                    "modified_by": "geändert {ts}",
                     "edit_moderated_value": {
                         "title": "Änderung bearbeiten",
                         "accept": "Bearbeitete Änderung annehmen",
@@ -599,6 +606,11 @@
                         "reset": "Bearbeitete Änderung zurücksetzen",
                         "cancel": "Bearbeitung verwerfen"
                     }
+                },
+                "change_indicator": {
+                    "local_only": "Der Attributwert wurde von dir geändert. Die Daten können gespeichert werden.",
+                    "external_only": "Der Attributwert wurde von einem anderen Benutzern geändert.",
+                    "both": "Der Attributwert wurde von dir und einem anderen Benutzern geändert. Beim Speichern werden deine Änderungen übernommen!"
                 }
             },
             "metadata": {
@@ -698,6 +710,10 @@
             "toggle_pretty_print": "Darstellung umschalten"
         },
         "datamodel": {
+            "expand_groups": "Alle Gruppen ausklappen",
+            "collapse_groups": "Alle Gruppen einklappen",
+            "sort_by_name": "Nach Namen sortieren",
+            "sort_by_creation_date": "Nach Erstellungsdatum sortieren",
             "toasts": {
                 "updated_type": {
                     "title": "Entitätstyp aktualisiert",
@@ -716,6 +732,10 @@
                 "title": "Verfügbare Attribute",
                 "add_button": "Attribut hinzufügen",
                 "show_hidden": "Ausgeblendete anzeigen",
+                "hide_hidden": "Ausgeblendete verstecken",
+                "separated": "Attribute einzeln auflisten",
+                "in_groups": "Attribute in Gruppen auflisten",
+                "indicator_info": "Dieses Attribut wird aktuell in keinem Entitätstyp verwendet! | Dieses Attribut wird aktuell in einem Entitätstyp verwendet. | Dieses Attribut wird aktuell in {cnt} Entitätstypen verwendet.",
                 "modal": {
                     "new": {
                         "title": "Neues Attribut"
@@ -740,7 +760,7 @@
             "detail": {
                 "properties": {
                     "title": "Eigenschaften",
-                    "top_level": "Top-Level Entitätstyp?",
+                    "top_level": "Top-Level",
                     "sub_types": "Erlaubte Unter-Entitätstypen"
                 },
                 "attribute": {
@@ -1030,5 +1050,9 @@
     "keyboard": {
         "tab": "Tab",
         "space": "Leertaste"
+    },
+    "websockets": {
+        "service_available_again": "Echtzeitupdates wieder verfügbar!",
+        "service_unavailable": "Echtzeitupdates nicht verfügbar!"
     }
 }

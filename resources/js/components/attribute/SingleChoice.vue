@@ -1,5 +1,6 @@
 <template>
     <multiselect
+        ref="multiselect"
         v-model="v.value"
         :classes="multiselectResetClasslist"
         :value-prop="'id'"
@@ -14,17 +15,36 @@
         :limit="15"
         :filter-results="false"
         :placeholder="t('global.select.placeholder')"
+        @keydown.tab="handleTab"
+        @keydown="clearInputOnDelete"
         @select="value => v.handleChange(value)"
         @deselect="v.handleChange(null)"
         @search-change="setSearchQuery"
     >
         <template #option="{ option }">
             {{ translateConcept(option.concept_url) }}
+            <span
+                v-if="isTabOption(option)"
+                class="position-absolute end-0 me-2 badge rounded-pill border border-1 border-secondary text-secondary py-1 fs-xs"
+            >Tab</span>
         </template>
         <template #singlelabel="{ value: singlelabelValue }">
             <div class="multiselect-single-label">
                 {{ translateConcept(singlelabelValue.concept_url) }}
             </div>
+        </template>
+        <template #clear="{ clear }">
+            <span
+                aria-hidden="true"
+                role="button"
+                data-clear=""
+                aria-roledescription="❎"
+                class="multiselect-clear multiselect-clear-reset"
+                tabindex="-1"
+                @mousedown.prevent.stop="clear"
+            >
+                <span class="multiselect-clear-icon" />
+            </span>
         </template>
     </multiselect>
     <div
@@ -43,6 +63,7 @@
     import {
         computed,
         reactive,
+        ref,
         toRefs,
         watch,
     } from 'vue';
@@ -53,14 +74,10 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import store from '@/bootstrap/store.js';
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
+    import useSystemStore from '@/bootstrap/stores/system.js';
 
     import {
-        searchConceptSelection,
-    } from '@/api.js';
-
-    import {
-        getAttributeName,
         translateConcept,
         multiselectResetClasslist,
         only,
@@ -100,6 +117,8 @@
         emits: ['change', 'update-selection'],
         setup(props, context) {
             const { t } = useI18n();
+            const attributeStore = useAttributeStore();
+            const systemStore = useSystemStore();
             const {
                 name,
                 disabled,
@@ -108,6 +127,8 @@
                 selectionFrom,
                 selectionFromValue,
             } = toRefs(props);
+
+            const multiselect = ref(null);
 
             const {
                 handleChange: veeHandleChange,
@@ -120,6 +141,10 @@
             // FETCH
 
             // FUNCTIONS
+            const getAttributeName = attributeId => {
+                return attributeStore.getAttributeName(attributeId);
+            };
+
             const handleUpdateForSelections = value => {
                 context.emit('update-selection', value?.id);
                 formatAndHandleChange(value);
@@ -136,7 +161,7 @@
                 }
             };
 
-            const handleSelectionUpdate = conceptId => {
+            const handleSelectionUpdate = async conceptId => {
                 if(!state.hasRootAttribute) return;
 
                 if(!conceptId) {
@@ -145,21 +170,9 @@
                     return;
                 }
 
-                const cachedSelection = store.getters.cachedConceptSelection(conceptId);
-                if(!cachedSelection) {
-                    searchConceptSelection(conceptId).then(selection => {
-                        store.dispatch('setCachedConceptSelection', {
-                            id: conceptId,
-                            selection: selection,
-                        });
-
-                        state.localSelection = selection;
-                        updateCurrentValue();
-                    });
-                } else {
-                    state.localSelection = cachedSelection;
-                    updateCurrentValue();
-                }
+                const cachedSelection = await systemStore.fetchCachedConceptSelection(conceptId);
+                state.localSelection = cachedSelection;
+                updateCurrentValue();
             };
 
             const resetFieldState = _ => {
@@ -183,6 +196,47 @@
                     value = formatValue(value);
                 }
                 return veeHandleChange(value);
+            };
+
+            const handleTab = event => {
+                const value = event.target?.value?.toLowerCase() ?? '';
+                if(isOnlyChoice(value)) {
+                    return formatAndHandleChange(state.filteredSelections[0]);
+                }
+
+                const match = state.filteredSelections.find(concept => {
+                    const label = translateConcept(concept.concept_url);
+                    return checkPerfectMatch(value, label);
+                });
+                if(match) {
+                    return formatAndHandleChange(match);
+                }
+            };
+
+            const isOnlyChoice = value => {
+                return value && value.length > 0 && state.filteredSelections && state.filteredSelections.length == 1;
+            };
+
+            const isPerfectMatch = label => {
+                if(!state.query) return false;
+                return checkPerfectMatch(state.query, label);
+            };
+
+            const checkPerfectMatch = (search, label) => {
+                return search.toLowerCase() === label.toLowerCase();
+            };
+
+            const isTabOption = option => {
+                const concept = translateConcept(option.concept_url);
+                return isOnlyChoice(concept) || isPerfectMatch(concept);
+            };
+
+            const clearInputOnDelete = e => {
+                if(e.key === 'Delete' || e.code === 'Delete' || e.which === 46 || e.keyCode === 46) {
+                    state.query = '';
+                    v.handleChange(null);
+                    multiselect.value.clearSearch();
+                }
             };
 
             const setSearchQuery = query => {
@@ -242,17 +296,20 @@
                 });
             }
 
-            // RETURN
             return {
                 t,
                 // HELPERS
-                getAttributeName,
-                translateConcept,
                 multiselectResetClasslist,
+                translateConcept,
                 // LOCAL
+                getAttributeName,
+                clearInputOnDelete,
+                handleTab,
+                isTabOption,
+                multiselect,
                 resetFieldState,
-                undirtyField,
                 setSearchQuery,
+                undirtyField,
                 // STATE
                 state,
                 v,

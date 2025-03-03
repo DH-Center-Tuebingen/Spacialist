@@ -5,10 +5,10 @@
         @mouseleave="state.hovered = false"
     >
         <md-viewer
-            v-if="current"
+            v-if="v.value"
             :id="name"
             :classes="state.classes"
-            :source="current"
+            :source="v.value"
         />
         <div
             v-else
@@ -42,7 +42,6 @@
     import {
         computed,
         reactive,
-        ref,
         toRefs,
         watch,
     } from 'vue';
@@ -77,33 +76,32 @@
             } = toRefs(props);
 
             const handleInput = text => {
-                current.value = text || '';
-                meta.dirty = true;
-                meta.valid = true;
+                v.value = text || '';
+                v.meta.dirty = true;
+                v.meta.valid = true;
 
                 context.emit('change', {
-                    dirty: meta.dirty,
-                    valid: meta.valid,
-                    value: current.value,
+                    dirty: v.meta.dirty,
+                    valid: v.meta.valid,
+                    value: v.value,
                 });
             };
 
             const resetFieldState = _ => {
-                current.value = initial.value || '';
+                v.value = initial.value || '';
                 undirtyField();
             };
 
             const undirtyField = _ => {
-                meta.dirty = false;
+                v.meta.dirty = false;
             };
 
             watch(initial, _ => {
                 resetFieldState();
             });
 
-
             const openMdEditor = _ => {
-                showMarkdownEditor(current.value, text => {
+                showMarkdownEditor(v.value, text => {
                     handleInput(text);
                 });
             };
@@ -119,24 +117,18 @@
                     }
                 }),
             });
-            const current = ref(initial.value || '');
-            const meta = reactive({
-                dirty: false,
-                valid: true,
-            });
 
             /**
-             * v is required as the attr-list fetches 
+             * v is required as the attr-list fetches
              * the values of the attributes via every
              * attribute's v.value.
              */
-            const v = computed(_ => {
-                return {
-                    value: current.value,
-                    meta: {
-                        ...meta
-                    }
-                };
+            const v = reactive({
+                value: initial.value || '',
+                meta: {
+                    dirty: false,
+                    valid: true,
+                }
             });
 
             // RETURN
@@ -147,7 +139,6 @@
                 undirtyField,
                 openMdEditor,
                 // STATE
-                current,
                 state,
                 v,
             };

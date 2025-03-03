@@ -59,7 +59,6 @@
     import {
         computed,
         reactive,
-        toRefs,
         watch,
     } from 'vue';
 
@@ -69,8 +68,9 @@
 
     import * as yup from 'yup';
 
+    import useUserStore from '@/bootstrap/stores/user.js';
+
     import {
-        getUsers,
         multiselectResetClasslist,
     } from '@/helpers/helpers.js';
 
@@ -97,18 +97,13 @@
         emits: ['change'],
         setup(props, context) {
             const { t } = useI18n();
-            const {
-                name,
-                disabled,
-                value,
-            } = toRefs(props);
+            const userStore = useUserStore();
             // FETCH
 
             // FUNCTIONS
-
             const resetFieldState = _ => {
                 v.resetField({
-                    value: value.value || []
+                    value: props.value || []
                 });
             };
             const undirtyField = _ => {
@@ -124,9 +119,9 @@
                 meta,
                 resetField,
             } = useField(`userlist_${name.value}`, yup.mixed(), {
-                initialValue: value.value || [],
+                initialValue: props.value || [],
             });
-            const users = getUsers();
+            const users = userStore.users;
             const v = reactive({
                 value: fieldValue,
                 handleChange,
@@ -134,8 +129,7 @@
                 resetField,
             });
 
-
-            watch(_ => value, (newValue, oldValue) => {
+            watch(_ => props.value, (newValue, oldValue) => {
                 resetFieldState();
             });
             watch(_ => v.value, (newValue, oldValue) => {

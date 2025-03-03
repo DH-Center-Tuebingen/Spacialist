@@ -6,7 +6,9 @@ use App\Attribute;
 use App\AttributeValue;
 use App\Entity;
 use App\EntityType;
+use App\Exceptions\InvalidDataException;
 use App\User;
+use App\Utils\StringUtils;
 use Illuminate\Support\Arr;
 
 abstract class AttributeBase
@@ -61,7 +63,7 @@ abstract class AttributeBase
                     } else if($on == "in_table") {
                         if($attr::getInTable() != $value) return false;
                     } else if($on == "field") {
-                        if($attr::getField() != $value) return false; 
+                        if($attr::getField() != $value) return false;
                     } else if($on == "has_selection") {
                         if($attr::getHasSelection() != $value) return false;
                     }
@@ -128,16 +130,32 @@ abstract class AttributeBase
                 $class::handleOnCreate($entity, $attr, $user);
             }
         }
-        
+
     }
+
     public static function onAddHandler(Attribute $attr, EntityType $entityType, User $user) : void {
         $class = self::getMatchingClass($attr->datatype);
-        if(method_exists($class, "handleOnAdd")) {
+        if($class !== false && method_exists($class, "handleOnAdd")) {
             $class::handleOnAdd($attr, $entityType, $user);
         }
     }
 
-    public abstract static function fromImport(int|float|bool|string $data) : mixed;
+    private static function importDataIsEmpty(int|float|bool|string $data) : bool {
+        if(!is_string($data)) return false;
+        return trim($data) === "";
+    }
+
+    public static function fromImport(int|float|bool|string $data) : mixed {
+        if(self::importDataIsEmpty($data)) {
+            return null;
+        }
+        return static::parseImport($data);
+    }
+
+    public static function parseImport(int|float|bool|string $data) : mixed {
+        return StringUtils::useGuard(InvalidDataException::class)($data);
+    }
+
     public abstract static function unserialize(mixed $data) : mixed;
     public abstract static function serialize(mixed $data) : mixed;
 }

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Attribute;
-use App\AttributeValue;
 use App\Bibliography;
 use App\Entity;
 use App\EntityType;
@@ -18,7 +17,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 use Spatie\Searchable\Search;
-use Spatie\Searchable\ModelSearchAspect;
 
 class SearchController extends Controller {
     private static $shebangPrefix = [
@@ -28,7 +26,7 @@ class SearchController extends Controller {
         'geodata' => '!g ',
     ];
 
-    private function stripShebang($query) {
+    private function stripShebang(string $query) : string {
         if($this->isBib($query)) {
             return Str::after($query, self::$shebangPrefix['bibliography']);
         } else if($this->isEntity($query)) {
@@ -42,28 +40,46 @@ class SearchController extends Controller {
         }
     }
 
-    private function noShebang($query) {
+    private function noShebang(string $query) : bool {
         return !Str::startsWith($query, '!') || !($this->isBib($query) || $this->isEntity($query) || $this->isFile($query) || $this->isGeodata($query));
     }
 
-    private function isBib($query) {
+    private function isBib(string $query) : bool {
         return Str::startsWith($query, self::$shebangPrefix['bibliography']);
     }
 
-    private function isEntity($query) {
+    private function isEntity(string $query) : bool {
         return Str::startsWith($query, self::$shebangPrefix['entities']);
     }
 
+    // TODO handle in Plugin
     private function isFile($query) {
         return Str::startsWith($query, self::$shebangPrefix['files']);
     }
 
+    // TODO handle in Plugin
     private function isGeodata($query) {
         return Str::startsWith($query, self::$shebangPrefix['geodata']);
     }
 
     public function searchGlobal(Request $request) {
         $user = auth()->user();
+
+        // Search is currently supported in
+        // Entity, AttributeValue, Bibliography and
+        // Following Plugins: File, Geodata (TODO handle in Plugins or a Search Handler)
+        if(
+            !$user->can('bibliography_read') &&
+            !$user->can('entity_read') &&
+            !$user->can('entity_data_read') &&
+            !$user->can('file_read') &&
+            !$user->can('geodata_read')
+        ) {
+            return response()->json([
+                'error' => __('You do not have the permission to search global')
+            ], 403);
+        }
+
         $q = $request->query('q');
         $stripedQuery = $this->stripShebang($q);
         $search = new Search();
@@ -84,7 +100,7 @@ class SearchController extends Controller {
         return response()->json($matches);
     }
 
-    public function searchEntityByName(Request $request) {
+    public function searchEntityByName(Request $request, int $page = 1) {
         $user = auth()->user();
         if(!$user->can('entity_read')) {
             return response()->json([
@@ -94,15 +110,37 @@ class SearchController extends Controller {
         $q = $request->query('q');
         $t = $request->query('t');
 
-        $matches = Entity::where('name', 'ilike', '%'.$q.'%');
+        $exactStart = false;
+        $exactEnd = false;
+        if(Str::startsWith($q, '^')) {
+            $exactStart = true;
+            $q = substr($q, 1);
+        }
+        if(Str::endsWith($q, '$')) {
+            $exactEnd = true;
+            $q = substr($q, 0, -1);
+        }
+
+        $searchQuery = $q;
+        if(!$exactStart) {
+            $searchQuery = '%'.$searchQuery;
+        }
+        if(!$exactEnd) {
+            $searchQuery = $searchQuery.'%';
+        }
+
+        $matches = Entity::where('name', 'ilike', $searchQuery);
         if(isset($t)) {
             $types = explode(',', $t);
             $matches->whereIn('entity_type_id', $types);
         }
         $matches = $matches
             ->orderBy('name')
-            ->get();
-        $matches->each->append(['ancestors']);
+            ->simplePaginate(10);
+
+        $matches->each(function($entity) {
+            $entity->append('ancestors');
+        });
         return response()->json($matches);
     }
 
@@ -155,10 +193,11 @@ class SearchController extends Controller {
         $langId = $language->id;
         $builder = th_tree_builder($lang);
 
-        $matches = $builder->whereHas('labels', function($query) use ($langId, $q){
-            $query->where('language_id', $langId)
-                ->where('label', 'ilike', "%$q%");
-        })
+        $matches = $builder
+            ->whereHas('labels', function($query) use ($langId, $q) {
+                $query->where('language_id', $langId)
+                    ->where('label', 'ilike', "%$q%");
+            })
             ->get();
 
         $foreignMatches = th_tree_builder($lang)
@@ -171,6 +210,8 @@ class SearchController extends Controller {
             ->get();
 
         $matches = $matches->merge($foreignMatches);
+        $matches->each->setAppends(['parent_path']);
+
         return response()->json($matches);
     }
 
@@ -207,7 +248,7 @@ class SearchController extends Controller {
         return response()->json($matches);
     }
 
-    public function getConceptChildren($id, Request $request) {
+    public function getConceptChildren(int $id, Request $request) {
         $user = auth()->user();
         if(!$user->can('thesaurus_read')) {
             return response()->json([

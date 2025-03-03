@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 
@@ -14,15 +15,30 @@ class ApiPreferenceTest extends TestCase
     // Testing GET requests
 
     /**
-     * A basic test example.
+     * @testdox GET    /api/v1/preferences : Get System Preferences
      *
      * @return void
      */
     public function testPreferenceEndpoint()
     {
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $cnt = UserPreference::count();
+        $this->assertEquals($cnt, 0);
+
+        $fields = [
+            'pref_id' => 1,
+            'user_id' => 1,
+            'value' => '{"language_key":"de"}'
+        ];
+        $up = new UserPreference();
+        foreach($fields as $k => $v) {
+            $up->{$k} = $v;
+        }
+        $up->save();
+
+        $cnt = UserPreference::count();
+        $this->assertEquals($cnt, 1);
+
+        $response = $this->userRequest()
             ->get('/api/v1/preference');
 
         $response->assertJsonCount(10);
@@ -31,322 +47,133 @@ class ApiPreferenceTest extends TestCase
                 'id',
                 'label',
                 'value',
-                'allow_override',
                 'created_at',
                 'updated_at'
             ]
         ]);
 
-        $response->assertJson([
-            'prefs.gui-language' => [
-                'id' => 1,
-                'label' => 'prefs.gui-language',
-                'value' => 'en',
-                'allow_override' => true
-            ],
-            'prefs.columns' => [
-                'id' => 2,
-                'label' => 'prefs.columns',
-                'value' => [
-                    'left' => 2,
-                    'center' => 5,
-                    'right' => 5
-                ],
-                'allow_override' => true
-            ],
-            'prefs.show-tooltips' => [
-                'id' => 3,
-                'label' => 'prefs.show-tooltips',
-                'value' => true,
-                'allow_override' => true
-            ],
-            'prefs.tag-root' => [
-                'id' => 4,
-                'label' => 'prefs.tag-root',
-                'value' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/eigenschaften#20171220100251',
-                'allow_override' => false
-            ],
-            'prefs.load-extensions' => [
-                'id' => 5,
-                'label' => 'prefs.load-extensions',
-                'value' => [
-                    'map' => true,
-                    'files' => true,
-                    'data-analysis' => true,
-                ],
-                'allow_override' => false
-            ],
-            'prefs.link-to-thesaurex' => [
-                'id' => 6,
-                'label' => 'prefs.link-to-thesaurex',
-                'value' => '',
-                'allow_override' => false
-            ],
-            'prefs.project-name' => [
-                'id' => 7,
-                'label' => 'prefs.project-name',
-                'value' => 'Spacialist',
-                'allow_override' => false
-            ],
-            'prefs.project-maintainer' => [
-                'id' => 8,
-                'label' => 'prefs.project-maintainer',
-                'value' => [
-                    'name' => '',
-                    'email' => '',
-                    'public' => false,
-                    'description' => ''
-                ],
-                'allow_override' => false
-            ],
-            'prefs.map-projection' => [
-                'id' => 9,
-                'label' => 'prefs.map-projection',
-                'value' => [
-                    'epsg' => 4326,
-                    'proj4' => '+proj=longlat +datum=WGS84 +no_defs '
-                ],
-                'allow_override' => false
-            ],
-            'prefs.enable-password-reset-link' => [
-                'id' => 10,
-                'label' => 'prefs.enable-password-reset-link',
-                'value' => false,
-                'allow_override' => false
-            ]
-        ]);
+        $response->assertJson(fn(AssertableJson $json) =>
+            $json
+                ->etc()
+                ->has('prefs.gui-language', fn(AssertableJson $guiJson) =>
+                $guiJson->where('id', 1)
+                    ->where('value', 'en')
+                    ->etc()
+            )
+                ->has('prefs.columns', fn(AssertableJson $colJson) =>
+                    $colJson->where('id', 2)
+                        ->where('value', [
+                            'left' => 2,
+                            'center' => 5,
+                            'right' => 5,
+                        ])
+                        ->etc()
+                )
+                ->has('prefs.show-tooltips', fn(AssertableJson $tooltipJson) =>
+                    $tooltipJson->where('id', 3)
+                        ->where('value', true)
+                        ->etc()
+                )
+                ->has('prefs.tag-root', fn(AssertableJson $tagJson) =>
+                    $tagJson->where('id', 4)
+                        ->where('value', 'https://spacialist.escience.uni-tuebingen.de/<user-project>/eigenschaften#20171220100251')
+                        ->etc()
+                )
+                ->has('prefs.link-to-thesaurex', fn(AssertableJson $thJson) =>
+                    $thJson->where('id', 5)
+                        ->where('value', '')
+                        ->etc()
+                )
+                ->has('prefs.project-name', fn(AssertableJson $projectNameJson) =>
+                    $projectNameJson->where('id', 6)
+                        ->where('value', 'Spacialist')
+                        ->etc()
+                )
+                ->has('prefs.project-maintainer', fn(AssertableJson $maintainerJson) =>
+                    $maintainerJson->where('id', 7)
+                        ->where('value', [
+                            'name' => '',
+                            'email' => '',
+                            'public' => false,
+                            'description' => '',
+                        ])
+                        ->etc()
+                )
+                ->has('plugin.map.prefs.map-projection', fn(AssertableJson $mapJson) =>
+                    $mapJson->where('id', 8)
+                        ->where('value', [
+                            'epsg' => '4326'
+                        ])
+                        ->etc()
+                )
+                ->has('prefs.enable-password-reset-link', fn(AssertableJson $pwJson) =>
+                    $pwJson->where('id', 9)
+                        ->where('value', false)
+                        ->etc()
+                )
+                ->has('prefs.color', fn(AssertableJson $colorJson) =>
+                    $colorJson->where('id', 10)
+                        ->where('value', '')
+                        ->etc()
+                )
+        );
     }
 
     /**
-     * A basic test example.
+     * @testdox PATCH  /api/v1/preference : Change System Preference
      *
      * @return void
      */
-    public function testUserPreferenceEndpoint()
+    public function testPatchSystemPreferenceEndpoint()
     {
-        $cnt = UserPreference::count();
-        $this->assertEquals($cnt, 0);
-
-        $fields = [
-            'pref_id' => 1,
-            'user_id' => 1,
-            'value' => '{"language_key":"de"}'
+        $data = [
+            'changes' => [
+                [
+                    'user' => false,
+                    'value' => 'Updated Project Name',
+                    'label' => 'prefs.project-name',
+                ],
+            ],
         ];
-        $up = new UserPreference();
-        foreach($fields as $k => $v) {
-            $up->{$k} = $v;
-        }
-        $up->save();
 
-        $cnt = UserPreference::count();
-        $this->assertEquals($cnt, 1);
+        $response = $this->userRequest()
+            ->patch('/api/v1/preference', $data);
 
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
-            ->get('/api/v1/preference/1');
-
-        $response->assertJsonCount(10);
-        $response->assertJsonStructure([
-            '*' => [
-                'id',
-                'label',
-                'value',
-                'allow_override',
-                'created_at',
-                'updated_at'
-            ]
-        ]);
-
-        $response->assertJson([
-            'prefs.gui-language' => [
-                'id' => 1,
-                'label' => 'prefs.gui-language',
-                'value' => 'de',
-                'allow_override' => true
-            ],
-            'prefs.columns' => [
-                'id' => 2,
-                'label' => 'prefs.columns',
-                'value' => [
-                    'left' => 2,
-                    'center' => 5,
-                    'right' => 5
-                ],
-                'allow_override' => true
-            ],
-            'prefs.show-tooltips' => [
-                'id' => 3,
-                'label' => 'prefs.show-tooltips',
-                'value' => true,
-                'allow_override' => true
-            ],
-            'prefs.tag-root' => [
-                'id' => 4,
-                'label' => 'prefs.tag-root',
-                'value' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/eigenschaften#20171220100251',
-                'allow_override' => false
-            ],
-            'prefs.load-extensions' => [
-                'id' => 5,
-                'label' => 'prefs.load-extensions',
-                'value' => [
-                    'map' => true,
-                    'files' => true,
-                    'data-analysis' => true,
-                ],
-                'allow_override' => false
-            ],
-            'prefs.link-to-thesaurex' => [
-                'id' => 6,
-                'label' => 'prefs.link-to-thesaurex',
-                'value' => '',
-                'allow_override' => false
-            ],
-            'prefs.project-name' => [
-                'id' => 7,
-                'label' => 'prefs.project-name',
-                'value' => 'Spacialist',
-                'allow_override' => false
-            ],
-            'prefs.project-maintainer' => [
-                'id' => 8,
-                'label' => 'prefs.project-maintainer',
-                'value' => [
-                    'name' => '',
-                    'email' => '',
-                    'public' => false,
-                    'description' => ''
-                ],
-                'allow_override' => false
-            ],
-            'prefs.map-projection' => [
-                'id' => 9,
-                'label' => 'prefs.map-projection',
-                'value' => [
-                    'epsg' => 4326,
-                    'proj4' => '+proj=longlat +datum=WGS84 +no_defs '
-                ],
-                'allow_override' => false
-            ],
-            'prefs.enable-password-reset-link' => [
-                'id' => 10,
-                'label' => 'prefs.enable-password-reset-link',
-                'value' => false,
-                'allow_override' => false
-            ]
-        ]);
+        $projectNamePref = Preference::find(6);
+        $this->assertEquals('prefs.project-name', $projectNamePref->label);
+        $this->assertEquals('{"name": "Updated Project Name"}', $projectNamePref->default_value);
     }
 
     /**
-     * A basic test example.
-     *
-     * @return void
-     */
-    public function testOtherUserPreferenceEndpoint()
-    {
-        $user = User::factory()->create();
-
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
-        ->get('/api/v1/preference/' . $user->id);
-
-        $response->assertStatus(403);
-        $response->assertSimilarJson([
-            'error' => 'You are not allowed to access preferences of another user'
-        ]);
-    }
-
-    /**
-     * A basic test example.
-     *
-     * @return void
-     */
-    public function testMissingUserPreferenceEndpoint()
-    {
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
-        ->get('/api/v1/preference/99');
-
-        $response->assertStatus(400);
-        $response->assertSimilarJson([
-            'error' => 'This user does not exist'
-        ]);
-    }
-
-    /**
-     * A basic test example.
-     *
-     * @return void
-     */
-    public function testPatchPreferenceEndpoint()
-    {
-        $cnt = UserPreference::count();
-        $this->assertEquals($cnt, 0);
-
-        $user = User::factory()->create();
-        $fields = [
-            'pref_id' => 1,
-            'user_id' => $user->id,
-            'value' => '{"language_key":"de"}'
-        ];
-        $up = new UserPreference();
-        foreach($fields as $k => $v) {
-            $up->{$k} = $v;
-        }
-        $up->save();
-
-        $cnt = UserPreference::count();
-        $this->assertEquals($cnt, 1);
-
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
-        ->patch('/api/v1/preference/1', [
-            'label' => 'prefs.gui-language',
-            'value' => 'fr',
-            'allow_override' => 'false'
-        ]);
-
-        // Because allow_override is set to false,
-        // user prefs should get deleted
-        $cnt = UserPreference::count();
-        $this->assertEquals($cnt, 0);
-        $response->assertStatus(204);
-        $pref = Preference::find(1);
-        $this->assertEquals('{"language_key": "fr"}', $pref->default_value);
-    }
-
-    /**
-     * Test patching a users preference.
+     * @testdox PATCH  /api/v1/preference : Change User Preference
      *
      * @return void
      */
     public function testPatchUserPreferenceEndpoint()
     {
         $data = [
-            'user_id' => 1,
-            'value' => '{"left": 2, "right": 2, "center": 8}',
-            'label' => 'prefs.columns',
+            'changes' => [
+                [
+                    'user' => true,
+                    'value' => '{"left": 2, "right": 2, "center": 8}',
+                    'label' => 'prefs.columns',
+                ],
+            ],
         ];
 
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
-        ->patch('/api/v1/preference/2', $data);
+        $response = $this->userRequest()
+            ->patch('/api/v1/preference', $data);
 
         $pref = User::with('preferences')->first()->preferences[0];
         $this->assertEquals(2, $pref->pref_id);
         $this->assertEquals(1, $pref->user_id);
-        $this->assertEquals('{"left": 2, "right": 2, "center": 8}', $pref->value);
+        $this->assertEquals('"{\\"left\\": 2, \\"right\\": 2, \\"center\\": 8}"', $pref->value);
     }
 
     // Testing exceptions and permissions
 
     /**
-     *
+     * @testdox Test Permissions
      *
      * @return void
      */
@@ -355,48 +182,48 @@ class ApiPreferenceTest extends TestCase
         User::first()->roles()->detach();
 
         $calls = [
-            ['url' => '/99', 'error' => 'You do not have the permission to edit preferences', 'verb' => 'patch'],
+            ['url' => '', 'error' => 'You do not have the permission to edit system preferences', 'verb' => 'patch'],
         ];
 
+        $response = null;
         foreach($calls as $c) {
-            $response = $this->withHeaders([
-                    'Authorization' => "Bearer $this->token"
-                ])
-                ->json($c['verb'], '/api/v1/preference' . $c['url']);
+            $response = $this->userRequest()
+                ->json($c['verb'], '/api/v1/preference' . $c['url'], [
+                    'changes' => [
+                        ['label' => 'prefs.columns']
+                    ],
+                ]);
 
             $response->assertStatus(403);
             $response->assertSimilarJson([
                 'error' => $c['error']
             ]);
-
-            $this->refreshToken($response);
         }
     }
     /**
-     *
+     * @testdox Test Exceptions
      *
      * @return void
      */
     public function testExceptions()
     {
         $calls = [
-            ['url' => '/99', 'error' => 'This preference does not exist', 'verb' => 'patch'],
+            ['url' => '', 'error' => 'This preference does not exist', 'verb' => 'patch'],
         ];
 
+        $response = null;
         foreach($calls as $c) {
-            $response = $this->withHeaders([
-                    'Authorization' => "Bearer $this->token"
-                ])
+            $response = $this->userRequest()
                 ->json($c['verb'], '/api/v1/preference' . $c['url'], [
-                    'label' => 'prefs.columns'
+                    'changes' => [
+                        ['label' => 'prefs.columnsWrongName']
+                    ]
                 ]);
 
-            $response->assertStatus(400);
+            $this->assertStatus($response, 400);
             $response->assertSimilarJson([
                 'error' => $c['error']
             ]);
-
-            $this->refreshToken($response);
         }
     }
 }

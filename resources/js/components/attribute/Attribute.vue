@@ -64,6 +64,7 @@
 
     <serial-attribute
         v-else-if="data.datatype == 'serial'"
+        :ref="el => setRef(el)"
         :disabled="state.disabled"
         :name="`attr-${data.id}`"
         :value="state.value"
@@ -223,6 +224,7 @@
 
     <sql-attribute
         v-else-if="data.datatype == 'sql'"
+        :ref="el => setRef(el)"
         :disabled="state.disabled"
         :name="`attr-${data.id}`"
         :value="state.value"
@@ -247,13 +249,16 @@
 <script>
     import {
         computed,
+        nextTick,
         reactive,
         ref,
         toRefs,
+        watch,
     } from 'vue';
 
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
+
     import {
-        getAttributeSelection,
         getEmptyAttributeValue,
         _cloneDeep,
     } from '@/helpers/helpers.js';
@@ -350,17 +355,23 @@
                 default: _ => new Object(),
             },
         },
-        emits: ['expanded','change', 'update-selection'],
+        emits: ['expanded', 'change', 'update-selection'],
         setup(props, context) {
+            const attributeStore = useAttributeStore();
             const {
                 data,
                 valueWrapper,
                 disabled,
             } = toRefs(props);
+
             // FETCH
-            
+
             const getValueOrDefault = _ => {
-                return valueWrapper.value.value || getEmptyAttributeValue(data.value.datatype);
+                if(valueWrapper?.value?.value == null) {
+                    return getEmptyAttributeValue(data.value.datatype);
+                }
+
+                return valueWrapper.value.value;
             };
 
             const attrRef = ref({});
@@ -368,9 +379,9 @@
                 type: computed(_ => data.value.datatype),
                 disabled: computed(_ => data.value.isDisabled || disabled.value),
                 value: _cloneDeep(getValueOrDefault()),
+                externalUpdate: false,
                 // TODO check for selection need?
-                selection: computed(_ => getAttributeSelection(data.value.id) || []),
-
+                selection: computed(_ => attributeStore.getAttributeSelection(data.value.id) || []),
             });
 
             const setRef = el => {
@@ -403,18 +414,39 @@
             };
 
             const undirtyField = _ => {
+                state.externalUpdate = false;
                 if(attrRef.value && attrRef.value.undirtyField) {
                     attrRef.value.undirtyField();
                 }
             };
 
             const resetFieldState = _ => {
+                state.externalUpdate = false;
                 if(attrRef.value && attrRef.value.resetFieldState) {
                     attrRef.value.resetFieldState();
                 }
             };
 
+            const handleExternalChange = changeData => {
+                state.externalUpdate = !!changeData;
+                if(state.externalUpdate) {
+                    // set "initial" value (aka state.value) to external value
+                    state.value = _cloneDeep(getValueOrDefault());
+
+                    // if not dirty: resetFieldState to external "initial" value
+                    if(!attrRef.value?.v?.meta?.dirty) {
+                        nextTick(_ => {
+                            resetFieldState();
+                        });
+                    }
+                }
+            };
+
             const v = ref({});
+
+            watch(_ => valueWrapper.value, (newValue, oldValue) => {
+                state.value = _cloneDeep(getValueOrDefault());
+            });
 
             // RETURN
             return {
@@ -428,6 +460,7 @@
                 //
                 undirtyField,
                 resetFieldState,
+                handleExternalChange,
                 v,
                 // STATE
                 state,

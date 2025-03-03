@@ -30,6 +30,7 @@
         "remove_file": "Remove file",
         "no_file": "No file",
         "list": {
+            "and_more": "and more | and {cnt} more",
             "nr_of_entries": "No Entries | 1 Entry | {cnt} Entries",
             "no_entries": "No entries found.",
             "fetch_next_entries": "Fetch next entries",
@@ -74,13 +75,15 @@
             "info_issue": "If you think this is a bug, please have a look at our <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues\" target=\"_blank\">issue tracker</a> on github to see if this has been already reported or <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues?q=is:issue+is:closed\" target=\"_blank\">closed</a> in a later version (Your current version can be found in Settings > <i class=\"fas fa-fw fa-info-circle\"></i> About Dialog). If it is neither reported nor closed, feel free to <a href=\"https://github.com/DH-Center-Tuebingen/Spacialist/issues/new\" target=\"_blank\">open a new issue</a>.",
             "occur": "Error occured",
             "headers": "Headers",
-            "request_failed": "<code class=\"fw-normal\">{method}</code>-Request to endpoint <code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code> failed with status code <span class=\"fw-medium\">{status}</span>."
+            "request_failed": "<code class=\"fw-normal\">{method}</code>-Request to endpoint <code class=\"bg-light-dark rounded px-2 normal text-dark\">{url}</code> failed with status code <span class=\"fw-medium\">{status}</span>.",
+            "value_invalid": "This value is invalid"
         },
         "search": "Search…",
         "search_no_results": "No results",
         "search_no_results_for": "No results for term:",
         "search_no_term_info": "Enter a search term",
         "search_no_term_info_global": "Enter a search term to search globally",
+        "search_load_n_more": "Load up to {n} more results",
         "login": "Login",
         "login_title": "Login",
         "login_subtitle": "Welcome to Spacialist",
@@ -236,6 +239,7 @@
                 "mass": {
                     "label": "Mass",
                     "units": {
+                        "milligram": "Milligram",
                         "gram": "Gram",
                         "kilogram": "Kilogram",
                         "ton": "Tons",
@@ -482,6 +486,8 @@
                 "add": "Add new Top-Level-Entity",
                 "contextmenu": {
                     "add": "Add Sub-Entity",
+                    "add_above": "Add Entity Above",
+                    "add_below": "Add Entity Below",
                     "duplicate": "Create Duplicate",
                     "move": "Move in Tree",
                     "delete": "Delete Entity"
@@ -538,6 +544,7 @@
             },
             "references": {
                 "title": "References",
+                "general": "General References",
                 "empty": "No References found",
                 "certainty": "Certainty",
                 "bibliography": {
@@ -591,8 +598,8 @@
                     "view_original_data": "Show original data",
                     "accept_changes": "Accept changes",
                     "deny_changes": "Deny changes",
-                    "deleted_by": "<i class=\"fas fa-fw fa-trash\"></i> deleted {ts}",
-                    "modified_by": "<i class=\"fas fa-fw fa-edit\"></i> modified {ts}",
+                    "deleted_by": "deleted {ts}",
+                    "modified_by": "modified {ts}",
                     "edit_moderated_value": {
                         "title": "Edit changes",
                         "accept": "Accept edited changes",
@@ -600,6 +607,11 @@
                         "reset": "Reset edited changes",
                         "cancel": "Cancel editing"
                     }
+                },
+                "change_indicator": {
+                    "local_only": "Attribute value changes made by you. Data can be saved.",
+                    "external_only": "Attribute value has been changed by another user.",
+                    "both": "Attribute value has been changed by you and another user. Saving will overwrite their changes with yours!"
                 }
             },
             "metadata": {
@@ -699,6 +711,10 @@
             "toggle_pretty_print": "Toggle Pretty Print"
         },
         "datamodel": {
+            "expand_groups": "Expand all groups",
+            "collapse_groups": "Collapse all groups",
+            "sort_by_name": "Sort by name",
+            "sort_by_creation_date": "Sort by creation date",
             "toasts": {
                 "updated_type": {
                     "title": "Entity-Type updated",
@@ -717,6 +733,10 @@
                 "title": "Available Attributes",
                 "add_button": "Add Attribute",
                 "show_hidden": "Show hidden",
+                "hide_hidden": "Hide hidden",
+                "separated": "List attributes separated",
+                "in_groups": "List attributes in groups",
+                "indicator_info": "This attribute is not currently used in any entity-type! | This attribute is currently used in one entity-type. | This attribute is currently used in {cnt} entity-types.",
                 "modal": {
                     "new": {
                         "title": "New Attribute"
@@ -741,7 +761,7 @@
             "detail": {
                 "properties": {
                     "title": "Properties",
-                    "top_level": "Top-Level-Entity-Type?",
+                    "top_level": "Top-Level",
                     "sub_types": "Allowed Sub-Entity-Types"
                 },
                 "attribute": {
@@ -1032,5 +1052,9 @@
     "keyboard": {
         "tab": "Tab",
         "space": "Spacebar"
+    },
+    "websockets": {
+        "service_available_again": "Live updates available again!",
+        "service_unavailable": "Live updates unavailable!"
     }
 }

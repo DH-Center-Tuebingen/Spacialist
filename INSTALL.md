@@ -223,7 +223,7 @@ php artisan db:seed --class=DemoSeeder
 ```
 
 Now you can login with:
-- **Email**: `admin@admin.com`
+- **Email**: `admin@localhost`
 - **Password**: `admin`
 
 **Important**: Since this is the same default password for all instances, we **strongly recommend** to change your password to something more secure. Even better is to create a new admin account with your actual email address and **delete** this default account.

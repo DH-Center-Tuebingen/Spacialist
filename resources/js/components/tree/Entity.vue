@@ -1,9 +1,9 @@
 <template>
     <div class="d-flex flex-column">
         <div class="d-flex flex-row justify-content-between mb-2">
-            <h3 class="mb-0">
+            <h3 class="mb-0 d-flex flex-row align-items-center gap-2 text-truncate">
                 {{ t('main.entity.title', 2) }}
-                <small class="badge bg-secondary fw-light align-middle font-size-50">
+                <small class="badge bg-secondary fw-light align-middle font-size-50 text-truncate">
                     {{ t('main.entity.count', {cnt: state.topLevelCount}, state.topLevelCount) }}
                 </small>
             </h3>
@@ -180,7 +180,7 @@
             <tree
                 id="entity-tree"
                 class="col px-0 overflow-y-auto"
-                :data="state.tree"
+                :data="entityStore.tree"
                 size="small"
                 preid=""
                 :draggable="state.isDragAllowed"
@@ -213,22 +213,13 @@
 
     import TreeSearch from '@/components/tree/Search.vue';
 
-    import store from '@/bootstrap/store.js';
     import router from '%router';
-
-    import {
-        moveEntity,
-    } from '@/api.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import {
         fetchChildren,
         openPath,
     } from '@/helpers/tree.js';
-
-    import {
-        getEntityType,
-        getEntityTypes,
-    } from '@/helpers/helpers.js';
 
     import {
         showAddEntity,
@@ -251,12 +242,13 @@
         setup(props) {
             const { t } = useI18n();
             const currentRoute = useRoute();
+            const entityStore = useEntityStore();
 
             // FETCH
 
             // FUNCTIONS
             // Drag & Drop helpers
-            const entityTypesAsArray = Object.values(getEntityTypes());
+            const entityTypesAsArray = Object.values(entityStore.entityTypes);
             const droppedToRootLevel = (tgt, tgtPath) => {
                 return tgt.state.dropPosition != DropPosition.inside && tgtPath.length == 1;
             };
@@ -295,7 +287,7 @@
             const isDropAllowed = dropData => {
                 const item = dropData.sourceData;
                 const target = dropData.targetData;
-                const dragEntityType = getEntityType(item.entity_type_id);
+                const dragEntityType = entityStore.getEntityType(item.entity_type_id);
 
                 if(target.parentIds.indexOf(item.id) != -1 ||
                     (target.state.dropPosition == DropPosition.inside && target.id == item.root_entity_id)) {
@@ -324,7 +316,7 @@
                 if(!realTarget) {
                     index = entityTypesAsArray.findIndex(et => et.is_root && et.id == dragEntityType.id);
                 } else {
-                    index = getEntityType(realTarget.entity_type_id).sub_entity_types.findIndex(et => et.id == dragEntityType.id);
+                    index = entityStore.getEntityType(realTarget.entity_type_id).sub_entity_types.findIndex(et => et.id == dragEntityType.id);
                 }
                 if(index == -1) {
                     return false;
@@ -390,14 +382,14 @@
                 const eid = node.id;
                 const pid = newParent ? newParent.id : null;
 
-                moveEntity(eid, pid, newRank);
+                entityStore.move(eid, pid, newRank);
             };
             const toggleSelectMode = _ => {
-                store.dispatch('toggleTreeSelectionMode');
+                entityStore.toggleTreeSelectionMode();
             };
             const openMultieditModal = _ => {
-                const entityIds = Object.keys(store.getters.treeSelection).map(id => parseInt(id));
-                const attributes = store.getters.treeSelectionIntersection;
+                const entityIds = Object.keys(entityStore.treeSelection).map(id => parseInt(id));
+                const attributes = entityStore.getTreeSelectionIntersection;
                 showMultiEditAttribute(entityIds, attributes);
             };
             const getSortingStateClass = (attr, dir) => {
@@ -412,10 +404,7 @@
             const setSort = (attr, dir) => {
                 state.sort.by = attr;
                 state.sort.dir = dir;
-                store.dispatch('sortTree', {
-                    by: attr,
-                    dir: dir
-                });
+                entityStore.sortTree(state.sort);
             };
             const openAddEntityDialog = _ => {
                 showAddEntity(null);
@@ -451,12 +440,12 @@
 
             // DATA
             const state = reactive({
-                selectMode: computed(_ => store.getters.treeSelectionMode),
-                canOpenMultiEditModal: computed(_ => store.getters.treeSelectionCount >= 2),
+                selectMode: computed(_ => entityStore.treeSelectionMode),
+                canOpenMultiEditModal: computed(_ => entityStore.getTreeSelectionCount >= 2),
                 highlightedItems: [],
-                tree: computed(_ => store.getters.tree),
-                entity: computed(_ => store.getters.entity),
-                entities: computed(_ => store.getters.entities),
+                tree: computed(_ => entityStore.tree),
+                entity: computed(_ => entityStore.selectedEntity),
+                entities: computed(_ => entityStore.entities),
                 topLevelCount: computed(_ => state.tree.length || 0),
                 isDragAllowed: computed(_ => state.sort.by == 'rank' && state.sort.dir == 'asc'),
                 sort: {
@@ -489,6 +478,7 @@
                 searchResultSelected,
                 // STATE
                 state,
+                entityStore,
             };
         }
     };

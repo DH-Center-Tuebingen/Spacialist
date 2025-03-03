@@ -2,13 +2,18 @@
 
 namespace App;
 
+use App\AttributeTypes\AttributeBase;
+use App\AttributeTypes\SqlAttribute;
 use App\Exceptions\AmbiguousValueException;
 use App\Traits\CommentTrait;
+
 use Illuminate\Database\Eloquent\Builder;
-use App\AttributeTypes\AttributeBase;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
+
 use Nicolaslopezj\Searchable\SearchableTrait;
+
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Models\Activity;
@@ -30,7 +35,6 @@ class Entity extends Model implements Searchable {
         'root_entity_id',
         'name',
         'user_id',
-        'geodata_id',
         'rank',
     ];
 
@@ -53,17 +57,16 @@ class Entity extends Model implements Searchable {
     ];
 
     const rules = [
-        'name'              => 'required|string',
-        'entity_type_id'   => 'required|integer|exists:entity_types,id',
-        'root_entity_id'   => 'integer|exists:entities,id',
-        'geodata_id'        => 'integer|exists:geodata,id'
+        'name'           => 'required|string',
+        'entity_type_id' => 'required|integer|exists:entity_types,id',
+        'root_entity_id' => 'integer|exists:entities,id',
+        'rank'           => 'integer|min:1',
     ];
 
     const patchRules = [
         'name'              => 'string',
         // 'entity_type_id'   => 'integer|exists:entity_types,id',
         // 'root_entity_id'   => 'integer|exists:entities,id',
-        // 'geodata_id'        => 'integer|exists:geodata,id'
     ];
 
     public function getActivitylogOptions(): LogOptions {
@@ -81,14 +84,14 @@ class Entity extends Model implements Searchable {
         );
     }
 
-    public function getAllMetadata(){
+    public function getAllMetadata() {
         return [
             'creator' => $this->creator,
             'editors' => $this->editors,
             'metadata' => $this->metadata,
         ];
-    }  
-    
+    }
+
     public static function getSearchCols(): array {
         return array_keys(self::searchCols);
     }
@@ -123,7 +126,7 @@ class Entity extends Model implements Searchable {
         }
     }
 
-    public static function create($fields, $entityTypeId, $user, $rootEntityId = null) {
+    public static function create($fields, $entityTypeId, $user, $rootEntityId = null, $rank = null) {
         $isChild = isset($rootEntityId);
         if($isChild) {
             $parentCtid = self::find($rootEntityId)->entity_type_id;
@@ -147,14 +150,27 @@ class Entity extends Model implements Searchable {
         }
 
         $entity = new self();
-        $rank;
         if($isChild) {
-            $rank = self::where('root_entity_id', $rootEntityId)->max('rank') + 1;
+            if(!isset($rank)) {
+                $rank = self::where('root_entity_id', $rootEntityId)->max('rank') + 1;
+            } else {
+                $nextSiblings = self::where('root_entity_id', $rootEntityId)->where('rank', '>=', $rank)->get();
+            }
             $entity->root_entity_id = $rootEntityId;
         } else {
-            $rank = self::whereNull('root_entity_id')->max('rank') + 1;
+            if(!isset($rank)) {
+                $rank = self::whereNull('root_entity_id')->max('rank') + 1;
+            } else {
+                $nextSiblings = self::whereNull('root_entity_id')->where('rank', '>=', $rank)->get();
+            }
         }
         $entity->rank = $rank;
+        if(isset($nextSiblings) && count($nextSiblings) > 0) {
+            foreach($nextSiblings as $sibling) {
+                $sibling->rank = $sibling->rank + 1;
+                $sibling->saveQuietly();
+            }
+        }
 
         foreach($fields as $key => $value) {
             $entity->{$key} = $value;
@@ -184,14 +200,39 @@ class Entity extends Model implements Searchable {
         return $entities->orderBy('rank')->get();
     }
 
+    private function moveOrFail(int | null $parentId) {
+        if(isset($parentId)) {
+            if($parentId == $this->id) {
+                throw new \Exception('Cannot move entity to itself.');
+            }
+
+            $parentEntity = Entity::findOrFail($parentId);
+            $parentEntityType = $parentEntity->entity_type;
+
+            if(!$parentEntityType->sub_entity_types->contains($this->entity_type_id)) {
+                throw new \Exception('This type is not an allowed sub-type.');
+            }
+
+            $this->root_entity_id = $parentId;
+            $query = self::where('root_entity_id', $parentId);
+        } else {
+            if(!$this->entity_type->is_root) {
+                throw new \Exception('This type is not an allowed root-type.');
+            }
+
+            $this->root_entity_id = null;
+            $query = self::whereNull('root_entity_id');
+        }
+        return $query;
+    }
+
     public static function patchRanks($rank, $id, $parent, $user) {
         $entity = Entity::find($id);
-
-        $hasParent = isset($parent);
         $oldRank = $entity->rank;
         $entity->rank = $rank;
         $entity->user_id = $user->id;
 
+        DB::beginTransaction();
         $query;
         if(isset($entity->root_entity_id)) {
             $query = self::where('root_entity_id', $entity->root_entity_id);
@@ -205,14 +246,13 @@ class Entity extends Model implements Searchable {
             $oc->saveQuietly();
         }
 
-        $query = null;
-        if($hasParent) {
-            $entity->root_entity_id = $parent;
-            $query = self::where('root_entity_id', $parent);
-        } else {
-            $entity->root_entity_id = null;
-            $query = self::whereNull('root_entity_id');
+        try {
+            $query = $entity->moveOrFail($parent);
+        } catch(\Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
+
         $newEntities = $query->where('rank', '>=', $rank)->get();
 
         foreach($newEntities as $nc) {
@@ -221,6 +261,7 @@ class Entity extends Model implements Searchable {
         }
 
         $entity->save();
+        DB::commit();
     }
 
     public function child_entities() {
@@ -369,55 +410,63 @@ class Entity extends Model implements Searchable {
         return $parents;
     }
 
-    public function getData() {
-        $attributes = AttributeValue::whereHas('attribute', function (Builder $q) {
-            $q->where('datatype', '!=', 'sql');
+    public function getStaticAttributes() {
+        $sqls = EntityAttribute::whereHas('attribute', function (Builder $q) {
+            $q->where('datatype', 'sql');
         })
-            ->where('entity_id', $this->id)
-            ->withModerated()
-            ->get();
+            ->where('entity_type_id', $this->entity_type_id);
+        if(isset($aid)) {
+            $sqls->where('attribute_id', $aid);
+        }
+        $sqls = $sqls->get();
+    }
 
-        $data = [];
-        foreach($attributes as $a) {
-            switch($a->attribute->datatype) {
-                case 'string-sc':
-                    $a->thesaurus_val = ThConcept::where('concept_url', $a->thesaurus_val)->first();
-                    break;
-                case 'entity':
-                    $a->name = Entity::find($a->entity_val)->name;
-                    break;
-                case 'entity-mc':
-                    $names = [];
-                    foreach(json_decode($a->json_val) as $dec) {
-                        $names[] = Entity::find($dec)->name;
-                    }
-                    $a->name = $names;
-                    break;
-                default:
-                    break;
+    public function getData($aid = null) {
+        $attributes = [];
+        if(isset($aid)) {
+            try {
+                Attribute::findOrFail($aid);
+            } catch(ModelNotFoundException $e) {
+                return response()->json([
+                    'error' => __('This attribute does not exist'),
+                ], 400);
             }
-            $value = $a->getValue();
-            if($a->moderation_state == 'pending-delete') {
-                $a->value = [];
-                $a->original_value = $value;
-            } else {
-                $a->value = $value;
-            }
-            if(isset($data[$a->attribute_id])) {
-                $oldAttr = $data[$a->attribute_id];
-                // check if stored entry is moderated one
-                // if so, add current value as original value
-                // otherwise, set stored entry as original value
-                if(isset($oldAttr->moderation_state)) {
-                    $oldAttr->original_value = $value;
-                    $a = $oldAttr;
-                } else {
-                    $a->original_value = $oldAttr->value;
-                }
-            }
-            $data[$a->attribute_id] = $a;
+            $attributes = AttributeValue::whereHas('attribute')
+                ->where('entity_id', $this->id)
+                ->where('attribute_id', $aid)
+                ->withModerated()
+                ->get();
+        } else {
+            $attributes = AttributeValue::whereHas('attribute')
+                ->where('entity_id', $this->id)
+                ->withModerated()
+                ->get();
         }
 
-        return $data;
+        $data = AttributeValue::generateObject($attributes);
+
+        //// Somehow this is not working and I only receive the entity_type instead of
+        //// the attributes array.
+        // $entityType = $this->entity_type;
+        // $attributes = $entityType->attributes;
+        // info(json_encode($attributes));
+
+        $sqls = EntityAttribute::whereHas('attribute', function (Builder $q) {
+            $q->where('datatype', 'sql');
+        })
+            ->where('entity_type_id', $this->entity_type_id);
+        if(isset($aid)) {
+            $sqls->where('attribute_id', $aid);
+        }
+        $sqls = $sqls->get();
+
+        foreach($sqls as $sql) {
+            $value = SqlAttribute::execute($sql->attribute->text, $this->id);
+            $data[$sql->attribute_id] = [
+                'value' => $value,
+            ];
+        }
+
+       return $data;
     }
 }

@@ -2,8 +2,7 @@
 
 namespace App;
 
-use App\Exceptions\InvalidDataException;
-use App\Plugins\Map\App\Geodata;
+use App\Geodata;
 use App\AttributeTypes\AttributeBase;
 use Illuminate\Database\Eloquent\Model;
 use Clickbar\Magellan\Database\Eloquent\HasPostgisColumns;
@@ -114,7 +113,7 @@ class AttributeValue extends Model implements Searchable
             return $arr['dt_val'];
         }
         if(isset($arr['geography_val'])) {
-            return Geodata::arrayToWkt($arr['geography_val']);
+            return Geodata::arrayToWKT($arr['geography_val']);
         }
     }
 
@@ -167,14 +166,60 @@ class AttributeValue extends Model implements Searchable
     public static function getValueColumn($type) {
         return AttributeBase::getFieldFromType($type);
     }
+    
+    public static function generateObject($attributeValues) {
+        $data = [];
+        foreach($attributeValues as $attributeValue) {
+            switch($attributeValue->attribute->datatype) {
+                case 'entity':
+                    $attributeValue->name = Entity::find($attributeValue->entity_val)->name;
+                    break;
+                case 'entity-mc':
+                    $names = [];
+                    foreach(json_decode($attributeValue->json_val) as $dec) {
+                        $names[] = Entity::find($dec)->name;
+                    }
+                    $attributeValue->name = $names;
+                    break;
+                case 'sql':
+                    // SQL will not have any entries in the attribute_values table
+                    break;
+                default:
+                    break;
+            }
+            $value = $attributeValue->getValue();
+            if($attributeValue->moderation_state == 'pending-delete') {
+                $attributeValue->value = [];
+                $attributeValue->original_value = $value;
+            } else {
+                $attributeValue->value = $value;
+            }
+            if(isset($data[$attributeValue->attribute_id])) {
+                $oldAttr = $data[$attributeValue->attribute_id];
+                // check if stored entry is moderated one
+                // if so, add current value as original value
+                // otherwise, set stored entry as original value
+                if(isset($oldAttr->moderation_state)) {
+                    $oldAttr->original_value = $value;
+                    $attributeValue = $oldAttr;
+                } else {
+                    $attributeValue->original_value = $oldAttr->value;
+                }
+            }
+            $data[$attributeValue->attribute_id] = $attributeValue;
+        }
+
+        return $data;
+    }
 
     // Throws InvalidDataException
     // Throws AmbiguousValueException
-    public static function stringToValue($strValue, $type) {
-        if(!isset($strValue) || trim($strValue) === '') return null;
+    public static function stringToValue(string $strValue, string $type) {
+        $strValue = trim($strValue);
+        if($strValue === '') return null;
 
         $attributeClass = AttributeBase::getMatchingClass($type);
-        return $attributeClass::fromImport(trim($strValue));
+        return $attributeClass::fromImport($strValue);
     }
 
     public function user() {

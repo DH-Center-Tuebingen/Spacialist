@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -14,6 +17,9 @@
 Route::get('/welcome', 'HomeController@welcome')->name('welcome');
 Route::get('/open', 'HomeController@external')->name('external');
 
-Auth::routes();
+Route::middleware('auth:sanctum')->get('/download/avatar', 'UserController@downloadAvatar');
+Route::middleware('auth:sanctum')->get('/download/bibliography', 'BibliographyController@downloadFile');
+
+Auth::routes(["middleware" => ["auth:sanctum"]]);
 
 Route::get('/', 'HomeController@index')->name('home');
