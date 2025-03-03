@@ -5,7 +5,6 @@
         :key-fn="handleDisplayResult"
         :chain="'ancestors'"
         :mode="state.mode"
-        :default-value="v.fieldValue"
         :disabled="disabled"
         :infinite="true"
         :limit="10"

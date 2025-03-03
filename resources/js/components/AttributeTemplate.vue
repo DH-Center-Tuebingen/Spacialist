@@ -13,7 +13,7 @@
                 <simple-search
                     :endpoint="searchLabel"
                     :key-fn="getConceptLabel"
-                    :default-value="state.searchResetValue"
+                    :value="state.searchResetValue"
                     @selected="label => labelSelected(label, 'label')"
                 >
                     <template #chain="{ option }">
@@ -99,7 +99,7 @@
                 <simple-search
                     :endpoint="searchLabel"
                     :key-fn="getConceptLabel"
-                    :default-value="state.attribute.label"
+                    :value="state.attribute.label"
                     @selected="label => labelSelected(label, 'rootLabel')"
                 />
             </div>
