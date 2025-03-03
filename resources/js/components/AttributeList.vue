@@ -106,19 +106,16 @@
                             </span>
                             <a
                                 v-if="getConceptNote(element.thesaurus_url)"
-                                href="#"
+                                tabindex="0"
                                 class="text-decoration-none text-muted ms-1 position-relative"
-                                @click.prevent.stop="handleNoteInfoClick(element)"
+                                data-bs-toggle="popover"
+                                data-bs-trigger="focus"
+                                data-bs-placement="top"
+                                :data-bs-content="getConceptNote(element.thesaurus_url)"
+                                href="#"
+                                @click.prevent
                             >
                                 <i class="fas fa-fw fa-circle-info" />
-                                <div
-                                    :id="`concept-note-${element.id}`"
-                                    class="infobox d-none position-absolute bg-white border rounded px-2 py-1"
-                                >
-                                    <div class="d-flex flex-row">
-                                        {{ getConceptNote(element.thesaurus_url) }}
-                                    </div>
-                                </div>
                             </a>
                             <sup
                                 v-if="hasEmitter('onMetadata')"
@@ -186,6 +183,8 @@
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
+
+    import { Popover } from 'bootstrap';
 
     import useAttributeStore from '@/bootstrap/stores/attribute.js';
     import useEntityStore from '@/bootstrap/stores/entity.js';
@@ -606,23 +605,6 @@
                     e.preventDefault();
                 }
             };
-            const handleNoteInfoClick = element => {
-                state.visibleAttributeNotes[element.id] = !state.visibleAttributeNotes[element.id];
-                document.getElementsByClassName('infobox').forEach(infobox => {
-                    infobox.classList.remove('d-flex');
-                    infobox.classList.add('d-none');
-                    const infoboxId = Number.parseInt(infobox.id.replace('concept-note-', ''));
-                    state.visibleAttributeNotes[infoboxId] = false;
-                });
-                const elem = document.getElementById(`concept-note-${element.id}`);
-                if(state.visibleAttributeNotes[element.id]) {
-                    elem.classList.add('d-flex');
-                    elem.classList.remove('d-none');
-                } else {
-                    elem.classList.remove('d-flex');
-                    elem.classList.add('d-none');
-                }
-            };
 
             const attrs = context.attrs;
             // DATA
@@ -668,6 +650,11 @@
                 itemClasses: computed(_ => options.value.item_classes),
             });
 
+            const initializeTooltips = _ => {
+                document.querySelectorAll('[data-bs-toggle="popover"]')
+                    .forEach(popoverElement => new Popover(popoverElement));
+            };
+
             // ON MOUNTED
             onMounted(_ => {
                 state.dynamicSelectionList.forEach(rootId => {
@@ -679,6 +666,8 @@
                         });
                     }
                 });
+
+                initializeTooltips();
             });
             onBeforeUpdate(_ => {
                 attrRefs.value = {};
@@ -724,7 +713,6 @@
                 hasComment,
                 hasBookmarks,
                 handleLabelClick,
-                handleNoteInfoClick,
                 // STATE
                 attrRefs,
                 state,
