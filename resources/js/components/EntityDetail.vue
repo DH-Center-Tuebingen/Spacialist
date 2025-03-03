@@ -133,15 +133,20 @@
                 </button>
             </form>
             <div class="d-flex flex-row gap-2 text-nowrap ms-2">
-                <button
+                <LoadingButton
                     type="submit"
                     form="entity-attribute-form"
-                    class="btn btn-outline-success btn-sm"
-                    :disabled="!state.formDirty || !can('entity_data_write')"
+                    class="btn-outline-success btn-sm"
+                    :loading="state.saving"
                     @click.prevent="saveEntity()"
                 >
-                    <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
-                </button>
+                    <template #icon>
+                        <i class="fas fa-fw fa-save" />
+                    </template>
+                    <template #default>
+                        {{ t('global.save') }}
+                    </template>
+                </LoadingButton>
                 <button
                     type="button"
                     class="btn btn-outline-warning btn-sm"
@@ -464,11 +469,13 @@
     import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
     import DotIndicator from '@/components/indicators/DotIndicator.vue';
     import MultiUserWidget from './user/MultiUserWidget.vue';
+    import LoadingButton from '@/components/forms/button/LoadingButton.vue';
 
     export default {
         components: {
             DotIndicator,
             EntityTypeLabel,
+            LoadingButton,
             MetadataTab,
             MultiUserWidget,
         },
@@ -502,6 +509,7 @@
             const attrRefs = ref({});
             const state = reactive({
                 dirtyStates: {},
+                saving: false,
                 attributeGrpHovered: null,
                 hiddenAttributes: {},
                 entityHeaderHovered: false,
@@ -886,7 +894,7 @@
                 }
             };
 
-            const saveEntity = grps => {
+            const saveEntity = async grps => {
                 if(!can('entity_data_write')) return;
 
                 const dirtyValues = getDirtyValues(grps);
@@ -934,7 +942,12 @@
                     patches.push(patch);
                     moderations.push(aid);
                 }
-                return entityStore.patchAttributes(state.entity.id, patches, dirtyValues, moderations).then(data => {
+
+                state.saving = true;
+
+                try {
+                    await entityStore.patchAttributes(state.entity.id, patches, dirtyValues, moderations);
+
                     undirtyList(grps);
                     resetDirtyStates(grps);
 
@@ -949,7 +962,7 @@
                             icon: true,
                         },
                     );
-                }).catch(error => {
+                } catch(error) {
                     let response = error.response;
 
                     if(!response) {
@@ -969,9 +982,10 @@
                         autohide: true,
                         icon: true,
                         duration: 5000,
-                    },
-                    );
-                });
+                    });
+                } finally {
+                    state.saving = false;
+                }
             };
             const resetForm = grps => {
                 resetListValues(grps);

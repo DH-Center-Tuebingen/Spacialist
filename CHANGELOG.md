@@ -26,6 +26,7 @@ All notable changes to this project will be documented in this file.
 - Improved style of Reference Input.
 - Do not return deleted users by default
 - Moved attribute indicators to the end of the line and reworked style (always visible, but greyed out)
+- _Entity Detail_ now has a loading spinner when saving
 
 ## 0.10.2
 ### Fixed
