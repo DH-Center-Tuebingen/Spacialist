@@ -16,15 +16,15 @@ class DaterangeAttribute extends AttributeBase
     }
 
     public static function parseImport(int|float|bool|string $data) : mixed {
-        $data = StringUtils::useGuard(InvalidDataException::class)($data);        
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);
         $dates = explode(";", $data);
         if(count($dates) != 2) {
             throw InvalidDataException::requiredFormat("START;END", $data);
         }
-        
+
         $start = DateAttribute::parseImport($dates[0]);
         $end = DateAttribute::parseImport($dates[1]);
-        
+
         if($start > $end) {
             throw InvalidDataException::requireBefore($start, $end);
         }
@@ -33,6 +33,10 @@ class DaterangeAttribute extends AttributeBase
             $start,
             $end,
         ]);
+    }
+
+    public static function parseExport(mixed $data) : string {
+        return implode(";", json_decode($data));
     }
 
     public static function unserialize(mixed $data) : mixed {

@@ -12,7 +12,7 @@ class DimensionAttribute extends AttributeBase
     protected static ?string $field = 'json_val';
 
     public static function parseImport(int|float|bool|string $data) : mixed {
-        $data = StringUtils::useGuard(InvalidDataException::class)($data);     
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);
         $parts = explode(';', $data);
 
         $format = "VAL1;VAL2;VAL3;UNIT";
@@ -22,7 +22,7 @@ class DimensionAttribute extends AttributeBase
 
         for($i = 0; $i < 3; $i++) {
             if(!is_numeric($parts[$i])) {
-                throw InvalidDataException::requiredFormat($format, $data);                
+                throw InvalidDataException::requiredFormat($format, $data);
             }
         }
 
@@ -32,6 +32,11 @@ class DimensionAttribute extends AttributeBase
             'T' => floatval(trim($parts[2])),
             'unit' => trim($parts[3]),
         ]);
+    }
+
+    public static function parseExport(mixed $data) : string {
+        $dataAsObj = json_decode($data);
+        return $dataAsObj->B . ';' . $dataAsObj->H . ';' . $dataAsObj->T . ';' . $dataAsObj->unit;
     }
 
     public static function unserialize(mixed $data) : mixed {

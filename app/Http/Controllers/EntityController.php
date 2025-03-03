@@ -10,7 +10,6 @@ use App\EntityFile;
 use App\EntityType;
 use App\File;
 use App\Reference;
-use App\ThConcept;
 use App\Exceptions\AmbiguousValueException;
 use App\Exceptions\AttributeImportException;
 use App\Exceptions\ImportException;
@@ -604,12 +603,12 @@ class EntityController extends Controller {
             ], 400);
         }
 
-        $entities = $this->getAllChildren($entity); 
-        $tmpDir = $this->createTemporaryDirectory();
+        $entities = $entity->getAllChildren();
+        $tmpDir = File::getUniqueTemporaryDirectoryName();
         Storage::disk('private')->makeDirectory($tmpDir);
-        try{
+        try {
             $files = $this->createImportFilesForDistinctEntityTypes($entities, $tmpDir);
-            
+
             if(count($files) == 0) {
                 return response()->json([
                     'error' => __('No entities found'),
@@ -624,7 +623,7 @@ class EntityController extends Controller {
                 $filename = $filename . '.csv';
                 Storage::disk('private')->move(array_pop($files), $filename);
                 $filepath = Storage::disk('private')->path($filename);
-            }else{
+            } else {
                 // Create a ZIP file
                 $filename = $filename . '.zip';
                 $zip = new ZipArchive;
@@ -637,14 +636,13 @@ class EntityController extends Controller {
                     $zip->close();
                 }
             }
-        
+
             // Clean up the temporary files
             Storage::disk('private')->deleteDirectory($tmpDir);
 
             // Return the ZIP file as a download response
             return response()->download($filepath, $filename)->deleteFileAfterSend(true);
-            
-        }catch(Exception $e){
+        } catch(Exception $e) {
             Storage::disk('private')->delete($tmpDir);
             Log::error($e->getMessage(), ['exception' => $e]);
             return response()->json([
@@ -653,104 +651,47 @@ class EntityController extends Controller {
         }
     }
 
-    private function createTemporaryDirectory(): string {
-        $i = 1;
-        $tmpDir = 'temp_' . Carbon::now()->format('YmdHis');
-        while(Storage::disk('private')->exists($tmpDir)){
-            $tmpDir = 'temp_' . Carbon::now()->format('YmdHis') . '_' . $i++;
-        }
-        return $tmpDir;
-    }
-
-    private function getAllChildren(Entity $entity): array {
-        $entities = [];
-        $parents = [$entity];
-        while($entity = array_shift($parents)) {
-            // Add entity to array
-            $data = [];
-            $data['_name']=$entity->name;
-            $data['_parent']=implode(EntityImporter::PARENT_DELIMITER, $entity->getAncestorsAttribute());
-            $data['_entity_type']= $entity->entity_type->thesaurus_concept->getActiveLocaleLabel();
-
-            $entityData = $entity->getData();
-            foreach($entityData as $attribute) {
-                $name = ThConcept::getLabel($attribute->attribute->thesaurus_url);
-                $rawValue = $attribute->getValue();
-                $data[$name] = $this->determineAttributeValue($rawValue);;
-            }            
-            $entities[] = $data;
-            // Get all children and add them to the Queue
-            $child_entities = Entity::getEntitiesByParent($entity->id);
-            $parents = array_merge($parents, $child_entities->all());
-        }
-        return $entities;
-    }
-
     private function createImportFilesForDistinctEntityTypes(array $entities, string $tmpDir): array{
-            $files = [];
-            $headersMap = [];
-            foreach($entities as $entity) {
-                $entityType = $entity['_entity_type'];
-                ksort($entity);
-                $delimiter = ";";
-                
-                if(!isset($files[$entityType])) {
-                    $filename = $tmpDir . '/' . $entity['_entity_type'] . '_' . Carbon::now()->format('YmdHis') . '.csv';
-                    $files[$entityType] = $filename;
+        $files = [];
+        $headersMap = [];
+        // TODO handle in Entity with other metadata (e.g. creator, licence, …)
+        $metadataFields = ['_name', '_entity_type', '_parent'];
+        foreach($entities as $entity) {
+            $entityTypeName = $entity['_entity_type'];
+            $entityTypeId = $entity['_entity_type_id'];
+            $delimiter = ";";
 
-                    $headersMap[$entityType] = array_keys($entity);
-                    $headerStrings = array_map(function($header) {
-                        $header = str_replace('"', '\"', $header);
-                        $header = str_replace('\n', '', $header);  
-                        return '"' . $header . '"';
-                    }, array_keys($entity));
-                    Storage::disk('private')->put($filename, implode($delimiter,  $headerStrings));
-                }
-                
-                $filename = $files[$entityType];    
-                $columns = [];
-                $columnHeaders = $headersMap[$entityType];
-                foreach($columnHeaders as $columnHeader) {
-                    $columns[] = isset($entity[$columnHeader]) ? $entity[$columnHeader] : "";
-                }
-                Storage::disk('private')->append($filename, implode($delimiter, array_map(function($item){
-                    return '"' . strval($item) . '"';
-                }, $columns)));
-                $files[$entityType] = $filename;
-            }
-            return $files;
-    }
+            if(!isset($files[$entityTypeId])) {
+                $filename = $tmpDir . '/' . $entityTypeName . '-' . $entityTypeId . '_' . Carbon::now()->format('YmdHis') . '.csv';
+                $files[$entityTypeId] = $filename;
 
-    //Todo: This should be done by the respective attribute classes
-    private function determineAttributeValue(mixed $attr_value){
-        if(is_array($attr_value)){
-            $val = [];
-            foreach($attr_value as $valueItem){
-                $val[] = $this->determineAttributeValue($valueItem);
+                $entityType = EntityType::find($entityTypeId);
+                $allEntityTypeAttributes = array_map(function($attribute) {
+                    return $attribute->thesaurus_concept->getActiveLocaleLabel();
+                }, $entityType->attributes->all());
+                $allEntityTypeAttributes = array_merge($allEntityTypeAttributes, $metadataFields);
+                sort($allEntityTypeAttributes);
+                $headersMap[$entityTypeId] = $allEntityTypeAttributes;
+                $headerStrings = array_map(function($header) {
+                    $header = str_replace('"', '\"', $header);
+                    $header = str_replace('\n', '', $header);
+                    return '"' . $header . '"';
+                }, $allEntityTypeAttributes);
+                Storage::disk('private')->put($filename, implode($delimiter,  $headerStrings));
             }
-            return implode(";", $val);
-        } else {
-            if(is_string($attr_value)){
-                return $attr_value;
-            } else if(is_int($attr_value)){
-                return $attr_value;
-            } else if(is_float($attr_value)){
-                return $attr_value;
-            } else if(is_bool($attr_value)){
-                return $attr_value;
-            } else if(isset($attr_value->unit)){
-                return $attr_value->value . ";" . $attr_value->unit;
-            } else if(isset($attr_value->concept_url)) {
-                return ThConcept::getLabel($attr_value->concept_url);
-            } else if(isset($attr_value->thesaurus_url)){
-                return ThConcept::getLabel($attr_value->thesaurus_url);
-            } else if(isset($attr_value->name)){
-                return $attr_value->name;
-            } else {
-                info("Could not process element: " . json_encode($attr_value));
-                return "";
+
+            $filename = $files[$entityTypeId];
+            $columns = [];
+            $columnHeaders = $headersMap[$entityTypeId];
+            foreach($columnHeaders as $columnHeader) {
+                $columns[] = isset($entity[$columnHeader]) ? $entity[$columnHeader] : "";
             }
+            Storage::disk('private')->append($filename, implode($delimiter, array_map(function($item) {
+                return '"' . $item . '"';
+            }, $columns)));
+            $files[$entityTypeId] = $filename;
         }
+        return $files;
     }
 
     function createImportedEntity($entityName, ?string $rootEntityPath, $entityTypeId, $user) {

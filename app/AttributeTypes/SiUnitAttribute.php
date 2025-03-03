@@ -12,7 +12,6 @@ class SiUnitAttribute extends AttributeBase {
     protected static bool $inTable = true;
     protected static ?string $field = 'json_val';
 
-
     public static function getGlobalData(): array {
         $unitsArray = [];
         foreach(UnitManager::get()->getUnitSystems() as $unitSystem) {
@@ -53,8 +52,12 @@ class SiUnitAttribute extends AttributeBase {
         ]);
     }
 
-    public static function unserialize(mixed $data): mixed {
+    public static function parseExport(mixed $data) : string {
+        $dataAsObj = json_decode($data);
+        return $dataAsObj->value . ';' . $dataAsObj->unit;
+    }
 
+    public static function unserialize(mixed $data): mixed {
         if(isset($data["unit"])) {
             $unit = UnitManager::get()->findUnitByAny($data['unit']);
         }

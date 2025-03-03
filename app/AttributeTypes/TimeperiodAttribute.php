@@ -33,8 +33,21 @@ class TimeperiodAttribute extends AttributeBase
         if($end < $start) {
             throw InvalidDataException::requireBefore($start, $end);
         }
-        
+
         return json_encode(new TimePeriod($start, $end));
+    }
+
+    public static function parseExport(mixed $data) : string {
+        $dataAsObj = json_decode($data);
+        $start = $dataAsObj->start;
+        $end = $dataAsObj->end;
+        if($dataAsObj->startLabel == 'BC') {
+            $start *= -1;
+        }
+        if($dataAsObj->endLabel == 'BC') {
+            $end *= -1;
+        }
+        return strval($start . ";" . $end);
     }
 
     public static function unserialize(mixed $data) : mixed {

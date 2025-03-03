@@ -52,6 +52,26 @@ class EpochAttribute extends AttributeBase
         );
     }
 
+    public static function parseExport(mixed $data) : string {
+        $dataAsObj = json_decode($data);
+        $start = $dataAsObj->start;
+        $end = $dataAsObj->end;
+        if($dataAsObj->startLabel == 'BC') {
+            $start *= -1;
+        }
+        if($dataAsObj->endLabel == 'BC') {
+            $end *= -1;
+        }
+        $epoch = $dataAsObj->epoch;
+        if(isset($epoch)) {
+            $epoch = ThConcept::getLabel($epoch->concept_url);
+        } else {
+            $epoch = '';
+        }
+
+        return $start . ";" . $end . ";" . $epoch;
+    }
+
     public static function unserialize(mixed $data) : mixed {
         $sl = isset($data['startLabel']) ? strtoupper($data['startLabel']) : null;
         $el = isset($data['endLabel']) ? strtoupper($data['endLabel']) : null;
