@@ -403,7 +403,7 @@ export async function duplicateEntity(entity) {
 
 export async function exportEntityTree(root){
     return $httpQueue.add(
-        () => http.get(`/entity/${root}/exportTree`,{
+        () => http.get(`/entity/${root}/export`,{
             responseType: 'blob'
         })
         .then(File.saveFileWithFallback('export_no_name'))
