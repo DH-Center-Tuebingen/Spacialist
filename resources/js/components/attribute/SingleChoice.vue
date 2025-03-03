@@ -170,7 +170,7 @@
                     return;
                 }
 
-                const cachedSelection = await systemStore.fetchCachedConceptSelection(conceptId);
+                const cachedSelection = await systemStore.fetchConceptSelection(conceptId);
                 state.localSelection = cachedSelection;
                 updateCurrentValue();
             };
@@ -272,7 +272,6 @@
                 meta,
                 resetField,
             });
-
 
             watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
