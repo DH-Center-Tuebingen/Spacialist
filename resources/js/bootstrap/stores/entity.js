@@ -42,6 +42,7 @@ import {
     patchAttributes,
     removeEntityTypeAttribute,
     reorderEntityAttributes,
+    updateAttributeDependency,
     updateAttributeMetadata,
 } from '@/api.js';
 

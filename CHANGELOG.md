@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
   - _Entity References_
   - _Entity Comments_
 - Filter and sort functionality on _Entity Type List_
+- Dependencies added to _System Separator_ attribute
 - Indicator in _Data Model Editor_ that visualizes if an attribute is used in any entity-type
 - Label Search displays full path of thesaurus concept
 - References can also be added to an Entity, not only to an Entity Attribute
@@ -23,6 +24,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Files (e.g. avatars or bibliography attachments) are stored in a user-only directory
 - Improved style of Reference Input.
+- Users can add more than one dependency for an attribute and use groups and union/intersect operators
 
 ## 0.10.2
 ### Fixed

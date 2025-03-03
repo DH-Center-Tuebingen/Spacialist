@@ -818,9 +818,21 @@ class ApiEditorTest extends TestCase
     {
         $response = $this->userRequest()
             ->patch('/api/v1/editor/dm/entity_type/4/attribute/14/dependency', [
-                'attribute' => 13,
-                'operator' => '=',
-                'value' => 'Test Value'
+                'data' => [
+                    'union' => false,
+                    'groups' => [
+                        [
+                            'union' => true,
+                            'rules' => [
+                                [
+                                    'attribute' => 13,
+                                    'operator' => '=',
+                                    'value' => 'Test Value'
+                                ],
+                            ],
+                        ]
+                    ],
+                ],
             ]);
 
         $this->assertStatus($response, 200);
@@ -828,11 +840,19 @@ class ApiEditorTest extends TestCase
         $entityAttribute = EntityAttribute::for(4, 14);
         $this->assertArrayHasKey('depends_on', $entityAttribute);
         $this->assertEquals([
-            13 => [
-                'operator' => '=',
-                'value' => 'Test Value',
-                'dependant' => 14
-            ]
+            'union' => false,
+            'groups' => [
+                [
+                    'union' => true,
+                    'rules' => [
+                        [
+                            'operator' => '=',
+                            'value' => 'Test Value',
+                            'on' => 13,
+                        ],
+                    ],
+                ]
+            ],
         ], $entityAttribute->depends_on);
     }
 
@@ -949,12 +969,16 @@ class ApiEditorTest extends TestCase
 
     public static function permissionsProvider() {
         return [
-            'permission to get entity type'                     => Permission::for("get", "/api/v1/editor/entity_type/1",           "You do not have the permission to get an entity type's data"),
-            'permission to view entity data'                    => Permission::for("get", "/api/v1/editor/entity_type/1/attribute", "You do not have the permission to view entity data"),
-            'permission to view entity data'                    => Permission::for("get", "/api/v1/editor/dm/entity_type/top",      "You do not have the permission to view entity data"),
-            'permission to view entity data'                    => Permission::for("get", "/api/v1/editor/dm/attribute",           "You do not have the permission to view entity data"),
-            'permission to create entity type'                  => Permission::for("post", "/api/v1/editor/dm/entity_type",        "You do not have the permission to create a new entity type"),
-            'permission to add attributes'                      => Permission::for("post", "/api/v1/editor/dm/attribute",          "You do not have the permission to add attributes",[
+            'permission to get entity type'                        => Permission::for("get", "/api/v1/editor/entity_type/1",           "You do not have the permission to get an entity type's data"),
+            'permission to view entity data on top entity types'   => Permission::for("get", "/api/v1/editor/dm/entity_type/top",      "You do not have the permission to view entity data"),
+            'permission to view entity data'                       => Permission::for("get", "/api/v1/editor/dm/attribute",           "You do not have the permission to view entity data"),
+            'permission to create entity type'                     => Permission::for("post", "/api/v1/editor/dm/entity_type",        "You do not have the permission to create a new entity type"),
+            'permission to modify entity relations'                => Permission::for("post", "/api/v1/editor/dm/1/relation",     "You do not have the permission to modify entity relations"),
+            'permission to view entity data'                       => Permission::for("get", "/api/v1/editor/entity_type/1/attribute", "You do not have the permission to view entity data"),
+            'permission to view entity data on top entity types'   => Permission::for("get", "/api/v1/editor/dm/entity_type/top",      "You do not have the permission to view entity data"),
+            'permission to view entity data'                       => Permission::for("get", "/api/v1/editor/dm/attribute",           "You do not have the permission to view entity data"),
+            'permission to create entity type'                     => Permission::for("post", "/api/v1/editor/dm/entity_type",        "You do not have the permission to create a new entity type"),
+            'permission to add attributes'                         => Permission::for("post", "/api/v1/editor/dm/attribute",          "You do not have the permission to add attributes",[
                     'label_id' => 1,
                     'datatype' => 'string-sc',
                     'root_id' => 1,
@@ -967,15 +991,27 @@ class ApiEditorTest extends TestCase
                     'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/fundstelle#20171220094911'
                 ]
             ]),
-            'permission to reorder attributes'                  => Permission::for("patch", "/api/v1/editor/dm/entity_type/1/attribute/1/position", "You do not have the permission to reorder attributes"),
-            'permission to add/modify attribute dependencies'   => Permission::for("patch", "/api/v1/editor/dm/entity_type/1/attribute/1/dependency", "You do not have the permission to add/modify attribute dependencies", [
-                    'attribute' => 15,
-                    'operator' => '=',
-                    'value' => 'NoValue',
+            'permission to reorder attributes'                     => Permission::for("patch", "/api/v1/editor/dm/entity_type/1/attribute/1/position", "You do not have the permission to reorder attributes"),
+            'permission to add/modify attribute dependencies'      => Permission::for("patch", "/api/v1/editor/dm/entity_type/1/attribute/1/dependency", "You do not have the permission to add/modify attribute dependencies", [
+                    'data' => [
+                        'union' => false,
+                        'groups' => [
+                            [
+                                'union' => true,
+                                'rules' => [
+                                    [
+                                        'attribute' => 15,
+                                        'operator' => '=',
+                                        'value' => 'NoValue',
+                                    ],
+                                ],
+                            ]
+                        ],
+                    ],
                 ]),
-            'permission to delete entity types'                 => Permission::for("delete", "/api/v1/editor/dm/entity_type/1", "You do not have the permission to delete entity types"),
-            'permission to delete attributes'                   => Permission::for("delete", "/api/v1/editor/dm/attribute/1", "You do not have the permission to delete attributes"),
-            'permission to remove attributes from entity types' => Permission::for("delete", "/api/v1/editor/dm/entity_type/attribute/19", "You do not have the permission to remove attributes from entity types"),
+            'permission to delete entity types'                    => Permission::for("delete", "/api/v1/editor/dm/entity_type/1", "You do not have the permission to delete entity types"),
+            'permission to delete attributes'                      => Permission::for("delete", "/api/v1/editor/dm/attribute/1", "You do not have the permission to delete attributes"),
+            'permission to remove attributes from entity types'    => Permission::for("delete", "/api/v1/editor/dm/entity_type/attribute/19", "You do not have the permission to remove attributes from entity types"),
         ];
     }
 
@@ -986,34 +1022,46 @@ class ApiEditorTest extends TestCase
         $attributeDoesNotExist = "This attribute does not exist";
 
         return [
-            'exception on get entity type'                     => Permission::for("get", "/api/v1/editor/entity_type/99", $entityDoesNotExist),
-            'exception on view entity data'                    => Permission::for("post", "/api/v1/editor/dm/entity_type/99/attribute", $entityDoesNotExist,[
+            'exception on get entity type'                         => Permission::for("get", "/api/v1/editor/entity_type/99", $entityDoesNotExist),
+            'exception on view entity data'                        => Permission::for("post", "/api/v1/editor/dm/entity_type/99/attribute", $entityDoesNotExist,[
                 'attribute_id' => 2,
                 'position' => 1
             ]),
             // TODO check if necessary to replace old set relation logic with new logic in EditorController::patchEntityType
-            // 'exception on modify entity relations'             => Permission::for("post", "/api/v1/editor/dm/99/relation", $entityDoesNotExist),
-            'exception on add attributes to an entity type'    => Permission::for("post", "/api/v1/editor/dm/entity_type/99/attribute", $entityDoesNotExist,[
+            'exception on modify entity relations'                 => Permission::for("post", "/api/v1/editor/dm/99/relation", $entityDoesNotExist),
+            'exception on add attributes to an entity type'        => Permission::for("post", "/api/v1/editor/dm/entity_type/99/attribute", $entityDoesNotExist,[
                 'attribute_id' => 2,
                 'position' => 1
             ]),
-            'exception on duplicate an entity type'            => Permission::for("post", "/api/v1/editor/dm/entity_type/99/duplicate", $entityDoesNotExist),
-            'exception on modify entity-type'                  => Permission::for("patch", "/api/v1/editor/dm/entity_type/99", $entityDoesNotExist,[
+            'exception on duplicate an entity type'                => Permission::for("post", "/api/v1/editor/dm/entity_type/99/duplicate", $entityDoesNotExist),
+            'exception on modify entity-type'                      => Permission::for("patch", "/api/v1/editor/dm/entity_type/99", $entityDoesNotExist,[
                 'data' => [
                     'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/fundstelle#20171220094911'
                 ]
             ]),
-            'exception on reorder attributes'                  => Permission::for("patch", "/api/v1/editor/dm/entity_type/1/attribute/99/position", $entityAttributeNotFound, [
+            'exception on reorder attributes'                      => Permission::for("patch", "/api/v1/editor/dm/entity_type/1/attribute/99/position", $entityAttributeNotFound, [
                 'position' => 1
             ]),
-            'exception on add/modify attribute dependencies'   => Permission::for("patch", "/api/v1/editor/dm/entity_type/1/attribute/99/dependency", $entityAttributeNotFound, [
-                    'attribute' => 15,
-                    'operator' => '=',
-                    'value' => 'NoValue',
+            'exception on add/modify attribute dependencies'       => Permission::for("patch", "/api/v1/editor/dm/entity_type/1/attribute/99/dependency", $entityAttributeNotFound, [
+                    'data' => [
+                        'union' => false,
+                        'groups' => [
+                            [
+                                'union' => true,
+                                'rules' => [
+                                    [
+                                        'attribute' => 15,
+                                        'operator' => '=',
+                                        'value' => 'NoValue',
+                                    ],
+                                ],
+                            ]
+                        ],
+                    ]
                 ]),
-            'exception on delete entity types'                 => Permission::for("delete", "/api/v1/editor/dm/entity_type/99", $entityDoesNotExist),
-            'exception on delete attributes'                   => Permission::for("delete", "/api/v1/editor/dm/attribute/99", $attributeDoesNotExist),
-            'exception on remove attributes from entity types' => Permission::for("delete", "/api/v1/editor/dm/entity_type/attribute/99", "Entity Attribute not found"),
+            'exception on delete entity types'                     => Permission::for("delete", "/api/v1/editor/dm/entity_type/99", $entityDoesNotExist),
+            'exception on delete attributes'                       => Permission::for("delete", "/api/v1/editor/dm/attribute/99", $attributeDoesNotExist),
+            'exception on remove attributes from entity types'     => Permission::for("delete", "/api/v1/editor/dm/entity_type/attribute/99", "Entity Attribute not found"),
         ];
     }
 }

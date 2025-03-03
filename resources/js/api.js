@@ -621,22 +621,33 @@ export async function reorderEntityAttributes(etid, aid, position) {
 }
 
 export async function updateAttributeDependency(etid, aid, dependency) {
-    const data = {};
-    if(!!dependency.attribute) {
-        data.attribute = dependency.attribute.id;
-        data.operator = dependency.operator.label;
-        data.value = dependency.value.value || dependency.value;
-    }
+    const apiData = {};
+    const dependencyData = {};
+    dependencyData.union = dependency.union;
+    dependencyData.groups = dependency.groups.map(group => {
+        group.rules = group.rules.map(rule => {
+            const formattedRule = {
+                attribute: rule.attribute.id,
+                operator: rule.operator.operator,
+            };
+
+            if(!rule.operator.no_parameter) {
+                formattedRule.value = rule.value.value || rule.value;
+            }
+
+            return formattedRule;
+        });
+        return group;
+    });
+    apiData.data = dependencyData;
     return $httpQueue.add(
-        () => http.patch(`/editor/dm/entity_type/${etid}/attribute/${aid}/dependency`, data).then(response => {
-            return Object.values(response.data).length > 0 ? response.data : null;
-        })
+        () => http.patch(`/editor/dm/entity_type/${etid}/attribute/${aid}/dependency`, apiData)
     );
 }
 
 export async function updateAttributeMetadata(pivid, data) {
     return $httpQueue.add(
-        () => http.patch(`/editor/dm/entity_type/attribute/system/${pivid}`, data).then(response => response.data)
+        () => http.patch(`/editor/dm/entity_type/attribute/${pivid}/metadata`, data)
     );
 }
 

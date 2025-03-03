@@ -171,32 +171,46 @@ export function getEntityTypeAttribute(etid, aid, exclude = false) {
     return attributes ? attributes.find(a => a.id == aid) : null;
 }
 
+// TODO: the return value for a given aid differs from
+// what is returned for the whole entity type
+// Currently this method is called two times:
+// One with aid, one without and it's expected to have different behaviour
+// It might be better to split this method into two separate methods [VR]
 export function getEntityTypeDependencies(id, aid) {
     if(!id) return {};
-    const attrs = getEntityTypeAttributes(id);
-    if(!attrs) return {};
+    const attributes = getEntityTypeAttributes(id);
+    if(!attributes) return {};
     if(!!aid) {
-        const attr = attrs.find(a => a.id == aid);
+        const attr = attributes.find(a => a.id == aid);
         return attr?.pivot?.depends_on || {};
     } else {
         const dependencies = {};
-        attrs.forEach(a => {
-            if(!!a.pivot.depends_on) {
-                const deps = a.pivot.depends_on;
-                const keys = Object.keys(deps);
-                const values = Object.values(deps);
-                for(let i = 0; i < keys.length; i++) {
-                    const currKey = keys[i];
-                    const currValue = values[i];
-                    if(!dependencies[currKey]) {
-                        dependencies[currKey] = [];
-                    }
-                    dependencies[currKey].push(currValue);
-                }
-            }
+        attributes.forEach(attribute => {
+            dependencies[attribute.id] = attribute?.pivot?.depends_on || {};
         });
         return dependencies;
     }
+}
+
+export function getEntityTypeDependencyTriggers(id) {
+    if(!id) return {};
+    const attributes = getEntityTypeAttributes(id);
+
+    const dependencyTriggers = {};
+    attributes.forEach(a => {
+        if(!!a.pivot.depends_on) {
+            const deps = a.pivot.depends_on;
+            deps.groups.forEach(group => {
+                group.rules.forEach(rule => {
+                    if(!dependencyTriggers[rule.on]) {
+                        dependencyTriggers[rule.on] = [];
+                    }
+                    dependencyTriggers[rule.on].push(a.id);
+                });
+            });
+        }
+    });
+    return dependencyTriggers;
 }
 
 export function isAllowedSubEntityType(parentId, id) {

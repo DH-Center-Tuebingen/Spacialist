@@ -421,6 +421,7 @@
         can,
         userId,
         getEntityTypeDependencies,
+        getEntityTypeDependencyTriggers,
         translateConcept,
         _cloneDeep,
     } from '@/helpers/helpers.js';
@@ -533,8 +534,17 @@
                         let currentGroup = 'default';
                         let currentGroupId = 'default';
                         let currentUnnamedGroupCntr = 1;
+                        let hideGroup = false;
                         state.entityAttributes.forEach(a => {
                             if(a.is_system && a.datatype == 'system-separator') {
+                                // If system separator is hidden, skip adding it
+                                // and set flag to hide it's attributes
+                                if(state.hiddenAttributes[a.id]?.hide) {
+                                    hideGroup = true;
+                                    return;
+                                } else {
+                                    hideGroup = false;
+                                }
                                 if(!a.pivot.metadata || !a.pivot.metadata.title) {
                                     currentGroup = t(`main.entity.tabs.untitled_group`, { cnt: currentUnnamedGroupCntr });
                                     currentUnnamedGroupCntr++;
@@ -544,6 +554,8 @@
                                 currentGroupId = a.pivot.id;
                                 return;
                             }
+                            if(hideGroup) return;
+
                             if(!tabGroups[currentGroup]) {
                                 tabGroups[currentGroup] = {
                                     id: currentGroupId,
@@ -565,6 +577,7 @@
                 }),
                 entityTypeSelections: computed(_ => entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id)),
                 entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
+                entityTypeTriggers: computed(_ => getEntityTypeDependencyTriggers(state.entity.entity_type_id)),
                 hasAttributeLinks: computed(_ => state.entity.attributeLinks && state.entity.attributeLinks.length > 0),
                 groupedAttributeLinks: computed(_ => {
                     if(!state.hasAttributeLinks) return {};
@@ -591,7 +604,10 @@
                     const values = Object.values(state.hiddenAttributes);
                     const list = [];
                     for(let i = 0; i < keys.length; i++) {
-                        if(values[i].hide && (!state.hiddenAttributes[values[i].by] || !state.hiddenAttributes[values[i].by].hide)) {
+                        // TODO/FIXME Disable check on dependant for now, because it breaks
+                        // !? operator. But now hidden dependants affect an attribute's
+                        // hide state!
+                        if(values[i].hide /* && (!state.hiddenAttributes[values[i].by] || !state.hiddenAttributes[values[i].by].hide) */) {
                             list.push(keys[i]);
                         }
                     }
@@ -713,40 +729,92 @@
                 state.editedEntityName = '';
             };
             const updateDependencyState = (aid, value) => {
-                const attrDeps = state.entityTypeDependencies[aid];
-                if(!attrDeps) return;
-                const type = attributeStore.getAttribute(aid).datatype;
-                attrDeps.forEach(ad => {
-                    let matches = false;
-                    switch(ad.operator) {
-                        case '=':
-                            if(type == 'string-sc') {
-                                matches = value?.id == ad.value;
-                            } else if(type == 'string-mc') {
-                                matches = value && value.some(mc => mc.id == ad.value);
-                            } else {
-                                matches = value == ad.value;
+                const attributeTriggers = state.entityTypeTriggers[aid];
+                if(!attributeTriggers) return;
+
+                const liveData = {
+                    ...state.entity.data,
+                    ...getDirtyValues(),
+                };
+
+                attributeTriggers.forEach(dependantId => {
+                    const attributeDependencies = state.entityTypeDependencies[dependantId];
+                    const matchAllGroups = !attributeDependencies.union;
+                    let dependencyMatch = matchAllGroups;
+
+                    attributeDependencies.groups.forEach(group => {
+                        const matchAllRules = !group.union;
+                        let ruleMatch = matchAllRules;
+
+                        group.rules.forEach(rule => {
+                            const type = attributeStore.getAttribute(rule.on).datatype;
+                            const refValue = liveData[rule.on];
+                            let tmpMatch = false;
+                            switch(rule.operator) {
+                                case '=':
+                                    if(type == 'string-sc') {
+                                        tmpMatch = refValue?.id == rule.value;
+                                    } else if(type == 'string-mc') {
+                                        tmpMatch = refValue && refValue.some(mc => mc.id == rule.value);
+                                    } else {
+                                        tmpMatch = refValue == rule.value;
+                                    }
+                                    break;
+                                case '!=':
+                                    if(type == 'string-sc') {
+                                        tmpMatch = refValue?.id != rule.value;
+                                    } else if(type == 'string-mc') {
+                                        tmpMatch = Array.isArray(refValue) && refValue.every(mc => mc.id != rule.value);
+                                    } else {
+                                        tmpMatch = refValue != rule.value;
+                                    }
+                                    break;
+                                case '<':
+                                    tmpMatch = refValue < rule.value;
+                                    break;
+                                case '>':
+                                    tmpMatch = refValue > rule.value;
+                                    break;
+                                case '?':
+                                case '!?':
+                                    if(type == 'string-sc') {
+                                        tmpMatch = refValue?.id !== undefined;
+                                    } else if(type == 'string-mc') {
+                                        tmpMatch = Array.isArray(refValue) && refValue.length > 0;
+                                    } else {
+                                        tmpMatch = refValue != undefined && refValue != null && refValue != '' &&
+                                                    refValue?.value != undefined && refValue?.value != null && refValue?.value != '';
+                                    }
+                                    // !? is the exact opposite of ?
+                                    if(rule.operator == '!?') {
+                                        tmpMatch = !tmpMatch;
+                                    }
+                                    break;
                             }
-                            break;
-                        case '!=':
-                            if(type == 'string-sc') {
-                                matches = value?.id != ad.value;
-                            } else if(type == 'string-mc') {
-                                matches = value && value.every(mc => mc.id != ad.value);
-                            } else {
-                                matches = value != ad.value;
+
+                            if(matchAllRules && !tmpMatch) {
+                                ruleMatch = false;
+                                return;
                             }
-                            break;
-                        case '<':
-                            matches = value < ad.value;
-                            break;
-                        case '>':
-                            matches = value > ad.value;
-                            break;
-                    }
-                    state.hiddenAttributes[ad.dependant] = {
-                        hide: !matches,
-                        by: aid,
+                            if(!matchAllRules && tmpMatch) {
+                                ruleMatch = true;
+                                return;
+                            }
+                        });
+
+                        if(matchAllGroups && !ruleMatch) {
+                            dependencyMatch = false;
+                            return;
+                        }
+                        if(!matchAllGroups && ruleMatch) {
+                            dependencyMatch = true;
+                            return;
+                        }
+                    });
+
+                    state.hiddenAttributes[dependantId] = {
+                        hide: !dependencyMatch,
+                        by: aid, // TODO might be more than one
                     };
                 });
             };
@@ -966,6 +1034,7 @@
             const resetForm = grps => {
                 resetListValues(grps);
                 resetDirtyStates(grps);
+                updateAllDependencies();
             };
             const setAttrRefs = (el, grp) => {
                 attrRefs.value[grp] = el;

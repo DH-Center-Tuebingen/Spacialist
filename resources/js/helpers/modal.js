@@ -54,7 +54,6 @@ import RemoveAttribute from '@/components/modals/entitytype/RemoveAttribute.vue'
 import AddAttribute from '@/components/modals/attribute/Add.vue';
 import EditAttribute from '@/components/modals/attribute/Edit.vue';
 import MultiEditAttribute from '@/components/modals/attribute/MultiEdit.vue';
-import EditSystemAttribute from '@/components/modals/attribute/EditSystem.vue';
 import DeleteAttribute from '@/components/modals/attribute/Delete.vue';
 import useBibliographyStore from '../bootstrap/stores/bibliography';
 
@@ -674,11 +673,9 @@ export function showDeleteEntityType(entityType, metadata, onDeleted) {
 }
 
 export function showEditAttribute(aid, etid, metadata) {
-    const isSystem = metadata && metadata.is_system;
-    const component = isSystem ? EditSystemAttribute : EditAttribute;
     const uid = `EditAttribute-${getTs()}`;
     const modal = useModal({
-        component: component,
+        component: EditAttribute,
         attrs: {
             name: uid,
             attributeId: aid,
@@ -690,18 +687,13 @@ export function showEditAttribute(aid, etid, metadata) {
             },
             async onConfirm(e) {
                 const entityStore = useEntityStore();
-                if(isSystem) {
-                    await entityStore.patchEntityMetadata(etid, aid, metadata.pivot.id, e);
-                    modal.destroy();
-                } else {
-                    if(e.metadata) {
-                        await entityStore.patchEntityMetadata(etid, aid, metadata.pivot.id, e.metadata);
-                    }
-                    if(e.dependency) {
-                        await entityStore.updateDependency(etid, aid, e.dependency);
-                    }
-                    modal.destroy();
+                if(e.metadata) {
+                    await entityStore.patchEntityMetadata(etid, aid, metadata.pivot.id, e.metadata);
                 }
+                if(e.dependency) {
+                    await entityStore.updateDependency(etid, aid, e.dependency);
+                }
+                modal.destroy();
             },
         },
     });

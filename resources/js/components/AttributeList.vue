@@ -25,7 +25,7 @@
                     >
                         <label
                             v-if="!state.hideLabels"
-                            class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break align-self-start gap-1"
+                            class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break align-self-start gap-1 position-relative"
                             :for="`attr-${element.id}`"
                             :class="attributeClasses(element)"
                             @click="e => handleLabelClick(e, element.datatype)"
@@ -43,7 +43,7 @@
                             </div>
                             <div
                                 v-show="!!state.hoverStates[index]"
-                                class="btn-fab-list position-absolute start-0"
+                                class="btn-fab-list btn-fab-list-md position-absolute start-0"
                             >
                                 <button
                                     v-show="hasEmitter('onReorderList')"
@@ -98,12 +98,16 @@
                                     />
                                 </button>
                             </div>
-                            <span
-                                v-if="!element.is_system"
+                            <div
                                 class="text-end col"
                             >
-                                {{ translateConcept(element.thesaurus_url) }}
-                            </span>
+                                <span v-if="element.is_system">
+                                    &nbsp;
+                                </span>
+                                <span v-else>
+                                    {{ translateConcept(element.thesaurus_url) }}
+                                </span>
+                            </div>
                             <sup
                                 v-if="hasEmitter('onMetadata')"
                                 class="clickable d-flex flex-row align-items-start top-0"
