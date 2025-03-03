@@ -137,7 +137,7 @@
                         </div>
                         <div
                             v-if="hasEmitter('onMetadata')"
-                            class="small col-md-1 clickable d-flex flex-row align-items-start justify-content-center"
+                            class="small col-md-1 pt-2 clickable d-flex flex-row align-items-start justify-content-center"
                             @click="onMetadataHandler(element)"
                         >
                             <ValidityIndicator
