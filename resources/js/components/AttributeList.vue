@@ -129,6 +129,7 @@
                             </sup>
                         </label>
                         <div :class="expandedClasses(index, element)">
+                            {{ element.id }}
                             <Attribute
                                 :ref="el => setRef(el, element.id)"
                                 :data="element"
@@ -655,6 +656,7 @@
 
                     const list = {};
                     for(let i = 0; i < hiddenAttributes.value.length; i++) {
+                        console.log(hiddenAttributes.value[i]);
                         const disId = hiddenAttributes.value[i];
                         list[disId] = true;
                     }

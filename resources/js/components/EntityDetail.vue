@@ -217,9 +217,7 @@
                         @mouseover="showTabActions(tg.id, true)"
                         @mouseleave="showTabActions(tg.id, false)"
                     >
-                        <DotIndicator
-                            :type="'warning'"
-                        />
+                        <DotIndicator :type="'warning'" />
                         <div v-show="state.attributeGrpHovered == tg.id">
                             <a
                                 href="#"
@@ -600,18 +598,7 @@
                     return entityStore.getEntityTypeName(state.entity.entity_type_id);
                 }),
                 hiddenAttributeList: computed(_ => {
-                    const keys = Object.keys(state.hiddenAttributes);
-                    const values = Object.values(state.hiddenAttributes);
-                    const list = [];
-                    for(let i = 0; i < keys.length; i++) {
-                        // TODO/FIXME Disable check on dependant for now, because it breaks
-                        // !? operator. But now hidden dependants affect an attribute's
-                        // hide state!
-                        if(values[i].hide /* && (!state.hiddenAttributes[values[i].by] || !state.hiddenAttributes[values[i].by].hide) */) {
-                            list.push(keys[i]);
-                        }
-                    }
-                    return list;
+                    return Object.keys(state.hiddenAttributes).filter(k => state.hiddenAttributes[k].hide);
                 }),
                 hiddenAttributeCount: computed(_ => state.hiddenAttributeList.length),
                 hiddenAttributeListing: computed(_ => {
@@ -750,6 +737,7 @@
                             const type = attributeStore.getAttribute(rule.on).datatype;
                             const refValue = liveData[rule.on];
                             let tmpMatch = false;
+                            console.log('dependantId: ' + dependantId + ' - rule: ', rule);
                             switch(rule.operator) {
                                 case '=':
                                     if(type == 'string-sc') {
@@ -777,13 +765,15 @@
                                     break;
                                 case '?':
                                 case '!?':
+
                                     if(type == 'string-sc') {
                                         tmpMatch = refValue?.id !== undefined;
                                     } else if(type == 'string-mc') {
                                         tmpMatch = Array.isArray(refValue) && refValue.length > 0;
                                     } else {
-                                        tmpMatch = refValue != undefined && refValue != null && refValue != '' &&
-                                                    refValue?.value != undefined && refValue?.value != null && refValue?.value != '';
+                                        const value = refValue?.value == undefined ? refValue : refValue.value;
+
+                                        tmpMatch = value != null && value != ''; 
                                     }
                                     // !? is the exact opposite of ?
                                     if(rule.operator == '!?') {
@@ -811,6 +801,9 @@
                             return;
                         }
                     });
+
+
+                    console.log(dependantId + ' => dependencyMatch', dependencyMatch);
 
                     state.hiddenAttributes[dependantId] = {
                         hide: !dependencyMatch,
