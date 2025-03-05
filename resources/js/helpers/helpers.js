@@ -761,19 +761,25 @@ export function sortConcepts(ca, cb) {
 
 export function sortTranslated(asc = true, prop = 'thesaurus_url') {
     const systemStore = useSystemStore();
-    return function (a, b) {
+    return function(a, b) {
         return systemStore.translateConcept(a[prop]).localeCompare(systemStore.translateConcept(b[prop])) * (asc ? 1 : -1);
     };
 }
 
 export function sortAlphabetically(asc = true) {
-    return function (a, b) {
+    return function(a, b) {
         return a.localeCompare(b) * (asc ? 1 : -1);
     };
 }
 
+export function sortAlphabeticallyBy(prop = 'name', asc = true) {
+    return function(a, b) {
+        return sortAlphabetically(asc)(a[prop], b[prop]);
+    };
+}
+
 export function sortByLength(secondarySort = null, asc = true) {
-    return function (a, b) {
+    return function(a, b) {
         if(secondarySort && a.length == b.length) {
             for(let i = 0; i < a.length; i++) {
                 const order = secondarySort(a[i], b[i]);

@@ -4,12 +4,13 @@
         :classes="multiselectResetClasslist"
         :value-prop="'id'"
         :label="'name'"
-        :track-by="'id'"
+        :track-by="['nickname', 'name', 'email']"
         :object="false"
         :mode="'tags'"
         :disabled="disabled"
         :options="users"
         :close-on-select="false"
+        :searchable="true"
         :name="name"
         :placeholder="t('global.select.placeholder')"
         @change="v.handleChange"
@@ -71,6 +72,7 @@
 
     import {
         multiselectResetClasslist,
+        sortAlphabeticallyBy,
     } from '@/helpers/helpers.js';
 
     import {
@@ -120,7 +122,7 @@
             } = useField(`userlist_${name.value}`, yup.mixed(), {
                 initialValue: props.value || [],
             });
-            const users = userStore.users;
+            const users = userStore.users.toSorted(sortAlphabeticallyBy());
             const v = reactive({
                 value: fieldValue,
                 handleChange,
