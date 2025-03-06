@@ -26,7 +26,7 @@ class EntityObserver
         $userIds = $entity->activities()->groupBy('causer_id')->where('causer_id', '<>', $user->id)->pluck('causer_id')->toArray();
         foreach($userIds as $uid) {
             try {
-                User::find($uid)->notify(new EntityUpdatedNotification($entity));
+                User::findOrFail($uid)->notify(new EntityUpdatedNotification($entity));
             } catch(ModelNotFoundException $e) {
             }
         }
