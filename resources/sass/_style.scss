@@ -243,7 +243,6 @@ table.table-sticky .dropdown-menu {
     }
 }
 
-
 .hover-underline:hover {
     text-decoration: underline;
 }
@@ -262,4 +261,8 @@ table.table-sticky .dropdown-menu {
 
 .list-hover:hover {
     background-color: $gray-200 !important;
+}
+
+.range-addon {
+    width: 8rem;
 }

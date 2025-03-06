@@ -28,6 +28,10 @@ All notable changes to this project will be documented in this file.
 - Do not return deleted users by default
 - Moved attribute indicators to the end of the line and reworked style (always visible, but greyed out)
 - _Entity Detail_ now has a loading spinner when saving
+- Percentage Attribute reworked
+  - Floating Point values are now allowed
+  - Mousewheel can be used to change value
+  - _Ctrl_ and _Shift_ key can be used to change step size (_Ctrl_ = 10, _Shift_ = 0.01, _Ctrl_ & _Shift_ = 0.1)
 
 ## 0.10.2
 ### Fixed
