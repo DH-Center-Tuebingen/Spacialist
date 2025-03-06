@@ -681,7 +681,6 @@ export function showEditAttribute(aid, etid, metadata) {
             attributeId: aid,
             entityTypeId: etid,
             metadata: metadata,
-            attributeSelection: getEntityTypeAttributes(etid),
             onClosing(e) {
                 modal.destroy();
             },
@@ -764,12 +763,13 @@ export function showRemoveAttribute(etid, aid, id, metadata, onDeleted) {
     modal.open();
 }
 
-export function showAddAttribute(onAdded) {
+export function showAddAttribute(onAdded, entityType = null) {
     const uid = `AddAttribute-${getTs()}`;
     const modal = useModal({
         component: AddAttribute,
         attrs: {
             name: uid,
+            entityType: entityType,
             onClosing(e) {
                 modal.destroy();
             },

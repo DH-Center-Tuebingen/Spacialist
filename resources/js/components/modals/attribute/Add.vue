@@ -19,7 +19,7 @@
             </div>
             <div class="modal-body nonscrollable">
                 <attribute-template
-                    :type="'default'"
+                    :type="entityType ?? 'default'"
                     :external="state.formId"
                     @created="add"
                     @updated="updateAttribute"
@@ -112,6 +112,11 @@
             'attribute-template': AttributeTemplate,
         },
         props: {
+            entityType: {
+                type: String,
+                required: false,
+                default: null
+            },
         },
         emits: ['closing', 'confirm'],
         setup(props, context) {

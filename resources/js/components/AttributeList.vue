@@ -105,7 +105,7 @@
                                     &nbsp;
                                 </span>
                                 <span v-else>
-                                    {{ translateConcept(element.thesaurus_url) }}
+                                    {{ translateConcept(element.thesaurus_url) }} [{{ element.id }}]
                                 </span>
                             </div>
                             <sup
@@ -129,7 +129,6 @@
                             </sup>
                         </label>
                         <div :class="expandedClasses(index, element)">
-                            {{ element.id }}
                             <Attribute
                                 :ref="el => setRef(el, element.id)"
                                 :data="element"

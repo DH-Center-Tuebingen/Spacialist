@@ -447,6 +447,7 @@
         handleEntityCommentDeleted,
     } from '@/handlers/entity.js';
 
+    import { evaluateRule } from '@/helpers/dependencies.js';
     import { usePreventNavigation } from '@/helpers/form.js';
 
     import MetadataTab from '@/components/entity/MetadataTab.vue';
@@ -724,73 +725,46 @@
                     ...getDirtyValues(),
                 };
 
-                attributeTriggers.forEach(dependantId => {
+                for(const dependantId of attributeTriggers) {
                     const attributeDependencies = state.entityTypeDependencies[dependantId];
                     const matchAllGroups = !attributeDependencies.union;
                     let dependencyMatch = matchAllGroups;
 
-                    attributeDependencies.groups.forEach(group => {
+                    for(const group of attributeDependencies.groups) {
                         const matchAllRules = !group.union;
                         let ruleMatch = matchAllRules;
 
-                        group.rules.forEach(rule => {
+                        for(const rule of group.rules) {
                             const type = attributeStore.getAttribute(rule.on).datatype;
-                            const refValue = liveData[rule.on];
-                            let tmpMatch = false;
-                            console.log('dependantId: ' + dependantId + ' - rule: ', rule);
-                            switch(rule.operator) {
-                                case '=':
-                                    if(type == 'string-sc') {
-                                        tmpMatch = refValue?.id == rule.value;
-                                    } else if(type == 'string-mc') {
-                                        tmpMatch = refValue && refValue.some(mc => mc.id == rule.value);
-                                    } else {
-                                        tmpMatch = refValue == rule.value;
-                                    }
-                                    break;
-                                case '!=':
-                                    if(type == 'string-sc') {
-                                        tmpMatch = refValue?.id != rule.value;
-                                    } else if(type == 'string-mc') {
-                                        tmpMatch = Array.isArray(refValue) && refValue.every(mc => mc.id != rule.value);
-                                    } else {
-                                        tmpMatch = refValue != rule.value;
-                                    }
-                                    break;
-                                case '<':
-                                    tmpMatch = refValue < rule.value;
-                                    break;
-                                case '>':
-                                    tmpMatch = refValue > rule.value;
-                                    break;
-                                case '?':
-                                case '!?':
+                            const attributeValue = liveData[rule.on];
 
-                                    if(type == 'string-sc') {
-                                        tmpMatch = refValue?.id !== undefined;
-                                    } else if(type == 'string-mc') {
-                                        tmpMatch = Array.isArray(refValue) && refValue.length > 0;
-                                    } else {
-                                        const value = refValue?.value == undefined ? refValue : refValue.value;
-
-                                        tmpMatch = value != null && value != ''; 
-                                    }
-                                    // !? is the exact opposite of ?
-                                    if(rule.operator == '!?') {
-                                        tmpMatch = !tmpMatch;
-                                    }
-                                    break;
+                            // When the rule is invalid we ignore the rule by returning true!
+                            if(attributeValue === undefined) {
+                                ruleMatch = true;
+                                console.error('Invalid target value for rule', rule);
+                                break;
                             }
+
+                            //// I assume the reference value is an exception from the rule!
+                            ////
+                            // if(!refValue.value) {
+                            //     ruleMatch = true;
+                            //     console.error('Rule target is not a ref value!', refValue);
+                            //     break;
+                            // }
+
+                            const tmpMatch = evaluateRule(type, attributeValue, rule);
+                            console.log('dependantId', dependantId, 'rule', rule, 'tmpMatch', tmpMatch);
 
                             if(matchAllRules && !tmpMatch) {
                                 ruleMatch = false;
-                                return;
+                                break;
                             }
                             if(!matchAllRules && tmpMatch) {
                                 ruleMatch = true;
-                                return;
+                                break;
                             }
-                        });
+                        }
 
                         if(matchAllGroups && !ruleMatch) {
                             dependencyMatch = false;
@@ -800,16 +774,13 @@
                             dependencyMatch = true;
                             return;
                         }
-                    });
-
-
-                    console.log(dependantId + ' => dependencyMatch', dependencyMatch);
+                    }
 
                     state.hiddenAttributes[dependantId] = {
                         hide: !dependencyMatch,
                         by: aid, // TODO might be more than one
                     };
-                });
+                }
             };
             const updateAllDependencies = _ => {
                 if(!state.entityAttributes) return;

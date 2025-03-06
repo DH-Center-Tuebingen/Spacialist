@@ -118,6 +118,8 @@ export const useEntityStore = defineStore('entity', {
             return state.entityTypes[id];
         },
         getEntityTypeAttributes: state => (id, exclude = false) => {
+            if(!id || !state.entityTypeAttributes[id]) return [];
+            
             if(exclude === true) {
                 return state.entityTypeAttributes[id].filter(a => a.datatype != 'system-separator');
             } else if(Array.isArray(exclude)) {
