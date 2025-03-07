@@ -54,6 +54,21 @@ code {
     align-items: center;
 }
 
+.accordion-button {
+    padding: 5px;
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+    outline: none !important;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: transparent;
+    color: black;
+    box-shadow: none;
+}
+
 .reference-group {
     margin-bottom: map-get($utilities, margin, values, 3);
 }

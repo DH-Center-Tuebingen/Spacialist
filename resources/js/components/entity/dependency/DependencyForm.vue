@@ -64,7 +64,7 @@
                     :mode="'single'"
                     :object="true"
                     :hide-selected="true"
-                    :options="getOperatorsForDatatype(itm.attribute.datatype)"
+                    :options="operatorsForDatatypeWithLabels(itm.attribute.datatype)"
                     :placeholder="t('global.select.placeholder')"
                     @change="operatorSelected"
                 />
@@ -193,6 +193,7 @@
         emits: ['update:modelValue'],
         setup(props, { emit }) {
 
+            const t = useI18n().t;
             const activeGroup = ref(0);
             const groupsCount = computed(_ => props.modelValue.groups.length);
             const lastGroupEmpty = computed(_ => props.modelValue.groups[groupsCount.value - 1].rules.length == 0);
@@ -264,14 +265,22 @@
                 emit('update:modelValue', value);
             };
 
+            const operatorsForDatatypeWithLabels = datatype => {
+                const operators = getOperatorsForDatatype(datatype);
+                return operators.map(op => {
+                    op.label = t(`global.dependency.operators.${op.name}`);
+                    return op;
+                });
+            };
+
             return {
-                t: useI18n().t,
+                t,
                 activeGroup,
                 addGroup,
                 getInputTypeClass,
                 addItem,
                 getDependantOptions,
-                getOperatorsForDatatype,
+                operatorsForDatatypeWithLabels,
                 gotoNextGroup,
                 gotoPrevGroup,
                 removeGroup,

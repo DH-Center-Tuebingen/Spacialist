@@ -143,7 +143,10 @@
             const state = reactive({
                 entityType: {
                     is_root: false,
-                    geometryType: null,
+                    geometryType: {
+                        label: 'Any',
+                        key: 'any'
+                    },
                     label: null,
                 },
                 availableGeometryTypes: computed(_ => systemStore.geometryTypes),
