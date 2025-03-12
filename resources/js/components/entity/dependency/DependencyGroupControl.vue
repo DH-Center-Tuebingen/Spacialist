@@ -49,10 +49,10 @@
     </div>
     <div
         v-else
-        class="mb-2 d-flex flex-row justify-content-end"
+        class="d-flex flex-row justify-content-end"
     >
         <button
-            class="btn btn-sm btn-outline-success"
+            class="btn btn-sm btn-outline-success text-nowrap"
             type="button"
             :disabled="lastGroupEmpty"
             @click="addGroup"

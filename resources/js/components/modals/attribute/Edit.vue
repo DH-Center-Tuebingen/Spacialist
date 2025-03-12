@@ -174,13 +174,8 @@
 
             // FUNCTIONS
             const validateDependencyRule = rule => {
-                return rule.attribute?.id &&
-                    rule.operator?.id &&
-                    (
-                        (!rule.operator.no_parameter && !!rule.value)
-                        ||
-                        (rule.operator.no_parameter && !rule.value)
-                    );
+                const valuesAreSet = rule.attribute?.id && rule.operator?.id;                
+                return valuesAreSet && rule.value != null;
             };
 
             const confirmEdit = _ => {
