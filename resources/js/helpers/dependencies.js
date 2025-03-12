@@ -1,90 +1,116 @@
+import useAttributeStore from '@/bootstrap/stores/attribute.js';
+
 const EQUAL = { name: 'equal', operator: '=' };
 const NOT_EQUAL = { name: 'not_equal', operator: '!=' };
-const LESS_THAN = { name: 'less_than', operator: '<' };
-const LESS_THAN_OR_EQUAL = { name: 'less_or_equal', operator: '<=' };
-const GREATER_THAN = { name: 'greater', operator: '>' };
-const GREATER_THAN_OR_EQUAL = { name: 'greater_or_equal', operator: '>=' };
-const IS_SET = { name: 'is_set', operator: '?', no_parameter: true };
-const IS_NOT_SET = { name: 'is_not_set', operator: '!?', no_parameter: true };
+const LESS = { name: 'less', operator: '<' };
+const LESS_OR_EQUAL = { name: 'less_or_equal', operator: '<=' };
+const GREATER = { name: 'greater', operator: '>' };
+const GREATER_OR_EQUAL = { name: 'greater_or_equal', operator: '>=' };
+const IS_SET = { name: 'set', operator: '?', no_parameter: true };
+const IS_NOT_SET = { name: 'not_set', operator: '!?', no_parameter: true };
 
-const operators = [
+export const operators = [
     EQUAL,
     NOT_EQUAL,
-    LESS_THAN,
-    LESS_THAN_OR_EQUAL,
-    GREATER_THAN,
-    GREATER_THAN_OR_EQUAL,
+    LESS,
+    LESS_OR_EQUAL,
+    GREATER,
+    GREATER_OR_EQUAL,
     IS_SET,
     IS_NOT_SET
 ];
 
+export const operatorMap = {};
+
 for(let i = 0; i < operators.length; i++) {
     const operator = operators[i];
     operator.id = i + 1;
+    operatorMap[operator.operator] = operator;
 }
 
-export function evaluateRule(type, value, rule) {
+export const getOperatorBySymbol = symbol => {
+    return operatorMap[symbol];
+};
+
+function checkIfSet(type, value) {
     let tmpMatch = false;
-    switch(rule.operator) {
-        case EQUAL.operator:
-            if(type == 'string-sc') {
-                tmpMatch = value?.id == rule.value;
-            } else if(type == 'string-mc') {
-                tmpMatch = value && value.some(mc => mc.id == rule.value);
-            } else {
-                tmpMatch = value == rule.value;
-            }
-            break;
-        case NOT_EQUAL.operator:
-            if(type == 'string-sc') {
-                tmpMatch = value?.id != rule.value;
-            } else if(type == 'string-mc') {
-                tmpMatch = Array.isArray(value) && value.every(mc => mc.id != rule.value);
-            } else {
-                tmpMatch = value != rule.value;
-            }
-            break;
-        case LESS_THAN.operator:
-            tmpMatch = value < rule.value;
-            break;
-        case GREATER_THAN.operator:
-            tmpMatch = value > rule.value;
-            break;
-        case LESS_THAN_OR_EQUAL.operator:
-            tmpMatch = value <= rule.value;
-            break;
-        case GREATER_THAN_OR_EQUAL.operator:
-            tmpMatch = value >= rule.value;
-            break;
-        case IS_SET.operator:
-        case IS_NOT_SET.operator:
-            if(type == 'string-sc') {
-                tmpMatch = value?.id !== undefined;
-            } else if(type == 'string-mc') {
-                tmpMatch = Array.isArray(value) && value.length > 0;
-            } else {
-                tmpMatch = value != null && value != '' && value != 0;
-            }
-            if(rule.operator == IS_NOT_SET.operator) {
-                tmpMatch = !tmpMatch;
-            }
-            break;
-        default:
-            console.error('Unknown operator: ' + rule.operator);
-            break;
+    if(type == 'string-sc') {
+        tmpMatch = value?.id !== undefined;
+    } else if(type == 'string-mc') {
+        tmpMatch = Array.isArray(value) && value.length > 0;
+    } else {
+        tmpMatch = value != null && value != '' && value != 0;
     }
     return tmpMatch;
 }
 
-export function getEmptyGroup(union = false) {
+function checkIfEqual(type, value, ruleValue) {
+    let match = true;
+    if(type == 'string-sc' || type == 'entity') {
+        match = value?.id == ruleValue;
+    } else if(type == 'string-mc' || type == 'entity-mc') {
+        for(const ruleValueId of ruleValue) {
+            const itemMatch = value.find(v => v.id == ruleValueId);
+            if(itemMatch === undefined) {
+                match = false;
+                break;
+            }
+        }
+    } else if(type == 'list') {
+        match = value.length === ruleValue.length && value.every((v, i) => v === ruleValue[i]);
+    } else {
+        match = value == ruleValue;
+    }
+    return match;
+}
+
+export function evaluateRule(type, value, rule) {
+    let ruleValue = rule.value;
+
+    if(type == 'date') {
+        value = new Date(value).getTime();
+        ruleValue = new Date(ruleValue).getTime();
+    }
+    
+    if(type == 'si-unit') {
+        value = value?.normalized;
+    }
+
+    switch(rule.operator) {
+        case EQUAL.operator:
+            return checkIfEqual(type, value, ruleValue);
+        case NOT_EQUAL.operator:
+            return !checkIfEqual(type, value, ruleValue);
+        case LESS.operator:
+            return value < ruleValue;
+        case GREATER.operator:
+            return value > ruleValue;
+        case LESS_OR_EQUAL.operator:
+            return value <= ruleValue;
+        case GREATER_OR_EQUAL.operator:
+            return value >= ruleValue;
+        case IS_SET.operator:
+            return checkIfSet(type, value);
+        case IS_NOT_SET.operator:
+            return !checkIfSet(type, value);
+        default:
+            console.error('Unknown operator: ' + rule.operator);
+            // Ignore the rule if it is not valid.
+            return true;
+    }
+}
+
+export function getEmptyGroup(is_and = false) {
     return {
-        union,
+        is_and,
         rules: [],
     };
 }
 
 export function getOperatorsForDatatype(datatype) {
-    const list = [EQUAL, NOT_EQUAL];
+    const EQUALITY = [EQUAL, NOT_EQUAL];
+    const SET = [IS_SET, IS_NOT_SET];
+    const COMPARISON = [LESS, LESS_OR_EQUAL, GREATER, GREATER_OR_EQUAL];
 
     switch(datatype) {
         case 'boolean':
@@ -92,56 +118,52 @@ export function getOperatorsForDatatype(datatype) {
         case 'entity-mc':
         case 'entity':
         case 'epoch':
-        case 'list':
-        case 'sql':
         case 'table':
         case 'timeperiod':
         case 'userlist':
-            break;
+            return EQUALITY;
         case 'geography':
-        case 'iconclass':
         case 'richtext':
+            return SET;
+        case 'iconclass':
+        case 'list':
         case 'rism':
-        case 'serial':
         case 'string-mc':
         case 'string-sc':
         case 'string':
         case 'stringf':
         case 'url':
-            list.push(
-                IS_SET,
-                IS_NOT_SET
-            );
-            break;
+            return [
+                ...EQUALITY,
+                ...SET,
+            ];
         case 'date':
         case 'double':
         case 'integer':
         case 'percentage':
+        case 'serial':
         case 'si-unit':
-            list.push(
-                LESS_THAN,
-                LESS_THAN_OR_EQUAL,
-                GREATER_THAN,
-                GREATER_THAN_OR_EQUAL,
-            );
-            break;
+            return [
+                ...EQUALITY,
+                ...COMPARISON,
+            ];
         default:
             throw new Error(`Unsupported datatype ${datatype}`);
     }
-    console.log(list);
-    return list;
 }
 
 
 export const getInputTypeClass = datatype => {
     switch(datatype) {
+        case 'si-unit':
+        case 'url':
+            return datatype;
         case 'string':
         case 'stringf':
         case 'richtext':
         case 'geography':
         case 'iconclass':
         case 'rism':
-        case 'serial':
             return 'text';
         case 'double':
         case 'integer':
@@ -157,15 +179,48 @@ export const getInputTypeClass = datatype => {
         // TODO handle entity attributes
         case 'entity':
         case 'entity-mc':
-        // return 'entity';
+            return 'entity';
+        case 'list':
+            return 'list';
         case 'userlist':
+        case 'serial':
         case 'epoch':
         case 'timeperiod':
         case 'dimension':
-        case 'list':
         case 'table':
         case 'sql':
         default:
             return 'unsupported';
     }
+};
+
+export const formatDependency = dependencyRules => {
+    const formattedRules = {};
+    formattedRules.is_and = !!dependencyRules?.is_and;
+    if(dependencyRules.groups) {
+        formattedRules.groups = dependencyRules.groups.map(group => {
+            const formattedGroup = {};
+            formattedGroup.is_and = group.is_and;
+            formattedGroup.rules = group.rules.map(rule => {
+                const converted = {
+                    attribute: null,
+                    operator: null,
+                    value: null,
+                };
+                converted.attribute = useAttributeStore().getAttribute(rule.on);
+                converted.operator = getOperatorBySymbol(rule.operator);
+                converted.value = rule.value;
+                return converted;
+            });
+            return formattedGroup;
+        });
+    } else if(Object.keys(dependencyRules).length == 0) {
+        formattedRules.is_and = true;
+        formattedRules.groups = [{
+            is_and: false,
+            rules: [],
+        }];
+    }
+    
+    return formattedRules;
 };

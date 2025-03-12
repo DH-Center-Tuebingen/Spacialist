@@ -77,7 +77,7 @@
                 <h5 class="text-center">
                     {{ t('global.dependency.title') }}
                 </h5>
-                <DependencyForm 
+                <DependencyForm
                     v-model="state.dependency"
                     :options="state.supportedEntityTypeAttributes"
                 />
@@ -128,11 +128,10 @@
         computed,
         onMounted,
         reactive,
-        toRefs,
     } from 'vue';
+
     import { useI18n } from 'vue-i18n';
 
-    import useAttributeStore from '@/bootstrap/stores/attribute.js';
     import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import {
@@ -146,10 +145,11 @@
         translateConcept,
         multiselectResetClasslist,
     } from '@/helpers/helpers.js';
-    
+
     import {
         getEmptyGroup,
         getInputTypeClass,
+        formatDependency,
     } from '@/helpers/dependencies.js';
 
     import DependencyForm from '../../entity/dependency/DependencyForm.vue';
@@ -171,12 +171,6 @@
         emits: ['closing', 'confirm'],
         setup(props, context) {
             const { t } = useI18n();
-            const attributeStore = useAttributeStore();
-            // const {
-            //     attributeId,
-            //     entityTypeId,
-            //     attributeSelection,
-            // } = toRefs(props);
 
             // FUNCTIONS
             const validateDependencyRule = rule => {
@@ -188,35 +182,7 @@
                         (rule.operator.no_parameter && !rule.value)
                     );
             };
-            const formatDependency = dependencyRules => {
-                const formattedRules = {};
-                formattedRules.union = !!dependencyRules?.union;
-                if(dependencyRules.groups) {
-                    formattedRules.groups = dependencyRules.groups.map(group => {
-                        const formattedGroup = {};
-                        formattedGroup.union = group.union;
-                        formattedGroup.rules = group.rules.map(rule => {
-                            const converted = {
-                                attribute: null,
-                                operator: null,
-                                value: null,
-                            };
-                            converted.attribute = attributeStore.getAttribute(rule.on);
-                            converted.operator = operators.find(o => o.operator == rule.operator);
-                            converted.value = rule.value;
-                            return converted;
-                        });
-                        return formattedGroup;
-                    });
-                } else if(Object.keys(dependencyRules).length == 0) {
-                    formattedRules.union = true;
-                    formattedRules.groups = [{
-                        union: false,
-                        rules: [],
-                    }];
-                }
-                return formattedRules;
-            };
+
             const confirmEdit = _ => {
                 const data = {
                     dependency: state.dependency,
@@ -243,7 +209,7 @@
                 context.emit('closing', false);
             };
             const handleSeparatorRename = label => {
-                if(label === null){
+                if(label === null) {
                     state.separatorTitle = null;
                 } else if(label.concept_url) {
                     state.separatorTitle = label.concept_url;
@@ -256,7 +222,7 @@
             const state = reactive({
                 separatorTitle: '',
                 dependency: {
-                    union: true,
+                    is_and: true,
                     groups: [getEmptyGroup(false)],
                 },
                 width: 100,
@@ -266,8 +232,9 @@
                     });
                 }),
                 attribute: {},
+                inputTypeClass: computed(_ => getInputTypeClass(state.attribute.datatype)),
                 supportedEntityTypeAttributes: computed(_ => {
-                    const attributeSelection = useEntityStore().getEntityTypeAttributes(props.entityTypeId);                    
+                    const attributeSelection = useEntityStore().getEntityTypeAttributes(props.entityTypeId);
                     const supportedEntityTypeAttributes = attributeSelection.filter(a => {
                         return a.id != props.attributeId && getInputTypeClass(a.datatype) != 'unsupported';
                     });

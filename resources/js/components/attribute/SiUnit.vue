@@ -3,9 +3,10 @@
         <input
             v-model="valueFieldValue"
             type="number"
-            class="form-control text-center"
+            class="form-control text-end"
             :disabled="disabled"
             step="0.01"
+            @keydown="onKeydown"
         >
         <button
             class="btn btn-outline-secondary dropdown-toggle"
@@ -58,6 +59,8 @@
     import {
         siSymbolToStr,
     } from '@/helpers/helpers.js';
+
+    import { useNumberInputHotkeys } from '@/composables/number-input-hotkeys.js';
 
     export default {
         props: {
@@ -133,9 +136,13 @@
 
             const v = reactive({
                 value: computed(_ => {
+                    const group = state.groupUnits.find(u => u.label == unitValue.value?.label);                    
+                    const conversion = group?.conversion ?? 1;
                     return {
                         value: valueFieldValue.value,
                         unit: unitValue.value?.label || '',
+                        normalized: valueFieldValue.value * conversion,
+                        baseunit: state.unitGrp,
                     };
                 }),
                 meta: computed(_ => {
@@ -145,6 +152,10 @@
                     };
                 }),
             });
+
+            const {
+                onKeydown,
+            } = useNumberInputHotkeys(valueFieldValue, true);
 
             const resetFieldState = _ => {
                 resetValueField({
@@ -214,7 +225,7 @@
                 v,
                 valueFieldValue,
                 unitValue,
-
+                onKeydown,
             };
         },
     };

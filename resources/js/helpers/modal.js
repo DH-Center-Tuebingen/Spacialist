@@ -660,7 +660,7 @@ export function showDeleteEntityType(entityType, metadata, onDeleted) {
                 modal.destroy();
             },
             onConfirm(e) {
-                useEntityStore().deleteEntityType(entityType).then(_ => {
+                useEntityStore().deleteEntityType(entityType.id).then(_ => {
                     if(!!onDeleted) {
                         onDeleted();
                     }

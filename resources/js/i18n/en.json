@@ -372,15 +372,17 @@
                 "equal": "equals",
                 "not_equal": "does not equal",
                 "greater": "greater than",
+                "greater_or_equal": "greater or equal",
                 "less": "less than",
+                "less_or_equal": "less or equal",
                 "set": "set",
                 "not_set": "not set"
             },
             "modes": {
-                "union": "Union",
-                "union_desc": "Any group must evaluate to true",
-                "intersect": "Intersect",
-                "intersect_desc": "All groups must evaluate to true"
+                "or": "Oder",
+                "or_desc": "At least one must evaluate to true",
+                "and": "And",
+                "and_desc": "All must evaluate to true"
             },
             "depends_on": {
                 "title": "Depends on",

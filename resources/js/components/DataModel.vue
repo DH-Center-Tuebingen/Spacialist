@@ -176,7 +176,7 @@
                             >
                                 <h2 class="accordion-header">
                                     <button
-                                        class="accordion-button"
+                                        class="accordion-button collapsed"
                                         :class="{ 'text-muted': attributeGroupItemCount(attrGrp) == 0 }"
                                         type="button"
                                         data-bs-toggle="collapse"
@@ -184,11 +184,11 @@
                                         aria-expanded="false"
                                         :aria-controls="`dme-attribute-list-${type}-grp-container`"
                                     >
-                                        <span>
+                                        <span class="flex-fill">
                                             {{ t(`global.attributes.${type}`) }}
                                         </span>
                                         <span
-                                            class="badge bg-primary ms-2 d-flex flex-row"
+                                            class="badge  text-secondary mx-3 d-flex flex-row"
                                             :class="{ 'bg-opacity-50': attributeGroupItemCount(attrGrp) == 0 }"
                                         >
                                             <span>{{ attributeGroupItemCount(attrGrp) }}</span>
@@ -196,18 +196,24 @@
                                             <span>{{ attrGrp.length }}</span>
                                         </span>
                                     </button>
+                                    <!-- 
+                                        This was really useful, when adding multiple attributes of the same type
+                                        But with the bootstrap accordion, it could not be put on the header.
+                                        It would be nice to put it on the header of a custom accordion component. [SO] 
+                                    -->
+                                    <!-- 
                                     <button
                                         class="btn btn-sm btn-outline-success"
                                         @click.stop="createAttribute(type)"
                                     >
                                         +
-                                    </button>
+                                    </button> -->
                                 </h2>
                                 <div
                                     :id="`dme-attribute-list-${type}-grp-container`"
-                                    class="accordion-collapse collapse show"
+                                    class="accordion-collapse collapse"
                                 >
-                                    <div class="accordion-body px-2 py-3">
+                                    <div class="accordion-body px-2 pb-3 pt-0">
                                         <attribute-list
                                             :group="{ name: `attribute-selection-${type}`, pull: true, put: false }"
                                             :attributes="attrGrp"

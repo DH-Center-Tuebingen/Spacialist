@@ -1,30 +1,13 @@
 <template>
     <div
         v-if="groupCount > 1"
-        class="mb-2 row d-flex flex-row justify-content-end"
+        class="row d-flex flex-row justify-content-end"
     >
         <div class="input-group input-group-sm w-auto">
-            <button
-                id="dependency-mode-toggle-btn"
-                class="btn btn-sm btn-outline-secondary"
-                type="button"
+            <DependencyToggle
+                :model-value="isAnd"
                 @click="toggleState"
-            >
-                <span
-                    v-show="isAnd"
-                    :title="t('global.dependency.modes.union_desc')"
-                >
-                    <i class="fas fa-fw fa-object-ungroup" />
-                    {{ t('global.dependency.modes.union') }}
-                </span>
-                <span
-                    v-show="!isAnd"
-                    :title="t('global.dependency.modes.intersect_desc')"
-                >
-                    <i class="fas fa-fw fa-object-group" />
-                    {{ t('global.dependency.modes.intersect') }}
-                </span>
-            </button>
+            />
             <button
                 class="btn btn-sm btn-outline-danger"
                 type="button"
@@ -53,7 +36,7 @@
             </button>
             <div class="input-group-text d-flex flex-row gap-2">
                 {{ t('global.dependency.group') }}
-                {{ state.currentDependencyGroupId + 1 }} / {{ groupCount }}
+                {{ activeGroup + 1 }} / {{ groupCount }}
             </div>
             <button
                 class="btn btn-sm btn-outline-secondary"
@@ -83,12 +66,20 @@
 <script>
     import { computed } from 'vue';
     import { useI18n } from 'vue-i18n';
+    import DependencyToggle from './DependencyToggle.vue';
 
     export default {
+        components: {
+            DependencyToggle,
+        },
         props: {
             isAnd: {
                 type: Boolean,
                 default: true
+            },
+            activeGroup: {
+                type: Number,
+                default: 0
             },
             groups: {
                 type: Array,
@@ -114,7 +105,7 @@
                 addGroup: _ => emit('add'),
                 gotoPrevGroup: _ => emit('prev'),
                 gotoNextGroup: _ => emit('next'),
-                remove: groupId => emit('remove'),
+                remove: _ => emit('remove'),
                 toggleState: _ => emit('toggleState'),
             };
         }

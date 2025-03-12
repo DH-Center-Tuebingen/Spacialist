@@ -496,11 +496,13 @@ class EditorController extends Controller {
         $dependencyData = $request->get('data');
         $hasData = false;
         $dependsOn = [
-            'union' => $dependencyData['union'],
+            'is_and' => $dependencyData['is_and'],
         ];
         $operators = [
             '<' => true,
             '>' => true,
+            '<=' => true,
+            '>=' => true,
             '=' => true,
             '!=' => true,
             '?' => false,
@@ -532,7 +534,7 @@ class EditorController extends Controller {
                     $groupRules[] = $formattedRule;
                 }
                 $dependsOn['groups'][] = [
-                    'union' => $group['union'],
+                    'is_and' => $group['is_and'],
                     'rules' => $groupRules,
                 ];
             }

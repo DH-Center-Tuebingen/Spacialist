@@ -33,7 +33,7 @@ import {
     faQuestionCircle,
     faRectangleList,
     faSadCry,
-    faSquare,
+    faSquare as faSquareReg,
     faSquareCheck,
 } from '@fortawesome/free-regular-svg-icons';
 import {
@@ -206,6 +206,7 @@ import {
     faSortNumericUp,
     faSortUp,
     faSpinner,
+    faSquare,
     faStop,
     faStopwatch,
     faStrikethrough,
@@ -427,6 +428,7 @@ library.add(
     faSortUp,
     faSpinner,
     faSquare,
+    faSquareReg,
     faSquareCheck,
     faStop,
     faStopwatch,

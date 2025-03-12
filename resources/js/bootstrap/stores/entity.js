@@ -31,6 +31,7 @@ import {
     deleteEntityType,
     duplicateEntityType,
     fetchEntityMetadata,
+    getEntity,
     getEntityComments,
     getEntityData,
     getEntityParentIds,
@@ -45,6 +46,7 @@ import {
     updateAttributeDependency,
     updateAttributeMetadata,
 } from '@/api.js';
+import { searchEntity } from '../../api.js';
 
 function updateSelectionTypeIdList(selection) {
     const tmpDict = {};
@@ -111,7 +113,19 @@ export const useEntityStore = defineStore('entity', {
             });
         },
         getEntity: state => id => {
-            return state.entities[id] || {};
+            return state.entities[id] || { id: 0 };
+        },
+        fetchEntity: function (state) {
+            return async id => {
+                const cachedEntity = this.getEntity(id);
+                if(cachedEntity.id !== 0) {
+                    return Promise.resolve(cachedEntity);
+                }
+
+                const entity = await getEntity(id);
+                this.add(entity);
+                return entity;
+            };
         },
         getEntityType: state => id => {
             if(!id) return {};
@@ -764,11 +778,11 @@ export const useEntityStore = defineStore('entity', {
             });
         },
         async updateDependency(entityTypeId, attributeId, dependency) {
-            return updateAttributeDependency(entityTypeId, attributeId, dependency).then(data => {
+            return updateAttributeDependency(entityTypeId, attributeId, dependency).then(response => {
                 const attributes = this.getEntityTypeAttributes(entityTypeId);
                 const attribute = attributes.find(a => a.id == attributeId);
                 if(attribute) {
-                    attribute.pivot.depends_on = data;
+                    attribute.pivot.depends_on = response.data;
                 }
             });
         },
@@ -841,6 +855,9 @@ export const useEntityStore = defineStore('entity', {
             this.treeSelectionTypeIds = [];
             this.treeSelectionTypeIds = updateSelectionTypeIdList(this.treeSelection);
         },
+        async search(query){
+            return searchEntity(query);
+        }
     },
 });
 

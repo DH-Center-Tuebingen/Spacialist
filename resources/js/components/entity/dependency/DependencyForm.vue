@@ -1,151 +1,48 @@
 <template>
-    <DependencyGroupControl
-        :is-and="modelValue.groups[activeGroup].union"
-        :groups="modelValue.groups"
-        @add="addGroup"
-        @prev="gotoPrevGroup"
-        @next="gotoNextGroup"
-        @remove="removeGroup"
-        @toggle-state="toggleState"
-    />
-    <Alert
-        v-if="modelValue.groups[activeGroup].rules.length == 0"
-        class="mb-2"
-        :message="t('global.dependency.no_rules_defined')"
-        :type="'info'"
-        :noicon="true"
-    />
-    <div class="overflow-y-auto overflow-x-hidden">
-        <div
-            v-for="(itm, i) in modelValue.groups[activeGroup].rules"
-            :key="`dependency-group-${activeGroup}-item-${i}`"
-            class="mb-2 row g-2 align-items-center"
-        >
-            <div class="col-5">
-                <multiselect
-                    v-model="itm.attribute"
-                    :classes="{
-                        ...multiselectResetClasslist,
-                        'dropdown': 'multiselect-dropdown multiselect-modal-dropdown'
-                    }"
-                    :append-to-body="true"
-                    :value-prop="'id'"
-                    :label="'thesaurus_url'"
-                    :track-by="'id'"
-                    :object="true"
-                    :mode="'single'"
-                    :hide-selected="true"
-                    :options="options"
-                    :placeholder="t('global.select.placeholder')"
-                    @change="dependantSelected"
-                >
-                    <template #option="{ option }">
-                        {{ translateConcept(option.thesaurus_url) }}
-                    </template>
-                    <template #singlelabel="{ value }">
-                        <div class="multiselect-single-label">
-                            {{ translateConcept(value.thesaurus_url) }}
-                        </div>
-                    </template>
-                </multiselect>
-            </div>
-            <div class="col-2">
-                <multiselect
-                    v-if="itm.attribute?.id"
-                    v-model="itm.operator"
-                    :classes="{
-                        ...multiselectResetClasslist,
-                        'dropdown': 'multiselect-dropdown multiselect-modal-dropdown'
-                    }"
-                    :append-to-body="true"
-                    :value-prop="'id'"
-                    :label="'label'"
-                    :track-by="'id'"
-                    :mode="'single'"
-                    :object="true"
-                    :hide-selected="true"
-                    :options="operatorsForDatatypeWithLabels(itm.attribute.datatype)"
-                    :placeholder="t('global.select.placeholder')"
-                    @change="operatorSelected"
-                />
-            </div>
-            <div class="col-4">
-                <div v-if="itm.attribute?.id && itm.operator?.id && !itm.operator.no_parameter">
-                    <div
-                        v-if="getInputTypeClass(itm.attribute.datatype) == 'boolean'"
-                        class="form-check form-switch"
-                    >
-                        <input
-                            id="dependency-boolean-value"
-                            v-model="itm.value"
-                            type="checkbox"
-                            class="form-check-input"
-                        >
-                    </div>
-                    <input
-                        v-else-if="getInputTypeClass(itm.attribute.datatype) == 'number'"
-                        v-model.number="itm.value"
-                        type="number"
-                        class="form-control"
-                        :step="itm.attribute.datatype == 'double' ? 0.01 : 1"
-                    >
-                    <multiselect
-                        v-else-if="getInputTypeClass(itm.attribute.datatype) == 'select'"
-                        v-model="itm.value"
-                        :classes="{
-                            ...multiselectResetClasslist,
-                            'dropdown': 'multiselect-dropdown multiselect-modal-dropdown'
-                        }"
-                        :append-to-body="true"
-                        :value-prop="'id'"
-                        :label="'concept_url'"
-                        :track-by="'id'"
-                        :hide-selected="true"
-                        :mode="'single'"
-                        :options="getDependantOptions(itm.attribute.id, itm.attribute.datatype)"
-                        :placeholder="t('global.select.placeholder')"
-                    >
-                        <template #option="{ option }">
-                            {{ translateConcept(option.concept_url) }}
-                        </template>
-                        <template #singlelabel="{ value }">
-                            <div class="multiselect-single-label">
-                                {{ translateConcept(value.concept_url) }}
-                            </div>
-                        </template>
-                    </multiselect>
-                    <input
-                        v-else
-                        v-model="itm.value"
-                        type="text"
-                        class="form-control"
-                    >
-                </div>
-            </div>
-            <div
-                class="col-1 d-flex flex-row justify-content-center align-items-center"
-                :title="t('global.dependency.remove_rule')"
+    <header class="d-flex flex-row justify-content-between mb-2">
+        <div class="input-group input-group-sm">
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-success"
+                @click="addItem"
             >
-                <a
-                    href="#"
-                    class="text-danger text-decoration-none"
-                    @click.prevent="removeItem(activeGroup, i)"
-                >
-                    <i class="fas fa-fw fa-trash" />
-                </a>
-            </div>
+                <i class="fas fa-fw fa-plus" />
+                {{ t('global.dependency.add_rule') }}
+            </button>
+            <DependencyToggle
+                :model-value="modelValue.groups[activeGroup].is_and"
+                @update:model-value="toggleGroupState"
+            />
         </div>
-    </div>
-    <div class="input-group input-group-sm">
-        <button
-            type="button"
-            class="btn btn-sm btn-outline-success"
-            @click="addItem"
-        >
-            <i class="fas fa-fw fa-plus" />
-            {{ t('global.dependency.add_rule') }}
-        </button>
-        <DependencyToggle />
+        <DependencyGroupControl
+            class="flex-nowrap"
+            :is-and="modelValue.is_and"
+            :groups="modelValue.groups"
+            :active-group="activeGroup"
+            @add="addGroup"
+            @prev="gotoPrevGroup"
+            @next="gotoNextGroup"
+            @remove="removeGroup"
+            @toggle-state="toggleGroupState"
+        />
+    </header>
+    <div class="dependency-group overflow-y-auto overflow-x-hidden">
+        <Alert
+            v-if="
+                modelValue.groups[activeGroup].rules.length == 0"
+            class="mb-2"
+            :message="t('global.dependency.no_rules_defined')"
+            :type="'info'"
+            :noicon="true"
+        />
+        <DependencyInput
+            v-for="(rule, i) in modelValue.groups[activeGroup].rules"
+            :key="`dependency-group-${activeGroup}-item-${i}`"
+            :options="options"
+            :model-value="rule"
+            @update:model-value="value => updateRule(value, i)"
+            @remove="() => removeItem(activeGroup, i)"
+        />
     </div>
 </template>
 
@@ -158,26 +55,22 @@
 
     import {
         getEmptyGroup,
-        getInputTypeClass,
-        getOperatorsForDatatype,
     } from '@/helpers/dependencies.js';
-    
-    import {
-        translateConcept
-    } from '@/helpers/helpers.js';
 
     import {
         mod,
     } from '@/helpers/math.js';
 
     import DependencyGroupControl from './DependencyGroupControl.vue';
+    import DependencyInput from './DependencyInput.vue';
     import DependencyToggle from './DependencyToggle.vue';
-    
+
     import { useI18n } from 'vue-i18n';
 
     export default {
         components: {
             DependencyGroupControl,
+            DependencyInput,
             DependencyToggle,
         },
         props: {
@@ -222,7 +115,7 @@
             };
 
             const removeGroup = idx => {
-                if(idx >= groupsCount.value) return;
+                if(groupsCount.value < 1 || idx >= groupsCount.value) return;
                 const modelValue = props.modelValue;
                 modelValue.groups.splice(idx, 1);
                 updateModelValue(modelValue);
@@ -245,48 +138,37 @@
                 modelValue.groups[grpIdx].rules.splice(idx, 1);
                 updateModelValue(modelValue);
             };
-
+            
             const toggleGroupState = _ => {
                 const modelValue = props.modelValue;
-                modelValue.groups[activeGroup.value].union = !modelValue.groups[activeGroup.value].union;
-                // TODO?  Don't we need to update the child states here? 
+                modelValue.is_and = !modelValue.is_and;
+                modelValue.groups.forEach(element => {
+                    element.is_and = !modelValue.is_and;
+                });
                 updateModelValue(modelValue);
             };
 
-            const getDependantOptions = (aid, datatype) => {
-                if(getInputTypeClass(datatype) == 'select') {
-                    return store.getters.attributeSelections[aid];
-                } else {
-                    return [];
-                }
+            const updateRule = (value, i) => {
+                const modelValue = props.modelValue;
+                modelValue.groups[activeGroup.value].rules[i] = value;
+                updateModelValue(modelValue);
             };
 
             const updateModelValue = value => {
                 emit('update:modelValue', value);
             };
 
-            const operatorsForDatatypeWithLabels = datatype => {
-                const operators = getOperatorsForDatatype(datatype);
-                return operators.map(op => {
-                    op.label = t(`global.dependency.operators.${op.name}`);
-                    return op;
-                });
-            };
-
             return {
                 t,
                 activeGroup,
                 addGroup,
-                getInputTypeClass,
                 addItem,
-                getDependantOptions,
-                operatorsForDatatypeWithLabels,
                 gotoNextGroup,
                 gotoPrevGroup,
                 removeGroup,
                 removeItem,
                 toggleGroupState,
-                translateConcept,
+                updateRule,
             };
         }
     };

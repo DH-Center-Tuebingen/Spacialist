@@ -819,10 +819,10 @@ class ApiEditorTest extends TestCase
         $response = $this->userRequest()
             ->patch('/api/v1/editor/dm/entity_type/4/attribute/14/dependency', [
                 'data' => [
-                    'union' => false,
+                    'is_and' => false,
                     'groups' => [
                         [
-                            'union' => true,
+                            'is_and' => true,
                             'rules' => [
                                 [
                                     'attribute' => 13,
@@ -840,10 +840,10 @@ class ApiEditorTest extends TestCase
         $entityAttribute = EntityAttribute::for(4, 14);
         $this->assertArrayHasKey('depends_on', $entityAttribute);
         $this->assertEquals([
-            'union' => false,
+            'is_and' => false,
             'groups' => [
                 [
-                    'union' => true,
+                    'is_and' => true,
                     'rules' => [
                         [
                             'operator' => '=',
@@ -994,10 +994,10 @@ class ApiEditorTest extends TestCase
             'permission to reorder attributes'                     => Permission::for("patch", "/api/v1/editor/dm/entity_type/1/attribute/1/position", "You do not have the permission to reorder attributes"),
             'permission to add/modify attribute dependencies'      => Permission::for("patch", "/api/v1/editor/dm/entity_type/1/attribute/1/dependency", "You do not have the permission to add/modify attribute dependencies", [
                     'data' => [
-                        'union' => false,
+                        'is_and' => false,
                         'groups' => [
                             [
-                                'union' => true,
+                                'is_and' => true,
                                 'rules' => [
                                     [
                                         'attribute' => 15,
@@ -1044,10 +1044,10 @@ class ApiEditorTest extends TestCase
             ]),
             'exception on add/modify attribute dependencies'       => Permission::for("patch", "/api/v1/editor/dm/entity_type/1/attribute/99/dependency", $entityAttributeNotFound, [
                     'data' => [
-                        'union' => false,
+                        'is_and' => false,
                         'groups' => [
                             [
-                                'union' => true,
+                                'is_and' => true,
                                 'rules' => [
                                     [
                                         'attribute' => 15,

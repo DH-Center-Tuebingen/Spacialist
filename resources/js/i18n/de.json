@@ -372,15 +372,17 @@
                 "equal": "entspricht",
                 "not_equal": "entspricht nicht",
                 "greater": "größer als",
+                "greater_or_equal": "größer oder gleich",
                 "less": "kleiner als",
+                "less_or_equal": "kleiner oder gleich",
                 "set": "gesetzt",
                 "not_set": "nicht gesetzt"
             },
             "modes": {
-                "union": "Vereinigung",
-                "union_desc": "Mindestens eine Gruppe muss erfüllt sein",
-                "intersect": "Schnitt",
-                "intersect_desc": "Alle Gruppen müssen erfüllt sein"
+                "or": "Oder",
+                "or_desc": "Mindestens eine Gruppe muss erfüllt sein",
+                "and": "Und",
+                "and_desc": "Alle Gruppen müssen erfüllt sein"
             },
             "depends_on": {
                 "title": "Hängt ab von",

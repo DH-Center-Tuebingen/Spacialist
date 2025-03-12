@@ -138,6 +138,12 @@ export async function getCommentReplies(cid, endpoint = '/comment/{cid}/reply') 
     );
 }
 
+export async function getEntity(id) {
+    return await $httpQueue.add(
+        () => http.get(`/entity/${id}`).then(response => response.data)
+    );
+}
+
 export async function getEntityParentIds(id) {
     return await $httpQueue.add(
         () => http.get(`/entity/${id}/parentIds`)
@@ -623,7 +629,7 @@ export async function reorderEntityAttributes(etid, aid, position) {
 export async function updateAttributeDependency(etid, aid, dependency) {
     const apiData = {};
     const dependencyData = {};
-    dependencyData.union = dependency.union;
+    dependencyData.is_and = dependency.is_and;
     dependencyData.groups = dependency.groups.map(group => {
         group.rules = group.rules.map(rule => {
             const formattedRule = {

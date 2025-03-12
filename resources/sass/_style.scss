@@ -54,10 +54,6 @@ code {
     align-items: center;
 }
 
-.accordion-button {
-    padding: 5px;
-}
-
 .accordion-button:focus {
     box-shadow: none;
     outline: none !important;
@@ -231,10 +227,15 @@ table.table-sticky > thead {
     z-index: $zindex-sticky-in-page;
 }
 
+.multiselect-dropdown {
+    z-index: $zindex-dropdown;    
+}
+
 table.table-sticky .multiselect-dropdown,
 table.table-sticky .dropdown-menu {
     z-index: $zindex-dropdown-underneath-sticky;
 }
+
 
 .multiselect-option.is-selected {
     &:hover {

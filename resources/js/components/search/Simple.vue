@@ -21,8 +21,10 @@
         :searchable="true"
         :placeholder="t('global.search')"
         :disabled="disabled"
+        :append-to-body="appendToBody"
         @search-change="search"
-        @select="onChange"
+        @select="onSelected"
+        @change="onChanged"
     >
         <template #singlelabel="{ value }">
             <div class="multiselect-single-label">
@@ -137,6 +139,11 @@
             Chain,
         },
         props: {
+            appendToBody:{
+                type: Boolean,
+                required: false,
+                default: false,
+            },
             delay: {
                 type: Number,
                 required: false,
@@ -290,8 +297,12 @@
                 return props.mode == 'single' ? {} : [];
             };
 
-            const onChange = value => {
+            const onSelected = value => {
                 context.emit('selected', value);
+            };
+            
+            const onChanged = value => {
+                context.emit('change', value);
             };
 
             const handleTagClick = option => {
@@ -339,7 +350,8 @@
                 displayResult,
                 // handleChange,
                 handleTagClick,
-                onChange,
+                onChanged,
+                onSelected,
                 // STATE
                 state,
             };

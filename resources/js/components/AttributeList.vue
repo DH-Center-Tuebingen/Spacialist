@@ -138,7 +138,7 @@
                                 :hide-links="state.hideEntityLink"
                                 :preview="preview"
                                 :preview-data="previewData"
-                                @change="updateDirtyState"
+                                @change="attributeChanged"
                                 @update-selection="handleSelectionUpdate"
                                 @expanded="e => onAttributeExpand(e, index)"
                             />
@@ -256,7 +256,7 @@
                 default: _ => new Object(),
             },
         },
-        emits: ['dirty'],
+        emits: ['dirty', 'change'],
         setup(props, context) {
             const { t } = useI18n();
             const attributeStore = useAttributeStore();
@@ -466,6 +466,12 @@
                 }
                 return values;
             };
+            
+            const attributeChanged = e => {
+                updateDirtyState(e);
+                context.emit('change', e);
+            };
+            
             const updateDirtyState = e => {
                 // state.changeTracker.local[e.attribute_id] = true;
                 state.changeTracker.local[e.attribute_id] = e.dirty;
@@ -593,35 +599,36 @@
                     e.preventDefault();
                 }
             };
-            const convertEntityValue = (value, isMultiple) => {
-                let actValue = null;
-                if(value == '' || !value.value) {
-                    if(isMultiple) {
-                        actValue = {
-                            value: [],
-                            name: [],
-                        };
-                    } else {
-                        actValue = {};
-                    }
-                } else {
-                    actValue = value;
-                }
+            //// This is never used
+            // const convertEntityValue = (value, isMultiple) => {
+            //     let actValue = null;
+            //     if(value == '' || !value.value) {
+            //         if(isMultiple) {
+            //             actValue = {
+            //                 value: [],
+            //                 name: [],
+            //             };
+            //         } else {
+            //             actValue = {};
+            //         }
+            //     } else {
+            //         actValue = value;
+            //     }
 
-                if(isMultiple) {
-                    return actValue.value.map((v, i) => {
-                        return {
-                            id: v,
-                            name: actValue.name ? actValue.name[i] : '',
-                        };
-                    });
-                } else {
-                    return {
-                        id: actValue.value,
-                        name: actValue.name,
-                    };
-                }
-            };
+            //     if(isMultiple) {
+            //         return actValue.value.map((v, i) => {
+            //             return {
+            //                 id: v,
+            //                 name: actValue.name ? actValue.name[i] : '',
+            //             };
+            //         });
+            //     } else {
+            //         return {
+            //             id: actValue.value,
+            //             name: actValue.name,
+            //         };
+            //     }
+            // };
 
             const attrs = context.attrs;
             // DATA
@@ -655,7 +662,6 @@
 
                     const list = {};
                     for(let i = 0; i < hiddenAttributes.value.length; i++) {
-                        console.log(hiddenAttributes.value[i]);
                         const disId = hiddenAttributes.value[i];
                         list[disId] = true;
                     }
@@ -689,6 +695,7 @@
                 // HELPERS
                 translateConcept,
                 // LOCAL
+                attributeChanged,
                 certainty,
                 handleSelectionUpdate,
                 additionalRowClasses,

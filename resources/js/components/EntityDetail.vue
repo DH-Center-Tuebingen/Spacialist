@@ -188,46 +188,46 @@
             role="tablist"
         >
             <li
-                v-for="(tg, key) in state.entityGroups"
-                :key="`attribute-group-${tg.id}-tab`"
+                v-for="group in state.filteredEntityGroups"
+                :key="`attribute-group-${group.id}-tab`"
                 class="nav-item"
                 role="presentation"
             >
                 <a
-                    :id="`active-entity-attributes-group-${tg.id}-tab`"
+                    :id="`active-entity-attributes-group-${group.id}-tab`"
                     class="nav-link active-entity-attributes-tab active-entity-detail-tab d-flex gap-2 align-items-center"
                     href="#"
-                    @click.prevent="setDetailPanel(`attributes-${tg.id}`)"
+                    @click.prevent="setDetailPanel(`attributes-${group.id}`)"
                 >
                     <span class="fa-layers fa-fw">
                         <i class="fas fa-fw fa-layer-group" />
                         <span class="fa-layers-counter fa-counter-lg bg-secondary-subtle text-reset">
-                            {{ tg.data.length }}
+                            {{ group.data.length }}
                         </span>
                     </span>
-                    <span v-if="key == 'default'">
+                    <span v-if="group.name == 'default'">
                         {{ t('main.entity.tabs.default') }}
                     </span>
                     <span v-else>
-                        {{ translateConcept(key) }}
+                        {{ translateConcept(group.name) }}
                     </span>
                     <div
-                        v-if="state.dirtyStates[tg.id]"
+                        v-if="state.dirtyStates[group.id]"
                         class="d-flex flex-row gap-2 align-items-center"
-                        @mouseover="showTabActions(tg.id, true)"
-                        @mouseleave="showTabActions(tg.id, false)"
+                        @mouseover="showTabActions(group.id, true)"
+                        @mouseleave="showTabActions(group.id, false)"
                     >
                         <DotIndicator :type="'warning'" />
-                        <div v-show="state.attributeGrpHovered == tg.id">
+                        <div v-show="state.attributeGrpHovered == group.id">
                             <a
                                 href="#"
-                                @click.prevent.stop="saveEntity(`${tg.id}`)"
+                                @click.prevent.stop="saveEntity(`${group.id}`)"
                             >
                                 <i class="fas fa-fw fa-save text-success" />
                             </a>
                             <a
                                 href="#"
-                                @click.prevent.stop="resetForm(`${tg.id}`)"
+                                @click.prevent.stop="resetForm(`${group.id}`)"
                             >
                                 <i class="fas fa-fw fa-undo text-warning" />
                             </a>
@@ -281,35 +281,36 @@
         </ul>
         <div
             id="entity-detail-tab-content"
-            class="tab-content col ps-0 pe-0 overflow-hidden"
+            class="tab-content col ps-0 pe-0 overflow-y-auto"
         >
             <div
-                v-for="tg in state.entityGroups"
-                :id="`active-entity-attributes-panel-${tg.id}`"
-                :key="`attribute-group-${tg.id}-panel`"
+                v-for="group in state.entityGroups"
+                :id="`active-entity-attributes-panel-${group.id}`"
+                :key="`attribute-group-${group.id}-panel`"
                 class="tab-pane fade h-100 active-entity-detail-panel active-entity-attributes-panel show active"
                 role="tabpanel"
             >
                 <form
-                    :id="`entity-attribute-form-${tg.id}`"
-                    :name="`entity-attribute-form-${tg.id}`"
+                    :id="`entity-attribute-form-${group.id}`"
+                    :name="`entity-attribute-form-${group.id}`"
                     class="h-100 container-fluid"
                     @submit.prevent
-                    @keydown.ctrl.s="e => handleSaveOnKey(e, `${tg.id}`)"
+                    @keydown.ctrl.s="e => handleSaveOnKey(e, `${group.id}`)"
                 >
                     <attribute-list
-                        v-if="state.attributesFetched"
-                        :ref="el => setAttrRefs(el, tg.id)"
+                        v-if="state.attributesFetched && !group.hidden"
+                        :ref="el => setAttrRefs(el, group.id)"
                         v-dcan="'entity_data_read'"
                         class="h-100 overflow-y-auto row"
-                        :attributes="tg.data"
+                        :attributes="group.data"
                         :hidden-attributes="state.hiddenAttributeList"
                         :show-hidden="state.hiddenAttributeState"
                         :disable-drag="true"
                         :metadata-addon="hasReferenceGroup"
                         :selections="state.entityTypeSelections"
                         :values="state.entity.data"
-                        @dirty="(e, isDirty) => setFormState(e, isDirty, tg.id)"
+                        @change="dataChanged"
+                        @dirty="(e, isDirty) => setFormState(e, isDirty, group.id)"
                         @metadata="showMetadata"
                     />
                 </form>
@@ -522,14 +523,18 @@
                     }
                     return false;
                 }),
+                filteredEntityGroups: computed(_ => {
+                    return state.entityGroups.filter(g => !g.hidden);
+                }),
                 entityGroups: computed(_ => {
                     // TODO:: Does this makes sense?
                     if(!state.entityAttributes) {
                         return state.entityAttributes;
                     }
 
+                    const groups = [];
                     if(state.attributesInTabs) {
-                        const tabGroups = {};
+                        const tabGroupMap = {};
                         let currentGroup = 'default';
                         let currentGroupId = 'default';
                         let currentUnnamedGroupCntr = 1;
@@ -540,7 +545,6 @@
                                 // and set flag to hide it's attributes
                                 if(state.hiddenAttributes[a.id]?.hide) {
                                     hideGroup = true;
-                                    return;
                                 } else {
                                     hideGroup = false;
                                 }
@@ -550,28 +554,33 @@
                                 } else {
                                     currentGroup = translateConcept(a.pivot.metadata.title);
                                 }
+                                
                                 currentGroupId = a.pivot.id;
                                 return;
                             }
-                            if(hideGroup) return;
 
-                            if(!tabGroups[currentGroup]) {
-                                tabGroups[currentGroup] = {
+                            if(!tabGroupMap[currentGroup]) {
+                                tabGroupMap[currentGroup] = {
                                     id: currentGroupId,
-                                    data: []
+                                    name: currentGroup,
+                                    data: [],
+                                    hidden: hideGroup,
                                 };
+                                groups.push(tabGroupMap[currentGroup]);
                             }
-                            tabGroups[currentGroup].data.push(a);
+                            tabGroupMap[currentGroup].data.push(a);
                         });
 
-                        return tabGroups;
+                        return groups;
                     } else {
-                        return {
-                            default: {
+                        return [
+                            {
                                 id: 'default',
+                                name: 'default',
                                 data: state.entityAttributes,
+                                hidden: false,
                             },
-                        };
+                        ];
                     }
                 }),
                 entityTypeSelections: computed(_ => entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id)),
@@ -720,20 +729,28 @@
                 const attributeTriggers = state.entityTypeTriggers[aid];
                 if(!attributeTriggers) return;
 
-                const liveData = {
-                    ...state.entity.data,
-                    ...getDirtyValues(),
-                };
+                // This is a bit of a temporary hack, as the dirty value
+                // used to overwrite the attribute value with just the value.
+                // Which leads to inconsitencies in the data. 
+                // So we need to update the attributes in the correct form.
+                // Ideally the getDirtyValues() function should return the correct
+                // attribute values in the first place. [SO]
+                const liveData = _cloneDeep(state.entity.data);
+                const dirtyValues = getDirtyValues();
+                for(const k in dirtyValues) {
+                    if(liveData[k]) {
+                        liveData[k].value = dirtyValues[k];
+                    }
+                }
 
                 for(const dependantId of attributeTriggers) {
                     const attributeDependencies = state.entityTypeDependencies[dependantId];
-                    const matchAllGroups = !attributeDependencies.union;
+                    const matchAllGroups = !attributeDependencies.is_and;
                     let dependencyMatch = matchAllGroups;
 
                     for(const group of attributeDependencies.groups) {
-                        const matchAllRules = !group.union;
+                        const matchAllRules = !group.is_and;
                         let ruleMatch = matchAllRules;
-
                         for(const rule of group.rules) {
                             const type = attributeStore.getAttribute(rule.on).datatype;
                             const attributeValue = liveData[rule.on];
@@ -753,8 +770,7 @@
                             //     break;
                             // }
 
-                            const tmpMatch = evaluateRule(type, attributeValue, rule);
-                            console.log('dependantId', dependantId, 'rule', rule, 'tmpMatch', tmpMatch);
+                            const tmpMatch = evaluateRule(type, attributeValue.value, rule);
 
                             if(matchAllRules && !tmpMatch) {
                                 ruleMatch = false;
@@ -768,11 +784,11 @@
 
                         if(matchAllGroups && !ruleMatch) {
                             dependencyMatch = false;
-                            return;
+                            break;
                         }
                         if(!matchAllGroups && ruleMatch) {
                             dependencyMatch = true;
-                            return;
+                            break;
                         }
                     }
 
@@ -843,13 +859,21 @@
             const showTabActions = (grp, status) => {
                 state.attributeGrpHovered = status ? grp : null;
             };
+
+            const dataChanged = function (e) {
+                updateDependencyState(e.attribute_id, e.value);
+            };
+
             const setFormState = (e, isDirty, grp) => {
                 state.dirtyStates[grp] = isDirty;
-                updateDependencyState(e.attribute_id, e.value);
+                //// It should be more consistent to set the dependencyState when the data 
+                //// is changed and not when the forms dirty state changes. [SO]
+                // updateDependencyState(e.attribute_id, e.value);
             };
             const getDirtyValues = grp => {
                 const list = grp ? grp.split(',') : Object.keys(attrRefs.value);
                 let values = {};
+
                 list.forEach(g => {
                     values = {
                         ...values,
@@ -1000,7 +1024,10 @@
                 resetDirtyStates(grps);
                 updateAllDependencies();
             };
-            const setAttrRefs = (el, grp) => {
+            const setAttrRefs = (el, grp) => {                
+                // IMPROVE:: When a group is hidden, the element is null
+                // deleting the entry does not work, skipping the update works.
+                if(el === null) return;
                 attrRefs.value[grp] = el;
             };
 
@@ -1158,6 +1185,7 @@
                 // LOCAL
                 hasReferenceGroup,
                 showMetadata,
+                dataChanged,
                 editEntityName,
                 updateEntityName,
                 cancelEditEntityName,

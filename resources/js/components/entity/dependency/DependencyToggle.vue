@@ -7,25 +7,31 @@
     >
         <span
             v-show="modelValue"
-            :title="t('global.dependency.modes.union_desc')"
+            :title="t('global.dependency.modes.or_desc')"
         >
-            <i class="fas fa-fw fa-object-ungroup" />
-            {{ t('global.dependency.modes.union') }}
+            <SomeIcon class="me-1" />
+            {{ t('global.dependency.modes.or') }}
         </span>
         <span
             v-show="!modelValue"
-            :title="t('global.dependency.modes.intersect_desc')"
+            :title="t('global.dependency.modes.and_desc')"
         >
-            <i class="fas fa-fw fa-object-group" />
-            {{ t('global.dependency.modes.intersect') }}
+            <EveryIcon class="me-1" />
+            {{ t('global.dependency.modes.and') }}
         </span>
     </button>
 </template>
 
 <script>
     import { useI18n } from 'vue-i18n';
+    import SomeIcon from '../../icons/SomeIcon.vue';
+    import EveryIcon from '../../icons/EveryIcon.vue';
 
     export default {
+        components: {
+            SomeIcon,
+            EveryIcon,
+        },
         props: {
             modelValue: {
                 type: Object,
