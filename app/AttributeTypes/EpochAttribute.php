@@ -6,6 +6,7 @@ use App\Attribute;
 use App\ThConcept;
 use App\Exceptions\InvalidDataException;
 use App\Utils\StringUtils;
+use Illuminate\Support\Str;
 
 class EpochAttribute extends AttributeBase
 {
@@ -56,10 +57,10 @@ class EpochAttribute extends AttributeBase
         $dataAsObj = json_decode($data);
         $start = $dataAsObj->start;
         $end = $dataAsObj->end;
-        if($dataAsObj->startLabel == 'BC') {
+        if(Str::upper($dataAsObj->startLabel) == 'BC') {
             $start *= -1;
         }
-        if($dataAsObj->endLabel == 'BC') {
+        if(Str::upper($dataAsObj->endLabel) == 'BC') {
             $end *= -1;
         }
         $epoch = $dataAsObj->epoch;
@@ -73,8 +74,8 @@ class EpochAttribute extends AttributeBase
     }
 
     public static function unserialize(mixed $data) : mixed {
-        $sl = isset($data['startLabel']) ? strtoupper($data['startLabel']) : null;
-        $el = isset($data['endLabel']) ? strtoupper($data['endLabel']) : null;
+        $sl = isset($data['startLabel']) ? Str::upper($data['startLabel']) : null;
+        $el = isset($data['endLabel']) ? Str::upper($data['endLabel']) : null;
         $s = $data['start'];
         $e = $data['end'];
         if(

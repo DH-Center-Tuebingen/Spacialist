@@ -255,6 +255,56 @@ class EntityAttributesTableSeeder extends Seeder
                 'position' => 3,
                 'depends_on' => NULL,
             ),
+            24 =>
+            array (
+                'id' => 27,
+                'entity_type_id' => 3, // Fundstelle
+                'attribute_id' => 20, // timeperiod
+                'created_at' => '2017-12-20 17:00:43',
+                'updated_at' => '2017-12-20 17:01:58',
+                'position' => 4,
+                'depends_on' => NULL,
+            ),
+            25 =>
+            array (
+                'id' => 28,
+                'entity_type_id' => 3, // Fundstelle
+                'attribute_id' => 21, // entity-mc
+                'created_at' => '2017-12-20 17:02:43',
+                'updated_at' => '2017-12-20 17:02:43',
+                'position' => 5,
+                'depends_on' => NULL,
+            ),
+            26 =>
+            array (
+                'id' => 29,
+                'entity_type_id' => 3, // Fundstelle
+                'attribute_id' => 22, // userlist
+                'created_at' => '2017-12-20 17:02:44',
+                'updated_at' => '2017-12-20 17:02:44',
+                'position' => 6,
+                'depends_on' => NULL,
+            ),
+            27 =>
+            array (
+                'id' => 30,
+                'entity_type_id' => 3, // Fundstelle
+                'attribute_id' => 23, // si-unit
+                'created_at' => '2017-12-20 17:02:44',
+                'updated_at' => '2017-12-20 17:02:44',
+                'position' => 7,
+                'depends_on' => NULL,
+            ),
+            28 =>
+            array (
+                'id' => 31,
+                'entity_type_id' => 4,
+                'attribute_id' => 24, // daterange
+                'created_at' => '2017-12-20 17:02:45',
+                'updated_at' => '2017-12-20 17:03:01',
+                'position' => 6,
+                'depends_on' => NULL,
+            ),
         ));
     }
 }

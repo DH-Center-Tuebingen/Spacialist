@@ -2,6 +2,7 @@
 namespace Tests\Unit\Attributes;
 
 use App\AttributeTypes\EpochAttribute;
+use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
@@ -28,6 +29,18 @@ class EpochAttributeTest extends TestCase {
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         EpochAttribute::fromImport($input);
+    }
+
+    /**
+     * Test export of epoch attribute (attribute value id = 62)
+     *
+     * @return void
+     */
+    public function testParseExport() {
+        $testValue = AttributeValue::find(62);
+        $parseResult = EpochAttribute::parseExport(json_encode($testValue->getValue()));
+
+        $this->assertEquals('-340;-300;Eisenzeit', $parseResult);
     }
 
     public static function truthyProvider() {

@@ -231,6 +231,66 @@ class AttributesTableSeeder extends Seeder
                 'text' => NULL,
                 'recursive' => true,
             ),
+            18 =>
+            array (
+                'id' => 20,
+                'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/datum#20171220105725',
+                'datatype' => 'timeperiod',
+                'thesaurus_root_url' => NULL,
+                'created_at' => '2017-12-20 17:10:03',
+                'updated_at' => '2017-12-20 17:10:03',
+                'parent_id' => NULL,
+                'text' => NULL,
+                'recursive' => true,
+            ),
+            19 =>
+            array (
+                'id' => 21,
+                'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/lagerstatte#20171220165727',
+                'datatype' => 'entity-mc',
+                'thesaurus_root_url' => NULL,
+                'created_at' => '2017-12-20 17:11:50',
+                'updated_at' => '2017-12-20 17:11:50',
+                'parent_id' => NULL,
+                'text' => NULL,
+                'recursive' => true,
+            ),
+            20 =>
+            array (
+                'id' => 22,
+                'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/notizen#20171220105603',
+                'datatype' => 'userlist',
+                'thesaurus_root_url' => NULL,
+                'created_at' => '2017-12-20 17:11:55',
+                'updated_at' => '2017-12-20 17:11:55',
+                'parent_id' => NULL,
+                'text' => NULL,
+                'recursive' => true,
+            ),
+            21 =>
+            array (
+                'id' => 23,
+                'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/eigenschaften#20171220100251',
+                'datatype' => 'si-unit',
+                'thesaurus_root_url' => NULL,
+                'created_at' => '2017-12-20 17:11:55',
+                'updated_at' => '2017-12-20 17:11:55',
+                'parent_id' => NULL,
+                'text' => NULL,
+                'recursive' => true,
+            ),
+            22 =>
+            array (
+                'id' => 24,
+                'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/datum#20171220105725',
+                'datatype' => 'daterange',
+                'thesaurus_root_url' => NULL,
+                'created_at' => '2017-12-20 18:01:33',
+                'updated_at' => '2017-12-20 18:01:33',
+                'parent_id' => NULL,
+                'text' => NULL,
+                'recursive' => true,
+            ),
         ));
     }
 }

@@ -104,7 +104,7 @@ class ApiEditorTest extends TestCase
 
 
         $this->assertStatus($response, 200);
-        $response->assertJsonCount(16, 'attributes');
+        $response->assertJsonCount(21, 'attributes');
         $response->assertJsonStructure([
             'attributes' => [
                 '*' => [
@@ -652,7 +652,7 @@ class ApiEditorTest extends TestCase
         $response->assertJson([
             'entity_type_id' => 3,
             'attribute_id' => 3,
-            'position' => 5,
+            'position' => 9,
             'depends_on' => null,
             'attribute' => [
                 'id' => 3,
@@ -844,11 +844,11 @@ class ApiEditorTest extends TestCase
         $etCnt = EntityType::count();
         $this->assertEquals(5, $etCnt);
         $eaCnt = EntityAttribute::count();
-        $this->assertEquals(24, $eaCnt);
+        $this->assertEquals(29, $eaCnt);
         $eCnt = Entity::count();
         $this->assertEquals(8, $eCnt);
         $avCnt = AttributeValue::count();
-        $this->assertEquals(25, $avCnt);
+        $this->assertEquals(31, $avCnt);
 
         $response = $this->userRequest()
             ->delete('/api/v1/editor/dm/entity_type/4');
@@ -858,11 +858,11 @@ class ApiEditorTest extends TestCase
         $etCnt = EntityType::count();
         $this->assertEquals(4, $etCnt);
         $eaCnt = EntityAttribute::count();
-        $this->assertEquals(19, $eaCnt);
+        $this->assertEquals(23, $eaCnt);
         $eCnt = Entity::count();
         $this->assertEquals(4, $eCnt);
         $avCnt = AttributeValue::count();
-        $this->assertEquals(7, $avCnt);
+        $this->assertEquals(11, $avCnt);
     }
 
      /**
@@ -871,11 +871,11 @@ class ApiEditorTest extends TestCase
     public function testDeleteAttributeEndpoint()
     {
         $eaCnt = EntityAttribute::count();
-        $this->assertEquals(24, $eaCnt);
+        $this->assertEquals(29, $eaCnt);
         $avCnt = AttributeValue::count();
-        $this->assertEquals(25, $avCnt);
+        $this->assertEquals(31, $avCnt);
         $aCnt = Attribute::count();
-        $this->assertEquals(19, $aCnt);
+        $this->assertEquals(24, $aCnt);
 
         $response = $this->userRequest()
             ->delete('/api/v1/editor/dm/attribute/12');
@@ -883,11 +883,11 @@ class ApiEditorTest extends TestCase
         $this->assertStatus($response, 204);
 
         $eaCnt = EntityAttribute::count();
-        $this->assertEquals(22, $eaCnt);
+        $this->assertEquals(27, $eaCnt);
         $avCnt = AttributeValue::count();
-        $this->assertEquals(21, $avCnt);
+        $this->assertEquals(27, $avCnt);
         $aCnt = Attribute::count();
-        $this->assertEquals(18, $aCnt);
+        $this->assertEquals(23, $aCnt);
     }
 
      /**
@@ -896,9 +896,9 @@ class ApiEditorTest extends TestCase
     public function testDeleteAttributeFromEntityTypeEndpoint()
     {
         $eaCnt = EntityAttribute::count();
-        $this->assertEquals(24, $eaCnt);
+        $this->assertEquals(29, $eaCnt);
         $avCnt = AttributeValue::count();
-        $this->assertEquals(25, $avCnt);
+        $this->assertEquals(31, $avCnt);
         $entityType = EntityType::find(5)->load('attributes');
 
         $oldPositions = [12, 9, 11, 2, 3, 5, 19, 4, 13];
@@ -918,9 +918,9 @@ class ApiEditorTest extends TestCase
         $this->assertStatus($response, 204);
 
         $eaCnt = EntityAttribute::count();
-        $this->assertEquals(23, $eaCnt);
+        $this->assertEquals(28, $eaCnt);
         $avCnt = AttributeValue::count();
-        $this->assertEquals(22, $avCnt);
+        $this->assertEquals(28, $avCnt);
         $entityType = EntityType::find(5)->load('attributes');
         $newPositions = [12, 9, 2, 3, 5, 19, 4, 13];
         foreach($entityType->attributes as $entityType) {

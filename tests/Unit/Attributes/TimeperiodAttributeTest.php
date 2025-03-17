@@ -1,7 +1,9 @@
 <?php
 namespace Tests\Unit\Attributes;
 
+use App\AttributeTypes\AttributeBase;
 use App\AttributeTypes\TimeperiodAttribute;
+use App\AttributeValue;
 use App\DataTypes\TimePeriod;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
@@ -33,6 +35,30 @@ class TimeperiodAttributeTest extends TestCase {
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         TimeperiodAttribute::fromImport($input);
+    }
+
+    /**
+     * Test export of attribute (attribute value id = 74)
+     *
+     * @return void
+     */
+    public function testParseExport() {
+        $testValue = AttributeValue::find(74);
+        $parseResult = TimeperiodAttribute::parseExport(json_encode($testValue->getValue()));
+
+        $this->assertEquals('-200;-100', $parseResult);
+    }
+
+    /**
+     * Test export of timeperiod attribute (attribute value id = 74) using AttributeBase's serializeExportData method
+     *
+     * @return void
+     */
+    public function testParseExportOnAttributeBase() {
+        $testValue = AttributeValue::find(74);
+        $parseResult = AttributeBase::serializeExportData($testValue);
+
+        $this->assertEquals('-200;-100', $parseResult);
     }
 
     public static function truthyProvider() {

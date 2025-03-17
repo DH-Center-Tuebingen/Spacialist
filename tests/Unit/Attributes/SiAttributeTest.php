@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Attributes;
 
+use App\AttributeTypes\AttributeBase;
 use App\AttributeTypes\SiUnitAttribute;
 use App\AttributeTypes\Units\Implementations\AreaUnits;
 use App\AttributeTypes\Units\Implementations\ForceUnits;
@@ -14,6 +15,7 @@ use App\AttributeTypes\Units\Implementations\TemperatureUnits;
 use App\AttributeTypes\Units\Implementations\TimeUnits;
 use App\AttributeTypes\Units\Implementations\VolumetricFlowUnits;
 use App\AttributeTypes\Units\Implementations\VolumeUnits;
+use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
@@ -476,5 +478,12 @@ class SiAttributeTest extends TestCase {
         $expected["normalized"] = 10500;
         $expected = json_encode($expected);
         $this->assertEquals($expected, SiUnitAttribute::unserialize($data));
+    }
+
+    public function testParseExport() {
+        $testValue = AttributeValue::find(77);
+        $parseResult = AttributeBase::serializeExportData($testValue);
+
+        $this->assertEquals('15.99;kilogram', $parseResult);
     }
 }

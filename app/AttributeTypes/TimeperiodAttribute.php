@@ -6,6 +6,7 @@ use App\Exceptions\InvalidDataException;
 use App\DataTypes\TimePeriod;
 use App\Utils\NumberUtils;
 use App\Utils\StringUtils;
+use Illuminate\Support\Str;
 
 class TimeperiodAttribute extends AttributeBase
 {
@@ -41,10 +42,10 @@ class TimeperiodAttribute extends AttributeBase
         $dataAsObj = json_decode($data);
         $start = $dataAsObj->start;
         $end = $dataAsObj->end;
-        if($dataAsObj->startLabel == 'BC') {
+        if(Str::upper($dataAsObj->startLabel) == 'BC') {
             $start *= -1;
         }
-        if($dataAsObj->endLabel == 'BC') {
+        if(Str::upper($dataAsObj->endLabel) == 'BC') {
             $end *= -1;
         }
         return strval($start . ";" . $end);

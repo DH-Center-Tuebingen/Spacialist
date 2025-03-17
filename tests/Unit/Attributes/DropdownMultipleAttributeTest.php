@@ -1,7 +1,9 @@
 <?php
 namespace Tests\Unit\Attributes;
 
+use App\AttributeTypes\AttributeBase;
 use App\AttributeTypes\DropdownMultipleAttribute;
+use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
@@ -28,6 +30,13 @@ class DropdownMultipleAttributeTest extends TestCase {
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         DropdownMultipleAttribute::fromImport($input);
+    }
+
+    public function testParseExport() {
+        $testValue = AttributeValue::find(78);
+        $parseResult = AttributeBase::serializeExportData($testValue);
+
+        $this->assertEquals('rot;grün', $parseResult);
     }
 
     public static function truthyProvider() {
