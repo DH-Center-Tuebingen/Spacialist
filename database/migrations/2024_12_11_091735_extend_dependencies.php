@@ -19,9 +19,9 @@ return new class extends Migration
             $dependsOn = array_keys($dependency)[0];
             $value = array_values($dependency)[0];
             $arrayDependency = [
-                'is_and' => false,
+                'or' => false,
                 'groups' => [[
-                    'is_and' => true,
+                    'or' => true,
                     'rules' => [
                         [
                             'value' => $value['value'],

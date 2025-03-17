@@ -3,7 +3,7 @@
         <input
             v-model="valueFieldValue"
             type="number"
-            class="form-control text-end"
+            class="form-control text-center"
             :disabled="disabled"
             step="0.01"
             @keydown="onKeydown"
@@ -136,7 +136,7 @@
 
             const v = reactive({
                 value: computed(_ => {
-                    const group = state.groupUnits.find(u => u.label == unitValue.value?.label);                    
+                    const group = state.groupUnits.find(u => u.label == unitValue.value?.label);
                     const conversion = group?.conversion ?? 1;
                     return {
                         value: valueFieldValue.value,

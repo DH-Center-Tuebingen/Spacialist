@@ -9,14 +9,14 @@
             v-show="modelValue"
             :title="t('global.dependency.modes.or_desc')"
         >
-            <SomeIcon class="me-1" />
+            <i class="fas fa-fw fa-object-ungroup" />
             {{ t('global.dependency.modes.or') }}
         </span>
         <span
             v-show="!modelValue"
             :title="t('global.dependency.modes.and_desc')"
         >
-            <EveryIcon class="me-1" />
+            <i class="fas fa-fw fa-object-group" />
             {{ t('global.dependency.modes.and') }}
         </span>
     </button>
@@ -24,14 +24,8 @@
 
 <script>
     import { useI18n } from 'vue-i18n';
-    import SomeIcon from '../../icons/SomeIcon.vue';
-    import EveryIcon from '../../icons/EveryIcon.vue';
 
     export default {
-        components: {
-            SomeIcon,
-            EveryIcon,
-        },
         props: {
             modelValue: {
                 type: Object,
@@ -40,12 +34,13 @@
         },
         emits: ['update:modelValue'],
         setup(props, { emit }) {
-            const toggleGroupState = () => {
+            const { t } = useI18n();
+            const toggleGroupState = _ => {
                 emit('update:modelValue', !props.modelValue);
             };
 
             return {
-                t: useI18n().t,
+                t,
                 toggleGroupState,
             };
         }

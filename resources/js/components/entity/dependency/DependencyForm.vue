@@ -10,13 +10,13 @@
                 {{ t('global.dependency.add_rule') }}
             </button>
             <DependencyToggle
-                :model-value="modelValue.groups[activeGroup].is_and"
-                @update:model-value="toggleGroupState"
+                :model-value="modelValue.groups[activeGroup].or"
+                @update:model-value="toggleGroupState(activeGroup)"
             />
         </div>
         <DependencyGroupControl
             class="flex-nowrap"
-            :is-and="modelValue.is_and"
+            :is-or="modelValue.or"
             :groups="modelValue.groups"
             :active-group="activeGroup"
             @add="addGroup"
@@ -35,7 +35,7 @@
             :type="'info'"
             :noicon="true"
         />
-        <DependencyInput
+        <DependencyRule
             v-for="(rule, i) in modelValue.groups[activeGroup].rules"
             :key="`dependency-group-${activeGroup}-item-${i}`"
             :options="options"
@@ -61,7 +61,7 @@
     } from '@/helpers/math.js';
 
     import DependencyGroupControl from './DependencyGroupControl.vue';
-    import DependencyInput from './DependencyInput.vue';
+    import DependencyRule from './DependencyRule.vue';
     import DependencyToggle from './DependencyToggle.vue';
 
     import { useI18n } from 'vue-i18n';
@@ -69,7 +69,7 @@
     export default {
         components: {
             DependencyGroupControl,
-            DependencyInput,
+            DependencyRule,
             DependencyToggle,
         },
         props: {
@@ -84,8 +84,8 @@
         },
         emits: ['update:modelValue'],
         setup(props, { emit }) {
+            const { t } = useI18n();
 
-            const t = useI18n().t;
             const activeGroup = ref(0);
             const groupsCount = computed(_ => props.modelValue.groups.length);
             const lastGroupEmpty = computed(_ => props.modelValue.groups[groupsCount.value - 1].rules.length == 0);
@@ -115,6 +115,7 @@
 
             const removeGroup = idx => {
                 if(groupsCount.value < 1 || idx >= groupsCount.value) return;
+
                 const modelValue = props.modelValue;
                 modelValue.groups.splice(idx, 1);
                 updateModelValue(modelValue);
@@ -137,13 +138,14 @@
                 modelValue.groups[grpIdx].rules.splice(idx, 1);
                 updateModelValue(modelValue);
             };
-            
-            const toggleGroupState = _ => {
+
+            const toggleGroupState = group => {
                 const modelValue = props.modelValue;
-                modelValue.is_and = !modelValue.is_and;
-                modelValue.groups.forEach(element => {
-                    element.is_and = !modelValue.is_and;
-                });
+                if(group != undefined) {
+                    modelValue.groups[group].or = !modelValue.groups[group].or;
+                } else {
+                    modelValue.or = !modelValue.or;
+                }
                 updateModelValue(modelValue);
             };
 

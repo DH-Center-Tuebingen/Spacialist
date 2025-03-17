@@ -379,10 +379,10 @@
                 "not_set": "nicht gesetzt"
             },
             "modes": {
-                "or": "Oder",
-                "or_desc": "Mindestens eine Gruppe muss erfüllt sein",
-                "and": "Und",
-                "and_desc": "Alle Gruppen müssen erfüllt sein"
+                "or": "Partiell",
+                "or_desc": "\"Oder\": Mindestens eine Bedingung muss erfüllt sein",
+                "and": "Alle",
+                "and_desc": "\"Und\": Alle Bedingungen müssen erfüllt sein"
             },
             "depends_on": {
                 "title": "Hängt ab von",

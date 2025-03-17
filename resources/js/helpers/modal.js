@@ -1,7 +1,9 @@
 
 import useAttributeStore from '@/bootstrap/stores/attribute.js';
+import useBibliographyStore from '@/bootstrap/stores/bibliography.js';
 import useEntityStore from '@/bootstrap/stores/entity.js';
 import useUserStore from '@/bootstrap/stores/user.js';
+
 import router from '%router';
 
 import { addToast } from '@/plugins/toast.js';
@@ -55,7 +57,6 @@ import AddAttribute from '@/components/modals/attribute/Add.vue';
 import EditAttribute from '@/components/modals/attribute/Edit.vue';
 import MultiEditAttribute from '@/components/modals/attribute/MultiEdit.vue';
 import DeleteAttribute from '@/components/modals/attribute/Delete.vue';
-import useBibliographyStore from '../bootstrap/stores/bibliography';
 
 export function showAbout() {
     const uid = `AboutModal-${getTs()}`;

@@ -554,7 +554,7 @@
                                 } else {
                                     currentGroup = translateConcept(a.pivot.metadata.title);
                                 }
-                                
+
                                 currentGroupId = a.pivot.id;
                                 return;
                             }
@@ -731,7 +731,7 @@
 
                 // This is a bit of a temporary hack, as the dirty value
                 // used to overwrite the attribute value with just the value.
-                // Which leads to inconsitencies in the data. 
+                // Which leads to inconsitencies in the data.
                 // So we need to update the attributes in the correct form.
                 // Ideally the getDirtyValues() function should return the correct
                 // attribute values in the first place. [SO]
@@ -745,11 +745,11 @@
 
                 for(const dependantId of attributeTriggers) {
                     const attributeDependencies = state.entityTypeDependencies[dependantId];
-                    const matchAllGroups = !attributeDependencies.is_and;
+                    const matchAllGroups = !attributeDependencies.or;
                     let dependencyMatch = matchAllGroups;
 
                     for(const group of attributeDependencies.groups) {
-                        const matchAllRules = !group.is_and;
+                        const matchAllRules = !group.or;
                         let ruleMatch = matchAllRules;
                         for(const rule of group.rules) {
                             const type = attributeStore.getAttribute(rule.on).datatype;
@@ -866,7 +866,7 @@
 
             const setFormState = (e, isDirty, grp) => {
                 state.dirtyStates[grp] = isDirty;
-                //// It should be more consistent to set the dependencyState when the data 
+                //// It should be more consistent to set the dependencyState when the data
                 //// is changed and not when the forms dirty state changes. [SO]
                 // updateDependencyState(e.attribute_id, e.value);
             };
@@ -1024,7 +1024,7 @@
                 resetDirtyStates(grps);
                 updateAllDependencies();
             };
-            const setAttrRefs = (el, grp) => {                
+            const setAttrRefs = (el, grp) => {
                 // IMPROVE:: When a group is hidden, the element is null
                 // deleting the entry does not work, skipping the update works.
                 if(el === null) return;

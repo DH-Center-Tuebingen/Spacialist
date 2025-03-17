@@ -22,7 +22,6 @@
                 type="text"
                 class="form-control"
                 :disabled="disabled"
-                :placeholder="entries.join(', ')"
                 @keydown.enter="addListEntry()"
             >
             <button

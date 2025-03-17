@@ -5,7 +5,7 @@
     >
         <div class="input-group input-group-sm w-auto">
             <DependencyToggle
-                :model-value="isAnd"
+                :model-value="isOr"
                 @click="toggleState"
             />
             <button
@@ -73,7 +73,7 @@
             DependencyToggle,
         },
         props: {
-            isAnd: {
+            isOr: {
                 type: Boolean,
                 default: true
             },
@@ -94,18 +94,19 @@
             'toggleState'
         ],
         setup(props, { emit }) {
+            const { t } = useI18n();
 
             const groupCount = computed(_ => props.groups.length);
             const lastGroupEmpty = computed(_ => props.groups[groupCount.value - 1].rules.length == 0);
 
             return {
-                t: useI18n().t,
+                t,
                 groupCount,
                 lastGroupEmpty,
                 addGroup: _ => emit('add'),
                 gotoPrevGroup: _ => emit('prev'),
                 gotoNextGroup: _ => emit('next'),
-                remove: _ => emit('remove'),
+                remove: _ => emit('remove', props.activeGroup),
                 toggleState: _ => emit('toggleState'),
             };
         }

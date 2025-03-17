@@ -379,10 +379,10 @@
                 "not_set": "not set"
             },
             "modes": {
-                "or": "Oder",
-                "or_desc": "At least one must evaluate to true",
-                "and": "And",
-                "and_desc": "All must evaluate to true"
+                "or": "Partial",
+                "or_desc": "\"Or\": At least one must evaluate to true",
+                "and": "All",
+                "and_desc": "\"And\": All must evaluate to true"
             },
             "depends_on": {
                 "title": "Depends on",

@@ -59,12 +59,6 @@ code {
     outline: none !important;
 }
 
-.accordion-button:not(.collapsed) {
-    background-color: transparent;
-    color: black;
-    box-shadow: none;
-}
-
 .reference-group {
     margin-bottom: map-get($utilities, margin, values, 3);
 }
@@ -228,7 +222,7 @@ table.table-sticky > thead {
 }
 
 .multiselect-dropdown {
-    z-index: $zindex-dropdown;    
+    z-index: $zindex-dropdown;
 }
 
 table.table-sticky .multiselect-dropdown,

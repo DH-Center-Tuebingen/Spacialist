@@ -89,9 +89,9 @@
     import { useI18n } from 'vue-i18n';
 
     import {
+        _cloneDeep,
         translateConcept,
     } from '@/helpers/helpers.js';
-    import { _cloneDeep } from '../helpers/helpers';
     import ListToolbar from './forms/ListToolbar.vue';
 
     export default {

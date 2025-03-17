@@ -68,20 +68,20 @@
                 @change="valueChanged"
             />
         </div>
-        <a
-            href="#"
-            class="btn btn-outline-danger flex-fill text-danger text-decoration-none"
+        <button
+            class="btn btn-outline-danger flex-fill"
             :title="t('global.dependency.remove_rule')"
-            @click.prevent="removeItem"
+            @click="removeItem"
         >
             <i class="fas fa-fw fa-trash" />
-        </a>
+        </button>
     </div>
 </template>
 
 <script>
     import {
         computed,
+        nextTick,
         onMounted,
         ref,
     } from 'vue';
@@ -101,7 +101,6 @@
     import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import Attribute from '@/components/attribute/Attribute.vue';
-    import { nextTick } from 'process';
 
     export default {
         components: {
@@ -119,14 +118,7 @@
         },
         emits: ['update:modelValue', 'remove'],
         setup(props, { emit }) {
-
-            onMounted(async () => {
-                if(datatype.value == 'entity') {
-                    await useEntityStore().fetchEntity(props.modelValue.value);
-                }
-                updateAttributeData();
-            });
-
+            const { t } = useI18n();
 
             const getDependantOptions = (aid, datatype) => {
                 if(getInputTypeClass(datatype) == 'select') {
@@ -183,16 +175,15 @@
                 emit('remove');
             };
 
-            const attribute = computed(() => {
+            const attribute = computed(_ => {
                 console.log(props.modelValue);
                 return props.modelValue.attribute;
             });
 
-            const datatype = computed(() => {
+            const datatype = computed(_ => {
                 if(!attribute.value) return 'unsupported';
                 return attribute.value?.datatype || 'unsupported';
             });
-
 
             /**
              * This is a little bit ugly. But we have to deal with
@@ -202,13 +193,13 @@
             const attributeData = ref(null);
             const attributeValueWrapper = ref(null);
 
-            const updateAttributeDataNextTick = () => {
-                nextTick(() => {
+            const updateAttributeDataNextTick = _ => {
+                nextTick(_ => {
                     updateAttributeData();
                 });
             };
 
-            const updateAttributeData = async () => {
+            const updateAttributeData = async _ => {
                 let value = props.modelValue.value;
                 switch(datatype.value) {
                     case 'string-sc':
@@ -235,25 +226,32 @@
                         value = value ? { id: value } : null;
                         break;
                 }
-                
+
                 attributeData.value = attribute.value;
                 attributeValueWrapper.value = value;
             };
 
             const searchEntity = async query => {
-                // TODO: We only show the first result. 
+                // TODO: We only show the first result.
                 // This should be just done inside the Attribute component.
                 // But we cannot set a value from outside at the moment.
                 if(!query) return [];
                 return useEntityStore().search(query);
             };
 
-            const getPaginatedResults = (results) => {
+            const getPaginatedResults = results => {
                 return results.data;
             };
 
+            onMounted(async _ => {
+                if(datatype.value == 'entity') {
+                    await useEntityStore().fetchEntity(props.modelValue.value);
+                }
+                updateAttributeData();
+            });
+
             return {
-                t: useI18n().t,
+                t,
                 attributeData,
                 attributeValueWrapper,
                 dependantSelected,

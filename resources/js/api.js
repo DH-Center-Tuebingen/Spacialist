@@ -629,7 +629,7 @@ export async function reorderEntityAttributes(etid, aid, position) {
 export async function updateAttributeDependency(etid, aid, dependency) {
     const apiData = {};
     const dependencyData = {};
-    dependencyData.is_and = dependency.is_and;
+    dependencyData.or = dependency.or;
     dependencyData.groups = dependency.groups.map(group => {
         group.rules = group.rules.map(rule => {
             const formattedRule = {

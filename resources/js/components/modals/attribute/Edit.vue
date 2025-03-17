@@ -152,7 +152,7 @@
         formatDependency,
     } from '@/helpers/dependencies.js';
 
-    import DependencyForm from '../../entity/dependency/DependencyForm.vue';
+    import DependencyForm from '@/components/entity/dependency/DependencyForm.vue';
 
     export default {
         components: {
@@ -174,7 +174,7 @@
 
             // FUNCTIONS
             const validateDependencyRule = rule => {
-                const valuesAreSet = rule.attribute?.id && rule.operator?.id;                
+                const valuesAreSet = rule.attribute?.id && rule.operator?.id;
                 return valuesAreSet && rule.value != null;
             };
 
@@ -217,7 +217,7 @@
             const state = reactive({
                 separatorTitle: '',
                 dependency: {
-                    is_and: true,
+                    or: true,
                     groups: [getEmptyGroup(false)],
                 },
                 width: 100,

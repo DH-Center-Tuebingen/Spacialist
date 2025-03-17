@@ -71,7 +71,7 @@ export function evaluateRule(type, value, rule) {
         value = new Date(value).getTime();
         ruleValue = new Date(ruleValue).getTime();
     }
-    
+
     if(type == 'si-unit') {
         value = value?.normalized;
     }
@@ -100,9 +100,9 @@ export function evaluateRule(type, value, rule) {
     }
 }
 
-export function getEmptyGroup(is_and = false) {
+export function getEmptyGroup(or = false) {
     return {
-        is_and,
+        or,
         rules: [],
     };
 }
@@ -152,7 +152,6 @@ export function getOperatorsForDatatype(datatype) {
     }
 }
 
-
 export const getInputTypeClass = datatype => {
     switch(datatype) {
         case 'si-unit':
@@ -196,11 +195,11 @@ export const getInputTypeClass = datatype => {
 
 export const formatDependency = dependencyRules => {
     const formattedRules = {};
-    formattedRules.is_and = !!dependencyRules?.is_and;
+    formattedRules.or = !!dependencyRules?.or;
     if(dependencyRules.groups) {
         formattedRules.groups = dependencyRules.groups.map(group => {
             const formattedGroup = {};
-            formattedGroup.is_and = group.is_and;
+            formattedGroup.or = group.or;
             formattedGroup.rules = group.rules.map(rule => {
                 const converted = {
                     attribute: null,
@@ -215,12 +214,12 @@ export const formatDependency = dependencyRules => {
             return formattedGroup;
         });
     } else if(Object.keys(dependencyRules).length == 0) {
-        formattedRules.is_and = true;
+        formattedRules.or = true;
         formattedRules.groups = [{
-            is_and: false,
+            or: false,
             rules: [],
         }];
     }
-    
+
     return formattedRules;
 };

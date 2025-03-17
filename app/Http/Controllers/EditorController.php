@@ -496,7 +496,7 @@ class EditorController extends Controller {
         $dependencyData = $request->get('data');
         $hasData = false;
         $dependsOn = [
-            'is_and' => $dependencyData['is_and'],
+            'or' => $dependencyData['or'],
         ];
         $operators = [
             '<' => true,
@@ -534,7 +534,7 @@ class EditorController extends Controller {
                     $groupRules[] = $formattedRule;
                 }
                 $dependsOn['groups'][] = [
-                    'is_and' => $group['is_and'],
+                    'or' => $group['or'],
                     'rules' => $groupRules,
                 ];
             }

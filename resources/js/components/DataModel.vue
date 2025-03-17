@@ -188,7 +188,7 @@
                                             {{ t(`global.attributes.${type}`) }}
                                         </span>
                                         <span
-                                            class="badge  text-secondary mx-3 d-flex flex-row"
+                                            class="badge bg-primary mx-2 d-flex flex-row"
                                             :class="{ 'bg-opacity-50': attributeGroupItemCount(attrGrp) == 0 }"
                                         >
                                             <span>{{ attributeGroupItemCount(attrGrp) }}</span>
@@ -196,12 +196,12 @@
                                             <span>{{ attrGrp.length }}</span>
                                         </span>
                                     </button>
-                                    <!-- 
+                                    <!--
                                         This was really useful, when adding multiple attributes of the same type
                                         But with the bootstrap accordion, it could not be put on the header.
-                                        It would be nice to put it on the header of a custom accordion component. [SO] 
+                                        It would be nice to put it on the header of a custom accordion component. [SO]
                                     -->
-                                    <!-- 
+                                    <!--
                                     <button
                                         class="btn btn-sm btn-outline-success"
                                         @click.stop="createAttribute(type)"
@@ -349,8 +349,8 @@
                     });
                 });
             };
-            const createAttribute = (type = null) => {
-                showAddAttribute(null, type);
+            const createAttribute = _ => {
+                showAddAttribute(null);
             };
             const onDeleteAttribute = e => {
                 const attribute = e.element;
