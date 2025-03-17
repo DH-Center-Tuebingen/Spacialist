@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 - Label Search displays full path of thesaurus concept
 - References can also be added to an Entity, not only to an Entity Attribute
 - _Add Entity Above_ and _Add Entity Below_ to the Contextmenu in the entity tree
+- Thesaurus Notes are now displayed as info text in Attribute List items
 ### Fixed
 - Dirty indicator not showing in Tab of _Entity Detail_
 - Missing "Color Dots" of _Entity Type_ (colors are now handled on the Entity Type itself and do no longer rely on the _Map_ Plugin)

@@ -108,6 +108,19 @@
                                     {{ translateConcept(element.thesaurus_url) }}
                                 </span>
                             </div>
+                            <a
+                                v-if="getConceptNote(element.thesaurus_url)"
+                                tabindex="0"
+                                class="text-decoration-none text-secondary ms-1 position-relative"
+                                data-bs-toggle="popover"
+                                data-bs-trigger="focus"
+                                data-bs-placement="top"
+                                :data-bs-content="getConceptNote(element.thesaurus_url)"
+                                href="#"
+                                @click.prevent
+                            >
+                                <i class="fas fa-fw fa-circle-info" />
+                            </a>
                             <sup
                                 v-if="hasEmitter('onMetadata')"
                                 class="clickable d-flex flex-row align-items-start top-0"
@@ -175,11 +188,14 @@
 
     import { useI18n } from 'vue-i18n';
 
+    import { Popover } from 'bootstrap';
+
     import useAttributeStore from '@/bootstrap/stores/attribute.js';
     import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import {
         translateConcept,
+        getConceptNote,
     } from '@/helpers/helpers.js';
 
     import ModerationPanel from '@/components/moderation/Panel.vue';
@@ -607,6 +623,7 @@
                 attributeList: attributes,
                 attributeValues: values,
                 rootAttributeValues: {},
+                visibleAttributeNotes: {},
                 changeTracker: {
                     local: {},
                     external: {},
@@ -643,6 +660,11 @@
                 itemClasses: computed(_ => options.value.item_classes),
             });
 
+            const initializeTooltips = _ => {
+                document.querySelectorAll('[data-bs-toggle="popover"]')
+                    .forEach(popoverElement => new Popover(popoverElement));
+            };
+
             // ON MOUNTED
             onMounted(_ => {
                 state.dynamicSelectionList.forEach(rootId => {
@@ -654,6 +676,8 @@
                         });
                     }
                 });
+
+                initializeTooltips();
             });
             onBeforeUpdate(_ => {
                 attrRefs.value = {};
@@ -664,6 +688,7 @@
                 t,
                 // HELPERS
                 translateConcept,
+                getConceptNote,
                 // LOCAL
                 attributeChanged,
                 certainty,
