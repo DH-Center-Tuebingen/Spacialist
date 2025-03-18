@@ -846,6 +846,25 @@ class ApiEditorTest extends TestCase
     }
 
     /**
+     *  @testdox PATCH /api/v1/editor/dm/entity_type/{id}/attribute/{aid}/dependency  -   Test adding dependency without data to an attribute of an entity type (id=4).
+     */
+    public function testAddEmptyDependencyToEntiyTypeAttributeEndpoint()
+    {
+        $response = $this->userRequest()
+            ->patch('/api/v1/editor/dm/entity_type/4/attribute/14/dependency', [
+                'data' => [
+                    'or' => false,
+                    'groups' => [],
+                ],
+            ]);
+
+        $this->assertStatus($response, 200);
+
+        $entityAttribute = EntityAttribute::for(4, 14);
+        $this->assertNull($entityAttribute->depends_on);
+    }
+
+    /**
      *  @testdox DELETE /api/v1/editor/dm/entity_type/{id}  -   Test deleting an entity type (id=4).
      */
     public function testDeleteEntityTypeEndpoint()
@@ -999,6 +1018,7 @@ class ApiEditorTest extends TestCase
                         ],
                     ],
                 ]),
+            'permission to edit metadata of an attribute'                    => Permission::for("patch", "/api/v1/editor/dm/entity_type/attribute/1/metadata", "You do not have the permission to edit attribute names"),
             'permission to delete entity types'                    => Permission::for("delete", "/api/v1/editor/dm/entity_type/1", "You do not have the permission to delete entity types"),
             'permission to delete attributes'                      => Permission::for("delete", "/api/v1/editor/dm/attribute/1", "You do not have the permission to delete attributes"),
             'permission to remove attributes from entity types'    => Permission::for("delete", "/api/v1/editor/dm/entity_type/attribute/19", "You do not have the permission to remove attributes from entity types"),
@@ -1006,7 +1026,6 @@ class ApiEditorTest extends TestCase
     }
 
     public static function exceptionsProvider() {
-
         $entityDoesNotExist = "This entity-type does not exist";
         $entityAttributeNotFound = "Entity Attribute not found";
         $attributeDoesNotExist = "This attribute does not exist";
@@ -1049,9 +1068,43 @@ class ApiEditorTest extends TestCase
                         ],
                     ]
                 ]),
+            'exception on add/modify attribute dependencies with wrong reference'       => Permission::for("patch", "/api/v1/editor/dm/entity_type/3/attribute/15/dependency", 'Entity attribute does not exist', [
+                    'data' => [
+                        'or' => false,
+                        'groups' => [
+                            [
+                                'or' => true,
+                                'rules' => [
+                                    [
+                                        'attribute' => 99,
+                                        'operator' => '=',
+                                        'value' => 'NoValue',
+                                    ],
+                                ],
+                            ]
+                        ],
+                    ]
+                ]),
+            'exception on add/modify attribute dependencies with operator mismatch'       => Permission::for("patch", "/api/v1/editor/dm/entity_type/3/attribute/15/dependency", 'Operator mismatch', [
+                    'data' => [
+                        'or' => false,
+                        'groups' => [
+                            [
+                                'or' => true,
+                                'rules' => [
+                                    [
+                                        'attribute' => 15,
+                                        'operator' => 'INVALID',
+                                        'value' => 'NoValue',
+                                    ],
+                                ],
+                            ]
+                        ],
+                    ]
+                ]),
             'exception on delete entity types'                     => Permission::for("delete", "/api/v1/editor/dm/entity_type/99", $entityDoesNotExist),
             'exception on delete attributes'                       => Permission::for("delete", "/api/v1/editor/dm/attribute/99", $attributeDoesNotExist),
-            'exception on remove attributes from entity types'     => Permission::for("delete", "/api/v1/editor/dm/entity_type/attribute/99", "Entity Attribute not found"),
+            'exception on remove attributes from entity types'     => Permission::for("delete", "/api/v1/editor/dm/entity_type/attribute/99", $entityAttributeNotFound),
         ];
     }
 }
