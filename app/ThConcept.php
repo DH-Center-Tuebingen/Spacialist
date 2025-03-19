@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Illuminate\Support\Facades\App as AppFacade;
 
 class ThConcept extends Model {
     use LogsActivity;
@@ -33,7 +34,7 @@ class ThConcept extends Model {
     }
 
     public function getActiveLocaleLabel() {
-        $locale = \App::getLocale();
+        $locale = AppFacade::getLocale();
         return $this->labels()->select('label')
             ->join('th_language', 'language_id', '=', 'th_language.id')
             ->orderByRaw('short_name = ? DESC', $locale)
@@ -42,7 +43,7 @@ class ThConcept extends Model {
 
     public static function getLabel($str) {
         $label = $str;
-        $locale = \App::getLocale();
+        $locale = AppFacade::getLocale();
         try {
             $concept = self::getByString($str);
             $label = ThConceptLabel::selectRaw('label, short_name = ? as is_locale', [$locale])
@@ -56,7 +57,7 @@ class ThConcept extends Model {
         }
         return $label;
     }
-    
+
     public static function getByURL($url) {
         return self::where('concept_url', $url)->first();
     }

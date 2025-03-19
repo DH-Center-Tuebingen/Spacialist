@@ -10,6 +10,45 @@ use App\Entity;
 class EntityTest extends TestCase
 {
     /**
+     * Test getting all children of an entity (id=2)
+     *
+     * @return void
+     */
+    public function testGetAllChildren()
+    {
+        $entity = Entity::find(2);
+        $childrenArray = $entity->getAllChildren();
+        $this->assertEquals(4, count($childrenArray));
+        $this->assertArraySubset([
+            [
+                '_name' => 'Befund 1',
+                '_parent' => 'Site A',
+                '_entity_type' => 'Feature',
+                '_entity_type_id' => 4,
+            ],
+            [
+                '_name' => 'Inv. 1234',
+                '_parent' => 'Site A\\\\Befund 1',
+                '_entity_type' => 'Pottery',
+                '_entity_type_id' => 5,
+            ],
+            [
+                '_name' => 'Inv. 124',
+                '_parent' => 'Site A\\\\Befund 1',
+                '_entity_type' => 'Pottery',
+                '_entity_type_id' => 5,
+            ],
+            [
+                '_name' => 'Inv. 31',
+                '_parent' => 'Site A\\\\Befund 1',
+                '_entity_type' => 'Stone',
+                '_entity_type_id' => 6,
+                'Gewicht' => 3.5,
+            ],
+        ], $childrenArray);
+    }
+
+    /**
      * Test relations of an entity (id=3 and id=1)
      *
      * @return void

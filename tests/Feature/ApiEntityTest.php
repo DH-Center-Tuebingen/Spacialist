@@ -1,11 +1,13 @@
 <?php
 
 namespace Tests\Feature;
-use Tests\TestCase;
+
+use Carbon\Carbon;
 
 use App\AttributeValue;
 use App\Entity;
 use App\User;
+use Tests\TestCase;
 use Tests\Permission;
 use Tests\ResponseTester;
 
@@ -217,6 +219,19 @@ class ApiEntityTest extends TestCase
     }
 
     /**
+    * @testdox GET    /api/v1/entity/{id}/export  -  Get entity and all children of an entity as csv/zip (id=3).
+     */
+    public function testEntityExportEndpoint()
+    {
+        Carbon::setTestNow(Carbon::create(2025, 1, 1, 12, 30, 0));
+        $response = $this->userRequest()
+            ->get('/api/v1/entity/3/export');
+
+        $response->assertDownload('export_inv1234_20250101123000.csv');
+        $response->assertStatus(200);
+    }
+
+    /**
     * @testdox GET    /api/v1/entity/{id}/parentIds  -  Get all parentIds of an entity (id=5).
      */
     public function testEntityParentIdEndpoint()
@@ -229,7 +244,6 @@ class ApiEntityTest extends TestCase
             1, 2, 5
         ]);
     }
-
 
     /**
      * @testdox GET    /api/v1/entity/byParent/{id}  -  Get all sub-entities/children of an entity (id=2).
@@ -338,7 +352,6 @@ class ApiEntityTest extends TestCase
         $cnt = Entity::count();
         $this->assertEquals($cnt, 9);
     }
-
 
     // ==========================================
     //              [[ PATCH ]]
@@ -646,7 +659,6 @@ class ApiEntityTest extends TestCase
         $this->assertEquals(2, $find12->rank);
     }
 
-
     /**
      *  @dataProvider  moveExceptionsProvider
      *  @testdox PATCH  /api/v1/entity/{entity_id}/rank  -  Move entities exception
@@ -670,9 +682,6 @@ class ApiEntityTest extends TestCase
             "move to non-existing entity" => [8, 99999, 422],
         ];
     }
-
-
-
 
     // ==========================================
     //              [[ DELETE ]]
@@ -737,6 +746,7 @@ class ApiEntityTest extends TestCase
     public function testWithoutPermission($permission) {
         (new ResponseTester($this))->testMissingPermission($permission);
     }
+
     /**
      * @dataProvider exceptions
      * @testdox [[PROVIDER]] Exceptions With Permissions
@@ -751,6 +761,7 @@ class ApiEntityTest extends TestCase
             "GET    /api/v1/entity/1"                      => Permission::for("get", "/api/v1/entity/1", "You do not have the permission to get a specific entity"),
             "GET    /api/v1/entity/entity_type/3/data/14"  => Permission::for("get", "/api/v1/entity/entity_type/3/data/14", "You do not have the permission to get an entity's data"),
             "GET    /api/v1/entity/1/data/14"              => Permission::for("get", "/api/v1/entity/1/data/14", "You do not have the permission to get an entity's data"),
+            "GET    /api/v1/entity/1/export"            => Permission::for("get", "/api/v1/entity/1/export", "You do not have the permission to export an entity tree"),
             "GET    /api/v1/entity/1/parentIds"            => Permission::for("get", "/api/v1/entity/1/parentIds", "You do not have the permission to get an entity's parent id's"),
             "POST   /api/v1/entity"                        => Permission::for("post", "/api/v1/entity", "You do not have the permission to add a new entity"),
             "PATCH  /api/v1/entity/1/attributes"           => Permission::for("patch", "/api/v1/entity/1/attributes", "You do not have the permission to modify an entity's data"),
@@ -767,6 +778,7 @@ class ApiEntityTest extends TestCase
             "GET    /api/v1/entity/entity_type/99/data/14" => Permission::for("get", "/api/v1/entity/entity_type/99/data/14", "This entity type does not exist"),
             "GET    /api/v1/entity/entity_type/3/data/99" => Permission::for("get", "/api/v1/entity/entity_type/3/data/99", "This attribute does not exist"),
             "GET    /api/v1/entity/99/data" => Permission::for("get", "/api/v1/entity/99/data", "This entity does not exist"),
+            "GET    /api/v1/entity/99/export" => Permission::for("get", "/api/v1/entity/99/export", "This entity does not exist"),
             "POST   /api/v1/entity" => Permission::for("post", "/api/v1/entity", "This type is not an allowed sub-type.", [
                 'name' => 'Test Entity',
                 'entity_type_id' => 3,

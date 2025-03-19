@@ -36,7 +36,7 @@ class DimensionAttribute extends AttributeBase
 
     public static function parseExport(mixed $data) : string {
         $dataAsObj = json_decode($data);
-        return $dataAsObj->B . ';' . $dataAsObj->H . ';' . $dataAsObj->T . ';' . $dataAsObj->unit;
+        return ($dataAsObj->B ?? '') . ';' . ($dataAsObj->H ?? '') . ';' . ($dataAsObj->T ?? '') . ';' . ($dataAsObj->unit ?? '');
     }
 
     public static function unserialize(mixed $data) : mixed {
