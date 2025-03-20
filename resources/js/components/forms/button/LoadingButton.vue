@@ -2,7 +2,7 @@
     <button
         class="btn"
         role="button"
-        :disabled="loading"
+        :disabled="computedDisabled"
     >
         <span
             v-if="loading"
@@ -20,12 +20,32 @@
 </template>
 
 <script>
+
+    import {
+        computed
+    } from 'vue';
+
     export default {
         props: {
             loading: {
                 type: Boolean,
                 required: true,
             },
+            disabled: {
+                type: Boolean,
+                required: false,
+                default: false,
+            }
         },
+        setup(props){
+            
+            const computedDisabled = computed(() => {
+                return props.loading || props.disabled;
+            });
+            
+            return {
+                computedDisabled,
+            };
+        }
     };
 </script>
