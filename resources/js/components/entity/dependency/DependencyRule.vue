@@ -130,7 +130,6 @@
 
             const operatorsForDatatypeWithLabels = datatype => {
                 const operators = getOperatorsForDatatype(datatype);
-                console.log(operators);
                 return operators.map(op => {
                     op.label = t(`global.dependency.operators.${op.name}`);
                     return op;
@@ -176,7 +175,6 @@
             };
 
             const attribute = computed(_ => {
-                console.log(props.modelValue);
                 return props.modelValue.attribute;
             });
 
@@ -203,11 +201,9 @@
                 let value = props.modelValue.value;
                 switch(datatype.value) {
                     case 'string-sc':
-                        console.log(value);
                         if(!value) {
                             value = null;
                         } else {
-                            console.log(value);
                             value = useSystemStore().getConceptById(value);
                         }
                         break;

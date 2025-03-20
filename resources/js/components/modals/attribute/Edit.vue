@@ -175,7 +175,7 @@
             // FUNCTIONS
             const validateDependencyRule = rule => {
                 const valuesAreSet = rule.attribute?.id && rule.operator?.id;
-                return valuesAreSet && rule.value != null;
+                return valuesAreSet && (rule.operator.no_parameter || rule.value != null);
             };
 
             const confirmEdit = _ => {
@@ -233,7 +233,6 @@
                     const supportedEntityTypeAttributes = attributeSelection.filter(a => {
                         return a.id != props.attributeId && getInputTypeClass(a.datatype) != 'unsupported';
                     });
-                    console.log(supportedEntityTypeAttributes);
                     return supportedEntityTypeAttributes;
                 }),
             });
