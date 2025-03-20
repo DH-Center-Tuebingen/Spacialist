@@ -41,6 +41,11 @@ class UserlistAttribute extends AttributeBase
         return json_encode($list);
     }
 
+    public static function parseExport(mixed $data) : string {
+        $dataAsObj = json_decode($data);
+        return implode(';', array_map(fn($id) => User::find($id)->nickname, $dataAsObj));
+    }
+
     public static function unserialize(mixed $data) : mixed {
         return json_encode($data);
     }

@@ -1,7 +1,9 @@
 <?php
 namespace Tests\Unit\Attributes;
 
+use App\AttributeTypes\AttributeBase;
 use App\AttributeTypes\EntityAttribute;
+use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
@@ -28,6 +30,18 @@ class EntityAttributeTest extends TestCase {
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         EntityAttribute::fromImport($input);
+    }
+
+    /**
+     * Test export of attribute (attribute value id = 35)
+     *
+     * @return void
+     */
+    public function testParseExport() {
+        $testValue = AttributeValue::find(35);
+        $parseResult = AttributeBase::serializeExportData($testValue);
+
+        $this->assertEquals('Aufschluss', $parseResult);
     }
 
     public static function truthyProvider() {

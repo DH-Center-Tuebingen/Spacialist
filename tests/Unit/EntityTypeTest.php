@@ -20,7 +20,7 @@ class EntityTypeTest extends TestCase
 
         $this->assertEquals(1, $type->entities->count());
         $this->assertEquals(2, $type->entities[0]->id);
-        $this->assertEquals(5, $type->attributes->count());
+        $this->assertEquals(6, $type->attributes->count());
         $this->assertEquals(14, $type->attributes[0]->id);
         $this->assertEquals(1, $type->attributes[0]->pivot->position);
         $this->assertEquals(16, $type->attributes[1]->id);

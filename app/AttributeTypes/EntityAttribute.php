@@ -35,6 +35,10 @@ class EntityAttribute extends AttributeBase
         return $data["id"] ?? null;
     }
 
+    public static function parseExport(mixed $data) : string {
+        return Entity::find($data)->name;
+    }
+
     public static function serialize(mixed $data) : mixed {
         $entity = Entity::without(['user'])->find($data);
         return self::serializeFromEntity($data, $entity);

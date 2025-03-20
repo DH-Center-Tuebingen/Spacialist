@@ -30,6 +30,10 @@ class TableAttribute extends AttributeBase
         return null;
     }
 
+    public static function parseExport(mixed $data) : string {
+        return '';
+    }
+
     public static function unserialize(mixed $data) : mixed {
         $attributeTypes = Attribute::whereNotNull('parent_id')
             ->whereIn('datatype', ['entity', 'entity-mc'])

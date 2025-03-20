@@ -12,13 +12,17 @@ class ListAttribute extends AttributeBase
     protected static ?string $field = 'json_val';
 
     public static function parseImport(int|float|bool|string $data) : mixed {
-        $data = StringUtils::useGuard(InvalidDataException::class)($data);  
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);
         $trimmedValues = [];
         $parts = explode(';', $data);
         foreach($parts as $part) {
             $trimmedValues[] = trim($part);
         }
         return json_encode($trimmedValues);
+    }
+
+    public static function parseExport(mixed $data) : string {
+        return implode(";", json_decode($data));
     }
 
     public static function unserialize(mixed $data) : mixed {

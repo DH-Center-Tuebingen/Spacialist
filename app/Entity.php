@@ -5,6 +5,7 @@ namespace App;
 use App\AttributeTypes\AttributeBase;
 use App\AttributeTypes\SqlAttribute;
 use App\Exceptions\AmbiguousValueException;
+use App\Import\EntityImporter;
 use App\Traits\CommentTrait;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -124,6 +125,39 @@ class Entity extends Model implements Searchable {
         } else {
             return null;
         }
+    }
+
+    public function getAllChildren(): array {
+        $entity = $this;
+        $entities = [];
+        $parents = [$entity];
+        $attributeCache = [];
+        while($entity = array_shift($parents)) {
+            // Add entity to array
+            $data = [];
+            $data['_name'] = $entity->name;
+            $data['_parent'] = implode(EntityImporter::PARENT_DELIMITER, $entity->getAncestorsAttribute());
+            $data['_entity_type'] = $entity->entity_type->thesaurus_concept->getActiveLocaleLabel();
+            $data['_entity_type_id'] = $entity->entity_type_id;
+
+            $entityData = $entity->getData();
+            foreach($entityData as $aid => $attributeValue) {
+                if(!array_key_exists($aid, $attributeCache)) {
+                    $attributeCache[$aid] = Attribute::find($aid);
+                }
+                $actualAttribute = $attributeCache[$aid];
+                if($actualAttribute->datatype == 'sql') {
+                    $data[$aid] = $attributeValue['value'];
+                } else {
+                    $data[$aid] = AttributeBase::serializeExportData($attributeValue);
+                }
+            }
+            $entities[] = $data;
+            // Get all children and add them to the Queue
+            $child_entities = Entity::getEntitiesByParent($entity->id);
+            $parents = array_merge($parents, $child_entities->all());
+        }
+        return $entities;
     }
 
     public static function create($fields, $entityTypeId, $user, $rootEntityId = null, $rank = null) {

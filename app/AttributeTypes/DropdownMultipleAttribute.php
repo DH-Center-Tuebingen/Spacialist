@@ -37,6 +37,11 @@ class DropdownMultipleAttribute extends AttributeBase
         return json_encode($convValues);
     }
 
+    public static function parseExport(mixed $data) : string {
+        $dataAsObj = json_decode($data);
+        return implode(';', array_map(fn($entry) => ThConcept::getLabel($entry->concept_url), $dataAsObj));
+    }
+
     public static function unserialize(mixed $data) : mixed {
         $thesaurus_urls = array_map(function($entry) {
             return [

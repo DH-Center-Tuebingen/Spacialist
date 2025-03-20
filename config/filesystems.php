@@ -63,6 +63,14 @@ return [
             'region' => env('AWS_DEFAULT_REGION'),
             'bucket' => env('AWS_BUCKET'),
         ],
+        
+        'private' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private'),
+            // 'url' => env('APP_URL').'/storage', // TODO doesn't work with port
+            'url' => './storage',
+            'visibility' => 'private',
+        ],
 
     ],
 

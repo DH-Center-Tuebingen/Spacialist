@@ -8,6 +8,7 @@ import {
     simpleResourceType,
     throwError,
 } from '@/helpers/helpers.js';
+import File from './helpers/file';
 
 // GET AND STORE (FETCH)
 export async function logout() {
@@ -397,6 +398,16 @@ export async function duplicateEntity(entity) {
     const data = {};
     return $httpQueue.add(
         () => http.post(`/entity/${entity.id}/duplicate`, data).then(response => response.data)
+    );
+}
+
+export async function exportEntityTree(root){
+    return $httpQueue.add(
+        () => http.get(`/entity/${root}/export`,{
+            responseType: 'blob'
+        })
+        .then(File.saveFileWithFallback('export_no_name'))
+        .catch(e => { throw e; })
     );
 }
 
