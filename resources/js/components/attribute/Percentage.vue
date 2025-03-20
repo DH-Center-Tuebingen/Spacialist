@@ -17,7 +17,7 @@
             :name="name"
         >
         <div
-            class="input-group range-addon"
+            class="input-group range-addon flex-shrink-0"
         >
             <input
                 v-model="v.value"
