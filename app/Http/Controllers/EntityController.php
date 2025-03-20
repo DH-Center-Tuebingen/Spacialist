@@ -651,7 +651,7 @@ class EntityController extends Controller {
         }
     }
 
-    private function createImportFilesForDistinctEntityTypes(array $entities, string $tmpDir): array{        
+    private function createImportFilesForDistinctEntityTypes(array $entities, string $tmpDir): array {
         $files = [];
         $headersMap = [];
         // TODO handle in Entity with other metadata (e.g. creator, licence, …)
@@ -667,7 +667,7 @@ class EntityController extends Controller {
 
                 $entityType = EntityType::find($entityTypeId);
                 $attributes = $entityType->attributes->all();
-                
+
                 // We use the id for the mapping to prevent conflicts from
                 // attributes with the same name.
                 $attributeIds = [];
@@ -680,11 +680,11 @@ class EntityController extends Controller {
                     $attributeIds[] = $attribute->id;
                     $attributeNames[] = $attribute->thesaurus_concept->getActiveLocaleLabel();
                 }
-                
-                $mergedHeaderKeyMap = array_merge($attributeIds, $metadataFields);                
+
+                $mergedHeaderKeyMap = array_merge($attributeIds, $metadataFields);
                 $headersMap[$entityTypeId] = $mergedHeaderKeyMap;
-                $mergedHeaderNames=array_merge($attributeNames, $metadataFields);
-                
+                $mergedHeaderNames = array_merge($attributeNames, $metadataFields);
+
                 $headerStrings = array_map(function($header) {
                     $header = str_replace('"', '\"', $header);
                     $header = str_replace('\n', '', $header);
