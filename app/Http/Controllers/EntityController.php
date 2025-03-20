@@ -651,7 +651,7 @@ class EntityController extends Controller {
         }
     }
 
-    private function createImportFilesForDistinctEntityTypes(array $entities, string $tmpDir): array{
+    private function createImportFilesForDistinctEntityTypes(array $entities, string $tmpDir): array{        
         $files = [];
         $headersMap = [];
         // TODO handle in Entity with other metadata (e.g. creator, licence, …)
@@ -666,17 +666,26 @@ class EntityController extends Controller {
                 $files[$entityTypeId] = $filename;
 
                 $entityType = EntityType::find($entityTypeId);
-                $allEntityTypeAttributes = array_map(function($attribute) {
+                $attributes = $entityType->attributes->all();
+                
+                // We use the id for the mapping to prevent conflicts from
+                // attributes with the same name.
+                $attributeIds = array_map(function($attribute) {
+                    return $attribute['id'];
+                }, $attributes);
+                $mergedHeaderKeyMap = array_merge($metadataFields, $attributeIds);                
+                $headersMap[$entityTypeId] = $mergedHeaderKeyMap;
+                
+                $attributeNames = array_map(function($attribute) {
                     return $attribute->thesaurus_concept->getActiveLocaleLabel();
-                }, $entityType->attributes->all());
-                $allEntityTypeAttributes = array_merge($allEntityTypeAttributes, $metadataFields);
-                sort($allEntityTypeAttributes);
-                $headersMap[$entityTypeId] = $allEntityTypeAttributes;
+                }, $attributes);
+                $mergedHeaderNames=array_merge($metadataFields, $attributeNames);
+                
                 $headerStrings = array_map(function($header) {
                     $header = str_replace('"', '\"', $header);
                     $header = str_replace('\n', '', $header);
                     return '"' . $header . '"';
-                }, $allEntityTypeAttributes);
+                }, $mergedHeaderNames);
                 Storage::disk('private')->put($filename, implode($delimiter,  $headerStrings));
             }
 

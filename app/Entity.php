@@ -146,11 +146,10 @@ class Entity extends Model implements Searchable {
                     $attributeCache[$aid] = Attribute::find($aid);
                 }
                 $actualAttribute = $attributeCache[$aid];
-                $name = ThConcept::getLabel($actualAttribute->thesaurus_url);
                 if($actualAttribute->datatype == 'sql') {
-                    $data[$name] = $attributeValue['value'];
+                    $data[$aid] = $attributeValue['value'];
                 } else {
-                    $data[$name] = AttributeBase::serializeExportData($attributeValue);
+                    $data[$aid] = AttributeBase::serializeExportData($attributeValue);
                 }
             }
             $entities[] = $data;
