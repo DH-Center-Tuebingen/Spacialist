@@ -266,3 +266,8 @@ table.table-sticky .dropdown-menu {
 .range-addon {
     width: 8rem;
 }
+
+.infobox {
+    min-width: 250px;
+    z-index: $zindex-sticky-in-page + 1;
+}

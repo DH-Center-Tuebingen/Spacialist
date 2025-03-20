@@ -104,6 +104,19 @@
                             >
                                 {{ translateConcept(element.thesaurus_url) }}
                             </span>
+                            <a
+                                v-if="getConceptNote(element.thesaurus_url)"
+                                tabindex="0"
+                                class="text-decoration-none text-secondary ms-1 position-relative"
+                                data-bs-toggle="popover"
+                                data-bs-trigger="focus"
+                                data-bs-placement="top"
+                                :data-bs-content="getConceptNote(element.thesaurus_url)"
+                                href="#"
+                                @click.prevent
+                            >
+                                <i class="fas fa-fw fa-circle-info" />
+                            </a>
                             <sup
                                 v-if="hasEmitter('onEditElement') && !!element.pivot.depends_on"
                                 :title="t('global.dependency.depends_on.desc')"
@@ -181,11 +194,14 @@
 
     import { useI18n } from 'vue-i18n';
 
+    import { Popover } from 'bootstrap';
+
     import useAttributeStore from '@/bootstrap/stores/attribute.js';
     import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import {
         translateConcept,
+        getConceptNote,
     } from '@/helpers/helpers.js';
 
     import ModerationPanel from '@/components/moderation/Panel.vue';
@@ -605,35 +621,6 @@
                     e.preventDefault();
                 }
             };
-            const convertEntityValue = (value, isMultiple) => {
-                let actValue = null;
-                if(value == '' || !value.value) {
-                    if(isMultiple) {
-                        actValue = {
-                            value: [],
-                            name: [],
-                        };
-                    } else {
-                        actValue = {};
-                    }
-                } else {
-                    actValue = value;
-                }
-
-                if(isMultiple) {
-                    return actValue.value.map((v, i) => {
-                        return {
-                            id: v,
-                            name: actValue.name ? actValue.name[i] : '',
-                        };
-                    });
-                } else {
-                    return {
-                        id: actValue.value,
-                        name: actValue.name,
-                    };
-                }
-            };
 
             const attrs = context.attrs;
             // DATA
@@ -642,6 +629,7 @@
                 attributeList: attributes,
                 attributeValues: values,
                 rootAttributeValues: {},
+                visibleAttributeNotes: {},
                 changeTracker: {
                     local: {},
                     external: {},
@@ -678,6 +666,11 @@
                 itemClasses: computed(_ => options.value.item_classes),
             });
 
+            const initializeTooltips = _ => {
+                document.querySelectorAll('[data-bs-toggle="popover"]')
+                    .forEach(popoverElement => new Popover(popoverElement));
+            };
+
             // ON MOUNTED
             onMounted(_ => {
                 state.dynamicSelectionList.forEach(rootId => {
@@ -689,6 +682,8 @@
                         });
                     }
                 });
+
+                initializeTooltips();
             });
             onBeforeUpdate(_ => {
                 attrRefs.value = {};
@@ -699,6 +694,7 @@
                 t,
                 // HELPERS
                 translateConcept,
+                getConceptNote,
                 // LOCAL
                 certainty,
                 handleSelectionUpdate,

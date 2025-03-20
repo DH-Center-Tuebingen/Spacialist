@@ -401,6 +401,16 @@ class SetupTables extends Migration
             $table->foreign('concept_id')->references('id')->on('th_concept')->onDelete('cascade');
             $table->foreign('language_id')->references('id')->on('th_language')->onDelete('cascade');
         });
+        // Create ThNotes
+        Schema::create('th_concept_notes', function (Blueprint $table) {
+            $table->increments('id');
+            $table->text('content');
+            $table->integer('concept_id');
+            $table->integer('language_id');
+            $table->timestamps();
+            $table->foreign('concept_id')->references('id')->on('th_concept')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('language_id')->references('id')->on('th_language')->onDelete('cascade')->onUpdate('cascade');
+        });
         // Create Users
         Schema::create('users', function (Blueprint $table) {
             $table->increments('id');
