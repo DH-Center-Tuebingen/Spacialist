@@ -43,7 +43,7 @@ class EntityTest extends TestCase
                 '_parent' => 'Site A\\\\Befund 1',
                 '_entity_type' => 'Stone',
                 '_entity_type_id' => 6,
-                'Gewicht' => 3.5,
+                12 => 3.5,
             ],
         ], $childrenArray);
     }
