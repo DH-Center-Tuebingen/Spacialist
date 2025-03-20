@@ -12,9 +12,7 @@
                 @mouseenter="onEntityHeaderHover(true)"
                 @mouseleave="onEntityHeaderHover(false)"
             >
-                <span
-                    :title="state.entity.name"
-                >
+                <span :title="state.entity.name">
                     {{ state.entity.name }}
                 </span>
             </h3>
@@ -64,7 +62,7 @@
                     </button>
                     <span
                         v-if="state.hasAttributeLinks"
-                        class="dropdown bg-body text-secondary clickable me-1"
+                        class="dropdown bg-body text-secondary clickable me-1 ms-2"
                     >
                         <span
                             class="fa-layers fa-fw"
@@ -78,7 +76,10 @@
                                 {{ state.entity.attributeLinks.length }}
                             </span>
                         </span>
-                        <ul class="dropdown-menu">
+                        <ul
+                            class="dropdown-menu overflow-y-auto"
+                            style="max-height: 60vh;"
+                        >
                             <li
                                 v-for="link in state.groupedAttributeLinks"
                                 :key="link.id"
@@ -232,9 +233,7 @@
                         @mouseover="showTabActions(tg.id, true)"
                         @mouseleave="showTabActions(tg.id, false)"
                     >
-                        <DotIndicator
-                            :type="'warning'"
-                        />
+                        <DotIndicator :type="'warning'" />
                         <div v-show="state.attributeGrpHovered == tg.id">
                             <a
                                 href="#"
