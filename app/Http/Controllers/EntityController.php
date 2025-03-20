@@ -670,16 +670,20 @@ class EntityController extends Controller {
                 
                 // We use the id for the mapping to prevent conflicts from
                 // attributes with the same name.
-                $attributeIds = array_map(function($attribute) {
-                    return $attribute['id'];
-                }, $attributes);
-                $mergedHeaderKeyMap = array_merge($metadataFields, $attributeIds);                
-                $headersMap[$entityTypeId] = $mergedHeaderKeyMap;
+                $attributeIds = [];
+                $attributeNames = [];
+                $excludedAttributeTypes = ['system-separator'];
+                foreach($attributes as $attribute) {
+                    if(in_array($attribute->datatype, $excludedAttributeTypes)) {
+                        continue;
+                    }
+                    $attributeIds[] = $attribute->id;
+                    $attributeNames[] = $attribute->thesaurus_concept->getActiveLocaleLabel();
+                }
                 
-                $attributeNames = array_map(function($attribute) {
-                    return $attribute->thesaurus_concept->getActiveLocaleLabel();
-                }, $attributes);
-                $mergedHeaderNames=array_merge($metadataFields, $attributeNames);
+                $mergedHeaderKeyMap = array_merge($attributeIds, $metadataFields);                
+                $headersMap[$entityTypeId] = $mergedHeaderKeyMap;
+                $mergedHeaderNames=array_merge($attributeNames, $metadataFields);
                 
                 $headerStrings = array_map(function($header) {
                     $header = str_replace('"', '\"', $header);
