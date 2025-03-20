@@ -48,16 +48,15 @@ export function getErrorMessages(error, suffix = '') {
 }
 
 
-const UNSET_CERTAINTY = {type: 'unset', icon: ['fas fa-fw fa-question', 'fas fa-fw fa-exclamation'], rangeFunction: (certainty) => certainty == null || certainty < 0 || certainty > 100};
+const UNSET_CERTAINTY = {type: 'unset', icon: 'far fa-fw fa-circle-check', rangeFunction: (certainty) => certainty == null || certainty < 0 || certainty > 100};
 export function getCertainties() {
     function inRangeOf(lowIn, highEx) {
         return (certainty) => parseFloat(certainty) >= lowIn && parseFloat(certainty) < highEx;
     }
     return [
-        {type: 'danger', icon: 'fas fa-fw fa-exclamation', rangeFunction: inRangeOf(0, 25)},
-        {type: 'warning', icon: 'fas fa-fw fa-exclamation', rangeFunction: inRangeOf(25, 50)},
-        {type: 'info', icon: 'fas fa-fw fa-exclamation', rangeFunction: inRangeOf(50, 100)},
-        {type: 'success', icon: 'fas fa-fw fa-check', rangeFunction: (certainty) => certainty === 100},
+        {type: 'danger', icon: 'fas fa-fw fa-circle-exclamation', rangeFunction: inRangeOf(0, 25)},
+        {type: 'warning', icon: 'fas fa-fw fa-circle-exclamation', rangeFunction: inRangeOf(25, 100)},
+        {type: 'success', icon: 'fas fa-fw fa-circle-check', rangeFunction: (certainty) => certainty === 100},
         UNSET_CERTAINTY,
     ];
 }

@@ -25,7 +25,7 @@
                     >
                         <label
                             v-if="!state.hideLabels"
-                            class="col-form-label col-md-2 d-flex flex-row justify-content-between text-break align-self-start gap-1 position-relative"
+                            class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break align-self-start gap-1 position-relative"
                             :for="`attr-${element.id}`"
                             :class="attributeClasses(element)"
                             @click="e => handleLabelClick(e, element.datatype)"
@@ -100,7 +100,8 @@
                             </div>
                             <span
                                 v-if="!element.is_system"
-                                class="text-end col"
+                                class="d-inline-block text-end col text-truncate"
+                                :title="translateConcept(element.thesaurus_url)"
                             >
                                 {{ translateConcept(element.thesaurus_url) }}
                             </span>
@@ -148,29 +149,31 @@
                                 @edit="e => handleEditModeration(element.id, e)"
                             />
                         </div>
-                        <div
-                            v-if="hasEmitter('onMetadata')"
-                            class="small col-md-1 pt-2 clickable d-flex flex-row align-items-start justify-content-center"
-                            @click="onMetadataHandler(element)"
+                    </div>
+                    <div
+                        v-if="hasEmitter('onMetadata')"
+                        class="pt-2 clickable d-flex flex-row align-items-start justify-content-center align-self-start gap-1"
+                        style="font-size: 1rem;"
+                        @click="onMetadataHandler(element)"
+                    >
+                        <ValidityIndicator
+                            class="col h-10"
+                            :class="getCertaintyStyle(certainty(element))"
+                            :center="true"
+                            :state="certainty(element)"
+                        />
+                        <span
+                            class="col text-center"
+                            :class="inactiveMetadataClass(!hasComment(element))"
                         >
-                            <ValidityIndicator
-                                class="col h-100"
-                                :center="true"
-                                :state="certainty(element)"
-                            />
-                            <span
-                                class="col text-center"
-                                :class="inactiveMetadataClass(!hasComment(element))"
-                            >
-                                <i class="fas fa-fw fa-comment" />
-                            </span>
-                            <span
-                                class="col text-center"
-                                :class="inactiveMetadataClass(!hasBookmarks(element))"
-                            >
-                                <i class="fas fa-fw fa-bookmark" />
-                            </span>
-                        </div>
+                            <i class="fas fa-fw fa-comment" />
+                        </span>
+                        <span
+                            class="col text-center"
+                            :class="inactiveMetadataClass(!hasBookmarks(element))"
+                        >
+                            <i class="fas fa-fw fa-bookmark" />
+                        </span>
                     </div>
                     <slot
                         name="after"
@@ -670,6 +673,14 @@
                 document.querySelectorAll('[data-bs-toggle="popover"]')
                     .forEach(popoverElement => new Popover(popoverElement));
             };
+            
+            const getCertaintyStyle = certainty => {
+                if(certainty === null) {
+                    return 'opacity-25';
+                }
+                
+                return '';
+            };
 
             // ON MOUNTED
             onMounted(_ => {
@@ -712,6 +723,7 @@
                 onLeave,
                 handleMove,
                 handleUpdate,
+                getCertaintyStyle,
                 getDirtyValues,
                 updateDirtyState,
                 resetListValues,
