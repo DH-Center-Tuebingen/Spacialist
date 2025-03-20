@@ -54,6 +54,11 @@ code {
     align-items: center;
 }
 
+.accordion-button:focus {
+    box-shadow: none;
+    outline: none !important;
+}
+
 .reference-group {
     margin-bottom: map-get($utilities, margin, values, 3);
 }
@@ -111,11 +116,19 @@ dl.dl-0-mb > dd:last-child {
     width: 1.8rem;
 }
 
-.btn-fab-sm {
+.btn-fab-list-sm > .btn-fab, .btn-fab-sm {
     padding: 0;
     height: 1.25rem;
     width: 1.25rem;
     font-size: 0.8rem;
+    line-height: normal;
+}
+
+.btn-fab-list-md > .btn-fab {
+    padding: 0;
+    height: 1.5rem;
+    width: 1.5rem;
+    font-size: 0.9rem;
     line-height: normal;
 }
 
@@ -208,10 +221,15 @@ table.table-sticky > thead {
     z-index: $zindex-sticky-in-page;
 }
 
+.multiselect-dropdown {
+    z-index: $zindex-dropdown;
+}
+
 table.table-sticky .multiselect-dropdown,
 table.table-sticky .dropdown-menu {
     z-index: $zindex-dropdown-underneath-sticky;
 }
+
 
 .multiselect-option.is-selected {
     &:hover {

@@ -65,8 +65,10 @@
             }
         },
         setup(props) {
+            const { t } = useI18n();
+
             return {
-                t: useI18n().t,
+                t,
                 translateConcept,
             };
         },

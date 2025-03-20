@@ -15,6 +15,7 @@
         :filter-results="false"
         :close-on-select="false"
         :placeholder="t('global.select.placeholder')"
+        :append-to-body="true"
         @change="v.handleChange"
         @search-change="setSearchQuery"
     >

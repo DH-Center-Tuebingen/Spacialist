@@ -5,12 +5,12 @@
         :key-fn="handleDisplayResult"
         :chain="'ancestors'"
         :mode="state.mode"
-        :default-value="v.fieldValue"
         :disabled="disabled"
         :infinite="true"
         :limit="10"
         :can-fetch-more="state.hasNextPage"
-        @selected="selected"
+        :append-to-body="true"
+        @change="changed"
         @entry-click="entity => entryClicked(entity)"
     />
     <router-link
@@ -161,8 +161,8 @@
                 }
             };
 
-            const selected = data => {
-                v.handleChange(data);
+            const changed = value => {
+                v.handleChange(value);
             };
 
             // DATA
@@ -226,7 +226,7 @@
                 resetFieldState,
                 undirtyField,
                 searchWrapper,
-                selected,
+                changed,
                 // STATE
                 state,
                 v,

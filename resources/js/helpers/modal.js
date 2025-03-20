@@ -1,7 +1,9 @@
 
 import useAttributeStore from '@/bootstrap/stores/attribute.js';
+import useBibliographyStore from '@/bootstrap/stores/bibliography.js';
 import useEntityStore from '@/bootstrap/stores/entity.js';
 import useUserStore from '@/bootstrap/stores/user.js';
+
 import router from '%router';
 
 import { addToast } from '@/plugins/toast.js';
@@ -54,9 +56,7 @@ import RemoveAttribute from '@/components/modals/entitytype/RemoveAttribute.vue'
 import AddAttribute from '@/components/modals/attribute/Add.vue';
 import EditAttribute from '@/components/modals/attribute/Edit.vue';
 import MultiEditAttribute from '@/components/modals/attribute/MultiEdit.vue';
-import EditSystemAttribute from '@/components/modals/attribute/EditSystem.vue';
 import DeleteAttribute from '@/components/modals/attribute/Delete.vue';
-import useBibliographyStore from '../bootstrap/stores/bibliography';
 
 export function showAbout() {
     const uid = `AboutModal-${getTs()}`;
@@ -661,7 +661,7 @@ export function showDeleteEntityType(entityType, metadata, onDeleted) {
                 modal.destroy();
             },
             onConfirm(e) {
-                useEntityStore().deleteEntityType(entityType).then(_ => {
+                useEntityStore().deleteEntityType(entityType.id).then(_ => {
                     if(!!onDeleted) {
                         onDeleted();
                     }
@@ -674,34 +674,26 @@ export function showDeleteEntityType(entityType, metadata, onDeleted) {
 }
 
 export function showEditAttribute(aid, etid, metadata) {
-    const isSystem = metadata && metadata.is_system;
-    const component = isSystem ? EditSystemAttribute : EditAttribute;
     const uid = `EditAttribute-${getTs()}`;
     const modal = useModal({
-        component: component,
+        component: EditAttribute,
         attrs: {
             name: uid,
             attributeId: aid,
             entityTypeId: etid,
             metadata: metadata,
-            attributeSelection: getEntityTypeAttributes(etid),
             onClosing(e) {
                 modal.destroy();
             },
             async onConfirm(e) {
                 const entityStore = useEntityStore();
-                if(isSystem) {
-                    await entityStore.patchEntityMetadata(etid, aid, metadata.pivot.id, e);
-                    modal.destroy();
-                } else {
-                    if(e.metadata) {
-                        await entityStore.patchEntityMetadata(etid, aid, metadata.pivot.id, e.metadata);
-                    }
-                    if(e.dependency) {
-                        await entityStore.updateDependency(etid, aid, e.dependency);
-                    }
-                    modal.destroy();
+                if(e.metadata) {
+                    await entityStore.patchEntityMetadata(etid, aid, metadata.pivot.id, e.metadata);
                 }
+                if(e.dependency) {
+                    await entityStore.updateDependency(etid, aid, e.dependency);
+                }
+                modal.destroy();
             },
         },
     });
@@ -772,12 +764,13 @@ export function showRemoveAttribute(etid, aid, id, metadata, onDeleted) {
     modal.open();
 }
 
-export function showAddAttribute(onAdded) {
+export function showAddAttribute(onAdded, entityType = null) {
     const uid = `AddAttribute-${getTs()}`;
     const modal = useModal({
         component: AddAttribute,
         attrs: {
             name: uid,
+            entityType: entityType,
             onClosing(e) {
                 modal.destroy();
             },

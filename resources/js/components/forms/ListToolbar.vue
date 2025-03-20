@@ -37,7 +37,7 @@
 </template>
 
 <script>
-    import { _cloneDeep } from '../../helpers/helpers';
+    import { _cloneDeep } from '@/helpers/helpers.js';
 
     export default {
         props: {
@@ -51,10 +51,8 @@
         },
         emits: ['update:modelValue'],
         setup(props, context) {
-
-
             const sortClicked = _ => {
-                const clone = _cloneDeep(props.modelValue);            
+                const clone = _cloneDeep(props.modelValue);
                 clone.type = clone.type === 'text' ? 'number' : 'text';
                 context.emit('update:modelValue', clone);
             };

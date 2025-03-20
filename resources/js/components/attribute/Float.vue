@@ -8,6 +8,7 @@
         placeholder="0.0"
         :disabled="disabled"
         :name="name"
+        @keydown="onKeydown"
     >
     <InputError
         :v="v"
@@ -26,6 +27,8 @@
 
     import * as yup from 'yup';
     import InputError from '@/components/forms/InputError.vue';
+    
+    import {useNumberInputHotkeys} from '@/composables/number-input-hotkeys.js';
 
     export default {
         components: {
@@ -48,17 +51,12 @@
         },
         emits: ['change'],
         setup(props, context) {
-            const {
-                name,
-                disabled,
-                value,
-            } = toRefs(props);
             // FETCH
 
             // FUNCTIONS
             const resetFieldState = _ => {
                 v.resetField({
-                    value: value.value
+                    value: props.value
                 });
             };
             const undirtyField = _ => {
@@ -73,19 +71,19 @@
                 meta,
                 resetField,
                 errorMessage,
-            } = useField(`float_${name.value}`, yup.number(), {
-                initialValue: value.value,
+            } = useField(`float_${props.name}`, yup.number(), {
+                initialValue: props.value,
             });
-            const state = reactive({
-
-            });
+            
             const v = reactive({
                 value: fieldValue,
                 meta,
                 resetField,
             });
 
-            watch(_ => value, (newValue, oldValue) => {
+            const { onKeydown } = useNumberInputHotkeys(v, true);
+
+            watch(_ => props.value, (newValue, oldValue) => {
                 resetFieldState();
             });
             watch(_ => v.value, (newValue, oldValue) => {
@@ -106,9 +104,9 @@
                 resetFieldState,
                 undirtyField,
                 // STATE
-                state,
                 v,
                 errorMessage,
+                onKeydown,
             };
         },
     };

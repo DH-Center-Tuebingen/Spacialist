@@ -64,6 +64,7 @@ class Unit {
         return [
             'label' => $this->label,
             'symbol' => $this->symbol,
+            'conversion' => ($this->conversion)(1),
         ];
     }
 }

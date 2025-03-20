@@ -143,6 +143,7 @@
             'close'
         ],
         setup(props, context) {
+            const { t } = useI18n();
             const entityStore = useEntityStore();
 
             useGlobalClick(function () {
@@ -189,7 +190,7 @@
             };
 
             return {
-                t: useI18n().t,
+                t,
                 can,
                 addEntity,
                 duplicateEntity,
