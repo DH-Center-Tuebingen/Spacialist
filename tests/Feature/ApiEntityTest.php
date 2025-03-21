@@ -36,8 +36,6 @@ class ApiEntityTest extends TestCase
                 'user_id',
                 'created_at',
                 'updated_at',
-                'parentIds',
-                'parentNames'
             ]
         ]);
     }
@@ -232,16 +230,40 @@ class ApiEntityTest extends TestCase
     }
 
     /**
-    * @testdox GET    /api/v1/entity/{id}/parentIds  -  Get all parentIds of an entity (id=5).
+    * @testdox GET    /api/v1/entity/{id}/parent/metadata  -  Get all parentIds of an entity (id=5).
      */
-    public function testEntityParentIdEndpoint()
+    public function testEntityParentMetadataGetIdEndpoint()
     {
         $response = $this->userRequest()
-            ->get('/api/v1/entity/5/parentIds');
+            ->get('/api/v1/entity/5/parent/metadata?ids');
 
         $response->assertJsonCount(3);
         $response->assertSimilarJson([
-            1, 2, 5
+            5, 2, 1
+        ]);
+    }
+
+    /**
+    * @testdox GET    /api/v1/entity/{id}/parent/metadata  -  Get all parent metadata of an entity (id=5).
+     */
+    public function testEntityParentMetadataEndpoint()
+    {
+        $response = $this->userRequest()
+            ->get('/api/v1/entity/5/parent/metadata');
+
+        $response->assertJsonCount(3);
+        $response->assertSimilarJson([
+            'parentIds' => [5, 2, 1],
+            'parentNames' => ['Inv. 31', 'Befund 1', 'Site A'],
+            'attributeLinks' => [
+                [
+                    "attribute_url" => "https://spacialist.escience.uni-tuebingen.de/<user-project>/lagerstatte#20171220165727",
+                    "entity_type_id" => 3,
+                    "id" => 7,
+                    "name" => "Site B",
+                    "path" => ["Site B"],
+                ]
+            ],
         ]);
     }
 
@@ -264,7 +286,6 @@ class ApiEntityTest extends TestCase
                 'user_id',
                 'created_at',
                 'updated_at',
-                'parentIds'
             ]
         ]);
         $response->assertJson([
@@ -762,7 +783,7 @@ class ApiEntityTest extends TestCase
             "GET    /api/v1/entity/entity_type/3/data/14"  => Permission::for("get", "/api/v1/entity/entity_type/3/data/14", "You do not have the permission to get an entity's data"),
             "GET    /api/v1/entity/1/data/14"              => Permission::for("get", "/api/v1/entity/1/data/14", "You do not have the permission to get an entity's data"),
             "GET    /api/v1/entity/1/export"            => Permission::for("get", "/api/v1/entity/1/export", "You do not have the permission to export an entity tree"),
-            "GET    /api/v1/entity/1/parentIds"            => Permission::for("get", "/api/v1/entity/1/parentIds", "You do not have the permission to get an entity's parent id's"),
+            "GET    /api/v1/entity/1/parent/metadata"            => Permission::for("get", "/api/v1/entity/1/parent/metadata", "You do not have the permission to get an entity's parent id's"),
             "POST   /api/v1/entity"                        => Permission::for("post", "/api/v1/entity", "You do not have the permission to add a new entity"),
             "PATCH  /api/v1/entity/1/attributes"           => Permission::for("patch", "/api/v1/entity/1/attributes", "You do not have the permission to modify an entity's data"),
             "PATCH  /api/v1/entity/1/attribute/13"         => Permission::for("patch", "/api/v1/entity/1/attribute/13", "You do not have the permission to modify an entity's data"),

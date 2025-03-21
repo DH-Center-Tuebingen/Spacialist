@@ -231,7 +231,7 @@ class EntityController extends Controller {
         return response()->json($entity->getAllMetadata());
     }
 
-    public function getParentIds($id) {
+    public function getParentMetadata(Request $request, $id) {
         $user = auth()->user();
         if(!$user->can('entity_read')) {
             return response()->json([
@@ -246,30 +246,32 @@ class EntityController extends Controller {
                 'error' => __('This entity does not exist'),
             ], 400);
         }
-        return response()->json($entity->parentIds);
-    }
 
-    // TODO merge with getParentIds($id) method
-    public function getParentMetadata($id) {
-        $user = auth()->user();
-        if(!$user->can('entity_read')) {
-            return response()->json([
-                'error' => __('You do not have the permission to get an entity\'s parent id\'s'),
-            ], 403);
+        $ids = $request->has('ids');
+        $names = $request->has('names');
+        $links = $request->has('links');
+
+        // if none provided, return all
+        if(!$ids && !$names && !$links) {
+            $ids = $names = $links = true;
         }
 
-        try {
-            $entity = Entity::findOrFail($id);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This entity does not exist'),
-            ], 400);
+        $data = [];
+        if($ids) {
+            $data['parentIds'] = $entity->parentIds;
         }
-        return response()->json([
-            'parentIds' => $entity->parentIds,
-            'parentNames' => $entity->parentNames,
-            'attributeLinks' => $entity->attributeLinks,
-        ]);
+        if($names) {
+            $data['parentNames'] = $entity->parentNames;
+        }
+        if($links) {
+            $data['attributeLinks'] = $entity->attributeLinks;
+        }
+
+        if(count($data) == 1) {
+            $data = array_shift($data);
+        }
+
+        return response()->json($data);
     }
 
     public function getEntitiesByParent($id) {
