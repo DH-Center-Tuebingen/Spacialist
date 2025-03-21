@@ -641,7 +641,7 @@ export function showEditEntityType(entityType) {
                 modal.destroy();
             },
             onConfirm(editedProps) {
-                useEntityStore().patchEntityType(entityType.id, editedProps).then(_ => {
+                useEntityStore().updateEntityType(entityType.id, editedProps).then(_ => {
                     modal.destroy();
                 });
             },
