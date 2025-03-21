@@ -35,6 +35,7 @@ import {
     getEntityComments,
     getEntityData,
     getEntityParentIds,
+    getEntityParentMetadata,
     getEntityReferences,
     handleModeration,
     moveEntity,
@@ -612,6 +613,12 @@ export const useEntityStore = defineStore('entity', {
                 const ids = await getEntityParentIds(entityId);
                 await openPath(ids);
                 entity = this.entities[entityId];
+            }
+            if(!entity.parentIds) {
+                const parentMetadata = await getEntityParentMetadata(entityId);
+                this.entities[entityId].parentIds = parentMetadata.parentIds;
+                this.entities[entityId].parentNames = parentMetadata.parentNames;
+                this.entities[entityId].attributeLinks = parentMetadata.attributeLinks;
             }
             if(!can('entity_data_read')) {
                 entity = {

@@ -224,14 +224,23 @@ class Entity extends Model implements Searchable {
         ];
     }
 
-    public static function getEntitiesByParent($id = null) {
-        $entities = self::withCount(['child_entities as children_count']);
+    public static function getEntitiesByParent($id = null, $skipMetadata = false) {
+        $query = self::withCount(['child_entities as children_count']);
         if(!isset($id)) {
-            $entities->whereNull('root_entity_id');
+            $query->whereNull('root_entity_id');
         } else {
-            $entities->where('root_entity_id', $id);
+            $query->where('root_entity_id', $id);
         }
-        return $entities->orderBy('rank')->get();
+        if($skipMetadata) {
+            $query->without('user');
+        }
+        $entities = $query->orderBy('rank')->get();
+        if($skipMetadata) {
+            $entities->each(function($entity) {
+                $entity->setAppends([]);
+            });
+        }
+        return $entities;
     }
 
     private function moveOrFail(int | null $parentId) {

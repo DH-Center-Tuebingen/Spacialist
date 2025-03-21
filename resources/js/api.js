@@ -154,6 +154,16 @@ export async function getEntityParentIds(id) {
     );
 }
 
+// TODO merge with getEntityParentIds(id) method
+export async function getEntityParentMetadata(id) {
+    return await $httpQueue.add(
+        () => http.get(`/entity/${id}/parentMetadata`)
+            .then(response => {
+                return response.data;
+            })
+    );
+}
+
 export async function getEntityData(id) {
     return await $httpQueue.add(
         () => http.get(`/entity/${id}/data`)
