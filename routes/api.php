@@ -53,9 +53,7 @@ Route::middleware('auth:sanctum')->prefix('v1/entity')->group(function() {
     Route::get('/{id}/metadata', 'EntityController@getMetadata')->where('id', '[0-9]+');
     Route::get('/{id}/reference', 'ReferenceController@getByEntity')->where('id', '[0-9]+');
     Route::get('/{id}/export', 'EntityController@exportEntityTree')->where('id', '[0-9]+');
-    Route::get('/{id}/parentIds', 'EntityController@getParentIds')->where('id', '[0-9]+');
-    // TODO merge with /{id}/parentIds route
-    Route::get('/{id}/parentMetadata', 'EntityController@getParentMetadata')->where('id', '[0-9]+');
+    Route::get('/{id}/parent/metadata', 'EntityController@getParentMetadata')->where('id', '[0-9]+');
     Route::get('/byParent/{id}', 'EntityController@getEntitiesByParent')->where('id', '[0-9]+');
 
     Route::post('', 'EntityController@addEntity');

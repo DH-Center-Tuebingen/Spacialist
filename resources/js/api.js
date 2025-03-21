@@ -145,19 +145,10 @@ export async function getEntity(id) {
     );
 }
 
-export async function getEntityParentIds(id) {
+export async function getEntityParentMetadata(id, fields = ['ids', 'names', 'links']) {
+    const fieldsAsQuery = fields.join('&');
     return await $httpQueue.add(
-        () => http.get(`/entity/${id}/parentIds`)
-            .then(response => {
-                return response.data;
-            })
-    );
-}
-
-// TODO merge with getEntityParentIds(id) method
-export async function getEntityParentMetadata(id) {
-    return await $httpQueue.add(
-        () => http.get(`/entity/${id}/parentMetadata`)
+        () => http.get(`/entity/${id}/parent/metadata?${fieldsAsQuery}`)
             .then(response => {
                 return response.data;
             })

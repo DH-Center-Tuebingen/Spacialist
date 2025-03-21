@@ -34,7 +34,6 @@ import {
     getEntity,
     getEntityComments,
     getEntityData,
-    getEntityParentIds,
     getEntityParentMetadata,
     getEntityReferences,
     handleModeration,
@@ -610,7 +609,7 @@ export const useEntityStore = defineStore('entity', {
         async setById(entityId) {
             let entity = this.entities[entityId];
             if(!entity) {
-                const ids = await getEntityParentIds(entityId);
+                const ids = await getEntityParentMetadata(entityId, ['ids']);
                 await openPath(ids);
                 entity = this.entities[entityId];
             }
