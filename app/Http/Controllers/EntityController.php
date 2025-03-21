@@ -47,7 +47,7 @@ class EntityController extends Controller {
                 'error' => __('You do not have the permission to get entities'),
             ], 403);
         }
-        $roots = Entity::getEntitiesByParent(null);
+        $roots = Entity::getEntitiesByParent(null, true);
 
         return response()->json($roots);
     }
@@ -249,6 +249,29 @@ class EntityController extends Controller {
         return response()->json($entity->parentIds);
     }
 
+    // TODO merge with getParentIds($id) method
+    public function getParentMetadata($id) {
+        $user = auth()->user();
+        if(!$user->can('entity_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to get an entity\'s parent id\'s'),
+            ], 403);
+        }
+
+        try {
+            $entity = Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist'),
+            ], 400);
+        }
+        return response()->json([
+            'parentIds' => $entity->parentIds,
+            'parentNames' => $entity->parentNames,
+            'attributeLinks' => $entity->attributeLinks,
+        ]);
+    }
+
     public function getEntitiesByParent($id) {
         $user = auth()->user();
         if(!$user->can('entity_read')) {
@@ -257,7 +280,7 @@ class EntityController extends Controller {
             ], 403);
         }
 
-        return Entity::getEntitiesByParent($id);
+        return Entity::getEntitiesByParent($id, true);
     }
 
     // POST
