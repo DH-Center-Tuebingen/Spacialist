@@ -285,10 +285,7 @@
                 return newRank;
             };
             const checkIsPartOfPath = (path, part) => {
-                if(path.length == 0 || part.length == 0) {
-                    return false;
-                }
-                if(part.length > path.length) {
+                if(path.length == 0 || part.length == 0 || part.length > path.length) {
                     return false;
                 }
 
