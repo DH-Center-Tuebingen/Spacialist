@@ -284,12 +284,31 @@
                 }
                 return newRank;
             };
+            const checkIsPartOfPath = (path, part) => {
+                if(path.length == 0 || part.length == 0) {
+                    return false;
+                }
+                if(part.length > path.length) {
+                    return false;
+                }
+
+                for(let i=0; i<part.length; i++) {
+                    if(part[i] != path[i]) {
+                        return false;
+                    }
+                }
+
+                return true;
+            };
             const isDropAllowed = dropData => {
                 const item = dropData.sourceData;
                 const target = dropData.targetData;
                 const dragEntityType = entityStore.getEntityType(item.entity_type_id);
 
-                if(target.parentIds.indexOf(item.id) != -1 ||
+                const targetParentPath = dropData.targetPath.slice(0, -1);
+                const sourceParentPath = dropData.sourcePath;
+                const sourceIsParent = checkIsPartOfPath(targetParentPath, sourceParentPath);
+                if(sourceIsParent ||
                     (target.state.dropPosition == DropPosition.inside && target.id == item.root_entity_id)) {
                     return false;
                 }
