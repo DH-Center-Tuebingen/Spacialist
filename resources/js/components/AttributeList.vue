@@ -323,8 +323,10 @@
                     switch(width) {
                         case 50:
                             classes.push('col-6');
+                            break;
                         default:
                             classes.push('col-12');
+                            break;
                     }
                 } else {
                     classes.push('col-12');
