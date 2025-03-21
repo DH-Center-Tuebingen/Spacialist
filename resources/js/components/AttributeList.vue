@@ -152,8 +152,7 @@
                     </div>
                     <div
                         v-if="hasEmitter('onMetadata')"
-                        class="pt-2 clickable d-flex flex-row align-items-start justify-content-center align-self-start gap-1"
-                        style="font-size: 1rem;"
+                        class="pt-2 fs-1r clickable d-flex flex-row align-items-start justify-content-center align-self-start gap-1"
                         @click="onMetadataHandler(element)"
                     >
                         <ValidityIndicator
@@ -673,12 +672,12 @@
                 document.querySelectorAll('[data-bs-toggle="popover"]')
                     .forEach(popoverElement => new Popover(popoverElement));
             };
-            
+
             const getCertaintyStyle = certainty => {
                 if(certainty === null) {
                     return 'opacity-25';
                 }
-                
+
                 return '';
             };
 

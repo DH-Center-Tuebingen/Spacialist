@@ -22,7 +22,7 @@
                 @mouseenter="onEntityHeaderHover(true)"
                 @mouseleave="onEntityHeaderHover(false)"
             >
-                <div class="d-inline-flex gap-1">
+                <div class="d-inline-flex gap-2 ms-2">
                     <button
                         v-show="state.hiddenAttributeCount > 0"
                         id="hidden-attributes-icon"
@@ -62,7 +62,7 @@
                     </button>
                     <span
                         v-if="state.hasAttributeLinks"
-                        class="dropdown bg-body text-secondary clickable me-1 ms-2"
+                        class="dropdown bg-body text-secondary clickable me-1"
                     >
                         <span
                             class="fa-layers fa-fw"

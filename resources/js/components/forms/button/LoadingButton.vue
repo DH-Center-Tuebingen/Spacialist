@@ -38,11 +38,11 @@
             }
         },
         setup(props){
-            
-            const computedDisabled = computed(() => {
+
+            const computedDisabled = computed(_ => {
                 return props.loading || props.disabled;
             });
-            
+
             return {
                 computedDisabled,
             };

@@ -78,7 +78,7 @@
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">                
+            <div class="modal-footer">
                 <LoadingButton
                     :loading="state.saving"
                     class="btn btn-outline-success"
@@ -118,11 +118,12 @@
         translateConcept,
         multiselectResetClasslist,
     } from '@/helpers/helpers.js';
+
     import LoadingButton from '@/components/forms/button/LoadingButton.vue';
 
     export default {
         components: {
-            LoadingButton
+            LoadingButton,
         },
         props: {
             parent: {
