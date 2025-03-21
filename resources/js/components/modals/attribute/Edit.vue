@@ -1,17 +1,26 @@
 <template>
     <vue-final-modal
         class="modal-container modal"
-        content-class="sp-modal-content sp-modal-content-sm"
+        content-class="sp-modal-content"
         name="edit-attribute-modal"
     >
-        <div class="sp-modal-content sp-modal-content-sm">
+        <div class="sp-modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    {{
-                        t('main.entity.modals.edit.title_attribute', {
-                            name: translateConcept(state.attribute.thesaurus_url)
-                        })
-                    }}
+                    <template v-if="state.attribute.is_system">
+                        {{
+                            t('main.entity.modals.edit.title_attribute', {
+                                name: t('global.attributes.system-separator')
+                            })
+                        }}
+                    </template>
+                    <template v-else>
+                        {{
+                            t('main.entity.modals.edit.title_attribute', {
+                                name: translateConcept(state.attribute.thesaurus_url)
+                            })
+                        }}
+                    </template>
                 </h5>
                 <button
                     type="button"
@@ -21,130 +30,57 @@
                     @click="closeModal()"
                 />
             </div>
-            <div class="modal-body nonscrollable">
-                <h5 class="text-center">
-                    {{ t('global.dependency.title') }}
-                </h5>
-                <div class="mb-3 row">
-                    <label class="col-form-label text-end col-md-2">
-                        {{ t('global.label') }}:
-                    </label>
-                    <div class="col-md-10">
-                        <input
-                            type="text"
-                            class="form-control"
-                            :value="translateConcept(state.attribute.thesaurus_url)"
-                            disabled
-                        >
+            <div class="modal-body overflow-hidden d-flex flex-column">
+                <template v-if="state.attribute.is_system">
+                    <div class="mb-3 row">
+                        <label class="col-form-label text-end col-md-2">
+                            {{ t('global.text') }}:
+                        </label>
+                        <div class="col-md-10">
+                            <simple-search
+                                :endpoint="searchLabel"
+                                :key-fn="getConceptLabel"
+                                @selected="handleSeparatorRename"
+                            />
+                        </div>
                     </div>
-                </div>
-                <div class="mb-3 row">
-                    <label class="col-form-label text-end col-md-2">
-                        {{ t('global.type') }}:
-                    </label>
-                    <div class="col-md-10">
-                        <input
-                            type="text"
-                            class="form-control"
-                            :value="t(`global.attributes.${state.attribute.datatype}`)"
-                            disabled
-                        >
-                    </div>
-                </div>
-                <div class="mb-3 row">
-                    <label class="col-form-label col-md-2">
-                        {{ t('global.dependency.depends_on.title') }}:
-                    </label>
-                    <div class="col-md-10">
-                        <multiselect
-                            v-model="state.dependency.attribute"
-                            :classes="multiselectResetClasslist"
-                            :value-prop="'id'"
-                            :label="'thesaurus_url'"
-                            :track-by="'id'"
-                            :object="true"
-                            :mode="'single'"
-                            :hide-selected="true"
-                            :options="state.selection"
-                            :placeholder="t('global.select.placeholder')"
-                            @change="dependantSelected"
-                        >
-                            <template #option="{ option }">
-                                {{ translateConcept(option.thesaurus_url) }}
-                            </template>
-                            <template #singlelabel="{ value }">
-                                <div class="multiselect-single-label">
-                                    {{ translateConcept(value.thesaurus_url) }}
-                                </div>
-                            </template>
-                        </multiselect>
-                        <multiselect
-                            v-if="state.attributeSelected"
-                            v-model="state.dependency.operator"
-                            class="mt-2"
-                            :classes="multiselectResetClasslist"
-                            :value-prop="'id'"
-                            :label="'label'"
-                            :track-by="'id'"
-                            :mode="'single'"
-                            :object="true"
-                            :hide-selected="true"
-                            :options="state.operatorList"
-                            :placeholder="t('global.select.placeholder')"
-                            @change="operatorSelected"
-                        />
-                        <div
-                            v-if="state.attributeSelected && state.operatorSelected"
-                            class="mt-2"
-                        >
-                            <div
-                                v-if="state.inputType == 'boolean'"
-                                class="form-check form-switch"
-                            >
-                                <input
-                                    id="dependency-boolean-value"
-                                    v-model="state.dependency.value"
-                                    type="checkbox"
-                                    class="form-check-input"
-                                >
-                            </div>
+                </template>
+                <template v-else>
+                    <div class="mb-3 row">
+                        <label class="col-form-label text-end col-md-2">
+                            {{ t('global.label') }}:
+                        </label>
+                        <div class="col-md-10">
                             <input
-                                v-else-if="state.inputType == 'number'"
-                                v-model.number="state.dependency.value"
-                                type="number"
-                                class="form-control"
-                                :step="state.dependency.attribute.datatype == 'double' ? 0.01 : 1"
-                            >
-                            <multiselect
-                                v-else-if="state.inputType == 'select'"
-                                v-model="state.dependency.value"
-                                :classes="multiselectResetClasslist"
-                                :value-prop="'id'"
-                                :label="'concept_url'"
-                                :track-by="'id'"
-                                :hide-selected="true"
-                                :mode="'single'"
-                                :options="state.dependantOptions"
-                                :placeholder="t('global.select.placeholder')"
-                            >
-                                <template #option="{ option }">
-                                    {{ translateConcept(option.concept_url) }}
-                                </template>
-                                <template #singlelabel="{ value }">
-                                    <div class="multiselect-single-label">
-                                        {{ translateConcept(value.concept_url) }}
-                                    </div>
-                                </template>
-                            </multiselect>
-                            <input
-                                v-else
-                                v-model="state.dependency.value"
                                 type="text"
                                 class="form-control"
+                                :value="translateConcept(state.attribute.thesaurus_url)"
+                                disabled
                             >
                         </div>
                     </div>
-                </div>
+                    <div class="mb-3 row">
+                        <label class="col-form-label text-end col-md-2">
+                            {{ t('global.type') }}:
+                        </label>
+                        <div class="col-md-10">
+                            <input
+                                type="text"
+                                class="form-control"
+                                :value="t(`global.attributes.${state.attribute.datatype}`)"
+                                disabled
+                            >
+                        </div>
+                    </div>
+                </template>
+                <hr>
+                <h5 class="text-center">
+                    {{ t('global.dependency.title') }}
+                </h5>
+                <DependencyForm
+                    v-model="state.dependency"
+                    :options="state.supportedEntityTypeAttributes"
+                />
                 <hr>
                 <div class="row">
                     <h5 class="text-center">
@@ -192,20 +128,36 @@
         computed,
         onMounted,
         reactive,
-        toRefs,
     } from 'vue';
+
     import { useI18n } from 'vue-i18n';
 
-    import useAttributeStore from '@/bootstrap/stores/attribute.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import {
+        searchLabel,
+    } from '@/api.js';
+
+    import {
+        getConceptLabel,
         getEntityTypeAttribute,
         getEntityTypeDependencies,
         translateConcept,
         multiselectResetClasslist,
     } from '@/helpers/helpers.js';
 
+    import {
+        getEmptyGroup,
+        getInputTypeClass,
+        formatDependency,
+    } from '@/helpers/dependencies.js';
+
+    import DependencyForm from '@/components/entity/dependency/DependencyForm.vue';
+
     export default {
+        components: {
+            DependencyForm,
+        },
         props: {
             attributeId: {
                 required: true,
@@ -215,60 +167,21 @@
                 required: true,
                 type: Number,
             },
-            attributeSelection: {
-                required: true,
-                type: Array,
-            },
         },
         emits: ['closing', 'confirm'],
         setup(props, context) {
             const { t } = useI18n();
-            const attributeStore = useAttributeStore();
-            const {
-                attributeId,
-                entityTypeId,
-                attributeSelection,
-            } = toRefs(props);
 
             // FUNCTIONS
-            const convertDependencyObject = dep => {
-                const converted = {
-                    attribute: null,
-                    operator: null,
-                    value: null,
-                };
-                const keys = Object.keys(dep);
-                if(keys.length != 1) {
-                    return converted;
-                }
-                const depId = keys[0];
-                const data = dep[depId];
-                converted.attribute = attributeStore.getAttribute(depId);
-                converted.operator = operators.find(o => o.label == data.operator);
-                converted.value = data.value;
-                return converted;
+            const validateDependencyRule = rule => {
+                const valuesAreSet = rule.attribute?.id && rule.operator?.id;
+                return valuesAreSet && (rule.operator.no_parameter || rule.value != null);
             };
-            const confirmEdit = _ => {
-                const data = {};
 
-                const oldDep = convertDependencyObject(state.activeDependency);
-                const currDep = state.dependency;
-                // simple check if there was a change from no dep -> dep or vice versa
-                if(
-                    (oldDep.attribute && !currDep.attribute) ||
-                    (!oldDep.attribute && currDep.attribute)
-                ) {
-                    data.dependency = state.dependency;
-                } else if(oldDep.attribute && currDep.attribute) {
-                    // or else check if dep is set, but has different values
-                    if(
-                        oldDep.attribute.id != currDep.attribute.id ||
-                        oldDep.operator.id != currDep.operator.id ||
-                        oldDep.value != currDep.value
-                    ) {
-                        data.dependency = state.dependency;
-                    }
-                }
+            const confirmEdit = _ => {
+                const data = {
+                    dependency: state.dependency,
+                };
 
                 // Check for changes in width metadata
                 if(state.attribute.pivot &&
@@ -278,178 +191,64 @@
                         width: state.width,
                     };
                 }
+                if(state.attribute.is_system && state.separatorTitle && (!state.attribute.pivot.metadata?.title || state.separatorTitle != state.attribute.pivot.metadata.title)
+                ) {
+                    data.metadata = {
+                        title: state.separatorTitle,
+                    };
+                }
 
                 context.emit('confirm', data);
             };
             const closeModal = _ => {
                 context.emit('closing', false);
             };
-            const dependantSelected = e => {
-            };
-            const operatorSelected = e => {
-            };
-            const getInputTypeClass = datatype => {
-                switch(datatype) {
-                        case 'string':
-                        case 'stringf':
-                        case 'richtext':
-                        case 'geography':
-                        case 'iconclass':
-                        case 'rism':
-                        case 'serial':
-                            return 'text';
-                        case 'double':
-                        case 'integer':
-                        case 'percentage':
-                            return 'number';
-                        case 'boolean':
-                            return 'boolean';
-                        case 'date':
-                            return 'date';
-                        case 'string-sc':
-                        case 'string-mc':
-                            return 'select';
-                        // TODO handle entity attributes
-                        case 'entity':
-                        case 'entity-mc':
-                            // return 'entity';
-                        case 'userlist':
-                        case 'epoch':
-                        case 'timeperiod':
-                        case 'dimension':
-                        case 'list':
-                        case 'table':
-                        case 'sql':
-                        default:
-                            return 'unsupported';
-                    }
+            const handleSeparatorRename = label => {
+                if(label === null) {
+                    state.separatorTitle = null;
+                } else if(label.concept_url) {
+                    state.separatorTitle = label.concept_url;
+                } else {
+                    console.error('Invalid separator label', label);
+                }
             };
 
             // DATA
-            const operators = [
-                {
-                    id: 1,
-                    label: '=',
-                },
-                {
-                    id: 2,
-                    label: '!=',
-                },
-                {
-                    id: 3,
-                    label: '<',
-                },
-                {
-                    id: 4,
-                    label: '>',
-                },
-            ];
             const state = reactive({
+                separatorTitle: '',
                 dependency: {
-                    attribute: null,
-                    operator: null,
-                    value: null,
+                    or: true,
+                    groups: [getEmptyGroup(false)],
                 },
                 width: 100,
-                dependantOptions: computed(_ => {
-                    if(state.attributeSelected && state.operatorSelected && state.inputType == 'select') {
-                        return attributeStore.getAttributeSelections(state.dependency.attribute.id);
-                    } else {
-                        return [];
-                    }
-                }),
                 isValid: computed(_ => {
-                    return (
-                        state.dependency.attribute && state.dependency.operator && state.dependency.value
-                    ) || (
-                        !state.dependency.attribute && !state.dependency.operator && !state.dependency.value
-                    );
-                }),
-                operatorList: computed(_ => {
-                    if(!state.attributeSelected) return [];
-                    const datatype = state.dependency.attribute.datatype
-                    switch(datatype) {
-                        case 'epoch':
-                        case 'timeperiod':
-                        case 'dimension':
-                        case 'list':
-                        case 'table':
-                        case 'sql':
-                            return [];
-                        // TODO handle entity attributes
-                        case 'entity':
-                        case 'entity-mc':
-                        case 'userlist':
-                            return [];
-                        case 'string':
-                        case 'stringf':
-                        case 'richtext':
-                        case 'string-sc':
-                        case 'string-mc':
-                        case 'geography':
-                        case 'iconclass':
-                        case 'rism':
-                        case 'serial':
-                            return operators.filter(o => {
-                                switch(o.id) {
-                                    case 1:
-                                    case 2:
-                                        return true;
-                                    default:
-                                        return false;
-                                }
-                            });
-                        case 'double':
-                        case 'integer':
-                        case 'date':
-                        case 'percentage':
-                            return operators.filter(o => {
-                                switch(o.id) {
-                                    case 1:
-                                    case 2:
-                                    case 3:
-                                    case 4:
-                                        return true;
-                                    default:
-                                        return false;
-                                }
-                            });
-                        case 'boolean':
-                            return operators.filter(o => {
-                                switch(o.id) {
-                                    case 1:
-                                        return true;
-                                    default:
-                                        return false;
-                                }
-                            });
-                        default:
-                            throw new Error(`Unsupported datatype ${datatype}`);
-                    }
-                }),
-                inputType: computed(_ => {
-                    if(!state.attributeSelected || !state.operatorSelected) return 'unsupported';
-
-                    return getInputTypeClass(state.dependency.attribute.datatype);
-                }),
-                attribute: computed(_ => getEntityTypeAttribute(entityTypeId.value, attributeId.value)),
-                activeDependency: computed(_ => getEntityTypeDependencies(entityTypeId.value, attributeId.value)),
-                selection: computed(_ => {
-                    return attributeSelection.value.filter(a => {
-                        return a.id != attributeId.value && getInputTypeClass(a.datatype) != 'unsupported';
+                    return state.dependency.groups.every(group => {
+                        return group.rules.length == 0 || group.rules.every(rule => validateDependencyRule(rule));
                     });
                 }),
-                attributeSelected: computed(_ => state.dependency.attribute && state.dependency.attribute.id),
-                operatorSelected: computed(_ => state.dependency.operator && state.dependency.operator.id),
+                attribute: {},
+                inputTypeClass: computed(_ => getInputTypeClass(state.attribute.datatype)),
+                supportedEntityTypeAttributes: computed(_ => {
+                    const attributeSelection = useEntityStore().getEntityTypeAttributes(props.entityTypeId);
+                    const supportedEntityTypeAttributes = attributeSelection.filter(a => {
+                        return a.id != props.attributeId && getInputTypeClass(a.datatype) != 'unsupported';
+                    });
+                    return supportedEntityTypeAttributes;
+                }),
             });
 
             // ON MOUNTED
             onMounted(_ => {
-                if(!!state.activeDependency) {
-                    state.dependency = convertDependencyObject(state.activeDependency);
+                state.attribute = getEntityTypeAttribute(props.entityTypeId, props.attributeId);
+                const currentDependency = getEntityTypeDependencies(props.entityTypeId, props.attributeId);
+                if(currentDependency) {
+                    state.dependency = formatDependency(currentDependency);
                 }
-                if(state.attribute.pivot && state.attribute.pivot.metadata) {
+                if(state.attribute?.pivot?.metadata) {
                     state.width = state.attribute.pivot.metadata.width || 100;
+                    if(state.attribute.is_system) {
+                        state.separatorTitle = state.attribute.pivot.metadata.title;
+                    }
                 }
             });
 
@@ -457,17 +256,19 @@
             return {
                 t,
                 // HELPERS
+                searchLabel,
+                getConceptLabel,
                 translateConcept,
                 multiselectResetClasslist,
                 // PROPS
                 // LOCAL
+                getInputTypeClass,
                 confirmEdit,
                 closeModal,
-                dependantSelected,
-                operatorSelected,
+                handleSeparatorRename,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

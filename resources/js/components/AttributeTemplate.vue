@@ -445,7 +445,7 @@
             const state = reactive({
                 attribute: {
                     recursive: false,
-                    type: '',
+                    type: type.value ?? '',
                     label: null,
                     rootLabel: null,
                     rootAttributeLabel: null,

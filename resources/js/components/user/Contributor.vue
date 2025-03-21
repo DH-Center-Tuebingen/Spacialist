@@ -25,8 +25,10 @@
                 required: true
             }
         }, setup() {
+            const { t } = useI18n();
+
             return {
-                t: useI18n().t
+                t,
             };
         }
     };

@@ -362,6 +362,28 @@
         "geometry_type": "Geometrietyp",
         "dependency": {
             "title": "Abhängigkeiten",
+            "group": "Gruppe",
+            "add_group": "Gruppe hinzufügen",
+            "remove_group": "Gruppe entfernen",
+            "add_rule": "Neue Regel hinzufügen",
+            "remove_rule": "Regel entfernen",
+            "no_rules_defined": "Noch keine Abhängigkeitsregeln für diese Gruppe definiert.",
+            "operators": {
+                "equal": "entspricht",
+                "not_equal": "entspricht nicht",
+                "greater": "größer als",
+                "greater_or_equal": "größer oder gleich",
+                "less": "kleiner als",
+                "less_or_equal": "kleiner oder gleich",
+                "set": "gesetzt",
+                "not_set": "nicht gesetzt"
+            },
+            "modes": {
+                "or": "Partiell",
+                "or_desc": "\"Oder\": Mindestens eine Bedingung muss erfüllt sein",
+                "and": "Alle",
+                "and_desc": "\"Und\": Alle Bedingungen müssen erfüllt sein"
+            },
             "depends_on": {
                 "title": "Hängt ab von",
                 "desc": "Sichtbarkeit hängt von einem anderen Attribut(wert) ab"

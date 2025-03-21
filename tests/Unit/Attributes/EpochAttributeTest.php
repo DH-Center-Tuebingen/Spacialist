@@ -2,10 +2,10 @@
 namespace Tests\Unit\Attributes;
 
 use App\AttributeTypes\EpochAttribute;
+use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
-// !!!! Currently this test is only testing the fromImport function!!!
 class EpochAttributeTest extends TestCase {
     /**
      * @dataProvider truthyProvider
@@ -28,6 +28,35 @@ class EpochAttributeTest extends TestCase {
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         EpochAttribute::fromImport($input);
+    }
+
+    /**
+     * Test export of epoch attribute (attribute value id = 62)
+     *
+     * @return void
+     */
+    public function testParseExport() {
+        $testValue = AttributeValue::find(62);
+        $parseResult = EpochAttribute::parseExport(json_encode($testValue->getValue()));
+
+        $this->assertEquals('-340;-300;Eisenzeit', $parseResult);
+    }
+    /**
+     * Test export value of epoch attribute value without epoch key (id=62)
+     *
+     * @return void
+     */
+    public function testParseExportWihtoutEpoch() {
+        $testValue = AttributeValue::find(62);
+        // remove epoch key from json data
+        $jsonVal = json_decode($testValue->json_val);
+        $jsonVal->epoch = null;
+        // and store value
+        $testValue->json_val = json_encode($jsonVal);
+
+        $parseResult = EpochAttribute::parseExport(json_encode($testValue->getValue()));
+        $this->assertEquals('-340;-300;', $parseResult);
+
     }
 
     public static function truthyProvider() {

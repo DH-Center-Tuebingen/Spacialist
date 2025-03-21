@@ -8,6 +8,7 @@ import {
     simpleResourceType,
     throwError,
 } from '@/helpers/helpers.js';
+import File from './helpers/file';
 
 // GET AND STORE (FETCH)
 export async function logout() {
@@ -135,6 +136,12 @@ export async function getCommentReplies(cid, endpoint = '/comment/{cid}/reply') 
 
     return $httpQueue.add(
         () => http.get(endpoint).then(response => response.data)
+    );
+}
+
+export async function getEntity(id) {
+    return await $httpQueue.add(
+        () => http.get(`/entity/${id}`).then(response => response.data)
     );
 }
 
@@ -400,6 +407,16 @@ export async function duplicateEntity(entity) {
     );
 }
 
+export async function exportEntityTree(root){
+    return $httpQueue.add(
+        () => http.get(`/entity/${root}/export`,{
+            responseType: 'blob'
+        })
+        .then(File.saveFileWithFallback('export_no_name'))
+        .catch(e => { throw e; })
+    );
+}
+
 export async function importEntityData(data) {
     return $httpQueue.add(
         () => http.post(`/entity/import`, data).then(response => response.data).catch(e => { throw e; })
@@ -621,22 +638,33 @@ export async function reorderEntityAttributes(etid, aid, position) {
 }
 
 export async function updateAttributeDependency(etid, aid, dependency) {
-    const data = {};
-    if(!!dependency.attribute) {
-        data.attribute = dependency.attribute.id;
-        data.operator = dependency.operator.label;
-        data.value = dependency.value.value || dependency.value;
-    }
+    const apiData = {};
+    const dependencyData = {};
+    dependencyData.or = dependency.or;
+    dependencyData.groups = dependency.groups.map(group => {
+        group.rules = group.rules.map(rule => {
+            const formattedRule = {
+                attribute: rule.attribute.id,
+                operator: rule.operator.operator,
+            };
+
+            if(!rule.operator.no_parameter) {
+                formattedRule.value = rule.value.value || rule.value;
+            }
+
+            return formattedRule;
+        });
+        return group;
+    });
+    apiData.data = dependencyData;
     return $httpQueue.add(
-        () => http.patch(`/editor/dm/entity_type/${etid}/attribute/${aid}/dependency`, data).then(response => {
-            return Object.values(response.data).length > 0 ? response.data : null;
-        })
+        () => http.patch(`/editor/dm/entity_type/${etid}/attribute/${aid}/dependency`, apiData)
     );
 }
 
 export async function updateAttributeMetadata(pivid, data) {
     return $httpQueue.add(
-        () => http.patch(`/editor/dm/entity_type/attribute/system/${pivid}`, data).then(response => response.data)
+        () => http.patch(`/editor/dm/entity_type/attribute/${pivid}/metadata`, data)
     );
 }
 

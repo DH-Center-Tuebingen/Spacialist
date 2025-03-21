@@ -8,21 +8,25 @@ use App\Entity;
 use App\EntityAttribute;
 use App\EntityFile;
 use App\EntityType;
+use App\File;
+use App\Reference;
 use App\Exceptions\AmbiguousValueException;
 use App\Exceptions\AttributeImportException;
 use App\Exceptions\ImportException;
 use App\Exceptions\InvalidDataException;
 use App\Exceptions\Structs\AttributeImportExceptionStruct;
 use App\Exceptions\Structs\ImportExceptionStruct;
-use App\File;
 use App\Import\EntityImporter;
-use App\Reference;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
+use Exception;
+use ZipArchive;
 
 class EntityController extends Controller {
     /**
@@ -581,6 +585,126 @@ class EntityController extends Controller {
         fclose($handle);
         DB::commit();
         return response()->json($changedEntities, 201);
+    }
+
+    function exportEntityTree($id, Request $request) {
+        $user = auth()->user();
+        if(!$user->can('entity_read') || !$user->can('entity_share')) {
+            return response()->json([
+                'error' => __('You do not have the permission to export an entity tree'),
+            ], 403);
+        }
+
+        try {
+            $entity = Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist'),
+            ], 400);
+        }
+
+        $entities = $entity->getAllChildren();
+        $tmpDir = File::getUniqueTemporaryDirectoryName();
+        Storage::disk('private')->makeDirectory($tmpDir);
+        try {
+            $files = $this->createImportFilesForDistinctEntityTypes($entities, $tmpDir);
+
+            if(count($files) == 0) {
+                return response()->json([
+                    'error' => __('No entities found'),
+                ], 400);
+            }
+
+            // We replace all non-alphanumeric characters to avoid path traversal attacks
+            $filename = 'export_' . Str::limit(Str::snake(preg_replace('/[^a-zA-Z0-9]/', '', $entity->name)), 20) . '_' . Carbon::now()->format('YmdHis');
+            $filepath = "";
+
+            if(count($files) == 1) {
+                $filename = $filename . '.csv';
+                Storage::disk('private')->move(array_pop($files), $filename);
+                $filepath = Storage::disk('private')->path($filename);
+            } else {
+                // Create a ZIP file
+                $filename = $filename . '.zip';
+                $zip = new ZipArchive;
+                $filepath = Storage::disk('private')->path($filename);
+
+                if($zip->open($filepath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+                    foreach($files as $file) {
+                        $zip->addFile(Storage::disk('private')->path($file), basename($file));
+                    }
+                    $zip->close();
+                }
+            }
+
+            // Clean up the temporary files
+            Storage::disk('private')->deleteDirectory($tmpDir);
+
+            // Return the ZIP file as a download response
+            return response()->download($filepath, $filename)->deleteFileAfterSend(true);
+        } catch(Exception $e) {
+            Storage::disk('private')->delete($tmpDir);
+            Log::error($e->getMessage(), ['exception' => $e]);
+            return response()->json([
+                'error' => __('An unexpected error occurred while exporting the entities'),
+            ], 500);
+        }
+    }
+
+    private function createImportFilesForDistinctEntityTypes(array $entities, string $tmpDir): array {
+        $files = [];
+        $headersMap = [];
+        // TODO handle in Entity with other metadata (e.g. creator, licence, …)
+        $metadataFields = ['_name', '_entity_type', '_parent'];
+        foreach($entities as $entity) {
+            $entityTypeName = $entity['_entity_type'];
+            $entityTypeId = $entity['_entity_type_id'];
+            $delimiter = ";";
+
+            if(!isset($files[$entityTypeId])) {
+                $filename = $tmpDir . '/' . $entityTypeName . '-' . $entityTypeId . '_' . Carbon::now()->format('YmdHis') . '.csv';
+                $files[$entityTypeId] = $filename;
+
+                $entityType = EntityType::find($entityTypeId);
+                $attributes = $entityType->attributes->all();
+
+                // We use the id for the mapping to prevent conflicts from
+                // attributes with the same name.
+                $attributeIds = [];
+                $attributeNames = [];
+                $excludedAttributeTypes = ['system-separator'];
+                foreach($attributes as $attribute) {
+                    if(in_array($attribute->datatype, $excludedAttributeTypes)) {
+                        continue;
+                    }
+                    $attributeIds[] = $attribute->id;
+                    $attributeNames[] = $attribute->thesaurus_concept->getActiveLocaleLabel();
+                }
+
+                $mergedHeaderKeyMap = array_merge($attributeIds, $metadataFields);
+                $headersMap[$entityTypeId] = $mergedHeaderKeyMap;
+                $mergedHeaderNames = array_merge($attributeNames, $metadataFields);
+
+                $headerStrings = array_map(function($header) {
+                    $header = str_replace('"', '\"', $header);
+                    $header = str_replace('\n', '', $header);
+                    return '"' . $header . '"';
+                }, $mergedHeaderNames);
+                Storage::disk('private')->put($filename, implode($delimiter,  $headerStrings));
+            }
+
+            $filename = $files[$entityTypeId];
+            $columns = [];
+            $columnHeaders = $headersMap[$entityTypeId];
+            foreach($columnHeaders as $columnHeader) {
+                $columns[] = isset($entity[$columnHeader]) ? $entity[$columnHeader] : "";
+            }
+            Storage::disk('private')->append($filename, implode($delimiter, array_map(function($item) {
+                return '"' . $item . '"';
+            }, $columns)));
+            $files[$entityTypeId] = $filename;
+        }
+        return $files;
     }
 
     function createImportedEntity($entityName, ?string $rootEntityPath, $entityTypeId, $user) {

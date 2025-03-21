@@ -74,6 +74,19 @@
                 </span>
             </a>
         </li>
+        <li v-if="can('entity_share')">
+            <a
+                class="dropdown-item"
+                href="#"
+                @click.stop.prevent="exportWithChildren"
+                @dblclick.stop.prevent=""
+            >
+                <i class="fas fa-fw fa-file-export text-primary" />
+                <span class="ms-2">
+                    {{ t('global.export') }}
+                </span>
+            </a>
+        </li>
         <li>
             <a
                 v-if="can('entity_delete')"
@@ -110,6 +123,7 @@
 
     import {
         duplicateEntity as duplicateEntityApi,
+        exportEntityTree as exportEntityTreeApi,
     } from '@/api.js';
 
     import {
@@ -129,6 +143,7 @@
             'close'
         ],
         setup(props, context) {
+            const { t } = useI18n();
             const entityStore = useEntityStore();
 
             useGlobalClick(function () {
@@ -163,13 +178,25 @@
                 context.emit('close');
             };
 
+            const exportWithChildren = async _ => {
+                if(!can('entity_share')) return;
+                try{
+                    const exported = await exportEntityTreeApi(props.data.id);
+                    console.log(exported);
+                } catch(e) {
+                    console.error(e);
+                }
+                context.emit('close');
+            };
+
             return {
-                t: useI18n().t,
+                t,
                 can,
                 addEntity,
                 duplicateEntity,
                 moveEntity,
                 deleteEntity,
+                exportWithChildren,
             };
         }
     };

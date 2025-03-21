@@ -1,7 +1,9 @@
 <?php
 namespace Tests\Unit\Attributes;
 
+use App\AttributeTypes\AttributeBase;
 use App\AttributeTypes\DimensionAttribute;
+use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
@@ -28,6 +30,18 @@ class DimensionAttributeTest extends TestCase {
     public function testFromImportException($input) {
         $this->expectException(InvalidDataException::class);
         DimensionAttribute::fromImport($input);
+    }
+
+    /**
+     * Test export of attribute (attribute value id = 33)
+     *
+     * @return void
+     */
+    public function testParseExport() {
+        $testValue = AttributeValue::find(33);
+        $parseResult = AttributeBase::serializeExportData($testValue);
+
+        $this->assertEquals('10;3;1.5;cm', $parseResult);
     }
 
     public static function truthyProvider() {

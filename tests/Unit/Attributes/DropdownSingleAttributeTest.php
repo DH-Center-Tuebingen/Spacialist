@@ -1,7 +1,9 @@
 <?php
 namespace Tests\Unit\Attributes;
 
+use App\AttributeTypes\AttributeBase;
 use App\AttributeTypes\DropdownSingleAttribute;
+use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
@@ -28,6 +30,18 @@ class DropdownSingleAttributeTest extends TestCase {
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         DropdownSingleAttribute::fromImport($input);
+    }
+
+    /**
+     * Test export of attribute (attribute value id = 60)
+     *
+     * @return void
+     */
+    public function testParseExport() {
+        $testValue = AttributeValue::find(60);
+        $parseResult = AttributeBase::serializeExportData($testValue);
+
+        $this->assertEquals('Graben', $parseResult);
     }
 
     public static function truthyProvider() {

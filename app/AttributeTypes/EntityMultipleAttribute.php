@@ -34,6 +34,12 @@ class EntityMultipleAttribute extends AttributeBase
         return json_encode($idList);
     }
 
+    public static function parseExport(mixed $data) : string {
+        return implode(';', array_map(function($id) {
+            return Entity::find($id)->name;
+        }, json_decode($data)));
+    }
+
     public static function unserialize(mixed $data) : mixed {
         $result = [];
         foreach($data as $entry) {

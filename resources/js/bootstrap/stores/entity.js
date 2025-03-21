@@ -31,6 +31,7 @@ import {
     deleteEntityType,
     duplicateEntityType,
     fetchEntityMetadata,
+    getEntity,
     getEntityComments,
     getEntityData,
     getEntityParentIds,
@@ -42,6 +43,8 @@ import {
     patchAttributes as apiPatchAttributes,
     removeEntityTypeAttribute,
     reorderEntityAttributes,
+    searchEntity,
+    updateAttributeDependency,
     updateAttributeMetadata,
 } from '@/api.js';
 
@@ -110,13 +113,27 @@ export const useEntityStore = defineStore('entity', {
             });
         },
         getEntity: state => id => {
-            return state.entities[id] || {};
+            return state.entities[id] || { id: 0 };
+        },
+        fetchEntity: function (state) {
+            return async id => {
+                const cachedEntity = this.getEntity(id);
+                if(cachedEntity.id !== 0) {
+                    return Promise.resolve(cachedEntity);
+                }
+
+                const entity = await getEntity(id);
+                this.add(entity);
+                return entity;
+            };
         },
         getEntityType: state => id => {
             if(!id) return {};
             return state.entityTypes[id];
         },
         getEntityTypeAttributes: state => (id, exclude = false) => {
+            if(!id || !state.entityTypeAttributes[id]) return [];
+
             if(exclude === true) {
                 return state.entityTypeAttributes[id].filter(a => a.datatype != 'system-separator');
             } else if(Array.isArray(exclude)) {
@@ -761,11 +778,11 @@ export const useEntityStore = defineStore('entity', {
             });
         },
         async updateDependency(entityTypeId, attributeId, dependency) {
-            return updateAttributeDependency(entityTypeId, attributeId, dependency).then(data => {
+            return updateAttributeDependency(entityTypeId, attributeId, dependency).then(response => {
                 const attributes = this.getEntityTypeAttributes(entityTypeId);
                 const attribute = attributes.find(a => a.id == attributeId);
                 if(attribute) {
-                    attribute.pivot.depends_on = data;
+                    attribute.pivot.depends_on = response.data;
                 }
             });
         },
@@ -838,6 +855,9 @@ export const useEntityStore = defineStore('entity', {
             this.treeSelectionTypeIds = [];
             this.treeSelectionTypeIds = updateSelectionTypeIdList(this.treeSelection);
         },
+        async search(query){
+            return searchEntity(query);
+        }
     },
 });
 

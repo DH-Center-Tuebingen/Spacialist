@@ -64,7 +64,9 @@ $breadcrumb-divider-flipped: $breadcrumb-divider;
 
 //Z-Index
 $zindex-sticky-in-page: 995;
-$zindex-dropdown-underneath-sticky: 990;
+$zindex-dropdown-underneath-sticky: 990; 
+/* Must be more than 1055 when it uses 'appendToBody' to be above a modal. */
+$zindex-dropdown: 2000;
 
 :root {
     /* Increases the max size of the vueform/multiselect list */

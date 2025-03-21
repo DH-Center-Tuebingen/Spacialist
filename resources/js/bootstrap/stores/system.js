@@ -116,6 +116,9 @@ export const useSystemStore = defineStore('system', {
         getDatatypeDataOf: state => key => state.datatypeData[key],
     },
     actions: {
+        getConceptById(id) {
+            return this.concepts[id];  
+        },
         setAppState(state) {
             this.appInitialized = state;
         },

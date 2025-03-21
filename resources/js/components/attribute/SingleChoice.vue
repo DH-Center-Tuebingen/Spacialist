@@ -15,6 +15,7 @@
         :limit="15"
         :filter-results="false"
         :placeholder="t('global.select.placeholder')"
+        :append-to-body="true"
         @keydown.tab="handleTab"
         @keydown="clearInputOnDelete"
         @select="value => v.handleChange(value)"

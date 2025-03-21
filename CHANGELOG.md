@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
   - _Entity References_
   - _Entity Comments_
 - Filter and sort functionality on _Entity Type List_
+- Dependencies added to _System Separator_ attribute
 - Indicator in _Data Model Editor_ that visualizes if an attribute is used in any entity-type
 - Label Search displays full path of thesaurus concept
 - References can also be added to an Entity, not only to an Entity Attribute
@@ -33,6 +34,7 @@ All notable changes to this project will be documented in this file.
   - Floating Point values are now allowed
   - Mousewheel can be used to change value
   - _Ctrl_ and _Shift_ key can be used to change step size (_Ctrl_ = 10, _Shift_ = 0.01, _Ctrl_ & _Shift_ = 0.1)
+- Users can add more than one dependency for an attribute and use groups
 
 ## 0.10.2
 ### Fixed

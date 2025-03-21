@@ -479,9 +479,7 @@ class EditorController extends Controller {
             ], 403);
         }
         $this->validate($request, [
-            'attribute' => 'integer|exists:entity_attributes,attribute_id',
-            'operator' => 'string|in:<,>,=,!=',
-            'value' => ''
+            'data' => 'required|array',
         ]);
 
         $entityAttribute = EntityAttribute::where([
@@ -495,28 +493,54 @@ class EditorController extends Controller {
             ], 400);
         }
 
-        $dAttribute = $request->get('attribute');
-        $dOperator = $request->get('operator');
-        $dValue = $request->get('value');
+        $dependencyData = $request->get('data');
+        $hasData = false;
+        $dependsOn = [
+            'or' => $dependencyData['or'],
+        ];
+        $operators = [
+            '<' => true,
+            '>' => true,
+            '<=' => true,
+            '>=' => true,
+            '=' => true,
+            '!=' => true,
+            '?' => false,
+            '!?' => false,
+        ];
+        foreach($dependencyData['groups'] as $group) {
+            if(count($group['rules']) > 0) {
+                $hasData = true;
+                $groupRules = [];
+                foreach($group['rules'] as $rule) {
+                    if(!in_array($rule['operator'], array_keys($operators))) {
+                        return response()->json([
+                            'error' => __('Operator mismatch')
+                        ], 400);
+                    }
+                    if(!EntityAttribute::where('attribute_id', $rule['attribute'])->exists()) {
+                        return response()->json([
+                            'error' => __('Entity attribute does not exist')
+                        ], 400);
+                    }
 
-        $allSet = isset($dAttribute) && isset($dOperator) && isset($dValue);
-        $noneSet = !isset($dAttribute) && !isset($dOperator) && !isset($dValue);
-
-        if(!($allSet) && !($noneSet)) {
-            return response()->json([
-                'error' => __('Please provide either all dependency fields or none')
-            ], 400);
+                    $formattedRule = [
+                        'operator' => $rule['operator'],
+                        'on' => $rule['attribute'],
+                    ];
+                    if($operators[$rule['operator']]) {
+                        $formattedRule['value'] = $rule['value'];
+                    }
+                    $groupRules[] = $formattedRule;
+                }
+                $dependsOn['groups'][] = [
+                    'or' => $group['or'],
+                    'rules' => $groupRules,
+                ];
+            }
         }
 
-        if($allSet) {
-            $dependsOn = [
-                $dAttribute => [
-                    'operator' => $dOperator,
-                    'value' => $dValue,
-                    'dependant' => $aid
-                ]
-            ];
-        } else {
+        if(!$hasData) {
             $dependsOn = null;
         }
 
@@ -525,7 +549,7 @@ class EditorController extends Controller {
         return response()->json($entityAttribute->depends_on, 200);
     }
 
-    public function patchSystemAttribute(Request $request, $id) {
+    public function patchAttributeMetadata(Request $request, $id) {
         $user = auth()->user();
         if(!$user->can('entity_type_write')) {
             return response()->json([

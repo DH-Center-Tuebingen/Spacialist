@@ -19,13 +19,17 @@ class DropdownSingleAttribute extends AttributeBase
     }
 
     public static function parseImport(int|float|bool|string $data) : mixed {
-        $data = StringUtils::useGuard(InvalidDataException::class)($data);  
+        $data = StringUtils::useGuard(InvalidDataException::class)($data);
         $concept = ThConcept::getByString($data);
         if(isset($concept)) {
             return $concept->concept_url;
         } else {
             throw InvalidDataException::invalidConcept($data);
         }
+    }
+
+    public static function parseExport(mixed $data) : string {
+        return ThConcept::getLabel($data);
     }
 
     public static function unserialize(mixed $data) : mixed {

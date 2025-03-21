@@ -1,7 +1,9 @@
 <?php
 namespace Tests\Unit\Attributes;
 
+use App\AttributeTypes\AttributeBase;
 use App\AttributeTypes\DaterangeAttribute;
+use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
@@ -21,6 +23,18 @@ class DaterangeAttributeTest extends TestCase {
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         DaterangeAttribute::fromImport($input);
+    }
+
+    /**
+     * Test export of attribute (attribute value id = 79)
+     *
+     * @return void
+     */
+    public function testParseExport() {
+        $testValue = AttributeValue::find(79);
+        $parseResult = AttributeBase::serializeExportData($testValue);
+
+        $this->assertEquals('2025-02-01;2025-02-07', $parseResult);
     }
 
     public static function truthyProvider() {

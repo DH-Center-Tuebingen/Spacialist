@@ -1,7 +1,9 @@
 <?php
 namespace Tests\Unit\Attributes;
 
+use App\AttributeTypes\AttributeBase;
 use App\AttributeTypes\UserlistAttribute;
+use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
@@ -28,6 +30,18 @@ class UserlistAttributeTest extends TestCase {
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         UserlistAttribute::fromImport($input);
+    }
+
+    /**
+     * Test export of attribute (attribute value id = xx)
+     *
+     * @return void
+     */
+    public function testParseExport() {
+        $testValue = AttributeValue::find(76);
+        $parseResult = AttributeBase::serializeExportData($testValue);
+
+        $this->assertEquals('admin', $parseResult);
     }
 
     public static function truthyProvider() {

@@ -43,7 +43,7 @@
                             </div>
                             <div
                                 v-show="!!state.hoverStates[index]"
-                                class="btn-fab-list position-absolute start-0"
+                                class="btn-fab-list btn-fab-list-md position-absolute start-0"
                             >
                                 <button
                                     v-show="hasEmitter('onReorderList')"
@@ -98,13 +98,19 @@
                                     />
                                 </button>
                             </div>
-                            <span
-                                v-if="!element.is_system"
-                                class="d-inline-block text-end col text-truncate"
-                                :title="translateConcept(element.thesaurus_url)"
+                            <div
+                                class="text-end col d-inline-block text-truncate"
                             >
-                                {{ translateConcept(element.thesaurus_url) }}
-                            </span>
+                                <span v-if="element.is_system">
+                                    &nbsp;
+                                </span>
+                                <span
+                                    v-else
+                                    :title="translateConcept(element.thesaurus_url)"
+                                >
+                                    {{ translateConcept(element.thesaurus_url) }}
+                                </span>
+                            </div>
                             <a
                                 v-if="getConceptNote(element.thesaurus_url)"
                                 tabindex="0"
@@ -135,7 +141,7 @@
                                 :hide-links="state.hideEntityLink"
                                 :preview="preview"
                                 :preview-data="previewData"
-                                @change="updateDirtyState"
+                                @change="attributeChanged"
                                 @update-selection="handleSelectionUpdate"
                                 @expanded="e => onAttributeExpand(e, index)"
                             />
@@ -280,7 +286,7 @@
                 default: _ => new Object(),
             },
         },
-        emits: ['dirty'],
+        emits: ['dirty', 'change'],
         setup(props, context) {
             const { t } = useI18n();
             const attributeStore = useAttributeStore();
@@ -490,6 +496,12 @@
                 }
                 return values;
             };
+
+            const attributeChanged = e => {
+                updateDirtyState(e);
+                context.emit('change', e);
+            };
+
             const updateDirtyState = e => {
                 // state.changeTracker.local[e.attribute_id] = true;
                 state.changeTracker.local[e.attribute_id] = e.dirty;
@@ -706,6 +718,7 @@
                 translateConcept,
                 getConceptNote,
                 // LOCAL
+                attributeChanged,
                 certainty,
                 handleSelectionUpdate,
                 additionalRowClasses,
