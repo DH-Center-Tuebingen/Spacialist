@@ -220,7 +220,7 @@ export const useUserStore = defineStore('user', {
         async setAvatar(file) {
             const user = this.getCurrentUser;
             const filepath = user.avatar;
-            setUserAvatar(file).then(data => {
+            return setUserAvatar(file).then(data => {
                 const updateData = {
                     avatar: data.avatar,
                 };
@@ -233,7 +233,7 @@ export const useUserStore = defineStore('user', {
             });
         },
         async deleteAvatar() {
-            deleteUserAvatar().then(_ => {
+            return deleteUserAvatar().then(_ => {
                 const updateData = {
                     avatar: false,
                 };

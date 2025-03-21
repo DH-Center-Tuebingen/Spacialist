@@ -80,8 +80,10 @@ class CommandTest extends TestCase {
         $user = User::firstWhere("email", "=", "admin@localhost");
         $this->assertEquals($user->name, 'Admin');
 
-        $latest = User::latest()->first();
+        $latest = User::withTrashed()->latest()->first();
         $this->assertEquals($latest->name, 'Gary Guest');
+        $user = User::latest()->first();
+        $this->assertEquals($user->name, 'John Doe');
     }
 
     /**
@@ -97,8 +99,10 @@ class CommandTest extends TestCase {
             ->expectsOutput('The email must be a valid email address.')
             ->assertExitCode(1);
 
-        $user = User::latest()->first();
+        $user = User::withTrashed()->latest()->first();
         $this->assertEquals($user->name, 'Gary Guest');
+        $user = User::latest()->first();
+        $this->assertEquals($user->name, 'John Doe');
     }
 
     /**
@@ -114,8 +118,10 @@ class CommandTest extends TestCase {
             ->expectsOutput('The nickname has already been taken.')
             ->assertExitCode(1);
 
-        $user = User::latest()->first();
+        $user = User::withTrashed()->latest()->first();
         $this->assertEquals($user->name, 'Gary Guest');
+        $user = User::latest()->first();
+        $this->assertEquals($user->name, 'John Doe');
     }
 
     /**
@@ -131,8 +137,10 @@ class CommandTest extends TestCase {
             ->expectsOutput('The nickname may only contain letters, numbers, and dashes.')
             ->assertExitCode(1);
 
-        $user = User::latest()->first();
+        $user = User::withTrashed()->latest()->first();
         $this->assertEquals($user->name, 'Gary Guest');
+        $user = User::latest()->first();
+        $this->assertEquals($user->name, 'John Doe');
     }
 
     /**

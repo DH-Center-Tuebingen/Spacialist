@@ -20,7 +20,7 @@
             >
                 <div class="d-flex align-items-center gap-2">
                     <div
-                        class="row flex-fill"
+                        class="row gx-3 flex-fill"
                         :class="addModerationStateClasses(element.id)"
                     >
                         <label
@@ -99,12 +99,15 @@
                                 </button>
                             </div>
                             <div
-                                class="text-end col"
+                                class="text-end col d-inline-block text-truncate"
                             >
                                 <span v-if="element.is_system">
                                     &nbsp;
                                 </span>
-                                <span v-else>
+                                <span
+                                    v-else
+                                    :title="translateConcept(element.thesaurus_url)"
+                                >
                                     {{ translateConcept(element.thesaurus_url) }}
                                 </span>
                             </div>
@@ -122,20 +125,7 @@
                                 <i class="fas fa-fw fa-circle-info" />
                             </a>
                             <sup
-                                v-if="hasEmitter('onMetadata')"
-                                class="clickable d-flex flex-row align-items-start top-0"
-                                @click="onMetadataHandler(element)"
-                            >
-                                <validity-indicator :state="certainty(element)" />
-                                <span v-if="hasComment(element)">
-                                    <i class="fas fa-fw fa-comment" />
-                                </span>
-                                <span v-if="hasBookmarks(element)">
-                                    <i class="fas fa-fw fa-bookmark" />
-                                </span>
-                            </sup>
-                            <sup
-                                v-if="hasEmitter('onEditElement') && !!element.pivot.depends_on"
+                                v-if="hasEmitter('onEditElement') && !!element.pivot.depends_on && Object.keys(element.pivot.depends_on).length > 0"
                                 :title="t('global.dependency.depends_on.desc')"
                             >
                                 <i class="fas fa-diagram-next text-warning fa-rotate-180" />
@@ -165,6 +155,30 @@
                                 @edit="e => handleEditModeration(element.id, e)"
                             />
                         </div>
+                    </div>
+                    <div
+                        v-if="hasEmitter('onMetadata')"
+                        class="pt-2 fs-1r clickable d-flex flex-row align-items-start justify-content-center align-self-start gap-1"
+                        @click="onMetadataHandler(element)"
+                    >
+                        <ValidityIndicator
+                            class="col h-10"
+                            :class="getCertaintyStyle(certainty(element))"
+                            :center="true"
+                            :state="certainty(element)"
+                        />
+                        <span
+                            class="col text-center"
+                            :class="inactiveMetadataClass(!hasComment(element))"
+                        >
+                            <i class="fas fa-fw fa-comment" />
+                        </span>
+                        <span
+                            class="col text-center"
+                            :class="inactiveMetadataClass(!hasBookmarks(element))"
+                        >
+                            <i class="fas fa-fw fa-bookmark" />
+                        </span>
                     </div>
                     <slot
                         name="after"
@@ -212,7 +226,7 @@
             classes: {
                 required: false,
                 type: String,
-                default: 'h-100 pe-2',
+                default: 'h-100',
             },
             attributes: {
                 required: true,
@@ -309,8 +323,10 @@
                     switch(width) {
                         case 50:
                             classes.push('col-6');
+                            break;
                         default:
                             classes.push('col-12');
+                            break;
                     }
                 } else {
                     classes.push('col-12');
@@ -610,6 +626,12 @@
                 return metadataAddon.value && metadataAddon.value(attribute.thesaurus_url);
             };
 
+            const inactiveMetadataClass = inactive => {
+                if(inactive) {
+                    return ['opacity-25'];
+                }
+            };
+
             const handleLabelClick = (e, attrType) => {
                 if(attrType == 'boolean') {
                     e.preventDefault();
@@ -665,6 +687,14 @@
                     .forEach(popoverElement => new Popover(popoverElement));
             };
 
+            const getCertaintyStyle = certainty => {
+                if(certainty === null) {
+                    return 'opacity-25';
+                }
+
+                return '';
+            };
+
             // ON MOUNTED
             onMounted(_ => {
                 state.dynamicSelectionList.forEach(rootId => {
@@ -707,6 +737,7 @@
                 onLeave,
                 handleMove,
                 handleUpdate,
+                getCertaintyStyle,
                 getDirtyValues,
                 updateDirtyState,
                 resetListValues,
@@ -723,6 +754,7 @@
                 hasEmitter,
                 hasComment,
                 hasBookmarks,
+                inactiveMetadataClass,
                 handleLabelClick,
                 // STATE
                 attrRefs,

@@ -26,7 +26,7 @@ class UserlistAttribute extends AttributeBase
 
             try {
                 $name = trim($name);
-                $user = User::where('nickname', $name)
+                $user = User::withTrashed()->where('nickname', $name)
                     ->firstOrFail();
                 $list[] = $user->id;
             } catch(ModelNotFoundException $e) {

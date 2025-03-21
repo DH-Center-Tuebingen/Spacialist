@@ -48,16 +48,15 @@ export function getErrorMessages(error, suffix = '') {
 }
 
 
-const UNSET_CERTAINTY = {type: 'unset', icon: 'fas fa-fw fa-question', rangeFunction: (certainty) => certainty == null || certainty < 0 || certainty > 100};
+const UNSET_CERTAINTY = {type: 'unset', icon: 'far fa-fw fa-circle-check', rangeFunction: (certainty) => certainty == null || certainty < 0 || certainty > 100};
 export function getCertainties() {
     function inRangeOf(lowIn, highEx) {
         return (certainty) => parseFloat(certainty) >= lowIn && parseFloat(certainty) < highEx;
     }
     return [
-        {type: 'danger', icon: 'fas fa-fw fa-exclamation', rangeFunction: inRangeOf(0, 25)},
-        {type: 'warning', icon: 'fas fa-fw fa-exclamation', rangeFunction: inRangeOf(25, 50)},
-        {type: 'info', icon: 'fas fa-fw fa-exclamation', rangeFunction: inRangeOf(50, 100)},
-        {type: 'success', icon: 'fas fa-fw fa-check', rangeFunction: (certainty) => certainty === 100},
+        {type: 'danger', icon: 'fas fa-fw fa-circle-exclamation', rangeFunction: inRangeOf(0, 25)},
+        {type: 'warning', icon: 'fas fa-fw fa-circle-exclamation', rangeFunction: inRangeOf(25, 100)},
+        {type: 'success', icon: 'fas fa-fw fa-circle-check', rangeFunction: (certainty) => certainty === 100},
         UNSET_CERTAINTY,
     ];
 }
@@ -779,19 +778,25 @@ export function sortConcepts(ca, cb) {
 
 export function sortTranslated(asc = true, prop = 'thesaurus_url') {
     const systemStore = useSystemStore();
-    return function (a, b) {
+    return function(a, b) {
         return systemStore.translateConcept(a[prop]).localeCompare(systemStore.translateConcept(b[prop])) * (asc ? 1 : -1);
     };
 }
 
 export function sortAlphabetically(asc = true) {
-    return function (a, b) {
+    return function(a, b) {
         return a.localeCompare(b) * (asc ? 1 : -1);
     };
 }
 
+export function sortAlphabeticallyBy(prop = 'name', asc = true) {
+    return function(a, b) {
+        return sortAlphabetically(asc)(a[prop], b[prop]);
+    };
+}
+
 export function sortByLength(secondarySort = null, asc = true) {
-    return function (a, b) {
+    return function(a, b) {
         if(secondarySort && a.length == b.length) {
             for(let i = 0; i < a.length; i++) {
                 const order = secondarySort(a[i], b[i]);

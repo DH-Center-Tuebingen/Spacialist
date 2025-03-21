@@ -284,12 +284,12 @@ export const useSystemStore = defineStore('system', {
             }
         },
         async fetchConceptSelection(id) {
-            const cachedSelection = state.cachedConceptSelections[id];
+            const cachedSelection = this.cachedConceptSelections[id];
             if(!cachedSelection) {
-                searchConceptSelection(id).then(selection => {
-                    state.cachedConceptSelections[id] = selection;
-                });
+                const selection = await searchConceptSelection(id);
+                this.cachedConceptSelections[id] = selection || [];
             }
+            return this.cachedConceptSelections[id];
         },
         async uploadPlugin(file) {
             return uploadPlugin(file).then(data => {

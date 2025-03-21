@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 0.11
+## 0.11 - Kilcrea
 ### Added
 - Added websockets for various data synchronization
   - _Entity Data_
@@ -21,10 +21,19 @@ All notable changes to this project will be documented in this file.
 - 'Jumping' behavior on floating quick access controls on the _Entity Type List_ (copy, duplicate, delete)
 - Attribute Dependency inverted
 - Several problems with adding, editing and displaying _Bibliography Items_
+- Long entity names in _Entity Detail_ are now truncated with … to avoid line breaks in name and buttons
 - _Map Action Button_ position and tooltips
+- _Userlist_ Attribute is now searchable and ordered by user name
 ### Changed
 - Files (e.g. avatars or bibliography attachments) are stored in a user-only directory
 - Improved style of Reference Input.
+- Do not return deleted users by default
+- Moved attribute indicators to the end of the line and reworked style (always visible, but greyed out)
+- _Entity Detail_ now has a loading spinner when saving
+- Percentage Attribute reworked
+  - Floating Point values are now allowed
+  - Mousewheel can be used to change value
+  - _Ctrl_ and _Shift_ key can be used to change step size (_Ctrl_ = 10, _Shift_ = 0.01, _Ctrl_ & _Shift_ = 0.1)
 - Users can add more than one dependency for an attribute and use groups
 
 ## 0.10.2

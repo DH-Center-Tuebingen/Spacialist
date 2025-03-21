@@ -5,133 +5,149 @@
             class="mb-2 small"
             :entity="state.entity"
         />
-        <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
             <h3
-                class="mb-0"
+                v-if="!state.entity.editing"
+                class="mb-0 overflow-hidden text-nowrap text-truncate"
                 @mouseenter="onEntityHeaderHover(true)"
                 @mouseleave="onEntityHeaderHover(false)"
             >
-                <span v-if="!state.entity.editing">
+                <span :title="state.entity.name">
                     {{ state.entity.name }}
-                    <small class="d-inline-flex gap-1">
-                        <button
-                            v-show="state.hiddenAttributeCount > 0"
-                            id="hidden-attributes-icon"
-                            class="border-0 bg-body text-secondary p-0"
-                            data-bs-container="body"
-                            data-bs-toggle="popover"
-                            data-bs-trigger="hover"
-                            data-bs-placement="bottom"
-                            :data-bs-content="state.hiddenAttributeListing"
-                            data-bs-html="true"
-                            data-bs-custom-class="popover-p-2"
-                            @mousedown="showHiddenAttributes()"
-                            @mouseup="hideHiddenAttributes()"
-                        >
-                            <span v-show="state.hiddenAttributeState">
-                                <span class="fa-layers fa-fw">
-                                    <i class="fas fa-eye fa-xs" />
-                                    <span
-                                        class="fa-layers-counter fa-counter-lg"
-                                        style="background:Tomato"
-                                    >
-                                        {{ state.hiddenAttributeCount }}
-                                    </span>
-                                </span>
-                            </span>
-                            <span v-show="!state.hiddenAttributeState">
-                                <span class="fa-layers fa-fw">
-                                    <i class="fas fa-eye-slash fa-xs" />
-                                    <span
-                                        class="fa-layers-counter fa-counter-lg"
-                                        style="background:Tomato"
-                                    >
-                                        {{ state.hiddenAttributeCount }}
-                                    </span>
-                                </span>
-                            </span>
-                        </button>
-                        <span
-                            v-if="state.hasAttributeLinks"
-                            class="dropdown bg-body text-secondary clickable me-1"
-                        >
-                            <span
-                                class="fa-layers fa-fw"
-                                data-bs-toggle="dropdown"
-                            >
-                                <i class="fas fa-fw fa-xs fa-link fa-xs" />
+                </span>
+            </h3>
+            <div
+                v-if="!state.entity.editing"
+                class="d-flex align-items-center flex-fill"
+                @mouseenter="onEntityHeaderHover(true)"
+                @mouseleave="onEntityHeaderHover(false)"
+            >
+                <div class="d-inline-flex gap-2 ms-2">
+                    <button
+                        v-show="state.hiddenAttributeCount > 0"
+                        id="hidden-attributes-icon"
+                        class="border-0 bg-body text-secondary p-0"
+                        data-bs-container="body"
+                        data-bs-toggle="popover"
+                        data-bs-trigger="hover"
+                        data-bs-placement="bottom"
+                        :data-bs-content="state.hiddenAttributeListing"
+                        data-bs-html="true"
+                        data-bs-custom-class="popover-p-2"
+                        @mousedown="showHiddenAttributes()"
+                        @mouseup="hideHiddenAttributes()"
+                    >
+                        <span v-show="state.hiddenAttributeState">
+                            <span class="fa-layers fa-fw">
+                                <i class="fas fa-eye" />
                                 <span
                                     class="fa-layers-counter fa-counter-lg"
                                     style="background:Tomato"
                                 >
-                                    {{ state.entity.attributeLinks.length }}
+                                    {{ state.hiddenAttributeCount }}
                                 </span>
                             </span>
-                            <ul class="dropdown-menu">
-                                <li
-                                    v-for="link in state.groupedAttributeLinks"
-                                    :key="link.id"
-                                >
-                                    <router-link
-                                        :to="{ name: 'entitydetail', params: { id: link.id }, query: state.routeQuery }"
-                                        class="dropdown-item d-flex align-items-center gap-1"
-                                        :title="link.path.join(' / ')"
-                                    >
-                                        <entity-type-label
-                                            :type="link.entity_type_id"
-                                            :icon-only="true"
-                                        />
-                                        {{ link.name }}
-                                        <span class="text-muted small">{{ link.attribute_urls.join(', ') }}</span>
-                                    </router-link>
-                                </li>
-                            </ul>
                         </span>
-                        <a
-                            v-if="state.entityHeaderHovered && can('entity_write')"
-                            href="#"
-                            class="text-secondary"
-                            @click.prevent="editEntityName()"
+                        <span v-show="!state.hiddenAttributeState">
+                            <span class="fa-layers fa-fw">
+                                <i class="fas fa-eye-slash" />
+                                <span
+                                    class="fa-layers-counter fa-counter-lg"
+                                    style="background:Tomato"
+                                >
+                                    {{ state.hiddenAttributeCount }}
+                                </span>
+                            </span>
+                        </span>
+                    </button>
+                    <span
+                        v-if="state.hasAttributeLinks"
+                        class="dropdown bg-body text-secondary clickable me-1"
+                    >
+                        <span
+                            class="fa-layers fa-fw"
+                            data-bs-toggle="dropdown"
                         >
-                            <i class="fas fa-fw fa-edit fa-xs" />
-                        </a>
-                    </small>
-                </span>
-                <form
-                    v-else
-                    class="d-flex flex-row"
-                    @submit.prevent="updateEntityName()"
+                            <i class="fas fa-fw fa-link" />
+                            <span
+                                class="fa-layers-counter fa-counter-lg"
+                                style="background:Tomato"
+                            >
+                                {{ state.entity.attributeLinks.length }}
+                            </span>
+                        </span>
+                        <ul
+                            class="dropdown-menu overflow-y-auto"
+                            style="max-height: 60vh;"
+                        >
+                            <li
+                                v-for="link in state.groupedAttributeLinks"
+                                :key="link.id"
+                            >
+                                <router-link
+                                    :to="{ name: 'entitydetail', params: { id: link.id }, query: state.routeQuery }"
+                                    class="dropdown-item d-flex align-items-center gap-1"
+                                    :title="link.path.join(' / ')"
+                                >
+                                    <entity-type-label
+                                        :type="link.entity_type_id"
+                                        :icon-only="true"
+                                    />
+                                    {{ link.name }}
+                                    <span class="text-muted small">{{ link.attribute_urls.join(', ') }}</span>
+                                </router-link>
+                            </li>
+                        </ul>
+                    </span>
+                    <a
+                        v-if="state.entityHeaderHovered && can('entity_write')"
+                        href="#"
+                        class="text-secondary"
+                        @click.prevent="editEntityName()"
+                    >
+                        <i class="fas fa-fw fa-edit" />
+                    </a>
+                </div>
+            </div>
+            <form
+                v-if="state.entity.editing"
+                class="d-flex flex-row flex-grow-1 gap-1 pe-2 border-end"
+                @submit.prevent="updateEntityName()"
+            >
+                <input
+                    v-model="state.editedEntityName"
+                    type="text"
+                    class="form-control form-control-sm"
                 >
-                    <input
-                        v-model="state.editedEntityName"
-                        type="text"
-                        class="form-control form-control-sm me-2"
-                    >
-                    <button
-                        type="submit"
-                        class="btn btn-outline-success btn-sm me-2"
-                    >
-                        <i class="fas fa-fw fa-check" />
-                    </button>
-                    <button
-                        type="reset"
-                        class="btn btn-outline-danger btn-sm"
-                        @click="cancelEditEntityName()"
-                    >
-                        <i class="fas fa-fw fa-ban" />
-                    </button>
-                </form>
-            </h3>
-            <div class="d-flex flex-row gap-2">
                 <button
                     type="submit"
-                    form="entity-attribute-form"
                     class="btn btn-outline-success btn-sm"
-                    :disabled="!state.formDirty || !can('entity_data_write')"
+                >
+                    <i class="fas fa-fw fa-check" />
+                </button>
+                <button
+                    type="reset"
+                    class="btn btn-outline-danger btn-sm"
+                    @click="cancelEditEntityName()"
+                >
+                    <i class="fas fa-fw fa-ban" />
+                </button>
+            </form>
+            <div class="d-flex flex-row gap-2 text-nowrap ms-2">
+                <LoadingButton
+                    type="submit"
+                    form="entity-attribute-form"
+                    class="btn-outline-success btn-sm"
+                    :loading="state.saving"
                     @click.prevent="saveEntity()"
                 >
-                    <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
-                </button>
+                    <template #icon>
+                        <i class="fas fa-fw fa-save" />
+                    </template>
+                    <template #default>
+                        {{ t('global.save') }}
+                    </template>
+                </LoadingButton>
                 <button
                     type="button"
                     class="btn btn-outline-warning btn-sm"
@@ -455,11 +471,13 @@
     import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
     import DotIndicator from '@/components/indicators/DotIndicator.vue';
     import MultiUserWidget from './user/MultiUserWidget.vue';
+    import LoadingButton from '@/components/forms/button/LoadingButton.vue';
 
     export default {
         components: {
             DotIndicator,
             EntityTypeLabel,
+            LoadingButton,
             MetadataTab,
             MultiUserWidget,
         },
@@ -493,6 +511,7 @@
             const attrRefs = ref({});
             const state = reactive({
                 dirtyStates: {},
+                saving: false,
                 attributeGrpHovered: null,
                 hiddenAttributes: {},
                 entityHeaderHovered: false,
@@ -932,7 +951,7 @@
                 }
             };
 
-            const saveEntity = grps => {
+            const saveEntity = async grps => {
                 if(!can('entity_data_write')) return;
 
                 const dirtyValues = getDirtyValues(grps);
@@ -980,7 +999,12 @@
                     patches.push(patch);
                     moderations.push(aid);
                 }
-                return entityStore.patchAttributes(state.entity.id, patches, dirtyValues, moderations).then(data => {
+
+                state.saving = true;
+
+                try {
+                    await entityStore.patchAttributes(state.entity.id, patches, dirtyValues, moderations);
+
                     undirtyList(grps);
                     resetDirtyStates(grps);
 
@@ -995,7 +1019,7 @@
                             icon: true,
                         },
                     );
-                }).catch(error => {
+                } catch(error) {
                     let response = error.response;
 
                     if(!response) {
@@ -1015,9 +1039,10 @@
                         autohide: true,
                         icon: true,
                         duration: 5000,
-                    },
-                    );
-                });
+                    });
+                } finally {
+                    state.saving = false;
+                }
             };
             const resetForm = grps => {
                 resetListValues(grps);

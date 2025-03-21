@@ -2,11 +2,11 @@
 
 namespace App;
 
-use App\Traits\SoftDeletesWithTrashed;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Notifications\Notifiable;
 use App\File\Directory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\Traits\CausesActivity;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -19,7 +19,7 @@ class User extends Authenticatable
     use HasRoles;
     use CausesActivity;
     use LogsActivity;
-    use SoftDeletesWithTrashed;
+    use SoftDeletes;
     use HasFactory;
     use HasApiTokens;
     // use Authenticatable;

@@ -1,16 +1,16 @@
 <template>
     <multiselect
         v-model="v.value"
-        class="mt-2"
         :classes="multiselectResetClasslist"
         :value-prop="'id'"
         :label="'name'"
-        :track-by="'id'"
+        :track-by="['nickname', 'name', 'email']"
         :object="false"
         :mode="'tags'"
         :disabled="disabled"
         :options="users"
         :close-on-select="false"
+        :searchable="true"
         :name="name"
         :placeholder="t('global.select.placeholder')"
         @change="v.handleChange"
@@ -26,7 +26,7 @@
             </span>
         </template>
         <template #tag="{ option, handleTagRemove, disabled: tagDisabled }">
-            <div class="multiselect-tag multiselect-tag-user py-2 bg-opacity-25 text-muted">
+            <div class="multiselect-tag multiselect-tag-user bg-opacity-25 text-muted px-1">
                 <a
                     href="#"
                     class="text-nowrap text-reset text-decoration-none"
@@ -36,7 +36,7 @@
                     <user-avatar
                         class="align-middle"
                         :user="option"
-                        :size="20"
+                        :size="18"
                     />
                     <span class="align-middle ms-2">
                         {{ option.name }}
@@ -72,6 +72,7 @@
 
     import {
         multiselectResetClasslist,
+        sortAlphabeticallyBy,
     } from '@/helpers/helpers.js';
 
     import {
@@ -121,7 +122,7 @@
             } = useField(`userlist_${name.value}`, yup.mixed(), {
                 initialValue: props.value || [],
             });
-            const users = userStore.users;
+            const users = userStore.users.toSorted(sortAlphabeticallyBy());
             const v = reactive({
                 value: fieldValue,
                 handleChange,

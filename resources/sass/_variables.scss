@@ -45,6 +45,7 @@ $btn-default-color: $text-color;
 $input-border: lighten($text-color, 40%);
 $input-border-focus: lighten($brand-primary, 25%);
 $input-color-placeholder: lighten($text-color, 30%);
+$form-range-track-height: .25rem;
 
 // Breadcrumbs
 $breadcrumb-item-padding: .25rem;
@@ -66,7 +67,6 @@ $zindex-sticky-in-page: 995;
 $zindex-dropdown-underneath-sticky: 990; 
 /* Must be more than 1055 when it uses 'appendToBody' to be above a modal. */
 $zindex-dropdown: 2000;
-
 
 :root {
     /* Increases the max size of the vueform/multiselect list */

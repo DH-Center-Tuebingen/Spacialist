@@ -386,12 +386,13 @@ export function showDeactivateUser(user, onDeactivated) {
     modal.open();
 }
 
-export function showAccessControlModal(roleId) {
+export function showAccessControlModal(roleId, readonly = false) {
     const uid = `AccessControl-${getTs()}`;
     const modal = useModal({
         component: AccessControl,
         attrs: {
             name: uid,
+            readonly: readonly,
             roleId: roleId,
             onSave(e) {
                 const data = {
@@ -640,7 +641,7 @@ export function showEditEntityType(entityType) {
                 modal.destroy();
             },
             onConfirm(editedProps) {
-                useEntityStore().patchEntityType(entityType.id, editedProps).then(_ => {
+                useEntityStore().updateEntityType(entityType.id, editedProps).then(_ => {
                     modal.destroy();
                 });
             },

@@ -79,14 +79,17 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button
-                    type="submit"
+                <LoadingButton
+                    :loading="state.saving"
                     class="btn btn-outline-success"
                     form="newEntityForm"
                     :disabled="state.dataMissing"
                 >
-                    <i class="fas fa-fw fa-plus" /> {{ t('global.add') }}
-                </button>
+                    <template #icon>
+                        <i class="fas fa-fw fa-plus" />
+                    </template>
+                    {{ t('global.add') }}
+                </LoadingButton>
                 <button
                     type="button"
                     class="btn btn-outline-secondary"
@@ -116,7 +119,12 @@
         multiselectResetClasslist,
     } from '@/helpers/helpers.js';
 
+    import LoadingButton from '@/components/forms/button/LoadingButton.vue';
+
     export default {
+        components: {
+            LoadingButton,
+        },
         props: {
             parent: {
                 required: false,
@@ -137,6 +145,7 @@
                 if(state.dataMissing) {
                     return;
                 }
+                state.saving = true;
                 context.emit('confirm', state.entity);
             };
             const closeModal = _ => {
@@ -145,6 +154,7 @@
 
             // DATA
             const state = reactive({
+                saving: false,
                 entity: {
                     name: '',
                     type: {},
@@ -181,7 +191,7 @@
                 closeModal,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>
