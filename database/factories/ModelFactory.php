@@ -1,10 +1,9 @@
 <?php
 
 namespace Database\Factories;
-
-use MStaack\LaravelPostgis\Geometries\Point;
-use MStaack\LaravelPostgis\Geometries\LineString;
-use MStaack\LaravelPostgis\Geometries\Polygon;
+use Clickbar\Magellan\Data\Geometries\Point;
+use Clickbar\Magellan\Data\Geometries\LineString;
+use Clickbar\Magellan\Data\Geometries\Polygon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -195,26 +194,26 @@ $factory->define(App\Geodata::class, function(Faker $faker) {
     $lat = $faker->latitude($min = 47, $max = 56);
     $lng = $faker->longitude($min = 6, $max = 15);
 
-    switch ($faker->randomElement(['point', 'polygon', 'linestring'])) {
+    switch($faker->randomElement(['point', 'polygon', 'linestring'])) {
     case 'point':
-        $geom = new Point($lat, $lng);
+        $geom = Point::make($lat, $lng);
         break;
     case 'polygon':
         for($i = 0; $i < $faker->numberBetween($min = 3, $max = 6); $i++){
             $deltaLat = $faker->randomFloat($nbMaxDecimals = NULL, $min = 0, $max = 0.5);
             $deltaLng = $faker->randomFloat($nbMaxDecimals = NULL, $min = 0, $max = 0.5);
-            $points[$i] = new Point($lat + $deltaLat, $lng + $deltaLng);
+            $points[$i] = Point::make($lat + $deltaLat, $lng + $deltaLng);
         }
         $points[] = $points[0]; // polygon must be closed
-        $geom = new Polygon([new LineString($points)]);
+        $geom = Polygon::make([LineString::make($points)]);
         break;
     case 'linestring':
         for($i = 0; $i < $faker->numberBetween($min = 3, $max = 6); $i++){
             $deltaLat = $faker->randomFloat($nbMaxDecimals = NULL, $min = 0, $max = 0.5);
             $deltaLng = $faker->randomFloat($nbMaxDecimals = NULL, $min = 0, $max = 0.5);
-            $points[$i] = new Point($lat + $deltaLat, $lng + $deltaLng);
+            $points[$i] = Point::make($lat + $deltaLat, $lng + $deltaLng);
         }
-        $geom = new LineString($points);
+        $geom = LineString::make($points);
         break;
     }
 
@@ -228,9 +227,9 @@ $factory->define(App\Context::class, function(Faker $faker) {
     $geodata = factory(App\Geodata::class)->create();
     if($geodata->geom instanceof Point || $geodata->geom instanceof MultiPoint) {
         $geomtype = 'Point';
-    } else if ($geodata->geom instanceof LineString || $geodata->geom instanceof MultiLineString){
+    } else if($geodata->geom instanceof LineString || $geodata->geom instanceof MultiLineString){
         $geomtype = 'Linestring';
-    } else if ($geodata->geom instanceof Polygon || $geodata->geom instanceof MultiPolygon) {
+    } else if($geodata->geom instanceof Polygon || $geodata->geom instanceof MultiPolygon) {
         $geomtype = 'Polygon';
     } else {
         $geomtype = '';
@@ -242,13 +241,13 @@ $factory->define(App\Context::class, function(Faker $faker) {
         $contextType = App\ContextType::findOrFail($validLayer->context_type_id);
         // if it was successfull, we may link the created geodata object to this context
         $geodataId = $geodata->id;
-    } catch (ModelNotFoundException $e) {
+    } catch(ModelNotFoundException $e) {
         // if we couldn't find a matching layer + contexttype, we may not link the geodata to this context
         $geodataId = NULL;
         // however the context needs to have a contexttype
         try {
             $contextType = App\ContextType::inRandomOrder()->first();
-        } catch (ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             $contextType = factory(App\ContextType::class)->create();
         }
 

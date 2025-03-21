@@ -15,6 +15,7 @@
         :limit="15"
         :filter-results="false"
         :placeholder="t('global.select.placeholder')"
+        :append-to-body="true"
         @keydown.tab="handleTab"
         @keydown="clearInputOnDelete"
         @select="value => v.handleChange(value)"
@@ -33,7 +34,7 @@
                 {{ translateConcept(singlelabelValue.concept_url) }}
             </div>
         </template>
-        <template #clear="{clear}">
+        <template #clear="{ clear }">
             <span
                 aria-hidden="true"
                 role="button"
@@ -74,14 +75,10 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import store from '@/bootstrap/store.js';
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
+    import useSystemStore from '@/bootstrap/stores/system.js';
 
     import {
-        searchConceptSelection,
-    } from '@/api.js';
-
-    import {
-        getAttributeName,
         translateConcept,
         multiselectResetClasslist,
         only,
@@ -121,6 +118,8 @@
         emits: ['change', 'update-selection'],
         setup(props, context) {
             const { t } = useI18n();
+            const attributeStore = useAttributeStore();
+            const systemStore = useSystemStore();
             const {
                 name,
                 disabled,
@@ -143,6 +142,10 @@
             // FETCH
 
             // FUNCTIONS
+            const getAttributeName = attributeId => {
+                return attributeStore.getAttributeName(attributeId);
+            };
+
             const handleUpdateForSelections = value => {
                 context.emit('update-selection', value?.id);
                 formatAndHandleChange(value);
@@ -159,7 +162,7 @@
                 }
             };
 
-            const handleSelectionUpdate = conceptId => {
+            const handleSelectionUpdate = async conceptId => {
                 if(!state.hasRootAttribute) return;
 
                 if(!conceptId) {
@@ -168,21 +171,9 @@
                     return;
                 }
 
-                const cachedSelection = store.getters.cachedConceptSelection(conceptId);
-                if(!cachedSelection) {
-                    searchConceptSelection(conceptId).then(selection => {
-                        store.dispatch('setCachedConceptSelection', {
-                            id: conceptId,
-                            selection: selection,
-                        });
-
-                        state.localSelection = selection;
-                        updateCurrentValue();
-                    });
-                } else {
-                    state.localSelection = cachedSelection;
-                    updateCurrentValue();
-                }
+                const cachedSelection = await systemStore.fetchConceptSelection(conceptId);
+                state.localSelection = cachedSelection;
+                updateCurrentValue();
             };
 
             const resetFieldState = _ => {
@@ -283,7 +274,6 @@
                 resetField,
             });
 
-
             watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
@@ -309,10 +299,10 @@
             return {
                 t,
                 // HELPERS
-                getAttributeName,
                 multiselectResetClasslist,
                 translateConcept,
                 // LOCAL
+                getAttributeName,
                 clearInputOnDelete,
                 handleTab,
                 isTabOption,

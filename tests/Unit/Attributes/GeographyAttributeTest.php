@@ -16,8 +16,12 @@ class GeographyAttributeTest extends TestCase {
     }
 
     private function assertPoint($expected, $actual) {
-        $this->assertEquals($expected[0], $actual->getLng());
-        $this->assertEquals($expected[1], $actual->getLat());
+        $this->assertEquals($expected[0], $actual->getX());
+        $this->assertEquals($expected[1], $actual->getY());
+        $this->assertEquals(isset($expected[2]), $actual->is3d());
+        if($actual->is3d()) {
+            $this->assertEquals($expected[2], $actual->getZ());
+        }
     }
 
     private function assertLineString($expected, $actual) {
@@ -77,21 +81,23 @@ class GeographyAttributeTest extends TestCase {
     * @dataProvider falsyProvider
     */
     public function testFromImportFalsy($input) {
-    $this->expectException(InvalidDataException::class);
-    GeographyAttribute::fromImport($input);
+        $this->expectException(InvalidDataException::class);
+        GeographyAttribute::fromImport($input);
     }
 
     public static function truthyProvider() {
-    return [
-        "empty" => ["", null, null],
-        "point" => ["POINT(1 1)", 'point', [1,1]],
-        "linestring" => ["LINESTRING(0 0, 1 1, 2 2)",'linestring', [[0,0], [1,1], [2,2]]],
-        "polygon" => ["POLYGON((0 0, 1 1, 1 0, 0 0))",'polygon', [[[0,0], [1,1], [1,0], [0,0]]]],
-        "multipoint" => ["MULTIPOINT(0 0, 1 1, 2 2)", 'multipoint', [[0,0], [1,1], [2,2]]],
-        "multilinestring" => ["MULTILINESTRING((0 0, 1 1, 2 2), (3 3, 4 4, 5 5))", "multilinestring", [[[0,0], [1,1], [2,2]], [[3,3], [4,4], [5,5]]]],
-        "multipolygon" => ["MULTIPOLYGON(((0 0, 1 1, 1 0, 0 0)), ((2 2, 3 3, 3 2, 2 2)))", "multipolygon", [[[[0,0], [1,1], [1,0], [0,0]]], [[[2,2], [3,3], [3,2], [2,2]]]]],
-        "point with floating point" => ["POINT(1.15847 1.13687)","point", [1.15847, 1.13687]],
-    ];
+        return [
+            "empty" => ["", null, null],
+            "point" => ["POINT(1 1)", 'point', [1,1]],
+            "point3d0" => ["POINTZ(1 3 0)", 'point', [1,3,0]],
+            "point3d" => ["POINTZ(2 1 5)", 'point', [2,1,5]],
+            "linestring" => ["LINESTRING(0 0, 1 1, 2 2)",'linestring', [[0,0], [1,1], [2,2]]],
+            "polygon" => ["POLYGON((0 0, 1 1, 1 0, 0 0))",'polygon', [[[0,0], [1,1], [1,0], [0,0]]]],
+            "multipoint" => ["MULTIPOINT(0 0, 1 1, 2 2)", 'multipoint', [[0,0], [1,1], [2,2]]],
+            "multilinestring" => ["MULTILINESTRING((0 0, 1 1, 2 2), (3 3, 4 4, 5 5))", "multilinestring", [[[0,0], [1,1], [2,2]], [[3,3], [4,4], [5,5]]]],
+            "multipolygon" => ["MULTIPOLYGON(((0 0, 1 1, 1 0, 0 0)), ((2 2, 3 3, 3 2, 2 2)))", "multipolygon", [[[[0,0], [1,1], [1,0], [0,0]]], [[[2,2], [3,3], [3,2], [2,2]]]]],
+            "point with floating point" => ["POINT(1.15847 1.13687)","point", [1.15847, 1.13687]],
+        ];
     }
 
     public static function falsyProvider() {

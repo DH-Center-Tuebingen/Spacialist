@@ -26,7 +26,7 @@ class UserlistAttribute extends AttributeBase
 
             try {
                 $name = trim($name);
-                $user = User::where('nickname', $name)
+                $user = User::withTrashed()->where('nickname', $name)
                     ->firstOrFail();
                 $list[] = $user->id;
             } catch(ModelNotFoundException $e) {
@@ -39,6 +39,11 @@ class UserlistAttribute extends AttributeBase
         }
 
         return json_encode($list);
+    }
+
+    public static function parseExport(mixed $data) : string {
+        $dataAsObj = json_decode($data);
+        return implode(';', array_map(fn($id) => User::find($id)->nickname, $dataAsObj));
     }
 
     public static function unserialize(mixed $data) : mixed {

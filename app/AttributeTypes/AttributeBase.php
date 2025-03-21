@@ -122,6 +122,16 @@ abstract class AttributeBase
         }
     }
 
+    public static function serializeExportData(AttributeValue $value) : mixed {
+        $class = self::getMatchingClass($value->attribute->datatype);
+        if($class !== false) {
+            $field = $class::getField();
+            return $class::parseExport($value->{$field});
+        } else {
+            return '';
+        }
+    }
+
     public static function onCreateHandler(Entity $entity, User $user) : void {
         $attributes = $entity->entity_type->attributes()->get();
         foreach($attributes as $attr) {
@@ -130,7 +140,6 @@ abstract class AttributeBase
                 $class::handleOnCreate($entity, $attr, $user);
             }
         }
-
     }
 
     public static function onAddHandler(Attribute $attr, EntityType $entityType, User $user) : void {
@@ -154,6 +163,10 @@ abstract class AttributeBase
 
     public static function parseImport(int|float|bool|string $data) : mixed {
         return StringUtils::useGuard(InvalidDataException::class)($data);
+    }
+
+    public static function parseExport(mixed $data) : string {
+        return strval($data);
     }
 
     public abstract static function unserialize(mixed $data) : mixed;

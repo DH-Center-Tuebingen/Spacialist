@@ -2,12 +2,11 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-
 use App\Bibliography;
-use App\User;
-
 use Illuminate\Http\UploadedFile;
+use Tests\Permission;
+use Tests\ResponseTester;
+use Tests\TestCase;
 
 class ApiBibliographyTest extends TestCase
 {
@@ -16,258 +15,626 @@ class ApiBibliographyTest extends TestCase
      * add entry (POST /bibliography/) API endpoints
      * @return void
      */
-    public function testGetAllAndAddEndpoint()
-    {
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
-            ->get('/api/v1/bibliography');
-
-        $response->assertStatus(200);
-        $response->assertJsonCount(61);
-        $this->refreshToken($response);
-
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
-            ->post('/api/v1/bibliography', [
-                'type' => 'article',
-                'title' => 'Test Article',
-                'author' => 'PhpUnit',
-                'pages' => '10-15'
-            ]);
-
-        $response->assertStatus(201);
-        $response->assertJsonStructure([
+     public function getBibliographyStructure(): array {
+        return [
+            // system fields
             'id',
-            'type',
-            'citekey',
-            'title',
-            'author',
-            'editor',
-            'journal',
-            'year',
-            'pages',
-            'volume',
-            'number',
-            'booktitle',
-            'publisher',
-            'address',
-            'misc',
-            'howpublished',
-            'annote',
-            'chapter',
-            'crossref',
-            'edition',
-            'institution',
-            'key',
-            'month',
-            'note',
-            'organization',
-            'school',
-            'series',
+            'entry_type',
+            'file',
             'user_id',
             'created_at',
-            'updated_at'
-        ]);
-        $response->assertJson([
-            'type' => 'article',
-            'title' => 'Test Article',
-            'author' => 'PhpUnit',
-            'citekey' => 'Ph:0000',
-            'year' => null,
-            'pages' => '10-15'
-        ]);
-        $this->refreshToken($response);
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+            'updated_at',
+            // bibtex fields
+            'address',
+            'annote',
+            'author',
+            'booktitle',
+            'chapter',
+            'citekey',
+            'crossref',
+            'edition',
+            'editor',
+            'howpublished',
+            'institution',
+            'journal',
+            'key',
+            'misc',
+            'month',
+            'note',
+            'number',
+            'organization',
+            'pages',
+            'publisher',
+            'school',
+            'series',
+            'title',
+            'type',
+            'volume',
+            'year',
+        ];
+     }
+
+     /**
+      * @testdox GET /api/v1/bibliography/
+      */
+     public function testGetAll() {
+        $response = $this->userRequest()
             ->get('/api/v1/bibliography');
 
-        $response->assertStatus(200);
-        $response->assertJsonCount(62);
-    }
+        $this->assertStatus($response, 200);
+        $response->assertJsonCount(6);
+     }
+
 
     /**
-     * Test getting count of references for a bibliography entry (id=1319)
-     * @return void
-     */
-    public function testGetReferenceCountEndpoint()
-    {
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+    * @testdox GET /api/v1/bibliography/{id}
+    */
+     public function testGetSingle() {
+        $response = $this->userRequest()
+            ->get('/api/v1/bibliography/1320');
+
+        $this->assertStatus($response, 200);
+        $response->assertJsonStructure($this->getBibliographyStructure());
+        $response->assertJson([
+            'id' => 1320,
+            'entry_type' => 'article',
+            'title' => '{Finite diagrams stable in power}',
+            'author' => 'Shelah, Saharon',
+            'journal' => 'Annals of Mathematical Logic',
+            'pages' => '69--118',
+            'volume' => '2',
+            'citekey' => 'Sh:3'
+        ]);
+     }
+
+     /**
+    * @testdox GET /api/v1/bibliography/{id}/ref_count
+    */
+    public function testGetReferenceCountEndpoint() {
+        $response = $this->userRequest()
             ->get('/api/v1/bibliography/1319/ref_count');
 
-        $response->assertStatus(200);
+        $this->assertStatus($response, 200);
         $response->assertSimilarJson([1]);
     }
 
     /**
-     * Test importing a bibtex file
-     * @return void
+     * @testdox POST /api/v1/bibliography/
      */
-    public function testImportBibtexEndpoint()
-    {
-        $cnt = Bibliography::count();
-        $this->assertEquals(61, $cnt);
+    public function testAdd() {
+        $response = $this->userRequest()
+            ->post('/api/v1/bibliography', [
+                'entry_type' => 'article',
+                'title' => 'Schweinegerichte und deren gesundheitliche Auswirkungen',
+                'author' => 'Dietmar Köppke and Jürgen Sauer',
+                'journal' => 'Kulinarik 101',
+                'pages' => '10-15',
+                'year' => '2021'
+            ]);
 
-        $name = 'import.bib';
-        $path = storage_path() . "/framework/testing/$name";
-        $file = new UploadedFile($path, $name, 'application/x-bibtex', null, true);
+        $this->assertStatus($response, 201);
+        $response->assertJsonStructure($this->getBibliographyStructure());
 
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $entry_id = 1324;
+        $response->assertJson([
+            'id' => $entry_id,
+            'entry_type' => 'article',
+            'title' => 'Schweinegerichte und deren gesundheitliche Auswirkungen',
+            'author' => 'Dietmar Köppke and Jürgen Sauer',
+            'journal' => 'Kulinarik 101',
+            'pages' => '10-15',
+            'year' => '2021',
+            'citekey' => 'Dietmar Köppke_Schweinegerichte_sudga_2021'
+        ]);
+
+        $response = $this->userRequest()
+            ->get('/api/v1/bibliography');
+
+        $this->assertStatus($response, 200);
+        $response->assertJsonCount(7);
+
+        $response = $this->userRequest()
+            ->get("/api/v1/bibliography/$entry_id");
+
+        $this->assertStatus($response, 200);
+        $response->assertJsonStructure($this->getBibliographyStructure());
+        $response->assertJson([
+            'entry_type' => 'article',
+            'title' => 'Schweinegerichte und deren gesundheitliche Auswirkungen',
+            'author' => 'Dietmar Köppke and Jürgen Sauer',
+            'journal' => 'Kulinarik 101',
+            'pages' => '10-15',
+            'year' => '2021',
+            'citekey' => 'Dietmar Köppke_Schweinegerichte_sudga_2021'
+        ]);
+    }
+
+    private function importTest($filename, $results) {
+        $path = storage_path() . "/framework/testing/$filename";
+        $file = new UploadedFile($path, $filename, 'application/x-bibtex', null, true);
+
+        $response = $this->userRequest()
             ->post('/api/v1/bibliography/import', [
                 'file' => $file
             ]);
 
-        $response->assertStatus(201);
-        $response->assertJsonCount(3);
-        $response->assertJsonStructure([
-            '*' => [
-                'id',
-                'type',
-                'citekey',
-                'title',
-                'author',
-                'editor',
-                'journal',
-                'year',
-                'pages',
-                'volume',
-                'number',
-                'booktitle',
-                'publisher',
-                'address',
-                'misc',
-                'howpublished',
-                'annote',
-                'chapter',
-                'crossref',
-                'edition',
-                'institution',
-                'key',
-                'month',
-                'note',
-                'organization',
-                'school',
-                'series',
-                'user_id',
-                'created_at',
-                'updated_at',
-            ]
+        $inserted = $response->json();
+
+        $this->assertStatus($response, 201);
+        $response->assertJsonCount(16);
+        $response->assertJsonStructure([ "*" => [
+            "entry" => $this->getBibliographyStructure()]
         ]);
-        $response->assertJson([
-            [
-                'type' => 'article',
-                'citekey' => 'Sh:1969',
-                'author' => 'Shelah, Saharon',
-                'journal' => 'Journal of Combinatorial Theory',
-                'pages' => '298--300',
-                'title' => '{Note on a min-max problem of Leo Moser}',
-                'volume' => '6',
-                'year' => '1969',
-            ],
-            [
-                'type' => 'book',
-                'citekey' => 'Te:1984',
-                'author' => 'Test Author',
-                'journal' => null,
-                'pages' => '1--3',
-                'title' => 'Test Booktitle',
-                'booktitle' => 'Test Book I',
-                'volume' => '3',
-                'year' => '1984',
-            ],
-            [
-                'type' => 'article',
-                'citekey' => 'Te:1337',
-                'author' => 'Test Author',
-                'journal' => 'Test Journal',
-                'pages' => '13--37',
-                'title' => 'Test Title',
-                'volume' => '1',
-                'year' => '1337',
-                'institution' => null,
-            ],
-        ]);
+
+        $response->assertJson(array_map(function($e) {
+            return [
+                "entry" => $e,
+                "added" => true
+            ];
+        }, $results));
+
         $cnt = Bibliography::count();
-        $this->assertEquals(64, $cnt);
+        $this->assertEquals(22, $cnt);
 
+        $i = 0;
+        foreach($results as $r) {
+            $addedItem = $inserted[$i++];
+            // Note: I don't like the reliance on the $addedItem["entry"]["id"] here.
+            //       But Postgres does not rollback the sequence when a transaction is rolled back.
+            //       Therefore all alternative also seem to be more complex than this.
+            $response = $this->userRequest()
+                ->get('/api/v1/bibliography/'. $addedItem["entry"]["id"]);
 
-        $this->refreshToken($response);
+            $this->assertStatus($response, 200);
+            $response->assertJsonStructure($this->getBibliographyStructure());
+            $response->assertJson($r);
+        }
+    }
 
+    /**
+     * @testdox POST /api/v1/bibliography/import (mandatory fields)
+     */
+    public function testMandatoryImport() {
+       $this->importTest('import_mandatory.bib', [
+           [
+               "entry_type" => "article",
+               "citekey" => "Smith2021",
+               "author" => "John Smith and Jane Doe and Alice Brown",
+               "title" => "A Comprehensive Study on Testing",
+               "journal" => "Journal of Testing",
+               "year" => "2021"
+           ],
+           [
+               "entry_type" => "book",
+               "citekey" => "Doe2020",
+               "author" => "Jane Doe and John Smith and Carol Green",
+               "title" => "The Art of Testing",
+               "publisher" => "Testing Publishers",
+               "year" => "2020"
+           ],
+           [
+               "entry_type" => "book",
+               "citekey" => "EditorBook2022",
+               "editor" => "Emily Editor and David Black and Eve Gray",
+               "title" => "Edited Volume on Testing",
+               "publisher" => "Testing Publishers",
+               "year" => "2022"
+           ],
+           [
+               "entry_type" => "booklet",
+               "citekey" => "Booklet2022",
+               "title" => "Testing Booklet"
+           ],
+           [
+               "entry_type" => "conference",
+               "citekey" => "White2018",
+               "author" => "Bob White and Carol Green and David Black",
+               "title" => "Conference on Testing Methods",
+               "booktitle" => "Annual Testing Conference",
+               "year" => "2018"
+           ],
+           [
+               "entry_type" => "inbook",
+               "citekey" => "Taylor2023",
+               "author" => "Laura Taylor and John Smith and Emily Brown",
+               "title" => "In-depth Testing Techniques",
+               "chapter" => "5",
+               "pages" => "123-145",
+               "publisher" => "Advanced Testing Publishers",
+               "year" => "2023"
+           ],
+           [
+               "entry_type" => "inbook",
+               "citekey" => "EditorInBook2023",
+               "editor" => "Nancy Editor and Alice White and Bob Smith",
+               "title" => "Advanced Testing Strategies",
+               "chapter" => "7",
+               "pages" => "200-220",
+               "publisher" => "Expert Testing Publishers",
+               "year" => "2023"
+           ],
+           [
+               "entry_type" => "incollection",
+               "citekey" => "Johnson2022",
+               "author" => "Michael Johnson and Alice White and Bob Smith",
+               "title" => "Chapter on Testing",
+               "booktitle" => "Handbook of Testing",
+               "publisher" => "Testing Publishers",
+               "year" => "2022"
+           ],
+           [
+               "entry_type" => "inproceedings",
+               "citekey" => "Brown2019",
+               "author" => "Alice Brown and David Green and Eve Gray",
+               "title" => "Proceedings of the Testing Conference",
+               "booktitle" => "International Conference on Testing",
+               "year" => "2019"
+           ],
+           [
+               "entry_type" => "manual",
+               "citekey" => "Manual2014",
+               "title" => "Testing Manual"
+           ],
+           [
+               "entry_type" => "mastersthesis",
+               "citekey" => "Black2016",
+               "author" => "David Black and Jane White and Bob Smith",
+               "title" => "Testing in Software Engineering",
+               "school" => "Institute of Testing",
+               "year" => "2016"
+           ],
+           [
+               "entry_type" => "misc",
+               "citekey" => "Misc2013",
+               "note" => "Misc has no mandatory fields"
+           ],
+           [
+               "entry_type" => "phdthesis",
+               "citekey" => "Green2017",
+               "author" => "Carol Green and John Doe and Alice Brown",
+               "title" => "Advanced Testing Techniques",
+               "school" => "University of Testing",
+               "year" => "2017"
+           ],
+           [
+               "entry_type" => "proceedings",
+               "citekey" => "Proceedings2021",
+               "title" => "Proceedings of the 2021 Testing Symposium",
+               "year" => "2021"
+           ],
+           [
+               "entry_type" => "techreport",
+               "citekey" => "Gray2015",
+               "author" => "Eve Gray and Bob Smith and Carol Green",
+               "title" => "Testing Report 2015",
+               "institution" => "Testing Institute",
+               "year" => "2015"
+           ],
+           [
+               "entry_type" => "unpublished",
+               "citekey" => "Unpublished2023",
+               "author" => "Frank Unpublished and Emily Editor and David Black",
+               "title" => "Unpublished Testing Research",
+               "note" => "Manuscript in preparation"
+           ]
+           ]);
+    }
+
+    /**
+     * @testdox POST /api/v1/bibliography/import (with optional fields)
+     */
+    public function testOptionalImport() {
+        $this->importTest("import_optional.bib", [
+            [
+                "entry_type" => "article",
+                "citekey" => "Smith2021",
+                "author" => "John Smith and Jane Doe and Alice Brown",
+                "title" => "A Comprehensive Study on Testing",
+                "journal" => "Journal of Testing",
+                "year" => "2021",
+                "volume" => "3",
+                "number" => "2",
+                "month" => "Apr",
+                "note" => "A significant piece of work"
+            ],
+            [
+                "entry_type" => "book",
+                "citekey" => "Doe2020",
+                "author" => "Jane Doe and John Smith and Carol Green",
+                "title" => "The Art of Testing",
+                "publisher" => "Testing Publishers",
+                "year" => "2020",
+                "series" => "In-depth Series",
+                "address" => "Boston",
+                "edition" => "Third",
+                "month" => "May",
+                "note" => "Great book"
+            ],
+            [
+                "entry_type" => "book",
+                "citekey" => "EditorBook2022",
+                "editor" => "Emily Editor and David Black and Eve Gray",
+                "title" => "Edited Volume on Testing",
+                "publisher" => "Testing Publishers",
+                "year" => "2022",
+                "series" => "Edited Series",
+                "address" => "New York",
+                "month" => "Oct",
+                "note" => "Edited volume"
+            ],
+            [
+                "entry_type" => "booklet",
+                "citekey" => "Booklet2022",
+                "title" => "Testing Booklet",
+                "author" => "Richard Roe",
+                "howpublished" => "Website",
+                "address" => "Heidelberg, Germany",
+                "month" => "Jun",
+                "year" => "2022",
+                "note" => "A booklet on testing"
+            ],
+            [
+                "entry_type" => "conference",
+                "citekey" => "White2018",
+                "author" => "Bob White and Carol Green and David Black",
+                "title" => "Conference on Testing Methods",
+                "booktitle" => "Annual Testing Conference",
+                "year" => "2018",
+                "volume" => "6",
+                "series" => "Workshop Series",
+                "pages" => "100-120",
+                "address" => "London, UK",
+                "month" => "Dec",
+                "organization" => "Testing Society",
+                "publisher" => "Testing Publishers",
+                "note" => "Conference paper"
+            ],
+            [
+                "entry_type" => "inbook",
+                "citekey" => "Taylor2023",
+                "author" => "Laura Taylor and John Smith and Emily Brown",
+                "title" => "In-depth Testing Techniques",
+                "chapter" => "5",
+                "pages" => "123-145",
+                "publisher" => "Advanced Testing Publishers",
+                "year" => "2023",
+                "volume" => "4",
+                "series" => "In-depth Series",
+                "type" => "Technical",
+                "address" => "Boston",
+                "edition" => "3rd",
+                "month" => "Jun",
+                "note" => "A detailed chapter"
+            ],
+            [
+                "entry_type" => "inbook",
+                "citekey" => "EditorInBook2023",
+                "author" => "Nancy Editor and Alice White and Bob Smith",
+                "title" => "Advanced Testing Strategies",
+                "chapter" => "7",
+                "pages" => "200-220",
+                "publisher" => "Expert Testing Publishers",
+                "year" => "2023",
+                "volume" => "5",
+                "series" => "Strategies Series",
+                "type" => "Research",
+                "address" => "Seattle",
+                "edition" => "First",
+                "month" => "Jul",
+                "note" => "An insightful chapter"
+            ],
+            [
+                "entry_type" => "incollection",
+                "citekey" => "Johnson2022",
+                "author" => "Michael Johnson and Alice White and Bob Smith",
+                "title" => "Chapter on Testing",
+                "booktitle" => "Handbook of Testing",
+                "publisher" => "Testing Publishers",
+                "year" => "2022",
+                "editor" => "Nancy Editor",
+                "volume" => "3",
+                "series" => "Testing Handbook Series",
+                "type" => "Research",
+                "chapter" => "10",
+                "pages" => "150-170",
+                "address" => "Atlanta",
+                "edition" => "Fourth",
+                "month" => "Mar",
+                "note" => "A key chapter"
+            ],
+            [
+                "entry_type" => "inproceedings",
+                "citekey" => "Brown2019",
+                "author" => "Alice Brown and David Green and Eve Gray",
+                "title" => "Proceedings of the Testing Conference",
+                "booktitle" => "International Conference on Testing",
+                "year" => "2019",
+                "editor" => "Michael Johnson",
+                "volume" => "6",
+                "series" => "Conference Proceedings",
+                "pages" => "300-320",
+                "address" => "New York",
+                "month" => "Aug",
+                "organization" => "Testing Society",
+                "publisher" => "Proceedings Publishers",
+                "note" => "A notable conference paper"
+            ],
+            [
+                "entry_type" => "manual",
+                "citekey" => "Manual2014",
+                "title" => "Testing Manual",
+                "author" => "John Smith",
+                "organization" => "Testing Organization",
+                "address" => "Los Angeles",
+                "edition" => "1st",
+                "month" => "Sep",
+                "year" => "2014",
+                "note" => "A comprehensive manual"
+            ],
+            [
+                "entry_type" => "mastersthesis",
+                "citekey" => "Black2016",
+                "author" => "David Black and Jane White and Bob Smith",
+                "title" => "Testing in Software Engineering",
+                "school" => "Institute of Testing",
+                "year" => "2016",
+                "type" => "Master's Thesis",
+                "address" => "Boston",
+                "month" => "Oct",
+                "note" => "A significant thesis"
+            ],
+            [
+                "entry_type" => "misc",
+                "citekey" => "Misc2013",
+                "title" => "Miscellaneous Testing",
+                "author" => "John Doe",
+                "howpublished" => "Unpublished",
+                "month" => "Nov",
+                "year" => "2013",
+                "note" => "Misc has no mandatory fields"
+            ],
+            [
+                "entry_type" => "phdthesis",
+                "citekey" => "Green2017",
+                "author" => "Carol Green and John Doe and Alice Brown",
+                "title" => "Advanced Testing Techniques",
+                "school" => "University of Testing",
+                "year" => "2017",
+                "type" => "PhD Thesis",
+                "address" => "San Francisco",
+                "month" => "Dec",
+                "note" => "A groundbreaking thesis"
+            ],
+            [
+                "entry_type" => "proceedings",
+                "citekey" => "Proceedings2021",
+                "title" => "Proceedings of the 2021 Testing Symposium",
+                "year" => "2021",
+                "editor" => "Michael Johnson and Alice White",
+                "volume" => "7",
+                "series" => "Symposium Series",
+                "address" => "Chicago, USA",
+                "month" => "Nov",
+                "organization" => "Testing Society",
+                "publisher" => "Symposium Publishers",
+                "note" => "A significant symposium"
+            ],
+            [
+                "entry_type" => "techreport",
+                "citekey" => "Gray2015",
+                "author" => "Eve Gray and Bob Smith and Carol Green",
+                "title" => "Testing Report 2015",
+                "institution" => "Testing Institute",
+                "year" => "2015",
+                "type" => "Technical Report",
+                "number" => "TR-2015-01",
+                "address" => "Chicago",
+                "month" => "Jan",
+                "note" => "A detailed technical report"
+            ],
+            [
+                "entry_type" => "unpublished",
+                "citekey" => "Unpublished2023",
+                "author" => "Frank Unpublished and Emily Editor and David Black",
+                "title" => "Unpublished Testing Research",
+                "note" => "Manuscript in preparation",
+                "month" => "Feb",
+                "year" => "2023"
+            ]
+            ]);
+    }
+
+    /**
+     * @testdox POST /api/v1/bibliography/import (with invalid data)
+     */
+    public function testInvalidImport() {
         $name = 'import_wrong_structure.bib';
         $path = storage_path() . "/framework/testing/$name";
         $file = new UploadedFile($path, $name, 'application/x-bibtex', null, true);
 
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+        $response = $this->userRequest()
             ->post('/api/v1/bibliography/import', [
                 'file' => $file
             ]);
 
-        $response->assertStatus(400);
+        $this->assertStatus($response, 400);
         $response->assertSimilarJson([
             'error' => "Unexpected character '\\0' at line 10 column 1"
         ]);
     }
 
     /**
-     * Tests the add (POST /bibliography/),
-     * export all (GET /bibliography/export/),
-     * patch item (PATCH /bibliography/{id}) and
-     * delete (DELETE /bibliography/{id}) API endpoints
-     * @return void
+     * @testdox POST /api/v1/bibliography/export
      */
-    public function testAddExportPatchAndDeleteEndpoint()
-    {
-        $cnt = Bibliography::count();
-        $this->assertEquals(61, $cnt);
+    public function testExport() {
+        $response = $this->userRequest()
+                ->post('/api/v1/bibliography/export');
 
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
-            ->post('/api/v1/bibliography', [
-                'type' => 'article',
-                'title' => 'Test Article',
-                'author' => 'PhpUnit',
-                'pages' => '10-15'
-            ]);
-
-        $response->assertStatus(201);
-        $cnt = Bibliography::count();
-        $this->assertEquals(62, $cnt);
-
-        $this->refreshToken($response);
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
-            ->get('/api/v1/bibliography/export');
-
-        $response->assertStatus(200);
+        $this->assertStatus($response, 200);
         $this->assertTrue($response->headers->get('content-type') == 'application/x-bibtex');
         $this->assertTrue($response->headers->get('content-disposition') == 'attachment; filename=export.bib');
-        $content = $this->getStreamedContent($response);
-        $this->assertStringContainsString("@article{Ph:0000,\n    title: {Test Article}\n    author: {PhpUnit}\n    pages: {10-15}\n}\n\n", $content);
+        $content = $response->streamedContent();
+        $expectedContent = file_get_contents(storage_path() . "/framework/testing/demo.bib");
+        $this->assertSame($expectedContent, $content);
+    }
 
-        $this->refreshToken($response);
-        $bib = Bibliography::latest()->first();
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
-            ->patch('/api/v1/bibliography/'.$bib->id, [
-                'type' => 'book',
-                'title' => 'Patched Title',
-                'institution' => 'University of Tuebingen',
-                'year' => '2019',
-                'pages' => ''
-            ]);
+    public function getUpdateData() {
+        return [
+            'entry_type'        => 'book',
+            'author'            => 'Köppke, Dietmar and Sauer, Jürgen',
+            'editor'            => 'King, Robert and Smith, John',
+            'title'             => 'Patched Title',
+            'journal'           => 'Patched Journal',
+            'year'              => 'Patched Year',
+            'pages'             => 'Patched Pages',
+            'volume'            => 'Patched Volume',
+            'number'            => 'Patched Number',
+            'booktitle'         => 'Patched Booktitle',
+            'publisher'         => 'Patched Publisher',
+            'address'           => 'Patched Address',
+            'misc'              => 'Patched Misc',
+            'howpublished'      => 'Patched Howpublished',
+            'annote'            => 'Patched Annote',
+            'chapter'           => 'Patched Chapter',
+            'crossref'          => 'Patched Crossref',
+            'edition'           => 'Patched Edition',
+            'institution'       => 'Patched Institution',
+            'key'               => 'Patched Key',
+            'month'             => 'Patched Month',
+            'note'              => 'Patched Note',
+            'organization'      => 'Patched Organization',
+            'school'            => 'Patched School',
+            'series'            => 'Patched Series',
+            'type'              => 'Patched Type',
+            'abstract'          => 'Patched Abstract',
+            'doi'               => 'Patched Doi',
+            'isbn'              => 'Patched Isbn',
+            'issn'              => 'Patched Issn',
+            'language'          => 'Patched Language',
+        ];
+    }
 
-        $response->assertStatus(200);
+
+    /*
+     * TODO: We are not simply updating all table cells according to
+     *       the passed data but instead sanatizing the data and
+     *       only updating the fields that fit the entry_type.
+     *       All other fields are set to NULL. This is at the time of writing the
+     *       desired behavior. We therefore need to test every entry type.
+     *       This is not yet implemented.
+     *
+     *      [SO/VR]
+     */
+
+     /**
+      * @testdox POST /api/v1/bibliography/{id}
+      */
+    public function testPatchItem() {
+        $data = $this->getUpdateData();
+        $response = $this->userRequest()
+            ->post('/api/v1/bibliography/1320', $data);
+
+        $this->assertStatus($response, 200);
         $response->assertJsonStructure([
             'id',
             'type',
@@ -300,88 +667,75 @@ class ApiBibliographyTest extends TestCase
             'created_at',
             'updated_at'
         ]);
-        $response->assertJson([
-            'type' => 'book',
-            'title' => 'Patched Title',
-            'author' => 'PhpUnit',
-            'institution' => 'University of Tuebingen',
-            'citekey' => 'Ph:2019',
-            'year' => '2019',
-            'pages' => ''
-        ]);
+        $response->assertJson(array_merge($data, [
+          // Set all non-book fields to NULL
+            'annote'            => null,
+            'booktitle'         => null,
+            'chapter'           => null,
+            'crossref'          => null,
+            'howpublished'      => null,
+            'institution'       => null,
+            'issn'              => null,
+            'journal'           => null,
+            'key'               => null,
+            'misc'              => null,
+            'number'            => null,
+            'organization'      => null,
+            'pages'             => null,
+            'school'            => null,
+            'type'              => null,
+            'volume'            => null,
+        ]));
+     }
 
-        $this->refreshToken($response);
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
+     /**
+      * @testdox DELETE /api/v1/bibliography/{id}
+      */
+     public function testDelete() {
+        $bib = Bibliography::latest()->first();
+
+        $response = $this->userRequest()
             ->delete('/api/v1/bibliography/'.$bib->id);
 
-        $response->assertStatus(204);
+        $this->assertStatus($response, 204);
         $cnt = Bibliography::count();
-        $this->assertEquals(61, $cnt);
+        $this->assertEquals(5, $cnt);
         $this->assertEquals("", $response->getContent());
     }
 
-    // Testing exceptions and permissions
+    /// TODO: Add tests for the following endpoints:
+    // - DELETE /{id}/file
+    // - UPLOAD file in all requests
 
     /**
-     *
-     *
-     * @return void
+     * @dataProvider permissions
      */
-    public function testPermissions()
-    {
-        User::first()->roles()->detach();
-
-        $calls = [
-            ['url' => '', 'error' => 'You do not have the permission to add new bibliography', 'verb' => 'post'],
-            ['url' => '/import', 'error' => 'You do not have the permission to add new bibliography', 'verb' => 'post'],
-            ['url' => '/1319', 'error' => 'You do not have the permission to edit existing bibliography', 'verb' => 'patch'],
-            ['url' => '/1319', 'error' => 'You do not have the permission to remove bibliography entries', 'verb' => 'delete'],
-        ];
-
-        foreach($calls as $c) {
-            $response = $this->withHeaders([
-                    'Authorization' => "Bearer $this->token"
-                ])
-                ->json($c['verb'], '/api/v1/bibliography' . $c['url']);
-
-            $response->assertStatus(403);
-            $response->assertSimilarJson([
-                'error' => $c['error']
-            ]);
-
-            $this->refreshToken($response);
-        }
+    public function testWithoutPermission($permission) {
+        (new ResponseTester($this))->testMissingPermission($permission);
     }
+
     /**
-     *
-     *
-     * @return void
+     * @dataProvider exceptionPermissions
      */
-    public function testExceptions()
-    {
-        $calls = [
-            ['url' => '/99/ref_count', 'error' => 'This bibliography item does not exist', 'verb' => 'get'],
-            ['url' => '/99', 'error' => 'This bibliography item does not exist', 'verb' => 'patch'],
-            ['url' => '/99', 'error' => 'This bibliography item does not exist', 'verb' => 'delete'],
+    public function testSucceedWithPermission($permission) {
+        (new ResponseTester($this))->testExceptions($permission);
+    }
+
+    // TODO: We should test the success of each endpoint by using a user that has only the single required permission. [SO]
+    public static function permissions() {
+        return [
+            'permission to add item'    => Permission::for("post", '/api/v1/bibliography' ,'You do not have the permission to add new bibliography'),
+            'permission to update item' => Permission::for("post", '/api/v1/bibliography/9000', 'You do not have the permission to edit existing bibliography'),
+            'permission to delete item' => Permission::for("delete", '/api/v1/bibliography/9000', 'You do not have the permission to remove bibliography entries'),
+            'permission to import item' => Permission::for("post", '/api/v1/bibliography/import', 'You do not have the permission to add new/modify existing bibliography items'),
         ];
+    }
 
-        foreach($calls as $c) {
-            $response = $this->withHeaders([
-                    'Authorization' => "Bearer $this->token"
-                ])
-                ->json($c['verb'], '/api/v1/bibliography' . $c['url'], [
-                    'type' => 'required',
-                    'title' => 'required',
-                ]);
-
-            $response->assertStatus(400);
-            $response->assertSimilarJson([
-                'error' => $c['error']
-            ]);
-
-            $this->refreshToken($response);
-        }
+    public static function exceptionPermissions() {
+        return [
+            "missing ref count" => Permission::for("get", '/api/v1/bibliography/99/ref_count', 'This bibliography item does not exist'),
+            "update missing item" => Permission::for("post", '/api/v1/bibliography/99', 'This bibliography item does not exist'),
+            "delete missing item" => Permission::for("delete", '/api/v1/bibliography/99', 'This bibliography item does not exist'),
+        ];
     }
 }

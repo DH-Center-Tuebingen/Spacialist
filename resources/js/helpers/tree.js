@@ -4,27 +4,25 @@ import {
     markRaw,
     ref,
  } from 'vue';
-import store from '@/bootstrap/store.js';
+import useEntityStore from '@/bootstrap/stores/entity.js';
 import { getNodeFromPath } from 'tree-component';
 import {
     fetchChildren as fetchChildrenApi,
 } from '@/api.js';
 
-import {
-    getEntityTypeName,
-} from '@/helpers/helpers.js';
-
 export async function fetchChildren(id, sort = {by: 'rank', dir: 'asc'}) {
+    const entityStore = useEntityStore();
     return fetchChildrenApi(id).then(data => {
-        return store.dispatch('loadEntities', {
+        return entityStore.setDescendants({
             entities: data,
             sort: sort,
         });
     });
-    
+
 }
 
 export function sortTree(by, dir, tree) {
+    const entityStore = useEntityStore();
     dir = dir == 'desc' ? dir : 'asc';
     let sortFn;
     switch(by) {
@@ -59,8 +57,8 @@ export function sortTree(by, dir, tree) {
             break;
         case 'type':
             sortFn = (a, b) => {
-                const aurl = getEntityTypeName(a.entity_type_id);
-                const burl = getEntityTypeName(b.entity_type_id);
+                const aurl = entityStore.getEntityTypeName(a.entity_type_id);
+                const burl = entityStore.getEntityTypeName(b.entity_type_id);
                 let value = 0;
                 if(aurl < burl) value = -1;
                 if(aurl > burl) value = 1;
@@ -88,8 +86,9 @@ function sortTreeLevel(tree, fn) {
 }
 
 export async function openPath(ids, sort = {by: 'rank', dir: 'asc'}) {
+    const entityStore = useEntityStore();
     const index = ids.pop();
-    const elem = store.getters.entities[index];
+    const elem = entityStore.entities[index];
     if(ids.length == 0) {
         return elem;
     }
@@ -102,7 +101,7 @@ export async function openPath(ids, sort = {by: 'rank', dir: 'asc'}) {
         // Have to get current elemen from tree (not entities array) as well
         // otherwise children and childrenLoaded props are not correctly set
         const htmlElem = document.getElementById(`tree-node-${elem.id}`).parentElement;
-        const node = getNodeFromPath(store.getters.tree, htmlElem.getAttribute('data-path').split(','));
+        const node = getNodeFromPath(entityStore.tree, htmlElem.getAttribute('data-path').split(','));
         node.children = children;
         node.childrenLoaded = true;
     }

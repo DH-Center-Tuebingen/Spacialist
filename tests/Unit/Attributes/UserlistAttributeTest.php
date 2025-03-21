@@ -1,7 +1,9 @@
 <?php
 namespace Tests\Unit\Attributes;
 
+use App\AttributeTypes\AttributeBase;
 use App\AttributeTypes\UserlistAttribute;
+use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
@@ -30,14 +32,26 @@ class UserlistAttributeTest extends TestCase {
         UserlistAttribute::fromImport($input);
     }
 
+    /**
+     * Test export of attribute (attribute value id = xx)
+     *
+     * @return void
+     */
+    public function testParseExport() {
+        $testValue = AttributeValue::find(76);
+        $parseResult = AttributeBase::serializeExportData($testValue);
+
+        $this->assertEquals('admin', $parseResult);
+    }
+
     public static function truthyProvider() {
         return [
             "empty string" => ["", null],
             "single user" => ["admin", "[1]"],
-            "multiple users" => ["admin;first_user", "[1,2]"],
-            "multiple users with spaces" => [" admin ; first_user ", "[1,2]"],
-            "single deleted user" => ["deleted_user", "[3]"],
-            "multiple users with single deleted user" => ["admin;deleted_user", "[1,3]"],
+            "multiple users" => ["admin;johndoe", "[1,2]"],
+            "multiple users with spaces" => [" admin ; johndoe ", "[1,2]"],
+            "single deleted user" => ["garyguest", "[3]"],
+            "multiple users with single deleted user" => ["admin;garyguest", "[1,3]"],
         ];
     }
 

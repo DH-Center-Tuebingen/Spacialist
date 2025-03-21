@@ -13,6 +13,7 @@
 
 <script>
     import {
+        computed,
         reactive,
         toRefs,
         watch,
@@ -40,17 +41,12 @@
         },
         emits: ['change'],
         setup(props, context) {
-            const {
-                name,
-                disabled,
-                value,
-            } = toRefs(props);
-            // FETCH
+            const initValue = computed(_ => !!props.value);
 
             // FUNCTIONS
             const resetFieldState = _ => {
                 v.resetField({
-                    value: initValue,
+                    value: initValue.value,
                 });
             };
             const undirtyField = _ => {
@@ -60,15 +56,14 @@
             };
 
             // DATA
-            const initValue = !!value.value ? true : false;
             const {
                 value: fieldValue,
                 meta,
                 resetField,
-            } = useField(`perc_${name.value}`, yup.boolean(), {
+            } = useField(`perc_${props.name}`, yup.boolean(), {
                 type: 'checkbox',
-                valueProp: initValue,
-                initialValue: initValue,
+                valueProp: initValue.value,
+                initialValue: initValue.value,
             });
             const state = reactive({
 
@@ -80,7 +75,7 @@
             });
 
 
-            watch(_ => value, (newValue, oldValue) => {
+            watch(_ => props.value, (newValue, oldValue) => {
                 resetFieldState();
             });
             watch(_ => v.value, (newValue, oldValue) => {

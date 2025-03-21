@@ -106,7 +106,7 @@
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
-    import store from '@/bootstrap/store.js';
+    import useSystemStore from '@/bootstrap/stores/system.js';
 
     import {
         searchLabel,
@@ -123,6 +123,7 @@
         emits: ['closing', 'confirm'],
         setup(props, context) {
             const { t } = useI18n();
+            const systemStore = useSystemStore();
 
             // FUNCTIONS
             const add = _ => {
@@ -142,10 +143,13 @@
             const state = reactive({
                 entityType: {
                     is_root: false,
-                    geometryType: null,
+                    geometryType: {
+                        label: 'Any',
+                        key: 'any'
+                    },
                     label: null,
                 },
-                availableGeometryTypes: computed(_ => store.getters.geometryTypes),
+                availableGeometryTypes: computed(_ => systemStore.geometryTypes),
                 dataMissing: computed(_ => !state.entityType.label),
             });
 

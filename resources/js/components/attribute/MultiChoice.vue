@@ -15,6 +15,7 @@
         :filter-results="false"
         :close-on-select="false"
         :placeholder="t('global.select.placeholder')"
+        :append-to-body="true"
         @change="v.handleChange"
         @search-change="setSearchQuery"
     >
@@ -94,6 +95,9 @@
             // FETCH
 
             // FUNCTIONS
+
+            // TODO FIX BUG: When the field is changed then saved and resetted, it will reset to the
+            // previously loaded value, bot the newly saved one!
             const resetFieldState = _ => {
                 v.resetField({
                     value: value.value
@@ -143,12 +147,29 @@
             watch(_ => value, (newValue, oldValue) => {
                 resetFieldState();
             });
-            watch(_ => v.value, (newValue, oldValue) => {
-                context.emit('change', {
-                    dirty: v.meta.dirty,
-                    valid: v.meta.valid,
-                    value: v.value,
+
+            function valueHasChanged(a, b) {
+                if(!a && !b) return false;
+                if(!a || !b) return true;
+
+                if(a.length != b.length) return true;
+                if(a.length == 0) return false;
+
+                return a.every((item, idx) => {
+                    if(item.id != b[idx].id) return true;
                 });
+            }
+
+            watch(_ => v.value, (newValue, oldValue) => {
+                // only emit @change event if field is validated (required because Entity.vue components)
+                // trigger this watcher several times even if another component is updated/validated
+                if(valueHasChanged(newValue, oldValue)) {
+                    context.emit('change', {
+                        dirty: v.meta.dirty,
+                        valid: v.meta.valid,
+                        value: v.value,
+                    });
+                }
             });
 
             // RETURN

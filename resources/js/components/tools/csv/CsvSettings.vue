@@ -129,7 +129,6 @@
                     {{ t('main.csv.uploader.show_linenumbers') }}
                 </label>
             </div>
-
             <IconButton
                 icon="eye"
                 :model-value="showPreview"

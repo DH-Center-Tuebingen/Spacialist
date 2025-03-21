@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'default' => env('FILESYSTEM_DISK', 'public'),
+    'default' => env('FILESYSTEM_DISK', 'local'),
 
     /*
     |--------------------------------------------------------------------------
@@ -45,7 +45,7 @@ return [
 
         'local' => [
             'driver' => 'local',
-            'root' => storage_path('app'),
+            'root' => storage_path('app/private'),
         ],
 
         'public' => [
@@ -62,6 +62,14 @@ return [
             'secret' => env('AWS_SECRET_ACCESS_KEY'),
             'region' => env('AWS_DEFAULT_REGION'),
             'bucket' => env('AWS_BUCKET'),
+        ],
+        
+        'private' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private'),
+            // 'url' => env('APP_URL').'/storage', // TODO doesn't work with port
+            'url' => './storage',
+            'visibility' => 'private',
         ],
 
     ],

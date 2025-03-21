@@ -39,7 +39,7 @@
                             <simple-search
                                 :endpoint="searchLabel"
                                 :key-fn="getConceptLabel"
-                                :default-value="state.defaultConcept"
+                                :value="state.defaultConcept"
                                 @selected="labelSelected"
                             />
                         </div>
@@ -111,7 +111,7 @@
             };
             const labelSelected = label => {
                 if(label === null){
-                    state.editedProps.thesaurus_url = label.concept_url; 
+                    state.editedProps.thesaurus_url = label.concept_url;
                 }else if(label.concept_url){
                     state.editedProps.thesaurus_url = label.concept_url;
                 }else{

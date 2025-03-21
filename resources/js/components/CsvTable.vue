@@ -251,7 +251,6 @@
 </script>
 
 <style scoped>
-
     /* 
         Bootstrap sets the sticky-top to z-index: 1020, which is the same level
         as the modals, which doesn't make sense in the table context.

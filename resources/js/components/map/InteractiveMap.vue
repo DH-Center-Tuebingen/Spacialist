@@ -1,5 +1,5 @@
 <template>
-    <div class="h-100"> 
+    <div class="h-100">
         <div
             :id="state.mapId"
             class="map h-100"
@@ -7,16 +7,16 @@
             <div class="d-flex flex-column ol-bar ol-right ol-bottom">
                 <div
                     v-if="drawing"
-                    class="d-flex flex-column align-items-end"
+                    class="d-flex flex-column align-items-end pb-2 pe-2"
                 >
                     <button
                         type="button"
                         class="btn btn-fab rounded-circle"
                         :class="{'btn-primary': actionState.drawType == 'Point', 'btn-outline-primary': actionState.drawType != 'Point'}"
                         data-bs-toggle="popover"
-                        :data-content="t('main.map.draw.point.desc')"
-                        data-trigger="hover"
-                        data-placement="bottom"
+                        :data-bs-content="t('main.map.draw.point.desc')"
+                        data-bs-trigger="hover"
+                        data-bs-placement="bottom"
                         @click="toggleDrawType('Point')"
                     >
                         <i class="fas fa-fw fa-map-marker-alt" />
@@ -26,9 +26,9 @@
                         class="btn btn-fab rounded-circle"
                         :class="{'btn-primary': actionState.drawType == 'LineString', 'btn-outline-primary': actionState.drawType != 'LineString'}"
                         data-bs-toggle="popover"
-                        :data-content="t('main.map.draw.linestring.desc')"
-                        data-trigger="hover"
-                        data-placement="bottom"
+                        :data-bs-content="t('main.map.draw.linestring.desc')"
+                        data-bs-trigger="hover"
+                        data-bs-placement="bottom"
                         @click="toggleDrawType('LineString')"
                     >
                         <i class="fas fa-fw fa-road" />
@@ -38,9 +38,9 @@
                         class="btn btn-fab rounded-circle"
                         :class="{'btn-primary': actionState.drawType == 'Polygon', 'btn-outline-primary': actionState.drawType != 'Polygon'}"
                         data-bs-toggle="popover"
-                        :data-content="t('main.map.draw.polygon.desc')"
-                        data-trigger="hover"
-                        data-placement="bottom"
+                        :data-bs-content="t('main.map.draw.polygon.desc')"
+                        data-bs-trigger="hover"
+                        data-bs-placement="bottom"
                         @click="toggleDrawType('Polygon')"
                     >
                         <i class="fas fa-fw fa-draw-polygon" />
@@ -50,9 +50,9 @@
                         type="button"
                         class="btn btn-fab rounded-circle btn-outline-info"
                         data-bs-toggle="popover"
-                        :data-content="t('main.map.draw.modify.desc')"
-                        data-trigger="hover"
-                        data-placement="bottom"
+                        :data-bs-content="t('main.map.draw.modify.desc')"
+                        data-bs-trigger="hover"
+                        data-bs-placement="bottom"
                         @click="setInteractionMode('modify')"
                     >
                         <i class="fas fa-fw fa-edit" />
@@ -62,9 +62,9 @@
                         type="button"
                         class="btn btn-fab rounded-circle btn-outline-success"
                         data-bs-toggle="popover"
-                        :data-content="t('main.map.draw.modify.pos_desc')"
-                        data-trigger="hover"
-                        data-placement="bottom"
+                        :data-bs-content="t('main.map.draw.modify.pos_desc')"
+                        data-bs-trigger="hover"
+                        data-bs-placement="bottom"
                         @click="updateFeatures()"
                     >
                         <i class="fas fa-fw fa-check" />
@@ -74,9 +74,9 @@
                         type="button"
                         class="btn btn-fab rounded-circle btn-outline-danger"
                         data-bs-toggle="popover"
-                        :data-content="t('main.map.draw.modify.neg_desc')"
-                        data-trigger="hover"
-                        data-placement="bottom"
+                        :data-bs-content="t('main.map.draw.modify.neg_desc')"
+                        data-bs-trigger="hover"
+                        data-bs-placement="bottom"
                         @click="updateFeatures(false)"
                     >
                         <i class="fas fa-fw fa-times" />
@@ -86,9 +86,9 @@
                         type="button"
                         class="btn btn-fab rounded-circle btn-outline-danger"
                         data-bs-toggle="popover"
-                        :data-content="t('main.map.draw.delete.desc')"
-                        data-trigger="hover"
-                        data-placement="bottom"
+                        :data-bs-content="t('main.map.draw.delete.desc')"
+                        data-bs-trigger="hover"
+                        data-bs-placement="bottom"
                         @click="setInteractionMode('delete')"
                     >
                         <i class="fas fa-fw fa-trash" />
@@ -98,9 +98,9 @@
                         type="button"
                         class="btn btn-fab rounded-circle btn-outline-success"
                         data-bs-toggle="popover"
-                        :data-content="t('main.map.draw.delete.pos_desc')"
-                        data-trigger="hover"
-                        data-placement="bottom"
+                        :data-bs-content="t('main.map.draw.delete.pos_desc')"
+                        data-bs-trigger="hover"
+                        data-bs-placement="bottom"
                         @click="deleteFeatures()"
                     >
                         <i class="fas fa-fw fa-check" />
@@ -110,9 +110,9 @@
                         type="button"
                         class="btn btn-fab rounded-circle btn-outline-danger"
                         data-bs-toggle="popover"
-                        :data-content="t('main.map.draw.delete.neg_desc')"
-                        data-trigger="hover"
-                        data-placement="bottom"
+                        :data-bs-content="t('main.map.draw.delete.neg_desc')"
+                        data-bs-trigger="hover"
+                        data-bs-placement="bottom"
                         @click="deleteFeatures(false)"
                     >
                         <i class="fas fa-fw fa-times" />
@@ -122,9 +122,9 @@
                         class="btn btn-fab rounded-circle"
                         :class="{'btn-primary': actionState.measure.active, 'btn-outline-primary': !actionState.measure.active}"
                         data-bs-toggle="popover"
-                        :data-content="t('main.map.draw.measure.desc')"
-                        data-trigger="hover"
-                        data-placement="bottom"
+                        :data-bs-content="t('main.map.draw.measure.desc')"
+                        data-bs-trigger="hover"
+                        data-bs-placement="bottom"
                         @click="toggleMeasurements()"
                     >
                         <i class="fas fa-fw fa-ruler-combined" />
@@ -303,8 +303,10 @@
         toRefs,
         watch,
     } from 'vue';
-    
+
     import { useI18n } from 'vue-i18n';
+
+    import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import {
         Tooltip,
@@ -359,7 +361,6 @@
     } from '@/helpers/map.js';
 
     import {
-        getEntityType,
         getTs,
         translateConcept,
         _throttle,
@@ -432,13 +433,14 @@
             },
         },
         emits: [
-            'added', 
+            'added',
             'deleted',
             'modified',
             'select',
         ],
         setup(props, context) {
             const { t } = useI18n();
+            const entityStore = useEntityStore();
 
             const {
                 selection,
@@ -613,7 +615,7 @@
                         } else {
                             let layerName = '';
                             if(l.entity_type_id) {
-                                const et = getEntityType(l.entity_type_id);
+                                const et = entityStore.getEntityType(l.entity_type_id);
                                 if(!!et) {
                                     layerName = translateConcept(et.thesaurus_url);
                                 }
@@ -691,7 +693,7 @@
                 let finalStyle = null;
                 const layerProps = layer.getProperties();
                 const color = layerProps.color;
-                
+
                 const p = f.getProperties();
                 if(stylePerLayer.value) {
                     if(!state.layerStyleCache[layerProps.layer_id]) {
@@ -1466,6 +1468,8 @@
                     updateLayerGroups();
                     initializeDrawFeatures();
                     initializeMapEvents();
+
+                    document.querySelectorAll('[data-bs-toggle="popover"]').forEach(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
                 });
             });
 
@@ -1563,7 +1567,7 @@
                 state,
                 actionState,
             };
-            
+
         },
     };
 </script>

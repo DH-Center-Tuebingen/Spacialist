@@ -8,7 +8,12 @@
         placeholder="0.0"
         :disabled="disabled"
         :name="name"
+        @keydown="onKeydown"
     >
+    <InputError
+        :v="v"
+        :error="errorMessage"
+    />
 </template>
 
 <script>
@@ -21,8 +26,14 @@
     import { useField } from 'vee-validate';
 
     import * as yup from 'yup';
+    import InputError from '@/components/forms/InputError.vue';
+    
+    import {useNumberInputHotkeys} from '@/composables/number-input-hotkeys.js';
 
     export default {
+        components: {
+            InputError,
+        },
         props: {
             name: {
                 type: String,
@@ -40,17 +51,12 @@
         },
         emits: ['change'],
         setup(props, context) {
-            const {
-                name,
-                disabled,
-                value,
-            } = toRefs(props);
             // FETCH
 
             // FUNCTIONS
             const resetFieldState = _ => {
                 v.resetField({
-                    value: value.value
+                    value: props.value
                 });
             };
             const undirtyField = _ => {
@@ -64,20 +70,20 @@
                 value: fieldValue,
                 meta,
                 resetField,
-            } = useField(`float_${name.value}`, yup.number(), {
-                initialValue: value.value,
+                errorMessage,
+            } = useField(`float_${props.name}`, yup.number(), {
+                initialValue: props.value,
             });
-            const state = reactive({
-
-            });
+            
             const v = reactive({
                 value: fieldValue,
                 meta,
                 resetField,
             });
 
+            const { onKeydown } = useNumberInputHotkeys(v, true);
 
-            watch(_ => value, (newValue, oldValue) => {
+            watch(_ => props.value, (newValue, oldValue) => {
                 resetFieldState();
             });
             watch(_ => v.value, (newValue, oldValue) => {
@@ -98,8 +104,9 @@
                 resetFieldState,
                 undirtyField,
                 // STATE
-                state,
                 v,
+                errorMessage,
+                onKeydown,
             };
         },
     };

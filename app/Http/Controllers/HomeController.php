@@ -21,9 +21,9 @@ class HomeController extends Controller
     {
         parent::__construct();
         if(!Preference::hasPublicAccess()) {
-            $this->middleware('auth')->except(['welcome', 'index', 'external']);
+            $this->middleware('auth:sanctum')->except(['welcome', 'index', 'external']);
         }
-        $this->middleware('guest')->only('welcome');
+        // $this->middleware('guest')->only('welcome');
     }
 
     public function getGlobalData() {
@@ -47,7 +47,9 @@ class HomeController extends Controller
             }
         }
 
-        $entityTypes = EntityType::with(['sub_entity_types', 'layer', 'attributes'])
+        // TODO handle layer relation in Map Plugin
+        // $entityTypes = EntityType::with(['sub_entity_types', 'layer', 'attributes'])
+        $entityTypes = EntityType::with(['sub_entity_types', 'attributes'])
             ->orderBy('id')
             ->get();
         $entityTypeMap = $entityTypes->getDictionary();

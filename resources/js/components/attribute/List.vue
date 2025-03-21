@@ -73,9 +73,9 @@
 
     export default {
         props: {
-            name:{ 
-                type: String, 
-                required: false, 
+            name:{
+                type: String,
+                required: false,
                 default: null
             },
             entries: {
@@ -153,7 +153,7 @@
                     value: v.value,
                 });
             });
-            watch(_ => entries, (newValue, oldValue) => {
+            watch(_ => entries.value, (newValue, oldValue) => {
                 state.initialValue = newValue.slice();
                 resetFieldState();
             });
@@ -172,7 +172,7 @@
                 // STATE
                 state,
                 v,
-            }
+            };
         },
-    }
+    };
 </script>

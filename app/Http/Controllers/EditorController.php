@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 // use App\AvailableLayer;
-use \DB;
 use App\Attribute;
 use App\AttributeValue;
 use App\AvailableLayer;
@@ -11,7 +10,7 @@ use App\Entity;
 use App\EntityAttribute;
 use App\EntityType;
 use App\EntityTypeRelation;
-use App\Geodata;
+use \App\Plugins\Map\App\Geodata;
 use App\Plugin;
 use App\ThConcept;
 use App\AttributeTypes\AttributeBase;
@@ -84,7 +83,7 @@ class EditorController extends Controller {
                 'error' => __('You do not have the permission to view entity data')
             ], 403);
         }
-        $attributes = Attribute::whereNull('parent_id')->orderBy('id')->get();
+        $attributes = Attribute::whereNull('parent_id')->withCount('entity_types')->orderBy('id')->get();
         $selections = [];
         foreach($attributes as $a) {
             $selection = $a->getSelection();
@@ -123,7 +122,7 @@ class EditorController extends Controller {
 
     public function getAvailableGeometryTypes() {
         if(Plugin::isInstalled('Map')) {
-            $types = \App\Plugins\Map\App\Geodata::getAvailableGeometryTypes();
+            $types = Geodata::getAvailableGeometryTypes();
             return response()->json($types);
         } else {
             return response()->json();
@@ -147,50 +146,29 @@ class EditorController extends Controller {
 
         $curl = $request->get('concept_url');
         $is_root = sp_parse_boolean($request->get('is_root'));
-        $geomtype = $request->get('geometry_type');
-        $cType = new EntityType();
-        $cType->thesaurus_url = $curl;
-        $cType->is_root = $is_root;
-        $cType->save();
-        $cType = EntityType::find($cType->id);
+        $entityType = new EntityType();
+        $entityType->thesaurus_url = $curl;
+        $entityType->is_root = $is_root;
+        $entityType->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+        $entityType->save();
+        $entityType = EntityType::find($entityType->id);
 
-        AvailableLayer::createFromArray([
-            'name' => '',
-            'url' => '',
-            'type' => $geomtype,
-            'opacity' => 1,
-            'visible' => true,
-            'is_overlay' => true,
-            'entity_type_id' => $cType->id
-        ]);
+        // TODO:: Reimplement in plugin [SO]
+        //
+        // $geomtype = $request->get('geometry_type');
+        // AvailableLayer::createFromArray([
+        //     'name' => '',
+        //     'url' => '',
+        //     'type' => $geomtype,
+        //     'opacity' => 1,
+        //     'visible' => true,
+        //     'is_overlay' => true,
+        //     'entity_type_id' => $cType->id
+        // ]);
 
-        $cType->load('layer');
+        // $cType->load('layer');
 
-        return response()->json($cType, 201);
-    }
-
-    public function setRelationInfo(Request $request, $id) {
-        $user = auth()->user();
-        if(!$user->can('entity_type_write')) {
-            return response()->json([
-                'error' => __('You do not have the permission to modify entity relations')
-            ], 403);
-        }
-        $this->validate($request, [
-            'is_root' => 'boolean_string',
-            'sub_entity_types' => 'array'
-        ]);
-        try {
-            $entityType = EntityType::findOrFail($id);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This entity-type does not exist')
-            ], 400);
-        }
-        $is_root = $request->get('is_root');
-        $subs = $request->get('sub_entity_types');
-        $entityType->setRelationInfo($is_root, $subs);
-        return response()->json(null, 204);
+        return response()->json($entityType, 201);
     }
 
     public function addAttribute(Request $request) {
@@ -349,10 +327,13 @@ class EditorController extends Controller {
         $duplicate = $entityType->replicate();
         $duplicate->save();
 
-        $newLayer = $entityType->layer->replicate();
-        $newLayer->entity_type_id = $duplicate->id;
-        $newLayer->position = AvailableLayer::where('is_overlay', true)->max('position') + 1;
-        $newLayer->save();
+        // TODO:: This should be handled by a hook in the plugin [SO]
+        // if($entityType->layer) {
+        //     $newLayer = $entityType->layer->replicate();
+        //     $newLayer->entity_type_id = $duplicate->id;
+        //     $newLayer->position = AvailableLayer::where('is_overlay', true)->max('position') + 1;
+        //     $newLayer->save();
+        // }
 
         foreach($entityType->attributes as $attribute) {
             $newAttribute = EntityAttribute::where('attribute_id', $attribute->pivot->attribute_id)
@@ -379,7 +360,8 @@ class EditorController extends Controller {
         }
 
         $duplicate->load('sub_entity_types');
-        $duplicate->load('layer');
+        // TODO handle in Map Plugin
+        // $duplicate->load('layer');
 
         return response()->json($duplicate);
     }
@@ -390,11 +372,11 @@ class EditorController extends Controller {
         $user = auth()->user();
         if(!$user->can('entity_type_write')) {
             return response()->json([
-                'error' => __('You do not have the permission to modify entity-type labels')
+                'error' => __('You do not have the permission to modify entity-type')
             ], 403);
         }
         $this->validate($request, [
-            'data' => 'required|array'
+            'data' => 'required|array',
         ]);
 
         try {
@@ -404,14 +386,32 @@ class EditorController extends Controller {
                 'error' => __('This entity-type does not exist')
             ], 400);
         }
-        $data = Arr::only($request->get('data'), array_keys(EntityType::patchRules));
-        if(count($data) < 1) {
+        $relationData = Arr::only(
+            $request->get('data'),
+            ['is_root', 'sub_entity_types', 'color'],
+        );
+        $propData = Arr::only(
+            $request->get('data'),
+            array_keys(EntityType::patchRules),
+        );
+
+        $updateRelation = count($relationData) > 0;
+        $updateProps = count($propData) > 0;
+
+        if(!$updateRelation && !$updateProps) {
             return response()->json([
                 'error' => __('The given data is invalid')
             ], 400);
         }
-        foreach($data as $key => $prop) {
-            $entityType->{$key} = $prop;
+
+        if($updateRelation) {
+            $entityType->setRelationInfo($relationData);
+        }
+
+        if($updateProps) {
+            foreach($propData as $key => $prop) {
+                $entityType->{$key} = $prop;
+            }
         }
         $entityType->save();
 
@@ -479,9 +479,7 @@ class EditorController extends Controller {
             ], 403);
         }
         $this->validate($request, [
-            'attribute' => 'integer|exists:entity_attributes,attribute_id',
-            'operator' => 'string|in:<,>,=,!=',
-            'value' => ''
+            'data' => 'required|array',
         ]);
 
         $entityAttribute = EntityAttribute::where([
@@ -495,28 +493,54 @@ class EditorController extends Controller {
             ], 400);
         }
 
-        $dAttribute = $request->get('attribute');
-        $dOperator = $request->get('operator');
-        $dValue = $request->get('value');
+        $dependencyData = $request->get('data');
+        $hasData = false;
+        $dependsOn = [
+            'or' => $dependencyData['or'],
+        ];
+        $operators = [
+            '<' => true,
+            '>' => true,
+            '<=' => true,
+            '>=' => true,
+            '=' => true,
+            '!=' => true,
+            '?' => false,
+            '!?' => false,
+        ];
+        foreach($dependencyData['groups'] as $group) {
+            if(count($group['rules']) > 0) {
+                $hasData = true;
+                $groupRules = [];
+                foreach($group['rules'] as $rule) {
+                    if(!in_array($rule['operator'], array_keys($operators))) {
+                        return response()->json([
+                            'error' => __('Operator mismatch')
+                        ], 400);
+                    }
+                    if(!EntityAttribute::where('attribute_id', $rule['attribute'])->exists()) {
+                        return response()->json([
+                            'error' => __('Entity attribute does not exist')
+                        ], 400);
+                    }
 
-        $allSet = isset($dAttribute) && isset($dOperator) && isset($dValue);
-        $noneSet = !isset($dAttribute) && !isset($dOperator) && !isset($dValue);
-
-        if(!($allSet) && !($noneSet)) {
-            return response()->json([
-                'error' => __('Please provide either all dependency fields or none')
-            ], 400);
+                    $formattedRule = [
+                        'operator' => $rule['operator'],
+                        'on' => $rule['attribute'],
+                    ];
+                    if($operators[$rule['operator']]) {
+                        $formattedRule['value'] = $rule['value'];
+                    }
+                    $groupRules[] = $formattedRule;
+                }
+                $dependsOn['groups'][] = [
+                    'or' => $group['or'],
+                    'rules' => $groupRules,
+                ];
+            }
         }
 
-        if($allSet) {
-            $dependsOn = [
-                $dAttribute => [
-                    'operator' => $dOperator,
-                    'value' => $dValue,
-                    'dependant' => $aid
-                ]
-            ];
-        } else {
+        if(!$hasData) {
             $dependsOn = null;
         }
 
@@ -525,7 +549,7 @@ class EditorController extends Controller {
         return response()->json($entityAttribute->depends_on, 200);
     }
 
-    public function patchSystemAttribute(Request $request, $id) {
+    public function patchAttributeMetadata(Request $request, $id) {
         $user = auth()->user();
         if(!$user->can('entity_type_write')) {
             return response()->json([

@@ -23,7 +23,7 @@ class MassUnits extends UnitSystem
         $this->addImperialUnits();
     }
 
-    private function addImperialUnits(){
+    private function addImperialUnits() {
         $this->addMultiple([
             Unit::createUnit('ounce', 'oz', Imperial::OUNCE_2_G),
             Unit::createUnit('pound', 'lb', Imperial::POUND_2_G),

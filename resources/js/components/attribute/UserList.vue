@@ -1,16 +1,16 @@
 <template>
     <multiselect
         v-model="v.value"
-        class="mt-2"
         :classes="multiselectResetClasslist"
         :value-prop="'id'"
         :label="'name'"
-        :track-by="'id'"
+        :track-by="['nickname', 'name', 'email']"
         :object="false"
         :mode="'tags'"
         :disabled="disabled"
         :options="users"
         :close-on-select="false"
+        :searchable="true"
         :name="name"
         :placeholder="t('global.select.placeholder')"
         @change="v.handleChange"
@@ -26,7 +26,7 @@
             </span>
         </template>
         <template #tag="{ option, handleTagRemove, disabled: tagDisabled }">
-            <div class="multiselect-tag multiselect-tag-user py-2 bg-opacity-25 text-muted">
+            <div class="multiselect-tag multiselect-tag-user bg-opacity-25 text-muted px-1">
                 <a
                     href="#"
                     class="text-nowrap text-reset text-decoration-none"
@@ -36,7 +36,7 @@
                     <user-avatar
                         class="align-middle"
                         :user="option"
-                        :size="20"
+                        :size="18"
                     />
                     <span class="align-middle ms-2">
                         {{ option.name }}
@@ -59,7 +59,6 @@
     import {
         computed,
         reactive,
-        toRefs,
         watch,
     } from 'vue';
 
@@ -69,9 +68,11 @@
 
     import * as yup from 'yup';
 
+    import useUserStore from '@/bootstrap/stores/user.js';
+
     import {
-        getUsers,
         multiselectResetClasslist,
+        sortAlphabeticallyBy,
     } from '@/helpers/helpers.js';
 
     import {
@@ -97,18 +98,13 @@
         emits: ['change'],
         setup(props, context) {
             const { t } = useI18n();
-            const {
-                name,
-                disabled,
-                value,
-            } = toRefs(props);
+            const userStore = useUserStore();
             // FETCH
 
             // FUNCTIONS
-
             const resetFieldState = _ => {
                 v.resetField({
-                    value: value.value || []
+                    value: props.value || []
                 });
             };
             const undirtyField = _ => {
@@ -124,9 +120,9 @@
                 meta,
                 resetField,
             } = useField(`userlist_${name.value}`, yup.mixed(), {
-                initialValue: value.value || [],
+                initialValue: props.value || [],
             });
-            const users = getUsers();
+            const users = userStore.users.toSorted(sortAlphabeticallyBy());
             const v = reactive({
                 value: fieldValue,
                 handleChange,
@@ -134,8 +130,7 @@
                 resetField,
             });
 
-
-            watch(_ => value, (newValue, oldValue) => {
+            watch(_ => props.value, (newValue, oldValue) => {
                 resetFieldState();
             });
             watch(_ => v.value, (newValue, oldValue) => {

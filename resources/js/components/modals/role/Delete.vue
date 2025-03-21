@@ -64,9 +64,7 @@
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
-    import {
-        getUsers,
-    } from '@/helpers/helpers.js';
+    import useUserStore from '@/bootstrap/stores/user.js';
 
     export default {
         props: {
@@ -78,6 +76,7 @@
         emits: ['cancel', 'confirm'],
         setup(props, context) {
             const { t } = useI18n();
+            const userStore = useUserStore();
             const {
                 role,
             } = toRefs(props);
@@ -92,7 +91,7 @@
 
             // DATA
             const state = reactive({
-                count: computed(_ => getUsers().filter(u => u.roles.some(ur => ur.id == role.value.id)).length),
+                count: computed(_ => userStore.users.filter(u => u.roles.some(ur => ur.id == role.value.id)).length),
                 needsAlert: computed(_ => state.count > 0),
             });
 

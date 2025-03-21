@@ -14,128 +14,176 @@
             <div
                 v-if="!state.hiddenAttributeList[element.id] || showHidden"
                 class="mt-3 px-2"
-                :class="clFromMetadata(element)"
+                :class="additionalRowClasses(element)"
                 @mouseenter="onEnter(index)"
                 @mouseleave="onLeave(index)"
             >
-                <div
-                    class="row"
-                    :class="addModerationStateClasses(element.id)"
-                >
-                    <label
-                        v-if="!state.hideLabels"
-                        class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break align-self-start"
-                        :for="`attr-${element.id}`"
-                        :class="attributeClasses(element)"
-                        @click="e => handleLabelClick(e, element.datatype)"
+                <div class="d-flex align-items-center gap-2">
+                    <div
+                        class="row gx-3 flex-fill"
+                        :class="addModerationStateClasses(element.id)"
                     >
-                        <div
-                            v-show="!!state.hoverStates[index]"
-                            class="btn-fab-list"
+                        <label
+                            v-if="!state.hideLabels"
+                            class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break align-self-start gap-1 position-relative"
+                            :for="`attr-${element.id}`"
+                            :class="attributeClasses(element)"
+                            @click="e => handleLabelClick(e, element.datatype)"
                         >
-                            <button
-                                v-show="hasEmitter('onReorderList')"
-                                class="reorder-handle btn btn-outline-secondary btn-fab rounded-circle"
-                                data-bs-toggle="popover"
-                                :data-content="t('global.resort')"
-                                data-trigger="hover"
-                                data-placement="bottom"
+                            <slot
+                                name="before"
+                                :attribute="element"
+                            />
+                            <div
+                                v-if="hasAttributeChangeIndicator(element)"
+                                class="d-flex align-items-center"
+                                :title="getAttributeChangeIndicatorDescription(element)"
                             >
-                                <i class="fas fa-fw fa-sort" />
-                            </button>
-                            <button
-                                v-show="hasEmitter('onEditElement')"
-                                class="btn btn-outline-info btn-fab rounded-circle"
-                                data-bs-toggle="popover"
-                                :data-content="t('global.edit')"
-                                data-trigger="hover"
-                                data-placement="bottom"
-                                @click="onEditHandler(element)"
+                                <DotIndicator :type="getAttributeChangeIndicator(element)" />
+                            </div>
+                            <div
+                                v-show="!!state.hoverStates[index]"
+                                class="btn-fab-list btn-fab-list-md position-absolute start-0"
                             >
-                                <i
-                                    class="fas fa-fw fa-xs fa-edit"
-                                    style="vertical-align: 0;"
-                                />
-                            </button>
-                            <button
-                                v-show="hasEmitter('onRemoveElement')"
-                                class="btn btn-outline-danger btn-fab rounded-circle"
-                                data-bs-toggle="popover"
-                                :data-content="t('global.remove')"
-                                data-trigger="hover"
-                                data-placement="bottom"
-                                @click="onRemoveHandler(element)"
+                                <button
+                                    v-show="hasEmitter('onReorderList')"
+                                    class="reorder-handle btn btn-outline-secondary btn-fab rounded-circle"
+                                    data-bs-toggle="popover"
+                                    :data-content="t('global.resort')"
+                                    data-trigger="hover"
+                                    data-placement="bottom"
+                                >
+                                    <i class="fas fa-fw fa-sort" />
+                                </button>
+                                <button
+                                    v-show="hasEmitter('onEditElement')"
+                                    class="btn btn-outline-info btn-fab rounded-circle"
+                                    data-bs-toggle="popover"
+                                    :data-content="t('global.edit')"
+                                    data-trigger="hover"
+                                    data-placement="bottom"
+                                    @click="onEditHandler(element)"
+                                >
+                                    <i
+                                        class="fas fa-fw fa-xs fa-edit"
+                                        style="vertical-align: 0;"
+                                    />
+                                </button>
+                                <button
+                                    v-show="hasEmitter('onRemoveElement')"
+                                    class="btn btn-outline-danger btn-fab rounded-circle"
+                                    data-bs-toggle="popover"
+                                    :data-content="t('global.remove')"
+                                    data-trigger="hover"
+                                    data-placement="bottom"
+                                    @click="onRemoveHandler(element)"
+                                >
+                                    <i
+                                        class="fas fa-fw fa-xs fa-times"
+                                        style="vertical-align: 0;"
+                                    />
+                                </button>
+                                <button
+                                    v-show="hasEmitter('onDeleteElement')"
+                                    class="btn btn-outline-danger btn-fab rounded-circle"
+                                    data-bs-toggle="popover"
+                                    :data-content="t('global.delete')"
+                                    data-trigger="hover"
+                                    data-placement="bottom"
+                                    @click="onDeleteHandler(element)"
+                                >
+                                    <i
+                                        class="fas fa-fw fa-xs fa-trash"
+                                        style="vertical-align: 0;"
+                                    />
+                                </button>
+                            </div>
+                            <div
+                                class="text-end col d-inline-block text-truncate"
                             >
-                                <i
-                                    class="fas fa-fw fa-xs fa-times"
-                                    style="vertical-align: 0;"
-                                />
-                            </button>
-                            <button
-                                v-show="hasEmitter('onDeleteElement')"
-                                class="btn btn-outline-danger btn-fab rounded-circle"
+                                <span v-if="element.is_system">
+                                    &nbsp;
+                                </span>
+                                <span
+                                    v-else
+                                    :title="translateConcept(element.thesaurus_url)"
+                                >
+                                    {{ translateConcept(element.thesaurus_url) }}
+                                </span>
+                            </div>
+                            <a
+                                v-if="getConceptNote(element.thesaurus_url)"
+                                tabindex="0"
+                                class="text-decoration-none text-secondary ms-1 position-relative"
                                 data-bs-toggle="popover"
-                                :data-content="t('global.delete')"
-                                data-trigger="hover"
-                                data-placement="bottom"
-                                @click="onDeleteHandler(element)"
+                                data-bs-trigger="focus"
+                                data-bs-placement="top"
+                                :data-bs-content="getConceptNote(element.thesaurus_url)"
+                                href="#"
+                                @click.prevent
                             >
-                                <i
-                                    class="fas fa-fw fa-xs fa-trash"
-                                    style="vertical-align: 0;"
-                                />
-                            </button>
-                        </div>
-                        <span
-                            v-if="!element.is_system"
-                            class="text-end col"
-                        >
-                            {{ translateConcept(element.thesaurus_url) }}
-                        </span>
-                        <sup
-                            v-if="hasEmitter('onMetadata')"
-                            class="clickable d-flex flex-row align-items-start top-0"
-                            @click="onMetadataHandler(element)"
-                        >
-                            <validity-indicator :state="certainty(element)" />
-                            <span v-if="hasComment(element)">
-                                <i class="fas fa-fw fa-comment" />
-                            </span>
-                            <span v-if="hasBookmarks(element)">
-                                <i class="fas fa-fw fa-bookmark" />
-                            </span>
-                        </sup>
-                        <sup
-                            v-if="hasEmitter('onEditElement') && !!element.pivot.depends_on"
-                            :title="t('global.dependency.depends_on.desc')"
-                        >
-                            <i class="fas fa-diagram-next text-warning fa-rotate-180" />
-                        </sup>
-                    </label>
-                    <div :class="expandedClasses(index)">
-                        <Attribute
-                            :ref="el => setRef(el, element.id)"
-                            :data="element"
-                            :value-wrapper="state.attributeValues[element.id]"
-                            :disabled="state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                            :react-to="state.rootAttributeValues[element.root_attribute_id]"
-                            :hide-links="state.hideEntityLink"
-                            :preview="preview"
-                            :preview-data="previewData"
-                            @change="updateDirtyState"
-                            @update-selection="handleSelectionUpdate"
-                            @expanded="e => onAttributeExpand(e, index)"
-                        />
+                                <i class="fas fa-fw fa-circle-info" />
+                            </a>
+                            <sup
+                                v-if="hasEmitter('onEditElement') && !!element.pivot.depends_on && Object.keys(element.pivot.depends_on).length > 0"
+                                :title="t('global.dependency.depends_on.desc')"
+                            >
+                                <i class="fas fa-diagram-next text-warning fa-rotate-180" />
+                            </sup>
+                        </label>
+                        <div :class="expandedClasses(index, element)">
+                            <Attribute
+                                :ref="el => setRef(el, element.id)"
+                                :data="element"
+                                :value-wrapper="state.attributeValues[element.id]"
+                                :disabled="state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
+                                :react-to="state.rootAttributeValues[element.root_attribute_id]"
+                                :hide-links="state.hideEntityLink"
+                                :preview="preview"
+                                :preview-data="previewData"
+                                @change="attributeChanged"
+                                @update-selection="handleSelectionUpdate"
+                                @expanded="e => onAttributeExpand(e, index)"
+                            />
 
-                        <attribute-moderation-panel
-                            v-if="isInModeration(element.id)"
-                            :element="element"
-                            :value="state.attributeValues[element.id]"
-                            @toggle-data="e => toggleAttributeValue(element.id)"
-                            @moderate="e => handleModeration(element.id, e)"
-                            @edit="e => handleEditModeration(element.id, e)"
-                        />
+                            <ModerationPanel
+                                v-if="isInModeration(element.id)"
+                                :element="element"
+                                :value="state.attributeValues[element.id]"
+                                @toggle-data="e => toggleAttributeValue(element.id)"
+                                @moderate="e => handleModeration(element.id, e)"
+                                @edit="e => handleEditModeration(element.id, e)"
+                            />
+                        </div>
                     </div>
+                    <div
+                        v-if="hasEmitter('onMetadata')"
+                        class="pt-2 fs-1r clickable d-flex flex-row align-items-start justify-content-center align-self-start gap-1"
+                        @click="onMetadataHandler(element)"
+                    >
+                        <ValidityIndicator
+                            class="col h-10"
+                            :class="getCertaintyStyle(certainty(element))"
+                            :center="true"
+                            :state="certainty(element)"
+                        />
+                        <span
+                            class="col text-center"
+                            :class="inactiveMetadataClass(!hasComment(element))"
+                        >
+                            <i class="fas fa-fw fa-comment" />
+                        </span>
+                        <span
+                            class="col text-center"
+                            :class="inactiveMetadataClass(!hasBookmarks(element))"
+                        >
+                            <i class="fas fa-fw fa-bookmark" />
+                        </span>
+                    </div>
+                    <slot
+                        name="after"
+                        :attribute="element"
+                    />
                 </div>
             </div>
         </template>
@@ -154,30 +202,31 @@
 
     import { useI18n } from 'vue-i18n';
 
+    import { Popover } from 'bootstrap';
+
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
+
     import {
-        getAttribute,
         translateConcept,
+        getConceptNote,
     } from '@/helpers/helpers.js';
 
-    import {
-        handleModeration as handleModerationApi,
-    } from '@/api.js';
-
-    import store from '@/bootstrap/store.js';
-
     import ModerationPanel from '@/components/moderation/Panel.vue';
-    import ValidityIndicator from './forms/indicators/ValidityIndicator.vue';
+    import ValidityIndicator from '@/components/forms/indicators/ValidityIndicator.vue';
+    import DotIndicator from '@/components/indicators/DotIndicator.vue';
 
     export default {
         components: {
-            'attribute-moderation-panel': ModerationPanel,
-            'validity-indicator': ValidityIndicator,
+            ModerationPanel,
+            ValidityIndicator,
+            DotIndicator,
         },
         props: {
             classes: {
                 required: false,
                 type: String,
-                default: 'h-100 pe-2',
+                default: 'h-100',
             },
             attributes: {
                 required: true,
@@ -237,9 +286,11 @@
                 default: _ => new Object(),
             },
         },
-        emits: ['dirty'],
+        emits: ['dirty', 'change'],
         setup(props, context) {
             const { t } = useI18n();
+            const attributeStore = useAttributeStore();
+            const entityStore = useEntityStore();
             const {
                 classes,
                 attributes,
@@ -265,17 +316,22 @@
                 }
             };
 
-            const clFromMetadata = elem => {
+            const additionalRowClasses = elem => {
+                const classes = [];
                 if(!state.ignoreMetadata && elem.pivot && elem.pivot.metadata && elem.pivot.metadata.width) {
                     const width = elem.pivot.metadata.width;
                     switch(width) {
                         case 50:
-                            return 'col-6';
+                            classes.push('col-6');
+                            break;
                         default:
-                            return 'col-12';
+                            classes.push('col-12');
+                            break;
                     }
+                } else {
+                    classes.push('col-12');
                 }
-                return 'col-12';
+                return classes;
             };
             const attributeClasses = attribute => {
                 const classes = [];
@@ -287,8 +343,10 @@
                 }
                 return classes;
             };
-            const expandedClasses = i => {
-                let expClasses = {};
+            const expandedClasses = (i, element) => {
+                let expClasses = {
+                    ['attribute-' + element.id]: true,
+                };
 
                 if(state.hideLabels || state.expansionStates[i]) {
                     expClasses['col-md-12'] = true;
@@ -345,7 +403,7 @@
                 ) {
                     toggleAttributeValue(aid);
                 }
-                handleModerationApi(action, entity_id, aid, overwrite_value);
+                entityStore.patchEntityDataModerations(action, entity_id, aid, overwrite_value);
             };
             const handleEditModeration = (aid, e) => {
                 const attr = state.attributeValues[aid];
@@ -406,13 +464,17 @@
             };
             const getDirtyValues = _ => {
                 const values = {};
+                const excludedDatatypes = ['sql', 'serial'];
                 for(let k in attrRefs.value) {
+                    const datatype = attributeStore.getAttribute(k).datatype;
                     const curr = attrRefs.value[k];
                     let currValue = null;
                     // curr is e.g. null if attribute is hidden
+                    if(excludedDatatypes.includes(datatype)) {
+                        continue;
+                    }
                     if(!!curr && !!curr.v && curr.v.meta.dirty && curr.v.meta.valid) {
                         currValue = curr.v.value;
-                        const datatype = getAttribute(k).datatype;
                         if(currValue !== null) {
                             // filter out deleted table rows
                             if(datatype == 'table') {
@@ -436,7 +498,15 @@
                 }
                 return values;
             };
+
+            const attributeChanged = e => {
+                updateDirtyState(e);
+                context.emit('change', e);
+            };
+
             const updateDirtyState = e => {
+                // state.changeTracker.local[e.attribute_id] = true;
+                state.changeTracker.local[e.attribute_id] = e.dirty;
                 // Do not update dirty state if attribute is currently in moderation edit mode
                 if(state.attributeValues[e.attribute_id].moderation_edit_state == 'active') {
                     return;
@@ -446,6 +516,8 @@
                 context.emit('dirty', e, isDirty);
             };
             const resetListValues = _ => {
+                state.changeTracker.local = {};
+                state.changeTracker.external = {};
                 for(let k in attrRefs.value) {
                     // skip all attributes currently in moderation edit mode
                     if(state.attributeValues[k].moderation_edit_state == 'active') {
@@ -458,6 +530,8 @@
                 }
             };
             const undirtyList = _ => {
+                state.changeTracker.local = {};
+                state.changeTracker.external = {};
                 for(let k in attrRefs.value) {
                     // skip all attributes currently in moderation edit mode
                     if(state.attributeValues[k].moderation_edit_state == 'active') {
@@ -467,6 +541,47 @@
                     if(!!curr && !!curr.undirtyField) {
                         curr.undirtyField();
                     }
+                }
+            };
+            const broadcastAttributeChanges = changes => {
+                for(let k in changes) {
+                    if(attrRefs.value[k]) {
+                        // Broadcast changes to Attribute component...
+                        state.attributeValues[k].value = changes[k].value;
+                        attrRefs.value[k].handleExternalChange(changes[k]);
+                        // ... but also display info
+                        state.changeTracker.external[k] = changes[k];
+                    }
+                }
+            };
+            const hasAttributeChangeIndicator = attribute => {
+                return state.changeTracker.local[attribute.id] || state.changeTracker.external[attribute.id];
+            };
+            const getAttributeChangeIndicator = attribute => {
+                let externalChange = false;
+                let localChange = false;
+                if(state.changeTracker.local[attribute.id]) {
+                    localChange = true;
+                }
+                if(state.changeTracker.external[attribute.id]) {
+                    externalChange = true;
+                }
+                if(externalChange && localChange) {
+                    return 'error';
+                } else if(externalChange) {
+                    return 'primary';
+                } else if(localChange) {
+                    return 'warning';
+                }
+            };
+            const getAttributeChangeIndicatorDescription = attribute => {
+                const type = getAttributeChangeIndicator(attribute);
+                if(type == 'error') {
+                    return t('main.entity.attributes.change_indicator.both');
+                } else if(type == 'primary') {
+                    return t('main.entity.attributes.change_indicator.external_only');
+                } else if(type == 'warning') {
+                    return t('main.entity.attributes.change_indicator.local_only');
                 }
             };
             const setRef = (el, id) => {
@@ -511,38 +626,15 @@
                 return metadataAddon.value && metadataAddon.value(attribute.thesaurus_url);
             };
 
+            const inactiveMetadataClass = inactive => {
+                if(inactive) {
+                    return ['opacity-25'];
+                }
+            };
+
             const handleLabelClick = (e, attrType) => {
                 if(attrType == 'boolean') {
                     e.preventDefault();
-                }
-            };
-            const convertEntityValue = (value, isMultiple) => {
-                let actValue = null;
-                if(value == '' || !value.value) {
-                    if(isMultiple) {
-                        actValue = {
-                            value: [],
-                            name: [],
-                        };
-                    } else {
-                        actValue = {};
-                    }
-                } else {
-                    actValue = value;
-                }
-
-                if(isMultiple) {
-                    return actValue.value.map((v, i) => {
-                        return {
-                            id: v,
-                            name: actValue.name ? actValue.name[i] : '',
-                        };
-                    });
-                } else {
-                    return {
-                        id: actValue.value,
-                        name: actValue.name,
-                    };
                 }
             };
 
@@ -553,7 +645,12 @@
                 attributeList: attributes,
                 attributeValues: values,
                 rootAttributeValues: {},
-                entity: computed(_ => store.getters.entity),
+                visibleAttributeNotes: {},
+                changeTracker: {
+                    local: {},
+                    external: {},
+                },
+                entity: computed(_ => entityStore.selectedEntity),
                 dynamicSelectionList: computed(_ => {
                     const list = [];
                     state.attributeList.forEach(a => {
@@ -585,6 +682,19 @@
                 itemClasses: computed(_ => options.value.item_classes),
             });
 
+            const initializeTooltips = _ => {
+                document.querySelectorAll('[data-bs-toggle="popover"]')
+                    .forEach(popoverElement => new Popover(popoverElement));
+            };
+
+            const getCertaintyStyle = certainty => {
+                if(certainty === null) {
+                    return 'opacity-25';
+                }
+
+                return '';
+            };
+
             // ON MOUNTED
             onMounted(_ => {
                 state.dynamicSelectionList.forEach(rootId => {
@@ -596,6 +706,8 @@
                         });
                     }
                 });
+
+                initializeTooltips();
             });
             onBeforeUpdate(_ => {
                 attrRefs.value = {};
@@ -606,10 +718,12 @@
                 t,
                 // HELPERS
                 translateConcept,
+                getConceptNote,
                 // LOCAL
+                attributeChanged,
                 certainty,
                 handleSelectionUpdate,
-                clFromMetadata,
+                additionalRowClasses,
                 attributeClasses,
                 expandedClasses,
                 onAttributeExpand,
@@ -623,10 +737,15 @@
                 onLeave,
                 handleMove,
                 handleUpdate,
+                getCertaintyStyle,
                 getDirtyValues,
                 updateDirtyState,
                 resetListValues,
                 undirtyList,
+                broadcastAttributeChanges,
+                hasAttributeChangeIndicator,
+                getAttributeChangeIndicator,
+                getAttributeChangeIndicatorDescription,
                 setRef,
                 onEditHandler,
                 onRemoveHandler,
@@ -635,6 +754,7 @@
                 hasEmitter,
                 hasComment,
                 hasBookmarks,
+                inactiveMetadataClass,
                 handleLabelClick,
                 // STATE
                 attrRefs,

@@ -1,7 +1,9 @@
 <?php
 namespace Tests\Unit\Attributes;
 
+use App\AttributeTypes\AttributeBase;
 use App\AttributeTypes\ListAttribute;
+use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
 
@@ -31,6 +33,13 @@ class ListAttributeTest extends TestCase {
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         ListAttribute::fromImport($input);
+    }
+
+    public function testParseExport() {
+        $testValue = AttributeValue::find(69);
+        $parseResult = AttributeBase::serializeExportData($testValue);
+
+        $this->assertEquals('Fundstelle A', $parseResult);
     }
 
     public static function truthyProvider() {

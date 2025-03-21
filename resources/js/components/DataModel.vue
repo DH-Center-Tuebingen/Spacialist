@@ -87,11 +87,11 @@
             </div>
             <div class="col overflow-hidden mt-2 d-flex flex-column">
                 <attribute-list
-                    :group="{name: 'attribute-selection', pull: true, put: false}"
+                    :group="{ name: 'attribute-selection', pull: true, put: false }"
                     :classes="'mx-2 px-2 py-3 rounded-3 bg-secondary bg-opacity-10'"
                     :attributes="state.systemAttributeList"
                     :values="[]"
-                    :options="{'hide_labels': true}"
+                    :options="{ 'hide_labels': true }"
                     :selections="{}"
                     :is-source="true"
                 />
@@ -136,7 +136,7 @@
                         <button
                             type="button"
                             class="btn btn-outline-primary"
-                            :class="{'active': state.sortAttributes}"
+                            :class="{ 'active': state.sortAttributes }"
                             @click="state.sortAttributes = !state.sortAttributes"
                         >
                             <span
@@ -176,34 +176,46 @@
                             >
                                 <h2 class="accordion-header">
                                     <button
-                                        class="accordion-button"
-                                        :class="{'text-muted': attributeGroupItemCount(attrGrp) == 0}"
+                                        class="accordion-button collapsed"
+                                        :class="{ 'text-muted': attributeGroupItemCount(attrGrp) == 0 }"
                                         type="button"
                                         data-bs-toggle="collapse"
                                         :data-bs-target="`#dme-attribute-list-${type}-grp-container`"
                                         aria-expanded="false"
                                         :aria-controls="`dme-attribute-list-${type}-grp-container`"
                                     >
-                                        <span>
+                                        <span class="flex-fill">
                                             {{ t(`global.attributes.${type}`) }}
                                         </span>
                                         <span
-                                            class="badge bg-primary ms-2 d-flex flex-row"
-                                            :class="{'bg-opacity-50': attributeGroupItemCount(attrGrp) == 0}"
+                                            class="badge bg-primary mx-2 d-flex flex-row"
+                                            :class="{ 'bg-opacity-50': attributeGroupItemCount(attrGrp) == 0 }"
                                         >
                                             <span>{{ attributeGroupItemCount(attrGrp) }}</span>
                                             <span>/</span>
                                             <span>{{ attrGrp.length }}</span>
                                         </span>
                                     </button>
+                                    <!--
+                                        This was really useful, when adding multiple attributes of the same type
+                                        But with the bootstrap accordion, it could not be put on the header.
+                                        It would be nice to put it on the header of a custom accordion component. [SO]
+                                    -->
+                                    <!--
+                                    <button
+                                        class="btn btn-sm btn-outline-success"
+                                        @click.stop="createAttribute(type)"
+                                    >
+                                        +
+                                    </button> -->
                                 </h2>
                                 <div
                                     :id="`dme-attribute-list-${type}-grp-container`"
-                                    class="accordion-collapse collapse show"
+                                    class="accordion-collapse collapse"
                                 >
-                                    <div class="accordion-body px-2 py-3">
+                                    <div class="accordion-body px-2 pb-3 pt-0">
                                         <attribute-list
-                                            :group="{name: `attribute-selection-${type}`, pull: true, put: false}"
+                                            :group="{ name: `attribute-selection-${type}`, pull: true, put: false }"
                                             :attributes="attrGrp"
                                             :hidden-attributes="state.selectedEntityTypeAttributeIds"
                                             :show-hidden="state.showHiddenAttributes"
@@ -212,7 +224,11 @@
                                             :is-source="true"
                                             :show-info="true"
                                             @delete-element="onDeleteAttribute"
-                                        />
+                                        >
+                                            <template #after="{ attribute }">
+                                                <AttributeUsageIndicator :count="attribute.entity_types_count" />
+                                            </template>
+                                        </attribute-list>
                                     </div>
                                 </div>
                             </div>
@@ -222,7 +238,7 @@
                 <attribute-list
                     v-else-if="!state.showAttributesInGroups"
                     :classes="'pe-2 col overflow-y-auto overflow-x-hidden'"
-                    :group="{name: 'attribute-selection', pull: true, put: false}"
+                    :group="{ name: 'attribute-selection', pull: true, put: false }"
                     :attributes="state.attributeList"
                     :hidden-attributes="state.selectedEntityTypeAttributeIds"
                     :show-hidden="state.showHiddenAttributes"
@@ -231,7 +247,11 @@
                     :is-source="true"
                     :show-info="true"
                     @delete-element="onDeleteAttribute"
-                />
+                >
+                    <template #after="{ attribute }">
+                        <AttributeUsageIndicator :count="attribute.entity_types_count" />
+                    </template>
+                </attribute-list>
                 <Alert
                     v-if="state.attributeList.length == 0"
                     class="mb-0"
@@ -258,11 +278,14 @@
         useRoute,
     } from 'vue-router';
 
-    import store from '@/bootstrap/store.js';
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
+    import useSystemStore from '@/bootstrap/stores/system.js';
     import router from '%router';
 
+    import AttributeUsageIndicator from '@/components/dme/AttributeUsageIndicator.vue';
+
     import {
-        duplicateEntityType as duplicateEntityTypeApi,
         getEntityTypeOccurrenceCount,
         getAttributeOccurrenceCount,
     } from '@/api.js';
@@ -282,9 +305,15 @@
     } from '@/helpers/modal.js';
 
     export default {
+        components: {
+            AttributeUsageIndicator,
+        },
         setup(props, context) {
             const { t } = useI18n();
             const currentRoute = useRoute();
+            const attributeStore = useAttributeStore();
+            const entityStore = useEntityStore();
+            const systemStore = useSystemStore();
 
             // FETCH
 
@@ -301,11 +330,7 @@
                 showAddEntityType();
             };
             const duplicateEntityType = event => {
-                const attrs = getEntityTypeAttributes(event.id).slice();
-                duplicateEntityTypeApi(event.id).then(data => {
-                    data.attributes = attrs;
-                    store.dispatch('addEntityType', data);
-                });
+                entityStore.duplicateEntityType(event.id);
             };
             const editEntityType = e => {
                 showEditEntityType(e.type);
@@ -325,7 +350,7 @@
                 });
             };
             const createAttribute = _ => {
-                showAddAttribute();
+                showAddAttribute(null);
             };
             const onDeleteAttribute = e => {
                 const attribute = e.element;
@@ -364,9 +389,9 @@
             // DATA
             const accordionRef = ref(null);
             const state = reactive({
-                siu: computed(_ => store.getters.datatypeDataOf('si-unit')),
-                systemAttributeList: computed(_ => store.getters.attributes.filter(a => a.is_system)),
-                userAttributeList: computed(_ => store.getters.attributes.filter(a => !a.is_system)),
+                siu: computed(_ => systemStore.getDatatypeDataOf('si-unit')),
+                systemAttributeList: computed(_ => attributeStore.getAttributeListBy('system')),
+                userAttributeList: computed(_ => attributeStore.getAttributeListBy()),
                 attributeList: computed(_ => {
                     if(!state.sortAttributes) return state.filteredAttributeList;
 
@@ -387,7 +412,7 @@
                 attributeListValues: computed(_ => {
                     if(!state.attributeList) return;
                     let data = {};
-                    for(let i=0; i<state.attributeList.length; i++) {
+                    for(let i = 0; i < state.attributeList.length; i++) {
                         let a = state.attributeList[i];
                         data[a.id] = {
                             value: getInitialAttributeValue(a, 'datatype'),
@@ -415,10 +440,10 @@
                     });
                 }),
                 showHiddenAttributes: false,
+                entityTypes: computed(_ => Object.values(entityStore.entityTypes)),
                 showAttributesInGroups: true,
                 sortAttributes: true,
                 attributeQuery: '',
-                entityTypes: computed(_ => Object.values(store.getters.entityTypes)),
                 selectedEntityType: computed(_ => parseInt(currentRoute.params.id)),
                 selectedEntityTypeAttributeIds: computed(_ => state.selectedEntityType ? getEntityTypeAttributes(state.selectedEntityType).map(a => a.id) : []),
             });

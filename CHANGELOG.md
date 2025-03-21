@@ -1,12 +1,47 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.11 - Kilcrea
+### Added
+- Added websockets for various data synchronization
+  - _Entity Data_
+  - _Attribute Values_
+  - _Entity References_
+  - _Entity Comments_
+- Filter and sort functionality on _Entity Type List_
+- Dependencies added to _System Separator_ attribute
+- Indicator in _Data Model Editor_ that visualizes if an attribute is used in any entity-type
+- Label Search displays full path of thesaurus concept
+- References can also be added to an Entity, not only to an Entity Attribute
+- _Add Entity Above_ and _Add Entity Below_ to the Contextmenu in the entity tree
+- Thesaurus Notes are now displayed as info text in Attribute List items
+### Fixed
+- Dirty indicator not showing in Tab of _Entity Detail_
+- Missing "Color Dots" of _Entity Type_ (colors are now handled on the Entity Type itself and do no longer rely on the _Map_ Plugin)
+- 'Jumping' behavior on floating quick access controls on the _Entity Type List_ (copy, duplicate, delete)
+- Attribute Dependency inverted
+- Several problems with adding, editing and displaying _Bibliography Items_
+- Long entity names in _Entity Detail_ are now truncated with … to avoid line breaks in name and buttons
+- _Map Action Button_ position and tooltips
+- _Userlist_ Attribute is now searchable and ordered by user name
+### Changed
+- Files (e.g. avatars or bibliography attachments) are stored in a user-only directory
+- Improved style of Reference Input.
+- Do not return deleted users by default
+- Moved attribute indicators to the end of the line and reworked style (always visible, but greyed out)
+- _Entity Detail_ now has a loading spinner when saving
+- Percentage Attribute reworked
+  - Floating Point values are now allowed
+  - Mousewheel can be used to change value
+  - _Ctrl_ and _Shift_ key can be used to change step size (_Ctrl_ = 10, _Shift_ = 0.01, _Ctrl_ & _Shift_ = 0.1)
+- Users can add more than one dependency for an attribute and use groups
+
 ## 0.10.2
 ### Fixed
 - Date Range _importFrom_ did not return a JSON string
 - Richtext editor did not trigger the dirty state on entity
 - Certainty warning due to _undefined_ value
-- Serial and Sql now have the required value (_v_) and functions (_resetFieldState_, _undirtyField_)
+- Serial and SQL attributes now have the required value (_v_) and functions (_resetFieldState_, _undirtyField_)
 ### Changed
 - Added tests to _ApiDataImporterTest_ to check if the same columns can be used in multiple attributes
 - Row error now also sends the column value, instead of just sending the column name

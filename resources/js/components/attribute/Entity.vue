@@ -5,12 +5,12 @@
         :key-fn="handleDisplayResult"
         :chain="'ancestors'"
         :mode="state.mode"
-        :default-value="v.fieldValue"
         :disabled="disabled"
         :infinite="true"
         :limit="10"
         :can-fetch-more="state.hasNextPage"
-        @selected="selected"
+        :append-to-body="true"
+        @change="changed"
         @entry-click="entity => entryClicked(entity)"
     />
     <router-link
@@ -45,6 +45,10 @@
     import {
         only,
     } from '@/helpers/helpers.js';
+
+    import {
+        hasNextPage,
+    } from '@/helpers/pagination.js';
 
     import {
         searchEntityInTypes,
@@ -87,6 +91,7 @@
             const route = useRoute();
             const {
                 value,
+                searchIn,
             } = toRefs(props);
             // FETCH
 
@@ -131,7 +136,7 @@
                 state.page++;
                 const pagination = await searchEntityInTypes(query, props.searchIn || [], state.page);
 
-                state.hasNextPage = !!pagination.next_page_url;
+                state.hasNextPage = hasNextPage(pagination);
                 return pagination.data;
             };
 
@@ -156,8 +161,8 @@
                 }
             };
 
-            const selected = data => {
-                v.handleChange(data);
+            const changed = value => {
+                v.handleChange(value);
             };
 
             // DATA
@@ -221,7 +226,7 @@
                 resetFieldState,
                 undirtyField,
                 searchWrapper,
-                selected,
+                changed,
                 // STATE
                 state,
                 v,

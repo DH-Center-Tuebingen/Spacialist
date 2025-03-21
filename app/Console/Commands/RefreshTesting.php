@@ -34,7 +34,6 @@ class RefreshTesting extends Command {
      * @return mixed
      */
     public function handle() {
-
         $testingEnv = \Dotenv\Dotenv::createMutable(base_path(), '.env.testing');
         $testingEnv->load();
         $this->call('config:clear');
@@ -48,7 +47,7 @@ class RefreshTesting extends Command {
                 '--env' => 'testing',
             ]);
             $this->call('db:seed', [
-                '--class' => 'DemoSeeder',
+                '--class' => 'TestingSeeder',
                 '--env' => 'testing',
             ]);
         }

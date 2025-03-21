@@ -79,14 +79,17 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button
-                    type="submit"
+                <LoadingButton
+                    :loading="state.saving"
                     class="btn btn-outline-success"
                     form="newEntityForm"
                     :disabled="state.dataMissing"
                 >
-                    <i class="fas fa-fw fa-plus" /> {{ t('global.add') }}
-                </button>
+                    <template #icon>
+                        <i class="fas fa-fw fa-plus" />
+                    </template>
+                    {{ t('global.add') }}
+                </LoadingButton>
                 <button
                     type="button"
                     class="btn btn-outline-secondary"
@@ -106,16 +109,22 @@
         reactive,
         toRefs,
     } from 'vue';
+
     import { useI18n } from 'vue-i18n';
 
+    import useEntityStore from '@/bootstrap/stores/entity.js';
+
     import {
-        getEntityType,
-        getEntityTypes,
         translateConcept,
         multiselectResetClasslist,
     } from '@/helpers/helpers.js';
 
+    import LoadingButton from '@/components/forms/button/LoadingButton.vue';
+
     export default {
+        components: {
+            LoadingButton,
+        },
         props: {
             parent: {
                 required: false,
@@ -126,6 +135,7 @@
         emits: ['closing', 'confirm'],
         setup(props, context) {
             const { t } = useI18n();
+            const entityStore = useEntityStore();
             const {
                 parent,
             } = toRefs(props);
@@ -135,6 +145,7 @@
                 if(state.dataMissing) {
                     return;
                 }
+                state.saving = true;
                 context.emit('confirm', state.entity);
             };
             const closeModal = _ => {
@@ -143,6 +154,7 @@
 
             // DATA
             const state = reactive({
+                saving: false,
                 entity: {
                     name: '',
                     type: {},
@@ -151,9 +163,9 @@
                 hasParent: computed(_ => !!parent.value),
                 entityTypes: computed(_ => {
                     if(parent.value && parent.value.entity_type_id) {
-                        return getEntityType(parent.value.entity_type_id).sub_entity_types;
+                        return entityStore.getEntityType(parent.value.entity_type_id).sub_entity_types;
                     } else {
-                        return Object.values(getEntityTypes()).filter(type => type.is_root);
+                        return Object.values(entityStore.entityTypes).filter(type => type.is_root);
                     }
                 }),
                 dataMissing: computed(_ => {
@@ -179,7 +191,7 @@
                 closeModal,
                 // STATE
                 state,
-            }
+            };
         },
-    }
+    };
 </script>

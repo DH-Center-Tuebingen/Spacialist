@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex flex-row align-items-center gap-2">
+    <div class="d-flex flex-row align-items-center gap-2 form-control">
         <div
             class="bg-secondary flex-grow-1 rounded-5"
             style="height: 3px;"

@@ -17,41 +17,68 @@
                 role="form"
                 @submit.prevent="updateEntityType"
             >
-                <div class="mb-3 offset-3 ps-2">
-                    <div class="form-check form-switch">
-                        <input
-                            id="entity-type-root-toggle"
-                            v-model="state.entityType.is_root"
-                            class="form-check-input"
-                            type="checkbox"
-                        >
-                        <label
-                            class="form-check-label"
-                            for="entity-type-root-toggle"
-                        >
-                            {{ t('main.datamodel.detail.properties.top_level') }}
-                        </label>
+                <div class="row mb-3">
+                    <div class="offset-3 col row align-items-center">
+                        <div class="form-check form-switch">
+                            <input
+                                id="entity-type-root-toggle"
+                                v-model="state.properties.is_root"
+                                class="form-check-input"
+                                type="checkbox"
+                            >
+                            <label
+                                class="form-check-label"
+                                for="entity-type-root-toggle"
+                            >
+                                {{ t('main.datamodel.detail.properties.top_level') }}
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col align-items-center">
+                        <div class="row align-items-center">
+                            <label
+                                for="entity-color"
+                                style="width: min-content;"
+                            >
+                                {{ t('global.color') }}
+                            </label>
+                            <div class="col align-items-center">
+                                <input
+                                    v-model="state.properties.color"
+                                    type="color"
+                                    class="form-control form-control-color w-100"
+                                >
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="mb-3 row">
+
+                <!-- TODO: This should be handled using a @PluginHook from within the map plugin! -->
+                <div
+                    v-if="state.entityType?.layer?.type"
+                    class="mb-3 row"
+                >
                     <label
                         for="entity-geometrytype-ro"
                         class="col-form-label col-md-3 text-end"
-                    >{{ t('global.geometry_type') }}</label>
+                    >
+                        {{ t('global.geometry_type') }}
+                    </label>
                     <div class="col-md-9 d-flex align-items-center">
                         <span>
-                            {{ state.entityType.layer.type }}
+                            {{ state.entityType?.layer?.type ?? "" }}
                         </span>
                         <!-- <router-link :to="{name: 'ldetail', params: { id: state.entityType.layer.id }}">
                             {{ t('main.datamodel.detail.manage_layer') }}
                         </router-link> -->
                     </div>
                 </div>
-                <div class="mb-3 row">
-                    <label class="col-form-label col-md-3 text-end">{{ t('main.datamodel.detail.properties.sub_types') }}</label>
+                <div class="mb-2 row">
+                    <label class="col-form-label col-md-3 text-end">{{ t('main.datamodel.detail.properties.sub_types')
+                    }}</label>
                     <div class="col-md-9">
                         <multiselect
-                            v-model="state.entityType.sub_entity_types"
+                            v-model="state.properties.sub_entity_types"
                             :object="true"
                             :mode="'tags'"
                             :label="'thesaurus_url'"
@@ -80,34 +107,39 @@
                             </template>
                         </multiselect>
                         <div class="mt-2 d-flex flex-row gap-2">
+                            <div
+                                class="btn-group"
+                                role="group"
+                            >
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-success btn-sm"
+                                    @click="addAllEntityTypes"
+                                >
+                                    <i class="fas fa-fw fa-tasks" /> {{ t('global.select_all') }}
+                                </button>
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-danger btn-sm"
+                                    @click="removeAllEntityTypes"
+                                >
+                                    <i class="fas fa-fw fa-times" /> {{ t('global.select_none') }}
+                                </button>
+                            </div>
+                            <div class="col" />
                             <button
-                                type="button"
+                                type="submit"
                                 class="btn btn-outline-success btn-sm"
-                                @click="addAllEntityTypes"
+                                :disabled="!state.propertiesDirty || state.propertiesSaving"
                             >
-                                <i class="fas fa-fw fa-tasks" /> {{ t('global.select_all') }}
-                            </button>
-                            <button
-                                type="button"
-                                class="btn btn-outline-danger btn-sm"
-                                @click="removeAllEntityTypes"
-                            >
-                                <i class="fas fa-fw fa-times" /> {{ t('global.select_none') }}
+                                <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
                             </button>
                         </div>
                     </div>
                 </div>
-                <div class="offset-3 ps-2">
-                    <button
-                        type="submit"
-                        class="btn btn-success"
-                    >
-                        <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
-                    </button>
-                </div>
-                <hr>
             </form>
-            <h4>{{ t('main.datamodel.detail.attribute.title') }}</h4>
+            <hr>
+            <h3>{{ t('main.datamodel.detail.attribute.title') }}</h3>
             <div class="col overflow-hidden flex-grow-1 position-relative">
                 <div
                     v-if="state.entityAttributes.length == 0"
@@ -117,7 +149,8 @@
                 </div>
                 <attribute-list
                     class="h-100 overflow-y-auto overflow-x-hidden"
-                    :group="{name: 'attribute-selection', pull: false, put: true}"
+                    style="padding-bottom: 10rem;"
+                    :group="{ name: 'attribute-selection', pull: false, put: true }"
                     :attributes="state.entityAttributes"
                     :values="state.entityValues"
                     :disable-drag="false"
@@ -136,7 +169,9 @@
 <script>
     import {
         computed,
+        onMounted,
         reactive,
+        watch,
     } from 'vue';
 
     import {
@@ -145,34 +180,30 @@
 
     import { useI18n } from 'vue-i18n';
 
-    import store from '@/bootstrap/store.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import { useToast } from '@/plugins/toast.js';
 
     import {
         getInitialAttributeValue,
-        getEntityType,
         getEntityTypeAttributes,
         translateConcept,
         _cloneDeep,
     } from '@/helpers/helpers.js';
 
     import {
-        reorderEntityAttributes,
-        addEntityTypeAttribute,
-        updateEntityTypeRelation,
         getAttributeOccurrenceCount,
-        removeEntityTypeAttribute,
     } from '@/api.js';
 
     import {
-      showEditAttribute,
+        showEditAttribute,
         showRemoveAttribute,
     } from '@/helpers/modal.js';
 
     export default {
         setup(props, context) {
             const { t } = useI18n();
+            const entityStore = useEntityStore();
             const currentRoute = useRoute();
             const toast = useToast();
             // FETCH
@@ -182,12 +213,9 @@
                 if(!state.entityType.id) return;
 
                 const et = state.entityType;
-                const data = {
-                    'is_root': et.is_root || false,
-                    'sub_entity_types': et.sub_entity_types || [],
-                };
 
-                updateEntityTypeRelation(et.id, data).then(_ => {
+                entityStore.updateEntityType(et.id, state.properties).then(_ => {
+                    state.propertiesSaving = true;
                     const name = translateConcept(state.entityType.thesaurus_url);
                     toast.$toast(
                         t('main.datamodel.toasts.updated_type.msg', {
@@ -198,17 +226,18 @@
                             channel: 'success',
                         }
                     );
+                }).finally(_ => {
+                    state.propertiesSaving = false;
                 });
             };
             const addAllEntityTypes = _ => {
-                state.entityType.sub_entity_types = [];
-                state.entityType.sub_entity_types = state.minimalEntityTypes.slice();
+                state.properties.sub_entity_types = state.minimalEntityTypes.slice();
             };
             const removeAllEntityTypes = _ => {
-                state.entityType.sub_entity_types = [];
+                state.properties.sub_entity_types = [];
             };
             const addAttributeToEntityType = e => {
-                addEntityTypeAttribute(currentRoute.params.id, e.element.id, e.to).then(data => {
+                entityStore.addEntityTypeAttribute(currentRoute.params.id, e.element.id, e.to + 1).then(data => {
                     if(e.element.is_system && e.element.datatype == 'system-separator') {
                         showEditAttribute(data.id, currentRoute.params.id, {
                             is_system: e.element.is_system,
@@ -244,21 +273,44 @@
                         });
                     }
                 } else {
-                    removeEntityTypeAttribute(id).then(_ => {
-                        store.dispatch('removeEntityTypeAttribute', {
-                            entity_type_id: etid,
-                            attribute_id: id,
-                        });
-                    });
+                    entityStore.removeEntityTypeAttribute(id, etid);
                 }
             };
             const reorderEntityAttribute = e => {
-                reorderEntityAttributes(currentRoute.params.id, e.element.id, e.from, e.to);
+                entityStore.reorderAttributes(currentRoute.params.id, e.element.id, e.from, e.to);
+            };
+
+            const getDefaultPropertyValues = function () {
+                return {
+                    id: null,
+                    is_root: undefined,
+                    sub_entity_types: [],
+                    color: undefined,
+                };
             };
 
             // DATA
             const state = reactive({
-                entityType: computed(_ => _cloneDeep(getEntityType(currentRoute.params.id))),
+                entityType: computed(_ => {
+                    const entityType = _cloneDeep(entityStore.getEntityType(currentRoute.params.id));
+
+                    // We need to ensure that sub_entity_types is set
+                    // otherwise the dirties calculation may fail.
+                    if(!entityType.sub_entity_types)
+                        entityType.sub_entity_types = [];
+                    return entityType;
+                }),
+                propertiesDirty: computed(_ => {
+                    if(!state.entityType) return false;
+                    const rootDirty = state.entityType.is_root !== state.properties.is_root;
+                    const colorDirty = state.entityType.color !== state.properties.color;
+                    const subTypesDirty = state.entityType.sub_entity_types.length !== state.properties.sub_entity_types.length ||
+                        state.properties.sub_entity_types.every((v, i) => v.id !== state.entityType.sub_entity_types[i].id);
+
+                    return rootDirty || colorDirty || subTypesDirty;
+                }),
+                propertiesSaving: false,
+                properties: getDefaultPropertyValues(),
                 entityAttributes: computed(_ => getEntityTypeAttributes(currentRoute.params.id)),
                 entityValues: computed(_ => {
                     let data = {};
@@ -285,7 +337,7 @@
                     values: []
                 },
                 minimalEntityTypes: computed(_ => {
-                    return Object.values(store.getters.entityTypes).map(et => ({
+                    return Object.values(entityStore.entityTypes).map(et => ({
                         id: et.id,
                         thesaurus_url: et.thesaurus_url
                     }));
@@ -344,23 +396,44 @@
                                 state.selectedDependency.operator &&
                                 state.selectedDependency.operator.id &&
                                 state.selectedDependency.value
-                                )
-                                ||
+                            )
+                            ||
+                            (
                                 (
-                                    (
-                                        !state.selectedDependency.attribute ||
-                                        !state.selectedDependency.attribute.id
-                                    ) &&
+                                    !state.selectedDependency.attribute ||
+                                    !state.selectedDependency.attribute.id
+                                ) &&
                                 (
                                     !state.selectedDependency.operator ||
                                     !state.selectedDependency.operator.id
                                 ) &&
                                 !state.selectedDependency.value
-                                )
                             )
-                            ;
+                        )
+                        ;
                 }),
             });
+
+            function updateProperties(entityType) {
+                if(entityType && entityType.id) {
+                    state.properties.id = entityType.id;
+                    state.properties.is_root = entityType.is_root;
+                    state.properties.sub_entity_types = entityType.sub_entity_types;
+                    state.properties.color = entityType.color;
+                } else {
+                    state.properties = getDefaultPropertyValues();
+                }
+            }
+
+            onMounted(() => {
+                updateProperties(state.entityType);
+            });
+
+            watch(() => state.entityType, (newValue, oldValue) => {
+                if(newValue?.id !== oldValue?.id) {
+                    updateProperties(newValue);
+                }
+            }, { deep: true });
 
             // RETURN
             return {

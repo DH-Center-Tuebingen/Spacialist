@@ -3,13 +3,51 @@
 namespace Tests\Unit;
 
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+
 
 use App\Entity;
 
 class EntityTest extends TestCase
 {
+    /**
+     * Test getting all children of an entity (id=2)
+     *
+     * @return void
+     */
+    public function testGetAllChildren()
+    {
+        $entity = Entity::find(2);
+        $childrenArray = $entity->getAllChildren();
+        $this->assertEquals(4, count($childrenArray));
+        $this->assertArraySubset([
+            [
+                '_name' => 'Befund 1',
+                '_parent' => 'Site A',
+                '_entity_type' => 'Feature',
+                '_entity_type_id' => 4,
+            ],
+            [
+                '_name' => 'Inv. 1234',
+                '_parent' => 'Site A\\\\Befund 1',
+                '_entity_type' => 'Pottery',
+                '_entity_type_id' => 5,
+            ],
+            [
+                '_name' => 'Inv. 124',
+                '_parent' => 'Site A\\\\Befund 1',
+                '_entity_type' => 'Pottery',
+                '_entity_type_id' => 5,
+            ],
+            [
+                '_name' => 'Inv. 31',
+                '_parent' => 'Site A\\\\Befund 1',
+                '_entity_type' => 'Stone',
+                '_entity_type_id' => 6,
+                12 => 3.5,
+            ],
+        ], $childrenArray);
+    }
+
     /**
      * Test relations of an entity (id=3 and id=1)
      *
@@ -17,16 +55,14 @@ class EntityTest extends TestCase
      */
     public function testRelations()
     {
-        $entity = Entity::with(['child_entities', 'entity_type', 'geodata', 'root_entity', 'bibliographies', 'attributes', 'files'])->find(3);
+        $entity = Entity::with(['child_entities', 'entity_type', 'root_entity', 'bibliographies', 'attributes'])->find(3);
 
         $this->assertEquals(0, $entity->child_entities->count());
         $this->assertEquals(5, $entity->entity_type->id);
         $this->assertEquals($entity->entity_type_id, $entity->entity_type->id);
-        $this->assertNull($entity->geodata);
         $this->assertEquals(2, $entity->root_entity->id);
         $this->assertEquals(0, $entity->bibliographies->count());
-        $this->assertEquals(6, $entity->attributes->count());
-        $this->assertEquals(2, $entity->files->count());
+        $this->assertEquals(7, $entity->attributes->count());
         $this->assertEquals(3, count($entity->parentIds));
         $this->assertEquals(3, count($entity->parentNames));
         $this->assertArraySubset([
@@ -34,6 +70,12 @@ class EntityTest extends TestCase
                 'id' => 2,
                 'pivot' => [
                     'int_val' => 35,
+                ],
+            ],
+            [
+                'id' => 3,
+                'pivot' => [
+                    'json_val' => '[{"id": 18, "concept_url": "https://spacialist.escience.uni-tuebingen.de/<user-project>/rot#20171220100515"}, {"id": 20, "concept_url": "https://spacialist.escience.uni-tuebingen.de/<user-project>/grun#20171220100524"}]',
                 ],
             ],
             [
@@ -67,16 +109,6 @@ class EntityTest extends TestCase
                 ],
             ],
         ], $entity->attributes->toArray());
-        $this->assertArraySubset([
-            [
-                'id' => 4,
-                'name' => 'spacialist_screenshot.png',
-            ],
-            [
-                'id' => 6,
-                'name' => 'test_archive.zip',
-            ],
-        ], $entity->files->toArray());
         $this->assertArraySubset([
             3, 2, 1
         ], $entity->parentIds);

@@ -111,23 +111,20 @@
 
         import { useI18n } from 'vue-i18n';
         import { useRoute } from 'vue-router';
-        import auth from '@/bootstrap/auth.js';
+        import useUserStore from '@/bootstrap/stores/user.js';
         import router from '%router';
 
         import {
-            initApp,
             getErrorMessages,
             getValidClass,
             getUser,
         } from '@/helpers/helpers.js';
 
-        import {
-            showConfirmPassword,
-        } from '@/helpers/modal.js';
-
         export default {
             setup() {
                 const { t, locale } = useI18n();
+                const route = useRoute();
+                const userStore = useUserStore();
                 // DATA
                 const state = reactive({
                     user: {},
@@ -139,63 +136,64 @@
                 });
 
                 // FUNCTIONS
-                const login = _ => {
+                const login = async _ => {
                     state.submitting = true;
                     state.error = {};
-                    let data = {
+                    const credentials = {
                         password: state.user.password
                     };
                     // dirty check if email field should be treated
                     // as actual email address or nickname
                     if(state.user.email.includes('@')) {
-                        data.email = state.user.email;
+                        credentials.email = state.user.email;
                     } else {
-                        data.nickname = state.user.email;
+                        credentials.nickname = state.user.email;
                     }
-                    auth.login({
-                        data: data,
-                        staySignedIn: state.user.remember,
-                        redirect: state.redirect,
-                        fetchUser: true
-                    })
-                    .then(_ => {
-                        state.submitting = false;
-                        return initApp(locale);
-                    })
-                    .catch(e => {
-                        state.submitting = false;
-                        state.error = getErrorMessages(e);
-                        return Promise.reject();
-                    })
-                    .then(_ => {
-                        state.error = {};
-                        const currUser = getUser();
-                        if(currUser.login_attempts > 0 || currUser.login_attempts === 0) {
-                            showConfirmPassword(currUser.id);
-                        }
-                    });
+                    await userStore.login(credentials)
+                        .then(_ => {
+                            state.submitting = false;
+                            state.error = {};
+                            if(route.query.redirectTo) {
+                                router.push(route.query.redirectTo);
+                            } else {
+                                router.push({
+                                    name: 'home',
+                                });
+                            }
+                        })
+                        .catch(e => {
+                            state.submitting = false;
+                            userStore.logout();
+                            state.error = getErrorMessages(e);
+                            return Promise.reject();
+                        });
                 };
 
                 // ON MOUNTED
                 onMounted(_ => {
-                    if(auth.check()) {
+                    if(userStore.userLoggedIn) {
                         router.push({
                             name: 'home'
                         });
                     }
-                    const lastRoute = auth.redirect() ? auth.redirect().from : undefined;
-                    const currentRoute = useRoute();
-                    if(lastRoute && lastRoute.name != 'login') {
-                        state.redirect = {
-                            name: lastRoute.name,
-                            params: lastRoute.params,
-                            query: lastRoute.query
-                        };
-                    } else if(currentRoute.query && currentRoute.query.redirect) {
-                        state.redirect = {
-                            path: currentRoute.query.redirect
-                        };
-                    }
+                    // if(auth.check()) {
+                    //     router.push({
+                    //         name: 'home'
+                    //     });
+                    // }
+                    // const lastRoute = auth.redirect() ? auth.redirect().from : undefined;
+                    // const currentRoute = useRoute();
+                    // if(lastRoute && lastRoute.name != 'login') {
+                    //     state.redirect = {
+                    //         name: lastRoute.name,
+                    //         params: lastRoute.params,
+                    //         query: lastRoute.query
+                    //     };
+                    // } else if(currentRoute.query && currentRoute.query.redirect) {
+                    //     state.redirect = {
+                    //         path: currentRoute.query.redirect
+                    //     };
+                    // }
                 });
 
                 // RETURN

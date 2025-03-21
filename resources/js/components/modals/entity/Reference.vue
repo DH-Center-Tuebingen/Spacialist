@@ -62,7 +62,7 @@
                 >
                     <template #metadata="data">
                         <span
-                            v-if="Object.keys(data.comment.metadata).length > 0"
+                            v-if="data?.comment?.metadata && Object.keys(data.comment.metadata).length > 0"
                             class="me-1 small"
                         >
                             <span
@@ -89,145 +89,23 @@
                     <li
                         v-for="reference in state.references"
                         :key="reference.id"
-                        class="list-group-item d-flex flex-row justify-content-between"
+                        class="list-group-item d-flex flex-row justify-content-between pt-0"
                     >
-                        <div class="flex-grow-1">
-                            <Quotation
-                                v-if="state.editItem.id !== reference.id"
-                                :value="reference"
-                            />
-                            <div
-                                v-else
-                                class="d-flex align-items-center"
-                            >
-                                <input
-                                    v-model="state.editItem.description"
-                                    type="text"
-                                    class="form-control me-1"
-                                >
-                                <button
-                                    type="button"
-                                    class="btn btn-outline-success btn-sm me-1"
-                                    @click.prevent="onUpdateReference(state.editItem)"
-                                >
-                                    <i class="fas fa-fw fa-check" />
-                                </button>
-                                <button
-                                    type="button"
-                                    class="btn btn-outline-danger btn-sm"
-                                    @click.prevent="cancelEditReference()"
-                                >
-                                    <i class="fas fa-fw fa-times" />
-                                </button>
-                            </div>
-                        </div>
-                        <div class="d-flex flex-row small ms-2">
-                            <span class="text-muted fw-light">
-                                {{ date(reference.updated_at) }}
-                            </span>
-                            <div class="dropdown ms-1">
-                                <span
-                                    :id="`edit-reference-dropdown-${reference.id}`"
-                                    class="clickable text-muted"
-                                    data-bs-toggle="dropdown"
-                                    aria-haspopup="true"
-                                    aria-expanded="false"
-                                >
-                                    <i class="fas fa-fw fa-ellipsis-h" />
-                                </span>
-                                <div
-                                    class="dropdown-menu"
-                                    :aria-labelledby="`edit-reference-dropdown-${reference.id}`"
-                                >
-                                    <a
-                                        class="dropdown-item"
-                                        href="#"
-                                        @click.prevent="enableEditReference(reference)"
-                                    >
-                                        <i class="fas fa-fw fa-edit text-info" /> {{ t('global.edit') }}
-                                    </a>
-                                    <a
-                                        class="dropdown-item"
-                                        href="#"
-                                        @click.prevent="onDeleteReference(reference)"
-                                    >
-                                        <i class="fas fa-fw fa-trash text-danger" /> {{ t('global.delete') }}
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+                        <EditableQuotation
+                            class="flex-fill"
+                            :value="reference"
+                            @update="onUpdateReference"
+                            @delete="onDeleteReference"
+                        />
                     </li>
                 </ul>
                 <h6 class="mt-2">
                     {{ t('main.entity.references.bibliography.add') }}
                 </h6>
-                <form
-                    v-dcan="'bibliography_read|entity_data_write'"
-                    role="form"
-                    @submit.prevent="onAddReference()"
-                >
-                    <div class="d-flex flex-row">
-                        <div class="flex-grow-1">
-                            <multiselect
-                                id="bibliography-search"
-                                v-model="state.newItem.bibliography"
-                                :object="true"
-                                :label="'title'"
-                                :track-by="'id'"
-                                :hide-selected="true"
-                                :value-prop="'id'"
-                                :mode="'single'"
-                                :delay="0"
-                                :min-chars="0"
-                                :resolve-on-load="true"
-                                :filterResults="false"
-                                :options="async query => await filterBibliographyList(query)"
-                                :searchable="true"
-                                :placeholder="t('global.select.placeholder')"
-                            >
-                                <template #singlelabel="{ value }">
-                                    <div class="multiselect-single-label">
-                                        <div>
-                                            <span class="fw-medium">{{ value.title }}</span>
-                                            -
-                                            <cite class="small">
-                                                {{ formatAuthors(value.author) }} ({{ value.year }})
-                                            </cite>
-                                        </div>
-                                    </div>
-                                </template>
-                                <template #option="{ option }">
-                                    <div>
-                                        <div>
-                                            <span class="fw-medium">{{ option.title }}</span>
-                                        </div>
-                                        <cite class="small">
-                                            {{ formatAuthors(option.author) }} <span class="fw-light">({{ option.year
-                                            }})</span>
-                                        </cite>
-                                    </div>
-                                </template>
-                            </multiselect>
-                        </div>
-                        <div class="flex-grow-1 ms-1">
-                            <textarea
-                                v-model="state.newItem.description"
-                                class="form-control"
-                                :placeholder="t('main.entity.references.bibliography.comment')"
-                            />
-                        </div>
-                        <div class="ms-1 mt-auto">
-                            <button
-                                type="submit"
-                                class="btn btn-outline-success btn-sm px-1 py-05"
-                                :disabled="state.addReferenceDisabled"
-                                :title="t('main.entity.references.bibliography.add_button')"
-                            >
-                                <i class="fas fa-fw fa-plus" />
-                            </button>
-                        </div>
-                    </div>
-                </form>
+                <ReferenceForm
+                    ref="referenceFormRef"
+                    @add="onAddReference"
+                />
             </div>
             <div class="modal-footer">
                 <button
@@ -249,40 +127,34 @@
         onMounted,
         reactive,
         toRefs,
+        ref,
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
     import router from '%router';
-    import store from '@/bootstrap/store.js';
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
+    import useReferenceStore from '@/bootstrap/stores/reference.js';
 
     import {
         can,
-        getAttribute,
+        throwError,
         getCertaintyClass,
         translateConcept,
     } from '@/helpers/helpers.js';
 
+    // TODO: This should be done in the store
     import {
-        patchAttribute,
         getAttributeValueComments,
-        deleteReferenceFromEntity,
-        updateReference,
-        addReference,
     } from '@/api.js';
 
-    import {
-        formatAuthors,
-    } from '@/helpers/bibliography.js';
-
-    import {
-        date,
-    } from '@/helpers/filters.js';
-
-    import Quotation from '@/components/bibliography/Quotation.vue';
+    import EditableQuotation from '@/components/bibliography/EditableQuotation.vue';
+    import ReferenceForm from '@/components/bibliography/ReferenceForm.vue';
 
     export default {
         components: {
-            Quotation,
+            EditableQuotation,
+            ReferenceForm,
         },
         props: {
             entity: {
@@ -292,13 +164,18 @@
         },
         setup(props, context) {
             const { t } = useI18n();
+            const attributeStore = useAttributeStore();
+            const entityStore = useEntityStore();
+            const referenceStore = useReferenceStore();
             const {
                 entity,
             } = toRefs(props);
             const aid = router.currentRoute.value.params.aid;
+            const referenceFormRef = ref(null);
 
             // FETCH
             if(can('comments_read')) {
+                // TODO: This should be done in the store
                 getAttributeValueComments(entity.value.id, aid).then(comments => {
                     state.comments = comments;
                 });
@@ -325,87 +202,49 @@
 
                 state.certainty = value;
             };
-            const onUpdateCertainty = event => {
+            const onUpdateCertainty = async event => {
                 let data = {
                     certainty: state.certainty,
                 };
-                patchAttribute(entity.value.id, aid, data).then(data => {
+                try {
+                    await entityStore.patchAttribute(entity.value.id, aid, data);
                     state.comments.push(event.comment);
-
-                    const dataRow = { [aid]: data };
-                    store.commit('updateEntityData', {
-                        eid: entity.value.id,
-                        data: dataRow,
-                        new_data: dataRow,
-                        sync: true,
-                    });
                     // set startCertainty to new, stored value
                     state.startCertainty = state.certainty;
-                });
-            };
-            const isMatch = (prop, exp) => {
-                return !!prop && !!prop.match(exp);
-            };
-            const filterBibliographyList = async query => {
-                if(!query) {
-                    return await new Promise(r => r(state.bibliography));
-                } else {
-                    const exp = new RegExp(query, 'i');
-                    return await new Promise(r => r(
-                        state.bibliography.filter(entry => {
-                            return (
-                                isMatch(entry.title, exp) ||
-                                isMatch(entry.booktitle, exp) ||
-                                isMatch(entry.author, exp) ||
-                                isMatch(entry.year, exp) ||
-                                isMatch(entry.citekey, exp) ||
-                                isMatch(entry.journal, exp)
-                            );
-                        })
-                    ));
+                } catch(e) {
+                    // Error will be handled elsewhere ...
+                    console.error(e);
                 }
             };
-            const resetNewItem = _ => {
-                state.newItem.bibliography = {};
-                state.newItem.description = '';
-            };
-            const enableEditReference = reference => {
-                state.editItem = {
-                    ...reference
-                };
-            };
-            const cancelEditReference = _ => {
-                state.editItem = {};
-            };
-            const onAddReference = _ => {
+
+            const onAddReference = async data => {
                 if(!can('bibliography_read|entity_data_write')) return;
-                const data = {
-                    bibliography_id: state.newItem.bibliography.id,
-                    description: state.newItem.description,
-                };
-                addReference(entity.value.id, state.attribute.id, state.attribute.thesaurus_url, data).then(data => {
-                    resetNewItem();
-                });
+                try {
+                    await referenceStore.add(entity.value.id, state.attribute.id, state.attribute.thesaurus_url, data);
+                    referenceFormRef.value.reset();
+                } catch(e) {
+                    // Error will be handled elsewhere ...
+                    console.error(e);
+                }
             };
             const onDeleteReference = reference => {
                 if(!can('bibliography_read|entity_data_write')) return;
-                const id = reference.id;
-                deleteReferenceFromEntity(reference.id, entity.value.id, state.attribute.thesaurus_url).then(data => {
-                    cancelEditReference();
-                });
+                referenceStore.delete(entity.value.id, state.attribute.thesaurus_url, reference);
             };
-            const onUpdateReference = editedReference => {
+            const onUpdateReference = (updatedReference, successCallback) => {
                 if(!can('bibliography_read|entity_data_write')) return;
-                const ref = state.references.find(r => r.id == editedReference.id);
-                if(ref.description == editedReference.description) {
-                    cancelEditReference();
+                const ref = state.references.find(r => r.id == updatedReference.id);
+                if(ref.description == updatedReference.description) {
+                    // We can return early here, because the reference was not changed
+                    successCallback(true);
                     return;
                 }
-                const data = {
-                    description: editedReference.description
-                };
-                updateReference(ref.id, entity.value.id, state.attribute.thesaurus_url, data).then(data => {
-                    cancelEditReference();
+
+                referenceStore.update(entity.value.id, state.attribute.thesaurus_url, updatedReference).then(_ => {
+                    successCallback(true);
+                }).catch(e => {
+                    successCallback(false);
+                    throwError(e);
                 });
             };
             const closeModal = _ => {
@@ -426,16 +265,8 @@
                     bibliography: {},
                     description: '',
                 },
-                addReferenceDisabled: computed(_ => {
-                    return (
-                        (!!state.newItem.bibliography && !state.newItem.bibliography.id) ||
-                        state.newItem.description.length == 0
-                    );
-                }),
-                editItem: {},
-                attribute: getAttribute(aid),
+                attribute: attributeStore.getAttribute(aid),
                 references: computed(_ => entity.value.references[state.attribute.thesaurus_url]),
-                bibliography: computed(_ => store.getters.bibliography),
                 startCertainty: entity.value.data[aid].certainty,
                 certainty: entity.value.data[aid].certainty,
                 comments: [],
@@ -470,20 +301,16 @@
                 can,
                 getCertaintyClass,
                 translateConcept,
-                formatAuthors,
-                date,
                 // PROPS
                 // LOCAL
                 setCertainty,
                 onUpdateCertainty,
-                filterBibliographyList,
-                enableEditReference,
-                cancelEditReference,
                 onAddReference,
                 onDeleteReference,
                 onUpdateReference,
                 closeModal,
                 // STATE
+                referenceFormRef,
                 state,
             };
 

@@ -41,7 +41,7 @@ class Plugin extends Model
     public function publicName($withPath = true) {
         $slug = $this->slugName();
         $uuid = $this->uuid;
-        $name = "${slug}-${uuid}.js";
+        $name = "{$slug}-{$uuid}.js";
         if($withPath) {
             $name = "plugins/$name";
         }

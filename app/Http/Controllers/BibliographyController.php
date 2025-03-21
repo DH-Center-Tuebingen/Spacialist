@@ -1,19 +1,39 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Bibliography;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use RenanBr\BibTexParser\Listener;
 use RenanBr\BibTexParser\Exception\ParserException;
 use RenanBr\BibTexParser\Parser;
 use RenanBr\BibTexParser\Processor\TagNameCaseProcessor;
+use Exception;
 
 class BibliographyController extends Controller
 {
-
     // GET
+    public function getBibliographyItem(int $id) {
+        $user = auth()->user();
+        if(!$user->can('bibliography_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to read bibliography')
+            ], 403);
+        }
+
+        try {
+            $bib = Bibliography::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This bibliography item does not exist')
+            ], 400);
+        }
+
+        return response()->json($bib);
+    }
+
     public function getBibliography() {
         $user = auth()->user();
         if(!$user->can('bibliography_read')) {
@@ -46,6 +66,18 @@ class BibliographyController extends Controller
         return response()->json($count);
     }
 
+    public function downloadFile(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('bibliography_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to view attached files')
+            ], 403);
+        }
+
+        $filepath = $request->query('path');
+        return Bibliography::getDirectory()->download($filepath);
+    }
+
     // POST
 
     public function addItem(Request $request) {
@@ -55,13 +87,12 @@ class BibliographyController extends Controller
                 'error' => __('You do not have the permission to add new bibliography')
             ], 403);
         }
+
         $this->validate($request, [
-            'type' => 'required|alpha',
-            'title' => 'required|string',
+            'entry_type' => 'required|alpha|bibtex_type',
             'file' => 'file',
         ]);
 
-        $file = $request->file('file');
         $bib = new Bibliography();
         $success = $bib->fieldsFromRequest($request->except('file'), $user);
         if(!$success) {
@@ -70,14 +101,21 @@ class BibliographyController extends Controller
             ], 422);
         }
 
-        if(isset($file)) {
-            $bib->file = $bib->uploadFile($file);
-            $bib->user_id = $user->id;
-            $bib->save();
+        if($request->has('file')) {
+            $file = $request->file('file');
+            $bib->uploadFile($file);
         }
-        $bib = Bibliography::find($bib->id);
 
-        return response()->json($bib, 201);
+        // Does this make sense? It seems none of the methods throws an exception [VR]
+        // try {
+        //     if($file) $bib->uploadFile($file);
+        // } catch(Exception $e) {
+        //     info($e->getMessage());
+        //     return response()->json([
+        //         'error' => $e->getMessage()
+        //     ], 400);
+        // }
+        return response()->json($bib->refresh(), 201);
     }
 
     public function importBibtex(Request $request) {
@@ -91,13 +129,14 @@ class BibliographyController extends Controller
             'file' => 'required|file'
         ]);
 
+        // TODO:: This is too much logic for a controller. This should be moved inside the Model!
+
         $file = $request->file('file');
         $noOverwriteOnDup = $request->input('no-overwrite', false);
         $listener = new Listener();
         $listener->addProcessor(new TagNameCaseProcessor(CASE_LOWER));
         $listener->addProcessor(function($entry) {
-            $entry['_type'] = strtolower($entry['_type']);
-            $entry['type'] = strtolower($entry['type']);
+            $entry['entry_type'] = strtolower($entry['_type']);
             return $entry;
         });
         $parser = new Parser();
@@ -116,7 +155,9 @@ class BibliographyController extends Controller
         DB::beginTransaction();
 
         foreach($entries as $entry) {
-            $isValid = Bibliography::validateMandatory($entry, $entry['type']);
+            // Test if type exists(?)
+            $entry_type = $entry['entry_type'];
+            $isValid = Bibliography::validateMandatory($entry, $entry_type);
             if(!$isValid) {
                 $errored = [
                     'type' => 'validation',
@@ -125,7 +166,7 @@ class BibliographyController extends Controller
                 break;
             }
 
-            $insArray = Bibliography::stripDisallowed($entry, $entry['type']);
+            $insArray = Bibliography::stripDisallowed($entry, $entry_type);
             // unset file, because file upload is (currently) not possible in import
             $insArray['file'] = null;
 
@@ -207,27 +248,31 @@ class BibliographyController extends Controller
 
         $entries = $query->get();
         $content = '';
+
         foreach($entries as $e) {
-            $content .= '@'.$e->type.'{'.$e->citekey.',';
-            $content .= "\n";
+            $content .= "@{$e->entry_type}{{$e->citekey},\n";
             $attrs = $e->getAttributes();
-            foreach($attrs as $k => $a) {
-                if(!isset($a)) continue;
-                switch($k) {
+            $added = false;
+            for($i = 0; $i < count($attrs); $i++) {
+                $key = array_keys($attrs)[$i];
+                $value = array_values($attrs)[$i];
+                if(!isset($value)) continue;
+                switch($key) {
                     case 'id':
-                    case 'type':
+                    case 'entry_type':
                     case 'created_at':
                     case 'updated_at':
                     case 'citekey':
                     case 'user_id':
                         break;
                     default:
-                        $content .= '    '.$k.' = {'.$a.'}';
-                        $content .= "\n";
+                        $added = true;
+                        $content .= "    $key = {{$value}},\n";
                         break;
                 }
             }
-            $content .= '}';
+            $content = ($added)? substr($content, 0, -2) : $content;
+            $content .= "\n}";
             $content .= "\n\n";
         }
 
@@ -241,8 +286,6 @@ class BibliographyController extends Controller
         ]);
     }
 
-    // PATCH
-
     public function updateItem(Request $request, $id) {
         $user = auth()->user();
         if(!$user->can('bibliography_write')) {
@@ -251,7 +294,7 @@ class BibliographyController extends Controller
             ], 403);
         }
         $this->validate($request, [
-            'type' => 'alpha|bibtex_type',
+            'entry_type' => 'alpha|bibtex_type',
             'file' => 'file',
             'delete_file' => 'boolean_string',
         ]);
@@ -263,7 +306,6 @@ class BibliographyController extends Controller
                 'error' => __('This bibliography item does not exist')
             ], 400);
         }
-        $file = $request->file('file');
 
         $success = $bib->fieldsFromRequest($request->except(['file', 'delete_file']), $user);
         if(!$success) {
@@ -271,16 +313,14 @@ class BibliographyController extends Controller
                 'error' => __('At least one required field is not set')
             ], 422);
         }
+
+        $file = $request->file('file');
         if(isset($file)) {
             $bib->file = $bib->uploadFile($file);
-            $bib->user_id = $user->id;
-            $bib->save();
         } else if($request->has('delete_file') && sp_parse_boolean($request->get('delete_file'))) {
             $bib->deleteFile();
         }
-        $bib = Bibliography::find($bib->id);
-
-        return response()->json($bib);
+        return response()->json($bib->refresh());
     }
 
     // DELETE
@@ -300,7 +340,8 @@ class BibliographyController extends Controller
             ], 400);
         }
 
-        $bib->deleteFile();
+        // Only delete file from storage to not fire 'save' event on item
+        $bib->deleteFileFromStorage();
         $bib->delete();
 
         return response()->json(null, 204);

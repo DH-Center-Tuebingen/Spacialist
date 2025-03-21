@@ -26,6 +26,32 @@
             <a
                 class="dropdown-item"
                 href="#"
+                @click.stop.prevent="addEntity('above')"
+                @dblclick.stop.prevent=""
+            >
+                <i class="fas fa-fw fa-turn-up text-success" />
+                <span class="ms-2">
+                    {{ t('main.entity.tree.contextmenu.add_above') }}
+                </span>
+            </a>
+        </li>
+        <li>
+            <a
+                class="dropdown-item"
+                href="#"
+                @click.stop.prevent="addEntity('below')"
+                @dblclick.stop.prevent=""
+            >
+                <i class="fas fa-fw fa-turn-down text-success" />
+                <span class="ms-2">
+                    {{ t('main.entity.tree.contextmenu.add_below') }}
+                </span>
+            </a>
+        </li>
+        <li>
+            <a
+                class="dropdown-item"
+                href="#"
                 @click.stop.prevent="duplicateEntity"
                 @dblclick.stop.prevent=""
             >
@@ -45,6 +71,19 @@
                 <i class="fas fa-fw fa-external-link-alt text-primary" />
                 <span class="ms-2">
                     {{ t('main.entity.tree.contextmenu.move') }}
+                </span>
+            </a>
+        </li>
+        <li v-if="can('entity_share')">
+            <a
+                class="dropdown-item"
+                href="#"
+                @click.stop.prevent="exportWithChildren"
+                @dblclick.stop.prevent=""
+            >
+                <i class="fas fa-fw fa-file-export text-primary" />
+                <span class="ms-2">
+                    {{ t('global.export') }}
                 </span>
             </a>
         </li>
@@ -84,13 +123,14 @@
 
     import {
         duplicateEntity as duplicateEntityApi,
+        exportEntityTree as exportEntityTreeApi,
     } from '@/api.js';
 
     import {
         can,
     } from '@/helpers/helpers.js';
 
-    import store from '@/bootstrap/store.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
 
     export default {
         props: {
@@ -103,16 +143,27 @@
             'close'
         ],
         setup(props, context) {
+            const { t } = useI18n();
+            const entityStore = useEntityStore();
+
             useGlobalClick(function () {
                 context.emit('close');
             });
 
-            const addEntity = _ => {
-                showAddEntity(props.data);
+            const addEntity = where => {
+                if(where == 'above') {
+                    const parent = entityStore.getEntity(props.data.root_entity_id);
+                    showAddEntity(parent, null, props.data.rank);
+                } else if(where == 'below') {
+                    const parent = entityStore.getEntity(props.data.root_entity_id);
+                    showAddEntity(parent, null, props.data.rank + 1);
+                } else {
+                    showAddEntity(props.data);
+                }
             };
             const duplicateEntity = _ => {
                 duplicateEntityApi(props.data).then(data => {
-                    store.dispatch('addEntity', data);
+                    entityStore.add(data);
                     context.emit('close');
                 });
             };
@@ -127,13 +178,25 @@
                 context.emit('close');
             };
 
+            const exportWithChildren = async _ => {
+                if(!can('entity_share')) return;
+                try{
+                    const exported = await exportEntityTreeApi(props.data.id);
+                    console.log(exported);
+                } catch(e) {
+                    console.error(e);
+                }
+                context.emit('close');
+            };
+
             return {
-                t: useI18n().t,
+                t,
                 can,
                 addEntity,
                 duplicateEntity,
                 moveEntity,
                 deleteEntity,
+                exportWithChildren,
             };
         }
     };

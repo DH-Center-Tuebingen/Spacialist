@@ -3,8 +3,7 @@
 namespace Tests\Unit;
 
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+
 
 use App\EntityType;
 
@@ -17,12 +16,11 @@ class EntityTypeTest extends TestCase
      */
     public function testRelations()
     {
-        $type = EntityType::with(['layer', 'entities', 'attributes', 'sub_entity_types', 'thesaurus_concept'])->find(4);
+        $type = EntityType::with(['entities', 'attributes', 'sub_entity_types', 'thesaurus_concept'])->find(4);
 
-        $this->assertEquals(5, $type->layer->id);
         $this->assertEquals(1, $type->entities->count());
         $this->assertEquals(2, $type->entities[0]->id);
-        $this->assertEquals(5, $type->attributes->count());
+        $this->assertEquals(6, $type->attributes->count());
         $this->assertEquals(14, $type->attributes[0]->id);
         $this->assertEquals(1, $type->attributes[0]->pivot->position);
         $this->assertEquals(16, $type->attributes[1]->id);

@@ -6,6 +6,7 @@ use App\Exceptions\InvalidDataException;
 use App\DataTypes\TimePeriod;
 use App\Utils\NumberUtils;
 use App\Utils\StringUtils;
+use Illuminate\Support\Str;
 
 class TimeperiodAttribute extends AttributeBase
 {
@@ -33,8 +34,21 @@ class TimeperiodAttribute extends AttributeBase
         if($end < $start) {
             throw InvalidDataException::requireBefore($start, $end);
         }
-        
+
         return json_encode(new TimePeriod($start, $end));
+    }
+
+    public static function parseExport(mixed $data) : string {
+        $dataAsObj = json_decode($data);
+        $start = $dataAsObj->start;
+        $end = $dataAsObj->end;
+        if(Str::upper($dataAsObj->startLabel) == 'BC') {
+            $start *= -1;
+        }
+        if(Str::upper($dataAsObj->endLabel) == 'BC') {
+            $end *= -1;
+        }
+        return strval($start . ";" . $end);
     }
 
     public static function unserialize(mixed $data) : mixed {

@@ -1,7 +1,7 @@
 {
     "private": true,
     "name": "spacialist",
-    "version": "0.10.2",
+    "version": "0.11.0",
     "description": "A Virtual Research Environment for the Spatial Humanities",
     "repository": {
         "type": "git",
@@ -31,22 +31,22 @@
         "@vue/babel-plugin-transform-vue-jsx": "^1.4.0",
         "@vue/cli-plugin-babel": "^5.0.8",
         "@vue/compiler-sfc": "^3.3.4",
-        "@websanova/vue-auth": "^4.2.1",
         "axios": "^1.4.0",
         "browser-sync": "^2.29.3",
         "browser-sync-webpack-plugin": "^2.3.0",
         "eslint": "^8.51.0",
         "eslint-plugin-vue": "^9.17.0",
+        "laravel-echo": "^1.16.1",
         "laravel-vite-plugin": "^1.0.0",
         "postcss": "^8.4.22",
+        "pusher-js": "^8.4.0-rc2",
         "resolve-url-loader": "^5.0.0",
         "sass": "^1.62.0",
         "sass-loader": "^13.3.1",
         "vite": "^5.0.10",
         "vue": "^3.3.4",
         "vue-loader": "^17.2.2",
-        "vue-router": "^4.2.2",
-        "vuex": "4.0.2"
+        "vue-router": "^4.2.2"
     },
     "dependencies": {
         "@f3ve/vue-markdown-it": "^0.2.0",
@@ -86,6 +86,7 @@
         "ol-ext": "^4.0.10",
         "p-queue": "^8.0.1",
         "picmo": "^5.8.2",
+        "pinia": "^2.2.2",
         "process": "^0.11.10",
         "proj4": "^2.9.0",
         "string-similarity-js": "^2.1.4",

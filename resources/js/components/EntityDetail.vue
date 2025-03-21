@@ -5,133 +5,149 @@
             class="mb-2 small"
             :entity="state.entity"
         />
-        <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
             <h3
-                class="mb-0"
+                v-if="!state.entity.editing"
+                class="mb-0 overflow-hidden text-nowrap text-truncate"
                 @mouseenter="onEntityHeaderHover(true)"
                 @mouseleave="onEntityHeaderHover(false)"
             >
-                <span v-if="!state.entity.editing">
+                <span :title="state.entity.name">
                     {{ state.entity.name }}
-                    <small class="d-inline-flex gap-1">
-                        <button
-                            v-show="state.hiddenAttributeCount > 0"
-                            id="hidden-attributes-icon"
-                            class="border-0 bg-body text-secondary p-0"
-                            data-bs-container="body"
-                            data-bs-toggle="popover"
-                            data-bs-trigger="hover"
-                            data-bs-placement="bottom"
-                            :data-bs-content="state.hiddenAttributeListing"
-                            data-bs-html="true"
-                            data-bs-custom-class="popover-p-2"
-                            @mousedown="showHiddenAttributes()"
-                            @mouseup="hideHiddenAttributes()"
-                        >
-                            <span v-show="state.hiddenAttributeState">
-                                <span class="fa-layers fa-fw">
-                                    <i class="fas fa-eye fa-xs" />
-                                    <span
-                                        class="fa-layers-counter fa-counter-lg"
-                                        style="background:Tomato"
-                                    >
-                                        {{ state.hiddenAttributeCount }}
-                                    </span>
-                                </span>
-                            </span>
-                            <span v-show="!state.hiddenAttributeState">
-                                <span class="fa-layers fa-fw">
-                                    <i class="fas fa-eye-slash fa-xs" />
-                                    <span
-                                        class="fa-layers-counter fa-counter-lg"
-                                        style="background:Tomato"
-                                    >
-                                        {{ state.hiddenAttributeCount }}
-                                    </span>
-                                </span>
-                            </span>
-                        </button>
-                        <span
-                            v-if="state.hasAttributeLinks"
-                            class="dropdown bg-body text-secondary clickable me-1"
-                        >
-                            <span
-                                class="fa-layers fa-fw"
-                                data-bs-toggle="dropdown"
-                            >
-                                <i class="fas fa-fw fa-xs fa-link fa-xs" />
+                </span>
+            </h3>
+            <div
+                v-if="!state.entity.editing"
+                class="d-flex align-items-center flex-fill"
+                @mouseenter="onEntityHeaderHover(true)"
+                @mouseleave="onEntityHeaderHover(false)"
+            >
+                <div class="d-inline-flex gap-2 ms-2">
+                    <button
+                        v-show="state.hiddenAttributeCount > 0"
+                        id="hidden-attributes-icon"
+                        class="border-0 bg-body text-secondary p-0"
+                        data-bs-container="body"
+                        data-bs-toggle="popover"
+                        data-bs-trigger="hover"
+                        data-bs-placement="bottom"
+                        :data-bs-content="state.hiddenAttributeListing"
+                        data-bs-html="true"
+                        data-bs-custom-class="popover-p-2"
+                        @mousedown="showHiddenAttributes()"
+                        @mouseup="hideHiddenAttributes()"
+                    >
+                        <span v-show="state.hiddenAttributeState">
+                            <span class="fa-layers fa-fw">
+                                <i class="fas fa-eye" />
                                 <span
                                     class="fa-layers-counter fa-counter-lg"
                                     style="background:Tomato"
                                 >
-                                    {{ state.entity.attributeLinks.length }}
+                                    {{ state.hiddenAttributeCount }}
                                 </span>
                             </span>
-                            <ul class="dropdown-menu">
-                                <li
-                                    v-for="link in state.groupedAttributeLinks"
-                                    :key="link.id"
-                                >
-                                    <router-link
-                                        :to="{ name: 'entitydetail', params: { id: link.id }, query: state.routeQuery }"
-                                        class="dropdown-item d-flex align-items-center gap-1"
-                                        :title="link.path.join(' / ')"
-                                    >
-                                        <entity-type-label
-                                            :type="link.entity_type_id"
-                                            :icon-only="true"
-                                        />
-                                        {{ link.name }}
-                                        <span class="text-muted small">{{ link.attribute_urls.join(', ') }}</span>
-                                    </router-link>
-                                </li>
-                            </ul>
                         </span>
-                        <a
-                            v-if="state.entityHeaderHovered && can('entity_write')"
-                            href="#"
-                            class="text-secondary"
-                            @click.prevent="editEntityName()"
+                        <span v-show="!state.hiddenAttributeState">
+                            <span class="fa-layers fa-fw">
+                                <i class="fas fa-eye-slash" />
+                                <span
+                                    class="fa-layers-counter fa-counter-lg"
+                                    style="background:Tomato"
+                                >
+                                    {{ state.hiddenAttributeCount }}
+                                </span>
+                            </span>
+                        </span>
+                    </button>
+                    <span
+                        v-if="state.hasAttributeLinks"
+                        class="dropdown bg-body text-secondary clickable me-1"
+                    >
+                        <span
+                            class="fa-layers fa-fw"
+                            data-bs-toggle="dropdown"
                         >
-                            <i class="fas fa-fw fa-edit fa-xs" />
-                        </a>
-                    </small>
-                </span>
-                <form
-                    v-else
-                    class="d-flex flex-row"
-                    @submit.prevent="updateEntityName()"
+                            <i class="fas fa-fw fa-link" />
+                            <span
+                                class="fa-layers-counter fa-counter-lg"
+                                style="background:Tomato"
+                            >
+                                {{ state.entity.attributeLinks.length }}
+                            </span>
+                        </span>
+                        <ul
+                            class="dropdown-menu overflow-y-auto"
+                            style="max-height: 60vh;"
+                        >
+                            <li
+                                v-for="link in state.groupedAttributeLinks"
+                                :key="link.id"
+                            >
+                                <router-link
+                                    :to="{ name: 'entitydetail', params: { id: link.id }, query: state.routeQuery }"
+                                    class="dropdown-item d-flex align-items-center gap-1"
+                                    :title="link.path.join(' / ')"
+                                >
+                                    <entity-type-label
+                                        :type="link.entity_type_id"
+                                        :icon-only="true"
+                                    />
+                                    {{ link.name }}
+                                    <span class="text-muted small">{{ link.attribute_urls.join(', ') }}</span>
+                                </router-link>
+                            </li>
+                        </ul>
+                    </span>
+                    <a
+                        v-if="state.entityHeaderHovered && can('entity_write')"
+                        href="#"
+                        class="text-secondary"
+                        @click.prevent="editEntityName()"
+                    >
+                        <i class="fas fa-fw fa-edit" />
+                    </a>
+                </div>
+            </div>
+            <form
+                v-if="state.entity.editing"
+                class="d-flex flex-row flex-grow-1 gap-1 pe-2 border-end"
+                @submit.prevent="updateEntityName()"
+            >
+                <input
+                    v-model="state.editedEntityName"
+                    type="text"
+                    class="form-control form-control-sm"
                 >
-                    <input
-                        v-model="state.editedEntityName"
-                        type="text"
-                        class="form-control form-control-sm me-2"
-                    >
-                    <button
-                        type="submit"
-                        class="btn btn-outline-success btn-sm me-2"
-                    >
-                        <i class="fas fa-fw fa-check" />
-                    </button>
-                    <button
-                        type="reset"
-                        class="btn btn-outline-danger btn-sm"
-                        @click="cancelEditEntityName()"
-                    >
-                        <i class="fas fa-fw fa-ban" />
-                    </button>
-                </form>
-            </h3>
-            <div class="d-flex flex-row gap-2">
                 <button
                     type="submit"
-                    form="entity-attribute-form"
                     class="btn btn-outline-success btn-sm"
-                    :disabled="!state.formDirty || !can('entity_data_write')"
+                >
+                    <i class="fas fa-fw fa-check" />
+                </button>
+                <button
+                    type="reset"
+                    class="btn btn-outline-danger btn-sm"
+                    @click="cancelEditEntityName()"
+                >
+                    <i class="fas fa-fw fa-ban" />
+                </button>
+            </form>
+            <div class="d-flex flex-row gap-2 text-nowrap ms-2">
+                <LoadingButton
+                    type="submit"
+                    form="entity-attribute-form"
+                    class="btn-outline-success btn-sm"
+                    :loading="state.saving"
                     @click.prevent="saveEntity()"
                 >
-                    <i class="fas fa-fw fa-save" /> {{ t('global.save') }}
-                </button>
+                    <template #icon>
+                        <i class="fas fa-fw fa-save" />
+                    </template>
+                    <template #default>
+                        {{ t('global.save') }}
+                    </template>
+                </LoadingButton>
                 <button
                     type="button"
                     class="btn btn-outline-warning btn-sm"
@@ -155,28 +171,31 @@
                 :type="state.entity.entity_type_id"
                 :icon-only="false"
             />
-            <div>
-                <i class="fas fa-fw fa-user-edit" />
-                <span
-                    class="ms-1"
-                    :title="date(state.lastModified, undefined, true, true)"
-                >
-                    {{ ago(state.lastModified) }}
-                </span>
-                -
-                <a
-                    v-if="state.entity.user"
-                    href="#"
-                    class="fw-medium"
-                    @click.prevent="showUserInfo(state.entityUser)"
-                >
-                    {{ state.entityUser.name }}
-                    <user-avatar
-                        :user="state.entityUser"
-                        :size="20"
-                        class="align-middle"
-                    />
-                </a>
+            <div class="d-flex flex-row gap-2">
+                <MultiUserWidget
+                    v-if="state.activeUsers.length > 0"
+                    :active-users="state.activeUsers"
+                />
+                <div class="d-flex flex-row gap-1 align-items-center">
+                    <i class="fas fa-fw fa-user-edit" />
+                    <span :title="date(state.lastModified, undefined, true, true)">
+                        {{ ago(state.lastModified) }}
+                    </span>
+                    -
+                    <a
+                        v-if="state.entity.user"
+                        href="#"
+                        class="fw-medium"
+                        @click.prevent="showUserInfo(state.entityUser)"
+                    >
+                        {{ state.entityUser.name }}
+                        <user-avatar
+                            :user="state.entityUser"
+                            :size="20"
+                            class="align-middle"
+                        />
+                    </a>
+                </div>
             </div>
         </div>
         <ul
@@ -185,46 +204,46 @@
             role="tablist"
         >
             <li
-                v-for="(tg, key) in state.entityGroups"
-                :key="`attribute-group-${tg.id}-tab`"
+                v-for="group in state.filteredEntityGroups"
+                :key="`attribute-group-${group.id}-tab`"
                 class="nav-item"
                 role="presentation"
             >
                 <a
-                    :id="`active-entity-attributes-group-${tg.id}-tab`"
+                    :id="`active-entity-attributes-group-${group.id}-tab`"
                     class="nav-link active-entity-attributes-tab active-entity-detail-tab d-flex gap-2 align-items-center"
                     href="#"
-                    @click.prevent="setDetailPanel(`attributes-${tg.id}`)"
+                    @click.prevent="setDetailPanel(`attributes-${group.id}`)"
                 >
                     <span class="fa-layers fa-fw">
                         <i class="fas fa-fw fa-layer-group" />
                         <span class="fa-layers-counter fa-counter-lg bg-secondary-subtle text-reset">
-                            {{ tg.data.length }}
+                            {{ group.data.length }}
                         </span>
                     </span>
-                    <span v-if="key == 'default'">
+                    <span v-if="group.name == 'default'">
                         {{ t('main.entity.tabs.default') }}
                     </span>
                     <span v-else>
-                        {{ translateConcept(key) }}
+                        {{ translateConcept(group.name) }}
                     </span>
                     <div
-                        v-if="state.dirtyStates[tg.id]"
+                        v-if="state.dirtyStates[group.id]"
                         class="d-flex flex-row gap-2 align-items-center"
-                        @mouseover="showTabActions(tg.id, true)"
-                        @mouseleave="showTabActions(tg.id, false)"
+                        @mouseover="showTabActions(group.id, true)"
+                        @mouseleave="showTabActions(group.id, false)"
                     >
-                        <i class="fas fa-fw fa-2xs fa-circle text-warning" />
-                        <div v-show="state.attributeGrpHovered == tg.id">
+                        <DotIndicator :type="'warning'" />
+                        <div v-show="state.attributeGrpHovered == group.id">
                             <a
                                 href="#"
-                                @click.prevent.stop="saveEntity(`${tg.id}`)"
+                                @click.prevent.stop="saveEntity(`${group.id}`)"
                             >
                                 <i class="fas fa-fw fa-save text-success" />
                             </a>
                             <a
                                 href="#"
-                                @click.prevent.stop="resetForm(`${tg.id}`)"
+                                @click.prevent.stop="resetForm(`${group.id}`)"
                             >
                                 <i class="fas fa-fw fa-undo text-warning" />
                             </a>
@@ -278,35 +297,36 @@
         </ul>
         <div
             id="entity-detail-tab-content"
-            class="tab-content col ps-0 pe-0 overflow-hidden"
+            class="tab-content col ps-0 pe-0 overflow-y-auto"
         >
             <div
-                v-for="tg in state.entityGroups"
-                :id="`active-entity-attributes-panel-${tg.id}`"
-                :key="`attribute-group-${tg.id}-panel`"
+                v-for="group in state.entityGroups"
+                :id="`active-entity-attributes-panel-${group.id}`"
+                :key="`attribute-group-${group.id}-panel`"
                 class="tab-pane fade h-100 active-entity-detail-panel active-entity-attributes-panel show active"
                 role="tabpanel"
             >
                 <form
-                    :id="`entity-attribute-form-${tg.id}`"
-                    :name="`entity-attribute-form-${tg.id}`"
+                    :id="`entity-attribute-form-${group.id}`"
+                    :name="`entity-attribute-form-${group.id}`"
                     class="h-100 container-fluid"
                     @submit.prevent
-                    @keydown.ctrl.s="e => handleSaveOnKey(e, `${tg.id}`)"
+                    @keydown.ctrl.s="e => handleSaveOnKey(e, `${group.id}`)"
                 >
                     <attribute-list
-                        v-if="state.attributesFetched"
-                        :ref="el => setAttrRefs(el, tg.id)"
+                        v-if="state.attributesFetched && !group.hidden"
+                        :ref="el => setAttrRefs(el, group.id)"
                         v-dcan="'entity_data_read'"
                         class="h-100 overflow-y-auto row"
-                        :attributes="tg.data"
+                        :attributes="group.data"
                         :hidden-attributes="state.hiddenAttributeList"
                         :show-hidden="state.hiddenAttributeState"
                         :disable-drag="true"
                         :metadata-addon="hasReferenceGroup"
                         :selections="state.entityTypeSelections"
                         :values="state.entity.data"
-                        @dirty="(e, isDirty) => setFormState(e, isDirty, tg.id)"
+                        @change="dataChanged"
+                        @dirty="(e, isDirty) => setFormState(e, isDirty, group.id)"
                         @metadata="showMetadata"
                     />
                 </form>
@@ -397,7 +417,8 @@
         Popover,
     } from 'bootstrap';
 
-    import store from '@/bootstrap/store.js';
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
+    import useEntityStore from '@/bootstrap/stores/entity.js';
     import router from '%router';
 
     import { useToast } from '@/plugins/toast.js';
@@ -408,25 +429,14 @@
     } from '@/helpers/filters.js';
 
     import {
-        getEntityComments,
-        patchAttributes,
         patchEntityName,
     } from '@/api.js';
 
     import {
         can,
-        isModerated,
-        isArray,
         userId,
-        getAttribute,
-        getAttributeName,
-        getUserBy,
-        getEntity,
-        getEntityColors,
-        getEntityTypeName,
-        getEntityTypeAttributeSelections,
         getEntityTypeDependencies,
-        getConcept,
+        getEntityTypeDependencyTriggers,
         translateConcept,
         _cloneDeep,
     } from '@/helpers/helpers.js';
@@ -436,16 +446,40 @@
         showUserInfo,
         canShowReferenceModal,
     } from '@/helpers/modal.js';
+    import {
+        listenToList,
+        joinEntityRoom,
+        leaveEntityRoom,
+    } from '@/helpers/websocket.js';
+    import {
+        handleEntityDataUpdated,
+        handleAttributeValueCreated,
+        handleAttributeValueUpdated,
+        handleAttributeValueDeleted,
+        handleEntityReferenceAdded,
+        handleEntityReferenceUpdated,
+        handleEntityReferenceDeleted,
+        handleEntityCommentAdded,
+        handleEntityCommentUpdated,
+        handleEntityCommentDeleted,
+    } from '@/handlers/entity.js';
 
+    import { evaluateRule } from '@/helpers/dependencies.js';
     import { usePreventNavigation } from '@/helpers/form.js';
 
     import MetadataTab from '@/components/entity/MetadataTab.vue';
     import EntityTypeLabel from '@/components/entity/EntityTypeLabel.vue';
+    import DotIndicator from '@/components/indicators/DotIndicator.vue';
+    import MultiUserWidget from './user/MultiUserWidget.vue';
+    import LoadingButton from '@/components/forms/button/LoadingButton.vue';
 
     export default {
         components: {
+            DotIndicator,
             EntityTypeLabel,
+            LoadingButton,
             MetadataTab,
+            MultiUserWidget,
         },
         props: {
             bibliography: {
@@ -463,10 +497,12 @@
             const { t } = useI18n();
             const route = useRoute();
             const toast = useToast();
+            const attributeStore = useAttributeStore();
+            const entityStore = useEntityStore();
 
             // FETCH
-            store.dispatch('getEntity', route.params.id).then(_ => {
-                getEntityTypeAttributeSelections();
+            entityStore.setById(route.params.id).then(_ => {
+                entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id);
                 state.initFinished = true;
                 updateAllDependencies();
             });
@@ -474,19 +510,8 @@
             // DATA
             const attrRefs = ref({});
             const state = reactive({
-                colorStyles: computed(_ => {
-                    const colors = getEntityColors(state.entity.entity_type_id);
-                    return {
-                        color: colors.backgroundColor
-                    };
-                }),
-                formDirty: computed(_ => {
-                    for(let k in state.dirtyStates) {
-                        if(state.dirtyStates[k]) return true;
-                    }
-                    return false;
-                }),
                 dirtyStates: {},
+                saving: false,
                 attributeGrpHovered: null,
                 hiddenAttributes: {},
                 entityHeaderHovered: false,
@@ -498,51 +523,88 @@
                 hiddenAttributeState: false,
                 attributesInTabs: true,
                 routeQuery: computed(_ => route.query),
-                entity: computed(_ => store.getters.entity),
+                entity: computed(_ => entityStore.selectedEntity),
                 entityUser: computed(_ => state.entity.user),
-                entityAttributes: computed(_ => store.getters.entityTypeAttributes(state.entity.entity_type_id)),
+                entityChanges: computed(_ => {
+                    if(!state.entity?.id) return {};
+                    return entityStore.receivedEntityData[state.entity.id];
+                }),
+                entityAttributes: computed(_ => entityStore.getEntityTypeAttributes(state.entity.entity_type_id)),
+                colorStyles: computed(_ => {
+                    const colors = entityStore.getEntityTypeColors(state.entity.entity_type_id);
+                    return {
+                        color: colors.backgroundColor
+                    };
+                }),
+                formDirty: computed(_ => {
+                    for(let k in state.dirtyStates) {
+                        if(state.dirtyStates[k]) return true;
+                    }
+                    return false;
+                }),
+                filteredEntityGroups: computed(_ => {
+                    return state.entityGroups.filter(g => !g.hidden);
+                }),
                 entityGroups: computed(_ => {
+                    // TODO:: Does this makes sense?
                     if(!state.entityAttributes) {
                         return state.entityAttributes;
                     }
 
+                    const groups = [];
                     if(state.attributesInTabs) {
-                        const tabGroups = {};
+                        const tabGroupMap = {};
                         let currentGroup = 'default';
                         let currentGroupId = 'default';
                         let currentUnnamedGroupCntr = 1;
+                        let hideGroup = false;
                         state.entityAttributes.forEach(a => {
                             if(a.is_system && a.datatype == 'system-separator') {
+                                // If system separator is hidden, skip adding it
+                                // and set flag to hide it's attributes
+                                if(state.hiddenAttributes[a.id]?.hide) {
+                                    hideGroup = true;
+                                } else {
+                                    hideGroup = false;
+                                }
                                 if(!a.pivot.metadata || !a.pivot.metadata.title) {
                                     currentGroup = t(`main.entity.tabs.untitled_group`, { cnt: currentUnnamedGroupCntr });
                                     currentUnnamedGroupCntr++;
                                 } else {
                                     currentGroup = translateConcept(a.pivot.metadata.title);
                                 }
+
                                 currentGroupId = a.pivot.id;
                                 return;
                             }
-                            if(!tabGroups[currentGroup]) {
-                                tabGroups[currentGroup] = {
+
+                            if(!tabGroupMap[currentGroup]) {
+                                tabGroupMap[currentGroup] = {
                                     id: currentGroupId,
-                                    data: []
+                                    name: currentGroup,
+                                    data: [],
+                                    hidden: hideGroup,
                                 };
+                                groups.push(tabGroupMap[currentGroup]);
                             }
-                            tabGroups[currentGroup].data.push(a);
+                            tabGroupMap[currentGroup].data.push(a);
                         });
 
-                        return tabGroups;
+                        return groups;
                     } else {
-                        return {
-                            default: {
+                        return [
+                            {
                                 id: 'default',
+                                name: 'default',
                                 data: state.entityAttributes,
+                                hidden: false,
                             },
-                        };
+                        ];
                     }
                 }),
-                entityTypeSelections: computed(_ => getEntityTypeAttributeSelections(state.entity.entity_type_id)),
+                entityTypeSelections: computed(_ => entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id)),
                 entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
+                entityTypeTriggers: computed(_ => getEntityTypeDependencyTriggers(state.entity.entity_type_id)),
                 hasAttributeLinks: computed(_ => state.entity.attributeLinks && state.entity.attributeLinks.length > 0),
                 groupedAttributeLinks: computed(_ => {
                     if(!state.hasAttributeLinks) return {};
@@ -562,18 +624,10 @@
                 }),
                 attributesFetched: computed(_ => state.initFinished && state.entity.data && !!state.entityAttributes && state.entityAttributes.length > 0),
                 entityTypeLabel: computed(_ => {
-                    return getEntityTypeName(state.entity.entity_type_id);
+                    return entityStore.getEntityTypeName(state.entity.entity_type_id);
                 }),
                 hiddenAttributeList: computed(_ => {
-                    const keys = Object.keys(state.hiddenAttributes);
-                    const values = Object.values(state.hiddenAttributes);
-                    const list = [];
-                    for(let i = 0; i < keys.length; i++) {
-                        if(values[i].hide && (!state.hiddenAttributes[values[i].by] || !state.hiddenAttributes[values[i].by].hide)) {
-                            list.push(keys[i]);
-                        }
-                    }
-                    return list;
+                    return Object.keys(state.hiddenAttributes).filter(k => state.hiddenAttributes[k].hide);
                 }),
                 hiddenAttributeCount: computed(_ => state.hiddenAttributeList.length),
                 hiddenAttributeListing: computed(_ => {
@@ -593,12 +647,12 @@
                             }
                         }
                         for(let k in listGroups) {
-                            const grpAttr = getAttribute(k);
+                            const grpAttr = attributeStore.getAttribute(k);
                             listing += `<span class="text-muted fw-light fs-6"># ${translateConcept(grpAttr.thesaurus_url)}</span>`;
                             listing += `<ol class="mb-0">`;
                             // const data = state.entity.data[keys[i]];
                             for(let i = 0; i < listGroups[k].length; i++) {
-                                const attr = getAttribute(listGroups[k][i]);
+                                const attr = attributeStore.getAttribute(listGroups[k][i]);
                                 listing += `<li><span class="fw-bold">${translateConcept(attr.thesaurus_url)}</span></li>`;
                             }
                             listing += `</ol>`;
@@ -630,7 +684,9 @@
                 commentFetchFailed: computed(_ => {
                     return state.commentLoadingState === 'failed';
                 }),
+                activeUsers: computed(_ => entityStore.getActiveEntityUsers),
             });
+            const channels = {};
 
             usePreventNavigation(_ => state.formDirty);
 
@@ -676,7 +732,7 @@
                     cancelUpdateEntityName();
                 } else {
                     patchEntityName(state.entity.id, state.editedEntityName).then(data => {
-                        store.dispatch('updateEntity', {
+                        entityStore.update({
                             ...data,
                             name: state.editedEntityName,
                         });
@@ -689,43 +745,77 @@
                 state.editedEntityName = '';
             };
             const updateDependencyState = (aid, value) => {
-                const attrDeps = state.entityTypeDependencies[aid];
-                if(!attrDeps) return;
-                const type = getAttribute(aid).datatype;
-                attrDeps.forEach(ad => {
-                    let matches = false;
-                    switch(ad.operator) {
-                        case '=':
-                            if(type == 'string-sc') {
-                                matches = value?.id == ad.value;
-                            } else if(type == 'string-mc') {
-                                matches = value && value.some(mc => mc.id == ad.value);
-                            } else {
-                                matches = value == ad.value;
-                            }
-                            break;
-                        case '!=':
-                            if(type == 'string-sc') {
-                                matches = value?.id != ad.value;
-                            } else if(type == 'string-mc') {
-                                matches = value && value.every(mc => mc.id != ad.value);
-                            } else {
-                                matches = value != ad.value;
-                            }
-                            break;
-                        case '<':
-                            matches = value < ad.value;
-                            break;
-                        case '>':
-                            matches = value > ad.value;
-                            break;
+                const attributeTriggers = state.entityTypeTriggers[aid];
+                if(!attributeTriggers) return;
+
+                // This is a bit of a temporary hack, as the dirty value
+                // used to overwrite the attribute value with just the value.
+                // Which leads to inconsitencies in the data.
+                // So we need to update the attributes in the correct form.
+                // Ideally the getDirtyValues() function should return the correct
+                // attribute values in the first place. [SO]
+                const liveData = _cloneDeep(state.entity.data);
+                const dirtyValues = getDirtyValues();
+                for(const k in dirtyValues) {
+                    if(liveData[k]) {
+                        liveData[k].value = dirtyValues[k];
                     }
-                    state.hiddenAttributes[ad.dependant] = {
-                        hide: !matches,
-                        hide: matches,
-                        by: aid,
+                }
+
+                for(const dependantId of attributeTriggers) {
+                    const attributeDependencies = state.entityTypeDependencies[dependantId];
+                    const matchAllGroups = !attributeDependencies.or;
+                    let dependencyMatch = matchAllGroups;
+
+                    for(const group of attributeDependencies.groups) {
+                        const matchAllRules = !group.or;
+                        let ruleMatch = matchAllRules;
+                        for(const rule of group.rules) {
+                            const type = attributeStore.getAttribute(rule.on).datatype;
+                            const attributeValue = liveData[rule.on];
+
+                            // When the rule is invalid we ignore the rule by returning true!
+                            if(attributeValue === undefined) {
+                                ruleMatch = true;
+                                console.error('Invalid target value for rule', rule);
+                                break;
+                            }
+
+                            //// I assume the reference value is an exception from the rule!
+                            ////
+                            // if(!refValue.value) {
+                            //     ruleMatch = true;
+                            //     console.error('Rule target is not a ref value!', refValue);
+                            //     break;
+                            // }
+
+                            const tmpMatch = evaluateRule(type, attributeValue.value, rule);
+
+                            if(matchAllRules && !tmpMatch) {
+                                ruleMatch = false;
+                                break;
+                            }
+                            if(!matchAllRules && tmpMatch) {
+                                ruleMatch = true;
+                                break;
+                            }
+                        }
+
+                        if(matchAllGroups && !ruleMatch) {
+                            dependencyMatch = false;
+                            break;
+                        }
+                        if(!matchAllGroups && ruleMatch) {
+                            dependencyMatch = true;
+                            break;
+                        }
+                    }
+
+                    state.hiddenAttributes[dependantId] = {
+                        hide: !dependencyMatch,
+                        by: aid, // TODO might be more than one
                     };
-                });
+                }
             };
             const updateAllDependencies = _ => {
                 if(!state.entityAttributes) return;
@@ -788,13 +878,21 @@
             const showTabActions = (grp, status) => {
                 state.attributeGrpHovered = status ? grp : null;
             };
+
+            const dataChanged = function (e) {
+                updateDependencyState(e.attribute_id, e.value);
+            };
+
             const setFormState = (e, isDirty, grp) => {
                 state.dirtyStates[grp] = isDirty;
-                updateDependencyState(e.attribute_id, e.value);
+                //// It should be more consistent to set the dependencyState when the data
+                //// is changed and not when the forms dirty state changes. [SO]
+                // updateDependencyState(e.attribute_id, e.value);
             };
             const getDirtyValues = grp => {
                 const list = grp ? grp.split(',') : Object.keys(attrRefs.value);
                 let values = {};
+
                 list.forEach(g => {
                     values = {
                         ...values,
@@ -826,8 +924,7 @@
                 if(!can('comments_read')) return;
 
                 state.commentLoadingState = 'fetching';
-                getEntityComments(state.entity.id).then(comments => {
-                    store.dispatch('setEntityComments', comments);
+                entityStore.fetchEntityComments(state.entity.id).then(_ => {
                     state.commentLoadingState = 'fetched';
                 }).catch(e => {
                     state.commentLoadingState = 'failed';
@@ -835,21 +932,9 @@
             };
 
             const addComment = event => {
-                const comment = event.comment;
-                const replyTo = event.replyTo;
-                if(replyTo) {
-                    const op = state.entity.comments.find(c => c.id == replyTo);
-                    if(op.replies) {
-                        op.replies.push(comment);
-                    }
-                    op.replies_count++;
-                } else {
-                    if(!state.entity.comments) {
-                        state.entity.comments = [];
-                    }
-                    state.entity.comments.push(comment);
-                    state.entity.comments_count++;
-                }
+                entityStore.addComment(state.entity.id, event.comment, {
+                    replyTo: event.replyTo,
+                });
             };
 
             const handleSaveOnKey = (e, grp) => {
@@ -866,17 +951,18 @@
                 }
             };
 
-            const saveEntity = grps => {
+            const saveEntity = async grps => {
                 if(!can('entity_data_write')) return;
 
                 const dirtyValues = getDirtyValues(grps);
                 const patches = [];
                 const moderations = [];
+                if(Object.keys(dirtyValues).length == 0) return;
 
                 for(let v in dirtyValues) {
                     const aid = v;
                     const data = state.entity.data[aid];
-                    const type = getAttribute(aid)?.datatype;
+                    const type = attributeStore.getAttribute(aid)?.datatype;
                     const patch = {
                         op: null,
                         value: null,
@@ -884,7 +970,7 @@
                             aid: aid,
                         },
                     };
-                    if(data.id) {
+                    if(data?.id) {
                         // if data.id exists, there has been an entry in the database, therefore it is a replace/remove operation
                         if(
                             (dirtyValues[v] && dirtyValues[v] != '')
@@ -913,24 +999,13 @@
                     patches.push(patch);
                     moderations.push(aid);
                 }
-                return patchAttributes(state.entity.id, patches).then(data => {
-                    undirtyList(grps);
-                    store.dispatch('updateEntity', data.entity);
-                    store.dispatch('updateEntityData', {
-                        data: dirtyValues,
-                        new_data: data.added_attributes,
-                        removed_data: data.removed_attributes,
-                        eid: state.entity.id,
-                        sync: !isModerated(),
-                    });
-                    if(isModerated()) {
-                        store.dispatch('updateEntityDataModerations', {
-                            entity_id: state.entity.id,
-                            attribute_ids: moderations,
-                            state: 'pending',
-                        });
-                    }
 
+                state.saving = true;
+
+                try {
+                    await entityStore.patchAttributes(state.entity.id, patches, dirtyValues, moderations);
+
+                    undirtyList(grps);
                     resetDirtyStates(grps);
 
                     toast.$toast(
@@ -944,7 +1019,7 @@
                             icon: true,
                         },
                     );
-                }).catch(error => {
+                } catch(error) {
                     let response = error.response;
 
                     if(!response) {
@@ -964,21 +1039,40 @@
                         autohide: true,
                         icon: true,
                         duration: 5000,
-                    },
-                    );
-                });
+                    });
+                } finally {
+                    state.saving = false;
+                }
             };
             const resetForm = grps => {
                 resetListValues(grps);
                 resetDirtyStates(grps);
+                updateAllDependencies();
             };
             const setAttrRefs = (el, grp) => {
+                // IMPROVE:: When a group is hidden, the element is null
+                // deleting the entry does not work, skipping the update works.
+                if(el === null) return;
                 attrRefs.value[grp] = el;
             };
 
             // ON MOUNTED
             onMounted(_ => {
                 console.log('entity detail component mounted');
+                channels.entity = joinEntityRoom(route.params.id);
+                listenToList(channels.entity, [
+                    handleEntityDataUpdated,
+                    handleAttributeValueCreated,
+                    handleAttributeValueUpdated,
+                    handleAttributeValueDeleted,
+                    handleEntityReferenceAdded,
+                    handleEntityReferenceUpdated,
+                    handleEntityReferenceDeleted,
+                    handleEntityCommentAdded,
+                    handleEntityCommentUpdated,
+                    handleEntityCommentDeleted,
+                ]);
+
                 let hiddenAttrElem = document.getElementById('hidden-attributes-icon');
                 if(!!hiddenAttrElem) {
                     new Popover(hiddenAttrElem, {
@@ -991,6 +1085,14 @@
                 attrRefs.value = {};
                 state.commentLoadingState = 'not';
             });
+
+            watch(_ => state.entityChanges,
+                (newChanges, oldChanges) => {
+                    for(let k in attrRefs.value) {
+                        attrRefs.value[k]?.broadcastAttributeChanges(newChanges);
+                    }
+                }
+            );
 
             watch(_ => state.hiddenAttributeCount,
                 async (newCount, oldCount) => {
@@ -1011,11 +1113,16 @@
                     if(newParams.id == oldParams.id) return;
                     if(!newParams.id) return;
                     state.initFinished = false;
-                    store.dispatch('getEntity', newParams.id).then(_ => {
-                        getEntityTypeAttributeSelections();
+                    entityStore.setById(newParams.id).then(_ => {
+                        entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id);
                         state.initFinished = true;
                         updateAllDependencies();
                     });
+                    // store.dispatch('getEntity', newParams.id).then(_ => {
+                    //     entityStore.getEntityTypeAttributeSelections();
+                    //     state.initFinished = true;
+                    //     updateAllDependencies();
+                    // });
                 }
             );
 
@@ -1053,7 +1160,9 @@
                     showDiscard(to, resetDirtyStates, saveEntity);
                     return false;
                 } else {
-                    store.dispatch('resetEntity');
+                    leaveEntityRoom(channels.entity);
+                    entityStore.unset();
+                    channels.entity = null;
                     return true;
                 }
             });
@@ -1064,7 +1173,21 @@
                         return false;
                     } else {
                         state.hiddenAttributes = {};
-                        // store.dispatch('resetEntity');
+                        leaveEntityRoom(channels.entity);
+                        channels.entity = joinEntityRoom(to.params.id);
+                        listenToList(channels.entity, [
+                            handleEntityDataUpdated,
+                            handleAttributeValueCreated,
+                            handleAttributeValueUpdated,
+                            handleAttributeValueDeleted,
+                            handleEntityReferenceAdded,
+                            handleEntityReferenceUpdated,
+                            handleEntityReferenceDeleted,
+                            handleEntityCommentAdded,
+                            handleEntityCommentUpdated,
+                            handleEntityCommentDeleted,
+                        ]);
+                        await entityStore.setById(to.params.id);
                         return true;
                     }
                 } else {
@@ -1082,16 +1205,12 @@
                 ago,
                 date,
                 userId,
-                getUserBy,
                 showUserInfo,
-                getAttributeName,
-                getEntityTypeName,
-                getEntityColors,
                 translateConcept,
-                getEntity,
                 // LOCAL
                 hasReferenceGroup,
                 showMetadata,
+                dataChanged,
                 editEntityName,
                 updateEntityName,
                 cancelEditEntityName,

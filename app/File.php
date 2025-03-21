@@ -2,6 +2,9 @@
 
 namespace App;
 
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+
 class File {
 
     static function getBomBytes() : string {
@@ -32,5 +35,14 @@ class File {
         } else {
             fclose($file);
         }
+    }
+
+    public static function getUniqueTemporaryDirectoryName(): string {
+        $i = 1;
+        $tmpDir = 'temp_' . Carbon::now()->format('YmdHis');
+        while(Storage::disk('private')->exists($tmpDir)){
+            $tmpDir = 'temp_' . Carbon::now()->format('YmdHis') . '_' . $i++;
+        }
+        return $tmpDir;
     }
 }
