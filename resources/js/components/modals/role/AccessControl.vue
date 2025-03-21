@@ -21,7 +21,10 @@
                 />
             </div>
             <div class="modal-body">
-                <div class="d-flex flex-row-reverse justify-content-between gap-2">
+                <div
+                    v-if="!readonly"
+                    class="d-flex flex-row-reverse justify-content-between gap-2"
+                >
                     <div>
                         <div class="form-check form-switch mb-0">
                             <input
@@ -65,11 +68,13 @@
                 <PermissionMatrix
                     v-if="state.permissionsLoaded"
                     v-model:permission-map="state.permissionStates"
+                    :disabled="readonly"
                     :permission-groups="state.permissionGroups"
                 />
             </div>
             <div class="modal-footer">
                 <button
+                    v-if="!readonly"
                     type="submit"
                     class="btn btn-outline-success"
                     @click="savePermissions()"
@@ -116,6 +121,10 @@
             roleId: {
                 type: Number,
                 required: true,
+            },
+            readonly: {
+                type: Boolean,
+                default: false,
             }
         },
         emits: ['save', 'cancel'],

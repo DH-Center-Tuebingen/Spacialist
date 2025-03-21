@@ -111,9 +111,23 @@ dl.dl-0-mb > dd:last-child {
 }
 
 .btn-fab {
+    @extend .rounded-circle;
     padding: 0;
     height: 1.8rem;
     width: 1.8rem;
+    background-color: $white;
+}
+
+.btn-fab:disabled {
+    background-color: $gray-200;
+    opacity: 1;
+}
+
+.btn-fab-xl {
+    @extend .btn-fab;
+    height: 4rem;
+    width: 4rem;
+    font-size: 1.6rem;
 }
 
 .btn-fab-list-sm > .btn-fab, .btn-fab-sm {
@@ -132,11 +146,15 @@ dl.dl-0-mb > dd:last-child {
     line-height: normal;
 }
 
-.btn-fab-list > .btn-fab, .btn-fab-list > .btn-fab-sm {
+.btn-fab-list > .btn-fab,
+.btn-fab-list > .btn-fab-sm,
+.btn-fab-list > .btn-fab-xl {
     margin-right: 0.25rem;
 }
 
-.btn-fab-list > .btn-fab:last-child, .btn-fab-list > .btn-fab-sm:last-child {
+.btn-fab-list > .btn-fab:last-child, 
+.btn-fab-list > .btn-fab-sm:last-child
+.btn-fab-list > .btn-fab-xl:last-child {
     margin-right: 0;
 }
 

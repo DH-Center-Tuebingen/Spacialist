@@ -6,9 +6,12 @@
     >
         <span
             v-if="loading"
-            class="me-1"
+            :class="iconWrapperClasses"
         >
-            <i class="fas fa-fw fa-circle-notch fa-spin" />
+            <i
+                class="fas fa-fw fa-circle-notch fa-spin"
+                :class="spinnerClasses"
+            />
         </span>
         <slot
             v-else
@@ -20,9 +23,8 @@
 </template>
 
 <script>
-
     import {
-        computed
+        computed,
     } from 'vue';
 
     export default {
@@ -35,16 +37,26 @@
                 type: Boolean,
                 required: false,
                 default: false,
+            },
+            spinnerClasses: {
+                type: String,
+                required: false,
+                default: '',
             }
         },
-        setup(props){
+        setup(props, { slots }) {
 
             const computedDisabled = computed(_ => {
                 return props.loading || props.disabled;
             });
 
+            const iconWrapperClasses = computed(() => {
+                return slots.default ? `me-1 ${props.spinnerClasses}` : props.spinnerClasses;
+            });
+
             return {
                 computedDisabled,
+                iconWrapperClasses,
             };
         }
     };

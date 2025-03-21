@@ -1,39 +1,62 @@
 <template>
     <div class="row">
-        <div class="col-3 pt-2 border-end">
-            <file-upload
-                ref="upload"
-                v-model="state.fileQueue"
-                accept="image/*"
-                class="w-100"
-                :custom-action="uploadFile"
-                :directory="false"
-                :drop="true"
-                :multiple="false"
-                @input-file="inputFile"
-            >
-                <user-avatar
-                    :user="state.user"
-                    class="d-flex justify-content-center"
-                />
-            </file-upload>
-            <div class="text-center mt-3">
-                <button
-                    type="button"
-                    class="btn btn-outline-danger ms-2"
-                    :disabled="!state.user.avatar"
-                    @click="deleteAvatar()"
-                >
-                    <i class="fas fa-fw fa-trash" />
-                    {{ t('global.delete') }}
-                </button>
+        <div class="col-3 pt-2 border-end px-5 overflow-hidden">
+            <header class="d-flex justify-content-center my-5">
+                <div class="position-relative">
+                    <file-upload
+                        ref="uploadAvatarInput"
+                        v-model="state.fileQueue"
+                        accept="image/*"
+                        class="w-100"
+                        :custom-action="uploadFile"
+                        :directory="false"
+                        :drop="true"
+                        :multiple="false"
+                        :disabled="state.uploadingAvatar"
+                        @input-file="inputFile"
+                    >
+                        <user-avatar
+                            :user="state.user"
+                            class="d-flex justify-content-center pe-none user-select-none border-1"
+                        />
+                    </file-upload>
+
+                    <LoadingButton
+                        :loading="state.uploadingAvatar"
+                        :spinner-classes="'fs-4'"
+                        class="position-absolute bottom-0 end-0 btn-fab-xl btn-outline-primary z-2"
+                        @click="clickFileUpload"
+                    >
+                        <template #icon>
+                            <i class="fs-4 fas fa-fw fa-file-upload" />
+                        </template>
+                    </LoadingButton>
+
+                    <button
+                        v-if="state.user.avatar"
+                        type="button"
+                        class="position-absolute bottom-0 start-0 btn btn-fab-xl btn-outline-danger z-2"
+                        @click.prevent="deleteAvatar()"
+                    >
+                        <i class="fs-4 fas fa-fw fa-trash" />
+                    </button>
+                </div>
+            </header>
+
+            <h2 class="mb-1">
+                {{ state.user.name }}
+            </h2>
+            <div>
+                <span class="subtitle opacity-25 fs-4 fst-italic fw-bold">
+                    @{{ state.user.nickname }}
+                </span>
             </div>
         </div>
         <div class="col-6 pt-2">
             <div class="d-flex justify-content-between">
-                <h3>
+                <h2>
                     {{ t('global.user.info_title') }}
-                </h3>
+                </h2>
                 <div class="d-flex flex-row align-items-center gap-2">
                     <button
                         type="submit"
@@ -55,6 +78,23 @@
                     </button>
                 </div>
             </div>
+            <!-- Rollen -->
+            <div class="d-flex align-items-center gap-2 mt-1">
+                <span>
+                    <i class="fas fa-fw fa-shield-alt" />
+                </span>
+                <span class="fw-bold">
+                    {{ t('global.roles') }}
+                </span>
+                <span
+                    v-for="role in state.user.roles"
+                    :key="role.id"
+                    class="badge bg-primary me-1 clickable"
+                    @click.prevent="showAccessControlModal(role.id, true)"
+                >
+                    {{ role.name }}
+                </span>
+            </div>
             <form
                 id="profile-user-info-form"
                 name="profile-user-info-form"
@@ -63,9 +103,9 @@
                 @submit.prevent="updateUserInformation()"
             >
                 <div class="col-6">
-                    <h4>
+                    <h3>
                         {{ t('global.user.personal_info_title') }}
-                    </h4>
+                    </h3>
                     <div>
                         <label
                             class="form-label mb-1"
@@ -232,9 +272,9 @@
                     </div>
                 </div>
                 <div class="col-6">
-                    <h4>
+                    <h3>
                         {{ t('global.user.contact') }}
-                    </h4>
+                    </h3>
                     <div>
                         <label
                             class="form-label mb-1"
@@ -324,6 +364,7 @@
     import {
         computed,
         reactive,
+        ref,
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
@@ -350,12 +391,19 @@
         _cloneDeep,
     } from '@/helpers/helpers.js';
 
+    import {
+        showAccessControlModal
+    } from '@/helpers/modal.js';
+
+    import LoadingButton from '@/components/forms/button/LoadingButton.vue';
+
     export default {
+        components: {
+            LoadingButton,
+        },
         setup(props) {
             const { t } = useI18n();
             const userStore = useUserStore();
-
-            // FETCH
 
             // FUNCTIONS
             const initializeValidation = _ => {
@@ -425,11 +473,22 @@
                     });
                 }
             };
-            const deleteAvatar = _ => {
-                userStore.deleteAvatar();
+            const deleteAvatar = async _ => {
+                try {
+                    await userStore.deleteAvatar();
+                } catch(e) {
+                    console.error(e);
+                }
             };
-            const uploadFile = (file, component) => {
-                return userStore.setAvatar(file.file);
+            const uploadFile = async (file, component) => {
+                try {
+                    state.uploadingAvatar = true;
+                    await userStore.setAvatar(file.file);
+                } catch(e) {
+                    console.error(e);
+                } finally {
+                    state.uploadingAvatar = false;
+                }
             };
             const inputFile = (newFile, oldFile) => {
                 // Wait for response
@@ -485,6 +544,7 @@
                 },
             };
             const state = reactive({
+                uploadingAvatar: false,
                 fileQueue: [],
                 user: computed(_ => appliedMetadata(getUser())),
             });
@@ -495,9 +555,15 @@
 
             initializeValidation();
 
+            const uploadAvatarInput = ref(null);
+            const clickFileUpload = _ => {
+                uploadAvatarInput.value.$el.querySelector('input[type="file"]').click();
+            };
+
             // RETURN
             return {
                 t,
+                clickFileUpload,
                 getClassByValidation,
                 inputFile,
                 uploadFile,
@@ -505,6 +571,8 @@
                 updateUserInformation,
                 resetUserInfo,
                 state,
+                showAccessControlModal,
+                uploadAvatarInput,
                 v,
             };
         },
