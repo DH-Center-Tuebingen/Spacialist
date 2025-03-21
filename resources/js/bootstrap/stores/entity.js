@@ -505,7 +505,7 @@ export const useEntityStore = defineStore('entity', {
         },
         async patchEntityMetadata(entityTypeId, attributeId, etAttrId, metadata) {
             return updateAttributeMetadata(etAttrId, metadata).then(data => {
-                this.updateAttributeMetadata(entityTypeId, attributeId, etAttrId, data);
+                this.updateAttributeMetadata(entityTypeId, attributeId, etAttrId, data.data);
             });
         },
         externalAttributeValueDeleted(entityId, attributeId) {
