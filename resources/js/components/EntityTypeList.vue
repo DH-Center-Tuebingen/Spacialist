@@ -25,6 +25,8 @@
                     </span>
                 </div>
                 <div
+                    v-if="state.hasOnHoverListener"
+                    v-show="state.hoverStates[i]"
                     class="ms-auto btn-fab-list btn-fab-list-sm bg-white position-absolute z-1 end-0 me-2"
                     :class="activeClasses(entry)"
                 >
