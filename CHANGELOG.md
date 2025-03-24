@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.11.1
+### Fixed
+- Login not possible on instances in subfolder
+
 ## 0.11 - Kilcrea
 ### Added
 - Added websockets for various data synchronization

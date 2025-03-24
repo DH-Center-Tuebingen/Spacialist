@@ -16,7 +16,7 @@ export async function logout() {
 }
 
 export async function getCsrfCookie() {
-    await $httpQueue.add(() => web_http.get('/sanctum/csrf-cookie').then(response => {
+    await $httpQueue.add(() => web_http.get('sanctum/csrf-cookie').then(response => {
     }));
 }
 
