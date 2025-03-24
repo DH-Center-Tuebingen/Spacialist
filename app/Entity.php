@@ -90,6 +90,7 @@ class Entity extends Model implements Searchable {
             'creator' => $this->creator,
             'editors' => $this->editors,
             'metadata' => $this->metadata,
+            'user' => $this->user,
         ];
     }
 

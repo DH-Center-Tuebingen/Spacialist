@@ -18,6 +18,7 @@ import {
     can,
     calculateEntityTypeColors,
     fillEntityData,
+    except,
     only,
 } from '@/helpers/helpers.js';
 
@@ -500,7 +501,11 @@ export const useEntityStore = defineStore('entity', {
         },
         async fetchEntityMetadata(id) {
             return fetchEntityMetadata(id).then(data => {
-                return this.updateEntityMetadata(id, data);
+                if(data.user) {
+                    this.entities[id].user = data.user;
+                }
+
+                return this.updateEntityMetadata(id, except(data, 'user'));
             });
         },
         async patchEntityMetadata(entityTypeId, attributeId, etAttrId, metadata) {

@@ -529,6 +529,10 @@ export function only(object, allows = []) {
 }
 
 export function except(object, excepts = []) {
+    // excepts can either be an array or a single key
+    if(!Array.isArray(excepts)) {
+        excepts = [excepts];
+    }
     return Object.keys(object)
         .filter(key => !excepts.includes(key))
         .reduce((obj, key) => {
