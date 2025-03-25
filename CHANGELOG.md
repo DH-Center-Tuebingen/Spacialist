@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.12 - (Luxor)
+### Changed
+- Alerts can now be dismissed
 
 ## 0.11 - Kilcrea
 ### Added
