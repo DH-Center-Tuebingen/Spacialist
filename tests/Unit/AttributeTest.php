@@ -34,12 +34,14 @@ class AttributeTest extends TestCase
         $this->assertNull($attribute->thesaurus_root_concept);
         $this->assertEquals(32, $attribute->thesaurus_concept->id);
 
-        $this->assertArraySubset([
+        $this->assertArrayIsEqualToArrayOnlyConsideringListOfKeys([
             ['id' => 6],
             ['id' => 7],
             ['id' => 8],
-        ], $attribute->children->toArray());
-        $this->assertArraySubset([
+        ], $attribute->children->toArray(),
+        ['id']
+        );
+        $this->assertArrayIsEqualToArrayOnlyConsideringListOfKeys([
             [
                 'id' => 4,
                 'pivot' => [
@@ -58,9 +60,11 @@ class AttributeTest extends TestCase
                     'json_val' => '[{"6": {"id": 39, "concept_url": "https://spacialist.escience.uni-tuebingen.de/<user-project>/boden#20171220105508"}, "7": {"id": 41, "concept_url": "https://spacialist.escience.uni-tuebingen.de/<user-project>/kammeindruck#20171220105520"}}]',
                 ],
             ],
-        ], $attribute->entities->toArray());
-        $this->assertArraySubset([
+        ], $attribute->entities->toArray(),
+        ['id', 'pivot']);
+        $this->assertArrayIsEqualToArrayOnlyConsideringListOfKeys([
             ['id' => 5],
-        ], $attribute->entity_types->toArray());
+        ], $attribute->entity_types->toArray(),
+        ['id']);
     }
 }

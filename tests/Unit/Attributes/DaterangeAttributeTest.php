@@ -6,20 +6,17 @@ use App\AttributeTypes\DaterangeAttribute;
 use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 // !!!! Currently this test is only testing the fromImport function!!!
 class DaterangeAttributeTest extends TestCase {
-    /**
-     * @dataProvider truthyProvider
-    */
+    #[DataProvider('truthyProvider')]
     public function testFromImportTruthy($input) {
         $this->expectNotToPerformAssertions(DaterangeAttribute::class);
         DaterangeAttribute::fromImport($input);
     }
 
-    /**
-     * @dataProvider falsyProvider
-    */
+    #[DataProvider('falsyProvider')]
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         DaterangeAttribute::fromImport($input);

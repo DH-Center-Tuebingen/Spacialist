@@ -4,28 +4,22 @@ namespace Tests\Unit\Attributes;
 use App\AttributeTypes\IntegerAttribute;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
-
+use PHPUnit\Framework\Attributes\DataProvider;
 
 // !!!! Currently this test is only testing the fromImport function!!!
 class IntegerAttributeTest extends TestCase {
-    /**
-    * @dataProvider truthyProvider
-    */
+    #[DataProvider('truthyProvider')]
     public function testFromImportTruthy($input) {
     $this->expectNotToPerformAssertions(IntegerAttribute::class);
         IntegerAttribute::fromImport($input);
     }
 
-    /**
-    * @dataProvider truthyProvider
-    */
+    #[DataProvider('truthyProvider')]
     public function testFromImportReturnValues($input, $expected) {
         $this->assertEquals($expected, IntegerAttribute::fromImport($input));
     }
 
-    /**
-    * @dataProvider falsyProvider
-    */
+    #[DataProvider('falsyProvider')]
     public function testFromImportFalsy($input) {
     $this->expectException(InvalidDataException::class);
     IntegerAttribute::fromImport($input);
