@@ -7,6 +7,7 @@ use App\Notifications\Notifiable;
 use App\File\Directory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\Traits\CausesActivity;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -22,6 +23,7 @@ class User extends Authenticatable
     use SoftDeletes;
     use HasFactory;
     use HasApiTokens;
+    use TwoFactorAuthenticatable;
     // use Authenticatable;
 
     protected $guard_name = 'web';

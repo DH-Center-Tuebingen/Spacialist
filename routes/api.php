@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Broadcast;
+use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -114,11 +115,14 @@ Route::middleware('auth:sanctum')->prefix('v1/editor')->group(function() {
 });
 
 // USER
+// Route::middleware('web')->prefix('v1')->group(function() {
+//     Route::post('/auth/login', 'UserController@login');
+//     Route::post('/auth/logout', 'UserController@logout');
+// });
 Route::middleware('web')->prefix('v1')->group(function() {
-    Route::post('/auth/login', 'UserController@login');
+    Route::post('/auth/login', [AuthenticatedSessionController::class, 'store']);
     Route::post('/auth/logout', 'UserController@logout');
 });
-
 
 Route::middleware('auth:sanctum')->prefix('v1')->group(function() {
     Route::get('/auth/user', 'UserController@getUser');

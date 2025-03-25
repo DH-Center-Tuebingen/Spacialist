@@ -354,6 +354,10 @@
                             </span>
                         </div>
                     </div>
+                    <h3 class="mt-2">
+                        {{ t('global.user.security.title') }}
+                    </h3>
+                    <TwoFactor :user="state.user" />
                 </div>
             </form>
         </div>
@@ -392,14 +396,16 @@
     } from '@/helpers/helpers.js';
 
     import {
-        showAccessControlModal
+        showAccessControlModal,
     } from '@/helpers/modal.js';
 
     import LoadingButton from '@/components/forms/button/LoadingButton.vue';
+    import TwoFactor from '@/components/user/TwoFactor.vue';
 
     export default {
         components: {
             LoadingButton,
+            TwoFactor,
         },
         setup(props) {
             const { t } = useI18n();

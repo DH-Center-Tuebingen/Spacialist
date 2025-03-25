@@ -20,6 +20,29 @@ export async function getCsrfCookie() {
     }));
 }
 
+export async function getTwoFactorState() {
+    return await $httpQueue.add(() => web_http.post('user/two-factor-authentication'));
+}
+
+export async function getTwoFactorQrCode() {
+    return await $httpQueue.add(() => web_http.get('user/two-factor-qr-code').then(response => response.data.svg));
+}
+
+export async function confirmTwoFactorActivation(code) {
+    const data = {
+        'code': code,
+    };
+    return await $httpQueue.add(() => web_http.post('user/confirmed-two-factor-authentication', data).catch(e => e.response.data));
+}
+
+export async function getTwoFactorBackupCodes() {
+    return await $httpQueue.add(() => web_http.get('user/two-factor-recovery-codes').then(response => response.data));
+}
+
+export async function disableTwoFactor() {
+    return await $httpQueue.add(() => web_http.delete('user/two-factor-authentication'));
+}
+
 export async function fetchVersion() {
     return await $httpQueue.add(() => http.get('/version').then(response => response.data));
 }
@@ -276,6 +299,12 @@ export async function login(credentials) {
     return await $httpQueue.add(() => http.post('/auth/login', credentials).then(response => {
         return response.data;
     }));
+}
+export async function confirmTwoFactorChallenge(code) {
+    const data = {
+        'code': code,
+    };
+    return await $httpQueue.add(() => web_http.post('two-factor-challenge', data).then(response => response.data));
 }
 
 export async function addUser(user) {

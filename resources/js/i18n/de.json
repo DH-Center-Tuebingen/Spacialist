@@ -13,6 +13,7 @@
         "add": "Hinzufügen",
         "edit": "Bearbeiten",
         "edited": "bearbeitet",
+        "export": "Exportieren",
         "duplicate": "Duplizieren",
         "sort": "Sortieren",
         "resort": "Umsortieren",
@@ -20,8 +21,8 @@
         "replace": "Ersetzen",
         "clear": "Leeren",
         "confirm": "Ok",
-        "apply": "Anwenden",
         "create": "Anlegen",
+        "apply": "Anwenden",
         "move": "Verschieben",
         "parse": "Parsen",
         "conflict": "Konflikt",
@@ -136,6 +137,21 @@
             "department": "Abteilung",
             "not_assigned": "Nicht angegeben",
             "contact": "Kontakt",
+            "security": {
+                "title": "Sicherheit",
+                "2fa": {
+                    "title": "2-Faktor-Authentifizierung",
+                    "enable": "2FA aktivieren",
+                    "enable_info": "2-Faktor-Authentifizierung mittels TOTP kann die Sicherheit verbessern. Du benötigst dazu eine TOTP-App (z.B. Aegis)",
+                    "request_qrcode": "QR-Code anfragen",
+                    "qrcode_info": "Um 2FA zu aktivieren, scanne den QR-Code mit deiner TOTP-App und gib den 6-stelligen Code ein.",
+                    "backup_codes": "Das sind deine Backup-Codes. Für den Fall, dass du keinen Zugriff auf deine TOTP-App hast, kannst du einen dieser Backup-Codes nutzen. Bewahre sie sicher auf!",
+                    "confirm_backup_codes": "Verstanden!",
+                    "copy_backup_codes": "Codes kopieren",
+                    "disable": "2FA deaktivieren",
+                    "disable_info": "2FA ist aktiv"
+                }
+            },
             "avatar": "Avatar",
             "invalid_orcid": "Die eigegebene ORCID ist ungültig"
         },
@@ -325,6 +341,7 @@
         "url": "URL",
         "name": "Name",
         "nickname": "Spitzname",
+        "2fa_code": "2FA-Code",
         "display_name": "Anzeigename",
         "email": "E-Mail-Adresse",
         "email_or_nick": "E-Mail-Adresse oder Name",

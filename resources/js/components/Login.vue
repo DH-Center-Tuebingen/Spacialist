@@ -16,7 +16,10 @@
                     {{ t('global.login_subtitle') }}
                 </h6>
                 <div class="card-text" />
-                <form @submit.prevent="login">
+                <form
+                    v-if="!state.twoFa.required"
+                    @submit.prevent="login"
+                >
                     <div class="mb-2">
                         <label
                             for="email"
@@ -97,6 +100,38 @@
                         </div>
                     </div>
                 </form>
+                <form v-else>
+                    <div class="mb-2">
+                        <label
+                            for="2fa-code"
+                            class="col-md-4 col-form-label"
+                        >
+                            {{ t('global.2fa_code') }}
+                            <i class="fas fa-fw fa-qrcode" />
+                        </label>
+
+                        <div class="col-md-6">
+                            <input
+                                id="2fa-code"
+                                v-model="state.twoFa.code"
+                                type="text"
+                                class="form-control"
+                                name="2fa-code"
+                                required
+                            >
+                        </div>
+                    </div>
+                    <div class="col-md-8 col-md-offset-4">
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            :disabled="state.twoFa.code.length != 6"
+                            @click="confirmSecondFactor"
+                        >
+                            {{ t('global.login') }}
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -128,6 +163,10 @@
                 // DATA
                 const state = reactive({
                     user: {},
+                    twoFa: {
+                        required: false,
+                        code: '',
+                    },
                     redirect: {
                         name: 'home'
                     },
@@ -140,25 +179,24 @@
                     state.submitting = true;
                     state.error = {};
                     const credentials = {
-                        password: state.user.password
+                        password: state.user.password,
+                        email: state.user.email,
                     };
-                    // dirty check if email field should be treated
-                    // as actual email address or nickname
-                    if(state.user.email.includes('@')) {
-                        credentials.email = state.user.email;
-                    } else {
-                        credentials.nickname = state.user.email;
-                    }
                     await userStore.login(credentials)
-                        .then(_ => {
-                            state.submitting = false;
-                            state.error = {};
-                            if(route.query.redirectTo) {
-                                router.push(route.query.redirectTo);
+                        .then(data => {
+                            if(data?.two_factor === true) {
+                                state.twoFa.required = true;
+                                state.twoFa.code = '';
                             } else {
-                                router.push({
-                                    name: 'home',
-                                });
+                                state.submitting = false;
+                                state.error = {};
+                                if(route.query.redirectTo) {
+                                    router.push(route.query.redirectTo);
+                                } else {
+                                    router.push({
+                                        name: 'home',
+                                    });
+                                }
                             }
                         })
                         .catch(e => {
@@ -167,6 +205,11 @@
                             state.error = getErrorMessages(e);
                             return Promise.reject();
                         });
+                };
+
+                const confirmSecondFactor = async _ => {
+                    if(state.twoFa.code.length != 6) return;
+                    await userStore.confirmTwoFactorChallenge(state.twoFa.code);
                 };
 
                 // ON MOUNTED
@@ -201,6 +244,7 @@
                     t,
                     state,
                     login,
+                    confirmSecondFactor,
                     getValidClass,
                 };
             },

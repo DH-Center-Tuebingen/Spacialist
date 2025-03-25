@@ -1,0 +1,85 @@
+<template>
+    <form
+        class="input-group"
+        :class="classes"
+        @submit="confirmChallenge"
+    >
+        <input
+            id="confirm-2fa-code"
+            :value="challenge"
+            class="form-control py-1"
+            style="font-size: .8rem;"
+            type="text"
+            placeholder="XXX XXX"
+            @input="styleChallenge"
+        >
+        <button
+            id="confirm-2fa-code-btn"
+            class="btn btn-sm btn-outline-success"
+            type="submit"
+        >
+            <i class="fas fa-fw fa-check" />
+        </button>
+    </form>
+</template>
+
+<script>
+    import {
+        ref,
+    } from 'vue';
+
+    import { useI18n } from 'vue-i18n';
+
+    export default {
+        props: {
+            classes: {
+                type: String,
+                required: false,
+                default: 'w-25 mx-auto mt-3',
+            }
+        },
+        emits: ['confirm'],
+        setup(props, {emit}) {
+            const { t } = useI18n();
+
+            const challenge = ref('');
+            const format = new RegExp(/\d{6}/);
+            const onlyDigits = new RegExp(/\d+/);
+
+            const confirmChallenge = _ => {
+                const trimmedChallenge = challenge.value.replace(/ /g, '');
+                if(!format.test(trimmedChallenge)) {
+                    // TODO show error?
+                    return;
+                }
+
+                emit('confirm', trimmedChallenge);
+            };
+
+            const styleChallenge = event => {
+                let currentValue = event.target.value.replaceAll(' ', '');
+                if(currentValue.length > 6) {
+                    currentValue = currentValue.substring(0, 6);
+                }
+                if(!onlyDigits.test(currentValue)) {
+                    // TODO set error?
+                    return;
+                }
+
+                if(currentValue.length > 3) {
+                    currentValue = currentValue.substring(0, 3) + ' ' + currentValue.substring(3);
+                }
+                // need to reset it to trigger update
+                challenge.value = '';
+                challenge.value = currentValue;
+            };
+
+            return {
+                t,
+                challenge,
+                confirmChallenge,
+                styleChallenge,
+            };
+        },
+    };
+</script>

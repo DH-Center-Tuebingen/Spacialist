@@ -11,6 +11,7 @@ import {
     deleteUserAvatar,
     getCsrfCookie,
     login,
+    confirmTwoFactorChallenge,
     logout,
     patchUserData,
     patchRoleData,
@@ -145,9 +146,17 @@ export const useUserStore = defineStore('user', {
         },
         async login(credentials) {
             await getCsrfCookie();
-            const user = await login(credentials);
+            const loginResponse = await login(credentials);
+            if(loginResponse.two_factor === true) {
+                return loginResponse;
+            } else {
+                this.userLoggedIn = true;
+                await useSystemStore().initialize();
+            }
+        },
+        async confirmTwoFactorChallenge(code) {
+            await confirmTwoFactorChallenge(code);
             this.userLoggedIn = true;
-            this.setActiveUser(user);
             await useSystemStore().initialize();
         },
         async logout() {

@@ -12,8 +12,8 @@
         "close": "Close",
         "add": "Add",
         "edit": "Edit",
-        "export":"Export",
         "edited": "edited",
+        "export": "Export",
         "duplicate": "Duplicate",
         "sort": "Sort",
         "resort": "Re-sort",
@@ -137,6 +137,21 @@
             "department": "Department",
             "not_assigned": "Not assigned",
             "contact": "Contact",
+            "security": {
+                "title": "Security",
+                "2fa": {
+                    "title": "Two-Factor-Authentification",
+                    "enable": "Enable 2FA",
+                    "enable_info": "Enabling Two-Factor-Authentification using TOTP can increase security. This requires a TOTP-App such as Aegis",
+                    "request_qrcode": "Request QR-Code",
+                    "qrcode_info": "To enable 2FA scan this QR-Code using your preferred TOTP-App and enter the 6-digit code.",
+                    "backup_codes": "This are your backup codes. In case you do not have access to your TOTP-App, you can use these backup codes to gain access. Keep them somewhere safe!",
+                    "confirm_backup_codes": "Got it!",
+                    "copy_backup_codes": "Copy Codes",
+                    "disable": "Disable 2FA",
+                    "disable_info": "2FA is enabled"
+                }
+            },
             "avatar": "Avatar",
             "invalid_orcid": "This ORCID is invalid"
         },
