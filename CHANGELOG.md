@@ -1,6 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.12 - (Luxor)
+
 ## 0.11 - Kilcrea
 ### Added
 - Added websockets for various data synchronization
