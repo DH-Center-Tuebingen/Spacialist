@@ -7,16 +7,16 @@ use App\Entity;
 use App\ThLanguage;
 use App\User;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\TestDox;
 
 class ApiSearchTest extends TestCase
 {
     // Testing GET requests
 
     /**
-     * @testdox GET    /api/v1/search : Search Global for Entity
-     *
-     * @return void
-     */
+	 * @return void
+	 */
+	#[TestDox('GET    /api/v1/search : Search Global for Entity')]
     public function testGlobalSearchEntityEndpoint()
     {
         $response = $this->userRequest()
@@ -63,10 +63,9 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * @testdox GET    /api/v1/search : Search Global for Bibliography
-     *
-     * @return void
-     */
+	 * @return void
+	 */
+	#[TestDox('GET    /api/v1/search : Search Global for Bibliography')]
     public function testGlobalSearchBibliographyEndpoint()
     {
         $fields = [
@@ -139,10 +138,9 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * @testdox GET    /api/v1/search : Search Global
-     *
-     * @return void
-     */
+	 * @return void
+	 */
+	#[TestDox('GET    /api/v1/search : Search Global')]
     public function testGlobalSearchAllEndpoint()
     {
         $nowTs = time();
@@ -189,10 +187,9 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * @testdox GET    /api/v1/search/entity : Search Entity
-     *
-     * @return void
-     */
+	 * @return void
+	 */
+	#[TestDox('GET    /api/v1/search/entity : Search Entity')]
     public function testEntitySearchEndpoint()
     {
         $response = $this->userRequest()
@@ -228,10 +225,9 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * @testdox GET    /api/v1/search/label : Search for Thesaurex Label
-     *
-     * @return void
-     */
+	 * @return void
+	 */
+	#[TestDox('GET    /api/v1/search/label : Search for Thesaurex Label')]
     public function testLabelSearchEndpoint()
     {
         $response = $this->userRequest()
@@ -284,10 +280,9 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * @testdox GET    /api/v1/search/attribute : Search Attributes
-     *
-     * @return void
-     */
+	 * @return void
+	 */
+	#[TestDox('GET    /api/v1/search/attribute : Search Attributes')]
     public function testAttributeSearchEndpoint()
     {
         $response = $this->userRequest()
@@ -328,10 +323,9 @@ class ApiSearchTest extends TestCase
     }
 
     /**
-     * @testdox GET    /api/v1/search/selection/{id} : Search in Attribute Selection
-     *
-     * @return void
-     */
+	 * @return void
+	 */
+	#[TestDox('GET    /api/v1/search/selection/{id} : Search in Attribute Selection')]
     public function testSelectionSearchEndpoint()
     {
         $response = $this->userRequest()
@@ -364,10 +358,9 @@ class ApiSearchTest extends TestCase
     // Testing exceptions and permissions
 
     /**
-     * @testdox Test Permissions
-     *
-     * @return void
-     */
+	 * @return void
+	 */
+	#[TestDox('Test Permissions')]
     public function testPermissions()
     {
         User::first()->roles()->detach();
@@ -391,10 +384,9 @@ class ApiSearchTest extends TestCase
         }
     }
     /**
-     * @testdox Test Exceptions
-     *
-     * @return void
-     */
+	 * @return void
+	 */
+	#[TestDox('Test Exceptions')]
     public function testExceptions()
     {
         $lang = User::first()->getLanguage();

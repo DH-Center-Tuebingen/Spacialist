@@ -4,12 +4,11 @@ namespace Tests\Unit\Attributes;
 use App\AttributeTypes\SerialAttribute;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 // !!!! Currently this test is only testing the fromImport function!!!
 class SerialAttributeTest extends TestCase {
-    /**
-    * @dataProvider falsyProvider
-    */
+    #[DataProvider('falsyProvider')]
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         SerialAttribute::fromImport($input);
@@ -23,7 +22,7 @@ class SerialAttributeTest extends TestCase {
             "fails on negative integer" => [-1],
             "fails on string" => ['ok'],
             "fails on string 0" => ['0'],
-            "fails on string" => ['kauderwelsch'],
+            "fails on another string" => ['kauderwelsch'],
             "fails on float" => [1.1],
             "fails on float string" => ["1.1"],
         ];

@@ -7,6 +7,8 @@ use Illuminate\Http\UploadedFile;
 use Tests\Permission;
 use Tests\ResponseTester;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestDox;
 
 class ApiBibliographyTest extends TestCase
 {
@@ -54,9 +56,7 @@ class ApiBibliographyTest extends TestCase
         ];
      }
 
-     /**
-      * @testdox GET /api/v1/bibliography/
-      */
+     #[TestDox('GET /api/v1/bibliography/')]
      public function testGetAll() {
         $response = $this->userRequest()
             ->get('/api/v1/bibliography');
@@ -66,9 +66,7 @@ class ApiBibliographyTest extends TestCase
      }
 
 
-    /**
-    * @testdox GET /api/v1/bibliography/{id}
-    */
+    #[TestDox('GET /api/v1/bibliography/{id}')]
      public function testGetSingle() {
         $response = $this->userRequest()
             ->get('/api/v1/bibliography/1320');
@@ -87,9 +85,7 @@ class ApiBibliographyTest extends TestCase
         ]);
      }
 
-     /**
-    * @testdox GET /api/v1/bibliography/{id}/ref_count
-    */
+     #[TestDox('GET /api/v1/bibliography/{id}/ref_count')]
     public function testGetReferenceCountEndpoint() {
         $response = $this->userRequest()
             ->get('/api/v1/bibliography/1319/ref_count');
@@ -98,9 +94,7 @@ class ApiBibliographyTest extends TestCase
         $response->assertSimilarJson([1]);
     }
 
-    /**
-     * @testdox POST /api/v1/bibliography/
-     */
+    #[TestDox('POST /api/v1/bibliography/')]
     public function testAdd() {
         $response = $this->userRequest()
             ->post('/api/v1/bibliography', [
@@ -191,9 +185,7 @@ class ApiBibliographyTest extends TestCase
         }
     }
 
-    /**
-     * @testdox POST /api/v1/bibliography/import (mandatory fields)
-     */
+    #[TestDox('POST /api/v1/bibliography/import (mandatory fields)')]
     public function testMandatoryImport() {
        $this->importTest('import_mandatory.bib', [
            [
@@ -320,9 +312,7 @@ class ApiBibliographyTest extends TestCase
            ]);
     }
 
-    /**
-     * @testdox POST /api/v1/bibliography/import (with optional fields)
-     */
+    #[TestDox('POST /api/v1/bibliography/import (with optional fields)')]
     public function testOptionalImport() {
         $this->importTest("import_optional.bib", [
             [
@@ -544,9 +534,7 @@ class ApiBibliographyTest extends TestCase
             ]);
     }
 
-    /**
-     * @testdox POST /api/v1/bibliography/import (with invalid data)
-     */
+    #[TestDox('POST /api/v1/bibliography/import (with invalid data)')]
     public function testInvalidImport() {
         $name = 'import_wrong_structure.bib';
         $path = storage_path() . "/framework/testing/$name";
@@ -563,9 +551,7 @@ class ApiBibliographyTest extends TestCase
         ]);
     }
 
-    /**
-     * @testdox POST /api/v1/bibliography/export
-     */
+    #[TestDox('POST /api/v1/bibliography/export')]
     public function testExport() {
         $response = $this->userRequest()
                 ->post('/api/v1/bibliography/export');
@@ -626,9 +612,7 @@ class ApiBibliographyTest extends TestCase
      *      [SO/VR]
      */
 
-     /**
-      * @testdox POST /api/v1/bibliography/{id}
-      */
+     #[TestDox('POST /api/v1/bibliography/{id}')]
     public function testPatchItem() {
         $data = $this->getUpdateData();
         $response = $this->userRequest()
@@ -688,9 +672,7 @@ class ApiBibliographyTest extends TestCase
         ]));
      }
 
-     /**
-      * @testdox DELETE /api/v1/bibliography/{id}
-      */
+     #[TestDox('DELETE /api/v1/bibliography/{id}')]
      public function testDelete() {
         $bib = Bibliography::latest()->first();
 
@@ -707,16 +689,12 @@ class ApiBibliographyTest extends TestCase
     // - DELETE /{id}/file
     // - UPLOAD file in all requests
 
-    /**
-     * @dataProvider permissions
-     */
+    #[DataProvider('permissions')]
     public function testWithoutPermission($permission) {
         (new ResponseTester($this))->testMissingPermission($permission);
     }
 
-    /**
-     * @dataProvider exceptionPermissions
-     */
+    #[DataProvider('exceptionPermissions')]
     public function testSucceedWithPermission($permission) {
         (new ResponseTester($this))->testExceptions($permission);
     }
