@@ -4,20 +4,17 @@ namespace Tests\Unit\Attributes;
 use App\AttributeTypes\DateAttribute;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 // !!!! Currently this test is only testing the fromImport function!!!
 class DateAttributeTest extends TestCase {
-    /**
-    * @dataProvider truthyProvider
-    */
+    #[DataProvider('truthyProvider')]
     public function testFromImportTruthy($input) {
         $this->expectNotToPerformAssertions(InvalidDataException::class);
         DateAttribute::fromImport($input);
     }
 
-    /**
-    * @dataProvider falsyProvider
-    */
+    #[DataProvider('falsyProvider')]
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         DateAttribute::fromImport($input);

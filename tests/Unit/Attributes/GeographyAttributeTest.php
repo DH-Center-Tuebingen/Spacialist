@@ -4,12 +4,11 @@ namespace Tests\Unit\Attributes;
 use App\AttributeTypes\GeographyAttribute;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 // !!!! Currently this test is only testing the fromImport function!!!
 class GeographyAttributeTest extends TestCase {
-    /**
-    * @dataProvider truthyProvider
-    */
+    #[DataProvider('truthyProvider')]
     public function testFromImportTruthy($input) {
     $this->expectNotToPerformAssertions(GeographyAttribute::class);
         GeographyAttribute::fromImport($input);
@@ -49,9 +48,7 @@ class GeographyAttributeTest extends TestCase {
         }
     }
 
-    /**
-    * @dataProvider truthyProvider
-    */
+    #[DataProvider('truthyProvider')]
     public function testFromImportReturnValues($input, $type, $coordinates) {
         $geo = GeographyAttribute::fromImport($input);
 
@@ -77,9 +74,7 @@ class GeographyAttributeTest extends TestCase {
         }
     }
 
-    /**
-    * @dataProvider falsyProvider
-    */
+    #[DataProvider('falsyProvider')]
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         GeographyAttribute::fromImport($input);

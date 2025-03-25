@@ -4,27 +4,22 @@ namespace Tests\Unit\Attributes;
 use App\AttributeTypes\RismAttribute;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 // !!!! Currently this test is only testing the fromImport function!!!
 class RismAttributeTest extends TestCase {
-    /**
-     * @dataProvider truthyProvider
-    */
+    #[DataProvider('truthyProvider')]
     public function testFromImportTruthy($input) {
         $this->expectNotToPerformAssertions(RismAttribute::class);
         RismAttribute::fromImport($input);
     }
 
-    /**
-    * @dataProvider truthyProvider
-    */
+    #[DataProvider('truthyProvider')]
     public function testFromImportReturnValues($input, $expected) {
         $this->assertEquals($expected, RismAttribute::fromImport($input));
     }
 
-    /**
-     * @dataProvider falsyProvider
-    */
+    #[DataProvider('falsyProvider')]
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         RismAttribute::fromImport($input);

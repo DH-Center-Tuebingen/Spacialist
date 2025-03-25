@@ -6,27 +6,22 @@ use App\AttributeTypes\DropdownSingleAttribute;
 use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 // !!!! Currently this test is only testing the fromImport function!!!
 class DropdownSingleAttributeTest extends TestCase {
-    /**
-     * @dataProvider truthyProvider
-    */
+    #[DataProvider('truthyProvider')]
     public function testFromImportTruthy($input) {
         $this->expectNotToPerformAssertions(DropdownSingleAttribute::class);
         DropdownSingleAttribute::fromImport($input);
     }
 
-    /**
-    * @dataProvider truthyProvider
-    */
+    #[DataProvider('truthyProvider')]
     public function testFromImportReturnValues($input, $expected) {
         $this->assertEquals($expected, DropdownSingleAttribute::fromImport($input));
     }
 
-    /**
-     * @dataProvider falsyProvider
-    */
+    #[DataProvider('falsyProvider')]
     public function testFromImportFalsy($input) {
         $this->expectException(InvalidDataException::class);
         DropdownSingleAttribute::fromImport($input);
@@ -55,8 +50,8 @@ class DropdownSingleAttributeTest extends TestCase {
 
     public static function falsyProvider() {
         return [
-            "fail when input is not a string" => [1],
-            "fail when input is not a string" => [true],
+            "fail when input is not a string (int)" => [1],
+            "fail when input is not a string (bool)" => [true],
             "fail when input is not a valid concept/label in the vocabulary" => ["Fund"],
             "fail when case is not correct" => ["fundobjekt"],
         ];

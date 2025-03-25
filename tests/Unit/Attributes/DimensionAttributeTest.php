@@ -6,27 +6,22 @@ use App\AttributeTypes\DimensionAttribute;
 use App\AttributeValue;
 use App\Exceptions\InvalidDataException;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 // !!!! Currently this test is only testing the fromImport function!!!
 class DimensionAttributeTest extends TestCase {
-    /**
-     * @dataProvider truthyProvider
-    */
+    #[DataProvider('truthyProvider')]
     public function testFromImportNoException($input) {
         $this->expectNotToPerformAssertions(DimensionAttribute::class);
         DimensionAttribute::fromImport($input);
     }
 
-    /**
-    * @dataProvider truthyProvider
-    */
+    #[DataProvider('truthyProvider')]
     public function testFromImportReturnValues($input, $expected) {
         $this->assertEquals($expected, DimensionAttribute::fromImport($input));
     }
 
-    /**
-     * @dataProvider falsyProvider
-    */
+    #[DataProvider('falsyProvider')]
     public function testFromImportException($input) {
         $this->expectException(InvalidDataException::class);
         DimensionAttribute::fromImport($input);
@@ -57,8 +52,8 @@ class DimensionAttributeTest extends TestCase {
 
     public static function falsyProvider() {
         return [
-            "fail when input is not a string" => [1],
-            "fail when input is not a string" => [true],
+            "fail when input is not a string (int)" => [1],
+            "fail when input is not a string (bool)" => [true],
             "fail when a dimension is missing" => ["1;2;cm"],
             "fail when no unit is provided" => ["1;2;3"],
             "fail when first is not a number" => ["a;2;3;cm"],

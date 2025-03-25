@@ -5,7 +5,7 @@ namespace App;
 use App\Geodata;
 use App\AttributeTypes\AttributeBase;
 use Illuminate\Database\Eloquent\Model;
-use Clickbar\Magellan\Database\Eloquent\HasPostgisColumns;
+use Clickbar\Magellan\Data\Geometries\Geometry;
 use App\Traits\CommentTrait;
 use App\Traits\ModerationTrait;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -16,7 +16,6 @@ use stdClass;
 
 class AttributeValue extends Model implements Searchable
 {
-    use HasPostgisColumns;
     use CommentTrait;
     use ModerationTrait;
     use LogsActivity;
@@ -55,8 +54,8 @@ class AttributeValue extends Model implements Searchable
         'thesaurus_val'
     ];
 
-    protected $postgisColumns = [
-        'geography_val',
+    protected $casts = [
+        'geography_val' => Geometry::class,
     ];
 
     protected $copyOn = [
@@ -166,7 +165,7 @@ class AttributeValue extends Model implements Searchable
     public static function getValueColumn($type) {
         return AttributeBase::getFieldFromType($type);
     }
-    
+
     public static function generateObject($attributeValues) {
         $data = [];
         foreach($attributeValues as $attributeValue) {
