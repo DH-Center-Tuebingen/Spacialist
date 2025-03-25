@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 ## Fixes
 - Fixed error when updating array based attribute value (AttributeValueId was removed when list was empty and not recreated when list contained values again)
 ### Changed
+- Alerts can now be dismissed
 - Moved patch logic from EntityController to Models
 - Moved epoch attribute testing from into epoch attribute test
 - Patch attribute endpoint: moved aid param from params obj to top level, as other values were not used 
