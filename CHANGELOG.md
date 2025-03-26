@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.11.1
+### Added
+- Attribute Lists are now striped for better readability
 ### Fixed
 - Login not possible on instances in subfolder
 - Last editor not visible in _Entity Detail_ tab
