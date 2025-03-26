@@ -313,7 +313,7 @@
             const state = reactive({
                 id: `multiselect-search-${getTs()}`,
                 loading: false,
-                query: 'base',
+                query: '',
                 isSimpleChain: computed(_ => props.chain && props.chain.length > 0),
                 isFnChain: computed(_ => !!props.chainFn),
                 enableChain: computed(_ => state.isSimpleChain || state.isFnChain || context.slots.chain),
