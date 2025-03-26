@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Login not possible on instances in subfolder
 - Last editor not visible in _Entity Detail_ tab
+- Modal not closing on deleting _Entity_ 
 
 ## 0.11 - Kilcrea
 ### Added

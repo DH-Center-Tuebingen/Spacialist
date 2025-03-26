@@ -422,7 +422,8 @@ export const useEntityStore = defineStore('entity', {
             return node;
         },
         async delete(entityId) {
-            return deleteEntity(entityId).then(_ => {
+            try {
+                await deleteEntity(entityId);
                 const entity = this.entities[entityId];
                 if(entity.root_entity_id) {
                     const parent = this.getEntity(entity.root_entity_id);
@@ -441,10 +442,10 @@ export const useEntityStore = defineStore('entity', {
                     }
                 }
                 delete this.entities[entityId];
-
                 handlePostDelete(entityId);
-                return entity;
-            });
+            } catch(e) {
+                console.error(e);
+            }
         },
         updateEntityMetadata(id, data) {
             const metadata = {};
