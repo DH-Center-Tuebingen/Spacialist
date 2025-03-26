@@ -1,26 +1,37 @@
 <template>
-    <form
-        class="input-group"
-        :class="classes"
-        @submit="confirmChallenge"
-    >
-        <input
-            id="confirm-2fa-code"
-            :value="challenge"
-            class="form-control py-1"
-            style="font-size: .8rem;"
-            type="text"
-            placeholder="XXX XXX"
-            @input="styleChallenge"
+    <div :class="classes">
+        <form
+            class="input-group"
+            :class="inputClasses"
+            @submit.prevent="confirmChallenge"
         >
-        <button
-            id="confirm-2fa-code-btn"
-            class="btn btn-sm btn-outline-success"
-            type="submit"
+            <input
+                id="confirm-2fa-code"
+                :value="challenge"
+                class="form-control py-1"
+                style="font-size: .8rem;"
+                type="text"
+                placeholder="XXX XXX"
+                @input="styleChallenge"
+            >
+            <button
+                id="confirm-2fa-code-btn"
+                class="btn btn-sm btn-outline-success"
+                type="submit"
+            >
+                <i class="fas fa-fw fa-check" />
+            </button>
+        </form>
+
+        <div
+            v-if="errors.length > 0"
+            class="mt-2 mb-0 py-1 px-2 alert alert-danger"
         >
-            <i class="fas fa-fw fa-check" />
-        </button>
-    </form>
+            <span v-for="error in errors">
+                {{ error }}
+            </span>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -35,8 +46,18 @@
             classes: {
                 type: String,
                 required: false,
-                default: 'w-25 mx-auto mt-3',
-            }
+                default: 'w-25 mx-auto',
+            },
+            inputClasses: {
+                type: String,
+                required: false,
+                default: '',
+            },
+            errors: {
+                type: Array,
+                required: false,
+                default: [],
+            },
         },
         emits: ['confirm'],
         setup(props, {emit}) {

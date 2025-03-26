@@ -92,7 +92,7 @@
                         <div class="col-md-8 col-md-offset-4">
                             <button
                                 type="submit"
-                                class="btn btn-primary"
+                                class="btn btn-outline-primary"
                                 :disabled="state.submitting"
                             >
                                 {{ t('global.login') }}
@@ -100,38 +100,27 @@
                         </div>
                     </div>
                 </form>
-                <form v-else>
-                    <div class="mb-2">
-                        <label
-                            for="2fa-code"
-                            class="col-md-4 col-form-label"
-                        >
-                            {{ t('global.2fa_code') }}
-                            <i class="fas fa-fw fa-qrcode" />
-                        </label>
+                <div v-else>
+                    <Alert
+                        type="info"
+                        :dismissible="true"
+                        :message="t('global.user.security.2fa.login_info')"
+                    />
+                    <label
+                        for="2fa-code"
+                        class="text-center w-100 col-form-label"
+                    >
+                        {{ t('global.2fa_code') }}
+                        <i class="fas fa-fw fa-qrcode" />
+                    </label>
 
-                        <div class="col-md-6">
-                            <input
-                                id="2fa-code"
-                                v-model="state.twoFa.code"
-                                type="text"
-                                class="form-control"
-                                name="2fa-code"
-                                required
-                            >
-                        </div>
-                    </div>
-                    <div class="col-md-8 col-md-offset-4">
-                        <button
-                            type="button"
-                            class="btn btn-primary"
-                            :disabled="state.twoFa.code.length != 6"
-                            @click="confirmSecondFactor"
-                        >
-                            {{ t('global.login') }}
-                        </button>
-                    </div>
-                </form>
+                    <TwoFactorChallenge
+                        classes="w-50 mx-auto"
+                        input-classes="w-50 mx-auto"
+                        :errors="state.twoFa.errors"
+                        @confirm="confirmSecondFactor"
+                    />
+                </div>
             </div>
         </div>
     </div>
@@ -146,8 +135,8 @@
 
         import { useI18n } from 'vue-i18n';
         import { useRoute } from 'vue-router';
-        import useUserStore from '@/bootstrap/stores/user.js';
         import router from '%router';
+        import useUserStore from '@/bootstrap/stores/user.js';
 
         import {
             getErrorMessages,
@@ -155,7 +144,12 @@
             getUser,
         } from '@/helpers/helpers.js';
 
+        import TwoFactorChallenge from '@/components/user/TwoFactorChallenge.vue';
+
         export default {
+            components: {
+                TwoFactorChallenge,
+            },
             setup() {
                 const { t, locale } = useI18n();
                 const route = useRoute();
@@ -166,6 +160,7 @@
                     twoFa: {
                         required: false,
                         code: '',
+                        errors: [],
                     },
                     redirect: {
                         name: 'home'
@@ -207,9 +202,14 @@
                         });
                 };
 
-                const confirmSecondFactor = async _ => {
-                    if(state.twoFa.code.length != 6) return;
-                    await userStore.confirmTwoFactorChallenge(state.twoFa.code);
+                const confirmSecondFactor = async challenge => {
+                    if(challenge.length != 6) return;
+                    const errors = await userStore.confirmTwoFactorChallenge(challenge);
+                    if(errors && Object.keys(errors).length > 0) {
+                        state.twoFa.errors = errors;
+                    } else {
+                        state.twoFa.errors = [];
+                    }
                 };
 
                 // ON MOUNTED

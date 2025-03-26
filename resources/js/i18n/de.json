@@ -149,7 +149,8 @@
                     "confirm_backup_codes": "Verstanden!",
                     "copy_backup_codes": "Codes kopieren",
                     "disable": "2FA deaktivieren",
-                    "disable_info": "2FA ist aktiv"
+                    "disable_info": "2FA ist aktiv",
+                    "login_info": "Dein Benutzerkonto ist durch 2-Faktor-Authentifizierung geschützt. Bitte gib den Code aus deiner TOTP-Authenticator-App ein."
                 }
             },
             "avatar": "Avatar",

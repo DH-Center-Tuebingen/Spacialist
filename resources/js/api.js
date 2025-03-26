@@ -304,7 +304,7 @@ export async function confirmTwoFactorChallenge(code) {
     const data = {
         'code': code,
     };
-    return await $httpQueue.add(() => web_http.post('two-factor-challenge', data).then(response => response.data));
+    return await $httpQueue.add(() => web_http.post('two-factor-challenge', data).catch(e => e.response.data));
 }
 
 export async function addUser(user) {

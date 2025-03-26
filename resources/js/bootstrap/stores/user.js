@@ -155,9 +155,13 @@ export const useUserStore = defineStore('user', {
             }
         },
         async confirmTwoFactorChallenge(code) {
-            await confirmTwoFactorChallenge(code);
-            this.userLoggedIn = true;
-            await useSystemStore().initialize();
+            const response = await confirmTwoFactorChallenge(code);
+            if(response?.errors && Object.keys(response.errors).length > 0) {
+                return response.errors.code;
+            } else {
+                this.userLoggedIn = true;
+                await useSystemStore().initialize();
+            }
         },
         async logout() {
             await logout();

@@ -149,7 +149,8 @@
                     "confirm_backup_codes": "Got it!",
                     "copy_backup_codes": "Copy Codes",
                     "disable": "Disable 2FA",
-                    "disable_info": "2FA is enabled"
+                    "disable_info": "2FA is enabled",
+                    "login_info": "Your user account is protected by Two-Factor-Authentication. Enter the code from your TOTP-Authenticator-App."
                 }
             },
             "avatar": "Avatar",

@@ -30,6 +30,7 @@
                 <span
                     class="fs-4 text-success"
                 >
+                    <i class="small fas fa-fw fa-check" />
                     {{ t('global.user.security.2fa.disable_info') }}
                 </span>
                 <button
@@ -43,15 +44,10 @@
         </div>
         <div v-if="state.showQrCode">
             <div v-html="state.qrCode" />
-            <TwoFactorChallenge @confirm="confirmActivation" />
-            <div
-                v-if="state.challengeErrors.length > 0"
-                class="mt-2 mb-0 p-1 alert alert-danger"
-            >
-                <span v-for="error in state.challengeErrors">
-                    {{ error }}
-                </span>
-            </div>
+            <TwoFactorChallenge
+                :errors="state.challengeErrors"
+                @confirm="confirmActivation"
+            />
         </div>
         <div v-if="state.backupCodes.length > 0">
             <hr>
@@ -124,8 +120,7 @@
                 required: true,
             },
         },
-        emits: ['confirm'],
-        setup(props, {emit}) {
+        setup(props) {
             const { t } = useI18n();
 
             const request = async _ => {
