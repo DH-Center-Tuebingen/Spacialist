@@ -697,7 +697,7 @@ class EntityController extends Controller {
                 // attributes with the same name.
                 $attributeIds = [];
                 $attributeNames = [];
-                $excludedAttributeTypes = ['system-separator'];
+                $excludedAttributeTypes = ['system-separator', 'sql'];
                 foreach($attributes as $attribute) {
                     if(in_array($attribute->datatype, $excludedAttributeTypes)) {
                         continue;

@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - Modal not closing on deleting _Entity_
 - _Avatar_ image and literature download path were absolute
 - _Entity Type_ color not showing
+- Excluded _SQL_ attribute from export
 
 ## 0.11 - Kilcrea
 ### Added
