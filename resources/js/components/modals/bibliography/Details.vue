@@ -92,7 +92,7 @@
                 </dl>
                 <a
                     v-if="state.file"
-                    :href="`/download/bibliography?path=${state.file}`"
+                    :href="`download/bibliography?path=${state.file}`"
                     class="text-decoration-none"
                     target="_blank"
                 >

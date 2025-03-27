@@ -2,7 +2,7 @@
     <span class="d-inline-flex">
         <img
             v-if="user.avatar"
-            :src="`/download/avatar?path=${user.avatar}`"
+            :src="`download/avatar?path=${user.avatar}`"
             alt="user avatar"
             :width="size"
             :height="size"
