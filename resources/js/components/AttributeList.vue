@@ -14,7 +14,7 @@
             <div
                 v-if="!state.hiddenAttributeList[element.id] || showHidden"
                 class="mt-3 px-2"
-                :class="additionalRowClasses(element)"
+                :class="additionalRowClasses(element, index)"
                 @mouseenter="onEnter(index)"
                 @mouseleave="onLeave(index)"
             >
@@ -316,7 +316,7 @@
                 }
             };
 
-            const additionalRowClasses = elem => {
+            const additionalRowClasses = (elem, idx) => {
                 const classes = [];
                 if(!state.ignoreMetadata && elem.pivot && elem.pivot.metadata && elem.pivot.metadata.width) {
                     const width = elem.pivot.metadata.width;
@@ -330,6 +330,9 @@
                     }
                 } else {
                     classes.push('col-12');
+                }
+                if(idx % 2 == 1) {
+                    classes.push('py-2', 'bg-secondary', 'bg-opacity-10', 'rounded-2');
                 }
                 return classes;
             };

@@ -1,6 +1,6 @@
 <template>
-    <div>
-        <table class="table table-striped table-hovered table-sm mb-0 table-sticky">
+    <div class="bg-body rounded-2 p-2">
+        <table class="table table-striped table-hover table-borderless table-sm mb-0 table-sticky">
             <thead class="thead-light">
                 <tr>
                     <th>#</th>
@@ -65,7 +65,7 @@
                 <tr v-if="!disabled && !state.isPreview">
                     <td
                         class="text-center"
-                        style="--bs-table-striped-bg: var(--bs-body-bg);"
+                        style="--bs-table-bg-type: var(--bs-body-bg);"
                         :colspan="state.placeholderWidth"
                     >
                         <button
@@ -82,10 +82,13 @@
                     v-if="!state.isPreview"
                     class="border-0"
                 >
-                    <td>&nbsp;</td>
+                    <td style="--bs-table-bg-type: var(--bs-body-bg);">
+                        &nbsp;
+                    </td>
                     <td
                         v-for="(column, i) in state.columns"
                         :key="i"
+                        style="--bs-table-bg-type: var(--bs-body-bg);"
                     >
                         <form
                             v-if="state.chartShown"
