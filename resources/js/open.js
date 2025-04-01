@@ -19,7 +19,7 @@ window.$httpQueue = queue;
 
 // Third-Party Components
 import Multiselect from "@vueform/multiselect";
-import DatePicker from "vue-datepicker-next";
+import VueDatePicker from "@vuepic/vue-datepicker";
 import draggable from "vuedraggable";
 
 // Components
@@ -46,7 +46,7 @@ app.component("attribute-list", AttributeList);
 app.component('result-card', ResultCard);
 // Third-Party components
 app.component("multiselect", Multiselect);
-app.component("date-picker", DatePicker);
+app.component("DatePicker", VueDatePicker);
 app.component("draggable", draggable);
 app.component('md-viewer', MarkdownViewer);
 

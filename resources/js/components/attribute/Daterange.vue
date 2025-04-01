@@ -1,24 +1,25 @@
 <template>
-    <date-picker
+    <DatePicker
         :id="name"
-        v-model:value="v.value"
+        :uid="name"
+        v-model="v.value"
         class="w-100"
         input-class="form-control"
         value-type="date"
+        :auto-apply="true"
+        :clearable="true"
         :range="true"
-        :separator="' &ndash; '"
+        :multi-calendars="true"
         :name="name"
         :disabled="disabled"
-        :show-week-number="true"
-        @change="handleInput"
-    >
-        <template #icon-calendar>
-            <i class="fas fa-fw fa-calendar-alt" />
-        </template>
-        <template #icon-clear>
-            <i class="fas fa-fw fa-times" />
-        </template>
-    </date-picker>
+        :enable-time-picker="false"
+        :format="'dd.MM.yyyy'"
+        :text-input="true"
+        :utc="'preserve'"
+        :week-numbers="{'type': 'iso'}"
+        :week-num-name="''"
+        @update:model-value="handleInput"
+    />
 </template>
 
 <script>
@@ -60,10 +61,6 @@
             } = toRefs(props);
 
             // FETCH
-            const fixValue = _ => {
-                return value.value?.map(dt => new Date(dt));
-            };
-
             const resetFieldState = _ => {
                 v.resetField({
                     value: fixValue(),
@@ -75,11 +72,7 @@
                 });
             };
             const handleInput = value => {
-                // add timezone offset before handle change
-                const correctValue = value.map(date => {
-                    return new Date(date.getTime() - (date.getTimezoneOffset()*60*1000));
-                });
-                v.handleChange(correctValue);
+                v.handleChange(value);
             };
 
             // DATA
@@ -89,7 +82,7 @@
                 meta,
                 resetField,
             } = useField(`daterange_${name.value}`, yup.array(), {
-                initialValue: fixValue(),
+                initialValue: value.value || [],
             });
             const state = reactive({
 

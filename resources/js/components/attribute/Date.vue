@@ -1,22 +1,23 @@
 <template>
-    <date-picker
+    <DatePicker
         :id="name"
-        v-model:value="v.value"
+        :uid="name"
+        v-model="v.value"
         class="w-100"
         input-class="form-control"
         value-type="date"
         :name="name"
+        :auto-apply="true"
+        :clearable="true"
         :disabled="disabled"
-        :show-week-number="true"
-        @change="handleInput"
-    >
-        <template #icon-calendar>
-            <i class="fas fa-fw fa-calendar-alt" />
-        </template>
-        <template #icon-clear>
-            <i class="fas fa-fw fa-times" />
-        </template>
-    </date-picker>
+        :enable-time-picker="false"
+        :format="'dd.MM.yyyy'"
+        :text-input="true"
+        :utc="'preserve'"
+        :week-numbers="{'type': 'iso'}"
+        :week-num-name="'&nbsp;'"
+        @update:model-value="handleInput"
+    />
 </template>
 
 <script>
@@ -68,13 +69,7 @@
                 });
             };
             const handleInput = value => {
-                if(!value) {
-                    v.handleChange(value);
-                } else {
-                    // add timezone offset before handle change
-                    const correctValue = new Date(value.getTime() - (value.getTimezoneOffset()*60*1000));
-                    v.handleChange(correctValue);
-                }
+                v.handleChange(value);
             };
 
             // DATA
@@ -84,7 +79,7 @@
                 meta,
                 resetField,
             } = useField(`date_${name.value}`, yup.date().nullable(), {
-                initialValue: value.value ? new Date(value.value) : null,
+                initialValue: value.value || null,
             });
             const state = reactive({
 

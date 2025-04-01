@@ -21,7 +21,7 @@ import BibtexCode from '@/components/bibliography/BibtexCode.vue';
 // Third-Party Components
 import Multiselect from '@vueform/multiselect';
 import VueUploadComponent from 'vue-upload-component';
-import DatePicker from 'vue-datepicker-next';
+import VueDatePicker from '@vuepic/vue-datepicker';
 import draggable from 'vuedraggable';
 import { Tree, Node, } from 'tree-vue-component';
 
@@ -51,7 +51,7 @@ export default function initGlobalComponents(app) {
     // Third-Party components
     app.component('Multiselect', Multiselect);
     app.component('FileUpload', VueUploadComponent);
-    app.component('DatePicker', DatePicker);
+    app.component('DatePicker', VueDatePicker);
     app.component('Draggable', draggable);
     app.component('Node', Node);
     app.component('Tree', Tree);
