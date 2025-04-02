@@ -16,6 +16,7 @@ use App\ThConcept;
 use App\AttributeTypes\AttributeBase;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class EditorController extends Controller {
@@ -281,6 +282,18 @@ class EditorController extends Controller {
         }
 
         $aid = $request->get('attribute_id');
+        $alreadyAdded = EntityAttribute::where('entity_type_id', $etid)
+            ->where('attribute_id', $aid)
+            ->whereHas('attribute', function(Builder $query) {
+                $query->where('multiple', false);
+            })
+            ->exists();
+        if($alreadyAdded) {
+            return response()->json([
+                'error' => __('This attribute is already added to this entity-type')
+            ], 400);
+        }
+
         $pos = $request->get('position');
         if(!isset($pos)) {
             $attrsCnt = EntityAttribute::where('entity_type_id', '=', $etid)->count();
