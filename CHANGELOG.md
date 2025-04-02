@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.11.1
+### Fixed
+- Attributes could be added multiple times to entity-type
+
 ## 0.11 - Kilcrea
 ### Added
 - Added websockets for various data synchronization

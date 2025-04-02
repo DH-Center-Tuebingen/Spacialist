@@ -1029,6 +1029,7 @@ class ApiEditorTest extends TestCase
         $entityDoesNotExist = "This entity-type does not exist";
         $entityAttributeNotFound = "Entity Attribute not found";
         $attributeDoesNotExist = "This attribute does not exist";
+        $attributeAlreadyAdded = "This attribute is already added to this entity-type";
 
         return [
             'exception on get entity type'                         => Permission::for("get", "/api/v1/editor/entity_type/99", $entityDoesNotExist),
@@ -1040,6 +1041,10 @@ class ApiEditorTest extends TestCase
             // 'exception on modify entity relations'                 => Permission::for("post", "/api/v1/editor/dm/99/relation", $entityDoesNotExist),
             'exception on add attributes to an entity type'        => Permission::for("post", "/api/v1/editor/dm/entity_type/99/attribute", $entityDoesNotExist,[
                 'attribute_id' => 2,
+                'position' => 1
+            ]),
+            'exception on add already added attribute'             => Permission::for("post", "/api/v1/editor/dm/entity_type/3/attribute", $attributeAlreadyAdded,[
+                'attribute_id' => 15,
                 'position' => 1
             ]),
             'exception on duplicate an entity type'                => Permission::for("post", "/api/v1/editor/dm/entity_type/99/duplicate", $entityDoesNotExist),
