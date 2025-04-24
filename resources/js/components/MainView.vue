@@ -17,7 +17,7 @@
             <router-view />
             <alert
                 v-if="!state.isDetailLoaded"
-                :message="t('main.entity.detail_tab_none_selected')"
+                :message="t('main.entity.detail.no_entity_selected')"
                 :type="'info'"
                 :noicon="false"
                 :icontext="t('global.information')"

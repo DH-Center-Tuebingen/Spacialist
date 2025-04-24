@@ -70,10 +70,6 @@
                 <i class="fas fa-fw fa-times" />
             </a>
         </div>
-        <!-- We disable the v-html as there is no user data that get's inserted into the alerts. -->
-        <!-- eslint-disable-next-line vue/no-v-html -->
-        <div v-html="message" />
-        <slot name="addon" />
     </div>
 </template>
 
