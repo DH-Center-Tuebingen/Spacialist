@@ -739,12 +739,21 @@
                 state.mapEntityLayers.push(wktLayer);
                 const source = wktLayer.getSource();
 
-                for(let i=0; i<features.length; i++) {
-                    const geom = wktFormat.readGeometry(features[i], {
-                        featureProjection: 'EPSG:3857',
-                        dataProjection: state.inputEpsgCode,
-                    });
-                    source.addFeature(new Feature({geometry: geom}));
+                for(let i = 0; i < features.length; i++) {
+                    let geom = null;
+                    try {
+                        geom = wktFormat.readGeometry(features[i], {
+                            featureProjection: 'EPSG:3857',
+                            dataProjection: state.inputEpsgCode,
+                        });
+                    }
+                    catch(e) {
+                        console.error('WKT parsing error', e);
+                        continue;
+                    }
+
+                    if(geom)
+                        source.addFeature(new Feature({ geometry: geom }));
                 }
             };
             const loadGeojsonData = features => {
