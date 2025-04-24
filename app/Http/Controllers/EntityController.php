@@ -9,7 +9,6 @@ use App\EntityAttribute;
 use App\EntityFile;
 use App\EntityType;
 use App\Traits\RestrictableTrait;
-use App\Import\EntityImporter;
 use App\Exceptions\AmbiguousValueException;
 use App\Exceptions\AttributeImportException;
 use App\Exceptions\ImportException;
