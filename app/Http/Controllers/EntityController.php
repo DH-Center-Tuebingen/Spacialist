@@ -1142,35 +1142,28 @@ class EntityController extends Controller {
                 'error' => __('You do not have the permission to modify an entity'),
             ], 403);
         }
-        $this->validate($request, [
-            'rank' => 'required|integer',
+        
+       $request->validate([
+            'rank' => 'required_without:to_end|integer',
             'parent_id' => 'nullable|integer|exists:entities,id',
-            'to_end' => 'boolean',
+            'to_end' => 'nullable|boolean',
         ]);
-
+        
+        $entity;
         try{
-            Entity::findOrFail($id);
+            $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => __('This entity does not exist'),
+            'error' => __('This entity does not exist'),
             ], 400);
         }
-
-        $rank = $request->get('rank');
-        $parent_id = $request->get('parent_id');
-        $addToEnd = $request->get('to_end');
-
-        if($addToEnd) {
-            if(isset($parent_id)) {
-                $rank = Entity::where('root_entity_id', $parent_id)->max('rank') + 1;
-            }else{
-                $rank = Entity::whereNull('root_entity_id')->max('rank') + 1;
-            }
-        }
-
+        
+        $rank = $request->get('rank') ?? null;
+        $parent_id = $request->get('parent_id') ?? null;
+    
         try{
-            Entity::patchRanks($rank, $id, $parent_id, $user);
-        }catch(Exception $e) {
+            $entity->move($parent_id, $rank, $user);
+        } catch(Exception $e) {
             return response()->json([
                 'error' => $e->getMessage(),
             ], 400);

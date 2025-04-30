@@ -269,6 +269,17 @@ class Entity extends Model implements Searchable {
         }
         return $query;
     }
+    
+    public function move($parentId, $rank, $user) {
+        if($rank == null){
+            if(isset($parentId)) {
+                $rank = Entity::where('root_entity_id', $parentId)->max('rank') + 1;
+            }else{
+                $rank = Entity::whereNull('root_entity_id')->max('rank') + 1;
+            }
+        }
+        Entity::patchRanks($rank, $this->id, $parentId, $user);
+    }
 
     public static function patchRanks($rank, $id, $parent, $user) {
         $entity = Entity::find($id);

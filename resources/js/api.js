@@ -599,9 +599,15 @@ export async function multieditAttributes(entityIds, entries) {
     );
 }
 
-export async function moveEntity(entityId, parentId = null, rank = null) {
+export async function moveEntity(entityId, {
+    rank,
+    parent_id,
+    to_end = false,
+}={}) {
     const data = {
-        parent_id: parentId,
+        rank: rank,
+        parent_id,
+        to_end,
     };
 
     return $httpQueue.add(
