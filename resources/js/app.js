@@ -3,9 +3,6 @@ import { createApp } from 'vue';
 // Third-Party Libs
 import PQueue from 'p-queue';
 
-// Init plugins
-import { provideToast } from '@/plugins/toast.js';
-
 // Helpers/Filter
 
 // Init Libs
@@ -40,7 +37,6 @@ import initDirectives from '@/bootstrap/directives.js';
 
 const app = createApp(App);
 app.use(i18n);
-app.use(router);
 app.use(pinia);
 // app.use(vueAuth);
 app.use(createVfm());
@@ -50,5 +46,9 @@ initGlobalComponents(app);
 
 SpPS.initialize(app, i18n.global.t);
 
-// Mount Vue
-app.mount('#app');
+// The plugins must be registered before the router is used.
+setTimeout(() => {
+    app.use(router);
+    // Mount Vue
+    app.mount('#app');
+}, 0);
