@@ -46,6 +46,7 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
+            'throw' => true,
         ],
 
         'public' => [
@@ -54,6 +55,7 @@ return [
             // 'url' => env('APP_URL').'/storage', // TODO doesn't work with port
             'url' => './storage',
             'visibility' => 'public',
+            'throw' => true,
         ],
 
         's3' => [
@@ -63,13 +65,14 @@ return [
             'region' => env('AWS_DEFAULT_REGION'),
             'bucket' => env('AWS_BUCKET'),
         ],
-        
+
         'private' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
             // 'url' => env('APP_URL').'/storage', // TODO doesn't work with port
             'url' => './storage',
             'visibility' => 'private',
+            'throw' => true,
         ],
 
     ],

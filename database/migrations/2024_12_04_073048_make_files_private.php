@@ -22,6 +22,11 @@ return new class extends Migration
                 if(!$private->exists($dir)) {
                     $private->makeDirectory($dir);
                 }
+                // 'throw' option is set in config/filesystems.php,
+                // so a League\Flysystem\UnableToWriteFile exception is thrown
+                // if something went wrong while copying.
+                // We do not catch it, because the thrown exception will cancel
+                // the migration anyway [VR]
                 try {
                     $files = $public->files($dir);
                     foreach($files as $file) {
