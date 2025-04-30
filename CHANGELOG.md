@@ -1,9 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 0.12 -
+## 0.12 - (Luxor)
 ### Added
 - Two-Factor authentication
+### Changed
+- Alerts can now be dismissed
 
 ## 0.11 - Kilcrea
 ### Added
