@@ -145,7 +145,6 @@ export const useSystemStore = defineStore('system', {
             const userStore = useUserStore();
 
             const userData = await fetchUser();
-
             const loginSuccessful = userData.status == 'success';
             userStore.setLoginState(loginSuccessful);
             userStore.setActiveUser(loginSuccessful ? userData.data : {});
@@ -158,37 +157,17 @@ export const useSystemStore = defineStore('system', {
             this.datatypeData = preData.datatype_data;
             entityStore.initializeEntityTypes(preData.entityTypes);
             userStore.setPreferences(preData.preferences);
-            // locale.value = this.getPreference('prefs.gui-language');
-
-            const attributeData = await fetchAttributes();
-            attributeStore.setAttributes(attributeData.attributes);
-            attributeStore.setAttributeSelections(attributeData.selections);
-
-            const usersData = await fetchUsers();
-            userStore.setUsers(usersData.user.users, usersData.user.deleted_users);
-            userStore.setRoles(usersData.role.roles, usersData.role.permissions, usersData.role.presets);
-
-            const topEntities = await fetchTopEntities();
-            entityStore.initialize(topEntities);
-
-            const bibliography = await fetchBibliography();
-            bibliographyStore.initialize(bibliography);
-
-            const tags = await fetchTags();
-            this.setTags(tags);
-
-            const versionData = await fetchVersion();
-            this.version = versionData;
-
-            const plugins = await fetchPlugins();
-            this.plugins = plugins;
-
-            const geometryTypes = await fetchGeometryTypes();
-            this.geometryTypes = geometryTypes;
-
-            const attributeTypes = await fetchAttributeTypes();
-            attributeStore.setAttributeTypes(attributeTypes);
-
+            attributeStore.setAttributes(preData.attributes);
+            attributeStore.setAttributeSelections(preData.attributeSelections);
+            userStore.setUsers(preData.users, preData.deleted_users);
+            userStore.setRoles(preData.roles, preData.permissions, preData.presets);
+            entityStore.initialize(preData.topEntities);
+            bibliographyStore.initialize(preData.bibliography);
+            this.setTags(preData.tags);
+            this.version = preData.version;
+            this.plugins = preData.plugins;
+            this.geometryTypes = preData.geometryTypes;
+            attributeStore.setAttributeTypes(preData.attributeTypes);
             this.appInitialized = true;
         },
         async initializeOpenAccess() {

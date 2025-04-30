@@ -353,4 +353,14 @@ class Plugin extends Model
         $id = Str::kebab($this->name);
         Preference::where('label', 'ilike', "plugin.$id.%")->delete();
     }
+    
+    public static function getPluginsWithMetadata(){
+        $plugins = self::all();
+        
+        foreach($plugins as $plugin) {
+            $plugin->metadata = $plugin->getMetadata();
+            $plugin->changelog = $plugin->getChangelog();
+        }
+        return $plugins;
+    }
 }
