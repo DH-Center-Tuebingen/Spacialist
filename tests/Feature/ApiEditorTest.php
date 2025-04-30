@@ -1029,7 +1029,7 @@ class ApiEditorTest extends TestCase
         $entityDoesNotExist = "This entity-type does not exist";
         $entityAttributeNotFound = "Entity Attribute not found";
         $attributeDoesNotExist = "This attribute does not exist";
-        $attributeAlreadyAdded = "This attribute is already added to this entity-type";
+        $attributeAlreadyAdded = "This attribute already exists on this entity-type";
 
         return [
             'exception on get entity type'                         => Permission::for("get", "/api/v1/editor/entity_type/99", $entityDoesNotExist),

@@ -290,7 +290,7 @@ class EditorController extends Controller {
             ->exists();
         if($alreadyAdded) {
             return response()->json([
-                'error' => __('This attribute is already added to this entity-type')
+                'error' => __('This attribute already exists on this entity-type')
             ], 400);
         }
 
