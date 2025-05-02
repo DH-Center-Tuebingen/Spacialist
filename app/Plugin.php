@@ -58,7 +58,7 @@ class Plugin extends Model
         }
 
         $xmlObject = simplexml_load_string($xmlString);
-        
+
         return json_decode(json_encode($xmlObject), true);
     }
 
@@ -152,13 +152,23 @@ class Plugin extends Model
         return $plugin;
     }
 
+    public static function getWithMetadata() {
+        $plugins = self::all();
+
+        foreach($plugins as $plugin) {
+            $plugin->metadata = $plugin->getMetadata();
+            $plugin->changelog = $plugin->getChangelog();
+        }
+        return $plugins;
+    }
+
     public function updateUpdateState($fromInfoVersion) {
         if($this->version != $fromInfoVersion) {
             // installed version splitted
             preg_match('/(\d+)\.(\d+).(\d+)(-.+)?/', $this->version, $iv);
             // available/latest version splitted
             preg_match('/(\d+)\.(\d+).(\d+)(-.+)?/', $fromInfoVersion, $lv);
-    
+
             if(
                 ($lv[1] > $iv[1] || $lv[2] > $iv[2] || $lv[3] > $iv[3]) ||
                 (!isset($lv[4]) && isset($iv[4])) ||
@@ -352,15 +362,5 @@ class Plugin extends Model
     private function removePreferences() {
         $id = Str::kebab($this->name);
         Preference::where('label', 'ilike', "plugin.$id.%")->delete();
-    }
-    
-    public static function getPluginsWithMetadata(){
-        $plugins = self::all();
-        
-        foreach($plugins as $plugin) {
-            $plugin->metadata = $plugin->getMetadata();
-            $plugin->changelog = $plugin->getChangelog();
-        }
-        return $plugins;
     }
 }
