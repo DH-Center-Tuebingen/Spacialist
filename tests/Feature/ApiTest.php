@@ -60,7 +60,7 @@ class ApiTest extends TestCase
             ->get('/api/v1/pre');
 
         $response->assertStatus(200);
-        $response->assertJsonCount(7);
+        $response->assertJsonCount(21);
         $response->assertJsonStructure([
             'system_preferences',
             'preferences',
@@ -69,6 +69,20 @@ class ApiTest extends TestCase
             'datatype_data',
             'colorsets',
             'analysis',
+            'attributes',
+            'attributeSelections',
+            'users',
+            'deleted_users',
+            'roles',
+            'permissions',
+            'presets',
+            'topEntities',
+            'bibliography',
+            'tags',
+            'version',
+            'plugins',
+            'geometryTypes',
+            'attributeTypes',
         ]);
     }
 
