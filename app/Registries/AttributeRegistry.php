@@ -27,7 +27,7 @@ class AttributeRegistry {
     }
 
     private static function registerCoreTypes(): void {
-        $files = glob('../app/AttributeTypes/*.php');
+        $files = glob(base_path('/app/AttributeTypes') . '/*.php');
         foreach($files as $file) {
             $className = basename($file, '.php');
             $class = "App\\AttributeTypes\\{$className}";
