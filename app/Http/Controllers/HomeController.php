@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\AttributeTypes\AttributeBase;
+use App\Registries\AttributeRegistry;
 use App\EntityType;
 use App\Plugin;
 use App\Preference;
@@ -39,9 +39,10 @@ class HomeController extends Controller
 
         $concepts = ThConcept::getMap($locale);
 
-        $datatypes = AttributeBase::getTypes();
+        $datatypes = AttributeRegistry::getTypes();
         $datatypeData = [];
-        foreach($datatypes as $key => $datatype) {
+        foreach($datatypes as $key => $typeDef) {
+            $datatype = $typeDef['class'];
             if(method_exists($datatype, "getGlobalData")) {
                 $datatypeData[$key] = $datatype::getGlobalData();
             }

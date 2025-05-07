@@ -70,7 +70,7 @@ class Directory {
      * @return Response|BinaryFileResponse The file as BinaryFileResponse or Response if the file is not inside the directory.
      */
     function download(string $filepath): Response | BinaryFileResponse {
-        if($this->contains($filepath)){
+        if($this->contains($filepath)) {
             return DownloadHandler::makeFileResponse($filepath);
         }
         return response()->noContent();

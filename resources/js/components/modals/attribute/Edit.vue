@@ -67,7 +67,7 @@
                             <input
                                 type="text"
                                 class="form-control"
-                                :value="t(`global.attributes.${state.attribute.datatype}`)"
+                                :value="getLabel(state.attribute.datatype)"
                                 disabled
                             >
                         </div>
@@ -132,6 +132,7 @@
 
     import { useI18n } from 'vue-i18n';
 
+    import useAttributeStore from '@/bootstrap/stores/attribute.js';
     import useEntityStore from '@/bootstrap/stores/entity.js';
 
     import {
@@ -171,6 +172,8 @@
         emits: ['closing', 'confirm'],
         setup(props, context) {
             const { t } = useI18n();
+            const attributeStore = useAttributeStore();
+            const entityStore = useEntityStore();
 
             // FUNCTIONS
             const validateDependencyRule = rule => {
@@ -212,6 +215,13 @@
                     console.error('Invalid separator label', label);
                 }
             };
+            const getLabel = datatype => {
+                if(attributeStore.isFromPlugin(datatype)) {
+                    return t(attributeStore.getPluginAttributeLabel(datatype));
+                } else {
+                    return t(`global.attributes.${datatype}`)
+                }
+            };
 
             // DATA
             const state = reactive({
@@ -229,7 +239,7 @@
                 attribute: {},
                 inputTypeClass: computed(_ => getInputTypeClass(state.attribute.datatype)),
                 supportedEntityTypeAttributes: computed(_ => {
-                    const attributeSelection = useEntityStore().getEntityTypeAttributes(props.entityTypeId);
+                    const attributeSelection = entityStore.getEntityTypeAttributes(props.entityTypeId);
                     const supportedEntityTypeAttributes = attributeSelection.filter(a => {
                         return a.id != props.attributeId && getInputTypeClass(a.datatype) != 'unsupported';
                     });
@@ -266,6 +276,7 @@
                 confirmEdit,
                 closeModal,
                 handleSeparatorRename,
+                getLabel,
                 // STATE
                 state,
             };

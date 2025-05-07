@@ -1,7 +1,7 @@
 <template>
     <div class="d-flex flex-column h-100">
         <h4>
-            {{ t('main.plugins.title') }}
+            {{ t('main.plugins.title', 2) }}
             <file-upload
                 ref="upload"
                 v-model="state.files"

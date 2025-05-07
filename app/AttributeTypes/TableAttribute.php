@@ -3,6 +3,7 @@
 namespace App\AttributeTypes;
 
 use App\Attribute;
+use App\Registries\AttributeRegistry;
 
 class TableAttribute extends AttributeBase
 {
@@ -14,7 +15,7 @@ class TableAttribute extends AttributeBase
     public static function getSelection(Attribute $a) {
         $types = array_map(function(array $entry) {
             return $entry["datatype"];
-        }, AttributeBase::getTypes(true, ['in_table' => true, 'has_selection' => true]));
+        }, AttributeRegistry::getTypes(true, ['in_table' => true, 'has_selection' => true]));
 
         $columns = Attribute::where('parent_id', $a->id)
             ->whereIn('datatype', $types)

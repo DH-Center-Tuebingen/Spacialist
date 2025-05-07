@@ -72,6 +72,7 @@ export const useSystemStore = defineStore('system', {
             tools: [],
             settings: [],
         },
+        registeredPluginAttributes: {},
         registeredPluginPreferences: {
             user: {},
             system: {},
@@ -117,7 +118,7 @@ export const useSystemStore = defineStore('system', {
     },
     actions: {
         getConceptById(id) {
-            return this.concepts[id];  
+            return this.concepts[id];
         },
         setAppState(state) {
             this.appInitialized = state;
@@ -246,6 +247,9 @@ export const useSystemStore = defineStore('system', {
         },
         registerPluginInSlot(data) {
             this.registeredPluginSlots[data.slot].push(data);
+        },
+        registerPluginAttribute(data) {
+            this.registeredPluginAttributes[data.datatype] = data;
         },
         registerPluginPreference(data) {
             const category = this.registeredPluginPreferences[data.category];
