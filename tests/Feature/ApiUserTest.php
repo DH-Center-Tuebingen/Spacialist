@@ -153,12 +153,57 @@ class ApiUserTest extends TestCase
     /**
 	 * @return void
 	 */
-	#[TestDox('GET    /api/v1/user : Failed Login')]
+	#[TestDox('GET    /api/v1/auth/login : Failed Login')]
     public function testLoginWrongCredentialsEndpoint()
     {
         $response = $this->userRequest()
             ->post('/api/v1/auth/login', [
                 'email' => 'admin@localhost',
+                'password' => 'admin1337'
+            ]);
+
+        $response->assertStatus(422);
+        $response->assertSimilarJson([
+            'message' => 'These credentials do not match our records.',
+            'errors' => [
+                'email' => [
+                    'These credentials do not match our records.'
+                ]
+            ],
+        ]);
+    }
+
+    /**
+	 * @return void
+	 */
+	#[TestDox('GET    /api/v1/auth/login : Failed Login with missing field')]
+    public function testLoginMissingCredentialsEndpoint()
+    {
+        $response = $this->userRequest()
+            ->post('/api/v1/auth/login', [
+                'password' => 'admin1337'
+            ]);
+
+        $response->assertStatus(422);
+        $response->assertSimilarJson([
+            'message' => 'The email field is required.',
+            'errors' => [
+                'email' => [
+                    'The email field is required.'
+                ]
+            ],
+        ]);
+    }
+
+    /**
+	 * @return void
+	 */
+	#[TestDox('GET    /api/v1/auth/login : Failed Login with non-existing user')]
+    public function testLoginWrongUserEndpoint()
+    {
+        $response = $this->userRequest()
+            ->post('/api/v1/auth/login', [
+                'email' => 'bruce_wayne',
                 'password' => 'admin1337'
             ]);
 
