@@ -187,10 +187,7 @@
                                         <span class="flex-fill">
                                             <span v-if="isFromPlugin(type)">
                                                 {{ t(getPluginLabel(type)) }}
-                                                <i
-                                                    class="fas fa-fw fa-puzzle-piece"
-                                                    title="from Plugin"
-                                                />
+                                                <i class="fas fa-fw fa-puzzle-piece" />
                                             </span>
                                             <span v-else>
                                                 {{ t(`global.attributes.${type}`) }}
