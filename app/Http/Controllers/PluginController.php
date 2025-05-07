@@ -40,6 +40,7 @@ class PluginController extends Controller
         foreach($plugins as $plugin) {
             $plugin->metadata = $plugin->getMetadata();
             $plugin->changelog = $plugin->getChangelog();
+            $plugin->registeredAttributes = $plugin->getRegisteredAttributes();
         }
 
         return response()->json($plugins);
@@ -205,4 +206,10 @@ class PluginController extends Controller
         }
         return Plugin::getDirectory()->downloadRelative($filepath);
     }
+    
+    //// REBASING:: Plugin Attribute 
+    // public function downloadScript(Request $request) {
+    //     $file = "plugins/" . $request->query('src');
+    //     return Plugin::getDirectory()->download($file);
+    // }
 }

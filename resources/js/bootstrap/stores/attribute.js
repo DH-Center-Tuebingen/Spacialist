@@ -51,6 +51,16 @@ export const useAttributeStore = defineStore('attribute', {
             return filteredSelection;
         },
         getTableAttributeTypes: state => state.attributeTypes.filter(type => type.in_table),
+        isFromPlugin: state => datatype => {
+            return !!useSystemStore().registeredPluginAttributes[datatype];
+        },
+        getPluginAttributeLabel: state => datatype => {
+            const attributeType = state.attributeTypes.find(attributeType => {
+                return attributeType.datatype == datatype && !!attributeType.plugin;
+            });
+
+            return attributeType?.label;
+        },
     },
     actions: {
         setAttributes(attributes) {
