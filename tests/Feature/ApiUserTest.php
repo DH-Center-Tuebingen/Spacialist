@@ -143,7 +143,7 @@ class ApiUserTest extends TestCase
     {
         $response = $this->userRequest()
             ->post('/api/v1/auth/login', [
-                'nickname' => 'admin',
+                'email' => 'admin',
                 'password' => 'admin'
             ]);
 
@@ -162,9 +162,14 @@ class ApiUserTest extends TestCase
                 'password' => 'admin1337'
             ]);
 
-        $response->assertStatus(400);
+        $response->assertStatus(422);
         $response->assertSimilarJson([
-            'error' => 'Invalid Credentials'
+            'message' => 'These credentials do not match our records.',
+            'errors' => [
+                'email' => [
+                    'These credentials do not match our records.'
+                ]
+            ],
         ]);
     }
 
@@ -359,6 +364,9 @@ class ApiUserTest extends TestCase
             'deleted_at' => null,
             'avatar' => null,
             'login_attempts' => null,
+            'two_factor_secret' => null,
+            'two_factor_recovery_codes' => null,
+            'two_factor_confirmed_at' => null,
             'metadata' => [
                 'phonenumber' => '+43 123 1234',
                 'orcid' => '0000-0002-1694-233X',
