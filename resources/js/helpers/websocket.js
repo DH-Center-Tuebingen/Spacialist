@@ -1,5 +1,3 @@
-
-
 import useEntityStore from '@/bootstrap/stores/entity.js';
 import useUserStore from '@/bootstrap/stores/user.js';
 

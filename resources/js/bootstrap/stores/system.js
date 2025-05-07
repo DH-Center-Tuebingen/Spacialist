@@ -6,17 +6,8 @@ import useEntityStore from './entity.js';
 import useUserStore from './user.js';
 
 import {
-    fetchAttributes,
-    fetchBibliography,
-    fetchTags,
-    fetchTopEntities,
     fetchPreData,
-    fetchGeometryTypes,
     fetchUser,
-    fetchUsers,
-    fetchVersion,
-    fetchPlugins,
-    fetchAttributeTypes,
     searchConceptSelection,
     uploadPlugin,
     installPlugin,
