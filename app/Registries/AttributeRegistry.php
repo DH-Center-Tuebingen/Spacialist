@@ -45,7 +45,8 @@ class AttributeRegistry {
         foreach($installedPlugins as $plugin) {
             $attributeTypes = $plugin->getRegisteredAttributes();
             foreach($attributeTypes as $attributeType) {
-                $class = basename($attributeType['@attributes']['src'], '.php');
+                $path = "App\\Plugins\\Address\\" . $attributeType['@attributes']['src'];
+                $class = basename($path, '.php');
                 self::register(new $class(), $plugin->name);
             }
         }
