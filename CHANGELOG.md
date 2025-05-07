@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.12 - (Luxor)
+### Added
+- Plugin-System now supports custom components, e.g. attribute types
 ### Changed
 - Alerts can now be dismissed
 
