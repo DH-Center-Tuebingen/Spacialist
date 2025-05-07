@@ -1,8 +1,10 @@
 <template>
-    <span class="badge bg-primary">
+    <div class="badge bg-primary d-flex flex-row align-items-center justify-content-center gap-1">
         <i class="fas fa-fw fa-puzzle-piece" />
-        <span class="fst-italic">{{ name }}</span>-{{ t('main.plugins.title') }}
-    </span>
+        <div>
+            <span class="fst-italic">{{ name }}</span>-{{ t('main.plugins.title') }}
+        </div>
+    </div>
 </template>
 
 <script>
