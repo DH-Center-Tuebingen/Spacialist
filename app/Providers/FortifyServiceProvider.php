@@ -43,11 +43,8 @@ class FortifyServiceProvider extends ServiceProvider
             }
 
             $username = $request->get('email');
-            if(Str::contains($username, '@')) {
-                $user = User::where('email', $request->get('email'))->withoutTrashed()->first();
-            } else {
-                $user = User::where('nickname', $request->get('nickname'))->withoutTrashed()->first();
-            }
+            $userfield = Str::contains($username, '@') ? 'email' : 'nickname';
+            $user = User::where($userfield, $username)->withoutTrashed()->first();
             if(!isset($user)) {
                 Sleep::for(2)->seconds();
                 return false;
