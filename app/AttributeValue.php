@@ -5,7 +5,6 @@ namespace App;
 use App\Geodata;
 use App\AttributeTypes\AttributeBase;
 use Illuminate\Database\Eloquent\Model;
-use Clickbar\Magellan\Database\Eloquent\HasPostgisColumns;
 use App\Traits\CommentTrait;
 use App\Traits\ModerationTrait;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -16,7 +15,6 @@ use stdClass;
 
 class AttributeValue extends Model implements Searchable
 {
-    use HasPostgisColumns;
     use CommentTrait;
     use ModerationTrait;
     use LogsActivity;
