@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.11.1
+### Breaking
+- Updated magellan to v2.0
 ### Fixed
 - Login not possible on instances in subfolder
 - Last editor not visible in _Entity Detail_ tab
