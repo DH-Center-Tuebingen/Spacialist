@@ -295,7 +295,7 @@ class Plugin extends Model
         $scriptPath = base_path("app/Plugins/$name/js/script.js");
         if(file_exists($scriptPath)) {
             $filehandle = fopen($scriptPath, 'r');
-            Storage::put(
+            Storage::disk("public")->put(
                 $this->publicName(),
                 $filehandle,
             );
@@ -305,8 +305,8 @@ class Plugin extends Model
 
     private function removeScript() {
         $path = $this->publicName();
-        if(Storage::exists($path)) {
-            Storage::delete($path);
+        if(Storage::disk("public")->exists($path)) {
+            Storage::disk("public")->delete($path);
         }
     }
 
