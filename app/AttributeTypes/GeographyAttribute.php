@@ -5,7 +5,6 @@ namespace App\AttributeTypes;
 use App\Exceptions\InvalidDataException;
 use App\Geodata;
 use App\Utils\StringUtils;
-use Exception;
 
 class GeographyAttribute extends AttributeBase
 {
@@ -37,6 +36,6 @@ class GeographyAttribute extends AttributeBase
     }
 
     public static function serialize(mixed $data): mixed {
-        return Geodata::toWKT($data);
+        return Geodata::wkb2wkt($data);
     }
 }
