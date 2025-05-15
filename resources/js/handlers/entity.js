@@ -1,7 +1,7 @@
 import useAttributeStore from '@/bootstrap/stores/attribute.js';
 import useBibliographyStore from '@/bootstrap/stores/bibliography.js';
 import useEntityStore from '@/bootstrap/stores/entity.js';
-import useReferenceStore from '../bootstrap/stores/reference';
+import useReferenceStore from '@/bootstrap/stores/reference.js';
 import useUserStore from '@/bootstrap/stores/user.js';
 
 import { addToast } from '@/plugins/toast.js';

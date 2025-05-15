@@ -84,25 +84,7 @@ class EditorController extends Controller {
             ], 403);
         }
         $attributes = Attribute::whereNull('parent_id')->withCount('entity_types')->orderBy('id')->get();
-        $selections = [];
-        foreach($attributes as $a) {
-            $selection = $a->getSelection();
-            if(isset($selection)) {
-                // Workaround to check if it is a plain array or a assoc array (table columns)
-                // if assoc array, add each entry to their corresponding id
-                if(!isset($selection[0])) {
-                    foreach($selection as $id => $sel) {
-                        $selections[$id] = $sel;
-                    }
-                } else {
-                    $selections[$a->id] = $selection;
-                }
-            }
-
-            if($a->datatype == 'table') {
-                $a->columns = Attribute::where('parent_id', $a->id)->get()->keyBy('id');
-            }
-        }
+        $selections = Attribute::getSelectionsFor($attributes);
         return response()->json([
             'attributes' => $attributes,
             'selections' => $selections,
