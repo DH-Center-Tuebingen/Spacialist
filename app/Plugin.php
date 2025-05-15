@@ -315,20 +315,14 @@ class Plugin extends Model
         $name = $this->name;
         $scriptPath = base_path("app/Plugins/$name/js/script.js");
         if(file_exists($scriptPath)) {
-            $filehandle = fopen($scriptPath, 'r');
-            Storage::put(
-                $this->publicName(),
-                $filehandle,
-            );
-            fclose($filehandle);
+            $scriptDirectory = self::getDirectory();
+            $scriptDirectory->store($this->publicName(false), $scriptPath);
         }
     }
 
     private function removeScript(): void {
         $path = $this->publicName();
-        if(Storage::exists($path)) {
-            Storage::delete($path);
-        }
+        self::getDirectory()->delete($this->publicName());
     }
 
     private function addPermissions(): void {
