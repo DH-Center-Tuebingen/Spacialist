@@ -48,6 +48,7 @@ class EntityAttribute extends AttributeBase
        return [
             "id" => $id,
             "name" => isset($entity) ? $entity->name : self::$deleted_string,
+            "deleted" => !isset($entity),
         ];
     }
 }

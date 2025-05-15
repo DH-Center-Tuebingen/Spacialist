@@ -164,27 +164,10 @@ class AttributeValue extends Model implements Searchable
     public static function getValueColumn($type) {
         return AttributeBase::getFieldFromType($type);
     }
-    
+
     public static function generateObject($attributeValues) {
         $data = [];
         foreach($attributeValues as $attributeValue) {
-            switch($attributeValue->attribute->datatype) {
-                case 'entity':
-                    $attributeValue->name = Entity::find($attributeValue->entity_val)->name;
-                    break;
-                case 'entity-mc':
-                    $names = [];
-                    foreach(json_decode($attributeValue->json_val) as $dec) {
-                        $names[] = Entity::find($dec)->name;
-                    }
-                    $attributeValue->name = $names;
-                    break;
-                case 'sql':
-                    // SQL will not have any entries in the attribute_values table
-                    break;
-                default:
-                    break;
-            }
             $value = $attributeValue->getValue();
             if($attributeValue->moderation_state == 'pending-delete') {
                 $attributeValue->value = [];
