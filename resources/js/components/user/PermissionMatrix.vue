@@ -52,7 +52,7 @@
                 <PermissionRow
                     v-for="permissionGroup in pluginGroup"
                     :key="permissionGroup"
-                    :label="t(`main.role.permissions.groups.${permissionGroup}`)"
+                    :label="t(`plugin.${pluginName}.permissions.groups.${permissionGroup}`)"
                     :permission-map="permissionMap"
                     :name="permissionGroup"
                     :rights="rights"
