@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 ## 0.11.1
 ### Fixed
 - Attributes could be added multiple times to entity-type
+- Changing color of entity type
+- Changing _sub entity types_ only visible after page reload
 
 ## 0.11 - Kilcrea
 ### Added

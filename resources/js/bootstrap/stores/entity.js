@@ -663,7 +663,7 @@ export const useEntityStore = defineStore('entity', {
         async updateEntityType(id, props) {
             return patchEntityType(id, props).then(data => {
                 const entityType = this.entityTypes[id];
-                const values = only(data, ['thesaurus_url', 'updated_at', 'is_root', 'sub_entity_types']);
+                const values = only(data, ['thesaurus_url', 'updated_at', 'is_root', 'sub_entity_types', 'color']);
                 for(let k in values) {
                     entityType[k] = values[k];
                 }

@@ -427,6 +427,7 @@ class EditorController extends Controller {
             }
         }
         $entityType->save();
+        $entityType->load('sub_entity_types');
 
         return response()->json($entityType, 200);
     }
