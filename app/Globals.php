@@ -45,7 +45,7 @@ class Globals {
 
     public static function getGeometryTypes(): array {
         if(Plugin::isInstalled('Map')) {
-            $types = Geodata::getAvailableGeometryTypes();
+            return Geodata::getAvailableGeometryTypes();
         } else {
             return [];
         }
