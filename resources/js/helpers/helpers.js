@@ -152,7 +152,9 @@ export function translateConcept(url) {
 }
 
 export function getConceptLabel(concept) {
-    return concept.labels.length ? concept.labels[0].label : '';
+    const lang = getUser().language || 'en';
+    const labelObject = concept.labels.find(l => l.language?.short_name == lang) || concept.labels[0];
+    return labelObject ? labelObject.label : '';
 }
 
 export function getConceptNote(url) {
@@ -404,7 +406,7 @@ export function calculateEntityTypeColors(entityType, alpha = 0.5) {
         // Bootstrap $gray-500
         backgroundColor: '#adb5bd'
     };
-    
+
     let typeColor = null;
     if(entityType?.layer?.color) {
         typeColor = entityType.layer.color;
