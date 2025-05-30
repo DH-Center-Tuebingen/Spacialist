@@ -2,8 +2,6 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.11.1
-### Breaking
-- Updated magellan to v2.0
 ### Fixed
 - Login not possible on instances in subfolder
 - Last editor not visible in _Entity Detail_ tab
@@ -12,6 +10,9 @@ All notable changes to this project will be documented in this file.
 - _Entity Type_ color not showing
 - Excluded _SQL_ attribute from export
 - Plugin script is now un-/published on correct disk (_public_)
+- Attributes could be added multiple times to entity-type
+- Changing color of entity type
+- Changing _sub entity types_ only visible after page reload
 
 ## 0.11 - Kilcrea
 ### Added
