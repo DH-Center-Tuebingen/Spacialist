@@ -18,6 +18,7 @@
     "You do not have the permission to add references": "Du hast keine Berechtigung, Referenzen hinzuzufügen",
     "This entity does not exist": "Diese Entität existiert nicht",
     "This attribute does not exist": "Dieses Attribut existiert nicht",
+    "This attribute already exists on this entity-type": "Dieses Attribut existiert bereits auf diesem Entitäts-Typ",
     "You do not have the permission to edit references": "Du hast keine Berechtigung, Referenzen zu verändern",
     "This reference does not exist": "Diese Referenz existiert nicht",
     "You do not have the permission to delete references": "Du hast keine Berechtigung, Referenzen zu löschen",
