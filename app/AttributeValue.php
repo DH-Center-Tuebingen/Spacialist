@@ -4,9 +4,10 @@ namespace App;
 
 use App\Geodata;
 use App\AttributeTypes\AttributeBase;
-use Illuminate\Database\Eloquent\Model;
 use App\Traits\CommentTrait;
 use App\Traits\ModerationTrait;
+use Clickbar\Magellan\Data\Geometries\Geometry;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Searchable\Searchable;
@@ -53,8 +54,8 @@ class AttributeValue extends Model implements Searchable
         'thesaurus_val'
     ];
 
-    protected $postgisColumns = [
-        'geography_val',
+    protected $casts = [
+        'geography_val' => Geometry::class,
     ];
 
     protected $copyOn = [
