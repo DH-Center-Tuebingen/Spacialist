@@ -28,6 +28,8 @@ class Plugin extends Model
         'title',
     ];
 
+    private const INFO_FILE = 'App/info.xml';
+
     private $presets = [];
 
     public function __construct($attributes = []) {
@@ -63,19 +65,9 @@ class Plugin extends Model
     public static function getInfo($path, $isString = false) {
         $xmlString = '';
         if(!$isString) {
-
-            $manifestLocations = [
-                'App/info.xml', // Legacy location of the 'info.xml' file
-                'manifest.xml', // This is the potential new location of the 'info.xml' file
-            ];
-
-            while(count($manifestLocations) > 0){
-                $location = array_shift($manifestLocations);
-                $infoPath = Str::finish($path, '/') . $location;
-                if(File::isFile($infoPath)){
-                    $xmlString = file_get_contents($infoPath);
-                    break;
-                }
+            $infoPath = Str::finish($path, '/') . self::INFO_FILE;
+            if(File::isFile($infoPath)){
+                $xmlString = file_get_contents($infoPath);
             }
 
             if($xmlString == ''){

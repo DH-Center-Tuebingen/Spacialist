@@ -44,7 +44,7 @@ class PluginController extends Controller
         }
 
         return response()->json($plugins);
-    }    
+    }
 
     public function uploadPlugin(Request $request) {
         $user = auth()->user();
@@ -92,7 +92,7 @@ class PluginController extends Controller
         $pluginPath = base_path("app/Plugins/$pluginName");
         if(file_exists($pluginPath)) {
             $installedPlugin = Plugin::where('name', $pluginName)->first();
-            $infoContent = Plugin::getInfO($zipFile->getFromName("{$rootFolder}App/info.xml"), true);
+            $infoContent = Plugin::getInfo($zipFile->getFromName("{$rootFolder}App/info.xml"), true);
 
             if($installedPlugin->version >= $infoContent['version']) {
                 return response()->json([
