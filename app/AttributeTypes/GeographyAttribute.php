@@ -5,6 +5,7 @@ namespace App\AttributeTypes;
 use App\Exceptions\InvalidDataException;
 use App\Geodata;
 use App\Utils\StringUtils;
+use Clickbar\Magellan\Data\Geometries\Geometry;
 
 class GeographyAttribute extends AttributeBase
 {
@@ -32,10 +33,18 @@ class GeographyAttribute extends AttributeBase
     }
 
     public static function unserialize(mixed $data): mixed {
-        return Geodata::fromWKT($data);
+        if($data instanceof Geometry) {
+            return $data;
+        } else {
+            return Geodata::fromWKT($data);
+        }
     }
 
     public static function serialize(mixed $data): mixed {
-        return Geodata::wkb2wkt($data);
+        if($data instanceof Geometry) {
+            return $data;
+        } else {
+            return Geodata::wkb2wkt($data);
+        }
     }
 }

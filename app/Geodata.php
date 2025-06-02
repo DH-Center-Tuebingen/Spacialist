@@ -48,11 +48,19 @@ class Geodata
     }
 
     public static function wkt2wkb(string $wkt): string {
-        return self::toWKB(self::fromWKT($wkt));
+        $geometry = self::fromWKT($wkt);
+        if(!isset($geometry)) {
+            return '';
+        }
+        return self::toWKB($geometry);
     }
 
     public static function wkb2wkt(string $wkb): string {
-        return self::toWKT(self::fromWKB($wkb));
+        $geometry = self::fromWKB($wkb);
+        if(!isset($geometry)) {
+            return '';
+        }
+        return self::toWKT($geometry);
     }
 
     public static function arrayToWKT(array $arr): string {
