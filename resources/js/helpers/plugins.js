@@ -9,7 +9,7 @@ export const removeScript = location => {
     const scripts = [
         ...document.head.getElementsByTagName('script')
     ];
-    const oldScript = scripts.find(s => s.src.endsWith(location));
+    const oldScript = scripts.find(s => s.src == `/download/plugin?src=${location}`);
     if(oldScript) {
         document.head.removeChild(oldScript);
     }
