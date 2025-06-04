@@ -525,7 +525,7 @@
                 return features ? (first ? features[0] : features) : null;
             };
             const getEntityExtent = _ => {
-                const layers = state.mapLayerGroups.entity.getLayers();
+                const layers = entityLayerGroup.getLayers();
                 let entityExtent = null;
                 layers.forEach(l => {
                     const source = l.getSource();
@@ -557,7 +557,7 @@
                 });
             };
             const getAssociatedLayer = feature => {
-                const layerGroup = state.mapLayerGroups.entity.getLayers().getArray();
+                const layerGroup = entityLayerGroup.getLayers().getArray();
                 if(data.value.format == 'wkt') {
                     for(let i=0; i<layerGroup.length; i++) {
                         if(layerGroup[i].get('layer_id')) {
@@ -611,7 +611,7 @@
                         // check if layer is not an entity layer
                         // and not the default unlinked layer
                         if(!l.entity_type_id && l.type != 'unlinked') {
-                            state.mapOverlays.push(createNewLayer(l));
+                            overlayLayerArray.push(createNewLayer(l));
                         } else {
                             let layerName = '';
                             if(l.entity_type_id) {
@@ -622,7 +622,7 @@
                             } else {
                                 layerName = t('global.unlinked');
                             }
-                            state.mapEntityLayers.push(
+                            entityLayerArray.push(
                                 createVectorLayer({
                                     show: true,
                                     title: layerName,
@@ -636,25 +636,13 @@
                             );
                         }
                     } else {
-                        state.mapBaselayers.push(createNewLayer(l));
+                        baseLayerArray.push(createNewLayer(l));
                     }
                 }
 
-                state.mapLayerGroups.base = new Group({
-                    title: t('main.map.baselayer', 2),
-                    openInLayerSwitcher: true,
-                    layers: state.mapBaselayers,
-                });
-                state.mapLayerGroups.overlay = new Group({
-                    title: t('main.map.overlay', 2),
-                    openInLayerSwitcher: true,
-                    layers: state.mapOverlays,
-                });
-                state.mapLayerGroups.entity = new Group({
-                    title: t('main.map.entity_layers'),
-                    openInLayerSwitcher: true,
-                    layers: state.mapEntityLayers,
-                });
+                baseLayerGroup.setLayers(new Collection(baseLayerArray));
+                overlayLayerGroup.setLayers(new Collection(overlayLayerArray));
+                entityLayerGroup.setLayers(new Collection(entityLayerArray));
             };
             const initializeProjections = async _ => {
                 // If desired epsg code is default, skip initialization
@@ -668,9 +656,9 @@
                 const p = f.getProperties();
                 if(p.entity) {
                     const et = Object.values(layers.value).find(l => l.entity_type_id == p.entity_type_id);
-                    return Object.values(state.mapEntityLayers).find(l => l.getProperties().layer_id == et.id);
+                    return entityLayerGroup.getLayers().getArray().find(l => l.getProperties().layer_id == et.id);
                 } else {
-                    return Object.values(state.mapEntityLayers).find(l => l.getProperties().type.toLowerCase() == 'unlinked');
+                    return entityLayerGroup.getLayers().getArray().find(l => l.getProperties().type.toLowerCase() == 'unlinked');
                 }
             };
             const removeFeatureFromLayer = f => {
@@ -681,9 +669,9 @@
             };
             const getLayerBy = (prop, value) => {
                 const layers = [
-                    ...state.mapLayerGroups.base.getLayers().getArray(),
-                    ...state.mapLayerGroups.overlay.getLayers().getArray(),
-                    ...state.mapLayerGroups.entity.getLayers().getArray(),
+                    ...baseLayerGroup.getLayers().getArray(),
+                    ...overlayLayerGroup.getLayers().getArray(),
+                    ...entityLayerGroup.getLayers().getArray(),
                 ];
 
                 return layers.find(l => l.getProperties()[prop] == value);
@@ -738,7 +726,7 @@
                     layer_id: 'wkt_layer',
                 });
 
-                state.mapEntityLayers.push(wktLayer);
+                entityLayerGroup.push(wktLayer);
                 const source = wktLayer.getSource();
 
                 for(let i=0; i<features.length; i++) {
@@ -788,9 +776,9 @@
             };
             const reinitializeData = _ => {
                 const layers = [
-                    ...state.mapLayerGroups.base.getLayers().getArray(),
-                    ...state.mapLayerGroups.overlay.getLayers().getArray(),
-                    ...state.mapLayerGroups.entity.getLayers().getArray(),
+                    ...baseLayerGroup.getLayers().getArray(),
+                    ...overlayLayerGroup.getLayers().getArray(),
+                    ...entityLayerGroup.getLayers().getArray(),
                 ];
 
                 layers.forEach(l => {
@@ -803,9 +791,9 @@
                 setExtent();
             };
             const updateLayerGroups = _ => {
-                state.mapLayerGroups.base.setLayers(new Collection(state.mapBaselayers));
-                state.mapLayerGroups.overlay.setLayers(new Collection(state.mapOverlays));
-                state.mapLayerGroups.entity.setLayers(new Collection(state.mapEntityLayers));
+                baseLayerGroup.setLayers(new Collection(baseLayerArray));
+                overlayLayerGroup.setLayers(new Collection(overlayLayerArray));
+                entityLayerGroup.setLayers(new Collection(entityLayerArray));
                 setExtent();
             };
             const initializeMapEvents = _ => {
@@ -1162,7 +1150,7 @@
                 const allLayers = !layer;
                 const currentExtent = state.map.getView().calculateExtent(state.map.getSize());
                 const extentFeatures = [];
-                const layers = allLayers ? state.mapLayerGroups.entity.getLayers() : [layer];
+                const layers = allLayers ? entityLayerGroup.getLayers() : [layer];
                 layers.forEach(lg => {
                     const src = lg.getSource();
                     if(src && !!src.forEachFeatureInExtent) {
@@ -1269,6 +1257,24 @@
 
             // DATA
             // EPSG:3857 bounds (taken from epsg.io/3857)
+            const baseLayerArray = [];
+            const overlayLayerArray = [];
+            const entityLayerArray = [];
+            const baseLayerGroup = new Group({
+                title: t('main.map.baselayer', 2),
+                openInLayerSwitcher: true,
+                layers: baseLayerArray,
+            });
+            const overlayLayerGroup = new Group({
+                title: t('main.map.overlay', 2),
+                openInLayerSwitcher: true,
+                layers: overlayLayerArray,
+            });
+            const entityLayerGroup = new Group({
+                title: t('main.map.entity_layers'),
+                openInLayerSwitcher: true,
+                layers: entityLayerArray,
+            });
             const defaultExtent = [-20026376.39, -20048966.10, 20026376.39, 20048966.10];
             const wktFormat = getWktFormat();
             const geojsonFormat = getGeoJsonFormat();
@@ -1276,14 +1282,6 @@
                 map: null,
                 extent: defaultExtent,
                 mapId: `interactive-map-container-${getTs()}`,
-                mapLayerGroups: {
-                    base: null,
-                    overlay: null,
-                    entity: null,
-                },
-                mapOverlays: [],
-                mapBaselayers: [],
-                mapEntityLayers: [],
                 layerStyleCache: {},
                 featureList: {},
                 epsgCode: computed(_ => `EPSG:${projection.value}`),
@@ -1424,9 +1422,9 @@
                             new PinchZoom(),
                         ]),
                         layers: [
-                            state.mapLayerGroups.base,
-                            state.mapLayerGroups.overlay,
-                            state.mapLayerGroups.entity,
+                            baseLayerGroup,
+                            overlayLayerGroup,
+                            entityLayerGroup,
                         ],
                         target: state.mapId,
                         view: new View({
@@ -1469,7 +1467,7 @@
                     initializeDrawFeatures();
                     initializeMapEvents();
 
-                    document.querySelectorAll('[data-bs-toggle="popover"]').forEach(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+                    document.querySelectorAll('[data-bs-toggle="popover"]').forEach(popoverTriggerEl => new Popover(popoverTriggerEl));
                 });
             });
 
@@ -1488,9 +1486,9 @@
 
             watch(_ => extent.value, (newValue, oldValue) => {
                 const layers = [
-                    ...state.mapLayerGroups.base.getLayers().getArray(),
-                    ...state.mapLayerGroups.overlay.getLayers().getArray(),
-                    ...state.mapLayerGroups.entity.getLayers().getArray(),
+                    ...baseLayerGroup.getLayers().getArray(),
+                    ...overlayLayerGroup.getLayers().getArray(),
+                    ...entityLayerGroup.getLayers().getArray(),
                 ];
                 const id = newValue.id;
 
