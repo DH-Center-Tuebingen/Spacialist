@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
+use App\File\Directory;
+
 class Plugin extends Model
 {
     /**
@@ -305,7 +307,7 @@ class Plugin extends Model
         $scriptPath = base_path("app/Plugins/$name/js/script.js");
         if(file_exists($scriptPath)) {
             $filehandle = fopen($scriptPath, 'r');
-            Storage::disk("public")->put(
+            Storage::put(
                 $this->publicName(),
                 $filehandle,
             );
@@ -315,8 +317,8 @@ class Plugin extends Model
 
     private function removeScript() {
         $path = $this->publicName();
-        if(Storage::disk("public")->exists($path)) {
-            Storage::disk("public")->delete($path);
+        if(Storage::exists($path)) {
+            Storage::delete($path);
         }
     }
 
@@ -362,5 +364,9 @@ class Plugin extends Model
     private function removePreferences() {
         $id = Str::kebab($this->name);
         Preference::where('label', 'ilike', "plugin.$id.%")->delete();
+    }
+    
+    public static function getScriptDirectory() : Directory{
+        return new Directory('plugins');
     }
 }

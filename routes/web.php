@@ -19,6 +19,7 @@ Route::get('/open', 'HomeController@external')->name('external');
 
 Route::middleware('auth:sanctum')->get('/download/avatar', 'UserController@downloadAvatar');
 Route::middleware('auth:sanctum')->get('/download/bibliography', 'BibliographyController@downloadFile');
+Route::middleware('auth:sanctum')->get('/download/plugin', 'PluginController@downloadScript');
 
 Auth::routes(["middleware" => ["auth:sanctum"]]);
 

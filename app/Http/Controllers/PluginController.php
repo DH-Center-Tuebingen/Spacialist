@@ -187,4 +187,13 @@ class PluginController extends Controller
             'uninstall_location' => $plugin->publicName(),
         ]);
     }
+    
+    public function downloadScript(Request $request) {
+        $this->validate($request, [
+            'path' => 'required|string'
+        ]);
+        
+        $filepath = $request->query('path');
+        return Plugin::getScriptDirectory()->downloadRelative($filepath);
+    }
 }

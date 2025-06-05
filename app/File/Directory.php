@@ -70,8 +70,22 @@ class Directory {
      * @return Response|BinaryFileResponse The file as BinaryFileResponse or Response if the file is not inside the directory.
      */
     function download(string $filepath): Response | BinaryFileResponse {
-        if($this->contains($filepath)){
+        if($this->contains($filepath)){            
             return DownloadHandler::makeFileResponse($filepath);
+        }
+        return response()->noContent();
+    }
+    
+    /**
+     * Downloads a file relative to the directory.
+     *
+     * @param string $filepath The path to the file without the directory prefix.
+     * @return Response|BinaryFileResponse The file as BinaryFileResponse or Response if the file is not inside the directory.
+     */
+    function downloadRelative(string $filepath): Response | BinaryFileResponse {
+        $storagePath = $this->directory . DIRECTORY_SEPARATOR . $filepath;
+        if(Storage::disk($this->disk)->exists($storagePath)) {
+            return DownloadHandler::makeFileResponse($storagePath, $this->disk);
         }
         return response()->noContent();
     }
