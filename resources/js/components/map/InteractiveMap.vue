@@ -1469,7 +1469,7 @@
                     initializeDrawFeatures();
                     initializeMapEvents();
 
-                    document.querySelectorAll('[data-bs-toggle="popover"]').forEach(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+                    document.querySelectorAll('[data-bs-toggle="popover"]').forEach(popoverTriggerEl => new Popover(popoverTriggerEl));
                 });
             });
 
