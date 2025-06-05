@@ -9,7 +9,7 @@ All notable changes to this project will be documented in this file.
 - _Avatar_ image and literature download path were absolute
 - _Entity Type_ color not showing
 - Excluded _SQL_ attribute from export
-- Plugin script is now un-/published on correct disk (_public_)
+- Plugin script can now be loaded from private route
 - Attributes could be added multiple times to entity-type
 - Changing color of entity type
 - Changing _sub entity types_ only visible after page reload
