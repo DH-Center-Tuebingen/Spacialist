@@ -1,7 +1,7 @@
 export const appendScript = location => {
     const scriptTag = document.createElement('script');
     scriptTag.type = 'text/javascript';
-    scriptTag.src = `storage/${location}`;
+    scriptTag.src = `download/plugin?path=${location}`;
     document.body.appendChild(scriptTag);
 };
 

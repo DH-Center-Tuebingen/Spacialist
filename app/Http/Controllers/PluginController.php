@@ -139,7 +139,7 @@ class PluginController extends Controller
 
             return response()->json([
                 'plugin' => $plugin,
-                'install_location' => $plugin->publicName(),
+                'install_location' => $plugin->publicName(false),
             ]);
         }
     }
@@ -164,7 +164,7 @@ class PluginController extends Controller
             $plugin->handleUninstall();
             return response()->json([
                 'plugin' => $plugin,
-                'uninstall_location' => $plugin->publicName(),
+                'uninstall_location' => $plugin->publicName(false),
             ]);
         } catch(ModelNotFoundException $e) {
             // Already uninstalled
@@ -184,7 +184,7 @@ class PluginController extends Controller
         $plugin->handleRemove();
         $plugin->delete();
         return response()->json([
-            'uninstall_location' => $plugin->publicName(),
+            'uninstall_location' => $plugin->publicName(false),
         ]);
     }
     
