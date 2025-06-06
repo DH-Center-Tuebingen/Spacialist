@@ -164,6 +164,10 @@ class Plugin extends Model
         return $plugins;
     }
 
+    public static function getDirectory(): Directory {
+        return new Directory('plugins');
+    }
+
     public function updateUpdateState($fromInfoVersion) {
         if($this->version != $fromInfoVersion) {
             // installed version splitted
@@ -306,20 +310,12 @@ class Plugin extends Model
         $name = $this->name;
         $scriptPath = base_path("app/Plugins/$name/js/script.js");
         if(file_exists($scriptPath)) {
-            $filehandle = fopen($scriptPath, 'r');
-            Storage::put(
-                $this->publicName(),
-                $filehandle,
-            );
-            fclose($filehandle);
+            self::getDirectory()->store($this->publicName(false), $scriptPath);
         }
     }
 
     private function removeScript() {
-        $path = $this->publicName();
-        if(Storage::exists($path)) {
-            Storage::delete($path);
-        }
+        self::getDirectory()->delete($this->publicName());
     }
 
     private function addPermissions() {
@@ -364,9 +360,5 @@ class Plugin extends Model
     private function removePreferences() {
         $id = Str::kebab($this->name);
         Preference::where('label', 'ilike', "plugin.$id.%")->delete();
-    }
-    
-    public static function getScriptDirectory() : Directory{
-        return new Directory('plugins');
     }
 }
