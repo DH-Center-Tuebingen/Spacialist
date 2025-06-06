@@ -3,6 +3,7 @@
 namespace App\File;
 
 use Illuminate\Http\Response;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -56,11 +57,16 @@ class Directory {
      * Stores a file inside the directory.
      *
      * @param string $filename The filename
-     * @param $file The file
+     * @param UploadedFile|string $file The file
      * @return string The path to the file
      */
-    public function store(string $filename, $file): string {
-        return $file->storeAs($this->directory, $filename, $this->disk);
+    public function store(string $filename, UploadedFile|string $file): string {
+        if($file instanceof UploadedFile) {
+            return $file->storeAs($this->directory, $filename, $this->disk);
+        } else {
+            $filename = Str::finish($this->directory, DIRECTORY_SEPARATOR) . $filename;
+            return Storage::disk($this->disk)->put($filename, $file);
+        }
     }
 
     /**
@@ -70,12 +76,12 @@ class Directory {
      * @return Response|BinaryFileResponse The file as BinaryFileResponse or Response if the file is not inside the directory.
      */
     function download(string $filepath): Response | BinaryFileResponse {
-        if($this->contains($filepath)){            
+        if($this->contains($filepath)){
             return DownloadHandler::makeFileResponse($filepath);
         }
         return response()->noContent();
     }
-    
+
     /**
      * Downloads a file relative to the directory.
      *
@@ -83,7 +89,7 @@ class Directory {
      * @return Response|BinaryFileResponse The file as BinaryFileResponse or Response if the file is not inside the directory.
      */
     function downloadRelative(string $filepath): Response | BinaryFileResponse {
-        $storagePath = $this->directory . DIRECTORY_SEPARATOR . $filepath;
+        $storagePath = Str::finish($this->directory, DIRECTORY_SEPARATOR) . $filepath;
         if(Storage::disk($this->disk)->exists($storagePath)) {
             return DownloadHandler::makeFileResponse($storagePath, $this->disk);
         }
