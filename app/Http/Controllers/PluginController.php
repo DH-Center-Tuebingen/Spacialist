@@ -188,12 +188,12 @@ class PluginController extends Controller
         ]);
     }
 
-    public function downloadScript(Request $request) {
-        $this->validate($request, [
-            'src' => 'required|string'
-        ]);
-
-        $filepath = $request->query('src');
+    public function downloadScript(Request $request, string $filepath) {
+        if($filepath === ''){
+            return response()->json([
+                'error' => __('No source provided.')
+            ], 400);
+        }
         return Plugin::getDirectory()->downloadRelative($filepath);
     }
 }

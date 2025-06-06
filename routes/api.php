@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Broadcast;
 Route::middleware('auth:sanctum')->prefix('download')->group(function () {
     Route::get('/avatar', 'UserController@downloadAvatar');
     Route::get('/bibliography', 'BibliographyController@downloadFile');
-    Route::get('/plugin', 'PluginController@downloadScript');
+    Route::get('/plugin/{filepath}', 'PluginController@downloadScript');
 });
 
 Route::middleware('auth:sanctum')->prefix('v1')->group(function() {

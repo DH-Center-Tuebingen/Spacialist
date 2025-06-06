@@ -2,7 +2,7 @@
 
 namespace App\File;
 
-use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -73,26 +73,32 @@ class Directory {
      * Downloads a file inside the directory.
      *
      * @param string $filepath The path to the file
-     * @return Response|BinaryFileResponse The file as BinaryFileResponse or Response if the file is not inside the directory.
+     * @return JsonResponse|BinaryFileResponse The file as BinaryFileResponse or Response if the file is not inside the directory.
      */
-    function download(string $filepath): Response | BinaryFileResponse {
+    function download(string $filepath): JsonResponse | BinaryFileResponse {
         if($this->contains($filepath)){
             return DownloadHandler::makeFileResponse($filepath);
         }
-        return response()->noContent();
+        return $this->return404();
     }
 
     /**
      * Downloads a file relative to the directory.
      *
      * @param string $filepath The path to the file without the directory prefix.
-     * @return Response|BinaryFileResponse The file as BinaryFileResponse or Response if the file is not inside the directory.
+     * @return JsonResponse|BinaryFileResponse The file as BinaryFileResponse or Response if the file is not inside the directory.
      */
-    function downloadRelative(string $filepath): Response | BinaryFileResponse {
+    function downloadRelative(string $filepath): JsonResponse | BinaryFileResponse {
         $storagePath = Str::finish($this->directory, DIRECTORY_SEPARATOR) . $filepath;
         if(Storage::disk($this->disk)->exists($storagePath)) {
             return DownloadHandler::makeFileResponse($storagePath, $this->disk);
         }
-        return response()->noContent();
+        return $this->return404();
+    }
+    
+    private function return404(): JsonResponse {
+        return response()->json([
+            'error' => __('File not found.')
+        ], 404);
     }
 }
