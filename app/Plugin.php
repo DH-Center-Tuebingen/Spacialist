@@ -155,6 +155,7 @@ class Plugin extends Model
     }
 
     public static function getWithMetadata() {
+        self::updateState();
         $plugins = self::all();
 
         foreach($plugins as $plugin) {
@@ -202,8 +203,6 @@ class Plugin extends Model
         $oldVersion = $this->version;
         // TODO is it really the same as install?
         $this->handleInstallation();
-
-
         $info = self::getInfo(base_path("app/Plugins/$this->name"));
         $this->update_available = null;
         $this->version = $info['version'];
@@ -310,7 +309,19 @@ class Plugin extends Model
         $name = $this->name;
         $scriptPath = base_path("app/Plugins/$name/js/script.js");
         if(file_exists($scriptPath)) {
-            self::getDirectory()->store($this->publicName(false), $scriptPath);
+            $filehandle = fopen($scriptPath, 'r');
+            
+            if(!$filehandle) {
+                throw new \Exception("Could not open script file for plugin $name.");
+            }
+            
+            self::getDirectory()->put(
+                $this->publicName(false), 
+                $filehandle
+            );
+            fclose($filehandle);
+        } else {
+            throw new \Exception("Script file for plugin $name does not exist at $scriptPath.");
         }
     }
 

@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.11.1
+### Added
+- Unit Tests for Directory.php
 ### Fixed
 - Login not possible on instances in subfolder
 - Last editor not visible in _Entity Detail_ tab
@@ -14,6 +16,7 @@ All notable changes to this project will be documented in this file.
 - Changing color of entity type
 - Changing _sub entity types_ only visible after page reload
 - 'Bootstrap not defined' on InteractiveMap
+- Fixed add/remove of plugin correctly setup in store and SpPS
 
 ## 0.11 - Kilcrea
 ### Added

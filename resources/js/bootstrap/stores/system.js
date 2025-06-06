@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 
+import { kebabCase } from 'lodash';
 import useAttributeStore from './attribute.js';
 import useBibliographyStore from './bibliography.js';
 import useEntityStore from './entity.js';
@@ -230,6 +231,7 @@ export const useSystemStore = defineStore('system', {
                 };
             }
             const pref = {
+                of: data.of,
                 title: data.label,
                 label: data.key,
                 component: data.component,
@@ -286,16 +288,48 @@ export const useSystemStore = defineStore('system', {
         },
         async uninstallPlugin(id) {
             return uninstallPlugin(id).then(data => {
+                const plugin = data.plugin;
+                const kebabedName = kebabCase(plugin.name);
+                
+                
+                // We use the window element here, as it resulted in an error, when
+                // trying to import the SpPS variable diretly:
+                // `Cannot access "router" before initialization`
+                // [TODO] This should be fixed in the plugin system rework.
+                if(window?.SpPS?.data?.plugins && window.SpPS.data.plugins[kebabedName]) {
+                    delete window?.SpPS.data.plugins[kebabedName];
+                }
+                
+                this.unregisterPluginSlots(kebabedName);
+                this.unregisterPluginPreferences(kebabedName);
                 this.updatePlugin({
                     plugin_id: id,
                     uninstalled: true,
                     properties: {
                         installed_at: null,
-                        updated_at: data.plugin.updated_at,
+                        updated_at: plugin.updated_at,
                     },
                 });
                 removeScript(data.uninstall_location);
             });
+        },
+        async unregisterPluginSectionFrom(name, pluginId) {
+            const slots = this[name];
+            for(let k in slots) {
+                const slot = slots[k];
+                for(let i = slot.length - 1; i >= 0; i--) {
+                    const plugin = slot[i];
+                    if(plugin.of == pluginId) {
+                        slot.splice(i, 1);
+                    }
+                }
+            }
+        },
+        async unregisterPluginSlots(pluginId) {
+            this.unregisterPluginSectionFrom('registeredPluginSlots', pluginId);
+        },
+        async unregisterPluginPreferences(pluginId) {
+            this.unregisterPluginSectionFrom('registeredPluginPreferences', pluginId);
         },
         async patchPlugin(id) {
             return updatePlugin(id).then(data => {

@@ -264,6 +264,6 @@ export const SpPS = {
         }
         SpPS.api.store.systemStore.registerPluginPreference(mergedOptions);
     },
-}
+};
 
 export default SpPS;

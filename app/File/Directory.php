@@ -21,6 +21,22 @@ class Directory {
         $this->disk = $disk;
         $this->directory = $directory;
     }
+    
+    /**
+     * Returns the disk name.
+     * @return string The disk name, e.g. 'local', 'public', etc.
+     */
+    public function getDisk(): string {
+        return $this->disk;
+    }
+    
+    /**
+     * Returns the directory path.
+     * @return string The directory path, e.g. 'avatars'
+     */
+    public function getDirectory(): string {
+        return $this->directory;
+    }
 
     /**
      * Validates if a file is inside the directory.
@@ -60,13 +76,22 @@ class Directory {
      * @param UploadedFile|string $file The file
      * @return string The path to the file
      */
-    public function store(string $filename, UploadedFile|string $file): string {
-        if($file instanceof UploadedFile) {
-            return $file->storeAs($this->directory, $filename, $this->disk);
-        } else {
-            $filename = Str::finish($this->directory, DIRECTORY_SEPARATOR) . $filename;
-            return Storage::disk($this->disk)->put($filename, $file);
-        }
+    public function store(string $filename, UploadedFile $file): string {
+        return $file->storeAs($this->directory, $filename, $this->disk);
+    }
+    
+    /**
+     * Stores a file inside the directory.
+     * This method is used to store a file from a resource handle.
+     * 
+     * @param string $filepath The path to the file
+     * @param resource $filehandle The file handle (e.g. fopen resource)
+     * @return string The path to the file
+     */
+    public function put(string $filepath, $filehandle): string {
+        $filepath = Str::finish($this->directory, DIRECTORY_SEPARATOR) . $filepath;
+        Storage::disk($this->disk)->put($filepath, $filehandle);
+        return $filepath;
     }
 
     /**
@@ -76,10 +101,10 @@ class Directory {
      * @return JsonResponse|BinaryFileResponse The file as BinaryFileResponse or Response if the file is not inside the directory.
      */
     function download(string $filepath): JsonResponse | BinaryFileResponse {
-        if($this->contains($filepath)){
-            return DownloadHandler::makeFileResponse($filepath);
+        if($this->contains($filepath)) {
+            return $this->createFileResponse($filepath);
         }
-        return $this->return404();
+        return self::notFound();
     }
 
     /**
@@ -90,13 +115,19 @@ class Directory {
      */
     function downloadRelative(string $filepath): JsonResponse | BinaryFileResponse {
         $storagePath = Str::finish($this->directory, DIRECTORY_SEPARATOR) . $filepath;
-        if(Storage::disk($this->disk)->exists($storagePath)) {
-            return DownloadHandler::makeFileResponse($storagePath, $this->disk);
-        }
-        return $this->return404();
+        return $this->download($storagePath);
     }
     
-    private function return404(): JsonResponse {
+    function createFileResponse(string $filepath): JsonResponse | BinaryFileResponse {
+        $mime = Storage::disk($this->disk)->mimeType($filepath);
+        $path = Storage::disk($this->disk)->path($filepath);
+        return response()->file($path, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename="'. $filepath . '"'
+        ]);
+    }
+    
+    private static function notFound(): JsonResponse {
         return response()->json([
             'error' => __('File not found.')
         ], 404);

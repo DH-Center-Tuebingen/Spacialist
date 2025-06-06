@@ -135,6 +135,10 @@ class PluginController extends Controller
                 return response()->json([
                     'error' => __('Error while installing plugin. Preset does not exist.')
                 ], 403);
+            } catch(\Exception $e) {
+                return response()->json([
+                    'error' => __('Error while installing plugin. Please check file permissions or ask your system administrator.')
+                ], 403);
             }
 
             return response()->json([
@@ -152,8 +156,13 @@ class PluginController extends Controller
                 'error' => __('This plugin does not exist.')
             ], 403);
         }
-
-        $updatedFrom = $plugin->handleUpdate();
+        try {
+            $updatedFrom = $plugin->handleUpdate();
+        } catch(\Exception $e) {
+            return response()->json([
+                'error' => __('Error while updating plugin. Please check file permissions or ask your system administrator.')
+            ], 403);
+        }
         $plugin->changelog = $plugin->getChangelog($updatedFrom);
         return response()->json($plugin);
     }
