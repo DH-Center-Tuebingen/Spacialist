@@ -324,7 +324,7 @@
                     if(tag[key] === true) {
                         classes.push(props.conditionalClasses[key]);
                     }
-                })
+                });
                 return classes;
             };
 

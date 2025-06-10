@@ -99,7 +99,7 @@
                 <simple-search
                     :endpoint="searchLabel"
                     :key-fn="getConceptLabel"
-                    :value="state.attribute.label"
+                    :value="state.attribute.rootLabel"
                     @selected="label => labelSelected(label, 'rootLabel')"
                 />
             </div>
@@ -265,7 +265,8 @@
                                         {{ siSymbolToStr(value.symbol) }}
                                     </span>
                                     <span>
-                                        {{ t(`global.attributes.si_units.${state.attribute.siGroup}.units.${value.label}`)
+                                        {{
+                                            t(`global.attributes.si_units.${state.attribute.siGroup}.units.${value.label}`)
                                         }}
                                     </span>
                                 </div>
@@ -293,6 +294,7 @@
         onMounted,
         reactive,
         toRefs,
+        watch,
     } from 'vue';
     import { useI18n } from 'vue-i18n';
 
@@ -323,7 +325,7 @@
             type: {
                 required: false,
                 type: String,
-                default: 'default',
+                default: '',
             },
             external: {
                 required: false,
@@ -390,6 +392,11 @@
             };
             const labelSelected = (label, key) => {
                 state.attribute[key] = label;
+
+                if(key === 'label' && !state.attribute.rootLabel) {
+                    state.attribute.rootLabel = label;
+                }
+
                 emitUpdate();
             };
             const typeSelected = e => {
@@ -487,22 +494,18 @@
                     return createText.value || t('global.create');
                 }),
                 validated: computed(_ => {
-                    let isValid = state.attribute.label &&
-                        state.attribute.label.id > 0 &&
-                        state.attribute.type &&
-                        state.hasRootElement &&
-                        (
-                            !state.needsTextareaElement ||
-                            (
-                                state.needsTextareaElement &&
-                                state.attribute.textContent.length > 0
-                            )
-                        ) && (
-                            (state.isSiUnit && state.attribute.siGroup && state.attribute.siGroupUnit) || !state.isSiUnit
-                        );
-                    context.emit('validation', isValid);
-                    return isValid;
+                    return (
+                        state.typeIsValid
+                        && state.labelIsValid
+                        && state.hasRootElement
+                        && state.textAreaIsValid
+                        && state.siUnitIsValid
+                    );
                 }),
+                typeIsValid: computed(() => Boolean(state.attribute.type)),
+                labelIsValid: computed(() => state.attribute.label && state.attribute.label.id > 0),
+                textAreaIsValid: computed(() => !state.needsTextareaElement || state.attribute.textContent.length > 0),
+                siUnitIsValid: computed(() => { return !state.isSiUnit || (state.attribute.siGroup && state.attribute.siGroupUnit); }),
                 allowsRestriction: computed(_ => {
                     return state.attribute.type == 'string-sc' ||
                         state.attribute.type == 'string-mc' ||
@@ -541,6 +544,14 @@
                             state.attribute.rootAttributeLabel.id > 0
                         );
                 }),
+            });
+
+            /**
+             * We update the validated event with a watcher
+             * to avoid side effects in the computed property.
+             */
+            watch(_ => state.validated, newValue => {
+                context.emit('validation', newValue);
             });
 
             // RETURN
