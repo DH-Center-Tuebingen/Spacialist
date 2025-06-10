@@ -310,13 +310,13 @@ class Plugin extends Model
         $scriptPath = base_path("app/Plugins/$name/js/script.js");
         if(file_exists($scriptPath)) {
             $filehandle = fopen($scriptPath, 'r');
-            
+
             if(!$filehandle) {
                 throw new \Exception("Could not open script file for plugin $name.");
             }
-            
-            self::getDirectory()->put(
-                $this->publicName(false), 
+
+            self::getDirectory()->store(
+                $this->publicName(false),
                 $filehandle
             );
             fclose($filehandle);
