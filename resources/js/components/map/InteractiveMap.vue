@@ -671,6 +671,8 @@
                     
                     if(et?.id){
                         return Object.values(state.mapEntityLayers).find(l => l.getProperties().layer_id == et.id);
+                    }else {
+                        console.error('Entity type not found for feature', p);
                     }
                 } 
                 return Object.values(state.mapEntityLayers).find(l => l.getProperties().type.toLowerCase() == 'unlinked');
