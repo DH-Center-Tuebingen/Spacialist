@@ -668,10 +668,12 @@
                 const p = f.getProperties();
                 if(p.entity) {
                     const et = Object.values(layers.value).find(l => l.entity_type_id == p.entity_type_id);
-                    return Object.values(state.mapEntityLayers).find(l => l.getProperties().layer_id == et.id);
-                } else {
-                    return Object.values(state.mapEntityLayers).find(l => l.getProperties().type.toLowerCase() == 'unlinked');
-                }
+                    
+                    if(et.id){
+                        return Object.values(state.mapEntityLayers).find(l => l.getProperties().layer_id == et.id);
+                    }
+                } 
+                return Object.values(state.mapEntityLayers).find(l => l.getProperties().type.toLowerCase() == 'unlinked');
             };
             const removeFeatureFromLayer = f => {
                 const layer = getLayerForFeature(f);
