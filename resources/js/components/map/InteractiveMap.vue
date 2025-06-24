@@ -669,7 +669,7 @@
                 if(p.entity) {
                     const et = Object.values(layers.value).find(l => l.entity_type_id == p.entity_type_id);
                     
-                    if(et.id){
+                    if(et?.id){
                         return Object.values(state.mapEntityLayers).find(l => l.getProperties().layer_id == et.id);
                     }
                 } 
