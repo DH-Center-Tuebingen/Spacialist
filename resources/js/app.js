@@ -44,7 +44,7 @@ app.use(createVfm());
 initDirectives(app);
 initGlobalComponents(app);
 
-SpPS.initialize(app, i18n.global.t);
+SpPS.initialize(app, pinia, i18n.global.t);
 
 // The plugins must be registered before the router is used.
 setTimeout(() => {
