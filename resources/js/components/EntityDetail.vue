@@ -1003,7 +1003,7 @@
                 state.saving = true;
 
                 try {
-                    await entityStore.patchAttributes(state.entity.id, patches, dirtyValues, moderations);
+                    const data = await entityStore.patchAttributes(state.entity.id, patches, dirtyValues, moderations);
 
                     undirtyList(grps);
                     resetDirtyStates(grps);
