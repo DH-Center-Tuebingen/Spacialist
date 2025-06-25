@@ -635,6 +635,7 @@ class Bibliography extends Model implements Searchable
             foreach($words as $word) {
                 // only keep (ascii) letters and numbers
                 $word = preg_replace('/[^A-Za-z0-9]/', '', Str::ascii(trim($word)));
+                if(strlen($word) == 0) continue;
                 if(strlen($firstWord) == 0 && strlen($word) > 3) {
                     $firstWord = $word;
                 }
