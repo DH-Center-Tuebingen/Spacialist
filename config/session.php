@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Str;
 
+use App\Utils\UrlUtils;
+
 return [
 
     /*
@@ -139,8 +141,8 @@ return [
     | your application but you are free to change this when necessary.
     |
     */
-
-    'path' => '/',
+    
+    'path' => UrlUtils::getSubPath(),
 
     /*
     |--------------------------------------------------------------------------

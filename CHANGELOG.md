@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 ## 0.11.1
 ### Added
 - Unit Tests for Directory.php
+### Changed
+- Added path value to XSRF cookie to prevent overwriting by another instance at the same domain
 ### Fixed
 - Login not possible on instances in subfolder
 - Last editor not visible in _Entity Detail_ tab
