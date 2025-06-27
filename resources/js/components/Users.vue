@@ -25,6 +25,7 @@
                         <th>{{ t('global.name') }}</th>
                         <th>{{ t('global.email') }}</th>
                         <th>{{ t('global.roles') }}</th>
+                        <th>{{ t('global.accesspoints') }}</th>
                         <th>{{ t('global.added_at') }}</th>
                         <th>{{ t('global.updated_at') }}</th>
                         <th>{{ t('global.options') }}</th>
@@ -41,7 +42,7 @@
                                 class="text-nowrap text-reset text-decoration-none"
                                 @click.prevent="showUserInfo(user)"
                             >
-                                <user-avatar
+                                <UserAvatar
                                     class="align-middle"
                                     :user="user"
                                     :size="20"
@@ -90,6 +91,30 @@
                             <div class="invalid-feedback">
                                 <span
                                     v-for="(msg, i) in getErrors(user.id, 'roles')"
+                                    :key="i"
+                                >
+                                    {{ msg }}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <multiselect
+                                v-model="v.fields[user.id].accesspoints.value"
+                                :name="`accesspoints_${user.id}`"
+                                :object="true"
+                                :label="'name'"
+                                :track-by="'url'"
+                                :value-prop="'url'"
+                                :close-on-select="false"
+                                :mode="'tags'"
+                                :disabled="!can('users_roles_write')"
+                                :options="state.accessPointsArray"
+                                @input="v.fields[user.id].accesspoints.handleChange"
+                            />
+
+                            <div class="invalid-feedback">
+                                <span
+                                    v-for="(msg, i) in getErrors(user.id, 'accesspoints')"
                                     :key="i"
                                 >
                                     {{ msg }}
@@ -168,6 +193,7 @@
                         <th>{{ t('global.name') }}</th>
                         <th>{{ t('global.email') }}</th>
                         <th>{{ t('global.roles') }}</th>
+                        <th>{{ t('global.accesspoints') }}</th>
                         <th>{{ t('global.added_at') }}</th>
                         <th>{{ t('global.updated_at') }}</th>
                         <th>{{ t('global.deactivated_at') }}</th>
@@ -200,7 +226,7 @@
                         </td>
                         <td>
                             <multiselect
-                                v-model="dUser.roles"
+                                :value="dUser.roles"
                                 :name="`roles_${dUser.id}`"
                                 :object="true"
                                 :label="'display_name'"
@@ -210,6 +236,19 @@
                                 :disabled="true"
                                 :options="[]"
                                 :placeholder="t('main.user.add_role_placeholder')"
+                            />
+                        </td>
+                        <td>
+                            <multiselect
+                                :value="accessPointsToArray(dUser.accesspoints)"
+                                :name="`accesspoints_${dUser.id}`"
+                                :object="true"
+                                :label="'name'"
+                                :track-by="'url'"
+                                :value-prop="'url'"
+                                :mode="'tags'"
+                                :disabled="true"
+                                :options="[]"
                             />
                         </td>
                         <td>
@@ -254,6 +293,7 @@
 
     import * as yup from 'yup';
 
+    import useSystemStore from '@/bootstrap/stores/system.js';
     import useUserStore from '@/bootstrap/stores/user.js';
 
     import { useToast } from '@/plugins/toast.js';
@@ -279,6 +319,7 @@
     export default {
         setup(props) {
             const { t } = useI18n();
+            const systemStore = useSystemStore();
             const userStore = useUserStore();
             const toast = useToast();
 
@@ -319,6 +360,20 @@
                     } = useField(`roles_${u.id}`, yup.array(), {
                         initialValue: u.roles,
                     });
+                    const {
+                        errors: eap,
+                        meta: map,
+                        value: vap,
+                        handleChange: hiap,
+                        resetField: hrap,
+                    } = useField(`accesspoints_${u.id}`, yup.array(), {
+                        initialValue: Object.keys(u.accesspoints || {}).map(url => {
+                            return {
+                                url: url,
+                                name: u.accesspoints[url],
+                            };
+                        }),
+                    });
                     v.fields[u.id] = reactive({
                         email: {
                             errors: em,
@@ -334,18 +389,26 @@
                             handleChange: hir,
                             reset: hrr,
                         },
+                        accesspoints: {
+                            errors: eap,
+                            meta: map,
+                            value: vap,
+                            handleChange: hiap,
+                            reset: hrap,
+                        },
                     });
                 }
             };
             const userDirty = id => {
-                return v.fields[id].email.meta.dirty || v.fields[id].roles.meta.dirty;
+                return v.fields[id].email.meta.dirty || v.fields[id].roles.meta.dirty || v.fields[id].accesspoints.meta.dirty;
             };
             const userValid = id => {
-                return v.fields[id].email.meta.valid && v.fields[id].roles.meta.valid;
+                return v.fields[id].email.meta.valid && v.fields[id].roles.meta.valid && v.fields[id].accesspoints.meta.valid;
             };
             const resetUser = id => {
                 v.fields[id].email.reset();
                 v.fields[id].roles.reset();
+                v.fields[id].accesspoints.reset();
             };
             const resetUserMeta = id => {
                 v.fields[id].email.reset({
@@ -353,6 +416,9 @@
                 });
                 v.fields[id].roles.reset({
                     value: v.fields[id].roles.value,
+                });
+                v.fields[id].accesspoints.reset({
+                    value: v.fields[id].accesspoints.value,
                 });
             };
             const patchUser = async id => {
@@ -368,6 +434,12 @@
                 }
                 if(v.fields[id].email.meta.dirty) {
                     data.email = v.fields[id].email.value;
+                }
+                if(v.fields[id].accesspoints.meta.dirty) {
+                    data.accesspoints = {};
+                    v.fields[id].accesspoints.value.forEach(ap => {
+                        data.accesspoints[ap.url] = ap.name;
+                    });
                 }
 
                 await userStore.updateUser(id, data).then(_ => {
@@ -402,6 +474,14 @@
                     ...formErrors,
                     ...apiErrors,
                 ];
+            };
+            const accessPointsToArray = accesspoints => {
+                return Object.keys(accesspoints || {}).map(url => {
+                    return {
+                        url: url,
+                        name: accesspoints[url],
+                    };
+                });
             };
             const showNewUserModal = _ => {
                 showAddUser();
@@ -473,6 +553,8 @@
                 }),
                 deletedUserList: computed(_ => userStore.deletedUsers),
                 roles: computed(_ => userStore.getRoles(true)),
+                accessPoints: computed(_ => systemStore.accessPoints),
+                accessPointsArray: computed(_ => Object.values(state.accessPoints)),
                 dataInitialized: computed(_ => state.userList.length > 0 && state.roles.length > 0),
                 errors: {},
             });
@@ -516,6 +598,7 @@
                 patchUser,
                 handleUserMailInput,
                 getErrors,
+                accessPointsToArray,
                 showNewUserModal,
                 deactivateUser,
                 reactivateUser,

@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.12 - (Luxor)
+### Added
+- Access Points (Plugins can define additional access points to restrict user access to certain parts of the plugin)
 ### Changed
 - Alerts can now be dismissed
 

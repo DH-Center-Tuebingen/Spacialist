@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Broadcast;
 */
 
 Route::middleware('auth:sanctum')->prefix('v1')->group(function() {
+    Route::get('/refresh', 'HomeController@updateSession');
     Route::get('/pre', 'HomeController@getGlobalData');
     Route::get('/version', function() {
         $versionInfo = new App\VersionInfo();
@@ -27,6 +28,8 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function() {
             'time' => $versionInfo->getTime()
         ]);
     });
+
+    Route::post('/access/check', 'HomeController@checkAccesspointAccess');
 });
 
 // PLUGINS

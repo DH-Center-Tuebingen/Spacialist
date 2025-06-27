@@ -58,7 +58,7 @@ class Plugin extends Model
         }
 
         $xmlObject = simplexml_load_string($xmlString);
-        
+
         return json_decode(json_encode($xmlObject), true);
     }
 
@@ -90,6 +90,37 @@ class Plugin extends Model
             }
         }
         return $changes;
+    }
+
+    public function getAccessPoints(): array {
+        $info = self::getInfo(base_path("app/Plugins/$this->name"));
+        $accesspoints = [];
+        $addedNames = [];
+        $addedUrls = [];
+        if($info !== false) {
+            if(array_key_exists('accesspoints', $info)) {
+                foreach($info['accesspoints'] as $accesspoint) {
+                    $name = $this->name . '-' . $accesspoint['name'];
+                    $url = Str::finish(Str::start($accesspoint['url'], '/'), '/');
+                    // $url = '/' . $this->slugName() . Str::finish(Str::start($accesspoint['url'], '/'), '/');
+                    if(array_key_exists($name, $addedNames)) {
+                        throw new \Exception("An accesspoint with the name ($name) already exists");
+                    }
+                    if(array_key_exists($url, $addedUrls)) {
+                        throw new \Exception("An accesspoint with the url ($url) already exists");
+                    }
+
+                    $addedNames[$name] = true;
+                    $addedUrls[$url] = true;
+
+                    $accesspoints[$name] = [
+                        'name' => $name,
+                        'url' => $url,
+                    ];
+                }
+            }
+        }
+        return $accesspoints;
     }
 
     public static function updateOrCreateFromInfo(array $info) : Plugin {
@@ -158,7 +189,7 @@ class Plugin extends Model
             preg_match('/(\d+)\.(\d+).(\d+)(-.+)?/', $this->version, $iv);
             // available/latest version splitted
             preg_match('/(\d+)\.(\d+).(\d+)(-.+)?/', $fromInfoVersion, $lv);
-    
+
             if(
                 ($lv[1] > $iv[1] || $lv[2] > $iv[2] || $lv[3] > $iv[3]) ||
                 (!isset($lv[4]) && isset($iv[4])) ||

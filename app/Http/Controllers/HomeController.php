@@ -26,6 +26,20 @@ class HomeController extends Controller
         // $this->middleware('guest')->only('welcome');
     }
 
+    public function checkAccesspointAccess(Request $request) {
+        $user = auth()->user();
+
+        $accesspoint = $request->get('endpoint', '/');
+
+        if(array_key_exists($accesspoint, $user->accesspoints)) {
+            return response()->json(null, 204);
+        }
+
+        return response()->json([
+            'redirect' => array_keys($user->accesspoints)[0],
+        ]);
+    }
+
     public function getGlobalData() {
         if(auth()->check()) {
             $preferenceValues = Preference::getUserPreferences(auth()->id(), true);
@@ -34,6 +48,13 @@ class HomeController extends Controller
             $preferenceValues = [];
             $locale = App::getLocale();
         }
+
+        $accesspoints = [
+            "Core" => [
+                "name" => "Core",
+                "url" => "/",
+            ],
+        ];
 
         $sysPrefsValues = Preference::getPreferences(true);
 
@@ -45,6 +66,11 @@ class HomeController extends Controller
             if(method_exists($datatype, "getGlobalData")) {
                 $datatypeData[$key] = $datatype::getGlobalData();
             }
+        }
+
+        $installedPlugins = Plugin::getInstalled();
+        foreach($installedPlugins as $plugin) {
+            $accesspoints = array_merge($accesspoints, $plugin->getAccessPoints());
         }
 
         // TODO handle layer relation in Map Plugin
@@ -60,9 +86,14 @@ class HomeController extends Controller
             'concepts' => $concepts,
             'entityTypes' => $entityTypeMap,
             'datatype_data' => $datatypeData,
+            'accesspoints' => $accesspoints,
             'colorsets' => sp_get_themes(),
             'analysis' => sp_has_analysis(),
         ]);
+    }
+
+    public function updateSession() {
+        return response()->json();
     }
 
     public function welcome(Request $request) {

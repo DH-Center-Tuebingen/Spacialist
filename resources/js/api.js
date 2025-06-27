@@ -3,12 +3,14 @@ import {
     external,
     web_http,
 } from '@/bootstrap/http.js';
+
 import {
     only,
     simpleResourceType,
     throwError,
 } from '@/helpers/helpers.js';
-import File from './helpers/file';
+
+import File from '@/helpers/file.js';
 
 // GET AND STORE (FETCH)
 export async function logout() {
@@ -18,6 +20,10 @@ export async function logout() {
 export async function getCsrfCookie() {
     await $httpQueue.add(() => web_http.get('/sanctum/csrf-cookie').then(response => {
     }));
+}
+
+export async function refreshSession() {
+    return $httpQueue.add(() => http.get('/refresh'));
 }
 
 export async function fetchVersion() {
@@ -272,6 +278,13 @@ export async function getMapProjection(srid) {
 }
 
 // POST
+export async function checkAccess(endpoint = '/') {
+    const data = {
+        endpoint: endpoint,
+    };
+    return $httpQueue.add(() => http.post('/access/check', data));
+}
+
 export async function login(credentials) {
     return await $httpQueue.add(() => http.post('/auth/login', credentials).then(response => {
         return response.data;
@@ -279,7 +292,7 @@ export async function login(credentials) {
 }
 
 export async function addUser(user) {
-    const data = only(user, ['name', 'nickname', 'email', 'password']);
+    const data = only(user, ['name', 'nickname', 'email', 'password', 'password_confirm', 'accesspoints']);
     return $httpQueue.add(
         () => http.post('user', data).then(response => response.data)
     );

@@ -339,6 +339,7 @@
         "description": "Beschreibung",
         "roles": "Rollen",
         "permissions": "Berechtigungen",
+        "accesspoints": "Einstiegspunkte",
         "added_at": "Hinzugefügt",
         "created_at": "Erstellt",
         "updated_at": "Aktualisert",

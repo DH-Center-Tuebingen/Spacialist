@@ -130,7 +130,7 @@
                     append: true,
                 });
             };
-           
+
             // DATA
             const state = reactive({
                 tab: computed(_ => systemStore.mainView.tab),

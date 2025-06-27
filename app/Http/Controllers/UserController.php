@@ -204,18 +204,22 @@ class UserController extends Controller {
             'nickname' => 'required_without:email|alpha_dash|max:255|unique:users,nickname',
             'name' => 'required|string|max:255',
             'password' => 'required|min:6',
+            'password_confirm' => 'required|same:password',
+            'accesspoints' => 'required|array',
         ]);
 
         $name = $request->get('name');
         $nickname = $request->get('nickname');
         $email = $request->get('email');
         $password = Hash::make($request->get('password'));
+        $accesspoints = $request->get('accesspoints');
 
         $user = new User();
         $user->name = $name;
         $user->nickname = Str::lower($nickname);
         $user->email = Str::lower($email);
         $user->password = $password;
+        $user->accesspoints = $accesspoints;
         $user->save();
         $user = User::find($user->id);
 
@@ -293,6 +297,7 @@ class UserController extends Controller {
         $this->validate($request, [
             'roles' => 'array',
             'email' => 'email',
+            'accesspoints' => 'array',
             'name' => 'string|max:255',
             'nickname' => 'alpha_dash|max:255|unique:users,nickname',
             'phonenumber' => 'nullable|string|max:255',
@@ -338,6 +343,10 @@ class UserController extends Controller {
         $saveRequired = false;
         if($request->has('email')) {
             $user->email = Str::lower($request->get('email'));
+            $saveRequired = true;
+        }
+        if($request->has('accesspoints')) {
+            $user->accesspoints = $request->get('accesspoints');
             $saveRequired = true;
         }
         if($request->has('name')) {

@@ -340,6 +340,7 @@
         "description": "Description",
         "roles": "Roles",
         "permissions": "Permissions",
+        "accesspoints": "Access Points",
         "added_at": "Added",
         "created_at": "Created",
         "updated_at": "Updated",
