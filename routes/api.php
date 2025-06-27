@@ -206,19 +206,26 @@ Route::middleware('auth:sanctum')->prefix('v1/tag')->group(function() {
     Route::get('', 'TagController@all');
 });
 
-// EXTENSIONS
+/**
+ * Plugins should have their own routes, if they are required to be implemented in the core,
+ * we are doing something wrong. Remove all plugin routes as soon as possible.
+ * 
+ * If some functionality is required for the core to access plugin data, we must adjust the plugin 
+ * system accordingly.
+ */
 
+ // EXTENSIONS
 // FILE
-Route::middleware('auth:sanctum')->prefix('v1/file')->group(function() {
-    Route::get('/{id}', 'FileController@getFile')->where('id', '[0-9]+');
-    Route::get('/{id}/link_count', 'FileController@getLinkCount')->where('id', '[0-9]+');
-    Route::get('/{id}/sub_files', 'FileController@getSubFiles')->where('id', '[0-9]+');
+// Route::middleware('auth:sanctum')->prefix('v1/file')->group(function() {
+//     Route::get('/{id}', 'FileController@getFile')->where('id', '[0-9]+');
+//     Route::get('/{id}/link_count', 'FileController@getLinkCount')->where('id', '[0-9]+');
+//     Route::get('/{id}/sub_files', 'FileController@getSubFiles')->where('id', '[0-9]+');
 
-    Route::post('/unlinked', 'FileController@getUnlinkedFiles');
-    Route::post('/linked/{cid}', 'FileController@getLinkedFiles')->where('cid', '[0-9]+');
+//     Route::post('/unlinked', 'FileController@getUnlinkedFiles');
+//     Route::post('/linked/{cid}', 'FileController@getLinkedFiles')->where('cid', '[0-9]+');
 
-    Route::delete('/{id}', 'FileController@deleteFile')->where('id', '[0-9]+');
-});
+//     Route::delete('/{id}', 'FileController@deleteFile')->where('id', '[0-9]+');
+// });
 
 // MAP
 Route::middleware('auth:sanctum')->prefix('v1/map')->group(function() {
