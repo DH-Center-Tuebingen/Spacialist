@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Added path value to XSRF cookie to prevent overwriting by another instance at the same domain
 - _Show x replies_ button in comment list moved to header
+- XSRF Token get's a custom name depending on the deployed app-name. Allows for deploying multiple instances on the same domain at different paths.
 ### Fixed
 - Login not possible on instances in subfolder
 - Last editor not visible in _Entity Detail_ tab

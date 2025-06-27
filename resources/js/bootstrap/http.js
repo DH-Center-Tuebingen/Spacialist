@@ -5,13 +5,25 @@ import {
     throwError,
 } from '@/helpers/helpers.js';
 
-export const web_http = axios.create();
-web_http.defaults.baseURL = '';
-web_http.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-web_http.defaults.withCredentials = true;
-web_http.defaults.withXSRFToken = true;
+/**
+ * Helper function to create always the same axios template.
+ */
+export function createAxios(options = {}) {
+    const instance = axios.create();
+    instance.defaults.baseURL = options.baseURL || 'api/v1';
+    instance.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+    instance.defaults.withCredentials = true;
+    instance.defaults.withXSRFToken = true;
+    instance.defaults.xsrfCookieName = 'XSRF-TOKEN';
+    
+    let appName = import.meta.env.VITE_APP_NAME || '';
+    if(appName !== '') {
+        instance.defaults.xsrfCookieName += `-${appName.toUpperCase()}`;
+    }
+}
 
-const instance = axios.create();
+export const web_http = axios.create();
+export const instance = axios.create({ baseURL: 'api/v1' });
 
 // These errors need to be handled manually.
 export const unhandledErrors = [400, 422];
@@ -34,10 +46,6 @@ export function handleUnhandledErrors(axiosError, callback) {
     }
 }
 
-instance.defaults.baseURL = 'api/v1';
-instance.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-instance.defaults.withCredentials = true;
-instance.defaults.withXSRFToken = true;
 instance.interceptors.response.use(response => {
     return response;
 }, error => {
