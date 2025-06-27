@@ -142,7 +142,7 @@ return [
     |
     */
     
-    'path' => UrlUtils::getSubPath(),
+    'path' => UrlUtils::getSubPath(env('APP_URL', '/')),
 
     /*
     |--------------------------------------------------------------------------
