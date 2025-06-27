@@ -9,13 +9,12 @@ class UrlUtils {
      * This function extracts the subpath from the app URL
      * and returns it.
      */
-    static function getSubPath() : string {
+    static function getSubPath($url) : string {
         $matches = [];
-        $doesMatch = preg_match('/https?:\/\/.+?\/(.*)/', config('app.url'), $matches);
-        
+        $doesMatch = preg_match('/https?:\/\/.+?\/(.*)/', $url, $matches);
         if(!$doesMatch || !isset($matches[1]) || empty(trim($matches[1]))) {
             return '/';
         }
-        return trim($matches[1]);
+        return '/' . ltrim(trim($matches[1]), '/'); // remove leading and trailing slashes
     }
 }
