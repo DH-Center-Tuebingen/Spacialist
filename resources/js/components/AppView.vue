@@ -551,6 +551,10 @@
             };
 
             onMounted(async _ => {
+                if(!systemStore.checkAccess(currentRoute.matched[0].path)) {
+                    return;
+                }
+
                 systemStore.initialize(locale).catch(e => {
                     console.log("ERROR", e)
                     if(e.response.status == 401) {
@@ -559,8 +563,6 @@
                         throwError(e);
                     }
                 });
-
-                systemStore.checkAccess(currentRoute.matched[0].path);
             });
 
             // WATCHER

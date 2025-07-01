@@ -132,6 +132,9 @@ export const useSystemStore = defineStore('system', {
         setMainViewTab(tab) {
             this.mainView.tab = tab;
         },
+        setConcepts(concepts) {
+            this.concepts = concepts;
+        },
         addCachedConceptSelection(data) {
             this.cachedConceptSelections[data.id] = data.selection;
         },
@@ -155,6 +158,15 @@ export const useSystemStore = defineStore('system', {
 
             return true;
         },
+        async setUser() {
+            const userStore = useUserStore();
+
+            const userData = await fetchUser();
+
+            const loginSuccessful = userData.status == 'success';
+            userStore.setLoginState(loginSuccessful);
+            userStore.setActiveUser(loginSuccessful ? userData.data : {});
+        },
         async initialize(locale) {
             resetState(this);
 
@@ -163,11 +175,7 @@ export const useSystemStore = defineStore('system', {
             const entityStore = useEntityStore();
             const userStore = useUserStore();
 
-            const userData = await fetchUser();
 
-            const loginSuccessful = userData.status == 'success';
-            userStore.setLoginState(loginSuccessful);
-            userStore.setActiveUser(loginSuccessful ? userData.data : {});
 
             const preData = await fetchPreData();
             this.concepts = preData.concepts;

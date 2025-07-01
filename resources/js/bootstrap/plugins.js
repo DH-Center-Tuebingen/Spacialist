@@ -1,4 +1,5 @@
 import { only } from '@/helpers/helpers.js';
+import useAttributeStore from './stores/attribute.js';
 import useEntityStore from './stores/entity.js';
 import useSystemStore from './stores/system.js';
 import useUserStore from './stores/user.js';
@@ -133,6 +134,7 @@ export const SpPS = {
         window.t = t;
         SpPS.data.app = app;
         SpPS.data.t = t;
+        SpPS.api.store.attributeStore = useAttributeStore();
         SpPS.api.store.entityStore = useEntityStore();
         SpPS.api.store.systemStore = useSystemStore();
         SpPS.api.store.userStore = useUserStore();

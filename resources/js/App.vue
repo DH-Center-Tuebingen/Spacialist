@@ -59,6 +59,7 @@
 
                 try {
                     await systemStore.checkAuthState();
+                    await systemStore.setUser();
                 } catch(e) {
                     if(e.response.status == 401) {
                         systemStore.setAppState(true);
