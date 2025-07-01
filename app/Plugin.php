@@ -5,9 +5,10 @@ namespace App;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+
+use App\File\Directory;
 
 class Plugin extends Model
 {
@@ -181,6 +182,10 @@ class Plugin extends Model
         $plugin = self::updateOrCreateFromInfo($info);
 
         return $plugin;
+    }
+
+    public static function getDirectory(): Directory {
+        return new Directory('plugins');
     }
 
     public function updateUpdateState($fromInfoVersion) {

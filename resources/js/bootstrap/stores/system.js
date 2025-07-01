@@ -6,6 +6,7 @@ import useEntityStore from './entity.js';
 import useUserStore from './user.js';
 
 import {
+    checkAccess,
     fetchAttributes,
     fetchBibliography,
     fetchTags,
@@ -23,7 +24,12 @@ import {
     uninstallPlugin,
     updatePlugin,
     removePlugin,
+    refreshSession,
 } from '@/api.js';
+
+import {
+    router,
+} from '@/bootstrap/router.js';
 
 import {
     fetchGlobals,
@@ -136,6 +142,18 @@ export const useSystemStore = defineStore('system', {
             }
 
             this.pluginStores[id] = defineStore(`plugin_${id}`, store);
+        },
+        async checkAuthState() {
+            return await fetchUser();
+        },
+        async checkAccess(route) {
+            const accessResponse = await checkAccess(route);
+            if(accessResponse.status == 200 && accessResponse?.data?.redirect) {
+                router.push(accessResponse.data.redirect);
+                return false;
+            }
+
+            return true;
         },
         async initialize(locale) {
             resetState(this);

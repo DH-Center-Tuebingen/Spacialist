@@ -9,6 +9,7 @@ use App\Preference;
 use App\ThConcept;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Str;
 
 class HomeController extends Controller
 {
@@ -29,7 +30,7 @@ class HomeController extends Controller
     public function checkAccesspointAccess(Request $request) {
         $user = auth()->user();
 
-        $accesspoint = $request->get('endpoint', '/');
+        $accesspoint = Str::finish($request->get('endpoint', '/'), '/');
 
         if(array_key_exists($accesspoint, $user->accesspoints)) {
             return response()->json(null, 204);
