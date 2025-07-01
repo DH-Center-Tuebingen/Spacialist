@@ -33,6 +33,7 @@ Broadcast::channel('room.entity.{entityId}', function (User $user, int $entityId
             'id' => $user->id,
         ];
     }
+    return false;
 });
 
 Broadcast::channel('private_testchannel', function (User $user) {
