@@ -19,7 +19,8 @@ All notable changes to this project will be documented in this file.
 - Changing _sub entity types_ only visible after page reload
 - 'Bootstrap not defined' on InteractiveMap
 - Fixed add/remove of plugin correctly setup in store and SpPS
-- Fixed error when generating cite key where bibliography title contained a space separated part of non-alphanumerical characters 
+- Fixed error when generating cite key where bibliography title contained a space separated part of non-alphanumerical characters
+- Reply to comment from notification
 
 ## 0.11 - Kilcrea
 ### Added

@@ -213,6 +213,10 @@
     import useUserStore from '@/bootstrap/stores/user.js';
 
     import {
+        postComment,
+    } from '@/api.js';
+
+    import {
         truncate,
         datestring,
         ago,
@@ -327,14 +331,14 @@
             const postReply = action => {
                 if(!state.replyMessage) return;
 
-                const isReply = action === 'to_chat' ? null : this.notf.data.comment;
-                this.$postComment(this.replyMessage, this.notf.data.resource, isReply, null, comment => {
-                    this.replyMessage = '';
-                    this.replySend = true;
-                    this.$emit('posted', {
-                        comment: comment
+                const isReply = action === 'to_chat' ? null : notf.value.data.comment;
+                postComment(state.replyMessage, notf.value.data.resource, isReply, null).then(comment => {
+                    state.replyMessage = '';
+                    state.replySend = true;
+                    context.emit('posted', {
+                        comment: comment,
                     });
-                })
+                });
             };
 
             // RETURN
@@ -351,6 +355,7 @@
                 markNotificationAsRead,
                 deleteNotification,
                 toggleReplyBox,
+                postReply,
                 // STATE
                 state,
             };
