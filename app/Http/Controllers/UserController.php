@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Sleep;
@@ -142,7 +143,7 @@ class UserController extends Controller {
         return response()->json($groups);
     }
 
-    public function downloadAvatar(Request $request): Response|BinaryFileResponse {
+    public function downloadAvatar(Request $request): JsonResponse|BinaryFileResponse {
         $filepath = $request->query('path');
         return User::getDirectory()->download($filepath);
     }
