@@ -23,8 +23,15 @@ class UrlUtils {
         if(!$doesMatch || !isset($matches[1])) {
             return '/';
         }
-        
-        $subpathUrl = trim($matches[1]);
-        return Str::start(trim($subpathUrl, '/'), '/');
+        $trimDefaultCharacters = " \n\r\t\v\0";
+        // Remove all irrelevant characters from the subpath
+        // including all leading and trailing slashes.
+        $subPathUrl = trim($matches[1], $trimDefaultCharacters . '/');
+        if(empty($subPathUrl)) {
+            return '/';
+        }
+
+        // Add leading slash to the subpath.
+        return  '/' . $subPathUrl;
     }
 }
