@@ -313,7 +313,6 @@ export const useEntityStore = defineStore('entity', {
             }
         },
         async move(entityId, parentId, rank) {
-
             const to_end = rank == null;
             await moveEntity(entityId, {
                 parent_id: parentId,

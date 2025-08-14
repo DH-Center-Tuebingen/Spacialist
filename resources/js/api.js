@@ -552,7 +552,7 @@ export async function moveEntity(entityId, {
     rank,
     parent_id,
     to_end = false,
-}={}) {
+} = {}) {
     const data = {
         rank: rank,
         parent_id,

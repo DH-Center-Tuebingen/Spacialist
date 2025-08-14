@@ -141,7 +141,7 @@ return [
     | your application but you are free to change this when necessary.
     |
     */
-    
+
     'path' => UrlUtils::getSubPath(env('APP_URL', '/')),
 
     /*
