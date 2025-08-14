@@ -55,7 +55,7 @@ class EntityMultipleAttribute extends AttributeBase
         $decodedData = json_decode($ids);
         $entityList = Entity::without(['user'])->whereIn('id', $decodedData)->get()->keyBy('id');
         return array_map(function($id) use ($entityList) {
-            return EntityAttribute::serializeFromEntity($id, $entityList[$id]);
+            return EntityAttribute::serializeFromEntity($id, $entityList[$id] ?? null);
         }, $decodedData);
     }
 }

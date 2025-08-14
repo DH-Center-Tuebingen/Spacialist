@@ -668,10 +668,14 @@
                 const p = f.getProperties();
                 if(p.entity) {
                     const et = Object.values(layers.value).find(l => l.entity_type_id == p.entity_type_id);
-                    return Object.values(state.mapEntityLayers).find(l => l.getProperties().layer_id == et.id);
-                } else {
-                    return Object.values(state.mapEntityLayers).find(l => l.getProperties().type.toLowerCase() == 'unlinked');
-                }
+                    
+                    if(et?.id){
+                        return Object.values(state.mapEntityLayers).find(l => l.getProperties().layer_id == et.id);
+                    }else {
+                        console.error('Entity type not found for feature', p);
+                    }
+                } 
+                return Object.values(state.mapEntityLayers).find(l => l.getProperties().type.toLowerCase() == 'unlinked');
             };
             const removeFeatureFromLayer = f => {
                 const layer = getLayerForFeature(f);
@@ -1469,7 +1473,7 @@
                     initializeDrawFeatures();
                     initializeMapEvents();
 
-                    document.querySelectorAll('[data-bs-toggle="popover"]').forEach(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+                    document.querySelectorAll('[data-bs-toggle="popover"]').forEach(popoverTriggerEl => new Popover(popoverTriggerEl));
                 });
             });
 

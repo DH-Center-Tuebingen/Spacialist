@@ -54,6 +54,21 @@
                                         class="me-2"
                                         :comment="comment"
                                     />
+                                    <span
+                                        v-if="comment.replies_count > 0"
+                                        :title="state.repliesOpen[comment.id] ? t('global.comments.hide_reply', comment.replies_count, {cnt: comment.replies_count}) : t('global.comments.show_reply', comment.replies_count, {cnt: comment.replies_count})"
+                                    >
+                                        <a
+                                            href="#"
+                                            class="text-decoration-none"
+                                            :class="{'text-muted': !state.repliesOpen[comment.id], 'text-primary': state.repliesOpen[comment.id]}"
+                                            @click.prevent="toggleReplies(comment)"
+                                        >
+                                            <i class="fas fa-fw fa-reply" />
+                                            ({{ comment.replies_count }})
+                                        </a>
+                                        &bull;
+                                    </span>
                                     <template v-if="comment.updated_at != comment.created_at">
                                         <span class="badge bg-light text-dark border">
                                             {{ t('global.edited') }}
@@ -175,29 +190,6 @@
                                     </div>
                                 </slot>
                             </div>
-                        </div>
-                        <div
-                            v-if="comment.replies_count > 0"
-                            class="d-flex flex-row justify-content-end"
-                        >
-                            <a
-                                href="#"
-                                class="small text-body"
-                                @click.prevent="toggleReplies(comment)"
-                            >
-                                <div v-show="state.repliesOpen[comment.id]">
-                                    <span>
-                                        {{ t('global.comments.hide_reply', comment.replies_count, {cnt: comment.replies_count}) }}
-                                    </span>
-                                    <i class="fas fa-fw fa-caret-up" />
-                                </div>
-                                <div v-show="!state.repliesOpen[comment.id]">
-                                    <span>
-                                        {{ t('global.comments.show_reply', comment.replies_count, {cnt: comment.replies_count}) }}
-                                    </span>
-                                    <i class="fas fa-fw fa-caret-down" />
-                                </div>
-                            </a>
                         </div>
                         <comment-list
                             v-if="state.repliesOpen[comment.id] && comment.replies"

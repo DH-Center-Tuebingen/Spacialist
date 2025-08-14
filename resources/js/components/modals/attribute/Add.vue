@@ -19,7 +19,6 @@
             </div>
             <div class="modal-body nonscrollable">
                 <attribute-template
-                    :type="'default'"
                     :external="state.formId"
                     @created="add"
                     @updated="updateAttribute"

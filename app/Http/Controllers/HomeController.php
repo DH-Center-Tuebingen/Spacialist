@@ -2,11 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Attribute;
 use App\AttributeTypes\AttributeBase;
+use App\Bibliography;
+use App\Entity;
 use App\EntityType;
+use App\Globals;
+use App\Permission;
 use App\Plugin;
 use App\Preference;
+use App\Role;
+use App\RolePreset;
 use App\ThConcept;
+use App\User;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 
@@ -39,6 +48,24 @@ class HomeController extends Controller
 
         $concepts = ThConcept::getMap($locale);
 
+        $tags = Globals::getTags();
+        $version = Globals::getVersion();
+        $plugins = Plugin::getWithMetadata();
+        $bibliography = Bibliography::orderBy('id')->get();
+
+        $attributes = Attribute::whereNull('parent_id')->withCount('entity_types')->orderBy('id')->get();
+        $attributeSelections = Attribute::getSelectionsFor($attributes);
+        $attributeTypes = AttributeBase::getTypes(true);
+
+        $users = User::with('roles')->withoutTrashed()->orderBy('id')->get();
+        $deletedUsers = User::with('roles')->onlyTrashed()->orderBy('id')->get();
+        $roles = Role::with(['permissions', 'derived'])->orderBy('id')->get();
+        $permissions = Permission::orderBy('id')->get();
+        $presets = RolePreset::all();
+
+        $topEntities = Entity::getEntitiesByParent(null, true);
+        $geometryTypes = Globals::getGeometryTypes();
+
         $datatypes = AttributeBase::getTypes();
         $datatypeData = [];
         foreach($datatypes as $key => $datatype) {
@@ -46,9 +73,6 @@ class HomeController extends Controller
                 $datatypeData[$key] = $datatype::getGlobalData();
             }
         }
-
-        // TODO handle layer relation in Map Plugin
-        // $entityTypes = EntityType::with(['sub_entity_types', 'layer', 'attributes'])
         $entityTypes = EntityType::with(['sub_entity_types', 'attributes'])
             ->orderBy('id')
             ->get();
@@ -62,6 +86,20 @@ class HomeController extends Controller
             'datatype_data' => $datatypeData,
             'colorsets' => sp_get_themes(),
             'analysis' => sp_has_analysis(),
+            'attributes' => $attributes,
+            'attributeSelections' => $attributeSelections,
+            'users' => $users,
+            'deleted_users' => $deletedUsers,
+            'roles' => $roles,
+            'permissions' => $permissions,
+            'presets' => $presets,
+            'topEntities' => $topEntities,
+            'bibliography' => $bibliography,
+            'tags' => $tags,
+            'version' => $version,
+            'plugins' => $plugins,
+            'geometryTypes' => $geometryTypes,
+            'attributeTypes' => $attributeTypes,
         ]);
     }
 

@@ -74,10 +74,15 @@
                     </div>
                 </div>
                 <div class="mb-2 row">
-                    <label class="col-form-label col-md-3 text-end">{{ t('main.datamodel.detail.properties.sub_types')
-                    }}</label>
+                    <label
+                        for="dme-allowed-sub-entity-types-select"
+                        class="col-form-label col-md-3 text-end"
+                    >
+                        {{ t('main.datamodel.detail.properties.sub_types') }}
+                    </label>
                     <div class="col-md-9">
                         <multiselect
+                            id="dme-allowed-sub-entity-types-select"
                             v-model="state.properties.sub_entity_types"
                             :object="true"
                             :mode="'tags'"
