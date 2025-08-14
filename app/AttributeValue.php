@@ -4,10 +4,10 @@ namespace App;
 
 use App\Geodata;
 use App\AttributeTypes\AttributeBase;
-use Illuminate\Database\Eloquent\Model;
-use Clickbar\Magellan\Database\Eloquent\HasPostgisColumns;
 use App\Traits\CommentTrait;
 use App\Traits\ModerationTrait;
+use Clickbar\Magellan\Data\Geometries\Geometry;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Searchable\Searchable;
@@ -16,7 +16,6 @@ use stdClass;
 
 class AttributeValue extends Model implements Searchable
 {
-    use HasPostgisColumns;
     use CommentTrait;
     use ModerationTrait;
     use LogsActivity;
@@ -55,8 +54,8 @@ class AttributeValue extends Model implements Searchable
         'thesaurus_val'
     ];
 
-    protected $postgisColumns = [
-        'geography_val',
+    protected $casts = [
+        'geography_val' => Geometry::class,
     ];
 
     protected $copyOn = [
@@ -166,27 +165,10 @@ class AttributeValue extends Model implements Searchable
     public static function getValueColumn($type) {
         return AttributeBase::getFieldFromType($type);
     }
-    
+
     public static function generateObject($attributeValues) {
         $data = [];
         foreach($attributeValues as $attributeValue) {
-            switch($attributeValue->attribute->datatype) {
-                case 'entity':
-                    $attributeValue->name = Entity::find($attributeValue->entity_val)->name;
-                    break;
-                case 'entity-mc':
-                    $names = [];
-                    foreach(json_decode($attributeValue->json_val) as $dec) {
-                        $names[] = Entity::find($dec)->name;
-                    }
-                    $attributeValue->name = $names;
-                    break;
-                case 'sql':
-                    // SQL will not have any entries in the attribute_values table
-                    break;
-                default:
-                    break;
-            }
             $value = $attributeValue->getValue();
             if($attributeValue->moderation_state == 'pending-delete') {
                 $attributeValue->value = [];

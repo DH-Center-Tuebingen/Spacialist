@@ -9,7 +9,7 @@
     "type": "project",
     "require": {
         "php": ">=8.2.0",
-        "clickbar/laravel-magellan": "^1.6.0",
+        "clickbar/laravel-magellan": "^2.0",
         "fileeye/pel": "^0.10.0",
         "guzzlehttp/guzzle": "^7.4",
         "laravel-lang/lang": "^12.21.1",

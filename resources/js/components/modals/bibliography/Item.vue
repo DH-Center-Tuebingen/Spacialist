@@ -95,7 +95,7 @@
                         class=""
                     >
                         <a
-                            :href="`download/bibliography?path=${state.data.file}`"
+                            :href="`api/download/bibliography?path=${state.data.file}`"
                             target="_blank"
                         >
                             {{ state.data.file.split('/')[1] }}

@@ -140,6 +140,10 @@ export const gradients = [
 ];
 
 export const splitColor = value => {
+    if(!value) {
+        return [0, 0, 0, 1];
+    }
+    
     let r, g, b, a;
     if(value.startsWith('#')) {
         const colors = value.substring(1);
@@ -167,7 +171,7 @@ export const splitColor = value => {
     }
 
     return [r, g, b, a];
-}
+};
 
 export const calculateColorSteps = (key, steps) => {
     const grad = gradients.find(g => g.key == key);
@@ -211,4 +215,4 @@ export const calculateColorSteps = (key, steps) => {
     }
 
     return colorList;
-}
+};

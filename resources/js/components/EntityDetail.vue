@@ -1003,7 +1003,7 @@
                 state.saving = true;
 
                 try {
-                    await entityStore.patchAttributes(state.entity.id, patches, dirtyValues, moderations);
+                    const data = await entityStore.patchAttributes(state.entity.id, patches, dirtyValues, moderations);
 
                     undirtyList(grps);
                     resetDirtyStates(grps);
@@ -1021,6 +1021,7 @@
                     );
                 } catch(error) {
                     let response = error.response;
+                    console.error('Error saving entity data', error);
 
                     if(!response) {
                         response = {
@@ -1035,7 +1036,7 @@
                     toast.$toast(
                         response.data.error,
                         `${response.status}: ${response.statusText}`, {
-                        channel: 'error',
+                        channel: 'danger',
                         autohide: true,
                         icon: true,
                         duration: 5000,

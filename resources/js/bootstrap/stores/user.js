@@ -250,7 +250,7 @@ export const useUserStore = defineStore('user', {
         },
         async updateRole(id, roleData) {
             return patchRoleData(id, roleData).then(data => {
-                const idx = state.roles.findIndex(role => role.id == id);
+                const idx = this.roles.findIndex(role => role.id == id);
                 if(idx > -1) {
                     const cleanData = only(data, ['display_name', 'description', 'permissions', 'is_moderated', 'updated_at', 'deleted_at']);
                     const currentData = this.roles[idx];

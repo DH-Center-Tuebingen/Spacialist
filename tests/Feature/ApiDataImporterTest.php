@@ -299,6 +299,28 @@ class ApiDataImporterTest extends TestCase {
                 ]
             ]);
     }
+    
+    public function testValidationErrorOnNonTopEntityAsTop(){
+            $file = $this->createCSVFile([
+                ['name', 'parent', 'Notizen'],
+                ['Feature #1', '', 'Feature is not a top level entity.']
+            ]);
+            
+            $this->userRequest()->post('/api/v1/entity/import/validate', [
+                'file' => $file,
+                'data' => $this->getData(parentColumn: 'parent', entityTypeId: 4), 
+                'metadata' => $this->getMetaData(),
+            ])
+                ->assertStatus(200)
+                ->assertJson([
+                    'errors' => ['[2] The relationship between entity types is not allowed: TOP -> Feature'],
+                    "summary" => [
+                        "create" => 0,
+                        "update" => 0,
+                        "conflict" => 1
+                    ]
+                ]);
+    }
 
     public function testValidationWithParentColumnTopLevelElementAlreadyExists() {
         $file = $this->createCSVFile([

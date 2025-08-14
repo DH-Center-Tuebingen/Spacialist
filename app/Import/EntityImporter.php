@@ -223,8 +223,11 @@ class EntityImporter {
             $childTh = EntityType::find($this->entityTypeId)->thesaurus_url;
             $childName = ThConcept::getLabel($childTh);
 
-            $parentTh = EntityType::find($parentTypeId)->thesaurus_url;
-            $parentName = ThConcept::getLabel($parentTh);
+            $parentName = "TOP";
+            if($parentTypeId){
+                $parentTh = EntityType::find($parentTypeId)->thesaurus_url;
+                $parentName = ThConcept::getLabel($parentTh);
+            }
 
             $this->rowConflict($rowIndex, "entity-importer.entity-type-relation-not-allowed", ["child" => $childName, "parent" => $parentName]);
             return false;

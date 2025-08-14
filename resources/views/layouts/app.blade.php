@@ -22,7 +22,7 @@
 
 
     @foreach($plugins as $plugin)
-        <script src="storage/plugins/{!! sp_slug($plugin->name) !!}-{!! $plugin->uuid !!}.js" defer> 
+        <script src="api/download/plugin/{!! sp_slug($plugin->name) !!}-{!! $plugin->uuid !!}.js" defer>
         </script>
     @endforeach
 </head>

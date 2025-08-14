@@ -1,6 +1,28 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.11.1
+### Added
+- Unit Tests for Directory.php
+### Changed
+- Added path value to XSRF cookie to prevent overwriting by another instance at the same domain
+- _Show x replies_ button in comment list moved to header
+### Fixed
+- Login not possible on instances in subfolder
+- Last editor not visible in _Entity Detail_ tab
+- Modal not closing on deleting _Entity_
+- _Avatar_ image and literature download path were absolute
+- _Entity Type_ color not showing
+- Excluded _SQL_ attribute from export
+- Plugin script can now be loaded from private route
+- Attributes could be added multiple times to entity-type
+- Changing color of entity type
+- Changing _sub entity types_ only visible after page reload
+- 'Bootstrap not defined' on InteractiveMap
+- Fixed add/remove of plugin correctly setup in store and SpPS
+- Fixed error when generating cite key where bibliography title contained a space separated part of non-alphanumerical characters
+- Reply to comment from notification
+
 ## 0.11 - Kilcrea
 ### Added
 - Added websockets for various data synchronization

@@ -101,6 +101,10 @@
     import {
         isAllowedSubEntityType,
     } from '@/helpers/helpers.js';
+    
+    import {
+        isPaginated,
+    } from '@/helpers/pagination.js';
 
     export default {
         props: {
@@ -121,6 +125,9 @@
                 state.parent = entity;
             };
             const filterEntityResults = results => {
+                if(isPaginated(results)) {
+                    results = results.data;
+                }
                 return results.filter(r => {
                     const onSame = r.id == entity.value.root_entity_id ||
                         r.id == entity.value.id;

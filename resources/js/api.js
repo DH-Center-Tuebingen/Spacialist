@@ -3,12 +3,14 @@ import {
     external,
     web_http,
 } from '@/bootstrap/http.js';
+
 import {
     only,
     simpleResourceType,
     throwError,
 } from '@/helpers/helpers.js';
-import File from './helpers/file';
+
+import File from '@/helpers/file.js';
 
 // GET AND STORE (FETCH)
 export async function logout() {
@@ -16,16 +18,8 @@ export async function logout() {
 }
 
 export async function getCsrfCookie() {
-    await $httpQueue.add(() => web_http.get('/sanctum/csrf-cookie').then(response => {
+    await $httpQueue.add(() => web_http.get('sanctum/csrf-cookie').then(response => {
     }));
-}
-
-export async function fetchVersion() {
-    return await $httpQueue.add(() => http.get('/version').then(response => response.data));
-}
-
-export async function fetchPlugins() {
-    return await $httpQueue.add(() => http.get('/plugin').then(response => response.data));
 }
 
 export async function uploadPlugin(file) {
@@ -69,57 +63,12 @@ export async function fetchUser() {
     return await $httpQueue.add(() => http.get('/auth/user').then(response => response.data));
 }
 
-export async function fetchUsers() {
-    const userData = await $httpQueue.add(() => http.get('user').then(response => response.data));
-    const roleData = await $httpQueue.add(() => http.get('role').then(response => response.data));
-    return {
-        user: userData,
-        role: roleData,
-    };
-}
-
-export async function fetchTopEntities() {
-    return await $httpQueue.add(() => http.get('/entity/top').then(response => response.data));
-}
-
 export async function fetchAttributes() {
     return await $httpQueue.add(() => http.get('editor/dm/attribute').then(response => response.data));
 }
 
-export async function fetchBibliography() {
-    return await $httpQueue.add(() => http.get('bibliography').then(response => response.data));
-}
-
-export async function fetchTags() {
-    return await $httpQueue.add(() => http.get('tag').then(response => response.data));
-}
-
 export async function fetchPreData() {
     return $httpQueue.add(() => http.get('pre').then(response => response.data));
-}
-
-export async function fetchGeometryTypes() {
-    return await $httpQueue.add(
-        () => http.get('editor/dm/geometry').then(response => {
-            let geom = [];
-            for(let i = 0; i < response.data.length; i++) {
-                const g = response.data[i];
-                geom.push({
-                    label: g,
-                    key: g.toLowerCase(),
-                });
-            }
-            geom.push({
-                label: 'Any',
-                key: 'any'
-            });
-            return geom;
-        })
-    );
-}
-
-export async function fetchAttributeTypes() {
-    return await $httpQueue.add(() => http.get('/editor/dm/attribute_types').then(response => response.data));
 }
 
 // GET
@@ -599,9 +548,15 @@ export async function multieditAttributes(entityIds, entries) {
     );
 }
 
-export async function moveEntity(entityId, parentId = null, rank = null) {
+export async function moveEntity(entityId, {
+    rank,
+    parent_id,
+    to_end = false,
+} = {}) {
     const data = {
-        parent_id: parentId,
+        rank: rank,
+        parent_id,
+        to_end,
     };
 
     return $httpQueue.add(
@@ -610,7 +565,7 @@ export async function moveEntity(entityId, parentId = null, rank = null) {
 }
 
 export async function patchEntityType(etid, updatedProps) {
-    const allowedData = only(updatedProps, ['thesaurus_url', 'is_root', 'sub_entity_types']);
+    const allowedData = only(updatedProps, ['thesaurus_url', 'is_root', 'sub_entity_types', 'color']);
     // If no allowed props updated, do nothing
     if(Object.keys(allowedData).length < 1) {
         return;

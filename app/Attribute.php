@@ -84,6 +84,30 @@ class Attribute extends Model
         }
     }
 
+    public static function getSelectionsFor(&$attributes): array {
+        $selections = [];
+        foreach($attributes as $a) {
+            $selection = $a->getSelection();
+            if(isset($selection)) {
+                // Workaround to check if it is a plain array or a assoc array (table columns)
+                // if assoc array, add each entry to their corresponding id
+                if(!isset($selection[0])) {
+                    foreach($selection as $id => $sel) {
+                        $selections[$id] = $sel;
+                    }
+                } else {
+                    $selections[$a->id] = $selection;
+                }
+            }
+
+            if($a->datatype == 'table') {
+                $a->columns = Attribute::where('parent_id', $a->id)->get()->keyBy('id');
+            }
+        }
+
+        return $selections;
+    }
+
     public function children() {
         return $this->hasMany('App\Attribute', 'parent_id');
     }

@@ -120,11 +120,13 @@ export const SpPS = {
         plugins: {},
         app: null,
         t: null,
+        pinia: null,
     },
-    initialize: (app, t) => {
+    initialize: (app, pinia, t) => {
         window.SpPS = SpPS;
         window.t = t;
         SpPS.data.app = app;
+        SpPS.data.pinia = pinia;
         SpPS.data.t = t;
         SpPS.api.store.systemStore = useSystemStore();
         SpPS.api.store.entityStore = useEntityStore();
@@ -264,6 +266,6 @@ export const SpPS = {
         }
         SpPS.api.store.systemStore.registerPluginPreference(mergedOptions);
     },
-}
+};
 
 export default SpPS;

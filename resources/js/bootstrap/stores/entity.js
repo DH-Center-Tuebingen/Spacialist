@@ -18,6 +18,7 @@ import {
     can,
     calculateEntityTypeColors,
     fillEntityData,
+    except,
     only,
 } from '@/helpers/helpers.js';
 
@@ -311,87 +312,85 @@ export const useEntityStore = defineStore('entity', {
                 };
             }
         },
-        move(entityId, parentId, rank) {
-            const data = {
+        async move(entityId, parentId, rank) {
+            const to_end = rank == null;
+            await moveEntity(entityId, {
                 parent_id: parentId,
-            };
-            if(rank || rank === 0) {
-                data.rank = rank;
+                rank: rank,
+                to_end: to_end,
+            });
+            this.processEntityMove(entityId, parentId, rank, to_end);
+        },
+        processEntityMove(entityId, parentId, rank, to_end) {
+            const entity = this.getEntity(entityId);
+            const oldRank = entity.rank;
+            const newRank = rank;
+            const rankIdx = newRank - 1;
+            const append = to_end;
+
+            entity.rank = newRank;
+
+            let oldSiblings;
+            if(!!entity.root_entity_id) {
+                oldSiblings = this.getEntity(entity.root_entity_id).children;
             } else {
-                data.rank = 0;
-                data.to_end = true;
+                oldSiblings = this.tree;
             }
-            return moveEntity(entityId, data).then(_ => {
-                const entity = this.getEntity(entityId);
-                const oldRank = entity.rank;
-                const newRank = data.rank;
-                const rankIdx = newRank - 1;
-                const append = data.to_end;
+            const idx = oldSiblings.findIndex(n => n.id == entity.id);
+            if(idx > -1) {
+                oldSiblings.splice(idx, 1);
+                oldSiblings.map(s => {
+                    if(s.rank > oldRank) {
+                        s.rank--;
+                    }
+                });
+            }
 
-                entity.rank = newRank;
-
-                let oldSiblings;
-                if(!!entity.root_entity_id) {
-                    oldSiblings = this.getEntity(entity.root_entity_id).children;
-                } else {
-                    oldSiblings = this.tree;
+            // Update children state of old parent
+            if(!!entity.root_entity_id) {
+                const oldParent = this.getEntity(entity.root_entity_id);
+                oldParent.children_count--;
+                if(oldParent.children_count == 0) {
+                    oldParent.state.openable = false;
+                    oldParent.state.opened = false;
                 }
-                const idx = oldSiblings.findIndex(n => n.id == entity.id);
-                if(idx > -1) {
-                    oldSiblings.splice(idx, 1);
-                    oldSiblings.map(s => {
-                        if(s.rank > oldRank) {
-                            s.rank--;
+            }
+
+            if(!parentId) {
+                // Set new (= unset) parent
+                entity.root_entity_id = null;
+                if(append) {
+                    this.tree.push(entity);
+                } else {
+                    this.tree.splice(rankIdx, 0, entity);
+                    this.tree.map(s => {
+                        if(s.rank >= newRank) {
+                            s.rank++;
                         }
                     });
                 }
-
-                // Update children state of old parent
-                if(!!entity.root_entity_id) {
-                    const oldParent = this.getEntity(entity.root_entity_id);
-                    oldParent.children_count--;
-                    if(oldParent.children_count == 0) {
-                        oldParent.state.openable = false;
-                        oldParent.state.opened = false;
-                    }
-                }
-
-                if(!parentId) {
-                    // Set new (= unset) parent
-                    entity.root_entity_id = null;
-                    if(append) {
-                        this.tree.push(entity);
-                    } else {
-                        this.tree.splice(rankIdx, 0, entity);
-                        this.tree.map(s => {
-                            if(s.rank >= newRank) {
-                                s.rank++;
-                            }
-                        });
-                    }
-                } else {
-                    // Update children state of new parent
-                    const parent = this.getEntity(data.parent_id);
-                    if(!!parent) {
-                        if(parent.childrenLoaded) {
-                            if(append) {
-                                parent.children.push(entity);
-                            } else {
-                                parent.children.splice(rankIdx, 0, entity);
-                                parent.children.map(s => {
-                                    if(s.rank >= newRank) {
-                                        s.rank++;
-                                    }
-                                });
-                            }
+            } else {
+                // Update children state of new parent
+                const parent = this.getEntity(parentId);
+                if(!!parent) {
+                    if(parent.childrenLoaded) {
+                        if(append) {
+                            parent.children.push(entity);
+                        } else {
+                            parent.children.splice(rankIdx, 0, entity);
+                            parent.children.map(s => {
+                                if(s.rank >= newRank) {
+                                    s.rank++;
+                                }
+                            });
                         }
-                        parent.children_count++;
-                        parent.state.openable = true;
                     }
-                    // Set new parent
-                    entity.root_entity_id = data.parent_id;
+                    parent.children_count++;
+                    parent.state.openable = true;
                 }
-            });
+                // Set new parent
+                entity.root_entity_id = parentId;
+            }
         },
         // delete entity from store (after delete event from websocket)
         soft_delete(node) {
@@ -421,7 +420,8 @@ export const useEntityStore = defineStore('entity', {
             return node;
         },
         async delete(entityId) {
-            return deleteEntity(entityId).then(_ => {
+            try {
+                await deleteEntity(entityId);
                 const entity = this.entities[entityId];
                 if(entity.root_entity_id) {
                     const parent = this.getEntity(entity.root_entity_id);
@@ -440,10 +440,10 @@ export const useEntityStore = defineStore('entity', {
                     }
                 }
                 delete this.entities[entityId];
-
                 handlePostDelete(entityId);
-                return entity;
-            });
+            } catch(e) {
+                console.error(e);
+            }
         },
         updateEntityMetadata(id, data) {
             const metadata = {};
@@ -500,7 +500,11 @@ export const useEntityStore = defineStore('entity', {
         },
         async fetchEntityMetadata(id) {
             return fetchEntityMetadata(id).then(data => {
-                return this.updateEntityMetadata(id, data);
+                if(data.user) {
+                    this.entities[id].user = data.user;
+                }
+
+                return this.updateEntityMetadata(id, except(data, 'user'));
             });
         },
         async patchEntityMetadata(entityTypeId, attributeId, etAttrId, metadata) {
@@ -663,7 +667,7 @@ export const useEntityStore = defineStore('entity', {
         async updateEntityType(id, props) {
             return patchEntityType(id, props).then(data => {
                 const entityType = this.entityTypes[id];
-                const values = only(data, ['thesaurus_url', 'updated_at', 'is_root', 'sub_entity_types']);
+                const values = only(data, ['thesaurus_url', 'updated_at', 'is_root', 'sub_entity_types', 'color']);
                 for(let k in values) {
                     entityType[k] = values[k];
                 }
@@ -861,7 +865,7 @@ export const useEntityStore = defineStore('entity', {
             this.treeSelectionTypeIds = [];
             this.treeSelectionTypeIds = updateSelectionTypeIdList(this.treeSelection);
         },
-        async search(query){
+        async search(query) {
             return searchEntity(query);
         }
     },

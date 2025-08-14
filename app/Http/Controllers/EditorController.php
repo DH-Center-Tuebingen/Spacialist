@@ -16,6 +16,7 @@ use App\ThConcept;
 use App\AttributeTypes\AttributeBase;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class EditorController extends Controller {
@@ -84,25 +85,7 @@ class EditorController extends Controller {
             ], 403);
         }
         $attributes = Attribute::whereNull('parent_id')->withCount('entity_types')->orderBy('id')->get();
-        $selections = [];
-        foreach($attributes as $a) {
-            $selection = $a->getSelection();
-            if(isset($selection)) {
-                // Workaround to check if it is a plain array or a assoc array (table columns)
-                // if assoc array, add each entry to their corresponding id
-                if(!isset($selection[0])) {
-                    foreach($selection as $id => $sel) {
-                        $selections[$id] = $sel;
-                    }
-                } else {
-                    $selections[$a->id] = $selection;
-                }
-            }
-
-            if($a->datatype == 'table') {
-                $a->columns = Attribute::where('parent_id', $a->id)->get()->keyBy('id');
-            }
-        }
+        $selections = Attribute::getSelectionsFor($attributes);
         return response()->json([
             'attributes' => $attributes,
             'selections' => $selections,
@@ -281,6 +264,18 @@ class EditorController extends Controller {
         }
 
         $aid = $request->get('attribute_id');
+        $alreadyAdded = EntityAttribute::where('entity_type_id', $etid)
+            ->where('attribute_id', $aid)
+            ->whereHas('attribute', function(Builder $query) {
+                $query->where('multiple', false);
+            })
+            ->exists();
+        if($alreadyAdded) {
+            return response()->json([
+                'error' => __('This attribute already exists on this entity-type')
+            ], 400);
+        }
+
         $pos = $request->get('position');
         if(!isset($pos)) {
             $attrsCnt = EntityAttribute::where('entity_type_id', '=', $etid)->count();
@@ -414,6 +409,7 @@ class EditorController extends Controller {
             }
         }
         $entityType->save();
+        $entityType->load('sub_entity_types');
 
         return response()->json($entityType, 200);
     }

@@ -2,7 +2,8 @@
 
 namespace App\File;
 
-use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -19,6 +20,22 @@ class Directory {
     public function __construct(string $directory, string $disk = 'local') {
         $this->disk = $disk;
         $this->directory = $directory;
+    }
+
+    /**
+     * Returns the disk name.
+     * @return string The disk name, e.g. 'local', 'public', etc.
+     */
+    public function getDisk(): string {
+        return $this->disk;
+    }
+
+    /**
+     * Returns the directory path.
+     * @return string The directory path, e.g. 'avatars'
+     */
+    public function getDirectory(): string {
+        return $this->directory;
     }
 
     /**
@@ -52,27 +69,60 @@ class Directory {
         return false;
     }
 
+    // TODO: resource is not (php 8.3) allowed as type, thus $file only typehinted in docblock
     /**
      * Stores a file inside the directory.
      *
      * @param string $filename The filename
-     * @param $file The file
+     * @param UploadedFile|string|resource $file The file
      * @return string The path to the file
      */
-    public function store(string $filename, $file): string {
-        return $file->storeAs($this->directory, $filename, $this->disk);
+    public function store(string $filename, $file): string|false {
+        if($file instanceof UploadedFile) {
+            return $file->storeAs($this->directory, $filename, $this->disk);
+        } else {
+            $filepath = Str::finish($this->directory, DIRECTORY_SEPARATOR) . $filename;
+            Storage::disk($this->disk)->put($filepath, $file);
+            return $filepath;
+        }
     }
 
     /**
      * Downloads a file inside the directory.
      *
      * @param string $filepath The path to the file
-     * @return Response|BinaryFileResponse The file as BinaryFileResponse or Response if the file is not inside the directory.
+     * @return JsonResponse|BinaryFileResponse The file as BinaryFileResponse or Response if the file is not inside the directory.
      */
-    function download(string $filepath): Response | BinaryFileResponse {
-        if($this->contains($filepath)){
-            return DownloadHandler::makeFileResponse($filepath);
+    function download(string $filepath): JsonResponse | BinaryFileResponse {
+        if($this->contains($filepath)) {
+            return $this->createFileResponse($filepath);
         }
-        return response()->noContent();
+        return self::notFound();
+    }
+
+    /**
+     * Downloads a file relative to the directory.
+     *
+     * @param string $filepath The path to the file without the directory prefix.
+     * @return JsonResponse|BinaryFileResponse The file as BinaryFileResponse or Response if the file is not inside the directory.
+     */
+    function downloadRelative(string $filepath): JsonResponse | BinaryFileResponse {
+        $storagePath = Str::finish($this->directory, DIRECTORY_SEPARATOR) . $filepath;
+        return $this->download($storagePath);
+    }
+
+    function createFileResponse(string $filepath): JsonResponse | BinaryFileResponse {
+        $mime = Storage::disk($this->disk)->mimeType($filepath);
+        $path = Storage::disk($this->disk)->path($filepath);
+        return response()->file($path, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename="'. $filepath . '"'
+        ]);
+    }
+
+    private static function notFound(): JsonResponse {
+        return response()->json([
+            'error' => __('File not found.')
+        ], 404);
     }
 }
