@@ -2,8 +2,6 @@
 
 namespace App\Utils;
 
-use Illuminate\Support\Str;
-
 class UrlUtils {
     /**
      * When serving multiple applications (also already spacialist + thesaurex)
@@ -16,7 +14,7 @@ class UrlUtils {
      *                  If there is no subpath present, '/' will be returned.
      *                  For Example https://spacialist.com/ancient-rome/ would result in '/ancient-rome'
      */
-    static function getSubPath($url) : string {
+    static function getSubPath(string $url) : string {
         $matches = [];
         // Get the string after the domain entry.
         $doesMatch = preg_match('/https?:\/\/.+?\/(.*)/', $url, $matches);

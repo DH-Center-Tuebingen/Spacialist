@@ -357,13 +357,13 @@ export async function duplicateEntity(entity) {
     );
 }
 
-export async function exportEntityTree(root){
+export async function exportEntityTree(root) {
     return $httpQueue.add(
-        () => http.get(`/entity/${root}/export`,{
+        () => http.get(`/entity/${root}/export`, {
             responseType: 'blob'
         })
-        .then(File.saveFileWithFallback('export_no_name'))
-        .catch(e => { throw e; })
+            .then(File.saveFileWithFallback('export_no_name'))
+            .catch(e => { throw e; })
     );
 }
 
@@ -552,7 +552,7 @@ export async function moveEntity(entityId, {
     rank,
     parent_id,
     to_end = false,
-}={}) {
+} = {}) {
     const data = {
         rank: rank,
         parent_id,
