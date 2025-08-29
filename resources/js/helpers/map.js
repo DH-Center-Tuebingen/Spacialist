@@ -23,7 +23,6 @@ import GeoJSON from 'ol/format/GeoJSON';
 
 import BingMaps from 'ol/source/BingMaps';
 import OSM from 'ol/source/OSM';
-import ImageTile from 'ol/source/ImageTile';
 import TileWMS from 'ol/source/TileWMS';
 import Vector from 'ol/source/Vector';
 
