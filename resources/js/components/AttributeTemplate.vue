@@ -469,10 +469,20 @@
                     types = attributeStore.attributeTypes;
                     break;
             }
+            
+            const preprocessDataTypeLabel = (attribute) => {
+                let label = `global.attributes.${attribute.datatype}`;
+                if(attribute.plugin){
+                    if(!attribute.label) return attribute.datatype;
+                    label = attribute.label;
+                }
+                return t(label);
+            };
+            
             types = types.slice().sort((a, b) => {
-                const labelA = a.plugin ? a.label : `global.attributes.${a.datatype}`;
-                const labelB = b.plugin ? b.label : `global.attributes.${b.datatype}`;
-                return t(labelA).localeCompare(t(labelB));
+                const labelA = preprocessDataTypeLabel(a);
+                const labelB = preprocessDataTypeLabel(b);
+                return labelA.localeCompare(labelB);
             });
 
             const state = reactive({

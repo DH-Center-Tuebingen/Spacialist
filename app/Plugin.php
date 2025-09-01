@@ -169,7 +169,7 @@ class Plugin extends Model
         return $plugin;
     }
 
-    public static function getWithMetadata(): array {
+    public static function getWithMetadata() {
         self::updateState();
         $plugins = self::all();
 
@@ -332,7 +332,7 @@ class Plugin extends Model
 
             self::getDirectory()->store(
                 $this->publicName(false),
-                $filehandle
+                $scriptPath
             );
             fclose($filehandle);
         } else {

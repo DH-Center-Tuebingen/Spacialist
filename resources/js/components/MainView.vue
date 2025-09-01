@@ -59,7 +59,9 @@
             </ul>
             <div class="mt-2 col px-0 overflow-hidden">
                 <keep-alive>
-                    <component :is="state.tabComponent" />
+                    <component
+                        :is="state.tabComponent"
+                    />
                 </keep-alive>
             </div>
         </div>
@@ -130,18 +132,21 @@
                     append: true,
                 });
             };
-           
+
             // DATA
             const state = reactive({
                 tab: computed(_ => systemStore.mainView.tab),
+                activePlugin: computed(() => {
+                    const plugin = state.tabPlugins.find(p => p.key == state.tab);
+                    return plugin ? plugin : null;
+                }),
                 tabComponent: computed(_ => {
                     if(state.tab === 'references') {
                         return ReferenceTab;
                     }
 
-                    const plugin = state.tabPlugins.find(p => p.key == state.tab);
-                    if(!!plugin) {
-                        return plugin.componentTag;
+                    if(state.activePlugin) {
+                        return state.activePlugin.component ?? state.activePlugin.componentTag;
                     } else {
                         return '';
                     }

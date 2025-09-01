@@ -45,9 +45,19 @@ class AttributeRegistry {
         foreach($installedPlugins as $plugin) {
             $attributeTypes = $plugin->getRegisteredAttributes();
             foreach($attributeTypes as $attributeType) {
-                $path = "App\\Plugins\\Address\\" . $attributeType['@attributes']['src'];
-                $class = basename($path, '.php');
-                self::register(new $class(), $plugin->name);
+                $AttributeNamespace = "App\\Plugins\\{$plugin->name}\\" . $attributeType['@attributes']['src'];
+
+                if(!class_exists($AttributeNamespace)) {
+                    info("Attribute class '{$AttributeNamespace}' does not exist.");
+                    continue;
+                }
+                
+                if(!is_subclass_of($AttributeNamespace, AttributeBase::class)) {
+                    info("Attribute class '{$AttributeNamespace}' is not a subclass of AttributeBase.");
+                    continue;
+                }
+
+                self::register(new $AttributeNamespace(), $plugin->name);
             }
         }
     }

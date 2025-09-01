@@ -45,7 +45,7 @@ abstract class AttributeBase
     }
 
     public static function getLabel() : ?string {
-        return static::$label;
+        return isset(static::$label) ? static::$label : null;
     }
 
     public static function getInTable() : bool {
@@ -56,7 +56,7 @@ abstract class AttributeBase
         return static::$field;
     }
 
-    public static function getHasSelection() : string {
+    public static function getHasSelection() : bool {
         return isset(static::$hasSelection) && static::$hasSelection;
     }
 
