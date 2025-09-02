@@ -337,7 +337,11 @@
                 class="tab-pane fade h-100 active-entity-detail-panel overflow-hidden"
                 role="tabpanel"
             >
-                <MetadataTab class="mb-auto scroll-y-auto h-100 pe-2" />
+                <!-- Only show the metadata tab when in the correct tab to avoid loading metadata. -->
+                <MetadataTab
+                    v-if="state.view === 'metadata'"
+                    class="mb-auto scroll-y-auto h-100 pe-2"
+                />
             </div>
 
             <div
@@ -501,10 +505,13 @@
             const entityStore = useEntityStore();
 
             // FETCH
-            entityStore.setById(route.params.id).then(_ => {
-                entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id);
-                state.initFinished = true;
-                updateAllDependencies();
+
+            onMounted(() => {
+                entityStore.setById(route.params.id).then(_ => {
+                    entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id);
+                    state.initFinished = true;
+                    updateAllDependencies();
+                }).catch(console.error);
             });
 
             // DATA
@@ -519,7 +526,6 @@
                 entityMetadata: {},
                 initFinished: false,
                 commentLoadingState: 'not',
-                metadataTabLoaded: false,
                 hiddenAttributeState: false,
                 attributesInTabs: true,
                 routeQuery: computed(_ => route.query),
@@ -685,6 +691,7 @@
                     return state.commentLoadingState === 'failed';
                 }),
                 activeUsers: computed(_ => entityStore.getActiveEntityUsers),
+                view: computed(_ => route.query.view || 'attributes-default')
             });
             const channels = {};
 
@@ -1189,7 +1196,6 @@
                             handleEntityCommentUpdated,
                             handleEntityCommentDeleted,
                         ]);
-                        await entityStore.setById(to.params.id);
                         return true;
                     }
                 } else {

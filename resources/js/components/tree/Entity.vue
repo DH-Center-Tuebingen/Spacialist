@@ -346,8 +346,8 @@
                 // if treeSelectionMode is active, itemClick is (wrongly) triggered, but has no data.
                 // Preventing itemClick to trigger would result in not checked checkboxes in node component
                 if(!item.data) return;
-
-                if(state.entity.id == item.data.id) {
+                
+                if(state?.entity?.id == item.data.id) {
                     router.push({
                         append: true,
                         name: 'home',

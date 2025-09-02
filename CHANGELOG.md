@@ -12,6 +12,18 @@ All notable changes to this project will be documented in this file.
 - Moved patch logic from EntityController to Models
 - Moved epoch attribute testing from into epoch attribute test
 - Patch attribute endpoint: moved aid param from params obj to top level, as other values were not used 
+## 0.12 - (Luxor)
+### Add
+- New Api endpoint for getting all entity details data in one request: GET::v1/entity/{id}/entity_detail
+
+### Changed
+- Alerts can now be dismissed
+- Now entity metadata is only loaded when accessing the metadata tab 
+
+## Fix
+- Removed redundant calls to the entity endpoint
+- Metadata tab error on submit (unknown variable)
+
 
 ## 0.11.1
 ### Added
