@@ -60,6 +60,26 @@ class Reference extends Model
         $this->save();
     }
 
+    public static function getByEntity($entityId) {
+        $references = Reference::with(['attribute', 'bibliography'])->where('entity_id', $entityId)->get();
+
+        $groupedReferences = [];
+        foreach($references as $r) {
+            if(isset($r->attribute)) {
+                $key = $r->attribute->thesaurus_url;
+            } else {
+                $key = 'on_entity';
+            }
+            if(!isset($groupedReferences[$key])) {
+                $groupedReferences[$key] = [];
+            }
+            unset($r->attribute);
+            $groupedReferences[$key][] = $r;
+        }
+
+        return $groupedReferences;
+    }
+
     public function user() {
         return $this->belongsTo('App\User');
     }
