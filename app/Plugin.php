@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\PluginMigration;
 use App\File\Directory;
 use App\Services\AccessPointsService;
 use Carbon\Carbon;
@@ -427,54 +428,16 @@ class Plugin extends Model
         return json_decode(file_get_contents($rolePresets), true);
     }
 
-    private function getClassWithPrefix($path, $classname): string {
-        return "App\\Plugins\\$this->name\\$path\\$classname";
+    public function getMigrationState(): array {
+        return PluginMigration::getMigrationState($this);
     }
 
-    private function getMigrationPath(): string {
-        return $this->getPath('Migration');
-    }
-    private function getSortedMigrations(bool $desc = false): array {
-        $migrationPath = $this->getMigrationPath();
-        if(file_exists($migrationPath) && is_dir($migrationPath)) {
-            $migrations = collect(File::files($migrationPath))->map(function($f) {
-                return $f->getFilename();
-            });
-            if($desc) {
-                $migrations = $migrations->sortDesc();
-            } else {
-                $migrations = $migrations->sort();
-            }
-
-            return $migrations->values()->toArray();
-        }
-        return [];
+    public function runMigrations(): void {
+        PluginMigration::run($this);
     }
 
-    private function runMigrations(): void {
-        foreach($this->getSortedMigrations() as $migration) {
-            preg_match("/^[1-9]\d{3}_\d{2}_\d{2}_\d{6}_(.*)\.php$/", $migration, $matches);
-            if(count($matches) != 2) continue;
-
-            $className = Str::studly($matches[1]);
-            require($this->getPath("Migration/$migration"));
-            $prefixedClassName = $this->getClassWithPrefix('Migration', $className);
-            $instance = new $prefixedClassName();
-            call_user_func([$instance, 'migrate']);
-        }
-    }
-
-    private function rollbackMigrations(): void {
-        foreach($this->getSortedMigrations(true) as $migration) {
-            preg_match("/^[1-9]\d{3}_\d{2}_\d{2}_\d{6}_(.*)\.php$/", $migration, $matches);
-            if(count($matches) != 2) continue;
-
-            $className = Str::studly($matches[1]);
-            require($this->getPath("Migration/$migration"));
-            $prefixedClassName = $this->getClassWithPrefix('Migration', $className);
-            $instance = new $prefixedClassName();
-            call_user_func([$instance, 'rollback']);
-        }
+    public function rollbackMigrations(): void {
+        PluginMigration::rollback($this);
     }
 
     private function publishScript(): void {

@@ -42,12 +42,21 @@ Route::middleware('auth:sanctum')->prefix('v1/plugin')->group(function() {
     Route::get('', 'PluginController@getPlugins');
     Route::get('/{id}', 'PluginController@installPlugin')->where('id', '[0-9]+');
 
-    Route::post('', 'PluginController@uploadPlugin');
+    // Migration Group
+    Route::middleware('can:preferences_create')->prefix("/migrate")->group(function(){
+        Route::get('/{plugin}/check', 'PluginController@getMigrationState');
 
-    Route::patch('/{id}', 'PluginController@updatePlugin')->where('id', '[0-9]+');
+        Route::post('/{plugin}', 'PluginController@migrate');
+        Route::post('/{plugin}/rollback', 'PluginController@rollback');
+    });
 
-    Route::delete('/{id}', 'PluginController@uninstallPlugin')->where('id', '[0-9]+');
-    Route::delete('/remove/{id}', 'PluginController@removePlugin')->where('id', '[0-9]+');
+    Route::middleware('can:preferences_create')->post('', 'PluginController@uploadPlugin');
+
+    Route::middleware('can:preferences_update')->patch('/{id}', 'PluginController@updatePlugin')->where('id', '[0-9]+');
+
+    // To 'disable' a plugin is just a modification, not a deletion operation.
+    Route::middleware('can:preferences_update')->delete('/{id}', 'PluginController@uninstallPlugin')->where('id', '[0-9]+');
+    Route::middleware('can:preferences_delete')->delete('/remove/{id}', 'PluginController@removePlugin')->where('id', '[0-9]+');
 });
 
 // ENTITY
@@ -232,22 +241,22 @@ Route::middleware('auth:sanctum')->prefix('v1/tag')->group(function() {
 // });
 
 // MAP
-Route::middleware('auth:sanctum')->prefix('v1/map')->group(function() {
-    Route::post('epsg/text', 'MapController@getEpsgByText');
+// Route::middleware('auth:sanctum')->prefix('v1/map')->group(function() {
+//     Route::post('epsg/text', 'MapController@getEpsgByText');
 
-    Route::patch('/{id}', 'MapController@updateGeometry')->where('id', '[0-9]+');
-    Route::patch('/layer/{id}/switch', 'MapController@changeLayerPositions')->where('id', '[0-9]+');
-    Route::patch('/layer/{id}/move', 'MapController@moveLayer')->where('id', '[0-9]+');
+//     Route::patch('/{id}', 'MapController@updateGeometry')->where('id', '[0-9]+');
+//     Route::patch('/layer/{id}/switch', 'MapController@changeLayerPositions')->where('id', '[0-9]+');
+//     Route::patch('/layer/{id}/move', 'MapController@moveLayer')->where('id', '[0-9]+');
 
-    Route::delete('/{id}', 'MapController@delete')->where('id', '[0-9]+');
-});
+//     Route::delete('/{id}', 'MapController@delete')->where('id', '[0-9]+');
+// });
 
 // ANALYSIS
-Route::middleware('auth:sanctum')->prefix('v1/analysis')->group(function() {
-    Route::post('export', 'AnalysisController@export');
-    Route::post('export/{type}', 'AnalysisController@export');
-    Route::post('filter', 'AnalysisController@applyFilterQuery');
-});
+// Route::middleware('auth:sanctum')->prefix('v1/analysis')->group(function() {
+//     Route::post('export', 'AnalysisController@export');
+//     Route::post('export/{type}', 'AnalysisController@export');
+//     Route::post('filter', 'AnalysisController@applyFilterQuery');
+// });
 
 // Open Access
 Route::prefix('v1/open')->group(function() {

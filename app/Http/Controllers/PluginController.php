@@ -47,12 +47,6 @@ class PluginController extends Controller
     }
 
     public function uploadPlugin(Request $request) {
-        $user = auth()->user();
-        if(!$user->can('preferences_create')) {
-            return response()->json([
-                'error' => __('You do not have the permission to upload plugin as zip')
-            ], 403);
-        }
         $this->validate($request, [
             'file' => 'required|file'
         ]);
@@ -208,8 +202,22 @@ class PluginController extends Controller
         }
         return Plugin::getDirectory()->downloadRelative($filepath);
     }
-    
-    //// REBASING:: Plugin Attribute 
+
+    public function migrate(Request $request, Plugin $plugin) {
+        $plugin->runMigrations();
+        return response()->json($plugin);
+    }
+
+    public function rollback(Request $request, Plugin $plugin) {
+        $plugin->rollbackMigrations();
+        return response()->json($plugin);
+    }
+
+    public function getMigrationState(Request $request, Plugin $plugin) {
+        return response()->json($plugin->getMigrationState());
+    }
+
+    //// REBASING:: Plugin Attribute
     // public function downloadScript(Request $request) {
     //     $file = "plugins/" . $request->query('src');
     //     return Plugin::getDirectory()->download($file);

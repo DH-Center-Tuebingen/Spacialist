@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex flex-column h-100">
+    <div class="container-fluid d-flex flex-column h-100 overflow-y-auto">
         <h4>
             {{ t('main.plugins.title', 2) }}
             <file-upload
@@ -60,7 +60,7 @@
                                 </ul>
                             </div>
                         </div>
-                        <div class="">
+                        <div class="d-flex flex-wrap gap-1">
                             <button
                                 v-if="isInstalled(plugin)"
                                 type="button"
@@ -86,7 +86,7 @@
                             >
                                 <button
                                     type="button"
-                                    class="btn btn-sm btn-outline-primary ms-2"
+                                    class="btn btn-sm btn-outline-primary"
                                     @click="update(plugin)"
                                 >
                                     <i class="fas fa-fw fa-download" />
@@ -104,11 +104,29 @@
                             </div>
                             <button
                                 type="button"
-                                class="btn btn-sm btn-outline-danger ms-2"
+                                class="btn btn-sm btn-outline-danger"
                                 @click="remove(plugin)"
                             >
                                 <i class="fas fa-fw fa-trash" />
                                 {{ t('main.plugins.remove') }}
+                            </button>
+                            <button
+                                class="btn btn-sm btn-outline-secondary"
+                                @click="migrate(plugin)"
+                            >
+                                Migrate
+                            </button>
+                            <button
+                                class="btn btn-sm btn-outline-secondary"
+                                @click="checkMigration(plugin)"
+                            >
+                                Check Migration
+                            </button>
+                            <button
+                                class="btn btn-sm btn-outline-secondary"
+                                @click="rollback(plugin, 1)"
+                            >
+                                Rollback
                             </button>
                         </div>
                     </div>
@@ -129,6 +147,8 @@
         computed,
         reactive,
     } from 'vue';
+
+    import http from '@/bootstrap/http.js';
 
     import { useI18n } from 'vue-i18n';
     import useSystemStore from '@/bootstrap/stores/system.js';
@@ -189,7 +209,7 @@
                 // Enable automatic upload
                 if(!!newFile && (Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error)) {
                     if(!newFile.active) {
-                        newFile.active = true
+                        newFile.active = true;
                     }
                 }
             };
@@ -206,12 +226,26 @@
                 files: [],
             });
 
+            const migrate = async plugin => {
+                return http.post(`/plugin/migrate/${plugin.id}`);
+            };
+
+            const checkMigration = async plugin => {
+                const result = await http.get(`/plugin/migrate/${plugin.id}/check`);
+                return result;  
+            };
+
+            const rollback = async (plugin) => {
+                return http.post(`/plugin/migrate/${plugin.id}/rollback`);
+            };
+
             // RETURN
             return {
                 t,
                 // HELPERS
                 can,
                 // LOCAL
+                checkMigration,
                 isInstalled,
                 updateAvailable,
                 showChangelog,
@@ -221,10 +255,12 @@
                 remove,
                 inputFile,
                 uploadZip,
+                migrate,
+                rollback,
                 // PROPS
                 // STATE
                 state,
             };
         },
-    }
+    };
 </script>
