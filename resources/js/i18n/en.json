@@ -14,7 +14,7 @@
         "edit": "Edit",
         "edited": "edited",
         "duplicate": "Duplicate",
-        "export":"Export",
+        "export": "Export",
         "sort": "Sort",
         "resort": "Re-sort",
         "update": "Update",
@@ -854,13 +854,20 @@
         "plugins": {
             "title": "Plugin | Plugins",
             "upload": "Upload Plugin",
-            "authors": "Authors",
+            "authors": "Author | Authors",
             "deactivate": "Deactivate",
             "activate": "Activate",
             "remove": "Remove",
             "update_to": "Update to <span class=\"fw-bold\">{ version }</span>",
             "changelog_info": "Show Changelog",
             "not_found": "No plugins found.",
+            "migrate": "Run",
+            "rollback": "Rollback",
+            "section": {
+                "info": "Information",
+                "migrations": "Migrationen",
+                "changelog": "Changelog"
+            },
             "modal": {
                 "changelog_title": "Plugin"
             },
@@ -869,6 +876,14 @@
                     "title": "Plugin updated",
                     "message": "Plugin {name} successfully updated to version {v} (from version {vo})."
                 }
+            },
+            "info": {
+                "add_migration_to_db": "Adds this migration manually to the database without running the migration. This is only necessary for older applications prior to version 0.12. Only continue if you know what you are doing!",
+                "no_migrations": "Plugin has no migrations.",
+                "no_migration_data": "No Migration data found.",
+                "migration-notice": "Please note, that the migration system is only available since version 0.12. If your application was installed before that, the migrations are not reflected correctly. The migrations must be set manually to reflect the correct application state.",
+                "migration-confirm": "Are you sure you want to run migrations? This may result in data loss, only continue if you know what you are doing!",
+                "rollback-confirm": "Are you sure you want to rollback the migrations? This may result in data loss, only continue if you know what you are doing!"
             }
         },
         "about": {

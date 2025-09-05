@@ -41,22 +41,23 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function() {
 Route::middleware('auth:sanctum')->prefix('v1/plugin')->group(function() {
     Route::get('', 'PluginController@getPlugins');
     Route::get('/{id}', 'PluginController@installPlugin')->where('id', '[0-9]+');
+     Route::get('/migrate/{plugin}/check', 'PluginController@getMigrationState');
 
-    // Migration Group
-    Route::middleware('can:preferences_create')->prefix("/migrate")->group(function(){
-        Route::get('/{plugin}/check', 'PluginController@getMigrationState');
 
-        Route::post('/{plugin}', 'PluginController@migrate');
-        Route::post('/{plugin}/rollback', 'PluginController@rollback');
-    });
 
-    Route::middleware('can:preferences_create')->post('', 'PluginController@uploadPlugin');
 
-    Route::middleware('can:preferences_update')->patch('/{id}', 'PluginController@updatePlugin')->where('id', '[0-9]+');
+
+
+    Route::post('', 'PluginController@uploadPlugin');
+    Route::post('/migrate/{plugin}', 'PluginController@migrate');
+    Route::post('/rollback/{plugin}', 'PluginController@rollback');
+    Route::post('/migrate/{plugin}/force_add', 'PluginController@addMigrationToDatabase');
+
+    Route::patch('/{id}', 'PluginController@updatePlugin')->where('id', '[0-9]+');
 
     // To 'disable' a plugin is just a modification, not a deletion operation.
-    Route::middleware('can:preferences_update')->delete('/{id}', 'PluginController@uninstallPlugin')->where('id', '[0-9]+');
-    Route::middleware('can:preferences_delete')->delete('/remove/{id}', 'PluginController@removePlugin')->where('id', '[0-9]+');
+    Route::delete('/{id}', 'PluginController@uninstallPlugin')->where('id', '[0-9]+');
+    Route::delete('/remove/{id}', 'PluginController@removePlugin')->where('id', '[0-9]+');
 });
 
 // ENTITY

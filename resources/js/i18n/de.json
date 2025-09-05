@@ -14,7 +14,7 @@
         "edit": "Bearbeiten",
         "edited": "bearbeitet",
         "duplicate": "Duplizieren",
-        "export":"Exportieren",
+        "export": "Exportieren",
         "sort": "Sortieren",
         "resort": "Umsortieren",
         "update": "Aktualisieren",
@@ -854,13 +854,20 @@
         "plugins": {
             "title": "Erweiterung | Erweiterungen",
             "upload": "Plugin hochladen",
-            "authors": "Ersteller",
+            "author": "Ersteller",
             "deactivate": "Deaktivieren",
             "activate": "Aktivieren",
             "remove": "Löschen",
             "update_to": "Auf <span class=\"fw-bold\">{ version }</span> aktualisieren",
             "changelog_info": "Änderungen anzeigen",
             "not_found": "Keine Erweiterungen gefunden.",
+            "migrate": "Migrieren",
+            "rollback": "Zurücksetzen",
+            "section": {
+                "info": "Informationen",
+                "migrations": "Migrationen",
+                "changelog": "Änderungsprotokoll"
+            },
             "modal": {
                 "changelog_title": "Erweiterung"
             },
@@ -869,6 +876,14 @@
                     "title": "Erweiterung aktualisiert",
                     "message": "Die Erweiterung {name} wurde erfolgreich auf Version {v} aktualisiert (von Version {vo})."
                 }
+            },
+            "info": {
+                "add_migration_to_db": "Füge die Migration manuell der Datenbank hinzu, ohne die Migration auszuführen. Dies ist nur für ältere Anwendungen vor Version 0.12 notwendig. Dies kann zu Datenverlust führen, fahren Sie nur fort, wenn Sie wissen, was Sie tun!",
+                "no_migrations": "Plugin hat keine Migrationen.",
+                "no_migration_data": "Keine Migrationsdaten gefunden.",
+                "migration_notice": "Bitte beachten Sie, dass das Migrationssystem erst seit Version 0.12 verfügbar ist. Wenn Ihre Anwendung vor dieser Version installiert wurde, werden die Migrationen nicht korrekt wiedergegeben. Die Migrationen müssen manuell gesetzt werden, um den korrekten Anwendungsstatus widerzuspiegeln.",
+                "migration-confirm": "Sind Sie sicher, dass Sie die Migrationen ausführen möchten? Dies kann zu Datenverlust führen, fahren Sie nur fort, wenn Sie wissen, was Sie tun!",
+                "rollback-confirm": "Sind Sie sicher, dass Sie die Migrationen zurücksetzen möchten? Dies kann zu Datenverlust führen, fahren Sie nur fort, wenn Sie wissen, was Sie tun!"
             }
         },
         "about": {

@@ -60,7 +60,7 @@ const updateUserAt = (context, userId, data, isProfile) => {
 export const useUserStore = defineStore('user', {
     state: _ => ({
         userLoggedIn: false,
-        user: {},
+        user: null,
         users: [],
         deletedUsers: [],
         roles: [],

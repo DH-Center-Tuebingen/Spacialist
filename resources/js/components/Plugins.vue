@@ -21,117 +21,12 @@
             </file-upload>
         </h4>
         <div class="row row-cols-3 g-3">
-            <div
+            <Plugin
                 v-for="plugin in state.sortedPlugins"
                 :key="plugin.name"
+                :value="plugin"
                 class="col"
-            >
-                <div class="card h-100">
-                    <div class="card-body d-flex flex-column">
-                        <div class="d-flex flex-row flex-grow-1 mb-3 justify-content-between">
-                            <div class="pe-2">
-                                <h5 class="card-title mb-1">
-                                    {{ plugin.metadata.title }}
-                                </h5>
-                                <h6 class="card-subtitle mb-2 text-muted">
-                                    <span class="badge bg-dark">
-                                        v{{ plugin.version }}
-                                    </span>
-                                    <span class="badge bg-primary ms-1">
-                                        {{ plugin.metadata.licence }}
-                                    </span>
-                                </h6>
-                                <p class="card-text border-start border-warning border-4 ps-2">
-                                    <md-viewer :source="plugin.metadata.description" />
-                                </p>
-                            </div>
-                            <div class="border-start ps-2">
-                                <h6 class="mb-0 text-end">
-                                    {{ t('main.plugins.authors') }}
-                                </h6>
-                                <ul class="list-group list-group-flush">
-                                    <li
-                                        v-for="(author, i) in plugin.metadata.authors"
-                                        :key="i"
-                                        class="list-group-item"
-                                    >
-                                        {{ author }}
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="d-flex flex-wrap gap-1">
-                            <button
-                                v-if="isInstalled(plugin)"
-                                type="button"
-                                class="btn btn-sm btn-outline-warning"
-                                @click="uninstall(plugin)"
-                            >
-                                <i class="fas fa-fw fa-times" />
-                                {{ t('main.plugins.deactivate') }}
-                            </button>
-                            <button
-                                v-else
-                                type="button"
-                                class="btn btn-sm btn-outline-success"
-                                @click="install(plugin)"
-                            >
-                                <i class="fas fa-fw fa-plus" />
-                                {{ t('main.plugins.activate') }}
-                            </button>
-                            <div
-                                v-if="updateAvailable(plugin)"
-                                class="btn-group"
-                                role="group"
-                            >
-                                <button
-                                    type="button"
-                                    class="btn btn-sm btn-outline-primary"
-                                    @click="update(plugin)"
-                                >
-                                    <i class="fas fa-fw fa-download" />
-                                    <!-- eslint-disable-next-line vue/no-v-html -->
-                                    <span v-html="t('main.plugins.update_to', {version: plugin.update_available})" />
-                                </button>
-                                <button
-                                    type="button"
-                                    class="btn btn-sm btn-outline-primary"
-                                    :title="t('main.plugins.changelog_info')"
-                                    @click="showChangelog(plugin)"
-                                >
-                                    <i class="fas fa-fw fa-file-pen" />
-                                </button>
-                            </div>
-                            <button
-                                type="button"
-                                class="btn btn-sm btn-outline-danger"
-                                @click="remove(plugin)"
-                            >
-                                <i class="fas fa-fw fa-trash" />
-                                {{ t('main.plugins.remove') }}
-                            </button>
-                            <button
-                                class="btn btn-sm btn-outline-secondary"
-                                @click="migrate(plugin)"
-                            >
-                                Migrate
-                            </button>
-                            <button
-                                class="btn btn-sm btn-outline-secondary"
-                                @click="checkMigration(plugin)"
-                            >
-                                Check Migration
-                            </button>
-                            <button
-                                class="btn btn-sm btn-outline-secondary"
-                                @click="rollback(plugin, 1)"
-                            >
-                                Rollback
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            />
             <alert
                 v-if="(!state.sortedPlugins || state.sortedPlugins.length == 0)"
                 :message="t('main.plugins.not_found')"
@@ -145,10 +40,11 @@
 <script>
     import {
         computed,
+        onMounted,
         reactive,
+        nextTick,
     } from 'vue';
 
-    import http from '@/bootstrap/http.js';
 
     import { useI18n } from 'vue-i18n';
     import useSystemStore from '@/bootstrap/stores/system.js';
@@ -159,32 +55,25 @@
         can,
     } from '@/helpers/helpers.js';
 
-    import {
-        showChangelogModal,
-    } from '@/helpers/modal.js';
+    import Plugin from './plugins/Plugin.vue';
 
     export default {
+        components: {
+            Plugin
+        },
         setup(props) {
             const { t } = useI18n();
             const systemStore = useSystemStore();
-            const toast = useToast();
 
-            // FUNCTIONS
-            const isInstalled = plugin => {
-                return !!plugin.installed_at;
-            };
-            const updateAvailable = plugin => {
-                return !!plugin.update_available;
-            };
-            const showChangelog = plugin => {
-                showChangelogModal(plugin);
-            };
-            const install = plugin => {
-                systemStore.installPlugin(plugin.id);
-            };
-            const uninstall = plugin => {
-                systemStore.uninstallPlugin(plugin.id);
-            };
+            let toast = null;
+            onMounted(() => {
+                // Ensure plugins are loaded
+                nextTick(() => {
+                    toast = useToast();
+                });
+            });
+
+
             const update = plugin => {
                 systemStore.patchPlugin(plugin.id).then(_ => {
                     const vo = plugin.version;
@@ -200,9 +89,7 @@
                     });
                 });
             };
-            const remove = plugin => {
-                systemStore.removePlugin(plugin.id);
-            };
+
             const inputFile = (newFile, oldFile) => {
                 if(!can('preferences_create')) return;
 
@@ -226,18 +113,6 @@
                 files: [],
             });
 
-            const migrate = async plugin => {
-                return http.post(`/plugin/migrate/${plugin.id}`);
-            };
-
-            const checkMigration = async plugin => {
-                const result = await http.get(`/plugin/migrate/${plugin.id}/check`);
-                return result;  
-            };
-
-            const rollback = async (plugin) => {
-                return http.post(`/plugin/migrate/${plugin.id}/rollback`);
-            };
 
             // RETURN
             return {
@@ -245,18 +120,8 @@
                 // HELPERS
                 can,
                 // LOCAL
-                checkMigration,
-                isInstalled,
-                updateAvailable,
-                showChangelog,
-                install,
-                uninstall,
-                update,
-                remove,
                 inputFile,
                 uploadZip,
-                migrate,
-                rollback,
                 // PROPS
                 // STATE
                 state,

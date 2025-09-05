@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Plugin;
 use App\Preference;
+use App\PluginMigration;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use ZipArchive;
@@ -212,6 +213,32 @@ class PluginController extends Controller
         $plugin->rollbackMigrations();
         return response()->json($plugin);
     }
+
+    public function addMigrationToDatabase(Request $request, Plugin $plugin) {
+        $this->validate($request, [
+            'name' => 'required|string'
+        ]);
+        $migrationName = $request->input('name');
+        $missingMigrations = PluginMigration::getMissingMigrations($plugin);
+        if(!in_array($migrationName, $missingMigrations)) {
+            return response()->json([
+                'error' => __('This migration does not exist or has already been run.')
+            ], 400);
+        }
+        //Determine the next batch number
+        $nextBatch = PluginMigration::max('batch') + 1;
+        //Record the migration as run   
+        PluginMigration::create([
+            'plugin_id' => $plugin->id,
+            'migration' => $migrationName,
+            'batch' => $nextBatch
+        ]);
+        return response()->json($plugin->getMigrationState());
+    }
+
+     /**
+     * Get the migration state for a plugin.
+     */
 
     public function getMigrationState(Request $request, Plugin $plugin) {
         return response()->json($plugin->getMigrationState());
