@@ -629,12 +629,11 @@ export const useEntityStore = defineStore('entity', {
                 entity = this.entities[entityId];
                 const entityDetail = await getEntityDetailsData(entityId);
 
-                // If the entity was not yet loaded into the cache, it means it's 
+                // If the entity was not yet loaded into the cache, it means it's
                 // an unloaded child entity. Therefore we need to open the path
                 // to that entity.
                 if(!entity) {
                     await openPath(entityDetail.parentIds);
-                    console.log(this.entities[entityId]);
                     entity = this.entities[entityId];
                 }
 
@@ -653,7 +652,6 @@ export const useEntityStore = defineStore('entity', {
 
                 // Fetch parent paths if they are not set already.
                 if(!entity.parentIds) {
-                    console.log(entity.parentIds);
                     const parentMetadata = await getEntityParentMetadata(entityId);
                     entity.parentIds = parentMetadata.parentIds;
                     entity.parentNames = parentMetadata.parentNames;
