@@ -212,12 +212,12 @@ class EntityController extends Controller {
         $data = $entity->getData($aid);
         return response()->json($data);
     }
-    
+
     /**
      * Bundles the requests of data reference, metadata and parentValue
      * to achieve much better performance.
      */
-    public function getEntityDetail(int $id){
+    public function getEntityDetail(int $id) {
          $user = auth()->user();
         if(!$user->can('entity_read') || !$user->can('entity_data_read')) {
             return response()->json([
@@ -226,7 +226,7 @@ class EntityController extends Controller {
         }
 
         $entity = null;
-        try{
+        try {
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
@@ -242,9 +242,9 @@ class EntityController extends Controller {
                 ], 400);
             }
         }
-        
+
         $data = $entity->getData();
-        
+
         return response()->json([
             'data' => $data,
             'metadata' => $entity->getAllMetadata(),
@@ -1184,13 +1184,13 @@ class EntityController extends Controller {
                 'error' => __('You do not have the permission to modify an entity'),
             ], 403);
         }
-        
+
        $request->validate([
             'rank' => 'required_without:to_end|integer',
             'parent_id' => 'nullable|integer|exists:entities,id',
             'to_end' => 'nullable|boolean',
         ]);
-        
+
         $entity;
         try{
             $entity = Entity::findOrFail($id);
@@ -1199,10 +1199,10 @@ class EntityController extends Controller {
             'error' => __('This entity does not exist'),
             ], 400);
         }
-        
+
         $rank = $request->get('rank') ?? null;
         $parent_id = $request->get('parent_id') ?? null;
-    
+
         try{
             $entity->move($parent_id, $rank, $user);
         } catch(Exception $e) {
