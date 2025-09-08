@@ -854,7 +854,7 @@
         "plugins": {
             "title": "Plugin | Plugins",
             "upload": "Upload Plugin",
-            "authors": "Author | Authors",
+            "author": "Author | Authors",
             "deactivate": "Deactivate",
             "activate": "Activate",
             "remove": "Remove",
@@ -880,10 +880,10 @@
             "info": {
                 "add_migration_to_db": "Adds this migration manually to the database without running the migration. This is only necessary for older applications prior to version 0.12. Only continue if you know what you are doing!",
                 "no_migrations": "Plugin has no migrations.",
-                "no_migration_data": "No Migration data found.",
-                "migration-notice": "Please note, that the migration system is only available since version 0.12. If your application was installed before that, the migrations are not reflected correctly. The migrations must be set manually to reflect the correct application state.",
+                "migration_notice": "Please note, that the migration system is only available since version 0.12. If your application was installed before that, the migrations are not reflected correctly. The migrations must be set manually to reflect the correct application state.",
                 "migration-confirm": "Are you sure you want to run migrations? This may result in data loss, only continue if you know what you are doing!",
-                "rollback-confirm": "Are you sure you want to rollback the migrations? This may result in data loss, only continue if you know what you are doing!"
+                "rollback-confirm": "Are you sure you want to rollback the migrations? This may result in data loss, only continue if you know what you are doing!",
+                "no_changelog": "No changelog available."
             }
         },
         "about": {

@@ -2,9 +2,9 @@
     <div class="d-flex flex-column gap-2">
         <div
             v-if="!migrationLoaded"
-            class="form-control"
+            class="form-control text-center"
         >
-            {{ t('main.plugins.info.no_migration_data') }}
+            <i class="fas fa-2x fa-fw fa-spinner fa-spin" />
         </div>
         <div
             v-else

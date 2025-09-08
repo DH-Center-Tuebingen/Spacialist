@@ -40,7 +40,10 @@
                         >{{ t(`main.plugins.section.${section}`) }}</a>
                     </li>
                 </ul>
-                <div class="my-3">
+                <div
+                    class="my-3 overflow-auto"
+                    style="max-height: 420px;"
+                >
                     <MigrationTab
                         v-if="page === 'migrations'"
                         :value="value"
@@ -49,6 +52,13 @@
                         v-else-if="page === 'info'"
                         :value="value"
                     />
+                    <ChangelogTab
+                        v-else-if="page === 'changelog'"
+                        :value="value"
+                    />
+                    <div v-else>
+                        404
+                    </div>
                 </div>
             </div>
 
@@ -103,7 +113,7 @@
                     <i class="fas fa-fw fa-trash" />
                     {{ t('main.plugins.remove') }}
                 </button>
-            </footer>   
+            </footer>
         </div>
     </div>
 </template>
@@ -118,11 +128,13 @@
 
     import useSystemStore from '@/bootstrap/stores/system.js';
 
+    import ChangelogTab from '@/components/plugins/tab/Changelog.vue';
     import MigrationTab from '@/components/plugins/tab/Migration.vue';
     import InformationTab from './tab/Information.vue';
 
     export default {
         components: {
+            ChangelogTab,
             MigrationTab,
             InformationTab,
         },

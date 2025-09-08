@@ -25,7 +25,7 @@
                 v-for="plugin in state.sortedPlugins"
                 :key="plugin.name"
                 :value="plugin"
-                class="col"
+                class="col col-12 col-md-6 col-xl-4"
             />
             <alert
                 v-if="(!state.sortedPlugins || state.sortedPlugins.length == 0)"
@@ -113,6 +113,10 @@
                 files: [],
             });
 
+            const columnClasses = [
+
+            ];
+
 
             // RETURN
             return {
@@ -125,6 +129,7 @@
                 // PROPS
                 // STATE
                 state,
+                columnClasses,
             };
         },
     };

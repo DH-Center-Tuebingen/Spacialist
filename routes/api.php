@@ -41,12 +41,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function() {
 Route::middleware('auth:sanctum')->prefix('v1/plugin')->group(function() {
     Route::get('', 'PluginController@getPlugins');
     Route::get('/{id}', 'PluginController@installPlugin')->where('id', '[0-9]+');
-     Route::get('/migrate/{plugin}/check', 'PluginController@getMigrationState');
-
-
-
-
-
+    Route::get('/migrate/{plugin}/check', 'PluginController@getMigrationState');
 
     Route::post('', 'PluginController@uploadPlugin');
     Route::post('/migrate/{plugin}', 'PluginController@migrate');

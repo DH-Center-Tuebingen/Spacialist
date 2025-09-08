@@ -2,7 +2,7 @@
     <div class="card-text my-4 text-secondary">
         <VueMarkdownIt :source="value.metadata.description" />
         <p>
-            <strong>{{ t("main.plugins.author", (value.metadata.authors ?? []).length) }}:</strong> {{
+            <strong>{{ t("main.plugins.author") }}:</strong> {{
                 (value.metadata.authors ?? []).join(', ') }}
         </p>
     </div>
