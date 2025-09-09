@@ -1,20 +1,20 @@
 <template>
     <div class="card-text my-4 text-secondary">
-        <VueMarkdownIt :source="value.metadata.description" />
+        <MarkdownText :value="value?.metadata?.description ?? ''" />
         <p>
-            <strong>{{ t("main.plugins.author") }}:</strong> {{
-                (value.metadata.authors ?? []).join(', ') }}
+            <strong>{{ t("main.plugins.author") }}:</strong> {{ authors }}
         </p>
     </div>
 </template>
 
 <script>
+    import { computed } from 'vue';
     import { useI18n } from 'vue-i18n';
-    import { VueMarkdownIt } from '@f3ve/vue-markdown-it';
+    import MarkdownText from '../../mde/MarkdownText.vue';
 
     export default {
         components: {
-            VueMarkdownIt,
+            MarkdownText
         },
         props: {
             value: {
@@ -22,11 +22,26 @@
                 required: true,
             },
         },
-        setup() {
+        setup(props) {
             const { t } = useI18n();
-            return { t };
+
+            const description = computed(() => {
+                return props.value?.metadata?.description ?? '';
+            });
+
+            const authors = computed(() => {
+                const authors = props.value?.metadata?.authors ?? [];
+                if(authors.length === 0) {
+                    return '–';
+                }
+                return authors.join(', ');
+            });
+
+            return {
+                t,
+                description,
+                authors
+            };
         }
     };
 </script>
-
-<style lang='scss' scoped></style>

@@ -56,6 +56,7 @@
     } from '@/helpers/helpers.js';
 
     import Plugin from './plugins/Plugin.vue';
+    import { isInstalled } from '../helpers/plugins';
 
     export default {
         components: {
@@ -109,7 +110,15 @@
             // DATA
             const state = reactive({
                 plugins: computed(_ => systemStore.plugins),
-                sortedPlugins: computed(_ => Object.values(state.plugins).sort((a, b) => a.metadata.title > b.metadata.title)),
+                sortedPlugins: computed(_ => {
+                    return Object.values(state.plugins).sort((a, b) => {
+
+                        if(isInstalled(a) && !isInstalled(b)) return -1;
+                        if(!isInstalled(a) && isInstalled(b)) return 1;
+
+                        return a.metadata.title.localeCompare(b.metadata.title);
+                    });
+                }),
                 files: [],
             });
 

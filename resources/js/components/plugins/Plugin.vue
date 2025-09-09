@@ -6,7 +6,7 @@
         <div
             class="card h-100"
             :class="{
-                ['opacity-75']: !isInstalled()
+                ['opacity-50']: !isInstalled()
             }"
         >
             <div class="card-body">
@@ -19,7 +19,7 @@
                             v{{ value.version }}
                         </span>
                         <span class="badge bg-primary ms-1">
-                            {{ value.metadata.licence }}
+                            {{ value.metadata.licence ? value.metadata.licence.toUpperCase() : '–' }}
                         </span>
                     </div>
                 </header>
@@ -28,7 +28,7 @@
                     <li
                         v-for="section in sections"
                         :key="section"
-                        class="nav-item user-select-none"
+                        class="nav-item user-select-none mb-1"
                     >
                         <a
                             aria-current="page"
@@ -41,7 +41,7 @@
                     </li>
                 </ul>
                 <div
-                    class="my-3 overflow-auto"
+                    class="overflow-auto"
                     style="max-height: 420px;"
                 >
                     <MigrationTab
@@ -127,6 +127,7 @@
     } from '@/helpers/modal.js';
 
     import useSystemStore from '@/bootstrap/stores/system.js';
+    import { isInstalled as isPluginInstalled } from '@/helpers/plugins.js';
 
     import ChangelogTab from '@/components/plugins/tab/Changelog.vue';
     import MigrationTab from '@/components/plugins/tab/Migration.vue';
@@ -153,7 +154,7 @@
             const systemStore = useSystemStore();
             // FUNCTIONS
             const isInstalled = _ => {
-                return !!props.value.installed_at;
+                return isPluginInstalled(props.value);
             };
             const updateAvailable = _ => {
                 return !!props.value.update_available;

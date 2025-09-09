@@ -5,7 +5,7 @@
 </template>
 
 <script>
-    import VueMarkdownIt from '@f3ve/vue-markdown-it';
+    import { VueMarkdownIt } from '@f3ve/vue-markdown-it';
 
     export default {
         components: {

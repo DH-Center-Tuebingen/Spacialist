@@ -14,3 +14,7 @@ export const removeScript = location => {
         document.head.removeChild(oldScript);
     }
 };
+
+export const isInstalled = (plugin) => {
+    return plugin?.installed_at !== null;
+}
