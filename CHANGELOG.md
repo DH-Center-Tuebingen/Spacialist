@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Errors in _map.js_
   - using undeclared & deprecated _TileImage_, now using _ImageTile_
-  - using undefined _layer_ in map.js, now using _layerdata.layer_
+  - using undefined _layer_ in map.js, now using _layerData.layer_
 
 ## 0.11.1
 ### Added
