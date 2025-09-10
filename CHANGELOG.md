@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Alerts can now be dismissed
 
+### Fixed
+- Errors in _map.js_
+  - using undeclared & deprecated _TileImage_, now using _ImageTile_
+  - using undefined _layer_ in map.js, now using _layerdata.layer_
+
 ## 0.11.1
 ### Added
 - Unit Tests for Directory.php
