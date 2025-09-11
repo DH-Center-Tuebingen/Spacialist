@@ -2,12 +2,47 @@
 
 namespace Tests\Unit\Migration;
 
+use Illuminate\Database\Migrations\Migration as LaravelMigration;
 // We need to use the default TestCase to avoid the Database to be refreshed.
 use Illuminate\Foundation\Testing\TestCase;
-
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Migration\FilesystemMigration;
+
+
+/**
+ *  The migrator is a very complex and file based system
+ *  so we just emulate it's core functionality for these few tests.
+ * (Only to test the proper calling of shouldRun() in up() and down())
+ */
+class Migrator {
+    static function run($migration){
+        $shouldRunMigration = $migration instanceof LaravelMigration
+            ? $migration->shouldRun()
+            : true;
+        
+        $skipped = true;
+        if($shouldRunMigration) {
+            $skipped = false;
+            $migration->up();
+        }
+        
+        return $skipped;
+    }
+
+    // Currently Laravel does not call shouldRun() on rollback (12.x)
+    static function rollback($migration){
+        $migration->down();
+        return false;
+    }
+}
+
+// We just need empty migrations as the Migrator is handling the check 
+// whether the migration was run or not.
+class TestMigration extends FilesystemMigration {
+    protected function migrate(): void {}
+    protected function rollback(): void {}
+}
 
 class FilesystemMigrationTest extends TestCase
 {
@@ -62,29 +97,48 @@ class FilesystemMigrationTest extends TestCase
     }
 
     /** @test */
-    public function should_not_run_when_environment_variable_is_false()
+    public function should_not_migrate_when_environment_variable_is_false()
     {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=false');
-
-        $migration = new class extends FilesystemMigration {
-            protected function migrate(): void {}
-            protected function rollback(): void {}
-        };
-
+        $migration = new TestMigration();
         $this->assertFalse($migration->shouldRun());
+        $skipped = Migrator::run($migration);
+        $this->assertTrue($skipped, 'migrate() should be skipped when shouldRun() returns false');
     }
 
     /** @test */
-    public function should_run_when_environment_variable_is_true()
+    public function should_migrate_when_environment_variable_is_true()
     {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
-
-        $migration = new class extends FilesystemMigration {
-            protected function migrate(): void {}
-            protected function rollback(): void {}
-        };
-
+        $migration = new TestMigration();
         $this->assertTrue($migration->shouldRun());
+        $skipped = Migrator::run($migration);
+        $this->assertFalse($skipped, 'migrate() should be run when shouldRun() returns true');
+    }
+    
+    /** @test 
+     * This is somewhat controversial, as it's only called when the migration is registered
+     * but when the variable is set for rollback, it would still happen. This is due to the current
+     * implementation in Laravel 12.x where shouldRun() is not called on rollback at all.
+     *
+    */
+    public function should_rollback_when_environment_variable_is_false()
+    {
+        putenv('ALLOW_FILESYSTEM_MIGRATIONS=false');
+        $migration = new TestMigration();
+        $this->assertFalse($migration->shouldRun());
+        $skipped = Migrator::rollback($migration);
+        $this->assertFalse($skipped, 'rollback() should be run when shouldRun() returns false');
+    }
+
+    /** @test */
+    public function should_rollback_when_environment_variable_is_true()
+    {
+        putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
+        $migration = new TestMigration();
+        $this->assertTrue($migration->shouldRun());
+        $skipped = Migrator::rollback($migration);
+        $this->assertFalse($skipped, 'rollback() should not be skipped when shouldRun() returns true');
     }
 
     /** @test */

@@ -1,31 +1,38 @@
 <?php
 
-    namespace App\Migration;
-    
-    use Illuminate\Support\Facades\Storage;
-    use League\Flysystem\UnableToListContents;
-    
-    /**
-     * FilesystemMigrations are a compromise to handle file system modifications in the application.
-     * When doing them, the user must specifically set the 'ALLOW_FILESYSTEM_MIGRATIONS' environment variable to true.
-     *
-     * However, as this is not a regular database migration, the application state can't be
-     * easily rolled back if something goes wrong, so it's highly unlikely that the 
-     * application state is the same after a failed FilesystemMigration!
-     *
-     * This should be considered when doing (or writing) such migrations.
-     */
-    abstract class FilesystemMigration extends Migration {
+namespace App\Migration;
+
+use Illuminate\Support\Facades\Storage;
+use League\Flysystem\UnableToListContents;
+
+/**
+ * FilesystemMigrations are a compromise to handle file system modifications in the application.
+ * When doing them, the user must specifically set the 'ALLOW_FILESYSTEM_MIGRATIONS' environment 
+ * variable to true.
+ *
+ * However, as this is not a regular database migration, the application state can't be
+ * easily rolled back if something goes wrong, so it's highly unlikely that the 
+ * application state is the same after a failed FilesystemMigration!
+ *
+ * This should be considered when doing (or writing) such migrations.
+ */
+abstract class FilesystemMigration extends Migration {
         
     /**
-     * Check if this migration should run based on custom conditions
+     * Check if this migration should run based on custom conditions.
+     * 
+     * IMPORTANT: Laravel's shouldRun() is not being called when a rollback is done,
+     * so in the scenario, that the migration is rolled back, and was in the migration database,
+     * then it will ignore the ALLOW_FILESYSTEM_MIGRATIONS variable and run nevertheless.
+     * This is only a problem in the very unlikely scenario, that the migration is run with the 
+     * ALLOW_FILESYSTEM_MIGRATIONS variable and then it was removed (to not allow filesystem migrations anymore on rollback).
      */
     public function shouldRun(): bool
     {
         // Skip if ALLOW_FILESYSTEM_MIGRATIONS not set or is set to false
         return env('ALLOW_FILESYSTEM_MIGRATIONS', false) === true;
     }
-
+    
     /**
      * Safely move directories between storage disks with verification.
      * The files are moved one by one, and each file is verified after copying.
@@ -51,13 +58,11 @@
         
         $source = Storage::disk($srcDisk);
         $target = Storage::disk($destDisk);
-
         if(!$source->exists($srcDirectory)) {
             // The source directory may not exists in the first place, we just skip the migration.
             // E.g. the structure was not obsolete but the migration is run nevertheless.
             return;
         }
-
         if(!$target->exists($destDirectory)) {
             $target->makeDirectory($destDirectory);
         }
@@ -93,7 +98,6 @@
             // thus we have to catch it, but there is no easy Laravel/Flysystem
             // approach to handle sym links
         }
-
         try{
             // Finally, we delete the source directory if it's empty.
             // Use files() and directories() separately to avoid symlink issues
