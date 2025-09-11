@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Migration\FilesystemMigration;
+use PHPUnit\Framework\Attributes\Test;
 
 
 /**
@@ -96,7 +97,7 @@ class FilesystemMigrationTest extends TestCase
         rmdir($path);
     }
 
-    /** @test */
+    #[Test]
     public function should_not_migrate_when_environment_variable_is_false()
     {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=false');
@@ -106,7 +107,7 @@ class FilesystemMigrationTest extends TestCase
         $this->assertTrue($skipped, 'migrate() should be skipped when shouldRun() returns false');
     }
 
-    /** @test */
+    #[Test]
     public function should_migrate_when_environment_variable_is_true()
     {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
@@ -116,7 +117,8 @@ class FilesystemMigrationTest extends TestCase
         $this->assertFalse($skipped, 'migrate() should be run when shouldRun() returns true');
     }
     
-    /** @test 
+    #[Test]
+    /** 
      * This is somewhat controversial, as it's only called when the migration is registered
      * but when the variable is set for rollback, it would still happen. This is due to the current
      * implementation in Laravel 12.x where shouldRun() is not called on rollback at all.
@@ -131,7 +133,7 @@ class FilesystemMigrationTest extends TestCase
         $this->assertFalse($skipped, 'rollback() should be run when shouldRun() returns false');
     }
 
-    /** @test */
+    #[Test]
     public function should_rollback_when_environment_variable_is_true()
     {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
@@ -141,7 +143,7 @@ class FilesystemMigrationTest extends TestCase
         $this->assertFalse($skipped, 'rollback() should not be skipped when shouldRun() returns true');
     }
 
-    /** @test */
+    #[Test]
     public function moves_files_between_disks_successfully()
     {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
@@ -176,7 +178,7 @@ class FilesystemMigrationTest extends TestCase
         $this->assertEquals('content2', $target->get('test_dir/file2.txt'));
     }
 
-    /** @test */
+    #[Test]
     public function handles_non_existent_source_directory_gracefully()
     {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
@@ -197,12 +199,12 @@ class FilesystemMigrationTest extends TestCase
         $this->assertFalse($target->exists('non_existent_dir'));
     }
 
-    /** @test 
-     * 
+    /** 
      * This test is not strictly necessary, but it ensures that
      * if a file with the same content already exists in the target,
      * the migration does not fail.
     */
+    #[Test]
     public function does_not_fail_when_files_have_same_content()
     {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
@@ -230,7 +232,7 @@ class FilesystemMigrationTest extends TestCase
         $this->assertEquals('same content', $target->get('test_dir/same_file.txt'));
     }
 
-    /** @test */
+    #[Test]
     public function fails_when_existing_file_has_different_content()
     {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
@@ -259,7 +261,7 @@ class FilesystemMigrationTest extends TestCase
         $migration->up();
     }
 
-    /** @test */
+    #[Test]
     public function creates_target_directory_if_not_exists()
     {
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
@@ -284,7 +286,7 @@ class FilesystemMigrationTest extends TestCase
         $this->assertTrue($target->exists('test_dir/file.txt'));
     }
     
-    /** @test */
+    #[Test]
     public function fails_when_encountering_symlinks(){
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
         
@@ -315,7 +317,7 @@ class FilesystemMigrationTest extends TestCase
         $this->assertFalse($target->exists('test_dir/symlink.txt'));
     }
     
-    /** @test */
+    #[Test]
     public function does_not_delete_source_directory_if_not_empty(){
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
         

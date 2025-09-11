@@ -4,8 +4,8 @@ namespace Tests\Unit\Migration;
 
 // We need to use the default TestCase to avoid the Database to be refreshed.
 use Illuminate\Foundation\Testing\TestCase;
-
 use Illuminate\Support\Facades\Storage;
+use PHPUnit\Framework\Attributes\Test;
 
 class MakeFilesPrivateMigrationTest extends TestCase
 {
@@ -74,7 +74,7 @@ class MakeFilesPrivateMigrationTest extends TestCase
         rmdir($path);
     }
 
-    /** @test */
+    #[Test]
     public function moves_files_from_public_to_private_storage()
     {
         // Get the actual migration
@@ -104,7 +104,7 @@ class MakeFilesPrivateMigrationTest extends TestCase
         $this->assertEquals('fake pdf content', $private->get('bibliography/paper1.pdf'));
     }
 
-    /** @test */
+    #[Test]
     public function can_rollback_migration()
     {
         // Get the actual migration
@@ -128,7 +128,7 @@ class MakeFilesPrivateMigrationTest extends TestCase
         $this->assertEquals('avatar content', $public->get('avatars/user1.jpg'));
     }
 
-    /** @test */
+    #[Test]
     public function skips_migration_when_no_directories_exist()
     {
         // Get the actual migration
@@ -151,7 +151,7 @@ class MakeFilesPrivateMigrationTest extends TestCase
         $this->assertFalse($private->exists('plugins'));
     }
     
-    /** @test */
+    #[Test]
     public function fail_when_directory_has_subdirectories(){
         // Get the actual migration
         $migration = require database_path('migrations/2024_12_04_073048_make_files_private.php');
