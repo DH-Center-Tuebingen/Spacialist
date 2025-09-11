@@ -2,20 +2,14 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.12 - (Luxor)
-### Changed
-- Alerts can now be dismissed
-
 ### Fixed
 - Errors in _map.js_
-  - using undeclared & deprecated _TileImage_, now using _ImageTile_
-  - using undefined _layer_ in map.js, now using _layerData.layer_
+### Changed
+  - Alerts can now be dismissed
 
 ## 0.11.1
 ### Added
 - Unit Tests for Directory.php
-### Changed
-- Added path value to XSRF cookie to prevent overwriting by another instance at the same domain
-- _Show x replies_ button in comment list moved to header
 ### Fixed
 - Login not possible on instances in subfolder
 - Last editor not visible in _Entity Detail_ tab
@@ -31,6 +25,9 @@ All notable changes to this project will be documented in this file.
 - Fixed add/remove of plugin correctly setup in store and SpPS
 - Fixed error when generating cite key where bibliography title contained a space separated part of non-alphanumerical characters
 - Reply to comment from notification
+### Changed
+- Added path value to XSRF cookie to prevent overwriting by another instance at the same domain
+- _Show x replies_ button in comment list moved to header
 
 ## 0.11 - Kilcrea
 ### Added
