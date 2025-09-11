@@ -2,10 +2,15 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.12 - (Luxor)
+### Added
+- API endpoint for getting all entity details data in one request: GET::v1/entity/{id}/entity_detail
 ### Fixed
+- Removed redundant calls to the entity endpoint
+- Metadata tab error on submit (unknown variable)
 - Errors in _map.js_
 ### Changed
-  - Alerts can now be dismissed
+- Alerts can now be dismissed
+- Now entity metadata is only loaded when accessing the metadata tab
 
 ## 0.11.1
 ### Added
