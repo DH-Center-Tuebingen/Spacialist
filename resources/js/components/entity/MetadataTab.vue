@@ -179,11 +179,8 @@
             const save = async _ => {
                 if(state.isDirty) {
                     patchEntityMetadata(state.entity.id, state.changedMetadata).then(data => {
-
-                        setMetadata({...metadata});
-
+                        setMetadata({...data.metadata});
                         entityStore.updateEntityMetadata(state.entity.id, data);
-
                         toast.$toast(
                             t('main.entity.toasts.updated_metadata.msg', {
                                 name: data.name

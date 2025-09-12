@@ -36,23 +36,8 @@ class ReferenceController extends Controller {
             ], 400);
         }
 
-        $references = Reference::with(['attribute', 'bibliography'])->where('entity_id', $id)->get();
-
-        $groupedReferences = [];
-        foreach($references as $r) {
-            if(isset($r->attribute)) {
-                $key = $r->attribute->thesaurus_url;
-            } else {
-                $key = 'on_entity';
-            }
-            if(!isset($groupedReferences[$key])) {
-                $groupedReferences[$key] = [];
-            }
-            unset($r->attribute);
-            $groupedReferences[$key][] = $r;
-        }
-
-        return response()->json($groupedReferences);
+        $references = Reference::getByEntity($id);
+        return response()->json($references);
     }
 
     // POST

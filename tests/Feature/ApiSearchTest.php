@@ -204,7 +204,7 @@ class ApiSearchTest extends TestCase
         $this->assertObjectHasProperty('to', $content);
         $this->assertObjectHasProperty('per_page', $content);
         $this->assertObjectHasProperty('current_page', $content);
-		$this->assertObjectHasProperty('current_page_url', $content);
+        $this->assertObjectHasProperty('current_page_url', $content);
         $this->assertObjectHasProperty('first_page_url', $content);
         $this->assertObjectHasProperty('next_page_url', $content);
         $this->assertObjectHasProperty('prev_page_url', $content);
