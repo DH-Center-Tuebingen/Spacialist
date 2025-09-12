@@ -17,8 +17,6 @@ trait FilesystemMigration {
      */
     public function shouldRun(): bool {
         // Skip if ALLOW_FILESYSTEM_MIGRATIONS not set or is set to false
-        $allow = env('ALLOW_FILESYSTEM_MIGRATIONS', false) === true;
-        info($allow ? "Filesystem Migrations are allowed" : "No filesystem migrations allowed");
         return env('ALLOW_FILESYSTEM_MIGRATIONS', false) === true;
     }
 

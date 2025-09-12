@@ -18,11 +18,9 @@ class DisableMigrationLogging {
      */
     public function handle(MigrationStarted | MigrationEnded $event): void {
         if($event instanceof MigrationStarted) {
-            info("Migration started");
             activity()->disableLogging();
         } else if($event instanceof MigrationEnded) {
             activity()->enableLogging();
-            info("Migration ended");
         }
     }
 }
