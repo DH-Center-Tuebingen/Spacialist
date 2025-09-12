@@ -3,16 +3,11 @@ All notable changes to this project will be documented in this file.
 
 ## 0.12 - (Luxor)
 ### Added
-- Added environment variable _ALLOW_FILESYSTEM_MIGRATIONS_ to explcitly enable filesystem migrations.
+- Added .env variable `ALLOW_FILESYSTEM_MIGRATIONS` to explcitly enable filesystem migrations
 ### Changed
 - Alerts can now be dismissed
-- Enhanced the migration system with project-specific base classes and filesystem migration support
-    - Added `App\Migration\Migration.php` base class that disables logging by default for all subclasses
-    - Created custom `make:migration` command that generates migrations by extending the project-specific base class
-    - Introduced `App\Migration\FilesystemMigration` class for migrations affecting the filesystem
-    - Converted migration `2024_12_04_073048_make_files_private.php` to use the new filesystem migration class
-    - Added unit tests to ensure the introduced safeguards and functions are working properly
-
+- Migrations now have logging automatically disabled
+- Migrations that require filesystem changes can now be handled using the `App\Traits\FilesystemMigration` trait (call `$this->safelyMoveDirectoryBetweenDisks(...)` with `ALLOW_FILESYTEM_MIGRATIONS` set to `true`)
 
 ## 0.11.1
 ### Added

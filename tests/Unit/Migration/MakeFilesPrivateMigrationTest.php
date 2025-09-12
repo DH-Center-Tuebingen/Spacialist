@@ -9,13 +9,12 @@ use PHPUnit\Framework\Attributes\Test;
 
 class MakeFilesPrivateMigrationTest extends TestCase
 {
-    protected function setUp(): void
-    {
+    protected function setUp(): void {
         parent::setUp();
-        
+
         // Set up test environment
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=true');
-        
+
         // Reconfigure the existing 'public' and 'local' disks to use test directories
         config([
             'filesystems.disks.public' => [
@@ -31,23 +30,21 @@ class MakeFilesPrivateMigrationTest extends TestCase
                 'throw' => true,
             ],
         ]);
-        
+
         // Clean up any existing test files
         $this->cleanupTestFiles();
     }
 
-    protected function tearDown(): void
-    {
+    protected function tearDown(): void {
         $this->cleanupTestFiles();
         putenv('ALLOW_FILESYSTEM_MIGRATIONS=false');
         parent::tearDown();
     }
 
-    private function cleanupTestFiles(): void
-    {
+    private function cleanupTestFiles(): void {
         $testPublicPath = storage_path('testing/make_private_migration/public');
         $testLocalPath = storage_path('testing/make_private_migration/local');
-        
+
         if(is_dir($testPublicPath)) {
             $this->deleteDirectory($testPublicPath);
         }
@@ -56,8 +53,7 @@ class MakeFilesPrivateMigrationTest extends TestCase
         }
     }
 
-    private function deleteDirectory(string $path): void
-    {
+    private function deleteDirectory(string $path): void {
         if(!is_dir($path)) {
             return;
         }
@@ -75,15 +71,14 @@ class MakeFilesPrivateMigrationTest extends TestCase
     }
 
     #[Test]
-    public function moves_files_from_public_to_private_storage()
-    {
+    public function moves_files_from_public_to_private_storage() {
         // Get the actual migration
         $migration = require database_path('migrations/2024_12_04_073048_make_files_private.php');
 
         // Setup test data in public storage
         $public = Storage::disk('public');
         $private = Storage::disk('local');
-        
+
         $public->makeDirectory('avatars');
         $public->makeDirectory('bibliography');
         $public->put('avatars/user1.jpg', 'fake avatar content');
@@ -105,15 +100,14 @@ class MakeFilesPrivateMigrationTest extends TestCase
     }
 
     #[Test]
-    public function can_rollback_migration()
-    {
+    public function can_rollback_migration() {
         // Get the actual migration
         $migration = require database_path('migrations/2024_12_04_073048_make_files_private.php');
 
         // Setup files in private storage (simulating after migration)
         $private = Storage::disk('local');
         $public = Storage::disk('public');
-        
+
         $private->makeDirectory('avatars');
         $private->put('avatars/user1.jpg', 'avatar content');
 
@@ -129,15 +123,14 @@ class MakeFilesPrivateMigrationTest extends TestCase
     }
 
     #[Test]
-    public function skips_migration_when_no_directories_exist()
-    {
+    public function skips_migration_when_no_directories_exist() {
         // Get the actual migration
         $migration = require database_path('migrations/2024_12_04_073048_make_files_private.php');
 
         // Ensure no directories exist
         $public = Storage::disk('public');
         $private = Storage::disk('local');
-        
+
         $this->assertFalse($public->exists('avatars'));
         $this->assertFalse($public->exists('bibliography'));
         $this->assertFalse($public->exists('plugins'));
@@ -150,9 +143,9 @@ class MakeFilesPrivateMigrationTest extends TestCase
         $this->assertFalse($private->exists('bibliography'));
         $this->assertFalse($private->exists('plugins'));
     }
-    
+
     #[Test]
-    public function fail_when_directory_has_subdirectories(){
+    public function fail_when_directory_has_subdirectories() {
         // Get the actual migration
         $migration = require database_path('migrations/2024_12_04_073048_make_files_private.php');
 
@@ -163,11 +156,11 @@ class MakeFilesPrivateMigrationTest extends TestCase
         $public->makeDirectory('avatars');
         $public->makeDirectory('bibliography');
         $public->makeDirectory('plugins');
-        
+
         $public->put('avatars/user1.jpg', 'fake avatar content');
         $public->put('bibliography/paper1.pdf', 'fake pdf content');
         $public->put('plugins/plugin1.php', 'fake plugin content');
-        
+
         $public->makeDirectory('avatars/subdir');
         $public->makeDirectory('bibliography/subdir');
         $public->makeDirectory('plugins/subdir');
@@ -185,7 +178,7 @@ class MakeFilesPrivateMigrationTest extends TestCase
         $this->assertFalse($public->exists('avatars/user1.jpg'));
         $this->assertFalse($public->exists('bibliography/paper1.pdf'));
         $this->assertFalse($public->exists('plugins/plugin1.php'));
-        
+
         $this->assertTrue($private->exists('avatars/user1.jpg'));
         $this->assertTrue($private->exists('bibliography/paper1.pdf'));
         $this->assertTrue($private->exists('plugins/plugin1.php'));
