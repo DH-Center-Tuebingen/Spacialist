@@ -8,10 +8,6 @@ import useUserStore from './user.js';
 
 import {
     checkAccess,
-    fetchAttributes,
-    fetchBibliography,
-    fetchTags,
-    fetchTopEntities,
     fetchPreData,
     fetchUser,
     searchConceptSelection,
@@ -323,8 +319,8 @@ export const useSystemStore = defineStore('system', {
             return uninstallPlugin(id).then(data => {
                 const plugin = data.plugin;
                 const kebabedName = kebabCase(plugin.name);
-                
-                
+
+
                 // We use the window element here, as it resulted in an error, when
                 // trying to import the SpPS variable diretly:
                 // `Cannot access "router" before initialization`
@@ -332,7 +328,7 @@ export const useSystemStore = defineStore('system', {
                 if(window?.SpPS?.data?.plugins && window.SpPS.data.plugins[kebabedName]) {
                     delete window?.SpPS.data.plugins[kebabedName];
                 }
-                
+
                 this.unregisterPluginSlots(kebabedName);
                 this.unregisterPluginPreferences(kebabedName);
                 this.updatePlugin({
