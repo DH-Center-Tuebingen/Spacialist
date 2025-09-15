@@ -74,10 +74,15 @@
                     </div>
                 </div>
                 <div class="mb-2 row">
-                    <label class="col-form-label col-md-3 text-end">{{ t('main.datamodel.detail.properties.sub_types')
-                    }}</label>
+                    <label
+                        for="dme-allowed-sub-entity-types-select"
+                        class="col-form-label col-md-3 text-end"
+                    >
+                        {{ t('main.datamodel.detail.properties.sub_types') }}
+                    </label>
                     <div class="col-md-9">
                         <multiselect
+                            id="dme-allowed-sub-entity-types-select"
                             v-model="state.properties.sub_entity_types"
                             :object="true"
                             :mode="'tags'"
@@ -236,8 +241,9 @@
             const removeAllEntityTypes = _ => {
                 state.properties.sub_entity_types = [];
             };
-            const addAttributeToEntityType = e => {
-                entityStore.addEntityTypeAttribute(currentRoute.params.id, e.element.id, e.to + 1).then(data => {
+            const addAttributeToEntityType = async e => {
+                try {
+                    const data = await entityStore.addEntityTypeAttribute(currentRoute.params.id, e.element.id, e.to + 1);
                     if(e.element.is_system && e.element.datatype == 'system-separator') {
                         showEditAttribute(data.id, currentRoute.params.id, {
                             is_system: e.element.is_system,
@@ -245,7 +251,17 @@
                             pivot: data.pivot,
                         });
                     }
-                });
+                } catch(e) {
+                    console.error(e);
+                    const errorMessage = e?.response?.data?.error || 'Unknown error occured!';
+                    toast.$toast(
+                        errorMessage,
+                        t('global.error.alert_title'),
+                        {
+                            channel: 'danger',
+                        }
+                    );
+                }
             };
             const onEditEntityAttribute = e => {
                 showEditAttribute(e.element.id, currentRoute.params.id, {
@@ -315,7 +331,7 @@
                 entityValues: computed(_ => {
                     let data = {};
                     if(!state.entityAttributes) return data;
-                    for(let i=0; i<state.entityAttributes.length; i++) {
+                    for(let i = 0; i < state.entityAttributes.length; i++) {
                         const curr = state.entityAttributes[i];
                         // several datatypes require a "valid"/non-string v-model
                         data[curr.id] = {
@@ -351,20 +367,20 @@
                     switch(state.selectedDependency.attribute.datatype) {
                         case 'boolean':
                             return [
-                                {id: '='}
+                                { id: '=' }
                             ];
                         case 'double':
                         case 'integer':
                         case 'date':
                         case 'percentage':
                             return [
-                                {id: '<'},
-                                {id: '>'},
-                                {id: '='},
+                                { id: '<' },
+                                { id: '>' },
+                                { id: '=' },
                             ];
                         default:
                             return [
-                                {id: '='}
+                                { id: '=' }
                             ];
                     }
                 }),

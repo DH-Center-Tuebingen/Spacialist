@@ -15,6 +15,12 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
+Route::middleware('auth:sanctum')->prefix('download')->group(function () {
+    Route::get('/avatar', 'UserController@downloadAvatar');
+    Route::get('/bibliography', 'BibliographyController@downloadFile');
+    Route::get('/plugin/{filepath}', 'PluginController@downloadScript');
+});
+
 Route::middleware('auth:sanctum')->prefix('v1')->group(function() {
     Route::get('/refresh', 'HomeController@updateSession');
     Route::get('/pre', 'HomeController@getGlobalData');
@@ -53,6 +59,7 @@ Route::middleware('auth:sanctum')->prefix('v1/entity')->group(function() {
     // This route is only used for the map plugin
     Route::get('/entity_type/{etid}/data/{aid}', 'EntityController@getDataForEntityType')->where('etid', '[0-9]+')->where('aid', '[0-9]+');
     Route::get('/{id}/data/{aid?}', 'EntityController@getData')->where('id', '[0-9]+');
+    Route::get('/{id}/entity_detail', 'EntityController@getEntityDetail')->where('id', '[0-9]+');
     Route::get('/{id}/metadata', 'EntityController@getMetadata')->where('id', '[0-9]+');
     Route::get('/{id}/reference', 'ReferenceController@getByEntity')->where('id', '[0-9]+');
     Route::get('/{id}/export', 'EntityController@exportEntityTree')->where('id', '[0-9]+');
@@ -200,22 +207,29 @@ Route::middleware('auth:sanctum')->prefix('v1/activity')->group(function() {
 
 // TAGS
 Route::middleware('auth:sanctum')->prefix('v1/tag')->group(function() {
-    Route::get('', 'TagController@getAll');
+    Route::get('', 'TagController@all');
 });
 
-// EXTENSIONS
+/**
+ * Plugins should have their own routes, if they are required to be implemented in the core,
+ * we are doing something wrong. Remove all plugin routes as soon as possible.
+ * 
+ * If some functionality is required for the core to access plugin data, we must adjust the plugin 
+ * system accordingly.
+ */
 
+ // EXTENSIONS
 // FILE
-Route::middleware('auth:sanctum')->prefix('v1/file')->group(function() {
-    Route::get('/{id}', 'FileController@getFile')->where('id', '[0-9]+');
-    Route::get('/{id}/link_count', 'FileController@getLinkCount')->where('id', '[0-9]+');
-    Route::get('/{id}/sub_files', 'FileController@getSubFiles')->where('id', '[0-9]+');
+// Route::middleware('auth:sanctum')->prefix('v1/file')->group(function() {
+//     Route::get('/{id}', 'FileController@getFile')->where('id', '[0-9]+');
+//     Route::get('/{id}/link_count', 'FileController@getLinkCount')->where('id', '[0-9]+');
+//     Route::get('/{id}/sub_files', 'FileController@getSubFiles')->where('id', '[0-9]+');
 
-    Route::post('/unlinked', 'FileController@getUnlinkedFiles');
-    Route::post('/linked/{cid}', 'FileController@getLinkedFiles')->where('cid', '[0-9]+');
+//     Route::post('/unlinked', 'FileController@getUnlinkedFiles');
+//     Route::post('/linked/{cid}', 'FileController@getLinkedFiles')->where('cid', '[0-9]+');
 
-    Route::delete('/{id}', 'FileController@deleteFile')->where('id', '[0-9]+');
-});
+//     Route::delete('/{id}', 'FileController@deleteFile')->where('id', '[0-9]+');
+// });
 
 // MAP
 Route::middleware('auth:sanctum')->prefix('v1/map')->group(function() {

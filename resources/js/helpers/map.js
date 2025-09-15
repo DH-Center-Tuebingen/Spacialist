@@ -18,6 +18,7 @@ import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
 
 import WKT from 'ol/format/WKT';
+import MVT from 'ol/format/MVT';
 import GeoJSON from 'ol/format/GeoJSON';
 
 import BingMaps from 'ol/source/BingMaps';
@@ -31,6 +32,10 @@ import Text from 'ol/style/Text';
 import Fill from 'ol/style/Fill';
 import Stroke from 'ol/style/Stroke';
 import Style from 'ol/style/Style';
+
+import VectorTileLayer from 'ol/layer/VectorTile';
+import VectorTileSource from 'ol/source/VectorTile';
+import { createXYZ } from 'ol/tilegrid';
 
 import { splitColor } from '@/helpers/colors.js';
 
@@ -177,7 +182,7 @@ export function createStyle(color = '#ffcc33', width = 2, styleOptions = {}) {
         });
     } else {
         options.image = new CircleStyle({
-            radius: width*3,
+            radius: width * 3,
             fill: new Fill({
                 color: color
             }),
@@ -242,11 +247,11 @@ export function createStyle(color = '#ffcc33', width = 2, styleOptions = {}) {
 export async function getLayers(includeEntityLayers = false) {
     const data = await getMapLayers(includeEntityLayers);
     const layers = {};
-    for(let i=0; i<data.baselayers.length; i++) {
+    for(let i = 0; i < data.baselayers.length; i++) {
         const l = data.baselayers[i];
         layers[l.id] = l;
     }
-    for(let i=0; i<data.overlays.length; i++) {
+    for(let i = 0; i < data.overlays.length; i++) {
         const l = data.overlays[i];
         layers[l.id] = l;
     }
@@ -264,32 +269,26 @@ export async function changeLayerClass(id) {
 }
 
 export function createNewLayer(layerData) {
-    const isBaseLayer = !layerData.is_overlay;
-    const isVisible = layerData.visible;
-    const opacity = parseFloat(layerData.opacity);
-    const url = layerData.url;
-    const attribution = layerData.attribution;
-    const apiKey = layerData.api_key;
-    const layers = layerData.layers;
-    const layerType = layerData.layer_type;
     let source;
+    let LayerClass = TileLayer;
+    let layer = 'osm';
+
+    const commonSourceOptions = {
+        attributions: layerData.attribution,
+        wrapX: false,
+        url: layerData.url,
+    };
 
     switch(layerData.type) {
         case 'xyz':
-            source = new ImageTile({
-                url: url,
-                attributions: attribution,
-                wrapX: false,
-            });
+            source = new ImageTile(commonSourceOptions);
             break;
         case 'wms':
             source = new TileWMS({
-                url: url,
-                attributions: attribution,
-                wrapX: false,
+                ...commonSourceOptions,
                 serverType: 'geoserver',
                 params: {
-                    layers: layers,
+                    layers: layerData.layers,
                     tiled: true,
                 },
             });
@@ -315,7 +314,21 @@ export function createNewLayer(layerData) {
                 - Streetside
                     */
                 imagerySet: layerType,
-            })
+            });
+            break;
+        case 'mvt':
+            const tileGrid = createXYZ({
+                maxZoom: 19
+            });
+
+            source = new VectorTileSource({
+                ...commonSourceOptions,
+                tileGrid,
+                format: new MVT(),
+            });
+
+            layer = 'mvt';
+            LayerClass = VectorTileLayer;
             break;
         default:
             source = new OSM({
@@ -324,15 +337,33 @@ export function createNewLayer(layerData) {
             break;
     }
 
-    return new TileLayer({
-        layer: 'osm',
+    const layerOptions = {
+        // Layer Properties
+        source: source,
+        opacity: parseFloat(layerData.opacity),
+        visible: layerData.visible,
+
+        // Only applied for VectorTileLayer
+        // style: createStyleFromColor(layerData.color),
+
+        // Custom Properties
         title: layerData.name,
-        baseLayer: isBaseLayer,
+        layer,
+        baseLayer: !layerData.is_overlay,
         displayInLayerSwitcher: true,
-        visible: isVisible,
-        opacity: opacity,
-        source: source
-    });
+    };
+
+    /**
+     * We need to add min and max zoom only when they are set
+     * otherwise the layer will interpret them as 0.
+     */
+    if(layerData.min_zoom)
+        layerOptions.minZoom = layerData.min_zoom;
+
+    if(layerData.max_zoom)
+        layerOptions.maxZoom = layerData.max_zoom;
+
+    return new LayerClass(layerOptions);
 }
 
 export function createVectorLayer(data = {}) {

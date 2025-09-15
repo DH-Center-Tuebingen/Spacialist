@@ -184,6 +184,17 @@ class Plugin extends Model
         return $plugin;
     }
 
+    public static function getWithMetadata() {
+        self::updateState();
+        $plugins = self::all();
+
+        foreach($plugins as $plugin) {
+            $plugin->metadata = $plugin->getMetadata();
+            $plugin->changelog = $plugin->getChangelog();
+        }
+        return $plugins;
+    }
+
     public static function getDirectory(): Directory {
         return new Directory('plugins');
     }
@@ -222,8 +233,6 @@ class Plugin extends Model
         $oldVersion = $this->version;
         // TODO is it really the same as install?
         $this->handleInstallation();
-
-
         $info = self::getInfo(base_path("app/Plugins/$this->name"));
         $this->update_available = null;
         $this->version = $info['version'];
@@ -331,19 +340,23 @@ class Plugin extends Model
         $scriptPath = base_path("app/Plugins/$name/js/script.js");
         if(file_exists($scriptPath)) {
             $filehandle = fopen($scriptPath, 'r');
-            Storage::put(
-                $this->publicName(),
-                $filehandle,
+
+            if(!$filehandle) {
+                throw new \Exception("Could not open script file for plugin $name.");
+            }
+
+            self::getDirectory()->store(
+                $this->publicName(false),
+                $filehandle
             );
             fclose($filehandle);
+        } else {
+            throw new \Exception("Script file for plugin $name does not exist at $scriptPath.");
         }
     }
 
     private function removeScript() {
-        $path = $this->publicName();
-        if(Storage::exists($path)) {
-            Storage::delete($path);
-        }
+        self::getDirectory()->delete($this->publicName());
     }
 
     private function addPermissions() {

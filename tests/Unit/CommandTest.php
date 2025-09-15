@@ -1,13 +1,12 @@
 <?php
 
 namespace Tests\Unit;
-
-use Tests\TestCase;
+use Tests\TransactionedTestCase;
 
 use App\Role;
 use App\User;
 
-class CommandTest extends TestCase {
+class CommandTest extends TransactionedTestCase {
     /**
      * Test creating role and user
      *

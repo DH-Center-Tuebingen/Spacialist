@@ -34,7 +34,7 @@
         <template #tag="{ option, handleTagRemove, disabled: tagDisabled }">
             <div
                 class="multiselect-tag"
-                :class="{ 'pe-2': tagDisabled }"
+                :class="computedTagClasses(option, tagDisabled)"
             >
                 <span @click.prevent="handleTagClick(option)">
                     {{ displayResult(option) }}
@@ -214,6 +214,11 @@
                 required: false,
                 default: false,
             },
+            conditionalClasses: {
+                type: Object,
+                required: false,
+                default: _ => new Object(),
+            },
         },
         emits: ['selected', 'entry-click'],
         setup(props, context) {
@@ -300,7 +305,7 @@
             const onSelected = value => {
                 context.emit('selected', value);
             };
-            
+
             const onChanged = value => {
                 context.emit('change', value);
             };
@@ -309,11 +314,25 @@
                 context.emit('entry-click', option);
             };
 
+            const computedTagClasses = (tag, disabled) => {
+                const classes = [];
+                if(disabled) {
+                    classes.push('pe-2');
+                }
+                const conditionKeys = Object.keys(props.conditionalClasses);
+                conditionKeys.forEach(key => {
+                    if(tag[key] === true) {
+                        classes.push(props.conditionalClasses[key]);
+                    }
+                });
+                return classes;
+            };
+
             // DATA
             const state = reactive({
                 id: `multiselect-search-${getTs()}`,
                 loading: false,
-                query: 'base',
+                query: '',
                 isSimpleChain: computed(_ => props.chain && props.chain.length > 0),
                 isFnChain: computed(_ => !!props.chainFn),
                 enableChain: computed(_ => state.isSimpleChain || state.isFnChain || context.slots.chain),
@@ -350,6 +369,7 @@
                 displayResult,
                 // handleChange,
                 handleTagClick,
+                computedTagClasses,
                 onChanged,
                 onSelected,
                 // STATE

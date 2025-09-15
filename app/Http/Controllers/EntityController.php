@@ -213,6 +213,48 @@ class EntityController extends Controller {
         return response()->json($data);
     }
 
+    /**
+     * Bundles the requests of data reference, metadata and parentValue
+     * to achieve much better performance.
+     */
+    public function getEntityDetail(int $id) {
+         $user = auth()->user();
+        if(!$user->can('entity_read') || !$user->can('entity_data_read')) {
+            return response()->json([
+                'error' => __('You do not have the permission to get an entity\'s data'),
+            ], 403);
+        }
+
+        $entity = null;
+        try {
+            $entity = Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist'),
+            ], 400);
+        }
+        if(isset($aid)) {
+            try {
+                Attribute::findOrFail($aid);
+            } catch(ModelNotFoundException $e) {
+                return response()->json([
+                    'error' => __('This attribute does not exist'),
+                ], 400);
+            }
+        }
+
+        $data = $entity->getData();
+
+        return response()->json([
+            'data' => $data,
+            'metadata' => $entity->getAllMetadata(),
+            'references' => Reference::getByEntity($id),
+            'parentIds' => $entity->parentIds,
+            'parentNames' => $entity->parentNames,
+            'attributeLinks' => $entity->attributeLinks,
+        ]);
+    }
+
     public function getMetadata($id) {
         $user = auth()->user();
         if(!$user->can('entity_read') || !$user->can('entity_data_read')) {
@@ -697,7 +739,7 @@ class EntityController extends Controller {
                 // attributes with the same name.
                 $attributeIds = [];
                 $attributeNames = [];
-                $excludedAttributeTypes = ['system-separator'];
+                $excludedAttributeTypes = ['system-separator', 'sql'];
                 foreach($attributes as $attribute) {
                     if(in_array($attribute->datatype, $excludedAttributeTypes)) {
                         continue;
@@ -1142,35 +1184,28 @@ class EntityController extends Controller {
                 'error' => __('You do not have the permission to modify an entity'),
             ], 403);
         }
-        $this->validate($request, [
-            'rank' => 'required|integer',
+
+       $request->validate([
+            'rank' => 'required_without:to_end|integer',
             'parent_id' => 'nullable|integer|exists:entities,id',
-            'to_end' => 'boolean',
+            'to_end' => 'nullable|boolean',
         ]);
 
+        $entity;
         try{
-            Entity::findOrFail($id);
+            $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => __('This entity does not exist'),
+            'error' => __('This entity does not exist'),
             ], 400);
         }
 
-        $rank = $request->get('rank');
-        $parent_id = $request->get('parent_id');
-        $addToEnd = $request->get('to_end');
-
-        if($addToEnd) {
-            if(isset($parent_id)) {
-                $rank = Entity::where('root_entity_id', $parent_id)->max('rank') + 1;
-            }else{
-                $rank = Entity::whereNull('root_entity_id')->max('rank') + 1;
-            }
-        }
+        $rank = $request->get('rank') ?? null;
+        $parent_id = $request->get('parent_id') ?? null;
 
         try{
-            Entity::patchRanks($rank, $id, $parent_id, $user);
-        }catch(Exception $e) {
+            $entity->move($parent_id, $rank, $user);
+        } catch(Exception $e) {
             return response()->json([
                 'error' => $e->getMessage(),
             ], 400);

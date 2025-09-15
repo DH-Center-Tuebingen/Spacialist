@@ -102,10 +102,7 @@ class OpenAccessController extends Controller
         $attributes = $request->input('attributes', []);
 
         $results = [];
-
-        info($types);
         $entityIds = empty($types) ? Entity::pluck('id') : Entity::whereIn('entity_type_id', $types)->pluck('id');
-        info($entityIds);
 
         if(!empty($attributes)) {
             $attributeValues = AttributeValue::whereIn('entity_id', $entityIds)->whereIn('attribute_id', $attributes)->get();

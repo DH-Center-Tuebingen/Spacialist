@@ -15,7 +15,6 @@ import {
 import {
     resetUserPassword,
     multieditAttributes,
-    moveEntity,
 } from '@/api.js';
 
 import {
@@ -573,7 +572,7 @@ export function ShowMoveEntity(entity, onMoved) {
                 modal.destroy();
             },
             onConfirm(parentId) {
-                moveEntity(entity.id, parentId).then(data => {
+                useEntityStore().move(entity.id, parentId).then(data => {
                     if(!!onMoved) {
                         onMoved(entity.id, parentId, data);
                     }

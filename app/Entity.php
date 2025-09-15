@@ -90,6 +90,7 @@ class Entity extends Model implements Searchable {
             'creator' => $this->creator,
             'editors' => $this->editors,
             'metadata' => $this->metadata,
+            'user' => $this->user,
         ];
     }
 
@@ -267,6 +268,17 @@ class Entity extends Model implements Searchable {
             $query = self::whereNull('root_entity_id');
         }
         return $query;
+    }
+    
+    public function move($parentId, $rank, $user) {
+        if($rank == null){
+            if(isset($parentId)) {
+                $rank = Entity::where('root_entity_id', $parentId)->max('rank') + 1;
+            }else{
+                $rank = Entity::whereNull('root_entity_id')->max('rank') + 1;
+            }
+        }
+        Entity::patchRanks($rank, $this->id, $parentId, $user);
     }
 
     public static function patchRanks($rank, $id, $parent, $user) {

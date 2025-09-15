@@ -10,6 +10,7 @@
         :limit="10"
         :can-fetch-more="state.hasNextPage"
         :append-to-body="true"
+        :conditional-classes="{'deleted': 'bg-danger'}"
         @change="changed"
         @entry-click="entity => entryClicked(entity)"
     />
@@ -99,6 +100,7 @@
 
             const entryClicked = entity => {
                 if(props.hideLink) return;
+                if(entity.deleted) return;
 
                 router.push({
                     name: 'entitydetail',
@@ -109,8 +111,8 @@
                 });
             };
             const handleDisplayResult = entity => {
-                if(searchEntityInTypes.name == 'error.deleted_entity') {
-                    return t('main.entity.attributes.tablsearchEntityInTypes.error.deleted_entity');
+                if(entity.name == 'error.deleted_entity') {
+                    return t('main.entity.attributes.table.error.deleted_entity');
                 }
                 return entity?.name;
             };
@@ -192,9 +194,9 @@
                     let value = null;
                     if(v.fieldValue) {
                         if(props.multiple) {
-                            value = v.fieldValue.map(fv => only(fv, ['id', 'name']));
+                            value = v.fieldValue.map(fv => only(fv, ['id', 'name', 'deleted']));
                         } else {
-                            value = only(v.fieldValue, ['id', 'name']);
+                            value = only(v.fieldValue, ['id', 'name', 'deleted']);
                         }
                     }
                     return value;

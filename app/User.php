@@ -75,11 +75,9 @@ class User extends Authenticatable
     }
 
     public function deleteAvatar() : void{
-        $success = self::getDirectory()->delete($this->avatar);
-        if($success) {
-            $this->avatar = null;
-            $this->save();
-        }
+        self::getDirectory()->delete($this->avatar);
+        $this->avatar = null;
+        $this->save();
     }
 
     public function setPermissions() {

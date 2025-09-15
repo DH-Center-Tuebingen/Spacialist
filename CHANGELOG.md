@@ -4,8 +4,36 @@ All notable changes to this project will be documented in this file.
 ## 0.12 - (Luxor)
 ### Added
 - Access Points (Plugins can define additional access points to restrict user access to certain parts of the plugin)
+- API endpoint for getting all entity details data in one request: GET::v1/entity/{id}/entity_detail
+### Fixed
+- Removed redundant calls to the entity endpoint
+- Metadata tab error on submit (unknown variable)
+- Errors in _map.js_
 ### Changed
 - Alerts can now be dismissed
+- Now entity metadata is only loaded when accessing the metadata tab
+
+## 0.11.1
+### Added
+- Unit Tests for Directory.php
+### Fixed
+- Login not possible on instances in subfolder
+- Last editor not visible in _Entity Detail_ tab
+- Modal not closing on deleting _Entity_
+- _Avatar_ image and literature download path were absolute
+- _Entity Type_ color not showing
+- Excluded _SQL_ attribute from export
+- Plugin script can now be loaded from private route
+- Attributes could be added multiple times to entity-type
+- Changing color of entity type
+- Changing _sub entity types_ only visible after page reload
+- 'Bootstrap not defined' on InteractiveMap
+- Fixed add/remove of plugin correctly setup in store and SpPS
+- Fixed error when generating cite key where bibliography title contained a space separated part of non-alphanumerical characters
+- Reply to comment from notification
+### Changed
+- Added path value to XSRF cookie to prevent overwriting by another instance at the same domain
+- _Show x replies_ button in comment list moved to header
 
 ## 0.11 - Kilcrea
 ### Added

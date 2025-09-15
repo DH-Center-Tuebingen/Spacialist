@@ -18,6 +18,7 @@
     "You do not have the permission to add references": "You do not have the permission to add references",
     "This entity does not exist": "This entity does not exist",
     "This attribute does not exist": "This attribute does not exist",
+    "This attribute already exists on this entity-type": "This attribute already exists on this entity-type",
     "You do not have the permission to edit references": "You do not have the permission to edit references",
     "This reference does not exist": "This reference does not exist",
     "You do not have the permission to delete references": "You do not have the permission to delete references",

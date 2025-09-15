@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 
+import { kebabCase } from 'lodash';
 import useAttributeStore from './attribute.js';
 import useBibliographyStore from './bibliography.js';
 import useEntityStore from './entity.js';
@@ -12,12 +13,7 @@ import {
     fetchTags,
     fetchTopEntities,
     fetchPreData,
-    fetchGeometryTypes,
     fetchUser,
-    fetchUsers,
-    fetchVersion,
-    fetchPlugins,
-    fetchAttributeTypes,
     searchConceptSelection,
     uploadPlugin,
     installPlugin,
@@ -186,37 +182,22 @@ export const useSystemStore = defineStore('system', {
             this.accessPoints = preData.accesspoints;
             entityStore.initializeEntityTypes(preData.entityTypes);
             userStore.setPreferences(preData.preferences);
-            // locale.value = this.getPreference('prefs.gui-language');
 
-            const attributeData = await fetchAttributes();
-            attributeStore.setAttributes(attributeData.attributes);
-            attributeStore.setAttributeSelections(attributeData.selections);
+            if(locale?.value) {
+                locale.value = this.getPreference('prefs.gui-language');
+            }
 
-            const usersData = await fetchUsers();
-            userStore.setUsers(usersData.user.users, usersData.user.deleted_users);
-            userStore.setRoles(usersData.role.roles, usersData.role.permissions, usersData.role.presets);
-
-            const topEntities = await fetchTopEntities();
-            entityStore.initialize(topEntities);
-
-            const bibliography = await fetchBibliography();
-            bibliographyStore.initialize(bibliography);
-
-            const tags = await fetchTags();
-            this.setTags(tags);
-
-            const versionData = await fetchVersion();
-            this.version = versionData;
-
-            const plugins = await fetchPlugins();
-            this.plugins = plugins;
-
-            const geometryTypes = await fetchGeometryTypes();
-            this.geometryTypes = geometryTypes;
-
-            const attributeTypes = await fetchAttributeTypes();
-            attributeStore.setAttributeTypes(attributeTypes);
-
+            attributeStore.setAttributes(preData.attributes);
+            attributeStore.setAttributeSelections(preData.attributeSelections);
+            userStore.setUsers(preData.users, preData.deleted_users);
+            userStore.setRoles(preData.roles, preData.permissions, preData.presets);
+            entityStore.initialize(preData.topEntities);
+            bibliographyStore.initialize(preData.bibliography);
+            this.setTags(preData.tags);
+            this.version = preData.version;
+            this.plugins = preData.plugins;
+            this.geometryTypes = preData.geometryTypes;
+            attributeStore.setAttributeTypes(preData.attributeTypes);
             this.appInitialized = true;
         },
         async initializeOpenAccess() {
@@ -283,6 +264,7 @@ export const useSystemStore = defineStore('system', {
                 };
             }
             const pref = {
+                of: data.of,
                 title: data.label,
                 label: data.key,
                 component: data.component,
@@ -339,16 +321,48 @@ export const useSystemStore = defineStore('system', {
         },
         async uninstallPlugin(id) {
             return uninstallPlugin(id).then(data => {
+                const plugin = data.plugin;
+                const kebabedName = kebabCase(plugin.name);
+                
+                
+                // We use the window element here, as it resulted in an error, when
+                // trying to import the SpPS variable diretly:
+                // `Cannot access "router" before initialization`
+                // [TODO] This should be fixed in the plugin system rework.
+                if(window?.SpPS?.data?.plugins && window.SpPS.data.plugins[kebabedName]) {
+                    delete window?.SpPS.data.plugins[kebabedName];
+                }
+                
+                this.unregisterPluginSlots(kebabedName);
+                this.unregisterPluginPreferences(kebabedName);
                 this.updatePlugin({
                     plugin_id: id,
                     uninstalled: true,
                     properties: {
                         installed_at: null,
-                        updated_at: data.plugin.updated_at,
+                        updated_at: plugin.updated_at,
                     },
                 });
                 removeScript(data.uninstall_location);
             });
+        },
+        async unregisterPluginSectionFrom(name, pluginId) {
+            const slots = this[name];
+            for(let k in slots) {
+                const slot = slots[k];
+                for(let i = slot.length - 1; i >= 0; i--) {
+                    const plugin = slot[i];
+                    if(plugin.of == pluginId) {
+                        slot.splice(i, 1);
+                    }
+                }
+            }
+        },
+        async unregisterPluginSlots(pluginId) {
+            this.unregisterPluginSectionFrom('registeredPluginSlots', pluginId);
+        },
+        async unregisterPluginPreferences(pluginId) {
+            this.unregisterPluginSectionFrom('registeredPluginPreferences', pluginId);
         },
         async patchPlugin(id) {
             return updatePlugin(id).then(data => {
