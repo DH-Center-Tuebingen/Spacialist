@@ -183,7 +183,7 @@
                     </span>
                     -
                     <a
-                        v-if="state.entity.user"
+                        v-if="state.entityUser"
                         href="#"
                         class="fw-medium"
                         @click.prevent="showUserInfo(state.entityUser)"
@@ -423,6 +423,7 @@
 
     import useAttributeStore from '@/bootstrap/stores/attribute.js';
     import useEntityStore from '@/bootstrap/stores/entity.js';
+    import useUserStore from '@/bootstrap/stores/user.js';
     import router from '%router';
 
     import { useToast } from '@/plugins/toast.js';
@@ -503,6 +504,7 @@
             const toast = useToast();
             const attributeStore = useAttributeStore();
             const entityStore = useEntityStore();
+            const userStore = useUserStore();
 
             // FETCH
 
@@ -530,7 +532,7 @@
                 attributesInTabs: true,
                 routeQuery: computed(_ => route.query),
                 entity: computed(_ => entityStore.selectedEntity),
-                entityUser: computed(_ => state.entity.user),
+                entityUser: computed(_ => userStore.getUserBy(state.entity?.user_id)),
                 entityChanges: computed(_ => {
                     if(!state.entity?.id) return {};
                     return entityStore.receivedEntityData[state.entity.id];

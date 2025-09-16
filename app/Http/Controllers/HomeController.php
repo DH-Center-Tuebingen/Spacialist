@@ -41,6 +41,12 @@ class HomeController extends Controller
 
         $accesspoint = Str::finish($request->get('endpoint', '/'), '/');
 
+        if(!isset($user->accesspoints)) {
+            return response()->json([
+                'redirect' => '/',
+            ]);
+        }
+
         if(array_key_exists($accesspoint, $user->accesspoints)) {
             return response()->json(null, 204);
         }

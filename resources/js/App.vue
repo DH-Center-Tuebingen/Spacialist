@@ -1,5 +1,8 @@
 <template>
-    <div class="d-flex flex-column h-100">
+    <div
+        v-if="state.init"
+        class="d-flex flex-column h-100"
+    >
         <router-view />
         <modals-container />
         <div
@@ -12,9 +15,8 @@
 <script>
     import {
         reactive,
-        computed,
+        nextTick,
         onMounted,
-        watch,
     } from 'vue';
 
     import {
@@ -46,28 +48,30 @@
 
             // ON MOUNTED
             onMounted(async _ => {
-                provideToast({
-                    duration: 2500,
-                    autohide: true,
-                    channel: 'success',
-                    icon: true,
-                    simple: false,
-                    is_tag: false,
-                    container: 'toast-container',
-                });
-                useToast();
-
                 try {
                     await systemStore.checkAuthState();
                     await systemStore.setUser();
                 } catch(e) {
-                    if(e.response.status == 401) {
-                        systemStore.setAppState(true);
-                    } else {
+                    // if(e.response.status == 401) {
+                    //     systemStore.setAppState(true);
+                    // } else {
                         throwError(e);
-                    }
+                    // }
                 }
                 state.init = true;
+
+                nextTick(_ => {
+                    provideToast({
+                        duration: 2500,
+                        autohide: true,
+                        channel: 'success',
+                        icon: true,
+                        simple: false,
+                        is_tag: false,
+                        container: 'toast-container',
+                    });
+                    useToast();
+                });
             });
 
             // RETURN

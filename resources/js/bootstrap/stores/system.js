@@ -16,7 +16,6 @@ import {
     uninstallPlugin,
     updatePlugin,
     removePlugin,
-    refreshSession,
 } from '@/api.js';
 
 import {
@@ -166,8 +165,6 @@ export const useSystemStore = defineStore('system', {
             const bibliographyStore = useBibliographyStore();
             const entityStore = useEntityStore();
             const userStore = useUserStore();
-
-
 
             const preData = await fetchPreData();
             this.concepts = preData.concepts;
