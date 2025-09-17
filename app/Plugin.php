@@ -97,26 +97,27 @@ class Plugin extends Model
         $info = self::getInfo(base_path("app/Plugins/$this->name"));
         $accesspoints = [];
         $addedNames = [];
-        $addedUrls = [];
+        $addedPaths = [];
         if($info !== false) {
             if(array_key_exists('accesspoints', $info)) {
                 foreach($info['accesspoints'] as $accesspoint) {
-                    $name = $this->name . '-' . $accesspoint['name'];
-                    $url = Str::finish(Str::start($accesspoint['url'], '/'), '/');
-                    // $url = '/' . $this->slugName() . Str::finish(Str::start($accesspoint['url'], '/'), '/');
+                    $name = $this->name . '-' . $accesspoint['id'];
+                    $label = $accesspoint['label'];
+                    $path = Str::finish(Str::start($accesspoint['path'], '/'), '/');
+                    // $path = '/' . $this->slugName() . Str::finish(Str::start($accesspoint['url'], '/'), '/');
                     if(array_key_exists($name, $addedNames)) {
                         throw new \Exception("An accesspoint with the name ($name) already exists");
                     }
-                    if(array_key_exists($url, $addedUrls)) {
-                        throw new \Exception("An accesspoint with the url ($url) already exists");
+                    if(array_key_exists($path, $addedPaths)) {
+                        throw new \Exception("An accesspoint with the path ($path) already exists");
                     }
 
                     $addedNames[$name] = true;
-                    $addedUrls[$url] = true;
+                    $addedPaths[$path] = true;
 
                     $accesspoints[$name] = [
-                        'name' => $name,
-                        'url' => $url,
+                        'label' => $label,
+                        'path' => $path,
                     ];
                 }
             }

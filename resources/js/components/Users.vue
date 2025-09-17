@@ -102,9 +102,9 @@
                                 v-model="v.fields[user.id].accesspoints.value"
                                 :name="`accesspoints_${user.id}`"
                                 :object="true"
-                                :label="'name'"
-                                :track-by="'url'"
-                                :value-prop="'url'"
+                                :label="'label'"
+                                :track-by="'path'"
+                                :value-prop="'path'"
                                 :close-on-select="false"
                                 :mode="'tags'"
                                 :disabled="!can('users_roles_write')"
@@ -243,9 +243,9 @@
                                 :value="accessPointsToArray(dUser.accesspoints)"
                                 :name="`accesspoints_${dUser.id}`"
                                 :object="true"
-                                :label="'name'"
-                                :track-by="'url'"
-                                :value-prop="'url'"
+                                :label="'label'"
+                                :track-by="'path'"
+                                :value-prop="'path'"
                                 :mode="'tags'"
                                 :disabled="true"
                                 :options="[]"
@@ -367,12 +367,7 @@
                         handleChange: hiap,
                         resetField: hrap,
                     } = useField(`accesspoints_${u.id}`, yup.array(), {
-                        initialValue: Object.keys(u.accesspoints || {}).map(url => {
-                            return {
-                                url: url,
-                                name: u.accesspoints[url],
-                            };
-                        }),
+                        initialValue: accessPointsToArray(u.accesspoints),
                     });
                     v.fields[u.id] = reactive({
                         email: {
@@ -436,9 +431,14 @@
                     data.email = v.fields[id].email.value;
                 }
                 if(v.fields[id].accesspoints.meta.dirty) {
-                    data.accesspoints = {};
+                    data.accesspoints = [];
                     v.fields[id].accesspoints.value.forEach(ap => {
-                        data.accesspoints[ap.url] = ap.name;
+                        for(let key in state.accessPoints) {
+                            if(state.accessPoints[key].path == ap.path) {
+                                data.accesspoints.push(key);
+                                break;
+                            }
+                        }
                     });
                 }
 
@@ -476,10 +476,13 @@
                 ];
             };
             const accessPointsToArray = accesspoints => {
-                return Object.keys(accesspoints || {}).map(url => {
+                if(!accesspoints) return [];
+
+                return accesspoints.map(name => {
+                    const accesspoint = state.accessPoints[name];
                     return {
-                        url: url,
-                        name: accesspoints[url],
+                        path: accesspoint.path,
+                        label: t(accesspoint.label),
                     };
                 });
             };
@@ -554,7 +557,14 @@
                 deletedUserList: computed(_ => userStore.deletedUsers),
                 roles: computed(_ => userStore.getRoles(true)),
                 accessPoints: computed(_ => systemStore.accessPoints),
-                accessPointsArray: computed(_ => Object.values(state.accessPoints)),
+                accessPointsArray: computed(_ => {
+                    return Object.values(state.accessPoints).map(accesspoint => {
+                        return {
+                            path: accesspoint.path,
+                            label: t(accesspoint.label),
+                        };
+                    });
+                }),
                 dataInitialized: computed(_ => state.userList.length > 0 && state.roles.length > 0),
                 errors: {},
             });

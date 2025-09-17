@@ -16,6 +16,7 @@ use App\RolePreset;
 use App\ThConcept;
 use App\User;
 
+use App\Utils\AccesspointUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
@@ -39,21 +40,35 @@ class HomeController extends Controller
     public function checkAccesspointAccess(Request $request) {
         $user = auth()->user();
 
-        $accesspoint = Str::finish($request->get('endpoint', '/'), '/');
+        $accessPath = Str::finish($request->get('endpoint', '/'), '/');
 
         if(!isset($user->accesspoints)) {
+            $path = AccesspointUtils::CORE_ACCESSPOINTS["Default"]["path"];
             return response()->json([
-                'redirect' => '/',
+                'redirect' => $path,
             ]);
         }
 
-        if(array_key_exists($accesspoint, $user->accesspoints)) {
-            return response()->json(null, 204);
+        $availableAccesspoints = AccesspointUtils::get();
+
+        foreach($user->accesspoints as $accesspointId) {
+            if(array_key_exists($accesspointId, $availableAccesspoints)) {
+                if($availableAccesspoints[$accesspointId]['path'] == $accessPath) {
+                    return response()->json(null, 204);
+                }
+            }
         }
 
-        return response()->json([
-            'redirect' => array_keys($user->accesspoints)[0],
-        ]);
+        $firstUserAccesspoint = $user->accesspoints[0];
+        if(array_key_exists($firstUserAccesspoint, $availableAccesspoints)) {
+            return response()->json([
+                'redirect' => $availableAccesspoints[$firstUserAccesspoint]['path'],
+            ]);
+        } else {
+            return response()->json([
+                'error' => __('Selected accesspoint is not found in the system'),
+            ], 403);
+        }
     }
 
     public function getGlobalData() {
@@ -64,13 +79,6 @@ class HomeController extends Controller
             $preferenceValues = [];
             $locale = App::getLocale();
         }
-
-        $accesspoints = [
-            "Core" => [
-                "name" => "Core",
-                "url" => "/",
-            ],
-        ];
 
         $sysPrefsValues = Preference::getPreferences(true);
 
@@ -102,10 +110,7 @@ class HomeController extends Controller
             }
         }
 
-        $installedPlugins = Plugin::getInstalled();
-        foreach($installedPlugins as $plugin) {
-            $accesspoints = array_merge($accesspoints, $plugin->getAccessPoints());
-        }
+        $accesspoints = AccesspointUtils::get();
 
         // TODO handle layer relation in Map Plugin
         // $entityTypes = EntityType::with(['sub_entity_types', 'layer', 'attributes'])

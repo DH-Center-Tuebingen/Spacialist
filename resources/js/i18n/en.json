@@ -647,6 +647,9 @@
             "active_users": "Active Users",
             "deactivated_users": "Deactivated Users",
             "empty_list": "User-list is empty",
+            "accesspoints": {
+                "default": "Spacialist (default)"
+            },
             "toasts": {
                 "updated": {
                     "title": "User updated",
