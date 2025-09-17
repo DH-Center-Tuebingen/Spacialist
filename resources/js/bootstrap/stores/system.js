@@ -317,7 +317,6 @@ export const useSystemStore = defineStore('system', {
                 const plugin = data.plugin;
                 const kebabedName = kebabCase(plugin.name);
 
-
                 // We use the window element here, as it resulted in an error, when
                 // trying to import the SpPS variable diretly:
                 // `Cannot access "router" before initialization`

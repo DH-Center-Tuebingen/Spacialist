@@ -839,7 +839,6 @@ class EntityController extends Controller {
             ], 400);
         }
 
-        DB::beginTransaction();
         $addedAttributes = [];
         $removedAttributes = [];
 
@@ -850,6 +849,8 @@ class EntityController extends Controller {
                 'removed_attributes' => $removedAttributes,
             ], 204);
         }
+
+        DB::beginTransaction();
 
         foreach($request->request as $patch) {
             $op = $patch['op'];
@@ -926,6 +927,7 @@ class EntityController extends Controller {
                 $attr = Attribute::findOrFail($aid);
                 $formKeyValue = AttributeValue::getFormattedKeyValue($attr->datatype, $value);
             } catch(InvalidDataException $ide) {
+                DB::rollBack();
                 return response()->json([
                     'error' => $ide->getMessage(),
                 ], 422);
