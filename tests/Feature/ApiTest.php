@@ -79,6 +79,7 @@ class ApiTest extends TestCase
             'plugins',
             'geometryTypes',
             'attributeTypes',
+            'accesspoints',
         ]);
     }
 
