@@ -183,7 +183,8 @@ class ApiUserTest extends TestCase
                 'email' => 'test@test.com',
                 'name' => 'Test User',
                 'nickname' => 'tuser',
-                'password' => 'test1234' // at least 6 characters
+                'password' => 'test1234', // at least 6 characters
+                'password_confirm' => 'test1234',
             ]);
 
         $user = User::latest()->first();

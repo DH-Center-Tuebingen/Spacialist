@@ -205,7 +205,7 @@ class UserController extends Controller {
             'name' => 'required|string|max:255',
             'password' => 'required|min:6',
             'password_confirm' => 'required|same:password',
-            'accesspoints' => 'required|array',
+            'accesspoints' => 'array',
         ]);
 
         $name = $request->get('name');

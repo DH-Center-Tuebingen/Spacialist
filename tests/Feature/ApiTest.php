@@ -56,7 +56,7 @@ class ApiTest extends TestCase
             ->get('/api/v1/pre');
 
         $response->assertStatus(200);
-        $response->assertJsonCount(21);
+        $response->assertJsonCount(22);
         $response->assertJsonStructure([
             'system_preferences',
             'preferences',
