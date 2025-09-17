@@ -5,7 +5,7 @@ namespace App\Utils;
 use App\Plugin;
 
 class AccesspointUtils {
-    public const array CORE_ACCESSPOINTS = [
+    public const /*array*/ CORE_ACCESSPOINTS = [
         "Default" => [
             "label" => "main.user.accesspoints.default",
             "path" => "/",

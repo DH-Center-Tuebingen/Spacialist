@@ -359,6 +359,7 @@ class ApiUserTest extends TestCase
             'deleted_at' => null,
             'avatar' => null,
             'login_attempts' => null,
+            'accesspoints' => null,
             'metadata' => [
                 'phonenumber' => '+43 123 1234',
                 'orcid' => '0000-0002-1694-233X',
