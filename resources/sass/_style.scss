@@ -152,7 +152,7 @@ dl.dl-0-mb > dd:last-child {
     margin-right: 0.25rem;
 }
 
-.btn-fab-list > .btn-fab:last-child, 
+.btn-fab-list > .btn-fab:last-child,
 .btn-fab-list > .btn-fab-sm:last-child
 .btn-fab-list > .btn-fab-xl:last-child {
     margin-right: 0;
@@ -234,9 +234,13 @@ dl.dl-0-mb > dd:last-child {
 table.table-sticky > thead {
     @extend .position-sticky;
     top:0;
-    background-color: var(--bs-table-bg);;
+    background-color: var(--bs-table-bg);
     box-shadow: 0 2px 1px -1px var(--bs-table-border-color);
     z-index: $zindex-sticky-in-page;
+}
+
+.attribute-list-item:first-child {
+    @extend .mt-0;
 }
 
 .multiselect-dropdown {
@@ -247,7 +251,6 @@ table.table-sticky .multiselect-dropdown,
 table.table-sticky .dropdown-menu {
     z-index: $zindex-dropdown-underneath-sticky;
 }
-
 
 .multiselect-option.is-selected {
     &:hover {
