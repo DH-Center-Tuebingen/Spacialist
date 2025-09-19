@@ -557,14 +557,7 @@
                 deletedUserList: computed(_ => userStore.deletedUsers),
                 roles: computed(_ => userStore.getRoles(true)),
                 accessPoints: computed(_ => systemStore.accessPoints),
-                accessPointsArray: computed(_ => {
-                    return Object.values(state.accessPoints).map(accesspoint => {
-                        return {
-                            path: accesspoint.path,
-                            label: t(accesspoint.label),
-                        };
-                    });
-                }),
+                accessPointsArray: computed(_ => systemStore.getAccessPointsAsArray),
                 dataInitialized: computed(_ => state.userList.length > 0 && state.roles.length > 0),
                 errors: {},
             });

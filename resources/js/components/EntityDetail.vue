@@ -137,7 +137,7 @@
                 <LoadingButton
                     type="submit"
                     form="entity-attribute-form"
-                    class="btn-outline-success btn-sm"
+                    class="btn-outline-success btn-sm d-flex flex-row gap-1 align-items-center"
                     :loading="state.saving"
                     @click.prevent="saveEntity()"
                 >
@@ -317,7 +317,7 @@
                         v-if="state.attributesFetched && !group.hidden"
                         :ref="el => setAttrRefs(el, group.id)"
                         v-dcan="'entity_data_read'"
-                        class="h-100 overflow-y-auto row"
+                        class="h-100 overflow-y-auto row mt-3"
                         :attributes="group.data"
                         :hidden-attributes="state.hiddenAttributeList"
                         :show-hidden="state.hiddenAttributeState"

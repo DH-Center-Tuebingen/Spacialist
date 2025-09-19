@@ -196,13 +196,12 @@
                                 v-model="v.fields.accesspoints.value"
                                 :name="'accesspoints'"
                                 :object="true"
-                                :label="'name'"
-                                :track-by="'url'"
-                                :value-prop="'url'"
+                                :label="'label'"
+                                :track-by="'path'"
+                                :value-prop="'path'"
                                 :close-on-select="false"
                                 :mode="'tags'"
                                 :options="state.accessPointsArray"
-                                :placeholder="t('main.user.add_role_placeholder')"
                             />
                         </div>
                     </div>
@@ -276,18 +275,25 @@
                 v.fields[field].handleChange(event);
             };
             const onAdd = _ => {
-                const accesspoints = {};
-                v.fields.accesspoints.value.forEach(ap => {
-                    accesspoints[ap.url] = ap.name;
-                });
                 const user = {
                     name: v.fields.name.value,
                     nickname: v.fields.nickname.value,
                     email: v.fields.email.value,
                     password: v.fields.password.value,
                     password_confirm: v.fields.password_confirm.value,
-                    accesspoints: accesspoints,
                 };
+
+                if(v.fields.accesspoints.value.length > 0) {
+                    user.accesspoints = [];
+                    v.fields.accesspoints.value.forEach(ap => {
+                        for(let key in state.accessPoints) {
+                            if(state.accessPoints[key].path == ap.path) {
+                                user.accesspoints.push(key);
+                                break;
+                            }
+                        }
+                    });
+                }
                 context.emit('add', user);
             };
             const togglePasswordVisibility = _ => {
@@ -307,7 +313,7 @@
                 email: yup.string().required().email().max(255),
                 password: yup.string().required().min(6),
                 password_confirm: yup.string().oneOf([yup.ref('password'), null]).required(),
-                accesspoints: yup.array().required(),
+                accesspoints: yup.array(),
             });
             const {
                 meta: formMeta
@@ -355,7 +361,7 @@
                 showPassword: false,
                 form: formMeta,
                 accessPoints: computed(_ => systemStore.accessPoints),
-                accessPointsArray: computed(_ => Object.values(state.accessPoints)),
+                accessPointsArray: computed(_ => systemStore.getAccessPointsAsArray),
                 errors: computed(_ => {
                     const errList = {};
                     const fields = Object.keys(v.fields);
@@ -410,8 +416,6 @@
                 },
                 schema: schema,
             });
-
-            v.fields.accesspoints.value = state.accessPointsArray;
 
             // RETURN
             return {

@@ -43,10 +43,8 @@ class HomeController extends Controller
         $accessPath = Str::finish($request->get('endpoint', '/'), '/');
 
         if(!isset($user->accesspoints)) {
-            $path = AccesspointUtils::CORE_ACCESSPOINTS["Default"]["path"];
-            return response()->json([
-                'redirect' => $path,
-            ]);
+            // do not redirect if user has no access points defined (aka access to everything)
+            return response()->json(null, 204);
         }
 
         $availableAccesspoints = AccesspointUtils::get();

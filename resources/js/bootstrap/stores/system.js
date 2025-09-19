@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia';
 
 import { kebabCase } from 'lodash';
+
+import i18n from '@/bootstrap/i18n.js';
+
 import useAttributeStore from './attribute.js';
 import useBibliographyStore from './bibliography.js';
 import useEntityStore from './entity.js';
@@ -112,6 +115,14 @@ export const useSystemStore = defineStore('system', {
             return slot ? plugins[slot] : plugins;
         },
         getDatatypeDataOf: state => key => state.datatypeData[key],
+        getAccessPointsAsArray(state) {
+            return Object.values(state.accessPoints).map(accesspoint => {
+                return {
+                    path: accesspoint.path,
+                    label: i18n.global.t(accesspoint.label),
+                };
+            });
+        },
     },
     actions: {
         getConceptById(id) {
