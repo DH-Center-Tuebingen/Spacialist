@@ -1,0 +1,7 @@
+{
+    "name": "package_foo",
+    "pluginName": "Foo",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module"
+}

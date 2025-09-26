@@ -28,10 +28,6 @@ abstract class TestCase extends BaseTestCase {
      */
     protected $seeder = TestingSeeder::class;
 
-    protected $connectionsToTransact = [
-        'testing'
-    ];
-
     public $user = null;
     public $token = null;
 
