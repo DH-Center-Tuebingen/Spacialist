@@ -89,7 +89,9 @@ class ApiPluginTest extends TestCase {
         
         // Create plugin directory structure
         $pluginDir = base_path(config('app.plugin_directory')) . '/' . $plugin['name'];
-        mkdir($pluginDir, 0755, true);
+        if(!file_exists($pluginDir)) {
+            mkdir($pluginDir, 0755, true);
+        }
         
         // Process structure array
         foreach($structure as $name => $content) {
@@ -97,7 +99,9 @@ class ApiPluginTest extends TestCase {
             
             if(is_array($content)) {
                 // Create directory and process contents
-                mkdir($path, 0755, true);
+                if(!file_exists($path)) {
+                    mkdir($path, 0755, true);
+                }
                 foreach($content as $subName => $subContent) {
                     file_put_contents($path . '/' . $subName, $subContent);
                 }
@@ -108,7 +112,7 @@ class ApiPluginTest extends TestCase {
         }
     }
     
-    private function generatePackageJSON($plugin){
+    private function generatePackageJSON($plugin){        
         return <<<JSON
 {
     "name": "package_{$plugin['name']}",
@@ -121,6 +125,8 @@ JSON;
     }
     
     private function generateInfoXml($plugin) {
+        $description = isset($plugin['description']) ? $plugin['description'] : "";
+        $licence = isset($plugin['licence']) ? $plugin['licence'] : "";
         $authors = "";
         if(!isset($plugin["authors"])) {
             $plugin["authors"] = [];
@@ -136,9 +142,9 @@ JSON;
     <!-- Must match id in JS SpPS.register call in kebab-case -->
     <name>{$plugin['name']}</name>
     <title>{$plugin['name']} Plugin</title>
-    <description>{$plugin['description']}</description>
+    <description>{$description}</description>
     <version>{$plugin['version']}</version>
-    <licence>{$plugin['licence']}</licence>
+    <licence>{$licence}</licence>
     <authors>
 {$authors}    </authors>
 </info>
@@ -223,7 +229,7 @@ XML;
         Carbon::setTestNow('2020-07-20 10:15:30');
 
         // Create a plugin entry in the database for the unregistered plugin
-        $plugin = Plugin::create([
+        $plugin = Plugin::forceCreate([
             'name' => 'UnregisteredPlugin',
             'version' => '1.0.0',
             'uuid' => '123e4567-e89b-12d3-a456-426614174003',
@@ -231,13 +237,13 @@ XML;
         ]);
         
         // We need to create a mock plugin directory for the plugin to be removed
-        mockPluginDirectory($this->getUnregisteredPlugin());
+        $this->mockPluginDirectory($this->getUnregisteredPlugin());
         
         $directoryWasCreated = file_exists('tests/assets/Plugins/UnregisteredPlugin');
         $this->assertTrue($directoryWasCreated);
         
         $response = $this->userRequest()
-            ->delete('/api/v1/plugin/remove/1');
+            ->delete("/api/v1/plugin/remove/{$plugin->id}");
             
         $response->assertStatus(200);
         $response->assertJson([
@@ -251,7 +257,23 @@ XML;
         $directoryWasRemoved = file_exists('tests/assets/Plugins/UnregisteredPlugin');
         $this->assertFalse($directoryWasRemoved);
         
+        //Other plugins are still there
+        $this->assertDatabaseHas('plugins', [
+            'name' => 'FooPlugin',
+        ]);
+        $this->assertDatabaseHas('plugins', [
+            'name' => 'BarPlugin',
+        ]);
+        
+        $fooPluginDirectoryExists = file_exists('tests/assets/Plugins/FooPlugin');
+        $this->assertTrue($fooPluginDirectoryExists);
+        
+        $barPluginDirectoryExists = file_exists('tests/assets/Plugins/BarPlugin');
+        $this->assertTrue($barPluginDirectoryExists);
+        
         // Reset time after test
         Carbon::setTestNow();
     }
+    
+    // TODO: Add upload plugin test
 }

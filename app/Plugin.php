@@ -103,9 +103,18 @@ class Plugin extends Model
             $metadata = [];
             foreach($this->metadataFields as $field) {
                 if($field == 'authors') {
+                    if(!array_key_exists($field, $info) || !array_key_exists('author', $info[$field])) {
+                        $metadata[$field] = [];
+                        continue;
+                    }
+                    
                     $authors = $info[$field]['author'];
                     $metadata[$field] = is_array($authors) ? $authors : [$authors];
                 } else {
+                    if(!array_key_exists($field, $info)) {
+                        $metadata[$field] = "";
+                        continue;
+                    }
                     $metadata[$field] = $info[$field];
                 }
             }
@@ -161,7 +170,6 @@ class Plugin extends Model
     }
 
     public static function updateState(): void {
-        info(self::getPluginPath());
         $availablePlugins = File::directories(self::getPluginPath());
         self::discoverPlugins($availablePlugins);
         self::cleanupPlugins($availablePlugins);
@@ -311,7 +319,6 @@ class Plugin extends Model
     }
     private function getSortedMigrations(bool $desc = false): array {
         $migrationPath = $this->getMigrationPath();
-        info($migrationPath);
         if(file_exists($migrationPath) && is_dir($migrationPath)) {
             $migrations = collect(File::files($migrationPath))->map(function($f) {
                 return $f->getFilename();
@@ -322,10 +329,8 @@ class Plugin extends Model
                 $migrations = $migrations->sort();
             }
 
-            info("Found migrations: " . implode(", ", $migrations->toArray()));
             return $migrations->values()->toArray();
         }
-        info("No migration path found.");
         return [];
     }
 
