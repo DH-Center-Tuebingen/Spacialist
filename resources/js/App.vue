@@ -52,11 +52,11 @@
                     await systemStore.checkAuthState();
                     await systemStore.setUser();
                 } catch(e) {
-                    // if(e.response.status == 401) {
-                    //     systemStore.setAppState(true);
-                    // } else {
+                    if(e.response.status == 401) {
+                        systemStore.setAppState(true);
+                    } else {
                         throwError(e);
-                    // }
+                    }
                 }
                 state.init = true;
 

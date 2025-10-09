@@ -187,6 +187,7 @@ class UserController extends Controller {
             $user->login_attempts--;
             $user->save();
         }
+        $user->setPermissions();
 
         return response()
             ->json($user, 200);
