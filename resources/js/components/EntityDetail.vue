@@ -317,7 +317,7 @@
                         v-if="state.attributesFetched && !group.hidden"
                         :ref="el => setAttrRefs(el, group.id)"
                         v-dcan="'entity_data_read'"
-                        class="h-100 overflow-y-auto row mt-3"
+                        class="h-100 overflow-y-auto row pt-3"
                         :attributes="group.data"
                         :hidden-attributes="state.hiddenAttributeList"
                         :show-hidden="state.hiddenAttributeState"
