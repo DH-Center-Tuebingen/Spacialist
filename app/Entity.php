@@ -319,6 +319,68 @@ class Entity extends Model implements Searchable {
         DB::commit();
     }
 
+    public function patchAttributes($patchedAttributes, $user)
+    {
+        $addedAttributes = [];
+        $removedAttributes = [];
+        $changedAttributes = [];
+        
+        DB::beginTransaction();
+        foreach($patchedAttributes as $patch) {
+            $aid = $patch['aid'];
+            $value = $patch['value'];
+            $operation = $patch['op'];
+            
+            try{
+                if($operation == 'remove'){
+                    $attributeValue = AttributeValue::remove($this->id, $aid);
+                    if(!$user->isModerated()){
+                        $removedAttributes[$aid] = $attributeValue;
+                    }
+                }else{
+                    /**
+                    * In the case when a user created the attribute, while another was visiting the
+                    * page and sends an 'add' operation, and the other user also sends his changes,
+                    * the application would have thrown an error, that the attribute was already created.
+                    *
+                    * That's why we combined the add and replace operations into one case.
+                    * [SO] 29.01.2025
+                    */
+                    $attributeValue = AttributeValue::upsert($this->id, $aid, $value);
+                    if($attributeValue->wasRecentlyCreated) {
+                        $addedAttributes[$aid] = $attributeValue;
+                    } else {
+                        $changedAttributes[$aid] = $attributeValue;
+                    }
+                }
+            } catch(Exception $e){                
+                DB::rollBack();
+                return response()->json([
+                    'error' => $e->getMessage(),
+                ], 422);
+            }
+        }
+
+        // Save model if last editor changed
+        // Only update timestamps otherwise
+        $this->user_id = $user->id;
+        if($this->isDirty()) {
+            $this->save();
+        }else{
+            $this->touch();
+        }
+
+        DB::commit();
+        $this->load('user');
+        
+        return [
+            'entity' => $this,
+            'added_attributes' => $addedAttributes,
+            'changed_attributes' => $changedAttributes,
+            'removed_attributes' => $removedAttributes,
+        ];
+    }
+
     public function child_entities() {
         return $this->hasMany('App\Entity', 'root_entity_id')->orderBy('id');
     }

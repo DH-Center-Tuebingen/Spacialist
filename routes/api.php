@@ -68,7 +68,7 @@ Route::middleware('auth:sanctum')->prefix('v1/entity')->group(function() {
     Route::post('/import/validate', 'EntityController@validateImportData');
     Route::post('/{id}/reference/{aid?}', 'ReferenceController@addReference')->where('id', '[0-9]+');
 
-    Route::patch('/{id}/attributes', 'EntityController@patchAttributes')->where('id', '[0-9]+');
+    Route::patch('/{entity}/attributes', 'EntityController@patchAttributes');
     Route::patch('/{id}/attribute/{aid}', 'EntityController@patchAttribute')->where('id', '[0-9]+')->where('aid', '[0-9]+');
     Route::patch('/multiedit', 'EntityController@multieditAttributes');
     Route::patch('/{id}/attribute/{aid}/moderate', 'EntityController@handleModeration')->where('id', '[0-9]+')->where('aid', '[0-9]+');

@@ -955,6 +955,7 @@
                 if(!can('entity_data_write')) return;
 
                 const dirtyValues = getDirtyValues(grps);
+                
                 const patches = [];
                 const moderations = [];
                 if(Object.keys(dirtyValues).length == 0) return;
@@ -965,11 +966,10 @@
                     const type = attributeStore.getAttribute(aid)?.datatype;
                     const patch = {
                         op: null,
+                        aid: aid,
                         value: null,
-                        params: {
-                            aid: aid,
-                        },
                     };
+                    
                     if(data?.id) {
                         // if data.id exists, there has been an entry in the database, therefore it is a replace/remove operation
                         if(
@@ -993,6 +993,7 @@
                             // patch.value = getCleanValue(patch.value, entity.attributes);
                         } else {
                             // there has be no entry in the database before and values are not different (should not happen ;))
+                            console.error('No existing value and new value is empty, skipping', aid, dirtyValues[v]);
                             continue;
                         }
                     }
@@ -1003,7 +1004,7 @@
                 state.saving = true;
 
                 try {
-                    const data = await entityStore.patchAttributes(state.entity.id, patches, dirtyValues, moderations);
+                    const data = await entityStore.patchAttributes(state.entity.id, patches, moderations);
 
                     undirtyList(grps);
                     resetDirtyStates(grps);
