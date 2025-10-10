@@ -436,6 +436,11 @@
         markAllAsRead,
         deleteNotification as deleteNotificationHelper,
     } from '@/api/notification.js';
+
+    import {
+        throwError,
+    } from '@/helpers/helpers.js';
+
     import {
         showAbout,
         showConfirmPassword,
