@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.11.2
+## Fixes
+- Fixed error when updating array based attribute value (AttributeValueId was removed when list was empty and not recreated when list contained values again)
+
 ## 0.11.1
 ### Added
 - Unit Tests for Directory.php
