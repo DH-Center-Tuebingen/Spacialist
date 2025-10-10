@@ -8,6 +8,8 @@ import useAttributeStore from './attribute.js';
 import useSystemStore from './system.js';
 import useUserStore from './user.js';
 
+import { evaluateRule } from '@/helpers/dependencies.js';
+
 import {
     Node,
     openPath,
@@ -18,6 +20,8 @@ import {
     can,
     calculateEntityTypeColors,
     fillEntityData,
+    getEntityTypeDependencies,
+    getEntityTypeDependencyTriggers,
     except,
     only,
 } from '@/helpers/helpers.js';
@@ -176,6 +180,73 @@ export const useEntityStore = defineStore('entity', {
                 }
                 return intersections;
             };
+        },
+        getDependencyStates(state) {
+            return (data, entityTypeId, aid, value) => {
+                const states = {};
+
+                const attributeTriggers = getEntityTypeDependencyTriggers(entityTypeId)[aid];
+                if(!attributeTriggers) return states;
+
+                const entityTypeDependencies = getEntityTypeDependencies(entityTypeId);
+
+                for(const dependantId of attributeTriggers) {
+                    const attributeDependencies = entityTypeDependencies[dependantId];
+                    const matchAllGroups = !attributeDependencies.or;
+                    let dependencyMatch = matchAllGroups;
+
+                    for(const group of attributeDependencies.groups) {
+                        const matchAllRules = !group.or;
+                        let ruleMatch = matchAllRules;
+                        for(const rule of group.rules) {
+                            const type = useAttributeStore().getAttribute(rule.on).datatype;
+                            const attributeValue = data[rule.on];
+
+                            // When the rule is invalid we ignore the rule by returning true!
+                            if(attributeValue === undefined) {
+                                ruleMatch = true;
+                                console.error('Invalid target value for rule', rule);
+                                break;
+                            }
+
+                            //// I assume the reference value is an exception from the rule!
+                            ////
+                            // if(!refValue.value) {
+                            //     ruleMatch = true;
+                            //     console.error('Rule target is not a ref value!', refValue);
+                            //     break;
+                            // }
+
+                            const tmpMatch = evaluateRule(type, attributeValue.value, rule);
+
+                            if(matchAllRules && !tmpMatch) {
+                                ruleMatch = false;
+                                break;
+                            }
+                            if(!matchAllRules && tmpMatch) {
+                                ruleMatch = true;
+                                break;
+                            }
+                        }
+
+                        if(matchAllGroups && !ruleMatch) {
+                            dependencyMatch = false;
+                            break;
+                        }
+                        if(!matchAllGroups && ruleMatch) {
+                            dependencyMatch = true;
+                            break;
+                        }
+                    }
+
+                    states[dependantId] = {
+                        hide: !dependencyMatch,
+                        by: aid, // TODO might be more than one
+                    };
+                }
+
+                return states;
+            }
         },
         hasIntersectionWithEntityAttributes(state) {
             return (entityTypeId, entityTypes) => {

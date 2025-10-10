@@ -440,8 +440,6 @@
     import {
         can,
         userId,
-        getEntityTypeDependencies,
-        getEntityTypeDependencyTriggers,
         translateConcept,
         _cloneDeep,
     } from '@/helpers/helpers.js';
@@ -469,7 +467,6 @@
         handleEntityCommentDeleted,
     } from '@/handlers/entity.js';
 
-    import { evaluateRule } from '@/helpers/dependencies.js';
     import { usePreventNavigation } from '@/helpers/form.js';
 
     import MetadataTab from '@/components/entity/MetadataTab.vue';
@@ -611,8 +608,6 @@
                     }
                 }),
                 entityTypeSelections: computed(_ => entityStore.getEntityTypeAttributeSelections(state.entity.entity_type_id)),
-                entityTypeDependencies: computed(_ => getEntityTypeDependencies(state.entity.entity_type_id)),
-                entityTypeTriggers: computed(_ => getEntityTypeDependencyTriggers(state.entity.entity_type_id)),
                 hasAttributeLinks: computed(_ => state.entity.attributeLinks && state.entity.attributeLinks.length > 0),
                 groupedAttributeLinks: computed(_ => {
                     if(!state.hasAttributeLinks) return {};
@@ -754,9 +749,6 @@
                 state.editedEntityName = '';
             };
             const updateDependencyState = (aid, value) => {
-                const attributeTriggers = state.entityTypeTriggers[aid];
-                if(!attributeTriggers) return;
-
                 // This is a bit of a temporary hack, as the dirty value
                 // used to overwrite the attribute value with just the value.
                 // Which leads to inconsitencies in the data.
@@ -771,58 +763,12 @@
                     }
                 }
 
-                for(const dependantId of attributeTriggers) {
-                    const attributeDependencies = state.entityTypeDependencies[dependantId];
-                    const matchAllGroups = !attributeDependencies.or;
-                    let dependencyMatch = matchAllGroups;
+                const dependencyStates = entityStore.getDependencyStates(liveData, state.entity.entity_type_id, aid, value);
 
-                    for(const group of attributeDependencies.groups) {
-                        const matchAllRules = !group.or;
-                        let ruleMatch = matchAllRules;
-                        for(const rule of group.rules) {
-                            const type = attributeStore.getAttribute(rule.on).datatype;
-                            const attributeValue = liveData[rule.on];
-
-                            // When the rule is invalid we ignore the rule by returning true!
-                            if(attributeValue === undefined) {
-                                ruleMatch = true;
-                                console.error('Invalid target value for rule', rule);
-                                break;
-                            }
-
-                            //// I assume the reference value is an exception from the rule!
-                            ////
-                            // if(!refValue.value) {
-                            //     ruleMatch = true;
-                            //     console.error('Rule target is not a ref value!', refValue);
-                            //     break;
-                            // }
-
-                            const tmpMatch = evaluateRule(type, attributeValue.value, rule);
-
-                            if(matchAllRules && !tmpMatch) {
-                                ruleMatch = false;
-                                break;
-                            }
-                            if(!matchAllRules && tmpMatch) {
-                                ruleMatch = true;
-                                break;
-                            }
-                        }
-
-                        if(matchAllGroups && !ruleMatch) {
-                            dependencyMatch = false;
-                            break;
-                        }
-                        if(!matchAllGroups && ruleMatch) {
-                            dependencyMatch = true;
-                            break;
-                        }
-                    }
-
-                    state.hiddenAttributes[dependantId] = {
-                        hide: !dependencyMatch,
-                        by: aid, // TODO might be more than one
+                for(let k in dependencyStates) {
+                    state.hiddenAttributes[k] = {
+                        hide: dependencyStates[k].hide,
+                        by: dependencyStates[k].by,
                     };
                 }
             };
