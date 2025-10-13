@@ -10,20 +10,23 @@ import {
  */
 export function createAxios(options = {}) {
     const instance = axios.create();
-    instance.defaults.baseURL = options.baseURL || 'api/v1';
+    instance.defaults.baseURL = options.baseURL || '/';
     instance.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
     instance.defaults.withCredentials = true;
     instance.defaults.withXSRFToken = true;
     instance.defaults.xsrfCookieName = 'XSRF-TOKEN';
     
+    console.log("CREATE AXIOS", import.meta.env.VITE_APP_NAME);
     let appName = import.meta.env.VITE_APP_NAME || '';
     if(appName !== '') {
         instance.defaults.xsrfCookieName += `-${appName.toUpperCase()}`;
+        console.log(`Using custom XSRF cookie name: ${instance.defaults.xsrfCookieName}`);
     }
+    return instance;
 }
 
-export const web_http = axios.create();
-export const instance = axios.create({ baseURL: 'api/v1' });
+export const web_http = createAxios();
+export const instance = createAxios({ baseURL: 'api/v1' });
 
 // These errors need to be handled manually.
 export const unhandledErrors = [400, 422];
