@@ -22,6 +22,19 @@ class VerifyCsrfToken extends Middleware
     //     return $response;
     // }
     
+    
+    /*  
+        When inspecting the base class you may find the 'XSRF-TOKEN' being used by the 
+        serialized function like this:
+        
+        public static function serialized()
+        {
+            return EncryptCookies::serialized('XSRF-TOKEN');
+        }
+            
+        Don't worry about this as the parameter is never used and it just returns a boolean!
+    */
+    
     /**
      * (!) NOTE: This is copied from the original Laravel 12.x implementation.
      * As there is no convenient way to overwrite the cookie name, 
