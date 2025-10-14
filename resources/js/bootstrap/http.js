@@ -16,7 +16,6 @@ export function createAxios(options = {}) {
     instance.defaults.withXSRFToken = true;
     instance.defaults.xsrfCookieName = 'XSRF-TOKEN';
     
-    console.log("CREATE AXIOS", import.meta.env.VITE_APP_NAME);
     let appName = import.meta.env.VITE_APP_NAME || '';
     if(appName !== '') {
         instance.defaults.xsrfCookieName += `-${appName.toUpperCase()}`;
