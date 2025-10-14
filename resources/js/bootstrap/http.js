@@ -10,7 +10,7 @@ import {
  */
 export function createAxios(options = {}) {
     const instance = axios.create();
-    instance.defaults.baseURL = options.baseURL || '/';
+    instance.defaults.baseURL = options.baseURL || '';
     instance.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
     instance.defaults.withCredentials = true;
     instance.defaults.withXSRFToken = true;
