@@ -21,6 +21,8 @@ class CookieUtils
         if($appName !== ''){
             $xsrfTokenName .= "-$appName";
         }
+        // To avoid conflicts with other applications, we append "SPACIALIST" to the name.
+        $xsrfTokenName .= "-SPACIALIST";
         return $xsrfTokenName;
     }
 }
