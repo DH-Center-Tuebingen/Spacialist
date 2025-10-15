@@ -4,6 +4,7 @@ namespace App;
 
 use App\Geodata;
 use App\AttributeTypes\AttributeBase;
+use App\Exceptions\InvalidDataException;
 use App\Traits\CommentTrait;
 use App\Traits\ModerationTrait;
 use Clickbar\Magellan\Data\Geometries\Geometry;
@@ -201,6 +202,9 @@ class AttributeValue extends Model implements Searchable
 
     public static function getFormattedKeyValue($datatype, $rawValue) : stdClass {
         $class = AttributeBase::getMatchingClass($datatype);
+        if($class == false) {
+            throw new InvalidDataException("Attribute of type '$datatype' is not supported. Maybe the underlying plugin is disabled or missing! You may still save all other properties.");
+        }
         $keyValue = new stdClass();
         $keyValue->key = $class::getField();
         $keyValue->val = $class::unserialize($rawValue);
