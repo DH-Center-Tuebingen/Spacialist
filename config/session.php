@@ -128,7 +128,7 @@ return [
 
     'cookie' => env(
         'SESSION_COOKIE',
-        'spacialist_'.Str::slug(env('APP_NAME', 'spacialist_demo'), '_').'_session'
+        Str::slug(env('APP_NAME', 'spacialist_demo'), '_').'_spacialist_session'
     ),
 
     /*
@@ -142,7 +142,7 @@ return [
     |
     */
 
-    'path' => UrlUtils::getSubPath(env('APP_URL', '/')),
+    'path' => env('APP_PATH', '/'),
 
     /*
     |--------------------------------------------------------------------------
