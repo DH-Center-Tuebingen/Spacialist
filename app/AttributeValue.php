@@ -167,6 +167,18 @@ class AttributeValue extends Model implements Searchable
             throw new \InvalidArgumentException('Entity ID and Attribute ID must be provided.');
         }
         
+        try{
+            $attribute = Attribute::findOrFail($attributeId);
+        } catch(ModelNotFoundException $e) {
+            throw new UnprocessableContentException(__('Attribute does not exist.'));
+        }
+        
+        try{
+            $formKeyValue = AttributeValue::getFormattedKeyValue($attribute->datatype, $value);
+        }catch(InvalidDataException $e) {
+            throw new UnprocessableContentException($e->getMessage());
+        }
+        
         // Check if entity_type does even have the attribute
         $entity = Entity::find($entityId);
         if(!$entity->entity_type->hasEntityAttribute($attributeId)) {
@@ -190,9 +202,6 @@ class AttributeValue extends Model implements Searchable
         ], [
             'certainty' => null
         ]);
-
-        $attribute = Attribute::findOrFail($attributeId);
-        $formKeyValue = AttributeValue::getFormattedKeyValue($attribute->datatype, $value);
    
         $attributeValue->entity_id = $entityId;
         $attributeValue->attribute_id = $attributeId;
@@ -200,7 +209,6 @@ class AttributeValue extends Model implements Searchable
         $attributeValue->user_id = $user->id;
         $attributeValue->save();
 
-        
         if($user->isModerated()) {
             $attributeValue = $attributeValue->moderate('pending', false, true);
             unset($attributeValue->comments_count);
