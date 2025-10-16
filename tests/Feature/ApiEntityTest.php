@@ -756,8 +756,8 @@ class ApiEntityTest extends TestCase
                 'name' => 'Test Entity',
                 'entity_type_id' => 4,
             ]),
-            "PATCH  /api/v1/entity/99/attributes" => Permission::for("patch", "/api/v1/entity/99/attributes", "This entity does not exist"),
-            "PATCH  /api/v1/entity/99/attribute/13" => Permission::for("patch", "/api/v1/entity/99/attribute/13", "This entity does not exist", [], 404),
+            "PATCH  /api/v1/entity/99/attributes" => Permission::for("patch", "/api/v1/entity/99/attributes", "This entity does not exist", [], 404),
+            "PATCH  /api/v1/entity/99/attribute/13" => Permission::for("patch", "/api/v1/entity/99/attribute/13", "This entity does not exist"),
             "PATCH  /api/v1/entity/1/attribute/99" => Permission::for("patch", "/api/v1/entity/1/attribute/99", "This attribute does not exist"),
             "PATCH  /api/v1/entity/99/name" => Permission::for("patch", "/api/v1/entity/99/name", "This entity does not exist", [
                 'name' => 'Test'
