@@ -232,3 +232,11 @@ export function mentionify(value) {
     }
     return newValue;
 }
+
+export function trim(str, charlist) {
+    // Escape all regex-specific characters
+    charlist = charlist.replace(/[()\[\]{}/\\^$*+-?.]/g, '\\$&');
+
+    const seq = new RegExp(`^[${charlist}]+|[${charlist}]+$`, "g");
+    return str.replace(seq, '');
+}
