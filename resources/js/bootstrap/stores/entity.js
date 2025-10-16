@@ -530,25 +530,17 @@ export const useEntityStore = defineStore('entity', {
         updateEntityData(entityId, updatedValues, addedData, removedData) {
             const entity = this.getEntity(entityId);
 
-            const updateEntityData = (attributeId, attributeValue) => {
+            const updatedOrAddedAttributes = { ...updatedValues, ...addedData };
+            for(const attributeId in updatedOrAddedAttributes) {
+                const attributeValue = updatedOrAddedAttributes[attributeId];
+
                 if(!entity.data) entity.data = {}
 
                 if(!entity.data?.[attributeId]) {
                     entity.data[attributeId] = {};
                 }
                 entity.data[attributeId] = attributeValue;
-            };
-
-            for(const attributeId in {...updatedValues, ...addedData}) {
-                const attributeValue = updatedValues[attributeId];
-                updateEntityData(attributeId, attributeValue);
             }
-
-            for(const attributeId in addedData) {
-                const attributeValue = addedData[attributeId];
-                updateEntityData(attributeId, attributeValue);
-            }
-
 
             // Remove the data from the entity.
             // We need to do this as the 'replace', 'add' 'remove'
