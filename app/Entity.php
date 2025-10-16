@@ -355,9 +355,7 @@ class Entity extends Model implements Searchable {
                 }
             } catch(Exception $e){                
                 DB::rollBack();
-                return response()->json([
-                    'error' => $e->getMessage(),
-                ], 422);
+                throw $e;
             }
         }
 
