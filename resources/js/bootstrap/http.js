@@ -1,6 +1,6 @@
 import axios from 'axios';
 import router from '%router';
-import { trim } from 'lodash';
+import { trim } from '@/helpers/filters.js';
 
 import {
     throwError,
@@ -15,16 +15,16 @@ export function createAxios(options = {}) {
     instance.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
     instance.defaults.withCredentials = true;
     instance.defaults.withXSRFToken = true;
-    
+
     let xsrfTokenName = "XSRF-TOKEN"
     let appName = import.meta.env.VITE_APP_NAME || '';
     if(appName !== '') {
         const tokenPostFix = appName.toUpperCase().replace(/[^A-Z0-9]/g, '-');
         xsrfTokenName += `-${trim(tokenPostFix, '-')}`;
     }
-    xsrfTokenName += "-SPACIALIST"; 
+    xsrfTokenName += "-SPACIALIST";
     instance.defaults.xsrfCookieName = xsrfTokenName;
-    
+
     return instance;
 }
 
