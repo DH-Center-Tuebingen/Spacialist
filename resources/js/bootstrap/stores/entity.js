@@ -539,7 +539,7 @@ export const useEntityStore = defineStore('entity', {
                 entity.data[attributeId] = attributeValue;
             };
 
-            for(const attributeId in {...updatedValues, ... addedData}) {
+            for(const attributeId in {...updatedValues, ...addedData}) {
                 const attributeValue = updatedValues[attributeId];
                 updateEntityData(attributeId, attributeValue);
             }
