@@ -401,7 +401,8 @@ class ApiEntityTest extends TestCase
             ->patch('/api/v1/entity/4/attributes', [
                 [
                     'aid' => 9,
-                    'op' => 'remove'
+                    'op' => 'remove',
+                    'value' => null
                 ],
                 [
                     'aid' => 11,
@@ -501,11 +502,7 @@ class ApiEntityTest extends TestCase
         $response = $this->userRequest()
         ->patch('/api/v1/entity/2/attributes', [
             [
-                'params' => [
-                    'id' => 62,
-                    'aid' => 17,
-                    'cid' => 2
-                ],
+                'aid' => 17,
                 'op' => 'replace',
                 'value' => [
                     'startLabel' => 'ad',
@@ -760,7 +757,7 @@ class ApiEntityTest extends TestCase
                 'entity_type_id' => 4,
             ]),
             "PATCH  /api/v1/entity/99/attributes" => Permission::for("patch", "/api/v1/entity/99/attributes", "This entity does not exist"),
-            "PATCH  /api/v1/entity/99/attribute/13" => Permission::for("patch", "/api/v1/entity/99/attribute/13", "This entity does not exist"),
+            "PATCH  /api/v1/entity/99/attribute/13" => Permission::for("patch", "/api/v1/entity/99/attribute/13", "This entity does not exist", [], 404),
             "PATCH  /api/v1/entity/1/attribute/99" => Permission::for("patch", "/api/v1/entity/1/attribute/99", "This attribute does not exist"),
             "PATCH  /api/v1/entity/99/name" => Permission::for("patch", "/api/v1/entity/99/name", "This entity does not exist", [
                 'name' => 'Test'
