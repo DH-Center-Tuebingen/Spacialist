@@ -782,7 +782,7 @@ class EntityController extends Controller {
 
     // PATCH
 
-    public function patchAttributes(Entity $entity, Request $request) {
+    public function patchAttributes($id, Request $request) {
         $user = auth()->user();
         if(!$user->can('entity_data_write')) {
             return response()->json([
@@ -790,6 +790,14 @@ class EntityController extends Controller {
             ], 403);
         }
         
+        try{
+            $entity = Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist'),
+            ], 400);
+        }
+
         $request->validate([
             '*.op' => 'required|string|in:add,replace,remove',
             '*.aid' => 'required|integer|exists:attributes,id',
