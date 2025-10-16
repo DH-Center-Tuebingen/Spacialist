@@ -9,6 +9,7 @@ use App\Traits\CommentTrait;
 use App\Traits\ModerationTrait;
 use Clickbar\Magellan\Data\Geometries\Geometry;
 use Illuminate\Database\Eloquent\Model;
+use Exception;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Searchable\Searchable;
@@ -155,7 +156,7 @@ class AttributeValue extends Model implements Searchable
             }
             return $attrval;
         }catch(ModelNotFoundException $e){
-            throw new Error(__('This attribute value does either not exist or is in moderation state.'));
+            throw new Exception(__('This attribute value does either not exist or is in moderation state.'));
         }
     }
     
