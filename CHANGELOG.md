@@ -2,10 +2,15 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.11.2
+## Added
+- Added patch exception, when entity_type does not have attribute
+- Added exceptions that contain HTTP status codes for api handling
 ## Fixes
 - Fixed error when updating array based attribute value (AttributeValueId was removed when list was empty and not recreated when list contained values again)
 ### Changed
 - Moved patch logic from EntityController to Models
+- Moved epoch attribute testing from into epoch attribute test
+- Patch attribute endpoint: moved aid param from params obj to top level, as other values were not used 
 
 ## 0.11.1
 ### Added

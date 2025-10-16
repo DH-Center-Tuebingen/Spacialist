@@ -14,6 +14,7 @@ use App\Exceptions\AmbiguousValueException;
 use App\Exceptions\AttributeImportException;
 use App\Exceptions\ImportException;
 use App\Exceptions\InvalidDataException;
+use App\Exceptions\Status\UnprocessableContentException;
 use App\Exceptions\Structs\AttributeImportExceptionStruct;
 use App\Exceptions\Structs\ImportExceptionStruct;
 use App\Import\EntityImporter;
@@ -797,7 +798,11 @@ class EntityController extends Controller {
         
         try{
             $attributeChanges = $entity->patchAttributes($request->all(), $user);
-        } catch(Exception $e) {
+        } catch(UnprocessableContentException $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+            ], $e->getStatusCode());
+        } catch(MalformedContentException $e) {
             return response()->json([
                 'error' => $e->getMessage(),
             ], 400);

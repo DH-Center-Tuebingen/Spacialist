@@ -5,6 +5,7 @@ namespace App;
 use App\AttributeTypes\AttributeBase;
 use App\AttributeTypes\SqlAttribute;
 use App\Exceptions\AmbiguousValueException;
+use App\Exceptions\Status\UnprocessableContentException;
 use App\Import\EntityImporter;
 use App\Traits\CommentTrait;
 
@@ -353,7 +354,10 @@ class Entity extends Model implements Searchable {
                         $changedAttributes[$aid] = $attributeValue;
                     }
                 }
-            } catch(Exception $e){                
+            } catch(UnprocessableContentException $e) {
+                DB::rollBack();
+                throw $e;
+            } catch(Exception $e){           
                 DB::rollBack();
                 throw $e;
             }
