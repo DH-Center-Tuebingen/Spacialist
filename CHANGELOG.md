@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 ## 0.11.2
 ## Fixes
 - Fixed error when updating array based attribute value (AttributeValueId was removed when list was empty and not recreated when list contained values again)
+### Changed
+- Moved patch logic from EntityController to Models
 
 ## 0.11.1
 ### Added

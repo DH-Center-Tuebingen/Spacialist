@@ -795,7 +795,14 @@ class EntityController extends Controller {
             '*.value' => 'present',
         ]);
         
-        $attributeChanges = $entity->patchAttributes($request->all(), $user);        
+        try{
+            $attributeChanges = $entity->patchAttributes($request->all(), $user);
+        } catch(Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+            ], 400);
+        }
+        
         return response()->json($attributeChanges);
     }
 
