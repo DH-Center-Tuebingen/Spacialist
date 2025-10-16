@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## 0.12 - (Luxor)
 ### Added
 - Plugin-System now supports custom components, e.g. attribute types
+- .env variable `ALLOW_FILESYSTEM_MIGRATIONS` to explcitly enable filesystem migrations
 - API endpoint for getting all entity details data in one request: GET::v1/entity/{id}/entity_detail
 ### Fixed
 - Removed redundant calls to the entity endpoint
@@ -12,6 +13,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Alerts can now be dismissed
 - Now entity metadata is only loaded when accessing the metadata tab
+- Migrations now have logging automatically disabled
+- Migrations that require filesystem changes can now be handled using the `App\Traits\FilesystemMigration` trait (call `$this->safelyMoveDirectoryBetweenDisks(...)` with `ALLOW_FILESYTEM_MIGRATIONS` set to `true`)
 
 ## 0.11.1
 ### Added
