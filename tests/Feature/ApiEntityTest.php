@@ -400,27 +400,17 @@ class ApiEntityTest extends TestCase
         $response = $this->userRequest()
             ->patch('/api/v1/entity/4/attributes', [
                 [
-                    'params' => [
-                        'id' => 39,
-                        'aid' => 9,
-                        'cid' => 4
-                    ],
-                    'op' => 'remove'
+                    'aid' => 9,
+                    'op' => 'remove',
+                    'value' => null
                 ],
                 [
-                    'params' => [
-                        'id' => 37,
-                        'aid' => 11,
-                        'cid' => 4
-                    ],
+                    'aid' => 11,
                     'op' => 'replace',
                     'value' => 2
                 ],
                 [
-                    'params' => [
-                        'aid' => 19,
-                        'cid' => 4
-                    ],
+                    'aid' => 19,
                     'op' => 'add',
                     'value' => 'Test'
                 ]
@@ -442,6 +432,18 @@ class ApiEntityTest extends TestCase
                         ->has('parentIds')
                         ->etc()
                 )
+                ->has('changed_attributes.11', fn($changedAttrJson) =>
+                    $changedAttrJson
+                        ->has('id')
+                        ->has('entity_id')
+                        ->has('attribute_id')
+                        ->has('certainty')
+                        ->has('user_id')
+                        ->has('created_at')
+                        ->has('updated_at')
+                        ->where('value', 2)
+                        ->etc()
+                )
                 ->has('added_attributes.19', fn($addedAttrJson) =>
                     $addedAttrJson
                         ->has('id')
@@ -451,6 +453,7 @@ class ApiEntityTest extends TestCase
                         ->has('user_id')
                         ->has('created_at')
                         ->has('updated_at')
+                        ->where('value', 'Test')
                         ->etc()
                 )
                 ->has('removed_attributes.9', fn($removedAttrJson) =>
@@ -482,7 +485,7 @@ class ApiEntityTest extends TestCase
     /**
      * @testdox PATCH  /api/v1/entity/{entity_id}/attributes  -  Test setting wrong values for epoch attribute of an entity (id=2).
      */
-    public function testPatchWrongAttributesEndpoint()
+    public function testInvalidAttributePatchAttributesEndpoint()
     {
         $entity = Entity::with('attributes')->find(2);
 
@@ -499,11 +502,7 @@ class ApiEntityTest extends TestCase
         $response = $this->userRequest()
         ->patch('/api/v1/entity/2/attributes', [
             [
-                'params' => [
-                    'id' => 62,
-                    'aid' => 17,
-                    'cid' => 2
-                ],
+                'aid' => 17,
                 'op' => 'replace',
                 'value' => [
                     'startLabel' => 'ad',
@@ -521,92 +520,40 @@ class ApiEntityTest extends TestCase
         $response->assertSimilarJson([
             'error' => 'Start date of a time period must not be after it\'s end date'
         ]);
-
-        $response = $this->userRequest()
-        ->patch('/api/v1/entity/2/attributes', [
-            [
-                'params' => [
-                    'id' => 62,
-                    'aid' => 17,
-                    'cid' => 2
-                ],
-                'op' => 'replace',
-                'value' => [
-                    'startLabel' => 'ad',
-                    'endLabel' => 'ad',
-                    'start' => 400,
-                    'end' => 150,
-                    'epoch' => [
-                        'concept_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/eisenzeit#20171220165409'
-                    ]
-                ]
-            ],
-        ]);
-
-        $response->assertStatus(422);
-        $response->assertSimilarJson([
-            'error' => 'Start date of a time period must not be after it\'s end date'
-        ]);
-
-        $response = $this->userRequest()
-        ->patch('/api/v1/entity/2/attributes', [
-            [
-                'params' => [
-                    'id' => 62,
-                    'aid' => 17,
-                    'cid' => 2
-                ],
-                'op' => 'replace',
-                'value' => [
-                    'startLabel' => 'bc',
-                    'endLabel' => 'bc',
-                    'start' => 100,
-                    'end' => 150,
-                    'epoch' => [
-                        'concept_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/eisenzeit#20171220165409'
-                    ]
-                ]
-            ],
-        ]);
-
-        $response->assertStatus(422);
-        $response->assertSimilarJson([
-            'error' => 'Start date of a time period must not be after it\'s end date'
-        ]);
-
-        $response = $this->userRequest()
-        ->patch('/api/v1/entity/2/attributes', [
-            [
-                'params' => [
-                    'id' => 62,
-                    'aid' => 17,
-                    'cid' => 2
-                ],
-                'op' => 'replace',
-                'value' => [
-                    'startLabel' => 'bc',
-                    'endLabel' => 'bc',
-                    'start' => 400,
-                    'end' => 300,
-                    'epoch' => [
-                        'concept_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/eisenzeit#20171220165409'
-                    ]
-                ]
-            ],
-        ]);
-
-        $response->assertStatus(200);
-
+        
         $entity = Entity::with('attributes')->find(2);
         foreach($entity->attributes as $attr) {
             if($attr->id == 17) {
                 $val = json_decode($attr->pivot->json_val);
-                $this->assertEquals(400, $val->start);
+                $this->assertEquals(340, $val->start);
                 $this->assertEquals(300, $val->end);
                 $this->assertEquals('bc', $val->startLabel);
                 $this->assertEquals('bc', $val->endLabel);
             }
         }
+    }
+    
+    /**
+     * @testdox PATCH  /api/v1/entity/{entity_id}/attributes  -  Test patching attribute (4) that is not part of the entity (id=2).
+     */
+    public function testInvalidAttributeIdPatchAttributesEndpoint()
+    {
+        $entity = Entity::with('attributes')->find(2);
+        
+        $response = $this->userRequest()
+        ->patch('/api/v1/entity/2/attributes', [
+            [
+                'aid' => 4,
+                'op' => 'replace',
+                'value' => 10
+            ],
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertSimilarJson([
+            'error' => 'Attribute is not part of the entity type of this entity.'
+        ]);
+        
     }
 
     /**
@@ -782,8 +729,8 @@ class ApiEntityTest extends TestCase
             "GET    /api/v1/entity/1"                      => Permission::for("get", "/api/v1/entity/1", "You do not have the permission to get a specific entity"),
             "GET    /api/v1/entity/entity_type/3/data/14"  => Permission::for("get", "/api/v1/entity/entity_type/3/data/14", "You do not have the permission to get an entity's data"),
             "GET    /api/v1/entity/1/data/14"              => Permission::for("get", "/api/v1/entity/1/data/14", "You do not have the permission to get an entity's data"),
-            "GET    /api/v1/entity/1/export"            => Permission::for("get", "/api/v1/entity/1/export", "You do not have the permission to export an entity tree"),
-            "GET    /api/v1/entity/1/parent/metadata"            => Permission::for("get", "/api/v1/entity/1/parent/metadata", "You do not have the permission to get an entity's parent id's"),
+            "GET    /api/v1/entity/1/export"               => Permission::for("get", "/api/v1/entity/1/export", "You do not have the permission to export an entity tree"),
+            "GET    /api/v1/entity/1/parent/metadata"      => Permission::for("get", "/api/v1/entity/1/parent/metadata", "You do not have the permission to get an entity's parent id's"),
             "POST   /api/v1/entity"                        => Permission::for("post", "/api/v1/entity", "You do not have the permission to add a new entity"),
             "PATCH  /api/v1/entity/1/attributes"           => Permission::for("patch", "/api/v1/entity/1/attributes", "You do not have the permission to modify an entity's data"),
             "PATCH  /api/v1/entity/1/attribute/13"         => Permission::for("patch", "/api/v1/entity/1/attribute/13", "You do not have the permission to modify an entity's data"),

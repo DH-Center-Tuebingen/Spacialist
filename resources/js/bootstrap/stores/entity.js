@@ -258,7 +258,7 @@ export const useEntityStore = defineStore('entity', {
                     } else {
                         const idx = this.tree.findIndex(c => c.rank == node.rank);
                         this.tree.splice(idx, 0, node);
-                        for(let i=idx+1; i<this.tree.length; i++) {
+                        for(let i = idx + 1; i < this.tree.length; i++) {
                             this.tree[i].rank++;
                         }
                     }
@@ -280,7 +280,7 @@ export const useEntityStore = defineStore('entity', {
                             } else {
                                 const idx = parent.children.findIndex(c => c.rank == node.rank);
                                 parent.children.splice(idx, 0, node);
-                                for(let i=idx+1; i<parent.children.length; i++) {
+                                for(let i = idx + 1; i < parent.children.length; i++) {
                                     parent.children[i].rank++;
                                 }
                             }
@@ -297,6 +297,11 @@ export const useEntityStore = defineStore('entity', {
             return node;
         },
         update(entityData) {
+            if(!entityData.id || !this.entities?.[entityData.id]) {
+                console.error('Could not update entity in store, missing id or entity does not exist', entityData);
+                return;
+            }
+
             const entity = this.entities[entityData.id];
             entity.updated_at = entityData.updated_at;
             entity.user_id = entityData.user_id;
@@ -305,7 +310,7 @@ export const useEntityStore = defineStore('entity', {
                 entity.name = entityData.name;
             }
 
-            if(this.selectedEntity.id == entity.id) {
+            if(this.selectedEntity?.id == entity.id) {
                 this.selectedEntity = {
                     ...this.selectedEntity,
                     ...entityData,
@@ -522,21 +527,19 @@ export const useEntityStore = defineStore('entity', {
             this.receivedEntityData[entityId][attributeId] = attributeValue;
             this.receivedEntityData[entityId][attributeId].value = value;
         },
-        updateEntityData(entityId, updatedValues, patchedData, removedData) {
+        updateEntityData(entityId, updatedValues, addedData, removedData) {
             const entity = this.getEntity(entityId);
-            for(let k in updatedValues) {
-                // when attribute value is set empty, delete whole attribute
-                if(!updatedValues[k] && updatedValues[k] != false) {
-                    entity.data[k] = {};
-                } else {
-                    // if no id exists, this data is added
-                    if(!entity.data[k].id) {
-                        entity.data[k] = patchedData[k];
-                        entity.data[k].value = updatedValues[k];
-                    } else {
-                        entity.data[k].value = updatedValues[k];
-                    }
+
+            const updatedOrAddedAttributes = { ...updatedValues, ...addedData };
+            for(const attributeId in updatedOrAddedAttributes) {
+                const attributeValue = updatedOrAddedAttributes[attributeId];
+
+                if(!entity.data) entity.data = {}
+
+                if(!entity.data?.[attributeId]) {
+                    entity.data[attributeId] = {};
                 }
+                entity.data[attributeId] = attributeValue;
             }
 
             // Remove the data from the entity.
@@ -544,8 +547,8 @@ export const useEntityStore = defineStore('entity', {
             // operations are calculated based on this value.
             for(const attributeId in removedData) {
                 if(entity.data[attributeId]) {
-                    this.entity.data[attributeId].id = null;
-                    if(sync) {
+                    entity.data[attributeId].id = null;
+                    if(this.selectedEntity?.data?.[attributeId]?.id) {
                         this.selectedEntity.data[attributeId].id = null;
                     }
                 }
@@ -720,11 +723,11 @@ export const useEntityStore = defineStore('entity', {
                 return data;
             });
         },
-        async patchAttributes(entityId, patchData, dirtyValues, moderations) {
+        async patchAttributes(entityId, patchData, moderations) {
             const moderated = useUserStore().getUserModerated;
             return apiPatchAttributes(entityId, patchData).then(data => {
                 this.update(data.entity);
-                this.updateEntityData(entityId, dirtyValues, data.added_attributes, data.removed_attributes);
+                this.updateEntityData(entityId, data.changed_attributes, data.added_attributes, data.removed_attributes);
                 if(moderated) {
                     this.updateEntityDataModerations(entityId, moderations, 'pending');
                 }

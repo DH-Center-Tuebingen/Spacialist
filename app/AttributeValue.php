@@ -4,10 +4,13 @@ namespace App;
 
 use App\Geodata;
 use App\AttributeTypes\AttributeBase;
+use App\Exceptions\InvalidDataException;
+use App\Exceptions\Status\UnprocessableContentException;
 use App\Traits\CommentTrait;
 use App\Traits\ModerationTrait;
 use Clickbar\Magellan\Data\Geometries\Geometry;
 use Illuminate\Database\Eloquent\Model;
+use Exception;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Searchable\Searchable;
@@ -54,6 +57,10 @@ class AttributeValue extends Model implements Searchable
         'thesaurus_val'
     ];
 
+    protected $appends = [
+        'value'
+    ];
+
     protected $casts = [
         'geography_val' => Geometry::class,
     ];
@@ -85,6 +92,10 @@ class AttributeValue extends Model implements Searchable
 
     public function getValue() {
         return AttributeBase::serializeValue($this);
+    }
+
+    public function getValueAttribute() {
+        return $this->getValue();
     }
 
     public static function getValueFromKey($arr) {
@@ -131,9 +142,86 @@ class AttributeValue extends Model implements Searchable
         }
         $this->save();
     }
+    
+    public static function remove($entityId, $attributeId): ?AttributeValue {
+        try{
+            $attrval = AttributeValue::where([
+                ['entity_id', '=', $entityId],
+                ['attribute_id', '=', $attributeId],
+            ])->firstOrFail();
+            
+             // If the user is moderated, he cannot delete the value directly
+            if(auth()->user()->isModerated()) {
+                $attrval->moderate('pending-delete', true);
+            } else {
+                $attrval->delete();
+            }
+            return $attrval;
+        }catch(ModelNotFoundException $e){
+            throw new Exception(__('This attribute value does either not exist or is in moderation state.'));
+        }
+    }
+    
+    public static function upsert($entityId, $attributeId, $value): ?AttributeValue{
+        if(!isset($entityId) || !isset($attributeId)) {
+            throw new \InvalidArgumentException('Entity ID and Attribute ID must be provided.');
+        }
+        
+        try{
+            $attribute = Attribute::findOrFail($attributeId);
+        } catch(ModelNotFoundException $e) {
+            throw new UnprocessableContentException(__('Attribute does not exist.'));
+        }
+        
+        try{
+            $formKeyValue = AttributeValue::getFormattedKeyValue($attribute->datatype, $value);
+        }catch(InvalidDataException $e) {
+            throw new UnprocessableContentException($e->getMessage());
+        }
+        
+        // Check if entity_type does even have the attribute
+        $entity = Entity::find($entityId);
+        if(!$entity->entity_type->hasEntityAttribute($attributeId)) {
+            throw new UnprocessableContentException(__('Attribute is not part of the entity type of this entity.'));
+        }
+        
+        $alreadyModerated = AttributeValue::where('entity_id', $entityId)
+                    ->where('attribute_id', $attributeId)
+                    ->onlyModerated()
+                    ->exists();
+
+        $user = auth()->user();
+        // Currently the logic is that a moderated state cannot be changed
+        // by a moderated user.
+        if($alreadyModerated && $user->isModerated()) {
+            throw new Exception(__('This attribute value is in moderation state. A user with appropriate permissions has to accept or deny it first.'));
+        }
+        $attributeValue = AttributeValue::firstOrNew([
+            'entity_id' => $entityId,
+            'attribute_id' => $attributeId,
+        ], [
+            'certainty' => null
+        ]);
+   
+        $attributeValue->entity_id = $entityId;
+        $attributeValue->attribute_id = $attributeId;
+        $attributeValue->{$formKeyValue->key} = $formKeyValue->val;
+        $attributeValue->user_id = $user->id;
+        $attributeValue->save();
+
+        if($user->isModerated()) {
+            $attributeValue = $attributeValue->moderate('pending', false, true);
+            unset($attributeValue->comments_count);
+        }
+        
+        return $attributeValue;
+    }
 
     public static function getFormattedKeyValue($datatype, $rawValue) : stdClass {
         $class = AttributeBase::getMatchingClass($datatype);
+        if($class == false) {
+            throw new InvalidDataException("Attribute of type '$datatype' is not supported. Maybe the underlying plugin is disabled or missing! You may still save all other properties.");
+        }
         $keyValue = new stdClass();
         $keyValue->key = $class::getField();
         $keyValue->val = $class::unserialize($rawValue);

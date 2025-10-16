@@ -1,12 +1,24 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.11.2
+## Added
+- Added patch exception, when entity_type does not have attribute
+- Added exceptions that contain HTTP status codes for api handling
+## Fixes
+- Fixed error when updating array based attribute value (AttributeValueId was removed when list was empty and not recreated when list contained values again)
+### Changed
+- Moved patch logic from EntityController to Models
+- Moved epoch attribute testing from into epoch attribute test
+- Patch attribute endpoint: moved aid param from params obj to top level, as other values were not used 
+
 ## 0.11.1
 ### Added
 - Unit Tests for Directory.php
 ### Changed
 - Added path value to XSRF cookie to prevent overwriting by another instance at the same domain
 - _Show x replies_ button in comment list moved to header
+- XSRF Token get's a custom name depending on the deployed app-name. Allows for deploying multiple instances on the same domain at different paths.
 ### Fixed
 - Login not possible on instances in subfolder
 - Last editor not visible in _Entity Detail_ tab

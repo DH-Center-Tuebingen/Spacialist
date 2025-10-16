@@ -56,7 +56,24 @@ class EpochAttributeTest extends TestCase {
 
         $parseResult = EpochAttribute::parseExport(json_encode($testValue->getValue()));
         $this->assertEquals('-340;-300;', $parseResult);
+    }
 
+    /** 
+     * Test the serialization of epoch attribute values 
+     * @dataProvider serializableTruthyProvider
+    */
+    public function testSerializeValueSucceeds($testValue) {
+        $this->assertEquals(json_encode($testValue), EpochAttribute::unserialize($testValue));
+    }
+    
+    /**
+     * Test error handling of serialization of epoch attribute values
+     * @dataProvider serializableFalsyProvider
+     */
+    public function testSerializeValueFails($data, $errorMessage) {
+        $this->expectException(InvalidDataException::class);
+        $this->expectExceptionMessage($errorMessage);
+        EpochAttribute::unserialize($data);
     }
 
     public static function truthyProvider() {
@@ -89,5 +106,118 @@ class EpochAttributeTest extends TestCase {
             "epoch does not exist" => ["-100;100;Moderne"],
             "floating point" => ["-100.5;100;Steinzeit"],
         ];
+    }
+    
+    public static function serializableTruthyProvider() {
+        
+        $existingEpoch = [
+            "id" => 59,
+            "concept_url" => "https://spacialist.escience.uni-tuebingen.de/<user-project>/steinzeit#20171220165355"
+        ];
+        
+        $correctTimespans = [
+            "ad-ad" => [
+                    "start" => 300,
+                    "startLabel" => "ad",
+                    "end" => 340,
+                    "endLabel" => "ad",
+                    "epoch" => null
+            ],
+            "ad-bc" => [
+                    "start" => 340,
+                    "startLabel" => "bc",
+                    "end" => 300,
+                    "endLabel" => "ad",
+                    "epoch" => null
+            ],
+            "bc-bc" => [
+                    "start" => 340,
+                    "startLabel" => "bc",
+                    "end" => 300,
+                    "endLabel" => "bc",
+                    "epoch" => null
+            ],
+        ];
+        
+        $tests = [];
+        foreach($correctTimespans as $key => $testValue) {
+            $withoutEpochKey = $key . " without epoch";
+            $tests[$withoutEpochKey] = [$testValue];
+            
+            $withEpochKey = $key . " with epoch";
+            $testValueWithEpoch = $testValue;
+            $testValueWithEpoch["epoch"] = $existingEpoch;
+            $tests[$withEpochKey] = [$testValueWithEpoch];
+        }
+        return $tests;
+    }
+    
+    public static function serializableFalsyProvider() {
+
+        $tests = [];
+        
+        $startBeforeEndTests = [];
+
+        $startBeforeEndTests["ad-ad"] = [
+            "start" => 340,
+            "startLabel" => "ad",
+            "end" => 300,
+            "endLabel" => "ad",
+            "epoch" => null,
+        ];
+        
+        $startBeforeEndTests["ad-bc"] = [
+            "start" => 300,
+            "startLabel" => "ad",
+            "end" => 340,
+            "endLabel" => "bc",
+            "epoch" => null,
+        ];
+        
+        $startBeforeEndTests["bc-bc"] = [
+            "start" => 300,
+            "startLabel" => "bc",
+            "end" => 340,
+            "endLabel" => "bc",
+            "epoch" => null,
+        ];
+        
+        foreach($startBeforeEndTests as $key => $data) {
+            $tests[$key . " start before end"] = [
+                $data,
+                'Start date of a time period must not be after it\'s end date',
+            ];
+        }
+        
+        $specifyAdAndBc = [
+            "no start label" => [
+                "start" => 300,
+                "end" => 340,
+                "endLabel" => "bc",
+                "epoch" => null,
+            ],
+            "no end label" => [
+                "start" => 300,
+                "startLabel" => "bc",
+                "end" => 340,
+                "epoch" => null,
+            ],
+            "no labels" => [
+                "start" => 300,
+                "end" => 340,
+                "epoch" => null,
+            ],
+            // TODO: We should also check when we pass an invalid label
+        ];
+        
+        
+        foreach($specifyAdAndBc as $key => $data) {
+            $tests[$key . " start before end"] = [
+                $data,
+                'You have to specify if your date is BC or AD.',
+            ];
+        }
+
+        return $tests;
     }
 }
