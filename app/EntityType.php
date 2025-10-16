@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\EntityAttribute;
 use App\EntityAttributePivot;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -77,4 +78,17 @@ class EntityType extends Model
     public function thesaurus_concept() {
         return $this->belongsTo('App\ThConcept', 'thesaurus_url', 'concept_url');
     }
+    
+    /**
+     * Check if this entity type has the given attribute assigned
+     *
+     * Note: HasAttribute would have been a better name, but it collides with
+     *       Laravel's internal method of the same name.
+     */
+    public function hasEntityAttribute($attributeId) {
+        return EntityAttribute::where('entity_type_id', $this->id)
+            ->where('attribute_id', $attributeId)
+            ->exists();
+    }
+
 }

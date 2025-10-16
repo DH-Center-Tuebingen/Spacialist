@@ -5,6 +5,7 @@ namespace App;
 use App\Geodata;
 use App\AttributeTypes\AttributeBase;
 use App\Exceptions\InvalidDataException;
+use App\Exceptions\Status\UnprocessableContentException;
 use App\Traits\CommentTrait;
 use App\Traits\ModerationTrait;
 use Clickbar\Magellan\Data\Geometries\Geometry;
@@ -148,7 +149,8 @@ class AttributeValue extends Model implements Searchable
                 ['entity_id', '=', $entityId],
                 ['attribute_id', '=', $attributeId],
             ])->firstOrFail();
-
+            
+             // If the user is moderated, he cannot delete the value directly
             if(auth()->user()->isModerated()) {
                 $attrval->moderate('pending-delete', true);
             } else {
@@ -163,6 +165,12 @@ class AttributeValue extends Model implements Searchable
     public static function upsert($entityId, $attributeId, $value): ?AttributeValue{
         if(!isset($entityId) || !isset($attributeId)) {
             throw new \InvalidArgumentException('Entity ID and Attribute ID must be provided.');
+        }
+        
+        // Check if entity_type does even have the attribute
+        $entity = Entity::find($entityId);
+        if(!$entity->entity_type->hasEntityAttribute($attributeId)) {
+            throw new UnprocessableContentException(__('Attribute is not part of the entity type of this entity.'));
         }
         
         $alreadyModerated = AttributeValue::where('entity_id', $entityId)
