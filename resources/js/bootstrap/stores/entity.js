@@ -199,7 +199,7 @@ export const useEntityStore = defineStore('entity', {
                         const matchAllRules = !group.or;
                         let ruleMatch = matchAllRules;
                         for(const rule of group.rules) {
-                            const type = useAttributeStore().getAttribute(rule.on).datatype;
+                            const type = this.getEntityTypeAttributes(entityTypeId).find(attribute => attribute.id == rule.on).datatype;
                             const attributeValue = data[rule.on];
 
                             // When the rule is invalid we ignore the rule by returning true!
