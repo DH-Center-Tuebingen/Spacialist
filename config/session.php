@@ -128,7 +128,7 @@ return [
 
     'cookie' => env(
         'SESSION_COOKIE',
-        Str::slug(env('APP_NAME', 'spacialist_demo'), '_').'_spacialist_session'
+        Str::slug(env('APP_NAME', 'spacialist_demo'), '_').'_session'
     ),
 
     /*
