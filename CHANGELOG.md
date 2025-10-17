@@ -1,13 +1,19 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.11.2
+### Changed
+- XSRF Token get's a custom name depending on the deployed app-name. Allows for deploying multiple instances on the same domain at different paths.
+- Removed legacy remember functionality (was replaced by Laravel Sanctum)
+    - Removed 'remember_token' from user table
+    - Removed 'remember_web' cookie
+
 ## 0.11.1
 ### Added
 - Unit Tests for Directory.php
 ### Changed
 - Added path value to XSRF cookie to prevent overwriting by another instance at the same domain
 - _Show x replies_ button in comment list moved to header
-- XSRF Token get's a custom name depending on the deployed app-name. Allows for deploying multiple instances on the same domain at different paths.
 ### Fixed
 - Login not possible on instances in subfolder
 - Last editor not visible in _Entity Detail_ tab

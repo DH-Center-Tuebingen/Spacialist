@@ -177,7 +177,7 @@ class UserController extends Controller {
         }
         $credentials = request($creds);
 
-        if(!Auth::guard('web')->attempt($credentials, true)) {
+        if(!Auth::guard('web')->attempt($credentials, false)) {
             return response()->json(['error' => __('Invalid Credentials')], 400);
         }
 
