@@ -31,8 +31,8 @@
                                 <span class="fw-bold">
                                     Updated by:
                                 </span>
-                                <a :href="`mailto:${entity.user.email}`">
-                                    {{ entity.user.name }}
+                                <a :href="`mailto:${entity.user?.email}`">
+                                    {{ entity.user?.name }}
                                 </a>
                             </div>
                         </small>
