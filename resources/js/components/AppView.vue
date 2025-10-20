@@ -559,14 +559,16 @@
                 if(!systemStore.checkAccess(currentRoute.matched[0].path)) {
                     return;
                 }
-
-                systemStore.initialize(locale).catch(e => {
+                try {
+                    await systemStore.initialize(locale);
+                    systemStore.setAppState(true);
+                } catch(e) {
                     if(e.response.status == 401) {
                         systemStore.setAppState(true);
                     } else {
                         throwError(e);
                     }
-                });
+                };
             });
 
             // WATCHER

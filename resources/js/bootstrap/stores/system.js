@@ -202,7 +202,6 @@ export const useSystemStore = defineStore('system', {
             this.plugins = preData.plugins;
             this.geometryTypes = preData.geometryTypes;
             attributeStore.setAttributeTypes(preData.attributeTypes);
-            this.appInitialized = true;
         },
         async initializeOpenAccess() {
             return fetchGlobals().then(data => {
