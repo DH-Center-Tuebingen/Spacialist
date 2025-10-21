@@ -220,6 +220,10 @@ export async function getMapProjection(srid) {
     );
 }
 
+export async function checkAuth() {
+    return $httpQueue.add(() => http.get('/auth/check').then(response => response.data));
+}
+
 // POST
 export async function login(credentials) {
     return await $httpQueue.add(() => http.post('/auth/login', credentials).then(response => {

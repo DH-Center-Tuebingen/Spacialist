@@ -5,6 +5,8 @@ namespace App;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Notifications\Notifiable;
 use App\File\Directory;
+use App\Events\UserLogin;
+use App\Events\UserLogout;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Sanctum\HasApiTokens;
@@ -47,6 +49,14 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
     ];
+    
+    public function login(){
+        UserLogin::dispatch($this);
+    }
+    
+    public function logout(){
+        UserLogout::dispatch($this);
+    }
 
     public function getActivitylogOptions() : LogOptions
     {
@@ -129,4 +139,16 @@ class User extends Authenticatable
     // public function roles() {
     //     return $this->belongsToMany('App\Role', 'role_user', 'user_id', 'role_id');
     // }
+    
+    
+    /**
+     * Get the column name for the "remember me" token.
+     * Returning null disables the remember token functionality.
+     *
+     * @return string
+     */
+    public function getRememberTokenName()
+    {
+        return null;
+    }
 }

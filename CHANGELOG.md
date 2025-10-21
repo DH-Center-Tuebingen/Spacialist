@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.11.2
+### Added
+- User now loggs out automatically if he logs out from companion app (e.g. ThesauRex)
 ### Changed
 - XSRF Token get's a custom name depending on the deployed app-name. Allows for deploying multiple instances on the same domain at different paths.
 - Removed legacy remember functionality (was replaced by Laravel Sanctum)

@@ -22,7 +22,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class UserController extends Controller {
     public function __construct() {
-        $this->middleware('auth:sanctum', ['except' => ['login']]);
+        $this->middleware('auth:sanctum', ['except' => ['checkAuth', 'login']]);
     }
 
     // GET
@@ -146,6 +146,19 @@ class UserController extends Controller {
         $filepath = $request->query('path');
         return User::getDirectory()->download($filepath);
     }
+    
+    public function checkAuth(Request $request) {
+        if(Auth::guard('web')->check()) {
+            return response()->json([
+                'auth' => true,
+                'user' => auth()->user()
+            ]);
+        } else {
+            return response()->json([
+                'auth' => false
+            ]);
+        }
+    }
 
     // POST
 
@@ -187,6 +200,9 @@ class UserController extends Controller {
             $user->login_attempts--;
             $user->save();
         }
+
+        // Broadcast login event
+        $user->login();
 
         return response()
             ->json($user, 200);
@@ -273,11 +289,18 @@ class UserController extends Controller {
     }
 
     public function logout(Request $request) {
-        Auth::guard('web')->logout(true);
-        // auth()->invalidate(true);
-
+        $user = auth()->user();
+        
+        // Broadcast logout event before actually logging out
+        if($user) {
+            $user->logout();
+        }
+        
+        Auth::guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        return response()->json(['message' => 'Successfully logged out'], 200);
     }
 
     // PATCH

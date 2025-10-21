@@ -420,6 +420,7 @@ import {
     reactive,
     computed,
     onMounted,
+    onBeforeUnmount,
     watch,
 } from 'vue';
 
@@ -429,7 +430,7 @@ import {
 
 import {
     router,
-} from '@/bootstrap/router.js';
+} from "@/bootstrap/router.js";
 
 import videojs from 'video.js';
 // import adapter from 'webrtc-adapter';
@@ -439,6 +440,7 @@ import useSystemStore from '@/bootstrap/stores/system.js';
 import useUserStore from '@/bootstrap/stores/user.js';
 import { useI18n } from 'vue-i18n';
 import { provideToast, useToast } from '@/plugins/toast.js';
+
 
 import {
     throwError,
@@ -590,9 +592,27 @@ export default {
                 // })
             }
         });
-        // watch(state.auth, (newValue, oldValue) => {
-        //     store.commit('setUser', state.auth.user());
-        // });
+        
+        let loginCurrentlyUpdating = false;
+        async function updateLogin() {
+            if(loginCurrentlyUpdating) {
+                return;
+            }
+            loginCurrentlyUpdating = true;
+            try {
+                await userStore.checkAuth();
+            } catch(e) {
+                console.error("Error while updating login state:", e);
+            } finally {
+                loginCurrentlyUpdating = false;
+            }
+        };
+        
+        async function updateLoginOnVisibilityChange() {
+            if(!document.hidden) {
+                await updateLogin();
+            }
+        };
 
         // ON MOUNTED
         onMounted(_ => {
@@ -606,6 +626,8 @@ export default {
                 container: 'toast-container',
             });
             useToast();
+            
+            document.addEventListener('visibilitychange', updateLoginOnVisibilityChange);
 
             // if(adapter.browserDetails.browser == 'firefox') {
             //     adapter.browserShim.shimGetDisplayMedia(window, 'window');
@@ -634,6 +656,10 @@ export default {
                 rtc.player.record().removeRecording();
             });
         });
+        
+        onBeforeUnmount(_ => {
+            document.removeEventListener('visibilitychange', updateLoginOnVisibilityChange);
+        })
 
         // RETURN
         return {
