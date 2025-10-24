@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 use App\File\Directory;
 
@@ -123,6 +123,53 @@ class Plugin extends Model
             }
         }
         return $accesspoints;
+    }
+
+    public function getScopes(): array {
+        $info = self::getInfo(base_path("app/Plugins/$this->name"), false);
+        $scopes = [];
+        if($info !== false) {
+            if(array_key_exists('scopes', $info)) {
+                foreach($info['scopes'] as $scope) {
+                    $attributes = $scope['@attributes'];
+                    if(!array_key_exists('src', $attributes)) {
+                        Log::error('<scope> attribute \'src\' is required');
+                        continue;
+                    }
+                    if(!array_key_exists('on', $attributes)) {
+                        Log::error('<scope> attribute \'on\' is required');
+                        continue;
+                    }
+
+                    $src = $attributes['src'];
+                    $on = $attributes['on'];
+
+                    $srcDir = base_path("app/Plugins/$this->name/Scopes");
+                    if(!file_exists($srcDir) || !is_dir($srcDir)) {
+                        Log::error('Missing \'Scopes\' directory');
+                        continue;
+                    }
+                    $srcPath = "{$srcDir}/{$src}";
+                    if(!file_exists($srcPath)) {
+                        Log::error("Missing file '$src'");
+                        continue;
+                    }
+                    if(!class_exists($on)) {
+                        Log::error("Class '{$on}' does not exist!");
+                        continue;
+                    }
+                    $className = Str::replaceEnd('.php', '', $src);
+                    $namespacedSrc = "App\Plugins\\$this->name\Scopes\\$className";
+
+                    if(!array_key_exists($on, $scopes)) {
+                        $scopes[$on] = [];
+                    }
+
+                    $scopes[$on][] = $namespacedSrc;
+                }
+            }
+        }
+        return $scopes;
     }
 
     public static function updateOrCreateFromInfo(array $info) : Plugin {

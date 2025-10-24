@@ -98,6 +98,13 @@ class Entity extends Model implements Searchable {
         return array_keys(self::searchCols);
     }
 
+    protected static function booted(): void {
+        $pluginScopes = Globals::getModelScopes(self::class);
+        foreach($pluginScopes as $pluginScope) {
+            static::addGlobalScope(new $pluginScope);
+        }
+    }
+
     public static function getFromPath($path, $delimiter = "\\\\"): ?int {
         if(!isset($path)) {
             return null;
@@ -215,7 +222,7 @@ class Entity extends Model implements Searchable {
         $entity->save();
 
         // TODO workaround to get all (optional, not part of request) attributes
-        $entity = self::find($entity->id);
+        $entity = self::withoutGlobalScopes()->find($entity->id);
         AttributeBase::onCreateHandler($entity, $user);
         $entity->children_count = 0;
 
@@ -269,7 +276,7 @@ class Entity extends Model implements Searchable {
         }
         return $query;
     }
-    
+
     public function move($parentId, $rank, $user) {
         if($rank == null){
             if(isset($parentId)) {
