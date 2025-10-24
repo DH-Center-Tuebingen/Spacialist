@@ -9,6 +9,10 @@ All notable changes to this project will be documented in this file.
 - Removed legacy remember functionality (was replaced by Laravel Sanctum)
     - Removed 'remember_token' from user table
     - Removed 'remember_web' cookie
+- Moved _attempt_ logic into User model.
+- Removed "Remember Me" toggle from login screen
+### Fixed
+- Fixed Broadcasting exception in EntityObserver
 
 ## 0.11.1
 ### Added

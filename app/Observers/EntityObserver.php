@@ -28,6 +28,13 @@ class EntityObserver
             try {
                 User::findOrFail($uid)->notify(new EntityUpdatedNotification($entity));
             } catch(ModelNotFoundException $e) {
+                if(env('APP_DEBUG')) {
+                    info("User with ID $uid not found while sending EntityUpdatedNotification");
+                }
+            } catch(BroadcastException $e) {
+                if(env('APP_DEBUG')) {
+                    info("BroadcastException while sending EntityUpdatedNotification to user ID $uid");
+                }
             }
         }
     }
