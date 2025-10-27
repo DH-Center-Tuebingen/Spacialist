@@ -40,6 +40,7 @@ class PluginController extends Controller
         foreach($plugins as $plugin) {
             $plugin->metadata = $plugin->getMetadata();
             $plugin->changelog = $plugin->getChangelog();
+            $plugin->registeredAttributes = $plugin->getRegisteredAttributes();
         }
 
         return response()->json($plugins);
@@ -88,10 +89,10 @@ class PluginController extends Controller
             }
         }
 
-        $pluginPath = base_path("app/Plugins/$pluginName");
+        $pluginPath = Plugin::getPluginPath($pluginName);
         if(file_exists($pluginPath)) {
             $installedPlugin = Plugin::where('name', $pluginName)->first();
-            $infoContent = Plugin::getInfo($zipFile->getFromName("{$rootFolder}App/info.xml"), true);
+            $infoContent = Plugin::getPluginInfo($zipFile->getFromName("{$rootFolder}App/info.xml"), true);
 
             if($installedPlugin->version >= $infoContent['version']) {
                 return response()->json([
@@ -100,7 +101,7 @@ class PluginController extends Controller
             }
         }
 
-        $extractPath = base_path('app/Plugins/');
+        $extractPath = Str::finish(Plugin::getPluginPath($pluginName), '/');
         $extracted = $zipFile->extractTo($extractPath);
         $zipFile->close();
 
@@ -127,15 +128,17 @@ class PluginController extends Controller
             Plugin::where('id', $id)->whereNotNull('installed_at')->firstOrFail();
             // Already installed
             return response()->json([], 204);
-        } catch(ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {            
             $plugin = Plugin::where('id', $id)->whereNull('installed_at')->first();
             try {
                 $plugin->handleInstallation();
             } catch(ModelNotFoundException $e) {
+                info("odelNotFoundException: " . $e->getMessage());
                 return response()->json([
                     'error' => __('Error while installing plugin. Preset does not exist.')
                 ], 403);
             } catch(\Exception $e) {
+                info("Exception: " . $e->getMessage());
                 return response()->json([
                     'error' => __('Error while installing plugin. Please check file permissions or ask your system administrator.')
                 ], 403);
@@ -205,4 +208,10 @@ class PluginController extends Controller
         }
         return Plugin::getDirectory()->downloadRelative($filepath);
     }
+    
+    //// REBASING:: Plugin Attribute 
+    // public function downloadScript(Request $request) {
+    //     $file = "plugins/" . $request->query('src');
+    //     return Plugin::getDirectory()->download($file);
+    // }
 }

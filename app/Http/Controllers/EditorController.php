@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-// use App\AvailableLayer;
 use App\Attribute;
 use App\AttributeValue;
 use App\AvailableLayer;
@@ -14,6 +13,7 @@ use \App\Plugins\Map\App\Geodata;
 use App\Plugin;
 use App\ThConcept;
 use App\AttributeTypes\AttributeBase;
+use App\Registries\AttributeRegistry;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
@@ -100,7 +100,7 @@ class EditorController extends Controller {
             ], 403);
         }
 
-        return response()->json(AttributeBase::getTypes(true));
+        return response()->json(AttributeRegistry::getTypes(true));
     }
 
     public function getAvailableGeometryTypes() {

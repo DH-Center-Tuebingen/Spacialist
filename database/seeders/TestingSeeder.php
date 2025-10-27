@@ -17,6 +17,7 @@ use Database\Seeders\General\RolesTableSeeder;
 use Database\Seeders\Testing\BibliographyTableSeeder;
 use Database\Seeders\Testing\CommentsSeeder;
 use Database\Seeders\Testing\UserSeeder;
+use Database\Seeders\Testing\PluginSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -46,6 +47,7 @@ class TestingSeeder extends Seeder {
         $this->call(AttributeValuesTableSeeder::class);
         $this->call(ReferencesTableSeeder::class);
         $this->call(CommentsSeeder::class);
+        $this->call(PluginSeeder::class);
 
         // Set different root for tags
         DB::table('preferences')

@@ -3,7 +3,8 @@ All notable changes to this project will be documented in this file.
 
 ## 0.12 - (Luxor)
 ### Added
-- Added .env variable `ALLOW_FILESYSTEM_MIGRATIONS` to explcitly enable filesystem migrations
+- Plugin-System now supports custom components, e.g. attribute types
+- .env variable `ALLOW_FILESYSTEM_MIGRATIONS` to explcitly enable filesystem migrations
 - API endpoint for getting all entity details data in one request: GET::v1/entity/{id}/entity_detail
 ### Fixed
 - Removed redundant calls to the entity endpoint

@@ -107,6 +107,17 @@ return [
     'key' => env('APP_KEY'),
 
     'cipher' => 'AES-256-CBC',
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Plugin Directory
+    |--------------------------------------------------------------------------
+    | This value determines the directory where plugins are stored.
+    | You may change this value to correspond to any directory you wish.
+    | This is usually used for plugin testing.
+    |
+    */
+    'plugin_directory' => env('APP_PLUGIN_DIRECTORY', 'app/Plugins'),
 
     /*
     |--------------------------------------------------------------------------

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<info>
+    <!-- Must match id in JS SpPS.register call in kebab-case -->
+    <name>Foo</name>
+    <title>Foo Plugin</title>
+    <description>Test plugin 1</description>
+    <version>2.2.0</version>
+    <licence>mit</licence>
+    <authors>
+        <author>Berta Beispiel</author>
+        <author>Max Muster</author>
+    </authors>
+</info>
