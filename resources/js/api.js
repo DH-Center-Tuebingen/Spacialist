@@ -22,6 +22,8 @@ export async function getCsrfCookie() {
     }));
 }
 
+// Might be used in Core or Plugins to refresh a session with a short TTL
+// e.g. for timer-based logout
 export async function refreshSession() {
     return $httpQueue.add(() => http.get('/refresh'));
 }

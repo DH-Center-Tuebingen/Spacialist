@@ -143,6 +143,8 @@ class HomeController extends Controller
         ]);
     }
 
+    // Might be used in Core or Plugins to refresh a session with a short TTL
+    // e.g. for timer-based logout
     public function updateSession() {
         return response()->json();
     }
