@@ -27,6 +27,12 @@ class UserController extends Controller {
 
     // GET
 
+    // Might be used in Core or Plugins to refresh a session with a short TTL
+    // e.g. for timer-based logout
+    public function refreshSession() {
+        return response()->json();
+    }
+
     public function getUser(Request $request) {
         $user = User::with('notifications')->find(auth()->user()->id);
         $user->setPermissions();
