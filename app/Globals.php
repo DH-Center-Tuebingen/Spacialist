@@ -50,20 +50,4 @@ class Globals {
             return [];
         }
     }
-
-    public static function getModelScopes(string $modelClass) {
-        $scopes = [];
-
-        $installedPlugins = Plugin::getInstalled();
-        foreach($installedPlugins as $plugin) {
-            $pluginScopes = $plugin->getScopes();
-            if(array_key_exists($modelClass, $pluginScopes)) {
-                foreach($pluginScopes[$modelClass] as $scope) {
-                    $scopes[] = $scope;
-                }
-            }
-        }
-
-        return $scopes;
-    }
 }

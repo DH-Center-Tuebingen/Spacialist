@@ -172,6 +172,25 @@ class Plugin extends Model
         return $scopes;
     }
 
+    /**
+     * Get all scopes defined in Plugins for a given model class (e.g. App\Entity).
+     */
+    public static function getScopesFor(string $modelClass) {
+        $scopes = [];
+
+        $installedPlugins = Plugin::getInstalled();
+        foreach($installedPlugins as $plugin) {
+            $pluginScopes = $plugin->getScopes();
+            if(array_key_exists($modelClass, $pluginScopes)) {
+                foreach($pluginScopes[$modelClass] as $scope) {
+                    $scopes[] = $scope;
+                }
+            }
+        }
+
+        return $scopes;
+    }
+
     public static function updateOrCreateFromInfo(array $info) : Plugin {
         $id = $info['name'];
         $plugin = self::where('name', $id)->first();

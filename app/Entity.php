@@ -99,7 +99,7 @@ class Entity extends Model implements Searchable {
     }
 
     protected static function booted(): void {
-        $pluginScopes = Globals::getModelScopes(self::class);
+        $pluginScopes = Plugin::getScopesFor(self::class);
         foreach($pluginScopes as $pluginScope) {
             static::addGlobalScope(new $pluginScope);
         }
