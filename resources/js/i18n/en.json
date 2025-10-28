@@ -12,9 +12,9 @@
         "close": "Close",
         "add": "Add",
         "edit": "Edit",
-        "export":"Export",
         "edited": "edited",
         "duplicate": "Duplicate",
+        "export":"Export",
         "sort": "Sort",
         "resort": "Re-sort",
         "update": "Update",
@@ -852,7 +852,7 @@
             }
         },
         "plugins": {
-            "title": "Plugins",
+            "title": "Plugin | Plugins",
             "upload": "Upload Plugin",
             "authors": "Authors",
             "deactivate": "Deactivate",

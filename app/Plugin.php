@@ -2,13 +2,16 @@
 
 namespace App;
 
+use App\File\Directory;
 use Carbon\Carbon;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
-
-use App\File\Directory;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Plugin extends Model
 {
@@ -20,26 +23,55 @@ class Plugin extends Model
     protected $fillable = [
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'installed_at' => 'datetime',
+    ];
+
     protected $metadataFields = [
         'authors',
         'description',
         'licence',
         'title',
     ];
-
-    public static function isInstalled($name) {
+    
+    private static function pluginDirectory() {
+        $pluginDirectory = config('app.plugin_directory');
+        return base_path($pluginDirectory);
+    }
+    
+    public static function getPluginPath(string $path = ''):string {
+        if($path === ''){
+            return self::pluginDirectory();
+        }
+        return self::pluginDirectory() . Str::start($path, '/');
+    }
+    
+    public static function isInstalled($name): bool {
         return self::whereNotNull('installed_at')->where('name', $name)->exists();
     }
 
-    public static function getInstalled() {
+    public static function getInstalled(): Collection {
         return self::whereNotNull('installed_at')->get();
     }
 
-    public function slugName() {
+    public function slugName(): string {
         return Str::slug($this->name);
     }
+    
+    public function getPath(string $path = ''): string {
+        $pluginPath = $this->name;
+        if($path !== ''){
+            $pluginPath .= Str::start($path, '/');
+        }
+        return self::getPluginPath($pluginPath);
+    }
 
-    public function publicName($withPath = true) {
+    public function publicName($withPath = true): string {
         $slug = $this->slugName();
         $uuid = $this->uuid;
         $name = "{$slug}-{$uuid}.js";
@@ -49,7 +81,7 @@ class Plugin extends Model
         return $name;
     }
 
-    public static function getInfo($path, $isString = false) {
+    public static function getPluginInfo($path, $isString = false): mixed {
         if(!$isString) {
             $infoPath = Str::finish($path, '/') . 'App/info.xml';
             if(!File::isFile($infoPath)) return false;
@@ -62,16 +94,29 @@ class Plugin extends Model
 
         return json_decode(json_encode($xmlObject), true);
     }
+    
+    public function getInfo(){
+        return self::getPluginInfo($this->getPath());
+    }
 
-    public function getMetadata() {
-        $info = self::getInfo(base_path("app/Plugins/$this->name"));
+    public function getMetadata(): array {
+        $info = $this->getInfo();
         if($info !== false) {
             $metadata = [];
             foreach($this->metadataFields as $field) {
                 if($field == 'authors') {
+                    if(!array_key_exists($field, $info) || !array_key_exists('author', $info[$field])) {
+                        $metadata[$field] = [];
+                        continue;
+                    }
+                    
                     $authors = $info[$field]['author'];
                     $metadata[$field] = is_array($authors) ? $authors : [$authors];
                 } else {
+                    if(!array_key_exists($field, $info)) {
+                        $metadata[$field] = "";
+                        continue;
+                    }
                     $metadata[$field] = $info[$field];
                 }
             }
@@ -81,8 +126,8 @@ class Plugin extends Model
         }
     }
 
-    public function getChangelog($since = null) {
-        $changelog = Str::finish(base_path("app/Plugins/$this->name"), '/') . 'CHANGELOG.md';
+    public function getChangelog(?string $since = null): string {
+        $changelog = $this->getPath('CHANGELOG.md');
         if(!File::isFile($changelog)) return '';
         $changes = file_get_contents($changelog);
         if(isset($since) && preg_match("/\\n#+\s(v\s?)?$since(\s-\s.+)?\\n/i", $changes, $matches, PREG_OFFSET_CAPTURE) !== false) {
@@ -191,7 +236,23 @@ class Plugin extends Model
         return $scopes;
     }
 
-    public static function updateOrCreateFromInfo(array $info) : Plugin {
+    public function getRegisteredAttributes(): array {
+        $info = $this->getInfo();
+        $attributes = [];
+        if($info !== false) {
+            if(array_key_exists('attributes', $info)) {
+                $attributes = $info['attributes']['attribute'];
+                // If only one <attribute> exists, this <attribute> is returned
+                // instead of an array, but we always want an array
+                if(array_key_exists('@attributes', $attributes)) {
+                    $attributes = [$attributes];
+                }
+            }
+        }
+        return $attributes;
+    }
+
+    public static function updateOrCreateFromInfo(array $info): Plugin {
         $id = $info['name'];
         $plugin = self::where('name', $id)->first();
         // discovered new Plugin, add it to DB
@@ -208,15 +269,13 @@ class Plugin extends Model
         return $plugin;
     }
 
-    public static function updateState() : void {
-        $pluginPath = base_path('app/Plugins');
-        $availablePlugins = File::directories($pluginPath);
-
+    public static function updateState(): void {
+        $availablePlugins = File::directories(self::getPluginPath());
         self::discoverPlugins($availablePlugins);
         self::cleanupPlugins($availablePlugins);
     }
 
-    public static function cleanupPlugins(array $list) : void {
+    public static function cleanupPlugins(array $list): void {
         $pluginNames = [];
 
         foreach($list as $p) {
@@ -230,24 +289,23 @@ class Plugin extends Model
         }
     }
 
-    public static function discoverPlugins(array $list) : void {
+    public static function discoverPlugins(array $list): void {
         foreach($list as $ap) {
-            $info = self::getInfo($ap);
+            $info = self::getPluginInfo($ap);
             if($info !== false) {
                 self::updateOrCreateFromInfo($info);
             }
         }
     }
 
-    public static function discoverPluginByName($name) : Plugin|null {
-        $pluginPath = base_path("app/Plugins/$name");
-        $info = self::getInfo($pluginPath);
+    public static function discoverPluginByName($name): ?Plugin {
+        $pluginPath = self::getPluginPath($name);
+        $info = self::getPluginInfo($pluginPath);
         if($info === false) {
             return null;
         }
 
         $plugin = self::updateOrCreateFromInfo($info);
-
         return $plugin;
     }
 
@@ -266,7 +324,7 @@ class Plugin extends Model
         return new Directory('plugins');
     }
 
-    public function updateUpdateState($fromInfoVersion) {
+    public function updateUpdateState($fromInfoVersion): void {
         if($this->version != $fromInfoVersion) {
             // installed version splitted
             preg_match('/(\d+)\.(\d+).(\d+)(-.+)?/', $this->version, $iv);
@@ -286,35 +344,37 @@ class Plugin extends Model
         }
     }
 
-    public function handleInstallation() {
+    public function handleInstallation(bool $isUpdate = false): void {
         $this->runMigrations();
         $this->publishScript();
         $this->addPermissions();
         $this->installPresetsFromFile();
 
-        $this->installed_at = Carbon::now();
+        if(!$isUpdate) {
+            $this->installed_at = Carbon::now();
+        }
         $this->save();
     }
 
-    public function handleUpdate() {
+    public function handleUpdate(): string {
         $oldVersion = $this->version;
         // TODO is it really the same as install?
-        $this->handleInstallation();
-        $info = self::getInfo(base_path("app/Plugins/$this->name"));
+        $this->handleInstallation(true);
+        $info = $this->getInfo();
         $this->update_available = null;
         $this->version = $info['version'];
         $this->save();
         return $oldVersion;
     }
 
-    public function handleUninstall() {
+    public function handleUninstall(): void {
         $this->removeScript();
 
         $this->installed_at = null;
         $this->save();
     }
 
-    public function handleRemove() {
+    public function handleRemove(): void {
         // if installed, first rollback migrations and delete all files and presets
         if(isset($this->installed_at)) {
             $this->handleUninstall();
@@ -324,13 +384,12 @@ class Plugin extends Model
         }
 
         $this->removePreferences();
-        sp_remove_dir(base_path("app/Plugins/$this->name"));
-
+        sp_remove_dir($this->getPath());
         $this->delete();
     }
 
-    public function getPermissions() {
-        $pluginPermissionPath = base_path("app/Plugins/$this->name/App/permissions.json");
+    public function getPermissions(): mixed {
+        $pluginPermissionPath = $this->getPath('App/permissions.json');
         if(!File::isFile($pluginPermissionPath)) {
             return [];
         }
@@ -338,12 +397,12 @@ class Plugin extends Model
         return json_decode(file_get_contents($pluginPermissionPath), true);
     }
 
-    public function getPermissionGroups() {
+    public function getPermissionGroups(): array {
         return array_keys($this->getPermissions());
     }
 
-    public function getRolePresets() {
-        $rolePresets = base_path("app/Plugins/$this->name/App/role-presets.json");
+    public function getRolePresets(): mixed {
+        $rolePresets = $this->getPath('App/role-presets.json');
         if(!File::isFile($rolePresets)) {
             return [];
         }
@@ -351,14 +410,14 @@ class Plugin extends Model
         return json_decode(file_get_contents($rolePresets), true);
     }
 
-    private function getClassWithPrefix($path, $classname) {
+    private function getClassWithPrefix($path, $classname): string {
         return "App\\Plugins\\$this->name\\$path\\$classname";
     }
 
-    private function getMigrationPath() {
-        return base_path("app/Plugins/$this->name/Migration");
+    private function getMigrationPath(): string {
+        return $this->getPath('Migration');
     }
-    private function getSortedMigrations(bool $desc = false) : array {
+    private function getSortedMigrations(bool $desc = false): array {
         $migrationPath = $this->getMigrationPath();
         if(file_exists($migrationPath) && is_dir($migrationPath)) {
             $migrations = collect(File::files($migrationPath))->map(function($f) {
@@ -372,39 +431,38 @@ class Plugin extends Model
 
             return $migrations->values()->toArray();
         }
-
         return [];
     }
 
-    private function runMigrations() {
+    private function runMigrations(): void {
         foreach($this->getSortedMigrations() as $migration) {
             preg_match("/^[1-9]\d{3}_\d{2}_\d{2}_\d{6}_(.*)\.php$/", $migration, $matches);
             if(count($matches) != 2) continue;
 
             $className = Str::studly($matches[1]);
-            require(base_path("app/Plugins/$this->name/Migration/$migration"));
+            require($this->getPath("Migration/$migration"));
             $prefixedClassName = $this->getClassWithPrefix('Migration', $className);
             $instance = new $prefixedClassName();
             call_user_func([$instance, 'migrate']);
         }
     }
 
-    private function rollbackMigrations() {
+    private function rollbackMigrations(): void {
         foreach($this->getSortedMigrations(true) as $migration) {
             preg_match("/^[1-9]\d{3}_\d{2}_\d{2}_\d{6}_(.*)\.php$/", $migration, $matches);
             if(count($matches) != 2) continue;
 
             $className = Str::studly($matches[1]);
-            require(base_path("app/Plugins/$this->name/Migration/$migration"));
+            require($this->getPath("Migration/$migration"));
             $prefixedClassName = $this->getClassWithPrefix('Migration', $className);
             $instance = new $prefixedClassName();
             call_user_func([$instance, 'rollback']);
         }
     }
 
-    private function publishScript() {
+    private function publishScript(): void {
         $name = $this->name;
-        $scriptPath = base_path("app/Plugins/$name/js/script.js");
+        $scriptPath = $this->getPath("js/script.js");
         if(file_exists($scriptPath)) {
             $filehandle = fopen($scriptPath, 'r');
 
@@ -414,7 +472,7 @@ class Plugin extends Model
 
             self::getDirectory()->store(
                 $this->publicName(false),
-                $filehandle
+                $scriptPath
             );
             fclose($filehandle);
         } else {
@@ -422,11 +480,11 @@ class Plugin extends Model
         }
     }
 
-    private function removeScript() {
-        self::getDirectory()->delete($this->publicName());
+    private function removeScript(): void {
+        self::getDirectory()->delete($this->publicName(false));
     }
 
-    private function addPermissions() {
+    private function addPermissions(): void {
         $permGroups = $this->getPermissions();
         foreach($permGroups as $group => $permSet) {
             foreach($permSet as $perm) {
@@ -440,7 +498,7 @@ class Plugin extends Model
         }
     }
 
-    private function removePermissions() {
+    private function removePermissions(): void {
         $permGroups = $this->getPermissions();
         foreach($permGroups as $group => $permSet) {
             foreach($permSet as $perm) {
@@ -449,7 +507,7 @@ class Plugin extends Model
         }
     }
 
-    private function installPresetsFromFile() {
+    private function installPresetsFromFile(): void {
         $rolePresets = $this->getRolePresets();
         foreach($rolePresets as $preset) {
             $baseRolePreset = RolePreset::where('name', $preset['extends'])->firstOrFail();
@@ -461,11 +519,11 @@ class Plugin extends Model
         }
     }
 
-    private function uninstallPresets() {
+    private function uninstallPresets(): void {
         RolePresetPlugin::where('from', $this->id)->delete();
     }
 
-    private function removePreferences() {
+    private function removePreferences(): void {
         $id = Str::kebab($this->name);
         Preference::where('label', 'ilike', "plugin.$id.%")->delete();
     }

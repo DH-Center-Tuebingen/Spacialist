@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Attribute;
-use App\AttributeTypes\AttributeBase;
+use App\Registries\AttributeRegistry;
 use App\Bibliography;
 use App\Entity;
 use App\EntityType;
@@ -81,7 +81,6 @@ class HomeController extends Controller
         $sysPrefsValues = Preference::getPreferences(true);
 
         $concepts = ThConcept::getMap($locale);
-
         $tags = Globals::getTags();
         $version = Globals::getVersion();
         $plugins = Plugin::getWithMetadata();
@@ -89,7 +88,7 @@ class HomeController extends Controller
 
         $attributes = Attribute::whereNull('parent_id')->withCount('entity_types')->orderBy('id')->get();
         $attributeSelections = Attribute::getSelectionsFor($attributes);
-        $attributeTypes = AttributeBase::getTypes(true);
+        $attributeTypes = AttributeRegistry::getTypes(true);
 
         $users = User::with('roles')->withoutTrashed()->orderBy('id')->get();
         $deletedUsers = User::with('roles')->onlyTrashed()->orderBy('id')->get();
@@ -100,9 +99,10 @@ class HomeController extends Controller
         $topEntities = Entity::getEntitiesByParent(null, true);
         $geometryTypes = Globals::getGeometryTypes();
 
-        $datatypes = AttributeBase::getTypes();
+        $datatypes = AttributeRegistry::getTypes();
         $datatypeData = [];
-        foreach($datatypes as $key => $datatype) {
+        foreach($datatypes as $key => $typeDef) {
+            $datatype = $typeDef['class'];
             if(method_exists($datatype, "getGlobalData")) {
                 $datatypeData[$key] = $datatype::getGlobalData();
             }

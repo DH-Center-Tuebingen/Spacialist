@@ -6,12 +6,15 @@ use App\AttributeValue;
 use App\Bibliography;
 use App\Comment;
 use App\Entity;
+use App\Listeners\DisableMigrationLogging;
 use App\Reference;
 use App\Observers\BibliographyObserver;
 use App\Observers\CommentObserver;
 use App\Observers\EntityObserver;
 use App\Observers\EntityAttributeObserver;
 use App\Observers\ReferenceObserver;
+use Illuminate\Database\Events\MigrationEnded;
+use Illuminate\Database\Events\MigrationStarted;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -22,8 +25,14 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        'App\Events\Event' => [
-            'App\Listeners\EventListener',
+        // 'App\Events\Event' => [
+        //     'App\Listeners\EventListener',
+        // ],
+        MigrationStarted::class => [
+            DisableMigrationLogging::class,
+        ],
+        MigrationEnded::class => [
+            DisableMigrationLogging::class,
         ],
     ];
 

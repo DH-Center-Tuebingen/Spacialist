@@ -44,11 +44,33 @@
                     @search-change="searchInAttributeTypes"
                 >
                     <template #option="{ option }">
-                        {{ t(`global.attributes.${option.datatype}`) }}
+                        <div
+                            v-if="option.plugin"
+                            class="w-100 d-flex flex-row justify-content-between align-items-center"
+                        >
+                            <span>
+                                {{ t(`${option.label}`) }}
+                            </span>
+                            <PluginBadge :name="option.plugin" />
+                        </div>
+                        <span v-else>
+                            {{ t(`global.attributes.${option.datatype}`) }}
+                        </span>
                     </template>
                     <template #singlelabel="{ value }">
-                        <div class="multiselect-single-label">
-                            {{ t(`global.attributes.${value.datatype}`) }}
+                        <div class="w-100 multiselect-single-label">
+                            <div
+                                v-if="value.plugin"
+                                class="w-100 d-flex flex-row justify-content-between align-items-center"
+                            >
+                                <span>
+                                    {{ t(`${value.label}`) }}
+                                </span>
+                                <PluginBadge :name="value.plugin" />
+                            </div>
+                            <span v-else>
+                                {{ t(`global.attributes.${value.datatype}`) }}
+                            </span>
                         </div>
                     </template>
                 </multiselect>
@@ -316,10 +338,12 @@
     } from '@/helpers/helpers.js';
 
     import ChainList from './chain/ChainList.vue';
+    import PluginBadge from './plugins/Badge.vue';
 
     export default {
         components: {
             ChainList,
+            PluginBadge,
         },
         props: {
             type: {
@@ -445,8 +469,20 @@
                     types = attributeStore.attributeTypes;
                     break;
             }
+            
+            const preprocessDataTypeLabel = (attribute) => {
+                let label = `global.attributes.${attribute.datatype}`;
+                if(attribute.plugin){
+                    if(!attribute.label) return attribute.datatype;
+                    label = attribute.label;
+                }
+                return t(label);
+            };
+            
             types = types.slice().sort((a, b) => {
-                return t(`global.attributes.${a.datatype}`) > t(`global.attributes.${b.datatype}`);
+                const labelA = preprocessDataTypeLabel(a);
+                const labelB = preprocessDataTypeLabel(b);
+                return labelA.localeCompare(labelB);
             });
 
             const state = reactive({
