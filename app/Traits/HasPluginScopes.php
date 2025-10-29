@@ -13,9 +13,15 @@ trait HasPluginScopes
      */
     protected static function bootHasPluginScopes(): void
     {
-        $pluginScopes = Plugin::getScopesFor(static::class);
-        foreach($pluginScopes as $pluginScope) {
-            static::addGlobalScope(new $pluginScope);
+        // The try-catch is to prevent issues during installation/package discovery
+        try {            
+            $pluginScopes = Plugin::getScopesFor(static::class);
+            foreach($pluginScopes as $pluginScope) {
+                static::addGlobalScope(new $pluginScope);
+            }
+        } catch(\Exception $e) {
+            // Fail silently during installation/package discovery
+            return;
         }
     }
 }
