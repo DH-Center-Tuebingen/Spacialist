@@ -87,4 +87,23 @@ abstract class TestCase extends BaseTestCase {
             'Accept' => 'application/json' // When not setting this, Laravels validation will return a 302 on failure!
         ]);
     }
+    
+    /**
+     * The booted method of laravel models is called before the testCase is run.
+     * Therefore when you need to modify any model and have those changes being
+     * available in the booted function of that model. You need to "reboot" the model.
+     */
+    public static function rebootModel($modelClass) {
+        // Clear global scopes before rebooting
+        $reflection = new \ReflectionClass($modelClass);
+        
+        // Clear global scopes
+        $scopesProperty = $reflection->getProperty('globalScopes');
+        $scopesProperty->setAccessible(true);
+        $scopesProperty->setValue(null, []);
+        
+        // Flush event listeners and reboot
+        $modelClass::flushEventListeners();
+        $modelClass::boot();
+    }
 }

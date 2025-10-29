@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use App\Plugin;
+use App\Entity;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\TestDox;
@@ -36,6 +37,20 @@ class ApiPluginTest extends TestCase {
             'installed_at' => null,
             'created_at' => '2020-04-14T04:40:04.000000Z',
             'updated_at' => '2020-06-16T06:36:27.000000Z',
+        ];
+    }
+    
+    private static function getScopePlugin(): array
+    {
+        return [
+            'id' => 3,
+            'name' => 'ScopePlugin',
+            'version' => '3.2.0',
+            'uuid' => '123e4567-e89b-12d3-a456-426614174004',
+            'update_available' => null,
+            'installed_at' => null,
+            'created_at' => '2020-08-01T08:00:00.000000Z',
+            'updated_at' => '2020-08-01T08:00:00.000000Z',
         ];
     }
     
@@ -158,7 +173,7 @@ XML;
             ->get('/api/v1/plugin');
 
         $response->assertStatus(200);
-        $response->assertJsonCount(2);
+        $response->assertJsonCount(3);
         $response->assertJson($this->getTestPlugins());
     }
 
@@ -276,4 +291,49 @@ XML;
     }
     
     // TODO: Add upload plugin test
+    
+    function testScopePlugin(){
+        // Set time for installed_at and updated_at
+        Carbon::setTestNow('2020-07-20 10:15:30');
+        Plugin::where('id', 3)->update([
+            'installed_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+        // We reboot the model to register the plugin scopes
+        self::rebootModel(Entity::class);
+        
+        $response = $this->userRequest()
+            ->get('/api/v1/search/entity?q=');
+            
+        $response->assertStatus(200);
+        $response->assertJsonCount(2, 'data');
+
+        $response->assertJsonFragment([
+            'id' => 7,
+            'name' => 'Site B',
+            'entity_type_id' => 3,
+        ]);
+        
+        $response->assertJsonFragment([
+            'id' => 1,
+            'name' => 'Site A',
+            'entity_type_id' => 3,
+        ]);
+        
+        // Test if works after uninstalling the plugin
+        Plugin::where('id', 3)->update([
+            'installed_at' => null,
+            'updated_at' => Carbon::now(),
+        ]);
+        self::rebootModel(Entity::class);
+        // Re-run the search query
+        $response = $this->userRequest()
+            ->get('/api/v1/search/entity?q=');
+            
+        $response->assertStatus(200);
+        $response->assertJsonCount(8, 'data');
+        
+        // Reset time after test
+        Carbon::setTestNow();
+    }
 }
