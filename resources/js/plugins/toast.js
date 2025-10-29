@@ -34,7 +34,7 @@ const perToastConfig = ['duration', 'autohide', 'channel', 'icon', 'simple'];
 
 export function addToast(message, title, config) {
     const toastId = `toast-${getTs()}`;
-    const toastContainer = document.createElement('div');
+    const toastContainer = document.createElement('template');
     const finalConfig = reduceToastConfig({...defaultConfig, ...config});
     render(createVNode(ToastComponent, {
         message: message,
@@ -42,10 +42,10 @@ export function addToast(message, title, config) {
         id: toastId,
         ...finalConfig,
     }), toastContainer);
-    store.wrapper.appendChild(toastContainer);
+    store.wrapper.appendChild(toastContainer.childNodes[0]);
     const toastElem = document.getElementById(toastId);
     toastElem.addEventListener('hidden.bs.toast', e => {
-        e.target.parentNode.remove();
+        e.target.remove();
     });
     const bsToast = new Toast(toastElem);
     finalConfig.instance = bsToast;
