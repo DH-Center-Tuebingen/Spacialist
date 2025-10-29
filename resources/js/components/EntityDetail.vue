@@ -138,6 +138,7 @@
                     type="submit"
                     form="entity-attribute-form"
                     class="btn-outline-success btn-sm"
+                    :disabled="!state.formDirty"
                     :loading="state.saving"
                     @click.prevent="saveEntity()"
                 >
@@ -548,6 +549,9 @@
                     }
                     return false;
                 }),
+                requiredAttributes: computed(_ => {
+                    return state.entityAttributes.filter(attribute => attribute?.pivot?.metadata?.required === true);
+                }),
                 filteredEntityGroups: computed(_ => {
                     return state.entityGroups.filter(g => !g.hidden);
                 }),
@@ -838,6 +842,29 @@
             const hideHiddenAttributes = _ => {
                 state.hiddenAttributeState = false;
             };
+            const isFormValid = (grps, asToast = true) => {
+                const dirtyValues = getDirtyValues(grps);
+                if(Object.keys(dirtyValues).length == 0) return true;
+
+                for(let attributeId in state.requiredAttributes) {
+                    const attribute = state.requiredAttributes[attributeId];
+                    if(!dirtyValues[attribute.id]) {
+                        if(asToast) {
+                            toast.$toast(
+                                t('main.entity.toasts.required_missing.msg'),
+                                t('main.entity.toasts.required_missing.title'),
+                                {
+                                    channel: 'warning',
+                                    autohide: true,
+                                    icon: true,
+                                },
+                            );
+                        }
+                        return false;
+                    }
+                }
+                return true;
+            };
             const confirmDeleteEntity = _ => {
                 if(!can('entity_delete')) return;
 
@@ -951,20 +978,24 @@
                 e.preventDefault();
                 if(e.shiftKey) {
                     if(!state.formDirty) return;
+                    if(!isFormValid()) return;
                     saveEntity();
                 } else {
                     if(!state.dirtyStates[grp]) return;
+                    if(!isFormValid(grp)) return;
                     saveEntity(grp);
                 }
             };
 
             const saveEntity = async grps => {
                 if(!can('entity_data_write')) return;
+                if(!state.formDirty) return;
+                if(!isFormValid(grps)) return;
 
                 const dirtyValues = getDirtyValues(grps);
+                if(Object.keys(dirtyValues).length == 0) return;
                 const patches = [];
                 const moderations = [];
-                if(Object.keys(dirtyValues).length == 0) return;
 
                 for(let v in dirtyValues) {
                     const aid = v;
