@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 - Plugin-System now supports custom components, e.g. attribute types
 - .env variable `ALLOW_FILESYSTEM_MIGRATIONS` to explcitly enable filesystem migrations
 - API endpoint for getting all entity details data in one request: GET::v1/entity/{id}/entity_detail
+- Option to set entity attributes as required fields
 ### Fixed
 - Removed redundant calls to the entity endpoint
 - Metadata tab error on submit (unknown variable)

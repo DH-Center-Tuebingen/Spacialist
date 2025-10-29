@@ -10,6 +10,7 @@
         "reset_password": "Passwort zurücksetzen",
         "cancel": "Abbrechen",
         "close": "Schließen",
+        "required": "Pflichtfeld",
         "add": "Hinzufügen",
         "edit": "Bearbeiten",
         "edited": "bearbeitet",
@@ -502,6 +503,10 @@
                 "deleted": {
                     "title": "Entität gelöscht",
                     "msg": "{name} wurde erfolgreich gelöscht."
+                },
+                "required_missing": {
+                    "title": "Pflichtfelder fehlen",
+                    "msg": "Bitte füllen Sie alle Pflichtfelder aus."
                 }
             },
             "tree": {
