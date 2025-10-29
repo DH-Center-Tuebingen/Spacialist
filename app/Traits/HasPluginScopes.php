@@ -14,7 +14,6 @@ trait HasPluginScopes
     protected static function bootHasPluginScopes(): void
     {
         $pluginScopes = Plugin::getScopesFor(static::class);
-        info($pluginScopes);
         foreach($pluginScopes as $pluginScope) {
             static::addGlobalScope(new $pluginScope);
         }
