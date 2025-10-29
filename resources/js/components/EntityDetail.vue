@@ -442,20 +442,25 @@
         userId,
         getEntityTypeDependencies,
         getEntityTypeDependencyTriggers,
+        hasKey,
+        isEmpty,
         translateConcept,
         _cloneDeep,
     } from '@/helpers/helpers.js';
+
     import {
         showDiscard,
         showDeleteEntity,
         showUserInfo,
         canShowReferenceModal,
     } from '@/helpers/modal.js';
+
     import {
         listenToList,
         joinEntityRoom,
         leaveEntityRoom,
     } from '@/helpers/websocket.js';
+
     import {
         handleEntityDataUpdated,
         handleAttributeValueCreated,
@@ -843,27 +848,54 @@
                 state.hiddenAttributeState = false;
             };
             const isFormValid = (grps, asToast = true) => {
+                let isValid = true;
                 const dirtyValues = getDirtyValues(grps);
-                if(Object.keys(dirtyValues).length == 0) return true;
 
                 for(let attributeId in state.requiredAttributes) {
                     const attribute = state.requiredAttributes[attributeId];
-                    if(!dirtyValues[attribute.id]) {
-                        if(asToast) {
-                            toast.$toast(
-                                t('main.entity.toasts.required_missing.msg'),
-                                t('main.entity.toasts.required_missing.title'),
-                                {
-                                    channel: 'warning',
-                                    autohide: true,
-                                    icon: true,
-                                },
-                            );
-                        }
-                        return false;
+
+                    // check if existing value has an empty dirty value
+                    // -> delete operation
+                    if(
+                        state.entity.data[attribute.id]?.id
+                        &&
+                        hasKey(dirtyValues, attribute.id)
+                        &&
+                        isEmpty(dirtyValues[attribute.id])
+                    ) {
+                        isValid = false;
+                        break;
+                    }
+                    // check if there is neither an existing valur nor:
+                    // a) an existing entry in dirty values
+                    // b) or the dirty value is empty
+                    // -> missing
+                    if(
+                        !state.entity.data[attribute.id]?.id
+                        &&
+                        (
+                            !hasKey(dirtyValues, attribute.id)
+                            ||
+                            isEmpty(dirtyValues[attribute.id])
+                        )
+                    ) {
+                        isValid = false;
+                        break;
                     }
                 }
-                return true;
+
+                if(!isValid && asToast) {
+                    toast.$toast(
+                        t('main.entity.toasts.required_missing.msg'),
+                        t('main.entity.toasts.required_missing.title'),
+                        {
+                            channel: 'warning',
+                            autohide: true,
+                            icon: true,
+                        },
+                    );
+                }
+                return isValid;
             };
             const confirmDeleteEntity = _ => {
                 if(!can('entity_delete')) return;
@@ -993,6 +1025,7 @@
                 if(!isFormValid(grps)) return;
 
                 const dirtyValues = getDirtyValues(grps);
+
                 if(Object.keys(dirtyValues).length == 0) return;
                 const patches = [];
                 const moderations = [];
