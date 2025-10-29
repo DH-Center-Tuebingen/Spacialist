@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -170,51 +171,58 @@ class Plugin extends Model
         return $accesspoints;
     }
 
+    private function getScopeCacheKey(): string {
+        return 'plugin_scopes_' . $this->id;
+    }
+
     public function getScopes(): array {
-        $info = self::getInfo();
-        $scopes = [];
-        if($info !== false) {
-            if(array_key_exists('scopes', $info)) {
-                foreach($info['scopes'] as $scope) {
-                    $attributes = $scope['@attributes'];
-                    if(!array_key_exists('src', $attributes)) {
-                        Log::error('<scope> attribute \'src\' is required');
-                        continue;
-                    }
-                    if(!array_key_exists('on', $attributes)) {
-                        Log::error('<scope> attribute \'on\' is required');
-                        continue;
-                    }
+        return Cache::rememberForever($this->getScopeCacheKey(), function() {
+            info("Cache miss for plugin scopes {$this->getScopeCacheKey()} of plugin {$this->name}, reading from info.xml");
+            $info = self::getInfo();
+            $scopes = [];
+            if($info !== false) {
+                if(array_key_exists('scopes', $info)) {
+                    foreach($info['scopes'] as $scope) {
+                        $attributes = $scope['@attributes'];
+                        if(!array_key_exists('src', $attributes)) {
+                            Log::error('<scope> attribute \'src\' is required');
+                            continue;
+                        }
+                        if(!array_key_exists('on', $attributes)) {
+                            Log::error('<scope> attribute \'on\' is required');
+                            continue;
+                        }
 
-                    $src = $attributes['src'];
-                    $on = $attributes['on'];
+                        $src = $attributes['src'];
+                        $on = $attributes['on'];
 
-                    $srcDir = $this->getPath("Scopes");
-                    if(!file_exists($srcDir) || !is_dir($srcDir)) {
-                        Log::error('Missing \'Scopes\' directory');
-                        continue;
-                    }
-                    $srcPath = $srcDir . DIRECTORY_SEPARATOR . $src;
-                    if(!file_exists($srcPath)) {
-                        Log::error("Missing file '$src'");
-                        continue;
-                    }
-                    if(!class_exists($on)) {
-                        Log::error("Class '{$on}' does not exist!");
-                        continue;
-                    }
-                    $className = Str::replaceEnd('.php', '', $src);
-                    $namespacedSrc = "App\\Plugins\\$this->name\\Scopes\\$className";
+                        $srcDir = $this->getPath("Scopes");
+                        if(!file_exists($srcDir) || !is_dir($srcDir)) {
+                            Log::error('Missing \'Scopes\' directory');
+                            continue;
+                        }
+                        $srcPath = $srcDir . DIRECTORY_SEPARATOR . $src;
+                        if(!file_exists($srcPath)) {
+                            Log::error("Missing file '$src'");
+                            continue;
+                        }
+                        if(!class_exists($on)) {
+                            Log::error("Class '{$on}' does not exist!");
+                            continue;
+                        }
+                        $className = Str::replaceEnd('.php', '', $src);
+                        $namespacedSrc = "App\\Plugins\\$this->name\\Scopes\\$className";
 
-                    if(!array_key_exists($on, $scopes)) {
-                        $scopes[$on] = [];
-                    }
+                        if(!array_key_exists($on, $scopes)) {
+                            $scopes[$on] = [];
+                        }
 
-                    $scopes[$on][] = $namespacedSrc;
+                        $scopes[$on][] = $namespacedSrc;
+                    }
                 }
             }
-        }
-        return $scopes;
+            return $scopes;
+        });
     }
 
     /**
@@ -343,12 +351,17 @@ class Plugin extends Model
             $this->save();
         }
     }
+    
+    public function clearCache(): void {
+        Cache::forget($this->getScopeCacheKey());
+    }
 
     public function handleInstallation(bool $isUpdate = false): void {
         $this->runMigrations();
         $this->publishScript();
         $this->addPermissions();
         $this->installPresetsFromFile();
+        $this->clearCache();
 
         if(!$isUpdate) {
             $this->installed_at = Carbon::now();
@@ -369,7 +382,7 @@ class Plugin extends Model
 
     public function handleUninstall(): void {
         $this->removeScript();
-
+        $this->clearCache();
         $this->installed_at = null;
         $this->save();
     }
