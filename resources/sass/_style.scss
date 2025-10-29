@@ -115,7 +115,7 @@ dl.dl-0-mb > dd:last-child {
     padding: 0;
     height: 1.8rem;
     width: 1.8rem;
-    background-color: $white;
+    /* background-color: $white; */
 }
 
 .btn-fab:disabled {
@@ -152,7 +152,7 @@ dl.dl-0-mb > dd:last-child {
     margin-right: 0.25rem;
 }
 
-.btn-fab-list > .btn-fab:last-child, 
+.btn-fab-list > .btn-fab:last-child,
 .btn-fab-list > .btn-fab-sm:last-child
 .btn-fab-list > .btn-fab-xl:last-child {
     margin-right: 0;
