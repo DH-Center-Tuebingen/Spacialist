@@ -17,7 +17,6 @@ class AccesspointUtils {
 
         $installedPlugins = Plugin::getInstalled();
         foreach($installedPlugins as $plugin) {
-            $plugin->getScopes();
             $accesspoints = array_merge($accesspoints, $plugin->getAccessPoints());
         }
 
