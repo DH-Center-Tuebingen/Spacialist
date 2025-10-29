@@ -139,7 +139,7 @@ class Plugin extends Model
     }
 
     public function getAccessPoints(): array {
-        $info = self::getInfo(base_path("app/Plugins/$this->name"));
+        $info = self::getInfo();
         $accesspoints = [];
         $addedNames = [];
         $addedPaths = [];
@@ -171,7 +171,7 @@ class Plugin extends Model
     }
 
     public function getScopes(): array {
-        $info = self::getInfo(base_path("app/Plugins/$this->name"), false);
+        $info = self::getInfo();
         $scopes = [];
         if($info !== false) {
             if(array_key_exists('scopes', $info)) {
@@ -189,12 +189,12 @@ class Plugin extends Model
                     $src = $attributes['src'];
                     $on = $attributes['on'];
 
-                    $srcDir = base_path("app/Plugins/$this->name/Scopes");
+                    $srcDir = $this->getPath("Scopes");
                     if(!file_exists($srcDir) || !is_dir($srcDir)) {
                         Log::error('Missing \'Scopes\' directory');
                         continue;
                     }
-                    $srcPath = "{$srcDir}/{$src}";
+                    $srcPath = $srcDir . DIRECTORY_SEPARATOR . $src;
                     if(!file_exists($srcPath)) {
                         Log::error("Missing file '$src'");
                         continue;
@@ -204,7 +204,7 @@ class Plugin extends Model
                         continue;
                     }
                     $className = Str::replaceEnd('.php', '', $src);
-                    $namespacedSrc = "App\Plugins\\$this->name\Scopes\\$className";
+                    $namespacedSrc = "App\\Plugins\\$this->name\\Scopes\\$className";
 
                     if(!array_key_exists($on, $scopes)) {
                         $scopes[$on] = [];
