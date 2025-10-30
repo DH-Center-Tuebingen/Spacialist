@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Attribute;
 use App\Registries\AttributeRegistry;
+use App\Services\AccessPointsService;
 use App\Bibliography;
 use App\Entity;
 use App\EntityType;
@@ -16,7 +17,6 @@ use App\RolePreset;
 use App\ThConcept;
 use App\User;
 
-use App\Utils\AccesspointUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
@@ -28,7 +28,7 @@ class HomeController extends Controller
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(private readonly AccessPointsService $accessPointsService)
     {
         parent::__construct();
         if(!Preference::hasPublicAccess()) {
@@ -39,7 +39,6 @@ class HomeController extends Controller
 
     public function checkAccesspointAccess(Request $request) {
         $user = auth()->user();
-
         $accessPath = Str::finish($request->get('endpoint', '/'), '/');
 
         if(!isset($user->accesspoints)) {
@@ -47,8 +46,7 @@ class HomeController extends Controller
             return response()->json(null, 204);
         }
 
-        $availableAccesspoints = AccesspointUtils::get();
-
+        $availableAccesspoints = $this->accessPointsService->get();
         foreach($user->accesspoints as $accesspointId) {
             if(array_key_exists($accesspointId, $availableAccesspoints)) {
                 if($availableAccesspoints[$accesspointId]['path'] == $accessPath) {
@@ -108,7 +106,7 @@ class HomeController extends Controller
             }
         }
 
-        $accesspoints = AccesspointUtils::get();
+        $accesspoints = $this->accessPointsService->get();
 
         // TODO handle layer relation in Map Plugin
         // $entityTypes = EntityType::with(['sub_entity_types', 'layer', 'attributes'])
