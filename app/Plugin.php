@@ -39,19 +39,19 @@ class Plugin extends Model
         'licence',
         'title',
     ];
-    
+
     private static function pluginDirectory() {
         $pluginDirectory = config('app.plugin_directory');
         return base_path($pluginDirectory);
     }
-    
+
     public static function getPluginPath(string $path = ''):string {
         if($path === ''){
             return self::pluginDirectory();
         }
         return self::pluginDirectory() . Str::start($path, '/');
     }
-    
+
     public static function isInstalled($name): bool {
         return self::whereNotNull('installed_at')->where('name', $name)->exists();
     }
@@ -63,7 +63,7 @@ class Plugin extends Model
     public function slugName(): string {
         return Str::slug($this->name);
     }
-    
+
     public function getPath(string $path = ''): string {
         $pluginPath = $this->name;
         if($path !== ''){
@@ -95,7 +95,7 @@ class Plugin extends Model
 
         return json_decode(json_encode($xmlObject), true);
     }
-    
+
     public function getInfo(){
         return self::getPluginInfo($this->getPath());
     }
@@ -110,7 +110,7 @@ class Plugin extends Model
                         $metadata[$field] = [];
                         continue;
                     }
-                    
+
                     $authors = $info[$field]['author'];
                     $metadata[$field] = is_array($authors) ? $authors : [$authors];
                 } else {
@@ -177,7 +177,6 @@ class Plugin extends Model
 
     public function getScopes(): array {
         return Cache::rememberForever($this->getScopeCacheKey(), function() {
-            info("Cache miss for plugin scopes {$this->getScopeCacheKey()} of plugin {$this->name}, reading from info.xml");
             $info = self::getInfo();
             $scopes = [];
             if($info !== false) {
@@ -351,7 +350,7 @@ class Plugin extends Model
             $this->save();
         }
     }
-    
+
     public function clearCache(): void {
         Cache::forget($this->getScopeCacheKey());
     }

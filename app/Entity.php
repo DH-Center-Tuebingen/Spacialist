@@ -71,7 +71,7 @@ class Entity extends Model implements Searchable {
         // 'entity_type_id'   => 'integer|exists:entity_types,id',
         // 'root_entity_id'   => 'integer|exists:entities,id',
     ];
-    
+
     public function getActivitylogOptions(): LogOptions {
         return LogOptions::defaults()
             ->logOnly(['id'])

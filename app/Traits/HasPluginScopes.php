@@ -4,17 +4,15 @@ namespace App\Traits;
 
 use App\Plugin;
 
-trait HasPluginScopes
-{
+trait HasPluginScopes {
     /**
      * Register plugin scopes for this model
-     * 
+     *
      * Note: This method is called automatically by Laravel when the model boots.
      */
-    protected static function bootHasPluginScopes(): void
-    {
+    protected static function bootHasPluginScopes(): void {
         // The try-catch is to prevent issues during installation/package discovery
-        try {            
+        try {
             $pluginScopes = Plugin::getScopesFor(static::class);
             foreach($pluginScopes as $pluginScope) {
                 static::addGlobalScope(new $pluginScope);
