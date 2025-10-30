@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -38,19 +39,19 @@ class Plugin extends Model
         'licence',
         'title',
     ];
-    
+
     private static function pluginDirectory() {
         $pluginDirectory = config('app.plugin_directory');
         return base_path($pluginDirectory);
     }
-    
+
     public static function getPluginPath(string $path = ''):string {
         if($path === ''){
             return self::pluginDirectory();
         }
         return self::pluginDirectory() . Str::start($path, '/');
     }
-    
+
     public static function isInstalled($name): bool {
         return self::whereNotNull('installed_at')->where('name', $name)->exists();
     }
@@ -62,7 +63,7 @@ class Plugin extends Model
     public function slugName(): string {
         return Str::slug($this->name);
     }
-    
+
     public function getPath(string $path = ''): string {
         $pluginPath = $this->name;
         if($path !== ''){
@@ -94,7 +95,7 @@ class Plugin extends Model
 
         return json_decode(json_encode($xmlObject), true);
     }
-    
+
     public function getInfo(){
         return self::getPluginInfo($this->getPath());
     }
@@ -109,7 +110,7 @@ class Plugin extends Model
                         $metadata[$field] = [];
                         continue;
                     }
-                    
+
                     $authors = $info[$field]['author'];
                     $metadata[$field] = is_array($authors) ? $authors : [$authors];
                 } else {
@@ -139,7 +140,7 @@ class Plugin extends Model
     }
 
     public function getAccessPoints(): array {
-        $info = self::getInfo(base_path("app/Plugins/$this->name"));
+        $info = self::getInfo();
         $accesspoints = [];
         $addedNames = [];
         $addedPaths = [];
@@ -170,51 +171,57 @@ class Plugin extends Model
         return $accesspoints;
     }
 
+    private function getScopeCacheKey(): string {
+        return 'plugin_scopes_' . $this->id;
+    }
+
     public function getScopes(): array {
-        $info = self::getInfo(base_path("app/Plugins/$this->name"), false);
-        $scopes = [];
-        if($info !== false) {
-            if(array_key_exists('scopes', $info)) {
-                foreach($info['scopes'] as $scope) {
-                    $attributes = $scope['@attributes'];
-                    if(!array_key_exists('src', $attributes)) {
-                        Log::error('<scope> attribute \'src\' is required');
-                        continue;
-                    }
-                    if(!array_key_exists('on', $attributes)) {
-                        Log::error('<scope> attribute \'on\' is required');
-                        continue;
-                    }
+        return Cache::rememberForever($this->getScopeCacheKey(), function() {
+            $info = self::getInfo();
+            $scopes = [];
+            if($info !== false) {
+                if(array_key_exists('scopes', $info)) {
+                    foreach($info['scopes'] as $scope) {
+                        $attributes = $scope['@attributes'];
+                        if(!array_key_exists('src', $attributes)) {
+                            Log::error('<scope> attribute \'src\' is required');
+                            continue;
+                        }
+                        if(!array_key_exists('on', $attributes)) {
+                            Log::error('<scope> attribute \'on\' is required');
+                            continue;
+                        }
 
-                    $src = $attributes['src'];
-                    $on = $attributes['on'];
+                        $src = $attributes['src'];
+                        $on = $attributes['on'];
 
-                    $srcDir = base_path("app/Plugins/$this->name/Scopes");
-                    if(!file_exists($srcDir) || !is_dir($srcDir)) {
-                        Log::error('Missing \'Scopes\' directory');
-                        continue;
-                    }
-                    $srcPath = "{$srcDir}/{$src}";
-                    if(!file_exists($srcPath)) {
-                        Log::error("Missing file '$src'");
-                        continue;
-                    }
-                    if(!class_exists($on)) {
-                        Log::error("Class '{$on}' does not exist!");
-                        continue;
-                    }
-                    $className = Str::replaceEnd('.php', '', $src);
-                    $namespacedSrc = "App\Plugins\\$this->name\Scopes\\$className";
+                        $srcDir = $this->getPath("Scopes");
+                        if(!file_exists($srcDir) || !is_dir($srcDir)) {
+                            Log::error('Missing \'Scopes\' directory');
+                            continue;
+                        }
+                        $srcPath = $srcDir . DIRECTORY_SEPARATOR . $src;
+                        if(!file_exists($srcPath)) {
+                            Log::error("Missing file '$src'");
+                            continue;
+                        }
+                        if(!class_exists($on)) {
+                            Log::error("Class '{$on}' does not exist!");
+                            continue;
+                        }
+                        $className = Str::replaceEnd('.php', '', $src);
+                        $namespacedSrc = "App\\Plugins\\$this->name\\Scopes\\$className";
 
-                    if(!array_key_exists($on, $scopes)) {
-                        $scopes[$on] = [];
-                    }
+                        if(!array_key_exists($on, $scopes)) {
+                            $scopes[$on] = [];
+                        }
 
-                    $scopes[$on][] = $namespacedSrc;
+                        $scopes[$on][] = $namespacedSrc;
+                    }
                 }
             }
-        }
-        return $scopes;
+            return $scopes;
+        });
     }
 
     /**
@@ -344,11 +351,16 @@ class Plugin extends Model
         }
     }
 
+    public function clearCache(): void {
+        Cache::forget($this->getScopeCacheKey());
+    }
+
     public function handleInstallation(bool $isUpdate = false): void {
         $this->runMigrations();
         $this->publishScript();
         $this->addPermissions();
         $this->installPresetsFromFile();
+        $this->clearCache();
 
         if(!$isUpdate) {
             $this->installed_at = Carbon::now();
@@ -369,7 +381,7 @@ class Plugin extends Model
 
     public function handleUninstall(): void {
         $this->removeScript();
-
+        $this->clearCache();
         $this->installed_at = null;
         $this->save();
     }

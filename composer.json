@@ -44,13 +44,15 @@
         ],
         "psr-4": {
             "App\\": "app/",
+            "App\\Plugins\\": "app/Plugins/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/"
+            "Tests\\": "tests/",
+            "App\\Plugins\\": "tests/assets/Plugins/"
         }
     },
     "extra": {

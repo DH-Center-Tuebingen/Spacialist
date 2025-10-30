@@ -35,6 +35,16 @@ class PluginSeeder extends Seeder
                 'created_at' => Carbon::createFromFormat('Y-m-d H:i:s', '2020-04-14 04:40:04', 'UTC'),
                 'updated_at' => Carbon::createFromFormat('Y-m-d H:i:s', '2020-06-16 06:36:27', 'UTC'),
             ),
+            2 => array(
+                'id' => 3,
+                'name' => 'ScopePlugin',
+                'version' => '3.2.0',
+                'uuid' => '123e4567-e89b-12d3-a456-426614174004',
+                'update_available' => null,
+                'installed_at' => null,
+                'created_at' => Carbon::createFromFormat('Y-m-d H:i:s', '2020-08-01 08:00:00', 'UTC'),
+                'updated_at' => Carbon::createFromFormat('Y-m-d H:i:s', '2020-08-01 08:00:00', 'UTC'),
+            ),
         ));
 
         // Reset PostgreSQL sequence to continue from the highest ID

@@ -7,6 +7,7 @@ use App\AttributeTypes\SqlAttribute;
 use App\Exceptions\AmbiguousValueException;
 use App\Import\EntityImporter;
 use App\Traits\CommentTrait;
+use App\Traits\HasPluginScopes;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -25,6 +26,7 @@ class Entity extends Model implements Searchable {
     use CommentTrait;
     use SearchableTrait;
     use LogsActivity;
+    use HasPluginScopes;
 
     /**
      * The attributes that are assignable.
@@ -98,12 +100,6 @@ class Entity extends Model implements Searchable {
         return array_keys(self::searchCols);
     }
 
-    protected static function booted(): void {
-        $pluginScopes = Plugin::getScopesFor(self::class);
-        foreach($pluginScopes as $pluginScope) {
-            static::addGlobalScope(new $pluginScope);
-        }
-    }
 
     public static function getFromPath($path, $delimiter = "\\\\"): ?int {
         if(!isset($path)) {
