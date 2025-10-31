@@ -6,16 +6,15 @@ use App\Plugin;
 use Illuminate\Support\Facades\Cache;
 
 class AccessPointsService {
-    
     private const CACHE_KEY = 'access_points';
-    
+
     public const /*array*/ CORE_ACCESSPOINTS = [
         "Default" => [
             "label" => "main.user.accesspoints.default",
             "path" => "/",
         ],
     ];
-    
+
     public function clearCache(): void {
         Cache::forget(self::CACHE_KEY);
     }
@@ -27,7 +26,7 @@ class AccessPointsService {
             return $accesspoints;
         });
     }
-    
+
     private function loadAccessPointsFromPlugins(): array {
         $installedPlugins = Plugin::getInstalled();
         $accesspoints = [];
