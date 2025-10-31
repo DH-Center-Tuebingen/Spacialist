@@ -22,7 +22,7 @@ class AccessPointsService {
     public function get(): array {
         return Cache::rememberForever(self::CACHE_KEY, function() {
             $accesspoints = self::CORE_ACCESSPOINTS;
-            $accesspoints = array_merge($accesspoints, self::loadAccessPointsFromPlugins());
+            $accesspoints = array_merge($accesspoints, $this->loadAccessPointsFromPlugins());
             return $accesspoints;
         });
     }
