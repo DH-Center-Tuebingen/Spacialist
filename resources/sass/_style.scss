@@ -307,3 +307,16 @@ table.table-sticky .dropdown-menu {
     min-width: 250px;
     z-index: $zindex-sticky-in-page + 1;
 }
+
+/**
+* The vue-draggable (to be more precise the 'sortablejs' library it uses) 
+* doesn't support multiple classes for the ghost element out of the box.
+* Therefore we need to define a specific class for it here.
+*/
+.vue-draggable-ghost {
+    background-color: $light;
+    border-radius: $border-radius;
+    border-color: $secondary;
+    border-width: map-get($map: $border-widths, $key: 2);
+    border-style: dashed;
+}

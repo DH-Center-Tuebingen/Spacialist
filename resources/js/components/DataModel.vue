@@ -231,6 +231,14 @@
                                             :show-info="true"
                                             @delete-element="onDeleteAttribute"
                                         >
+                                            <template #before-container="{attribute, hovered, dragging}">
+                                                <AttributeListControls
+                                                    v-if="hovered && !dragging"
+                                                    class="position-absolute start-0 top-50 translate-middle-y"
+                                                    :attribute="attribute"
+                                                    @delete="onDeleteAttribute(attribute)"
+                                                />
+                                            </template> 
                                             <template #after="{ attribute }">
                                                 <AttributeUsageIndicator :count="attribute.entity_types_count" />
                                             </template>
@@ -252,10 +260,13 @@
                     :selections="{}"
                     :is-source="true"
                     :show-info="true"
-                    @delete-element="onDeleteAttribute"
                 >
-                    <template #after="{ attribute }">
-                        <AttributeUsageIndicator :count="attribute.entity_types_count" />
+                    <template #after="{ attribute, hovered, dragging }">
+                        <AttributeUsageIndicator 
+                            v-if="hovered && !dragging"
+                            :count="attribute.entity_types_count"
+                            @delete="onDeleteAttribute"
+                        />
                     </template>
                 </attribute-list>
                 <Alert
@@ -309,10 +320,12 @@
         showDeleteAttribute,
         showEditEntityType,
     } from '@/helpers/modal.js';
+    import AttributeListControls from './attribute/AttributeListControls.vue';
 
     export default {
         components: {
             AttributeUsageIndicator,
+            AttributeListControls,
         },
         setup(props, context) {
             const { t } = useI18n();
@@ -358,8 +371,7 @@
             const createAttribute = _ => {
                 showAddAttribute(null);
             };
-            const onDeleteAttribute = e => {
-                const attribute = e.element;
+            const onDeleteAttribute = attribute => {
                 getAttributeOccurrenceCount(attribute.id).then(data => {
                     const metadata = {
                         attributeCount: data,

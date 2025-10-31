@@ -5,10 +5,14 @@
         item-key="id"
         class="attribute-list-container align-content-start"
         :class="classes"
+        ghost-class="vue-draggable-ghost"
         :disabled="disableDrag || preview"
         :group="group"
         :move="handleMove"
         @change="handleUpdate"
+        @start="state.dragging = true"
+        @stop="state.dragging = false"
+        @drop="state.dragging = false"
     >
         <template #item="{ element, index }">
             <div
@@ -18,7 +22,13 @@
                 @mouseenter="onEnter(index)"
                 @mouseleave="onLeave(index)"
             >
-                <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2 position-relative">
+                    <slot
+                        name="before-container"
+                        :attribute="element"
+                        :hovered="isHovered(index)"
+                        :dragging="state.dragging"
+                    />
                     <div
                         class="row gx-3 flex-fill"
                         :class="addModerationStateClasses(element.id)"
@@ -33,6 +43,8 @@
                             <slot
                                 name="before"
                                 :attribute="element"
+                                :hovered="isHovered(index)"
+                                :dragging="state.dragging"
                             />
                             <div
                                 v-if="hasAttributeChangeIndicator(element)"
@@ -41,82 +53,7 @@
                             >
                                 <DotIndicator :type="getAttributeChangeIndicator(element)" />
                             </div>
-                            <div
-                                v-show="!!state.hoverStates[index]"
-                                class="btn-fab-list btn-fab-list-md position-absolute start-0"
-                            >
-                                <button
-                                    v-show="hasEmitter('onReorderList')"
-                                    class="reorder-handle btn btn-outline-secondary btn-fab rounded-circle"
-                                    data-bs-toggle="popover"
-                                    :data-content="t('global.resort')"
-                                    data-trigger="hover"
-                                    data-placement="bottom"
-                                >
-                                    <i class="fas fa-fw fa-sort" />
-                                </button>
-                                <button
-                                    v-show="hasEmitter('onEditElement')"
-                                    class="btn btn-outline-info btn-fab rounded-circle"
-                                    data-bs-toggle="popover"
-                                    :data-content="t('global.edit')"
-                                    data-trigger="hover"
-                                    data-placement="bottom"
-                                    @click="onEditHandler(element)"
-                                >
-                                    <i
-                                        class="fas fa-fw fa-xs fa-edit"
-                                        style="vertical-align: 0;"
-                                    />
-                                </button>
-                                <button
-                                    v-if="!element.is_system"
-                                    v-show="hasEmitter('onRequireElement')"
-                                    class="btn btn-fab rounded-circle"
-                                    :class="{'btn-outline-primary': !element.pivot?.metadata?.required, 'btn-primary': element.pivot?.metadata?.required}"
-                                    data-bs-toggle="popover"
-                                    :data-content="t('global.required')"
-                                    data-trigger="hover"
-                                    data-placement="bottom"
-                                    @click="onRequireHandler(element)"
-                                >
-                                    <i
-                                        class="fas fa-fw fa-xs fa-asterisk"
-                                        style="vertical-align: 0;"
-                                    />
-                                </button>
-                                <button
-                                    v-show="hasEmitter('onRemoveElement')"
-                                    class="btn btn-outline-danger btn-fab rounded-circle"
-                                    data-bs-toggle="popover"
-                                    :data-content="t('global.remove')"
-                                    data-trigger="hover"
-                                    data-placement="bottom"
-                                    @click="onRemoveHandler(element)"
-                                >
-                                    <i
-                                        class="fas fa-fw fa-xs fa-times"
-                                        style="vertical-align: 0;"
-                                    />
-                                </button>
-                                <button
-                                    v-show="hasEmitter('onDeleteElement')"
-                                    class="btn btn-outline-danger btn-fab rounded-circle"
-                                    data-bs-toggle="popover"
-                                    :data-content="t('global.delete')"
-                                    data-trigger="hover"
-                                    data-placement="bottom"
-                                    @click="onDeleteHandler(element)"
-                                >
-                                    <i
-                                        class="fas fa-fw fa-xs fa-trash"
-                                        style="vertical-align: 0;"
-                                    />
-                                </button>
-                            </div>
-                            <div
-                                class="text-end col d-inline-block text-truncate"
-                            >
+                            <div class="text-end col d-inline-block text-truncate">
                                 <span v-if="element.is_system">
                                     &nbsp;
                                 </span>
@@ -220,6 +157,7 @@
         reactive,
         ref,
         toRefs,
+        useAttrs,
     } from 'vue';
 
     import { useI18n } from 'vue-i18n';
@@ -449,10 +387,11 @@
             };
 
             const onEnter = i => {
-                state.hoverStates[i] = state.isHoveringPossible;
+                console.log("ENTER", i);
+                state.hovered = i;
             };
             const onLeave = i => {
-                state.hoverStates[i] = false;
+                if(state.hovered == i) state.hovered = -1;
             };
             const handleMove = (e, orgE) => {
                 // Preview does not allow dragging
@@ -465,7 +404,7 @@
                 if(!!e.moved) {
                     // only handle event if position changed
                     if(e.moved.oldIndex != e.moved.newIndex) {
-                        onReorderHandler({
+                        context.emit('reorder-list', {
                             element: e.moved.element,
                             from: e.moved.oldIndex,
                             to: e.moved.newIndex,
@@ -609,31 +548,6 @@
             const setRef = (el, id) => {
                 attrRefs.value[id] = el;
             };
-            const onReorderHandler = data => {
-                context.emit('reorder-list', data);
-            };
-            const onEditHandler = element => {
-                context.emit('edit-element', {
-                    element: element
-                });
-            };
-            const onRequireHandler = element => {
-                context.emit('require-element', {
-                    element: element,
-                    active: !element.pivot?.metadata?.required,
-                });
-            };
-            const onRemoveHandler = element => {
-                context.emit('remove-element', {
-                    element: element,
-                    modal: true,
-                });
-            };
-            const onDeleteHandler = element => {
-                context.emit('delete-element', {
-                    element: element
-                });
-            };
             const onMetadataHandler = element => {
                 context.emit('metadata', {
                     element: element
@@ -666,7 +580,11 @@
                 }
             };
 
-            const attrs = context.attrs;
+            const isHovered = index => {
+                return state.hovered === index;
+            };
+
+            const attrs = useAttrs();
             // DATA
             const attrRefs = ref({});
             const state = reactive({
@@ -678,6 +596,7 @@
                     local: {},
                     external: {},
                 },
+                dragging: false,
                 entity: computed(_ => entityStore.selectedEntity),
                 dynamicSelectionList: computed(_ => {
                     const list = [];
@@ -688,12 +607,9 @@
                     });
                     return list;
                 }),
-                hoverStates: new Array(attributes.value.length).fill(false),
+                hovered: -1,
                 expansionStates: new Array(attributes.value.length).fill(false),
                 componentLoaded: computed(_ => state.attributeValues),
-                isHoveringPossible: computed(_ => {
-                    return !!attrs.onReorderList || !!attrs.onEditElement || !!attrs.onRequireElement || !!attrs.onRemoveElement || !!attrs.onDeleteElement;
-                }),
                 hiddenAttributeList: computed(_ => {
                     if(!state.componentLoaded) return {};
 
@@ -748,43 +664,40 @@
                 translateConcept,
                 getConceptNote,
                 // LOCAL
-                attributeChanged,
-                certainty,
-                handleSelectionUpdate,
                 additionalRowClasses,
-                attributeClasses,
-                expandedClasses,
-                onAttributeExpand,
-                isInModeration,
-                isDisabledInModeration,
                 addModerationStateClasses,
-                toggleAttributeValue,
-                handleModeration,
-                handleEditModeration,
-                onEnter,
-                onLeave,
-                handleMove,
-                handleUpdate,
-                getCertaintyStyle,
-                getDirtyValues,
-                updateDirtyState,
-                resetListValues,
-                undirtyList,
+                attributeChanged,
+                attributeClasses,
                 broadcastAttributeChanges,
-                hasAttributeChangeIndicator,
+                certainty,
+                expandedClasses,
                 getAttributeChangeIndicator,
                 getAttributeChangeIndicatorDescription,
-                setRef,
-                onEditHandler,
-                onRequireHandler,
-                onRemoveHandler,
-                onDeleteHandler,
-                onMetadataHandler,
-                hasEmitter,
-                hasComment,
-                hasBookmarks,
-                inactiveMetadataClass,
+                getCertaintyStyle,
+                getDirtyValues,
+                handleEditModeration,
                 handleLabelClick,
+                handleModeration,
+                handleMove,
+                handleSelectionUpdate,
+                handleUpdate,
+                hasAttributeChangeIndicator,
+                hasBookmarks,
+                hasComment,
+                hasEmitter,
+                inactiveMetadataClass,
+                isDisabledInModeration,
+                isHovered,
+                isInModeration,
+                onAttributeExpand,
+                onEnter,
+                onLeave,
+                onMetadataHandler,
+                resetListValues,
+                setRef,
+                toggleAttributeValue,
+                undirtyList,
+                updateDirtyState,
                 // STATE
                 attrRefs,
                 state,

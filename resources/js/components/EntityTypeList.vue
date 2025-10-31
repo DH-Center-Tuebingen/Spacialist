@@ -24,55 +24,11 @@
                         {{ translateConcept(entry.thesaurus_url) }}
                     </span>
                 </div>
-                <div
-                    v-if="state.hasOnHoverListener"
-                    v-show="state.hoverStates[i]"
-                    class="ms-auto btn-fab-list btn-fab-list-sm bg-white position-absolute z-1 end-0 me-2"
-                    :class="activeClasses(entry)"
-                >
-                    <button
-                        v-if="state.hasEditListener"
-                        class="btn btn-outline-info btn-fab rounded-circle"
-                        data-bs-toggle="popover"
-                        :data-content="t('global.edit')"
-                        data-trigger="hover"
-                        data-placement="bottom"
-                        @click="onEdit(entry)"
-                    >
-                        <i
-                            class="fas fa-fw fa-xs fa-edit"
-                            style="vertical-align: 0;"
-                        />
-                    </button>
-                    <button
-                        v-if="state.hasDuplicateListener"
-                        class="btn btn-outline-primary btn-fab rounded-circle"
-                        data-bs-toggle="popover"
-                        :data-content="t('global.duplicate')"
-                        data-trigger="hover"
-                        data-placement="bottom"
-                        @click="onDuplicate(entry)"
-                    >
-                        <i
-                            class="fas fa-fw fa-xs fa-clone"
-                            style="vertical-align: 0;"
-                        />
-                    </button>
-                    <button
-                        v-if="state.hasDeleteListener"
-                        class="btn btn-outline-danger btn-fab rounded-circle"
-                        data-bs-toggle="popover"
-                        :data-content="t('global.delete')"
-                        data-trigger="hover"
-                        data-placement="bottom"
-                        @click="onDelete(entry)"
-                    >
-                        <i
-                            class="fas fa-fw fa-xs fa-trash"
-                            style="vertical-align: 0;"
-                        />
-                    </button>
-                </div>
+               <FabButtonList
+                    v-show="state.hasOnHoverListener && state.hoverStates[i]"
+                    class="position-absolute end-0 me-2"
+                    :buttons="controlButtons"
+               />
             </a>
         </div>
     </div>
@@ -93,9 +49,11 @@
         translateConcept,
     } from '@/helpers/helpers.js';
     import ListToolbar from './forms/ListToolbar.vue';
+    import FabButtonList from './forms/button/FabButtonList.vue';
 
     export default {
         components: {
+            FabButtonList,
             ListToolbar,
         },
         props: {
@@ -193,12 +151,42 @@
                 }
             });
 
+            const controlButtons = computed(_ => {
+                let buttons = [];
+                if(state.hasEditListener) {
+                    buttons.push({
+                        icon: 'fas fa-xs fa-edit',
+                        title: t('global.edit'),
+                        classes: 'btn btn-outline-info btn-fab rounded-circle',
+                        action: onEdit,
+                    });
+                }
+                if(state.hasDuplicateListener) {
+                    buttons.push({
+                        icon: 'fas fa-xs fa-clone',
+                        title: t('global.duplicate'),
+                        classes: 'btn btn-outline-primary btn-fab rounded-circle',
+                        action: onDuplicate,
+                    });
+                }
+                if(state.hasDeleteListener) {
+                    buttons.push({
+                        icon: 'fas fa-xs fa-trash',
+                        title: t('global.delete'),
+                        classes: 'btn btn-outline-danger btn-fab rounded-circle',
+                        action: onDelete,
+                    });
+                }
+                return buttons;
+            });
+
             // RETURN
             return {
                 t,
                 // HELPERS
                 translateConcept,
                 // LOCAL
+                controlButtons,
                 onEnter,
                 onLeave,
                 activeClasses,

@@ -162,11 +162,19 @@
                     :selections="{}"
                     :show-info="true"
                     @add-element="addAttributeToEntityType"
-                    @edit-element="onEditEntityAttribute"
-                    @require-element="onRequireEntityAttribute"
-                    @remove-element="onRemoveAttributeFromEntityType"
                     @reorder-list="reorderEntityAttribute"
-                />
+                >
+                    <template #before-container="{ attribute, dragging, hovered }">
+                       <EntityAttributeListControls
+                            v-if="hovered && !dragging"
+                            :attribute="attribute"
+                            class="top-50 translate-middle-y"
+                            @edit="() => onEditEntityAttribute(attribute)"
+                            @require="() => onRequireEntityAttribute(attribute)"
+                            @remove="() => onRemoveAttributeFromEntityType(attribute, true)"
+                        />
+                    </template>
+                </attribute-list>
             </div>
         </div>
     </div>
@@ -206,7 +214,12 @@
         showRemoveAttribute,
     } from '@/helpers/modal.js';
 
+    import EntityAttributeListControls from './attribute/EntityAttributeListControls.vue';
+
     export default {
+        components: {
+            EntityAttributeListControls
+        },
         setup(props, context) {
             const { t } = useI18n();
             const entityStore = useEntityStore();
@@ -264,17 +277,14 @@
                     );
                 }
             };
-            const onEditEntityAttribute = e => {
-                showEditAttribute(e.element.id, state.entityType.id, {
-                    is_system: e.element.is_system,
-                    datatype: e.element.datatype,
-                    pivot: e.element.pivot,
+            const onEditEntityAttribute = attribute => {
+                showEditAttribute(attribute.id, state.entityType.id, {
+                    is_system: attribute.is_system,
+                    datatype: attribute.datatype,
+                    pivot: attribute.pivot,
                 });
             };
-            const onRequireEntityAttribute = e => {
-                const attribute = state.entityAttributes.find(attribute => {
-                    return attribute.id == e.element.id;
-                });
+            const onRequireEntityAttribute = attribute => {
                 if(attribute) {
                     const isRequired = e.active === true;
                     const metadata = {
@@ -295,26 +305,25 @@
                     });
                 }
             };
-            const onRemoveAttributeFromEntityType = e => {
-                const etid = currentRoute.params.id;
-                const aid = e.element.id;
-                const id = e.element.pivot.id;
-                if(e.modal) {
-                    if(e.element.is_system && e.element.datatype == 'system-separator') {
-                        showRemoveAttribute(etid, aid, id, {
-                            is_system: e.element.is_system,
-                            datatype: e.element.datatype,
-                            pivot: e.element.pivot,
+            const onRemoveAttributeFromEntityType = (attribute, modal = false) => {
+                const entityTypeId = state.entityType.id;
+                const pivotId = attribute?.pivot?.id;
+                if(modal) {
+                    if(attribute.is_system && attribute.datatype == 'system-separator') {
+                        showRemoveAttribute(entityTypeId, attribute.id, pivotId, {
+                            is_system: attribute.is_system,
+                            datatype: attribute.datatype,
+                            pivot: attribute.pivot,
                         });
                     } else {
-                        getAttributeOccurrenceCount(aid, etid).then(cnt => {
-                            showRemoveAttribute(etid, aid, id, {
+                        getAttributeOccurrenceCount(attribute.id, entityTypeId).then(cnt => {
+                            showRemoveAttribute(entityTypeId, attribute.id, pivotId, {
                                 cnt: cnt
                             });
                         });
                     }
                 } else {
-                    entityStore.removeEntityTypeAttribute(id, etid);
+                    entityStore.removeEntityTypeAttribute(pivotId, entityTypeId);
                 }
             };
             const reorderEntityAttribute = e => {
