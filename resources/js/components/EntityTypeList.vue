@@ -25,7 +25,7 @@
                     </span>
                 </div>
                <FabButtonList
-                    v-show="state.hasOnHoverListener && state.hoverStates[i]"
+                    v-if="state.hasOnHoverListener && state.hoveredItem === i"
                     class="position-absolute end-0 me-2"
                     :buttons="controlButtons"
                />
@@ -97,10 +97,10 @@
 
             // FUNCTIONS
             const onEnter = i => {
-                state.hoverStates[i] = true;
+                state.hoveredItem = i;
             };
             const onLeave = i => {
-                state.hoverStates[i] = false;
+                state.hoveredItem = -1;
             };
             const activeClasses = entry => {
                 // if(entry.id != selectedId.value) return [];
