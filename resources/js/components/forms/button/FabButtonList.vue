@@ -7,13 +7,13 @@
             :key="index"
             class="btn btn-sm btn-fab"
             :class="getButtonClasses(value.classes)"
+            @click="value.action(entry)"
         >
             <i
                 class="fa-fw"
                 :class="value.icon"
                 :title="value.title"
                 style="vertical-align: 0;"
-                @click="value.action(entry)"
             ></i>
         </button>
     </div>
