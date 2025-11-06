@@ -18,8 +18,8 @@ import DataImporter from '@/components/view/DataImporter.vue';
 import Users from '@/components/Users.vue';
 import Roles from '@/components/Roles.vue';
 import Plugins from '@/components/Plugins.vue';
-import DataModel from '@/components/DataModel.vue';
-import DataModelDetailView from '@/components/DataModelDetailView.vue';
+import DataModel from '@/components/data-model/DataModel.vue';
+import DataModelDetailView from '@/components/data-model/DataModelDetailView.vue';
 import Preferences from '@/components/Preferences.vue';
 // User
 import UserProfile from '@/components/UserProfile.vue';

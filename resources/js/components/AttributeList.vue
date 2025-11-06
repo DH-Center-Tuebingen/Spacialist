@@ -1,7 +1,6 @@
 <template>
     <draggable
-        v-if="state.componentLoaded"
-        v-model="state.attributeList"
+        :model-value="attributes"
         item-key="id"
         class="attribute-list-container align-content-start"
         :class="classes"
@@ -14,56 +13,57 @@
         @stop="state.dragging = false"
         @drop="state.dragging = false"
     >
-        <template #item="{ element, index }">
+        <template #item="{ element: attribute, index }">
             <div
-                v-if="!state.hiddenAttributeList[element.id] || showHidden"
-                class="mt-3 px-2"
-                :class="additionalRowClasses(element)"
+                v-if="!state.hiddenAttributeList[attribute.id] || showHidden"
+                class="px-2"
+                :class="additionalRowClasses(attribute, index)"
                 @mouseenter="onEnter(index)"
                 @mouseleave="onLeave(index)"
             >
                 <div class="d-flex align-items-center gap-2 position-relative">
                     <slot
                         name="before-container"
-                        :attribute="element"
+                        :attribute="attribute"
+                        :index="index"
                         :hovered="isHovered(index)"
                         :dragging="state.dragging"
                     />
                     <div
                         class="row gx-3 flex-fill"
-                        :class="addModerationStateClasses(element.id)"
+                        :class="addModerationStateClasses(attribute)"
                     >
                         <label
                             v-if="!state.hideLabels"
                             class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break align-self-start gap-1 position-relative"
-                            :for="`attr-${element.id}`"
-                            :class="attributeClasses(element)"
-                            @click="e => handleLabelClick(e, element.datatype)"
+                            :for="`attr-${attribute.id}`"
+                            :class="attributeClasses(attribute)"
+                            @click="e => handleLabelClick(e, attribute.datatype)"
                         >
                             <slot
                                 name="before"
-                                :attribute="element"
+                                :attribute="attribute"
                                 :hovered="isHovered(index)"
                                 :dragging="state.dragging"
                             />
                             <div
-                                v-if="hasAttributeChangeIndicator(element)"
+                                v-if="hasAttributeChangeIndicator(attribute)"
                                 class="d-flex align-items-center"
-                                :title="getAttributeChangeIndicatorDescription(element)"
+                                :title="getAttributeChangeIndicatorDescription(attribute)"
                             >
-                                <DotIndicator :type="getAttributeChangeIndicator(element)" />
+                                <DotIndicator :type="getAttributeChangeIndicator(attribute)" />
                             </div>
                             <div class="text-end col d-inline-block text-truncate">
-                                <span v-if="element.is_system">
+                                <span v-if="attribute.is_system">
                                     &nbsp;
                                 </span>
                                 <span
                                     v-else
-                                    :title="translateConcept(element.thesaurus_url)"
+                                    :title="translateConcept(attribute.thesaurus_url)"
                                 >
-                                    {{ translateConcept(element.thesaurus_url) }}
+                                    {{ translateConcept(attribute.thesaurus_url) }}
                                     <span
-                                        v-if="element.pivot?.metadata?.required"
+                                        v-if="attribute.pivot?.metadata?.required"
                                         class="text-danger"
                                     >
                                         <i class="fas fa-fw fa-xs fa-asterisk align-top" />
@@ -71,32 +71,32 @@
                                 </span>
                             </div>
                             <a
-                                v-if="getConceptNote(element.thesaurus_url)"
+                                v-if="getConceptNote(attribute.thesaurus_url)"
                                 tabindex="0"
                                 class="text-decoration-none text-secondary ms-1 position-relative"
                                 data-bs-toggle="popover"
                                 data-bs-trigger="focus"
                                 data-bs-placement="top"
-                                :data-bs-content="getConceptNote(element.thesaurus_url)"
+                                :data-bs-content="getConceptNote(attribute.thesaurus_url)"
                                 href="#"
                                 @click.prevent
                             >
                                 <i class="fas fa-fw fa-circle-info" />
                             </a>
                             <sup
-                                v-if="hasEmitter('onEditElement') && !!element.pivot.depends_on && Object.keys(element.pivot.depends_on).length > 0"
+                                v-if="hasEmitter('onEditElement') && !!attribute.pivot.depends_on && Object.keys(attribute.pivot.depends_on).length > 0"
                                 :title="t('global.dependency.depends_on.desc')"
                             >
                                 <i class="fas fa-diagram-next text-warning fa-rotate-180" />
                             </sup>
                         </label>
-                        <div :class="expandedClasses(index, element)">
+                        <div :class="expandedClasses(index, attribute)">
                             <Attribute
-                                :ref="el => setRef(el, element.id)"
-                                :data="element"
-                                :value-wrapper="state.attributeValues[element.id]"
-                                :disabled="state.hiddenAttributeList[element.id] || isDisabledInModeration(element.id)"
-                                :react-to="state.rootAttributeValues[element.root_attribute_id]"
+                                :ref="el => setRef(el, attribute.id)"
+                                :data="attribute"
+                                :value-wrapper="values[attribute.id]"
+                                :disabled="isAttributeDisabled(attribute)"
+                                :react-to="state.rootAttributeValues[attribute.root_attribute_id]"
                                 :hide-links="state.hideEntityLink"
                                 :preview="preview"
                                 :preview-data="previewData"
@@ -106,42 +106,42 @@
                             />
 
                             <ModerationPanel
-                                v-if="isInModeration(element.id)"
-                                :element="element"
-                                :value="state.attributeValues[element.id]"
-                                @toggle-data="e => toggleAttributeValue(element.id)"
-                                @moderate="e => handleModeration(element.id, e)"
-                                @edit="e => handleEditModeration(element.id, e)"
+                                v-if="isInModeration(attribute)"
+                                :element="attribute"
+                                :value="values[attribute.id]"
+                                @toggle-data="e => toggleAttributeValue(attribute)"
+                                @moderate="e => handleModeration(attribute, e)"
+                                @edit="e => handleEditModeration(attribute, e)"
                             />
                         </div>
                     </div>
-                    <div
+                    <!-- <div
                         v-if="hasEmitter('onMetadata')"
                         class="pt-2 fs-1r clickable d-flex flex-row align-items-start justify-content-center align-self-start gap-1"
-                        @click="onMetadataHandler(element)"
+                        @click="onMetadataHandler(attribute)"
                     >
                         <ValidityIndicator
                             class="col h-10"
-                            :class="getCertaintyStyle(certainty(element))"
+                            :class="getCertaintyStyle(certainty(attribute))"
                             :center="true"
-                            :state="certainty(element)"
+                            :state="certainty(attribute)"
                         />
                         <span
                             class="col text-center"
-                            :class="inactiveMetadataClass(!hasComment(element))"
+                            :class="inactiveMetadataClass(!hasComment(attribute))"
                         >
                             <i class="fas fa-fw fa-comment" />
                         </span>
                         <span
                             class="col text-center"
-                            :class="inactiveMetadataClass(!hasBookmarks(element))"
+                            :class="inactiveMetadataClass(!hasBookmarks(attribute))"
                         >
                             <i class="fas fa-fw fa-bookmark" />
                         </span>
-                    </div>
+                    </div> -->
                     <slot
                         name="after"
-                        :attribute="element"
+                        :attribute="attribute"
                     />
                 </div>
             </div>
@@ -156,6 +156,7 @@
         onMounted,
         reactive,
         ref,
+        toRef,
         toRefs,
         useAttrs,
     } from 'vue';
@@ -202,6 +203,11 @@
                 type: Boolean,
                 default: false,
             },
+            disabled: {
+                required: false,
+                type: Boolean,
+                default: false,
+            },
             disableDrag: {
                 required: false,
                 type: Boolean,
@@ -235,6 +241,7 @@
                 type: Object,
                 default: _ => new Object(),
             },
+            //Todo: This is kinda read-only, consider ream
             preview: {
                 required: false,
                 type: Boolean,
@@ -251,23 +258,7 @@
             const { t } = useI18n();
             const attributeStore = useAttributeStore();
             const entityStore = useEntityStore();
-            const {
-                classes,
-                attributes,
-                hiddenAttributes,
-                showHidden,
-                disableDrag,
-                group,
-                metadataAddon,
-                selections,
-                values,
-                options,
-                preview,
-                previewData,
-            } = toRefs(props);
-            // FETCH
 
-            // FUNCTIONS
             const handleSelectionUpdate = e => {
                 const elemId = e.elemId;
                 const conceptId = e.conceptId;
@@ -276,10 +267,10 @@
                 }
             };
 
-            const additionalRowClasses = elem => {
+            const additionalRowClasses = (elemement, index) => {
                 const classes = [];
-                if(!state.ignoreMetadata && elem.pivot && elem.pivot.metadata && elem.pivot.metadata.width) {
-                    const width = elem.pivot.metadata.width;
+                if(!state.ignoreMetadata && elemement.pivot && elemement.pivot.metadata && elemement.pivot.metadata.width) {
+                    const width = elemement.pivot.metadata.width;
                     switch(width) {
                         case 50:
                             classes.push('col-6');
@@ -291,6 +282,11 @@
                 } else {
                     classes.push('col-12');
                 }
+
+                if(index != 0) {
+                    classes.push('mt-3');
+                }
+
                 return classes;
             };
             const attributeClasses = attribute => {
@@ -303,9 +299,9 @@
                 }
                 return classes;
             };
-            const expandedClasses = (i, element) => {
+            const expandedClasses = (i, attribute) => {
                 let expClasses = {
-                    ['attribute-' + element.id]: true,
+                    ['attribute-' + attribute.id]: true,
                 };
 
                 if(state.hideLabels || state.expansionStates[i]) {
@@ -326,34 +322,32 @@
             const onAttributeExpand = (e, i) => {
                 state.expansionStates[i] = !state.expansionStates[i];
             };
-            const isInModeration = aid => {
-                const attr = state.attributeValues[aid];
+            const isInModeration = attribute => {
                 // system attributes have no attribute value and are not (yet) moderated
-                if(!attr) {
+                if(!attribute) {
                     return false;
                 }
-                return attr.moderation_state && attr.moderation_state.startsWith('pending');
+                return attribute.moderation_state && attribute.moderation_state.startsWith('pending');
             };
-            const isDisabledInModeration = aid => {
-                const attr = state.attributeValues[aid];
-                return isInModeration(aid) && attr.moderation_edit_state != 'active';
+            const isDisabledInModeration = attribute => {
+                return isInModeration(attribute) && attribute.moderation_edit_state != 'active';
             };
-            const addModerationStateClasses = aid => {
+            const addModerationStateClasses = attribute => {
                 const classes = [];
 
-                if(isInModeration(aid)) {
+                if(isInModeration(attribute)) {
                     classes.push('bg-danger');
                     classes.push('py-2');
                 }
 
                 return classes;
             };
-            const toggleAttributeValue = aid => {
-                const tmpVal = state.attributeValues[aid].value;
-                state.attributeValues[aid].value = state.attributeValues[aid].original_value;
-                state.attributeValues[aid].original_value = tmpVal;
+            const toggleAttributeValue = attribute => {
+                const tmpVal = attribute.value;
+                attribute.value = attribute.original_value;
+                attribute.original_value = tmpVal;
             };
-            const handleModeration = (aid, e, overwrite_value = null) => {
+            const handleModeration = (attribute, e, overwrite_value = null) => {
                 const action = e.action;
                 const entity_id = e.entity_id;
                 const active = e.active;
@@ -361,44 +355,42 @@
                     (action == 'accept' && active == 'original') ||
                     (action == 'deny' && active == 'moderation')
                 ) {
-                    toggleAttributeValue(aid);
+                    toggleAttributeValue(attribute);
                 }
                 entityStore.patchEntityDataModerations(action, entity_id, aid, overwrite_value);
             };
-            const handleEditModeration = (aid, e) => {
-                const attr = state.attributeValues[aid];
+            const handleEditModeration = (attribute, e) => {
                 const action = e.action;
                 if(action == 'enable') {
-                    attr.moderation_edit_state = 'active';
+                    attribute.moderation_edit_state = 'active';
                 } else if(action == 'reset') {
-                    attrRefs.value[aid].resetFieldState();
+                    attrRefs.value[attribute.id].resetFieldState();
                 } else if(action == 'cancel') {
-                    delete attr.moderation_edit_state;
-                    attrRefs.value[aid].resetFieldState();
+                    delete attribute.moderation_edit_state;
+                    attrRefs.value[attribute.id].resetFieldState();
                 } else if(action == 'accept') {
-                    attrRefs.value[aid].undirtyField();
-                    const editValue = attrRefs.value[aid].v.value;
+                    attrRefs.value[attribute.id].undirtyField();
+                    const editValue = attrRefs.value[attribute.id].v.value;
                     const data = {
                         action: action,
                         entity_id: e.entity_id,
                     };
-                    handleModeration(aid, data, editValue);
+                    handleModeration(attribute, data, editValue);
                 }
             };
 
             const onEnter = i => {
-                console.log("ENTER", i);
                 state.hovered = i;
             };
             const onLeave = i => {
                 if(state.hovered == i) state.hovered = -1;
             };
-            const handleMove = (e, orgE) => {
+            const handleMove = (e) => {
                 // Preview does not allow dragging
-                if(preview.value) return false;
+                const draggedAid = e.draggedContext?.element?.id;
+                if(props.preview || !draggedAid) return false;
 
-                const draggedAid = e.draggedContext.element.id;
-                return !(showHidden.value && Object.keys(state.hiddenAttributeList).some(aid => aid == draggedAid)) && !disableDrag.value;
+                return !(props.showHidden && Object.keys(state.hiddenAttributeList).some(aid => aid == draggedAid)) && !props.disableDrag;
             };
             const handleUpdate = (e) => {
                 if(!!e.moved) {
@@ -469,7 +461,7 @@
                 // state.changeTracker.local[e.attribute_id] = true;
                 state.changeTracker.local[e.attribute_id] = e.dirty;
                 // Do not update dirty state if attribute is currently in moderation edit mode
-                if(state.attributeValues[e.attribute_id].moderation_edit_state == 'active') {
+                if(props.values[e.attribute_id].moderation_edit_state == 'active') {
                     return;
                 }
                 const dirtyValues = getDirtyValues();
@@ -481,7 +473,7 @@
                 state.changeTracker.external = {};
                 for(let k in attrRefs.value) {
                     // skip all attributes currently in moderation edit mode
-                    if(state.attributeValues[k].moderation_edit_state == 'active') {
+                    if(props.values[k].moderation_edit_state == 'active') {
                         continue;
                     }
                     const curr = attrRefs.value[k];
@@ -495,7 +487,7 @@
                 state.changeTracker.external = {};
                 for(let k in attrRefs.value) {
                     // skip all attributes currently in moderation edit mode
-                    if(state.attributeValues[k].moderation_edit_state == 'active') {
+                    if(props.values[k].moderation_edit_state == 'active') {
                         continue;
                     }
                     const curr = attrRefs.value[k];
@@ -508,7 +500,7 @@
                 for(let k in changes) {
                     if(attrRefs.value[k]) {
                         // Broadcast changes to Attribute component...
-                        state.attributeValues[k].value = changes[k].value;
+                        props.values[k].value = changes[k].value;
                         attrRefs.value[k].handleExternalChange(changes[k]);
                         // ... but also display info
                         state.changeTracker.external[k] = changes[k];
@@ -558,14 +550,14 @@
             };
 
             const certainty = attribute => {
-                return state.attributeValues?.[attribute.id]?.certainty ?? null;
+                return props.values?.[attribute.id]?.certainty ?? null;
             };
 
             const hasComment = attribute => {
-                return state.attributeValues[attribute.id]?.comments_count > 0;
+                return props.values[attribute.id]?.comments_count > 0;
             };
             const hasBookmarks = attribute => {
-                return metadataAddon.value && metadataAddon.value(attribute.thesaurus_url);
+                return props.metadataAddon && props.metadataAddon(attribute.thesaurus_url);
             };
 
             const inactiveMetadataClass = inactive => {
@@ -584,12 +576,17 @@
                 return state.hovered === index;
             };
 
+            const isAttributeDisabled = attribute => {
+                if(props.disabled) {
+                    return true;
+                }
+                return state.hiddenAttributeList[attribute.id] || isDisabledInModeration(attribute.id);
+            };
+
             const attrs = useAttrs();
             // DATA
             const attrRefs = ref({});
             const state = reactive({
-                attributeList: attributes,
-                attributeValues: values,
                 rootAttributeValues: {},
                 visibleAttributeNotes: {},
                 changeTracker: {
@@ -600,7 +597,7 @@
                 entity: computed(_ => entityStore.selectedEntity),
                 dynamicSelectionList: computed(_ => {
                     const list = [];
-                    state.attributeList.forEach(a => {
+                    props.attributes.forEach(a => {
                         if(a.root_attribute_id) {
                             list.push(a.root_attribute_id);
                         }
@@ -608,22 +605,19 @@
                     return list;
                 }),
                 hovered: -1,
-                expansionStates: new Array(attributes.value.length).fill(false),
-                componentLoaded: computed(_ => state.attributeValues),
+                expansionStates: new Array(props.attributes.length).fill(false),
                 hiddenAttributeList: computed(_ => {
-                    if(!state.componentLoaded) return {};
-
                     const list = {};
-                    for(let i = 0; i < hiddenAttributes.value.length; i++) {
-                        const disId = hiddenAttributes.value[i];
+                    for(let i = 0; i < props.hiddenAttributes.length; i++) {
+                        const disId = props.hiddenAttributes[i];
                         list[disId] = true;
                     }
                     return list;
                 }),
-                hideLabels: computed(_ => options.value.hide_labels),
-                hideEntityLink: computed(_ => options.value.hide_entity_link),
-                ignoreMetadata: computed(_ => options.value.ignore_metadata),
-                itemClasses: computed(_ => options.value.item_classes),
+                hideLabels: computed(_ => props.options.hide_labels),
+                hideEntityLink: computed(_ => props.options.hide_entity_link),
+                ignoreMetadata: computed(_ => props.options.ignore_metadata),
+                itemClasses: computed(_ => props.options.item_classes),
             });
 
             const initializeTooltips = _ => {
@@ -642,7 +636,7 @@
             // ON MOUNTED
             onMounted(_ => {
                 state.dynamicSelectionList.forEach(rootId => {
-                    const attrValue = state.attributeValues[rootId].value;
+                    const attrValue = props.values[rootId].value;
                     if(attrValue) {
                         handleSelectionUpdate({
                             elemId: rootId,
@@ -686,6 +680,7 @@
                 hasComment,
                 hasEmitter,
                 inactiveMetadataClass,
+                isAttributeDisabled,
                 isDisabledInModeration,
                 isHovered,
                 isInModeration,

@@ -9,7 +9,7 @@
     import { computed } from 'vue';
     import { useI18n } from 'vue-i18n';
 
-    import FabButtonList from '../forms/button/FabButtonList.vue';
+    import { FabButtonList } from 'dhc-components';
 
     export default {
         components: {
@@ -34,7 +34,6 @@
                     title: t('global.delete'),
                     classes: 'btn-outline-danger',
                     action: () => {
-                        console.log("EMIT DELETE");
                         emit('delete');
                     },
                 },

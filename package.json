@@ -87,6 +87,7 @@
         "circular-dependency-plugin": "^5.2.2",
         "d3-dsv": "^3.0.1",
         "dayjs": "^1.11.7",
+        "dhc-components": "github:DH-Center-Tuebingen/dhc-components",
         "emojibase-data": "^16.0.0",
         "highlight.js": "^11.8.0",
         "lodash": "^4.17.21",

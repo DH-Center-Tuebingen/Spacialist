@@ -761,7 +761,7 @@
                 }
             },
             "attribute": {
-                "title": "Verfügbare Attribute",
+                "title": "Attribute",
                 "add_button": "Attribut hinzufügen",
                 "show_hidden": "Ausgeblendete anzeigen",
                 "hide_hidden": "Ausgeblendete verstecken",
@@ -778,7 +778,7 @@
                 }
             },
             "entity": {
-                "title": "Verfügbare Entitätstypen",
+                "title": "Entitätstypen",
                 "add_button": "Entitätstyp hinzufügen",
                 "modal": {
                     "new": {

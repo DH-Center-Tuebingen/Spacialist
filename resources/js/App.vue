@@ -366,7 +366,7 @@
                 </div>
             </div>
         </nav>
-        <div class="container-fluid my-3 col overflow-hidden">
+        <div class="container-fluid col overflow-hidden">
             <template v-if="state.init">
                 <router-view />
             </template>
@@ -465,8 +465,8 @@ export default {
         const userStore = useUserStore();
 
         // FETCH
-        systemStore.initialize(locale).catch(e => {
-            if(e.response.status == 401) {
+        systemStore.initialize(locale).catch(e =>{
+            if(e?.response?.status == 401) {
                 systemStore.setAppState(true);
             } else {
                 throwError(e);

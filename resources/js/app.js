@@ -29,6 +29,9 @@ import '@/bootstrap/font.js';
 // Laravel Echo (Frontend part of Reverb aka WebSockets)
 import '@/bootstrap/websocket.js';
 
+// Styles for the dhc-components
+import 'dhc-components/css'
+
 // Plugin System
 import { SpPS } from '@/bootstrap/plugins.js';
 

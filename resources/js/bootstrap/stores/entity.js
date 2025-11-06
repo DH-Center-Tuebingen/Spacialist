@@ -47,6 +47,7 @@ import {
     updateAttributeDependency,
     updateAttributeMetadata,
 } from '@/api.js';
+import { moveItem } from '../../helpers/list.js';
 
 function updateSelectionTypeIdList(selection) {
     const tmpDict = {};
@@ -206,6 +207,12 @@ export const useEntityStore = defineStore('entity', {
                 return systemStore.translateConcept(entityType.thesaurus_url);
             };
         },
+        getMinimalEntityTypes(state) {
+            return Object.values(state.entityTypes).map(entityType => ({
+                id: entityType.id,
+                thesaurus_url: entityType.thesaurus_url
+            }));
+        },
         getTreeSelectionCount: state => {
             return Object.keys(state.treeSelection).length;
         },
@@ -257,7 +264,7 @@ export const useEntityStore = defineStore('entity', {
                     } else {
                         const idx = this.tree.findIndex(c => c.rank == node.rank);
                         this.tree.splice(idx, 0, node);
-                        for(let i=idx+1; i<this.tree.length; i++) {
+                        for(let i = idx + 1; i < this.tree.length; i++) {
                             this.tree[i].rank++;
                         }
                     }
@@ -279,7 +286,7 @@ export const useEntityStore = defineStore('entity', {
                             } else {
                                 const idx = parent.children.findIndex(c => c.rank == node.rank);
                                 parent.children.splice(idx, 0, node);
-                                for(let i=idx+1; i<parent.children.length; i++) {
+                                for(let i = idx + 1; i < parent.children.length; i++) {
                                     parent.children[i].rank++;
                                 }
                             }
@@ -506,9 +513,9 @@ export const useEntityStore = defineStore('entity', {
                 return this.updateEntityMetadata(id, except(data, 'user'));
             });
         },
-        async patchEntityMetadata(entityTypeId, attributeId, etAttrId, metadata) {
-            return updateAttributeMetadata(etAttrId, metadata).then(data => {
-                this.updateAttributeMetadata(entityTypeId, attributeId, etAttrId, data.data);
+        async patchEntityMetadata(entityTypeId, attributeId, entityTypeAttributeId, metadata) {
+            return updateAttributeMetadata(entityTypeAttributeId, metadata).then(data => {
+                this.updateAttributeMetadata(entityTypeId, attributeId, entityTypeAttributeId, data.data);
             });
         },
         externalAttributeValueDeleted(entityId, attributeId) {
@@ -757,42 +764,20 @@ export const useEntityStore = defineStore('entity', {
                 }
             });
         },
-        async reorderAttributes(entityTypeId, attributeId, from, to) {
+        async reorderAttributes(entityTypeId, attribute, from, to, target = 'pivot.position') {
+            console.log('reorderAttributes', entityTypeId, attribute, from, to, target);
             if(from == to) {
                 return;
             }
             const attributes = this.getEntityTypeAttributes(entityTypeId);
-            // Already added
-            if(attributes.length < to && attributes[to].id == attributeId) {
-                return;
+            // For an instant visual feedback, we move the item first
+            const toRank = moveItem(attributes, from, to, target);
+            try {
+                await reorderEntityAttributes(entityTypeId, attribute.id, toRank);
+            } catch(error) {
+                console.error('Error reordering entity attributes:', error);
+                moveItem(attributes, to, from, target);
             }
-            // Return if moved attribute does not match
-            if(attributes[from].id != attributeId) {
-                return;
-            }
-            const rank = to + 1;
-            return reorderEntityAttributes(entityTypeId, attributeId, rank).then(_ => {
-                attributes[from].position = rank;
-                const movedAttrs = attributes.splice(from, 1);
-                attributes.splice(to, 0, ...movedAttrs);
-                if(from < to) {
-                    for(let i = from; i < to; i++) {
-                        if(attributes[i].position) {
-                            attributes[i].position++;
-                        } else if(attributes[i].pivot && attributes[i].pivot.position) {
-                            attributes[i].pivot.position++;
-                        }
-                    }
-                } else {
-                    for(let i = to + 1; i <= from; i++) {
-                        if(attributes[i].position) {
-                            attributes[i].position--;
-                        } else if(attributes[i].pivot && attributes[i].pivot.position) {
-                            attributes[i].pivot.position--;
-                        }
-                    }
-                }
-            });
         },
         async updateDependency(entityTypeId, attributeId, dependency) {
             return updateAttributeDependency(entityTypeId, attributeId, dependency).then(response => {
@@ -814,12 +799,28 @@ export const useEntityStore = defineStore('entity', {
         initializeEntityTypes(data) {
             this.entityTypes = {};
             this.entityTypeAttributes = {};
-            for(let k in data) {
-                const entityType = data[k];
+            const entityTypeParents = {};
+            for(let entityType of Object.values(data)) {
                 this.entityTypeAttributes[entityType.id] = entityType.attributes.slice();
+
+                // Collect parents for each sub-entity-type
+                for(let subEntityType of entityType.sub_entity_types) {
+                    if(!entityTypeParents[subEntityType.id]) {
+                        entityTypeParents[subEntityType.id] = new Set();
+                    }
+                    entityTypeParents[subEntityType.id].add(entityType.id);
+                }
+
                 delete entityType.attributes;
             }
+
             this.entityTypes = data;
+
+            // Add parents to each entity type
+            for(let entityType of Object.values(this.entityTypes)) {
+                const parentsArray = entityTypeParents[entityType.id] ? Array.from(entityTypeParents[entityType.id]) : [];
+                entityType.parents = parentsArray;
+            }
         },
         removeAttributeFromEntityTypes: state => attributeId => {
             for(let k in this.entityTypeAttributes) {

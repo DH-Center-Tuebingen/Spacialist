@@ -1,6 +1,6 @@
 <template>
     <FabButtonList
-        class="position-absolute start-0 top-0"
+        class="position-absolute start-0 top-0 z-1"
         :buttons="buttons"
     />
 </template>
@@ -9,7 +9,7 @@
     import { computed } from 'vue';
     import { useI18n } from 'vue-i18n';
 
-    import FabButtonList from '../forms/button/FabButtonList.vue';
+    import { FabButtonList } from 'dhc-components';
 
     export default {
         components: {
@@ -29,12 +29,8 @@
         setup(props, { emit }) {
             const { t } = useI18n();
 
-            const getRequiredButtonClass = computed(() => {
-                if(props.attribute?.pivot?.metadata?.required) {
-                    return 'btn-primary';
-                } else {
-                    return 'btn-outline-secondary';
-                }
+            const active = computed(() => {
+                return props.attribute?.pivot?.metadata?.required ?? false;
             });
 
             const buttons = computed(() => {
@@ -57,7 +53,8 @@
                     {
                         icon: 'fas fa-xs fa-asterisk',
                         title: t('global.required'),
-                        classes: getRequiredButtonClass.value,
+                        color: active.value ? 'primary' : 'secondary',
+                        active: active.value,
                         action: () => {
                             emit('require');
                         },

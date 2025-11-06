@@ -74,6 +74,7 @@ class HomeController extends Controller
             }
         }
         $entityTypes = EntityType::with(['sub_entity_types', 'attributes'])
+            ->withCount('entities')
             ->orderBy('id')
             ->get();
         $entityTypeMap = $entityTypes->getDictionary();

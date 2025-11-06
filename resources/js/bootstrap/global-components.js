@@ -1,6 +1,6 @@
 import AttributeList from '@/components/AttributeList.vue';
 import Attribute from '@/components/attribute/Attribute.vue';
-import EntityTypeList from '@/components/EntityTypeList.vue';
+import EntityTypeList from '@/components/data-model/EntityTypeList.vue';
 import EntityTree from '@/components/tree/Entity.vue';
 import EntityBreadcrumbs from '@/components/EntityBreadcrumbs.vue';
 import UserAvatar from '@/components/UserAvatar.vue';
